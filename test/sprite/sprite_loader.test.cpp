@@ -33,9 +33,9 @@ std::string defaultSpritePath = "test/fixtures/resources/sprite";
 
 class SpriteLoaderTest {
 public:
-    SpriteLoaderTest()
+    SpriteLoaderTest(float pixelRatio = 1)
         : threadPool(Scheduler::GetBackground(), uniqueID),
-          spriteLoader(1, threadPool) {}
+          spriteLoader(pixelRatio, threadPool) {}
 
     ~SpriteLoaderTest() {
         threadPool.waitForEmpty();
@@ -65,18 +65,18 @@ public:
     void end() { loop.stop(); }
 };
 
-auto successfulSpriteImageResponse(const std::string& spritePath = defaultSpritePath) {
-    return [spritePath](const Resource& resource) {
-        EXPECT_EQ(spritePath + ".png", resource.url);
+auto successfulSpriteImageResponse(const std::string& spritePath = defaultSpritePath, float pixelRatio = 1) {
+    return [spritePath, pixelRatio](const Resource& resource) {
+        EXPECT_EQ(spritePath + (pixelRatio == 2.0 ? "@2x" : "") + ".png", resource.url);
         Response response;
         response.data = std::make_unique<std::string>(util::read_file(resource.url));
         return response;
     };
 }
 
-auto successfulSpriteJSONResponse(const std::string& spritePath = defaultSpritePath) {
-    return [spritePath](const Resource& resource) {
-        EXPECT_EQ(spritePath + ".json", resource.url);
+auto successfulSpriteJSONResponse(const std::string& spritePath = defaultSpritePath, float pixelRatio = 1) {
+    return [spritePath, pixelRatio](const Resource& resource) {
+        EXPECT_EQ(spritePath + (pixelRatio == 2.0 ? "@2x" : "") + ".json", resource.url);
         Response response;
         response.data = std::make_unique<std::string>(util::read_file(resource.url));
         return response;
@@ -95,15 +95,16 @@ Response corruptSpriteResponse(const Resource&) {
     return response;
 }
 
-class SpriteLoaderParametrized : public testing::TestWithParam<std::tuple<std::string, size_t>> {};
+class SpriteLoaderParametrized : public testing::TestWithParam<std::tuple<std::string, size_t, float>> {};
 
 TEST_P(SpriteLoaderParametrized, LoadingSuccess) {
-    SpriteLoaderTest test;
-    auto [spritePath, expectedImages] = GetParam();
+    auto [spritePath, expectedImages, pixelRatio] = GetParam();
+
+    SpriteLoaderTest test{pixelRatio};
     test.spritePath = spritePath;
 
-    test.fileSource.spriteImageResponse = successfulSpriteImageResponse(spritePath);
-    test.fileSource.spriteJSONResponse = successfulSpriteJSONResponse(spritePath);
+    test.fileSource.spriteImageResponse = successfulSpriteImageResponse(spritePath, pixelRatio);
+    test.fileSource.spriteJSONResponse = successfulSpriteJSONResponse(spritePath, pixelRatio);
 
     test.observer.spriteError = [&](std::exception_ptr error) {
         FAIL() << util::toString(error);
@@ -118,10 +119,13 @@ TEST_P(SpriteLoaderParametrized, LoadingSuccess) {
     test.run();
 }
 
-INSTANTIATE_TEST_SUITE_P(SpriteLoaderSprites,
-                         SpriteLoaderParametrized,
-                         ::testing::Values(std::make_tuple("test/fixtures/resources/sprite", 418),
-                                           std::make_tuple("test/fixtures/resources/versatiles-sprite/sprite", 112)));
+INSTANTIATE_TEST_SUITE_P(
+    SpriteLoaderSprites,
+    SpriteLoaderParametrized,
+    ::testing::Values(
+        std::make_tuple<std::string, size_t>("test/fixtures/resources/sprite", 418, 1.0),
+        std::make_tuple<std::string, size_t>("test/fixtures/resources/versatiles-sprite/sprite", 112, 1.0),
+        std::make_tuple<std::string, size_t>("test/fixtures/resources/versatiles-sprite/sprite", 112, 2.0)));
 
 TEST(SpriteLoader, JSONLoadingFail) {
     SpriteLoaderTest test;
