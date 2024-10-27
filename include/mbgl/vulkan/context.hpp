@@ -12,6 +12,7 @@
 #include <mbgl/vulkan/uniform_buffer.hpp>
 #include <mbgl/vulkan/renderer_backend.hpp>
 #include <mbgl/vulkan/pipeline.hpp>
+#include <mbgl/vulkan/descriptor_set.hpp>
 
 #include <memory>
 #include <optional>
@@ -54,13 +55,15 @@ public:
 
     void beginFrame() override;
     void endFrame() override;
+    void submitFrame();
     void waitFrame() const;
 
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
 
     BufferResource createBuffer(const void* data, std::size_t size, std::uint32_t usage, bool persistent) const;
 
-    UniqueShaderProgram createProgram(std::string name,
+    UniqueShaderProgram createProgram(shaders::BuiltIn shaderID,
+                                      std::string name,
                                       const std::string_view vertex,
                                       const std::string_view fragment,
                                       const ProgramParameters& programParameters,
@@ -133,61 +136,67 @@ public:
     const std::unique_ptr<BufferResource>& getDummyVertexBuffer();
     const std::unique_ptr<BufferResource>& getDummyUniformBuffer();
     const std::unique_ptr<Texture2D>& getDummyTexture();
-    const vk::UniqueDescriptorSetLayout& getUniformDescriptorSetLayout();
-    const vk::UniqueDescriptorSetLayout& getImageDescriptorSetLayout();
-    const std::vector<vk::DescriptorSetLayout>& getDescriptorSetLayouts();
+
+    const vk::DescriptorSetLayout& getDescriptorSetLayout(DescriptorSetType type);
+    DescriptorPoolGrowable& getDescriptorPool(DescriptorSetType type);
     const vk::UniquePipelineLayout& getGeneralPipelineLayout();
     const vk::UniquePipelineLayout& getPushConstantPipelineLayout();
 
     uint8_t getCurrentFrameResourceIndex() const { return frameResourceIndex; }
-    const vk::UniqueDescriptorPool& getCurrentDescriptorPool() const;
-    void enqueueDeletion(std::function<void(const Context&)>&& function);
-    void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function);
+    void enqueueDeletion(std::function<void(Context&)>&& function);
+    void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) const;
+
+    void requestSurfaceUpdate() { surfaceUpdateRequested = true; }
 
 private:
     struct FrameResources {
         vk::UniqueCommandBuffer commandBuffer;
-        vk::UniqueDescriptorPool descriptorPool;
 
         vk::UniqueSemaphore surfaceSemaphore;
         vk::UniqueSemaphore frameSemaphore;
         vk::UniqueFence flightFrameFence;
 
-        std::vector<std::function<void(const Context&)>> deletionQueue;
+        std::vector<std::function<void(Context&)>> deletionQueue;
 
         FrameResources(vk::UniqueCommandBuffer& cb,
-                       vk::UniqueDescriptorPool&& dp,
                        vk::UniqueSemaphore&& surf,
                        vk::UniqueSemaphore&& frame,
                        vk::UniqueFence&& flight)
             : commandBuffer(std::move(cb)),
-              descriptorPool(std::move(dp)),
               surfaceSemaphore(std::move(surf)),
               frameSemaphore(std::move(frame)),
               flightFrameFence(std::move(flight)) {}
 
-        void runDeletionQueue(const Context&);
+        void runDeletionQueue(Context&);
     };
 
     void initFrameResources();
     void destroyResources();
 
+    void buildImageDescriptorSetLayout();
+    void buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& layout,
+                                         size_t uniformCount,
+                                         const std::string& name);
+
 private:
     RendererBackend& backend;
 
     vulkan::UniformBufferArray globalUniformBuffers;
+    std::unordered_map<DescriptorSetType, DescriptorPoolGrowable> descriptorPoolMap;
 
     std::unique_ptr<BufferResource> dummyVertexBuffer;
     std::unique_ptr<BufferResource> dummyUniformBuffer;
     std::unique_ptr<Texture2D> dummyTexture2D;
-    vk::UniqueDescriptorSetLayout uniformDescriptorSetLayout;
-    vk::UniqueDescriptorSetLayout imageDescriptorSetLayout;
-    std::vector<vk::DescriptorSetLayout> descriptorSetLayouts;
+    vk::UniqueDescriptorSetLayout globalUniformDescriptorSetLayout;
+    vk::UniqueDescriptorSetLayout layerUniformDescriptorSetLayout;
+    vk::UniqueDescriptorSetLayout drawableUniformDescriptorSetLayout;
+    vk::UniqueDescriptorSetLayout drawableImageDescriptorSetLayout;
     vk::UniquePipelineLayout generalPipelineLayout;
     vk::UniquePipelineLayout pushConstantPipelineLayout;
 
     uint8_t frameResourceIndex = 0;
     std::vector<FrameResources> frameResources;
+    bool surfaceUpdateRequested{false};
 
     struct {
         gfx::ShaderProgramBasePtr shader;

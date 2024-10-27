@@ -36,7 +36,7 @@
 constexpr auto EnableMetalCapture = 0;
 constexpr auto CaptureFrameStart = 0; // frames are 0-based
 constexpr auto CaptureFrameCount = 1;
-#else // !MLN_RENDER_BACKEND_METAL
+#elif MLN_RENDER_BACKEND_OPENGL
 #include <mbgl/gl/defines.hpp>
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gl/drawable_gl.hpp>
@@ -68,14 +68,34 @@ Renderer::Impl::~Impl() {
     assert(gfx::BackendScope::exists());
 };
 
+void Renderer::Impl::onPreCompileShader(shaders::BuiltIn shaderID,
+                                        gfx::Backend::Type type,
+                                        const std::string& additionalDefines) {
+    observer->onPreCompileShader(shaderID, type, additionalDefines);
+}
+
+void Renderer::Impl::onPostCompileShader(shaders::BuiltIn shaderID,
+                                         gfx::Backend::Type type,
+                                         const std::string& additionalDefines) {
+    observer->onPostCompileShader(shaderID, type, additionalDefines);
+}
+
+void Renderer::Impl::onShaderCompileFailed(shaders::BuiltIn shaderID,
+                                           gfx::Backend::Type type,
+                                           const std::string& additionalDefines) {
+    observer->onShaderCompileFailed(shaderID, type, additionalDefines);
+}
+
 void Renderer::Impl::setObserver(RendererObserver* observer_) {
     observer = observer_ ? observer_ : &nullObserver();
 }
 
 void Renderer::Impl::render(const RenderTree& renderTree,
                             [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
     auto& context = backend.getContext();
+    context.setObserver(this);
+
 #if MLN_RENDER_BACKEND_METAL
     if constexpr (EnableMetalCapture) {
         const auto& mtlBackend = static_cast<mtl::RendererBackend&>(backend);
@@ -432,14 +452,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         // Renders debug overlays.
         {
             const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
-            orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) {
-                visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
-                    for (const auto& tweaker : drawable.getTweakers()) {
-                        tweaker->execute(drawable, parameters);
-                    }
-                    drawable.draw(parameters);
-                });
-            });
+            orchestrator.visitDebugLayerGroups(
+                [&](LayerGroupBase& layerGroup) { layerGroup.render(orchestrator, parameters); });
         }
     };
 #endif // MLN_DRAWABLE_RENDERER
@@ -505,10 +519,10 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     parameters.renderPass.reset();
 
     const auto startRendering = util::MonotonicTimer::now().count();
+    // present submits render commands
     parameters.encoder->present(parameters.backend.getDefaultRenderable());
     const auto renderingTime = util::MonotonicTimer::now().count() - startRendering;
 
-    // CommandEncoder destructor submits render commands.
     parameters.encoder.reset();
     context.endFrame();
 
@@ -542,7 +556,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     }
 
     frameCount += 1;
-    MLN_END_FRAME()
+    MLN_END_FRAME();
 }
 
 void Renderer::Impl::reduceMemoryUse() {

@@ -27,12 +27,5 @@ struct alignas(16) HeatmapInterpolateUBO {
 };
 static_assert(sizeof(HeatmapInterpolateUBO) % 16 == 0);
 
-enum {
-    idHeatmapDrawableUBO = globalUBOCount,
-    idHeatmapEvaluatedPropsUBO,
-    idHeatmapInterpolateUBO,
-    heatmapUBOCount
-};
-
 } // namespace shaders
 } // namespace mbgl

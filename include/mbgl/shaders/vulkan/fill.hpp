@@ -17,7 +17,7 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
+layout(location = 0) in ivec2 in_position;
 
 #if !defined(HAS_UNIFORM_u_color)
 layout(location = 1) in vec4 in_color;
@@ -27,11 +27,11 @@ layout(location = 1) in vec4 in_color;
 layout(location = 2) in vec2 in_opacity;
 #endif
 
-layout(set = 0, binding = 1) uniform FillDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillDrawableUBO {
     mat4 matrix;
 } drawable;
 
-layout(set = 0, binding = 3) uniform FillInterpolateUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform FillInterpolateUBO {
     float color_t;
     float opacity_t;
 } interp;
@@ -71,7 +71,7 @@ layout(location = 1) in lowp float frag_opacity;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 4) uniform FillEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform FillEvaluatedPropsUBO {
     vec4 color;
     vec4 outline_color;
     float opacity;
@@ -110,7 +110,7 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
+layout(location = 0) in ivec2 in_position;
 
 #if !defined(HAS_UNIFORM_u_outline_color)
 layout(location = 1) in vec4 in_color;
@@ -120,11 +120,11 @@ layout(location = 1) in vec4 in_color;
 layout(location = 2) in vec2 in_opacity;
 #endif
 
-layout(set = 0, binding = 1) uniform FillDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillDrawableUBO {
     mat4 matrix;
 } drawable;
 
-layout(set = 0, binding = 3) uniform FillInterpolateUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform FillInterpolateUBO {
     float color_t;
     float opacity_t;
 } interp;
@@ -170,7 +170,7 @@ layout(location = 2) in vec2 frag_position;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 4) uniform FillEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform FillEvaluatedPropsUBO {
     vec4 color;
     vec4 outline_color;
     float opacity;
@@ -216,21 +216,21 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
+layout(location = 0) in ivec2 in_position;
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 1) in mediump vec4 in_pattern_from;
+layout(location = 1) in mediump uvec4 in_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 2) in mediump vec4 in_pattern_to;
+layout(location = 2) in mediump uvec4 in_pattern_to;
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 3) in vec2 in_opacity;
 #endif
 
-layout(set = 0, binding = 1) uniform FillPatternDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillPatternDrawableUBO {
     mat4 matrix;
     vec2 pixel_coord_upper;
     vec2 pixel_coord_lower;
@@ -239,18 +239,18 @@ layout(set = 0, binding = 1) uniform FillPatternDrawableUBO {
     float pad;
 } drawable;
 
-layout(set = 0, binding = 2) uniform FillPatternTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform FillPatternTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
 } tile;
 
-layout(set = 0, binding = 3) uniform FillPatternInterpolateUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 2) uniform FillPatternInterpolateUBO {
     float pattern_from_t;
     float pattern_to_t;
     float opacity_t;
 } interp;
 
-layout(set = 0, binding = 4) uniform FillEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform FillEvaluatedPropsUBO {
     vec4 color;
     vec4 outline_color;
     float opacity;
@@ -332,7 +332,7 @@ layout(location = 4) in lowp float frag_opacity;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform FillPatternDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillPatternDrawableUBO {
     mat4 matrix;
     vec2 pixel_coord_upper;
     vec2 pixel_coord_lower;
@@ -341,12 +341,12 @@ layout(set = 0, binding = 1) uniform FillPatternDrawableUBO {
     float pad;
 } drawable;
 
-layout(set = 0, binding = 2) uniform FillPatternTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform FillPatternTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
 } tile;
 
-layout(set = 0, binding = 4) uniform FillEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform FillEvaluatedPropsUBO {
     vec4 color;
     vec4 outline_color;
     float opacity;
@@ -355,7 +355,7 @@ layout(set = 0, binding = 4) uniform FillEvaluatedPropsUBO {
     float to_scale;
 } props;
 
-layout(set = 1, binding = 0) uniform sampler2D image0_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
 void main() {
 
@@ -411,21 +411,21 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Vulka
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
+layout(location = 0) in ivec2 in_position;
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 1) in mediump vec4 in_pattern_from;
+layout(location = 1) in mediump uvec4 in_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 2) in mediump vec4 in_pattern_to;
+layout(location = 2) in mediump uvec4 in_pattern_to;
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 3) in vec2 in_opacity;
 #endif
 
-layout(set = 0, binding = 1) uniform FillOutlinePatternDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillOutlinePatternDrawableUBO {
     mat4 matrix;
     vec2 pixel_coord_upper;
     vec2 pixel_coord_lower;
@@ -434,18 +434,18 @@ layout(set = 0, binding = 1) uniform FillOutlinePatternDrawableUBO {
     float pad;
 } drawable;
 
-layout(set = 0, binding = 2) uniform FillOutlinePatternTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform FillOutlinePatternTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
 } tile;
 
-layout(set = 0, binding = 3) uniform FillOutlinePatternInterpolateUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 2) uniform FillOutlinePatternInterpolateUBO {
     float pattern_from_t;
     float pattern_to_t;
     float opacity_t;
 } interp;
 
-layout(set = 0, binding = 4) uniform FillEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform FillEvaluatedPropsUBO {
     vec4 color;
     vec4 outline_color;
     float opacity;
@@ -533,7 +533,7 @@ layout(location = 5) in lowp float frag_opacity;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform FillOutlinePatternDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillOutlinePatternDrawableUBO {
     mat4 matrix;
     vec2 pixel_coord_upper;
     vec2 pixel_coord_lower;
@@ -542,12 +542,12 @@ layout(set = 0, binding = 1) uniform FillOutlinePatternDrawableUBO {
     float pad;
 } drawable;
 
-layout(set = 0, binding = 2) uniform FillOutlinePatternTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform FillOutlinePatternTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
 } tile;
 
-layout(set = 0, binding = 4) uniform FillEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform FillEvaluatedPropsUBO {
     vec4 color;
     vec4 outline_color;
     float opacity;
@@ -556,7 +556,7 @@ layout(set = 0, binding = 4) uniform FillEvaluatedPropsUBO {
     float to_scale;
 } props;
 
-layout(set = 1, binding = 0) uniform sampler2D image0_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
 void main() {
 
@@ -615,10 +615,10 @@ struct ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_pos_normal;
-layout(location = 1) in vec4 in_data;
+layout(location = 0) in ivec2 in_pos_normal;
+layout(location = 1) in uvec4 in_data;
 
-layout(set = 0, binding = 1) uniform FillOutlineTriangulatedDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillOutlineTriangulatedDrawableUBO {
     mat4 matrix;
     float ratio;
     float pad1, pad2, pad3;
@@ -641,10 +641,12 @@ void main() {
     // We store these in the least significant bit of in_pos_normal
     mediump vec2 normal = in_pos_normal - 2.0 * pos;
     frag_normal = vec2(normal.x, normal.y * 2.0 - 1.0);
+    frag_normal.y *= -1.0;
 
     // these transformations used to be applied in the JS and native code bases.
     // moved them into the shader for clarity and simplicity.
-    float halfwidth = drawable.width / 2.0;
+    float width = 1.0;
+    float halfwidth = width / 2.0;
     float outset = halfwidth + (halfwidth == 0.0 ? 0.0 : ANTIALIASING);
 
     // Scale the extrusion vector down to a normal and then up by the line width
@@ -652,17 +654,15 @@ void main() {
     mediump vec2 dist = outset * a_extrude * LINE_NORMAL_SCALE;
 
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
-    gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0) + projected_extrude;
+    gl_Position = drawable.matrix * vec4(pos, 0.0, 1.0) + projected_extrude;
+    gl_Position.y *= -1.0;
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
-    float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * drawable.units_to_pixels);
+    float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * global.units_to_pixels);
 
-    frag_width = outset;
-    frag_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective
-    
-    gl_Position.y *= -1.0;
-
+    frag_width2 = outset;
+    frag_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
 }
 )";
 
@@ -674,7 +674,7 @@ layout(location = 2) in float frag_gamma_scale;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 4) uniform FillEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform FillEvaluatedPropsUBO {
     vec4 color;
     vec4 outline_color;
     float opacity;
@@ -698,7 +698,7 @@ void main() {
     const float blur2 = (1.0 / DEVICE_PIXEL_RATIO) * frag_gamma_scale;
     const float alpha = clamp(min(dist + blur2, frag_width2 - dist) / blur2, 0.0, 1.0);
 
-    out_color = props.outline_color * (alpha * props.opacit));
+    out_color = props.outline_color * alpha * props.opacity;
 }
 )";
 };
@@ -714,8 +714,8 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec4 in_normal_ed;
+layout(location = 0) in ivec2 in_position;
+layout(location = 1) in ivec4 in_normal_ed;
 
 #if !defined(HAS_UNIFORM_u_color)
 layout(location = 2) in vec4 in_color;
@@ -729,7 +729,7 @@ layout(location = 3) in vec2 in_base;
 layout(location = 4) in vec2 in_height;
 #endif
 
-layout(set = 0, binding = 1) uniform FillExtrusionDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillExtrusionDrawableUBO {
     mat4 matrix;
     vec2 texsize;
     vec2 pixel_coord_upper;
@@ -738,7 +738,16 @@ layout(set = 0, binding = 1) uniform FillExtrusionDrawableUBO {
     float tile_ratio;
 } drawable;
 
-layout(set = 0, binding = 2) uniform FillExtrusionPropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 2) uniform FillExtrusionInterpolateUBO {
+    float base_t;
+    float height_t;
+    float color_t;
+    float pattern_from_t;
+    float pattern_to_t;
+    float pad1, pad2, pad3;
+} interp;
+
+layout(set = LAYER_SET_INDEX, binding = 0) uniform FillExtrusionPropsUBO {
     vec4 color;
     vec4 light_color_pad;
     vec4 light_position_base;
@@ -751,15 +760,6 @@ layout(set = 0, binding = 2) uniform FillExtrusionPropsUBO {
     float to_scale;
     float pad2;
 } props;
-
-layout(set = 0, binding = 4) uniform FillExtrusionInterpolateUBO {
-    float base_t;
-    float height_t;
-    float color_t;
-    float pattern_from_t;
-    float pattern_to_t;
-    float pad1, pad2, pad3;
-} interp;
 
 layout(location = 0) out mediump vec4 frag_color;
 
@@ -856,8 +856,8 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vul
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec4 in_normal_ed;
+layout(location = 0) in ivec2 in_position;
+layout(location = 1) in ivec4 in_normal_ed;
 
 #if !defined(HAS_UNIFORM_u_base)
 layout(location = 2) in vec2 in_base;
@@ -868,14 +868,14 @@ layout(location = 3) in vec2 in_height;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 4) in vec4 in_pattern_from;
+layout(location = 4) in uvec4 in_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 5) in vec4 in_pattern_to;
+layout(location = 5) in uvec4 in_pattern_to;
 #endif
 
-layout(set = 0, binding = 1) uniform FillExtrusionDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillExtrusionDrawableUBO {
     mat4 matrix;
     vec2 texsize;
     vec2 pixel_coord_upper;
@@ -884,7 +884,21 @@ layout(set = 0, binding = 1) uniform FillExtrusionDrawableUBO {
     float tile_ratio;
 } drawable;
 
-layout(set = 0, binding = 2) uniform FillExtrusionPropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform FillExtrusionTilePropsUBO {
+    vec4 pattern_from;
+    vec4 pattern_to;
+} tile;
+
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 2) uniform FillExtrusionInterpolateUBO {
+    float base_t;
+    float height_t;
+    float color_t;
+    float pattern_from_t;
+    float pattern_to_t;
+    float pad1, pad2, pad3;
+} interp;
+
+layout(set = LAYER_SET_INDEX, binding = 0) uniform FillExtrusionPropsUBO {
     vec4 color;
     vec4 light_color_pad;
     vec4 light_position_base;
@@ -897,20 +911,6 @@ layout(set = 0, binding = 2) uniform FillExtrusionPropsUBO {
     float to_scale;
     float pad2;
 } props;
-
-layout(set = 0, binding = 3) uniform FillExtrusionTilePropsUBO {
-    vec4 pattern_from;
-    vec4 pattern_to;
-} tile;
-
-layout(set = 0, binding = 4) uniform FillExtrusionInterpolateUBO {
-    float base_t;
-    float height_t;
-    float color_t;
-    float pattern_from_t;
-    float pattern_to_t;
-    float pad1, pad2, pad3;
-} interp;
 
 layout(location = 0) out mediump vec4 frag_lighting;
 layout(location = 1) out mediump vec2 frag_pos_a;
@@ -1027,7 +1027,7 @@ layout(location = 4) in mediump vec4 frag_pattern_to;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform FillExtrusionDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillExtrusionDrawableUBO {
     mat4 matrix;
     vec2 texsize;
     vec2 pixel_coord_upper;
@@ -1036,7 +1036,12 @@ layout(set = 0, binding = 1) uniform FillExtrusionDrawableUBO {
     float tile_ratio;
 } drawable;
 
-layout(set = 0, binding = 2) uniform FillExtrusionPropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform FillExtrusionTilePropsUBO {
+    vec4 pattern_from;
+    vec4 pattern_to;
+} tile;
+
+layout(set = LAYER_SET_INDEX, binding = 0) uniform FillExtrusionPropsUBO {
     vec4 color;
     vec4 light_color_pad;
     vec4 light_position_base;
@@ -1050,12 +1055,7 @@ layout(set = 0, binding = 2) uniform FillExtrusionPropsUBO {
     float pad2;
 } props;
 
-layout(set = 0, binding = 3) uniform FillExtrusionTilePropsUBO {
-    vec4 pattern_from;
-    vec4 pattern_to;
-} tile;
-
-layout(set = 1, binding = 0) uniform sampler2D image0_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
 void main() {
 

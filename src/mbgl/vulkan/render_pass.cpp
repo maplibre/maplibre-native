@@ -53,7 +53,7 @@ void RenderPass::clearStencil(uint32_t value) const {
                             .setAspectMask(vk::ImageAspectFlagBits::eStencil)
                             .setClearValue(vk::ClearDepthStencilValue(0.0f, value));
 
-    const auto& rect = vk::ClearRect().setBaseArrayLayer(0).setLayerCount(1).setRect(
+    const auto rect = vk::ClearRect().setBaseArrayLayer(0).setLayerCount(1).setRect(
         {{0, 0}, {extent.width, extent.height}});
 
     commandEncoder.getCommandBuffer()->clearAttachments(attach, rect);
@@ -69,16 +69,6 @@ void RenderPass::popDebugGroup() {
 
 void RenderPass::addDebugSignpost(const char* name) {
     commandEncoder.getContext().getBackend().insertDebugLabel(commandEncoder.getCommandBuffer().get(), name);
-}
-
-void RenderPass::bindVertex(const BufferResource& buf, std::size_t offset, std::size_t, std::size_t size) {
-    [[maybe_unused]] const auto actualSize = size ? size : buf.getSizeInBytes() - offset;
-    assert(actualSize <= buf.getSizeInBytes());
-}
-
-void RenderPass::bindFragment(const BufferResource& buf, std::size_t offset, std::size_t, std::size_t size) {
-    [[maybe_unused]] const auto actualSize = size ? size : buf.getSizeInBytes() - offset;
-    assert(actualSize <= buf.getSizeInBytes());
 }
 
 } // namespace vulkan

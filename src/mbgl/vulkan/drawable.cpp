@@ -100,6 +100,34 @@ void Drawable::setCullFaceMode(const gfx::CullFaceMode& mode) {
     impl->pipelineInfo.setCullMode(mode);
 }
 
+void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
+                                      std::size_t vertexCount,
+                                      gfx::DrawMode mode,
+                                      gfx::IndexVectorBasePtr indexes,
+                                      const SegmentBase* segments,
+                                      std::size_t segmentCount) {
+    gfx::Drawable::setVertexAttributes(std::move(vertices));
+    impl->vertexCount = vertexCount;
+
+    std::vector<std::unique_ptr<Drawable::DrawSegment>> drawSegs;
+    drawSegs.reserve(segmentCount);
+    for (std::size_t i = 0; i < segmentCount; ++i) {
+        const auto& seg = segments[i];
+        auto segCopy = SegmentBase{
+            // no copy constructor
+            seg.vertexOffset,
+            seg.indexOffset,
+            seg.vertexLength,
+            seg.indexLength,
+            seg.sortKey,
+        };
+        drawSegs.push_back(std::make_unique<Drawable::DrawSegment>(mode, std::move(segCopy)));
+    }
+
+    impl->indexes = std::move(indexes);
+    impl->segments = std::move(drawSegs);
+}
+
 void Drawable::upload(gfx::UploadPass& uploadPass_) {
     if (isCustom) {
         return;
@@ -116,13 +144,12 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 
     // We need either raw index data or a buffer already created from them.
     // We can have a buffer and no indexes, but only if it's not marked dirty.
-    if (!impl->indexes || (impl->indexes->empty() &&
-                           (!impl->indexes->getBuffer() || impl->indexes->isModifiedAfter(attributeUpdateTime)))) {
+    if (!impl->indexes || (impl->indexes->empty() && (!impl->indexes->getBuffer() || impl->indexes->getDirty()))) {
         assert(!"Missing index data");
         return;
     }
 
-    if (!impl->indexes->getBuffer() || impl->indexes->isModifiedAfter(attributeUpdateTime)) {
+    if (!impl->indexes->getBuffer() || impl->indexes->getDirty()) {
         // Create a buffer for the index data.  We don't update any
         // existing buffer because it may still be in use by the previous frame.
         auto indexBufferResource{uploadPass.createIndexBufferResource(
@@ -132,9 +159,11 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         auto buffer = std::make_unique<IndexBuffer>(std::move(indexBuffer));
 
         impl->indexes->setBuffer(std::move(buffer));
+        impl->indexes->setDirty(false);
     }
 
-    const bool buildAttribs = !vertexAttributes || vertexAttributes->isModifiedAfter(attributeUpdateTime) ||
+    const bool buildAttribs = !vertexAttributes || !attributeUpdateTime ||
+                              vertexAttributes->isModifiedAfter(*attributeUpdateTime) ||
                               impl->pipelineInfo.inputAttributes.empty();
 
     if (buildAttribs) {
@@ -166,7 +195,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     }
 
     // build instance buffer
-    const bool buildInstanceBuffer = (instanceAttributes && instanceAttributes->isModifiedAfter(attributeUpdateTime));
+    const bool buildInstanceBuffer =
+        (instanceAttributes && (!attributeUpdateTime || instanceAttributes->isModifiedAfter(*attributeUpdateTime)));
 
     if (buildInstanceBuffer) {
         // Build instance attribute buffers
@@ -187,8 +217,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         if (impl->instanceBindings != instanceBindings_) {
             impl->instanceBindings = std::move(instanceBindings_);
         }
-
-        attributeUpdateTime = util::MonotonicTimer::now();
     }
 
     if (buildAttribs || buildInstanceBuffer) {
@@ -201,6 +229,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     if (texturesNeedUpload) {
         uploadTextures(uploadPass);
     }
+
+    attributeUpdateTime = util::MonotonicTimer::now();
 }
 
 void Drawable::draw(PaintParameters& parameters) const {
@@ -239,7 +269,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     impl->pipelineInfo.setRenderable(renderPass_.getDescriptor().renderable);
 
-    const uint32_t instances = instanceAttributes ? instanceAttributes->getMaxCount() : 1;
+    const auto instances = instanceAttributes ? instanceAttributes->getMaxCount() : 1;
 
     for (const auto& seg : impl->segments) {
         const auto& segment = seg->getSegment();
@@ -247,15 +277,22 @@ void Drawable::draw(PaintParameters& parameters) const {
         // update pipeline info with per segment modifiers
         impl->pipelineInfo.setDrawMode(seg->getMode());
 
-        impl->pipelineInfo.setDynamicValues(commandBuffer);
+        impl->pipelineInfo.setDynamicValues(context.getBackend(), commandBuffer);
 
         const auto& pipeline = shaderImpl.getPipeline(impl->pipelineInfo);
         commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get());
 
         if (segment.indexLength) {
-            commandBuffer->drawIndexed(segment.indexLength, instances, segment.indexOffset, segment.vertexOffset, 0);
+            commandBuffer->drawIndexed(static_cast<uint32_t>(segment.indexLength),
+                                       static_cast<uint32_t>(instances),
+                                       static_cast<uint32_t>(segment.indexOffset),
+                                       static_cast<int32_t>(segment.vertexOffset),
+                                       0);
         } else {
-            commandBuffer->draw(segment.vertexLength, instances, segment.vertexOffset, 0);
+            commandBuffer->draw(static_cast<uint32_t>(segment.vertexLength),
+                                static_cast<uint32_t>(instances),
+                                static_cast<uint32_t>(segment.vertexOffset),
+                                0);
         }
 
         context.renderingStats().numDrawCalls++;
@@ -314,7 +351,7 @@ void Drawable::buildVulkanInputBindings() noexcept {
             const auto& buffer = vertexBuffer->get();
 
             const auto& buffIt = std::find(uniqueBuffers.begin(), uniqueBuffers.end(), binding->vertexBufferResource);
-            uint32_t bindingIndex = 0;
+            std::size_t bindingIndex = 0;
 
             if (buffIt == uniqueBuffers.end()) {
                 bindingIndex = impl->pipelineInfo.inputBindings.size();
@@ -323,7 +360,7 @@ void Drawable::buildVulkanInputBindings() noexcept {
 
                 // add new buffer binding
                 impl->pipelineInfo.inputBindings.push_back(vk::VertexInputBindingDescription()
-                                                               .setBinding(bindingIndex)
+                                                               .setBinding(static_cast<uint32_t>(bindingIndex))
                                                                .setStride(binding->vertexStride)
                                                                .setInputRate(inputRate));
 
@@ -335,8 +372,8 @@ void Drawable::buildVulkanInputBindings() noexcept {
 
             impl->pipelineInfo.inputAttributes.push_back(
                 vk::VertexInputAttributeDescription()
-                    .setBinding(bindingIndex)
-                    .setLocation(i)
+                    .setBinding(static_cast<uint32_t>(bindingIndex))
+                    .setLocation(static_cast<uint32_t>(i))
                     .setFormat(PipelineInfo::vulkanFormat(binding->attribute.dataType))
                     .setOffset(binding->attribute.offset));
         }
@@ -368,80 +405,19 @@ bool Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
 bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
     if (!shader) return false;
 
-    auto& context = encoder.getContext();
-    const auto& device = context.getBackend().getDevice();
-    const auto& descriptorPool = context.getCurrentDescriptorPool();
-    const auto& descriptorSetLayouts = context.getDescriptorSetLayouts();
+    // bind uniforms
+    impl->uniformBuffers.bindDescriptorSets(encoder);
 
-    const auto descriptorAllocInfo =
-        vk::DescriptorSetAllocateInfo().setDescriptorPool(*descriptorPool).setSetLayouts(descriptorSetLayouts);
-
-    const auto& drawableDescriptorSets = device->allocateDescriptorSets(descriptorAllocInfo);
-    const auto& uniformDescriptorSet = drawableDescriptorSets[0];
-
-    const auto updateUniformDescriptors = [&](const auto& buffer, bool fillGaps) {
-        for (size_t id = 0; id < buffer.allocatedSize(); ++id) {
-            vk::DescriptorBufferInfo descriptorBufferInfo;
-
-            if (const auto& uniformBuffer = buffer.get(id)) {
-                const auto& uniformBufferImpl = static_cast<const UniformBuffer&>(*uniformBuffer);
-                const auto& bufferResource = uniformBufferImpl.getBufferResource();
-                descriptorBufferInfo.setBuffer(bufferResource.getVulkanBuffer())
-                    .setOffset(bufferResource.getVulkanBufferOffset())
-                    .setRange(bufferResource.getVulkanBufferSize());
-            } else if (fillGaps) {
-                descriptorBufferInfo.setBuffer(context.getDummyUniformBuffer()->getVulkanBuffer())
-                    .setOffset(0)
-                    .setRange(VK_WHOLE_SIZE);
-            } else {
-                continue;
-            }
-
-            const auto writeDescriptorSet = vk::WriteDescriptorSet()
-                                                .setBufferInfo(descriptorBufferInfo)
-                                                .setDescriptorCount(1)
-                                                .setDescriptorType(vk::DescriptorType::eUniformBuffer)
-                                                .setDstBinding(id)
-                                                .setDstSet(uniformDescriptorSet);
-
-            device->updateDescriptorSets(writeDescriptorSet, nullptr);
+    const auto& shaderImpl = static_cast<const mbgl::vulkan::ShaderProgram&>(*shader);
+    if (shaderImpl.hasTextures()) {
+        // update image set
+        if (!impl->imageDescriptorSet) {
+            impl->imageDescriptorSet = std::make_unique<ImageDescriptorSet>(encoder.getContext());
         }
-    };
-    const auto& globalUniforms = context.getGlobalUniformBuffers();
-    for (size_t i = 0; i < globalUniforms.allocatedSize(); ++i) {
-        if (globalUniforms.get(i)) impl->uniformBuffers.set(i, globalUniforms.get(i));
+
+        impl->imageDescriptorSet->update(textures);
+        impl->imageDescriptorSet->bind(encoder);
     }
-
-    updateUniformDescriptors(getUniformBuffers(), true);
-
-    if (drawableDescriptorSets.size() >= 2) {
-        const auto& imageDescriptorSet = drawableDescriptorSets[1];
-
-        for (size_t id = 0; id < shaders::maxTextureCountPerShader; ++id) {
-            const auto& texture = id < textures.size() ? textures[id] : nullptr;
-            auto& textureImpl = texture ? static_cast<Texture2D&>(*texture) : *context.getDummyTexture();
-
-            const auto descriptorImageInfo = vk::DescriptorImageInfo()
-                                                 .setImageLayout(textureImpl.getVulkanImageLayout())
-                                                 .setImageView(textureImpl.getVulkanImageView().get())
-                                                 .setSampler(textureImpl.getVulkanSampler());
-
-            const auto writeDescriptorSet = vk::WriteDescriptorSet()
-                                                .setImageInfo(descriptorImageInfo)
-                                                .setDescriptorCount(1)
-                                                .setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
-                                                .setDstBinding(id)
-                                                .setDstSet(imageDescriptorSet);
-
-            device->updateDescriptorSets(writeDescriptorSet, nullptr);
-        }
-    }
-
-    if (drawableDescriptorSets.empty()) return true;
-
-    const auto& commandBuffer = encoder.getCommandBuffer();
-    commandBuffer->bindDescriptorSets(
-        vk::PipelineBindPoint::eGraphics, context.getGeneralPipelineLayout().get(), 0, drawableDescriptorSets, nullptr);
 
     return true;
 }

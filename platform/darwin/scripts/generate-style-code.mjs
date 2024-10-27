@@ -6,8 +6,13 @@ import assert from "assert";
 
 import { readAndCompile, writeIfModified, camelize, unhyphenate } from "../../../scripts/style-code.mjs";
 
+import styleSpec from "../../../scripts/style-spec.mjs";
+
+delete styleSpec.layer.type.values["location-indicator"];
+delete styleSpec["layout_location-indicator"]
+delete styleSpec["paint_location-indicator"];
+
 import cocoaConventions from './style-spec-cocoa-conventions-v8.json' with { type: "json" };
-import styleSpec from '../../../scripts/style-spec-reference/v8.json' with { type: "json" };
 import styleSpecOverrides from './style-spec-overrides-v8.json' with { type: "json" };
 
 function setupGlobalEjsHelpers() {
@@ -170,6 +175,16 @@ global.testImplementation = function (property, layerType, isFunction) {
 
 global.objCTestValue = function (property, layerType, arraysAsStructs, indent) {
     let propertyName = originalPropertyName(property);
+
+    const paddingTestValue = () => {
+        if (arraysAsStructs) {
+            let iosValue = '[NSValue valueWithUIEdgeInsets:UIEdgeInsetsMake(1, 1, 1, 1)]'.indent(indent * 4);
+            let macosValue = '[NSValue valueWithEdgeInsets:NSEdgeInsetsMake(1, 1, 1, 1)]'.indent(indent * 4);
+            return `@"%@",\n#if TARGET_OS_IPHONE\n${iosValue}\n#else\n${macosValue}\n#endif\n${''.indent((indent - 1) * 4)}`;
+        }
+        return '@"{1, 1, 1, 1}"';
+    }
+
     switch (property.type) {
         case 'boolean':
             return property.default ? '@"false"' : '@"true"';
@@ -191,6 +206,8 @@ global.objCTestValue = function (property, layerType, arraysAsStructs, indent) {
             return `@"'${_.last(_.keys(property.values))}'"`;
         case 'color':
             return '@"%@", [MLNColor redColor]';
+        case 'padding':
+            return paddingTestValue();
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -198,12 +215,7 @@ global.objCTestValue = function (property, layerType, arraysAsStructs, indent) {
                 case 'font':
                     return `@"{'${_.startCase(propertyName)}', '${_.startCase(_.reverse(propertyName.split('')).join(''))}'}"`;
                 case 'padding': {
-                    if (arraysAsStructs) {
-                        let iosValue = '[NSValue valueWithUIEdgeInsets:UIEdgeInsetsMake(1, 1, 1, 1)]'.indent(indent * 4);
-                        let macosValue = '[NSValue valueWithEdgeInsets:NSEdgeInsetsMake(1, 1, 1, 1)]'.indent(indent * 4);
-                        return `@"%@",\n#if TARGET_OS_IPHONE\n${iosValue}\n#else\n${macosValue}\n#endif\n${''.indent((indent - 1) * 4)}`;
-                    }
-                    return '@"{1, 1, 1, 1}"';
+                    return paddingTestValue();
                 }
                 case 'offset':
                 case 'translate': {
@@ -256,6 +268,8 @@ global.mbglTestValue = function (property, layerType) {
         }
         case 'color':
             return '{ 1, 0, 0, 1 }';
+        case 'padding':
+            return '{ 1, 1, 1, 1 }';
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -330,6 +344,8 @@ global.testHelperMessage = function (property, layerType, isFunction) {
             return `testEnum${fnSuffix}:${objCEnum} type:@encode(${objCType})`;
         case 'color':
             return 'testColor' + fnSuffix;
+        case 'padding':
+            return 'testPaddingType' + fnSuffix;
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -512,6 +528,8 @@ global.describeType = function (property) {
             return '`MLN' + camelize(property.name) + '`';
         case 'color':
             return '`UIColor`';
+        case 'padding':
+            return '`UIEdgeInsets`';
         case 'array':
             switch (arrayType(property)) {
                 case 'padding':
@@ -535,7 +553,7 @@ global.describeType = function (property) {
 }
 
 global.describeValue = function (value, property, layerType) {
-    if (Array.isArray(value) && property.type !== 'array' && property.type !== 'enum') {
+    if (Array.isArray(value) && property.type !== 'array' && property.type !== 'enum' && property.type !== 'padding') {
         switch (value[0]) {
             case 'interpolate': {
                 let curveType = value[1][0];
@@ -546,6 +564,21 @@ global.describeValue = function (value, property, layerType) {
             default:
                 throw new Error(`No description available for ${value[0]} expression in ${property.name} of ${layerType}.`);
         }
+    }
+
+    const describePadding = () => {
+        let units = property.units || '';
+        if (units) {
+            units = ` ${units}`.replace(/pixel/, 'point');
+        }
+
+        if (value.every(num => num === 0)) {
+            return 'an `NSValue` object containing `UIEdgeInsetsZero`';
+        }
+        if (value.length === 1) {
+            return 'an `NSValue` object containing a `UIEdgeInsets` struct set to' + ` ${formatNumber(value[0])}${units} on all sides`;
+        }
+        return 'an `NSValue` object containing a `UIEdgeInsets` struct set to' + ` ${formatNumber(value[0])}${units} on the top, ${formatNumber(value[3])}${units} on the left, ${formatNumber(value[2])}${units} on the bottom, and ${formatNumber(value[1])}${units} on the right`;
     }
 
     switch (property.type) {
@@ -590,6 +623,10 @@ global.describeValue = function (value, property, layerType) {
                 return '`UIColor.whiteColor`';
             }
             return 'a `UIColor`' + ` object whose RGB value is ${formatNumber(color.r)}, ${formatNumber(color.g)}, ${formatNumber(color.b)} and whose alpha value is ${formatNumber(color.a)}`;
+
+        case 'padding':
+            return describePadding();
+
         case 'array':
             let units = property.units || '';
             if (units) {
@@ -597,10 +634,7 @@ global.describeValue = function (value, property, layerType) {
             }
             switch (arrayType(property)) {
                 case 'padding':
-                    if (value[0] === 0 && value[1] === 0 && value[2] === 0 && value[3] === 0) {
-                        return 'an `NSValue` object containing `UIEdgeInsetsZero`';
-                    }
-                    return 'an `NSValue` object containing a `UIEdgeInsets` struct set to' + ` ${formatNumber(value[0])}${units} on the top, ${formatNumber(value[3])}${units} on the left, ${formatNumber(value[2])}${units} on the bottom, and ${formatNumber(value[1])}${units} on the right`;
+                    return describePadding();
                 case 'offset':
                 case 'translate':
                     return 'an `NSValue` object containing a `CGVector` struct set to' + ` ${formatNumber(value[0])}${units} rightward and ${formatNumber(value[1])}${units} downward`;
@@ -648,6 +682,8 @@ global.propertyType = function (property) {
             return 'NSValue *';
         case 'color':
             return 'MLNColor *';
+        case 'padding':
+            return 'NSValue *';
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -696,6 +732,8 @@ global.valueTransformerArguments = function (property) {
             return [mbglType(property), 'NSValue *', mbglType(property), `MLN${camelize(property.name)}`];
         case 'color':
             return ['mbgl::Color', objCType];
+        case 'padding':
+            return ['mbgl::Padding', objCType];
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -751,6 +789,8 @@ global.mbglType = function(property) {
         }
         case 'color':
             return 'mbgl::Color';
+        case 'padding':
+            return 'mbgl::Padding';
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -806,9 +846,6 @@ const layerH = readAndCompile('platform/darwin/src/MLNStyleLayer.h.ejs', root);
 const layerPrivateH = readAndCompile('platform/darwin/src/MLNStyleLayer_Private.h.ejs', root);
 const layerM = readAndCompile('platform/darwin/src/MLNStyleLayer.mm.ejs', root);
 const testLayers = readAndCompile('platform/darwin/test/MLNStyleLayerTests.mm.ejs', root);
-const forStyleAuthorsMD = readAndCompile('platform/darwin/docs/guides/For_Style_Authors.md.ejs', root);
-const ddsGuideMD = readAndCompile('platform/darwin/docs/guides/Migrating_to_Expressions.md.ejs', root);
-const templatesMD = readAndCompile('platform/darwin/docs/guides/Tile_URL_Templates.md.ejs', root);
 
 const lightH = readAndCompile('platform/darwin/src/MLNLight.h.ejs', root);
 const lightM = readAndCompile('platform/darwin/src/MLNLight.mm.ejs', root);
@@ -900,61 +937,3 @@ for (var layer of layers) {
     writeIfModified(`platform/darwin/test/${prefix}${camelize(layer.type)}${suffix}Tests.mm`,
         testLayers(layer), outLocation);
 }
-
-// Extract examples for guides from unit tests.
-/*let examplesSrc = fs.readFileSync('platform/darwin/test/MLNDocumentationGuideTests.swift', 'utf8');
-const exampleRegex = /func test([\w$]+)\s*\(\)\s*\{[^]*?\n([ \t]+)\/\/#-example-code\n([^]+?)\n\2\/\/#-end-example-code\n/gm;
-
-let examples = {};
-let match;
-while ((match = exampleRegex.exec(examplesSrc)) !== null) {
-    let testMethodName = match[1],
-        indentation = match[2],
-        exampleCode = match[3];
-
-    // Trim leading whitespace from the example code.
-    exampleCode = exampleCode.replace(new RegExp('^' + indentation, 'gm'), '');
-
-    examples[testMethodName] = exampleCode;
-}
-
-global.guideExample = function (guide, exampleId, os) {
-    // Get the contents of the test method whose name matches the symbol path.
-    let testMethodName = `${guide}$${exampleId}`;
-    let example = examples[testMethodName];
-    if (!example) {
-        console.error(`MLNDocumentationExampleTests.test${testMethodName}() not found.`);
-        process.exit(1);
-    }
-
-    // Resolve conditional compilation blocks.
-    example = example.replace(/^(\s*)#if\s+os\((iOS|macOS)\)\n([^]*?)(?:^\1#else\n([^]*?))?^\1#endif\b\n?/gm,
-                              function (m, indentation, ifOs, ifCase, elseCase) {
-      return (os === ifOs ? ifCase : elseCase).replace(new RegExp('^    ', 'gm'), '');
-    }).replace(/\n$/, '');
-
-    return '```swift\n' + example + '\n```';
-};
-
-writeIfModified(`platform/ios/docs/guides/For Style Authors.md`, forStyleAuthorsMD({
-    os: 'iOS',
-    renamedProperties: renamedPropertiesByLayerType,
-    layers: layers,
-}), outLocation);
-writeIfModified(`platform/macos/docs/guides/For Style Authors.md`, forStyleAuthorsMD({
-    os: 'macOS',
-    renamedProperties: renamedPropertiesByLayerType,
-    layers: layers,
-}), outLocation);
-writeIfModified(`platform/ios/docs/guides/Migrating to Expressions.md`, ddsGuideMD({
-    os: 'iOS',
-}), outLocation);
-writeIfModified(`platform/macos/docs/guides/Migrating to Expressions.md`, ddsGuideMD({
-    os: 'macOS',
-}), outLocation);
-writeIfModified(`platform/ios/docs/guides/Tile URL Templates.md`, templatesMD({
-    os: 'iOS',
-}), outLocation);
-writeIfModified(`platform/macos/docs/guides/Tile URL Templates.md`, templatesMD({
-    os: 'macOS',
-}), rooutLocationot);*/

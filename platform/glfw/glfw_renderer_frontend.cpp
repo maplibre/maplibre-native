@@ -33,7 +33,7 @@ const mbgl::TaggedScheduler& GLFWRendererFrontend::getThreadPool() const {
 }
 
 void GLFWRendererFrontend::render() {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 
     assert(renderer);
 

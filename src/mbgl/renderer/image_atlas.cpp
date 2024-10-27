@@ -13,7 +13,9 @@ ImagePosition::ImagePosition(const mapbox::Bin& bin, const style::Image::Impl& i
       version(version_),
       stretchX(image.stretchX),
       stretchY(image.stretchY),
-      content(image.content) {}
+      content(image.content),
+      textFitWidth(image.textFitWidth),
+      textFitHeight(image.textFitHeight) {}
 
 namespace {
 

@@ -126,6 +126,24 @@ public:
 };
 
 template <>
+struct Interpolator<Padding> {
+public:
+    Padding operator()(const Padding& a, const Padding& b, const float t) const noexcept {
+        return {interpolate(a.top, b.top, t),
+                interpolate(a.right, b.right, t),
+                interpolate(a.bottom, b.bottom, t),
+                interpolate(a.left, b.left, t)};
+    }
+
+    Padding operator()(const Padding& a, const Padding& b, const double t) const noexcept {
+        return {interpolate(a.top, b.top, t),
+                interpolate(a.right, b.right, t),
+                interpolate(a.bottom, b.bottom, t),
+                interpolate(a.left, b.left, t)};
+    }
+};
+
+template <>
 struct Interpolator<style::Rotation> {
 public:
     style::Rotation operator()(const style::Rotation& a, const style::Rotation& b, const double t) noexcept {

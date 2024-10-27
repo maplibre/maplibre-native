@@ -137,6 +137,7 @@ private:
 
     std::unique_ptr<Impl> impl;
     ::mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
+    // Do not add members here, see `WeakPtrFactory`
 };
 
 } // namespace util

@@ -229,7 +229,6 @@ js_library(
     name = "style-spec",
     srcs = ["scripts/style-spec.mjs"],
     data = glob([
-        "scripts/style-spec-reference/*.mjs",
         "scripts/style-spec-reference/*.json",
     ]),
     visibility = ["//visibility:public"],

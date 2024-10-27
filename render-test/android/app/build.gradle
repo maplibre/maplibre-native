@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+//apply from: "${rootDir}/../../platform/android/gradle/download-vulkan-validation.gradle"
 
 android {
     ndkVersion '27.0.12077973'
@@ -49,6 +50,21 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.debug
+        }
+    }
+
+    flavorDimensions += "renderer"
+    productFlavors {
+        create("opengl") {
+            dimension = "renderer"
+        }
+        create("vulkan") {
+            dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments "-DMLN_WITH_OPENGL=OFF", "-DMLN_WITH_VULKAN=ON"
+                }
+            }
         }
     }
 

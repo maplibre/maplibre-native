@@ -113,8 +113,6 @@ void FillBucket::update(const FeatureStates& states,
         uploaded = false;
 
         sharedVertices->updateModified();
-        sharedBasicLineIndexes->updateModified();
-        sharedTriangles->updateModified();
     }
 }
 

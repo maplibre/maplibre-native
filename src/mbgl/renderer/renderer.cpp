@@ -30,7 +30,7 @@ void Renderer::setObserver(RendererObserver* observer) {
 }
 
 void Renderer::render(const std::shared_ptr<UpdateParameters>& updateParameters) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
     assert(updateParameters);
     if (auto renderTree = impl->orchestrator.createRenderTree(updateParameters)) {
         renderTree->prepare();
