@@ -6,6 +6,18 @@
 
 ### 🐞 Bug fixes
 
+## 11.5.2
+
+### ✨ Features and improvements
+
+- Use Kotlin instead of Groovy for Android build configuration ([#2902](https://github.com/maplibre/maplibre-native/pull/2902)).
+- Performance improvements ([#2892](https://github.com/maplibre/maplibre-native/pull/2892)).
+- Remove workaround for emulator crashes, and apply proper fix: revert index buffers to dirty flag instead of timestamps ([#2927](https://github.com/maplibre/maplibre-native/pull/2927)).
+
+### 🐞 Bug fixes
+
+- Fix line atlas, which was causing an issue with `line-pattern`s ([#2908](https://github.com/maplibre/maplibre-native/pull/2908)).
+
 ## 11.5.1
 
 ### ✨ Features and improvements

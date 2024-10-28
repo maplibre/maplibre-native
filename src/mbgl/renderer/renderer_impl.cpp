@@ -452,14 +452,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         // Renders debug overlays.
         {
             const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
-            orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) {
-                visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
-                    for (const auto& tweaker : drawable.getTweakers()) {
-                        tweaker->execute(drawable, parameters);
-                    }
-                    drawable.draw(parameters);
-                });
-            });
+            orchestrator.visitDebugLayerGroups(
+                [&](LayerGroupBase& layerGroup) { layerGroup.render(orchestrator, parameters); });
         }
     };
 #endif // MLN_DRAWABLE_RENDERER
@@ -525,10 +519,10 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     parameters.renderPass.reset();
 
     const auto startRendering = util::MonotonicTimer::now().count();
+    // present submits render commands
     parameters.encoder->present(parameters.backend.getDefaultRenderable());
     const auto renderingTime = util::MonotonicTimer::now().count() - startRendering;
 
-    // CommandEncoder destructor submits render commands.
     parameters.encoder.reset();
     context.endFrame();
 

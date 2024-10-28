@@ -9,6 +9,7 @@
 #include <mbgl/util/identity.hpp>
 #include <mbgl/util/monotonic_timer.hpp>
 #include <mbgl/util/traits.hpp>
+#include <mbgl/util/immutable.hpp>
 
 #include <cstdint>
 #include <cstddef>

@@ -6,9 +6,6 @@ let modifiedReferenceSpec = referenceSpec;
 // https://github.com/maplibre/maplibre-native/issues/250
 delete modifiedReferenceSpec['layout_symbol']['text-rotation-alignment']["values"]['viewport-glyph']
 
-// https://github.com/maplibre/maplibre-native/issues/2358
-delete modifiedReferenceSpec['layout_symbol']['text-variable-anchor-offset'];
-
 // https://github.com/maplibre/maplibre-native/issues/251
 delete modifiedReferenceSpec['layout_symbol']['icon-overlap'];
 delete modifiedReferenceSpec['layout_symbol']['text-overlap'];

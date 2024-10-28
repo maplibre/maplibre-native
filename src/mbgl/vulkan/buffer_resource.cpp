@@ -118,7 +118,7 @@ BufferResource::~BufferResource() noexcept {
 
     if (!bufferAllocation) return;
 
-    context.enqueueDeletion([allocation = std::move(bufferAllocation)](const auto&) mutable { allocation.reset(); });
+    context.enqueueDeletion([allocation = std::move(bufferAllocation)](auto&) mutable { allocation.reset(); });
 }
 
 BufferResource BufferResource::clone() const {
@@ -162,10 +162,6 @@ std::size_t BufferResource::getVulkanBufferOffset() const noexcept {
     if (bufferWindowSize > 0) return 0;
 
     return context.getCurrentFrameResourceIndex() * bufferWindowSize;
-}
-
-std::size_t BufferResource::getVulkanBufferSize() const noexcept {
-    return bufferWindowSize > 0 ? bufferWindowSize : size;
 }
 
 } // namespace vulkan
