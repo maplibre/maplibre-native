@@ -1,11 +1,5 @@
 # Quickstart
 
-<div class="warning">
-
-In versions prior to the (upcoming) MapLibre Native for Android 11.0 release, you need to use `com.mapbox.mapboxsdk.*` for imports instead of `org.maplibre.android.*`. Classes with `Mapbox` in the name are replaced with `MapLibre`. Details can be found in the [changelog](https://github.com/maplibre/maplibre-native/blob/main/platform/android/CHANGELOG.md).
-
-</div>
-
 1. Add bintray Maven repositories to your project-level Gradle file (usually `<project>/<app-module>/build.gradle`).
 
     ```gradle
@@ -17,7 +11,7 @@ In versions prior to the (upcoming) MapLibre Native for Android 11.0 release, yo
     }
     ```
 
-2. Add the library as a dependency into your module Gradle file (usually `<project>/<app-module>/build.gradle`). Replace `<version>` with the latest MapLibre Native version (e.g.: `org.maplibre.gl:android-sdk:10.0.2`). Visit [https://mvnrepository.com/artifact/org.maplibre.gl/android-sdk](https://mvnrepository.com/artifact/org.maplibre.gl/android-sdk) to view the version history of MapLibre Native for android. 
+2. Add the library as a dependency into your module Gradle file (usually `<project>/<app-module>/build.gradle`). Replace `<version>` with the [latest MapLibre Android version](https://github.com/maplibre/maplibre-native/releases?q=android-v11&expanded=true) (e.g.: `org.maplibre.gl:android-sdk:11.5.2`):
 
     ```gradle
     dependencies {
@@ -115,6 +109,7 @@ In versions prior to the (upcoming) MapLibre Native for Android 11.0 release, yo
     ```
 
 6. Build and run the app. If you run the app successfully, a map will be displayed as seen in the screenshot below.
+
 <div style="text-align: center;">
 <img src="https://user-images.githubusercontent.com/32692818/228113379-475e86f5-e3fa-4a36-8b4b-1fcba0f1eb3b.png" alt="Screenshot with the map in demotile style" width="50%" height="50%">
 </div>

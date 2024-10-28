@@ -12,3 +12,7 @@
 .md-nav__title {
   display: none;
 }
+
+.md-sidebar + .md-sidebar--secondary {
+  display: none !important;
+}
