@@ -252,10 +252,12 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #endif
 
         // Tweakers are run in the upload pass so they can set up uniforms.
-        int32_t i = static_cast<int32_t>(orchestrator.numLayerGroups()) - 1;
+        parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            parameters.currentLayer = i++;
             layerGroup.runTweakers(renderTree, parameters);
+            if (parameters.currentLayer > 0) {
+                parameters.currentLayer--;
+            }
         });
         orchestrator.visitDebugLayerGroups(
             [&](LayerGroupBase& layerGroup) { layerGroup.runTweakers(renderTree, parameters); });
@@ -318,10 +320,12 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         assert(parameters.pass == RenderPass::Pass3D);
 
         // draw layer groups, 3D pass
-        int32_t i = static_cast<int32_t>(orchestrator.numLayerGroups()) - 1;
+        parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            parameters.currentLayer = i++;
             layerGroup.render(orchestrator, parameters);
+            if (parameters.currentLayer > 0) {
+                parameters.currentLayer--;
+            }
         });
     };
 #endif // MLN_DRAWABLE_RENDERER
@@ -376,10 +380,12 @@ void Renderer::Impl::render(const RenderTree& renderTree,
                                             PaintParameters::depthEpsilon;
 
         // draw layer groups, opaque pass
-        int32_t i = static_cast<int32_t>(orchestrator.numLayerGroups()) - 1;
+        parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            parameters.currentLayer = i--;
             layerGroup.render(orchestrator, parameters);
+            if (parameters.currentLayer > 0) {
+                parameters.currentLayer--;
+            }
         });
     };
 
@@ -390,17 +396,19 @@ void Renderer::Impl::render(const RenderTree& renderTree,
                                             PaintParameters::depthEpsilon;
 
         // draw layer groups, translucent pass
-        int32_t i = static_cast<int32_t>(orchestrator.numLayerGroups()) - 1;
+        parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            parameters.currentLayer = i--;
             layerGroup.render(orchestrator, parameters);
+            if (parameters.currentLayer > 0) {
+                parameters.currentLayer--;
+            }
         });
 
         // Finally, render any legacy layers which have not been converted to drawables.
         // Note that they may be out of order, this is just a temporary fix for `RenderLocationIndicatorLayer` (#2216)
         parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * PaintParameters::numSublayers *
                                             PaintParameters::depthEpsilon;
-        i = static_cast<int32_t>(layerRenderItems.size()) - 1;
+        int32_t i = static_cast<int32_t>(layerRenderItems.size()) - 1;
         for (auto it = layerRenderItems.begin(); it != layerRenderItems.end() && i >= 0; ++it, --i) {
             parameters.currentLayer = i;
             const RenderItem& item = *it;

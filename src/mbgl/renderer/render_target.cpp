@@ -73,24 +73,26 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
 
     // draw layer groups, opaque pass
     parameters.pass = RenderPass::Opaque;
-    parameters.currentLayer = 0;
+    parameters.currentLayer = static_cast<uint32_t>(numLayerGroups()) - 1;
     parameters.depthRangeSize = 1 -
                                 (numLayerGroups() + 2) * PaintParameters::numSublayers * PaintParameters::depthEpsilon;
 
     visitLayerGroups([&](LayerGroupBase& layerGroup) {
         layerGroup.render(orchestrator, parameters);
-        parameters.currentLayer++;
+        if (parameters.currentLayer > 0) {
+            parameters.currentLayer--;
+        }
     });
 
     // draw layer groups, translucent pass
     parameters.pass = RenderPass::Translucent;
-    parameters.currentLayer = static_cast<int32_t>(numLayerGroups()) - 1;
+    parameters.currentLayer = static_cast<uint32_t>(numLayerGroups()) - 1;
     parameters.depthRangeSize = 1 -
                                 (numLayerGroups() + 2) * PaintParameters::numSublayers * PaintParameters::depthEpsilon;
 
     visitLayerGroups([&](LayerGroupBase& layerGroup) {
         layerGroup.render(orchestrator, parameters);
-        if (parameters.currentLayer != 0) {
+        if (parameters.currentLayer > 0) {
             parameters.currentLayer--;
         }
     });
