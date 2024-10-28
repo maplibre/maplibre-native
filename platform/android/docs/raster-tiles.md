@@ -1,4 +1,0 @@
-# Using Raster Tiles
-
-```
-```
