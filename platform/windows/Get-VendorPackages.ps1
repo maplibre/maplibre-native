@@ -14,6 +14,7 @@ foreach($letter in [byte][char]'Z'..[byte][char]'A')
     if(-not (Test-Path $vcpkg_temp_dir))
     {
         & subst $vcpkg_temp_dir ([System.IO.Path]::Combine($PWD.Path, 'vendor', 'vcpkg'))
+        $env:VCPKG_ROOT = ('{0}\' -f $vcpkg_temp_dir)
         break
     }
 }
@@ -21,17 +22,25 @@ foreach($letter in [byte][char]'Z'..[byte][char]'A')
 switch($Renderer)
 {
     'EGL'    { $renderer_packages = @('egl', 'opengl-registry'); break }
-    'OSMesa' { $renderer_packages = @('');                       break }
+    'OSMesa' { $renderer_packages = @();                         break }
     'OpenGL' { $renderer_packages = @('opengl-registry');        break }
-	'Vulkan' { $renderer_packages = @('');        break }
+	'Vulkan' { $renderer_packages = @();                         break }
 }
 
-if(-not (Test-Path "$vcpkg_temp_dir\vcpkg.exe"))
+if(-not (Test-Path ('{0}\vcpkg.exe' -f $vcpkg_temp_dir)))
 {
-    & "$vcpkg_temp_dir\bootstrap-vcpkg.bat"
+    & ('{0}\bootstrap-vcpkg.bat' -f $vcpkg_temp_dir)
 }
 
-& "$vcpkg_temp_dir\vcpkg.exe" --disable-metrics --overlay-triplets=$([System.IO.Path]::Combine($PWD.Path, 'vendor', 'vcpkg-custom-triplets')) --triplet=$($Triplet) --clean-after-build install curl dlfcn-win32 glfw3 icu libuv libjpeg-turbo libpng libwebp $($renderer_packages)
+& ('{0}\vcpkg.exe' -f $vcpkg_temp_dir) $(
+    @(
+        '--disable-metrics',
+        ('--overlay-triplets={0}' -f [System.IO.Path]::Combine($PWD.Path, 'vendor', 'vcpkg-custom-triplets')),
+        ('--triplet={0}' -f $Triplet),
+        '--clean-after-build',
+        'install', 'curl', 'dlfcn-win32', 'glfw3', 'icu', 'libuv', 'libjpeg-turbo', 'libpng', 'libwebp'
+    ) + $renderer_packages
+)
 
 subst $vcpkg_temp_dir /D
 
