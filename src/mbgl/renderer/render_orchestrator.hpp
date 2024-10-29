@@ -126,7 +126,6 @@ public:
         }
     }
 
-    
     void updateLayers(gfx::ShaderRegistry&,
                       gfx::Context&,
                       const TransformState&,
