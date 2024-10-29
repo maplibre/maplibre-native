@@ -42,7 +42,7 @@ struct SymbolDrawableUBO {
     vec2 pad;
 };
 
-layout(std140, set = 0, binding = 2) readonly buffer SymbolDrawableUBOVector {
+layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 0) readonly buffer SymbolDrawableUBOVector {
     SymbolDrawableUBO drawable_ubo[];
 } drawable_vector;
 
@@ -57,7 +57,7 @@ struct SymbolTilePropsUBO {
     float padding;
 };
 
-layout(std140, set = 0, binding = 3) readonly buffer SymbolTilePropsUBOVector {
+layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 1) readonly buffer SymbolTilePropsUBOVector {
     SymbolTilePropsUBO tile_ubo[];
 } tile_vector;
 
@@ -70,7 +70,7 @@ struct SymbolInterpolateUBO {
     float pad1, pad2, pad3;
 };
 
-layout(std140, set = 0, binding = 4) readonly buffer SymbolInterpolateUBOVector {
+layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 2) readonly buffer SymbolInterpolateUBOVector {
     SymbolInterpolateUBO interp_ubo[];
 } interp_vector;
 
@@ -174,11 +174,11 @@ struct SymbolTilePropsUBO {
     float padding;
 };
 
-layout(std140, set = 0, binding = 3) readonly buffer SymbolTilePropsUBOVector {
+layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 1) readonly buffer SymbolTilePropsUBOVector {
     SymbolTilePropsUBO tile_ubo[];
 } tile_vector;
 
-layout(set = 0, binding = 4) uniform SymbolEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform SymbolEvaluatedPropsUBO {
     vec4 text_fill_color;
     vec4 text_halo_color;
     float text_opacity;
@@ -193,7 +193,7 @@ layout(set = 0, binding = 4) uniform SymbolEvaluatedPropsUBO {
     float pad2;
 } props;
 
-layout(set = 1, binding = 0) uniform sampler2D image0_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
 void main() {
 #if defined(OVERDRAW_INSPECTOR)
@@ -266,7 +266,7 @@ struct SymbolDrawableUBO {
     vec2 pad;
 };
 
-layout(std140, set = 0, binding = 2) readonly buffer SymbolDrawableUBOVector {
+layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 0) readonly buffer SymbolDrawableUBOVector {
     SymbolDrawableUBO drawable_ubo[];
 } drawable_vector;
 
@@ -281,7 +281,7 @@ struct SymbolTilePropsUBO {
     float padding;
 };
 
-layout(std140, set = 0, binding = 3) readonly buffer SymbolTilePropsUBOVector {
+layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 1) readonly buffer SymbolTilePropsUBOVector {
     SymbolTilePropsUBO tile_ubo[];
 } tile_vector;
 
@@ -294,7 +294,7 @@ struct SymbolInterpolateUBO {
     float pad1, pad2, pad3;
 };
 
-layout(std140, set = 0, binding = 4) readonly buffer SymbolInterpolateUBOVector {
+layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 2) readonly buffer SymbolInterpolateUBOVector {
     SymbolInterpolateUBO interp_ubo[];
 } interp_vector;
 
@@ -459,7 +459,7 @@ struct SymbolDrawableUBO {
     vec2 pad;
 };
 
-layout(std140, set = 0, binding = 2) readonly buffer SymbolDrawableUBOVector {
+layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 0) readonly buffer SymbolDrawableUBOVector {
     SymbolDrawableUBO drawable_ubo[];
 } drawable_vector;
 
@@ -474,11 +474,11 @@ struct SymbolTilePropsUBO {
     float padding;
 };
 
-layout(std140, set = 0, binding = 3) readonly buffer SymbolTilePropsUBOVector {
+layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 1) readonly buffer SymbolTilePropsUBOVector {
     SymbolTilePropsUBO tile_ubo[];
 } tile_vector;
 
-layout(set = 0, binding = 4) uniform SymbolEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform SymbolEvaluatedPropsUBO {
     vec4 text_fill_color;
     vec4 text_halo_color;
     float text_opacity;
@@ -493,7 +493,7 @@ layout(set = 0, binding = 4) uniform SymbolEvaluatedPropsUBO {
     float pad2;
 } props;
 
-layout(set = 1, binding = 0) uniform sampler2D image0_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
 void main() {
 
@@ -599,7 +599,7 @@ struct SymbolDrawableUBO {
     vec2 pad;
 };
 
-layout(std140, set = 0, binding = 2) readonly buffer SymbolDrawableUBOVector {
+layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 0) readonly buffer SymbolDrawableUBOVector {
     SymbolDrawableUBO drawable_ubo[];
 } drawable_vector;
 
@@ -614,7 +614,7 @@ struct SymbolTilePropsUBO {
     float padding;
 };
 
-layout(std140, set = 0, binding = 3) readonly buffer SymbolTilePropsUBOVector {
+layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 1) readonly buffer SymbolTilePropsUBOVector {
     SymbolTilePropsUBO tile_ubo[];
 } tile_vector;
 
@@ -627,7 +627,7 @@ struct SymbolInterpolateUBO {
     float pad1, pad2, pad3;
 };
 
-layout(std140, set = 0, binding = 4) readonly buffer SymbolInterpolateUBOVector {
+layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 1) readonly buffer SymbolInterpolateUBOVector {
     SymbolInterpolateUBO interp_ubo[];
 } interp_vector;
 
@@ -799,7 +799,7 @@ struct SymbolDrawableUBO {
     vec2 pad;
 };
 
-layout(std140, set = 0, binding = 2) readonly buffer SymbolDrawableUBOVector {
+layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 0) readonly buffer SymbolDrawableUBOVector {
     SymbolDrawableUBO drawable_ubo[];
 } drawable_vector;
 
@@ -814,11 +814,11 @@ struct SymbolTilePropsUBO {
     float padding;
 };
 
-layout(std140, set = 0, binding = 3) readonly buffer SymbolTilePropsUBOVector {
+layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 1) readonly buffer SymbolTilePropsUBOVector {
     SymbolTilePropsUBO tile_ubo[];
 } tile_vector;
 
-layout(set = 0, binding = 4) uniform SymbolEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform SymbolEvaluatedPropsUBO {
     vec4 text_fill_color;
     vec4 text_halo_color;
     float text_opacity;
@@ -833,8 +833,8 @@ layout(set = 0, binding = 4) uniform SymbolEvaluatedPropsUBO {
     float pad2;
 } props;
 
-layout(set = 1, binding = 0) uniform sampler2D glyph_image;
-layout(set = 1, binding = 1) uniform sampler2D icon_image;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D glyph_image;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 1) uniform sampler2D icon_image;
 
 void main() {
 #if defined(OVERDRAW_INSPECTOR)
@@ -905,11 +905,11 @@ struct ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::Vulkan>
 layout(location = 0) in vec2 in_position;
 layout(location = 1) in vec2 in_tex;
 
-layout(set = 0, binding = 1) uniform CustomSymbolIconDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform CustomSymbolIconDrawableUBO {
     mat4 matrix;
 } drawable;
 
-layout(set = 0, binding = 2) uniform CustomSymbolIconParametersUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform CustomSymbolIconParametersUBO {
     vec2 extrude_scale;
     vec2 anchor;
     float angle_degrees;
@@ -969,7 +969,7 @@ void main() {
 layout(location = 0) in vec2 frag_tex;
 layout(location = 0) out vec4 out_color;
 
-layout(set = 1, binding = 0) uniform sampler2D image_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image_sampler;
 
 void main() {
 

@@ -44,6 +44,25 @@ Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, Padding>:
     return result;
 }
 
+Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, VariableAnchorOffsetCollection>::operator()(
+    jni::JNIEnv& env, const VariableAnchorOffsetCollection& value) const {
+    auto variableAnchorOffsets = jni::Array<jni::Object<>>::New(env, value.size() * 2);
+    for (std::size_t i = 0; i < value.size(); i++) {
+        auto anchorOffsetPair = value[i];
+        auto anchorType = jni::Make<jni::String>(env,
+                                                 Enum<style::SymbolAnchorType>::toString(anchorOffsetPair.anchorType));
+        auto offset = jni::Array<jni::Float>::New(env, anchorOffsetPair.offset.size());
+        for (size_t j = 0; j < anchorOffsetPair.offset.size(); j++) {
+            offset.Set(env, j, jni::Box(env, anchorOffsetPair.offset[j]));
+        }
+
+        variableAnchorOffsets.Set(env, i, anchorType);
+        variableAnchorOffsets.Set(env, i + 1, offset);
+    }
+
+    return variableAnchorOffsets;
+}
+
 Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, style::expression::Formatted>::operator()(
     jni::JNIEnv& env, const style::expression::Formatted& value) const {
     return Formatted::New(env, value);

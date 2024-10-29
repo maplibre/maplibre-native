@@ -1,4 +1,5 @@
 #include <mbgl/shaders/mtl/circle.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
 
 namespace mbgl {
 namespace shaders {
@@ -6,8 +7,8 @@ namespace shaders {
 const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{true, false, sizeof(GlobalPaintParamsUBO), idGlobalPaintParamsUBO},
     UniformBlockInfo{true, false, sizeof(CircleDrawableUBO), idCircleDrawableUBO},
-    UniformBlockInfo{true, true, sizeof(CircleEvaluatedPropsUBO), idCircleEvaluatedPropsUBO},
     UniformBlockInfo{true, false, sizeof(CircleInterpolateUBO), idCircleInterpolateUBO},
+    UniformBlockInfo{true, true, sizeof(CircleEvaluatedPropsUBO), idCircleEvaluatedPropsUBO},
 };
 const std::array<AttributeInfo, 8> ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>::attributes = {
     AttributeInfo{circleUBOCount + 0, gfx::AttributeDataType::Short2, idCirclePosVertexAttribute},

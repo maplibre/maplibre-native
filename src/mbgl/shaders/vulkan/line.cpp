@@ -1,4 +1,6 @@
 #include <mbgl/shaders/vulkan/line.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
+#include <mbgl/shaders/line_layer_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {

@@ -74,7 +74,6 @@ void CircleBucket::update(const FeatureStates& states,
         uploaded = false;
 
         sharedVertices->updateModified();
-        sharedTriangles->updateModified();
     }
 }
 

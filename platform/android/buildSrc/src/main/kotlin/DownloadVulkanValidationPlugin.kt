@@ -16,5 +16,4 @@ internal fun Project.configureVulkanJniLibs() = this.extensions.getByType<BaseEx
             jniLibs.srcDir(tasks.named("unzip").get().outputs.files.asFileTree)
         }
     }
-
 }

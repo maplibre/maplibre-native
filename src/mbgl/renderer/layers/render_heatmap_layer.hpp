@@ -33,10 +33,6 @@ public:
                 const std::shared_ptr<UpdateParameters>&,
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
-
-    /// Remove all the drawables for tiles
-    /// @return The number of drawables actually removed.
-    std::size_t removeAllDrawables() override;
 #endif
 
 private:
@@ -67,6 +63,10 @@ private:
     /// Remove all drawables for the tile from the layer group
     /// @return The number of drawables actually removed.
     std::size_t removeTile(RenderPass, const OverscaledTileID&) override;
+
+    /// Remove all the drawables for tiles
+    /// @return The number of drawables actually removed.
+    std::size_t removeAllDrawables() override;
 #endif
 
     // Paint properties

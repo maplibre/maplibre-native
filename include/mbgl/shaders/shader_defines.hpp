@@ -1,50 +1,197 @@
 #pragma once
 
-#include <mbgl/shaders/common_ubo.hpp>
-#include <mbgl/shaders/background_layer_ubo.hpp>
-#include <mbgl/shaders/circle_layer_ubo.hpp>
-#include <mbgl/shaders/collision_layer_ubo.hpp>
-#include <mbgl/shaders/custom_drawable_layer_ubo.hpp>
-#include <mbgl/shaders/debug_layer_ubo.hpp>
-#include <mbgl/shaders/fill_layer_ubo.hpp>
-#include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
-#include <mbgl/shaders/heatmap_layer_ubo.hpp>
-#include <mbgl/shaders/heatmap_texture_layer_ubo.hpp>
-#include <mbgl/shaders/hillshade_layer_ubo.hpp>
-#include <mbgl/shaders/hillshade_prepare_layer_ubo.hpp>
-#include <mbgl/shaders/line_layer_ubo.hpp>
-#include <mbgl/shaders/raster_layer_ubo.hpp>
-#include <mbgl/shaders/symbol_layer_ubo.hpp>
-#include <mbgl/shaders/widevector_ubo.hpp>
+#include <mbgl/shaders/layer_ubo.hpp>
 
 #include <algorithm>
 
 namespace mbgl {
 namespace shaders {
 
-// UBO defines
+// drawable UBOs
+
 enum {
     idClippingMaskUBO = globalUBOCount,
     clippingMaskUBOCount
 };
 
-static constexpr auto maxUBOCountPerShader = std::max({static_cast<size_t>(backgroundUBOCount),
-                                                       static_cast<size_t>(circleUBOCount),
+enum {
+    idCommonUBO = globalUBOCount,
+    commonDrawableUBOCount
+};
+
+enum {
+    idCircleDrawableUBO = globalUBOCount,
+    idCircleInterpolateUBO,
+    circleDrawableUBOCount
+};
+
+enum {
+    idBackgroundDrawableUBO = globalUBOCount,
+    backgroundDrawableUBOCount
+};
+
+enum {
+    idCustomSymbolDrawableUBO = globalUBOCount,
+    idCustomSymbolParametersUBO,
+    customSymbolDrawableUBOCount
+};
+
+enum {
+    idCollisionUBO = globalUBOCount,
+    collisionDrawableUBOCount
+};
+
+enum {
+    idDebugUBO = globalUBOCount,
+    debugDrawableUBOCount
+};
+
+enum {
+    idFillDrawableUBO = globalUBOCount,
+    idFillTilePropsUBO,
+    idFillInterpolateUBO,
+    fillDrawableUBOCount
+};
+
+enum {
+    idFillExtrusionDrawableUBO = globalUBOCount,
+    idFillExtrusionTilePropsUBO,
+    idFillExtrusionInterpolateUBO,
+    fillExtrusionDrawableUBOCount
+};
+
+enum {
+    idHeatmapDrawableUBO = globalUBOCount,
+    idHeatmapInterpolateUBO,
+    heatmapDrawableUBOCount
+};
+
+enum {
+    idHillshadeDrawableUBO = globalUBOCount,
+    hillshadeDrawableUBOCount
+};
+
+enum {
+    idHillshadePrepareDrawableUBO = globalUBOCount,
+    hillshadePrepareDrawableUBOCount
+};
+
+enum {
+    idLineDrawableUBO = globalUBOCount,
+    idLineInterpolationUBO,
+    idLineTilePropertiesUBO,
+    lineDrawableUBOCount
+};
+
+enum {
+    idRasterDrawableUBO = globalUBOCount,
+    rasterDrawableUBOCount
+};
+
+enum {
+    idSymbolDrawableUBO = globalUBOCount,
+    idSymbolTilePropsUBO,
+    idSymbolInterpolateUBO,
+    symbolDrawableUBOCount
+};
+
+enum {
+    idWideVectorUniformsUBO = globalUBOCount,
+    idWideVectorUniformWideVecUBO,
+    wideVectorDrawableUBOCount
+};
+
+static constexpr auto layerUBOStartId = std::max({static_cast<size_t>(circleDrawableUBOCount),
+                                                  static_cast<size_t>(backgroundDrawableUBOCount),
+                                                  static_cast<size_t>(customSymbolDrawableUBOCount),
+                                                  static_cast<size_t>(collisionDrawableUBOCount),
+                                                  static_cast<size_t>(commonDrawableUBOCount),
+                                                  static_cast<size_t>(debugDrawableUBOCount),
+                                                  static_cast<size_t>(fillDrawableUBOCount),
+                                                  static_cast<size_t>(fillExtrusionDrawableUBOCount),
+                                                  static_cast<size_t>(heatmapDrawableUBOCount),
+                                                  static_cast<size_t>(hillshadeDrawableUBOCount),
+                                                  static_cast<size_t>(hillshadePrepareDrawableUBOCount),
+                                                  static_cast<size_t>(lineDrawableUBOCount),
+                                                  static_cast<size_t>(rasterDrawableUBOCount),
+                                                  static_cast<size_t>(symbolDrawableUBOCount),
+                                                  static_cast<size_t>(wideVectorDrawableUBOCount)});
+
+static constexpr auto maxUBOCountPerDrawable = layerUBOStartId - globalUBOCount;
+
+// layer UBOs
+
+#if MLN_RENDER_BACKEND_VULKAN
+#define getLayerStartValue(packedValue) layerUBOStartId
+#else
+#define getLayerStartValue(packedValue) packedValue
+#endif
+
+enum {
+    idCircleEvaluatedPropsUBO = getLayerStartValue(circleDrawableUBOCount),
+    circleUBOCount
+};
+
+enum {
+    idBackgroundLayerUBO = getLayerStartValue(backgroundDrawableUBOCount),
+    backgroundUBOCount
+};
+
+enum {
+    idFillEvaluatedPropsUBO = getLayerStartValue(fillDrawableUBOCount),
+    fillUBOCount
+};
+
+enum {
+    idFillExtrusionPropsUBO = getLayerStartValue(fillExtrusionDrawableUBOCount),
+    fillExtrusionUBOCount
+};
+
+enum {
+    idHeatmapEvaluatedPropsUBO = getLayerStartValue(heatmapDrawableUBOCount),
+    heatmapUBOCount
+};
+
+enum {
+    idHeatmapTexturePropsUBO = getLayerStartValue(globalUBOCount),
+    heatmapTextureUBOCount
+};
+
+enum {
+    idHillshadeEvaluatedPropsUBO = getLayerStartValue(hillshadeDrawableUBOCount),
+    hillshadeUBOCount
+};
+
+enum {
+    idLineEvaluatedPropsUBO = getLayerStartValue(lineDrawableUBOCount),
+    idLineExpressionUBO,
+    lineUBOCount
+};
+
+enum {
+    idRasterEvaluatedPropsUBO = getLayerStartValue(rasterDrawableUBOCount),
+    rasterUBOCount
+};
+
+enum {
+    idSymbolEvaluatedPropsUBO = getLayerStartValue(symbolDrawableUBOCount),
+    symbolUBOCount
+};
+
+#undef getLayerStartValue
+
+static constexpr auto maxUBOCountPerShader = std::max({static_cast<size_t>(circleUBOCount),
                                                        static_cast<size_t>(clippingMaskUBOCount),
-                                                       static_cast<size_t>(collisionUBOCount),
-                                                       static_cast<size_t>(commonUBOCount),
-                                                       static_cast<size_t>(customSymbolUBOCount),
-                                                       static_cast<size_t>(debugUBOCount),
                                                        static_cast<size_t>(fillUBOCount),
                                                        static_cast<size_t>(fillExtrusionUBOCount),
                                                        static_cast<size_t>(heatmapUBOCount),
                                                        static_cast<size_t>(heatmapTextureUBOCount),
                                                        static_cast<size_t>(hillshadeUBOCount),
-                                                       static_cast<size_t>(hillshadePrepareUBOCount),
                                                        static_cast<size_t>(lineUBOCount),
                                                        static_cast<size_t>(rasterUBOCount),
-                                                       static_cast<size_t>(symbolUBOCount),
-                                                       static_cast<size_t>(wideVectorUBOCount)});
+                                                       static_cast<size_t>(symbolUBOCount)});
+
+static constexpr auto maxUBOCountPerLayer = maxUBOCountPerShader - layerUBOStartId;
 
 // Texture defines
 enum {

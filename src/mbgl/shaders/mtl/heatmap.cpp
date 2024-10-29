@@ -1,12 +1,13 @@
 #include <mbgl/shaders/mtl/heatmap.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
 
 namespace mbgl {
 namespace shaders {
 
 const std::array<UniformBlockInfo, 3> ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{true, false, sizeof(HeatmapDrawableUBO), idHeatmapDrawableUBO},
-    UniformBlockInfo{true, true, sizeof(HeatmapEvaluatedPropsUBO), idHeatmapEvaluatedPropsUBO},
     UniformBlockInfo{true, false, sizeof(HeatmapInterpolateUBO), idHeatmapInterpolateUBO},
+    UniformBlockInfo{true, true, sizeof(HeatmapEvaluatedPropsUBO), idHeatmapEvaluatedPropsUBO},
 };
 const std::array<AttributeInfo, 3> ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal>::attributes = {
     AttributeInfo{heatmapUBOCount + 0, gfx::AttributeDataType::Short2, idHeatmapPosVertexAttribute},
