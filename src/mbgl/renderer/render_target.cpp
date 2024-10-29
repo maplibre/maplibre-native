@@ -69,27 +69,29 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
         "render target", {*offscreenTexture, Color{0.0f, 0.0f, 0.0f, 1.0f}, {}, {}});
 
     // Run layer tweakers to update any dynamic elements
-    visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.runTweakers(renderTree, parameters); });
+    parameters.currentLayer = 0;
+    visitLayerGroups([&](LayerGroupBase& layerGroup) {
+        layerGroup.runTweakers(renderTree, parameters);
+        parameters.currentLayer++;
+    });
 
     // draw layer groups, opaque pass
     parameters.pass = RenderPass::Opaque;
-    parameters.currentLayer = static_cast<uint32_t>(numLayerGroups()) - 1;
     parameters.depthRangeSize = 1 -
                                 (numLayerGroups() + 2) * PaintParameters::numSublayers * PaintParameters::depthEpsilon;
 
-    visitLayerGroups([&](LayerGroupBase& layerGroup) {
+    parameters.currentLayer = 0;
+    visitLayerGroupsReversed([&](LayerGroupBase& layerGroup) {
         layerGroup.render(orchestrator, parameters);
-        if (parameters.currentLayer > 0) {
-            parameters.currentLayer--;
-        }
+        parameters.currentLayer++;
     });
 
     // draw layer groups, translucent pass
     parameters.pass = RenderPass::Translucent;
-    parameters.currentLayer = static_cast<uint32_t>(numLayerGroups()) - 1;
     parameters.depthRangeSize = 1 -
                                 (numLayerGroups() + 2) * PaintParameters::numSublayers * PaintParameters::depthEpsilon;
 
+    parameters.currentLayer = static_cast<uint32_t>(numLayerGroups()) - 1;
     visitLayerGroups([&](LayerGroupBase& layerGroup) {
         layerGroup.render(orchestrator, parameters);
         if (parameters.currentLayer > 0) {
