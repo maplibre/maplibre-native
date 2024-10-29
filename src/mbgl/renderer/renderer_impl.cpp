@@ -252,12 +252,10 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #endif
 
         // Tweakers are run in the upload pass so they can set up uniforms.
-        parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
+        parameters.currentLayer = 0;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
             layerGroup.runTweakers(renderTree, parameters);
-            if (parameters.currentLayer > 0) {
-                parameters.currentLayer--;
-            }
+            parameters.currentLayer++;
         });
         orchestrator.visitDebugLayerGroups(
             [&](LayerGroupBase& layerGroup) { layerGroup.runTweakers(renderTree, parameters); });
@@ -380,12 +378,10 @@ void Renderer::Impl::render(const RenderTree& renderTree,
                                             PaintParameters::depthEpsilon;
 
         // draw layer groups, opaque pass
-        parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
-        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
+        parameters.currentLayer = 0;
+        orchestrator.visitLayerGroupsReversed([&](LayerGroupBase& layerGroup) {
             layerGroup.render(orchestrator, parameters);
-            if (parameters.currentLayer > 0) {
-                parameters.currentLayer--;
-            }
+            parameters.currentLayer++;
         });
     };
 

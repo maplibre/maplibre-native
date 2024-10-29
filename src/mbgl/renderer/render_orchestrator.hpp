@@ -117,6 +117,16 @@ public:
         }
     }
 
+    template <typename Func /* void(LayerGroupBase&) */>
+    void visitLayerGroupsReversed(Func f) {
+        for (auto rit = layerGroupsByLayerIndex.rbegin(); rit != layerGroupsByLayerIndex.rend(); ++rit) {
+            if (rit->second) {
+                f(*rit->second);
+            }
+        }
+    }
+
+    
     void updateLayers(gfx::ShaderRegistry&,
                       gfx::Context&,
                       const TransformState&,
