@@ -213,6 +213,10 @@ ParseResult ParsingContext::parse(const Convertible& value,
                    (actual == type::Value || actual == type::Number || actual.is<type::Array>())) {
             parsed = {annotate(
                 std::move(*parsed), std::move(*expected), typeAnnotationOption.value_or(TypeAnnotationOption::coerce))};
+        } else if (*expected == type::VariableAnchorOffsetCollection &&
+                   (actual == type::Value || actual.is<type::Array>())) {
+            parsed = {annotate(
+                std::move(*parsed), std::move(*expected), typeAnnotationOption.value_or(TypeAnnotationOption::coerce))};
         } else {
             checkType((*parsed)->getType());
             if (!errors->empty()) {

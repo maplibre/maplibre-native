@@ -7,6 +7,7 @@
 #include <mbgl/style/position.hpp>
 #include <mbgl/style/rotation.hpp>
 #include <mbgl/style/types.hpp>
+#include <mbgl/style/variable_anchor_offset_collection.hpp>
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/enum.hpp>
 #include <mbgl/util/feature.hpp>
@@ -28,6 +29,7 @@ using ValueBase = variant<NullValue,
                           double,
                           std::string,
                           Color,
+                          VariableAnchorOffsetCollection,
                           Collator,
                           Formatted,
                           Image,

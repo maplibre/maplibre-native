@@ -189,6 +189,11 @@ jni::Local<jni::Object<>> SymbolLayer::getTextVariableAnchor(jni::JNIEnv& env) {
     return std::move(*convert<jni::Local<jni::Object<>>>(env, toSymbolLayer(layer).getTextVariableAnchor()));
 }
 
+jni::Local<jni::Object<>> SymbolLayer::getTextVariableAnchorOffset(jni::JNIEnv& env) {
+    using namespace mbgl::android::conversion;
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toSymbolLayer(layer).getTextVariableAnchorOffset()));
+}
+
 jni::Local<jni::Object<>> SymbolLayer::getTextAnchor(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
     return std::move(*convert<jni::Local<jni::Object<>>>(env, toSymbolLayer(layer).getTextAnchor()));
@@ -540,6 +545,7 @@ void SymbolJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&SymbolLayer::getTextJustify, "nativeGetTextJustify"),
         METHOD(&SymbolLayer::getTextRadialOffset, "nativeGetTextRadialOffset"),
         METHOD(&SymbolLayer::getTextVariableAnchor, "nativeGetTextVariableAnchor"),
+        METHOD(&SymbolLayer::getTextVariableAnchorOffset, "nativeGetTextVariableAnchorOffset"),
         METHOD(&SymbolLayer::getTextAnchor, "nativeGetTextAnchor"),
         METHOD(&SymbolLayer::getTextMaxAngle, "nativeGetTextMaxAngle"),
         METHOD(&SymbolLayer::getTextWritingMode, "nativeGetTextWritingMode"),
