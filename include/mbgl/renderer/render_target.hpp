@@ -61,7 +61,7 @@ public:
             }
         }
     }
-    
+
     /// Execute the given function for each contained layer group in reversed order
     template <typename Func /* void(LayerGroupBase&) */>
     void visitLayerGroupsReversed(Func f) {
