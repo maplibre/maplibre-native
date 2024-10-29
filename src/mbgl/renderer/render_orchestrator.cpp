@@ -959,16 +959,6 @@ size_t RenderOrchestrator::numLayerGroups() const noexcept {
     return layerGroupsByLayerIndex.size();
 }
 
-int32_t RenderOrchestrator::maxLayerIndex() const {
-    MLN_TRACE_FUNC();
-
-    if (!layerGroupsByLayerIndex.empty()) {
-        assert(layerGroupsByLayerIndex.crbegin()->first == layerGroupsByLayerIndex.crbegin()->second->getLayerIndex());
-        return layerGroupsByLayerIndex.crbegin()->first;
-    }
-    return -1;
-}
-
 void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
                                       const TransformState& state,
