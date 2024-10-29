@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.annotation.Keep
 import androidx.annotation.UiThread
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.toBitmap
 import org.maplibre.android.R
 import org.maplibre.android.attribution.AttributionLayout
 import org.maplibre.android.attribution.AttributionMeasure
@@ -568,7 +569,7 @@ open class MapSnapshotter(context: Context, options: Options) {
      * @return the scaled large logo
      */
     private fun createScaledLogo(snapshot: Bitmap): Logo {
-        val logo = BitmapFactory.decodeResource(context.resources, R.drawable.maplibre_logo_icon, null)
+        val logo = context.resources.getDrawable(R.drawable.maplibre_logo_icon, null)?.toBitmap()!!
         val scale = calculateLogoScale(snapshot, logo)
         val matrix = Matrix()
         matrix.postScale(scale, scale)
