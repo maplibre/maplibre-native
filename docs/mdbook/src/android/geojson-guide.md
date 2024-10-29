@@ -1,39 +1,39 @@
 # Introduction
 
-This guide will teach you how to use [`GeoJsonDataSource`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.style.sources/-geo-json-source/index.html") by deep diving into [`GeoJson`]("https://geojson.org/") file format.
+This guide will teach you how to use [`GeoJsonSource`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.style.sources/-geo-json-source/index.html") by deep diving into [`GeoJSON`]("https://geojson.org/") file format.
 
-You will start with fundamentals of how map renders data under the hood and why [`JSON`]("https://en.wikipedia.org/wiki/JSON") format is preferred in storing geospatial data
+You will start with fundamentals of how map renders data under the hood and why [JSON]("https://en.wikipedia.org/wiki/JSON") format is preferred in storing geospatial data
 
 # Goals
 After finishing  this documentation you should be able to
 
-1. understand how [`Style`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.maps/-style/index.html?query=open%20class%20Style"), [`Layer`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.style.layers/-layer/index.html?query=abstract%20class%20Layer"), and [`DataSource`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.style.sources/-source/index.html?query=abstract%20class%20Source") interact with each other
-2. describe `JSON` files
-3. explore building blocks of `GeoJson` data
-4. use `GeoJson` files in constructing [`GeoJsonDataSources`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.style.sources/-source/index.html?query=abstract%20class%20Source")
+1. understand how [`Style`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.maps/-style/index.html?query=open%20class%20Style"), [`Layer`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.style.layers/-layer/index.html?query=abstract%20class%20Layer"), and [`Data source`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.style.sources/-source/index.html?query=abstract%20class%20Source") interact with each other
+2. describe JSON files
+3. explore building blocks of `GeoJSON` data
+4. use `GeoJSON` files in constructing [`GeoJsonSource`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.style.sources/-source/index.html?query=abstract%20class%20Source")s
 5. update data at runtime
 
-### 1. Styles, Layers, and DataSources
+### 1. Styles, Layers, and Data source
 - `Style ` defines the visual representation of the map such as colors and appearance.
 
 - `Layer` controls how data should be presented to the user
 
-- `Datasource`  holds actual data and provides layers with it
+- `Data source`  holds actual data and provides layers with it
 
-Styles consist of collections of layers and datasources. Layers reference datasources. Hence they require unique source ID when they are constructed
+Styles consist of collections of layers and data source. Layers reference data source. Hence they require a unique source ID when they are constructed
 
-It would be meaningless if we don't have any data to show so we need know supplying data with datasources.
+It would be meaningless if we don't have any data to show so we need know supplying data with data source.
 
-Firstly, we need to understand how to store data and passing them into datasources and therefore `JSON` comes into play in the next session.
+Firstly, we need to understand how to store data and passing them into data source and therefore JSON comes into play in the next session.
 
 ### 2. JSON
-`JSON` stands for JavaScript Object Notation. It is a key-value pair text format for storing and retrieving data between client and server. 
+JSON stands for JavaScript Object Notation. It is a key-value pair text format for storing and retrieving data between client and server. 
 
 It is popular because it is human readable and easy to parse into objects.
 
 JSON content is treated as string and it makes easy to transmit data across clients. JSON file is saved in .json extension
 
-A sample json file:
+A sample JSON file:
 ```json
 {
   "name": "John Doe",
@@ -47,12 +47,12 @@ A sample json file:
 }
 
 ```
-With its straightforward syntax, we can benefit from it by describing our geospatial data inside json
+With its straightforward syntax, we can benefit from it by describing our geospatial data inside JSON
 
-### 3. GeoJson 
-[`GeoJson`]("https://geojson.org/") is a json file for encoding various geographical data structures.
+### 3. GeoJSON 
+[`GeoJSON`]("https://geojson.org/") is a JSON file for encoding various geographical data structures.
 
-It defines several json objects to represent geospatial information. GeoJson file is saved with `.geojson` extension
+It defines several JSON objects to represent geospatial information. GeoJSON file is saved with `.geojson` extension
 
 The following list illustrates the most fundamental objects:
 
@@ -77,7 +77,7 @@ They are visual objects that seen on map with one or more coordinates. We can us
 
 `FeatureCollection` is set of features stored in an array. It is a root object that introduces all other features.
 
-A typical GeoJson file might look like:
+A typical GeoJSON file might look like:
 ```json
  {
   "type": "FeatureCollection",
@@ -136,22 +136,22 @@ A typical GeoJson file might look like:
   ]
 }
 ```
-So far we learned describing Geospatial data in geojson files. We will start applying this knowledge into our map applications 
+So far we learned describing Geospatial data in GeoJSON files. We will start applying this knowledge into our map applications 
 
-### 4. GeoJsonDataSource
-As we discussed before, map requires some sort data to be rendered. We use different sources such as [`Vector`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.style.sources/-vector-source/index.html?query=class%20VectorSource%20:%20Source"), [`Raster`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.style.sources/-raster-source/index.html?query=class%20RasterSource%20:%20Source") and `GeoJson`.
-We will not deal with other sources and only focus on `GeoJsonDataSource`.
+### 4. GeoJsonSource
+As we discussed before, map requires some sort data to be rendered. We use different sources such as [`Vector`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.style.sources/-vector-source/index.html?query=class%20VectorSource%20:%20Source"), [`Raster`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.style.sources/-raster-source/index.html?query=class%20RasterSource%20:%20Source") and `GeoJSON`.
+We will not deal with other sources and only focus on `GeoJsonSource`.
 
-`GeoJsonDataSource` is a type of source that has a unique `String` ID and GeoJson data. There are several ways of creating and adding `GeoJsonDataSource` objects.
+`GeoJsonSource` is a type of source that has a unique `String` ID and GeoJSON data. There are several ways of creating and adding `GeoJsonSource` objects.
 
-A GeoJsonDataSource might be constructed with several approaches:
+A GeoJsonSource might be constructed with several approaches:
 
 - Locally stored files such as assets and raw folders
 - Remote services 
 - Raw string  parsed into FeatureCollections objects
-- Geometry, Feature, and FeatureCollection objects that map to GeoJson Base builders
+- Geometry, Feature, and FeatureCollection objects that map to GeoJSON Base builders
 
-A sample GeoJsonDatasource:
+A sample GeoJsonSource:
 ```kotlin
 val source = GeoJsonSource("source", featureCollection)
 val lineLayer = LineLayer("layer", "source")
@@ -164,7 +164,7 @@ style.addSource(source)
 style.addLayer(lineLayer)
 ```
 
-Note that dataSources can not be simply shown. Layers must reference them. Therefore, you create a layer that gives visual appearance to it.
+Note that data source can not be simply shown. Layers must reference them. Therefore, you create a layer that gives visual appearance to it.
 
 - Loading from local files
 
@@ -304,8 +304,8 @@ parsing method:
 ```
 - Creating Geometry, Feature, and FeatureCollections from scratch
  
-Note that GeoJson objects as we discussed above have classes defined in MapLibre SDK.
-So we can map json objects into regular Java/Kotlin objects or build straightaway.
+Note that GeoJSON objects as we discussed above have classes defined in MapLibre SDK.
+So we can map JSON objects into regular Java/Kotlin objects or build straightaway.
 ```kotlin
     val properties = JsonObject()
         properties.addProperty("key1", "value1")
@@ -329,7 +329,7 @@ So we can map json objects into regular Java/Kotlin objects or build straightawa
 ```
 
 ### 5. Updating data at runtime
-The most important feature of GeoJsonDataSources, once we add one of them, we can set another set of data.
+The most important feature of GeoJsonSources, once we add one of them, we can set another set of data.
 We achieve this with `setGeoJson()` method.
 
 For example we create a source variable and check if it is not assigned, then we create new source object and add it to style, otherwise we set another data:
@@ -366,8 +366,8 @@ Probably the most advanced use case might be animating random objects such as ca
 ```
 
 # Summary
-GeoJsonDataSources come with their pros and cons. They work best if you want to add additional data to your style , or provide features like animating objects on your map.
+GeoJsonSources come with their pros and cons. They work best if you want to add additional data to your style , or provide features like animating objects on your map.
 
-It would be difficult if you have large datasets and you want to manipulate and store inside app. In that case you should prefer remote datasources.
+It would be difficult if you have large datasets and you want to manipulate and store inside app. In that case you should prefer remote data source.
 
 Lastly, you may check [`Official Maplibre Android Documentation`]("https://maplibre.org/maplibre-native/android/api/index.html") for full guide and  [`Test App`]("https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapLibreAndroidTestApp") in order learn best practises to adopt in your apps.

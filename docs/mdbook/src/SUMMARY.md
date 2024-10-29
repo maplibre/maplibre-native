@@ -15,7 +15,7 @@
     - [Annotation: Marker](./android/annotation-guide.md)
     - [Location Component](./android/location-component-guide.md)
     - [MapOptions Guide](./android/map-options-guide.md)
-    - [GeoJson Guide](./android/geojson-guide.md)
+    - [GeoJSON Guide](./android/geojson-guide.md)
 
 - [Profiling applications that use MapLibre Native](./profiling/README.md)
     - [Tracy profiling](./profiling/tracy-profiling.md)
