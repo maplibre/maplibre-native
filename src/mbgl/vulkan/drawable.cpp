@@ -415,7 +415,7 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
     if (!shader) return false;
 
     // bind uniforms
-    //impl->uniformBuffers.bindDescriptorSets(encoder);
+    // impl->uniformBuffers.bindDescriptorSets(encoder);
 
     const auto& shaderImpl = static_cast<const mbgl::vulkan::ShaderProgram&>(*shader);
     if (shaderImpl.hasTextures()) {
