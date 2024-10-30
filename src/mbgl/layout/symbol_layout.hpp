@@ -3,6 +3,7 @@
 #include <mbgl/layout/layout.hpp>
 #include <mbgl/map/mode.hpp>
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
+#include <mbgl/style/variable_anchor_offset_collection.hpp>
 #include <mbgl/layout/symbol_feature.hpp>
 #include <mbgl/layout/symbol_instance.hpp>
 #include <mbgl/text/bidi.hpp>
@@ -112,6 +113,10 @@ private:
                                          std::size_t sectionIndex,
                                          const CanonicalTileID& canonical);
 
+    // Helper to support both text-variable-anchor and text-variable-anchor-offset.
+    // Offset values converted from EMs to PXs.
+    std::optional<VariableAnchorOffsetCollection> getTextVariableAnchorOffset(const SymbolFeature&);
+
     // Stores the layer so that we can hold on to GeometryTileFeature instances
     // in SymbolFeature, which may reference data from this object.
     const std::unique_ptr<GeometryTileLayer> sourceLayer;
@@ -134,6 +139,7 @@ private:
     style::TextSize::UnevaluatedType textSize;
     style::IconSize::UnevaluatedType iconSize;
     style::TextRadialOffset::UnevaluatedType textRadialOffset;
+    style::TextVariableAnchorOffset::UnevaluatedType textVariableAnchorOffset;
     Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout;
     std::vector<SymbolFeature> features;
 

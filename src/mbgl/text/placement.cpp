@@ -97,10 +97,6 @@ public:
 
     const TransformState& getTransformState() const { return state; }
 
-    const std::vector<style::TextVariableAnchorType>& getVariableTextAnchors() const {
-        return getLayout().get<style::TextVariableAnchor>();
-    }
-
     float pixelsToTileUnits;
     float scale;
     float pixelRatio;
@@ -229,8 +225,7 @@ Point<float> calculateVariableLayoutOffset(style::SymbolAnchorType anchor,
     AnchorAlignment alignment = AnchorAlignment::getAnchorAlignment(anchor);
     float shiftX = -(alignment.horizontalAlign - 0.5f) * width;
     float shiftY = -(alignment.verticalAlign - 0.5f) * height;
-    auto variableOffset = SymbolLayout::evaluateVariableOffset(anchor, offset);
-    Point<float> shift{shiftX + variableOffset[0] * textBoxScale, shiftY + variableOffset[1] * textBoxScale};
+    Point<float> shift{shiftX + offset[0] * textBoxScale, shiftY + offset[1] * textBoxScale};
     if (rotateWithMap) {
         shift = util::rotate(shift, pitchWithMap ? bearing : -bearing);
     }
@@ -284,7 +279,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
     const SymbolBucket& bucket = ctx.getBucket();
     const mat4& posMatrix = ctx.getRenderTile().matrix;
     const auto& collisionGroup = ctx.collisionGroup;
-    auto variableTextAnchors = ctx.getVariableTextAnchors();
+    auto variableTextAnchors = symbolInstance.getTextAnchors();
     textBoxes.clear();
     iconBoxes.clear();
 
@@ -411,11 +406,12 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                     // so this code would not be reached
                     // NOLINTNEXTLINE(clang-analyzer-core.DivideZero)
                     auto anchor = variableTextAnchors[i % anchorsSize];
+                    auto variableTextOffset = symbolInstance.getTextVariableAnchorOffset()->getOffsetByAnchor(anchor);
                     const bool allowOverlap = (i >= anchorsSize);
                     shift = calculateVariableLayoutOffset(anchor,
                                                           width,
                                                           height,
-                                                          symbolInstance.getVariableTextOffset(),
+                                                          variableTextOffset,
                                                           textBoxScale,
                                                           ctx.rotateTextWithMap,
                                                           ctx.pitchTextWithMap,
@@ -478,13 +474,9 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                             }
                         }
 
-                        variableOffsets.insert(std::make_pair(symbolInstance.getCrossTileID(),
-                                                              VariableOffset{symbolInstance.getVariableTextOffset(),
-                                                                             width,
-                                                                             height,
-                                                                             anchor,
-                                                                             textBoxScale,
-                                                                             prevAnchor}));
+                        variableOffsets.insert(std::make_pair(
+                            symbolInstance.getCrossTileID(),
+                            VariableOffset{variableTextOffset, width, height, anchor, textBoxScale, prevAnchor}));
 
                         if (bucket.allowVerticalPlacement) {
                             placedOrientations.emplace(symbolInstance.getCrossTileID(), orientation);
@@ -772,9 +764,8 @@ Point<float> calculateVariableRenderShift(style::SymbolAnchorType anchor,
     const AnchorAlignment alignment = AnchorAlignment::getAnchorAlignment(anchor);
     const float shiftX = -(alignment.horizontalAlign - 0.5f) * width;
     const float shiftY = -(alignment.verticalAlign - 0.5f) * height;
-    auto variableOffset = SymbolLayout::evaluateVariableOffset(anchor, textOffset);
-    return {(shiftX / textBoxScale + variableOffset[0]) * renderTextSize,
-            (shiftY / textBoxScale + variableOffset[1]) * renderTextSize};
+    return {(shiftX / textBoxScale + textOffset[0]) * renderTextSize,
+            (shiftY / textBoxScale + textOffset[1]) * renderTextSize};
 }
 } // namespace
 
@@ -784,7 +775,7 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
     using namespace style;
     const auto& layout = *bucket.layout;
     const bool alongLine = layout.get<SymbolPlacement>() != SymbolPlacementType::Point;
-    const bool hasVariableAnchors = !layout.get<TextVariableAnchor>().empty() && bucket.hasTextData();
+    const bool hasVariableAnchors = bucket.hasVariableTextAnchors() && bucket.hasTextData();
     const bool updateTextFitIcon = layout.get<IconTextFit>() != IconTextFitType::None &&
                                    (bucket.allowVerticalPlacement || hasVariableAnchors) &&
                                    (bucket.hasIconData() || bucket.hasSdfIconData());
@@ -979,7 +970,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
 
     const bool textAllowOverlap = bucket.layout->get<style::TextAllowOverlap>();
     const bool iconAllowOverlap = bucket.layout->get<style::IconAllowOverlap>();
-    const bool variablePlacement = !bucket.layout->get<style::TextVariableAnchor>().empty();
+    const bool variablePlacement = bucket.hasVariableTextAnchors();
     const bool rotateWithMap = bucket.layout->get<style::TextRotationAlignment>() == style::AlignmentType::Map;
     const bool pitchWithMap = bucket.layout->get<style::TextPitchAlignment>() == style::AlignmentType::Map;
     const bool hasIconTextFit = bucket.layout->get<style::IconTextFit>() != style::IconTextFitType::None;
@@ -1492,14 +1483,11 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
                          collisionGroups.get(params.sourceId),
                          getAvoidEdges(bucket, renderTile.matrix)};
 
-    const auto& variableTextAnchors = ctx.getVariableTextAnchors();
     // In this case we first try to place symbols, which intersects the tile
     // borders, so that those symbols will remain even if each tile is handled
     // independently.
     SymbolInstanceReferences symbolInstances = getBucketSymbols(
         bucket, params.sortKeyRange, collisionIndex.getTransformState().getBearing());
-    std::optional<style::TextVariableAnchorType> variableAnchor;
-    if (!variableTextAnchors.empty()) variableAnchor = variableTextAnchors.front();
 
     // Keeps the data necessary to find a feature location according to a tile.
     struct NeighborTileData {
@@ -1543,13 +1531,18 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
     };
 
     auto symbolIntersectsTileEdges = [&collisionBoxIntersectsTileEdges,
-                                      variableAnchor,
                                       pitchTextWithMap = ctx.pitchTextWithMap,
                                       rotateTextWithMap = ctx.rotateTextWithMap,
                                       variableIconPlacement = ctx.hasIconTextFit && !ctx.iconAllowOverlap,
                                       bearing = static_cast<float>(ctx.getTransformState().getBearing())](
                                          const SymbolInstance& symbol) noexcept -> IntersectStatus {
         IntersectStatus result;
+        std::optional<style::TextVariableAnchorType> variableAnchor;
+        auto textVariableAnchorOffset = symbol.getTextVariableAnchorOffset();
+        if (textVariableAnchorOffset && !textVariableAnchorOffset->empty()) {
+            variableAnchor = textVariableAnchorOffset->begin()->anchorType;
+        }
+
         if (!symbol.getTextCollisionFeature().boxes.empty()) {
             const auto& textCollisionBox = symbol.getTextCollisionFeature().boxes.front();
 
@@ -1557,10 +1550,13 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
             if (variableAnchor) {
                 float width = textCollisionBox.x2 - textCollisionBox.x1;
                 float height = textCollisionBox.y2 - textCollisionBox.y1;
+
+                auto variableTextOffset = textVariableAnchorOffset->getOffsetByAnchor(*variableAnchor);
+
                 offset = calculateVariableLayoutOffset(*variableAnchor,
                                                        width,
                                                        height,
-                                                       symbol.getVariableTextOffset(),
+                                                       variableTextOffset,
                                                        symbol.getTextBoxScale(),
                                                        rotateTextWithMap,
                                                        pitchTextWithMap,
@@ -1575,10 +1571,13 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
             if (variableAnchor && variableIconPlacement) {
                 float width = iconCollisionBox.x2 - iconCollisionBox.x1;
                 float height = iconCollisionBox.y2 - iconCollisionBox.y1;
+
+                auto variableTextOffset = textVariableAnchorOffset->getOffsetByAnchor(*variableAnchor);
+
                 offset = calculateVariableLayoutOffset(*variableAnchor,
                                                        width,
                                                        height,
-                                                       symbol.getVariableTextOffset(),
+                                                       variableTextOffset,
                                                        symbol.getTextBoxScale(),
                                                        rotateTextWithMap,
                                                        pitchTextWithMap,
@@ -1668,7 +1667,7 @@ void TilePlacement::newSymbolPlaced(const SymbolInstance& symbol,
 
 bool TilePlacement::shouldRetryPlacement(const JointPlacement& placement, const PlacementContext& ctx) {
     // We re-try the placement to try out remaining variable anchors.
-    return populateIntersections && !placement.placed() && !ctx.getVariableTextAnchors().empty();
+    return populateIntersections && !placement.placed() && ctx.getBucket().hasVariableTextAnchors();
 }
 
 // static
