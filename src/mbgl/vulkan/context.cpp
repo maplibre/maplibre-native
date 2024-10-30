@@ -520,7 +520,7 @@ const std::unique_ptr<BufferResource>& Context::getDummyUniformBuffer() {
 const std::unique_ptr<BufferResource>& Context::getDummyStorageBuffer() {
     if (!dummyStorageBuffer)
         dummyStorageBuffer = std::make_unique<BufferResource>(
-                *this, nullptr, 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, false);
+            *this, nullptr, 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, false);
     return dummyStorageBuffer;
 }
 
