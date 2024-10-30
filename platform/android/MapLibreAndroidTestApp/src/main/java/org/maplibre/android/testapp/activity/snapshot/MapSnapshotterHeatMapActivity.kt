@@ -36,9 +36,9 @@ class MapSnapshotterHeatMapActivity : AppCompatActivity(), MapSnapshotter.Snapsh
                 override fun onGlobalLayout() {
                     container.viewTreeObserver.removeOnGlobalLayoutListener(this)
                     Timber.i("Starting snapshot")
-                    val builder = Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Outdoor"))
+                    val builder = Style.Builder().fromUri(TestStyles.AMERICANA)
                         .withSource(earthquakeSource!!)
-                        .withLayerAbove(heatmapLayer, "water_intermittent")
+                        .withLayerAbove(heatmapLayer, "water")
                     mapSnapshotter = MapSnapshotter(
                         applicationContext,
                         MapSnapshotter.Options(container.measuredWidth, container.measuredHeight)
@@ -65,7 +65,7 @@ class MapSnapshotterHeatMapActivity : AppCompatActivity(), MapSnapshotter.Snapsh
     // Adjust the heatmap radius by zoom level
     // Transition from heatmap to circle layer by zoom level
     private val heatmapLayer: HeatmapLayer
-        private get() {
+        get() {
             val layer = HeatmapLayer(HEATMAP_LAYER_ID, EARTHQUAKE_SOURCE_ID)
             layer.maxZoom = 9f
             layer.sourceLayer = HEATMAP_LAYER_SOURCE
@@ -133,7 +133,7 @@ class MapSnapshotterHeatMapActivity : AppCompatActivity(), MapSnapshotter.Snapsh
     }
 
     private val earthquakeSource: Source?
-        private get() {
+        get() {
             var source: Source? = null
             try {
                 source = GeoJsonSource(EARTHQUAKE_SOURCE_ID, URI(EARTHQUAKE_SOURCE_URL))
@@ -145,7 +145,7 @@ class MapSnapshotterHeatMapActivity : AppCompatActivity(), MapSnapshotter.Snapsh
 
     companion object {
         private const val EARTHQUAKE_SOURCE_URL =
-            "https://www.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson"
+            "https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson"
         private const val EARTHQUAKE_SOURCE_ID = "earthquakes"
         private const val HEATMAP_LAYER_ID = "earthquakes-heat"
         private const val HEATMAP_LAYER_SOURCE = "earthquakes"

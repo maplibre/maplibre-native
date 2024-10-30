@@ -27,6 +27,7 @@ import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.style.sources.RasterSource
 import org.maplibre.android.style.sources.Source
+import org.maplibre.android.style.sources.TileSet
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.utils.BitmapUtils
@@ -35,7 +36,7 @@ import java.util.Objects
 import java.util.Random
 
 /**
- * Test activity showing how to use a the [com.mapbox.mapboxsdk.snapshotter.MapSnapshotter]
+ * Test activity showing how to use a the [MapSnapshotter]
  */
 class MapSnapshotterActivity : AppCompatActivity() {
     lateinit var grid: GridLayout
@@ -66,16 +67,21 @@ class MapSnapshotterActivity : AppCompatActivity() {
     }
 
     private fun startSnapShot(row: Int, column: Int) {
+        val styles = arrayOf(
+            TestStyles.DEMOTILES,
+            TestStyles.AMERICANA,
+            TestStyles.OPENFREEMAP_LIBERY,
+            TestStyles.AWS_OPEN_DATA_STANDARD_LIGHT,
+            TestStyles.PROTOMAPS_LIGHT,
+            TestStyles.PROTOMAPS_DARK,
+            TestStyles.PROTOMAPS_WHITE,
+            TestStyles.PROTOMAPS_GRAYSCALE,
+            TestStyles.VERSATILES
+        )
         // Optionally the style
         val builder = Style.Builder()
             .fromUri(
-                TestStyles.getPredefinedStyleWithFallback(
-                    if ((column + row) % 2 == 0) {
-                        "Streets"
-                    } else {
-                        "Pastel"
-                    }
-                )
+                styles.get((row * grid.rowCount + column) % styles.size)
             )
 
         // Define the dimensions
@@ -130,16 +136,7 @@ class MapSnapshotterActivity : AppCompatActivity() {
                     .build()
             )
         }
-        if (row == 0 && column == 0) {
-            // Add a source
-            val source: Source =
-                RasterSource("my-raster-source", "maptiler://sources/satellite", 512)
-            builder.withLayerAbove(
-                RasterLayer("satellite-layer", "my-raster-source"),
-                "country_1"
-            )
-            builder.withSource(source)
-        } else if (row == 0 && column == 2) {
+        if (row == 0 && column == 2) {
             val carBitmap = BitmapUtils.getBitmapFromDrawable(
                 ResourcesCompat.getDrawable(resources, R.drawable.ic_directions_car_black, theme)
             )
