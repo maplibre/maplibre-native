@@ -514,6 +514,13 @@ const std::unique_ptr<BufferResource>& Context::getDummyUniformBuffer() {
     return dummyUniformBuffer;
 }
 
+const std::unique_ptr<BufferResource>& Context::getDummyStorageBuffer() {
+    if (!dummyStorageBuffer)
+        dummyStorageBuffer = std::make_unique<BufferResource>(
+                *this, nullptr, 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, false);
+    return dummyStorageBuffer;
+}
+
 const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
     if (!dummyTexture2D) {
         const Size size(2, 2);

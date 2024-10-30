@@ -135,6 +135,7 @@ public:
 
     const std::unique_ptr<BufferResource>& getDummyVertexBuffer();
     const std::unique_ptr<BufferResource>& getDummyUniformBuffer();
+    const std::unique_ptr<BufferResource>& getDummyStorageBuffer();
     const std::unique_ptr<Texture2D>& getDummyTexture();
 
     const vk::DescriptorSetLayout& getDescriptorSetLayout(DescriptorSetType type);
@@ -187,6 +188,7 @@ private:
 
     std::unique_ptr<BufferResource> dummyVertexBuffer;
     std::unique_ptr<BufferResource> dummyUniformBuffer;
+    std::unique_ptr<BufferResource> dummyStorageBuffer;
     std::unique_ptr<Texture2D> dummyTexture2D;
     vk::UniqueDescriptorSetLayout globalUniformDescriptorSetLayout;
     vk::UniqueDescriptorSetLayout layerUniformDescriptorSetLayout;
