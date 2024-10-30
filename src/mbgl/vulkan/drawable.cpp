@@ -247,12 +247,11 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     if (uboIndex >= 0) {
         commandBuffer->pushConstants(
-                context.getGeneralPipelineLayout().get(),
-                vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex |
-                vk::ShaderStageFlagBits::eFragment,
-                0,
-                sizeof(uboIndex),
-                &uboIndex);
+            context.getGeneralPipelineLayout().get(),
+            vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
+            0,
+            sizeof(uboIndex),
+            &uboIndex);
     }
 
     if (!bindAttributes(encoder)) return;

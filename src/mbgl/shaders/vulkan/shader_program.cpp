@@ -190,7 +190,7 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
 
     const auto& device = backend.getDevice();
     auto& context = static_cast<Context&>(backend.getContext());
-    const auto& pipelineLayout =  pipelineInfo.usePushConstants ? context.getPushConstantPipelineLayout()
+    const auto& pipelineLayout = pipelineInfo.usePushConstants ? context.getPushConstantPipelineLayout()
                                                                : context.getGeneralPipelineLayout();
 
     const std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages = {

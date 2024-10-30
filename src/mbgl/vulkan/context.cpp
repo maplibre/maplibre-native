@@ -543,7 +543,8 @@ void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& lay
         bindings.push_back(vk::DescriptorSetLayoutBinding()
                                .setBinding(i)
                                .setStageFlags(stageFlags)
-                               .setDescriptorType(i < ssboCount ? vk::DescriptorType::eStorageBuffer : vk::DescriptorType::eUniformBuffer)
+                               .setDescriptorType(i < ssboCount ? vk::DescriptorType::eStorageBuffer
+                                                                : vk::DescriptorType::eUniformBuffer)
                                .setDescriptorCount(1));
     }
 

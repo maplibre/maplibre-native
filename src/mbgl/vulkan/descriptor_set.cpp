@@ -31,24 +31,26 @@ void DescriptorSet::createDescriptorPool(DescriptorPoolGrowable& growablePool) {
                                                    std::pow(growablePool.growFactor, growablePool.pools.size()));
     if (type == DescriptorSetType::Layer) {
         const std::vector<vk::DescriptorPoolSize> sizes = {
-                {vk::DescriptorType::eStorageBuffer, maxSets * growablePool.descriptorsPerSet},
-                {vk::DescriptorType::eUniformBuffer, maxSets * growablePool.descriptorsPerSet},
+            {vk::DescriptorType::eStorageBuffer, maxSets * growablePool.descriptorsPerSet},
+            {vk::DescriptorType::eUniformBuffer, maxSets * growablePool.descriptorsPerSet},
         };
 
-        const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
-                .setPoolSizes(sizes)
-                .setMaxSets(maxSets);
+        const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo(
+                                            vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
+                                            .setPoolSizes(sizes)
+                                            .setMaxSets(maxSets);
 
         growablePool.pools.emplace_back(device->createDescriptorPoolUnique(descriptorPoolInfo), maxSets);
     } else {
         const vk::DescriptorPoolSize size = {type != DescriptorSetType::DrawableImage
-                                             ? vk::DescriptorType::eUniformBuffer
-                                             : vk::DescriptorType::eCombinedImageSampler,
+                                                 ? vk::DescriptorType::eUniformBuffer
+                                                 : vk::DescriptorType::eCombinedImageSampler,
                                              maxSets * growablePool.descriptorsPerSet};
 
-        const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
-                .setPoolSizes(size)
-                .setMaxSets(maxSets);
+        const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo(
+                                            vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
+                                            .setPoolSizes(size)
+                                            .setMaxSets(maxSets);
 
         growablePool.pools.emplace_back(device->createDescriptorPoolUnique(descriptorPoolInfo), maxSets);
     }
@@ -136,7 +138,8 @@ void UniformDescriptorSet::update(const gfx::UniformBufferArray& uniforms,
         const auto writeDescriptorSet = vk::WriteDescriptorSet()
                                             .setBufferInfo(descriptorBufferInfo)
                                             .setDescriptorCount(1)
-                                            .setDescriptorType(index < ssboCount ? vk::DescriptorType::eStorageBuffer : vk::DescriptorType::eUniformBuffer)
+                                            .setDescriptorType(index < ssboCount ? vk::DescriptorType::eStorageBuffer
+                                                                                 : vk::DescriptorType::eUniformBuffer)
                                             .setDstBinding(index)
                                             .setDstSet(descriptorSets[frameIndex]);
 
