@@ -56,7 +56,7 @@ public:
     void createOrUpdate(
         const size_t id, const void* data, std::size_t size, gfx::Context& context, bool persistent = false) override;
 
-    void bindDescriptorSets(CommandEncoder& encoder);
+    void bindDescriptorSets(CommandEncoder& encoder, uint32_t ssboCount = 0);
     void freeDescriptorSets() { descriptorSet.reset(); }
 
 private:

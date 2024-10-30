@@ -176,7 +176,8 @@ private:
     void buildImageDescriptorSetLayout();
     void buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& layout,
                                          size_t uniformCount,
-                                         const std::string& name);
+                                         const std::string& name,
+                                         uint32_t ssboCount = 0);
 
 private:
     RendererBackend& backend;

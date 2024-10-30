@@ -115,7 +115,7 @@ void Context::initFrameResources() {
     buildUniformDescriptorSetLayout(
         globalUniformDescriptorSetLayout, shaders::globalUBOCount, "GlobalUniformDescriptorSetLayout");
     buildUniformDescriptorSetLayout(
-        layerUniformDescriptorSetLayout, shaders::maxUBOCountPerLayer, "LayerUniformDescriptorSetLayout");
+        layerUniformDescriptorSetLayout, shaders::maxUBOCountPerLayer, "LayerUniformDescriptorSetLayout", 3);
     buildUniformDescriptorSetLayout(
         drawableUniformDescriptorSetLayout, shaders::maxUBOCountPerDrawable, "DrawableUniformDescriptorSetLayout");
     buildImageDescriptorSetLayout();
@@ -533,7 +533,8 @@ const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
 
 void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& layout,
                                               size_t uniformCount,
-                                              const std::string& name) {
+                                              const std::string& name,
+                                              uint32_t ssboCount) {
     std::vector<vk::DescriptorSetLayoutBinding> bindings;
     const auto stageFlags = vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex |
                             vk::ShaderStageFlagBits::eFragment;
@@ -542,7 +543,7 @@ void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& lay
         bindings.push_back(vk::DescriptorSetLayoutBinding()
                                .setBinding(i)
                                .setStageFlags(stageFlags)
-                               .setDescriptorType(vk::DescriptorType::eUniformBuffer)
+                               .setDescriptorType(i < ssboCount ? vk::DescriptorType::eStorageBuffer : vk::DescriptorType::eUniformBuffer)
                                .setDescriptorCount(1));
     }
 
@@ -597,6 +598,9 @@ DescriptorPoolGrowable& Context::getDescriptorPool(DescriptorSetType type) {
 const vk::UniquePipelineLayout& Context::getGeneralPipelineLayout() {
     if (generalPipelineLayout) return generalPipelineLayout;
 
+    const auto stages = vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment;
+    const auto pushConstant = vk::PushConstantRange().setSize(sizeof(int32_t)).setStageFlags(stages);
+
     const std::vector<vk::DescriptorSetLayout> layouts = {
         globalUniformDescriptorSetLayout.get(),
         layerUniformDescriptorSetLayout.get(),
@@ -605,7 +609,7 @@ const vk::UniquePipelineLayout& Context::getGeneralPipelineLayout() {
     };
 
     generalPipelineLayout = backend.getDevice()->createPipelineLayoutUnique(
-        vk::PipelineLayoutCreateInfo().setSetLayouts(layouts));
+        vk::PipelineLayoutCreateInfo().setPushConstantRanges(pushConstant).setSetLayouts(layouts));
 
     backend.setDebugName(generalPipelineLayout.get(), "PipelineLayout_general");
 

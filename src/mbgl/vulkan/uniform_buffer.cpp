@@ -59,12 +59,12 @@ void UniformBufferArray::createOrUpdate(
     gfx::UniformBufferArray::createOrUpdate(id, data, size, context, persistent);
 }
 
-void UniformBufferArray::bindDescriptorSets(CommandEncoder& encoder) {
+void UniformBufferArray::bindDescriptorSets(CommandEncoder& encoder, uint32_t ssboCount) {
     if (!descriptorSet) {
         descriptorSet = std::make_unique<UniformDescriptorSet>(encoder.getContext(), descriptorSetType);
     }
 
-    descriptorSet->update(*this, descriptorStartIndex, descriptorBindingCount);
+    descriptorSet->update(*this, descriptorStartIndex, descriptorBindingCount, ssboCount);
     descriptorSet->bind(encoder);
 }
 

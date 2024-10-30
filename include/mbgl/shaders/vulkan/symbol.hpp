@@ -42,7 +42,7 @@ struct SymbolDrawableUBO {
     vec2 pad;
 };
 
-layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 0) readonly buffer SymbolDrawableUBOVector {
+layout(std140, set = LAYER_SET_INDEX, binding = 0) readonly buffer SymbolDrawableUBOVector {
     SymbolDrawableUBO drawable_ubo[];
 } drawable_vector;
 
@@ -57,7 +57,7 @@ struct SymbolTilePropsUBO {
     float padding;
 };
 
-layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 1) readonly buffer SymbolTilePropsUBOVector {
+layout(std140, set = LAYER_SET_INDEX, binding = 1) readonly buffer SymbolTilePropsUBOVector {
     SymbolTilePropsUBO tile_ubo[];
 } tile_vector;
 
@@ -70,7 +70,7 @@ struct SymbolInterpolateUBO {
     float pad1, pad2, pad3;
 };
 
-layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 2) readonly buffer SymbolInterpolateUBOVector {
+layout(std140, set = LAYER_SET_INDEX, binding = 2) readonly buffer SymbolInterpolateUBOVector {
     SymbolInterpolateUBO interp_ubo[];
 } interp_vector;
 
@@ -174,11 +174,11 @@ struct SymbolTilePropsUBO {
     float padding;
 };
 
-layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 1) readonly buffer SymbolTilePropsUBOVector {
+layout(std140, set = LAYER_SET_INDEX, binding = 1) readonly buffer SymbolTilePropsUBOVector {
     SymbolTilePropsUBO tile_ubo[];
 } tile_vector;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform SymbolEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 3) uniform SymbolEvaluatedPropsUBO {
     vec4 text_fill_color;
     vec4 text_halo_color;
     float text_opacity;
@@ -266,7 +266,7 @@ struct SymbolDrawableUBO {
     vec2 pad;
 };
 
-layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 0) readonly buffer SymbolDrawableUBOVector {
+layout(std140, set = LAYER_SET_INDEX, binding = 0) readonly buffer SymbolDrawableUBOVector {
     SymbolDrawableUBO drawable_ubo[];
 } drawable_vector;
 
@@ -281,7 +281,7 @@ struct SymbolTilePropsUBO {
     float padding;
 };
 
-layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 1) readonly buffer SymbolTilePropsUBOVector {
+layout(std140, set = LAYER_SET_INDEX, binding = 1) readonly buffer SymbolTilePropsUBOVector {
     SymbolTilePropsUBO tile_ubo[];
 } tile_vector;
 
@@ -294,7 +294,7 @@ struct SymbolInterpolateUBO {
     float pad1, pad2, pad3;
 };
 
-layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 2) readonly buffer SymbolInterpolateUBOVector {
+layout(std140, set = LAYER_SET_INDEX, binding = 2) readonly buffer SymbolInterpolateUBOVector {
     SymbolInterpolateUBO interp_ubo[];
 } interp_vector;
 
@@ -459,7 +459,7 @@ struct SymbolDrawableUBO {
     vec2 pad;
 };
 
-layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 0) readonly buffer SymbolDrawableUBOVector {
+layout(std140, set = LAYER_SET_INDEX, binding = 0) readonly buffer SymbolDrawableUBOVector {
     SymbolDrawableUBO drawable_ubo[];
 } drawable_vector;
 
@@ -474,11 +474,11 @@ struct SymbolTilePropsUBO {
     float padding;
 };
 
-layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 1) readonly buffer SymbolTilePropsUBOVector {
+layout(std140, set = LAYER_SET_INDEX, binding = 1) readonly buffer SymbolTilePropsUBOVector {
     SymbolTilePropsUBO tile_ubo[];
 } tile_vector;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform SymbolEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 3) uniform SymbolEvaluatedPropsUBO {
     vec4 text_fill_color;
     vec4 text_halo_color;
     float text_opacity;
@@ -599,7 +599,7 @@ struct SymbolDrawableUBO {
     vec2 pad;
 };
 
-layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 0) readonly buffer SymbolDrawableUBOVector {
+layout(std140, set = LAYER_SET_INDEX, binding = 0) readonly buffer SymbolDrawableUBOVector {
     SymbolDrawableUBO drawable_ubo[];
 } drawable_vector;
 
@@ -614,7 +614,7 @@ struct SymbolTilePropsUBO {
     float padding;
 };
 
-layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 1) readonly buffer SymbolTilePropsUBOVector {
+layout(std140, set = LAYER_SET_INDEX, binding = 1) readonly buffer SymbolTilePropsUBOVector {
     SymbolTilePropsUBO tile_ubo[];
 } tile_vector;
 
@@ -627,7 +627,7 @@ struct SymbolInterpolateUBO {
     float pad1, pad2, pad3;
 };
 
-layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 1) readonly buffer SymbolInterpolateUBOVector {
+layout(std140, set = LAYER_SET_INDEX, binding = 2) readonly buffer SymbolInterpolateUBOVector {
     SymbolInterpolateUBO interp_ubo[];
 } interp_vector;
 
@@ -799,7 +799,7 @@ struct SymbolDrawableUBO {
     vec2 pad;
 };
 
-layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 0) readonly buffer SymbolDrawableUBOVector {
+layout(std140, set = LAYER_SET_INDEX, binding = 0) readonly buffer SymbolDrawableUBOVector {
     SymbolDrawableUBO drawable_ubo[];
 } drawable_vector;
 
@@ -814,11 +814,11 @@ struct SymbolTilePropsUBO {
     float padding;
 };
 
-layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = 1) readonly buffer SymbolTilePropsUBOVector {
+layout(std140, set = LAYER_SET_INDEX, binding = 1) readonly buffer SymbolTilePropsUBOVector {
     SymbolTilePropsUBO tile_ubo[];
 } tile_vector;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform SymbolEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 3) uniform SymbolEvaluatedPropsUBO {
     vec4 text_fill_color;
     vec4 text_halo_color;
     float text_opacity;

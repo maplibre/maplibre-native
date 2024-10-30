@@ -58,7 +58,7 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         }
 
         if (!bindUBOs) {
-            uniformBuffers.bindDescriptorSets(encoder);
+            uniformBuffers.bindDescriptorSets(encoder, 3);
             bindUBOs = true;
         }
 
