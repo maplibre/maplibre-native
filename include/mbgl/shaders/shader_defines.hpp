@@ -89,7 +89,10 @@ enum {
 };
 
 enum {
-    symbolDrawableUBOCount = globalUBOCountWithIndex
+    idSymbolDrawableUBO = globalUBOCount,
+    idSymbolTilePropsUBO,
+    idSymbolInterpolateUBO,
+    symbolDrawableUBOCount
 };
 
 enum {
@@ -171,10 +174,7 @@ enum {
 };
 
 enum {
-    idSymbolDrawableUBO = getLayerStartValue(symbolDrawableUBOCount),
-    idSymbolTilePropsUBO,
-    idSymbolInterpolateUBO,
-    idSymbolEvaluatedPropsUBO,
+    idSymbolEvaluatedPropsUBO = getLayerStartValue(symbolDrawableUBOCount),
     symbolUBOCount
 };
 

@@ -77,7 +77,7 @@ void Context::initFrameResources() {
                               DescriptorPoolGrowable(globalDescriptorPoolSize, shaders::globalUBOCount));
 
     descriptorPoolMap.emplace(DescriptorSetType::Layer,
-                              DescriptorPoolGrowable(layerDescriptorPoolSize, shaders::maxUBOCountPerLayer));
+                              DescriptorPoolGrowable(layerDescriptorPoolSize, shaders::maxUBOCountPerDrawable + shaders::maxUBOCountPerLayer));
 
     /*descriptorPoolMap.emplace(
         DescriptorSetType::DrawableUniform,
@@ -115,7 +115,7 @@ void Context::initFrameResources() {
     buildUniformDescriptorSetLayout(
         globalUniformDescriptorSetLayout, shaders::globalUBOCount, "GlobalUniformDescriptorSetLayout");
     buildUniformDescriptorSetLayout(
-        layerUniformDescriptorSetLayout, shaders::maxUBOCountPerLayer, "LayerUniformDescriptorSetLayout", 3);
+        layerUniformDescriptorSetLayout, shaders::maxUBOCountPerDrawable + shaders::maxUBOCountPerLayer, "LayerUniformDescriptorSetLayout", shaders::maxUBOCountPerDrawable);
     // buildUniformDescriptorSetLayout(
     //     drawableUniformDescriptorSetLayout, shaders::maxUBOCountPerDrawable, "DrawableUniformDescriptorSetLayout");
     buildImageDescriptorSetLayout();
