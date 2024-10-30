@@ -79,9 +79,9 @@ void Context::initFrameResources() {
     descriptorPoolMap.emplace(DescriptorSetType::Layer,
                               DescriptorPoolGrowable(layerDescriptorPoolSize, shaders::maxUBOCountPerLayer));
 
-    descriptorPoolMap.emplace(
+    /*descriptorPoolMap.emplace(
         DescriptorSetType::DrawableUniform,
-        DescriptorPoolGrowable(drawableUniformDescriptorPoolSize, shaders::maxUBOCountPerDrawable));
+        DescriptorPoolGrowable(drawableUniformDescriptorPoolSize, shaders::maxUBOCountPerDrawable));*/
 
     descriptorPoolMap.emplace(
         DescriptorSetType::DrawableImage,
@@ -116,8 +116,8 @@ void Context::initFrameResources() {
         globalUniformDescriptorSetLayout, shaders::globalUBOCount, "GlobalUniformDescriptorSetLayout");
     buildUniformDescriptorSetLayout(
         layerUniformDescriptorSetLayout, shaders::maxUBOCountPerLayer, "LayerUniformDescriptorSetLayout", 3);
-    buildUniformDescriptorSetLayout(
-        drawableUniformDescriptorSetLayout, shaders::maxUBOCountPerDrawable, "DrawableUniformDescriptorSetLayout");
+    //buildUniformDescriptorSetLayout(
+    //    drawableUniformDescriptorSetLayout, shaders::maxUBOCountPerDrawable, "DrawableUniformDescriptorSetLayout");
     buildImageDescriptorSetLayout();
 }
 
@@ -578,8 +578,8 @@ const vk::DescriptorSetLayout& Context::getDescriptorSetLayout(DescriptorSetType
         case DescriptorSetType::Layer:
             return layerUniformDescriptorSetLayout.get();
 
-        case DescriptorSetType::DrawableUniform:
-            return drawableUniformDescriptorSetLayout.get();
+        //case DescriptorSetType::DrawableUniform:
+        //    return drawableUniformDescriptorSetLayout.get();
 
         case DescriptorSetType::DrawableImage:
             return drawableImageDescriptorSetLayout.get();
@@ -605,7 +605,7 @@ const vk::UniquePipelineLayout& Context::getGeneralPipelineLayout() {
     const std::vector<vk::DescriptorSetLayout> layouts = {
         globalUniformDescriptorSetLayout.get(),
         layerUniformDescriptorSetLayout.get(),
-        drawableUniformDescriptorSetLayout.get(),
+        //drawableUniformDescriptorSetLayout.get(),
         drawableImageDescriptorSetLayout.get(),
     };
 

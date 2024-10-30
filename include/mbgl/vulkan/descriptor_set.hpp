@@ -12,7 +12,7 @@ class CommandEncoder;
 enum class DescriptorSetType : uint8_t {
     Global,
     Layer,
-    DrawableUniform,
+    //DrawableUniform,
     DrawableImage,
     Count,
 };

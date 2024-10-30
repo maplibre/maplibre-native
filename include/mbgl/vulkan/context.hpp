@@ -190,7 +190,7 @@ private:
     std::unique_ptr<Texture2D> dummyTexture2D;
     vk::UniqueDescriptorSetLayout globalUniformDescriptorSetLayout;
     vk::UniqueDescriptorSetLayout layerUniformDescriptorSetLayout;
-    vk::UniqueDescriptorSetLayout drawableUniformDescriptorSetLayout;
+    //vk::UniqueDescriptorSetLayout drawableUniformDescriptorSetLayout;
     vk::UniqueDescriptorSetLayout drawableImageDescriptorSetLayout;
     vk::UniquePipelineLayout generalPipelineLayout;
     vk::UniquePipelineLayout pushConstantPipelineLayout;

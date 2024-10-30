@@ -64,7 +64,7 @@ private:
         return std::make_unique<UniformBuffer>(static_cast<const UniformBuffer&>(buffer).clone());
     }
 
-    const DescriptorSetType descriptorSetType{DescriptorSetType::DrawableUniform};
+    const DescriptorSetType descriptorSetType{DescriptorSetType::Layer};
     const uint32_t descriptorStartIndex{0};
     const uint32_t descriptorBindingCount{0};
 
