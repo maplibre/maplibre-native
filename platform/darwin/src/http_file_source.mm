@@ -226,8 +226,9 @@ BOOL isValidMapboxEndpoint(NSURL *url) {
 MLN_APPLE_EXPORT
 NSURL *resourceURL(const Resource& resource) {
     
-    NSURL *url = [NSURL URLWithString:@(resource.url.c_str())];
-
+    NSString *encodedUrlString = [@(resource.url.c_str()) stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.URLQueryAllowedCharacterSet];
+    NSURL *url = [NSURL URLWithString:encodedUrlString];
+    
 #if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
     if (isValidMapboxEndpoint(url)) {
         NSURLComponents *components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];

@@ -4,6 +4,19 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+## 6.8.0
+
+### Features
+
+- Add support for `text-variable-anchor-offset` property ([#2921](https://github.com/maplibre/maplibre-native/pull/2921)).
+- Encode the style URL in iOS ([#2965](https://github.com/maplibre/maplibre-native/pull/2965)).
+
+### Rendering Improvements
+
+- Revert index buffers to dirty flag instead of timestamps ([#2927](https://github.com/maplibre/maplibre-native/pull/2927)).
+- Group descriptor sets by binding frequency ([#2892](https://github.com/maplibre/maplibre-native/pull/2892)).
+- Change `parameters.currentLayer` to index instead of layerIndex ([#2956](https://github.com/maplibre/maplibre-native/pull/2956)).
+
 ## 6.7.1
 
 - Fix line atlas, which was causing an issue with `line-pattern`s ([#2908](https://github.com/maplibre/maplibre-native/pull/2908)).
