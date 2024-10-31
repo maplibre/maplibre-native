@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       renderer:
-        description: 'Select renderering backend'
+        description: "Select renderering backend"
         required: true
-        default: 'OpenGL'
+        default: "OpenGL"
         type: choice
         options:
           - OpenGL
@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    runs-on: [MapLibre_Native_Ubuntu_24_04_x84_16_core, ubuntu-24.04]
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: platform/android
