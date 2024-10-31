@@ -43,7 +43,6 @@ jobs:
       run:
         working-directory: platform/android
     env:
-      JOBS: 8
       BUILDTYPE: Debug
       IS_LOCAL_DEVELOPMENT: false
       MLN_ANDROID_STL: c++_static
