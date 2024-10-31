@@ -305,6 +305,12 @@ jobs:
         with:
           key: ${{ github.job }}
 
+      - name: Get CMake and Ninja
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: 3.24.1
+          ninjaVersion: latest
+
       - uses: actions/setup-java@v4
         with:
           distribution: "temurin"
