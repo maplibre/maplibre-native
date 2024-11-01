@@ -119,15 +119,14 @@ void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
 
     if (atlasTextures->icon && !imagePatches.empty()) {
         for (const auto& imagePatch : imagePatches) { // patch updated images.
+            uint32_t xDest = imagePatch.paddedRect.x + ImagePosition::padding;
+            uint32_t yDest = imagePatch.paddedRect.y + ImagePosition::padding;
+            assert(xDest + imagePatch.image->image.size.width <= atlasTextures->icon->getSize().width);
+            assert(yDest + imagePatch.image->image.size.height <= atlasTextures->icon->getSize().height);
 #if MLN_DRAWABLE_RENDERER
-            atlasTextures->icon->uploadSubRegion(imagePatch.image->image,
-                                                 imagePatch.paddedRect.x + ImagePosition::padding,
-                                                 imagePatch.paddedRect.y + ImagePosition::padding);
+            atlasTextures->icon->uploadSubRegion(imagePatch.image->image, xDest, yDest);
 #else
-            uploadPass.updateTextureSub(*atlasTextures->icon,
-                                        imagePatch.image->image,
-                                        imagePatch.paddedRect.x + ImagePosition::padding,
-                                        imagePatch.paddedRect.y + ImagePosition::padding);
+            uploadPass.updateTextureSub(*atlasTextures->icon, imagePatch.image->image, xDest, yDest);
 #endif
         }
         imagePatches.clear();

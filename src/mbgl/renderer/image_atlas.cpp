@@ -1,5 +1,6 @@
 #include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/renderer/image_manager.hpp>
+#include <mbgl/util/logging.hpp>
 
 #include <mapbox/shelf-pack.hpp>
 
@@ -63,7 +64,44 @@ void populateImagePatches(ImagePositions& imagePositions,
             const auto updatedImage = imageManager.getSharedImage(name);
             if (updatedImage == nullptr) continue;
 
-            patches.emplace_back(*updatedImage, position.paddedRect);
+            Immutable<style::Image::Impl> imagePatch = *updatedImage;
+
+            // The max patch size that fits the current Atlas is the paddedRect size and the padding
+            assert(position.paddedRect.w > ImagePosition::padding * 2);
+            assert(position.paddedRect.h > ImagePosition::padding * 2);
+            uint32_t maxPatchWidth = position.paddedRect.w - ImagePosition::padding * 2;
+            uint32_t maxPatchHeight = position.paddedRect.h - ImagePosition::padding * 2;
+            if (maxPatchWidth < imagePatch->image.size.width || maxPatchHeight < imagePatch->image.size.height) {
+                // imagePositions are created in makeImageAtlas
+                // User can update the image. e.g. an Android call to
+                // MapLibreMap.getStyle.addImage(imageId, imageBitmap), which will call ImageManager.updateImage
+                // If the updated image is larger than the previous image then position.paddedRect area in the atlas
+                // won't fit the new image. ImageManager is unaware of the the atlas packing.
+                // This code simply prints an error message and resizes the image to fit the atlas to avoid crashes
+                // A better solution (potentially expensive) is to repack the atlas: this requires keeping the
+                // previous atlas image and detect when a repack is required.
+                // Another possibility is to simply throw an exception and requires the user to provide different
+                // IDs for images with different sizes
+                const auto& imageImpl = *updatedImage->get();
+                Log::Error(Event::General,
+                           imageImpl.id + " does not fit the atlas. " + imageImpl.id +
+                               " will be resized from:" + std::to_string(imageImpl.image.size.width) + "x" +
+                               std::to_string(imageImpl.image.size.height) + " to:" + std::to_string(maxPatchWidth) +
+                               "x" + std::to_string(maxPatchHeight));
+                auto resizedImage = imagePatch->image.clone();
+                auto newWidth = std::min(maxPatchWidth, imagePatch->image.size.width);
+                auto newHeight = std::min(maxPatchHeight, imagePatch->image.size.height);
+                resizedImage.resize({newWidth, newHeight});
+                auto mutableImagePatch = makeMutable<style::Image::Impl>(imageImpl.id,
+                                                                         std::move(resizedImage),
+                                                                         imageImpl.pixelRatio,
+                                                                         imageImpl.sdf,
+                                                                         style::ImageStretches(),
+                                                                         style::ImageStretches());
+                imagePatch = std::move(mutableImagePatch);
+            }
+
+            patches.emplace_back(imagePatch, position.paddedRect);
             position.version = version;
         }
     }
