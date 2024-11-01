@@ -119,15 +119,17 @@ void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
 
     if (atlasTextures->icon && !imagePatches.empty()) {
         for (const auto& imagePatch : imagePatches) { // patch updated images.
+            uint32_t xDest = imagePatch.paddedRect.x + ImagePosition::padding;
+            uint32_t yDest = imagePatch.paddedRect.y + ImagePosition::padding;
+            if (atlasTextures->icon->getSize().width < xDest + imagePatch.image->image.size.width ||
+                atlasTextures->icon->getSize().height < yDest + imagePatch.image->image.size.height) {
+                Log::Error(Event::General, imagePatch.image->id + " does not fit the icon atlas");
+                assert(false);
+            }
 #if MLN_DRAWABLE_RENDERER
-            atlasTextures->icon->uploadSubRegion(imagePatch.image->image,
-                                                 imagePatch.paddedRect.x + ImagePosition::padding,
-                                                 imagePatch.paddedRect.y + ImagePosition::padding);
+            atlasTextures->icon->uploadSubRegion(imagePatch.image->image, xDest, yDest);
 #else
-            uploadPass.updateTextureSub(*atlasTextures->icon,
-                                        imagePatch.image->image,
-                                        imagePatch.paddedRect.x + ImagePosition::padding,
-                                        imagePatch.paddedRect.y + ImagePosition::padding);
+            uploadPass.updateTextureSub(*atlasTextures->icon, imagePatch.image->image, xDest, yDest);
 #endif
         }
         imagePatches.clear();
