@@ -6,6 +6,17 @@
 
 ### 🐞 Bug fixes
 
+## 11.6.0
+
+### ✨ Features and improvements
+
+- Add support for `text-variable-anchor-offset` property ([#2921](https://github.com/maplibre/maplibre-native/pull/2921)).
+- Change `parameters.currentLayer` to `index` instead of `layerIndex` ([#2956](https://github.com/maplibre/maplibre-native/pull/2956)).
+
+### 🐞 Bug fixes
+
+- Fix MapSnapshotter icon loading ([#2967](https://github.com/maplibre/maplibre-native/pull/2967)).
+
 ## 11.5.2
 
 ### ✨ Features and improvements
