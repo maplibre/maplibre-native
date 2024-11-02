@@ -51,7 +51,7 @@ public class HttpRequestImpl implements HttpRequest {
   static final OkHttpClient DEFAULT_CLIENT = new OkHttpClient.Builder().dispatcher(getDispatcher()).build();
 
   @VisibleForTesting
-  static OkHttpClient client = DEFAULT_CLIENT;
+  static Call.Factory client = DEFAULT_CLIENT;
 
   private Call call;
 
@@ -105,7 +105,12 @@ public class HttpRequestImpl implements HttpRequest {
     HttpLogger.logEnabled = enabled;
   }
 
+  @Deprecated
   public static void setOkHttpClient(@Nullable OkHttpClient okHttpClient) {
+    setOkHttpCallFactory(okHttpClient);
+  }
+
+  public static void setOkHttpCallFactory(@Nullable Call.Factory okHttpClient) {
     if (okHttpClient != null) {
       HttpRequestImpl.client = okHttpClient;
     } else {

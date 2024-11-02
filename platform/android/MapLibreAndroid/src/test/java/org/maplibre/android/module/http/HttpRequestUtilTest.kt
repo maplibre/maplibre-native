@@ -3,6 +3,7 @@ package org.maplibre.android.module.http
 import org.maplibre.android.MapLibreInjector
 import org.maplibre.android.utils.ConfigUtils
 import io.mockk.mockk
+import okhttp3.Call
 import okhttp3.OkHttpClient
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -18,15 +19,15 @@ class HttpRequestUtilTest {
 
         assertEquals(HttpRequestImpl.DEFAULT_CLIENT, HttpRequestImpl.client)
 
-        val httpMock = mockk<OkHttpClient>()
-        HttpRequestUtil.setOkHttpClient(httpMock)
+        val httpMock = mockk<Call.Factory>()
+        HttpRequestUtil.setOkHttpCallFactory(httpMock)
         assertEquals(
             "Http client should have set to the mocked client",
             httpMock,
             HttpRequestImpl.client
         )
 
-        HttpRequestUtil.setOkHttpClient(null)
+        HttpRequestUtil.setOkHttpCallFactory(null)
         assertEquals(
             "Http client should have been reset to the default client",
             HttpRequestImpl.DEFAULT_CLIENT,

@@ -35,7 +35,7 @@ class TileLoadingMeasurementUtils {
                 val okHttpClient: OkHttpClient = Builder()
                     .addNetworkInterceptor(TileLoadingInterceptor())
                     .build()
-                HttpRequestUtil.setOkHttpClient(okHttpClient)
+                HttpRequestUtil.setOkHttpCallFactory(okHttpClient)
             }
         }
 

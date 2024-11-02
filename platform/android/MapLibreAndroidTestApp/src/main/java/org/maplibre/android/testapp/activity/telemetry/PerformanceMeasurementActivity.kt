@@ -34,7 +34,7 @@ class PerformanceMeasurementActivity : AppCompatActivity() {
         val okHttpClient: OkHttpClient = Builder()
             .eventListener(eventListener)
             .build()
-        HttpRequestUtil.setOkHttpClient(okHttpClient)
+        HttpRequestUtil.setOkHttpCallFactory(okHttpClient)
         mapView.getMapAsync {
             it.setStyle(
                 Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
@@ -68,7 +68,7 @@ class PerformanceMeasurementActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        HttpRequestUtil.setOkHttpClient(null)
+        HttpRequestUtil.setOkHttpCallFactory(null)
         super.onDestroy()
         mapView.onDestroy()
     }

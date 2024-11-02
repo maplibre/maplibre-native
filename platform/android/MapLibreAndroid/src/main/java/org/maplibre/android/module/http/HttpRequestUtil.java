@@ -3,6 +3,7 @@ package org.maplibre.android.module.http;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okio.Buffer;
 
@@ -47,8 +48,22 @@ public class HttpRequestUtil {
    *
    * @param client the OkHttpClient
    */
+  @Deprecated
   public static void setOkHttpClient(@Nullable OkHttpClient client) {
-    HttpRequestImpl.setOkHttpClient(client);
+    HttpRequestImpl.setOkHttpCallFactory(client);
+  }
+
+  /**
+   * Set the OkHttpClient used for requesting map resources.
+   * <p>
+   * This configuration survives across mapView instances.
+   * Reset the OkHttpClient to the default by passing null as parameter.
+   * </p>
+   *
+   * @param client the OkHttp Call.Factory
+   */
+  public static void setOkHttpCallFactory(@Nullable Call.Factory client) {
+    HttpRequestImpl.setOkHttpCallFactory(client);
   }
 
   @NonNull
