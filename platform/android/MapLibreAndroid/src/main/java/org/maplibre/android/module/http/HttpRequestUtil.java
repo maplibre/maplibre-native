@@ -40,7 +40,7 @@ public class HttpRequestUtil {
   }
 
   /**
-   * Set the OkHttpClient used for requesting map resources.
+   * Set the OkHttp Call.Factory used for requesting map resources.
    * <p>
    * This configuration survives across mapView instances.
    * Reset the OkHttpClient to the default by passing null as parameter.
@@ -54,13 +54,13 @@ public class HttpRequestUtil {
   }
 
   /**
-   * Set the OkHttpClient used for requesting map resources.
+   * Set the OkHttp Call.Factory used for requesting map resources.
    * <p>
    * This configuration survives across mapView instances.
    * Reset the OkHttpClient to the default by passing null as parameter.
    * </p>
    *
-   * @param client the OkHttp Call.Factory
+   * @param client the OkHttp Call.Factory, typically OkHttpClient.
    */
   public static void setOkHttpCallFactory(@Nullable Call.Factory client) {
     HttpRequestImpl.setOkHttpCallFactory(client);

@@ -110,9 +110,9 @@ public class HttpRequestImpl implements HttpRequest {
     setOkHttpCallFactory(okHttpClient);
   }
 
-  public static void setOkHttpCallFactory(@Nullable Call.Factory okHttpClient) {
-    if (okHttpClient != null) {
-      HttpRequestImpl.client = okHttpClient;
+  public static void setOkHttpCallFactory(@Nullable Call.Factory client) {
+    if (client != null) {
+      HttpRequestImpl.client = client;
     } else {
       HttpRequestImpl.client = DEFAULT_CLIENT;
     }
