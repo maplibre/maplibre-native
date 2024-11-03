@@ -46,24 +46,10 @@ public class HttpRequestUtil {
    * Reset the OkHttpClient to the default by passing null as parameter.
    * </p>
    *
-   * @param client the OkHttpClient
-   */
-  @Deprecated
-  public static void setOkHttpClient(@Nullable OkHttpClient client) {
-    HttpRequestImpl.setOkHttpCallFactory(client);
-  }
-
-  /**
-   * Set the OkHttp Call.Factory used for requesting map resources.
-   * <p>
-   * This configuration survives across mapView instances.
-   * Reset the OkHttpClient to the default by passing null as parameter.
-   * </p>
-   *
    * @param client the OkHttp Call.Factory, typically OkHttpClient.
    */
-  public static void setOkHttpCallFactory(@Nullable Call.Factory client) {
-    HttpRequestImpl.setOkHttpCallFactory(client);
+  public static void setOkHttpClient(@Nullable Call.Factory client) {
+    HttpRequestImpl.setOkHttpClient(client);
   }
 
   @NonNull
