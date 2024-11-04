@@ -107,7 +107,7 @@ public class HttpRequestImpl implements HttpRequest {
   }
 
   public static void setOkHttpClient(@Nullable Call.Factory client) {
-      HttpRequestImpl.client = Objects.requireNonNullElse(client, DEFAULT_CLIENT);
+    HttpRequestImpl.client = Objects.requireNonNullElse(client, DEFAULT_CLIENT);
   }
 
   private static class OkHttpCallback implements Callback {
