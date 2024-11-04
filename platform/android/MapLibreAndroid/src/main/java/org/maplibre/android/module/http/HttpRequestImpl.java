@@ -22,6 +22,7 @@ import java.net.NoRouteToHostException;
 import java.net.ProtocolException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Objects;
 
 import javax.net.ssl.SSLException;
 
@@ -51,7 +52,7 @@ public class HttpRequestImpl implements HttpRequest {
   static final OkHttpClient DEFAULT_CLIENT = new OkHttpClient.Builder().dispatcher(getDispatcher()).build();
 
   @VisibleForTesting
-  static OkHttpClient client = DEFAULT_CLIENT;
+  static Call.Factory client = DEFAULT_CLIENT;
 
   private Call call;
 
@@ -105,12 +106,8 @@ public class HttpRequestImpl implements HttpRequest {
     HttpLogger.logEnabled = enabled;
   }
 
-  public static void setOkHttpClient(@Nullable OkHttpClient okHttpClient) {
-    if (okHttpClient != null) {
-      HttpRequestImpl.client = okHttpClient;
-    } else {
-      HttpRequestImpl.client = DEFAULT_CLIENT;
-    }
+  public static void setOkHttpClient(@Nullable Call.Factory client) {
+    HttpRequestImpl.client = Objects.requireNonNullElse(client, DEFAULT_CLIENT);
   }
 
   private static class OkHttpCallback implements Callback {
