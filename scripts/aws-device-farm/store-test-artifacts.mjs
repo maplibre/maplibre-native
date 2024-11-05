@@ -8,6 +8,18 @@ import { parseArgs } from "node:util";
 import { ArtifactType, ListArtifactsCommand, ListJobsCommand, ListSuitesCommand } from "@aws-sdk/client-device-farm";
 import { getDeviceFarmClient } from "./device-farm-client.mjs";
 
+/**
+ * @returns {never}
+ */
+function usage() {
+  console.error("Stores artifacts from AWS Device Farm run");
+  console.error("Usage: node store-test-artifacts.mjs --outputDir OUTPUT_DIR --runArn RUN_ARN");
+  console.error("Arguments:")
+  console.error("--customerArtifacts: only download customer artifacts");
+  console.error("--testsSuite: only download stuff from Tests Suite");
+  process.exit(1);
+}
+
 function getArgs() {
   const {
     values
@@ -57,32 +69,24 @@ function getArgs() {
 
 const { outputDir, runArn, suitesFilter, artifactsToDownload } = getArgs();
 
-/**
- * @returns {never}
- */
-function usage() {
-  console.error("Stores artifacts from AWS Device Farm run");
-  console.error("Usage: node store-test-artifacts.mjs --outputDir OUTPUT_DIR --runArn RUN_ARN");
-  console.error("Arguments:")
-  console.error("--customerArtifacts: only download customer artifacts");
-  console.error("--testsSuite: only download stuff from Tests Suite");
-  process.exit(1);
-}
-
 if (!fs.existsSync(outputDir)) {
   console.error("Output dir does not exist");
   process.exit(1);
 }
 
 const deviceFarmClient = getDeviceFarmClient();
+await storeRunArtifacts(runArn, outputDir);
+
+///////////////////////////////////////////////////////////////////////////////
 
 /**
  * Looks for the run with the provided ARN and returns the test spec output.
  * 
- * @param {string} arn 
+ * @param {string} arn
+ * @param {string} outputDir
  * @returns string
  */
-async function getTestSpecOutput(arn) {
+async function storeRunArtifacts(arn, outputDir) {
   const jobs = await deviceFarmClient.send(new ListJobsCommand({
     arn
   }));
@@ -107,6 +111,5 @@ async function getTestSpecOutput(arn) {
       }));
     }));
   }));
+  console.log(`Wrote run artifacts to ${outputDir}`)
 }
-
-await getTestSpecOutput(runArn);
