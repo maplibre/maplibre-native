@@ -19,6 +19,8 @@ fun obtainTestBuildType(): String {
 }
 
 android {
+    ndkVersion = Versions.ndkVersion
+
     compileSdk = 34
 
     defaultConfig {
