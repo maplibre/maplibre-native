@@ -77,7 +77,7 @@ async function writeResultsToOutputDir() {
       const benchmarkResultContents = await fs.readFile(fullBenchmarkResultPath, {encoding: 'utf-8'});
       const benchmarkResults = JSON.parse(benchmarkResultContents);
       const { timestamp } = benchmarkResults;
-      if (typeof timestamp !== 'string') throw new Error("No timestamp found in bechmark result");
+      if (typeof timestamp !== 'number') throw new Error("No timestamp found in bechmark result");
       await fs.copyFile(fullBenchmarkResultPath, path.join(outputDir, `${timestamp}.json`));
     } catch (err) {
       console.error(`Error ${err}. Skipping: '${benchmarkResultPath}'`);

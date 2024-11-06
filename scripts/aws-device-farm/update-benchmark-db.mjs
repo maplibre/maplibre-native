@@ -107,22 +107,11 @@ async function downloadBenchmarkResults(gitRevision) {
  * @returns {Promise<Object[]>} An array with parsed JSON objects from each file
  */
 async function loadResults(dir) {
-  const files = await fs.readdir(dir);
-
-  return (await Promise.all(
-    files.flatMap(async (filename) => {
-      if (path.extname(filename) !== ".json") return [];
-      const filePath = path.join(dir, filename);
-
-      try {
-        const fileContent = await fs.readFile(filePath, "utf-8");
-        return [JSON.parse(fileContent)];
-      } catch (error) {
-        console.error(`Failed to load or parse ${filename}:`, error);
-        return [];
-      }
-    })
-  )).flat();
+  return (await Promise.all((await fs.readdir(dir))
+    .map(filePath => path.join(dir, filePath))
+    .filter(filePath => path.extname(filePath) === ".json")
+    .map(filePath => fs.readFile(filePath, "utf-8"))))
+    .map(fileContents => JSON.parse(fileContents));
 }
 
 /**
@@ -133,7 +122,7 @@ function updateDb(dbPath, results) {
   const db = new DatabaseSync(dbPath);
   db.exec(`
     CREATE TABLE IF NOT EXISTS benchmark_result (
-      id INTEGER PRIMARY KEY,
+      id TEXT PRIMARY KEY,
       styleName TEXT NOT NULL,
       fps REAL NOT NULL,
       avgEncodingTime REAL NOT NULL,
@@ -144,12 +133,15 @@ function updateDb(dbPath, results) {
       deviceManufacturer TEXT NOT NULL,
       model TEXT NOT NULL,
       renderer TEXT NOT NULL,
-      gitRevision TEXT NOT NULL,
-      timestamp INTEGER NOT NULL UNIQUE
+      gitRevision TEXT NOT NULL
     )`);
+
+  const deleteExisting = db.prepare(
+    `DELETE FROM benchmark_result WHERE id = ?`);
 
   const stmt = db.prepare(
     `INSERT INTO benchmark_result (
+      id,
       styleName,
       fps,
       avgEncodingTime,
@@ -160,9 +152,9 @@ function updateDb(dbPath, results) {
       deviceManufacturer,
       model,
       renderer,
-      gitRevision,
-      timestamp
+      gitRevision
     ) VALUES (
+      @id,
       @styleName,
       @fps,
       @avgEncodingTime,
@@ -173,19 +165,28 @@ function updateDb(dbPath, results) {
       @deviceManufacturer,
       @model,
       @renderer,
-      @gitRevision,
-      @timestamp
-  ) ON CONFLICT IGNORE`);
+      @gitRevision
+  ) RETURNING *`);
 
   for (const run of results) {
-    for (const result of run.results) {
+    for (const [index, result] of run.results.entries()) {
+      const id = `${run.timestamp}-${index}`;
+      const { 
+        deviceManufacturer,
+        gitRevision,
+        model,
+        renderer,
+      } = run;
+      deleteExisting.run(id);
       const params = {
         ...result,
-        ...run,
-        syncRendering: result.syncRendering ? 1: 0
+        id,
+        deviceManufacturer,
+        gitRevision,
+        model,
+        renderer,
+        syncRendering: result.syncRendering ? 1 : 0,
       };
-      delete params['results'];
-      delete params['debugBuild'];
       stmt.run(params);
     }
   }
