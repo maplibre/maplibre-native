@@ -8,6 +8,10 @@
 
 ## 11.6.1
 
+### 🐞 Bug fixes
+
+- Fix 16K alignment Android builds ([#2995](https://github.com/maplibre/maplibre-native/issues/2995)).
+
 ### ✨ Features and improvements
 
 - Allow configuring a `Call.Factory` instead of a `OkHttpClient` ([https://github.com/maplibre/maplibre-native/pull/2987](#2987)). Since an `OkHttpClient` can be assigned to a `Call.Factory` this should not cause any issues.
