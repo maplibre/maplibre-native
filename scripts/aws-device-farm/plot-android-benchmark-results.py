@@ -47,7 +47,7 @@ for row in rows:
 
 # Define the colors for each renderer
 colors = {'legacy': 'gray', 'drawable': 'blue', 'vulkan': 'red'}
-renderer_order = ['drawable', 'vulkan']
+renderer_order = ['legacy', 'drawable', 'vulkan']
 
 legend_names = {'legacy': 'Legacy', 'drawable': 'OpenGL', 'vulkan': 'Vulkan'}
 

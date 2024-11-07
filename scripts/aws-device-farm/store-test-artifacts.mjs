@@ -29,10 +29,11 @@ function getArgs() {
         type: "string",
       },
       runArn: {
-        type: "string"
+        type: "string",
+        multiple: true
       },
       testsSuite: {
-       type: "boolean" 
+        type: "boolean"
       },
       customerArtifacts: {
         type: "boolean"
@@ -42,7 +43,7 @@ function getArgs() {
   const { outputDir, runArn } = values;
   if (typeof outputDir !== 'string') usage();
 
-  if (typeof runArn !== 'string') usage();
+  if (!runArn || !runArn.length) usage();
 
   function suitesFilter() {
     const names = new Set();
@@ -82,34 +83,36 @@ await storeRunArtifacts(runArn, outputDir);
 /**
  * Looks for the run with the provided ARN and returns the test spec output.
  * 
- * @param {string} arn
+ * @param {string[]} arnArr
  * @param {string} outputDir
  * @returns string
  */
-async function storeRunArtifacts(arn, outputDir) {
-  const jobs = await deviceFarmClient.send(new ListJobsCommand({
-    arn
-  }));
-  
-  await Promise.all((jobs.jobs || []).map(async (job) => {
-    const suites = await deviceFarmClient.send(new ListSuitesCommand({arn: job.arn}));
-    await Promise.all((suites.suites || []).filter(suitesFilter).map(async (suite) => {
-      const artifacts = await deviceFarmClient.send(new ListArtifactsCommand({
-        arn: suite.arn,
-        type: 'FILE'
-      }));
-      await Promise.all((artifacts.artifacts || []).map(async (artifact) => {
-        if (!artifact.name || !artifact.url || !artifact.type) return;
-        if (artifactsToDownload.includes(artifact.type)) {
-          const filename = `${artifact.name.replaceAll(' ', '_')}-${crypto.randomBytes(10).toString('hex')}.${artifact.extension}`;
-          const res = await fetch(artifact.url);
-          if (!res.ok || !res.body) return;
-          const destination = path.resolve(outputDir, filename);
-          const fileStream = fs.createWriteStream(destination, { flags: 'wx' });
-          await finished(Readable.fromWeb(/** @type {any} **/ (res.body)).pipe(fileStream));
-        }
+async function storeRunArtifacts(arnArr, outputDir) {
+  for (const arn of arnArr) {
+    const jobs = await deviceFarmClient.send(new ListJobsCommand({
+      arn
+    }));
+
+    await Promise.all((jobs.jobs || []).map(async (job) => {
+      const suites = await deviceFarmClient.send(new ListSuitesCommand({ arn: job.arn }));
+      await Promise.all((suites.suites || []).filter(suitesFilter).map(async (suite) => {
+        const artifacts = await deviceFarmClient.send(new ListArtifactsCommand({
+          arn: suite.arn,
+          type: 'FILE'
+        }));
+        await Promise.all((artifacts.artifacts || []).map(async (artifact) => {
+          if (!artifact.name || !artifact.url || !artifact.type) return;
+          if (artifactsToDownload.includes(artifact.type)) {
+            const filename = `${artifact.name.replaceAll(' ', '_')}-${crypto.randomBytes(10).toString('hex')}.${artifact.extension}`;
+            const res = await fetch(artifact.url);
+            if (!res.ok || !res.body) return;
+            const destination = path.resolve(outputDir, filename);
+            const fileStream = fs.createWriteStream(destination, { flags: 'wx' });
+            await finished(Readable.fromWeb(/** @type {any} **/(res.body)).pipe(fileStream));
+          }
+        }));
       }));
     }));
-  }));
+  }
   console.log(`Wrote run artifacts to ${outputDir}`)
 }
