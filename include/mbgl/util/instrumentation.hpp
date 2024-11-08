@@ -91,11 +91,10 @@ constexpr const char* tracyConstMemoryLabel = "Constant Buffer Memory";
 
 #elif MLN_RENDER_BACKEND_VULKAN
 
-#define MLN_END_FRAME()  \
-    do {                 \
-        FrameMark;       \
+#define MLN_END_FRAME() \
+    do {                \
+        FrameMark;      \
     } while (0);
-
 
 #else
 

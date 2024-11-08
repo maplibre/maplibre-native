@@ -65,9 +65,8 @@ void DescriptorSet::allocate() {
     auto& growablePool = context.getDescriptorPool(type);
     const std::vector<vk::DescriptorSetLayout> layouts(context.getBackend().getMaxFrames(), descriptorSetLayout);
 
-    if (growablePool.currentPoolIndex == -1 || (growablePool.current().unusedSets.empty() &&
-        growablePool.current().remainingSets < layouts.size())) {
-
+    if (growablePool.currentPoolIndex == -1 ||
+        (growablePool.current().unusedSets.empty() && growablePool.current().remainingSets < layouts.size())) {
 #ifdef USE_DESCRIPTOR_POOL_RESET
         // find a pool that has unused allocated descriptor sets
         const auto& unusedPoolIt = std::find_if(
