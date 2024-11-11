@@ -48,6 +48,8 @@ tasks.withType<DokkaTask> {
 }
 
 android {
+    ndkVersion = Versions.ndkVersion
+
     defaultConfig {
         compileSdk = 34
         minSdk = 21
