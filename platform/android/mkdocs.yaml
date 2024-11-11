@@ -1,7 +1,8 @@
 site_name: MapLibre Android Examples
 site_url: https://www.maplibre.org/maplibre-native/android/examples
-repo_url: https://github.com/maplibre/maplibre-native
+repo_url: https://github.com/louwers/maplibre-native
 site_description: MapLibre Android Examples
+edit_uri: edit/main/platform/android/docs
 extra_css:
   - assets/extra.css
 theme:
@@ -27,6 +28,8 @@ theme:
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
+  features:
+    - content.action.edit
 markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
