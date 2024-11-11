@@ -3,7 +3,7 @@ repos:
     rev: v5.0.0
     hooks:
     -   id: check-yaml
-        args: [--allow-multiple-documents]
+        args: [--allow-multiple-documents, --unsafe]
 - repo: https://github.com/pre-commit/mirrors-clang-format
   rev: v19.1.2
   hooks:

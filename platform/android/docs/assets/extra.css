@@ -13,6 +13,6 @@
   display: none;
 }
 
-.md-sidebar + .md-sidebar--secondary {
-  display: none !important;
+.md-grid {
+  max-width: 1800px; 
 }

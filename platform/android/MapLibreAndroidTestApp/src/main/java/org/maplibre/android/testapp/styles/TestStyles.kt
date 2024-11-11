@@ -23,7 +23,7 @@ object TestStyles {
     val PROTOMAPS_GRAYSCALE = protomaps("grayscale")
 
     val PROTOMAPS_WHITE = protomaps("white")
-
+    
     fun getPredefinedStyleWithFallback(name: String): String {
         try {
             val style = Style.getPredefinedStyle(name)

@@ -2,6 +2,35 @@
 
 Welcome to the examples documentation of MapLibre Android.
 
+<div class="grid cards" markdown>
+
+-   :material-clock-fast:{ .lg .middle } __Quickstart__
+
+    ---
+
+    Learn how to include MapLibre Android in your project
+
+    [:octicons-arrow-right-24: Getting started](getting-started)
+
+-   :fontawesome-brands-slack:{ .lg .middle } __Find us on Slack__
+
+    ---
+
+    Discuss the project and ask questions in the `#maplibre-android` channel
+
+    [:octicons-arrow-right-24: Slack](https://osmus.slack.com/archives/C01G3D28DAB)
+
+-   :fontawesome-solid-code:{ .lg .middle } __Contribute to these Docs__
+
+    ---
+
+    Share your own examples with the community!
+
+    [:octicons-arrow-right-24: Documentation on GitHub](https://github.com/maplibre/maplibre-native/tree/main/platform/android/docs)
+
+</div>
+
+
 ## Open-Source Apps Using MapLibre Android
 
 You can learn how to use the API from MapLibre Android by stuying the source code of existing apps that intergrate MapLibre Android. Here are some open-source apps that use MapLibre Android:
