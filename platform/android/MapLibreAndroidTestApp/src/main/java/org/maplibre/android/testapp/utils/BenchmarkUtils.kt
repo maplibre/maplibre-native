@@ -25,6 +25,7 @@ data class BenchmarkRun(
     val styleName: String,
     val styleURL: String,
     val syncRendering: Boolean,
+    val duration: Int
 )
 
 data class BenchmarkRunResult(
@@ -58,6 +59,7 @@ fun jsonPayload(benchmarkResult: BenchmarkResult): JsonObject {
         put("renderer", JsonPrimitive(BuildConfig.FLAVOR))
         put("debugBuild", JsonPrimitive(BuildConfig.DEBUG))
         put("gitRevision", JsonPrimitive(GIT_REVISION))
+        put("timestamp", JsonPrimitive(System.currentTimeMillis()))
     }
 }
 
