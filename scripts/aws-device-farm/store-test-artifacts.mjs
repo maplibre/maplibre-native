@@ -103,10 +103,15 @@ async function storeRunArtifacts(arnArr, outputDir) {
         await Promise.all((artifacts.artifacts || []).map(async (artifact) => {
           if (!artifact.name || !artifact.url || !artifact.type) return;
           if (artifactsToDownload.includes(artifact.type)) {
-            const filename = `${artifact.name.replaceAll(' ', '_')}-${crypto.randomBytes(10).toString('hex')}.${artifact.extension}`;
+            if (!artifact.arn) return;
+            const destination = path.join(outputDir, `${Buffer.from(artifact.arn).toString('base64')}.${artifact.extension}`);
+            try {
+              await fs.promises.access(destination);
+              return; // already exists
+            } catch (err) {
+            }
             const res = await fetch(artifact.url);
             if (!res.ok || !res.body) return;
-            const destination = path.resolve(outputDir, filename);
             const fileStream = fs.createWriteStream(destination, { flags: 'wx' });
             await finished(Readable.fromWeb(/** @type {any} **/(res.body)).pipe(fileStream));
           }
