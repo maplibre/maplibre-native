@@ -201,7 +201,7 @@ jobs:
 
       - name: Deploy DocC documentation (main) 🚀
         if: github.ref == 'refs/heads/main'
-        uses: JamesIves/github-pages-deploy-action@v4.6.8
+        uses: JamesIves/github-pages-deploy-action@v4.6.9
         continue-on-error: true
         with:
           branch: gh-pages
