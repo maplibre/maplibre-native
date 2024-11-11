@@ -10,7 +10,7 @@ Welcome to the examples documentation of MapLibre Android.
 
     Learn how to include MapLibre Android in your project
 
-    [:octicons-arrow-right-24: Getting started](getting-started)
+    [:octicons-arrow-right-24: Getting started](getting-started.md)
 
 -   :fontawesome-brands-slack:{ .lg .middle } __Find us on Slack__
 
