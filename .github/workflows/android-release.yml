@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       renderer:
-        description: 'Select renderering backend'
+        description: "Select renderering backend"
         required: true
-        default: 'OpenGL'
+        default: "OpenGL"
         type: choice
         options:
           - OpenGL
@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: platform/android
@@ -43,6 +43,12 @@ jobs:
         with:
           distribution: "temurin"
           java-version: "17"
+
+      - name: Get CMake and Ninja
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: 3.24.1
+          ninjaVersion: latest
 
       - name: Ensure source code revision
         run: scripts/ensure-code-revision.sh
