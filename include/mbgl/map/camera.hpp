@@ -57,6 +57,7 @@ struct CameraOptions {
     /** Coordinate at the center of the map. */
     std::optional<LatLng> center;
 
+    /** Altitude of the center of the map, in meters above sea level. */
     std::optional<double> centerAltitude;
 
     /** Padding around the interior of the view that affects the frame of
@@ -78,7 +79,10 @@ struct CameraOptions {
         two-dimensional map. */
     std::optional<double> pitch;
 
+    /** Camera roll, measured in degrees. */
     std::optional<double> roll;
+    
+    /** Camera vertical field of view, measured in degrees. */
     std::optional<double> fov;
 };
 
