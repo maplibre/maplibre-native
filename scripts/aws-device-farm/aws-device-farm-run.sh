@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # List of required environment variables
 required_vars=(
   "AWS_DEVICE_FARM_PROJECT_ARN"

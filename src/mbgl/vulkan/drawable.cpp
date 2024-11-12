@@ -18,6 +18,7 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/variant.hpp>
 #include <mbgl/util/hash.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 #include <cassert>
 #if !defined(NDEBUG)
@@ -129,6 +130,8 @@ void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
 }
 
 void Drawable::upload(gfx::UploadPass& uploadPass_) {
+    MLN_TRACE_FUNC();
+
     if (isCustom) {
         return;
     }
@@ -234,6 +237,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 }
 
 void Drawable::draw(PaintParameters& parameters) const {
+    MLN_TRACE_FUNC();
+
     if (isCustom) {
         return;
     }
@@ -334,6 +339,8 @@ gfx::UniformBufferArray& Drawable::mutableUniformBuffers() {
 }
 
 void Drawable::buildVulkanInputBindings() noexcept {
+    MLN_TRACE_FUNC();
+
     impl->vulkanVertexBuffers.clear();
     impl->vulkanVertexOffsets.clear();
 
@@ -386,6 +393,8 @@ void Drawable::buildVulkanInputBindings() noexcept {
 }
 
 bool Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
+    MLN_TRACE_FUNC();
+
     if (impl->vulkanVertexBuffers.empty()) return false;
 
     const auto& commandBuffer = encoder.getCommandBuffer();
@@ -403,6 +412,8 @@ bool Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
 }
 
 bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
+    MLN_TRACE_FUNC();
+
     if (!shader) return false;
 
     // bind uniforms
@@ -415,6 +426,15 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
             impl->imageDescriptorSet = std::make_unique<ImageDescriptorSet>(encoder.getContext());
         }
 
+        for (const auto& texture : textures) {
+            if (!texture) continue;
+            const auto textureImpl = static_cast<const Texture2D*>(texture.get());
+            if (textureImpl->isDirty()) {
+                impl->imageDescriptorSet->markDirty(true);
+                break;
+            }
+        }
+
         impl->imageDescriptorSet->update(textures);
         impl->imageDescriptorSet->bind(encoder);
     }
@@ -423,6 +443,7 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
 }
 
 void Drawable::uploadTextures(UploadPass&) const noexcept {
+    MLN_TRACE_FUNC();
     for (const auto& texture : textures) {
         if (texture) {
             texture->upload();

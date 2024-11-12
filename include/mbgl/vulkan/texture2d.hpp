@@ -59,6 +59,8 @@ public:
     size_t getPixelStride() const noexcept override;
     size_t numChannels() const noexcept override;
 
+    bool isDirty() const { return samplerStateDirty || textureDirty; }
+
     void create() noexcept override;
 
     void upload() noexcept override;
