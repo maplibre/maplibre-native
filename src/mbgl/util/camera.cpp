@@ -241,7 +241,7 @@ void FreeCameraOptions::lookAtPoint(const LatLng& location, const std::optional<
     orientation = util::Camera::orientationFromFrame(forward, up)->m;
 }
 
-void FreeCameraOptions::setPitchBearing(double pitch, double bearing, double roll) noexcept {
+void FreeCameraOptions::setRollPitchBearing(double roll, double pitch, double bearing) noexcept {
     orientation =
         util::orientationFromPitchBearing(util::deg2rad(pitch), util::deg2rad(bearing), util::deg2rad(roll)).m;
 }

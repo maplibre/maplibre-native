@@ -173,9 +173,9 @@ struct FreeCameraOptions {
        bearing can't be deduced from the viewing direction */
     void lookAtPoint(const LatLng& location, const std::optional<vec3>& upVector = std::nullopt) noexcept;
 
-    /** Helper function for setting the orientation of the camera as a pitch and
-       a bearing. Both values are in degrees */
-    void setPitchBearing(double pitch, double bearing, double roll) noexcept;
+    /** Helper function for setting the orientation of the camera as a roll, pitch, and
+       a bearing. All values are in degrees */
+    void setRollPitchBearing(double roll, double pitch, double bearing) noexcept;
 };
 
 } // namespace mbgl
