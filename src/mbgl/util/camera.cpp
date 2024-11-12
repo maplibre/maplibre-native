@@ -15,7 +15,7 @@ using namespace std::numbers;
 namespace mbgl {
 
 namespace {
-double vec2Len(const vec2& v) noexcept {
+/*double vec2Len(const vec2& v) noexcept {
     return std::sqrt(v[0] * v[0] + v[1] * v[1]);
 };
 
@@ -25,8 +25,8 @@ double vec2Dot(const vec2& a, const vec2& b) noexcept {
 
 vec2 vec2Scale(const vec2& v, double s) noexcept {
     return vec2{{v[0] * s, v[1] * s}};
-};
-} // namespace*/
+};*/
+} // namespace
 
 namespace util {
 
@@ -191,7 +191,7 @@ void Camera::setPosition(const vec3& position) noexcept {
     updateTransform(transform, position);
 }
 
-Quaternion Camera::orientationFromFrame(const vec3& forward, const vec3& up) noexcept {
+std::optional<Quaternion> Camera::orientationFromFrame(const vec3& forward, const vec3& up) noexcept {
     const vec3 right = vec3Cross(up, forward);
 
     const double bearing = std::atan2(-right[1], right[0]);
@@ -238,7 +238,7 @@ void FreeCameraOptions::lookAtPoint(const LatLng& location, const std::optional<
     // Flip z-component of the up vector if it's pointing downwards
     up[2] = std::abs(up[2]);
 
-    orientation = util::Camera::orientationFromFrame(forward, up).m;
+    orientation = util::Camera::orientationFromFrame(forward, up)->m;
 }
 
 void FreeCameraOptions::setPitchBearing(double pitch, double bearing, double twist) noexcept {
