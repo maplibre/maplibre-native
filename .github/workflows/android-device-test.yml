@@ -144,9 +144,6 @@ jobs:
           export testPackageType=INSTRUMENTATION_TEST_PACKAGE
           export testType=INSTRUMENTATION
           export testFilter="${{ matrix.test.testFilter }}"
-          export AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}"
-          export AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-          export AWS_ROLE_TO_ASSUME="${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}"
           export AWS_DEVICE_FARM_PROJECT_ARN="${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}"
           export AWS_DEVICE_FARM_DEVICE_POOL_ARN="${{ matrix.test.devicePool }}"
           export testSpecArn="${{ matrix.test.testSpecArn }}"
