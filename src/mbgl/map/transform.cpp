@@ -101,7 +101,7 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
     double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
     double fov = camera.fov ? util::deg2rad(*camera.fov) : getFieldOfView();
-    double alt_m = camera.altM.value_or(100000);
+    double center_alt = camera.centerAltitude.value_or(0);
     double roll = camera.roll ? util::deg2rad(*camera.roll) : getRoll();
 
     if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch)) {
@@ -168,7 +168,7 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
                 state.setPitch(util::interpolate(startPitch, pitch, t));
             }
             state.setFieldOfView(fov);
-            state.setAltM(alt_m);
+            state.setCenterAltitude(center_alt);
             state.setRoll(roll);
         },
         duration);

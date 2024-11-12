@@ -432,7 +432,7 @@ void TransformState::setViewportMode(ViewportMode val) {
 CameraOptions TransformState::getCameraOptions(const std::optional<EdgeInsets>& padding) const {
     return CameraOptions()
         .withCenter(getLatLng())
-        .withAlt(getAltM())
+        .withCenterAltitude(getCenterAltitude())
         .withPadding(padding ? padding : edgeInsets)
         .withZoom(getZoom())
         .withBearing(util::rad2deg(-bearing))
@@ -456,7 +456,7 @@ LatLng TransformState::getLatLng(LatLng::WrapMode wrapMode) const {
     return {util::rad2deg(2 * std::atan(std::exp(y / Cc)) - 0.5 * pi), -x / Bc, wrapMode};
 }
 
-double TransformState::getAltM() const {
+double TransformState::getCenterAltitude() const {
     return z * Projection::getMetersPerPixelAtLatitude(getLatLng().latitude(), getZoom());
 }
 
@@ -838,7 +838,7 @@ void TransformState::setLatLngZoom(const LatLng& latLng, double zoom) {
     setScalePoint(newScale, point);
 }
 
-void TransformState::setAltM(double alt_m) {
+void TransformState::setCenterAltitude(double alt_m) {
     z = alt_m / Projection::getMetersPerPixelAtLatitude(getLatLng().latitude(), getZoom());
     requestMatricesUpdate = true;
 }

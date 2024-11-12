@@ -154,7 +154,7 @@ public:
 
     // Position
     LatLng getLatLng(LatLng::WrapMode = LatLng::Unwrapped) const;
-    double getAltM() const;
+    double getCenterAltitude() const;
     double pixel_x() const;
     double pixel_y() const;
 
@@ -235,7 +235,7 @@ public:
         point on screen. */
     void moveLatLng(const LatLng&, const ScreenCoordinate&);
     void setLatLngZoom(const LatLng& latLng, double zoom);
-    void setAltM(double alt_m);
+    void setCenterAltitude(double alt_m);
 
     void constrain(double& scale, double& x, double& y) const;
     const mat4& getProjectionMatrix() const;

@@ -21,8 +21,8 @@ struct CameraOptions {
         center = o;
         return *this;
     }
-    CameraOptions& withAlt(const std::optional<double>& o) {
-        altM = o;
+    CameraOptions& withCenterAltitude(const std::optional<double>& o) {
+        centerAltitude = o;
         return *this;
     }
     CameraOptions& withPadding(const std::optional<EdgeInsets>& p) {
@@ -57,7 +57,7 @@ struct CameraOptions {
     /** Coordinate at the center of the map. */
     std::optional<LatLng> center;
 
-    std::optional<double> altM;
+    std::optional<double> centerAltitude;
 
     /** Padding around the interior of the view that affects the frame of
         reference for `center`. */
@@ -84,7 +84,7 @@ struct CameraOptions {
 
 constexpr bool operator==(const CameraOptions& a, const CameraOptions& b) {
     return a.center == b.center && a.padding == b.padding && a.anchor == b.anchor && a.zoom == b.zoom &&
-           a.bearing == b.bearing && a.pitch == b.pitch && a.roll == b.roll && a.fov == b.fov && a.altM == b.altM;
+           a.bearing == b.bearing && a.pitch == b.pitch && a.roll == b.roll && a.fov == b.fov && a.centerAltitude == b.centerAltitude;
 }
 
 constexpr bool operator!=(const CameraOptions& a, const CameraOptions& b) {
