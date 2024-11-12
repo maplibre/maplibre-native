@@ -13,6 +13,8 @@ theme:
     - content.code.copy
     - search.suggest
     - navigation.instant
+    - navigation.sections
+    - content.action.edit
   palette:
     - media: "(prefers-color-scheme)"
       toggle:
@@ -28,8 +30,6 @@ theme:
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
-  features:
-    - content.action.edit
 markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
