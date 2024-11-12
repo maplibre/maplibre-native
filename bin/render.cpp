@@ -33,11 +33,11 @@ int main(int argc, char* argv[]) {
 
     args::ValueFlag<double> lonValue(argumentParser, "degrees", "Longitude", {'x', "lon"});
     args::ValueFlag<double> latValue(argumentParser, "degrees", "Latitude", {'y', "lat"});
-    args::ValueFlag<double> altValue(argumentParser, "degrees", "Altitude", {'y', "alt"});
+    args::ValueFlag<double> altValue(argumentParser, "degrees", "Altitude", {'A', "alt"});
     args::ValueFlag<double> fovValue(argumentParser, "degrees", "FOV", {'f', "fov"});
     args::ValueFlag<double> bearingValue(argumentParser, "degrees", "Bearing", {'b', "bearing"});
     args::ValueFlag<double> pitchValue(argumentParser, "degrees", "Pitch", {'p', "pitch"});
-    args::ValueFlag<double> rollValue(argumentParser, "degrees", "Roll", {'T', "roll"});
+    args::ValueFlag<double> rollValue(argumentParser, "degrees", "Roll", {'R', "roll"});
     args::ValueFlag<uint32_t> widthValue(argumentParser, "pixels", "Image width", {'w', "width"});
     args::ValueFlag<uint32_t> heightValue(argumentParser, "pixels", "Image height", {'h', "height"});
 
