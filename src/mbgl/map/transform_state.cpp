@@ -62,8 +62,8 @@ void TransformState::setProperties(const TransformStateProperties& properties) {
     if (properties.pitch) {
         setPitch(*properties.pitch);
     }
-    if (properties.twist) {
-        setTwist(*properties.twist);
+    if (properties.roll) {
+        setRoll(*properties.roll);
     }
     if (properties.xSkew) {
         setXSkew(*properties.xSkew);
@@ -214,7 +214,7 @@ void TransformState::updateCameraState() const {
     const double dy = 0.5 * worldSize - y;
 
     // Set camera orientation and move it to a proper distance from the map
-    camera.setOrientation(pitch, getBearing(), getTwist());
+    camera.setOrientation(pitch, getBearing(), getRoll());
 
     vec3 cameraPosition = {{dx, dy, z}};
 
@@ -237,8 +237,8 @@ void TransformState::updateStateFromCamera() {
     // Compute bearing and pitch
     double newBearing;
     double newPitch;
-    double newTwist;
-    camera.getOrientation(newPitch, newBearing, newTwist);
+    double newRoll;
+    camera.getOrientation(newPitch, newBearing, newRoll);
     newPitch = util::clamp(newPitch, minPitch, maxPitch);
 
     // Compute zoom level from the camera altitude
@@ -253,7 +253,7 @@ void TransformState::updateStateFromCamera() {
     setLatLngZoom(latLngFromMercator(mercatorPoint), scaleZoom(newScale));
     setBearing(newBearing);
     setPitch(newPitch);
-    setTwist(newTwist);
+    setRoll(newRoll);
 }
 
 FreeCameraOptions TransformState::getFreeCameraOptions() const {
@@ -437,7 +437,7 @@ CameraOptions TransformState::getCameraOptions(const std::optional<EdgeInsets>& 
         .withZoom(getZoom())
         .withBearing(util::rad2deg(-bearing))
         .withPitch(util::rad2deg(pitch))
-        .withTwist(util::rad2deg(twist))
+        .withRoll(util::rad2deg(roll))
         .withFov(util::rad2deg(fov));
 }
 
@@ -621,13 +621,13 @@ void TransformState::setFieldOfView(double val) {
     }
 }
 
-double TransformState::getTwist() const {
-    return twist;
+double TransformState::getRoll() const {
+    return roll;
 }
 
-void TransformState::setTwist(double val) {
-    if (twist != val) {
-        twist = val;
+void TransformState::setRoll(double val) {
+    if (roll != val) {
+        roll = val;
         requestMatricesUpdate = true;
     }
 }

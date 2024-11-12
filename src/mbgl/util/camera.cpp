@@ -65,13 +65,13 @@ static vec3 toMercator(const LatLng& location, double altitudeMeters) noexcept {
              altitudeMeters * pixelsPerMeter / worldSize}};
 }
 
-static Quaternion orientationFromPitchBearing(double pitch, double bearing, double twist) noexcept {
+static Quaternion orientationFromPitchBearing(double pitch, double bearing, double roll) noexcept {
     // Both angles have to be negated to achieve CW rotation around the axis of rotation
     Quaternion rotBearing = Quaternion::fromAxisAngle({{0.0, 0.0, 1.0}}, -bearing);
     Quaternion rotPitch = Quaternion::fromAxisAngle({{1.0, 0.0, 0.0}}, -pitch);
-    Quaternion rotTwist = Quaternion::fromAxisAngle({{0.0, 0.0, 1.0}}, -twist);
+    Quaternion rotRoll = Quaternion::fromAxisAngle({{0.0, 0.0, 1.0}}, -roll);
 
-    return rotBearing.multiply(rotPitch).multiply(rotTwist);
+    return rotBearing.multiply(rotPitch).multiply(rotRoll);
 }
 
 static void updateTransform(mat4& transform, const Quaternion& orientation) noexcept {
@@ -168,17 +168,17 @@ vec3 Camera::up() const noexcept {
     return {{-column[0], -column[1], -column[2]}};
 }
 
-void Camera::getOrientation(double& pitch, double& bearing, double& twist) const noexcept {
+void Camera::getOrientation(double& pitch, double& bearing, double& roll) const noexcept {
     const vec3 f = forward();
     const vec3 r = right();
 
     bearing = std::atan2(-r[1], r[0]);
     pitch = std::atan2(std::sqrt(f[0] * f[0] + f[1] * f[1]), -f[2]);
-    twist = 0; //TODO
+    roll = 0; //TODO
 }
 
-void Camera::setOrientation(double pitch, double bearing, double twist) noexcept {
-    orientation = orientationFromPitchBearing(pitch, bearing, twist);
+void Camera::setOrientation(double pitch, double bearing, double roll) noexcept {
+    orientation = orientationFromPitchBearing(pitch, bearing, roll);
     updateTransform(transform, orientation);
 }
 
@@ -196,9 +196,9 @@ std::optional<Quaternion> Camera::orientationFromFrame(const vec3& forward, cons
 
     const double bearing = std::atan2(-right[1], right[0]);
     const double pitch = std::atan2(std::sqrt(forward[0] * forward[0] + forward[1] * forward[1]), -forward[2]);
-    const double twist = 0; //TODO
+    const double roll = 0; //TODO
 
-    return util::orientationFromPitchBearing(pitch, bearing, twist);
+    return util::orientationFromPitchBearing(pitch, bearing, roll);
 }
 } // namespace util
 
@@ -241,9 +241,9 @@ void FreeCameraOptions::lookAtPoint(const LatLng& location, const std::optional<
     orientation = util::Camera::orientationFromFrame(forward, up)->m;
 }
 
-void FreeCameraOptions::setPitchBearing(double pitch, double bearing, double twist) noexcept {
+void FreeCameraOptions::setPitchBearing(double pitch, double bearing, double roll) noexcept {
     orientation =
-        util::orientationFromPitchBearing(util::deg2rad(pitch), util::deg2rad(bearing), util::deg2rad(twist)).m;
+        util::orientationFromPitchBearing(util::deg2rad(pitch), util::deg2rad(bearing), util::deg2rad(roll)).m;
 }
 
 } // namespace mbgl
