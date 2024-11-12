@@ -168,7 +168,7 @@ vec3 Camera::up() const noexcept {
     return {{-column[0], -column[1], -column[2]}};
 }
 
-void Camera::getOrientation(double& pitch, double& bearing, double& roll) const noexcept {
+void Camera::getOrientation(double& roll, double& pitch, double& bearing) const noexcept {
     const vec3 f = forward();
     const vec3 r = right();
 

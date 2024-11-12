@@ -156,7 +156,6 @@ struct FreeCameraOptions {
        0, 0]
 
         Orientation can be set freely but certain constraints still apply
-         - Orientation must be representable with only pitch and bearing.
          - Pitch has an upper limit */
     std::optional<vec4> orientation = std::nullopt;
 

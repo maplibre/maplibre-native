@@ -25,7 +25,7 @@ public:
     vec3 up() const noexcept;
 
     const Quaternion& getOrientation() const noexcept { return orientation; }
-    void getOrientation(double& pitch, double& bearing, double& roll) const noexcept;
+    void getOrientation(double& roll, double& pitch, double& bearing) const noexcept;
     void setOrientation(double roll, double pitch, double bearing) noexcept;
     void setOrientation(const Quaternion& orientation_) noexcept;
     void setPosition(const vec3& position) noexcept;

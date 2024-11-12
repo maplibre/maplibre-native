@@ -205,6 +205,7 @@ void TransformState::updateCameraState() const {
     }
 
     const double worldSize = Projection::worldSize(scale);
+    const double cameraToCenterDistance = getCameraToCenterDistance();
 
     // x & y tracks the center of the map in pixels. However as rendering is
     // done in pixel coordinates the rendering origo is actually in the middle
@@ -215,9 +216,13 @@ void TransformState::updateCameraState() const {
     const double dy = 0.5 * worldSize - y;
 
     // Set camera orientation and move it to a proper distance from the map
-    camera.setOrientation(getRoll(), pitch, getBearing());
+    camera.setOrientation(getRoll(), getPitch(), getBearing());
 
-    vec3 cameraPosition = {{dx, dy, z}};
+    const vec3 forward = camera.forward();
+    const vec3 orbitPosition = {{-forward[0] * cameraToCenterDistance,
+                                 -forward[1] * cameraToCenterDistance,
+                                 -forward[2] * cameraToCenterDistance}};
+    vec3 cameraPosition = {{dx + orbitPosition[0], dy + orbitPosition[1], z + orbitPosition[2]}};
 
     cameraPosition[0] /= worldSize;
     cameraPosition[1] /= worldSize;
@@ -239,7 +244,7 @@ void TransformState::updateStateFromCamera() {
     double newBearing;
     double newPitch;
     double newRoll;
-    camera.getOrientation(newPitch, newBearing, newRoll);
+    camera.getOrientation(newRoll, newPitch, newBearing);
     newPitch = util::clamp(newPitch, minPitch, maxPitch);
 
     // Compute zoom level from the camera altitude
