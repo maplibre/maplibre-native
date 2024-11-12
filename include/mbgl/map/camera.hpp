@@ -81,7 +81,7 @@ struct CameraOptions {
 
     /** Camera roll, measured in degrees. */
     std::optional<double> roll;
-    
+
     /** Camera vertical field of view, measured in degrees. */
     std::optional<double> fov;
 };
