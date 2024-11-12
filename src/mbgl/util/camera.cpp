@@ -65,7 +65,7 @@ static vec3 toMercator(const LatLng& location, double altitudeMeters) noexcept {
              altitudeMeters * pixelsPerMeter / worldSize}};
 }
 
-static Quaternion orientationFromPitchBearing(double pitch, double bearing, double roll) noexcept {
+static Quaternion orientationFromRollPitchBearing(double roll, double pitch, double bearing) noexcept {
     // Both angles have to be negated to achieve CW rotation around the axis of rotation
     Quaternion rotBearing = Quaternion::fromAxisAngle({{0.0, 0.0, 1.0}}, -bearing);
     Quaternion rotPitch = Quaternion::fromAxisAngle({{1.0, 0.0, 0.0}}, -pitch);
@@ -177,8 +177,8 @@ void Camera::getOrientation(double& pitch, double& bearing, double& roll) const 
     roll = 0; // TODO
 }
 
-void Camera::setOrientation(double pitch, double bearing, double roll) noexcept {
-    orientation = orientationFromPitchBearing(pitch, bearing, roll);
+void Camera::setOrientation(double roll, double pitch, double bearing) noexcept {
+    orientation = orientationFromRollPitchBearing(roll, pitch, bearing);
     updateTransform(transform, orientation);
 }
 
@@ -198,7 +198,7 @@ std::optional<Quaternion> Camera::orientationFromFrame(const vec3& forward, cons
     const double pitch = std::atan2(std::sqrt(forward[0] * forward[0] + forward[1] * forward[1]), -forward[2]);
     const double roll = 0; // TODO
 
-    return util::orientationFromPitchBearing(pitch, bearing, roll);
+    return util::orientationFromRollPitchBearing(pitch, bearing, roll);
 }
 } // namespace util
 
@@ -243,7 +243,7 @@ void FreeCameraOptions::lookAtPoint(const LatLng& location, const std::optional<
 
 void FreeCameraOptions::setRollPitchBearing(double roll, double pitch, double bearing) noexcept {
     orientation =
-        util::orientationFromPitchBearing(util::deg2rad(pitch), util::deg2rad(bearing), util::deg2rad(roll)).m;
+        util::orientationFromRollPitchBearing(util::deg2rad(roll), util::deg2rad(pitch), util::deg2rad(bearing)).m;
 }
 
 } // namespace mbgl

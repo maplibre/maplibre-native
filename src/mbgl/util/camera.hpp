@@ -26,7 +26,7 @@ public:
 
     const Quaternion& getOrientation() const noexcept { return orientation; }
     void getOrientation(double& pitch, double& bearing, double& roll) const noexcept;
-    void setOrientation(double pitch, double bearing, double roll) noexcept;
+    void setOrientation(double roll, double pitch, double bearing) noexcept;
     void setOrientation(const Quaternion& orientation_) noexcept;
     void setPosition(const vec3& position) noexcept;
 
