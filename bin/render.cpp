@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
     map.getStyle().loadURL(style);
     map.jumpTo(CameraOptions()
                    .withCenter(LatLng{lat, lon})
-                   .withAlt(alt)
+                   .withCenterAltitude(alt)
                    .withZoom(zoom)
                    .withBearing(bearing)
                    .withPitch(pitch)
