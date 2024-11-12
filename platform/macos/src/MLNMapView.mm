@@ -88,7 +88,7 @@ static NSString * const MLNDefaultStyleMarkerSymbolName = @"default_marker";
 
 /// Prefix that denotes a sprite installed by MLNMapView, to avoid collisions
 /// with style-defined sprites.
-static NSString * const MLNAnnotationSpritePrefix = @"com.mapbox.sprites.";
+static NSString * const MLNAnnotationSpritePrefix = @"org.maplibre.sprites.";
 
 /// Slop area around the hit testing point, allowing for imprecise annotation selection.
 const CGFloat MLNAnnotationImagePaddingForHitTest = 4;
@@ -670,6 +670,11 @@ public:
 - (void)setPrefetchesTiles:(BOOL)prefetchesTiles
 {
     _mbglMap->setPrefetchZoomDelta(prefetchesTiles ? mbgl::util::DEFAULT_PREFETCH_ZOOM_DELTA : 0);
+}
+
+- (BOOL)prefetchesTiles
+{
+    return _mbglMap->getPrefetchZoomDelta() > 0 ? YES : NO;
 }
 
 - (mbgl::Renderer *)renderer {
@@ -2426,7 +2431,7 @@ public:
                            : NSMaxXEdge);
 
         // The following will do nothing if the positioning rect is not on-screen. See
-        // `-[MLNMapView updateAnnotationCallouts]` for presenting the callout when the selected
+        // ``MLNMapView/updateAnnotationCallouts`` for presenting the callout when the selected
         // annotation comes back on-screen.
         [callout showRelativeToRect:positioningRect ofView:self preferredEdge:edge];
     }

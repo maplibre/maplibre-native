@@ -8,6 +8,9 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/projection.hpp>
 #include <mbgl/util/tile_coordinate.hpp>
+#include <numbers>
+
+using namespace std::numbers;
 
 constexpr double MAX_PITCH = 1.55;
 
@@ -15,7 +18,7 @@ namespace mbgl {
 
 namespace {
 LatLng latLngFromMercator(Point<double> mercatorCoordinate, LatLng::WrapMode wrapMode = LatLng::WrapMode::Unwrapped) {
-    return {util::rad2deg(2 * std::atan(std::exp(M_PI - mercatorCoordinate.y * util::M2PI)) - M_PI_2),
+    return {util::rad2deg(2 * std::atan(std::exp(pi - mercatorCoordinate.y * 2 * pi)) - (pi / 2)),
             mercatorCoordinate.x * 360.0 - 180.0,
             wrapMode};
 }
@@ -385,11 +388,11 @@ void TransformState::setNorthOrientation(const NorthOrientation val) {
 double TransformState::getNorthOrientationAngle() const {
     double angleOrientation = 0;
     if (orientation == NorthOrientation::Rightwards) {
-        angleOrientation += M_PI / 2.0f;
+        angleOrientation += pi / 2;
     } else if (orientation == NorthOrientation::Downwards) {
-        angleOrientation += M_PI;
+        angleOrientation += pi;
     } else if (orientation == NorthOrientation::Leftwards) {
-        angleOrientation -= M_PI / 2.0f;
+        angleOrientation -= pi / 2;
     }
     return angleOrientation;
 }
@@ -446,7 +449,7 @@ void TransformState::setEdgeInsets(const EdgeInsets& val) {
 // MARK: - Position
 
 LatLng TransformState::getLatLng(LatLng::WrapMode wrapMode) const {
-    return {util::rad2deg(2 * std::atan(std::exp(y / Cc)) - 0.5 * M_PI), -x / Bc, wrapMode};
+    return {util::rad2deg(2 * std::atan(std::exp(y / Cc)) - 0.5 * pi), -x / Bc, wrapMode};
 }
 
 double TransformState::getAltM() const {

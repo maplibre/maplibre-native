@@ -7,6 +7,8 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/change_request.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/gfx/texture2d.hpp>
+#include <mbgl/gfx/context.hpp>
 
 #include <array>
 #include <memory>
@@ -31,19 +33,35 @@ public:
 
 class CustomDrawableLayerHost::Interface {
 public:
+    enum class LineShaderType {
+        Classic,
+        MetalWideVector
+    };
+
     struct LineOptions {
-        Color color;
+        gfx::PolylineGeneratorOptions geometry;
         float blur = 0.f;
         float opacity = 1.f;
         float gapWidth = 0.f;
         float offset = 0.f;
         float width = 1.f;
-        gfx::PolylineGeneratorOptions geometry;
+        LineShaderType shaderType = LineShaderType::Classic;
+        Color color;
     };
 
     struct FillOptions {
         Color color;
         float opacity = 1.f;
+    };
+
+    struct SymbolOptions {
+        Size size;
+        gfx::Texture2DPtr texture;
+        std::array<float, 2> anchor{0.5f, 0.5f};
+        std::array<std::array<float, 2>, 2> textureCoordinates{{{0, 0}, {1, 1}}};
+        float angleDegrees{.0f};
+        bool scaleWithMap{false};
+        bool pitchWithMap{false};
     };
 
 public:
@@ -85,14 +103,43 @@ public:
     void setFillOptions(const FillOptions& options);
 
     /**
+     * @brief Set the Symbol options
+     *
+     * @param options
+     */
+    void setSymbolOptions(const SymbolOptions& options);
+
+    /**
      * @brief Add a polyline
      *
-     * @param coordinates
-     * @param options Polyline options
+     * @param coordinates in tile range
+     * @return true if the polyline was added
      */
-    void addPolyline(const GeometryCoordinates& coordinates);
+    bool addPolyline(const GeometryCoordinates& coordinates);
 
-    void addFill(const GeometryCollection& geometry);
+    /**
+     * @brief Add a polyline
+     *
+     * @param coordinates Geographic coordinates
+     * @return true if the polyline was added
+     */
+    bool addPolyline(const LineString<double>& coordinates);
+
+    /**
+     * @brief Add a multipolygon area fill
+     *
+     * @param geometry a collection of rings with optional holes
+     * @return true if the fill was added
+     */
+    bool addFill(const GeometryCollection& geometry);
+
+    /**
+     * @brief Add a symbol
+     *
+     * @param point
+     * @return true if the symbol was added
+     */
+    bool addSymbol(const GeometryCoordinate& point);
 
     /**
      * @brief Finish the current drawable building session
@@ -112,16 +159,33 @@ public:
 
 private:
     gfx::ShaderPtr lineShaderDefault() const;
+    gfx::ShaderPtr lineShaderWideVector() const;
     gfx::ShaderPtr fillShaderDefault() const;
+    gfx::ShaderPtr symbolShaderDefault() const;
+
+    enum class BuilderType {
+        None,
+        LineClassic,
+        LineWideVector,
+        Fill,
+        Symbol
+    };
 
     std::unique_ptr<gfx::DrawableBuilder> createBuilder(const std::string& name, gfx::ShaderPtr shader) const;
+    bool updateBuilder(BuilderType type, const std::string& name, gfx::ShaderPtr shader);
+
+    std::unique_ptr<gfx::DrawableBuilder> builder;
+    std::optional<OverscaledTileID> tileID;
 
     gfx::ShaderPtr lineShader;
     gfx::ShaderPtr fillShader;
-    std::unique_ptr<gfx::DrawableBuilder> builder;
-    std::optional<OverscaledTileID> tileID;
+    gfx::ShaderPtr symbolShader;
+
     LineOptions lineOptions;
     FillOptions fillOptions;
+    SymbolOptions symbolOptions;
+
+    BuilderType builderType{BuilderType::None};
 };
 
 class CustomDrawableLayer final : public Layer {

@@ -14,18 +14,19 @@ struct ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 5> attributes;
     static const std::array<UniformBlockInfo, 1> uniforms;
+    static const std::array<AttributeInfo, 5> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(0)]];
-    short2 anchor_pos [[attribute(1)]];
-    short2 extrude [[attribute(2)]];
-    ushort2 placed [[attribute(3)]];
-    float2 shift [[attribute(4)]];
+    short2 pos [[attribute(2)]];
+    short2 anchor_pos [[attribute(3)]];
+    short2 extrude [[attribute(4)]];
+    ushort2 placed [[attribute(5)]];
+    float2 shift [[attribute(6)]];
 };
 
 struct FragmentStage {
@@ -37,17 +38,18 @@ struct FragmentStage {
 struct alignas(16) CollisionBoxUBO {
     float4x4 matrix;
     float2 extrude_scale;
-    float camera_to_center_distance;
+    float overscale_factor;
     float pad1;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const CollisionBoxUBO& drawable [[buffer(5)]]) {
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
+                                device const CollisionBoxUBO& drawable [[buffer(1)]]) {
 
     float4 projectedPoint = drawable.matrix * float4(float2(vertx.anchor_pos), 0, 1);
     float camera_to_anchor_distance = projectedPoint.w;
     float collision_perspective_ratio = clamp(
-        0.5 + 0.5 * (drawable.camera_to_center_distance / camera_to_anchor_distance),
+        0.5 + 0.5 * (paintParams.camera_to_center_distance / camera_to_anchor_distance),
         0.0, // Prevents oversized near-field boxes in pitched/overzoomed tiles
         4.0);
 
@@ -65,7 +67,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const CollisionBoxUBO& drawable [[buffer(5)]]) {
+                            device const CollisionBoxUBO& drawable [[buffer(1)]]) {
 
     float alpha = 0.5;
 

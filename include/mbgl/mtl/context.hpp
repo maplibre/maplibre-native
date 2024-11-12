@@ -9,6 +9,7 @@
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/mtl/buffer_resource.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
+#include <mbgl/mtl/uniform_buffer.hpp>
 #include <mbgl/util/noncopyable.hpp>
 #include <mbgl/util/containers.hpp>
 
@@ -65,7 +66,8 @@ public:
     BufferResource createBuffer(
         const void* data, std::size_t size, gfx::BufferUsageType usage, bool isIndexBuffer, bool persistent) const;
 
-    UniqueShaderProgram createProgram(std::string name,
+    UniqueShaderProgram createProgram(shaders::BuiltIn shaderID,
+                                      std::string name,
                                       std::string_view source,
                                       std::string_view vertexName,
                                       std::string_view fragmentName,
@@ -126,10 +128,7 @@ public:
     virtual bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&,
                                               const void* data,
                                               std::size_t size,
-                                              bool persistent);
-
-    /// Get an empty buffer to act as a placeholder
-    const BufferResource& getEmptyBuffer();
+                                              bool persistent) override;
 
     /// Get a reusable buffer containing the standard fixed tile vertices (+/- `util::EXTENT`)
     const BufferResource& getTileVertexBuffer();
@@ -143,6 +142,18 @@ public:
     bool renderTileClippingMasks(gfx::RenderPass& renderPass,
                                  RenderStaticData& staticData,
                                  const std::vector<shaders::ClipUBO>& tileUBOs);
+
+    /// Get the global uniform buffers
+    const gfx::UniformBufferArray& getGlobalUniformBuffers() const override { return globalUniformBuffers; };
+
+    /// Get the mutable global uniform buffer array
+    gfx::UniformBufferArray& mutableGlobalUniformBuffers() override { return globalUniformBuffers; };
+
+    /// Bind the global uniform buffers
+    void bindGlobalUniformBuffers(gfx::RenderPass&) const noexcept override;
+
+    /// Unbind the global uniform buffers
+    void unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept override {}
 
 private:
     RendererBackend& backend;
@@ -160,6 +171,8 @@ private:
     std::optional<BufferResource> clipMaskUniformsBuffer;
     bool clipMaskUniformsBufferUsed = false;
     const gfx::Renderable* stencilStateRenderable = nullptr;
+
+    UniformBufferArray globalUniformBuffers;
 };
 
 } // namespace mtl

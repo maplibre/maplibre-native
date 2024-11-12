@@ -42,6 +42,8 @@ public:
 
     Milliseconds processRunnables();
 
+    void waitForEmpty();
+
     ALooper* loop = nullptr;
     RunLoop* runLoop = nullptr;
     std::atomic<bool> running;
@@ -57,6 +59,7 @@ private:
     std::unique_ptr<Thread<Alarm>> alarm;
 
     std::mutex mutex;
+    std::condition_variable cvEmpty;
     std::list<Runnable*> runnables;
 };
 

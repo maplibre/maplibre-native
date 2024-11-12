@@ -35,6 +35,8 @@ public:
                 ->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
         }
 
+        // On iOS simulator, the depth target is PixelFormatDepth32Float_Stencil8
+#if !TARGET_OS_SIMULATOR
         if (stencil) {
             stencilTexture = context.createTexture2D();
             stencilTexture->setSize(size);
@@ -44,6 +46,8 @@ public:
             static_cast<Texture2D*>(stencilTexture.get())
                 ->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
         }
+#endif
+
         context.renderingStats().numFrameBuffers++;
     }
 

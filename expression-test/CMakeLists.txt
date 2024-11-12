@@ -26,7 +26,7 @@ target_link_libraries(
         mbgl-compiler-options
 )
 
-set_property(TARGET mbgl-expression-test PROPERTY FOLDER Executables)
+set_property(TARGET mbgl-expression-test PROPERTY FOLDER MapLibre)
 
 string(RANDOM LENGTH 5 ALPHABET 0123456789 MLN_EXPRESSION_TEST_SEED)
 

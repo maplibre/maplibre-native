@@ -24,7 +24,6 @@
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/util/string_indexer.hpp>
 #endif
 
 namespace mbgl {
@@ -43,6 +42,7 @@ inline const HeatmapLayer::Impl& impl_cast(const Immutable<Layer::Impl>& impl) {
 RenderHeatmapLayer::RenderHeatmapLayer(Immutable<HeatmapLayer::Impl> _impl)
     : RenderLayer(makeMutable<HeatmapLayerProperties>(std::move(_impl))),
       unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
+    styleDependencies = unevaluated.getDependencies();
     colorRamp = std::make_shared<PremultipliedImage>(Size(256, 1));
 }
 
@@ -63,8 +63,10 @@ void RenderHeatmapLayer::layerChanged(const TransitionParameters& parameters,
 #endif
 
 void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    auto properties = makeMutable<HeatmapLayerProperties>(staticImmutableCast<HeatmapLayer::Impl>(baseImpl),
-                                                          unevaluated.evaluate(parameters));
+    const auto previousProperties = staticImmutableCast<HeatmapLayerProperties>(evaluatedProperties);
+    auto properties = makeMutable<HeatmapLayerProperties>(
+        staticImmutableCast<HeatmapLayer::Impl>(baseImpl),
+        unevaluated.evaluate(parameters, previousProperties->evaluated));
 
     passes = (properties->evaluated.get<style::HeatmapOpacity>() > 0) ? (RenderPass::Translucent | RenderPass::Pass3D)
                                                                       : RenderPass::None;
@@ -128,7 +130,7 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
 
             const auto extrudeScale = tile.id.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));
 
-            const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+            auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
 
             const auto allUniformValues = HeatmapProgram::computeAllUniformValues(
                 HeatmapProgram::LayoutUniformValues{
@@ -278,10 +280,6 @@ namespace {
 constexpr auto HeatmapShaderGroupName = "HeatmapShader";
 constexpr auto HeatmapTextureShaderGroupName = "HeatmapTextureShader";
 
-const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
-const StringIdentity idTexImageName = stringIndexer().get("u_image");
-const StringIdentity idTexColorRampName = stringIndexer().get("u_color_ramp");
-
 } // namespace
 
 using namespace shaders;
@@ -292,8 +290,6 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
                                 const std::shared_ptr<UpdateParameters>&,
                                 [[maybe_unused]] const RenderTree& renderTree,
                                 UniqueChangeRequestVec& changes) {
-    std::unique_lock<std::mutex> guard(mutex);
-
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -349,9 +345,9 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         [&](gfx::Drawable& drawable) { return drawable.getTileID() && !hasRenderTile(*drawable.getTileID()); });
 
     const auto& evaluated = static_cast<const HeatmapLayerProperties&>(*evaluatedProperties).evaluated;
-    std::optional<mbgl::unordered_set<StringIdentity>> propertiesAsUniforms;
+    std::optional<StringIDSetsPair> propertiesAsUniforms;
 #if !defined(NDEBUG)
-    std::optional<mbgl::unordered_set<StringIdentity>> previousPropertiesAsUniforms;
+    std::optional<StringIDSetsPair> previousPropertiesAsUniforms;
 #endif
 
     gfx::ShaderPtr heatmapShader;
@@ -365,9 +361,9 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        const auto& bucket = static_cast<HeatmapBucket&>(*renderData->bucket);
+        auto& bucket = static_cast<HeatmapBucket&>(*renderData->bucket);
         const auto vertexCount = bucket.vertices.elements();
-        const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+        auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
 
         const auto prevBucketID = getRenderTileBucketID(tileID);
         if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
@@ -376,37 +372,14 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         }
         setRenderTileBucketID(tileID, bucket.getID());
 
-        const float zoom = static_cast<float>(state.getZoom());
-
-        gfx::UniformBufferPtr interpolateBuffer;
-        const auto getInterpolateBuffer = [&]() {
-            if (!interpolateBuffer) {
-                const HeatmapInterpolateUBO interpolateUBO = {
-                    /* .weight_t = */ std::get<0>(paintPropertyBinders.get<HeatmapWeight>()->interpolationFactor(zoom)),
-                    /* .radius_t = */ std::get<0>(paintPropertyBinders.get<HeatmapRadius>()->interpolationFactor(zoom)),
-                    /* .padding = */ {0}};
-                interpolateBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO), false);
-            }
-            return interpolateBuffer;
-        };
-
-        const auto updatedCount = tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+        auto updateExisting = [&](gfx::Drawable& drawable) {
             if (drawable.getLayerTweaker() != layerTweaker) {
                 // This drawable was produced on a previous style/bucket, and should not be updated.
-                return;
+                return false;
             }
-
-            // We assume vertex attributes don't change, and so don't update them to avoid re-uploading
-            // drawable.setVertexAttributes(heatmapVertexAttrs);
-
-            auto& uniforms = drawable.mutableUniformBuffers();
-
-            if (auto buffer = getInterpolateBuffer()) {
-                uniforms.set(idHeatmapInterpolateUBO, std::move(buffer));
-            }
-        });
-
-        if (updatedCount > 0) {
+            return true;
+        };
+        if (updateTile(renderPass, tileID, std::move(updateExisting))) {
             continue;
         }
 
@@ -415,13 +388,14 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         }
 #if !defined(NDEBUG)
         else {
-            propertiesAsUniforms->clear();
+            propertiesAsUniforms->first.clear();
+            propertiesAsUniforms->second.clear();
         }
 #endif
 
         auto heatmapVertexAttrs = context.createVertexAttributeArray();
         heatmapVertexAttrs->readDataDrivenPaintProperties<HeatmapWeight, HeatmapRadius>(
-            paintPropertyBinders, evaluated, *propertiesAsUniforms);
+            paintPropertyBinders, evaluated, *propertiesAsUniforms, idHeatmapWeightVertexAttribute);
 
 #if !defined(NDEBUG)
         // We assume the properties are the same across tiles.
@@ -439,7 +413,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
 
-        if (const auto& attr = heatmapVertexAttrs->add(idVertexAttribName)) {
+        if (const auto& attr = heatmapVertexAttrs->set(idHeatmapPosVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(HeatmapLayoutVertex, a1),
                                    /*vertexOffset=*/0,
@@ -463,13 +437,8 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         for (auto& drawable : heatmapBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
             drawable->setLayerTweaker(layerTweaker);
-
-            auto& uniforms = drawable->mutableUniformBuffers();
-
-            if (auto buffer = getInterpolateBuffer()) {
-                uniforms.set(idHeatmapInterpolateUBO, std::move(buffer));
-            }
-
+            drawable->setBinders(renderData->bucket, &paintPropertyBinders);
+            drawable->setRenderTile(renderTilesOwner, &tile);
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;
         }
@@ -509,7 +478,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     const auto textureVertexCount = sharedTextureVertices->elements();
 
     auto textureVertexAttrs = context.createVertexAttributeArray();
-    if (const auto& attr = textureVertexAttrs->add(idVertexAttribName)) {
+    if (const auto& attr = textureVertexAttrs->set(idHeatmapPosVertexAttribute)) {
         attr->setSharedRawData(sharedTextureVertices,
                                offsetof(HeatmapLayoutVertex, a1),
                                /*vertexOffset=*/0,
@@ -531,18 +500,13 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     heatmapTextureBuilder->setSegments(
         gfx::Triangles(), RenderStaticData::quadTriangleIndices().vector(), segments.data(), segments.size());
 
-    auto imageLocation = heatmapTextureShader->getSamplerLocation(idTexImageName);
-    if (imageLocation.has_value()) {
-        heatmapTextureBuilder->setTexture(renderTarget->getTexture(), imageLocation.value());
-    }
-    auto colorRampLocation = heatmapTextureShader->getSamplerLocation(idTexColorRampName);
-    if (colorRampLocation.has_value()) {
-        std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
-        texture->setImage(colorRamp);
-        texture->setSamplerConfiguration(
-            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-        heatmapTextureBuilder->setTexture(std::move(texture), colorRampLocation.value());
-    }
+    heatmapTextureBuilder->setTexture(renderTarget->getTexture(), idHeatmapImageTexture);
+
+    std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
+    texture->setImage(colorRamp);
+    texture->setSamplerConfiguration(
+        {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+    heatmapTextureBuilder->setTexture(std::move(texture), idHeatmapColorRampTexture);
 
     heatmapTextureBuilder->flush(context);
 

@@ -1,12 +1,12 @@
-#import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
+#import <Foundation/Foundation.h>
 
 #import "MLNFoundation.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- The `MLNCoordinateFormatter` class provides properly formatted descriptions of
+ The ``MLNCoordinateFormatter`` class provides properly formatted descriptions of
  geographic coordinate pairs. Use this class to create localized coordinate
  strings when displaying location information to users.
  */
@@ -47,9 +47,11 @@ MLN_EXPORT
 - (NSString *)stringFromCoordinate:(CLLocationCoordinate2D)coordinate;
 
 /**
- This method is not supported for the `MLNCoordinateFormatter` class.
+ This method is not supported for the ``MLNCoordinateFormatter`` class.
  */
-- (BOOL)getObjectValue:(out id __nullable * __nullable)obj forString:(NSString *)string errorDescription:(out NSString * __nullable * __nullable)error;
+- (BOOL)getObjectValue:(out id __nullable *__nullable)obj
+             forString:(NSString *)string
+      errorDescription:(out NSString *__nullable *__nullable)error;
 
 @end
 

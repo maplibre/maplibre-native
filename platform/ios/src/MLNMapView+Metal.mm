@@ -52,8 +52,10 @@ public:
             commandQueue = [mtlView.device newCommandQueue];
         }
 
-        commandBuffer = [commandQueue commandBuffer];
-        commandBufferPtr = NS::RetainPtr((__bridge MTL::CommandBuffer*)commandBuffer);
+        if (!commandBuffer) {
+            commandBuffer = [commandQueue commandBuffer];
+            commandBufferPtr = NS::RetainPtr((__bridge MTL::CommandBuffer*)commandBuffer);
+        }
     }
 
     const mbgl::mtl::RendererBackend& getBackend() const override { return backend; }
@@ -77,12 +79,16 @@ public:
 
     void swap() override {
         id<CAMetalDrawable> currentDrawable = [mtlView currentDrawable];
-        [commandBuffer presentDrawable:currentDrawable];
-        [commandBuffer commit];
-
-        // Un-comment for synchronous, which can help troubleshoot rendering problems,
-        // particularly those related to resource tracking and multiple queued buffers.
-        //[commandBuffer waitUntilCompleted];
+        if (currentDrawable) {
+            if (presentsWithTransaction) {
+                [commandBuffer commit];
+                [commandBuffer waitUntilCompleted];
+                [currentDrawable present];
+            } else {
+                [commandBuffer presentDrawable:currentDrawable];
+                [commandBuffer commit];
+            }
+        }
 
         commandBuffer = nil;
         commandBufferPtr.reset();
@@ -106,6 +112,7 @@ public:
     MTKView *mtlView = nil;
     id <MTLCommandBuffer> commandBuffer;
     id <MTLCommandQueue> commandQueue;
+    bool presentsWithTransaction = false;
 
     // We count how often the context was activated/deactivated so that we can truly deactivate it
     // after the activation count drops to 0.
@@ -127,10 +134,10 @@ void MLNMapViewMetalImpl::setOpaque(const bool opaque) {
 }
 
 void MLNMapViewMetalImpl::setPresentsWithTransaction(const bool value) {
-    presentsWithTransaction = value;
+    auto& resource = getResource<MLNMapViewMetalRenderableResource>();
+    resource.presentsWithTransaction = value;
 
     if (@available(iOS 13.0, *)) {
-        auto& resource = getResource<MLNMapViewMetalRenderableResource>();
         if (CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer)) {
             metalLayer.presentsWithTransaction = value;
         }
@@ -170,7 +177,7 @@ void MLNMapViewMetalImpl::createView() {
     resource.mtlView.enableSetNeedsDisplay = YES;
     if (@available(iOS 13.0, *)) {
         CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer);
-        metalLayer.presentsWithTransaction = presentsWithTransaction;
+        metalLayer.presentsWithTransaction = resource.presentsWithTransaction;
     }
 
     [mapView insertSubview:resource.mtlView atIndex:0];
@@ -218,4 +225,15 @@ void MLNMapViewMetalImpl::layoutChanged() {
     const auto scaleFactor = contentScaleFactor();
     size = { static_cast<uint32_t>(mapView.bounds.size.width * scaleFactor),
              static_cast<uint32_t>(mapView.bounds.size.height * scaleFactor) };
+}
+
+MLNBackendResource MLNMapViewMetalImpl::getObject() {
+    auto& resource = getResource<MLNMapViewMetalRenderableResource>();
+    auto renderPassDescriptor = resource.getRenderPassDescriptor().get();
+    return {
+        resource.mtlView,
+        resource.mtlView.device,
+        [MTLRenderPassDescriptor renderPassDescriptor],
+        resource.commandBuffer
+    };
 }

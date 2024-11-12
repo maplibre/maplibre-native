@@ -2,10 +2,19 @@ name: android-release
 
 on:
   workflow_dispatch:
+    inputs:
+      renderer:
+        description: "Select renderering backend"
+        required: true
+        default: "OpenGL"
+        type: choice
+        options:
+          - OpenGL
+          - Vulkan
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: platform/android
@@ -19,12 +28,27 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Map renderer input
+        id: backend_lowercase
+        run: |
+          if [ "${{ github.event.inputs.renderer }}" = "OpenGL" ]; then
+            echo "backend_lowercase=drawable" >> "$GITHUB_ENV"
+          elif [ "${{ github.event.inputs.renderer }}" = "Vulkan" ]; then
+            echo "backend_lowercase=vulkan" >> "$GITHUB_ENV"
+          fi
+
       - run: echo "cmake.dir=$(dirname "$(dirname "$(command -v cmake)")")" >> local.properties
 
       - uses: actions/setup-java@v4
         with:
           distribution: "temurin"
           java-version: "17"
+
+      - name: Get CMake and Ninja
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: 3.24.1
+          ninjaVersion: latest
 
       - name: Ensure source code revision
         run: scripts/ensure-code-revision.sh
@@ -89,38 +113,49 @@ jobs:
           RELEASE_VERSION="$( git describe --tags --match=android-v*.*.* --abbrev=0 | sed 's/^android-v//' )"
           echo "Latest version from tag: $RELEASE_VERSION"
           if [ -n "$RELEASE_VERSION" ]; then
-            sed -i -e "s/^VERSION_NAME=.*/VERSION_NAME=${RELEASE_VERSION}/" MapboxGLAndroidSDK/gradle.properties
-            echo "MapboxGLAndroidSDK/gradle.properties:"
-            cat MapboxGLAndroidSDK/gradle.properties
+            sed -i -e "s/^VERSION_NAME=.*/VERSION_NAME=${RELEASE_VERSION}/" MapLibreAndroid/gradle.properties
+            echo "MapLibreAndroid/gradle.properties:"
+            cat MapLibreAndroid/gradle.properties
           fi
         shell: bash
 
       - name: Build package
         run: make apackage
+        env:
+          RENDERER: ${{ env.backend_lowercase }}
 
       - name: Build release Test App
         run: |
           MAPLIBRE_DEVELOPER_CONFIG_XML='${{ secrets.MAPLIBRE_DEVELOPER_CONFIG_XML }}'
           if [ -n "${MAPLIBRE_DEVELOPER_CONFIG_XML}" ]; then
-            echo "${MAPLIBRE_DEVELOPER_CONFIG_XML}" > MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml
+            echo "${MAPLIBRE_DEVELOPER_CONFIG_XML}" > MapLibreAndroidTestApp/src/main/res/values/developer-config.xml
             make android
           else
             echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, skipping apk build..."
           fi
         shell: bash
 
-      - name: Generate javadoc
-        run: make android-javadoc
-
       # create github release
       - name: Prepare release
         id: prepare_release
         run: |
           RELEASE_NOTES_PATH="${PWD}/release_notes.txt"
-          ./scripts/release-notes.js > "${RELEASE_NOTES_PATH}"
+          node scripts/release-notes.mjs > "${RELEASE_NOTES_PATH}"
           echo release_notes="${RELEASE_NOTES_PATH}" >> "$GITHUB_OUTPUT"
           echo version_tag="$( git describe --tags --match=android-v*.*.* --abbrev=0 )" >> "$GITHUB_OUTPUT"
         shell: bash
+
+      - name: Check if version is valid semver
+        id: check_version
+        run: |
+          version_tag="${{ steps.prepare_release.outputs.version_tag }}"
+          if [[ $version_tag =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Valid semver: $version_tag"
+            echo "prerelease=false" >> "$GITHUB_ENV"
+          else
+            echo "Invalid semver: $version_tag"
+            echo "prerelease=true" >> "$GITHUB_ENV"
+          fi
 
       - name: Create release
         id: create_release
@@ -132,7 +167,7 @@ jobs:
           release_name: ${{steps.prepare_release.outputs.version_tag }}
           body_path: ${{ steps.prepare_release.outputs.release_notes }}
           draft: false
-          prerelease: false
+          prerelease: ${{ env.prerelease }}
 
       - name: Upload aar
         id: upload-release-asset
@@ -141,9 +176,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/MapboxGLAndroidSDK/build/outputs/aar/MapboxGLAndroidSDK-release.aar
-          asset_name: MapboxGLAndroidSDK-release.aar
+          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-${{ env.backend_lowercase }}-release.aar
+          asset_name: MapLibreAndroid-release.aar
           asset_content_type: application/zip
+
+      - name: Upload debug symbols
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: platform/android/build/debug-symbols.tar.gz
+          asset_name: debug-symbols.tar.gz
+          asset_content_type: application/gzip
 
       - name: Clean release
         run: |
@@ -165,3 +210,4 @@ jobs:
           SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
           SONATYPE_STAGING_PROFILE_ID: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}
+          RENDERER: ${{ env.backend_lowercase }}

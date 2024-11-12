@@ -15,7 +15,6 @@
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 #include <Foundation/NSSharedPtr.hpp>
 #include <Metal/MTLVertexDescriptor.hpp>
@@ -37,6 +36,7 @@ public:
     std::vector<UniqueDrawSegment> segments;
 
     MTLVertexDescriptorPtr vertexDesc;
+    std::size_t vertexDescHash{0};
 
     /*
         std::vector<TextureID> textures;
@@ -45,7 +45,8 @@ public:
     std::size_t vertexCount = 0;
     gfx::AttributeDataType vertexType = gfx::AttributeDataType::Invalid;
 
-    std::vector<gfx::UniqueVertexBufferResource> attributeBuffers;
+    gfx::AttributeBindingArray attributeBindings;
+    gfx::AttributeBindingArray instanceBindings;
 
     UniformBufferArray uniformBuffers;
 
@@ -53,11 +54,9 @@ public:
     gfx::StencilMode stencilMode;
     gfx::CullFaceMode cullFaceMode;
     // GLfloat pointSize = 0.0f;
-    StringIdentity idVertexAttrName = stringIndexer().get("a_pos");
+    std::size_t vertexAttrId = 0;
 
     VertexBufferResource* noBindingBuffer = nullptr;
-
-    gfx::AttributeBindingArray attributeBindings;
 
     MTLRenderPipelineStatePtr pipelineState;
 

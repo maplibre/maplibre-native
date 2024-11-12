@@ -5,7 +5,6 @@
 #include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/util/string_indexer.hpp>
 #include <mbgl/gfx/gfx_types.hpp>
 
 namespace mbgl {
@@ -13,7 +12,7 @@ namespace gfx {
 
 DrawableBuilder::DrawableBuilder(std::string name_)
     : name(std::move(name_)),
-      vertexAttrNameId(stringIndexer().get("a_pos")),
+      vertexAttrId(0),
       renderPass(mbgl::RenderPass::Opaque),
       impl(std::make_unique<Impl>()) {}
 
@@ -45,6 +44,9 @@ void DrawableBuilder::flush(gfx::Context& context) {
         if (Impl::Mode::Polylines == impl->getMode()) {
             // setup for polylines
             impl->setupForPolylines(context, *this);
+        } else if (Impl::Mode::WideVectorLocal == impl->getMode() || Impl::Mode::WideVectorGlobal == impl->getMode()) {
+            // setup for wide vectors
+            impl->setupForWideVectors(context, *this);
         }
 
         const auto& draw = getCurrentDrawable(/*createIfNone=*/true);
@@ -63,6 +65,7 @@ void DrawableBuilder::flush(gfx::Context& context) {
         draw->setShader(shader);
         draw->setTextures(textures);
         draw->setTweakers(tweakers);
+        draw->setOrigin(origin);
 
         if (vertexAttrs) {
             draw->setVertexAttributes(vertexAttrs);
@@ -70,10 +73,17 @@ void DrawableBuilder::flush(gfx::Context& context) {
             draw->setVertexAttributes(context.createVertexAttributeArray());
         }
 
+        if (instanceAttrs) {
+            draw->setInstanceAttributes(instanceAttrs);
+        }
+
         init();
 
         // reset mode
         impl->setMode(Impl::Mode::Custom);
+
+        // reset origin
+        origin.reset();
     }
     if (currentDrawable) {
         drawables.emplace_back(std::move(currentDrawable));
@@ -102,8 +112,18 @@ void DrawableBuilder::resetDrawPriority(DrawPriority value) {
     }
 }
 
-void DrawableBuilder::setTexture(const std::shared_ptr<gfx::Texture2D>& texture, int32_t location) {
-    textures.insert(std::make_pair(location, gfx::Texture2DPtr{})).first->second = std::move(texture);
+static const gfx::Texture2DPtr noTexture;
+
+const gfx::Texture2DPtr& DrawableBuilder::getTexture(size_t id) const {
+    return (id < textures.size()) ? textures[id] : noTexture;
+}
+
+void DrawableBuilder::setTexture(const std::shared_ptr<gfx::Texture2D>& texture, size_t id) {
+    assert(id < textures.size());
+    if (id >= textures.size()) {
+        return;
+    }
+    textures[id] = std::move(texture);
 }
 
 void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
@@ -269,6 +289,24 @@ void DrawableBuilder::addPolyline(const GeometryCoordinates& coordinates,
 
     // append polyline
     impl->addPolyline(*this, coordinates, options);
+}
+
+void DrawableBuilder::addWideVectorPolylineLocal(const GeometryCoordinates& coordinates,
+                                                 const gfx::PolylineGeneratorOptions& options) {
+    // mark the current mode
+    if (!impl->checkAndSetMode(Impl::Mode::WideVectorLocal)) return;
+
+    // append polyline
+    impl->addWideVectorPolylineLocal(*this, coordinates, options);
+}
+
+void DrawableBuilder::addWideVectorPolylineGlobal(const LineString<double>& coordinates,
+                                                  const gfx::PolylineGeneratorOptions& options) {
+    // mark the current mode
+    if (!impl->checkAndSetMode(Impl::Mode::WideVectorGlobal)) return;
+
+    // append polyline
+    origin = impl->addWideVectorPolylineGlobal(*this, coordinates, options);
 }
 
 } // namespace gfx

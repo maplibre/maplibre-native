@@ -1,6 +1,6 @@
-#import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import <CoreLocation/CoreLocation.h>
+#import <Foundation/Foundation.h>
 
 #import "MLNFoundation.h"
 #import "MLNTypes.h"
@@ -11,18 +11,18 @@ NS_ASSUME_NONNULL_BEGIN
  The attribution info is represented in the longest format available.
  */
 typedef NS_ENUM(NSUInteger, MLNAttributionInfoStyle) {
-    /**
-     Specifies a short attribution info style.
-     */
-    MLNAttributionInfoStyleShort = 1,
-    /**
-     Specifies a medium attribution info style.
-     */
-    MLNAttributionInfoStyleMedium,
-    /**
-     Specifies a long attribution info style.
-     */
-    MLNAttributionInfoStyleLong
+  /**
+   Specifies a short attribution info style.
+   */
+  MLNAttributionInfoStyleShort = 1,
+  /**
+   Specifies a medium attribution info style.
+   */
+  MLNAttributionInfoStyleMedium,
+  /**
+   Specifies a long attribution info style.
+   */
+  MLNAttributionInfoStyleLong
 };
 
 /**
@@ -66,12 +66,12 @@ MLN_EXPORT
 
 /**
  Returns a copy of the current `title` formatted accordingly to `style`.
- 
- Example: If the `style` property is set to `MLNAttributionInfoStyleShort` and the
- `title` property is set to `OpenStreetMap`, then this method returns `OSM`.
- 
+
+ Example: If the `style` property is set to ``MLNAttributionInfoStyle/MLNAttributionInfoStyleShort``
+ and the `title` property is set to `OpenStreetMap`, then this method returns `OSM`.
+
  @param style The attribution info style.
- 
+
  @return The `NSAttributedString` styled title.
  */
 - (NSAttributedString *)titleWithStyle:(MLNAttributionInfoStyle)style;

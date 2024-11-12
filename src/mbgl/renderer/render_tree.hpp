@@ -13,8 +13,8 @@
 
 namespace mbgl {
 
-class PaintParameters;
 class PatternAtlas;
+class PaintParameters;
 
 namespace gfx {
 class UploadPass;

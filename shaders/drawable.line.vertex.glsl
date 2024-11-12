@@ -9,27 +9,21 @@
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
-layout (std140) uniform LineDynamicUBO {
+layout (std140) uniform GlobalPaintParamsUBO {
+    highp vec2 u_pattern_atlas_texsize;
     highp vec2 u_units_to_pixels;
-    lowp float pad0, pad1;
+    highp vec2 u_world_size;
+    highp float u_camera_to_center_distance;
+    highp float u_symbol_fade_change;
+    highp float u_aspect_ratio;
+    highp float u_pixel_ratio;
+    highp float global_pad1, global_pad2;
 };
 
-layout (std140) uniform LineUBO {
+layout (std140) uniform LineDrawableUBO {
     highp mat4 u_matrix;
     mediump float u_ratio;
-    lowp float pad2, pad3, pad4;
-};
-
-layout (std140) uniform LinePropertiesUBO {
-    highp vec4 u_color;
-    lowp float u_blur;
-    lowp float u_opacity;
-    mediump float u_gapwidth;
-    lowp float u_offset;
-    mediump float u_width;
-
-    highp float pad5;
-    highp vec2 pad6;
+    lowp float drawable_pad1, drawable_pad2, drawable_pad3;
 };
 
 layout (std140) uniform LineInterpolationUBO {
@@ -39,8 +33,19 @@ layout (std140) uniform LineInterpolationUBO {
     lowp float u_gapwidth_t;
     lowp float u_offset_t;
     lowp float u_width_t;
+    highp vec2 interp_pad1;
+};
 
-    highp vec2 pad7;
+layout (std140) uniform LineEvaluatedPropsUBO {
+    highp vec4 u_color;
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+    lowp float u_floorwidth;
+    highp float props_pad1;
+    highp float props_pad2;
 };
 
 out vec2 v_normal;

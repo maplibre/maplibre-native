@@ -1,11 +1,11 @@
-#import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
+#import <Foundation/Foundation.h>
 #import <TargetConditionals.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- The `MLNAnnotation` protocol is used to provide annotation-related information
+ The ``MLNAnnotation`` protocol is used to provide annotation-related information
  to a map view. To use this protocol, you adopt it in any custom objects that
  store or represent annotation data. Each object then serves as the source of
  information about a single map annotation and provides critical information,
@@ -16,12 +16,11 @@ NS_ASSUME_NONNULL_BEGIN
 
  An object that adopts this protocol must implement the `coordinate` property.
  The other methods of this protocol are optional.
- 
+
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/annotation-models/">
- Annotation models</a> and <a href="https://docs.mapbox.com/ios/maps/examples/annotation-views/">
- Annotation views</a> examples to learn how to add objects that follow the
- `MLNAnnotation` protocol.
+ TODO: Annotation models
+ TODO: Annotation views, learn how to add objects that follow the
+ ``MLNAnnotation`` protocol
  */
 @protocol MLNAnnotation <NSObject>
 

@@ -45,6 +45,8 @@ public:
 
     bool isReleased() const { return released; }
 
+    void reserve(std::size_t count) { v.reserve(count); }
+
     void extend(std::size_t n, const uint16_t val) {
         assert(!released);
         v.resize(v.size() + n, val);
@@ -108,9 +110,10 @@ public:
 
     template <class... Args>
     void emplace_back(Args&&... args) {
-        static_assert(sizeof...(args) == groupSize, "wrong buffer element count");
+        static_assert(sizeof...(args) % groupSize == 0, "wrong buffer element count");
         assert(!released);
         util::ignore({(v.emplace_back(std::forward<Args>(args)), 0)...});
+        dirty = true;
     }
 };
 

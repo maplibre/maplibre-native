@@ -53,7 +53,9 @@ public:
 
     unsigned long constantsMask() const override;
 
-    const HeatmapLayer::Impl& layerImpl() const;
+    expression::Dependency getDependencies() const noexcept override;
+
+    const HeatmapLayer::Impl& layerImpl() const noexcept;
     // Data members.
     HeatmapPaintProperties::PossiblyEvaluated evaluated;
 };

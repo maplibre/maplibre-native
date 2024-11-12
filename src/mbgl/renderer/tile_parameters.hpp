@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/map/mode.hpp>
+#include <mbgl/actor/scheduler.hpp>
 
 #include <memory>
 
@@ -22,9 +23,10 @@ public:
     std::shared_ptr<FileSource> fileSource;
     const MapMode mode;
     mapbox::base::WeakPtr<AnnotationManager> annotationManager;
-    ImageManager& imageManager;
-    GlyphManager& glyphManager;
+    std::shared_ptr<ImageManager> imageManager;
+    std::shared_ptr<GlyphManager> glyphManager;
     const uint8_t prefetchZoomDelta;
+    TaggedScheduler threadPool;
 };
 
 } // namespace mbgl

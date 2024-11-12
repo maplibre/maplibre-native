@@ -15,13 +15,14 @@
  will also be picked up by xcpretty. PENDING tests will be distinguished by a `⧖`
  and `[PENDING]`
  */
-#define MLN_CHECK_IF_PENDING_TEST_SHOULD_RUN() \
-    /* By default, skip pending tests. Otherwise check environment for MAPBOX_RUN_PENDING_TESTS */ \
-    { \
-        NSString *runPendingTests = [[NSProcessInfo processInfo] environment][@"MAPBOX_RUN_PENDING_TESTS"]; \
-        if (![runPendingTests boolValue]) { \
-            /* The following warning will be picked up by xcpretty */ \
-            printf("warning: '%s' is a pending test - skipping\n", __PRETTY_FUNCTION__); \
-            return; \
-        } \
-    }
+#define MLN_CHECK_IF_PENDING_TEST_SHOULD_RUN()                                                   \
+  /* By default, skip pending tests. Otherwise check environment for MAPBOX_RUN_PENDING_TESTS */ \
+  {                                                                                              \
+    NSString *runPendingTests =                                                                  \
+        [[NSProcessInfo processInfo] environment][@"MAPBOX_RUN_PENDING_TESTS"];                  \
+    if (![runPendingTests boolValue]) {                                                          \
+      /* The following warning will be picked up by xcpretty */                                  \
+      printf("warning: '%s' is a pending test - skipping\n", __PRETTY_FUNCTION__);               \
+      return;                                                                                    \
+    }                                                                                            \
+  }

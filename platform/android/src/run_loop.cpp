@@ -1,11 +1,13 @@
 #include "run_loop_impl.hpp"
 
-#include <mbgl/util/platform.hpp>
-#include <mbgl/util/thread_local.hpp>
-#include <mbgl/util/thread.hpp>
-#include <mbgl/util/timer.hpp>
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/util/event.hpp>
+#include <mbgl/util/logging.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
+#include <mbgl/util/platform.hpp>
+#include <mbgl/util/thread.hpp>
+#include <mbgl/util/thread_local.hpp>
+#include <mbgl/util/timer.hpp>
 
 #include <android/looper.h>
 
@@ -18,7 +20,6 @@
 
 #include <fcntl.h>
 #include <unistd.h>
-#include <mbgl/util/logging.hpp>
 
 #define PIPE_OUT 0
 #define PIPE_IN 1
@@ -167,6 +168,9 @@ void RunLoop::Impl::addRunnable(Runnable* runnable) {
 void RunLoop::Impl::removeRunnable(Runnable* runnable) {
     std::lock_guard<std::mutex> lock(mutex);
     runnables.remove(runnable);
+    if (runnables.empty()) {
+        cvEmpty.notify_all();
+    }
 }
 
 Milliseconds RunLoop::Impl::processRunnables() {
@@ -196,6 +200,10 @@ Milliseconds RunLoop::Impl::processRunnables() {
         runnable->runTask();
     }
 
+    if (runnables.empty()) {
+        cvEmpty.notify_all();
+    }
+
     if (runnables.empty() || nextDue == TimePoint::max()) {
         return Milliseconds(-1);
     }
@@ -206,6 +214,22 @@ Milliseconds RunLoop::Impl::processRunnables() {
     }
 
     return timeout;
+}
+
+void RunLoop::Impl::waitForEmpty() {
+    while (true) {
+        std::size_t remaining;
+        {
+            std::lock_guard<std::mutex> lock(mutex);
+            remaining = runnables.size();
+        }
+
+        if (remaining == 0) {
+            return;
+        }
+
+        runLoop->runOnce();
+    }
 }
 
 RunLoop* RunLoop::Get() {
@@ -230,6 +254,10 @@ void RunLoop::wake() {
     impl->wake();
 }
 
+void RunLoop::waitForEmpty([[maybe_unused]] const SimpleIdentity tag) {
+    impl->waitForEmpty();
+}
+
 void RunLoop::run() {
     MBGL_VERIFY_THREAD(tid);
 
@@ -241,7 +269,10 @@ void RunLoop::run() {
     while (impl->running) {
         process();
         auto timeout = impl->processRunnables().count();
-        ALooper_pollAll(timeout, &outFd, &outEvents, reinterpret_cast<void**>(&outData));
+        auto result = ALooper_pollOnce(timeout, &outFd, &outEvents, reinterpret_cast<void**>(&outData));
+        if (result == ALOOPER_POLL_ERROR) {
+            throw std::runtime_error("ALooper_pollOnce returned an error");
+        }
     }
 }
 

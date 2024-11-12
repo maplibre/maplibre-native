@@ -28,6 +28,8 @@ public:
     style::ImageStretches stretchX;
     style::ImageStretches stretchY;
     std::optional<style::ImageContent> content;
+    std::optional<style::TextFit> textFitWidth;
+    std::optional<style::TextFit> textFitHeight;
 
     std::array<uint16_t, 2> tl() const {
         return {{static_cast<uint16_t>(paddedRect.x + padding), static_cast<uint16_t>(paddedRect.y + padding)}};
@@ -52,7 +54,7 @@ public:
     }
 };
 
-using ImagePositions = std::map<std::string, ImagePosition>;
+using ImagePositions = mbgl::unordered_map<std::string, ImagePosition>;
 
 class ImagePatch {
 public:
@@ -73,8 +75,6 @@ public:
     std::vector<ImagePatch> getImagePatchesAndUpdateVersions(const ImageManager&);
 };
 
-ImageAtlas makeImageAtlas(const ImageMap&,
-                          const ImageMap&,
-                          const std::unordered_map<std::string, uint32_t>& versionMap);
+ImageAtlas makeImageAtlas(const ImageMap&, const ImageMap&, const ImageVersionMap& versionMap);
 
 } // namespace mbgl

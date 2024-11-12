@@ -90,7 +90,12 @@ public:
             NSURLSessionConfiguration *sessionConfig = MLNNativeNetworkManager.sharedManager.sessionConfiguration;
             session = [NSURLSession sessionWithConfiguration:sessionConfig];
 
-            userAgent = getUserAgent();
+            if (sessionConfig.HTTPAdditionalHeaders[@"User-Agent"] == nil) {
+                userAgent = getUserAgent();
+            } else {
+                userAgent = sessionConfig.HTTPAdditionalHeaders[@"User-Agent"];
+            }
+            
         }
     }
 
@@ -141,10 +146,7 @@ NSString *HTTPFileSource::Impl::getUserAgent() const {
 
     NSBundle *sdkBundle = HTTPFileSource::Impl::getSDKBundle();
     if (sdkBundle) {
-        NSString *versionString = sdkBundle.infoDictionary[@"MLNSemanticVersionString"];
-        if (!versionString) {
-            versionString = sdkBundle.infoDictionary[@"CFBundleShortVersionString"];
-        }
+        NSString *versionString = sdkBundle.infoDictionary[@"CFBundleShortVersionString"];
         if (versionString) {
             [userAgentComponents addObject:[NSString stringWithFormat:@"%@/%@",
                                             sdkBundle.infoDictionary[@"CFBundleName"], versionString]];
@@ -153,7 +155,7 @@ NSString *HTTPFileSource::Impl::getUserAgent() const {
 
     // Avoid %s here because it inserts hidden bidirectional markers on macOS when the system
     // language is set to a right-to-left language.
-    [userAgentComponents addObject:[NSString stringWithFormat:@"MapboxGL/0.0.0 (%@)",
+    [userAgentComponents addObject:[NSString stringWithFormat:@"MapLibreNative/0.0.0 (%@)",
                                     @(mbgl::version::revision)]];
 
     NSString *systemName = @"Darwin";
@@ -224,8 +226,9 @@ BOOL isValidMapboxEndpoint(NSURL *url) {
 MLN_APPLE_EXPORT
 NSURL *resourceURL(const Resource& resource) {
     
-    NSURL *url = [NSURL URLWithString:@(resource.url.c_str())];
-
+    NSString *encodedUrlString = [@(resource.url.c_str()) stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.URLQueryAllowedCharacterSet];
+    NSURL *url = [NSURL URLWithString:encodedUrlString];
+    
 #if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
     if (isValidMapboxEndpoint(url)) {
         NSURLComponents *components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];

@@ -7,9 +7,11 @@
 #include <mbgl/style/position.hpp>
 #include <mbgl/style/rotation.hpp>
 #include <mbgl/style/types.hpp>
+#include <mbgl/style/variable_anchor_offset_collection.hpp>
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/enum.hpp>
 #include <mbgl/util/feature.hpp>
+#include <mbgl/util/padding.hpp>
 #include <mbgl/util/variant.hpp>
 
 #include <array>
@@ -27,27 +29,34 @@ using ValueBase = variant<NullValue,
                           double,
                           std::string,
                           Color,
+                          VariableAnchorOffsetCollection,
                           Collator,
                           Formatted,
                           Image,
+                          Padding,
                           mapbox::util::recursive_wrapper<std::vector<Value>>,
                           mapbox::util::recursive_wrapper<std::unordered_map<std::string, Value>>>;
 struct Value : ValueBase {
-    using ValueBase::ValueBase;
-
-    VARIANT_INLINE Value()
-        : ValueBase() {}
+    VARIANT_INLINE Value() noexcept {}
 
     template <typename T>
     VARIANT_INLINE Value(T&& val)
+        : ValueBase(std::forward<T>(val)) {}
+
+    template <typename T>
+    VARIANT_INLINE Value(const T& val)
         : ValueBase(val) {}
 
     // Javascript's Number.MAX_SAFE_INTEGER
-    static uint64_t maxSafeInteger() { return 9007199254740991ULL; }
+    static constexpr uint64_t maxSafeInteger() noexcept { return 9007199254740991ULL; }
 
-    static bool isSafeInteger(uint64_t x) { return x <= maxSafeInteger(); };
-    static bool isSafeInteger(int64_t x) { return static_cast<uint64_t>(x > 0 ? x : -x) <= maxSafeInteger(); }
-    static bool isSafeInteger(double x) { return static_cast<uint64_t>(x > 0 ? x : -x) <= maxSafeInteger(); }
+    static constexpr bool isSafeInteger(uint64_t x) noexcept { return x <= maxSafeInteger(); };
+    static constexpr bool isSafeInteger(int64_t x) noexcept {
+        return static_cast<uint64_t>(x > 0 ? x : -x) <= maxSafeInteger();
+    }
+    static constexpr bool isSafeInteger(double x) noexcept {
+        return static_cast<uint64_t>(x > 0 ? x : -x) <= maxSafeInteger();
+    }
 };
 
 constexpr NullValue Null = NullValue();

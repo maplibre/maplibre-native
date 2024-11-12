@@ -10,7 +10,6 @@
 #include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 #include <Metal/MTLLibrary.hpp>
 #include <Metal/MTLRenderPass.hpp>
@@ -23,25 +22,6 @@
 using namespace std::string_literals;
 
 namespace mbgl {
-
-shaders::AttributeInfo::AttributeInfo(std::size_t index_, gfx::AttributeDataType dataType_, std::string_view name_)
-    : index(index_),
-      dataType(dataType_),
-      name(name_),
-      nameID(stringIndexer().get(name_)) {}
-
-shaders::UniformBlockInfo::UniformBlockInfo(
-    std::size_t index_, bool vertex_, bool fragment_, std::size_t size_, std::size_t id_)
-    : index(index_),
-      vertex(vertex_),
-      fragment(fragment_),
-      size(size_),
-      id(id_) {}
-
-shaders::TextureInfo::TextureInfo(std::size_t index_, std::string_view name_)
-    : index(index_),
-      name(name_),
-      nameID(stringIndexer().get(name_)) {}
 
 namespace mtl {
 namespace {
@@ -103,7 +83,14 @@ ShaderProgram::~ShaderProgram() noexcept = default;
 
 MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Renderable& renderable,
                                                                 const MTLVertexDescriptorPtr& vertexDescriptor,
-                                                                const gfx::ColorMode& colorMode) const {
+                                                                const gfx::ColorMode& colorMode,
+                                                                const std::optional<std::size_t> reuseHash) const {
+    if (reuseHash.has_value()) {
+        // we'd like to reuse a previous value
+        if (auto it = renderPipelineStateCache.find(reuseHash.value()); it != renderPipelineStateCache.end())
+            return it->second;
+    }
+
     auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
 
     const auto& renderableResource = renderable.getResource<RenderableResource>();
@@ -185,33 +172,47 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
         assert(false);
     }
 
+    if (reuseHash.has_value()) {
+        // store the value for future reuse
+        renderPipelineStateCache[reuseHash.value()] = rps;
+    }
+
     return rps;
 }
 
-std::optional<uint32_t> ShaderProgram::getSamplerLocation(const StringIdentity id) const {
-    if (auto it = textureBindings.find(id); it != textureBindings.end()) {
-        return it->second;
-    }
-    return std::nullopt;
+std::optional<size_t> ShaderProgram::getSamplerLocation(const size_t id) const {
+    return (id < textureBindings.size()) ? textureBindings[id] : std::nullopt;
 }
 
 void ShaderProgram::initAttribute(const shaders::AttributeInfo& info) {
     const auto index = static_cast<int>(info.index);
 #if !defined(NDEBUG)
     // Indexes must be unique, if there's a conflict check the `attributes` array in the shader
-    vertexAttributes.visitAttributes(
-        [&](auto, const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
+    vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
+    instanceAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
     uniformBlocks.visit([&](const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
 #endif
-    vertexAttributes.add(stringIndexer().get(info.name), index, info.dataType, 1);
+    vertexAttributes.set(info.id, index, info.dataType, 1);
+}
+
+void ShaderProgram::initInstanceAttribute(const shaders::AttributeInfo& info) {
+    // Index is the block index of the instance attribute
+    const auto index = static_cast<int>(info.index);
+#if !defined(NDEBUG)
+    // Indexes must not be reused by regular attributes or uniform blocks
+    // More than one instance attribute can have the same index, if they share the block
+    vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
+    uniformBlocks.visit([&](const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
+#endif
+    instanceAttributes.set(info.id, index, info.dataType, 1);
 }
 
 void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
     const auto index = static_cast<int>(info.index);
 #if !defined(NDEBUG)
     // Indexes must be unique, if there's a conflict check the `attributes` array in the shader
-    vertexAttributes.visitAttributes(
-        [&](auto, const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
+    vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
+    instanceAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
     uniformBlocks.visit([&](const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
 #endif
     if (const auto& block_ = uniformBlocks.set(info.id, index, info.size)) {
@@ -222,7 +223,11 @@ void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
 }
 
 void ShaderProgram::initTexture(const shaders::TextureInfo& info) {
-    textureBindings[stringIndexer().get(info.name.data())] = info.index;
+    assert(info.id < textureBindings.size());
+    if (info.id >= textureBindings.size()) {
+        return;
+    }
+    textureBindings[info.id] = info.index;
 }
 
 } // namespace mtl

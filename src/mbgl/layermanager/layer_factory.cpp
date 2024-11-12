@@ -33,7 +33,7 @@ std::unique_ptr<Bucket> LayerFactory::createBucket(const BucketParameters&,
 
 std::unique_ptr<Layout> LayerFactory::createLayout(const LayoutParameters&,
                                                    std::unique_ptr<GeometryTileLayer>,
-                                                   const std::vector<Immutable<style::LayerProperties>>&) noexcept {
+                                                   const std::vector<Immutable<style::LayerProperties>>&) {
     assert(false);
     return nullptr;
 }

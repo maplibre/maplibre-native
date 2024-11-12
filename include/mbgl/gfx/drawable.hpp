@@ -5,9 +5,11 @@
 #include <mbgl/gfx/uniform_buffer.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/color.hpp>
-#include <mbgl/util/identity.hpp>
-#include <mbgl/util/traits.hpp>
 #include <mbgl/util/containers.hpp>
+#include <mbgl/util/identity.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
+#include <mbgl/util/traits.hpp>
+#include <mbgl/util/immutable.hpp>
 
 #include <cstdint>
 #include <cstddef>
@@ -17,12 +19,17 @@
 
 namespace mbgl {
 
+class Bucket;
 class Color;
-class PaintParameters;
 class LayerTweaker;
+class PaintParameters;
+class PaintPropertyBindersBase;
 enum class RenderPass : uint8_t;
+class RenderTile;
+class SegmentBase;
 
 using LayerTweakerPtr = std::shared_ptr<LayerTweaker>;
+using RenderTiles = std::shared_ptr<const std::vector<std::reference_wrapper<const RenderTile>>>;
 
 namespace gfx {
 
@@ -44,8 +51,8 @@ using VertexAttributeArrayPtr = std::shared_ptr<VertexAttributeArray>;
 
 class Drawable {
 public:
-    /// @brief Map from sampler location to texture info
-    using Textures = mbgl::unordered_map<int32_t, gfx::Texture2DPtr>;
+    /// @brief Array of textures to bind
+    using Textures = std::array<gfx::Texture2DPtr, shaders::maxTextureCountPerShader>;
 
 protected:
     Drawable(std::string name);
@@ -97,28 +104,20 @@ public:
     int32_t getLineWidth() const { return lineWidth; }
 
     /// Set line width
-    void setLineWidth(int32_t value) { lineWidth = value; }
+    virtual void setLineWidth(int32_t value) { lineWidth = value; }
 
-    /// @brief Remove an attached texture from this drawable at the given sampler location
-    /// @param location Texture sampler location
-    void removeTexture(int32_t location);
-
-    /// @brief Return the textures attached to this drawable
-    /// @return Texture and sampler location pairs
-    const Textures& getTextures() const { return textures; };
-
-    /// @brief Get the texture at the given sampler location.
-    const gfx::Texture2DPtr& getTexture(int32_t location) const;
+    /// @brief Get the texture at the given internal ID.
+    const gfx::Texture2DPtr& getTexture(size_t id) const;
 
     /// @brief Set the collection of textures bound to this drawable
     /// @param textures_ A Textures collection to set
     void setTextures(const Textures& textures_) noexcept { textures = textures_; }
     void setTextures(Textures&& textures_) noexcept { textures = std::move(textures_); }
 
-    /// @brief Attach the given texture to this drawable at the given sampler location.
+    /// @brief Attach the given texture to this drawable at the given internal ID.
     /// @param texture Texture2D instance
-    /// @param location A sampler location in the shader being used with this drawable.
-    void setTexture(gfx::Texture2DPtr texture, int32_t location);
+    /// @param id Internal ID of the texture.
+    void setTexture(gfx::Texture2DPtr texture, size_t id);
 
     /// Whether the drawble should be drawn
     bool getEnabled() const { return enabled; }
@@ -130,7 +129,7 @@ public:
     bool getEnableColor() const { return enableColor; }
 
     /// Set whether to render to the color target
-    void setEnableColor(bool value) { enableColor = value; }
+    virtual void setEnableColor(bool value) { enableColor = value; }
 
     /// Whether to do stenciling (based on the Tile ID or 3D)
     bool getEnableStencil() const { return enableStencil; }
@@ -151,9 +150,6 @@ public:
 
     /// Set sub-layer index
     virtual void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
-
-    void setLayerIndex(int32_t value) { layerIndex = value; }
-    int32_t getLayerIndex() const { return layerIndex; }
 
     /// Depth writability for 2D drawables
     DepthMaskType getDepthType() const { return depthType; }
@@ -183,7 +179,7 @@ public:
     const gfx::CullFaceMode& getCullFaceMode() const;
 
     /// Set cull face mode
-    void setCullFaceMode(const gfx::CullFaceMode&);
+    virtual void setCullFaceMode(const gfx::CullFaceMode&);
 
     /// Get color mode
     const gfx::ColorMode& getColorMode() const;
@@ -195,7 +191,26 @@ public:
     const gfx::VertexAttributeArrayPtr& getVertexAttributes() const noexcept { return vertexAttributes; }
 
     /// Set vertex attribute array
-    void setVertexAttributes(gfx::VertexAttributeArrayPtr value) noexcept { vertexAttributes = std::move(value); }
+    void setVertexAttributes(gfx::VertexAttributeArrayPtr value) noexcept {
+        vertexAttributes = std::move(value);
+        // The attribute bindings need to be rebuilt, we can't rely on the update
+        // time check as these new values may not have been modified recently.
+        attributeUpdateTime.reset();
+    }
+
+    /// Update vertices, indices, and segments
+    virtual void updateVertexAttributes(gfx::VertexAttributeArrayPtr,
+                                        std::size_t vertexCount,
+                                        gfx::DrawMode,
+                                        gfx::IndexVectorBasePtr,
+                                        const SegmentBase* segments,
+                                        std::size_t segmentCount) = 0;
+
+    /// Get the instance attributes
+    const gfx::VertexAttributeArrayPtr& getInstanceAttributes() const noexcept { return instanceAttributes; }
+
+    /// Set instance attribute array
+    void setInstanceAttributes(gfx::VertexAttributeArrayPtr value) noexcept { instanceAttributes = std::move(value); }
 
     /// Provide raw data for vertices. Incompatible with adding primitives
     virtual void setVertices(std::vector<uint8_t>&&, std::size_t, AttributeDataType) = 0;
@@ -240,6 +255,26 @@ public:
     void setLayerTweaker(LayerTweakerPtr tweaker) { layerTweaker = std::move(tweaker); }
     const LayerTweakerPtr& getLayerTweaker() const { return layerTweaker; }
 
+    /// Get origin point
+    const std::optional<mbgl::Point<double>>& getOrigin() const { return origin; }
+
+    /// Set origin point
+    void setOrigin(std::optional<Point<double>> p) { origin = std::move(p); }
+
+    /// Get the property binders used for property updates
+    PaintPropertyBindersBase* getBinders();
+    const PaintPropertyBindersBase* getBinders() const;
+
+    /// Set the property binders used for property updates
+    void setBinders(std::shared_ptr<Bucket>, PaintPropertyBindersBase*);
+
+    const RenderTile* getRenderTile() const;
+    const std::shared_ptr<Bucket>& getBucket() const;
+    void setRenderTile(Immutable<std::vector<RenderTile>>, const RenderTile*);
+
+    const std::chrono::duration<double> createTime = util::MonotonicTimer::now();
+    std::optional<std::chrono::duration<double>> getAttributeUpdateTime() const { return attributeUpdateTime; }
+
 protected:
     bool enabled = true;
     bool enableColor = true;
@@ -255,10 +290,11 @@ protected:
     DrawPriority drawPriority = 0;
     int32_t lineWidth = 1;
     int32_t subLayerIndex = 0;
-    int32_t layerIndex = 0;
     DepthMaskType depthType; // = DepthMaskType::ReadOnly;
     UniqueDrawableData drawableData{};
     gfx::VertexAttributeArrayPtr vertexAttributes;
+    gfx::VertexAttributeArrayPtr instanceAttributes;
+    std::optional<std::chrono::duration<double>> attributeUpdateTime;
 
     struct Impl;
     std::unique_ptr<Impl> impl;
@@ -268,6 +304,7 @@ protected:
     LayerTweakerPtr layerTweaker;
 
     std::size_t type = 0;
+    std::optional<mbgl::Point<double>> origin;
 };
 
 using DrawablePtr = std::shared_ptr<Drawable>;

@@ -13,28 +13,28 @@ NS_ASSUME_NONNULL_BEGIN
 // interoperate with ARC. The inner pointer is weak in order to avoid a reference cycle for
 // "pending" MLNStyleLayers, which have a strong owning pointer to the mbgl::style::Layer.
 struct LayerWrapper {
-    __weak MLNStyleLayer *layer;
+  __weak MLNStyleLayer *layer;
 };
 
 /**
  Assert that the style layer is valid.
 
  This macro should be used at the beginning of any public-facing instance method
- of `MLNStyleLayer` and its subclasses. For private methods, an assertion is more appropriate.
+ of ``MLNStyleLayer`` and its subclasses. For private methods, an assertion is more appropriate.
  */
-#define MLNAssertStyleLayerIsValid() \
-    do { \
-        if (!self.rawLayer) { \
-            [NSException raise:MLNInvalidStyleLayerException \
-                        format: \
-            @"Either this layer got invalidated after the style change or " \
-            @"-[MLNStyle removeLayer:] has been called " \
-            @"with this instance but another style layer instance was added with the same identifer. It is an " \
-            @"error to send any message to this layer since it cannot be recovered after removal due to the " \
-            @"identifier collision. Use unique identifiers for all layer instances including layers of " \
-            @"different types."]; \
-        } \
-    } while (NO);
+#define MLNAssertStyleLayerIsValid()                                                           \
+  do {                                                                                         \
+    if (!self.rawLayer) {                                                                      \
+      [NSException raise:MLNInvalidStyleLayerException                                         \
+                  format:@"Either this layer got invalidated after the style change or "       \
+                         @"-[MLNStyle removeLayer:] has been called with this instance but "   \
+                         @"another style layer instance was added with the same identifer. "   \
+                         @"It is an error to send any message to this layer since  it cannot " \
+                         @"be recovered after removal due to the identifier collision. "       \
+                         @"Use unique identifiers for all layer instances including layers "   \
+                         @"of different types."];                                              \
+    }                                                                                          \
+  } while (NO);
 
 @class MLNStyle;
 
@@ -77,7 +77,7 @@ struct LayerWrapper {
  Removes the mbgl style layer that this object represents from the mbgl map.
 
  When a mbgl style layer is removed, ownership of the object is transferred back
- to the `MLNStyleLayer` instance and the unique_ptr reference is valid again. It
+ to the ``MLNStyleLayer`` instance and the unique_ptr reference is valid again. It
  is safe to add the layer back to the style after it is removed.
  */
 - (void)removeFromStyle:(MLNStyle *)style;
@@ -87,16 +87,16 @@ struct LayerWrapper {
 namespace mbgl {
 
 class LayerPeerFactory {
-public:
-    virtual ~LayerPeerFactory() = default;
-    /**
-     Get the corresponding core layer factory.
-     */
-    virtual LayerFactory* getCoreLayerFactory() = 0;
-    /**
-     Creates an MLNStyleLayer instance with a raw pointer to the backing store.
-     */
-    virtual MLNStyleLayer* createPeer(style::Layer*) = 0;
+ public:
+  virtual ~LayerPeerFactory() = default;
+  /**
+   Get the corresponding core layer factory.
+   */
+  virtual LayerFactory *getCoreLayerFactory() = 0;
+  /**
+   Creates an MLNStyleLayer instance with a raw pointer to the backing store.
+   */
+  virtual MLNStyleLayer *createPeer(style::Layer *) = 0;
 };
 
 }  // namespace mbgl

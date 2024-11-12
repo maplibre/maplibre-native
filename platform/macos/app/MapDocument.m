@@ -1,14 +1,14 @@
 #import "MapDocument.h"
 
 #import "AppDelegate.h"
-#import "LimeGreenStyleLayer.h"
+// #import "CustomStyleLayerExample.h"
 #import "DroppedPinAnnotation.h"
 #import "MLNMapsnapshotter.h"
 
 #import "MLNStyle+MBXAdditions.h"
 #import "MLNVectorTileSource_Private.h"
 
-#import <Mapbox/Mapbox.h>
+#import <Mapbox.h>
 
 static NSString * const MLNDroppedPinAnnotationImageIdentifier = @"dropped";
 
@@ -778,36 +778,36 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
     }
 }
 
-- (IBAction)insertCustomStyleLayer:(id)sender {
-    [self.undoManager registerUndoWithTarget:self handler:^(id  _Nonnull target) {
-        [self removeCustomStyleLayer:sender];
-    }];
+// - (IBAction)insertCustomStyleLayer:(id)sender {
+//     [self.undoManager registerUndoWithTarget:self handler:^(id  _Nonnull target) {
+//         [self removeCustomStyleLayer:sender];
+//     }];
 
-    if (!self.undoManager.isUndoing) {
-        [self.undoManager setActionName:@"Add Lime Green Layer"];
-    }
+//     if (!self.undoManager.isUndoing) {
+//         [self.undoManager setActionName:@"Add Lime Green Layer"];
+//     }
 
-    LimeGreenStyleLayer *layer = [[LimeGreenStyleLayer alloc] initWithIdentifier:@"mbx-custom"];
-    MLNStyleLayer *houseNumberLayer = [self.mapView.style layerWithIdentifier:@"housenum-label"];
-    if (houseNumberLayer) {
-        [self.mapView.style insertLayer:layer belowLayer:houseNumberLayer];
-    } else {
-        [self.mapView.style addLayer:layer];
-    }
-}
+//     CustomStyleLayerExample *layer = [[CustomStyleLayerExample alloc] initWithIdentifier:@"mbx-custom"];
+//     MLNStyleLayer *houseNumberLayer = [self.mapView.style layerWithIdentifier:@"housenum-label"];
+//     if (houseNumberLayer) {
+//         [self.mapView.style insertLayer:layer belowLayer:houseNumberLayer];
+//     } else {
+//         [self.mapView.style addLayer:layer];
+//     }
+// }
 
-- (IBAction)removeCustomStyleLayer:(id)sender {
-    [self.undoManager registerUndoWithTarget:self handler:^(id  _Nonnull target) {
-        [self insertCustomStyleLayer:sender];
-    }];
+// - (IBAction)removeCustomStyleLayer:(id)sender {
+//     [self.undoManager registerUndoWithTarget:self handler:^(id  _Nonnull target) {
+//         [self insertCustomStyleLayer:sender];
+//     }];
 
-    if (!self.undoManager.isUndoing) {
-        [self.undoManager setActionName:@"Delete Lime Green Layer"];
-    }
+//     if (!self.undoManager.isUndoing) {
+//         [self.undoManager setActionName:@"Delete Lime Green Layer"];
+//     }
 
-    MLNStyleLayer *layer = [self.mapView.style layerWithIdentifier:@"mbx-custom"];
-    [self.mapView.style removeLayer:layer];
-}
+//     MLNStyleLayer *layer = [self.mapView.style layerWithIdentifier:@"mbx-custom"];
+//     [self.mapView.style removeLayer:layer];
+// }
 
 - (IBAction)insertGraticuleLayer:(id)sender {
     [self.undoManager registerUndoWithTarget:self handler:^(id  _Nonnull target) {

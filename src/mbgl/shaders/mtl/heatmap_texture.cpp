@@ -1,19 +1,21 @@
 #include <mbgl/shaders/mtl/heatmap_texture.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
 
 namespace mbgl {
 namespace shaders {
 
+const std::array<UniformBlockInfo, 2> ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal>::uniforms =
+    {
+        UniformBlockInfo{true, false, sizeof(GlobalPaintParamsUBO), idGlobalPaintParamsUBO},
+        UniformBlockInfo{true, true, sizeof(HeatmapTexturePropsUBO), idHeatmapTexturePropsUBO},
+};
 const std::array<AttributeInfo, 1> ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal>::attributes =
     {
-        AttributeInfo{0, gfx::AttributeDataType::Short2, "a_pos"},
-};
-const std::array<UniformBlockInfo, 1> ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal>::uniforms =
-    {
-        UniformBlockInfo{1, true, true, sizeof(HeatmapTextureDrawableUBO), idHeatmapTextureDrawableUBO},
+        AttributeInfo{heatmapTextureUBOCount + 0, gfx::AttributeDataType::Short2, idHeatmapPosVertexAttribute},
 };
 const std::array<TextureInfo, 2> ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal>::textures = {
-    TextureInfo{0, "u_image"},
-    TextureInfo{1, "u_color_ramp"},
+    TextureInfo{0, idHeatmapImageTexture},
+    TextureInfo{1, idHeatmapColorRampTexture},
 };
 
 } // namespace shaders

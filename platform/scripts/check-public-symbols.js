@@ -1,11 +1,7 @@
-#!/usr/bin/env node
-
-'use strict';
-
-const fs = require('fs');
-const path = require('path');
-const execFileSync = require('child_process').execFileSync;
-const _ = require('lodash');
+import fs from "node:fs";
+import path from "node:path";
+import { execFileSync } from "node:child_process";
+import _ from "lodash";
 
 const keyword = /\bMLN_EXPORT\b/;
 
@@ -30,13 +26,13 @@ function hasMissingSymbols(os) {
       _.forEach(structure['key.substructure'], function (substructure) {
         switch (substructure['key.kind']) {
           case 'sourcekitten.source.lang.objc.decl.class':
-            if (!(keyword.test(src[substructure['key.doc.line'] - 1]) || keyword.test(src[substructure['key.doc.line'] - 2]))) {
+            if (!keyword.test(src[substructure['key.doc.line'] - 1]) && !keyword.test(src[substructure['key.doc.line'] - 2]) && !keyword.test(src[substructure['key.doc.line'] - 3]) && !keyword.test(src[substructure['key.doc.line'] - 4])) {
               console.warn(`- missing symbol export for class ${substructure['key.name']} in ${path}:${substructure['key.doc.line']}:${substructure['key.doc.column']}`);
               missing = true;
             }
             break;
           case 'sourcekitten.source.lang.objc.decl.constant':
-            if (!keyword.test(src[substructure['key.doc.line'] - 1])) {
+            if (!keyword.test(src[substructure['key.doc.line'] - 1]) && !keyword.test(src[substructure['key.doc.line'] - 2])) {
               console.warn(`- missing symbol export for constant ${substructure['key.name']} in ${path}:${substructure['key.doc.line']}:${substructure['key.doc.column']}`);
               missing = true;
             }

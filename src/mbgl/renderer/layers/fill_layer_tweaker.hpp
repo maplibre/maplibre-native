@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/renderer/layer_tweaker.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 #include <string>
 
@@ -21,16 +20,7 @@ public:
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
 private:
-    gfx::UniformBufferPtr fillPropsUniformBuffer;
-    gfx::UniformBufferPtr fillOutlinePropsUniformBuffer;
-    gfx::UniformBufferPtr fillPatternPropsUniformBuffer;
-    gfx::UniformBufferPtr fillOutlinePatternPropsUniformBuffer;
-
-    // Only run each update function once per property update
-    bool fillUniformBufferUpdated = true;
-    bool fillOutlineUniformBufferUpdated = true;
-    bool fillPatternUniformBufferUpdated = true;
-    bool fillOutlinePatternUniformBufferUpdated = true;
+    gfx::UniformBufferPtr evaluatedPropsUniformBuffer;
 };
 
 } // namespace mbgl

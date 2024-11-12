@@ -1,5 +1,7 @@
 #include <mbgl/gfx/uniform_block.hpp>
 
+#include <cassert>
+
 namespace mbgl {
 namespace gfx {
 
@@ -21,8 +23,7 @@ UniformBlockArray& UniformBlockArray::operator=(const UniformBlockArray& other) 
 }
 
 const std::unique_ptr<UniformBlock>& UniformBlockArray::get(const size_t id) const {
-    const auto& result = (id < uniformBlockVector.size()) ? uniformBlockVector[id] : nullref;
-    return (result != nullptr) ? result : nullref;
+    return (id < uniformBlockVector.size()) ? uniformBlockVector[id] : nullref;
 }
 
 const std::unique_ptr<UniformBlock>& UniformBlockArray::set(const size_t id, const size_t index, std::size_t size) {

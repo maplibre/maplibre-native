@@ -65,8 +65,6 @@ void RenderCustomDrawableLayer::update(gfx::ShaderRegistry& shaders,
                                        const std::shared_ptr<UpdateParameters>& updateParameters,
                                        const RenderTree& renderTree,
                                        UniqueChangeRequestVec& changes) {
-    std::unique_lock<std::mutex> guard(mutex);
-
     // check if host changed and update
     bool hostChanged = (host != impl(baseImpl).host);
     if (hostChanged) {

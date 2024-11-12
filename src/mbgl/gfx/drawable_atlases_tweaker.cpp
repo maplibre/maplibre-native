@@ -8,16 +8,9 @@
 namespace mbgl {
 namespace gfx {
 
-namespace {
-std::optional<int> getSamplerLocation(const gfx::ShaderProgramBasePtr& shader,
-                                      const std::optional<StringIdentity>& nameId) {
-    return nameId ? shader->getSamplerLocation(*nameId) : std::nullopt;
-}
-} // namespace
-
 void DrawableAtlasesTweaker::setupTextures(gfx::Drawable& drawable, const bool linearFilterForIcons) {
     if (const auto& shader = drawable.getShader()) {
-        if (const auto samplerLocation = getSamplerLocation(shader, glyphNameId)) {
+        if (glyphTextureId) {
             if (atlases) {
                 atlases->glyph->setSamplerConfiguration(
                     {TextureFilterType::Linear, TextureWrapType::Clamp, TextureWrapType::Clamp});
@@ -26,12 +19,12 @@ void DrawableAtlasesTweaker::setupTextures(gfx::Drawable& drawable, const bool l
                      TextureWrapType::Clamp,
                      TextureWrapType::Clamp});
             }
-            if (const auto iconSamplerLocation = getSamplerLocation(shader, iconNameId)) {
-                assert(*samplerLocation != *iconSamplerLocation);
-                drawable.setTexture(atlases ? atlases->glyph : nullptr, *samplerLocation);
-                drawable.setTexture(atlases ? atlases->icon : nullptr, *iconSamplerLocation);
+            if (iconTextureId && shader->getSamplerLocation(*iconTextureId)) {
+                assert(*glyphTextureId != *iconTextureId);
+                drawable.setTexture(atlases ? atlases->glyph : nullptr, *glyphTextureId);
+                drawable.setTexture(atlases ? atlases->icon : nullptr, *iconTextureId);
             } else {
-                drawable.setTexture(atlases ? (isText ? atlases->glyph : atlases->icon) : nullptr, *samplerLocation);
+                drawable.setTexture(atlases ? (isText ? atlases->glyph : atlases->icon) : nullptr, *glyphTextureId);
             }
         }
     }

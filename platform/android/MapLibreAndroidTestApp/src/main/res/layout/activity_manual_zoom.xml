@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <org.maplibre.android.maps.MapView
+        android:id="@id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:maplibre_cameraBearing="220"
+        app:maplibre_cameraTargetLat="50.871062"
+        app:maplibre_cameraTargetLng="1.583210"
+        app:maplibre_cameraZoom="10"/>
+
+</RelativeLayout>

@@ -13,7 +13,6 @@
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 #include <cstdint>
 #include <memory>
@@ -39,7 +38,7 @@ public:
     std::size_t vertexCount = 0;
     gfx::AttributeDataType vertexType = static_cast<gfx::AttributeDataType>(-1);
 
-    gfx::IndexBuffer indexBuffer = {0, nullptr};
+    AttributeBindingArray attributeBindings;
     std::vector<gfx::UniqueVertexBufferResource> attributeBuffers;
 
     UniformBufferArrayGL uniformBuffers;
@@ -49,7 +48,7 @@ public:
     gfx::CullFaceMode cullFaceMode;
     GLfloat pointSize = 0.0f;
 
-    StringIdentity idVertexAttrName = stringIndexer().get("a_pos");
+    size_t vertexAttrId = 0;
 };
 
 struct DrawableGL::DrawSegmentGL final : public gfx::Drawable::DrawSegment {

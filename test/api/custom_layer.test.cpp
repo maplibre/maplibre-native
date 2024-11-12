@@ -15,6 +15,8 @@
 #include <mbgl/util/mat4.hpp>
 #include <mbgl/util/run_loop.hpp>
 
+#include <memory>
+
 using namespace mbgl;
 using namespace mbgl::style;
 using namespace mbgl::platform;

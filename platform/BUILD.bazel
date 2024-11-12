@@ -1,6 +1,82 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
 
+objc_library(
+    name = "macos-objcpp",
+    srcs = [
+        "//platform/darwin:darwin_objcpp_custom_drawable_srcs",
+        "//platform/darwin:darwin_objcpp_srcs",
+        "//platform/darwin:darwin_private_hdrs",
+        "//platform/darwin:generated_style_srcs",
+        "//platform/macos:macos_objcpp_srcs",
+        "//platform/macos:macos_private_hdrs",
+        "//platform/macos:macos_public_hdrs",
+    ],
+    hdrs = [
+        "//platform/darwin:include/mbgl/util/image+MLNAdditions.hpp",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
+        "-fcxx-modules",
+        "-fmodules",
+        "-Wno-vla-extension",
+        "-Wno-gnu-conditional-omitted-operand",
+        "-Wno-deprecated-declarations",
+    ],
+    includes = [
+        "darwin/include",
+        "darwin/src",
+        "macos/src",
+    ],
+    module_name = "MapLibre",
+    sdk_frameworks = [
+        "Metal",
+        "MetalKit",
+        "QuartzCore",
+        "CoreGraphics",
+        "CoreLocation",
+        "AppKit",
+        "SystemConfiguration",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "macos-objc",
+        "//:mbgl-core",
+        "//platform/darwin:darwin-generated-style-artifacts",
+        "//platform/darwin:darwin-objcpp",
+        "//platform/default:mbgl-default",
+    ],
+)
+
+objc_library(
+    name = "macos-objc",
+    srcs = [
+        "//platform/darwin:darwin_objc_hdrs",
+        "//platform/darwin:darwin_objc_srcs",
+        "//platform/darwin:darwin_private_hdrs",
+        "//platform/macos:macos_objc_srcs",
+        "//platform/macos:macos_private_hdrs",
+        "//platform/macos:macos_public_hdrs",
+    ],
+    copts = select({
+        "@platforms//os:ios": WARNING_FLAGS["ios"],
+        "@platforms//os:macos": WARNING_FLAGS["macos"],
+    }) + MAPLIBRE_FLAGS + [
+        "-fmodules",
+        "-Wno-deprecated-declarations",
+    ],
+    includes = [
+        "darwin/include",
+        "darwin/src",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:mbgl-core",
+        "//platform/darwin:darwin-generated-style-artifacts",
+        "//platform/darwin:darwin-objc",
+        "//platform/default:mbgl-default",
+    ],
+)
+
 # Objcpp files for the iOS source
 objc_library(
     name = "objcpp-sdk",
@@ -12,11 +88,6 @@ objc_library(
         "//platform/ios:ios_public_hdrs",
         "//platform/ios:ios_sdk_hdrs",
     ] + select({
-        "//:metal_renderer": [],
-        "//conditions:default": [
-            "//platform/darwin:darwin_objcpp_opengl_srcs",
-        ],
-    }) + select({
         "//:legacy_renderer": [],
         "//conditions:default": [
             "//platform/darwin:darwin_objcpp_custom_drawable_srcs",
@@ -73,7 +144,10 @@ objc_library(
     hdrs = [
         "//platform/darwin:include/mbgl/util/image+MLNAdditions.hpp",
     ],
-    copts = WARNING_FLAGS["ios"] + MAPLIBRE_FLAGS + [
+    copts = select({
+        "@platforms//os:ios": WARNING_FLAGS["ios"],
+        "@platforms//os:macos": WARNING_FLAGS["macos"],
+    }) + MAPLIBRE_FLAGS + [
         "-fmodules",
         "-Wno-gnu-zero-variadic-macro-arguments",
         "-Wno-variadic-macros",
@@ -192,14 +266,10 @@ objc_library(
 objc_library(
     name = "iosapp",
     srcs = [
+        "//platform/darwin:app/CustomStyleLayerExample.h",
+        "//platform/darwin:app/CustomStyleLayerExample.m",
         "//platform/ios:ios_app_srcs",
-    ] + select({
-        "//:metal_renderer": [],
-        "//conditions:default": [
-            "//platform/darwin:app/LimeGreenStyleLayer.h",
-            "//platform/darwin:app/LimeGreenStyleLayer.m",
-        ],
-    }),
+    ],
     defines = ["GLES_SILENCE_DEPRECATION"],
     includes = [
         "darwin/app",
@@ -211,7 +281,7 @@ objc_library(
             "MetalKit",
         ],
         "//conditions:default": [
-            "GLKit",  # needed for LimeGreenStyleLayer
+            "GLKit",  # needed for CustomStyleLayerExample
         ],
     }),
     visibility = ["//visibility:public"],

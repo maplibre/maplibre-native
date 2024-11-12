@@ -38,7 +38,7 @@ private:
 /// @brief IBufferAllocator hides the underlying implementation of the buffer allocator scheme used.
 class IBufferAllocator {
 public:
-    virtual ~IBufferAllocator(){};
+    virtual ~IBufferAllocator() {};
 
     /// @brief Write data into a buffer managed by the allocator
     /// @param data Pointer to data to write into the buffer
@@ -54,7 +54,7 @@ public:
     virtual void release(BufferRef* ref) noexcept = 0;
 
     /// Defragment the allocator's underlying buffer pool.
-    virtual void defragment(const std::shared_ptr<gl::Fence>& fence) noexcept = 0;
+    virtual void defragment(const std::shared_ptr<gl::Fence>& fence) = 0;
 
     /// Return the buffer page size used by the allocator. This is the maximum size a
     /// single buffer can possible be.
@@ -164,7 +164,7 @@ public:
 
     bool write(const void* data, size_t size, BufferRef*& ref) noexcept override;
     void release(BufferRef* ref) noexcept override;
-    void defragment(const std::shared_ptr<gl::Fence>& fence) noexcept override;
+    void defragment(const std::shared_ptr<gl::Fence>& fence) override;
     size_t pageSize() const noexcept override;
     int32_t getBufferID(size_t bufferIndex) const noexcept override;
 

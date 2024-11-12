@@ -3,8 +3,12 @@
 #include <mbgl/style/expression/value.hpp>
 #include <mbgl/style/position.hpp>
 #include <mbgl/style/rotation.hpp>
+#include <mbgl/style/types.hpp>
+#include <mbgl/style/variable_anchor_offset_collection.hpp>
+#include <mbgl/util/enum.hpp>
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/range.hpp>
+#include <mbgl/util/string.hpp>
 
 #include <array>
 #include <vector>
@@ -15,7 +19,7 @@
 namespace mbgl {
 namespace util {
 
-float interpolationFactor(float base, Range<float> range, float z);
+float interpolationFactor(float base, Range<float> range, float z) noexcept;
 
 template <class T, class Enabled = void>
 struct Interpolator;
@@ -37,9 +41,9 @@ struct Interpolator {
 
 template <>
 struct Interpolator<float> {
-    float operator()(const float& a, const float& b, const float t) const { return a * (1.0f - t) + b * t; }
+    float operator()(const float& a, const float& b, const float t) const noexcept { return a * (1.0f - t) + b * t; }
 
-    float operator()(const float& a, const float& b, const double t) const {
+    float operator()(const float& a, const float& b, const double t) const noexcept {
         return static_cast<float>(a * (1.0 - t) + b * t);
     }
 };
@@ -50,12 +54,12 @@ private:
     using Array = std::array<T, N>;
 
     template <std::size_t... I>
-    Array operator()(const Array& a, const Array& b, const double t, std::index_sequence<I...>) {
+    Array operator()(const Array& a, const Array& b, const double t, std::index_sequence<I...>) noexcept {
         return {{interpolate(a[I], b[I], t)...}};
     }
 
 public:
-    Array operator()(const Array& a, const Array& b, const double t) {
+    Array operator()(const Array& a, const Array& b, const double t) noexcept {
         return operator()(a, b, t, std::make_index_sequence<N>());
     }
 };
@@ -66,12 +70,12 @@ private:
     using Array = std::array<float, N>;
 
     template <std::size_t... I>
-    Array operator()(const Array& a, const Array& b, const float t, std::index_sequence<I...>) {
+    Array operator()(const Array& a, const Array& b, const float t, std::index_sequence<I...>) noexcept {
         return {{interpolate(a[I], b[I], t)...}};
     }
 
 public:
-    Array operator()(const Array& a, const Array& b, const float t) {
+    Array operator()(const Array& a, const Array& b, const float t) noexcept {
         return operator()(a, b, t, std::make_index_sequence<N>());
     }
 };
@@ -105,7 +109,7 @@ struct Interpolator<std::vector<style::expression::Value>> {
 template <>
 struct Interpolator<style::Position> {
 public:
-    style::Position operator()(const style::Position& a, const style::Position& b, const float t) {
+    style::Position operator()(const style::Position& a, const style::Position& b, const float t) noexcept {
         auto pos = style::Position();
         auto interpolated = interpolate(a.getCartesian(), b.getCartesian(), t);
         pos.setCartesian(interpolated);
@@ -116,19 +120,67 @@ public:
 template <>
 struct Interpolator<Color> {
 public:
-    Color operator()(const Color& a, const Color& b, const float t) {
+    Color operator()(const Color& a, const Color& b, const float t) noexcept {
         return {interpolate(a.r, b.r, t), interpolate(a.g, b.g, t), interpolate(a.b, b.b, t), interpolate(a.a, b.a, t)};
     }
 
-    Color operator()(const Color& a, const Color& b, const double t) {
+    Color operator()(const Color& a, const Color& b, const double t) noexcept {
         return {interpolate(a.r, b.r, t), interpolate(a.g, b.g, t), interpolate(a.b, b.b, t), interpolate(a.a, b.a, t)};
+    }
+};
+
+template <>
+struct Interpolator<Padding> {
+public:
+    Padding operator()(const Padding& a, const Padding& b, const float t) const noexcept {
+        return {interpolate(a.top, b.top, t),
+                interpolate(a.right, b.right, t),
+                interpolate(a.bottom, b.bottom, t),
+                interpolate(a.left, b.left, t)};
+    }
+
+    Padding operator()(const Padding& a, const Padding& b, const double t) const noexcept {
+        return {interpolate(a.top, b.top, t),
+                interpolate(a.right, b.right, t),
+                interpolate(a.bottom, b.bottom, t),
+                interpolate(a.left, b.left, t)};
+    }
+};
+
+template <>
+struct Interpolator<VariableAnchorOffsetCollection> {
+public:
+    VariableAnchorOffsetCollection operator()(const VariableAnchorOffsetCollection& a,
+                                              const VariableAnchorOffsetCollection& b,
+                                              const float t) const {
+        if (a.size() != b.size()) {
+            throw std::runtime_error("Cannot interpolate values of different length. from: " + a.toString() +
+                                     ", to: " + b.toString());
+        }
+        std::vector<AnchorOffsetPair> offsetMap;
+        offsetMap.reserve(a.size());
+        for (size_t index = 0; index < a.size(); index++) {
+            const auto& aPair = a[index];
+            const auto& bPair = b[index];
+            if (aPair.anchorType != bPair.anchorType) {
+                throw std::runtime_error(
+                    "Cannot interpolate values containing mismatched anchors. index: " + util::toString(index) +
+                    "from: " + Enum<style::SymbolAnchorType>::toString(aPair.anchorType) +
+                    ", to: " + Enum<style::SymbolAnchorType>::toString(bPair.anchorType));
+            }
+            auto offset = std::array<float, 2>{interpolate(aPair.offset[0], bPair.offset[0], t),
+                                               interpolate(aPair.offset[1], bPair.offset[1], t)};
+            offsetMap.emplace_back(aPair.anchorType, offset);
+        }
+
+        return VariableAnchorOffsetCollection(std::move(offsetMap));
     }
 };
 
 template <>
 struct Interpolator<style::Rotation> {
 public:
-    style::Rotation operator()(const style::Rotation& a, const style::Rotation& b, const double t) {
+    style::Rotation operator()(const style::Rotation& a, const style::Rotation& b, const double t) noexcept {
         assert(a.period() == b.period());
         auto period = a.period();
         auto aAngle = std::fmod(a.getAngle(), period);

@@ -76,7 +76,9 @@ public:
 
     unsigned long constantsMask() const override;
 
-    const <%- camelize(type) %>Layer::Impl& layerImpl() const;
+    expression::Dependency getDependencies() const noexcept override;
+
+    const <%- camelize(type) %>Layer::Impl& layerImpl() const noexcept;
     // Data members.
 <% if (type === 'background' || type === 'fill' || type === 'line' || type === 'fill-extrusion') { -%>
     CrossfadeParameters crossfade;

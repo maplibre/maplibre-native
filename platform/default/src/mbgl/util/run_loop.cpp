@@ -1,7 +1,8 @@
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/async_task.hpp>
-#include <mbgl/util/thread_local.hpp>
 #include <mbgl/actor/scheduler.hpp>
+#include <mbgl/util/async_task.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
+#include <mbgl/util/run_loop.hpp>
+#include <mbgl/util/thread_local.hpp>
 
 #include <uv.h>
 
@@ -146,6 +147,22 @@ void RunLoop::runOnce() {
 
 void RunLoop::stop() {
     invoke([&] { uv_unref(impl->holderHandle()); });
+}
+
+void RunLoop::waitForEmpty([[maybe_unused]] const mbgl::util::SimpleIdentity tag) {
+    while (true) {
+        std::size_t remaining;
+        {
+            std::lock_guard<std::mutex> lock(mutex);
+            remaining = defaultQueue.size() + highPriorityQueue.size();
+        }
+
+        if (remaining == 0) {
+            return;
+        }
+
+        runOnce();
+    }
 }
 
 void RunLoop::addWatch(int fd, Event event, std::function<void(int, Event)>&& callback) {

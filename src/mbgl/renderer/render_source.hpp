@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/actor/scheduler.hpp>
 #include <mbgl/map/mode.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/tile/tile_observer.hpp>
@@ -17,20 +18,21 @@
 
 namespace mbgl {
 
-class PaintParameters;
-class TransformState;
-class RenderTile;
-class RenderLayer;
-class RenderedQueryOptions;
-class SourceQueryOptions;
-class Tile;
-class RenderSourceObserver;
-class TileParameters;
 class CollisionIndex;
-class TransformParameters;
 class ImageManager;
 class ImageSourceRenderData;
+class PaintParameters;
+class RenderedQueryOptions;
 class RenderItem;
+class RenderLayer;
+class RenderSourceObserver;
+class RenderTile;
+class Scheduler;
+class SourceQueryOptions;
+class Tile;
+class TileParameters;
+class TransformParameters;
+class TransformState;
 
 namespace gfx {
 class UploadPass;
@@ -47,7 +49,7 @@ using RenderTiles = std::shared_ptr<const std::vector<std::reference_wrapper<con
 
 class RenderSource : protected TileObserver {
 public:
-    static std::unique_ptr<RenderSource> create(const Immutable<style::Source::Impl>&);
+    static std::unique_ptr<RenderSource> create(const Immutable<style::Source::Impl>&, const TaggedScheduler&);
     ~RenderSource() override;
 
     bool isEnabled() const;
@@ -74,6 +76,7 @@ public:
     // If supported, returns pointer to image data; returns nullptr otherwise.
     virtual const ImageSourceRenderData* getImageRenderData() const { return nullptr; }
     virtual const Tile* getRenderedTile(const UnwrappedTileID&) const { return nullptr; }
+    virtual Immutable<std::vector<RenderTile>> getRawRenderTiles() const;
 
     virtual std::unordered_map<std::string, std::vector<Feature>> queryRenderedFeatures(
         const ScreenLineString& geometry,
@@ -99,6 +102,8 @@ public:
                                     const std::optional<std::string>&,
                                     const std::optional<std::string>&) {}
 
+    virtual void setCacheEnabled(bool) {};
+
     virtual void reduceMemoryUse() = 0;
 
     virtual void dumpDebugLogs() const = 0;
@@ -117,6 +122,7 @@ protected:
 
     void onTileChanged(Tile&) override;
     void onTileError(Tile&, std::exception_ptr) final;
+    void onTileAction(OverscaledTileID, std::string, TileOperation) override;
 };
 
 } // namespace mbgl

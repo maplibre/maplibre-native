@@ -28,7 +28,12 @@ class TileAtlasTextures;
 
 class GeometryTile : public Tile, public GlyphRequestor, public ImageRequestor {
 public:
-    GeometryTile(const OverscaledTileID&, std::string sourceID, const TileParameters&);
+    const std::thread::id renderThreadID = std::this_thread::get_id();
+
+    GeometryTile(const OverscaledTileID&,
+                 std::string sourceID,
+                 const TileParameters&,
+                 TileObserver* observer = nullptr);
 
     ~GeometryTile() override;
 
@@ -92,26 +97,26 @@ public:
     void performedFadePlacement() override;
     std::shared_ptr<FeatureIndex> getFeatureIndex() const;
 
-    const std::string sourceID;
-
     void setFeatureState(const LayerFeatureStates&) override;
 
 protected:
     const GeometryTileData* getData() const;
     LayerRenderData* getLayerRenderData(const style::Layer::Impl&);
 
-private:
-    void markObsolete();
-
     // Used to signal the worker that it should abandon parsing this tile as soon as possible.
     std::atomic<bool> obsolete{false};
 
-    std::shared_ptr<Mailbox> mailbox;
+private:
+    void markObsolete();
+
+    TaggedScheduler threadPool;
+
+    const std::shared_ptr<Mailbox> mailbox;
     Actor<GeometryTileWorker> worker;
 
-    std::shared_ptr<FileSource> fileSource;
-    GlyphManager& glyphManager;
-    ImageManager& imageManager;
+    const std::shared_ptr<FileSource> fileSource;
+    const std::shared_ptr<GlyphManager> glyphManager;
+    const std::shared_ptr<ImageManager> imageManager;
 
     uint64_t correlationID = 0;
 

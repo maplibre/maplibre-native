@@ -15,9 +15,7 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
       commandEncoder(commandEncoder_) {
     auto& resource = descriptor.renderable.getResource<RenderableResource>();
 
-    if (!resource.getCommandBuffer()) {
-        resource.bind();
-    }
+    resource.bind();
 
     if (const auto& buffer = resource.getCommandBuffer()) {
         if (auto rpd = resource.getRenderPassDescriptor()) {
@@ -27,7 +25,7 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
                         const auto& c = *descriptor.clearColor;
                         colorTarget->setLoadAction(MTL::LoadActionClear);
                         colorTarget->setClearColor(MTL::ClearColor::Make(c.r, c.g, c.b, c.a));
-                        rpd = copy;
+                        rpd = std::move(copy);
                     }
                 }
             }

@@ -14,7 +14,7 @@
 #include <unordered_map>
 
 #include <mbgl/shaders/shader_manifest.hpp>
-#if !MLN_RENDER_BACKEND_METAL
+#if MLN_RENDER_BACKEND_OPENGL
 #include <mbgl/gl/program.hpp>
 #endif
 
@@ -52,10 +52,14 @@ public:
 
     std::unique_ptr<gfx::Program<Name>> program;
 
-    Program(const ProgramParameters& programParameters) {
+    Program([[maybe_unused]] const ProgramParameters& programParameters) {
         switch (gfx::Backend::GetType()) {
 #if MLN_RENDER_BACKEND_METAL
             case gfx::Backend::Type::Metal: {
+                break;
+            }
+#elif MLN_RENDER_BACKEND_VULKAN
+            case gfx::Backend::Type::Vulkan: {
                 break;
             }
 #else // MLN_RENDER_BACKEND_OPENGL

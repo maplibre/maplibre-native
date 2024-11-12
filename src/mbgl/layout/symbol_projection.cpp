@@ -5,6 +5,10 @@
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
 #include <mbgl/util/math.hpp>
 
+#include <numbers>
+
+using namespace std::numbers;
+
 namespace mbgl {
 
 /*
@@ -146,6 +150,9 @@ void addDynamicAttributes(const Point<float>& anchorPoint,
 
 void hideGlyphs(size_t numGlyphs, gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray) {
     const Point<float> offscreenPoint = {-INFINITY, -INFINITY};
+    if (dynamicVertexArray.empty()) {
+        dynamicVertexArray.reserve(4 * numGlyphs);
+    }
     for (size_t i = 0; i < numGlyphs; i++) {
         addDynamicAttributes(offscreenPoint, 0, dynamicVertexArray);
     }
@@ -195,10 +202,10 @@ std::optional<PlacedGlyph> placeGlyphAlongLine(const float offsetX,
         // The label needs to be flipped to keep text upright.
         // Iterate in the reverse direction.
         dir *= -1;
-        angle = static_cast<float>(M_PI);
+        angle = pi_v<float>;
     }
 
-    if (dir < 0) angle += static_cast<float>(M_PI);
+    if (dir < 0) angle += pi_v<float>;
 
     int32_t currentIndex = dir > 0 ? anchorSegment : anchorSegment + 1;
 
@@ -270,7 +277,6 @@ std::optional<std::pair<PlacedGlyph, PlacedGlyph>> placeFirstAndLastGlyph(const 
 
     const float firstGlyphOffset = symbol.glyphOffsets.front();
     const float lastGlyphOffset = symbol.glyphOffsets.back();
-    ;
 
     std::optional<PlacedGlyph> firstPlacedGlyph = placeGlyphAlongLine(fontScale * firstGlyphOffset,
                                                                       lineOffsetX,
@@ -365,6 +371,7 @@ PlacementResult placeGlyphsAlongLine(const PlacedSymbol& symbol,
             }
         }
 
+        placedGlyphs.reserve(symbol.glyphOffsets.size());
         placedGlyphs.push_back(firstAndLastGlyph->first);
         for (size_t glyphIndex = 1; glyphIndex < symbol.glyphOffsets.size() - 1; glyphIndex++) {
             const float glyphOffsetX = symbol.glyphOffsets[glyphIndex];
@@ -429,6 +436,9 @@ PlacementResult placeGlyphsAlongLine(const PlacedSymbol& symbol,
     // The number of placedGlyphs must equal the number of glyphOffsets, which
     // must correspond to the number of glyph vertices There may be 0 glyphs
     // here, if a label consists entirely of glyphs that have 0x0 dimensions
+    if (dynamicVertexArray.empty()) {
+        dynamicVertexArray.reserve(4 * placedGlyphs.size());
+    }
     for (auto& placedGlyph : placedGlyphs) {
         addDynamicAttributes(placedGlyph.point, placedGlyph.angle, dynamicVertexArray);
     }

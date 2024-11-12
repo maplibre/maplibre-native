@@ -37,7 +37,6 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/android/src/bitmap.hpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/bitmap_factory.cpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/bitmap_factory.hpp
-        ${PROJECT_SOURCE_DIR}/platform/android/src/gl_functions.cpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/image.cpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/jni.cpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/jni.hpp
@@ -48,7 +47,6 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/android/src/timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/map/map_snapshotter.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/platform/time.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/asset_file_source.cpp
@@ -72,8 +70,25 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/thread_local.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/utf.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/layermanager/layer_manager.cpp
-        ${PROJECT_SOURCE_DIR}/platform/linux/src/headless_backend_egl.cpp
 )
+
+if(MLN_WITH_OPENGL)
+    target_sources(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
+            ${PROJECT_SOURCE_DIR}/platform/linux/src/headless_backend_egl.cpp
+            ${PROJECT_SOURCE_DIR}/platform/android/src/gl_functions.cpp
+    )
+endif()
+
+if(MLN_WITH_VULKAN)
+    target_sources(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/vulkan/headless_backend.cpp
+    )
+endif()
 
 target_include_directories(
     mbgl-core
@@ -110,7 +125,6 @@ target_link_libraries(
     PRIVATE
         GLESv3
         Mapbox::Base
-        Mapbox::Base::optional
         log
         mbgl-compiler-options
 )
@@ -127,14 +141,19 @@ add_library(
 
 target_include_directories(
     mbgl-test-runner
-    PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue ${PROJECT_SOURCE_DIR}/platform/android/src ${PROJECT_SOURCE_DIR}/src
+    PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue
+    ${PROJECT_SOURCE_DIR}/platform/android/src
+    ${PROJECT_SOURCE_DIR}/src
 )
+
+find_package(curl CONFIG)
 
 target_link_libraries(
     mbgl-test-runner
     PRIVATE
         Mapbox::Base::jni.hpp
         mbgl-compiler-options
+        $<$<BOOL:${curl_FOUND}>:curl::curl_static>
         -Wl,--whole-archive
         mbgl-test
         -Wl,--no-whole-archive
@@ -143,7 +162,7 @@ target_link_libraries(
 
 target_sources(
     mbgl-test-runner
-    PRIVATE ${PROJECT_SOURCE_DIR}/platform/android/MapboxGLAndroidSDK/src/cpp/http_file_source.cpp
+    PRIVATE ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/http_file_source.cpp
 )
 
 add_custom_command(
@@ -177,7 +196,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/local_glyph_rasterizer.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/collator_test_stub.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/number_format_test_stub.cpp
-    ${PROJECT_SOURCE_DIR}/platform/android/MapboxGLAndroidSDK/src/cpp/http_file_source.cpp
+    ${PROJECT_SOURCE_DIR}/platform/android/MapLibreAndroid/src/cpp/http_file_source.cpp
 )
 
 target_include_directories(
@@ -226,8 +245,12 @@ add_library(
     ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/local_glyph_rasterizer.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/collator_test_stub.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/number_format_test_stub.cpp
-    ${PROJECT_SOURCE_DIR}/platform/android/MapboxGLAndroidSDK/src/cpp/http_file_source.cpp
+    ${PROJECT_SOURCE_DIR}/platform/android/MapLibreAndroid/src/cpp/http_file_source.cpp
 )
+
+if(MLN_WITH_VULKAN)
+    target_compile_definitions(mbgl-render-test-runner PRIVATE "MLN_RENDER_BACKEND_VULKAN=1")
+endif()
 
 target_include_directories(
     mbgl-render-test-runner

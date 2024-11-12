@@ -295,7 +295,7 @@ static NSString * const MLNInvisibleStyleMarkerSymbolName = @"invisible_marker";
 
 /// Prefix that denotes a sprite installed by MLNMapView, to avoid collisions
 /// with style-defined sprites.
-NSString * const MLNAnnotationSpritePrefix = @"com.mapbox.sprites.";
+NSString * const MLNAnnotationSpritePrefix = @"org.maplibre.sprites.";
 
 /// Slop area around the hit testing point, allowing for imprecise annotation selection.
 const CGFloat MLNAnnotationImagePaddingForHitTest = 5;
@@ -306,7 +306,7 @@ const CGFloat MLNAnnotationImagePaddingForCallout = 1;
 const CGSize MLNAnnotationAccessibilityElementMinimumSize = CGSizeMake(10, 10);
 
 /// The number of view annotations (excluding the user location view) that must
-/// be descendents of `MLNMapView` before presentsWithTransaction is enabled.
+/// be descendents of ``MLNMapView`` before presentsWithTransaction is enabled.
 static const NSUInteger MLNPresentsWithTransactionAnnotationCount = 0;
 
 /// An indication that the requested annotation was not found or is nonexistent.
@@ -451,7 +451,7 @@ public:
     MLNAnnotationTagContextMap _annotationContextsByAnnotationTag;
     MLNAnnotationObjectTagMap _annotationTagsByAnnotation;
 
-    /// Tag of the selected annotation. If the user location annotation is selected, this ivar is set to `MLNAnnotationTagNotFound`.
+    /// Tag of the selected annotation. If the user location annotation is selected, this ivar is set to ``MLNAnnotationTagNotFound``.
     MLNAnnotationTag _selectedAnnotationTag;
 
     BOOL _userLocationAnnotationIsSelected;
@@ -859,6 +859,8 @@ public:
     _pendingLatitude = NAN;
     _pendingLongitude = NAN;
     _targetCoordinate = kCLLocationCoordinate2DInvalid;
+    
+    _shouldRequestAuthorizationToUseLocationServices = YES;
 }
 
 - (mbgl::Size)size
@@ -2862,14 +2864,14 @@ public:
         }
     }
 
-    NSString *actionSheetTitle = NSLocalizedStringWithDefaultValue(@"SDK_NAME", nil, nil, @"Mapbox Maps SDK for iOS", @"Action sheet title");
+    NSString *actionSheetTitle = NSLocalizedStringWithDefaultValue(@"SDK_NAME", nil, nil, @"MapLibre Native iOS", @"Action sheet title");
     UIAlertController *attributionController = [UIAlertController alertControllerWithTitle:actionSheetTitle
                                                                                    message:nil
                                                                             preferredStyle:UIAlertControllerStyleActionSheet];
-
-    if (shouldShowVersion)
+    NSString *version = [NSBundle mgl_frameworkInfoDictionary][@"CFBundleShortVersionString"];
+    if (shouldShowVersion && version != nil && ![version isEqualToString:@""]) 
     {
-        attributionController.title = [actionSheetTitle stringByAppendingFormat:@" %@", [NSBundle mgl_frameworkInfoDictionary][@"MLNSemanticVersionString"]];
+        attributionController.title = [actionSheetTitle stringByAppendingFormat:@" %@", version];
     }
     
     NSArray *attributionInfos = [self.style attributionInfosWithFontSize:[UIFont buttonFontSize] linkColor:nil];
@@ -2877,7 +2879,13 @@ public:
     {
         UIAlertAction *action = [UIAlertAction actionWithTitle:[attributionInfo.title.string mgl_titleCasedStringWithLocale:[NSLocale currentLocale]]
                                                          style:UIAlertActionStyleDefault
-                                                       handler:nil];
+                                                       handler:^(UIAlertAction * _Nonnull actionBlock) {
+            NSURL *url = attributionInfo.URL;
+            if (url)
+            {
+                [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
+            }
+        }];
         [attributionController addAction:action];
     }
 
@@ -3139,6 +3147,16 @@ static void *windowScreenContext = &windowScreenContext;
 - (BOOL)prefetchesTiles
 {
     return self.mbglMap.getPrefetchZoomDelta() > 0 ? YES : NO;
+}
+
+- (void)setTileCacheEnabled:(BOOL)enabled
+{
+    _rendererFrontend->setTileCacheEnabled(enabled);
+}
+
+- (BOOL)tileCacheEnabled
+{
+    return _rendererFrontend->getTileCacheEnabled();
 }
 
 // MARK: - Accessibility -
@@ -5432,7 +5450,7 @@ static void *windowScreenContext = &windowScreenContext;
         // marginInsetsHintForPresentationFromRect: - in this case we need to
         // ensure that partially off-screen annotations are NOT moved into view.
         //
-        // We may want to create (and fallback to) an `MLNMapViewDelegate` version
+        // We may want to create (and fallback to) an ``MLNMapViewDelegate`` version
         // of the `-[MLNCalloutView marginInsetsHintForPresentationFromRect:]
         // protocol method.
         bounds = CGRectInset(bounds, -calloutPositioningRect.size.width, -calloutPositioningRect.size.height);
@@ -5812,7 +5830,7 @@ static void *windowScreenContext = &windowScreenContext;
 
     if (shouldEnableLocationServices)
     {
-        if (self.locationManager.authorizationStatus == kCLAuthorizationStatusNotDetermined) {
+        if (self.shouldRequestAuthorizationToUseLocationServices && self.locationManager.authorizationStatus == kCLAuthorizationStatusNotDetermined) {
             BOOL hasWhenInUseUsageDescription = !![[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationWhenInUseUsageDescription"];
 
             if (@available(iOS 11.0, *)) {
@@ -6975,6 +6993,7 @@ static void *windowScreenContext = &windowScreenContext;
         if (annotationView)
         {
             CLLocationCoordinate2D coordinate = annotation.coordinate;
+
             // Every so often (1 out of 1000 frames?) the mbgl query mechanism fails. This logic spot checks the
             // offscreenAnnotations values -- if they are actually still on screen then the view center is
             // moved and the enqueue operation is avoided. This allows us to keep the performance benefit of
@@ -6994,7 +7013,7 @@ static void *windowScreenContext = &windowScreenContext;
                 CGPoint adjustedCenter = annotationView.center;
                 adjustedCenter.x = -CGRectGetWidth(self.frame) * 10.0;
                 annotationView.center = adjustedCenter;
-
+                
                 [self enqueueAnnotationViewForAnnotationContext:annotationContext];
             }
         }
@@ -7325,6 +7344,10 @@ static void *windowScreenContext = &windowScreenContext;
     }
 
     return _annotationViewReuseQueueByIdentifier[identifier];
+}
+
+- (MLNBackendResource)backendResource {
+    return _mbglView->getObject();
 }
 
 @end

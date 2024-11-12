@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gl/extension.hpp>
+#include <mbgl/gl/defines.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 
 #define GL_DEBUG_OUTPUT_SYNCHRONOUS 0x8242

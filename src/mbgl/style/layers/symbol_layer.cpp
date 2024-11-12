@@ -168,15 +168,15 @@ void SymbolLayer::setIconOptional(const PropertyValue<bool>& value) {
     baseImpl = std::move(impl_);
     observer->onLayerChanged(*this);
 }
-PropertyValue<float> SymbolLayer::getDefaultIconPadding() {
+PropertyValue<Padding> SymbolLayer::getDefaultIconPadding() {
     return IconPadding::defaultValue();
 }
 
-const PropertyValue<float>& SymbolLayer::getIconPadding() const {
+const PropertyValue<Padding>& SymbolLayer::getIconPadding() const {
     return impl().layout.get<IconPadding>();
 }
 
-void SymbolLayer::setIconPadding(const PropertyValue<float>& value) {
+void SymbolLayer::setIconPadding(const PropertyValue<Padding>& value) {
     if (value == getIconPadding()) return;
     auto impl_ = mutableImpl();
     impl_->layout.get<IconPadding>() = value;
@@ -648,6 +648,7 @@ void SymbolLayer::setTextTransform(const PropertyValue<TextTransformType>& value
     baseImpl = std::move(impl_);
     observer->onLayerChanged(*this);
 }
+
 PropertyValue<std::vector<TextVariableAnchorType>> SymbolLayer::getDefaultTextVariableAnchor() {
     return TextVariableAnchor::defaultValue();
 }
@@ -663,6 +664,23 @@ void SymbolLayer::setTextVariableAnchor(const PropertyValue<std::vector<TextVari
     baseImpl = std::move(impl_);
     observer->onLayerChanged(*this);
 }
+
+PropertyValue<VariableAnchorOffsetCollection> SymbolLayer::getDefaultTextVariableAnchorOffset() {
+    return TextVariableAnchorOffset::defaultValue();
+}
+
+const PropertyValue<VariableAnchorOffsetCollection>& SymbolLayer::getTextVariableAnchorOffset() const {
+    return impl().layout.get<TextVariableAnchorOffset>();
+}
+
+void SymbolLayer::setTextVariableAnchorOffset(const PropertyValue<VariableAnchorOffsetCollection>& value) {
+    if (value == getTextVariableAnchorOffset()) return;
+    auto impl_ = mutableImpl();
+    impl_->layout.get<TextVariableAnchorOffset>() = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
 PropertyValue<std::vector<TextWritingModeType>> SymbolLayer::getDefaultTextWritingMode() {
     return TextWritingMode::defaultValue();
 }
@@ -1134,6 +1152,7 @@ enum class Property : uint8_t {
     TextSize,
     TextTransform,
     TextVariableAnchor,
+    TextVariableAnchorOffset,
     TextWritingMode,
 };
 
@@ -1142,7 +1161,7 @@ constexpr uint8_t toUint8(T t) noexcept {
     return uint8_t(mbgl::underlying_type(t));
 }
 
-MAPBOX_ETERNAL_CONSTEXPR const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
+constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
     {{"icon-color", toUint8(Property::IconColor)},
      {"icon-halo-blur", toUint8(Property::IconHaloBlur)},
      {"icon-halo-color", toUint8(Property::IconHaloColor)},
@@ -1211,6 +1230,7 @@ MAPBOX_ETERNAL_CONSTEXPR const auto layerProperties = mapbox::eternal::hash_map<
      {"text-size", toUint8(Property::TextSize)},
      {"text-transform", toUint8(Property::TextTransform)},
      {"text-variable-anchor", toUint8(Property::TextVariableAnchor)},
+     {"text-variable-anchor-offset", toUint8(Property::TextVariableAnchorOffset)},
      {"text-writing-mode", toUint8(Property::TextWritingMode)}});
 
 StyleProperty getLayerProperty(const SymbolLayer& layer, Property property) {
@@ -1351,6 +1371,8 @@ StyleProperty getLayerProperty(const SymbolLayer& layer, Property property) {
             return makeStyleProperty(layer.getTextTransform());
         case Property::TextVariableAnchor:
             return makeStyleProperty(layer.getTextVariableAnchor());
+        case Property::TextVariableAnchorOffset:
+            return makeStyleProperty(layer.getTextVariableAnchorOffset());
         case Property::TextWritingMode:
             return makeStyleProperty(layer.getTextWritingMode());
     }
@@ -1628,39 +1650,15 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
             return std::nullopt;
         }
     }
-    if (property == Property::IconPadding || property == Property::SymbolSpacing ||
-        property == Property::TextLineHeight || property == Property::TextMaxAngle ||
-        property == Property::TextPadding) {
+    if (property == Property::IconPadding) {
         Error error;
-        const auto& typedValue = convert<PropertyValue<float>>(value, error, false, false);
+        const auto& typedValue = convert<PropertyValue<Padding>>(value, error, true, false);
         if (!typedValue) {
             return error;
         }
 
-        if (property == Property::IconPadding) {
-            setIconPadding(*typedValue);
-            return std::nullopt;
-        }
-
-        if (property == Property::SymbolSpacing) {
-            setSymbolSpacing(*typedValue);
-            return std::nullopt;
-        }
-
-        if (property == Property::TextLineHeight) {
-            setTextLineHeight(*typedValue);
-            return std::nullopt;
-        }
-
-        if (property == Property::TextMaxAngle) {
-            setTextMaxAngle(*typedValue);
-            return std::nullopt;
-        }
-
-        if (property == Property::TextPadding) {
-            setTextPadding(*typedValue);
-            return std::nullopt;
-        }
+        setIconPadding(*typedValue);
+        return std::nullopt;
     }
     if (property == Property::IconPitchAlignment || property == Property::IconRotationAlignment ||
         property == Property::TextPitchAlignment || property == Property::TextRotationAlignment) {
@@ -1719,6 +1717,34 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
 
         setSymbolPlacement(*typedValue);
         return std::nullopt;
+    }
+    if (property == Property::SymbolSpacing || property == Property::TextLineHeight ||
+        property == Property::TextMaxAngle || property == Property::TextPadding) {
+        Error error;
+        const auto& typedValue = convert<PropertyValue<float>>(value, error, false, false);
+        if (!typedValue) {
+            return error;
+        }
+
+        if (property == Property::SymbolSpacing) {
+            setSymbolSpacing(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::TextLineHeight) {
+            setTextLineHeight(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::TextMaxAngle) {
+            setTextMaxAngle(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::TextPadding) {
+            setTextPadding(*typedValue);
+            return std::nullopt;
+        }
     }
     if (property == Property::SymbolZOrder) {
         Error error;
@@ -1779,6 +1805,16 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
         }
 
         setTextVariableAnchor(*typedValue);
+        return std::nullopt;
+    }
+    if (property == Property::TextVariableAnchorOffset) {
+        Error error;
+        const auto& typedValue = convert<PropertyValue<VariableAnchorOffsetCollection>>(value, error, true, false);
+        if (!typedValue) {
+            return error;
+        }
+
+        setTextVariableAnchorOffset(*typedValue);
         return std::nullopt;
     }
     if (property == Property::TextWritingMode) {

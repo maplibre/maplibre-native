@@ -54,16 +54,18 @@ using SourceType = mbgl::style::SourceType;
 
 class SourceTest {
 public:
+    util::SimpleIdentity uniqueID;
     util::RunLoop loop;
     std::shared_ptr<StubFileSource> fileSource = std::make_shared<StubFileSource>();
     StubStyleObserver styleObserver;
     StubRenderSourceObserver renderSourceObserver;
     Transform transform;
     TransformState transformState;
-    Style style{fileSource, 1};
     AnnotationManager annotationManager{style};
-    ImageManager imageManager;
-    GlyphManager glyphManager;
+    std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
+    std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
+    TaggedScheduler threadPool;
+    Style style;
 
     TileParameters tileParameters(MapMode mapMode = MapMode::Continuous) {
         return {1.0,
@@ -74,10 +76,13 @@ public:
                 annotationManager.makeWeakPtr(),
                 imageManager,
                 glyphManager,
-                0};
+                0,
+                threadPool};
     };
 
-    SourceTest() {
+    SourceTest()
+        : threadPool(Scheduler::GetBackground(), uniqueID),
+          style{fileSource, 1, threadPool} {
         // Squelch logging.
         Log::setObserver(std::make_unique<Log::NullObserver>());
 
@@ -86,6 +91,8 @@ public:
 
         transformState = transform.getState();
     }
+
+    ~SourceTest() { threadPool.waitForEmpty(); }
 
     void run() { loop.run(); }
 
@@ -167,7 +174,7 @@ TEST(Source, RasterTileEmpty) {
         FAIL() << "Should never be called";
     };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -203,7 +210,7 @@ TEST(Source, RasterDEMTileEmpty) {
         FAIL() << "Should never be called";
     };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -241,7 +248,7 @@ TEST(Source, VectorTileEmpty) {
         FAIL() << "Should never be called";
     };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -276,7 +283,7 @@ TEST(Source, RasterTileFail) {
             test.end();
         };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -311,7 +318,7 @@ TEST(Source, RasterDEMTileFail) {
             test.end();
         };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -348,7 +355,7 @@ TEST(Source, VectorTileFail) {
             test.end();
         };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -384,7 +391,7 @@ TEST(Source, RasterTileCorrupt) {
             test.end();
         };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -421,7 +428,7 @@ TEST(Source, RasterDEMTileCorrupt) {
             test.end();
         };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -458,7 +465,7 @@ TEST(Source, VectorTileCorrupt) {
             test.end();
         };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -492,7 +499,7 @@ TEST(Source, RasterTileCancel) {
         FAIL() << "Should never be called";
     };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -526,7 +533,7 @@ TEST(Source, RasterDEMTileCancel) {
         FAIL() << "Should never be called";
     };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -562,7 +569,7 @@ TEST(Source, VectorTileCancel) {
         FAIL() << "Should never be called";
     };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -607,7 +614,7 @@ TEST(Source, RasterTileAttribution) {
     source.setObserver(&test.styleObserver);
     source.loadDescription(*test.fileSource);
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
     test.run();
@@ -648,7 +655,7 @@ TEST(Source, RasterDEMTileAttribution) {
     source.setObserver(&test.styleObserver);
     source.loadDescription(*test.fileSource);
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
     test.run();
@@ -741,7 +748,7 @@ TEST(Source, CustomGeometrySourceSetTileData) {
         FAIL() << "Should never be called";
     };
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
@@ -758,8 +765,8 @@ class FakeTileSource;
 
 class FakeTile : public Tile {
 public:
-    FakeTile(FakeTileSource& source_, const OverscaledTileID& tileID)
-        : Tile(Tile::Kind::Geometry, tileID),
+    FakeTile(FakeTileSource& source_, const OverscaledTileID& tileID, TileObserver* observer_)
+        : Tile(Tile::Kind::Geometry, tileID, "FakeTileSource", observer_),
           source(source_) {
         renderable = true;
     }
@@ -768,6 +775,8 @@ public:
     bool layerPropertiesUpdated(const Immutable<style::LayerProperties>&) override { return true; }
 
     std::unique_ptr<TileRenderData> createRenderData() override { return nullptr; }
+
+    void cancel() override {}
 
 private:
     FakeTileSource& source;
@@ -778,8 +787,8 @@ public:
     MOCK_METHOD1(tileSetNecessity, void(TileNecessity));
     MOCK_METHOD1(tileSetMinimumUpdateInterval, void(Duration));
 
-    explicit FakeTileSource(Immutable<style::Source::Impl> impl_)
-        : RenderTileSetSource(std::move(impl_)) {}
+    explicit FakeTileSource(Immutable<style::Source::Impl> impl_, const TaggedScheduler& threadPool_)
+        : RenderTileSetSource(std::move(impl_), threadPool_) {}
     void updateInternal(const Tileset& tileset,
                         const std::vector<Immutable<style::LayerProperties>>& layers,
                         const bool needsRendering,
@@ -793,7 +802,9 @@ public:
                            util::tileSize_I,
                            tileset.zoomRange,
                            tileset.bounds,
-                           [&](const OverscaledTileID& tileID) { return std::make_unique<FakeTile>(*this, tileID); });
+                           [&](const OverscaledTileID& tileID, TileObserver* observer_) {
+                               return std::make_unique<FakeTile>(*this, tileID, observer_);
+                           });
     }
 
     const std::optional<Tileset>& getTileset() const override {
@@ -816,7 +827,7 @@ TEST(Source, InvisibleSourcesTileNecessity) {
     VectorSource initialized("source", Tileset{{"tiles"}});
     initialized.loadDescription(*test.fileSource);
 
-    FakeTileSource renderTilesetSource{initialized.baseImpl};
+    FakeTileSource renderTilesetSource{initialized.baseImpl, test.threadPool};
     RenderSource* renderSource = &renderTilesetSource;
     LineLayer layer("id", "source");
     Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
@@ -839,7 +850,7 @@ TEST(Source, SourceMinimumUpdateInterval) {
     VectorSource initialized("source", Tileset{{"tiles"}});
     initialized.loadDescription(*test.fileSource);
 
-    FakeTileSource renderTilesetSource{initialized.baseImpl};
+    FakeTileSource renderTilesetSource{initialized.baseImpl, test.threadPool};
     RenderSource* renderSource = &renderTilesetSource;
     LineLayer layer("id", "source");
     Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
@@ -882,8 +893,8 @@ TEST(Source, RenderTileSetSourceUpdate) {
 
     class FakeRenderTileSetSource : public RenderTileSetSource {
     public:
-        explicit FakeRenderTileSetSource(Immutable<style::Source::Impl> impl_)
-            : RenderTileSetSource(std::move(impl_)) {}
+        explicit FakeRenderTileSetSource(Immutable<style::Source::Impl> impl_, TaggedScheduler threadPool_)
+            : RenderTileSetSource(std::move(impl_), threadPool_) {}
 
         MOCK_METHOD0(mockedUpdateInternal, void());
 
@@ -903,7 +914,7 @@ TEST(Source, RenderTileSetSourceUpdate) {
     VectorSource initialized("source", Tileset{{"tiles"}});
     initialized.loadDescription(*test.fileSource);
 
-    FakeRenderTileSetSource renderTilesetSource{initialized.baseImpl};
+    FakeRenderTileSetSource renderTilesetSource{initialized.baseImpl, test.threadPool};
 
     LineLayer layer("id", "source");
     Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
@@ -966,10 +977,12 @@ TEST(Source, VectorSourceUrlSetTiles) {
 TEST(Source, GeoJSONSourceTilesAfterDataReset) {
     SourceTest test;
     GeoJSONSource source("source");
-    auto geoJSONData = GeoJSONData::create(mapbox::geojson::parse(
-        R"({"geometry": {"type": "Point", "coordinates": [1.1, 1.1]}, "type": "Feature", "properties": {}})"));
+    auto geoJSONData = GeoJSONData::create(
+        mapbox::geojson::parse(
+            R"({"geometry": {"type": "Point", "coordinates": [1.1, 1.1]}, "type": "Feature", "properties": {}})"),
+        Scheduler::GetSequenced());
     source.setGeoJSONData(geoJSONData);
-    RenderGeoJSONSource renderSource{staticImmutableCast<GeoJSONSource::Impl>(source.baseImpl)};
+    RenderGeoJSONSource renderSource{staticImmutableCast<GeoJSONSource::Impl>(source.baseImpl), test.threadPool};
 
     CircleLayer layer("id", "source");
     Immutable<LayerProperties> layerProperties = makeMutable<CircleLayerProperties>(
@@ -1026,7 +1039,7 @@ TEST(Source, SetMaxParentOverscaleFactor) {
     ASSERT_EQ(3, *source.getMaxOverscaleFactorForParentTiles());
     source.loadDescription(*test.fileSource);
 
-    auto renderSource = RenderSource::create(source.baseImpl);
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 

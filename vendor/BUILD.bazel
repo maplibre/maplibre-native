@@ -44,7 +44,6 @@ cc_library(
         "mapbox-base/include",
     ],
     visibility = ["//visibility:public"],
-    deps = ["optional"],
 )
 
 # vendor/parsedate
@@ -54,15 +53,6 @@ cc_library(
     hdrs = glob(["parsedate/**/*.hpp"]),
     copts = CPP_FLAGS,
     includes = ["parsedate"],
-    visibility = ["//visibility:public"],
-)
-
-# vendor/optional
-cc_library(
-    name = "optional",
-    hdrs = glob(["mapbox-base/deps/optional/*.hpp"]),
-    copts = CPP_FLAGS,
-    includes = ["mapbox-base/deps/optional"],
     visibility = ["//visibility:public"],
 )
 
@@ -78,7 +68,6 @@ cc_library(
     copts = CPP_FLAGS,
     includes = ["csscolorparser"],
     visibility = ["//visibility:public"],
-    deps = ["optional"],
 )
 
 # vendor/wagyu-files.json

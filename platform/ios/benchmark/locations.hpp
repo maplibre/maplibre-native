@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace mbgl {
 namespace bench {
@@ -16,5 +16,5 @@ struct Location {
 
 extern const std::vector<Location> locations;
 
-}
-}
+} // namespace bench
+} // namespace mbgl

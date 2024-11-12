@@ -1,0 +1,72 @@
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+
+objc_library(
+    name = "metal_backend",
+    srcs = [
+        "glfw_backend.hpp",
+        "glfw_metal_backend.h",
+        "glfw_metal_backend.mm",
+        "metal_backend.h",
+        "metal_backend.mm",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    deps = [
+        "//:maplibre_lib",
+        "@glfw",
+    ],
+)
+
+filegroup(
+    name = "mapbox_puck_assets",
+    srcs = glob([
+        "assets/*.png",
+    ]),
+)
+
+cc_binary(
+    name = "glfw_app",
+    srcs = glob(
+               [
+                   "*.cpp",
+                   "*.hpp",
+               ],
+               exclude = [
+                   "glfw_*_backend.*",
+               ],
+           ) +
+           select({
+               "//:metal_renderer": [
+               ],
+               "//conditions:default": [
+                   "glfw_gl_backend.cpp",
+                   "glfw_gl_backend.hpp",
+               ],
+           }),
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    data = [
+        ":mapbox_puck_assets",
+    ],
+    defines = [
+        r"MAPBOX_PUCK_ASSETS_PATH=\"./platform/glfw/assets/\"",
+    ],
+    linkopts = [
+        "-lglfw",
+    ] + select({
+        "@platforms//os:macos": [
+            "-framework Cocoa",
+            "-framework IOKit",
+        ],
+        "//conditions:default": [],
+    }),
+    visibility = [
+        "@rules_xcodeproj//xcodeproj:generated",
+    ],
+    deps = [
+        "//:maplibre_lib",
+        "@glfw",
+    ] + select({
+        "@platforms//os:macos": ["metal_backend"],
+        "@platforms//os:linux": ["//platform/linux:impl"],
+        "//conditions:default": [],
+    }),
+)

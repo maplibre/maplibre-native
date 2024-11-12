@@ -1,5 +1,6 @@
 #include "scheduler.hpp"
 
+#include <mbgl/util/monotonic_timer.hpp>
 #include <mbgl/util/util.hpp>
 
 #include <cassert>
@@ -12,7 +13,7 @@ Scheduler::~Scheduler() {
     MBGL_VERIFY_THREAD(tid);
 }
 
-void Scheduler::schedule(std::function<void()> function) {
+void Scheduler::schedule(std::function<void()>&& function) {
     const std::lock_guard<std::mutex> lock(m_taskQueueMutex);
     m_taskQueue.push(std::move(function));
 
@@ -26,6 +27,7 @@ void Scheduler::processEvents() {
     {
         const std::unique_lock<std::mutex> lock(m_taskQueueMutex);
         std::swap(taskQueue, m_taskQueue);
+        pendingItems += taskQueue.size();
     }
 
     while (!taskQueue.empty()) {
@@ -34,7 +36,25 @@ void Scheduler::processEvents() {
             function();
         }
         taskQueue.pop();
+        pendingItems--;
     }
+
+    cvEmpty.notify_all();
+}
+
+void Scheduler::waitForEmpty([[maybe_unused]] const mbgl::util::SimpleIdentity tag) {
+    MBGL_VERIFY_THREAD(tid);
+
+    std::unique_lock<std::mutex> lock(m_taskQueueMutex);
+    const auto isDone = [&] {
+        return m_taskQueue.empty() && pendingItems == 0;
+    };
+
+    while (!isDone()) {
+        cvEmpty.wait(lock);
+    }
+
+    assert(m_taskQueue.size() + pendingItems == 0);
 }
 
 } // namespace QMapLibre

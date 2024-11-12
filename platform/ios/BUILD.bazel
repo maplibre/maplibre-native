@@ -3,12 +3,12 @@ load("@build_bazel_rules_apple//apple:apple.bzl", "apple_static_xcframework", "a
 load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application", "ios_framework")
 load("@build_bazel_rules_apple//apple:resources.bzl", "apple_resource_bundle")
 load("@build_bazel_rules_apple//apple:versioning.bzl", "apple_bundle_version")
+load("@darwin_config//:config.bzl", "BUNDLE_ID_PREFIX")
 load(
     "@rules_xcodeproj//xcodeproj:defs.bzl",
     "top_level_target",
     "xcodeproj",
 )
-load("//platform/ios/bazel:config.bzl", "BUILD_MODE", "BUNDLE_ID_PREFIX")
 load(
     "//platform/ios/bazel:files.bzl",
     "MLN_IOS_PRIVATE_HEADERS",
@@ -31,23 +31,9 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
-# this can be removed once the legacy renderer is removed completely for iOS
-genrule(
-    name = "umbrella_header",
-    srcs = ["src/Mapbox.template.h"],
-    outs = ["src/Mapbox.h"],
-    cmd = select({
-        "//:metal_renderer": """
-        echo "#define MLN_RENDER_BACKEND_METAL 1" > $@;
-        cat $(location src/Mapbox.template.h) >> $@;
-    """,
-        "//conditions:default": "cat $(location src/Mapbox.template.h) >> $@",
-    }),
-)
-
 filegroup(
     name = "ios_public_hdrs",
-    srcs = MLN_IOS_PUBLIC_HEADERS + [":umbrella_header"],
+    srcs = MLN_IOS_PUBLIC_HEADERS,
     visibility = ["//visibility:public"],
 )
 
@@ -137,7 +123,8 @@ apple_xcframework(
     data = glob([
         "resources/*.lproj/**",
         "resources/*.xcassets/**",
-    ]),
+        "resources/metal-cpp-ignores.txt",
+    ]) + ["PrivacyInfo.xcprivacy"],
     infoplists = ["info_plist"],
     ios = {
         "simulator": [
@@ -173,6 +160,7 @@ apple_resource_bundle(
     resources = glob([
         "resources/*.lproj/**",
         "resources/*.xcassets/**",
+        "resources/metal-cpp-ignores.txt",
     ]),
     visibility = ["//visibility:public"],
 )
@@ -194,6 +182,11 @@ _IOS_APPLICATION_RESOURCES = [
     "app/Assets.xcassets/**",
 ])
 
+apple_bundle_version(
+    name = "maplibre_app_version",
+    build_version = "1.0.0",
+)
+
 ios_application(
     name = "App",
     bundle_id = "{}.maplibre.app".format(BUNDLE_ID_PREFIX),
@@ -205,6 +198,7 @@ ios_application(
     minimum_os_version = "12.0",
     provisioning_profile = "xcode_profile",
     resources = _IOS_APPLICATION_RESOURCES,
+    version = ":maplibre_app_version",
     visibility = ["//visibility:public"],
     deps = [
         "//platform:iosapp",
@@ -241,7 +235,10 @@ ios_application(
     infoplists = ["//platform/ios/benchmark:info_benchmark_plist"],
     minimum_os_version = "12.0",
     provisioning_profile = "xcode_profile",
-    resources = ["//platform/ios/benchmark:bundle_resources"],
+    resources = [
+        "//platform/ios/benchmark:bundle_resources",
+        "//platform/ios/benchmark/assets:benchmark_assets",
+    ],
     visibility = ["//visibility:public"],
     deps = [
         "//platform:ios-benchapp",
@@ -249,17 +246,40 @@ ios_application(
     ],
 )
 
+filegroup(
+    name = "extra_files",
+    srcs = [
+        "BAZEL.md",
+        "CHANGELOG.md",
+        "MapLibre.podspec",
+        "PrivacyInfo.xcprivacy",
+        "README.md",
+        "RELEASE.md",
+        "VERSION",
+    ],
+    visibility = ["@rules_xcodeproj//xcodeproj:generated"],
+)
+
 xcodeproj(
     name = "xcodeproj",
     bazel_env = {"PATH": "/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin"},
-    build_mode = BUILD_MODE,
     default_xcode_configuration = "Debug",
+    extra_files = [
+        ":extra_files",
+    ],
     minimum_xcode_version = "14",
     project_name = "MapLibre",
     tags = ["manual"],
     top_level_targets = [
         top_level_target(
             "App",
+            target_environments = [
+                "simulator",
+                "device",
+            ],
+        ),
+        top_level_target(
+            "//platform/ios/app-swift:MapLibreApp",
             target_environments = [
                 "simulator",
                 "device",

@@ -4,14 +4,14 @@
 #include <mapbox/geometry/box.hpp>
 #include <mbgl/math/minmax.hpp>
 
-#include <unordered_set>
+#include <cassert>
 #include <cmath>
-#include <cstdint>
 #include <cstddef>
-#include <vector>
+#include <cstdint>
 #include <functional>
 #include <optional>
-#include <cassert>
+#include <unordered_set>
+#include <vector>
 
 namespace mbgl {
 
@@ -103,8 +103,8 @@ private:
     std::vector<std::pair<T, BBox>> boxElements;
     std::vector<std::pair<T, BCircle>> circleElements;
 
-    std::vector<std::vector<size_t>> boxCells;
-    std::vector<std::vector<size_t>> circleCells;
+    std::vector<std::vector<uint32_t>> boxCells;
+    std::vector<std::vector<uint32_t>> circleCells;
 };
 
 template <class T>
@@ -123,7 +123,8 @@ GridIndex<T>::GridIndex(const float width_, const float height_, const uint32_t 
 
 template <class T>
 void GridIndex<T>::insert(T&& t, const BBox& bbox) {
-    const size_t uid = boxElements.size();
+    assert(boxElements.size() < std::numeric_limits<uint32_t>::max());
+    const auto uid = static_cast<uint32_t>(boxElements.size());
 
     const auto cx1 = convertToXCellCoord(bbox.min.x);
     const auto cy1 = convertToYCellCoord(bbox.min.y);
@@ -140,12 +141,13 @@ void GridIndex<T>::insert(T&& t, const BBox& bbox) {
         }
     }
 
-    boxElements.emplace_back(t, bbox);
+    boxElements.emplace_back(std::move(t), bbox);
 }
 
 template <class T>
 void GridIndex<T>::insert(T&& t, const BCircle& bcircle) {
-    const size_t uid = circleElements.size();
+    assert(circleElements.size() < std::numeric_limits<uint32_t>::max());
+    const auto uid = static_cast<uint32_t>(circleElements.size());
 
     const auto cx1 = convertToXCellCoord(bcircle.center.x - bcircle.radius);
     const auto cy1 = convertToYCellCoord(bcircle.center.y - bcircle.radius);
@@ -162,7 +164,7 @@ void GridIndex<T>::insert(T&& t, const BCircle& bcircle) {
         }
     }
 
-    circleElements.emplace_back(t, bcircle);
+    circleElements.emplace_back(std::move(t), bcircle);
 }
 
 template <class T>
@@ -231,8 +233,8 @@ typename GridIndex<T>::BBox GridIndex<T>::convertToBox(const BCircle& circle) co
 
 template <class T>
 void GridIndex<T>::query(const BBox& queryBBox, std::function<bool(const T&, const BBox&)> resultFn) const {
-    std::unordered_set<size_t> seenBoxes;
-    std::unordered_set<size_t> seenCircles;
+    std::unordered_set<uint32_t> seenBoxes;
+    std::unordered_set<uint32_t> seenCircles;
 
     if (noIntersection(queryBBox)) {
         return;
@@ -263,7 +265,7 @@ void GridIndex<T>::query(const BBox& queryBBox, std::function<bool(const T&, con
             cellIndex = xCellCount * y + x;
             // Look up other boxes
             for (auto uid : boxCells[cellIndex]) {
-                if (seenBoxes.count(uid) == 0) {
+                if (!seenBoxes.contains(uid)) {
                     seenBoxes.insert(uid);
 
                     auto& pair = boxElements.at(uid);
@@ -278,7 +280,7 @@ void GridIndex<T>::query(const BBox& queryBBox, std::function<bool(const T&, con
 
             // Look up circles
             for (auto uid : circleCells[cellIndex]) {
-                if (seenCircles.count(uid) == 0) {
+                if (!seenCircles.contains(uid)) {
                     seenCircles.insert(uid);
 
                     auto& pair = circleElements.at(uid);
@@ -328,7 +330,7 @@ void GridIndex<T>::query(const BCircle& queryBCircle, std::function<bool(const T
             cellIndex = xCellCount * y + x;
             // Look up boxes
             for (auto uid : boxCells[cellIndex]) {
-                if (seenBoxes.count(uid) == 0) {
+                if (!seenBoxes.contains(uid)) {
                     seenBoxes.insert(uid);
 
                     auto& pair = boxElements.at(uid);
@@ -343,7 +345,7 @@ void GridIndex<T>::query(const BCircle& queryBCircle, std::function<bool(const T
 
             // Look up other circles
             for (auto uid : circleCells[cellIndex]) {
-                if (seenCircles.count(uid) == 0) {
+                if (!seenCircles.contains(uid)) {
                     seenCircles.insert(uid);
 
                     auto& pair = circleElements.at(uid);

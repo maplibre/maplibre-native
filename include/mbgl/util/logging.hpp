@@ -38,30 +38,34 @@ public:
     Log();
     ~Log();
 
-    static void useLogThread(bool enable);
+    /// @brief Determines whether messages of a given severity level are logged asynchronously.
+    ///
+    /// In a crash or other unexpected termination, pending asynchronous log entries will be lost.
+    /// The default is true (asynchronous) for all levels except `Error`.
+    static void useLogThread(bool enable, std::optional<EventSeverity> = {});
 
     template <typename... Args>
-    static void Debug(Event event, Args&&... args) {
+    static void Debug(Event event, Args&&... args) noexcept {
         Record(EventSeverity::Debug, event, ::std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    static void Info(Event event, Args&&... args) {
+    static void Info(Event event, Args&&... args) noexcept {
         Record(EventSeverity::Info, event, ::std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    static void Warning(Event event, Args&&... args) {
+    static void Warning(Event event, Args&&... args) noexcept {
         Record(EventSeverity::Warning, event, ::std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    static void Error(Event event, Args&&... args) {
+    static void Error(Event event, Args&&... args) noexcept {
         Record(EventSeverity::Error, event, ::std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    static void Record(EventSeverity severity, Event event, Args&&... args) {
+    static void Record(EventSeverity severity, Event event, Args&&... args) noexcept {
         if (!includes(severity, disabledEventSeverities) && !includes(event, disabledEvents) &&
             !includes({severity, event}, disabledEventPermutations)) {
             record(severity, event, ::std::forward<Args>(args)...);
@@ -71,8 +75,8 @@ public:
 private:
     static Log* get() noexcept;
 
-    static void record(EventSeverity severity, Event event, const std::string& msg);
-    static void record(EventSeverity severity, Event event, int64_t code, const std::string& msg);
+    static void record(EventSeverity severity, Event event, const std::string& msg) noexcept;
+    static void record(EventSeverity severity, Event event, int64_t code, const std::string& msg) noexcept;
     static void record(EventSeverity severity,
                        Event event,
                        int64_t code,

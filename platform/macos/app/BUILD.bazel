@@ -1,0 +1,32 @@
+load("@build_bazel_rules_apple//apple:macos.bzl", "macos_application")
+
+objc_library(
+    name = "macos_app_lib",
+    srcs = glob([
+        "*.h",
+        "*.m",
+    ]),
+    enable_modules = True,
+    deps = [
+        "//platform:macos-objcpp",
+    ],
+)
+
+macos_application(
+    name = "macos_app",
+    bundle_id = "org.maplibre.macosapp",
+    infoplists = [
+        "Info.plist",
+    ],
+    minimum_os_version = "11.0",
+    resources = glob([
+        "*.lproj/**",
+        "Assets.xcassets/**",
+    ]),
+    visibility = [
+        "@rules_xcodeproj//xcodeproj:generated",
+    ],
+    deps = [
+        ":macos_app_lib",
+    ],
+)

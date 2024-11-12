@@ -6,6 +6,7 @@
 #include <mbgl/gfx/index_vector.hpp>
 #include <mbgl/gfx/types.hpp>
 #include <mbgl/renderer/render_pass.hpp>
+#include <mbgl/renderer/render_tile.hpp>
 
 namespace mbgl {
 namespace gfx {
@@ -13,6 +14,12 @@ namespace gfx {
 struct Drawable::Impl {
     gfx::ColorMode colorMode = gfx::ColorMode::disabled();
     gfx::CullFaceMode cullFaceMode = gfx::CullFaceMode::disabled();
+
+    std::shared_ptr<Bucket> bucket;
+    PaintPropertyBindersBase* binders = nullptr; // owned by `bucket`
+
+    Immutable<std::vector<RenderTile>> renderTiles = makeMutable<std::vector<RenderTile>>();
+    const RenderTile* renderTile = nullptr; // owned by `renderTiles`
 };
 
 Drawable::Drawable(std::string name_)
@@ -45,17 +52,42 @@ void Drawable::setIndexData(std::vector<std::uint16_t> indexes, std::vector<Uniq
 
 static const gfx::Texture2DPtr noTexture;
 
-const gfx::Texture2DPtr& Drawable::getTexture(int32_t location) const {
-    const auto hit = textures.find(location);
-    return (hit != textures.end()) ? hit->second : noTexture;
+const gfx::Texture2DPtr& Drawable::getTexture(size_t id) const {
+    return (id < textures.size()) ? textures[id] : noTexture;
 }
 
-void Drawable::setTexture(std::shared_ptr<gfx::Texture2D> texture, int32_t location) {
-    textures.insert(std::make_pair(location, gfx::Texture2DPtr{})).first->second = std::move(texture);
+void Drawable::setTexture(std::shared_ptr<gfx::Texture2D> texture, size_t id) {
+    assert(id < textures.size());
+    if (id >= textures.size()) {
+        return;
+    }
+    textures[id] = std::move(texture);
 }
 
-void Drawable::removeTexture(int32_t location) {
-    textures.erase(location);
+PaintPropertyBindersBase* Drawable::getBinders() {
+    return impl->binders;
+}
+const PaintPropertyBindersBase* Drawable::getBinders() const {
+    return impl->binders;
+}
+
+/// Set the property binders used for property updates
+void Drawable::setBinders(std::shared_ptr<Bucket> bucket_, PaintPropertyBindersBase* binders_) {
+    impl->bucket = std::move(bucket_);
+    impl->binders = binders_;
+}
+
+const RenderTile* Drawable::getRenderTile() const {
+    return impl->renderTile;
+}
+
+const std::shared_ptr<Bucket>& Drawable::getBucket() const {
+    return impl->bucket;
+}
+
+void Drawable::setRenderTile(Immutable<std::vector<RenderTile>> renderTiles_, const RenderTile* tile_) {
+    impl->renderTiles = std::move(renderTiles_);
+    impl->renderTile = tile_;
 }
 
 } // namespace gfx

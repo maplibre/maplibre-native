@@ -25,8 +25,12 @@ unsigned long HillshadeLayerProperties::constantsMask() const {
     return evaluated.constantsMask();
 }
 
-const HillshadeLayer::Impl& HillshadeLayerProperties::layerImpl() const {
+const HillshadeLayer::Impl& HillshadeLayerProperties::layerImpl() const noexcept {
     return static_cast<const HillshadeLayer::Impl&>(*baseImpl);
+}
+
+expression::Dependency HillshadeLayerProperties::getDependencies() const noexcept {
+    return layerImpl().paint.getDependencies();
 }
 
 } // namespace style

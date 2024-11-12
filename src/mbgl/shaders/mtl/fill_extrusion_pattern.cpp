@@ -1,28 +1,31 @@
 #include <mbgl/shaders/mtl/fill_extrusion_pattern.hpp>
 #include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
 
 namespace mbgl {
 namespace shaders {
 
-const std::array<AttributeInfo, 6>
-    ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Metal>::attributes = {
-        AttributeInfo{0, gfx::AttributeDataType::Short2, "a_pos"},
-        AttributeInfo{1, gfx::AttributeDataType::Short4, "a_normal_ed"},
-        AttributeInfo{2, gfx::AttributeDataType::Float, "a_base"},
-        AttributeInfo{3, gfx::AttributeDataType::Float, "a_height"},
-        AttributeInfo{4, gfx::AttributeDataType::UShort4, "a_pattern_from"},
-        AttributeInfo{5, gfx::AttributeDataType::UShort4, "a_pattern_to"},
-};
-const std::array<UniformBlockInfo, 4>
+const std::array<UniformBlockInfo, 5>
     ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Metal>::uniforms = {
-        UniformBlockInfo{6, true, true, sizeof(FillExtrusionDrawableUBO), idFillExtrusionDrawableUBO},
-        UniformBlockInfo{7, true, true, sizeof(FillExtrusionDrawablePropsUBO), idFillExtrusionDrawablePropsUBO},
-        UniformBlockInfo{8, true, true, sizeof(FillExtrusionDrawableTilePropsUBO), idFillExtrusionDrawableTilePropsUBO},
-        UniformBlockInfo{9, true, false, sizeof(FillExtrusionInterpolateUBO), idFillExtrusionInterpolateUBO},
+        UniformBlockInfo{true, false, sizeof(GlobalPaintParamsUBO), idGlobalPaintParamsUBO},
+        UniformBlockInfo{true, true, sizeof(FillExtrusionDrawableUBO), idFillExtrusionDrawableUBO},
+        UniformBlockInfo{true, true, sizeof(FillExtrusionTilePropsUBO), idFillExtrusionTilePropsUBO},
+        UniformBlockInfo{true, false, sizeof(FillExtrusionInterpolateUBO), idFillExtrusionInterpolateUBO},
+        UniformBlockInfo{true, true, sizeof(FillExtrusionPropsUBO), idFillExtrusionPropsUBO},
+};
+const std::array<AttributeInfo, 6> ShaderSource<BuiltIn::FillExtrusionPatternShader,
+                                                gfx::Backend::Type::Metal>::attributes = {
+    AttributeInfo{fillExtrusionUBOCount + 0, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute},
+    AttributeInfo{fillExtrusionUBOCount + 1, gfx::AttributeDataType::Short4, idFillExtrusionNormalEdVertexAttribute},
+    AttributeInfo{fillExtrusionUBOCount + 2, gfx::AttributeDataType::Float, idFillExtrusionBaseVertexAttribute},
+    AttributeInfo{fillExtrusionUBOCount + 3, gfx::AttributeDataType::Float, idFillExtrusionHeightVertexAttribute},
+    AttributeInfo{
+        fillExtrusionUBOCount + 4, gfx::AttributeDataType::UShort4, idFillExtrusionPatternFromVertexAttribute},
+    AttributeInfo{fillExtrusionUBOCount + 5, gfx::AttributeDataType::UShort4, idFillExtrusionPatternToVertexAttribute},
 };
 const std::array<TextureInfo, 1>
     ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Metal>::textures = {
-        TextureInfo{0, "u_image"},
+        TextureInfo{0, idFillExtrusionImageTexture},
 };
 
 } // namespace shaders

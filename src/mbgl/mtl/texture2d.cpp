@@ -82,6 +82,20 @@ size_t Texture2D::numChannels() const noexcept {
 }
 
 MTL::PixelFormat Texture2D::getMetalPixelFormat() const noexcept {
+    // On iOS simulator and x86-64, we need to use the combined depth/stencil format.  If the depth and stencil
+    // formats are both set on a render pipeline, they have to be identical or we'll get, e.g.:
+    //     validateWithDevice:4343: failed assertion `Render Pipeline Descriptor Validation
+    //                              depthAttachmentPixelFormat (MTLPixelFormatDepth32Float) and
+    //                              stencilAttachmentPixelFormat (MTLPixelFormatStencil8) must match.
+
+#if TARGET_OS_SIMULATOR || defined(__x86_64__)
+    if ((channelType == gfx::TextureChannelDataType::Float ||
+         channelType == gfx::TextureChannelDataType::UnsignedByte) &&
+        (pixelFormat == gfx::TexturePixelType::Depth || pixelFormat == gfx::TexturePixelType::Stencil)) {
+        return MTL::PixelFormatDepth32Float_Stencil8;
+    }
+#endif
+
     switch (channelType) {
         case gfx::TextureChannelDataType::UnsignedByte:
             switch (pixelFormat) {
@@ -138,6 +152,24 @@ void Texture2D::createMetalTexture() noexcept {
     if (auto textureDescriptor = NS::RetainPtr(
             MTL::TextureDescriptor::texture2DDescriptor(format, size.width, size.height, /*mipmapped=*/false))) {
         textureDescriptor->setUsage(usage);
+#if TARGET_OS_SIMULATOR || defined(__x86_64__)
+        switch (format) {
+            case MTL::PixelFormatDepth16Unorm:
+            case MTL::PixelFormatDepth32Float:
+            case MTL::PixelFormatStencil8:
+            case MTL::PixelFormatDepth24Unorm_Stencil8:
+            case MTL::PixelFormatDepth32Float_Stencil8:
+            case MTL::PixelFormatX32_Stencil8:
+            case MTL::PixelFormatX24_Stencil8:
+                // On iOS simulator and x86-64, the default shared mode is invalid for depth and stencil textures.
+                //  'Texture Descriptor Validation MTLTextureDescriptor: Depth, Stencil, DepthStencil
+                //   textures cannot be allocated with MTLStorageModeShared on this device.
+                textureDescriptor->setStorageMode(MTL::StorageMode::StorageModePrivate);
+                break;
+            default:
+                break;
+        }
+#endif
         metalTexture = context.createMetalTexture(std::move(textureDescriptor));
     }
 
@@ -170,7 +202,7 @@ MTL::Texture* Texture2D::getMetalTexture() const noexcept {
 }
 
 void Texture2D::updateSamplerConfiguration() noexcept {
-    auto samplerDescriptor = NS::RetainPtr(MTL::SamplerDescriptor::alloc()->init());
+    auto samplerDescriptor = NS::TransferPtr(MTL::SamplerDescriptor::alloc()->init());
     samplerDescriptor->setMinFilter(samplerState.filter == gfx::TextureFilterType::Nearest
                                         ? MTL::SamplerMinMagFilterNearest
                                         : MTL::SamplerMinMagFilterLinear);

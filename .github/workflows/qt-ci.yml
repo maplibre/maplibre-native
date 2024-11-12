@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - qt-*.*.x
     tags:
       - "qt-**"
     paths:
@@ -67,39 +68,39 @@ jobs:
           - name: Linux
             os: ubuntu-22.04
             build_type: RelWithDebInfo
-            qt_version: 6.5.3
+            qt_version: 6.7.0
             qt_target: desktop
             compiler: ""
           - name: Linux_GCC13
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             build_type: RelWithDebInfo
-            qt_version: 6.5.3
+            qt_version: 6.7.0
             qt_target: desktop
             compiler: "gcc-13"
           - name: macOS
-            os: macos-12
+            os: macos-13
             build_type: RelWithDebInfo
             qt_version: 5.15.2
             qt_target: desktop
-            deployment_target: 10.13
+            deployment_target: 10.15
             deployment_arch: "x86_64"
             compiler: ""
           - name: macOS
-            os: macos-12
+            os: macos-14
             build_type: RelWithDebInfo
-            qt_version: 6.5.3
+            qt_version: 6.7.0
             qt_target: desktop
             deployment_target: 11.0
             deployment_arch: "x86_64;arm64"
             compiler: ""
-          - name: macOS_LLVM17
-            os: macos-13
+          - name: macOS_LLVM18
+            os: macos-14
             build_type: RelWithDebInfo
-            qt_version: 6.5.3
+            qt_version: 6.7.0
             qt_target: desktop
             deployment_target: 11.0
-            deployment_arch: "x86_64"
-            compiler: "llvm@17"
+            deployment_arch: "arm64"
+            compiler: "llvm"
           - name: win64_msvc2019
             os: windows-2022
             build_type: "RelWithDebInfo"
@@ -114,7 +115,7 @@ jobs:
             build_type: "RelWithDebInfo"
             compiler_type: x64
             compiler_version: 14.29
-            qt_version: 6.5.3
+            qt_version: 6.7.0
             qt_target: desktop
             qt_arch: win64_msvc2019_64
             qt_tools: ""
@@ -144,6 +145,7 @@ jobs:
       - name: Install test dependencies
         if: runner.os == 'Linux' && matrix.compiler != ''
         run: |
+          sudo apt-get update
           sudo apt-get install \
             libxkbcommon-x11-0 \
             libxcb-cursor0 \
@@ -154,7 +156,7 @@ jobs:
             libxcb-render-util0 \
             libxcb-xinerama0 \
             libxcb-xfixes0 \
-            libegl1-mesa \
+            libegl1 \
             fonts-noto-cjk
 
       - name: Install compiler
@@ -183,12 +185,12 @@ jobs:
           # https://github.com/actions/runner-images/issues/8838#issuecomment-1817486924
           brew link --overwrite python@3.12
           brew install "$MLN_COMPILER"
-          echo "/usr/local/opt/${MLN_COMPILER}/bin" >> "$GITHUB_PATH"
+          echo "/opt/homebrew/opt/${MLN_COMPILER}/bin" >> "$GITHUB_PATH"
           {
-            echo "CC=/usr/local/opt/${MLN_COMPILER}/bin/clang"
-            echo "CXX=/usr/local/opt/${MLN_COMPILER}/bin/clang++"
-            echo "LDFLAGS=\"-L/usr/local/opt/${MLN_COMPILER}/lib\""
-            echo "CPPFLAGS=\"-I/usr/local/opt/${MLN_COMPILER}/include\""
+            echo "CC=/opt/homebrew/opt/${MLN_COMPILER}/bin/clang"
+            echo "CXX=/opt/homebrew/opt/${MLN_COMPILER}/bin/clang++"
+            echo "LDFLAGS=\"-L/opt/homebrew/opt/${MLN_COMPILER}/lib\""
+            echo "CPPFLAGS=\"-I/opt/homebrew/opt/${MLN_COMPILER}/include\""
           } >> "$GITHUB_ENV"
 
       - name: Setup Xcode
@@ -205,10 +207,10 @@ jobs:
           toolset: ${{ matrix.compiler_version }}
 
       - name: Setup ninja
-        uses: seanmiddleditch/gha-setup-ninja@v4
+        uses: seanmiddleditch/gha-setup-ninja@v5
 
       - name: Download Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           aqtversion: ==3.1.*
           version: ${{ env.QT_VERSION }}
@@ -216,6 +218,7 @@ jobs:
           target: ${{ matrix.qt_target }}
           arch: ${{ matrix.qt_arch }}
           tools: ${{ matrix.qt_tools }}
+          extra: --base https://mirrors.ocf.berkeley.edu/qt/
 
       - name: Update ccache
         if: runner.os == 'Windows'

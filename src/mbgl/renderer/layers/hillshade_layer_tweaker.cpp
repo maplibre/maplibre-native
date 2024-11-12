@@ -8,7 +8,6 @@
 #include <mbgl/shaders/hillshade_layer_ubo.hpp>
 #include <mbgl/style/layers/hillshade_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
@@ -44,17 +43,16 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    const auto getPropsBuffer = [&]() -> auto& {
-        if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
-            const HillshadeEvaluatedPropsUBO evaluatedPropsUBO = {
-                /* .highlight = */ evaluated.get<HillshadeHighlightColor>(),
-                /* .shadow = */ evaluated.get<HillshadeShadowColor>(),
-                /* .accent = */ evaluated.get<HillshadeAccentColor>()};
-            parameters.context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
-            propertiesUpdated = false;
-        }
-        return evaluatedPropsUniformBuffer;
-    };
+    if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
+        const HillshadeEvaluatedPropsUBO evaluatedPropsUBO = {
+            /* .highlight = */ evaluated.get<HillshadeHighlightColor>(),
+            /* .shadow = */ evaluated.get<HillshadeShadowColor>(),
+            /* .accent = */ evaluated.get<HillshadeAccentColor>()};
+        parameters.context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
+        propertiesUpdated = false;
+    }
+    auto& layerUniforms = layerGroup.mutableUniformBuffers();
+    layerUniforms.set(idHillshadeEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
@@ -63,15 +61,13 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.set(idHillshadeEvaluatedPropsUBO, getPropsBuffer());
-
         const auto matrix = getTileMatrix(
             tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, drawable, true);
         HillshadeDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix),
                                             /* .latrange = */ getLatRange(tileID),
                                             /* .light = */ getLight(parameters, evaluated)};
-        uniforms.createOrUpdate(idHillshadeDrawableUBO, &drawableUBO, parameters.context);
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idHillshadeDrawableUBO, &drawableUBO, parameters.context);
     });
 }
 

@@ -6,15 +6,13 @@
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/programs/fill_extrusion_program.hpp>
 #include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/layers/fill_extrusion_layer_properties.hpp>
-#include <mbgl/util/convert.hpp>
-#include <mbgl/util/std.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/shaders/mtl/fill_extrusion.hpp>
@@ -25,11 +23,6 @@ namespace mbgl {
 
 using namespace shaders;
 using namespace style;
-
-namespace {
-const StringIdentity idTexImageName = stringIndexer().get("u_image");
-
-} // namespace
 
 void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
@@ -49,7 +42,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
 
     // UBO depends on more than just evaluated properties, so we need to update every time,
     // but the resulting buffer can be shared across all the drawables from the layer.
-    const FillExtrusionDrawablePropsUBO paramsUBO = {
+    const FillExtrusionPropsUBO propsUBO = {
         /* .color = */ constOrDefault<FillExtrusionColor>(evaluated),
         /* .light_color = */ FillExtrusionProgram::lightColor(parameters.evaluatedLight),
         /* .pad = */ 0,
@@ -60,22 +53,31 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         /* .vertical_gradient = */ evaluated.get<FillExtrusionVerticalGradient>() ? 1.0f : 0.0f,
         /* .opacity = */ evaluated.get<FillExtrusionOpacity>(),
         /* .fade = */ crossfade.t,
-        /* .pad = */ 0,
-        0,
-        0};
-    context.emplaceOrUpdateUniformBuffer(propsBuffer, &paramsUBO);
+        /* .from_scale = */ crossfade.fromScale,
+        /* .to_scale = */ crossfade.toScale,
+        /* .pad = */ 0};
+    auto& layerUniforms = layerGroup.mutableUniformBuffers();
+    layerUniforms.createOrUpdate(idFillExtrusionPropsUBO, &propsUBO, context);
+
     propertiesUpdated = false;
+
+    const auto zoom = static_cast<float>(parameters.state.getZoom());
+    const auto defPattern = mbgl::Faded<expression::Image>{"", ""};
+    const auto fillPatternValue = evaluated.get<FillExtrusionPattern>().constantOr(defPattern);
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;
         }
 
+        auto* binders = static_cast<FillExtrusionProgram::Binders*>(drawable.getBinders());
+        const auto* tile = drawable.getRenderTile();
+        if (!binders || !tile) {
+            assert(false);
+            return;
+        }
+
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.set(idFillExtrusionDrawablePropsUBO, propsBuffer);
-
         const auto& translation = evaluated.get<FillExtrusionTranslate>();
         const auto anchor = evaluated.get<FillExtrusionTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
@@ -90,29 +92,48 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         const auto pixelX = static_cast<int32_t>(tileSizeAtNearestZoom *
                                                  (tileID.canonical.x + tileID.wrap * zoomScale));
         const auto pixelY = static_cast<int32_t>(tileSizeAtNearestZoom * tileID.canonical.y);
-        const auto pixelRatio = parameters.pixelRatio;
         const auto numTiles = std::pow(2, tileID.canonical.z);
         const auto heightFactor = static_cast<float>(-numTiles / util::tileSize_D / 8.0);
 
         Size textureSize = {0, 0};
-        if (const auto shader = drawable.getShader()) {
-            if (const auto index = shader->getSamplerLocation(idTexImageName)) {
-                if (const auto& tex = drawable.getTexture(*index)) {
-                    textureSize = tex->getSize();
-                }
-            }
+        if (const auto& tex = drawable.getTexture(idFillExtrusionImageTexture)) {
+            textureSize = tex->getSize();
+        }
+
+        const auto hasPattern = !!drawable.getType();
+        const auto patternPosA = tile->getPattern(fillPatternValue.from.id());
+        const auto patternPosB = tile->getPattern(fillPatternValue.to.id());
+        if (hasPattern) {
+            binders->setPatternParameters(patternPosA, patternPosB, crossfade);
         }
 
         const FillExtrusionDrawableUBO drawableUBO = {
             /* .matrix = */ util::cast<float>(matrix),
-            /* .scale = */ {pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
             /* .texsize = */ {static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
             /* .pixel_coord_upper = */ {static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
             /* .pixel_coord_lower = */ {static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
             /* .height_factor = */ heightFactor,
-            /* .pad = */ 0};
+            /* .tile_ratio = */ tileRatio};
 
-        uniforms.createOrUpdate(idFillExtrusionDrawableUBO, &drawableUBO, context);
+        const FillExtrusionInterpolateUBO interpUBO = {
+            /* .base_t = */ std::get<0>(binders->get<FillExtrusionBase>()->interpolationFactor(zoom)),
+            /* .height_t = */ std::get<0>(binders->get<FillExtrusionHeight>()->interpolationFactor(zoom)),
+            /* .color_t = */ std::get<0>(binders->get<FillExtrusionColor>()->interpolationFactor(zoom)),
+            /* .pattern_from_t = */ std::get<0>(binders->get<FillExtrusionPattern>()->interpolationFactor(zoom)),
+            /* .pattern_to_t = */ std::get<0>(binders->get<FillExtrusionPattern>()->interpolationFactor(zoom)),
+            /* .pad = */ 0,
+            0,
+            0};
+
+        const FillExtrusionTilePropsUBO tilePropsUBO = {
+            /* pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
+            /* pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
+        };
+
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idFillExtrusionDrawableUBO, &drawableUBO, context);
+        drawableUniforms.createOrUpdate(idFillExtrusionTilePropsUBO, &tilePropsUBO, context);
+        drawableUniforms.createOrUpdate(idFillExtrusionInterpolateUBO, &interpUBO, context);
     });
 }
 

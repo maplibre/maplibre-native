@@ -13,9 +13,6 @@ enum class SymbolType : uint8_t;
 namespace gfx {
 
 struct SymbolDrawableData : public DrawableData {
-    constexpr static std::size_t LinearThreshold = 10;
-    using PropertyMapType = util::TinyUnorderedMap<StringIdentity, bool, LinearThreshold>;
-
     SymbolDrawableData(const bool isHalo_,
                        const bool bucketVariablePlacement_,
                        const style::SymbolType symbolType_,

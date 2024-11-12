@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MapLibre Native Android TestApp</string>
+    <string name="fps30">fps30</string>
+    <string name="fps60">fps60</string>
+    <string name="this_is_an_empty_fragment">This is an empty Fragment</string>
+    <string name="category_benchmark">Benchmark</string>
+    <string name="activity_benchmark_world_tour">World Tour Benchmark</string>
+    <string name="description_world_tour_benchmark">Writes out avg. fps and 1% fps after world tour with .flyTo()</string>
+</resources>

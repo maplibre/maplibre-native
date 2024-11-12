@@ -10,10 +10,10 @@ namespace expression {
 template <class T>
 class FormatSectionOverride final : public Expression {
 public:
-    FormatSectionOverride(const type::Type& type_,
-                          PossiblyEvaluatedPropertyValue<T> defaultValue_,
-                          std::string propertyName_)
-        : Expression(Kind::FormatSectionOverride, type_),
+    FormatSectionOverride(type::Type type_, PossiblyEvaluatedPropertyValue<T> defaultValue_, std::string propertyName_)
+        : Expression(Kind::FormatSectionOverride,
+                     std::move(type_),
+                     defaultValue_.getDependencies() | Dependency::Override | Dependency::Feature),
           defaultValue(std::move(defaultValue_)),
           propertyName(std::move(propertyName_)) {}
 
@@ -59,6 +59,8 @@ public:
 
         return false;
     }
+
+    bool operator==(const FormatSectionOverride& other) const { return *this == static_cast<const Expression&>(other); }
 
     std::vector<std::optional<Value>> possibleOutputs() const final { return {std::nullopt}; }
 

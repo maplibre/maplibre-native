@@ -17,46 +17,46 @@ NS_ASSUME_NONNULL_BEGIN
  requires a value of 256, as do many third-party tile servers, so consult your
  provider’s documentation for the correct value.
 
- This option is only applicable to `MLNRasterTileSource` objects; it is ignored
- when initializing `MLNVectorTileSource` objects.
+ This option is only applicable to ``MLNRasterTileSource`` objects; it is ignored
+ when initializing ``MLNVectorTileSource`` objects.
  */
 FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionTileSize;
 
 /**
- `MLNRasterTileSource` is a map content source that supplies raster image tiles
+ ``MLNRasterTileSource`` is a map content source that supplies raster image tiles
  to be shown on the map. The location of and metadata about the tiles are
  defined either by an option dictionary or by an external file that conforms to
  the
  <a href="https://github.com/mapbox/tilejson-spec/">TileJSON specification</a>.
- A raster tile source is added to an `MLNStyle` object along with one or more
- `MLNRasterStyleLayer` objects. Use a raster style layer to control the
+ A raster tile source is added to an ``MLNStyle`` object along with one or more
+ ``MLNRasterStyleLayer`` objects. Use a raster style layer to control the
  appearance of content supplied by the raster tile source.
 
  Each
  <a href="https://maplibre.org/maplibre-style-spec/#sources-raster"><code>raster</code></a>
  source defined by the style JSON file is represented at runtime by an
- `MLNRasterTileSource` object that you can use to initialize new style layers. You
+ ``MLNRasterTileSource`` object that you can use to initialize new style layers. You
  can also add and remove sources dynamically using methods such as
- `-[MLNStyle addSource:]` and `-[MLNStyle sourceWithIdentifier:]`.
+ ``MLNStyle/addSource:`` and ``MLNStyle/sourceWithIdentifier:``.
 
  ### Example
 
  ```swift
- let source = MLNRasterTileSource(identifier: "clouds", tileURLTemplates: ["https://example.com/raster-tiles/{z}/{x}/{y}.png"], options: [
-     .minimumZoomLevel: 9,
+ let source = MLNRasterTileSource(identifier: "clouds", tileURLTemplates:
+ ["https://example.com/raster-tiles/{z}/{x}/{y}.png"], options: [ .minimumZoomLevel: 9,
      .maximumZoomLevel: 16,
      .tileSize: 512,
      .attributionInfos: [
-         MLNAttributionInfo(title: NSAttributedString(string: "© Mapbox"), url: URL(string: "https://mapbox.com"))
+         MLNAttributionInfo(title: NSAttributedString(string: "© Mapbox"), url: URL(string:
+ "https://mapbox.com"))
      ]
  ])
  mapView.style?.addSource(source)
  ```
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/source-custom-raster/">
- Add raster imagery</a> example to learn how to add a `MLNRasterStyleLayer`
- to your map using an `MLNRasterTileSource`.
+ TODO: Add raster imagery, learn how to add a ``MLNRasterStyleLayer``
+ to your map using an ``MLNRasterTileSource``.
  */
 MLN_EXPORT
 @interface MLNRasterTileSource : MLNTileSource
@@ -68,7 +68,7 @@ MLN_EXPORT
  URL.
 
  After initializing and configuring the source, add it to a map view’s style
- using the `-[MLNStyle addSource:]` method.
+ using the ``MLNStyle/addSource:`` method.
 
  The URL may be a full HTTP or HTTPS URL or canonical URL. The URL should
  point to a JSON file that conforms to the
@@ -76,7 +76,7 @@ MLN_EXPORT
 
  If a Mapbox URL is specified, this source uses a tile size of 256. For all
  other tilesets, the default value is 512. (See the
- `MLNTileSourceOptionTileSize` documentation for more information about tile
+ ``MLNTileSourceOptionTileSize`` documentation for more information about tile
  sizes.) If you need to use a tile size other than the default, use the
  `-initWithIdentifier:configurationURL:tileSize:` method.
 
@@ -86,14 +86,15 @@ MLN_EXPORT
     source’s contents and other metadata.
  @return An initialized raster tile source.
  */
-- (instancetype)initWithIdentifier:(NSString *)identifier configurationURL:(NSURL *)configurationURL;
+- (instancetype)initWithIdentifier:(NSString *)identifier
+                  configurationURL:(NSURL *)configurationURL;
 
 /**
  Returns a raster tile source initialized with an identifier, configuration URL,
  and tile size.
 
  After initializing and configuring the source, add it to a map view’s style
- using the `-[MLNStyle addSource:]` method.
+ using the ``MLNStyle/addSource:`` method.
 
  The URL may be a full HTTP or HTTPS URL or, canonical URL. The URL should
  point to a JSON file that conforms to the
@@ -104,11 +105,13 @@ MLN_EXPORT
  @param configurationURL A URL to a TileJSON configuration file describing the
  source’s contents and other metadata.
  @param tileSize The width and height (measured in points) of each tiled image
-    in the raster tile source. See the `MLNTileSourceOptionTileSize`
+    in the raster tile source. See the ``MLNTileSourceOptionTileSize``
     documentation for details.
  @return An initialized raster tile source.
  */
-- (instancetype)initWithIdentifier:(NSString *)identifier configurationURL:(NSURL *)configurationURL tileSize:(CGFloat)tileSize NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithIdentifier:(NSString *)identifier
+                  configurationURL:(NSURL *)configurationURL
+                          tileSize:(CGFloat)tileSize NS_DESIGNATED_INITIALIZER;
 
 /**
  Returns a raster tile source initialized an identifier, tile URL templates, and
@@ -119,18 +122,21 @@ MLN_EXPORT
  guide for information about the format of a tile URL template.
 
  After initializing and configuring the source, add it to a map view’s style
- using the `-[MLNStyle addSource:]` method.
+ using the ``MLNStyle/addSource:`` method.
 
  @param identifier A string that uniquely identifies the source in the style to
     which it is added.
  @param tileURLTemplates An array of tile URL template strings. Only the first
     string is used; any additional strings are ignored.
  @param options A dictionary containing configuration options. See
-    `MLNTileSourceOption` for available keys and values. Pass in `nil` to use
+    ``MLNTileSourceOption`` for available keys and values. Pass in `nil` to use
     the default values.
  @return An initialized tile source.
  */
-- (instancetype)initWithIdentifier:(NSString *)identifier tileURLTemplates:(NSArray<NSString *> *)tileURLTemplates options:(nullable NSDictionary<MLNTileSourceOption, id> *)options NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithIdentifier:(NSString *)identifier
+                  tileURLTemplates:(NSArray<NSString *> *)tileURLTemplates
+                           options:(nullable NSDictionary<MLNTileSourceOption, id> *)options
+    NS_DESIGNATED_INITIALIZER;
 
 @end
 

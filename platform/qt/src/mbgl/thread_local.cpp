@@ -27,8 +27,8 @@ ThreadLocalBase::~ThreadLocalBase() {
     reinterpret_cast<StorageType&>(storage).~QThreadStorage();
 }
 
-void* ThreadLocalBase::get() {
-    return reinterpret_cast<StorageType&>(storage).localData()[0];
+void* ThreadLocalBase::get() const {
+    return reinterpret_cast<const StorageType&>(storage).localData()[0];
 }
 
 void ThreadLocalBase::set(void* ptr) {

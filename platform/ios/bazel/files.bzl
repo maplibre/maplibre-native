@@ -11,9 +11,11 @@ MLN_IOS_SDK_HEADERS = [
     "src/MLNUserLocation.h",
     "src/MLNUserLocationAnnotationView.h",
     "src/MLNUserLocationAnnotationViewStyle.h",
+    "src/MLNScaleBar.h",
 ]
 
 MLN_IOS_PUBLIC_HEADERS = [
+    "src/Mapbox.h",
 ]
 
 MLN_IOS_PRIVATE_HEADERS = [
@@ -26,7 +28,6 @@ MLN_IOS_PRIVATE_HEADERS = [
     "src/MLNMapAccessibilityElement.h",
     "src/UIViewController+MLNAdditions.h",
     "src/UIView+MLNAdditions.h",
-    "src/MLNScaleBar.h",
     "src/MLNFaux3DUserLocationAnnotationView.h",
     "src/MLNUserLocationHeadingBeamLayer.h",
     "src/MLNAnnotationContainerView.h",
@@ -91,7 +92,7 @@ MLN_PUBLIC_IOS_APP_SOPURCE = [
     "app/MBXState.m",
     "app/MBXStateManager.m",
     "app/MBXUserLocationAnnotationView.m",
-    "app/MBXViewController.m",
+    "app/MBXViewController.mm",
     "app/main.m",
     "app/MBXAnnotationView.h",
     "app/MBXAppDelegate.h",

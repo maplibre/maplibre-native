@@ -23,33 +23,23 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::OpenGL> {
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
-layout (std140) uniform LineDynamicUBO {
+layout (std140) uniform GlobalPaintParamsUBO {
+    highp vec2 u_pattern_atlas_texsize;
     highp vec2 u_units_to_pixels;
-    lowp float pad0, pad1;
+    highp vec2 u_world_size;
+    highp float u_camera_to_center_distance;
+    highp float u_symbol_fade_change;
+    highp float u_aspect_ratio;
+    highp float u_pixel_ratio;
+    highp float global_pad1, global_pad2;
 };
 
-layout (std140) uniform LinePatternUBO {
+layout (std140) uniform LinePatternDrawableUBO {
     highp mat4 u_matrix;
     mediump vec4 u_scale;
     highp vec2 u_texsize;
     mediump float u_ratio;
     highp float u_fade;
-};
-
-layout (std140) uniform LinePatternPropertiesUBO {
-    lowp float u_blur;
-    lowp float u_opacity;
-    lowp float u_offset;
-    mediump float u_gapwidth;
-    mediump float u_width;
-
-    highp float pad2;
-    highp vec2 pad3;
-};
-
-layout (std140) uniform LinePatternTilePropertiesUBO {
-    lowp vec4 u_pattern_from;
-    lowp vec4 u_pattern_to;
 };
 
 layout (std140) uniform LinePatternInterpolationUBO {
@@ -60,8 +50,24 @@ layout (std140) uniform LinePatternInterpolationUBO {
     lowp float u_width_t;
     lowp float u_pattern_from_t;
     lowp float u_pattern_to_t;
+    highp float interp_pad1;
+};
 
-    highp float pad4;
+layout (std140) uniform LinePatternTilePropertiesUBO {
+    lowp vec4 u_pattern_from;
+    lowp vec4 u_pattern_to;
+};
+
+layout (std140) uniform LineEvaluatedPropsUBO {
+    highp vec4 u_color;
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+    lowp float u_floorwidth;
+    highp float props_pad1;
+    highp float props_pad2;
 };
 
 out vec2 v_normal;
@@ -182,28 +188,12 @@ mediump vec4 pattern_to = u_pattern_to;
     v_width2 = vec2(outset, inset);
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform LinePatternUBO {
+    static constexpr const char* fragment = R"(layout (std140) uniform LinePatternDrawableUBO {
     highp mat4 u_matrix;
     mediump vec4 u_scale;
     highp vec2 u_texsize;
     mediump float u_ratio;
     highp float u_fade;
-};
-
-layout (std140) uniform LinePatternPropertiesUBO {
-    lowp float u_blur;
-    lowp float u_opacity;
-    lowp float u_offset;
-    mediump float u_gapwidth;
-    mediump float u_width;
-
-    highp float pad2;
-    highp vec2 pad3;
-};
-
-layout (std140) uniform LinePatternTilePropertiesUBO {
-    lowp vec4 u_pattern_from;
-    lowp vec4 u_pattern_to;
 };
 
 layout (std140) uniform LinePatternInterpolationUBO {
@@ -214,8 +204,24 @@ layout (std140) uniform LinePatternInterpolationUBO {
     lowp float u_width_t;
     lowp float u_pattern_from_t;
     lowp float u_pattern_to_t;
+    highp float interp_pad1;
+};
 
-    highp float pad4;
+layout (std140) uniform LinePatternTilePropertiesUBO {
+    lowp vec4 u_pattern_from;
+    lowp vec4 u_pattern_to;
+};
+
+layout (std140) uniform LineEvaluatedPropsUBO {
+    highp vec4 u_color;
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+    lowp float u_floorwidth;
+    highp float props_pad1;
+    highp float props_pad2;
 };
 
 uniform sampler2D u_image;

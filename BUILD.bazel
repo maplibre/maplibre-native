@@ -139,6 +139,9 @@ cc_library(
         "@platforms//os:ios": [
             "//vendor:icu",
         ],
+        "@platforms//os:osx": [
+            "//vendor:icu",
+        ],
         "//conditions:default": [],
     }) + select({
         ":metal_renderer": [
@@ -211,7 +214,7 @@ js_binary(
         ":style-code",
         ":style-spec",
     ],
-    entry_point = "scripts/generate-style-code.js",
+    entry_point = "scripts/generate-style-code.mjs",
 )
 
 js_binary(
@@ -219,14 +222,13 @@ js_binary(
     data = [
         ":node_modules/argparse",
     ],
-    entry_point = "shaders/generate_shader_code.js",
+    entry_point = "shaders/generate_shader_code.mjs",
 )
 
 js_library(
     name = "style-spec",
-    srcs = ["scripts/style-spec.js"],
+    srcs = ["scripts/style-spec.mjs"],
     data = glob([
-        "scripts/style-spec-reference/*.js",
         "scripts/style-spec-reference/*.json",
     ]),
     visibility = ["//visibility:public"],
@@ -234,9 +236,19 @@ js_library(
 
 js_library(
     name = "style-code",
-    srcs = ["scripts/style-code.js"],
+    srcs = ["scripts/style-code.mjs"],
     visibility = ["//visibility:public"],
     deps = [
         ":node_modules/ejs",
     ],
+)
+
+cc_library(
+    name = "maplibre_lib",
+    srcs = [],
+    visibility = ["//visibility:public"],
+    deps = select({
+        "@platforms//os:macos": ["//platform:macos-objcpp"],
+        "//conditions:default": [],
+    }),
 )

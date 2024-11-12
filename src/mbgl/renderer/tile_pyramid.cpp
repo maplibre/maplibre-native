@@ -5,6 +5,7 @@
 #include <mbgl/renderer/query.hpp>
 #include <mbgl/map/transform.hpp>
 #include <mbgl/math/clamp.hpp>
+#include <mbgl/actor/scheduler.hpp>
 #include <mbgl/util/tile_cover.hpp>
 #include <mbgl/util/tile_range.hpp>
 #include <mbgl/util/enum.hpp>
@@ -22,9 +23,11 @@ namespace mbgl {
 using namespace style;
 
 static TileObserver nullObserver;
+static const std::map<OverscaledTileID, std::unique_ptr<Tile>> emptyPrefetchedTiles;
 
-TilePyramid::TilePyramid()
-    : observer(&nullObserver) {}
+TilePyramid::TilePyramid(const TaggedScheduler& threadPool_)
+    : cache(threadPool_),
+      observer(&nullObserver) {}
 
 TilePyramid::~TilePyramid() = default;
 
@@ -56,7 +59,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
                          const uint16_t tileSize,
                          const Range<uint8_t> zoomRange,
                          std::optional<LatLngBounds> bounds,
-                         std::function<std::unique_ptr<Tile>(const OverscaledTileID&)> createTile) {
+                         std::function<std::unique_ptr<Tile>(const OverscaledTileID&, TileObserver*)> createTile) {
     // If we need a relayout, abandon any cached tiles; they're now stale.
     if (needsRelayout) {
         cache.clear();
@@ -65,13 +68,15 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     // If we're not going to render anything, move our existing tiles into
     // the cache (if they're not stale) or abandon them, and return.
     if (!needsRendering) {
-        if (!needsRelayout) {
-            for (auto& entry : tiles) {
+        for (auto& entry : tiles) {
+            if (!needsRelayout) {
                 // These tiles are invisible, we set optional necessity
                 // for them and thus suppress network requests on
                 // tiles expiration (see `OnlineFileRequest`).
                 entry.second->setNecessity(TileNecessity::Optional);
                 cache.add(entry.first, std::move(entry.second));
+            } else {
+                cache.deferredRelease(std::move(entry.second));
             }
         }
 
@@ -167,9 +172,8 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         }
         std::unique_ptr<Tile> tile = cache.pop(tileID);
         if (!tile) {
-            tile = createTile(tileID);
+            tile = createTile(tileID, observer);
             if (!tile) return nullptr;
-            tile->setObserver(observer);
             tile->setLayers(layers);
         }
 
@@ -193,12 +197,19 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
             retainTileFn,
             [](const UnwrappedTileID&, Tile&) {},
             panTiles,
+            emptyPrefetchedTiles,
             zoomRange,
             maxParentTileOverscaleFactor);
     }
 
-    algorithm::updateRenderables(
-        getTileFn, createTileFn, retainTileFn, renderTileFn, idealTiles, zoomRange, maxParentTileOverscaleFactor);
+    algorithm::updateRenderables(getTileFn,
+                                 createTileFn,
+                                 retainTileFn,
+                                 renderTileFn,
+                                 idealTiles,
+                                 tiles,
+                                 zoomRange,
+                                 maxParentTileOverscaleFactor);
 
     for (auto previouslyRenderedTile : previouslyRenderedTiles) {
         Tile& tile = previouslyRenderedTile.second;
@@ -211,12 +222,14 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         }
     }
 
-    if (type != SourceType::Annotations) {
+    if (type != SourceType::Annotations && cacheEnabled) {
         auto conservativeCacheSize = static_cast<size_t>(
             std::max(static_cast<double>(parameters.transformState.getSize().width) / tileSize, 1.0) *
             std::max(static_cast<double>(parameters.transformState.getSize().height) / tileSize, 1.0) *
             (parameters.transformState.getMaxZoom() - parameters.transformState.getMinZoom() + 1) * 0.5);
         cache.setSize(conservativeCacheSize);
+    } else {
+        cache.setSize(0);
     }
 
     // Remove stale tiles. This goes through the (sorted!) tiles map and retain
@@ -227,11 +240,17 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         auto retainIt = retain.begin();
         while (tilesIt != tiles.end()) {
             if (retainIt == retain.end() || tilesIt->first < *retainIt) {
-                if (!needsRelayout) {
-                    tilesIt->second->setNecessity(TileNecessity::Optional);
-                    cache.add(tilesIt->first, std::move(tilesIt->second));
+                // Remove the tile from the map.
+                // If it requires re-layout, discard it asynchronously, otherwise keep it in the cache
+                const auto key = tilesIt->first;
+                if (std::unique_ptr<Tile> tile = std::move(tiles.extract(tilesIt++).mapped())) {
+                    if (needsRelayout) {
+                        cache.deferredRelease(std::move(tile));
+                    } else {
+                        tile->setNecessity(TileNecessity::Optional);
+                        cache.add(key, std::move(tile));
+                    }
                 }
-                tiles.erase(tilesIt++);
             } else {
                 if (!(*retainIt < tilesIt->first)) {
                     ++tilesIt;
@@ -378,8 +397,8 @@ std::vector<Feature> TilePyramid::querySourceFeatures(const SourceQueryOptions& 
     return result;
 }
 
-void TilePyramid::setCacheSize(size_t size) {
-    cache.setSize(size);
+void TilePyramid::setCacheEnabled(bool enable) {
+    cacheEnabled = enable;
 }
 
 void TilePyramid::reduceMemoryUse() {

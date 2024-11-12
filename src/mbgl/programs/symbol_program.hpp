@@ -18,7 +18,7 @@
 #include <array>
 
 #include <mbgl/shaders/shader_manifest.hpp>
-#if !MLN_RENDER_BACKEND_METAL
+#if MLN_RENDER_BACKEND_OPENGL
 #include <mbgl/gl/program.hpp>
 #endif
 
@@ -94,10 +94,10 @@ public:
 
 class ConstantSymbolSizeBinder final : public SymbolSizeBinder {
 public:
-    ConstantSymbolSizeBinder(const float /*tileZoom*/, const float& size, const float /*defaultValue*/)
+    ConstantSymbolSizeBinder(const float /*tileZoom*/, const float& size, const float /*defaultValue*/) noexcept
         : layoutSize(size) {}
 
-    ConstantSymbolSizeBinder(const float /*tileZoom*/, const style::Undefined&, const float defaultValue)
+    ConstantSymbolSizeBinder(const float /*tileZoom*/, const style::Undefined&, const float defaultValue) noexcept
         : layoutSize(defaultValue) {}
 
     ConstantSymbolSizeBinder(const float tileZoom,
@@ -111,7 +111,7 @@ public:
             zoomLevels, Range<float>{expression_.evaluate(zoomLevels.min), expression_.evaluate(zoomLevels.max)});
     }
 
-    Range<float> getVertexSizeData(const GeometryTileFeature&) override { return {0.0f, 0.0f}; };
+    Range<float> getVertexSizeData(const GeometryTileFeature&) noexcept override { return {0.0f, 0.0f}; };
 
     ZoomEvaluatedSize evaluateForZoom(float currentZoom) const override {
         float size = layoutSize;
@@ -143,7 +143,7 @@ class SourceFunctionSymbolSizeBinder final : public SymbolSizeBinder {
 public:
     SourceFunctionSymbolSizeBinder(const float /*tileZoom*/,
                                    style::PropertyExpression<float> expression_,
-                                   const float defaultValue_)
+                                   const float defaultValue_) noexcept
         : expression(std::move(expression_)),
           defaultValue(defaultValue_) {}
 
@@ -152,7 +152,7 @@ public:
         return {size, size};
     };
 
-    ZoomEvaluatedSize evaluateForZoom(float) const override {
+    ZoomEvaluatedSize evaluateForZoom(float) const noexcept override {
         const float unused = 0.0f;
         return {true, false, unused, unused, unused};
     }
@@ -165,7 +165,7 @@ class CompositeFunctionSymbolSizeBinder final : public SymbolSizeBinder {
 public:
     CompositeFunctionSymbolSizeBinder(const float tileZoom,
                                       style::PropertyExpression<float> expression_,
-                                      const float defaultValue_)
+                                      const float defaultValue_) noexcept
         : expression(std::move(expression_)),
           defaultValue(defaultValue_),
           layoutZoom(tileZoom + 1),
@@ -261,9 +261,9 @@ public:
 
     std::unique_ptr<gfx::Program<Name>> program;
 
-    SymbolProgram(const ProgramParameters& programParameters) {
+    SymbolProgram([[maybe_unused]] const ProgramParameters& programParameters) {
         switch (gfx::Backend::GetType()) {
-#if !MLN_RENDER_BACKEND_METAL
+#if MLN_RENDER_BACKEND_OPENGL
             case gfx::Backend::Type::OpenGL: {
                 program = std::make_unique<gl::Program<Name>>(programParameters.withDefaultSource(
                     {gfx::Backend::Type::OpenGL,

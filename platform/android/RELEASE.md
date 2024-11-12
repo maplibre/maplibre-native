@@ -3,11 +3,11 @@
 To make an Android release, do the following:
 
 * Update `CHANGELOG.md` in a pull request
-  * Add a section title containing the version which should be released, e.g. `## 9.6.0 - December 18, 2022`
+  * Add a section title containing the version which should be released, e.g. `## 9.6.0`
   * Remove the `* Add your pull request...` entries
   * Add a new `main` section at the top of the changelog
 
-* Update `android/MapboxGLAndroidSDK/gradle.properties` with the new version.
+* Update `android/MapLibreAndroid/gradle.properties` with the new version.
 
 * Once the changelog update pull request was merged, tag the commit:
   * Create a tag locally, e.g. `git tag -a android-v9.6.0 -m "Release android-v9.6.0"`

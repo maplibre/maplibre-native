@@ -9,7 +9,6 @@
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/layers/background_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
@@ -19,8 +18,6 @@ using namespace shaders;
 #if !defined(NDEBUG)
 constexpr auto BackgroundPatternShaderName = "BackgroundPatternShader";
 #endif
-
-static const StringIdentity idTexUniformName = stringIndexer().get("u_image");
 
 void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     const auto& state = parameters.state;
@@ -53,7 +50,29 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
     // properties are re-evaluated every time
     propertiesUpdated = false;
 
-    std::optional<uint32_t> samplerLocation{};
+    auto& layerUniforms = layerGroup.mutableUniformBuffers();
+
+    if (hasPattern) {
+        const BackgroundPatternLayerUBO layerUBO = {/* .pattern_tl_a = */ util::cast<float>(imagePosA->tl()),
+                                                    /* .pattern_br_a = */ util::cast<float>(imagePosA->br()),
+                                                    /* .pattern_tl_b = */ util::cast<float>(imagePosB->tl()),
+                                                    /* .pattern_br_b = */ util::cast<float>(imagePosB->br()),
+                                                    /* .pattern_size_a = */ imagePosA->displaySize(),
+                                                    /* .pattern_size_b = */ imagePosB->displaySize(),
+                                                    /* .scale_a = */ crossfade.fromScale,
+                                                    /* .scale_b = */ crossfade.toScale,
+                                                    /* .mix = */ crossfade.t,
+                                                    /* .opacity = */ evaluated.get<BackgroundOpacity>()};
+        layerUniforms.createOrUpdate(idBackgroundLayerUBO, &layerUBO, context);
+    } else {
+        const BackgroundLayerUBO layerUBO = {/* .color = */ evaluated.get<BackgroundColor>(),
+                                             /* .opacity = */ evaluated.get<BackgroundOpacity>(),
+                                             /* .pad1/2/3 = */ 0,
+                                             0,
+                                             0};
+        layerUniforms.createOrUpdate(idBackgroundLayerUBO, &layerUBO, context);
+    }
+
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         assert(drawable.getTileID());
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
@@ -61,71 +80,41 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
         }
 
         // We assume that drawables don't change between pattern and non-pattern.
-        const auto& shader = drawable.getShader();
-        assert(hasPattern ==
-               (shader == context.getGenericShader(parameters.shaders, std::string(BackgroundPatternShaderName))));
+        assert(hasPattern == (drawable.getShader() ==
+                              context.getGenericShader(parameters.shaders, std::string(BackgroundPatternShaderName))));
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto matrix = getTileMatrix(
             tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, drawable);
 
-        const BackgroundDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix)};
-
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idBackgroundDrawableUBO, &drawableUBO, context);
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
 
         if (hasPattern) {
-            if (!samplerLocation.has_value()) {
-                samplerLocation = shader->getSamplerLocation(idTexUniformName);
-                if (const auto& tex = parameters.patternAtlas.texture()) {
-                    tex->setSamplerConfiguration(
-                        {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-                }
-            }
-            if (samplerLocation.has_value()) {
-                if (const auto& tex = parameters.patternAtlas.texture()) {
-                    drawable.setTexture(tex, samplerLocation.value());
-                }
+            if (const auto& tex = parameters.patternAtlas.texture()) {
+                tex->setSamplerConfiguration(
+                    {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+                drawable.setTexture(tex, idBackgroundImageTexture);
             }
 
-            // from BackgroundPatternProgram::layoutUniformValues
             const int32_t tileSizeAtNearestZoom = static_cast<int32_t>(
                 util::tileSize_D * state.zoomScale(state.getIntegerZoom() - tileID.canonical.z));
             const int32_t pixelX = static_cast<int32_t>(
                 tileSizeAtNearestZoom * (tileID.canonical.x + tileID.wrap * state.zoomScale(tileID.canonical.z)));
             const int32_t pixelY = tileSizeAtNearestZoom * tileID.canonical.y;
-            const Size atlasSize = parameters.patternAtlas.getPixelSize();
             const auto pixToTile = tileID.pixelsToTileUnits(1.0f, state.getIntegerZoom());
 
-            const BackgroundPatternLayerUBO layerUBO = {
-                /* .pattern_tl_a = */ util::cast<float>(imagePosA->tl()),
-                /* .pattern_br_a = */ util::cast<float>(imagePosA->br()),
-                /* .pattern_tl_b = */ util::cast<float>(imagePosB->tl()),
-                /* .pattern_br_b = */ util::cast<float>(imagePosB->br()),
-                /* .texsize = */ {static_cast<float>(atlasSize.width), static_cast<float>(atlasSize.height)},
-                /* .pattern_size_a = */ imagePosA->displaySize(),
-                /* .pattern_size_b = */ imagePosB->displaySize(),
+            const BackgroundPatternDrawableUBO drawableUBO = {
+                /* .matrix = */ util::cast<float>(matrix),
                 /* .pixel_coord_upper = */ {static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
                 /* .pixel_coord_lower = */ {static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
                 /* .tile_units_to_pixels = */ (pixToTile != 0) ? 1.0f / pixToTile : 0.0f,
-                /* .scale_a = */ crossfade.fromScale,
-                /* .scale_b = */ crossfade.toScale,
-                /* .mix = */ crossfade.t,
-                /* .opacity = */ evaluated.get<BackgroundOpacity>(),
-                /* .pad1 = */ 0,
-            };
-            uniforms.createOrUpdate(idBackgroundLayerUBO, &layerUBO, context);
+                /* .pad1/2/3 = */ 0,
+                0,
+                0};
+            drawableUniforms.createOrUpdate(idBackgroundDrawableUBO, &drawableUBO, context);
         } else {
-            // UBOs can be shared
-            if (!backgroundLayerBuffer) {
-                const BackgroundLayerUBO layerUBO = {/* .color = */ evaluated.get<BackgroundColor>(),
-                                                     /* .opacity = */ evaluated.get<BackgroundOpacity>(),
-                                                     /* .pad1/2/3 = */ 0,
-                                                     0,
-                                                     0};
-                backgroundLayerBuffer = context.createUniformBuffer(&layerUBO, sizeof(layerUBO));
-            }
-            uniforms.set(idBackgroundLayerUBO, backgroundLayerBuffer);
+            const BackgroundDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix)};
+            drawableUniforms.createOrUpdate(idBackgroundDrawableUBO, &drawableUBO, context);
         }
     });
 }

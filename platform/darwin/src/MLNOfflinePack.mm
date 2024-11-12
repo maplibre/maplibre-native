@@ -12,6 +12,7 @@
 
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/storage/database_file_source.hpp>
+#include <mbgl/util/variant.hpp>
 
 const MLNExceptionName MLNInvalidOfflinePackException = @"MLNInvalidOfflinePackException";
 
@@ -19,7 +20,7 @@ const MLNExceptionName MLNInvalidOfflinePackException = @"MLNInvalidOfflinePackE
  Assert that the current offline pack is valid.
 
  This macro should be used at the beginning of any public-facing instance method
- of `MLNOfflinePack`. For private methods, an assertion is more appropriate.
+ of ``MLNOfflinePack``. For private methods, an assertion is more appropriate.
  */
 #define MLNAssertOfflinePackIsValid() \
     do { \
@@ -93,15 +94,14 @@ private:
     MLNAssert([MLNTilePyramidOfflineRegion conformsToProtocol:@protocol(MLNOfflineRegion_Private)], @"MLNTilePyramidOfflineRegion should conform to MLNOfflineRegion_Private.");
     MLNAssert([MLNShapeOfflineRegion conformsToProtocol:@protocol(MLNOfflineRegion_Private)], @"MLNShapeOfflineRegion should conform to MLNOfflineRegion_Private.");
     
-    
-    
-    return regionDefinition.match(
-                           [&] (const mbgl::OfflineTilePyramidRegionDefinition def){
-                               return (id <MLNOfflineRegion>)[[MLNTilePyramidOfflineRegion alloc] initWithOfflineRegionDefinition:def];
-                           },
-                           [&] (const mbgl::OfflineGeometryRegionDefinition& def){
-                               return (id <MLNOfflineRegion>)[[MLNShapeOfflineRegion alloc] initWithOfflineRegionDefinition:def];
-                           });
+    return  std::visit(mbgl::overloaded{
+                                   [&] (const mbgl::OfflineTilePyramidRegionDefinition def){
+                                       return (id <MLNOfflineRegion>)[[MLNTilePyramidOfflineRegion alloc] initWithOfflineRegionDefinition:def];
+                                   },
+                                   [&] (const mbgl::OfflineGeometryRegionDefinition& def){
+                                       return (id <MLNOfflineRegion>)[[MLNShapeOfflineRegion alloc] initWithOfflineRegionDefinition:def];
+                                   }
+    }, regionDefinition);
 }
 
 - (NSData *)context {

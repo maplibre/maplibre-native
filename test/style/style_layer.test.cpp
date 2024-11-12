@@ -292,7 +292,7 @@ TEST(Layer, DuplicateLayer) {
 
     // Setup style
     auto fileSource = std::make_shared<StubFileSource>();
-    Style::Impl style{fileSource, 1.0};
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
     style.loadJSON(util::read_file("test/fixtures/resources/style-unused-sources.json"));
 
     // Add initial layer
@@ -313,7 +313,7 @@ TEST(Layer, IncompatibleLayer) {
 
     // Setup style
     auto fileSource = std::make_shared<StubFileSource>();
-    Style::Impl style{fileSource, 1.0};
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
     style.loadJSON(util::read_file("test/fixtures/resources/style-unused-sources.json"));
 
     // Try to add duplicate
@@ -353,7 +353,7 @@ void testHasOverrides(LayoutType& layout) {
 
     // Expression, overridden text-color.
     FormatExpressionSection section(literal(""));
-    section.setTextSectionOptions(std::nullopt, std::nullopt, toColor(literal("red")));
+    section.setTextSectionOptions({}, {}, toColor(literal("red")));
     auto formatExprOverride = std::make_unique<FormatExpression>(std::vector<FormatExpressionSection>{section});
     PropertyExpression<Formatted> propExprOverride(std::move(formatExprOverride));
     layout.template get<TextField>() = PropertyValueType<Formatted>(std::move(propExprOverride));
@@ -362,7 +362,7 @@ void testHasOverrides(LayoutType& layout) {
     // Nested expressions, overridden text-color.
     auto formattedExpr1 = format("first paragraph");
     FormatExpressionSection secondParagraph(literal("second paragraph"));
-    secondParagraph.setTextSectionOptions(std::nullopt, std::nullopt, toColor(literal("blue")));
+    secondParagraph.setTextSectionOptions({}, {}, toColor(literal("blue")));
     std::vector<FormatExpressionSection> sections{{std::move(secondParagraph)}};
     auto formattedExpr2 = std::make_unique<FormatExpression>(std::move(sections));
     std::unordered_map<std::string, std::shared_ptr<Expression>> branches{{"1st", std::move(formattedExpr1)},

@@ -8,10 +8,11 @@
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/programs/programs.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
+#include <mbgl/util/constants.hpp>
+#include <mbgl/util/instrumentation.hpp>
+#include <mbgl/util/logging.hpp>
 #include <mbgl/util/tile_coordinate.hpp>
 #include <mbgl/util/tile_cover.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/constants.hpp>
 
 namespace mbgl {
 
@@ -89,6 +90,7 @@ std::unique_ptr<RenderItem> RenderImageSource::createRenderItem() {
 }
 
 void RenderImageSource::prepare(const SourcePrepareParameters& parameters) {
+    MLN_TRACE_FUNC();
     assert(!renderData);
     if (!isLoaded()) {
         renderData = std::make_unique<ImageSourceRenderData>(bucket, std::vector<mat4>{}, baseImpl->id);
@@ -101,7 +103,9 @@ void RenderImageSource::prepare(const SourcePrepareParameters& parameters) {
         mat4& matrix = matrices[i];
         matrix::identity(matrix);
         transformParams.state.matrixFor(matrix, tileIds[i]);
+#if MLN_LEGACY_RENDERER
         matrix::multiply(matrix, transformParams.alignedProjMatrix, matrix);
+#endif
     }
     renderData = std::make_unique<ImageSourceRenderData>(bucket, std::move(matrices), baseImpl->id);
 }

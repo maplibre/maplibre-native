@@ -106,19 +106,17 @@ bool VertexAttributeGL::get(const gfx::VertexAttribute::ElementType& element, GL
         case GL_FLOAT:
             return gl::get<float>(element, buffer) || gl::get<float, std::int32_t>(element, buffer);
         case GL_FLOAT_VEC2:
-            return gl::get<float2>(element, buffer) || gl::get<int2, float2>(element, buffer, [](int2 x) {
-                       return float2{(float)x[0], (float)x[1]};
-                   });
+            return gl::get<float2>(element, buffer) ||
+                   gl::get<int2, float2>(element, buffer, [](int2 x) { return float2{(float)x[0], (float)x[1]}; });
         case GL_FLOAT_VEC3:
             return gl::get<float3>(element, buffer);
         case GL_FLOAT_VEC4:
         case GL_FLOAT_MAT2:
             return gl::get<float4>(element, buffer) ||
-                   gl::get<int4, float4>(element,
-                                         buffer,
-                                         [](int4 x) {
-                                             return float4{(float)x[0], (float)x[1], (float)x[2], (float)x[3]};
-                                         }) ||
+                   gl::get<int4, float4>(
+                       element,
+                       buffer,
+                       [](int4 x) { return float4{(float)x[0], (float)x[1], (float)x[2], (float)x[3]}; }) ||
                    gl::get<ushort8, float4>(element, buffer, [](ushort8 x) {
                        return float4{(float)x[0], (float)x[1], (float)x[2], (float)x[3]};
                    });
@@ -155,14 +153,13 @@ std::size_t VertexAttributeGL::getStride() const {
     return getStride(getGLType());
 }
 
-namespace {
-const std::vector<std::uint8_t> noData;
-}
-const std::vector<std::uint8_t>& VertexAttributeGL::getRaw(gfx::VertexAttribute& attr, platform::GLenum type) {
+const std::vector<std::uint8_t>& VertexAttributeGL::getRaw(gfx::VertexAttribute& attr,
+                                                           platform::GLenum type,
+                                                           std::optional<std::chrono::duration<double>> lastUpdate) {
     const auto count = attr.getCount();
     const auto stride_ = getStride(type);
     auto& rawData = attr.getRawData();
-    if (attr.isDirty() || rawData.size() != count * stride_) {
+    if (!lastUpdate || attr.isModifiedAfter(*lastUpdate) || rawData.size() != count * stride_) {
         rawData.resize(stride_ * count);
 
         if (!rawData.empty()) {
@@ -180,19 +177,6 @@ const std::vector<std::uint8_t>& VertexAttributeGL::getRaw(gfx::VertexAttribute&
         attr.setDirty(false);
     }
     return rawData;
-}
-
-bool VertexAttributeArrayGL::isDirty() const {
-    return std::any_of(attrs.begin(), attrs.end(), [](const auto& kv) {
-        if (kv.second) {
-            // If we have shared data, the dirty flag from that overrides ours
-            const auto& glAttrib = static_cast<const VertexAttributeGL&>(*kv.second);
-            if (const auto& shared = glAttrib.getSharedRawData()) {
-                return shared->getDirty();
-            }
-        }
-        return kv.second && kv.second->isDirty();
-    });
 }
 
 } // namespace gl

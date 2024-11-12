@@ -11,9 +11,14 @@ on:
           - pre
           - no
         description: Whether to make a release, choose full release (uses platform/ios/VERSION) or pre-release
+      pre_release_version:
+        type: string
+        default: ''
+        description: Version (only for pre-releases)
   push:
     branches:
       - main
+      - ios-*.*.x
     tags:
       - 'ios-*'
   
@@ -29,19 +34,21 @@ jobs:
   pre_job:
     runs-on: ubuntu-latest
     outputs:
-      should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files-yaml.outputs.ios_any_changed != 'true' }}
+      should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files-yaml.outputs.ios_any_modified != 'true' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Get all iOS files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files-yaml
-        uses: tj-actions/changed-files@v42
+        uses: tj-actions/changed-files@v45
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
       - name: Run step if test file(s) change
-        if: steps.changed-files-yaml.outputs.ios_any_changed == 'true'  
+        if: steps.changed-files-yaml.outputs.ios_any_modified == 'true'  
         run: |
           echo "One or more iOS file(s) has changed."
           echo "List of changes: ${{ steps.changed-files-yaml.outputs.ios_all_changed_files }}"
@@ -76,7 +83,8 @@ jobs:
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
 
-      - run: cp bazel/example_config.bzl bazel/config.bzl
+      - name: Build Example (Swift) App
+        run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal
 
       - name: Check debug symbols
         run: bazel run //platform:check-public-symbols --//:renderer=metal
@@ -87,15 +95,19 @@ jobs:
       - name: Running iOS tests
         run: bazel test //platform/ios/test:ios_test --test_output=errors --//:renderer=metal
 
-      - name: Running iOS UI tests
-        run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal
+      # tsan run fails with 'Interceptors are not working. This may be because ThreadSanitizer is loaded too late...'
+      #- name: Running iOS UI tests (Thread Sanitizer)
+      #  run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=tsan
+
+      - name: Running iOS UI tests (Address+UB Sanitizer)
+        run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=include_clang_rt --copt=-fsanitize=undefined --linkopt=-fsanitize=undefined --copt=-fsanitize-recover=null --linkopt=-fsanitize-recover=null
 
       # render test
 
       - name: Build RenderTest .ipa and .xctest for AWS Device Farm
         run: |
           set -e
-          bazel run --//:renderer=metal //platform/ios:xcodeproj
+          bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
           build_dir="$(mktemp -d)"
           xcodebuild build-for-testing  -scheme RenderTest -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
           render_test_app_dir="$(dirname "$(find "$build_dir" -name RenderTestApp.app)")"
@@ -182,33 +194,93 @@ jobs:
       - if: github.event_name == 'pull_request'
         uses: ./.github/actions/save-pr-number
 
+      - name: Build DocC documentation
+        working-directory: .
+        run: |
+          HOSTING_BASE_PATH="maplibre-native/ios/latest" platform/ios/scripts/docc.sh
+
+      - name: Deploy DocC documentation (main) 🚀
+        if: github.ref == 'refs/heads/main'
+        uses: JamesIves/github-pages-deploy-action@v4.6.9
+        continue-on-error: true
+        with:
+          branch: gh-pages
+          folder: build/docs
+          target-folder: ios/latest/
+
+  ios-release:
+    runs-on: macos-14
+    needs: ios-build
+    if: github.ref == 'refs/heads/main' || github.event.inputs.release == 'pre'
+    defaults:
+      run:
+        working-directory: platform/ios
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: VERSION file changed
+        id: version-file-ios-changed
+        uses: tj-actions/changed-files@v45
+        with:
+          files: platform/ios/VERSION
+
       # Make Metal XCFramework release
       - name: Should make release?
-        if: github.event.inputs.release == 'full' || github.event.inputs.release == 'pre'
+        if: |
+          github.event.inputs.release == 'full' || github.event.inputs.release == 'pre' ||
+          (github.event_name == 'push' && steps.version-file-ios-changed.outputs.any_changed == 'true')
         run: echo make_release=true >> "$GITHUB_ENV"
 
       - name: Build XCFramework
+        if: env.make_release
         run: |
-          bazel build --compilation_mode=opt --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
+          bazel build --compilation_mode=opt --features=dead_strip,thin_lto --objc_enable_binary_stripping \
+            --apple_generate_dsym --output_groups=+dsyms --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
           echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal //platform/ios:MapLibre.dynamic)" >> "$GITHUB_ENV"
+          
+      - name: Create .zip with debug symbols
+        if: env.make_release
+        working-directory: ./bazel-bin/platform/ios/MapLibre.dynamic_dsyms
+        run: |
+          zip MapLibre_ios_device.framework.dSYM.zip MapLibre_ios_device.framework.dSYM/Contents/Resources/DWARF/MapLibre_ios_device MapLibre_ios_device.framework.dSYM/Contents/Info.plist
+          echo debug_symbols_ios="$(realpath MapLibre_ios_device.framework.dSYM.zip)" >> "$GITHUB_ENV"
 
       - name: Get version (release)
-        if: github.event.inputs.release == 'full'
+        if: github.event.inputs.release == 'full' || steps.version-file-ios-changed.outputs.any_changed == 'true'
         run: |
           echo version="$(head VERSION)" >> "$GITHUB_ENV"
-          echo changelog_version_heading="## {{ env.version }}" >> "$GITHUB_ENV"
+          echo changelog_version_heading="## $(head VERSION)" >> "$GITHUB_ENV"
 
       - name: Get version (pre-release)
         if: github.event.inputs.release == 'pre'
         run: |
-          echo version="$(head VERSION)"-pre${{ github.sha }} >> "$GITHUB_ENV"
+          version="${{ github.event.inputs.pre_release_version }}"
+          if [[ -z "$version" ]]; then
+            version="$(head VERSION)"-pre${{ github.sha }}
+          fi
+          echo version="$version" >> "$GITHUB_ENV"
           echo changelog_version_heading="## main" >> "$GITHUB_ENV"
 
       - name: Extract changelog for version
         if: env.make_release
         run: |
-          awk '/^##/ { p = 0 }; p == 1 { print }; $0 == "{{ env.changelog_version_heading }}" { p = 1 };' CHANGELOG.md > changelog_for_version.md
+          awk '/^##/ { p = 0 }; p == 1 { print }; $0 == "${{ env.changelog_version_heading }}" { p = 1 };' CHANGELOG.md > changelog_for_version.md
           cat changelog_for_version.md
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
+      - name: Upload changelog to S3
+        if: env.make_release
+        run: aws s3 cp changelog_for_version.md s3://maplibre-native/changelogs/ios-${{ env.version }}.md
 
       - name: Create tag
         if: env.make_release
@@ -227,12 +299,14 @@ jobs:
       - name: Release (GitHub)
         if: env.make_release
         id: github_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           name: ios-v${{ env.version }}
-          files: MapLibre.dynamic.xcframework.zip
+          files: |
+            MapLibre.dynamic.xcframework.zip
+            ${{ env.debug_symbols_ios }}
           tag_name: ios-v${{ env.version }}
-          prerelease: ${{ !github.event.inputs.release }}
+          prerelease: ${{ github.event.inputs.release == 'pre' }}
           body_path: platform/ios/changelog_for_version.md
           fail_on_unmatched_files: true
 
@@ -256,9 +330,9 @@ jobs:
             -H "Authorization: token ${{ steps.generate_token.outputs.token }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             https://api.github.com/repos/maplibre/maplibre-gl-native-distribution/actions/workflows/$release_workflow_id/dispatches \
-            -d '{"ref":"main","inputs":{ \
-              "changelog": "'"$(cat changelog_for_version.md)"'", \
-              "version":"${{ env.version }}", \
+            -d '{"ref":"main","inputs":{
+              "changelog_url": "https://maplibre-native.s3.eu-central-1.amazonaws.com/changelogs/ios-${{ env.version }}.md",
+              "version":"${{ env.version }}",
               "download_url":"${{ fromJSON(steps.github_release.outputs.assets)[0].browser_download_url }}"}}'
 
       - name: Release (CocoaPods)

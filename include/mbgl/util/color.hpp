@@ -27,6 +27,8 @@ public:
         assert(a_ >= 0.0f);
         assert(a_ <= 1.0f);
     }
+    Color(const float rgba[4])
+        : Color(rgba[0], rgba[1], rgba[2], rgba[3]) {}
 
     float r = 0.0f;
     float g = 0.0f;
@@ -43,6 +45,7 @@ public:
     static std::optional<Color> parse(const std::string&);
     std::string stringify() const;
     std::array<double, 4> toArray() const;
+    operator std::array<float, 4>() const { return {r, g, b, a}; }
     mbgl::Value toObject() const;
     mbgl::Value serialize() const;
 };

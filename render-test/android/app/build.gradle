@@ -1,18 +1,26 @@
 apply plugin: 'com.android.application'
+//apply from: "${rootDir}/../../platform/android/gradle/download-vulkan-validation.gradle"
 
 android {
-    compileSdkVersion 33
+    ndkVersion '27.0.12077973'
+
+    sourceSets {
+        test {
+            assets.srcDirs += ['../../../metrics']
+        }
+    }
 
     defaultConfig {
-        applicationId = 'com.mapbox.mapboxsdk.maps.render_test_runner'
+        applicationId = 'org.maplibre.render_test_runner'
+        compileSdk 34
         minSdkVersion 21
         targetSdkVersion 33
         def abi = 'all'
-        if (project.hasProperty('mapbox.abis')) {
-            abi = project.getProperty('mapbox.abis')
+        if (project.hasProperty('maplibre.abis')) {
+            abi = project.getProperty('maplibre.abis')
         }
         ndk {
-            if (abi != 'all') {
+            if (abi != 'all' && abi != 'none') {
                 abiFilters abi.split(' ')
             } else {
                 abiFilters 'armeabi-v7a', 'x86', 'arm64-v8a', 'x86_64'
@@ -22,6 +30,7 @@ android {
             cmake {
                 arguments '-DANDROID_CCACHE=ccache'
                 arguments '-DANDROID_STL=c++_static'
+                arguments "-DMLN_LEGACY_RENDERER=OFF", "-DMLN_DRAWABLE_RENDERER=ON"
                 targets 'mbgl-render-test-runner'
             }
         }
@@ -44,13 +53,27 @@ android {
         }
     }
 
+    flavorDimensions += "renderer"
+    productFlavors {
+        create("opengl") {
+            dimension = "renderer"
+        }
+        create("vulkan") {
+            dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments "-DMLN_WITH_OPENGL=OFF", "-DMLN_WITH_VULKAN=ON"
+                }
+            }
+        }
+    }
+
     namespace 'android.app'
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.5.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
-    androidTestImplementation 'androidx.test:rules:1.5.0'
+    implementation libs.supportConstraintLayout
+    androidTestImplementation libs.testRunner
+    androidTestImplementation libs.testEspressoCore
+    androidTestImplementation libs.testRules
 }

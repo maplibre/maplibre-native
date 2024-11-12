@@ -1,15 +1,20 @@
 #include <mbgl/gfx/drawable_builder_impl.hpp>
 
 #include <mbgl/gfx/drawable_impl.hpp>
-#include <mbgl/util/math.hpp>
-#include <mbgl/style/types.hpp>
 #include <mbgl/gfx/polyline_generator.hpp>
+#include <mbgl/style/types.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/math.hpp>
+#include <mbgl/util/projection.hpp>
 
 #include <string>
 
 namespace mbgl {
 namespace gfx {
+
+using namespace shaders;
+
+// MARK: - Polylines
 
 DrawableBuilder::Impl::LineLayoutVertex DrawableBuilder::Impl::layoutVertex(
     Point<int16_t> p, Point<double> e, bool round, bool up, int8_t dir, int32_t linesofar /*= 0*/) {
@@ -61,18 +66,14 @@ void DrawableBuilder::Impl::addPolyline(gfx::DrawableBuilder& builder,
 
 void DrawableBuilder::Impl::setupForPolylines(gfx::Context& context, gfx::DrawableBuilder& builder) {
     // setup vertex attributes
-    static const StringIdentity idVertexAttribName = stringIndexer().get("a_pos_normal");
-    static const StringIdentity idDataAttribName = stringIndexer().get("a_data");
-
-    builder.setVertexAttrNameId(idVertexAttribName);
-
+    builder.setVertexAttrId(idLinePosNormalVertexAttribute);
     builder.setRawVertices({}, polylineVertices.elements(), gfx::AttributeDataType::Short2);
 
     auto attrs = context.createVertexAttributeArray();
     using VertexVector = gfx::VertexVector<LineLayoutVertex>;
     std::shared_ptr<VertexVector> verts = std::make_shared<VertexVector>(std::move(polylineVertices));
 
-    if (const auto& attr = attrs->add(idVertexAttribName)) {
+    if (const auto& attr = attrs->set(idLinePosNormalVertexAttribute)) {
         attr->setSharedRawData(verts,
                                offsetof(LineLayoutVertex, a1),
                                /*vertexOffset=*/0,
@@ -80,7 +81,7 @@ void DrawableBuilder::Impl::setupForPolylines(gfx::Context& context, gfx::Drawab
                                gfx::AttributeDataType::Short2);
     }
 
-    if (const auto& attr = attrs->add(idDataAttribName)) {
+    if (const auto& attr = attrs->set(idLineDataVertexAttribute)) {
         attr->setSharedRawData(verts,
                                offsetof(LineLayoutVertex, a2),
                                /*vertexOffset=*/0,
@@ -93,6 +94,186 @@ void DrawableBuilder::Impl::setupForPolylines(gfx::Context& context, gfx::Drawab
     sharedIndexes = std::make_shared<gfx::IndexVectorBase>(std::move(polylineIndexes));
 }
 
+// MARK: - Wide Vector Polylines
+
+namespace {
+inline void genInstanceLinks(
+    int32_t& outPrev, int32_t& outNext, const int base, const int coord_size, const int index, bool loop) {
+    if (loop) {
+        // loop line
+        outPrev = base + (index - 1 + coord_size) % coord_size;
+        outNext = base + (index + 1) % coord_size;
+    } else {
+        // line string
+        outPrev = (0 == index) ? -1 : base + index - 1;
+        outNext = (index + 1 >= coord_size) ? -1 : base + index + 1;
+    }
+}
+} // namespace
+
+void DrawableBuilder::Impl::addWideVectorPolylineLocal(gfx::DrawableBuilder& /*builder*/,
+                                                       const GeometryCoordinates& coordinates,
+                                                       const gfx::PolylineGeneratorOptions& options) {
+    // add instance data
+    const int base = static_cast<int>(wideVectorInstanceData.elements());
+    const int coord_size = static_cast<int>(coordinates.size());
+    int index = 0;
+    for (const auto& coord : coordinates) {
+        VertexTriWideVecInstance data;
+        data.center = {static_cast<float>(coord.x), static_cast<float>(coord.y), 0};
+        genInstanceLinks(data.prev, data.next, base, coord_size, index, FeatureType::Polygon == options.type);
+        wideVectorInstanceData.emplace_back(std::move(data));
+        ++index;
+    }
+}
+
+mbgl::Point<double> DrawableBuilder::Impl::addWideVectorPolylineGlobal(gfx::DrawableBuilder& /*builder*/,
+                                                                       const LineString<double>& coordinates,
+                                                                       const gfx::PolylineGeneratorOptions& options) {
+    constexpr int32_t zoom = 0;
+
+    // get center
+    constexpr double maxd = std::numeric_limits<double>::max();
+    constexpr double mind = std::numeric_limits<double>::min();
+    Point<double> minPoint{maxd, maxd}, maxPoint{mind, mind};
+    for (const auto& coord : coordinates) {
+        auto merc = Projection::project(LatLng(coord.y, coord.x), zoom);
+        Point<double> pSource{merc.x * mbgl::util::EXTENT, merc.y * mbgl::util::EXTENT};
+        minPoint.x = std::min(pSource.x, minPoint.x);
+        minPoint.y = std::min(pSource.y, minPoint.y);
+        maxPoint.x = std::max(pSource.x, maxPoint.x);
+        maxPoint.y = std::max(pSource.y, maxPoint.y);
+    }
+    Point<double> pCenter{(minPoint.x + maxPoint.x) / 2.0, (minPoint.y + maxPoint.y) / 2.0};
+
+    // add centerline instance data
+    const int base = static_cast<int>(wideVectorInstanceData.elements());
+    const int coord_size = static_cast<int>(coordinates.size());
+    int index = 0;
+    for (const auto& coord : coordinates) {
+        auto merc = Projection::project(LatLng(coord.y, coord.x), zoom);
+        Point<double> pSource{merc.x * mbgl::util::EXTENT, merc.y * mbgl::util::EXTENT};
+        pSource.x -= pCenter.x;
+        pSource.y -= pCenter.y;
+        VertexTriWideVecInstance data;
+        data.center = {static_cast<float>(pSource.x), static_cast<float>(pSource.y), 0};
+        genInstanceLinks(data.prev, data.next, base, coord_size, index, FeatureType::Polygon == options.type);
+        wideVectorInstanceData.emplace_back(std::move(data));
+        ++index;
+    }
+
+    return pCenter;
+}
+
+void DrawableBuilder::Impl::setupForWideVectors(gfx::Context& context, gfx::DrawableBuilder& builder) {
+    // vertices
+    if (!wideVectorVertices) {
+        constexpr shaders::VertexTriWideVecB kWideVectorVertices[]{
+            {{0}, {0}, (0 << 16) + 0},
+            {{0}, {0}, (1 << 16) + 0},
+            {{0}, {0}, (2 << 16) + 0},
+            {{0}, {0}, (3 << 16) + 0},
+
+            {{0}, {0}, (4 << 16) + 1},
+            {{0}, {0}, (5 << 16) + 1},
+            {{0}, {0}, (6 << 16) + 1},
+            {{0}, {0}, (7 << 16) + 1},
+
+            {{0}, {0}, (8 << 16) + 2},
+            {{0}, {0}, (9 << 16) + 2},
+            {{0}, {0}, (10 << 16) + 2},
+            {{0}, {0}, (11 << 16) + 2},
+        };
+        wideVectorVertices = std::make_shared<gfx::VertexVector<shaders::VertexTriWideVecB>>();
+        for (auto& v : kWideVectorVertices) {
+            wideVectorVertices->emplace_back(v);
+        }
+    }
+
+    // instance data
+    using InstanceVector = gfx::VertexVector<VertexTriWideVecInstance>;
+    const std::shared_ptr<InstanceVector> sharedInstanceData = std::make_shared<InstanceVector>(
+        std::move(wideVectorInstanceData));
+
+    // indexes
+    if (!wideVectorIndexes) {
+        wideVectorIndexes = std::make_shared<gfx::IndexVector<gfx::Triangles>>();
+        wideVectorIndexes->emplace_back(
+            0, 3, 1, 0, 2, 3, 4 + 0, 4 + 3, 4 + 1, 4 + 0, 4 + 2, 4 + 3, 8 + 0, 8 + 3, 8 + 1, 8 + 0, 8 + 2, 8 + 3);
+    }
+
+    // segments
+    SegmentVector<VertexTriWideVecB> triangleSegments;
+    triangleSegments.emplace_back(Segment<VertexTriWideVecB>{0, 0, 12, 18});
+
+    // add to builder
+    {
+        // add vertex attributes
+        auto vertexAttributes = context.createVertexAttributeArray();
+        if (const auto& attr = vertexAttributes->set(idWideVectorScreenPos)) {
+            attr->setSharedRawData(wideVectorVertices,
+                                   offsetof(VertexTriWideVecB, screenPos),
+                                   /*vertexOffset=*/0,
+                                   sizeof(VertexTriWideVecB),
+                                   gfx::AttributeDataType::Float3);
+        }
+        if (const auto& attr = vertexAttributes->set(idWideVectorColor)) {
+            attr->setSharedRawData(wideVectorVertices,
+                                   offsetof(VertexTriWideVecB, color),
+                                   /*vertexOffset=*/0,
+                                   sizeof(VertexTriWideVecB),
+                                   gfx::AttributeDataType::Float4);
+        }
+        if (const auto& attr = vertexAttributes->set(idWideVectorIndex)) {
+            attr->setSharedRawData(wideVectorVertices,
+                                   offsetof(VertexTriWideVecB, index),
+                                   /*vertexOffset=*/0,
+                                   sizeof(VertexTriWideVecB),
+                                   gfx::AttributeDataType::Int);
+        }
+        builder.setVertexAttributes(std::move(vertexAttributes));
+    }
+
+    {
+        // add instance attributes
+        auto instanceAttributes = context.createVertexAttributeArray();
+        if (const auto& attr = instanceAttributes->set(idWideVectorInstanceCenter)) {
+            attr->setSharedRawData(sharedInstanceData,
+                                   offsetof(VertexTriWideVecInstance, center),
+                                   /*vertexOffset=*/0,
+                                   sizeof(VertexTriWideVecInstance),
+                                   gfx::AttributeDataType::Float3);
+        }
+        if (const auto& attr = instanceAttributes->set(idWideVectorInstanceColor)) {
+            attr->setSharedRawData(sharedInstanceData,
+                                   offsetof(VertexTriWideVecInstance, color),
+                                   /*vertexOffset=*/0,
+                                   sizeof(VertexTriWideVecInstance),
+                                   gfx::AttributeDataType::Float4);
+        }
+        if (const auto& attr = instanceAttributes->set(idWideVectorInstancePrevious)) {
+            attr->setSharedRawData(sharedInstanceData,
+                                   offsetof(VertexTriWideVecInstance, prev),
+                                   /*vertexOffset=*/0,
+                                   sizeof(VertexTriWideVecInstance),
+                                   gfx::AttributeDataType::Int);
+        }
+        if (const auto& attr = instanceAttributes->set(idWideVectorInstanceNext)) {
+            attr->setSharedRawData(sharedInstanceData,
+                                   offsetof(VertexTriWideVecInstance, next),
+                                   /*vertexOffset=*/0,
+                                   sizeof(VertexTriWideVecInstance),
+                                   gfx::AttributeDataType::Int);
+        }
+        builder.setInstanceAttributes(std::move(instanceAttributes));
+    }
+
+    builder.setRawVertices({}, wideVectorVertices->elements(), gfx::AttributeDataType::Float2);
+    builder.setSegments(gfx::Triangles(), wideVectorIndexes, triangleSegments.data(), triangleSegments.size());
+}
+
+// MARK: - Common
+
 bool DrawableBuilder::Impl::checkAndSetMode(Mode target) {
     if (target != mode && vertexCount()) {
         // log error
@@ -103,6 +284,10 @@ bool DrawableBuilder::Impl::checkAndSetMode(Mode target) {
                     return "Mode::Primitives";
                 case Mode::Polylines:
                     return "Mode::Polylines";
+                case Mode::WideVectorLocal:
+                    return "Mode::WideVectorLocal";
+                case Mode::WideVectorGlobal:
+                    return "Mode::WideVectorGlobal";
                 case Mode::Custom:
                     return "Mode::Custom";
                 default:

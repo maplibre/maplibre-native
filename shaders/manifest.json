@@ -55,41 +55,6 @@
         "glsl_frag": "drawable.fill_outline.fragment.glsl",
         "uses_ubos": true
     },
-    { 
-        "name": "LineGradientShader",
-        "header": "drawable_line_gradient",
-        "glsl_vert": "drawable.line_gradient.vertex.glsl",
-        "glsl_frag": "drawable.line_gradient.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "LinePatternShader",
-        "header": "drawable_line_pattern",
-        "glsl_vert": "drawable.line_pattern.vertex.glsl",
-        "glsl_frag": "drawable.line_pattern.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "LineSDFShader",
-        "header": "drawable_line_sdf",
-        "glsl_vert": "drawable.line_sdf.vertex.glsl",
-        "glsl_frag": "drawable.line_sdf.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "LineShader",
-        "header": "drawable_line",
-        "glsl_vert": "drawable.line.vertex.glsl",
-        "glsl_frag": "drawable.line.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "LineBasicShader",
-        "header": "drawable_line_basic",
-        "glsl_vert": "drawable.line_basic.vertex.glsl",
-        "glsl_frag": "drawable.line_basic.fragment.glsl",
-        "uses_ubos": true
-    },
     {
         "name": "FillPatternShader",
         "header": "drawable_fill_pattern",
@@ -102,6 +67,13 @@
         "header": "drawable_fill_outline_pattern",
         "glsl_vert": "drawable.fill_outline_pattern.vertex.glsl",
         "glsl_frag": "drawable.fill_outline_pattern.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "FillOutlineTriangulatedShader",
+        "header": "drawable_fill_outline_triangulated",
+        "glsl_vert": "drawable.fill_outline_triangulated.vertex.glsl",
+        "glsl_frag": "drawable.fill_outline_triangulated.fragment.glsl",
         "uses_ubos": true
     },
     {
@@ -147,6 +119,34 @@
         "uses_ubos": true 
     },
     {
+        "name": "LineShader",
+        "header": "drawable_line",
+        "glsl_vert": "drawable.line.vertex.glsl",
+        "glsl_frag": "drawable.line.fragment.glsl",
+        "uses_ubos": true
+    },
+    { 
+        "name": "LineGradientShader",
+        "header": "drawable_line_gradient",
+        "glsl_vert": "drawable.line_gradient.vertex.glsl",
+        "glsl_frag": "drawable.line_gradient.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "LinePatternShader",
+        "header": "drawable_line_pattern",
+        "glsl_vert": "drawable.line_pattern.vertex.glsl",
+        "glsl_frag": "drawable.line_pattern.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "LineSDFShader",
+        "header": "drawable_line_sdf",
+        "glsl_vert": "drawable.line_sdf.vertex.glsl",
+        "glsl_frag": "drawable.line_sdf.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "RasterShader",
         "header": "drawable_raster",
         "glsl_vert": "drawable.raster.vertex.glsl",
@@ -173,6 +173,20 @@
         "glsl_vert": "drawable.symbol_text_and_icon.vertex.glsl",
         "glsl_frag": "drawable.symbol_text_and_icon.fragment.glsl",
         "uses_ubos": true
+    },
+    {
+        "name": "CustomSymbolIconShader",
+        "header": "drawable_custom_symbol_icon",
+        "glsl_vert": "drawable.custom.symbol_icon.vertex.glsl",
+        "glsl_frag": "drawable.custom.symbol_icon.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "WideVectorShader",
+        "header": "drawable_wide_vector",
+        "glsl_vert": "_empty.glsl",
+        "glsl_frag": "_empty.glsl",
+        "uses_ubos": false
     },
 
     {

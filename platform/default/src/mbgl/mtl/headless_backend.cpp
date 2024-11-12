@@ -4,10 +4,11 @@
 #include <mbgl/mtl/context.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
 
+#include <Metal/Metal.hpp>
+
 #include <cassert>
 #include <stdexcept>
 #include <type_traits>
-#include <Metal/Metal.hpp>
 
 namespace mbgl {
 namespace mtl {

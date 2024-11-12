@@ -9,10 +9,15 @@ BinPackParameters: false
 ColumnLimit: 120
 IncludeBlocks: Preserve
 IndentWidth: 4
-Language: Cpp
 PackConstructorInitializers: Never
 PenaltyBreakAssignment: 80
 SortIncludes: false
 SpacesBeforeTrailingComments: 1
-Standard: c++17
+Standard: c++20
+---
+Language: Cpp
+---
+Language: ObjC
+BasedOnStyle: Google
+ObjCSpaceAfterProperty: true
 ...

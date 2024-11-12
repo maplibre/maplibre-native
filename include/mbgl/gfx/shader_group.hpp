@@ -13,7 +13,7 @@
 
 namespace mbgl {
 
-using StringIdentity = std::size_t;
+using StringIDSetsPair = std::pair<unordered_set<std::string_view>, unordered_set<size_t>>;
 
 namespace gfx {
 
@@ -93,8 +93,10 @@ public:
     /// This variant looks up shaders only by type name.
     /// @tparam T Derived type, inheriting `gfx::Shader`
     /// @return T or nullptr if not found in the group
-    template <typename T, typename std::enable_if_t<is_shader_v<T>, bool>* = nullptr>
-    std::shared_ptr<T> get() noexcept {
+    template <typename T>
+    std::shared_ptr<T> get() noexcept
+        requires(is_shader_v<T>)
+    {
         auto shader = getShader(std::string(T::Name));
         if (!shader || shader->typeName() != T::Name) {
             return nullptr;
@@ -128,8 +130,10 @@ public:
     /// @tparam T Derived type, inheriting `gfx::Shader`
     /// @param to Location to store the shader
     /// @return True if 'to' has a valid program object, false otherwise.
-    template <typename T, typename std::enable_if_t<is_shader_v<T>, bool>* = nullptr>
-    bool populate(std::shared_ptr<T>& to) noexcept {
+    template <typename T>
+    bool populate(std::shared_ptr<T>& to) noexcept
+        requires(is_shader_v<T>)
+    {
         if (to) {
             return true;
         }
@@ -147,10 +151,9 @@ public:
     /// @param propertiesAsUniforms Set of data driven properties as uniforms.
     /// @param firstAttribName Name of the first attribute
     /// @return A `gfx::ShaderPtr`
-    virtual gfx::ShaderPtr getOrCreateShader(
-        gfx::Context&,
-        [[maybe_unused]] const mbgl::unordered_set<StringIdentity>& propertiesAsUniforms,
-        [[maybe_unused]] std::string_view firstAttribName = "a_pos") {
+    virtual gfx::ShaderPtr getOrCreateShader(gfx::Context&,
+                                             [[maybe_unused]] const StringIDSetsPair& propertiesAsUniforms,
+                                             [[maybe_unused]] std::string_view firstAttribName = "a_pos") {
         return {};
     }
 
@@ -162,9 +165,9 @@ protected:
     }
 
     /// Generate a map key for the specified combination of properties
-    PropertyHashType propertyHash(const mbgl::unordered_set<StringIdentity>& propertiesAsUniforms) {
-        const auto beg = propertiesAsUniforms.cbegin();
-        const auto end = propertiesAsUniforms.cend();
+    PropertyHashType propertyHash(const StringIDSetsPair& propertiesAsUniforms) {
+        const auto beg = propertiesAsUniforms.second.cbegin();
+        const auto end = propertiesAsUniforms.second.cend();
         return util::order_independent_hash<decltype(beg), PropertyHashType>(beg, end);
     }
 

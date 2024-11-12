@@ -11,6 +11,7 @@
 #include <mbgl/style/sources/image_source.hpp>
 #include <mbgl/style/conversion/json.hpp>
 #include <mbgl/style/conversion/tileset.hpp>
+#include <mbgl/style/sprite.hpp>
 #include <mbgl/text/glyph.hpp>
 #include <mbgl/util/i18n.hpp>
 #include <mbgl/util/mapbox.hpp>
@@ -62,12 +63,15 @@ void tileCover(const OfflineRegionDefinition& definition,
                uint16_t tileSize,
                const Range<uint8_t>& zoomRange,
                Fn&& fn) {
-    const Range<uint8_t> clampedZoomRange = definition.match(
-        [&](auto& reg) { return coveringZoomRange(reg, type, tileSize, zoomRange); });
+    const Range<uint8_t> clampedZoomRange = std::visit(
+        [&](auto& reg) { return coveringZoomRange(reg, type, tileSize, zoomRange); }, definition);
 
     for (uint8_t z = clampedZoomRange.min; z <= clampedZoomRange.max; z++) {
-        definition.match([&](const OfflineTilePyramidRegionDefinition& reg) { tileCover(reg.bounds, z, fn); },
-                         [&](const OfflineGeometryRegionDefinition& reg) { tileCover(reg.geometry, z, fn); });
+        std::visit(overloaded{[&](const OfflineTilePyramidRegionDefinition& reg) { tileCover(reg.bounds, z, fn); },
+                              [&](const OfflineGeometryRegionDefinition& reg) {
+                                  tileCover(reg.geometry, z, fn);
+                              }},
+                   definition);
     }
 }
 
@@ -75,14 +79,17 @@ uint64_t tileCount(const OfflineRegionDefinition& definition,
                    style::SourceType type,
                    uint16_t tileSize,
                    const Range<uint8_t>& zoomRange) {
-    const Range<uint8_t> clampedZoomRange = definition.match(
-        [&](auto& reg) { return coveringZoomRange(reg, type, tileSize, zoomRange); });
+    const Range<uint8_t> clampedZoomRange = std::visit(
+        [&](auto& reg) { return coveringZoomRange(reg, type, tileSize, zoomRange); }, definition);
 
     uint64_t result{};
     for (uint8_t z = clampedZoomRange.min; z <= clampedZoomRange.max; z++) {
-        result += definition.match(
-            [&](const OfflineTilePyramidRegionDefinition& reg) { return util::tileCount(reg.bounds, z); },
-            [&](const OfflineGeometryRegionDefinition& reg) { return util::tileCount(reg.geometry, z); });
+        result += std::visit(
+            overloaded{[&](const OfflineTilePyramidRegionDefinition& reg) { return util::tileCount(reg.bounds, z); },
+                       [&](const OfflineGeometryRegionDefinition& reg) {
+                           return util::tileCount(reg.geometry, z);
+                       }},
+            definition);
     }
 
     return result;
@@ -137,7 +144,7 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
 
     result->requiredResourceCount++;
     std::optional<Response> styleResponse = offlineDatabase.get(
-        Resource::style(definition.match([](auto& reg) { return reg.styleURL; })));
+        Resource::style(std::visit([](auto& reg) { return reg.styleURL; }, definition)));
     if (!styleResponse) {
         return *result;
     }
@@ -218,13 +225,13 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
 
     if (!parser.glyphURL.empty()) {
         result->requiredResourceCount += parser.fontStacks().size() *
-                                         (definition.match([](auto& reg) { return reg.includeIdeographs; })
+                                         (std::visit([](auto& reg) { return reg.includeIdeographs; }, definition)
                                               ? GLYPH_RANGES_PER_FONT_STACK
                                               : NON_IDEOGRAPH_GLYPH_RANGES_PER_FONT_STACK);
     }
 
-    if (!parser.spriteURL.empty()) {
-        result->requiredResourceCount += 4;
+    if (!parser.sprites.empty()) {
+        result->requiredResourceCount += 4 * parser.sprites.size();
     }
 
     return *result;
@@ -235,7 +242,7 @@ void OfflineDownload::activateDownload() {
     status.downloadState = OfflineRegionDownloadState::Active;
     status.requiredResourceCount++;
 
-    auto styleResource = Resource::style(definition.match([](auto& reg) { return reg.styleURL; }));
+    auto styleResource = Resource::style(std::visit([](auto& reg) { return reg.styleURL; }, definition));
     styleResource.setPriority(Resource::Priority::Low);
     styleResource.setUsage(Resource::Usage::Offline);
 
@@ -246,7 +253,6 @@ void OfflineDownload::activateDownload() {
         parser.parse(*styleResponse.data);
 
         auto tileServerOptions = onlineFileSource.getResourceOptions().tileServerOptions();
-        parser.spriteURL = util::mapbox::canonicalizeSpriteURL(tileServerOptions, parser.spriteURL);
         parser.glyphURL = util::mapbox::canonicalizeGlyphURL(tileServerOptions, parser.glyphURL);
 
         for (const auto& source : parser.sources) {
@@ -267,7 +273,7 @@ void OfflineDownload::activateDownload() {
                     sourceResource.setPriority(Resource::Priority::Low);
                     sourceResource.setUsage(Resource::Usage::Offline);
 
-                    ensureResource(std::move(sourceResource), [=](const Response& sourceResponse) {
+                    ensureResource(std::move(sourceResource), [=, this](const Response& sourceResponse) {
                         style::conversion::Error error;
                         std::optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(*sourceResponse.data,
                                                                                                  error);
@@ -330,7 +336,7 @@ void OfflineDownload::activateDownload() {
         }
 
         if (!parser.glyphURL.empty()) {
-            const bool includeIdeographs = definition.match([](auto& reg) { return reg.includeIdeographs; });
+            const bool includeIdeographs = std::visit([](auto& reg) { return reg.includeIdeographs; }, definition);
             for (const auto& fontStack : parser.fontStacks()) {
                 for (char16_t i = 0; i < GLYPH_RANGES_PER_FONT_STACK; i++) {
                     // Assumes that if a glyph range starts with fixed width/ideographic
@@ -343,12 +349,15 @@ void OfflineDownload::activateDownload() {
             }
         }
 
-        if (!parser.spriteURL.empty()) {
+        if (!parser.sprites.empty()) {
             // Always request 1x and @2x sprite images for portability.
-            queueResource(Resource::spriteImage(parser.spriteURL, 1));
-            queueResource(Resource::spriteImage(parser.spriteURL, 2));
-            queueResource(Resource::spriteJSON(parser.spriteURL, 1));
-            queueResource(Resource::spriteJSON(parser.spriteURL, 2));
+            for (const auto& sprite : parser.sprites) {
+                std::string spriteURL = util::mapbox::canonicalizeSpriteURL(tileServerOptions, sprite.spriteURL);
+                queueResource(Resource::spriteImage(spriteURL, 1));
+                queueResource(Resource::spriteImage(spriteURL, 2));
+                queueResource(Resource::spriteJSON(spriteURL, 1));
+                queueResource(Resource::spriteJSON(spriteURL, 2));
+            }
         }
 
         continueDownload();
@@ -435,7 +444,7 @@ void OfflineDownload::queueTiles(SourceType type, uint16_t tileSize, const Tiles
         status.requiredTileCount++;
 
         auto tileResource = Resource::tile(tileset.tiles[0],
-                                           definition.match([](auto& def) { return def.pixelRatio; }),
+                                           std::visit([](auto& def) { return def.pixelRatio; }, definition),
                                            tile.x,
                                            tile.y,
                                            tile.z,
@@ -458,7 +467,7 @@ void OfflineDownload::ensureResource(Resource&& resource, std::function<void(Res
     assert(resource.usage == Resource::Usage::Offline);
 
     auto workRequestsIt = requests.insert(requests.begin(), nullptr);
-    *workRequestsIt = util::RunLoop::Get()->invokeCancellable([=]() {
+    *workRequestsIt = util::RunLoop::Get()->invokeCancellable([=, this]() {
         requests.erase(workRequestsIt);
         const auto resourceKind = resource.kind;
         auto getResourceSizeInDatabase = [&]() -> std::optional<int64_t> {
@@ -498,7 +507,7 @@ void OfflineDownload::ensureResource(Resource&& resource, std::function<void(Res
         }
 
         auto fileRequestsIt = requests.insert(requests.begin(), nullptr);
-        *fileRequestsIt = onlineFileSource.request(resource, [=](const Response& onlineResponse) {
+        *fileRequestsIt = onlineFileSource.request(resource, [=, this](const Response& onlineResponse) {
             if (onlineResponse.error) {
                 observer->responseError(*onlineResponse.error);
                 if (onlineResponse.error->reason == Response::Error::Reason::NotFound) {

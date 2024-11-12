@@ -93,7 +93,9 @@ public:
 
     unsigned long constantsMask() const override;
 
-    const CircleLayer::Impl& layerImpl() const;
+    expression::Dependency getDependencies() const noexcept override;
+
+    const CircleLayer::Impl& layerImpl() const noexcept;
     // Data members.
     CirclePaintProperties::PossiblyEvaluated evaluated;
 };

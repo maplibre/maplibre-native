@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/drawable.hpp>
+#include <mbgl/programs/circle_program.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_tree.hpp>
@@ -9,7 +10,6 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/style/layers/circle_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/shaders/mtl/circle.hpp>
@@ -35,15 +35,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    // Updated every frame, but shared across drawables
-    const CirclePaintParamsUBO paintParamsUBO = {
-        /* .camera_to_center_distance = */ parameters.state.getCameraToCenterDistance(),
-        /* .padding = */ 0,
-        0,
-        0};
-    context.emplaceOrUpdateUniformBuffer(paintParamsUniformBuffer, &paintParamsUBO);
-
-    const auto zoom = parameters.state.getZoom();
+    const auto zoom = static_cast<float>(parameters.state.getZoom());
     const bool pitchWithMap = evaluated.get<CirclePitchAlignment>() == AlignmentType::Map;
     const bool scaleWithMap = evaluated.get<CirclePitchScale>() == CirclePitchScaleType::Map;
 
@@ -61,8 +53,10 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             /* .pitch_with_map = */ pitchWithMap,
             /* .padding = */ 0};
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
+        propertiesUpdated = false;
     }
-    propertiesUpdated = false;
+    auto& layerUniforms = layerGroup.mutableUniformBuffers();
+    layerUniforms.set(idCircleEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         assert(drawable.getTileID() || !"Circles only render with tiles");
@@ -71,9 +65,11 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         }
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.set(idCirclePaintParamsUBO, paintParamsUniformBuffer);
-        uniforms.set(idCircleEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
+        auto* binders = static_cast<CircleProgram::Binders*>(drawable.getBinders());
+        if (!binders) {
+            assert(false);
+            return;
+        }
 
         const auto& translation = evaluated.get<CircleTranslate>();
         const auto anchor = evaluated.get<CircleTranslateAnchor>();
@@ -82,7 +78,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const auto matrix = getTileMatrix(
             tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable);
 
-        const auto pixelsToTileUnits = tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom));
+        const auto pixelsToTileUnits = tileID.pixelsToTileUnits(1.0f, zoom);
         const auto extrudeScale = pitchWithMap ? std::array<float, 2>{pixelsToTileUnits, pixelsToTileUnits}
                                                : parameters.pixelsToGLUnits;
 
@@ -91,7 +87,22 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                                /* .extrude_scale = */ extrudeScale,
                                                /* .padding = */ 0};
 
-        uniforms.createOrUpdate(idCircleDrawableUBO, &drawableUBO, context);
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idCircleDrawableUBO, &drawableUBO, context);
+
+        const CircleInterpolateUBO interpolateUBO = {
+            /* .color_t = */ std::get<0>(binders->get<CircleColor>()->interpolationFactor(zoom)),
+            /* .radius_t = */ std::get<0>(binders->get<CircleRadius>()->interpolationFactor(zoom)),
+            /* .blur_t = */ std::get<0>(binders->get<CircleBlur>()->interpolationFactor(zoom)),
+            /* .opacity_t = */ std::get<0>(binders->get<CircleOpacity>()->interpolationFactor(zoom)),
+            /* .stroke_color_t = */
+            std::get<0>(binders->get<CircleStrokeColor>()->interpolationFactor(zoom)),
+            /* .stroke_width_t = */
+            std::get<0>(binders->get<CircleStrokeWidth>()->interpolationFactor(zoom)),
+            /* .stroke_opacity_t = */
+            std::get<0>(binders->get<CircleStrokeOpacity>()->interpolationFactor(zoom)),
+            /* .padding = */ 0};
+        drawableUniforms.createOrUpdate(idCircleInterpolateUBO, &interpolateUBO, context);
     });
 }
 

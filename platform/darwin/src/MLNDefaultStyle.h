@@ -5,7 +5,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- The `MLNDefaultStyle` defines the predefined vendor style
+ The ``MLNDefaultStyle`` defines the predefined vendor style
  */
 MLN_EXPORT
 @interface MLNDefaultStyle : NSObject
@@ -13,12 +13,12 @@ MLN_EXPORT
 /**
 The style URL
  */
-@property (nonatomic,retain) NSURL* url;
+@property (nonatomic, retain) NSURL* url;
 
 /**
 The style name
  */
-@property (nonatomic,retain) NSString* name;
+@property (nonatomic, retain) NSString* name;
 
 /**
 The style version

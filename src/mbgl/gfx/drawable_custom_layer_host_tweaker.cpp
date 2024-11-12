@@ -6,30 +6,27 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/context.hpp>
 
+#if MLN_RENDER_BACKEND_METAL
+#include <mbgl/style/layers/mtl/custom_layer_render_parameters.hpp>
+#endif
+
+#include <memory>
+
 namespace mbgl {
 namespace gfx {
 
 void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& drawable,
-                                             const PaintParameters& paintParameters) {
+                                             const mbgl::PaintParameters& paintParameters) {
     // custom drawing
     auto& context = paintParameters.context;
-    const TransformState& state = paintParameters.state;
     context.resetState(paintParameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
                        paintParameters.colorModeForRenderPass());
 
-    style::CustomLayerRenderParameters parameters;
-
-    parameters.width = state.getSize().width;
-    parameters.height = state.getSize().height;
-    parameters.latitude = state.getLatLng().latitude();
-    parameters.longitude = state.getLatLng().longitude();
-    parameters.zoom = state.getZoom();
-    parameters.bearing = util::rad2deg(-state.getBearing());
-    parameters.pitch = state.getPitch();
-    parameters.fieldOfView = state.getFieldOfView();
-    mat4 projMatrix;
-    state.getProjMatrix(projMatrix);
-    parameters.projectionMatrix = projMatrix;
+#if MLN_RENDER_BACKEND_METAL
+    style::mtl::CustomLayerRenderParameters parameters(paintParameters);
+#else
+    style::CustomLayerRenderParameters parameters(paintParameters);
+#endif
 
     host->render(parameters);
 

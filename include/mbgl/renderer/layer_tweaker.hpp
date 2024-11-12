@@ -4,6 +4,7 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/immutable.hpp>
 #include <mbgl/util/containers.hpp>
+#include <mbgl/util/mat4.hpp>
 
 #include <array>
 #include <memory>
@@ -22,14 +23,11 @@ class LayerProperties;
 enum class TranslateAnchorType : bool;
 } // namespace style
 
-class TransformState;
 class LayerGroupBase;
 class PaintParameters;
 class RenderTree;
+class TransformState;
 class UnwrappedTileID;
-
-using mat4 = std::array<double, 16>;
-using StringIdentity = std::size_t;
 
 /**
     Base class for layer tweakers, which manipulate layer group per frame
@@ -63,6 +61,13 @@ public:
 protected:
     /// Determine whether this tweaker should apply to the given drawable
     bool checkTweakDrawable(const gfx::Drawable&) const;
+
+    /// Multiplies with the projection matrix (either default, near clipped or aligned) for the given drawable
+    static void multiplyWithProjectionMatrix(/*in-out*/ mat4& matrix,
+                                             const PaintParameters& parameters,
+                                             const gfx::Drawable& drawable,
+                                             bool nearClipped,
+                                             bool aligned);
 
     std::string id;
     Immutable<style::LayerProperties> evaluatedProperties;

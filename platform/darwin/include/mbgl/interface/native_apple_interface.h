@@ -26,9 +26,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-#define MLN_APPLE_EXPORT __attribute__((visibility ("default")))
+#define MLN_APPLE_EXPORT __attribute__((visibility("default")))
 
-@interface MLNNativeNetworkManager: NSObject
+@interface MLNNativeNetworkManager : NSObject
 
 + (MLNNativeNetworkManager *)sharedManager;
 

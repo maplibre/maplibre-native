@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <org.maplibre.android.maps.MapView
+        android:id="@id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:maplibre_cameraTargetLat="45.1855569"
+        app:maplibre_cameraTargetLng="5.7215506"
+        app:maplibre_cameraZoom="11"
+        app:maplibre_uiAttributionGravity="top|end"
+        app:maplibre_uiLogoGravity="top|end"
+        app:maplibre_uiLogoMarginRight="28dp"/>
+
+</RelativeLayout>

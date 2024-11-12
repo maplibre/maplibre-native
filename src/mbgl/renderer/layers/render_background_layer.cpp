@@ -29,6 +29,7 @@
 namespace mbgl {
 
 using namespace style;
+using namespace shaders;
 
 namespace {
 
@@ -41,7 +42,9 @@ inline const BackgroundLayer::Impl& impl_cast(const Immutable<style::Layer::Impl
 
 RenderBackgroundLayer::RenderBackgroundLayer(Immutable<style::BackgroundLayer::Impl> _impl)
     : RenderLayer(makeMutable<BackgroundLayerProperties>(std::move(_impl))),
-      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {}
+      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
+    styleDependencies = unevaluated.getDependencies();
+}
 
 RenderBackgroundLayer::~RenderBackgroundLayer() = default;
 
@@ -50,7 +53,8 @@ void RenderBackgroundLayer::transition(const TransitionParameters& parameters) {
 }
 
 void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    auto evaluated = unevaluated.evaluate(parameters);
+    const auto previousProperties = staticImmutableCast<BackgroundLayerProperties>(evaluatedProperties);
+    auto evaluated = unevaluated.evaluate(parameters, previousProperties->evaluated);
     auto properties = makeMutable<BackgroundLayerProperties>(
         staticImmutableCast<BackgroundLayer::Impl>(baseImpl), parameters.getCrossfadeParameters(), evaluated);
 
@@ -215,8 +219,6 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                                    const std::shared_ptr<UpdateParameters>&,
                                    [[maybe_unused]] const RenderTree& renderTree,
                                    [[maybe_unused]] UniqueChangeRequestVec& changes) {
-    std::unique_lock<std::mutex> guard(mutex);
-
     const auto zoom = state.getIntegerZoom();
     const auto tileCover = util::tileCover(state, zoom);
 
@@ -310,6 +312,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         auto verticesCopy = rawVertices;
+        builder->setVertexAttrId(idBackgroundPosVertexAttribute);
         builder->setRawVertices(std::move(verticesCopy), vertexCount, gfx::AttributeDataType::Short2);
         builder->setSegments(gfx::Triangles(), indexes.vector(), segs.data(), segs.size());
         builder->flush(context);

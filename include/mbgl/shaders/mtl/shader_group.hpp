@@ -16,19 +16,15 @@ namespace mbgl {
 namespace mtl {
 
 class ShaderGroupBase : public gfx::ShaderGroup {
-public:
-    using StringIDSet = mbgl::unordered_set<StringIdentity>;
-
 protected:
     ShaderGroupBase(const ProgramParameters& parameters_)
         : programParameters(parameters_) {}
 
     using DefinesMap = mbgl::unordered_map<std::string, std::string>;
-    void addAdditionalDefines(const StringIDSet& propertiesAsUniforms, DefinesMap& additionalDefines) {
-        additionalDefines.reserve(propertiesAsUniforms.size());
-        for (const auto nameID : propertiesAsUniforms) {
+    void addAdditionalDefines(const StringIDSetsPair& propertiesAsUniforms, DefinesMap& additionalDefines) {
+        additionalDefines.reserve(propertiesAsUniforms.first.size());
+        for (const auto name : propertiesAsUniforms.first) {
             // We expect the names to be prefixed by "a_", but we need just the base here.
-            const auto name = stringIndexer().get(nameID);
             const auto* base = (name[0] == 'a' && name[1] == '_') ? &name[2] : name.data();
             additionalDefines.insert(std::make_pair(std::string(uniformPrefix) + base, std::string()));
         }
@@ -48,7 +44,7 @@ public:
     ~ShaderGroup() noexcept override = default;
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& gfxContext,
-                                     const mbgl::unordered_set<StringIdentity>& propertiesAsUniforms,
+                                     const StringIDSetsPair& propertiesAsUniforms,
                                      std::string_view /*firstAttribName*/) override {
         using ShaderSource = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
         constexpr auto& name = ShaderSource::name;
@@ -69,7 +65,7 @@ public:
             auto& context = static_cast<Context&>(gfxContext);
             const auto shaderSource = std::string(shaders::prelude) + source;
             shader = context.createProgram(
-                shaderName, shaderSource, vertMain, fragMain, programParameters, additionalDefines);
+                ShaderID, shaderName, shaderSource, vertMain, fragMain, programParameters, additionalDefines);
             assert(shader);
             if (!shader || !registerShader(shader, shaderName)) {
                 assert(false);
@@ -78,9 +74,12 @@ public:
 
             using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
             for (const auto& attrib : ShaderClass::attributes) {
-                if (!propertiesAsUniforms.count(attrib.nameID)) {
+                if (!propertiesAsUniforms.second.count(attrib.id)) {
                     shader->initAttribute(attrib);
                 }
+            }
+            for (const auto& attrib : ShaderClass::instanceAttributes) {
+                shader->initInstanceAttribute(attrib);
             }
             for (const auto& uniform : ShaderClass::uniforms) {
                 shader->initUniformBlock(uniform);

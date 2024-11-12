@@ -1,6 +1,8 @@
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/async_task.hpp>
 #include <mbgl/actor/scheduler.hpp>
+#include <mbgl/util/async_task.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
+#include <mbgl/util/run_loop.hpp>
+#include <mbgl/util/string.hpp>
 
 #include <CoreFoundation/CoreFoundation.h>
 
@@ -18,8 +20,8 @@ RunLoop* RunLoop::Get() {
 }
 
 RunLoop::RunLoop(Type)
-  : impl(std::make_unique<Impl>()) {
-    assert(!Scheduler::GetCurrent());
+    : impl(std::make_unique<Impl>()) {
+    assert(!Scheduler::GetCurrent(false));
     Scheduler::SetCurrent(this);
     impl->async = std::make_unique<AsyncTask>(std::bind(&RunLoop::process, this));
 }
@@ -43,6 +45,22 @@ void RunLoop::runOnce() {
 
 void RunLoop::stop() {
     invoke([&] { CFRunLoopStop(CFRunLoopGetCurrent()); });
+}
+
+void RunLoop::waitForEmpty([[maybe_unused]] const SimpleIdentity tag) {
+    while (true) {
+        std::size_t remaining;
+        {
+            std::lock_guard<std::mutex> lock(mutex);
+            remaining = defaultQueue.size() + highPriorityQueue.size();
+        }
+
+        if (remaining == 0) {
+            return;
+        }
+
+        runOnce();
+    }
 }
 
 } // namespace util

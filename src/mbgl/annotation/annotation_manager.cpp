@@ -32,12 +32,12 @@ namespace mbgl {
 
 using namespace style;
 
-const std::string AnnotationManager::SourceID = "com.mapbox.annotations";
-const std::string AnnotationManager::PointLayerID = "com.mapbox.annotations.points";
-const std::string AnnotationManager::ShapeLayerID = "com.mapbox.annotations.shape.";
+const std::string AnnotationManager::SourceID = "org.maplibre.annotations";
+const std::string AnnotationManager::PointLayerID = "org.maplibre.annotations.points";
+const std::string AnnotationManager::ShapeLayerID = "org.maplibre.annotations.shape.";
 
 AnnotationManager::AnnotationManager(Style& style_)
-    : style(style_){};
+    : style(style_) {}
 
 AnnotationManager::~AnnotationManager() = default;
 
@@ -234,11 +234,15 @@ void AnnotationManager::removeTile(AnnotationTile& tile) {
     tiles.erase(&tile);
 }
 
+namespace {
+
 // To ensure that annotation images do not collide with images from the style,
-// we prefix input image IDs with "com.mapbox.annotations".
-static std::string prefixedImageID(const std::string& id) {
+// we prefix input image IDs with "org.maplibre.annotations".
+std::string prefixedImageID(const std::string& id) {
     return AnnotationManager::SourceID + "." + id;
 }
+
+} // namespace
 
 void AnnotationManager::addImage(std::unique_ptr<style::Image> image) {
     CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG();

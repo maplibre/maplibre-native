@@ -17,6 +17,7 @@
 #include <mbgl/shaders/mtl/clipping_mask.hpp>
 #include <mbgl/shaders/mtl/collision_box.hpp>
 #include <mbgl/shaders/mtl/collision_circle.hpp>
+#include <mbgl/shaders/mtl/custom_symbol_icon.hpp>
 #include <mbgl/shaders/mtl/debug.hpp>
 #include <mbgl/shaders/mtl/fill.hpp>
 #include <mbgl/shaders/mtl/fill_extrusion.hpp>
@@ -26,12 +27,12 @@
 #include <mbgl/shaders/mtl/hillshade.hpp>
 #include <mbgl/shaders/mtl/hillshade_prepare.hpp>
 #include <mbgl/shaders/mtl/line.hpp>
-#include <mbgl/shaders/mtl/line_gradient.hpp>
 #include <mbgl/shaders/mtl/fill.hpp>
 #include <mbgl/shaders/mtl/raster.hpp>
 #include <mbgl/shaders/mtl/symbol_icon.hpp>
 #include <mbgl/shaders/mtl/symbol_sdf.hpp>
 #include <mbgl/shaders/mtl/symbol_text_and_icon.hpp>
+#include <mbgl/shaders/mtl/widevector.hpp>
 
 #include <cassert>
 #include <string>
@@ -45,6 +46,11 @@ RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
       commandQueue(NS::TransferPtr(device->newCommandQueue())) {
     assert(device);
     assert(commandQueue);
+#if TARGET_OS_SIMULATOR
+    baseVertexInstanceDrawingSupported = true;
+#else
+    baseVertexInstanceDrawingSupported = device->supportsFamily(MTL::GPUFamilyApple3);
+#endif
 }
 
 RendererBackend::~RendererBackend() = default;
@@ -55,47 +61,23 @@ std::unique_ptr<gfx::Context> RendererBackend::createContext() {
 
 PremultipliedImage RendererBackend::readFramebuffer(const Size& size) {
     return PremultipliedImage(size);
-    // return getContext<mtl::Context>().readFramebuffer<PremultipliedImage>(size);
 }
 
-void RendererBackend::assumeFramebufferBinding(const mtl::FramebufferID fbo) {
-    /*getContext<mtl::Context>().bindFramebuffer.setCurrentValue(fbo);
-    if (fbo != ImplicitFramebufferBinding) {
-        assert(mtl::value::BindFramebuffer::Get() == getContext<mtl::Context>().bindFramebuffer.getCurrentValue());
-    }*/
-}
+void RendererBackend::assumeFramebufferBinding(const mtl::FramebufferID fbo) {}
 
-void RendererBackend::assumeViewport(int32_t x, int32_t y, const Size& size) {
-    /*getContext<mtl::Context>().viewport.setCurrentValue({x, y, size});
-    assert(mtl::value::Viewport::Get() == getContext<mtl::Context>().viewport.getCurrentValue());*/
-}
+void RendererBackend::assumeViewport(int32_t x, int32_t y, const Size& size) {}
 
-void RendererBackend::assumeScissorTest(bool enabled) {
-    /*getContext<mtl::Context>().scissorTest.setCurrentValue(enabled);
-    assert(mtl::value::ScissorTest::Get() == getContext<mtl::Context>().scissorTest.getCurrentValue());*/
-}
+void RendererBackend::assumeScissorTest(bool enabled) {}
 
 bool RendererBackend::implicitFramebufferBound() {
     return false;
-    // return getContext<mtl::Context>().bindFramebuffer.getCurrentValue() == ImplicitFramebufferBinding;
 }
 
-void RendererBackend::setFramebufferBinding(const mtl::FramebufferID fbo) {
-    /*getContext<mtl::Context>().bindFramebuffer = fbo;
-    if (fbo != ImplicitFramebufferBinding) {
-        assert(mtl::value::BindFramebuffer::Get() == getContext<mtl::Context>().bindFramebuffer.getCurrentValue());
-    }*/
-}
+void RendererBackend::setFramebufferBinding(const mtl::FramebufferID fbo) {}
 
-void RendererBackend::setViewport(int32_t x, int32_t y, const Size& size) {
-    /*getContext<mtl::Context>().viewport = {x, y, size};
-    assert(mtl::value::Viewport::Get() == getContext<mtl::Context>().viewport.getCurrentValue());*/
-}
+void RendererBackend::setViewport(int32_t x, int32_t y, const Size& size) {}
 
-void RendererBackend::setScissorTest(bool enabled) {
-    /*getContext<mtl::Context>().scissorTest = enabled;
-    assert(mtl::value::ScissorTest::Get() == getContext<mtl::Context>().scissorTest.getCurrentValue());*/
-}
+void RendererBackend::setScissorTest(bool enabled) {}
 
 /// @brief Register a list of types with a shader registry instance
 /// @tparam ...ShaderID Pack of BuiltIn:: shader IDs
@@ -129,18 +111,19 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::ClippingMaskProgram,
                   shaders::BuiltIn::CollisionBoxShader,
                   shaders::BuiltIn::CollisionCircleShader,
+                  shaders::BuiltIn::CustomSymbolIconShader,
                   shaders::BuiltIn::DebugShader,
                   shaders::BuiltIn::FillShader,
                   shaders::BuiltIn::FillOutlineShader,
-                  shaders::BuiltIn::FillOutlinePatternShader,
                   shaders::BuiltIn::FillPatternShader,
+                  shaders::BuiltIn::FillOutlinePatternShader,
+                  shaders::BuiltIn::FillOutlineTriangulatedShader,
                   shaders::BuiltIn::FillExtrusionShader,
                   shaders::BuiltIn::FillExtrusionPatternShader,
                   shaders::BuiltIn::HeatmapShader,
                   shaders::BuiltIn::HeatmapTextureShader,
                   shaders::BuiltIn::HillshadeShader,
                   shaders::BuiltIn::HillshadePrepareShader,
-                  shaders::BuiltIn::LineBasicShader,
                   shaders::BuiltIn::LineShader,
                   shaders::BuiltIn::LineGradientShader,
                   shaders::BuiltIn::LineSDFShader,
@@ -148,7 +131,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::RasterShader,
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFIconShader,
-                  shaders::BuiltIn::SymbolTextAndIconShader>(shaders, programParameters);
+                  shaders::BuiltIn::SymbolTextAndIconShader,
+                  shaders::BuiltIn::WideVectorShader>(shaders, programParameters);
 }
 
 } // namespace mtl

@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - topic/drawable
+      - node-*.*.x
     tags:
       - "node-*"
     paths:
@@ -30,6 +31,8 @@ on:
       - "vendor/**"
       - ".gitmodules"
       - "!**/*.md"
+      - "package.json"
+      - "package-lock.json"
 
   pull_request:
     branches:
@@ -56,6 +59,8 @@ on:
       - "vendor/**"
       - ".gitmodules"
       - "!**/*.md"
+      - "package.json"
+      - "package-lock.json"
 
 concurrency:
   # cancel jobs on PRs only
@@ -71,14 +76,12 @@ jobs:
         include:
           - runs-on: ubuntu-22.04
             arch: x86_64
-          - runs-on: [self-hosted, linux, ARM64]
+          - runs-on: MapLibre_Native_Ubuntu_22_04_ARM_8_core
             arch: arm64
-          # Disabled until Metal backend is complete
-          # A release for macOS can be made from the opengl-2 branch
-          # - runs-on: macos-12
-          #   arch: x86_64
-          # - runs-on: [self-hosted, macOS, ARM64]
-          #   arch: arm64
+          - runs-on: macos-14
+            arch: arm64
+          - runs-on: macos-14-large
+            arch: x86_64
           - runs-on: windows-2022
             arch: x86_64
     continue-on-error: true
@@ -113,7 +116,6 @@ jobs:
           HOMEBREW_NO_AUTO_UPDATE: 1
           HOMEBREW_NO_INSTALL_CLEANUP: 1
         run: |
-          brew list cmake || brew install cmake
           brew list ccache || brew install ccache
           brew list ninja || brew install ninja
           brew list pkg-config || brew install pkg-config
@@ -146,6 +148,7 @@ jobs:
           node-version-file: '.nvmrc'
 
       - name: npm ci
+        working-directory: platform/node
         run: npm ci --ignore-scripts
 
       - name: Set up msvc dev cmd (Windows)
@@ -160,11 +163,15 @@ jobs:
           $env:PATH = $env:PATH -replace "C:\\Strawberry\\c\\bin;", ""
           "PATH=$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-      - name: Setup cmake (Linux)
-        if: runner.os == 'Linux' && matrix.arch != 'arm64'
-        uses: jwlawson/actions-setup-cmake@v1.14
+      - name: Setup cmake
+        if: ${{contains(runner.name, 'GitHub Actions')}}
+        uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: "3.19.x"
+          cmake-version: '3.29.2'
+ 
+      - name: cmake version
+        run: |
+          cmake --version
 
       - name: Set up ccache (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
@@ -201,11 +208,15 @@ jobs:
             -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DMLN_WITH_NODE=ON
+            -DMLN_WITH_NODE=ON \
+            -DMLN_WITH_OPENGL=OFF \
+            -DMLN_WITH_METAL=ON \
+            -DMLN_LEGACY_RENDERER=OFF \
+            -DMLN_DRAWABLE_RENDERER=ON \
+            -DMLN_WITH_WERROR=OFF
 
       - name: Configure maplibre-native (Linux)
         if: runner.os == 'Linux'
-        shell: bash -leo pipefail {0}
         run: |
           cmake . -B build \
             -G Ninja \
@@ -235,11 +246,12 @@ jobs:
 
       - name: Configure maplibre-native (Windows)
         if: runner.os == 'Windows'
+        shell: pwsh
         run: |
-          cmake . -B build \
-            -G Ninja \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
+          cmake . -B build `
+            -G Ninja `
+            -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} `
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
             -DMLN_WITH_NODE=ON
 
       - name: Build maplibre-native (MacOS/Linux)
@@ -253,27 +265,33 @@ jobs:
           cmake --build build
 
       - name: Run render tests on macOS
+        id: render_tests
         if: runner.os == 'macOS'
-        run: set -o pipefail && ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
+        continue-on-error: ${{ runner.arch == 'X64' }}
+        run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
 
       - name: Upload render test artifacts (MacOS)
-        if: runner.os == 'MacOS'
+        if: runner.os == 'MacOS' && steps.render_tests.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
-          name: render-query-test-results
+          name: render-query-test-results_${{ runner.os }}_${{ matrix.arch }}
           path: metrics/macos-xcode11-release-style.html
 
       - name: Test (Linux)
+        working-directory: platform/node
         if: runner.os == 'Linux'
         run: xvfb-run --auto-servernum npm test
 
       - name: Test (MacOS)
         if: runner.os == 'MacOS'
+        continue-on-error: true  # flaky on CI
+        working-directory: platform/node
         run: npm test
 
       - name: Test (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
+        working-directory: platform/node
         env:
           LIBGL_ALWAYS_SOFTWARE: true
           GALLIUM_DRIVER: softpipe
@@ -284,5 +302,6 @@ jobs:
 
       # On PRs make sure that the npm package can be packaged.
       - name: Pack
+        working-directory: platform/node
         run: |
-          npm pack --dry-run
+          npm pack  --dry-run

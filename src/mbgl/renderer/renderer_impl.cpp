@@ -9,6 +9,7 @@
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/programs/programs.hpp>
+#include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/pattern_atlas.hpp>
 #include <mbgl/renderer/renderer_observer.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
@@ -16,6 +17,7 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_tweaker.hpp>
@@ -34,7 +36,7 @@
 constexpr auto EnableMetalCapture = 0;
 constexpr auto CaptureFrameStart = 0; // frames are 0-based
 constexpr auto CaptureFrameCount = 1;
-#else // !MLN_RENDER_BACKEND_METAL
+#elif MLN_RENDER_BACKEND_OPENGL
 #include <mbgl/gl/defines.hpp>
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gl/drawable_gl.hpp>
@@ -57,7 +59,7 @@ RendererObserver& nullObserver() {
 Renderer::Impl::Impl(gfx::RendererBackend& backend_,
                      float pixelRatio_,
                      const std::optional<std::string>& localFontFamily_)
-    : orchestrator(!backend_.contextIsShared(), localFontFamily_),
+    : orchestrator(!backend_.contextIsShared(), backend_.getThreadPool(), localFontFamily_),
       backend(backend_),
       observer(&nullObserver()),
       pixelRatio(pixelRatio_) {}
@@ -66,16 +68,38 @@ Renderer::Impl::~Impl() {
     assert(gfx::BackendScope::exists());
 };
 
+void Renderer::Impl::onPreCompileShader(shaders::BuiltIn shaderID,
+                                        gfx::Backend::Type type,
+                                        const std::string& additionalDefines) {
+    observer->onPreCompileShader(shaderID, type, additionalDefines);
+}
+
+void Renderer::Impl::onPostCompileShader(shaders::BuiltIn shaderID,
+                                         gfx::Backend::Type type,
+                                         const std::string& additionalDefines) {
+    observer->onPostCompileShader(shaderID, type, additionalDefines);
+}
+
+void Renderer::Impl::onShaderCompileFailed(shaders::BuiltIn shaderID,
+                                           gfx::Backend::Type type,
+                                           const std::string& additionalDefines) {
+    observer->onShaderCompileFailed(shaderID, type, additionalDefines);
+}
+
 void Renderer::Impl::setObserver(RendererObserver* observer_) {
     observer = observer_ ? observer_ : &nullObserver();
 }
 
 void Renderer::Impl::render(const RenderTree& renderTree,
                             [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters) {
+    MLN_TRACE_FUNC();
     auto& context = backend.getContext();
+    context.setObserver(this);
+
 #if MLN_RENDER_BACKEND_METAL
     if constexpr (EnableMetalCapture) {
         const auto& mtlBackend = static_cast<mtl::RendererBackend&>(backend);
+
         const auto& mtlDevice = mtlBackend.getDevice();
 
         if (!commandCaptureScope) {
@@ -228,8 +252,11 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #endif
 
         // Tweakers are run in the upload pass so they can set up uniforms.
-        orchestrator.visitLayerGroups(
-            [&](LayerGroupBase& layerGroup) { layerGroup.runTweakers(renderTree, parameters); });
+        parameters.currentLayer = 0;
+        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
+            layerGroup.runTweakers(renderTree, parameters);
+            parameters.currentLayer++;
+        });
         orchestrator.visitDebugLayerGroups(
             [&](LayerGroupBase& layerGroup) { layerGroup.runTweakers(renderTree, parameters); });
 
@@ -245,6 +272,22 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         // Upload the Debug layer group
         orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
     }
+
+    const Size atlasSize = parameters.patternAtlas.getPixelSize();
+    const auto& worldSize = parameters.staticData.backendSize;
+    const shaders::GlobalPaintParamsUBO globalPaintParamsUBO = {
+        /* .pattern_atlas_texsize = */ {static_cast<float>(atlasSize.width), static_cast<float>(atlasSize.height)},
+        /* .units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
+        /* .world_size = */ {static_cast<float>(worldSize.width), static_cast<float>(worldSize.height)},
+        /* .camera_to_center_distance = */ parameters.state.getCameraToCenterDistance(),
+        /* .symbol_fade_change = */ parameters.symbolFadeChange,
+        /* .aspect_ratio = */ parameters.state.getSize().aspectRatio(),
+        /* .pixel_ratio = */ parameters.pixelRatio,
+        /* .zoom = */ static_cast<float>(parameters.state.getZoom()),
+        /* .pad1 = */ 0,
+    };
+    auto& globalUniforms = context.mutableGlobalUniformBuffers();
+    globalUniforms.createOrUpdate(shaders::idGlobalPaintParamsUBO, &globalPaintParamsUBO, context);
 #endif
 
     // - 3D PASS
@@ -258,13 +301,14 @@ void Renderer::Impl::render(const RenderTree& renderTree,
             const auto debugGroup(parameters.encoder->createDebugGroup("common-3d"));
             parameters.pass = RenderPass::Pass3D;
 
-            if (!parameters.staticData.depthRenderbuffer ||
-                parameters.staticData.depthRenderbuffer->getSize() != parameters.staticData.backendSize) {
-                parameters.staticData.depthRenderbuffer =
-                    parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(
-                        parameters.staticData.backendSize);
-            }
-            parameters.staticData.depthRenderbuffer->setShouldClear(true);
+            // TODO is this needed?
+            // if (!parameters.staticData.depthRenderbuffer ||
+            //    parameters.staticData.depthRenderbuffer->getSize() != parameters.staticData.backendSize) {
+            //    parameters.staticData.depthRenderbuffer =
+            //        parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(
+            //            parameters.staticData.backendSize);
+            //}
+            // parameters.staticData.depthRenderbuffer->setShouldClear(true);
         }
     };
 
@@ -274,10 +318,12 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         assert(parameters.pass == RenderPass::Pass3D);
 
         // draw layer groups, 3D pass
-        const auto maxLayerIndex = orchestrator.maxLayerIndex();
+        parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
             layerGroup.render(orchestrator, parameters);
-            parameters.currentLayer = maxLayerIndex - layerGroup.getLayerIndex();
+            if (parameters.currentLayer > 0) {
+                parameters.currentLayer--;
+            }
         });
     };
 #endif // MLN_DRAWABLE_RENDERER
@@ -327,31 +373,45 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     // Drawables
     const auto drawableOpaquePass = [&] {
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-opaque"));
-        const auto maxLayerIndex = orchestrator.maxLayerIndex();
         parameters.pass = RenderPass::Opaque;
-        parameters.currentLayer = 0;
-        parameters.depthRangeSize = 1 -
-                                    (maxLayerIndex + 3) * PaintParameters::numSublayers * PaintParameters::depthEpsilon;
+        parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * PaintParameters::numSublayers *
+                                            PaintParameters::depthEpsilon;
 
         // draw layer groups, opaque pass
-        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            parameters.currentLayer = layerGroup.getLayerIndex();
+        parameters.currentLayer = 0;
+        orchestrator.visitLayerGroupsReversed([&](LayerGroupBase& layerGroup) {
             layerGroup.render(orchestrator, parameters);
+            parameters.currentLayer++;
         });
     };
 
     const auto drawableTranslucentPass = [&] {
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-translucent"));
-        const auto maxLayerIndex = orchestrator.maxLayerIndex();
         parameters.pass = RenderPass::Translucent;
-        parameters.depthRangeSize = 1 -
-                                    (maxLayerIndex + 3) * PaintParameters::numSublayers * PaintParameters::depthEpsilon;
+        parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * PaintParameters::numSublayers *
+                                            PaintParameters::depthEpsilon;
 
         // draw layer groups, translucent pass
+        parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            parameters.currentLayer = maxLayerIndex - layerGroup.getLayerIndex();
             layerGroup.render(orchestrator, parameters);
+            if (parameters.currentLayer > 0) {
+                parameters.currentLayer--;
+            }
         });
+
+        // Finally, render any legacy layers which have not been converted to drawables.
+        // Note that they may be out of order, this is just a temporary fix for `RenderLocationIndicatorLayer` (#2216)
+        parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * PaintParameters::numSublayers *
+                                            PaintParameters::depthEpsilon;
+        int32_t i = static_cast<int32_t>(layerRenderItems.size()) - 1;
+        for (auto it = layerRenderItems.begin(); it != layerRenderItems.end() && i >= 0; ++it, --i) {
+            parameters.currentLayer = i;
+            const RenderItem& item = *it;
+            if (item.hasRenderPass(parameters.pass)) {
+                item.render(parameters);
+            }
+        }
     };
 #endif
 
@@ -398,14 +458,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         // Renders debug overlays.
         {
             const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
-            orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) {
-                visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
-                    for (const auto& tweaker : drawable.getTweakers()) {
-                        tweaker->execute(drawable, parameters);
-                    }
-                    drawable.draw(parameters);
-                });
-            });
+            orchestrator.visitDebugLayerGroups(
+                [&](LayerGroupBase& layerGroup) { layerGroup.render(orchestrator, parameters); });
         }
     };
 #endif // MLN_DRAWABLE_RENDERER
@@ -444,6 +498,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     }
     drawableTargetsPass();
     commonClearPass();
+    context.bindGlobalUniformBuffers(*parameters.renderPass);
     drawableOpaquePass();
     drawableTranslucentPass();
     drawableDebugOverlays();
@@ -463,16 +518,17 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #if MLN_DRAWABLE_RENDERER
     // Give the layers a chance to do cleanup
     orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.postRender(orchestrator, parameters); });
+    context.unbindGlobalUniformBuffers(*parameters.renderPass);
 #endif
 
     // Ends the RenderPass
     parameters.renderPass.reset();
 
     const auto startRendering = util::MonotonicTimer::now().count();
+    // present submits render commands
     parameters.encoder->present(parameters.backend.getDefaultRenderable());
     const auto renderingTime = util::MonotonicTimer::now().count() - startRendering;
 
-    // CommandEncoder destructor submits render commands.
     parameters.encoder.reset();
     context.endFrame();
 
@@ -506,6 +562,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     }
 
     frameCount += 1;
+    MLN_END_FRAME();
 }
 
 void Renderer::Impl::reduceMemoryUse() {

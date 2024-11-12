@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/actor/scheduler.hpp>
 #include <mbgl/style/style.hpp>
 #include <mbgl/style/transition_options.hpp>
 #include <mbgl/style/observer.hpp>
@@ -36,7 +37,7 @@ class Style::Impl : public SpriteLoaderObserver,
                     public LightObserver,
                     public util::noncopyable {
 public:
-    Impl(std::shared_ptr<FileSource>, float pixelRatio);
+    Impl(std::shared_ptr<FileSource>, float pixelRatio, const TaggedScheduler& threadPool_);
     ~Impl() override;
 
     void loadJSON(const std::string&);
@@ -86,10 +87,10 @@ public:
     Immutable<std::vector<Immutable<Layer::Impl>>> getLayerImpls() const;
 
     void dumpDebugLogs() const;
+    bool areSpritesLoaded() const;
 
     bool mutated = false;
     bool loaded = false;
-    bool spriteLoaded = false;
 
 private:
     void parse(const std::string&);
@@ -108,14 +109,16 @@ private:
     Collection<Layer> layers;
     TransitionOptions transitionOptions;
     std::unique_ptr<Light> light;
+    std::unordered_map<std::string, bool> spritesLoadingStatus;
 
     // Defaults
     std::string name;
     CameraOptions defaultCamera;
 
     // SpriteLoaderObserver implementation.
-    void onSpriteLoaded(std::vector<Immutable<style::Image::Impl>>) override;
-    void onSpriteError(std::exception_ptr) override;
+    void onSpriteLoaded(std::optional<style::Sprite> sprite, std::vector<Immutable<style::Image::Impl>>) override;
+    void onSpriteError(std::optional<style::Sprite> sprite, std::exception_ptr) override;
+    void onSpriteRequested(const std::optional<style::Sprite>&) override;
 
     // SourceObserver implementation.
     void onSourceLoaded(Source&) override;

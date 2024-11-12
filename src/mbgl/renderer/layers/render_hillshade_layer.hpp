@@ -75,7 +75,6 @@ private:
 #if MLN_DRAWABLE_RENDERER
     gfx::ShaderProgramBasePtr hillshadePrepareShader;
     gfx::ShaderProgramBasePtr hillshadeShader;
-    std::optional<int> hillshadeImageLocation;
     std::vector<RenderTargetPtr> activatedRenderTargets;
 
     using HillshadeVertexVector = gfx::VertexVector<HillshadeLayoutVertex>;

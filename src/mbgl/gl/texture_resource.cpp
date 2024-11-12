@@ -1,5 +1,6 @@
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/texture_resource.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 namespace mbgl {
 namespace gl {
@@ -31,11 +32,10 @@ static int channelStorageSize(gfx::TextureChannelDataType type) {
     }
 }
 
-TextureResource::~TextureResource() noexcept {
-    auto& stats = texture.get_deleter().context->renderingStats();
-    stats.memTextures -= byteSize;
-    assert(stats.memTextures >= 0);
-}
+TextureResource::TextureResource(UniqueTexture&& texture_)
+    : texture(std::move(texture_)) {}
+
+TextureResource::~TextureResource() noexcept {}
 
 int TextureResource::getStorageSize(const Size& size, gfx::TexturePixelType format, gfx::TextureChannelDataType type) {
     return size.width * size.height * channelCount(format) * channelStorageSize(type);

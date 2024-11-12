@@ -1,8 +1,6 @@
 #pragma once
 
 #include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/background_layer_ubo.hpp>
-#include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 
 namespace mbgl {
@@ -22,8 +20,9 @@ struct ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 1> attributes;
     static const std::array<UniformBlockInfo, 1> uniforms;
+    static const std::array<AttributeInfo, 1> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
@@ -39,7 +38,7 @@ struct alignas(16) ClipUBO {
 static_assert(sizeof(ClipUBO) == 5 * 16, "unexpected padding");
 
 struct VertexStage {
-    short2 position [[attribute(0)]];
+    short2 position [[attribute(2)]];
 };
 
 struct FragmentStage {

@@ -1,6 +1,8 @@
 #pragma once
 
+#include <mbgl/actor/scheduler.hpp>
 #include <mbgl/style/image.hpp>
+#include <mbgl/style/sprite.hpp>
 #include <mapbox/std/weak.hpp>
 
 #include <string>
@@ -14,19 +16,18 @@ namespace mbgl {
 
 class FileSource;
 class SpriteLoaderObserver;
-class Scheduler;
 
 class SpriteLoader {
 public:
-    SpriteLoader(float pixelRatio);
+    SpriteLoader(float pixelRatio, const TaggedScheduler& threadPool_);
     ~SpriteLoader();
 
-    void load(const std::string& url, FileSource&);
+    void load(const std::optional<style::Sprite> sprite, FileSource&);
 
     void setObserver(SpriteLoaderObserver*);
 
 private:
-    void emitSpriteLoadedIfComplete();
+    void emitSpriteLoadedIfComplete(style::Sprite sprite);
 
     // Invoked by SpriteAtlasWorker
     friend class SpriteLoaderWorker;
@@ -34,11 +35,13 @@ private:
     const float pixelRatio;
 
     struct Data;
-    std::unique_ptr<Data> data;
+    std::map<std::string, std::unique_ptr<Data>> dataMap;
+    std::mutex dataMapMutex;
 
     SpriteLoaderObserver* observer = nullptr;
-    std::shared_ptr<Scheduler> threadPool;
+    TaggedScheduler threadPool;
     mapbox::base::WeakPtrFactory<SpriteLoader> weakFactory{this};
+    // Do not add members here, see `WeakPtrFactory`
 };
 
 } // namespace mbgl

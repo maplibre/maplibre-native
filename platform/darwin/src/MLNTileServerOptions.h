@@ -1,109 +1,109 @@
 #import <Foundation/Foundation.h>
 
-#import "MLNFoundation.h"
 #import "MLNDefaultStyle.h"
+#import "MLNFoundation.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- The `MLNTileServerOptions` defines server properties such as URL etc...
+ The ``MLNTileServerOptions`` defines server properties such as URL etc...
  */
 MLN_EXPORT
 @interface MLNTileServerOptions : NSObject
 
 /**
-* API base URL.
-*/
-@property (nonatomic,retain) NSString* baseURL;
-        
-/**
-* Tile server URI alias.
-*/
-@property (nonatomic,retain) NSString* uriSchemeAlias;
+ * API base URL.
+ */
+@property (nonatomic, retain) NSString* baseURL;
 
 /**
-* URL template for sources.
-*/
-@property (nonatomic,retain) NSString* sourceTemplate;
+ * Tile server URI alias.
+ */
+@property (nonatomic, retain) NSString* uriSchemeAlias;
 
 /**
-* source domain name.
-*/
-@property (nonatomic,retain) NSString* sourceDomainName;
-        
-/**
-* source version prefix
-*/
-@property (nonatomic,retain,nullable) NSString* sourceVersionPrefix;
+ * URL template for sources.
+ */
+@property (nonatomic, retain) NSString* sourceTemplate;
 
 /**
-* URL template for style.
-*/
-@property (nonatomic,retain) NSString* styleTemplate;
-        
-/**
-* style domain name.
-*/
-@property (nonatomic,retain) NSString* styleDomainName;
-        
-/**
-* style version prefix
-*/
-@property (nonatomic,retain,nullable) NSString* styleVersionPrefix;
+ * source domain name.
+ */
+@property (nonatomic, retain) NSString* sourceDomainName;
 
 /**
-* URL template for sprites.
-*/
-@property (nonatomic,retain) NSString* spritesTemplate;
-        
-/**
-* sprites domain name.
-*/
-@property (nonatomic,retain) NSString* spritesDomainName;
+ * source version prefix
+ */
+@property (nonatomic, retain, nullable) NSString* sourceVersionPrefix;
 
 /**
-* version prefix
-*/
-@property (nonatomic,retain,nullable) NSString* spritesVersionPrefix;
+ * URL template for style.
+ */
+@property (nonatomic, retain) NSString* styleTemplate;
 
 /**
-* URL template for glyphs.
-*/
-@property (nonatomic,retain) NSString* glyphsTemplate;
+ * style domain name.
+ */
+@property (nonatomic, retain) NSString* styleDomainName;
 
 /**
-* glyphs domain name.
-*/
-@property (nonatomic,retain) NSString* glyphsDomainName;
+ * style version prefix
+ */
+@property (nonatomic, retain, nullable) NSString* styleVersionPrefix;
 
 /**
-* Glyphs version prefix
-*/
-@property (nonatomic,retain,nullable) NSString* glyphsVersionPrefix;
+ * URL template for sprites.
+ */
+@property (nonatomic, retain) NSString* spritesTemplate;
 
 /**
-* URL template for tiles.
-*/
-@property (nonatomic,retain) NSString* tileTemplate;
+ * sprites domain name.
+ */
+@property (nonatomic, retain) NSString* spritesDomainName;
 
 /**
-* tile domain name.
-*/
-@property (nonatomic,retain) NSString* tileDomainName;
+ * version prefix
+ */
+@property (nonatomic, retain, nullable) NSString* spritesVersionPrefix;
 
 /**
-* tile version prefix
-*/
-@property (nonatomic,retain,nullable) NSString* tileVersionPrefix;
-        
-/**
-* API key parameter name.
-*/
-@property (nonatomic,retain) NSString* apiKeyParameterName;
+ * URL template for glyphs.
+ */
+@property (nonatomic, retain) NSString* glyphsTemplate;
 
 /**
-* Default styles.
-*/
+ * glyphs domain name.
+ */
+@property (nonatomic, retain) NSString* glyphsDomainName;
+
+/**
+ * Glyphs version prefix
+ */
+@property (nonatomic, retain, nullable) NSString* glyphsVersionPrefix;
+
+/**
+ * URL template for tiles.
+ */
+@property (nonatomic, retain) NSString* tileTemplate;
+
+/**
+ * tile domain name.
+ */
+@property (nonatomic, retain) NSString* tileDomainName;
+
+/**
+ * tile version prefix
+ */
+@property (nonatomic, retain, nullable) NSString* tileVersionPrefix;
+
+/**
+ * API key parameter name.
+ */
+@property (nonatomic, retain) NSString* apiKeyParameterName;
+
+/**
+ * Default styles.
+ */
 @property (nonatomic, retain) NSArray<MLNDefaultStyle*>* defaultStyles;
 
 /**

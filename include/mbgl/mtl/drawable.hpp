@@ -11,6 +11,7 @@ namespace mbgl {
 
 template <class AttributeList>
 class Segment;
+class PaintParameters;
 
 namespace gfx {
 
@@ -43,7 +44,7 @@ public:
     const gfx::UniformBufferArray& getUniformBuffers() const override;
     gfx::UniformBufferArray& mutableUniformBuffers() override;
 
-    void setVertexAttrNameId(const StringIdentity);
+    void setVertexAttrId(const size_t);
 
     void upload(gfx::UploadPass&);
 
@@ -56,12 +57,21 @@ public:
     void setSubLayerIndex(int32_t) override;
     void setDepthType(gfx::DepthMaskType) override;
 
+    void updateVertexAttributes(gfx::VertexAttributeArrayPtr,
+                                std::size_t vertexCount,
+                                gfx::DrawMode,
+                                gfx::IndexVectorBasePtr,
+                                const SegmentBase* segments,
+                                std::size_t segmentCount) override;
+
 protected:
     // For testing only.
     Drawable(std::unique_ptr<Impl>);
 
     void bindAttributes(RenderPass&) const noexcept;
     void unbindAttributes(RenderPass&) const noexcept {}
+
+    void bindInstanceAttributes(RenderPass&) const noexcept;
 
     void bindUniformBuffers(RenderPass&) const noexcept;
     void unbindUniformBuffers(RenderPass&) const noexcept {}
