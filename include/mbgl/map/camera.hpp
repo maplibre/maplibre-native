@@ -84,7 +84,8 @@ struct CameraOptions {
 
 constexpr bool operator==(const CameraOptions& a, const CameraOptions& b) {
     return a.center == b.center && a.padding == b.padding && a.anchor == b.anchor && a.zoom == b.zoom &&
-           a.bearing == b.bearing && a.pitch == b.pitch && a.roll == b.roll && a.fov == b.fov && a.centerAltitude == b.centerAltitude;
+           a.bearing == b.bearing && a.pitch == b.pitch && a.roll == b.roll && a.fov == b.fov &&
+           a.centerAltitude == b.centerAltitude;
 }
 
 constexpr bool operator!=(const CameraOptions& a, const CameraOptions& b) {
