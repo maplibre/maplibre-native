@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
 
     const double lat = latValue ? args::get(latValue) : 0;
     const double lon = lonValue ? args::get(lonValue) : 0;
-    const double alt = altValue ? args::get(altValue) : 100000;
+    const double alt = altValue ? args::get(altValue) : 0;
     const double zoom = zoomValue ? args::get(zoomValue) : 0;
     const double fov = fovValue ? args::get(fovValue) : 37;
     const double bearing = bearingValue ? args::get(bearingValue) : 0;
