@@ -131,13 +131,12 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
     // (the distance between[width/2, height/2] and [width/2 + 1, height/2])
     // See https://github.com/mapbox/mapbox-gl-native/pull/15195 for details.
     // See TransformState::fov description: fov = 2 * arctan((height / 2) / (height * 1.5)).
-    const double tanFovAboveCenter = (0.5 + offset.y / size.height) * 2.0 * std::tan(getFieldOfView() / 2.0) *
+    const double tanFovAboveCenter = (0.5 + offset.y / size.height) * 2.0 * std::tan(fov / 2.0) *
                                      (std::abs(std::cos(roll)) + std::abs(std::sin(roll)) * size.width / size.height);
     const double tanMultiple = tanFovAboveCenter * std::tan(getPitch());
     assert(tanMultiple < 1);
     // Calculate z distance of the farthest fragment that should be rendered.
     const double furthestDistance = cameraToCenterDistance / (1 - tanMultiple);
-
     // Add a bit extra to avoid precision problems when a fragment's distance is exactly `furthestDistance`
     const double farZ = furthestDistance * 1.01;
 
