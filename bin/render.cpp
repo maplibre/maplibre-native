@@ -103,7 +103,14 @@ int main(int argc, char* argv[]) {
     }
 
     map.getStyle().loadURL(style);
-    map.jumpTo(CameraOptions().withCenter(LatLng{lat, lon}).withAlt(alt).withZoom(zoom).withBearing(bearing).withPitch(pitch).withRoll(roll).withFov(fov));
+    map.jumpTo(CameraOptions()
+                   .withCenter(LatLng{lat, lon})
+                   .withAlt(alt)
+                   .withZoom(zoom)
+                   .withBearing(bearing)
+                   .withPitch(pitch)
+                   .withRoll(roll)
+                   .withFov(fov));
 
     if (debug) {
         map.setDebug(debug ? mbgl::MapDebugOptions::TileBorders | mbgl::MapDebugOptions::ParseStatus

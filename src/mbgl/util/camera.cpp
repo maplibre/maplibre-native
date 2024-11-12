@@ -174,7 +174,7 @@ void Camera::getOrientation(double& pitch, double& bearing, double& roll) const 
 
     bearing = std::atan2(-r[1], r[0]);
     pitch = std::atan2(std::sqrt(f[0] * f[0] + f[1] * f[1]), -f[2]);
-    roll = 0; //TODO
+    roll = 0; // TODO
 }
 
 void Camera::setOrientation(double pitch, double bearing, double roll) noexcept {
@@ -196,7 +196,7 @@ std::optional<Quaternion> Camera::orientationFromFrame(const vec3& forward, cons
 
     const double bearing = std::atan2(-right[1], right[0]);
     const double pitch = std::atan2(std::sqrt(forward[0] * forward[0] + forward[1] * forward[1]), -forward[2]);
-    const double roll = 0; //TODO
+    const double roll = 0; // TODO
 
     return util::orientationFromPitchBearing(pitch, bearing, roll);
 }
