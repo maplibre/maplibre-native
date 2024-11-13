@@ -141,6 +141,7 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
     const double startZoom = state.getZoom();
     const double startBearing = state.getBearing();
     const double startPitch = state.getPitch();
+    const double startRoll = state.getRoll();
     const double startFov = state.getFieldOfView();
     state.setProperties(TransformStateProperties()
                             .withPanningInProgress(unwrappedLatLng != startLatLng)
@@ -171,10 +172,12 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
             if (pitch != startPitch) {
                 state.setPitch(util::interpolate(startPitch, pitch, t));
             }
+            if (roll != startRoll) {
+                state.setPitch(util::interpolate(startRoll, roll, t));
+            }
             if (fov != startFov) {
                 state.setFieldOfView(util::interpolate(startFov, fov, t));
             }
-            state.setRoll(roll);
         },
         duration);
 }
@@ -194,6 +197,7 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
     double zoom = camera.zoom.value_or(getZoom());
     double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
+    double roll = camera.roll ? util::deg2rad(*camera.roll) : getRoll();
     double fov = camera.fov ? util::deg2rad(*camera.fov) : getFieldOfView();
 
     if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch) || state.getSize().isEmpty()) {
@@ -222,6 +226,7 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
     const double startZoom = state.scaleZoom(state.getScale());
     const double startBearing = state.getBearing();
     const double startPitch = state.getPitch();
+    const double startRoll = state.getRoll();
     const double startFov = state.getFieldOfView();
 
     /// w₀: Initial visible span, measured in pixels at the initial scale.
@@ -351,6 +356,9 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
 
             if (pitch != startPitch) {
                 state.setPitch(util::interpolate(startPitch, pitch, k));
+            }
+            if (roll != startRoll) {
+                state.setPitch(util::interpolate(startRoll, roll, k));
             }
             if (fov != startFov) {
                 state.setFieldOfView(util::interpolate(startFov, fov, k));
