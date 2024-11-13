@@ -121,15 +121,7 @@ Therefore, you create a layer that gives visual appearance to it.
 
 with assets folder file
 ```kotlin
- binding.mapView.getMapAsync { map ->
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(cameraTarget, cameraZoom))
-            map.setStyle(
-                Style.Builder()
-                    .withImage(imageId, imageIcon)
-                    .withSource(GeoJsonSource(sourceId, URI("asset://points-sf.geojson")))
-                    .withLayer(SymbolLayer(layerId, sourceId).withProperties(iconImage(imageId)))
-            )
-        }
+{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/style/NoStyleActivity.kt:setup}}
 ```
 with raw folder file
 ```kotlin
