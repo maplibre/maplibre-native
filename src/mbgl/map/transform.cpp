@@ -124,6 +124,7 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
             startLatLng.unwrapForShortestPath(latLng);
         }
     }
+    const double startCenterAlt = state.getCenterAltitude();
 
     const Point<double> startPoint = Projection::project(startLatLng, state.getScale());
     const Point<double> endPoint = Projection::project(latLng, state.getScale());
@@ -131,6 +132,7 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
     // Constrain camera options.
     zoom = util::clamp(zoom, state.getMinZoom(), state.getMaxZoom());
     pitch = util::clamp(pitch, state.getMinPitch(), state.getMaxPitch());
+    fov = util::clamp(fov, state.getMinFieldOfView(), state.getMaxFieldOfView());
 
     // Minimize rotation by taking the shorter path around the circle.
     bearing = _normalizeAngle(bearing, state.getBearing());
@@ -139,7 +141,7 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
     const double startZoom = state.getZoom();
     const double startBearing = state.getBearing();
     const double startPitch = state.getPitch();
-    const double startCenterAlt = state.getCenterAltitude();
+    const double startFov = state.getFieldOfView();
     state.setProperties(TransformStateProperties()
                             .withPanningInProgress(unwrappedLatLng != startLatLng)
                             .withScalingInProgress(zoom != startZoom)
@@ -169,7 +171,9 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
             if (pitch != startPitch) {
                 state.setPitch(util::interpolate(startPitch, pitch, t));
             }
-            state.setFieldOfView(fov);
+            if (fov != startFov) {
+                state.setFieldOfView(util::interpolate(startFov, fov, t));
+            }
             state.setRoll(roll);
         },
         duration);
@@ -190,6 +194,7 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
     double zoom = camera.zoom.value_or(getZoom());
     double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
+    double fov = camera.fov ? util::deg2rad(*camera.fov) : getFieldOfView();
 
     if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch) || state.getSize().isEmpty()) {
         if (animation.transitionFinishFn) {
@@ -209,6 +214,7 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
     // Constrain camera options.
     zoom = util::clamp(zoom, state.getMinZoom(), state.getMaxZoom());
     pitch = util::clamp(pitch, state.getMinPitch(), state.getMaxPitch());
+    fov = util::clamp(fov, state.getMinFieldOfView(), state.getMaxFieldOfView());
 
     // Minimize rotation by taking the shorter path around the circle.
     bearing = _normalizeAngle(bearing, state.getBearing());
@@ -216,6 +222,7 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
     const double startZoom = state.scaleZoom(state.getScale());
     const double startBearing = state.getBearing();
     const double startPitch = state.getPitch();
+    const double startFov = state.getFieldOfView();
 
     /// w₀: Initial visible span, measured in pixels at the initial scale.
     /// Known henceforth as a <i>screenful</i>.
@@ -344,6 +351,9 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
 
             if (pitch != startPitch) {
                 state.setPitch(util::interpolate(startPitch, pitch, k));
+            }
+            if (fov != startFov) {
+                state.setFieldOfView(util::interpolate(startFov, fov, k));
             }
         },
         duration);

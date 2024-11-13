@@ -186,6 +186,8 @@ public:
     double getMinPitch() const;
     void setMaxPitch(double);
     double getMaxPitch() const;
+    double getMinFieldOfView() const;
+    double getMaxFieldOfView() const;
 
     // Rotation
     double getBearing() const;
@@ -260,6 +262,8 @@ private:
     // Limit the amount of pitch
     double minPitch = util::PITCH_MIN;
     double maxPitch = util::PITCH_MAX;
+    double minFov = util::deg2rad(0.1);
+    double maxFov = util::deg2rad(150.0);
 
     NorthOrientation orientation = NorthOrientation::Upwards;
 

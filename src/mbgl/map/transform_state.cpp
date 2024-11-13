@@ -558,6 +558,14 @@ double TransformState::getMaxPitch() const {
     return maxPitch;
 }
 
+double TransformState::getMinFieldOfView() const {
+    return minFov;
+}
+
+double TransformState::getMaxFieldOfView() const {
+    return maxFov;
+}
+
 // MARK: - Scale
 double TransformState::getScale() const {
     return scale;
