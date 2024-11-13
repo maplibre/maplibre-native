@@ -13,8 +13,6 @@
 
 using namespace std::numbers;
 
-constexpr double MAX_PITCH = 1.55;
-
 namespace mbgl {
 
 namespace {
@@ -299,14 +297,11 @@ bool TransformState::setCameraOrientation(const Quaternion& orientation_) {
         return false;
     }
 
-    std::optional<Quaternion> updatedOrientation = util::Camera::orientationFromFrame(forward, up);
+    const std::optional<Quaternion> updatedOrientation = util::Camera::orientationFromFrame(forward, up);
+    if (!updatedOrientation) return false;
 
-    if (updatedOrientation) {
-        camera.setOrientation(*updatedOrientation);
-        return true;
-    }
-
-    return false;
+    camera.setOrientation(updatedOrientation.value());
+    return true;
 }
 
 void TransformState::setFreeCameraOptions(const FreeCameraOptions& options) {
@@ -639,11 +634,11 @@ void TransformState::setRoll(double val) {
 }
 
 float TransformState::getCameraToCenterDistance() const {
-    return static_cast<float>(getZ() / cos(std::min(pitch, MAX_PITCH)));
+    return static_cast<float>(0.5 * size.height / std::tan(fov / 2.0));
 }
 
 double TransformState::getPitch() const {
-    return std::min(pitch, MAX_PITCH);
+    return pitch;
 }
 
 void TransformState::setPitch(double val) {
