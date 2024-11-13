@@ -1,0 +1,18 @@
+
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #295DAA;
+  --md-accent-fg-color: #568ad6;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #295DAA;
+  --md-accent-fg-color: #568ad6;
+}
+
+.md-nav__title {
+  display: none;
+}
+
+.md-grid {
+  max-width: 1800px; 
+}
