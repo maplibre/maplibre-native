@@ -101,7 +101,7 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
     double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
     double fov = camera.fov ? util::deg2rad(*camera.fov) : getFieldOfView();
-    double center_alt = camera.centerAltitude.value_or(0);
+    double centerAlt = camera.centerAltitude.value_or(state.getCenterAltitude());
     double roll = camera.roll ? util::deg2rad(*camera.roll) : getRoll();
 
     if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch)) {
@@ -139,6 +139,7 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
     const double startZoom = state.getZoom();
     const double startBearing = state.getBearing();
     const double startPitch = state.getPitch();
+    const double startCenterAlt = state.getCenterAltitude();
     state.setProperties(TransformStateProperties()
                             .withPanningInProgress(unwrappedLatLng != startLatLng)
                             .withScalingInProgress(zoom != startZoom)
@@ -153,6 +154,7 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
             LatLng frameLatLng = Projection::unproject(framePoint, state.zoomScale(startZoom));
             double frameZoom = util::interpolate(startZoom, zoom, t);
             state.setLatLngZoom(frameLatLng, frameZoom);
+            state.setCenterAltitude(util::interpolate(startCenterAlt, centerAlt, t));
             if (bearing != startBearing) {
                 state.setBearing(util::wrap(util::interpolate(startBearing, bearing, t), -pi, pi));
             }
@@ -168,7 +170,6 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
                 state.setPitch(util::interpolate(startPitch, pitch, t));
             }
             state.setFieldOfView(fov);
-            state.setCenterAltitude(center_alt);
             state.setRoll(roll);
         },
         duration);
@@ -185,6 +186,7 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
 void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& animation, bool linearZoomInterpolation) {
     const EdgeInsets& padding = camera.padding.value_or(state.getEdgeInsets());
     const LatLng& latLng = camera.center.value_or(getLatLng(LatLng::Unwrapped)).wrapped();
+    const double centerAlt = camera.centerAltitude.value_or(state.getCenterAltitude());
     double zoom = camera.zoom.value_or(getZoom());
     double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
@@ -199,6 +201,7 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
     // Determine endpoints.
     LatLng startLatLng = getLatLng(LatLng::Unwrapped).wrapped();
     startLatLng.unwrapForShortestPath(latLng);
+    const double startCenterAlt = state.getCenterAltitude();
 
     const Point<double> startPoint = Projection::project(startLatLng, state.getScale());
     const Point<double> endPoint = Projection::project(latLng, state.getScale());
@@ -326,6 +329,7 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
             // Convert to geographic coordinates and set the new viewpoint.
             LatLng frameLatLng = Projection::unproject(framePoint, startScale);
             state.setLatLngZoom(frameLatLng, frameZoom);
+            state.setCenterAltitude(util::interpolate(startCenterAlt, centerAlt, us));
             if (bearing != startBearing) {
                 state.setBearing(util::wrap(util::interpolate(startBearing, bearing, k), -pi, pi));
             }

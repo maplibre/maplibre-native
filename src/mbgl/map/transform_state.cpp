@@ -273,7 +273,14 @@ FreeCameraOptions TransformState::getFreeCameraOptions() const {
 bool TransformState::setCameraPosition(const vec3& position) {
     if (std::isnan(position[0]) || std::isnan(position[1]) || std::isnan(position[2])) return false;
 
-    camera.setPosition(position);
+    const double maxWorldSize = Projection::worldSize(std::pow(2.0, getMaxZoom()));
+    const double minWorldSize = Projection::worldSize(std::pow(2.0, getMinZoom()));
+    const double distToCenter = getCameraToCenterDistance();
+
+    const vec3 updatedPos = vec3{
+        {position[0], position[1], util::clamp(position[2], distToCenter / maxWorldSize, distToCenter / minWorldSize)}};
+
+    camera.setPosition(updatedPos);
     return true;
 }
 
