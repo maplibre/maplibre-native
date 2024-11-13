@@ -887,9 +887,9 @@ void main() {
 #endif
 
 #ifndef HAS_UNIFORM_u_offset
-    const mediump float offset = unpack_mix_float(in_offset, interp.offset_t);
+    const mediump float offset = unpack_mix_float(in_offset, interp.offset_t) * -1.0;
 #else
-    const mediump float offset = props.offset;
+    const mediump float offset = props.offset * -1.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_width
@@ -919,7 +919,6 @@ void main() {
     // We store these in the least significant bit of in_pos_normal
     mediump vec2 normal = in_pos_normal - 2.0 * pos;
     frag_normal = vec2(normal.x, normal.y * 2.0 - 1.0);
-    frag_normal.y *= -1.0;
 
     // these transformations used to be applied in the JS and native code bases.
     // moved them into the shader for clarity and simplicity.
@@ -951,8 +950,8 @@ void main() {
 
     frag_width2 = vec2(outset, inset);
 
-    frag_tex_a = vec2(linesofar * drawable.patternscale_a.x / floorwidth, (normal.y * drawable.patternscale_a.y + drawable.tex_y_a) * 2.0);
-    frag_tex_b = vec2(linesofar * drawable.patternscale_b.x / floorwidth, (normal.y * drawable.patternscale_b.y + drawable.tex_y_b) * 2.0);
+    frag_tex_a = vec2(linesofar * drawable.patternscale_a.x / floorwidth, frag_normal.y * drawable.patternscale_a.y + drawable.tex_y_a);
+    frag_tex_b = vec2(linesofar * drawable.patternscale_b.x / floorwidth, frag_normal.y * drawable.patternscale_b.y + drawable.tex_y_b);
 }
 )";
 
@@ -1050,6 +1049,9 @@ void main() {
     const lowp float floorwidth = frag_floorwidth;
 #endif
 
+    // Calculate the distance of the pixel from the line in pixels.
+    const float dist = length(frag_normal) * frag_width2.x;
+
     // Calculate the antialiasing fade factor. This is either when fading in the
     // line in case of an offset line (`v_width2.y`) or when fading out (`v_width2.x`)
     const float blur2 = (blur + 1.0 / DEVICE_PIXEL_RATIO) * frag_gamma_scale;
@@ -1057,7 +1059,6 @@ void main() {
     const float sdfdist_a = texture(image0_sampler, frag_tex_a).a;
     const float sdfdist_b = texture(image0_sampler, frag_tex_b).a;
     const float sdfdist = mix(sdfdist_a, sdfdist_b, drawable.mix);
-    const float dist = length(frag_normal) * frag_width2.x;
     const float alpha = clamp(min(dist - (frag_width2.y - blur2), frag_width2.x - dist) / blur2, 0.0, 1.0) *
                         smoothstep(0.5 - drawable.sdfgamma / floorwidth, 0.5 + drawable.sdfgamma / floorwidth, sdfdist);
 
