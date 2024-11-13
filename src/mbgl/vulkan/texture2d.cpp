@@ -50,6 +50,11 @@ Texture2D::~Texture2D() {
 }
 
 gfx::Texture2D& Texture2D::setSamplerConfiguration(const SamplerState& samplerState_) noexcept {
+    if (samplerState.filter == samplerState_.filter && samplerState.wrapU == samplerState_.wrapU &&
+        samplerState.wrapV == samplerState_.wrapV) {
+        return *this;
+    }
+
     samplerState = samplerState_;
     samplerStateDirty = true;
     return *this;

@@ -106,7 +106,6 @@ public:
     bool addLayerGroup(LayerGroupBasePtr);
     bool removeLayerGroup(const LayerGroupBasePtr&);
     size_t numLayerGroups() const noexcept;
-    int32_t maxLayerIndex() const;
     void updateLayerIndex(LayerGroupBasePtr, int32_t newIndex);
 
     template <typename Func /* void(LayerGroupBase&) */>
@@ -114,6 +113,15 @@ public:
         for (auto& pair : layerGroupsByLayerIndex) {
             if (pair.second) {
                 f(*pair.second);
+            }
+        }
+    }
+
+    template <typename Func /* void(LayerGroupBase&) */>
+    void visitLayerGroupsReversed(Func f) {
+        for (auto rit = layerGroupsByLayerIndex.rbegin(); rit != layerGroupsByLayerIndex.rend(); ++rit) {
+            if (rit->second) {
+                f(*rit->second);
             }
         }
     }
