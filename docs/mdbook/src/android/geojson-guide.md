@@ -125,59 +125,18 @@ with assets folder file
 ```
 with raw folder file
 ```kotlin
-   val source: Source = try {
-            GeoJsonSource("amsterdam-spots", ResourceUtils.readRawResource(this, R.raw.amsterdam))
-        } catch (ioException: IOException) {
-            Toast.makeText(
-                this@RuntimeStyleActivity,
-                "Couldn't add source: " + ioException.message,
-                Toast.LENGTH_SHORT
-            ).show()
-            return
-        }
-        maplibreMap.style!!.addSource(source)
-        var layer: FillLayer? = FillLayer("parksLayer", "amsterdam-spots")
-        layer!!.setProperties(
-            PropertyFactory.fillColor(Color.RED),
-            PropertyFactory.fillOutlineColor(Color.BLUE),
-            PropertyFactory.fillOpacity(0.3f),
-            PropertyFactory.fillAntialias(true)
-        )
+  {{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/style/RuntimeStyleActivity.kt:source}}
 ```
 parsing method:
 ```kotlin
-    fun readRawResource(context: Context?, @RawRes rawResource: Int): String {
-        var json = ""
-        if (context != null) {
-            val writer: Writer = StringWriter()
-            val buffer = CharArray(1024)
-            context.resources.openRawResource(rawResource).use { `is` ->
-                val reader: Reader = BufferedReader(InputStreamReader(`is`, "UTF-8"))
-                var numRead: Int
-                while (reader.read(buffer).also { numRead = it } != -1) {
-                    writer.write(buffer, 0, numRead)
-                }
-            }
-            json = writer.toString()
-        }
-        return json
-    }
+{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/utils/ResourceUtils.kt:read_raw}}
 ```
 - Loading from remote services
 ```kotlin
- private fun createEarthquakeSource(): GeoJsonSource {
-        return GeoJsonSource(EARTHQUAKE_SOURCE_ID, URI(EARTHQUAKE_SOURCE_URL))
-    }
+{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/style/HeatmapLayerActivity.kt:create_earthquake}}
 ```
 ```kotlin
- companion object {
-        private const val EARTHQUAKE_SOURCE_URL =
-            "https://maplibre.org/maplibre-gl-js-docs/assets/earthquakes.geojson"
-        private const val EARTHQUAKE_SOURCE_ID = "earthquakes"
-        private const val HEATMAP_LAYER_ID = "earthquakes-heat"
-        private const val HEATMAP_LAYER_SOURCE = "earthquakes"
-        private const val CIRCLE_LAYER_ID = "earthquakes-circle"
-    }
+{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/style/HeatmapLayerActivity.kt:constants}}
 ```
 - Parsing string with `fromJson` method of FeatureCollection
 ```kotlin
