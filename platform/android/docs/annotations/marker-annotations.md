@@ -76,7 +76,7 @@ Then add markers to the map with GeoJSON:
 [marker image]: https://raw.githubusercontent.com/maplibre/maplibre-native/main/test/fixtures/sprites/default_marker.png
 [IconFactory]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.annotations/-icon-factory/index.html
 [Icon]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.annotations/-icon/index.html
-[Quickstart]: ./getting-started.md
+[Quickstart]: ../getting-started.md
 [mvn]: https://mvnrepository.com/artifact/org.maplibre.gl/android-plugin-annotation-v9
 [Android Developer Documentation]: https://developer.android.com/topic/libraries/architecture/coroutines
 [MarkerOptions]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.annotations/-marker-options/index.html
