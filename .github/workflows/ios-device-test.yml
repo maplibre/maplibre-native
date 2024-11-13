@@ -50,7 +50,6 @@ jobs:
           files: "${{ matrix.test.xcTestFile }}, ${{ matrix.test.ipaFile }}"
 
       - name: Configure AWS Credentials
-        if: env.run_device_test == 'true'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2
