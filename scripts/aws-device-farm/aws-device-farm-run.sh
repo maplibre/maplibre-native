@@ -67,10 +67,10 @@ while ((max_checks--)); do
   status_test_package="$status_test_package"
 
   if [[ "$status_app" == "SUCCEEDED" && "$status_test_package" == "SUCCEEDED" ]]; then
-    echo "Uploads succeeded"  >&2
+    echo "Uploads succeeded" >&2
     break
   elif ((max_checks == 0)); then
-    echo "App or test package failed to upload"  >&2
+    echo "App or test package failed to upload" >&2
     exit 1
   fi
 
@@ -100,9 +100,9 @@ while true; do
   sleep 30
   result="$(aws devicefarm get-run --arn "$arn" --output text --query "run.result")"
   case $result in
-    FAILED|ERRORED|STOPPED) echo "Run $result" && exit 1 ;;
-    SKIPPED|PASSED) echo "Run $result" && exit 0 ;;
+    FAILED|ERRORED|STOPPED) echo "Run $result" >&2 && exit 1 ;;
+    SKIPPED|PASSED) echo "Run $result" >&2 && exit 0 ;;
     PENDING) continue ;;
-    *) echo "Unexpected run result $result" && exit 1 ;;
+    *) echo "Unexpected run result $result" >&2 && exit 1 ;;
   esac
 done
