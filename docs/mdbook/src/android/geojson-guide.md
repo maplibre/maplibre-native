@@ -155,29 +155,11 @@ Therefore, we can either map JSON objects to regular Java/Kotlin objects or buil
 The key feature of GeoJsonSources is that once we add one, we can set another set of data.
 We achieve this using `setGeoJson()` method. For instance, we create a source variable and check if we have not assigned it, then we create a new source object and add it to style; otherwise, we set a different data source:
 ```kotlin
-  private fun createFeatureCollection(): FeatureCollection {
-        val point = if (isInitialPosition) {
-            Point.fromLngLat(-74.01618140, 40.701745)
-        } else {
-            Point.fromLngLat(-73.988097, 40.749864)
-        }
-        val properties = JsonObject()
-        properties.addProperty(KEY_PROPERTY_SELECTED, isSelected)
-        val feature = Feature.fromGeometry(point, properties)
-        return FeatureCollection.fromFeatures(arrayOf(feature))
-    }
+{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/style/ZoomFunctionSymbolLayerActivity.kt:createFeatureCollection}}
 ```
 
 ```kotlin
-    private fun updateSource(style: Style?) {
-        val featureCollection = createFeatureCollection()
-        if (source != null) {
-            source!!.setGeoJson(featureCollection)
-        } else {
-            source = GeoJsonSource(SOURCE_ID, featureCollection)
-            style!!.addSource(source!!)
-        }
-    }
+{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/style/ZoomFunctionSymbolLayerActivity.kt:updateSource}}
 ```
 
 
