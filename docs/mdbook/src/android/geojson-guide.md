@@ -147,25 +147,7 @@ parsing method:
 Note that the GeoJSON objects we discussed earlier have classes defined in the MapLibre SDK. 
 Therefore, we can either map JSON objects to regular Java/Kotlin objects or build them directly.
 ```kotlin
-    val properties = JsonObject()
-        properties.addProperty("key1", "value1")
-        val source = GeoJsonSource(
-            "test-source",
-            FeatureCollection.fromFeatures(
-                arrayOf(
-                    Feature.fromGeometry(Point.fromLngLat(17.1, 51.0), properties),
-                    Feature.fromGeometry(Point.fromLngLat(17.2, 51.0), properties),
-                    Feature.fromGeometry(Point.fromLngLat(17.3, 51.0), properties),
-                    Feature.fromGeometry(Point.fromLngLat(17.4, 51.0), properties)
-                )
-            )
-        )
-        style.addSource(source)
-        val visible = Expression.eq(Expression.get("key1"), Expression.literal("value1"))
-        val invisible = Expression.neq(Expression.get("key1"), Expression.literal("value1"))
-        val layer = CircleLayer("test-layer", source.id)
-            .withFilter(visible)
-        style.addLayer(layer)
+{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/feature/QuerySourceFeaturesActivity.kt:json_object}}
 ```
 
 ### 4. Updating data at runtime
