@@ -1,22 +1,22 @@
 # Introduction
 
 This guide will teach you how to use [`GeoJsonSource`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.style.sources/-geo-json-source/index.html") by deep diving into [`GeoJSON`]("https://geojson.org/") file format.
-You will start with fundamentals of how a map renders data internally and why you should prefer [JSON]("https://en.wikipedia.org/wiki/JSON") format in storing geospatial data
+You will start with fundamentals of how a map renders data internally and why you should prefer [JSON]("https://en.wikipedia.org/wiki/JSON") format in storing geospatial data.
 
 # Goals
 
 After finishing  this documentation you should be able to:
-1. Understand how [`Style`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.maps/-style/index.html?query=open%20class%20Style"), [`Layer`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.style.layers/-layer/index.html?query=abstract%20class%20Layer"), and [`Data source`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.style.sources/-source/index.html?query=abstract%20class%20Source") interact with each other
-2. Describe JSON files
-3. Explore building blocks of `GeoJSON` data
-4. Use `GeoJSON` files in constructing [`GeoJsonSource`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.style.sources/-source/index.html?query=abstract%20class%20Source")s
-5. Update data at runtime
+1. Understand how [`Style`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.maps/-style/index.html?query=open%20class%20Style"), [`Layer`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.style.layers/-layer/index.html?query=abstract%20class%20Layer"), and [`Data source`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.style.sources/-source/index.html?query=abstract%20class%20Source") interact with each other.
+2. Describe JSON files.
+3. Explore building blocks of `GeoJSON` data.
+4. Use `GeoJSON` files in constructing [`GeoJsonSource`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.style.sources/-source/index.html?query=abstract%20class%20Source")s.
+5. Update data at runtime.
 
 ### 1. Styles, Layers, and Data source
 
 - `Style ` defines the visual representation of the map such as colors and appearance.
-- `Layer` controls how data should be presented to the user
-- `Data source`  holds actual data and provides layers with it
+- `Layer` controls how data should be presented to the user.
+- `Data source`  holds actual data and provides layers with it.
 
 Styles consist of collections of layers and data source. Layers reference data source. Hence they require a unique source ID when you construct them.
 It would be meaningless if we don't have any data to show, so we need know how to supply data through a data source.
@@ -26,7 +26,7 @@ Firstly, we need to understand how to store data and pass it into a data source;
 
 JSON stands for JavaScript Object Notation. It is a key-value pair text format for storing and retrieving data between client and server.
 It is popular because it is human readable and easy to parse into objects.
-The system treats JSON content as a string, making it easy to transmit data across clients, and saves it as a .json extension
+The system treats JSON content as a string, making it easy to transmit data across clients, and saves it as a .json extension.
 
 A sample JSON file:
 ```json
@@ -42,7 +42,7 @@ A sample JSON file:
 }
 
 ```
-With its straightforward syntax, we can benefit from it by describing our geospatial data inside JSON
+With its straightforward syntax, we can benefit from it by describing our geospatial data inside JSON.
 
 ### 3. GeoJSON 
 
@@ -118,7 +118,7 @@ A typical GeoJSON file might look like:
   ]
 }
 ```
-So far we learned describing Geospatial data in GeoJSON files. We will start applying this knowledge into our map applications 
+So far we learned describing Geospatial data in GeoJSON files. We will start applying this knowledge into our map applications. 
 
 ### 4. GeoJsonSource
 
