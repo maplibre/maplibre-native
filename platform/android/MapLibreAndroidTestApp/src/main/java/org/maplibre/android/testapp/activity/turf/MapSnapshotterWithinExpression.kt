@@ -187,8 +187,8 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
         super.onSaveInstanceState(outState, outPersistentState)
         binding.mapView.onSaveInstanceState(outState)
     }
-
-    private fun bufferLineStringGeometry(): Polygon {
+        /* ANCHOR: buffer_line */
+        private fun bufferLineStringGeometry(): Polygon {
         // TODO replace static data by Turf#Buffer: mapbox-java/issues/987
         return FeatureCollection.fromJson(
             """
@@ -251,6 +251,7 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
             """.trimIndent()
         ).features()!![0].geometry() as Polygon
     }
+    /* ANCHOR_END: buffer_line */
 
     companion object {
         const val POINT_ID = "point"
