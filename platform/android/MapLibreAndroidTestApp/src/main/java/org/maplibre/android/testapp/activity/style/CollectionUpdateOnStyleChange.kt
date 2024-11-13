@@ -56,6 +56,7 @@ class CollectionUpdateOnStyleChange : AppCompatActivity(), OnMapReadyCallback, S
     }
 
     private fun setupLayer(style: Style) {
+        /* ANCHOR: geojson */
         val source = GeoJsonSource("source", featureCollection)
         val lineLayer = LineLayer("layer", "source")
             .withProperties(
@@ -65,6 +66,7 @@ class CollectionUpdateOnStyleChange : AppCompatActivity(), OnMapReadyCallback, S
 
         style.addSource(source)
         style.addLayer(lineLayer)
+        /* ANCHOR_END: geojson */
     }
 
     private fun setupStyleChangeView() {

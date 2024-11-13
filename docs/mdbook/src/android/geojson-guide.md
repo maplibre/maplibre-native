@@ -111,15 +111,7 @@ There are several ways to construct a `GeoJsonSource`:
 
 A sample GeoJsonSource:
 ```kotlin
-val source = GeoJsonSource("source", featureCollection)
-val lineLayer = LineLayer("layer", "source")
-    .withProperties(
-        PropertyFactory.lineColor(Color.RED),
-        PropertyFactory.lineWidth(10f)
-    )
-
-style.addSource(source)
-style.addLayer(lineLayer)
+{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/style/CollectionUpdateOnStyleChange.kt:geojson}}
 ```
 
 Note that you can not simply show data on a map. Layers must reference them.
