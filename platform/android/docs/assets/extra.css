@@ -17,3 +17,7 @@
 .md-nav--primary .md-nav__link[for=__toc] ~ .md-nav {
   display: none;
 }
+
+.md-copyright__highlight {
+  color: inherit;
+}
