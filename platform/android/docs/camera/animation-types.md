@@ -21,9 +21,9 @@ The `MapLibreMap.moveCamera` method jumps to the camera position provided.
 ```
 
 <figure markdown="span">
-<video controls width="250" poster="https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/move_animation_thumbnail.jpg">
-  <source src="https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/move_animation.mp4" />
-</video>
+  <video controls width="250" poster="https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/move_animation_thumbnail.jpg">
+    <source src="https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/move_animation.mp4" />
+  </video>
 </figure>
 
 ### Ease
