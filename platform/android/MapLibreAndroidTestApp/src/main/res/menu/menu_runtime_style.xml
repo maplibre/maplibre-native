@@ -43,8 +43,8 @@
         android:title="@string/add_a_terrain_layer"
         maplibre:showAsAction="never" />
     <item
-        android:id="@+id/action_add_satellite_layer"
-        android:title="@string/add_a_satellite_layer"
+        android:id="@+id/action_add_raster_source_layer"
+        android:title="@string/set_raster_style"
         maplibre:showAsAction="never" />
     <item
         android:id="@+id/action_update_water_color_on_zoom"

@@ -49,20 +49,28 @@ jobs:
         with:
           files: "${{ matrix.test.xcTestFile }}, ${{ matrix.test.ipaFile }}"
 
-      - uses: ./.github/actions/aws-device-farm-run
-        if: steps.check_files.outputs.files_exists == 'true'
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          name: ${{ matrix.test.name }}
-          appType: IOS_APP
-          appFile: ${{ matrix.test.ipaFile }}
-          testFile: ${{ matrix.test.xcTestFile }}
-          testPackageType: XCTEST_TEST_PACKAGE
-          testType: XCTEST
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_ROLE_TO_ASSUME: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
-          AWS_DEVICE_FARM_PROJECT_ARN: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
-          AWS_DEVICE_FARM_DEVICE_POOL_ARN: ${{ vars.AWS_DEVICE_FARM_IPHONE_DEVICE_POOL_ARN }}
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+          role-duration-seconds: 14400
+
+      - name: Run ${{ matrix.test.name }} on AWS Device Farm
+        if: steps.check_files.outputs.files_exists == 'true'
+        run: |
+          export name="${{ matrix.test.name }}"
+          export appType=IOS_APP
+          export appFile="${{ matrix.test.ipaFile }}"
+          export testFile="${{ matrix.test.xcTestFile }}"
+          export testPackageType=XCTEST_TEST_PACKAGE
+          export testType=XCTEST
+          export AWS_DEVICE_FARM_PROJECT_ARN="${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}"
+          export AWS_DEVICE_FARM_DEVICE_POOL_ARN="${{ vars.AWS_DEVICE_FARM_IPHONE_DEVICE_POOL_ARN }}"
+          export wait_for_completion=true
+
+          ./scripts/aws-device-farm/aws-device-farm-run.sh
 
       - uses: LouisBrunner/checks-action@v2.0.0
         if: always()

@@ -20,9 +20,10 @@ const void* castGpuIdToTracyPtr(GpuId id) {
     return reinterpret_cast<const void*>(static_cast<std::ptrdiff_t>(id));
 }
 
-#ifndef MLN_RENDER_BACKEND_OPENGL
+#if !defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MLN_RENDER_BACKEND_VULKAN)
 #error \
-    "MLN_RENDER_BACKEND_OPENGL is not defined. MLN_RENDER_BACKEND_OPENGL is expected to be defined in CMake and Bazel"
+    "MLN_RENDER_BACKEND_OPENGL/MLN_RENDER_BACKEND_VULKAN is not defined. \
+    MLN_RENDER_BACKEND_OPENGL/MLN_RENDER_BACKEND_VULKAN is expected to be defined in CMake and Bazel"
 #endif
 
 #define MLN_TRACE_FUNC() ZoneScoped
@@ -88,14 +89,21 @@ constexpr const char* tracyConstMemoryLabel = "Constant Buffer Memory";
 #undef glGetQueryObjectui64v
 #undef GLint
 
-#else // MLN_RENDER_BACKEND_OPENGL
+#elif MLN_RENDER_BACKEND_VULKAN
+
+#define MLN_END_FRAME() \
+    do {                \
+        FrameMark;      \
+    } while (0);
+
+#else
 
 #define MLN_TRACE_GL_CONTEXT() ((void)0)
 #define MLN_TRACE_GL_ZONE(label) ((void)0)
 #define MLN_TRACE_FUNC_GL() ((void)0)
 #define MLN_END_FRAME() FrameMark
 
-#endif // MLN_RENDER_BACKEND_OPENGL
+#endif
 
 #else // MLN_TRACY_ENABLE
 

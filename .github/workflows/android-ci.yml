@@ -143,8 +143,11 @@ jobs:
       - name: Build libmaplibre.so for arm-v8
         run: make android-lib-arm-v8
 
-      - name: Build documentation
+      - name: Build API documentation
         run: ./gradlew dokkaHtml
+      
+      - name: Build Examples documentation
+        run: make mkdocs-build
 
       - name: Copy developer config with API key for UI tests
         if: github.ref == 'refs/heads/main'
@@ -161,6 +164,12 @@ jobs:
           ./gradlew assembleDrawableRelease assembleDrawableReleaseAndroidTest -PtestBuildType=release
           cp MapLibreAndroidTestApp/build/outputs/apk/drawable/release/MapLibreAndroidTestApp-drawable-release.apk .
           cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/drawable/release/MapLibreAndroidTestApp-drawable-release-androidTest.apk .
+
+      # https://developer.android.com/guide/practices/page-sizes
+      - name: Check alignment of .apk
+        run: |
+          unzip -o MapLibreAndroidTestApp/build/outputs/apk/drawable/release/MapLibreAndroidTestApp-drawable-release.apk -d /tmp/my_apk_out
+          scripts/check-alignment.sh /tmp/my_apk_out
 
       - name: Create artifact for benchmark APKs
         uses: actions/upload-artifact@v4

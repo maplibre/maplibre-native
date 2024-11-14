@@ -362,6 +362,21 @@ class AttributionParseTest {
         )
     }
 
+    @Test
+    @Throws(Exception::class)
+    fun testOutputNoAttribution() {
+        val attributionParser = AttributionParser.Options(RuntimeEnvironment.application)
+            .withAttributionData("")
+            .withCopyrightSign(false)
+            .withImproveMap(false)
+            .build()
+        Assert.assertEquals(
+            "Attribution string should match",
+            "",
+            attributionParser.createAttributionString()
+        )
+    }
+
     companion object {
         private const val STREETS_ATTRIBUTION =
             "<a href=\"https://www.mapbox.com/about/maps/\" target=\"_blank\">&copy; MapLibre</a> <a href=\"http://www.openstreetmap.org/about/\" target=\"_blank\">&copy; OpenStreetMap</a> \n"
