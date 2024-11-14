@@ -13,7 +13,9 @@ if(MBGL_WITH_OPENGL)
 
     target_compile_definitions(
         mbgl-core
-        PUBLIC GL_SILENCE_DEPRECATION
+        PUBLIC 
+            GL_SILENCE_DEPRECATION
+            _LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION
     )
     target_sources(
         mbgl-core

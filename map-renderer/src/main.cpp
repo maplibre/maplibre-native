@@ -5,6 +5,14 @@
 #include "json.hpp"
 #include "maprenderer.h"
 
+namespace {
+
+bool verbose = false;
+
+bool isUrl(const std::string &str) {
+    return str.find("://") != std::string::npos;
+}
+
 nlohmann::json parseJson(std::istream &stream) {
     nlohmann::json jsonData;
     try {
@@ -17,13 +25,81 @@ nlohmann::json parseJson(std::istream &stream) {
     return jsonData;
 }
 
+void filterSourceWithBidLvl(nlohmann::json &source, int bid, int lvl) {
+    auto &features = source["features"];
+    auto it = features.begin();
+    while (it != features.end()) {
+        auto &feature = *it;
+        if (feature["properties"]["bid"] != bid || feature["properties"]["lvl"] != lvl) {
+            if (verbose) {
+                std::cout << "Erasing feature " << feature["properties"]["fid"] << std::endl;
+            }
+            it = features.erase(it);
+            continue;
+        }
+        it++;
+    }
+}
+
+void filterStyleWithBidLvl(nlohmann::json &style, int bid, int lvl) {
+    auto &layers = style["layers"];
+    for (auto &layer : layers) {
+        auto it = layer.find("source");
+        if (it == layer.end() || *it != "source_ptr") {
+            continue;
+        }
+
+        it = layer.find("filter");
+        if (it == layer.end()) {
+            continue;
+        }
+
+        auto &filter = *it;
+
+        // bid/lvl filters always start with "all"
+        if (filter.empty() || filter[0] != "all") {
+            continue;
+        }
+
+        if (verbose) {
+            std::cout << "Changing filter for " << layer["id"] << std::endl;
+        }
+        for (int i = 1; i < filter.size(); i++) {
+            if (filter[i][1][1] == "bid") {
+                filter[i][2].clear();
+                filter[i][2].push_back(bid);
+            }
+            if (filter[i][1][1] == "lvl") {
+                filter[i][2] = lvl;
+            }
+        }
+    }
+}
+
+void removeSymbolLayers(nlohmann::json &style) {
+    auto &layers = style["layers"];
+    auto it = layers.begin();
+    while (it != layers.end()) {
+        auto &layer = *it;
+        if (layer["type"] == "symbol") {
+            if (verbose) {
+                std::cout << "Erasing layer " << layer["id"] << std::endl;
+            }
+            it = layers.erase(it);
+            continue;
+        }
+        it++;
+    }
+}
+
+}  // namespace
+
 int main(int argc, char **argv) {
     std::string argv_str(argv[0]);
     std::string exeDir = argv_str.substr(0, argv_str.find_last_of("/"));
 
     cxxopts::Options options(
-        "map-renderer",
-        "Renders MapLibre maps to raster images. Either center/zoom or bounds should be provided.");
+        "map-renderer", "Renders MapLibre maps to raster images. Either center/zoom or bounds should be provided.");
 
     options.add_options()                                                                                         //
         ("s,style", "Path to style json file", cxxopts::value<std::string>())                                     //
@@ -42,9 +118,12 @@ int main(int argc, char **argv) {
         ("width", "[Optional] Image width", cxxopts::value<int>()->default_value("1024"))                         //
         ("height", "[Optional] Image height", cxxopts::value<int>()->default_value("1024"))                       //
         ("ratio", "[Optional] Pixel ratio", cxxopts::value<double>()->default_value("4"))                         //
-        ("source", "[Optional] Vector tiles url for source_ptr", cxxopts::value<std::string>())                   //
+        ("source",                                                                                                //
+         "[Optional] Vector tiles url or path to geojson file for source_ptr",                                    //
+         cxxopts::value<std::string>())                                                                           //
         ("bid", "[Optional] Building id to filter style", cxxopts::value<int>())                                  //
         ("lvl", "[Optional] Level index to filter style", cxxopts::value<int>())                                  //
+        ("symbols", "[Flag] Whether to render symbol layers")                                                     //
         ("verbose", "Verbose mode")                                                                               //
         ("h,help", "Print usage")                                                                                 //
         ;
@@ -61,7 +140,6 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    bool verbose = false;
     if (result.count("verbose")) {
         verbose = true;
     }
@@ -106,72 +184,76 @@ int main(int argc, char **argv) {
 
     std::string styleStr;
     try {
+        if (verbose) {
+            std::cout << "Parsing style json" << std::endl;
+        }
+
         auto styleJson = parseJson(in);
 
         // Insert Pointr source
         if (result.count("source")) {
-            auto sourceUrl = result["source"].as<std::string>();
-            styleJson["sources"]["source_ptr"]["type"] = "vector";
-            styleJson["sources"]["source_ptr"]["url"] = sourceUrl;
-        }
-
-        auto &layers = styleJson["layers"];
-
-        // Remove symbol layers
-        auto it = layers.begin();
-        while (it != layers.end()) {
-            auto &layer = *it;
-            if (layer["type"] == "symbol") {
+            auto source = result["source"].as<std::string>();
+            if (isUrl(source)) {
+                // Source must be a vector tiles url
                 if (verbose) {
-                    std::cout << "Erasing " << layer["id"] << std::endl;
+                    std::cout << "Setting vector tiles url as source" << std::endl;
                 }
-                it = layers.erase(it);
-                continue;
+                styleJson["sources"]["source_ptr"]["type"] = "vector";
+                styleJson["sources"]["source_ptr"]["url"] = source;
+            } else {
+                // Source must be a local geojson file
+                if (verbose) {
+                    std::cout << "Parsing local source geojson" << std::endl;
+                }
+                auto inSource = std::ifstream{source};
+                if (inSource.fail()) {
+                    std::cerr << "Cannot open source geojson file" << std::endl;
+                    return -1;
+                }
+                auto sourceGeojson = parseJson(inSource);
+                auto itResult = sourceGeojson.find("result");
+                if (itResult != sourceGeojson.end()) {
+                    sourceGeojson = *itResult;
+                }
+
+                if (result.count("bid") && result.count("lvl")) {
+                    int bid = result["bid"].as<int>();
+                    int lvl = result["lvl"].as<int>();
+                    if (verbose) {
+                        std::cout << "Filtering source with given bid/lvl" << std::endl;
+                    }
+                    filterSourceWithBidLvl(sourceGeojson, bid, lvl);
+                }
+
+                if (verbose) {
+                    std::cout << "Setting geojson as source" << std::endl;
+                }
+                styleJson["sources"]["source_ptr"]["type"] = "geojson";
+                styleJson["sources"]["source_ptr"]["data"] = sourceGeojson;
+                std::cout << "Set geojson source" << std::endl;
             }
-            it++;
         }
 
-        // Filter style for given bid/lvl
+        if (!result["symbols"].as<bool>()) {
+            if (verbose) {
+                std::cout << "Removing symbol layers" << std::endl;
+            }
+            removeSymbolLayers(styleJson);
+        }
+
         if (result.count("bid") && result.count("lvl")) {
             int bid = result["bid"].as<int>();
             int lvl = result["lvl"].as<int>();
-            for (auto &layer : layers) {
-                auto it = layer.find("source");
-                if (it == layer.end() || *it != "source_ptr") {
-                    continue;
-                }
-
-                it = layer.find("filter");
-                if (it == layer.end()) {
-                    continue;
-                }
-
-                auto &filter = *it;
-
-                // bid/lvl filters always start with "all"
-                if (filter.empty() || filter[0] != "all") {
-                    continue;
-                }
-
-                if (verbose) {
-                    std::cout << "Changing filter for " << layer["id"] << std::endl;
-                }
-                for (int i = 1; i < filter.size(); i++) {
-                    if (filter[i][1][1] == "bid") {
-                        filter[i][2].clear();
-                        filter[i][2].push_back(bid);
-                    }
-                    if (filter[i][1][1] == "lvl") {
-                        filter[i][2] = lvl;
-                    }
-                }
+            if (verbose) {
+                std::cout << "Filtering style with given bid/lvl" << std::endl;
             }
+            filterStyleWithBidLvl(styleJson, bid, lvl);
         }
 
         // Dump to string
         styleStr = styleJson.dump();
     } catch (const nlohmann::json::exception &e) {
-        std::cerr << "An exception occurred while processing style json: " << e.what() << std::endl;
+        std::cerr << "An exception occurred while processing style/source json: " << e.what() << std::endl;
         return -2;
     }
 
@@ -185,6 +267,9 @@ int main(int argc, char **argv) {
         }
 
         // Render png map image
+        if (verbose) {
+            std::cout << "Rendering map image" << std::endl;
+        }
         auto str = mapRenderer.renderPNG();
 
         // Write png to file
