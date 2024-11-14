@@ -1,8 +1,9 @@
 site_name: MapLibre Android Examples
 site_url: https://www.maplibre.org/maplibre-native/android/examples
-repo_url: https://github.com/louwers/maplibre-native
+repo_url: https://github.com/maplibre/maplibre-native
 site_description: MapLibre Android Examples
 edit_uri: edit/main/platform/android/docs
+copyright: Map data from <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>
 extra_css:
   - assets/extra.css
 theme:
@@ -15,6 +16,7 @@ theme:
     - navigation.instant
     - navigation.sections
     - content.action.edit
+    - toc.integrate
   palette:
     - media: "(prefers-color-scheme)"
       toggle:
