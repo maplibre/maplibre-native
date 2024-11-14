@@ -41,11 +41,20 @@ void UniformBuffer::update(const void* data, std::size_t size_) {
 
 const std::shared_ptr<gfx::UniformBuffer>& UniformBufferArray::set(const size_t id,
                                                                    std::shared_ptr<gfx::UniformBuffer> uniformBuffer) {
+    if (id >= uniformBufferVector.size()) {
+        return nullref;
+    }
+
+    if (uniformBufferVector[id] == uniformBuffer) {
+        return uniformBufferVector[id];
+    }
+
     if (descriptorSet) {
         descriptorSet->markDirty();
     }
 
-    return gfx::UniformBufferArray::set(id, uniformBuffer);
+    uniformBufferVector[id] = std::move(uniformBuffer);
+    return uniformBufferVector[id];
 }
 
 void UniformBufferArray::createOrUpdate(

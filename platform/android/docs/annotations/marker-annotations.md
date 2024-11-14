@@ -4,6 +4,7 @@ This guide will show you how to add Markers in the map.
 
 `Annotation` is an overlay on top of a Map. In package
 `org.maplibre.android.annotations`, it has the following subclasses:
+
 1. [Marker]
 2. [Polyline]
 3. [Polygon]
@@ -23,50 +24,44 @@ rename Activity into `JsonApiActivity`,
 and pull the GeoJSON data from a free and public API.
 Then add markers to the map with GeoJSON:
 
-1. In your module Gradle file (usually `<project>/<app-module>/build.gradle`), add
-   `okhttp` to simplify code for making HTTP requests.
-
- ```gradle
- dependencies {
-     ...
-     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
-     ...
- }
- ```
+1. In your module Gradle file (usually `<project>/<app-module>/build.gradle`), add `okhttp` to simplify code for making HTTP requests.
+  ```gradle
+  dependencies {
+      ...
+      implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+      ...
+  }
+  ```
 
 2. Sync your Android project the with Gradle files.
 
-3. In `JsonApiActivity` we add a new variable for `MapboxMap`.
+3. In `JsonApiActivity` we add a new variable for `MapLibreMap`.
    It is used to add annotations to the map instance.
+  ```kotlin
+  --8<-- "MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt:top"
+  ```
 
-```kotlin
-{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt:top}}
-```
-
-4. Call `mapview.getMapSync()` in order to get a `MapboxMap` object.
+4. Call `mapview.getMapSync()` in order to get a `MapLibreMap` object.
    After `maplibreMap` is assigned, call the `getEarthQuakeDataFromUSGS()` method
    to make a HTTP request and transform data into the map annotations.
-
-```kotlin
-{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt:mapAsync}}
-```
+  ```kotlin
+  --8<-- "MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt:mapAsync"
+  ```
 
 5. Define a function `getEarthQuakeDataFromUSGS()` to fetch GeoJSON data from a public API.
    If we successfully get the response, call `addMarkersToMap()` on the UI thread.
-
-```kotlin
-{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt:getEarthquakes}}
-```
+  ```kotlin
+  --8<-- "MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt:getEarthquakes"
+  ```
 
 6. Now it is time to add markers into the map.
    - In the `addMarkersToMap()` method, we define two types of bitmap for the marker icon.
    - For each feature in the GeoJSON, add a marker with a snippet about earthquake details.
    - If the magnitude of an earthquake is bigger than 6.0, we use the red icon. Otherwise, we use the blue one.
    - Finally, move the camera to the bounds of the newly added markers
-
-```kotlin
-{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt:addMarkers}}
-```
+  ```kotlin
+  --8<-- "MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt:addMarkers"
+  ```
 
 7. Here is the final result. For the full contents of `JsonApiActivity`, please visit source code of our [Test App].
 
@@ -81,7 +76,7 @@ Then add markers to the map with GeoJSON:
 [marker image]: https://raw.githubusercontent.com/maplibre/maplibre-native/main/test/fixtures/sprites/default_marker.png
 [IconFactory]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.annotations/-icon-factory/index.html
 [Icon]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.annotations/-icon/index.html
-[Quickstart]: ./getting-started-guide.md
+[Quickstart]: ../getting-started.md
 [mvn]: https://mvnrepository.com/artifact/org.maplibre.gl/android-plugin-annotation-v9
 [Android Developer Documentation]: https://developer.android.com/topic/libraries/architecture/coroutines
 [MarkerOptions]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.annotations/-marker-options/index.html

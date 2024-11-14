@@ -20,7 +20,7 @@ jobs:
       - name: Use Node.js from nvmrc
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: 'platform/node/.nvmrc'
 
       - name: Check if version is published
         id: check
@@ -115,7 +115,7 @@ jobs:
       - name: Use Node.js from nvmrc
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: 'platform/node/.nvmrc'
 
       - name: npm ci
         working-directory: platform/node
@@ -270,7 +270,7 @@ jobs:
       - name: Use Node.js from nvmrc
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: 'platform/node/.nvmrc'
 
       - name: Get version
         id: package-version

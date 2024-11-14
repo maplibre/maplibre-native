@@ -284,6 +284,8 @@ final class NativeMapView implements NativeMap {
     if (checkState("getCameraForLatLngBounds")) {
       return null;
     }
+    // Note that we have to juggle things a bit to match the ordering of arguments
+    // to match the NativeMapView C++ interface.
     return nativeGetCameraForLatLngBounds(
       bounds,
       padding[1] / pixelRatio,
