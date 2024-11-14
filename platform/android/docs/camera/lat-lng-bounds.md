@@ -3,7 +3,7 @@
 
 !!! note
 
-    You can find the full source code of this example in [`LatLngBoundsActivity.kt`](https://github.com/maplibre/maplibre-native/blob/main/platform/android/testapp/activity/camera/LatLngBoundsActivity.kt) of the MapLibreAndroidTestApp.
+    You can find the full source code of this example in [`LatLngBoundsActivity.kt`](https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/camera/LatLngBoundsActivity.kt) of the MapLibreAndroidTestApp.
 
 This example demonstrates setting the camera to some bounds defined by some features. It sets these bounds when the map is initialized and when the [bottom sheet](https://m2.material.io/components/sheets-bottom) is opened or closed.
 

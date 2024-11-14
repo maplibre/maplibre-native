@@ -2,7 +2,7 @@
 
 !!! note
 
-    You can find the full source code of this example in [`CameraAnimationTypeActivity.kt`](MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/camera/CameraAnimationTypeActivity.kt) of the MapLibreAndroidTestApp.
+    You can find the full source code of this example in [`CameraAnimationTypeActivity.kt`](https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/activity/camera/CameraAnimationTypeActivity.kt) of the MapLibreAndroidTestApp.
 
 ## Animation Types
 
