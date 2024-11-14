@@ -4,8 +4,6 @@
 
     You can find the full source code of this example in [`CameraAnimationTypeActivity.kt`](https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/activity/camera/CameraAnimationTypeActivity.kt) of the MapLibreAndroidTestApp.
 
-## Animation Types
-
 This example showcases the different animation types.
 
 - **Move**: available via the `MapLibreMap.moveCamera` method.
@@ -35,9 +33,9 @@ The `MapLibreMap.moveCamera` eases to the camera position provided (with constan
 ```
 
 <figure markdown="span">
-<video preload="none" controls width="250" poster="https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/ease_animation_thumbnail.jpg">
-  <source src="https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/ease_animation.mp4" />
-</video>
+  <video preload="none" controls width="250" poster="https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/ease_animation_thumbnail.jpg">
+    <source src="https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/ease_animation.mp4" />
+  </video>
 </figure>
 
 
@@ -52,9 +50,9 @@ The `MapLibreMap.animateCamera` uses a powered flight animation move to the came
 ```
 
 <figure markdown="span">
-<video preload="none" controls width="250" poster="https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/animate_animation_thumbnail.jpg">
-  <source src="https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/animate_animation.mp4" />
-</video>
+  <video preload="none" controls width="250" poster="https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/animate_animation_thumbnail.jpg">
+    <source src="https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/animate_animation.mp4" />
+  </video>
 </figure>
 
 ## Animation Callbacks
