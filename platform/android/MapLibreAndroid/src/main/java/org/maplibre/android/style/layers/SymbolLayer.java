@@ -316,13 +316,13 @@ public class SymbolLayer extends Layer {
   /**
    * Get the IconPadding property
    *
-   * @return property wrapper value around Float
+   * @return property wrapper value around Float[]
    */
   @NonNull
   @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getIconPadding() {
+  public PropertyValue<Float[]> getIconPadding() {
     checkThread();
-    return (PropertyValue<Float>) new PropertyValue("icon-padding", nativeGetIconPadding());
+    return (PropertyValue<Float[]>) new PropertyValue("icon-padding", nativeGetIconPadding());
   }
 
   /**
@@ -503,6 +503,18 @@ public class SymbolLayer extends Layer {
   public PropertyValue<String[]> getTextVariableAnchor() {
     checkThread();
     return (PropertyValue<String[]>) new PropertyValue("text-variable-anchor", nativeGetTextVariableAnchor());
+  }
+
+  /**
+   * Get the TextVariableAnchorOffset property
+   *
+   * @return property wrapper value around Object[]
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Object[]> getTextVariableAnchorOffset() {
+    checkThread();
+    return (PropertyValue<Object[]>) new PropertyValue("text-variable-anchor-offset", nativeGetTextVariableAnchorOffset());
   }
 
   /**
@@ -1244,6 +1256,10 @@ public class SymbolLayer extends Layer {
   @NonNull
   @Keep
   private native Object nativeGetTextVariableAnchor();
+
+  @NonNull
+  @Keep
+  private native Object nativeGetTextVariableAnchorOffset();
 
   @NonNull
   @Keep

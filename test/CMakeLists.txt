@@ -48,6 +48,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/style/conversion/geojson_options.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/layer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/light.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/style/conversion/padding.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/property_value.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/stringify.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/tileset.test.cpp
@@ -62,6 +63,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/style/style_image.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/style_layer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/style_parser.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/style/variable_anchor_offset_collection.test.cpp
     $<$<AND:$<NOT:$<BOOL:MBGL_WITH_QT>>,$<NOT:$<PLATFORM_ID:Windows>>>:${PROJECT_SOURCE_DIR}/test/text/bidi.test.cpp>
     ${PROJECT_SOURCE_DIR}/test/text/calculate_tile_distances.test.cpp
     ${PROJECT_SOURCE_DIR}/test/text/cross_tile_symbol_index.test.cpp
@@ -95,6 +97,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/memory.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/merge_lines.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/number_conversions.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/padding.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/position.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/projection.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/rotation.test.cpp

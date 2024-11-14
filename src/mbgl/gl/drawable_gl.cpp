@@ -18,7 +18,6 @@ DrawableGL::DrawableGL(std::string name_)
       impl(std::make_unique<Impl>()) {}
 
 DrawableGL::~DrawableGL() {
-    impl->indexBuffer = {0, nullptr};
     impl->attributeBuffers.clear();
 }
 
@@ -72,10 +71,10 @@ void DrawableGL::draw(PaintParameters& parameters) const {
             context.draw(glSeg.getMode(), mlSeg.indexOffset, mlSeg.indexLength);
         }
     }
-
-#ifndef NDEBUG
+    // Unbind the VAO so that future buffer commands outside Drawable do not change the current VAO state
     context.bindVertexArray = value::BindVertexArray::Default;
 
+#ifndef NDEBUG
     unbindTextures();
     unbindUniformBuffers();
 #endif
@@ -84,6 +83,36 @@ void DrawableGL::draw(PaintParameters& parameters) const {
 void DrawableGL::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<UniqueDrawSegment> segments) {
     impl->indexes = std::move(indexes);
     impl->segments = std::move(segments);
+}
+
+void DrawableGL::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
+                                        std::size_t vertexCount,
+                                        gfx::DrawMode mode,
+                                        gfx::IndexVectorBasePtr indexes,
+                                        const SegmentBase* segments,
+                                        std::size_t segmentCount) {
+    gfx::Drawable::setVertexAttributes(std::move(vertices));
+    impl->vertexCount = vertexCount;
+
+    std::vector<std::unique_ptr<Drawable::DrawSegment>> drawSegs;
+    drawSegs.reserve(segmentCount);
+    for (std::size_t i = 0; i < segmentCount; ++i) {
+        const auto& seg = segments[i];
+        auto segCopy = SegmentBase{
+            // no copy constructor
+            seg.vertexOffset,
+            seg.indexOffset,
+            seg.vertexLength,
+            seg.indexLength,
+            seg.sortKey,
+        };
+        auto drawSeg = std::make_unique<DrawableGL::DrawSegmentGL>(
+            mode, std::move(segCopy), VertexArray{{nullptr, false}});
+        drawSegs.push_back(std::move(drawSeg));
+    }
+
+    impl->indexes = std::move(indexes);
+    impl->segments = std::move(drawSegs);
 }
 
 void DrawableGL::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::AttributeDataType type_) {
@@ -162,11 +191,8 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
     auto& glContext = static_cast<gl::Context&>(context);
     constexpr auto usage = gfx::BufferUsageType::StaticDraw;
 
-    // Create an index buffer if necessary
-    if (impl->indexes) {
-        impl->indexes->updateModified();
-    }
-    if (impl->indexes && (!impl->indexes->getBuffer() || impl->indexes->isModifiedAfter(attributeUpdateTime))) {
+    // Create an index buffer if necessary}
+    if (impl->indexes && (!impl->indexes->getBuffer() || impl->indexes->getDirty())) {
         MLN_TRACE_ZONE(build indexes);
         auto indexBufferResource{
             uploadPass.createIndexBufferResource(impl->indexes->data(), impl->indexes->bytes(), usage)};
@@ -174,11 +200,12 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
                                                               std::move(indexBufferResource));
         auto buffer = std::make_unique<IndexBufferGL>(std::move(indexBuffer));
         impl->indexes->setBuffer(std::move(buffer));
+        impl->indexes->setDirty(false);
     }
 
     // Build the vertex attributes and bindings, if necessary
     if (impl->attributeBindings.empty() ||
-        (vertexAttributes && vertexAttributes->isModifiedAfter(attributeUpdateTime))) {
+        (vertexAttributes && (!attributeUpdateTime || vertexAttributes->isModifiedAfter(*attributeUpdateTime)))) {
         MLN_TRACE_ZONE(build attributes);
 
         // Apply drawable values to shader defaults

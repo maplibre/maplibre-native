@@ -59,6 +59,8 @@ public:
     size_t getPixelStride() const noexcept override;
     size_t numChannels() const noexcept override;
 
+    bool isDirty() const { return samplerStateDirty || textureDirty; }
+
     void create() noexcept override;
 
     void upload() noexcept override;
@@ -95,6 +97,9 @@ private:
     void transitionToTransferLayout(const vk::UniqueCommandBuffer&);
     void transitionToShaderReadLayout(const vk::UniqueCommandBuffer&);
     void transitionToGeneralLayout(const vk::UniqueCommandBuffer&);
+
+    uint32_t getMipLevels() const;
+    void generateMips(const vk::UniqueCommandBuffer& buffer);
 
 private:
     Context& context;

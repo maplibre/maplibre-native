@@ -3689,6 +3689,20 @@ public class Expression {
   }
 
   /**
+   * Converts input value to a padding.
+   *
+   * If the input is a number or an array of numbers padding is created following
+   * the same pattern as CSS padding. See <a href="https://maplibre.org/maplibre-style-spec/types/#padding">Style specification</a>.
+   * Otherwise, the expression is an error.
+   *
+   * @param input expression input
+   * @return expression
+   */
+  public static Expression toPadding(@NonNull Expression input) {
+    return new Expression("to-padding", input);
+  }
+
+  /**
    * Binds input to named variables,
    * which can then be referenced in the result expression using {@link #var(String)} or {@link #var(Expression)}.
    *

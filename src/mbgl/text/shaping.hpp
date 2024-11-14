@@ -28,20 +28,6 @@ style::TextJustifyType getAnchorJustification(style::SymbolAnchorType anchor);
 class SymbolFeature;
 class BiDi;
 
-class Padding {
-public:
-    float left = 0;
-    float top = 0;
-    float right = 0;
-    float bottom = 0;
-
-    explicit operator bool() const { return left != 0 || top != 0 || right != 0 || bottom != 0; }
-
-    bool operator==(const Padding& rhs) const {
-        return left == rhs.left && top == rhs.top && right == rhs.right && bottom == rhs.bottom;
-    }
-};
-
 class PositionedIcon {
 private:
     PositionedIcon(

@@ -27,6 +27,8 @@ function getTagLastVersion() {
 
 const tagLastVersion = getTagLastVersion();
 
+if (!process.env.GITHUB_ACCESS_TOKEN) throw new Error("!process.env.GITHUB_ACCESS_TOKEN");
+
 const git = simpleGit();
 const octokit = new Octokit({
   auth: process.env.GITHUB_ACCESS_TOKEN

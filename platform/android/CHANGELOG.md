@@ -6,6 +6,70 @@
 
 ### 🐞 Bug fixes
 
+## 11.6.1
+
+### 🐞 Bug fixes
+
+- Fix 16K alignment Android builds ([#2995](https://github.com/maplibre/maplibre-native/issues/2995)).
+
+### ✨ Features and improvements
+
+- Allow configuring a `Call.Factory` instead of a `OkHttpClient` ([https://github.com/maplibre/maplibre-native/pull/2987](#2987)). Since an `OkHttpClient` can be assigned to a `Call.Factory` this should not cause any issues.
+
+### 🐞 Bug fixes
+
+- Fix puck rendering behavior Android ([#2957](https://github.com/maplibre/maplibre-native/pull/2957)).
+
+## 11.6.0
+
+### ✨ Features and improvements
+
+- Add support for `text-variable-anchor-offset` property ([#2921](https://github.com/maplibre/maplibre-native/pull/2921)).
+- Change `parameters.currentLayer` to `index` instead of `layerIndex` ([#2956](https://github.com/maplibre/maplibre-native/pull/2956)).
+
+### 🐞 Bug fixes
+
+- Fix MapSnapshotter icon loading ([#2967](https://github.com/maplibre/maplibre-native/pull/2967)).
+
+## 11.5.2
+
+### ✨ Features and improvements
+
+- Use Kotlin instead of Groovy for Android build configuration ([#2902](https://github.com/maplibre/maplibre-native/pull/2902)).
+- Performance improvements ([#2892](https://github.com/maplibre/maplibre-native/pull/2892)).
+- Remove workaround for emulator crashes, and apply proper fix: revert index buffers to dirty flag instead of timestamps ([#2927](https://github.com/maplibre/maplibre-native/pull/2927)).
+
+### 🐞 Bug fixes
+
+- Fix line atlas, which was causing an issue with `line-pattern`s ([#2908](https://github.com/maplibre/maplibre-native/pull/2908)).
+
+## 11.5.1
+
+### ✨ Features and improvements
+
+- Add `PropertyFactory.iconPadding(Float)` overload for better backcompat ([#2880](https://github.com/maplibre/maplibre-native/pull/2880)).
+
+### 🐞 Bug fixes
+
+- Android renderThreadManager changed to non static ([#2872](https://github.com/maplibre/maplibre-native/pull/2872)).
+- Make sure `Scheduler::GetCurrent()` cannot return a nullptr ([#2887](https://github.com/maplibre/maplibre-native/pull/2887)). This should fix a crash on startup when the library is not initialized on the main thread.
+
+## 11.5.0
+
+### ✨ Features and improvements
+
+- Expose `RENDERMODE_CONTINUOUSLY` and `RENDERMODE_WHEN_DIRTY` ([#2801](https://github.com/maplibre/maplibre-native/pull/2801)). Toggling this can be helpful for development (e.g. when testing and optimizing performance).
+- Compile for Android with support for 16 KB page sizes ([#2852](https://github.com/maplibre/maplibre-native/pull/2852)).
+- Enable crash mitigation when running OpenGL in the Android emulator ([#2858](https://github.com/maplibre/maplibre-native/pull/2858)). Technically the crashes were caused by an issue with the Android Emulator, but we were able to find a workaround.
+- Add array support for `icon-padding` ([#2845](https://github.com/maplibre/maplibre-native/pull/2845)).
+  More information can be found in the [MapLibre Style Spec Documentation](https://maplibre.org/maplibre-style-spec/types/#padding). This is the first (code) contribution from [@random3940](https://github.com/random3940)! 🎉
+- Use `thread_local` for thread local scheduler ([#2863](https://github.com/maplibre/maplibre-native/pull/2863)).
+
+### 🐞 Bug fixes
+
+- Move WeakPtrFactory in `map_renderer.hpp` ([#2861](https://github.com/maplibre/maplibre-native/pull/2861)).
+- Fix updates hillshade geometry ([#2842](https://github.com/maplibre/maplibre-native/pull/2842)).
+
 ## 11.4.0
 
 ### ✨ Features and improvements

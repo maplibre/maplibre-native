@@ -33,7 +33,7 @@ function isLightProperty(property) {
 };
 
 /**
- * @param {any} property 
+ * @param {any} property
  */
 function isOverridable(property) {
     return ['text-color'].includes(property.name);
@@ -56,6 +56,10 @@ function expressionType(property) {
             return 'StringType';
         case 'color':
             return `ColorType`;
+        case 'padding':
+            return `PaddingType`;
+        case 'variableAnchorOffsetCollection':
+            return `VariableAnchorOffsetCollectionType`;
         case 'formatted':
             return `FormattedType`;
         case 'array':
@@ -70,6 +74,9 @@ function expressionType(property) {
  * @returns {string}
  */
 function evaluatedType(property) {
+  if (/text-variable-anchor-offset/.test(property.name)) {
+    return 'VariableAnchorOffsetCollection';
+  }
   if (/-translate-anchor$/.test(property.name)) {
     return 'TranslateAnchorType';
   }
@@ -104,6 +111,8 @@ function evaluatedType(property) {
     return (isLightProperty(property) ? 'Light' : '') + `${camelize(property.name)}Type`;
   case 'color':
     return `Color`;
+  case 'padding':
+    return `Padding`;
   case 'array':
     if (property.length) {
       return `std::array<${evaluatedType({type: property.value, name: property.name})}, ${property.length}>`;
@@ -228,6 +237,7 @@ function defaultValue(property) {
   case 'formatted':
   case 'string':
   case 'resolvedImage':
+  case 'variableAnchorOffsetCollection':
     return property.default ? `{${JSON.stringify(property.default)}}` : '{}';
   case 'enum':
     if (property.default === undefined) {
@@ -248,6 +258,7 @@ function defaultValue(property) {
       return `{ ${color} }`;
     }
   case 'array':
+  case 'padding':
     const defaults = (property.default || []).map((/** @type {any} **/ e) => defaultValue({ type: property.value, default: e }));
     if (property.length) {
       return `{{${defaults.join(', ')}}}`;

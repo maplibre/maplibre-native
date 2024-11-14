@@ -2,6 +2,10 @@ name: gh-pages-android-api
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: [android-release]
+    types:
+      - completed
 
 jobs:
   gh-pages-android-api:
@@ -22,7 +26,7 @@ jobs:
         run: ./gradlew dokkaHtml
 
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.6.3
+        uses: JamesIves/github-pages-deploy-action@v4.6.9
         with:
           branch: gh-pages
           folder: platform/android/MapLibreAndroid/build/dokka/html

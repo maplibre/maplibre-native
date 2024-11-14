@@ -46,7 +46,8 @@ struct source_location {
 #endif
 #else
 #define SYM_GUARD_LOC \
-    {}
+    {                 \
+    }
 #endif
 
 namespace mbgl {
@@ -110,7 +111,7 @@ public:
                    style::SymbolPlacementType textPlacement,
                    const std::array<float, 2>& textOffset,
                    float iconBoxScale,
-                   float iconPadding,
+                   Padding iconPadding,
                    const std::array<float, 2>& iconOffset,
                    const RefIndexedSubfeature& indexedFeature,
                    std::size_t layoutFeatureIndex,
@@ -119,7 +120,7 @@ public:
                    float overscaling,
                    float iconRotation,
                    float textRotation,
-                   const std::array<float, 2>& variableTextOffset,
+                   const std::optional<VariableAnchorOffsetCollection>& textVariableAnchorOffset,
                    bool allowVerticalPlacement,
                    SymbolContent iconType = SymbolContent::None);
 
@@ -135,6 +136,7 @@ public:
     const std::optional<SymbolQuads>& iconQuads() const;
     const std::optional<SymbolQuads>& verticalIconQuads() const;
     void releaseSharedData();
+    std::vector<style::SymbolAnchorType> getTextAnchors() const;
 
 #if MLN_SYMBOL_GUARDS
     /// Check all guard blocks
@@ -182,7 +184,9 @@ public:
     std::optional<size_t> getPlacedIconIndex() const { return placedIconIndex; }
     std::optional<size_t> getPlacedVerticalIconIndex() const { return placedVerticalIconIndex; }
     float getTextBoxScale() const { return textBoxScale; }
-    std::array<float, 2> getVariableTextOffset() const { return variableTextOffset; }
+    std::optional<VariableAnchorOffsetCollection> getTextVariableAnchorOffset() const {
+        return textVariableAnchorOffset;
+    }
     bool getSingleLine() const { return singleLine; }
 
     uint32_t getCrossTileID() const { return crossTileID; }
@@ -266,7 +270,7 @@ private:
     SYM_GUARD_VALUE(24)
     float textBoxScale;
     SYM_GUARD_VALUE(25)
-    std::array<float, 2> variableTextOffset;
+    std::optional<VariableAnchorOffsetCollection> textVariableAnchorOffset;
     SYM_GUARD_VALUE(26)
     bool singleLine;
     SYM_GUARD_VALUE(27)

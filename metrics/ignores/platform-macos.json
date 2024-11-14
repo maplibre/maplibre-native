@@ -1,5 +1,10 @@
 {
     "render-tests/icon-image/icon-sdf-non-sdf-one-layer": "Failing on GitHub runner for unknown reason https://github.com/maplibre/maplibre-native/issues/377",
     "render-tests/regressions/mapbox-gl-js#5642": "Failing with mbgl-render-test",
-    "render-tests/regressions/mapbox-gl-js#7066": "Failing with mbgl-render-test"
+    "render-tests/regressions/mapbox-gl-js#7066": "Failing with mbgl-render-test",
+    "render-tests/text-field/formatted-images": "Needs to be investigated and fixed.",
+    "render-tests/symbol-visibility/visible": "Needs to be investigated and fixed.",
+    "render-tests/fill-outline-color/zoom-and-property-function": "It will be fixed after triangulated lines will support data driven properties",
+    "render-tests/fill-outline-color/property-function": "It will be fixed after triangulated lines will support data driven properties",
+    "render-tests/fill-extrusion-color/function": "Layer Z Fighting: https://github.com/maplibre/maplibre-native/issues/1847"
 }

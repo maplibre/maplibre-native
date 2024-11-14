@@ -12,6 +12,7 @@
 #include <mbgl/shaders/vulkan/circle.hpp>
 #include <mbgl/shaders/vulkan/clipping_mask.hpp>
 #include <mbgl/shaders/vulkan/collision.hpp>
+#include <mbgl/shaders/vulkan/common.hpp>
 #include <mbgl/shaders/vulkan/debug.hpp>
 #include <mbgl/shaders/vulkan/fill.hpp>
 #include <mbgl/shaders/vulkan/heatmap.hpp>
@@ -102,11 +103,21 @@ std::vector<const char*> RendererBackend::getLayers() {
 }
 
 std::vector<const char*> RendererBackend::getInstanceExtensions() {
-    return {};
+    return {
+#ifdef __APPLE__
+        "VK_KHR_portability_enumeration"
+#endif
+    };
 }
 
 std::vector<const char*> RendererBackend::getDeviceExtensions() {
-    return getDefaultRenderable().getResource<SurfaceRenderableResource>().getDeviceExtensions();
+    auto extensions = getDefaultRenderable().getResource<SurfaceRenderableResource>().getDeviceExtensions();
+
+#ifdef __APPLE__
+    extensions.push_back("VK_KHR_portability_subset");
+#endif
+
+    return extensions;
 }
 
 std::vector<const char*> RendererBackend::getDebugExtensions() {
@@ -185,7 +196,8 @@ void RendererBackend::initFrameCapture() {
 void RendererBackend::startFrameCapture() {
 #ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
     if (g_rdoc_api) {
-        g_rdoc_api->StartFrameCapture(nullptr, nullptr);
+        RENDERDOC_DevicePointer devicePtr = RENDERDOC_DEVICEPOINTER_FROM_VKINSTANCE(instance->operator VkInstance_T*());
+        g_rdoc_api->StartFrameCapture(devicePtr, nullptr);
     }
 #endif
 }
@@ -193,7 +205,8 @@ void RendererBackend::startFrameCapture() {
 void RendererBackend::endFrameCapture() {
 #ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
     if (g_rdoc_api) {
-        g_rdoc_api->EndFrameCapture(nullptr, nullptr);
+        RENDERDOC_DevicePointer devicePtr = RENDERDOC_DEVICEPOINTER_FROM_VKINSTANCE(instance->operator VkInstance_T*());
+        g_rdoc_api->EndFrameCapture(devicePtr, nullptr);
     }
 #endif
 }
@@ -323,8 +336,14 @@ void RendererBackend::initInstance() {
 
     // Vulkan 1.1 on Android is supported on 71% of devices (compared to 1.3 with 6%) as of April 23 2024
     // https://vulkan.gpuinfo.org/
+#ifdef __APPLE__
+    vk::InstanceCreateFlags instanceFlags = vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
+#else
+    vk::InstanceCreateFlags instanceFlags = {};
+#endif
+
     vk::ApplicationInfo appInfo("maplibre-native", 1, "maplibre-native", 1, VK_API_VERSION_1_0);
-    vk::InstanceCreateInfo createInfo(vk::InstanceCreateFlags(), &appInfo);
+    vk::InstanceCreateInfo createInfo(instanceFlags, &appInfo);
 
     const auto& layers = getLayers();
 
@@ -501,7 +520,7 @@ void RendererBackend::initDevice() {
     // TODO
     // - WideLines disabled on Android (20.77% device coverage https://vulkan.gpuinfo.org/listfeaturescore10.php)
     // - Rework this to a dynamic toggle based on MLN_TRIANGULATE_FILL_OUTLINES/MLN_ENABLE_POLYLINE_DRAWABLES
-#if !defined(__ANDROID__) && !defined(__apple__)
+#if !defined(__ANDROID__) && !defined(__APPLE__)
     if (supportedDeviceFeatures.wideLines) {
         physicalDeviceFeatures.setWideLines(true);
 
@@ -509,9 +528,15 @@ void RendererBackend::initDevice() {
         // physicalDeviceProperties.limits.lineWidthRange;
         // physicalDeviceProperties.limits.lineWidthGranularity;
     } else {
-        mbgl::Log::Error(mbgl::Event::Render, "Wide line support not available");
+        mbgl::Log::Error(mbgl::Event::Render, "Feature not available: wideLines");
     }
 #endif
+
+    if (supportedDeviceFeatures.samplerAnisotropy) {
+        physicalDeviceFeatures.setSamplerAnisotropy(true);
+    } else {
+        mbgl::Log::Error(mbgl::Event::Render, "Feature not available: samplerAnisotropy");
+    }
 
     auto createInfo = vk::DeviceCreateInfo()
                           .setQueueCreateInfos(queueCreateInfos)
@@ -596,6 +621,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::ClippingMaskProgram,
                   shaders::BuiltIn::CollisionBoxShader,
                   shaders::BuiltIn::CollisionCircleShader,
+                  shaders::BuiltIn::CommonShader,
+                  shaders::BuiltIn::CommonTexturedShader,
                   shaders::BuiltIn::CustomSymbolIconShader,
                   shaders::BuiltIn::DebugShader,
                   shaders::BuiltIn::FillShader,

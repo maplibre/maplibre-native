@@ -117,6 +117,14 @@ std::unique_ptr<Expression> toColor(std::unique_ptr<Expression> value, std::uniq
     return coercion(type::Color, std::move(value), std::move(def));
 }
 
+std::unique_ptr<Expression> toPadding(std::unique_ptr<Expression> value, std::unique_ptr<Expression> def) {
+    return coercion(type::Padding, std::move(value), std::move(def));
+}
+
+std::unique_ptr<Expression> toVariableAnchorOffset(std::unique_ptr<Expression> value, std::unique_ptr<Expression> def) {
+    return coercion(type::VariableAnchorOffsetCollection, std::move(value), std::move(def));
+}
+
 std::unique_ptr<Expression> toString(std::unique_ptr<Expression> value, std::unique_ptr<Expression> def) {
     return coercion(type::String, std::move(value), std::move(def));
 }

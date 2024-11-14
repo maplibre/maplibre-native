@@ -38,7 +38,7 @@ if(WIN32 AND NOT MLN_WITH_QT AND NOT CMAKE_SYSTEM_NAME STREQUAL Android)
     set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/platform/windows/custom-toolchain.cmake)
 endif()
 
-project("Mapbox GL Native" LANGUAGES CXX C)
+project("MapLibre Native" LANGUAGES CXX C)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER MapLibre)
@@ -203,6 +203,8 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/hillshade_prepare_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/line_layer_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/line_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/location_indicator_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/location_indicator_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/raster_layer_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/raster_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/symbol_layer_tweaker.cpp
@@ -377,6 +379,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/transition_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/types.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/undefined.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/variable_anchor_offset_collection.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/text/glyph.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/text/glyph_range.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/tile/tile_id.hpp
@@ -413,6 +416,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/logging.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/lru_cache.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/noncopyable.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/padding.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/platform.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/premultiply.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/projection.hpp
@@ -861,6 +865,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/style_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/style_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/types.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/variable_anchor_offset_collection.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_render_parameters.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_layer_factory.cpp
@@ -972,6 +977,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/mat4.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/mat4.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/math.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/padding.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/premultiply.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/quaternion.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/rapidjson.cpp
@@ -1133,6 +1139,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/background_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/circle_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/collision_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/common_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_drawable_layer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/custom_drawable_layer_factory.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/debug_layer_ubo.hpp
@@ -1294,6 +1301,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/command_encoder.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/context.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/drawable.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/descriptor_set.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/drawable_builder.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/index_buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/layer_group.hpp
@@ -1329,6 +1337,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/command_encoder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/context.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/descriptor_set.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable_builder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable_impl.hpp
@@ -1349,6 +1358,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/circle.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/clipping_mask.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/collision.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/common.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/debug.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/fill.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/heatmap.cpp
@@ -1530,10 +1540,10 @@ endif()
 set_target_properties(
     mbgl-core
     PROPERTIES
-        INTERFACE_MAPBOX_NAME "Mapbox GL Native"
-        INTERFACE_MAPBOX_URL "https://github.com/maplibre/maplibre-native"
-        INTERFACE_MAPBOX_AUTHOR "Mapbox"
-        INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/LICENSE.md
+        INTERFACE_MAPLIBRE_NAME "MapLibre Native"
+        INTERFACE_MAPLIBRE_URL "https://github.com/maplibre/maplibre-native"
+        INTERFACE_MAPLIBRE_AUTHOR "MapLibre"
+        INTERFACE_MAPLIBRE_LICENSE ${PROJECT_SOURCE_DIR}/LICENSE.md
 )
 
 set_property(TARGET mbgl-core PROPERTY FOLDER MapLibre)

@@ -3,13 +3,14 @@
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gfx/context.hpp>
 
+#define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
+
 #ifdef _WIN32
 #define VK_USE_PLATFORM_WIN32_KHR
 #elif defined(__ANDROID__)
 #define VK_USE_PLATFORM_ANDROID_KHR
 #endif
 
-#define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
 #include <vulkan/vulkan.hpp>
 
 #define VMA_VULKAN_VERSION 1000000

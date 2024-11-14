@@ -3,8 +3,12 @@
 #include <mbgl/style/expression/value.hpp>
 #include <mbgl/style/position.hpp>
 #include <mbgl/style/rotation.hpp>
+#include <mbgl/style/types.hpp>
+#include <mbgl/style/variable_anchor_offset_collection.hpp>
+#include <mbgl/util/enum.hpp>
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/range.hpp>
+#include <mbgl/util/string.hpp>
 
 #include <array>
 #include <vector>
@@ -122,6 +126,54 @@ public:
 
     Color operator()(const Color& a, const Color& b, const double t) noexcept {
         return {interpolate(a.r, b.r, t), interpolate(a.g, b.g, t), interpolate(a.b, b.b, t), interpolate(a.a, b.a, t)};
+    }
+};
+
+template <>
+struct Interpolator<Padding> {
+public:
+    Padding operator()(const Padding& a, const Padding& b, const float t) const noexcept {
+        return {interpolate(a.top, b.top, t),
+                interpolate(a.right, b.right, t),
+                interpolate(a.bottom, b.bottom, t),
+                interpolate(a.left, b.left, t)};
+    }
+
+    Padding operator()(const Padding& a, const Padding& b, const double t) const noexcept {
+        return {interpolate(a.top, b.top, t),
+                interpolate(a.right, b.right, t),
+                interpolate(a.bottom, b.bottom, t),
+                interpolate(a.left, b.left, t)};
+    }
+};
+
+template <>
+struct Interpolator<VariableAnchorOffsetCollection> {
+public:
+    VariableAnchorOffsetCollection operator()(const VariableAnchorOffsetCollection& a,
+                                              const VariableAnchorOffsetCollection& b,
+                                              const float t) const {
+        if (a.size() != b.size()) {
+            throw std::runtime_error("Cannot interpolate values of different length. from: " + a.toString() +
+                                     ", to: " + b.toString());
+        }
+        std::vector<AnchorOffsetPair> offsetMap;
+        offsetMap.reserve(a.size());
+        for (size_t index = 0; index < a.size(); index++) {
+            const auto& aPair = a[index];
+            const auto& bPair = b[index];
+            if (aPair.anchorType != bPair.anchorType) {
+                throw std::runtime_error(
+                    "Cannot interpolate values containing mismatched anchors. index: " + util::toString(index) +
+                    "from: " + Enum<style::SymbolAnchorType>::toString(aPair.anchorType) +
+                    ", to: " + Enum<style::SymbolAnchorType>::toString(bPair.anchorType));
+            }
+            auto offset = std::array<float, 2>{interpolate(aPair.offset[0], bPair.offset[0], t),
+                                               interpolate(aPair.offset[1], bPair.offset[1], t)};
+            offsetMap.emplace_back(aPair.anchorType, offset);
+        }
+
+        return VariableAnchorOffsetCollection(std::move(offsetMap));
     }
 };
 

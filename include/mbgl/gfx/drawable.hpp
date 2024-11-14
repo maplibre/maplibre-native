@@ -9,6 +9,7 @@
 #include <mbgl/util/identity.hpp>
 #include <mbgl/util/monotonic_timer.hpp>
 #include <mbgl/util/traits.hpp>
+#include <mbgl/util/immutable.hpp>
 
 #include <cstdint>
 #include <cstddef>
@@ -25,6 +26,7 @@ class PaintParameters;
 class PaintPropertyBindersBase;
 enum class RenderPass : uint8_t;
 class RenderTile;
+class SegmentBase;
 
 using LayerTweakerPtr = std::shared_ptr<LayerTweaker>;
 using RenderTiles = std::shared_ptr<const std::vector<std::reference_wrapper<const RenderTile>>>;
@@ -149,9 +151,6 @@ public:
     /// Set sub-layer index
     virtual void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
 
-    void setLayerIndex(int32_t value) { layerIndex = value; }
-    int32_t getLayerIndex() const { return layerIndex; }
-
     /// Depth writability for 2D drawables
     DepthMaskType getDepthType() const { return depthType; }
 
@@ -192,7 +191,20 @@ public:
     const gfx::VertexAttributeArrayPtr& getVertexAttributes() const noexcept { return vertexAttributes; }
 
     /// Set vertex attribute array
-    void setVertexAttributes(gfx::VertexAttributeArrayPtr value) noexcept { vertexAttributes = std::move(value); }
+    void setVertexAttributes(gfx::VertexAttributeArrayPtr value) noexcept {
+        vertexAttributes = std::move(value);
+        // The attribute bindings need to be rebuilt, we can't rely on the update
+        // time check as these new values may not have been modified recently.
+        attributeUpdateTime.reset();
+    }
+
+    /// Update vertices, indices, and segments
+    virtual void updateVertexAttributes(gfx::VertexAttributeArrayPtr,
+                                        std::size_t vertexCount,
+                                        gfx::DrawMode,
+                                        gfx::IndexVectorBasePtr,
+                                        const SegmentBase* segments,
+                                        std::size_t segmentCount) = 0;
 
     /// Get the instance attributes
     const gfx::VertexAttributeArrayPtr& getInstanceAttributes() const noexcept { return instanceAttributes; }
@@ -261,6 +273,7 @@ public:
     void setRenderTile(Immutable<std::vector<RenderTile>>, const RenderTile*);
 
     const std::chrono::duration<double> createTime = util::MonotonicTimer::now();
+    std::optional<std::chrono::duration<double>> getAttributeUpdateTime() const { return attributeUpdateTime; }
 
 protected:
     bool enabled = true;
@@ -277,12 +290,11 @@ protected:
     DrawPriority drawPriority = 0;
     int32_t lineWidth = 1;
     int32_t subLayerIndex = 0;
-    int32_t layerIndex = 0;
     DepthMaskType depthType; // = DepthMaskType::ReadOnly;
     UniqueDrawableData drawableData{};
     gfx::VertexAttributeArrayPtr vertexAttributes;
     gfx::VertexAttributeArrayPtr instanceAttributes;
-    std::chrono::duration<double> attributeUpdateTime = util::MonotonicTimer::now();
+    std::optional<std::chrono::duration<double>> attributeUpdateTime;
 
     struct Impl;
     std::unique_ptr<Impl> impl;
