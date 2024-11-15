@@ -23,8 +23,8 @@ jobs:
         run: make mkdocs-build
 
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.6.8
+        uses: JamesIves/github-pages-deploy-action@v4.6.9
         with:
           branch: gh-pages
           folder: platform/android/site
-          target-folder: maplibre-native/android/examples/
+          target-folder: android/examples/
