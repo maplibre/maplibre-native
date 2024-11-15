@@ -1,11 +1,12 @@
 import os
-import pathlib
+from pathlib import Path
 
 def find_file(start_directory, target_filename):
     """Recursively search for a file by name starting from start_directory."""
     for root, dirs, files in os.walk(start_directory):
         if target_filename in files:
-            return os.path.join(root, target_filename)
+            path = Path(os.path.join(root, target_filename))
+            return path.relative_to("/docs")
     raise FileNotFoundError(f"File '{target_filename}' could not be found in {start_directory}")
 
 def define_env(env):
@@ -20,5 +21,5 @@ def define_env(env):
         return f"""
 !!! note
 
-    You can find the full source code of this example in [`{filename}`](https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/{file_path}) of the MapLibreAndroidTestApp.
+    You can find the full source code of this example in [`{filename}`](https://github.com/maplibre/maplibre-native/blob/main/platform/android/{file_path}) of the MapLibreAndroidTestApp.
 """
