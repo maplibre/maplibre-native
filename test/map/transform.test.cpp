@@ -616,7 +616,7 @@ TEST(Transform, DefaultTransform) {
     transform.resize({1000, 500});
     transform.setLatLngBounds(LatLngBounds::hull({40.0, -10.0}, {70.0, 40.0}));
     transform.setConstrainMode(ConstrainMode::Screen);
-    
+
     // Request impossible zoom
     AnimationOptions easeOptions(Seconds(1));
     transform.easeTo(CameraOptions().withCenter(LatLng{56, 11}).withZoom(1), easeOptions);
