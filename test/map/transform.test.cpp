@@ -611,6 +611,26 @@ TEST(Transform, DefaultTransform) {
     point = state.latLngToScreenCoordinate(nullIsland);
     ASSERT_DOUBLE_EQ(point.x, center.x);
     ASSERT_DOUBLE_EQ(point.y, center.y);
+
+    // Constrain to screen while resizing
+    transform.resize({1000, 500});
+    transform.setLatLngBounds(LatLngBounds::hull({40.0, -10.0}, {70.0, 40.0}));
+    transform.setConstrainMode(ConstrainMode::Screen);
+    
+    // Request impossible zoom
+    AnimationOptions easeOptions(Seconds(1));
+    transform.easeTo(CameraOptions().withCenter(LatLng{56, 11}).withZoom(1), easeOptions);
+    ASSERT_TRUE(transform.inTransition());
+    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(250));
+
+    // Rotate the screen during a transition (resize it)
+    transform.resize({500, 1000});
+
+    // The resize while constraining to screen should have stopped the transition and updated the state
+    ASSERT_FALSE(transform.inTransition());
+    ASSERT_NEAR(transform.getLatLng().longitude(), 8.22103, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().latitude(), 46.6905, 1e-4);
+    ASSERT_NEAR(transform.getState().getScale(), 38.1529, 1e-4);
 }
 
 TEST(Transform, LatLngBounds) {
