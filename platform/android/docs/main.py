@@ -23,3 +23,7 @@ def define_env(env):
 
     You can find the full source code of this example in [`{filename}`](https://github.com/maplibre/maplibre-native/blob/main/platform/android/{file_path}) of the MapLibreAndroidTestApp.
 """
+
+    @env.macro
+    def s3_url(filename):
+        return f"https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/{filename}"
