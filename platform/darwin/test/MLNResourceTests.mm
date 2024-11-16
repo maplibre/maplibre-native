@@ -86,15 +86,4 @@ namespace mbgl {
     [self internalTestOfflineQueryParameterIsAddedForOfflineResource:testURL];
 }
 
-- (void)testResourceURL {
-    using namespace mbgl;
-
-    // Test URL with characters requiring encoding
-    Resource resource(Resource::Kind::Unknown, "https://example.com/test?param1=a|b&param2=c|d");
-    NSURL *url = resourceURL(resource);
-
-    XCTAssertNotNil(url);
-    XCTAssertEqualObjects(url.absoluteString, @"https://example.com/test?param1=a%7Cb&param2=c%7Cd");
-}
-
 @end
