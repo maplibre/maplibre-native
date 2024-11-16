@@ -311,3 +311,13 @@ clean:
 	        ./MapLibreAndroidTestApp/src/androidTest/java/org/maplibre/android/testapp/activity/gen \
 	        ./MapLibreAndroid/src/main/assets \
 		    ./MapLibreAndroidTestApp/src/main/assets/integration
+
+### MkDocs Documentation ########################################################
+
+.PHONY: mkdocs
+mkdocs:
+	docker run --rm -it -p 8000:8000 -v ${PWD}:/docs squidfunk/mkdocs-material
+
+.PHONY: mkdocs-build
+mkdocs-build:
+	docker run --rm -v ${PWD}:/docs squidfunk/mkdocs-material build --strict

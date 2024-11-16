@@ -110,7 +110,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float ANTIALIASING = 1.0 / DEVICE_PIXEL_RATIO / 2.0;
 
     const float2 a_extrude = float2(vertx.data.xy) - 128.0;
-    const float a_direction = fmod(float(vertx.data.z), 4.0) - 1.0;
+    const float a_direction = glMod(float(vertx.data.z), 4.0) - 1.0;
     const float2 pos = floor(float2(vertx.pos_normal) * 0.5);
 
     // x is 1 if it's a round cap, 0 otherwise
@@ -297,7 +297,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float ANTIALIASING = 1.0 / DEVICE_PIXEL_RATIO / 2.0;
 
     const float2 a_extrude = float2(vertx.data.xy) - 128.0;
-    const float a_direction = fmod(float(vertx.data.z), 4.0) - 1.0;
+    const float a_direction = glMod(float(vertx.data.z), 4.0) - 1.0;
     const float v_lineprogress = (floor(float(vertx.data.z) / 4.0) + vertx.data.w * 64.0) * 2.0 / MAX_LINE_DISTANCE;
     const float2 pos = floor(float2(vertx.pos_normal) * 0.5);
 
@@ -501,7 +501,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float LINE_DISTANCE_SCALE = 2.0;
 
     const float2 a_extrude = float2(vertx.data.xy) - 128.0;
-    const float a_direction = fmod(float(vertx.data.z), 4.0) - 1.0;
+    const float a_direction = glMod(float(vertx.data.z), 4.0) - 1.0;
     const float linesofar = (floor(vertx.data.z / 4.0) + vertx.data.w * 64.0) * LINE_DISTANCE_SCALE;
     const float2 pos = floor(float2(vertx.pos_normal) * 0.5);
 
@@ -731,16 +731,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto exprGapWidth = (props.expressionMask & LineExpressionMask::GapWidth);
-    const auto gapwidth = (exprGapWidth ? expr.gapwidth.eval(paintParams.zoom) : props.gapwidth) / 2;
+    const auto gapwidth = (exprGapWidth ? expr.gapwidth.eval(paintParams.zoom) : props.gapwidth) / 2.0;
 #else
-    const auto gapwidth = unpack_mix_float(vertx.gapwidth, interp.gapwidth_t) / 2;
+    const auto gapwidth = unpack_mix_float(vertx.gapwidth, interp.gapwidth_t) / 2.0;
 #endif
 
 #if defined(HAS_UNIFORM_u_offset)
     const auto exprOffset = (props.expressionMask & LineExpressionMask::Offset);
-    const auto offset   = (exprOffset ? expr.offset.eval(paintParams.zoom) : props.offset) * -1;
+    const auto offset   = (exprOffset ? expr.offset.eval(paintParams.zoom) : props.offset) * -1.0;
 #else
-    const auto offset   = unpack_mix_float(vertx.offset, interp.offset_t) * -1;
+    const auto offset   = unpack_mix_float(vertx.offset, interp.offset_t) * -1.0;
 #endif
 
 #if defined(HAS_UNIFORM_u_width)
@@ -763,8 +763,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float LINE_DISTANCE_SCALE = 2.0;
 
     const float2 a_extrude = float2(vertx.data.xy) - 128.0;
-    const float a_direction = fmod(float(vertx.data.z), 4.0) - 1.0;
-    float linesofar = (floor(vertx.data.z / 4.0) + vertx.data.w * 64.0) * LINE_DISTANCE_SCALE;
+    const float a_direction = glMod(float(vertx.data.z), 4.0) - 1.0;
+    float linesofar = (floor(float(vertx.data.z) / 4.0) + float(vertx.data.w) * 64.0) * LINE_DISTANCE_SCALE;
     const float2 pos = floor(float2(vertx.pos_normal) * 0.5);
 
     // x is 1 if it's a round cap, 0 otherwise
@@ -800,8 +800,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .width2       = float2(outset, inset),
         .normal       = v_normal,
         .gamma_scale  = half(extrude_length_without_perspective / extrude_length_with_perspective),
-        .tex_a        = float2(linesofar * drawable.patternscale_a.x / floorwidth, (normal.y * drawable.patternscale_a.y + drawable.tex_y_a) * 2.0),
-        .tex_b        = float2(linesofar * drawable.patternscale_b.x / floorwidth, (normal.y * drawable.patternscale_b.y + drawable.tex_y_b) * 2.0),
+        .tex_a        = float2(linesofar * drawable.patternscale_a.x / floorwidth, v_normal.y * drawable.patternscale_a.y + drawable.tex_y_a),
+        .tex_b        = float2(linesofar * drawable.patternscale_b.x / floorwidth, v_normal.y * drawable.patternscale_b.y + drawable.tex_y_b),
 
 #if !defined(HAS_UNIFORM_u_color)
         .color        = unpack_mix_color(vertx.color, interp.color_t),
@@ -857,6 +857,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const auto floorwidth = in.floorwidth;
 #endif
 
+    // Calculate the distance of the pixel from the line in pixels.
+    const float dist = length(in.normal) * in.width2.x;
+
     // Calculate the antialiasing fade factor. This is either when fading in the
     // line in case of an offset line (`v_width2.y`) or when fading out (`v_width2.x`)
     const float blur2 = (blur + 1.0 / DEVICE_PIXEL_RATIO) * in.gamma_scale;
@@ -864,7 +867,6 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float sdfdist_a = image0.sample(image0_sampler, in.tex_a).a;
     const float sdfdist_b = image0.sample(image0_sampler, in.tex_b).a;
     const float sdfdist = mix(sdfdist_a, sdfdist_b, drawable.mix);
-    const float dist = length(in.normal) * in.width2.x;
     const float alpha = clamp(min(dist - (in.width2.y - blur2), in.width2.x - dist) / blur2, 0.0, 1.0) *
                         smoothstep(0.5 - drawable.sdfgamma / floorwidth, 0.5 + drawable.sdfgamma / floorwidth, sdfdist);
 

@@ -41,6 +41,7 @@ compile_commands.json
 /platform/ios/platform/ios/benchmark/assets/glyphs/Roboto Condensed Italic,Noto Sans Italic
 /platform/ios/platform/ios/benchmark/assets/glyphs/Noto Sans Regular
 /platform/android/key.json
+/platform/android/site
 node_modules
 # Node binaries.
 /lib

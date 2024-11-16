@@ -92,3 +92,16 @@ To run the benchmarks (for Android) include the following line on a PR comment:
 ## Profiling
 
 [maplibre-native/docs/mdbook](https://maplibre.org/maplibre-native/docs/book/) describes how Tracy can be used for profiling.
+
+
+## Examples Documentation
+
+To build the Examples Documentation you need to have Docker installed.
+
+From `platform/android`, run:
+
+```
+make mkdocs
+```
+
+Next, visit http://localhost:8000/maplibre-native/android/examples/
