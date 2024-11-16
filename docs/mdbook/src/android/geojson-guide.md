@@ -36,64 +36,9 @@ We define the most fundamental objects:
 - `Feautue` is a compound object that combines a single geometry with user-defined attributes, such as name, color.
 - `FeatureCollection` is set of features stored in an array. It is a root object that introduces all other features.
 
-A typical GeoJSON file might look like:
-```json
- {
-  "type": "FeatureCollection",
-  "features": [
-    {
-      "type": "Feature",
-      "properties": {},
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              -77.06867337226866,
-              38.90467655551809
-            ],
-            [
-              -77.06233263015747,
-              38.90479344272695
-            ],
-            [
-              -77.06234335899353,
-              38.906463238984344
-            ],
-            [
-              -77.06290125846863,
-              38.907206285691615
-            ],
-            [
-              -77.06364154815674,
-              38.90684728656818
-            ],
-            [
-              -77.06326603889465,
-              38.90637140121084
-            ],
-            [
-              -77.06321239471436,
-              38.905561553883246
-            ],
-            [
-              -77.0691454410553,
-              38.905436318935635
-            ],
-            [
-              -77.06912398338318,
-              38.90466820642439
-            ],
-            [
-              -77.06867337226866,
-              38.90467655551809
-            ]
-          ]
-        ]
-      }
-    }
-  ]
-}
+A typical GeoJSON structure might look like:
+```kotlin
+ {{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/turf/MapSnapshotterWithinExpression.kt:buffer_line}}
 ```
 So far we learned describing Geospatial data in GeoJSON files. We will start applying this knowledge into our map applications. 
 
