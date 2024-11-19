@@ -57,7 +57,7 @@ TEST(AssetFileSource, Load) {
         mbgl::AssetFileSource* fs;
         std::unique_ptr<mbgl::AsyncRequest> request;
 
-        std::function<void(mbgl::Response)> requestCallback;
+        mbgl::FileSource::CopyableCallback<void(mbgl::Response)> requestCallback;
     };
 
     std::vector<std::unique_ptr<util::Thread<TestWorker>>> threads;
