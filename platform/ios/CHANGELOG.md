@@ -4,6 +4,13 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+## 6.8.1
+
+- Update Bazel dependencies ([#3000](https://github.com/maplibre/maplibre-native/pull/3000)).
+- Reuse allocated descriptor sets ([#3002](https://github.com/maplibre/maplibre-native/pull/3002)).
+- Line SDF shader fix ([#3010](https://github.com/maplibre/maplibre-native/pull/3010)).
+- Revert "Encode the style URL in iOS. This change was causing several regressions with styles not loading ([#3024](https://github.com/maplibre/maplibre-native/pull/3024)).
+
 ## 6.8.0
 
 ### Features

@@ -1,4 +1,4 @@
-# MapLibre Configuration
+# Configuration
 
 This guide will explain various ways to create a map.
 
@@ -13,6 +13,7 @@ There are several ways to build a `MapView`:
 Before diving into `MapView` configurations, let's understand the capabilities of both XML namespaces and `MapLibreMapOptions`.
 
 Here are some common configurations you can set:
+
 - Map base URI
 - Camera settings
 - Zoom level
@@ -30,7 +31,7 @@ We will explore how to achieve these configurations in XML layout and programmat
 To configure `MapView` within an XML layout, you need to use the right namespace and provide the necessary data in the layout file.
 
 ```xml
-{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/res/layout/activity_map_options_xml.xml}}
+--8<-- "MapLibreAndroidTestApp/src/main/res/layout/activity_map_options_xml.xml"
 ```
 
 This can be found in [`activity_map_options_xml.xml`](https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/res/layout/activity_map_fragment.xml).
@@ -38,7 +39,7 @@ This can be found in [`activity_map_options_xml.xml`](https://github.com/maplibr
 You can assign any other existing values to the `maplibre...` tags. Then, you only need to create `MapView` and `MapLibreMap` objects with a simple setup in the Activity.
 
 ```kotlin
-{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options/MapOptionsXmlActivity.kt}}
+--8<-- "MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options/MapOptionsXmlActivity.kt"
 ```
 
 This can be found in [`MapOptionsXmlActivity.kt`](https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options/MapOptionsXmlActivity.kt).
@@ -47,7 +48,7 @@ This can be found in [`MapOptionsXmlActivity.kt`](https://github.com/maplibre/ma
 
  Here we don't have to create MapView from XML since we want to create it programmatically.
 ```xml
-{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/res/layout/activity_map_options_xml.xml}}
+--8<-- "MapLibreAndroidTestApp/src/main/res/layout/activity_map_options_runtime.xml"
 ```
 
 This can be found in [`activity_map_options_runtime.xml`](https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/res/layout/activity_map_options_runtime.xml).
@@ -55,7 +56,7 @@ This can be found in [`activity_map_options_runtime.xml`](https://github.com/map
 A `MapLibreMapOptions` object must be created and passed to the MapView constructor. All setup is done in the Activity code:
 
 ```kotlin
-{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options/MapOptionsRuntimeActivity.kt}}
+--8<-- "MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options/MapOptionsRuntimeActivity.ktl"
 ```
 
 This can be found in [`MapOptionsRuntimeActivity.kt`](https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options/MapOptionsRuntimeActivity.kt).
@@ -77,7 +78,7 @@ If you are using MapFragment in your project, it is also easy to provide initial
 Let's see how this can be done in a sample activity:
 
 ```kotlin
-{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/fragment/SupportMapFragmentActivity.kt}}
+--8<-- "MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/fragment/SupportMapFragmentActivity.kt"
 ```
 
 You can also find the full contents of `SupportMapFragmentActivity` in the [MapLibreAndroidTestApp](https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/fragment/SupportMapFragmentActivity.kt).

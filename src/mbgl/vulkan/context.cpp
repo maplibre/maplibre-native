@@ -147,6 +147,8 @@ void Context::enqueueDeletion(std::function<void(Context&)>&& function) {
 }
 
 void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) const {
+    MLN_TRACE_FUNC();
+
     const vk::CommandBufferAllocateInfo allocateInfo(
         backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, 1);
 
@@ -173,6 +175,7 @@ void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueComm
 }
 
 void Context::waitFrame() const {
+    MLN_TRACE_FUNC();
     const auto& device = backend.getDevice();
     auto& frame = frameResources[frameResourceIndex];
     constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
@@ -183,6 +186,8 @@ void Context::waitFrame() const {
     }
 }
 void Context::beginFrame() {
+    MLN_TRACE_FUNC();
+
     const auto& device = backend.getDevice();
     auto& renderableResource = backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
     const auto& platformSurface = renderableResource.getPlatformSurface();
@@ -211,6 +216,7 @@ void Context::beginFrame() {
     frame.runDeletionQueue(*this);
 
     if (platformSurface) {
+        MLN_TRACE_ZONE(acquireNextImageKHR);
         try {
             const vk::ResultValue acquireImageResult = device->acquireNextImageKHR(
                 renderableResource.getSwapchain().get(), timeout, frame.surfaceSemaphore.get(), nullptr);
@@ -248,6 +254,7 @@ void Context::endFrame() {
 }
 
 void Context::submitFrame() {
+    MLN_TRACE_FUNC();
     const auto& frame = frameResources[frameResourceIndex];
     frame.commandBuffer->end();
 
@@ -642,6 +649,8 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
 }
 
 void Context::FrameResources::runDeletionQueue(Context& context) {
+    MLN_TRACE_FUNC();
+
     for (const auto& function : deletionQueue) function(context);
 
     deletionQueue.clear();

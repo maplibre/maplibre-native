@@ -3,6 +3,7 @@
 #include <mbgl/gfx/uniform_buffer.hpp>
 #include <mbgl/vulkan/buffer_resource.hpp>
 #include <span>
+#include <queue>
 
 namespace mbgl {
 namespace vulkan {
@@ -21,6 +22,7 @@ struct DescriptorPoolGrowable {
     struct PoolInfo {
         vk::UniqueDescriptorPool pool;
         uint32_t remainingSets{0};
+        std::queue<std::vector<vk::DescriptorSet>> unusedSets;
 
         PoolInfo(vk::UniqueDescriptorPool&& pool_, uint32_t remainingSets_)
             : pool(std::move(pool_)),

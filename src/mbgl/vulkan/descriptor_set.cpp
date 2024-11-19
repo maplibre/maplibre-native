@@ -4,9 +4,12 @@
 #include <mbgl/vulkan/command_encoder.hpp>
 #include <mbgl/vulkan/texture2d.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 #include <cassert>
 #include <math.h>
+
+#define USE_DESCRIPTOR_POOL_RESET
 
 namespace mbgl {
 namespace vulkan {
@@ -19,8 +22,12 @@ DescriptorSet::~DescriptorSet() {
     context.enqueueDeletion(
         [type_ = type, poolIndex = descriptorPoolIndex, sets = std::move(descriptorSets)](auto& context_) mutable {
             auto& poolInfo = context_.getDescriptorPool(type_).pools[poolIndex];
+#ifdef USE_DESCRIPTOR_POOL_RESET
+            poolInfo.unusedSets.push(std::move(sets));
+#else
             context_.getBackend().getDevice()->freeDescriptorSets(poolInfo.pool.get(), sets);
             poolInfo.remainingSets += sets.size();
+#endif
         });
 }
 
@@ -29,16 +36,20 @@ void DescriptorSet::createDescriptorPool(DescriptorPoolGrowable& growablePool) {
 
     const uint32_t maxSets = static_cast<uint32_t>(growablePool.maxSets *
                                                    std::pow(growablePool.growFactor, growablePool.pools.size()));
+
+#ifdef USE_DESCRIPTOR_POOL_RESET
+    const auto poolFlags = vk::DescriptorPoolCreateFlags();
+#else
+    const auto poolFlags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet;
+#endif
+  
     if (type == DescriptorSetType::Layer) {
         const std::vector<vk::DescriptorPoolSize> sizes = {
             {vk::DescriptorType::eStorageBuffer, maxSets * growablePool.descriptorsPerSet},
             {vk::DescriptorType::eUniformBuffer, maxSets * growablePool.descriptorsPerSet},
         };
 
-        const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo(
-                                            vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
-                                            .setPoolSizes(sizes)
-                                            .setMaxSets(maxSets);
+        const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo(poolFlags).setPoolSizes(sizes).setMaxSets(maxSets);
 
         growablePool.pools.emplace_back(device->createDescriptorPoolUnique(descriptorPoolInfo), maxSets);
     } else {
@@ -47,10 +58,7 @@ void DescriptorSet::createDescriptorPool(DescriptorPoolGrowable& growablePool) {
                                                  : vk::DescriptorType::eCombinedImageSampler,
                                              maxSets * growablePool.descriptorsPerSet};
 
-        const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo(
-                                            vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
-                                            .setPoolSizes(size)
-                                            .setMaxSets(maxSets);
+        const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo(poolFlags).setPoolSizes(size).setMaxSets(maxSets);
 
         growablePool.pools.emplace_back(device->createDescriptorPoolUnique(descriptorPoolInfo), maxSets);
     }
@@ -59,6 +67,8 @@ void DescriptorSet::createDescriptorPool(DescriptorPoolGrowable& growablePool) {
 };
 
 void DescriptorSet::allocate() {
+    MLN_TRACE_FUNC();
+
     if (!descriptorSets.empty()) {
         return;
     }
@@ -68,31 +78,55 @@ void DescriptorSet::allocate() {
     auto& growablePool = context.getDescriptorPool(type);
     const std::vector<vk::DescriptorSetLayout> layouts(context.getBackend().getMaxFrames(), descriptorSetLayout);
 
-    if (growablePool.currentPoolIndex == -1 || growablePool.current().remainingSets < layouts.size()) {
-        const auto& poolIt = std::find_if(growablePool.pools.begin(), growablePool.pools.end(), [&](const auto& p) {
-            return p.remainingSets >= layouts.size();
-        });
+    if (growablePool.currentPoolIndex == -1 ||
+        (growablePool.current().unusedSets.empty() && growablePool.current().remainingSets < layouts.size())) {
+#ifdef USE_DESCRIPTOR_POOL_RESET
+        // find a pool that has unused allocated descriptor sets
+        const auto& unusedPoolIt = std::find_if(
+            growablePool.pools.begin(), growablePool.pools.end(), [&](const auto& p) { return !p.unusedSets.empty(); });
 
-        if (poolIt != growablePool.pools.end()) {
-            growablePool.currentPoolIndex = std::distance(growablePool.pools.begin(), poolIt);
-        } else {
-            createDescriptorPool(growablePool);
+        if (unusedPoolIt != growablePool.pools.end()) {
+            growablePool.currentPoolIndex = std::distance(growablePool.pools.begin(), unusedPoolIt);
+        } else
+#endif
+        {
+            // find a pool that has available memory to allocate more descriptor sets
+            const auto& freePoolIt = std::find_if(growablePool.pools.begin(),
+                                                  growablePool.pools.end(),
+                                                  [&](const auto& p) { return p.remainingSets >= layouts.size(); });
+
+            if (freePoolIt != growablePool.pools.end()) {
+                growablePool.currentPoolIndex = std::distance(growablePool.pools.begin(), freePoolIt);
+            } else {
+                createDescriptorPool(growablePool);
+            }
         }
     }
 
     descriptorPoolIndex = growablePool.currentPoolIndex;
-    descriptorSets = device->allocateDescriptorSets(
-        vk::DescriptorSetAllocateInfo().setDescriptorPool(growablePool.current().pool.get()).setSetLayouts(layouts));
-    growablePool.current().remainingSets -= descriptorSets.size();
 
-    markDirty(true);
+#ifdef USE_DESCRIPTOR_POOL_RESET
+    if (!growablePool.current().unusedSets.empty()) {
+        descriptorSets = growablePool.current().unusedSets.front();
+        growablePool.current().unusedSets.pop();
+    } else
+#endif
+    {
+        descriptorSets = device->allocateDescriptorSets(vk::DescriptorSetAllocateInfo()
+                                                            .setDescriptorPool(growablePool.current().pool.get())
+                                                            .setSetLayouts(layouts));
+        growablePool.current().remainingSets -= descriptorSets.size();
+    }
+
+    dirty = std::vector(descriptorSets.size(), true);
 }
 
 void DescriptorSet::markDirty(bool value) {
-    dirty = std::vector(descriptorSets.size(), value);
+    std::fill(dirty.begin(), dirty.end(), value);
 }
 
 void DescriptorSet::bind(CommandEncoder& encoder) {
+    MLN_TRACE_FUNC();
     auto& commandBuffer = encoder.getCommandBuffer();
 
     const uint8_t index = context.getCurrentFrameResourceIndex();
@@ -111,6 +145,8 @@ void UniformDescriptorSet::update(const gfx::UniformBufferArray& uniforms,
                                   uint32_t uniformStartIndex,
                                   uint32_t descriptorBindingCount,
                                   uint32_t ssboCount) {
+    MLN_TRACE_FUNC();
+
     allocate();
 
     const uint8_t frameIndex = context.getCurrentFrameResourceIndex();
@@ -147,12 +183,15 @@ void UniformDescriptorSet::update(const gfx::UniformBufferArray& uniforms,
 
         device->updateDescriptorSets(writeDescriptorSet, nullptr);
     }
+
+    dirty[frameIndex] = false;
 }
 
 ImageDescriptorSet::ImageDescriptorSet(Context& context_)
     : DescriptorSet(context_, DescriptorSetType::DrawableImage) {}
 
 void ImageDescriptorSet::update(const std::array<gfx::Texture2DPtr, shaders::maxTextureCountPerShader>& textures) {
+    MLN_TRACE_FUNC();
     allocate();
 
     const uint8_t frameIndex = context.getCurrentFrameResourceIndex();
@@ -180,6 +219,8 @@ void ImageDescriptorSet::update(const std::array<gfx::Texture2DPtr, shaders::max
 
         device->updateDescriptorSets(writeDescriptorSet, nullptr);
     }
+
+    dirty[frameIndex] = false;
 }
 
 } // namespace vulkan

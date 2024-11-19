@@ -83,7 +83,9 @@ class CameraPositionActivity : FragmentActivity(), OnMapReadyCallback, View.OnCl
         if (logCameraChanges) {
             maplibreMap.addOnCameraIdleListener(idleListener)
             maplibreMap.addOnCameraMoveCancelListener(moveCanceledListener)
+            // # --8<-- [start:addOnCameraMoveListener]
             maplibreMap.addOnCameraMoveListener(moveListener)
+            // # --8<-- [end:addOnCameraMoveListener]
             maplibreMap.addOnCameraMoveStartedListener(moveStartedListener)
         } else {
             maplibreMap.removeOnCameraIdleListener(idleListener)
@@ -151,12 +153,16 @@ class CameraPositionActivity : FragmentActivity(), OnMapReadyCallback, View.OnCl
             ContextCompat.getColor(this@CameraPositionActivity, android.R.color.holo_green_dark)
         )
     }
+
+    // # --8<-- [start:moveListener]
     private val moveListener = OnCameraMoveListener {
         Timber.e("OnCameraMove")
         fab.setColorFilter(
             ContextCompat.getColor(this@CameraPositionActivity, android.R.color.holo_orange_dark)
         )
     }
+    // # --8<-- [end:moveListener]
+
     private val moveCanceledListener = OnCameraMoveCanceledListener {
         Timber.e("OnCameraMoveCanceled")
     }
@@ -203,6 +209,7 @@ class CameraPositionActivity : FragmentActivity(), OnMapReadyCallback, View.OnCl
                 return
             }
 
+            // # --8<-- [start:cameraPosition]
             val cameraPosition = CameraPosition.Builder().target(LatLng(latitude, longitude)).zoom(zoom).bearing(bearing).tilt(tilt).build()
 
             maplibreMap?.animateCamera(
@@ -218,6 +225,7 @@ class CameraPositionActivity : FragmentActivity(), OnMapReadyCallback, View.OnCl
                     }
                 }
             )
+            // # --8<-- [end:cameraPosition]
             Timber.v(cameraPosition.toString())
         }
     }
