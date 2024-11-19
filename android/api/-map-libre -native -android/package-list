@@ -1794,6 +1794,7 @@ $dokka.location:org.maplibre.android.offline/OfflineTilePyramidRegionDefinition/
 $dokka.location:org.maplibre.android.offline/OfflineTilePyramidRegionDefinition/type/#/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.offline/-offline-tile-pyramid-region-definition/type.html
 $dokka.location:org.maplibre.android.offline/OfflineTilePyramidRegionDefinition/writeToParcel/#android.os.Parcel#kotlin.Int/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.offline/-offline-tile-pyramid-region-definition/write-to-parcel.html
 $dokka.location:org.maplibre.android.snapshotter////PointingToDeclaration/-map-libre -native -android/org.maplibre.android.snapshotter/index.html
+$dokka.location:org.maplibre.android.snapshotter//fromHTML/#kotlin.String/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.snapshotter/from-h-t-m-l.html
 $dokka.location:org.maplibre.android.snapshotter/MapSnapshot///PointingToDeclaration/-map-libre -native -android/org.maplibre.android.snapshotter/-map-snapshot/index.html
 $dokka.location:org.maplibre.android.snapshotter/MapSnapshot/attributions/#/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.snapshotter/-map-snapshot/attributions.html
 $dokka.location:org.maplibre.android.snapshotter/MapSnapshot/bitmap/#/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.snapshotter/-map-snapshot/bitmap.html
