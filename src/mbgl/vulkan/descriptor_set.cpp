@@ -42,7 +42,7 @@ void DescriptorSet::createDescriptorPool(DescriptorPoolGrowable& growablePool) {
 #else
     const auto poolFlags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet;
 #endif
-  
+
     if (type == DescriptorSetType::Layer) {
         const std::vector<vk::DescriptorPoolSize> sizes = {
             {vk::DescriptorType::eStorageBuffer, maxSets * growablePool.descriptorsPerSet},
