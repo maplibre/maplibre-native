@@ -435,6 +435,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/traits.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/type_list.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/unitbezier.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/unique_function.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/util.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/variant.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/vectors.hpp

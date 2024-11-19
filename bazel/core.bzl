@@ -861,6 +861,7 @@ MLN_CORE_HEADERS = [
     "include/mbgl/util/traits.hpp",
     "include/mbgl/util/type_list.hpp",
     "include/mbgl/util/unitbezier.hpp",
+    "include/mbgl/util/unique_function.hpp",
     "include/mbgl/util/util.hpp",
     "include/mbgl/util/variant.hpp",
     "include/mbgl/util/vectors.hpp",
