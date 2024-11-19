@@ -48,8 +48,8 @@ private:
     struct wrapper<Fn, std::enable_if_t<!std::is_copy_constructible_v<Fn> && std::is_move_constructible_v<Fn>>> {
         Fn fn;
 
-        wrapper(Fn &&fn)
-            : fn(std::forward<Fn>(fn)) {}
+        wrapper(Fn &&fn_)
+            : fn(std::forward<Fn>(fn_)) {}
         wrapper(wrapper &&) = default;
         wrapper &operator=(wrapper &&) = default;
 

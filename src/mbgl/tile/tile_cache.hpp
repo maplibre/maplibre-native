@@ -18,15 +18,7 @@ public:
     TileCache(const TaggedScheduler& threadPool_, size_t size_ = 0)
         : threadPool(threadPool_),
           size(size_) {}
-
-    ~TileCache() {
-        clear();
-
-        std::unique_lock<std::mutex> counterLock(deferredSignalLock);
-        while (deferredDeletionsPending != 0) {
-            deferredSignal.wait(counterLock);
-        }
-    }
+    ~TileCache();
 
     /// Change the maximum size of the cache.
     void setSize(size_t);

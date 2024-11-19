@@ -8,6 +8,18 @@
 
 namespace mbgl {
 
+TileCache::~TileCache() {
+    MLN_TRACE_FUNC();
+
+    clear();
+    pendingReleases.clear();
+
+    std::unique_lock<std::mutex> counterLock(deferredSignalLock);
+    while (deferredDeletionsPending != 0) {
+        deferredSignal.wait(counterLock);
+    }
+}
+
 void TileCache::setSize(size_t size_) {
     MLN_TRACE_FUNC();
 
