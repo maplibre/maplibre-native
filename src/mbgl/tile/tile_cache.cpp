@@ -76,19 +76,21 @@ void TileCache::deferPendingReleases() {
         deferredDeletionsPending++;
     }
 
-    threadPool.schedule(
-        util::unique_function<void()>{[this, wrap_{CaptureWrapper{std::move(pendingReleases)}}]() mutable {
-            MLN_TRACE_ZONE(deferPendingReleases lambda);
-            MLN_ZONE_VALUE(wrap_.releases.size());
+    CaptureWrapper wrap{std::move(pendingReleases)};
+    pendingReleases.clear();
 
-            // Run the deletions
-            wrap_.releases.clear();
+    threadPool.schedule(util::unique_function<void()>{[this, wrap_{std::move(wrap)}]() mutable {
+        MLN_TRACE_ZONE(deferPendingReleases lambda);
+        MLN_ZONE_VALUE(wrap_.releases.size());
 
-            // Wake up a waiting destructor
-            std::lock_guard counterLock{deferredSignalLock};
-            deferredDeletionsPending--;
-            deferredSignal.notify_all();
-        }});
+        // Run the deletions
+        wrap_.releases.clear();
+
+        // Wake up a waiting destructor
+        std::lock_guard counterLock{deferredSignalLock};
+        deferredDeletionsPending--;
+        deferredSignal.notify_all();
+    }});
 }
 
 void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile>&& tile) {
