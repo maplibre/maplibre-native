@@ -4,6 +4,7 @@
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/platform.hpp>
 #include <mbgl/util/run_loop.hpp>
 
 #include <string>
@@ -211,6 +212,9 @@ void MapRenderer::render(JNIEnv&) {
 void MapRenderer::onSurfaceCreated(JNIEnv& env, const jni::Object<AndroidSurface>& surface) {
     // Lock as the initialization can come from the main thread or the GL thread first
     std::lock_guard<std::mutex> lock(initialisationMutex);
+
+    platform::makeThreadHighPriority();
+    Log::Debug(Event::Android, "Setting render thread priority to " + std::to_string(platform::getCurrentThreadPriority()));
 
     // The android system will have already destroyed the underlying
     // GL resources if this is not the first initialization and an

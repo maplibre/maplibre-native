@@ -40,6 +40,18 @@ void makeThreadLowPriority() {
     setpriority(PRIO_PROCESS, 0, 19);
 }
 
+void makeThreadHighPriority() {
+    // ANDROID_PRIORITY_HIGHEST = -20
+    //
+    // Supposedly would set the priority for the whole process, but
+    // on Linux/Android it only sets for the current thread.
+    setpriority(PRIO_PROCESS, 0, -20);
+}
+
+double getCurrentThreadPriority() {
+    return getpriority(PRIO_PROCESS, 0);
+}
+
 void setCurrentThreadPriority(double priority) {
     if (priority < -20 || priority > 19) {
         Log::Warning(Event::General, "Couldn't set thread priority");

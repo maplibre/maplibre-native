@@ -14,6 +14,10 @@ void setCurrentThreadName(const std::string&) {}
 
 void makeThreadLowPriority() {}
 
+void makeThreadHighPriority() {}
+
+double getCurrentThreadPriority() { return 0;}
+
 void setCurrentThreadPriority(double) {}
 
 void attachThread() {}

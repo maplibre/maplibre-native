@@ -60,6 +60,8 @@ namespace platform {
 std::string getCurrentThreadName();
 void setCurrentThreadName(const std::string& name);
 void makeThreadLowPriority();
+void makeThreadHighPriority();
+double getCurrentThreadPriority();
 void setCurrentThreadPriority(double priority);
 } // namespace platform
 } // namespace mbgl

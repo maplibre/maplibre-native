@@ -22,6 +22,7 @@
 #include <mbgl/util/geo.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/projection.hpp>
 #include <mbgl/style/style.hpp>
@@ -478,6 +479,8 @@ jni::Local<jni::Object<CameraPosition>> NativeMapView::getCameraForGeometry(
     double right,
     double bearing,
     double tilt) {
+    MLN_TRACE_FUNC();
+
     auto geometry = geojson::Geometry::convert(env, jGeometry);
     mbgl::EdgeInsets padding = {top, left, bottom, right};
     return CameraPosition::New(env, map->cameraForGeometry(geometry, padding, bearing, tilt), pixelRatio);

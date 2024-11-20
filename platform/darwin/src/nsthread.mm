@@ -25,6 +25,26 @@ void makeThreadLowPriority() {
     [NSThread currentThread].qualityOfService = NSQualityOfServiceUtility;
 }
 
+void makeThreadHighPriority() {
+    [NSThread currentThread].qualityOfService = NSQualityOfServiceUserInteractive;
+}
+
+double getCurrentThreadPriority() {
+    NSQualityOfService qualityOfService = [NSThread currentThread].qualityOfService;
+    switch (qualityOfService) {
+        case NSQualityOfServiceBackground:
+            return 0.0;
+        case NSQualityOfServiceUtility:
+            return 0.25;
+        case NSQualityOfServiceUserInitiated:
+            return 0.5;
+        case NSQualityOfServiceUserInteractive:
+            return 1.0;
+        default:
+            return 0.5;
+    }
+}
+
 void setCurrentThreadPriority(double priority) {
     if (priority > 1.0 || priority < 0.0) {
         Log::Warning(Event::General, "Invalid thread priority was provided");

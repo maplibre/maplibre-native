@@ -2,6 +2,7 @@
 #include "geometry.hpp"
 #include "../gson/json_object.hpp"
 
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/string.hpp>
 
 namespace mbgl {
@@ -11,6 +12,8 @@ namespace geojson {
 using namespace gson;
 
 mbgl::GeoJSONFeature Feature::convert(jni::JNIEnv& env, const jni::Object<Feature>& jFeature) {
+    MLN_TRACE_FUNC();
+
     static auto& javaClass = jni::Class<Feature>::Singleton(env);
     static auto id = javaClass.GetMethod<jni::String()>(env, "id");
     static auto geometry = javaClass.GetMethod<jni::Object<Geometry>()>(env, "geometry");
