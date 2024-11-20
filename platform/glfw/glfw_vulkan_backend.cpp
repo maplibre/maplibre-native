@@ -14,7 +14,8 @@
 class GLFWVulkanRenderableResource final : public mbgl::vulkan::SurfaceRenderableResource {
 public:
     explicit GLFWVulkanRenderableResource(GLFWVulkanBackend& backend_, bool capFrameRate)
-        : SurfaceRenderableResource(backend_, capFrameRate ? vk::PresentModeKHR::eFifo : vk::PresentModeKHR::eImmediate) {}
+        : SurfaceRenderableResource(backend_,
+                                    capFrameRate ? vk::PresentModeKHR::eFifo : vk::PresentModeKHR::eImmediate) {}
 
     std::vector<const char*> getDeviceExtensions() override { return {VK_KHR_SWAPCHAIN_EXTENSION_NAME}; }
 
