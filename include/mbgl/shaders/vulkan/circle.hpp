@@ -150,7 +150,7 @@ void main() {
         gl_Position.xy += scaled_extrude * (radius + stroke_width) * factor;
     }
 
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     // This is a minimum blur distance that serves as a faux-antialiasing for
     // the circle. since blur is a ratio of the circle's size and the intent is
