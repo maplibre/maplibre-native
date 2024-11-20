@@ -47,6 +47,8 @@ public:
     void runOnce();
     void stop();
 
+    void updateTime();
+
     /// Platform integration callback for platforms that do not have full
     /// run loop integration or don't want to block at the Mapbox GL Native
     /// loop. It will be called from any thread and is up to the platform

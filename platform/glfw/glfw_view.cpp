@@ -1100,6 +1100,8 @@ void GLFWView::run() {
         }
 
         render();
+
+        runLoop.updateTime();
     };
 
     // Cap frame rate to 60hz if benchmark mode is disabled
