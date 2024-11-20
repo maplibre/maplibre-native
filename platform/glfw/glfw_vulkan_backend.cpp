@@ -37,7 +37,7 @@ public:
 
 GLFWVulkanBackend::GLFWVulkanBackend(GLFWwindow* window_, const bool capFrameRate)
     : mbgl::vulkan::RendererBackend(mbgl::gfx::ContextMode::Unique),
-      mbgl::gfx::Renderable(
+      mbgl::vulkan::Renderable(
           [window_] {
               int fbWidth;
               int fbHeight;

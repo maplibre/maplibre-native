@@ -31,7 +31,7 @@ layout(location = 0) out vec2 frag_uv;
 void main() {
 
     gl_Position = debug.matrix * vec4(in_position * debug.overlay_scale, 0, 1);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     // This vertex shader expects a EXTENT x EXTENT quad,
     // The UV co-ordinates for the overlay texture can be calculated using that knowledge

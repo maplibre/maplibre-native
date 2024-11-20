@@ -561,7 +561,7 @@ void RendererBackend::initDevice() {
 }
 
 void RendererBackend::initSwapchain() {
-    const auto& renderable = getDefaultRenderable();
+    auto& renderable = getDefaultRenderable();
     auto& renderableResource = renderable.getResource<SurfaceRenderableResource>();
     const auto& size = renderable.getSize();
 
@@ -570,6 +570,13 @@ void RendererBackend::initSwapchain() {
     maxFrames = renderableResource.getPlatformSurface() ? 2 : 1;
 
     renderableResource.init(size.width, size.height);
+
+    if (renderableResource.hasSurfaceTransformSupport()) {
+        auto& renderableImpl = static_cast<Renderable&>(renderable);
+        const auto& extent = renderableResource.getExtent();
+
+        renderableImpl.setSize({extent.width, extent.height});
+    }
 }
 
 void RendererBackend::initCommandPool() {

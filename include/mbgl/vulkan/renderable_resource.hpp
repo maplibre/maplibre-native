@@ -59,6 +59,15 @@ public:
     void setAcquiredImageIndex(uint32_t index) { acquiredImageIndex = index; };
     const vk::Image getAcquiredImage() const;
 
+    bool hasSurfaceTransformSupport() const;
+    bool didSurfaceTransformUpdate() const;
+
+    // rotation needed to align framebuffer contents with device surface
+    float getRotation();
+
+    void setSurfaceTransformPollingInterval(int32_t value) { surfaceTransformPollingInterval = value; }
+    int32_t getSurfaceTransformPollingInterval() const { return surfaceTransformPollingInterval; }
+
     void init(uint32_t w, uint32_t h);
     void recreateSwapchain();
 
@@ -66,6 +75,8 @@ protected:
     vk::UniqueSurfaceKHR surface;
     vk::UniqueSwapchainKHR swapchain;
     vk::PresentModeKHR presentMode;
+
+    vk::SurfaceCapabilitiesKHR capabilities;
 
     uint32_t acquiredImageIndex{0};
 
@@ -79,6 +90,18 @@ protected:
 
     UniqueImageAllocation depthAllocation;
     vk::Format depthFormat{vk::Format::eUndefined};
+
+    int32_t surfaceTransformPollingInterval{-1};
+};
+
+class Renderable : public gfx::Renderable {
+protected:
+    Renderable(const Size size_, std::unique_ptr<gfx::RenderableResource> resource_)
+        : gfx::Renderable(size_, std::move(resource_)) {}
+    virtual ~Renderable() override = default;
+
+public:
+    void setSize(const Size& size_) { size = size_; }
 };
 
 } // namespace vulkan
