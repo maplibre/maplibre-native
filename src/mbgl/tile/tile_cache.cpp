@@ -13,10 +13,8 @@ TileCache::~TileCache() {
     clear();
     pendingReleases.clear();
 
-    std::unique_lock<std::mutex> counterLock(deferredSignalLock);
-    while (deferredDeletionsPending != 0) {
-        deferredSignal.wait(counterLock);
-    }
+    std::unique_lock counterLock{deferredSignalLock};
+    deferredSignal.wait(counterLock, [&]() { return deferredDeletionsPending == 0; });
 }
 
 void TileCache::setSize(size_t size_) {
@@ -94,6 +92,7 @@ void TileCache::deferPendingReleases() {
         deferredDeletionsPending--;
         deferredSignal.notify_all();
     }};
+
     threadPool.schedule(std::move(func));
 }
 
