@@ -27,3 +27,11 @@ def define_env(env):
     @env.macro
     def s3_url(filename):
         return f"https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/{filename}"
+
+    @env.macro
+    def openmaptiles_caption():
+        return f"""
+<caption>
+    <p class="inline-attribution">Map data [OpenStreetMap](https://www.openstreetmap.org/copyright). © [OpenMapTiles](https://openmaptiles.org/).</p>
+</caption>
+"""

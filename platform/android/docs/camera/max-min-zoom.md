@@ -22,5 +22,6 @@ You can remove a click listener again with `MapLibreMap.removeOnMapClickListener
   <video controls width="250" poster="https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/max_min_zoom_thumbnail.jpg">
     <source src="https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/max_min_zoom.mp4" />
   </video>
+  {{ openmaptiles_caption }}
 </figure>
 

@@ -112,11 +112,13 @@ class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         override fun run() {
+             // --8<-- [start:setImage]
             imageSource.setImage(drawables[drawableIndex++]!!)
             if (drawableIndex > 3) {
                 drawableIndex = 0
             }
             handler.postDelayed(this, 1000)
+             // --8<-- [end:setImage]
         }
 
         init {
