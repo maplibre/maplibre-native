@@ -714,11 +714,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../camera/min-max-zoom/" class="md-nav__link">
+      <a href="../camera/max-min-zoom/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Min/Max Zoom
+    Max/Min Zoom
   </span>
   
 
@@ -761,6 +761,242 @@
   
   <span class="md-ellipsis">
     Zoom Methods
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Styling
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Styling
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../styling/animated-image-source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Animated Image Source
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../styling/animated-symbol-layer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Animated SymbolLayer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../styling/building-layer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Building Layer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../styling/circle-layer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Circle Layer (with Clustering)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../styling/custom-sprite/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Add Custom Sprite
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../styling/data-driven-style/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Driven Style
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../styling/distance-expression/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Distance Expression
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../styling/draggable-marker/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Draggable Marker
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../styling/live-realtime-data/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Add live realtime data
   </span>
   
 
@@ -842,7 +1078,7 @@
 </div>
 <p>In this example, we demonstrate how to use the <code>MapSnapshotter</code> to create multiple map snapshots with different styles and camera positions, displaying them in a grid layout.</p>
 <figure>
-  <img alt="Map Snapshotter" src="https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/map_snapshotter.png" width="300" />
+  <img alt="Map Snapshotter" src="https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/map_snapshotter.png" width="300" />
 </figure>
 <p>First we create a <a href="https://developer.android.com/reference/kotlin/android/widget/GridLayout"><code>GridLayout</code></a> and a list of <code>MapSnapshotter</code> instances. We create a <code>Style.Builder</code> with a different style for each cell in the grid.</p>
 <div class="language-kotlin highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">val</span><span class="w"> </span><span class="nv">styles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">arrayOf</span><span class="p">(</span>
@@ -962,11 +1198,11 @@
 <h2 id="map-snapshot-with-bitmap-overlay">Map Snapshot with Bitmap Overlay</h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>You can also find this code in <a href="https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/snapshot/MapSnapshotterBitMapOverlayActivity.kt"><code>MapSnapshotterBitMapOverlayActivity.kt</code></a> of the MapLibreAndroidTestApp.</p>
+<p>You can find the full source code of this example in <a href="https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/snapshot/MapSnapshotterBitMapOverlayActivity.kt"><code>MapSnapshotterBitMapOverlayActivity.kt</code></a> of the MapLibreAndroidTestApp.</p>
 </div>
 <p>This example adds a bitmap on top of the snapshot. It also demonstrates how you can add a click listener to a snapshot.</p>
 <figure>
-  <img alt="Screenshot of Map Snapshot with Bitmap Overlay" src="https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/map_snapshot_with_bitmap_overlay.png" width="300" />
+  <img alt="Screenshot of Map Snapshot with Bitmap Overlay" src="https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/map_snapshot_with_bitmap_overlay.png" width="300" />
 </figure>
 <div class="language-kotlin highlight"><span class="filename">MapSnapshotterBitMapOverlayActivity.kt</span><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">package</span><span class="w"> </span><span class="nn">org.maplibre.android.testapp.activity.snapshot</span>
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
@@ -1077,7 +1313,7 @@
 </div>
 <p>In this example, we demonstrate how to use the <code>MapSnapshotter</code> to create a snapshot of a map that includes a heatmap layer. The heatmap represents earthquake data loaded from a GeoJSON source.</p>
 <figure>
-  <img alt="Screenshot of Snapshotter with Heatmap" src="https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/snapshotter_headmap_screenshot.png" width="300" />
+  <img alt="Screenshot of Snapshotter with Heatmap" src="https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/snapshotter_headmap_screenshot.png" width="300" />
 </figure>
 <p>First, we create the <code>MapSnapshotterHeatMapActivity</code> class, which extends <code>AppCompatActivity</code> and implements <code>MapSnapshotter.SnapshotReadyCallback</code> to receive the snapshot once it's ready.</p>
 <div class="language-kotlin highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kd">class</span><span class="w"> </span><span class="nc">MapSnapshotterHeatMapActivity</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">AppCompatActivity</span><span class="p">(),</span><span class="w"> </span><span class="n">MapSnapshotter</span><span class="p">.</span><span class="na">SnapshotReadyCallback</span><span class="w"> </span><span class="p">{</span>

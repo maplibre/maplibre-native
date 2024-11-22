@@ -21,3 +21,7 @@
 .md-copyright__highlight {
   color: inherit;
 }
+
+.inline-attribution {
+  font-size: smaller;
+}

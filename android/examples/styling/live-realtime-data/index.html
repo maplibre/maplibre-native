@@ -10,13 +10,11 @@
       
       
       
-        <link rel="canonical" href="https://www.maplibre.org/maplibre-native/android/examples/camera/move-map-pixels/">
+        <link rel="canonical" href="https://www.maplibre.org/maplibre-native/android/examples/styling/live-realtime-data/">
       
       
-        <link rel="prev" href="../max-min-zoom/">
+        <link rel="prev" href="../draggable-marker/">
       
-      
-        <link rel="next" href="../zoom-methods/">
       
       
       <link rel="icon" href="https://maplibre.org/favicon.ico">
@@ -24,7 +22,7 @@
     
     
       
-        <title>Scroll by Method - MapLibre Android Examples</title>
+        <title>Add live realtime data - MapLibre Android Examples</title>
       
     
     
@@ -61,11 +59,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="Scroll by Method - MapLibre Android Examples" >
+        <meta  property="og:title"  content="Add live realtime data - MapLibre Android Examples" >
       
         <meta  property="og:description"  content="MapLibre Android Examples" >
       
-        <meta  property="og:image"  content="https://www.maplibre.org/maplibre-native/android/examples/assets/images/social/camera/move-map-pixels.png" >
+        <meta  property="og:image"  content="https://www.maplibre.org/maplibre-native/android/examples/assets/images/social/styling/live-realtime-data.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -73,15 +71,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://www.maplibre.org/maplibre-native/android/examples/camera/move-map-pixels/" >
+        <meta  property="og:url"  content="https://www.maplibre.org/maplibre-native/android/examples/styling/live-realtime-data/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="Scroll by Method - MapLibre Android Examples" >
+        <meta  name="twitter:title"  content="Add live realtime data - MapLibre Android Examples" >
       
         <meta  name="twitter:description"  content="MapLibre Android Examples" >
       
-        <meta  name="twitter:image"  content="https://www.maplibre.org/maplibre-native/android/examples/assets/images/social/camera/move-map-pixels.png" >
+        <meta  name="twitter:image"  content="https://www.maplibre.org/maplibre-native/android/examples/assets/images/social/styling/live-realtime-data.png" >
       
     
     
@@ -104,7 +102,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#scroll-by-method" class="md-skip">
+        <a href="#add-live-realtime-data" class="md-skip">
           Skip to content
         </a>
       
@@ -139,7 +137,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Scroll by Method
+              Add live realtime data
             
           </span>
         </div>
@@ -481,8 +479,6 @@
       
   
   
-    
-  
   
   
     
@@ -494,11 +490,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
           <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
@@ -512,7 +508,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             Camera
@@ -526,7 +522,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../animation-types/" class="md-nav__link">
+      <a href="../../camera/animation-types/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -547,7 +543,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../animator-animation/" class="md-nav__link">
+      <a href="../../camera/animator-animation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -568,7 +564,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../cameraposition/" class="md-nav__link">
+      <a href="../../camera/cameraposition/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -589,7 +585,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../gesture-detector/" class="md-nav__link">
+      <a href="../../camera/gesture-detector/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -610,7 +606,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../lat-lng-bounds/" class="md-nav__link">
+      <a href="../../camera/lat-lng-bounds/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -631,11 +627,270 @@
   
   
     <li class="md-nav__item">
-      <a href="../max-min-zoom/" class="md-nav__link">
+      <a href="../../camera/max-min-zoom/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
     Max/Min Zoom
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../camera/move-map-pixels/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scroll by Method
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../camera/zoom-methods/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Zoom Methods
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Styling
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Styling
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../animated-image-source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Animated Image Source
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../animated-symbol-layer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Animated SymbolLayer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building-layer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Building Layer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../circle-layer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Circle Layer (with Clustering)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom-sprite/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Add Custom Sprite
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data-driven-style/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Driven Style
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../distance-expression/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Distance Expression
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../draggable-marker/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Draggable Marker
   </span>
   
 
@@ -661,265 +916,18 @@
         
       
       
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  <span class="md-ellipsis">
-    Scroll by Method
-  </span>
-  
-
-      </a>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../zoom-methods/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Zoom Methods
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-      
-        
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
-        
+        <label class="md-nav__link md-nav__link--active" for="__toc">
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
-            
   
   <span class="md-ellipsis">
-    Styling
+    Add live realtime data
   </span>
   
 
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
-            <span class="md-nav__icon md-icon"></span>
-            Styling
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../styling/animated-image-source/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Animated Image Source
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../styling/animated-symbol-layer/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Animated SymbolLayer
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../styling/building-layer/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Building Layer
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../styling/circle-layer/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Circle Layer (with Clustering)
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../styling/custom-sprite/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Add Custom Sprite
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../styling/data-driven-style/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Data Driven Style
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../styling/distance-expression/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Distance Expression
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../styling/draggable-marker/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Draggable Marker
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../styling/live-realtime-data/" class="md-nav__link">
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -928,6 +936,35 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#bonus-set-icon-rotation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bonus: set icon rotation
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -955,7 +992,7 @@
                   
 
   
-    <a href="https://github.com/maplibre/maplibre-native/edit/main/platform/android/docs/camera/move-map-pixels.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/maplibre/maplibre-native/edit/main/platform/android/docs/styling/live-realtime-data.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -963,20 +1000,69 @@
   
 
 
-<h1 id="scroll-by-method">Scroll by Method</h1>
+<h1 id="add-live-realtime-data">Add live realtime data</h1>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>You can find the full source code of this example in <a href="https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/camera/ScrollByActivity.kt"><code>ScrollByActivity.kt</code></a> of the MapLibreAndroidTestApp.</p>
+<p>You can find the full source code of this example in <a href="https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/style/RealTimeGeoJsonActivity.kt"><code>RealTimeGeoJsonActivity.kt</code></a> of the MapLibreAndroidTestApp.</p>
 </div>
-<p>This example shows how you can move the map by x/y pixels.</p>
-<div class="language-kotlin highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">maplibreMap</span><span class="p">.</span><span class="na">scrollBy</span><span class="p">(</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p">(</span><span class="n">seekBarX</span><span class="p">.</span><span class="na">progress</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">MULTIPLIER_PER_PIXEL</span><span class="p">).</span><span class="na">toFloat</span><span class="p">(),</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="p">(</span><span class="n">seekBarY</span><span class="p">.</span><span class="na">progress</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">MULTIPLIER_PER_PIXEL</span><span class="p">).</span><span class="na">toFloat</span><span class="p">()</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">)</span>
-</span></code></pre></div>
+<p>In this example you will learn how to add a live GeoJSON source. We have set up a <a href="https://m6rgfvqjp34nnwqcdm4cmmy3cm0dtupu.lambda-url.us-east-1.on.aws/">lambda function</a> that returns a new GeoJSON point every time it is called. </p>
 <figure>
-  <img alt="Screenshot of Example Activity to move the map by some pixels" src="https://github.com/user-attachments/assets/f8ae0ec7-a165-4fb3-ab9f-bfb5579c7dd8" width="300" />
+<video controls="controls" poster="https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/live_realtime_data_thumbnail.jpg" width="250">
+    <source src="https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/live_realtime_data.mp4" />
+  </video>
 </figure>
+<p>First we will create a <code>GeoJSONSource</code>.</p>
+<div class="language-kotlin highlight"><span class="filename">Adding GeoJSON source</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="n">style</span><span class="p">.</span><span class="na">addSource</span><span class="p">(</span><span class="n">GeoJsonSource</span><span class="p">(</span><span class="n">ID_GEOJSON_SOURCE</span><span class="p">,</span><span class="w"> </span><span class="n">URI</span><span class="p">(</span><span class="n">URL_GEOJSON_SOURCE</span><span class="p">)))</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">malformedUriException</span><span class="p">:</span><span class="w"> </span><span class="n">URISyntaxException</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="n">Timber</span><span class="p">.</span><span class="na">e</span><span class="p">(</span><span class="n">malformedUriException</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Invalid URL&quot;</span><span class="p">)</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>Next we will create a <code>SymbolLayer</code> that uses the source.</p>
+<div class="language-kotlin highlight"><span class="filename">Adding a SymbolLayer source</span><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">val</span><span class="w"> </span><span class="nv">layer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SymbolLayer</span><span class="p">(</span><span class="n">ID_GEOJSON_LAYER</span><span class="p">,</span><span class="w"> </span><span class="n">ID_GEOJSON_SOURCE</span><span class="p">)</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">layer</span><span class="p">.</span><span class="na">setProperties</span><span class="p">(</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="n">PropertyFactory</span><span class="p">.</span><span class="na">iconImage</span><span class="p">(</span><span class="s">&quot;plane&quot;</span><span class="p">),</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="n">PropertyFactory</span><span class="p">.</span><span class="na">iconAllowOverlap</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">)</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">style</span><span class="p">.</span><span class="na">addLayer</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
+</span></code></pre></div>
+<p>We use define a <code>Runnable</code> and use <code>android.os.Handler</code> with a <code>android.os.Looper</code> to update the GeoJSON source every 2 seconds.</p>
+<div class="language-kotlin highlight"><span class="filename">Defining a Runnable for updating the GeoJSON source</span><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">private</span><span class="w"> </span><span class="kd">inner</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">RefreshGeoJsonRunnable</span><span class="p">(</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">val</span><span class="w"> </span><span class="nv">maplibreMap</span><span class="p">:</span><span class="w"> </span><span class="n">MapLibreMap</span><span class="p">,</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">val</span><span class="w"> </span><span class="nv">handler</span><span class="p">:</span><span class="w"> </span><span class="n">Handler</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">)</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">Runnable</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="kd">override</span><span class="w"> </span><span class="kd">fun</span><span class="w"> </span><span class="nf">run</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">        </span><span class="kd">val</span><span class="w"> </span><span class="nv">geoJsonSource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">maplibreMap</span><span class="p">.</span><span class="na">style</span><span class="o">!!</span><span class="p">.</span><span class="na">getSource</span><span class="p">(</span><span class="n">ID_GEOJSON_SOURCE</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">GeoJsonSource</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">        </span><span class="n">geoJsonSource</span><span class="p">.</span><span class="na">setUri</span><span class="p">(</span><span class="n">URL_GEOJSON_SOURCE</span><span class="p">)</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">        </span><span class="kd">val</span><span class="w"> </span><span class="nv">features</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">geoJsonSource</span><span class="p">.</span><span class="na">querySourceFeatures</span><span class="p">(</span><span class="kc">null</span><span class="p">)</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">        </span><span class="n">setIconRotation</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">        </span><span class="n">handler</span><span class="p">.</span><span class="na">postDelayed</span><span class="p">(</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="m">2000</span><span class="p">)</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="p">}</span>
+</span></code></pre></div>
+<h2 id="bonus-set-icon-rotation">Bonus: set icon rotation</h2>
+<p>You can set the icon rotation of the icon when ever the point is updated based on the last two points.</p>
+<div class="language-kotlin highlight"><span class="filename">Defining a Runnable for updating the GeoJSON source</span><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">features</span><span class="p">.</span><span class="na">size</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="m">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="n">Timber</span><span class="p">.</span><span class="na">e</span><span class="p">(</span><span class="s">&quot;Expected only one feature&quot;</span><span class="p">)</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="k">return</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">}</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="kd">val</span><span class="w"> </span><span class="nv">feature</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">features</span><span class="o">[</span><span class="m">0</span><span class="o">]</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="kd">val</span><span class="w"> </span><span class="nv">geometry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">feature</span><span class="p">.</span><span class="na">geometry</span><span class="p">()</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">geometry</span><span class="w"> </span><span class="k">!is</span><span class="w"> </span><span class="n">Point</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="n">Timber</span><span class="p">.</span><span class="na">e</span><span class="p">(</span><span class="s">&quot;Expected geometry to be a point&quot;</span><span class="p">)</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">    </span><span class="k">return</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="p">}</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">lastLocation</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">    </span><span class="n">lastLocation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">geometry</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">    </span><span class="k">return</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="p">}</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="n">maplibreMap</span><span class="p">.</span><span class="na">style</span><span class="o">!!</span><span class="p">.</span><span class="na">getLayer</span><span class="p">(</span><span class="n">ID_GEOJSON_LAYER</span><span class="p">)</span><span class="o">!!</span><span class="p">.</span><span class="na">setProperties</span><span class="p">(</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">    </span><span class="n">PropertyFactory</span><span class="p">.</span><span class="na">iconRotate</span><span class="p">(</span><span class="n">calculateRotationAngle</span><span class="p">(</span><span class="n">lastLocation</span><span class="o">!!</span><span class="p">,</span><span class="w"> </span><span class="n">geometry</span><span class="p">)),</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="p">)</span>
+</span></code></pre></div>
 
 
 
