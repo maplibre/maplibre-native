@@ -9,7 +9,7 @@ import org.maplibre.android.module.loader.LibraryLoaderProviderImpl;
 import org.maplibre.android.maps.NativeMap;
 import org.maplibre.android.maps.NativeMapView;
 import org.maplibre.android.maps.NativeMapView.ViewCallback;
-import org.maplibre.android.maps.NativeMapView.StateCallback; 
+import org.maplibre.android.maps.NativeMapView.StateCallback;
 import org.maplibre.android.maps.renderer.MapRenderer;
 
 public class ModuleProviderImpl implements ModuleProvider {
@@ -29,7 +29,8 @@ public class ModuleProviderImpl implements ModuleProvider {
   @NonNull
   @Override
   public NativeMap createNativeMapView(Context context, float pixelRatio, boolean crossSourceCollisions,
-                                       ViewCallback viewCallback, StateCallback stateCallback, MapRenderer mapRenderer) {
+                                       ViewCallback viewCallback, StateCallback stateCallback,
+                                       MapRenderer mapRenderer) {
     return new NativeMapView(context, pixelRatio, crossSourceCollisions, viewCallback, stateCallback, mapRenderer);
   }
 }

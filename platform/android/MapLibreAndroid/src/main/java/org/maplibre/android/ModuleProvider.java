@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 import org.maplibre.android.http.HttpRequest;
 import org.maplibre.android.maps.NativeMap;
 import org.maplibre.android.maps.NativeMapView.ViewCallback;
-import org.maplibre.android.maps.NativeMapView.StateCallback; 
+import org.maplibre.android.maps.NativeMapView.StateCallback;
 import org.maplibre.android.maps.renderer.MapRenderer;
 
 /**
@@ -32,7 +32,7 @@ public interface ModuleProvider {
 
   /**
    * Create and return a new NativeMap view
-   * 
+   *
    * @return a new instance implementing NativeMap
    */
   @NonNull
