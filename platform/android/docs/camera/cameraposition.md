@@ -1,14 +1,12 @@
 # CameraPosition Capabilities
 
-!!! note
-
-    You can find the full source code of this example in [`CameraPositionActivity.kt`](https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/camera/CameraPositionActivity.kt) of the MapLibreAndroidTestApp.
+{{ activity_source_note("CameraPositionActivity.kt") }}
 
 This example showcases how to listen to camera change events.
 
 <figure markdown="span">
-  <video controls width="250" poster="https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/cameraposition_thumbnail.jpg">
-    <source src="https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/cameraposition.mp4" />
+  <video controls width="250" poster="https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/cameraposition_thumbnail.jpg">
+    <source src="https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/cameraposition.mp4" />
   </video>
 </figure>
 

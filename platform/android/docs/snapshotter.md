@@ -4,9 +4,7 @@ This guide will help you walk through how to use [MapSnapshotter](https://maplib
 
 ## Map Snapshot with Local Style
 
-!!! note
-
-    You can find the full source code of this example in [`MapSnapshotterLocalStyleActivity.kt`](https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/snapshot/MapSnapshotterLocalStyleActivity.kt) of the MapLibreAndroidTestApp.
+{{ activity_source_note("MapSnapshotterLocalStyleActivity.kt") }}
 
 To get started we will show how to use the map snapshotter with a local style.
 
@@ -36,14 +34,12 @@ Lastly we use the `.start()` method to create the snapshot, and pass callbacks f
 
 ## Show a Grid of Snapshots
 
-!!! note
-
-    You can find the full source code of this example in [`MapSnapshotterActivity.kt`](https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/snapshot/MapSnapshotterActivity.kt) of the MapLibreAndroidTestApp.
+{{ activity_source_note("MapSnapshotterActivity.kt") }}
 
 In this example, we demonstrate how to use the `MapSnapshotter` to create multiple map snapshots with different styles and camera positions, displaying them in a grid layout.
 
 <figure markdown="span">
-  ![Map Snapshotter](https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/map_snapshotter.png){ width="300" }
+  ![Map Snapshotter](https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/map_snapshotter.png){ width="300" }
 </figure>
 
 First we create a [`GridLayout`](https://developer.android.com/reference/kotlin/android/widget/GridLayout) and a list of `MapSnapshotter` instances. We create a `Style.Builder` with a different style for each cell in the grid.
@@ -78,14 +74,12 @@ In the last column of the first row we add two bitmaps. See the next example for
 
 ## Map Snapshot with Bitmap Overlay
 
-!!! note
-
-    You can also find this code in [`MapSnapshotterBitMapOverlayActivity.kt`](https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/snapshot/MapSnapshotterBitMapOverlayActivity.kt) of the MapLibreAndroidTestApp.
+{{ activity_source_note("MapSnapshotterBitMapOverlayActivity.kt") }}
 
 This example adds a bitmap on top of the snapshot. It also demonstrates how you can add a click listener to a snapshot.
 
 <figure markdown="span">
-  ![Screenshot of Map Snapshot with Bitmap Overlay](https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/map_snapshot_with_bitmap_overlay.png){ width="300" }
+  ![Screenshot of Map Snapshot with Bitmap Overlay](https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/map_snapshot_with_bitmap_overlay.png){ width="300" }
 </figure>
 
 
@@ -95,14 +89,12 @@ This example adds a bitmap on top of the snapshot. It also demonstrates how you 
 
 ## Map Snapshotter with Heatmap Layer
 
-!!! note
-
-    You can find the full source code of this example in [`MapSnapshotterHeatMapActivity.kt`](https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/snapshot/MapSnapshotterHeatMapActivity.kt) of the MapLibreAndroidTestApp.
+{{ activity_source_note("MapSnapshotterHeatMapActivity.kt") }}
 
 In this example, we demonstrate how to use the `MapSnapshotter` to create a snapshot of a map that includes a heatmap layer. The heatmap represents earthquake data loaded from a GeoJSON source.
 
 <figure markdown="span">
-  ![Screenshot of Snapshotter with Heatmap](https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/snapshotter_headmap_screenshot.png){ width="300" }
+  ![Screenshot of Snapshotter with Heatmap](https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/snapshotter_headmap_screenshot.png){ width="300" }
 </figure>
 
 First, we create the `MapSnapshotterHeatMapActivity` class, which extends `AppCompatActivity` and implements `MapSnapshotter.SnapshotReadyCallback` to receive the snapshot once it's ready.
@@ -148,9 +140,7 @@ Finally, we ensure to cancel the snapshotter in the `onStop` method to free up r
 
 ## Map Snapshotter with Expression
 
-!!! note
-
-    You can find the full source code of this example in [`MapSnapshotterWithinExpression.kt`](https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/turf/MapSnapshotterWithinExpression.kt) of the MapLibreAndroidTestApp.
+{{ activity_source_note("MapSnapshotterWithinExpression.kt") }}
 
 In this example the map on top is a live while the map on the bottom is a snapshot that is updated as you pan the map. We style of the snapshot is modified: using a [within](https://maplibre.org/maplibre-style-spec/expressions/#within) expression only POIs within a certain distance to a line is shown. A highlight for this area is added to the map as are various points.
 
