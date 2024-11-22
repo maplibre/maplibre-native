@@ -312,5 +312,12 @@ MapRenderer& MapRenderer::getNativePeer(JNIEnv& env, const jni::Object<MapRender
     return *mapRenderer;
 }
 
+int MapRenderer::getLastRenderedTileCount() const noexcept {
+    if (!renderer) {
+        return 0;
+    }
+    return renderer->getLastRenderedTileCount();
+}
+
 } // namespace android
 } // namespace mbgl

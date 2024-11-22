@@ -889,6 +889,14 @@ final class NativeMapView implements NativeMap {
     }
     return nativeGetTileLodZoomShift();
   }
+
+  @Override
+  public int getLastRenderedTileCount() {
+    if (checkState("getLastRenderedTileCount")) {
+      return 0;
+    }
+    return nativeGetLastRenderedTileCount();
+  }
   // Runtime style Api
 
   @Override
@@ -1683,6 +1691,9 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native double nativeGetTileLodZoomShift();
+
+  @Keep
+  private native int nativeGetLastRenderedTileCount();
 
   @Override
   public long getNativePtr() {

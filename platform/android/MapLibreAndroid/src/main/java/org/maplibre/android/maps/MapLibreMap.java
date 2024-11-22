@@ -466,6 +466,15 @@ public final class MapLibreMap {
     return transform.getMinZoom();
   }
 
+  /**
+   * Get the number of tiles rendered in the last frame.
+   *
+   * @return number of tiles rendered in the last frame.
+   */
+  public int getLastRenderedTileCount() {
+    return nativeMapView.getLastRenderedTileCount();
+  }
+
   //
   // MaxZoom
   //

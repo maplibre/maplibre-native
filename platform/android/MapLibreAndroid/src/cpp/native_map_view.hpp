@@ -311,6 +311,8 @@ public:
 
     jni::jdouble getTileLodZoomShift(JNIEnv&);
 
+    jni::jint getLastRenderedTileCount(JNIEnv&);
+
     mbgl::Map& getMap();
 
     void triggerRepaint(JNIEnv&);

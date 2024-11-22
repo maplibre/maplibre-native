@@ -113,9 +113,12 @@ public:
     void reduceMemoryUse();
     void clearData();
 
+    int getLastRenderedTileCount() const noexcept { return lastRenderedTileCount; }
 private:
     class Impl;
     std::unique_ptr<Impl> impl;
+
+    int lastRenderedTileCount = 0;
 };
 
 } // namespace mbgl

@@ -131,6 +131,9 @@ public:
     // Checks whether the given zoom is inside this layer zoom range.
     bool supportsZoom(float zoom) const;
 
+    // Return the number of tiles to display for this layer
+    int renderTileCount() const noexcept { return renderTiles ? static_cast<int>(renderTiles->size()) : 0; }
+
     virtual void upload(gfx::UploadPass&) {}
     virtual void render(PaintParameters&) {}
 
