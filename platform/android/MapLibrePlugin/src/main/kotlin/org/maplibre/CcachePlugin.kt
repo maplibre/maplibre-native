@@ -11,10 +11,10 @@ fun configureCcache(project: Project) {
         defaultConfig {
             externalNativeBuild {
                 cmake {
-                    val ccachePath = findCcachePath()
-                    if (ccachePath != null) {
-                        arguments.add("-DCMAKE_CXX_COMPILER_LAUNCHER=$ccachePath")
-                        println("ccache enabled at: $ccachePath")
+                    val cacheToolPath = findCacheToolPath()
+                    if (cacheToolPath != null) {
+                        arguments.add("-DCMAKE_CXX_COMPILER_LAUNCHER=$cacheToolPath")
+                        println("ccache enabled at: $cacheToolPath")
                     } else {
                         println("ccache not found on the system, continuing without it.")
                     }
@@ -24,24 +24,27 @@ fun configureCcache(project: Project) {
     }
 }
 
-fun findCcachePath(): String? {
-    val command = if (System.getProperty("os.name").startsWith("Windows")) {
-        "where sccache"
-    } else {
-        "which ccache"
-    }
+fun findCacheToolPath(): String? {
+    val os = System.getProperty("os.name")
+    val ccacheCommand = if (os.startsWith("Windows")) "where ccache" else "which ccache"
+    val sccacheCommand = if (os.startsWith("Windows")) "where sccache" else "which sccache"
 
-    return try {
-        val process = Runtime.getRuntime().exec(command)
-        val result = process.inputStream.bufferedReader().readText().trim()
-        if (process.waitFor() == 0 && result.isNotEmpty()) {
-            File(result).absolutePath
-        } else {
+    fun findCommandPath(command: String): String? {
+        return try {
+            val process = Runtime.getRuntime().exec(command)
+            val result = process.inputStream.bufferedReader().readText().trim()
+            if (process.waitFor() == 0 && result.isNotEmpty()) {
+                File(result).absolutePath
+            } else {
+                null
+            }
+        } catch (e: Exception) {
             null
         }
-    } catch (e: Exception) {
-        null
     }
+
+    // Try to find ccache first, then fallback to sccache
+    return findCommandPath(ccacheCommand) ?: findCommandPath(sccacheCommand)
 }
 
 class CcachePlugin : Plugin<Project> {
