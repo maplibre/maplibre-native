@@ -90,7 +90,7 @@ fun Project.nativeBuild(nativeTargets: List<String>) =
                         // Enable ccache if available.
                         val ccachePath = findCcachePath()
                         if (ccachePath != null) {
-                            arguments.add("-D=$ccachePath")
+                            arguments.add("-DANDROID_CCACHE=$ccachePath")
                             println("ccache enabled at: $ccachePath")
                         } else {
                             println("ccache not found on the system, continuing without it.")
