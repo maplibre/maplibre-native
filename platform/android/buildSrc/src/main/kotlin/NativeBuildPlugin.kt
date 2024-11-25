@@ -2,6 +2,7 @@ import com.android.build.gradle.BaseExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.getByType
+import java.io.File
 
 open class NativeBuildPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -16,6 +17,27 @@ open class NativeBuildPlugin : Plugin<Project> {
 open class NativeBuildExtension {
     var nativeTargets: List<String> = listOf()
 }
+
+fun findCcachePath(): String? {
+    val command = if (System.getProperty("os.name").startsWith("Windows")) {
+        "where ccache"
+    } else {
+        "which ccache"
+    }
+
+    return try {
+        val process = Runtime.getRuntime().exec(command)
+        val result = process.inputStream.bufferedReader().readText().trim()
+        if (process.waitFor() == 0 && result.isNotEmpty()) {
+            File(result).absolutePath
+        } else {
+            null
+        }
+    } catch (e: Exception) {
+        null
+    }
+}
+
 
 fun Project.nativeBuild(nativeTargets: List<String>) =
     this.extensions.getByType<BaseExtension>().run {
@@ -66,11 +88,12 @@ fun Project.nativeBuild(nativeTargets: List<String>) =
                         )
 
                         // Enable ccache if available.
-                        val ccachePaths = listOf("/usr/bin/ccache", "/usr/local/bin/ccache")
-                        for (path in ccachePaths) {
-                            if (file(path).exists()) {
-                                arguments.add("-DANDROID_CCACHE=$path")
-                            }
+                        val ccachePath = findCcachePath()
+                        if (ccachePath != null) {
+                            arguments.add("-D=$ccachePath")
+                            println("ccache enabled at: $ccachePath")
+                        } else {
+                            println("ccache not found on the system, continuing without it.")
                         }
 
                         cFlags.add("-Qunused-arguments")
