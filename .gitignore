@@ -9,8 +9,6 @@
 /platform/android/MapLibreAndroid/build
 /platform/android/MapLibreAndroidTestApp/.cxx
 /platform/android/MapLibreAndroidTestApp/build
-/platform/android/.gradle
-/platform/android/buildSrc/.gradle
 /platform/android/buildSrc/build
 /platform/android/x86
 /platform/android/x86_64
@@ -21,6 +19,7 @@
 /platform/windows/vendor/mesa3d/
 *.code-workspace
 
+.gradle
 .DS_Store
 .cache
 compile_commands.json

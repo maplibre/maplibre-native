@@ -18,27 +18,6 @@ open class NativeBuildExtension {
     var nativeTargets: List<String> = listOf()
 }
 
-fun findCcachePath(): String? {
-    val command = if (System.getProperty("os.name").startsWith("Windows")) {
-        "where ccache"
-    } else {
-        "which ccache"
-    }
-
-    return try {
-        val process = Runtime.getRuntime().exec(command)
-        val result = process.inputStream.bufferedReader().readText().trim()
-        if (process.waitFor() == 0 && result.isNotEmpty()) {
-            File(result).absolutePath
-        } else {
-            null
-        }
-    } catch (e: Exception) {
-        null
-    }
-}
-
-
 fun Project.nativeBuild(nativeTargets: List<String>) =
     this.extensions.getByType<BaseExtension>().run {
 
@@ -86,15 +65,6 @@ fun Project.nativeBuild(nativeTargets: List<String>) =
                                 "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
                             )
                         )
-
-                        // Enable ccache if available.
-                        val ccachePath = findCcachePath()
-                        if (ccachePath != null) {
-                            arguments.add("-DANDROID_CCACHE=$ccachePath")
-                            println("ccache enabled at: $ccachePath")
-                        } else {
-                            println("ccache not found on the system, continuing without it.")
-                        }
 
                         cFlags.add("-Qunused-arguments")
                         cppFlags.add("-Qunused-arguments")
