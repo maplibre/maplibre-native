@@ -1,5 +1,6 @@
 plugins {
     id("com.android.application")
+    id("org.maplibre.ccache-plugin")
 }
 
 android {
@@ -33,7 +34,6 @@ android {
 
         externalNativeBuild {
             cmake {
-                arguments("-DANDROID_CCACHE=ccache")
                 arguments("-DANDROID_STL=c++_static")
                 arguments("-DMLN_LEGACY_RENDERER=OFF", "-DMLN_DRAWABLE_RENDERER=ON")
                 targets.add("mbgl-render-test-runner")
