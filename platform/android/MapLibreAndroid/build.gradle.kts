@@ -12,6 +12,7 @@ plugins {
     id("maplibre.android-nitpick")
     id("maplibre.gradle-publish")
     id("maplibre.artifact-settings")
+    id("org.maplibre.ccache-plugin")
 }
 
 dependencies {
