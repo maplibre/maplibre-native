@@ -73,6 +73,8 @@ android {
     }
 
     namespace = "android.app"
+
+    testBuildType = "release"
 }
 
 dependencies {
