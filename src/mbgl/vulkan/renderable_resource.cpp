@@ -71,7 +71,7 @@ void SurfaceRenderableResource::initColor(uint32_t w, uint32_t h) {
     }
 }
 
-void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h, vk::PresentModeKHR presentMode) {
+void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
     const auto& physicalDevice = backend.getPhysicalDevice();
     const auto& device = backend.getDevice();
 

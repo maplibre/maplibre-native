@@ -34,12 +34,13 @@ protected:
 
 class SurfaceRenderableResource : public RenderableResource {
 protected:
-    explicit SurfaceRenderableResource(RendererBackend& backend_)
-        : RenderableResource(backend_) {}
+    explicit SurfaceRenderableResource(RendererBackend& backend_, vk::PresentModeKHR mode = vk::PresentModeKHR::eFifo)
+        : RenderableResource(backend_),
+          presentMode(mode) {}
     ~SurfaceRenderableResource() override;
 
     void initColor(uint32_t w, uint32_t h);
-    void initSwapchain(uint32_t w, uint32_t h, vk::PresentModeKHR presentMode = vk::PresentModeKHR::eFifo);
+    void initSwapchain(uint32_t w, uint32_t h);
 
     void initDepthStencil();
 
@@ -73,6 +74,8 @@ public:
 protected:
     vk::UniqueSurfaceKHR surface;
     vk::UniqueSwapchainKHR swapchain;
+    vk::PresentModeKHR presentMode;
+
     vk::SurfaceCapabilitiesKHR capabilities;
 
     uint32_t acquiredImageIndex{0};

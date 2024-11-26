@@ -1100,6 +1100,10 @@ void GLFWView::run() {
         }
 
         render();
+
+#ifndef __APPLE__
+        runLoop.updateTime();
+#endif
     };
 
     // Cap frame rate to 60hz if benchmark mode is disabled
