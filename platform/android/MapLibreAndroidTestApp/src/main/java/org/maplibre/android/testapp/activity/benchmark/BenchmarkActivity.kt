@@ -2,10 +2,12 @@ package org.maplibre.android.testapp.activity.benchmark
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
+import android.os.PowerManager
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
@@ -189,6 +191,13 @@ class BenchmarkActivity : AppCompatActivity() {
     }
 
     private fun setupMapView() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+            powerManager.addThermalStatusListener {
+                    status -> println("Thermal status changed $status")
+            }
+        }
+        
         mapView = findViewById<View>(R.id.mapView) as MapView
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
             val benchmarkResult = BenchmarkResult(arrayListOf())
@@ -254,7 +263,13 @@ class BenchmarkActivity : AppCompatActivity() {
 
         mapView.removeOnDidFinishRenderingFrameListener(listener)
 
-        return BenchmarkRunResult(fps, encodingTimeStore, renderingTimeStore)
+        var thermalStatus = -1;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+            thermalStatus = powerManager.currentThermalStatus
+        }
+
+        return BenchmarkRunResult(fps, encodingTimeStore, renderingTimeStore, thermalStatus)
     }
 
     override fun onStart() {
