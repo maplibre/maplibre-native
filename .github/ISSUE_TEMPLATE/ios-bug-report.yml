@@ -25,7 +25,7 @@ body:
     id: device
     attributes:
       label: Device
-      description: Enter the device that you encountered the issue on.
+      description: "Enter the device that you encountered the issue on or enter 'Simulator' if you only see this issue in a simulator."
       placeholder: iPhone 15 Pro
     validations:
       required: true
