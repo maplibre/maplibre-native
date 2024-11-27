@@ -1,4 +1,4 @@
-# Introduction
+# Using a GeoJSON Source
 
 This guide will teach you how to use [`GeoJsonSource`]("https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.style.sources/-geo-json-source/index.html") by deep diving into [`GeoJSON`]("https://geojson.org/") file format.
 You will start with fundamentals of how a map renders data internally and why you should prefer [JSON]("https://en.wikipedia.org/wiki/JSON") format in storing geospatial data.
@@ -21,18 +21,18 @@ Styles consist of collections of layers and data source. Layers reference data s
 It would be meaningless if we don't have any data to show, so we need know how to supply data through a data source.
 Firstly, we need to understand how to store data and pass it into a data source; therefore, we will discuss JSON in the next session.
 
-### 2. GeoJSON 
+### 2. GeoJSON
 
 [`GeoJSON`]("https://geojson.org/") is a JSON file for encoding various geographical data structures.
 It defines several JSON objects to represent geospatial information. We use the`.geojson` extension for GeoJSON files.
 We define the most fundamental objects:
 - `Geometry` refers to a single geometric shape that contains one or more coordinates. These shapes are visual objects displayed on a map. A geometry can be one of the following six types:
-  - Point
-  - MultiPoint
-  - LineString
-  - MultilineString
-  - Polygon
-  - MultiPolygon
+    - Point
+    - MultiPoint
+    - LineString
+    - MultilineString
+    - Polygon
+    - MultiPolygon
 - `Feautue` is a compound object that combines a single geometry with user-defined attributes, such as name, color.
 - `FeatureCollection` is set of features stored in an array. It is a root object that introduces all other features.
 
@@ -40,7 +40,7 @@ A typical GeoJSON structure might look like:
 ```kotlin
  {{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/turf/MapSnapshotterWithinExpression.kt:buffer_line}}
 ```
-So far we learned describing Geospatial data in GeoJSON files. We will start applying this knowledge into our map applications. 
+So far we learned describing Geospatial data in GeoJSON files. We will start applying this knowledge into our map applications.
 
 ### 3. GeoJsonSource
 
@@ -50,7 +50,7 @@ We will focus exclusively on `GeoJsonSource` and will not address other sources.
 
 There are several ways to construct a `GeoJsonSource`:
 - Locally stored files such as assets and raw folders
-- Remote services 
+- Remote services
 - Raw string  parsed into FeatureCollections objects
 - Geometry, Feature, and FeatureCollection objects that map to GeoJSON Base builders
 
@@ -89,7 +89,7 @@ parsing method:
 ```
 - Creating Geometry, Feature, and FeatureCollections from scratch
 
-Note that the GeoJSON objects we discussed earlier have classes defined in the MapLibre SDK. 
+Note that the GeoJSON objects we discussed earlier have classes defined in the MapLibre SDK.
 Therefore, we can either map JSON objects to regular Java/Kotlin objects or build them directly.
 ```kotlin
 {{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/feature/QuerySourceFeaturesActivity.kt:json_object}}
@@ -108,8 +108,8 @@ We achieve this using `setGeoJson()` method. For instance, we create a source va
 ```
 
 
-Another advanced example showcases random cars and a passenger on a map updating their positions with smooth animation. 
-The example defines two sources for the cars and passenger objects and we assign these sources to appropriate layers. 
+Another advanced example showcases random cars and a passenger on a map updating their positions with smooth animation.
+The example defines two sources for the cars and passenger objects and we assign these sources to appropriate layers.
 We use `ValueAnimator` objects and update positions with `onAnimationUpdate()`:
 
 ```kotlin
@@ -118,6 +118,6 @@ We use `ValueAnimator` objects and update positions with `onAnimationUpdate()`:
 
 # Summary
 
-GeoJsonSources have their pros and cons. They are most effective when you want to add additional data to your style or provide features like animating objects on your map. 
+GeoJsonSources have their pros and cons. They are most effective when you want to add additional data to your style or provide features like animating objects on your map.
 However, working with large datasets can be challenging if you need to manipulate and store data within the app; in such cases, it’s better to use a remote data source.
 Lastly, you can refer to [`Official Maplibre Android Documentation`]("https://maplibre.org/maplibre-native/android/api/index.html") for a comprehensive guide and  [`Test App`]("https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapLibreAndroidTestApp") to learn best practises for your applications.
