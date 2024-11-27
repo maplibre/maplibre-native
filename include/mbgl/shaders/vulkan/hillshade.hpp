@@ -20,7 +20,7 @@ struct ShaderSource<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::Vulkan>
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec2 in_texture_position;
 
-layout(set = 0, binding = 1) uniform HillshadePrepareDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform HillshadePrepareDrawableUBO {
     mat4 matrix;
     vec4 unpack;
     vec2 dimension;
@@ -33,7 +33,7 @@ layout(location = 0) out vec2 frag_position;
 void main() {
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     const vec2 epsilon = vec2(1.0) / drawable.dimension;
     const float scale = (drawable.dimension.x - 2.0) / drawable.dimension.x;
@@ -46,7 +46,7 @@ void main() {
 layout(location = 0) in vec2 frag_position;
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform HillshadePrepareDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform HillshadePrepareDrawableUBO {
     mat4 matrix;
     vec4 unpack;
     vec2 dimension;
@@ -54,7 +54,7 @@ layout(set = 0, binding = 1) uniform HillshadePrepareDrawableUBO {
     float maxzoom;
 } drawable;
 
-layout(set = 1, binding = 0) uniform sampler2D image_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image_sampler;
 
 float getElevation(vec2 coord, float bias, sampler2D image_sampler, vec4 unpack) {
     // Convert encoded elevation value to meters
@@ -138,7 +138,7 @@ struct ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::Vulkan> {
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec2 in_texture_position;
 
-layout(set = 0, binding = 1) uniform HillshadeDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform HillshadeDrawableUBO {
     mat4 matrix;
     vec2 latrange;
     vec2 light;
@@ -149,7 +149,7 @@ layout(location = 0) out vec2 frag_position;
 void main() {
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     frag_position = vec2(in_texture_position) / 8192.0;
     frag_position.y = 1.0 - frag_position.y; // TODO check this. prepare should ignore the flip
@@ -161,19 +161,19 @@ void main() {
 layout(location = 0) in vec2 frag_position;
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform HillshadeDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform HillshadeDrawableUBO {
     mat4 matrix;
     vec2 latrange;
     vec2 light;
 } drawable;
 
-layout(set = 0, binding = 2) uniform HillshadeEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform HillshadeEvaluatedPropsUBO {
     vec4 highlight;
     vec4 shadow;
     vec4 accent;
 } props;
 
-layout(set = 1, binding = 0) uniform sampler2D image_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image_sampler;
 
 void main() {
 

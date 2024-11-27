@@ -27,11 +27,11 @@ layout(location = 1) in vec4 in_color;
 layout(location = 2) in vec2 in_opacity;
 #endif
 
-layout(set = 0, binding = 1) uniform FillDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillDrawableUBO {
     mat4 matrix;
 } drawable;
 
-layout(set = 0, binding = 3) uniform FillInterpolateUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform FillInterpolateUBO {
     float color_t;
     float opacity_t;
 } interp;
@@ -55,7 +55,7 @@ void main() {
 #endif
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 }
 )";
 
@@ -71,7 +71,7 @@ layout(location = 1) in lowp float frag_opacity;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 4) uniform FillEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform FillEvaluatedPropsUBO {
     vec4 color;
     vec4 outline_color;
     float opacity;
@@ -120,11 +120,11 @@ layout(location = 1) in vec4 in_color;
 layout(location = 2) in vec2 in_opacity;
 #endif
 
-layout(set = 0, binding = 1) uniform FillDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillDrawableUBO {
     mat4 matrix;
 } drawable;
 
-layout(set = 0, binding = 3) uniform FillInterpolateUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform FillInterpolateUBO {
     float color_t;
     float opacity_t;
 } interp;
@@ -150,7 +150,7 @@ void main() {
 #endif
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     frag_position = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * global.world_size;
 }
@@ -170,7 +170,7 @@ layout(location = 2) in vec2 frag_position;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 4) uniform FillEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform FillEvaluatedPropsUBO {
     vec4 color;
     vec4 outline_color;
     float opacity;
@@ -230,7 +230,7 @@ layout(location = 2) in mediump uvec4 in_pattern_to;
 layout(location = 3) in vec2 in_opacity;
 #endif
 
-layout(set = 0, binding = 1) uniform FillPatternDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillPatternDrawableUBO {
     mat4 matrix;
     vec2 pixel_coord_upper;
     vec2 pixel_coord_lower;
@@ -239,18 +239,18 @@ layout(set = 0, binding = 1) uniform FillPatternDrawableUBO {
     float pad;
 } drawable;
 
-layout(set = 0, binding = 2) uniform FillPatternTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform FillPatternTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
 } tile;
 
-layout(set = 0, binding = 3) uniform FillPatternInterpolateUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 2) uniform FillPatternInterpolateUBO {
     float pattern_from_t;
     float pattern_to_t;
     float opacity_t;
 } interp;
 
-layout(set = 0, binding = 4) uniform FillEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform FillEvaluatedPropsUBO {
     vec4 color;
     vec4 outline_color;
     float opacity;
@@ -309,7 +309,7 @@ void main() {
     frag_pos_b = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, in_position),
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 }
 )";
 
@@ -332,7 +332,7 @@ layout(location = 4) in lowp float frag_opacity;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform FillPatternDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillPatternDrawableUBO {
     mat4 matrix;
     vec2 pixel_coord_upper;
     vec2 pixel_coord_lower;
@@ -341,12 +341,12 @@ layout(set = 0, binding = 1) uniform FillPatternDrawableUBO {
     float pad;
 } drawable;
 
-layout(set = 0, binding = 2) uniform FillPatternTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform FillPatternTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
 } tile;
 
-layout(set = 0, binding = 4) uniform FillEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform FillEvaluatedPropsUBO {
     vec4 color;
     vec4 outline_color;
     float opacity;
@@ -355,7 +355,7 @@ layout(set = 0, binding = 4) uniform FillEvaluatedPropsUBO {
     float to_scale;
 } props;
 
-layout(set = 1, binding = 0) uniform sampler2D image0_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
 void main() {
 
@@ -425,7 +425,7 @@ layout(location = 2) in mediump uvec4 in_pattern_to;
 layout(location = 3) in vec2 in_opacity;
 #endif
 
-layout(set = 0, binding = 1) uniform FillOutlinePatternDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillOutlinePatternDrawableUBO {
     mat4 matrix;
     vec2 pixel_coord_upper;
     vec2 pixel_coord_lower;
@@ -434,18 +434,18 @@ layout(set = 0, binding = 1) uniform FillOutlinePatternDrawableUBO {
     float pad;
 } drawable;
 
-layout(set = 0, binding = 2) uniform FillOutlinePatternTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform FillOutlinePatternTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
 } tile;
 
-layout(set = 0, binding = 3) uniform FillOutlinePatternInterpolateUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 2) uniform FillOutlinePatternInterpolateUBO {
     float pattern_from_t;
     float pattern_to_t;
     float opacity_t;
 } interp;
 
-layout(set = 0, binding = 4) uniform FillEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform FillEvaluatedPropsUBO {
     vec4 color;
     vec4 outline_color;
     float opacity;
@@ -502,14 +502,12 @@ void main() {
     const vec2 display_size_b = vec2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
 
     const vec2 position2 = in_position.xy;
-    vec4 position = drawable.matrix * vec4(in_position, 0.0, 1.0);
-    position.y *= -1.0;
+    gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
+    applySurfaceTransform();
 
     frag_pos_a = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, position2),
     frag_pos_b = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, position2),
-    frag_pos = (position.xy / position.w + 1.0) / 2.0 * global.world_size;
-    
-    gl_Position = position;
+    frag_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * global.world_size;
 }
 )";
 
@@ -533,7 +531,7 @@ layout(location = 5) in lowp float frag_opacity;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform FillOutlinePatternDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillOutlinePatternDrawableUBO {
     mat4 matrix;
     vec2 pixel_coord_upper;
     vec2 pixel_coord_lower;
@@ -542,12 +540,12 @@ layout(set = 0, binding = 1) uniform FillOutlinePatternDrawableUBO {
     float pad;
 } drawable;
 
-layout(set = 0, binding = 2) uniform FillOutlinePatternTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform FillOutlinePatternTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
 } tile;
 
-layout(set = 0, binding = 4) uniform FillEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform FillEvaluatedPropsUBO {
     vec4 color;
     vec4 outline_color;
     float opacity;
@@ -556,7 +554,7 @@ layout(set = 0, binding = 4) uniform FillEvaluatedPropsUBO {
     float to_scale;
 } props;
 
-layout(set = 1, binding = 0) uniform sampler2D image0_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
 void main() {
 
@@ -618,7 +616,7 @@ struct ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::
 layout(location = 0) in ivec2 in_pos_normal;
 layout(location = 1) in uvec4 in_data;
 
-layout(set = 0, binding = 1) uniform FillOutlineTriangulatedDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillOutlineTriangulatedDrawableUBO {
     mat4 matrix;
     float ratio;
     float pad1, pad2, pad3;
@@ -655,7 +653,7 @@ void main() {
 
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos, 0.0, 1.0) + projected_extrude;
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
@@ -674,7 +672,7 @@ layout(location = 2) in float frag_gamma_scale;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 4) uniform FillEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform FillEvaluatedPropsUBO {
     vec4 color;
     vec4 outline_color;
     float opacity;
@@ -729,7 +727,7 @@ layout(location = 3) in vec2 in_base;
 layout(location = 4) in vec2 in_height;
 #endif
 
-layout(set = 0, binding = 1) uniform FillExtrusionDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillExtrusionDrawableUBO {
     mat4 matrix;
     vec2 texsize;
     vec2 pixel_coord_upper;
@@ -738,7 +736,16 @@ layout(set = 0, binding = 1) uniform FillExtrusionDrawableUBO {
     float tile_ratio;
 } drawable;
 
-layout(set = 0, binding = 2) uniform FillExtrusionPropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 2) uniform FillExtrusionInterpolateUBO {
+    float base_t;
+    float height_t;
+    float color_t;
+    float pattern_from_t;
+    float pattern_to_t;
+    float pad1, pad2, pad3;
+} interp;
+
+layout(set = LAYER_SET_INDEX, binding = 0) uniform FillExtrusionPropsUBO {
     vec4 color;
     vec4 light_color_pad;
     vec4 light_position_base;
@@ -751,15 +758,6 @@ layout(set = 0, binding = 2) uniform FillExtrusionPropsUBO {
     float to_scale;
     float pad2;
 } props;
-
-layout(set = 0, binding = 4) uniform FillExtrusionInterpolateUBO {
-    float base_t;
-    float height_t;
-    float color_t;
-    float pattern_from_t;
-    float pattern_to_t;
-    float pad1, pad2, pad3;
-} interp;
 
 layout(location = 0) out mediump vec4 frag_color;
 
@@ -788,7 +786,7 @@ void main() {
     const float z = t != 0.0 ? height : base;
 
     gl_Position = drawable.matrix * vec4(in_position, z, 1.0);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
 #if defined(OVERDRAW_INSPECTOR)
     frag_color = vec4(1.0);
@@ -875,7 +873,7 @@ layout(location = 4) in uvec4 in_pattern_from;
 layout(location = 5) in uvec4 in_pattern_to;
 #endif
 
-layout(set = 0, binding = 1) uniform FillExtrusionDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillExtrusionDrawableUBO {
     mat4 matrix;
     vec2 texsize;
     vec2 pixel_coord_upper;
@@ -884,7 +882,21 @@ layout(set = 0, binding = 1) uniform FillExtrusionDrawableUBO {
     float tile_ratio;
 } drawable;
 
-layout(set = 0, binding = 2) uniform FillExtrusionPropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform FillExtrusionTilePropsUBO {
+    vec4 pattern_from;
+    vec4 pattern_to;
+} tile;
+
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 2) uniform FillExtrusionInterpolateUBO {
+    float base_t;
+    float height_t;
+    float color_t;
+    float pattern_from_t;
+    float pattern_to_t;
+    float pad1, pad2, pad3;
+} interp;
+
+layout(set = LAYER_SET_INDEX, binding = 0) uniform FillExtrusionPropsUBO {
     vec4 color;
     vec4 light_color_pad;
     vec4 light_position_base;
@@ -897,20 +909,6 @@ layout(set = 0, binding = 2) uniform FillExtrusionPropsUBO {
     float to_scale;
     float pad2;
 } props;
-
-layout(set = 0, binding = 3) uniform FillExtrusionTilePropsUBO {
-    vec4 pattern_from;
-    vec4 pattern_to;
-} tile;
-
-layout(set = 0, binding = 4) uniform FillExtrusionInterpolateUBO {
-    float base_t;
-    float height_t;
-    float color_t;
-    float pattern_from_t;
-    float pattern_to_t;
-    float pad1, pad2, pad3;
-} interp;
 
 layout(location = 0) out mediump vec4 frag_lighting;
 layout(location = 1) out mediump vec2 frag_pos_a;
@@ -944,7 +942,7 @@ void main() {
     const float z = t != 0.0 ? height : base;
 
     gl_Position = drawable.matrix * vec4(in_position, z, 1.0);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
 #if defined(OVERDRAW_INSPECTOR)
     frag_color = vec4(1.0);
@@ -1027,7 +1025,7 @@ layout(location = 4) in mediump vec4 frag_pattern_to;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform FillExtrusionDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillExtrusionDrawableUBO {
     mat4 matrix;
     vec2 texsize;
     vec2 pixel_coord_upper;
@@ -1036,7 +1034,12 @@ layout(set = 0, binding = 1) uniform FillExtrusionDrawableUBO {
     float tile_ratio;
 } drawable;
 
-layout(set = 0, binding = 2) uniform FillExtrusionPropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform FillExtrusionTilePropsUBO {
+    vec4 pattern_from;
+    vec4 pattern_to;
+} tile;
+
+layout(set = LAYER_SET_INDEX, binding = 0) uniform FillExtrusionPropsUBO {
     vec4 color;
     vec4 light_color_pad;
     vec4 light_position_base;
@@ -1050,12 +1053,7 @@ layout(set = 0, binding = 2) uniform FillExtrusionPropsUBO {
     float pad2;
 } props;
 
-layout(set = 0, binding = 3) uniform FillExtrusionTilePropsUBO {
-    vec4 pattern_from;
-    vec4 pattern_to;
-} tile;
-
-layout(set = 1, binding = 0) uniform sampler2D image0_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
 void main() {
 

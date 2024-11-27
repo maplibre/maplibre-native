@@ -8,6 +8,7 @@
 #include <mbgl/style/filter.hpp>
 #include <mbgl/style/property_value.hpp>
 #include <mbgl/style/expression/formatted.hpp>
+#include <mbgl/style/variable_anchor_offset_collection.hpp>
 #include <mbgl/util/color.hpp>
 
 #include <vector>
@@ -184,6 +185,10 @@ public:
     const PropertyValue<std::vector<TextVariableAnchorType>>& getTextVariableAnchor() const;
     void setTextVariableAnchor(const PropertyValue<std::vector<TextVariableAnchorType>>&);
 
+    static PropertyValue<VariableAnchorOffsetCollection> getDefaultTextVariableAnchorOffset();
+    const PropertyValue<VariableAnchorOffsetCollection>& getTextVariableAnchorOffset() const;
+    void setTextVariableAnchorOffset(const PropertyValue<VariableAnchorOffsetCollection>&);
+
     static PropertyValue<std::vector<TextWritingModeType>> getDefaultTextWritingMode();
     const PropertyValue<std::vector<TextWritingModeType>>& getTextWritingMode() const;
     void setTextWritingMode(const PropertyValue<std::vector<TextWritingModeType>>&);
@@ -288,7 +293,7 @@ protected:
     std::optional<conversion::Error> setPropertyInternal(const std::string& name, const conversion::Convertible& value) final;
 
     StyleProperty getProperty(const std::string& name) const final;
-    mapbox::base::Value serialize() const final;
+    Value serialize() const final;
 
     Mutable<Layer::Impl> mutableBaseImpl() const final;
 };

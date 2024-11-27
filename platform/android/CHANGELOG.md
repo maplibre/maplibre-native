@@ -6,6 +6,43 @@
 
 ### 🐞 Bug fixes
 
+## 11.6.1
+
+### 🐞 Bug fixes
+
+- Fix 16K alignment Android builds ([#2995](https://github.com/maplibre/maplibre-native/issues/2995)).
+
+### ✨ Features and improvements
+
+- Allow configuring a `Call.Factory` instead of a `OkHttpClient` ([https://github.com/maplibre/maplibre-native/pull/2987](#2987)). Since an `OkHttpClient` can be assigned to a `Call.Factory` this should not cause any issues.
+
+### 🐞 Bug fixes
+
+- Fix puck rendering behavior Android ([#2957](https://github.com/maplibre/maplibre-native/pull/2957)).
+
+## 11.6.0
+
+### ✨ Features and improvements
+
+- Add support for `text-variable-anchor-offset` property ([#2921](https://github.com/maplibre/maplibre-native/pull/2921)).
+- Change `parameters.currentLayer` to `index` instead of `layerIndex` ([#2956](https://github.com/maplibre/maplibre-native/pull/2956)).
+
+### 🐞 Bug fixes
+
+- Fix MapSnapshotter icon loading ([#2967](https://github.com/maplibre/maplibre-native/pull/2967)).
+
+## 11.5.2
+
+### ✨ Features and improvements
+
+- Use Kotlin instead of Groovy for Android build configuration ([#2902](https://github.com/maplibre/maplibre-native/pull/2902)).
+- Performance improvements ([#2892](https://github.com/maplibre/maplibre-native/pull/2892)).
+- Remove workaround for emulator crashes, and apply proper fix: revert index buffers to dirty flag instead of timestamps ([#2927](https://github.com/maplibre/maplibre-native/pull/2927)).
+
+### 🐞 Bug fixes
+
+- Fix line atlas, which was causing an issue with `line-pattern`s ([#2908](https://github.com/maplibre/maplibre-native/pull/2908)).
+
 ## 11.5.1
 
 ### ✨ Features and improvements

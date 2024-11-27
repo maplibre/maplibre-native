@@ -18,6 +18,7 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/variant.hpp>
 #include <mbgl/util/hash.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 #include <cassert>
 #if !defined(NDEBUG)
@@ -129,6 +130,8 @@ void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
 }
 
 void Drawable::upload(gfx::UploadPass& uploadPass_) {
+    MLN_TRACE_FUNC();
+
     if (isCustom) {
         return;
     }
@@ -144,13 +147,12 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 
     // We need either raw index data or a buffer already created from them.
     // We can have a buffer and no indexes, but only if it's not marked dirty.
-    if (!impl->indexes || (impl->indexes->empty() && (!impl->indexes->getBuffer() || !attributeUpdateTime ||
-                                                      impl->indexes->isModifiedAfter(*attributeUpdateTime)))) {
+    if (!impl->indexes || (impl->indexes->empty() && (!impl->indexes->getBuffer() || impl->indexes->getDirty()))) {
         assert(!"Missing index data");
         return;
     }
 
-    if (!impl->indexes->getBuffer() || !attributeUpdateTime || impl->indexes->isModifiedAfter(*attributeUpdateTime)) {
+    if (!impl->indexes->getBuffer() || impl->indexes->getDirty()) {
         // Create a buffer for the index data.  We don't update any
         // existing buffer because it may still be in use by the previous frame.
         auto indexBufferResource{uploadPass.createIndexBufferResource(
@@ -160,6 +162,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         auto buffer = std::make_unique<IndexBuffer>(std::move(indexBuffer));
 
         impl->indexes->setBuffer(std::move(buffer));
+        impl->indexes->setDirty(false);
     }
 
     const bool buildAttribs = !vertexAttributes || !attributeUpdateTime ||
@@ -234,6 +237,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 }
 
 void Drawable::draw(PaintParameters& parameters) const {
+    MLN_TRACE_FUNC();
+
     if (isCustom) {
         return;
     }
@@ -334,6 +339,8 @@ gfx::UniformBufferArray& Drawable::mutableUniformBuffers() {
 }
 
 void Drawable::buildVulkanInputBindings() noexcept {
+    MLN_TRACE_FUNC();
+
     impl->vulkanVertexBuffers.clear();
     impl->vulkanVertexOffsets.clear();
 
@@ -386,6 +393,8 @@ void Drawable::buildVulkanInputBindings() noexcept {
 }
 
 bool Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
+    MLN_TRACE_FUNC();
+
     if (impl->vulkanVertexBuffers.empty()) return false;
 
     const auto& commandBuffer = encoder.getCommandBuffer();
@@ -403,87 +412,38 @@ bool Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
 }
 
 bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
+    MLN_TRACE_FUNC();
+
     if (!shader) return false;
 
-    auto& context = encoder.getContext();
-    const auto& device = context.getBackend().getDevice();
-    const auto& descriptorPool = context.getCurrentDescriptorPool();
-    const auto& descriptorSetLayouts = context.getDescriptorSetLayouts();
+    // bind uniforms
+    impl->uniformBuffers.bindDescriptorSets(encoder);
 
-    const auto descriptorAllocInfo =
-        vk::DescriptorSetAllocateInfo().setDescriptorPool(*descriptorPool).setSetLayouts(descriptorSetLayouts);
+    const auto& shaderImpl = static_cast<const mbgl::vulkan::ShaderProgram&>(*shader);
+    if (shaderImpl.hasTextures()) {
+        // update image set
+        if (!impl->imageDescriptorSet) {
+            impl->imageDescriptorSet = std::make_unique<ImageDescriptorSet>(encoder.getContext());
+        }
 
-    const auto& drawableDescriptorSets = device->allocateDescriptorSets(descriptorAllocInfo);
-    const auto& uniformDescriptorSet = drawableDescriptorSets[0];
-
-    const auto updateUniformDescriptors = [&](const auto& buffer, bool fillGaps) {
-        for (size_t id = 0; id < buffer.allocatedSize(); ++id) {
-            vk::DescriptorBufferInfo descriptorBufferInfo;
-
-            if (const auto& uniformBuffer = buffer.get(id)) {
-                const auto& uniformBufferImpl = static_cast<const UniformBuffer&>(*uniformBuffer);
-                const auto& bufferResource = uniformBufferImpl.getBufferResource();
-                descriptorBufferInfo.setBuffer(bufferResource.getVulkanBuffer())
-                    .setOffset(bufferResource.getVulkanBufferOffset())
-                    .setRange(bufferResource.getSizeInBytes());
-            } else if (fillGaps) {
-                descriptorBufferInfo.setBuffer(context.getDummyUniformBuffer()->getVulkanBuffer())
-                    .setOffset(0)
-                    .setRange(VK_WHOLE_SIZE);
-            } else {
-                continue;
+        for (const auto& texture : textures) {
+            if (!texture) continue;
+            const auto textureImpl = static_cast<const Texture2D*>(texture.get());
+            if (textureImpl->isDirty()) {
+                impl->imageDescriptorSet->markDirty(true);
+                break;
             }
-
-            const auto writeDescriptorSet = vk::WriteDescriptorSet()
-                                                .setBufferInfo(descriptorBufferInfo)
-                                                .setDescriptorCount(1)
-                                                .setDescriptorType(vk::DescriptorType::eUniformBuffer)
-                                                .setDstBinding(static_cast<uint32_t>(id))
-                                                .setDstSet(uniformDescriptorSet);
-
-            device->updateDescriptorSets(writeDescriptorSet, nullptr);
         }
-    };
-    const auto& globalUniforms = context.getGlobalUniformBuffers();
-    for (size_t i = 0; i < globalUniforms.allocatedSize(); ++i) {
-        if (globalUniforms.get(i)) impl->uniformBuffers.set(i, globalUniforms.get(i));
+
+        impl->imageDescriptorSet->update(textures);
+        impl->imageDescriptorSet->bind(encoder);
     }
-
-    updateUniformDescriptors(getUniformBuffers(), true);
-
-    if (drawableDescriptorSets.size() >= 2) {
-        const auto& imageDescriptorSet = drawableDescriptorSets[1];
-
-        for (size_t id = 0; id < shaders::maxTextureCountPerShader; ++id) {
-            const auto& texture = id < textures.size() ? textures[id] : nullptr;
-            auto& textureImpl = texture ? static_cast<Texture2D&>(*texture) : *context.getDummyTexture();
-
-            const auto descriptorImageInfo = vk::DescriptorImageInfo()
-                                                 .setImageLayout(textureImpl.getVulkanImageLayout())
-                                                 .setImageView(textureImpl.getVulkanImageView().get())
-                                                 .setSampler(textureImpl.getVulkanSampler());
-
-            const auto writeDescriptorSet = vk::WriteDescriptorSet()
-                                                .setImageInfo(descriptorImageInfo)
-                                                .setDescriptorCount(1)
-                                                .setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
-                                                .setDstBinding(static_cast<uint32_t>(id))
-                                                .setDstSet(imageDescriptorSet);
-
-            device->updateDescriptorSets(writeDescriptorSet, nullptr);
-        }
-    }
-
-    if (drawableDescriptorSets.empty()) return true;
-
-    const auto& commandBuffer = encoder.getCommandBuffer();
-    commandBuffer->bindDescriptorSets(
-        vk::PipelineBindPoint::eGraphics, context.getGeneralPipelineLayout().get(), 0, drawableDescriptorSets, nullptr);
 
     return true;
 }
 
 void Drawable::uploadTextures(UploadPass&) const noexcept {
+    MLN_TRACE_FUNC();
     for (const auto& texture : textures) {
         if (texture) {
             texture->upload();

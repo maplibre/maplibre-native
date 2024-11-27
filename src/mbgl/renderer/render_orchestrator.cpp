@@ -959,16 +959,6 @@ size_t RenderOrchestrator::numLayerGroups() const noexcept {
     return layerGroupsByLayerIndex.size();
 }
 
-int32_t RenderOrchestrator::maxLayerIndex() const {
-    MLN_TRACE_FUNC();
-
-    if (!layerGroupsByLayerIndex.empty()) {
-        assert(layerGroupsByLayerIndex.crbegin()->first == layerGroupsByLayerIndex.crbegin()->second->getLayerIndex());
-        return layerGroupsByLayerIndex.crbegin()->first;
-    }
-    return -1;
-}
-
 void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
                                       const TransformState& state,
@@ -993,13 +983,6 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
 
     for (const auto& item : items) {
         auto& renderLayer = item.layer.get();
-#if MLN_RENDER_BACKEND_OPENGL
-        // Android Emulator: Goldfish is *very* broken. This will prevent a crash
-        // inside the GL translation layer at the cost of emulator performance.
-        if (androidGoldfishMitigationEnabled) {
-            renderLayer.removeAllDrawables();
-        }
-#endif
         renderLayer.update(shaders, context, state, updateParameters, renderTree, changes);
     }
     addChanges(changes);

@@ -47,13 +47,24 @@ layout(location = 6) in vec2 in_stroke_width;
 layout(location = 7) in vec2 in_stroke_opacity;
 #endif
 
-layout(set = 0, binding = 1) uniform CircleDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform CircleDrawableUBO {
     mat4 matrix;
     vec2 extrude_scale;
     vec2 padding;
 } drawable;
 
-layout(set = 0, binding = 2) uniform CircleEvaluatedPropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform CircleInterpolateUBO {
+    float color_t;
+    float radius_t;
+    float blur_t;
+    float opacity_t;
+    float stroke_color_t;
+    float stroke_width_t;
+    float stroke_opacity_t;
+    float pad1_;
+} interp;
+
+layout(set = LAYER_SET_INDEX, binding = 0) uniform CircleEvaluatedPropsUBO {
     vec4 color;
     vec4 stroke_color;
     float radius;
@@ -65,17 +76,6 @@ layout(set = 0, binding = 2) uniform CircleEvaluatedPropsUBO {
     bool pitch_with_map;
     float padding;
 } props;
-
-layout(set = 0, binding = 3) uniform CircleInterpolateUBO {
-    float color_t;
-    float radius_t;
-    float blur_t;
-    float opacity_t;
-    float stroke_color_t;
-    float stroke_width_t;
-    float stroke_opacity_t;
-    float pad1_;
-} interp;
 
 layout(location = 0) out vec2 frag_extrude;
 layout(location = 1) out float frag_antialiasblur;
@@ -150,7 +150,7 @@ void main() {
         gl_Position.xy += scaled_extrude * (radius + stroke_width) * factor;
     }
 
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     // This is a minimum blur distance that serves as a faux-antialiasing for
     // the circle. since blur is a ratio of the circle's size and the intent is
@@ -224,7 +224,7 @@ layout(location = 8) in lowp float frag_stroke_opacity;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 2) uniform CircleEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform CircleEvaluatedPropsUBO {
     vec4 color;
     vec4 stroke_color;
     float radius;

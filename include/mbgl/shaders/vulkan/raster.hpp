@@ -20,11 +20,11 @@ struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::Vulkan> {
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec2 in_texture_position;
 
-layout(set = 0, binding = 1) uniform RasterDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform RasterDrawableUBO {
     mat4 matrix;
 } drawable;
 
-layout(set = 0, binding = 2) uniform RasterEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform RasterEvaluatedPropsUBO {
     vec4 spin_weights;
     vec2 tl_parent;
     float scale_parent;
@@ -44,7 +44,7 @@ layout(location = 1) out vec2 frag_position1;
 void main() {
 
     gl_Position = drawable.matrix * vec4(in_position, 0, 1);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     // We are using Int16 for texture position coordinates to give us enough precision for
     // fractional coordinates. We use 8192 to scale the texture coordinates in the buffer
@@ -63,7 +63,7 @@ layout(location = 1) in vec2 frag_position1;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 2) uniform RasterEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform RasterEvaluatedPropsUBO {
     vec4 spin_weights;
     vec2 tl_parent;
     float scale_parent;
@@ -77,8 +77,8 @@ layout(set = 0, binding = 2) uniform RasterEvaluatedPropsUBO {
     float pad1, pad2;
 } props;
 
-layout(set = 1, binding = 0) uniform sampler2D image0_sampler;
-layout(set = 1, binding = 1) uniform sampler2D image1_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 1) uniform sampler2D image1_sampler;
 
 void main() {
 

@@ -1,4 +1,6 @@
 #include <mbgl/shaders/vulkan/circle.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
+#include <mbgl/shaders/circle_layer_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {
@@ -6,8 +8,8 @@ namespace shaders {
 const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Vulkan>::uniforms = {
     UniformBlockInfo{true, false, sizeof(GlobalPaintParamsUBO), idGlobalPaintParamsUBO},
     UniformBlockInfo{true, false, sizeof(CircleDrawableUBO), idCircleDrawableUBO},
-    UniformBlockInfo{true, true, sizeof(CircleEvaluatedPropsUBO), idCircleEvaluatedPropsUBO},
     UniformBlockInfo{true, false, sizeof(CircleInterpolateUBO), idCircleInterpolateUBO},
+    UniformBlockInfo{true, true, sizeof(CircleEvaluatedPropsUBO), idCircleEvaluatedPropsUBO},
 };
 const std::array<AttributeInfo, 8> ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Vulkan>::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, idCirclePosVertexAttribute},

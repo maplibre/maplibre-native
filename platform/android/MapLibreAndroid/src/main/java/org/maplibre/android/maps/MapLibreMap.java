@@ -759,6 +759,24 @@ public final class MapLibreMap {
     nativeMapView.moveBy(x, y, duration);
   }
 
+  /**
+   * Returns the current zoom level.
+   */
+  public double getZoom() {
+    return nativeMapView.getZoom();
+  }
+
+  /**
+   * Zooms the camera to the specified level.
+   * @param zoom              The zoom level to which the camera should move.
+   * @param focalPoint        The point around which to zoom.
+   * @param duration          The duration for the zoom animation
+   */
+  public void setZoom(double zoom, @NonNull PointF focalPoint, long duration ) {
+    notifyDeveloperAnimationListeners();
+    nativeMapView.setZoom(zoom, focalPoint, duration);
+  }
+
   //
   //  Reset North
   //
@@ -1546,7 +1564,7 @@ public final class MapLibreMap {
    * Get a camera position that fits a provided bounds and padding and the current camera tilt and bearing.
    *
    * @param latLngBounds the bounds to set the map with
-   * @param padding      the padding to apply to the bounds
+   * @param padding      the padding to apply to the bounds (in left, top, right, bottom order)
    * @return the camera position that fits the bounds and padding
    */
   @Nullable
@@ -1579,7 +1597,7 @@ public final class MapLibreMap {
    * Get a camera position that fits a provided bounds, padding, bearing and tilt.
    *
    * @param latLngBounds the bounds to set the map with
-   * @param padding      the padding to apply to the bounds
+   * @param padding      the padding to apply to the bounds (in left, top, right, bottom order)
    * @param bearing      the bearing to transform the camera position with
    * @param tilt         to transform the camera position with
    * @return the camera position that fits the bounds, bearing and tilt

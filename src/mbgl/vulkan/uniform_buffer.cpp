@@ -2,6 +2,7 @@
 
 #include <mbgl/vulkan/context.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/vulkan/command_encoder.hpp>
 
 #include <cassert>
 
@@ -36,6 +37,44 @@ void UniformBuffer::update(const void* data, std::size_t size_) {
     buffer.getContext().renderingStats().numUniformUpdates++;
     buffer.getContext().renderingStats().uniformUpdateBytes += size_;
     buffer.update(data, size, /*offset=*/0);
+}
+
+const std::shared_ptr<gfx::UniformBuffer>& UniformBufferArray::set(const size_t id,
+                                                                   std::shared_ptr<gfx::UniformBuffer> uniformBuffer) {
+    if (id >= uniformBufferVector.size()) {
+        return nullref;
+    }
+
+    if (uniformBufferVector[id] == uniformBuffer) {
+        return uniformBufferVector[id];
+    }
+
+    if (descriptorSet) {
+        descriptorSet->markDirty();
+    }
+
+    uniformBufferVector[id] = std::move(uniformBuffer);
+    return uniformBufferVector[id];
+}
+
+void UniformBufferArray::createOrUpdate(
+    const size_t id, const void* data, std::size_t size, gfx::Context& context, bool persistent) {
+    if (descriptorSet) {
+        if (auto& ubo = get(id); !ubo || ubo->getSize() != size) {
+            descriptorSet->markDirty();
+        }
+    }
+
+    gfx::UniformBufferArray::createOrUpdate(id, data, size, context, persistent);
+}
+
+void UniformBufferArray::bindDescriptorSets(CommandEncoder& encoder) {
+    if (!descriptorSet) {
+        descriptorSet = std::make_unique<UniformDescriptorSet>(encoder.getContext(), descriptorSetType);
+    }
+
+    descriptorSet->update(*this, descriptorStartIndex, descriptorBindingCount);
+    descriptorSet->bind(encoder);
 }
 
 } // namespace vulkan

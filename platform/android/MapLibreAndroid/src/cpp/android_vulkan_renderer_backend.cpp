@@ -25,6 +25,11 @@ public:
         auto& backendImpl = static_cast<AndroidVulkanRendererBackend&>(backend);
         const vk::AndroidSurfaceCreateInfoKHR createInfo({}, backendImpl.getWindow());
         surface = backendImpl.getInstance()->createAndroidSurfaceKHRUnique(createInfo);
+
+        const int apiLevel = android_get_device_api_level();
+        if (apiLevel < __ANDROID_API_Q__) {
+            setSurfaceTransformPollingInterval(30);
+        }
     }
 
     void bind() override {}
@@ -42,7 +47,7 @@ private:
 
 AndroidVulkanRendererBackend::AndroidVulkanRendererBackend(ANativeWindow* window_)
     : vulkan::RendererBackend(gfx::ContextMode::Unique),
-      mbgl::gfx::Renderable({64, 64}, std::make_unique<AndroidVulkanRenderableResource>(*this)),
+      vulkan::Renderable({64, 64}, std::make_unique<AndroidVulkanRenderableResource>(*this)),
       window(window_) {
     init();
 }

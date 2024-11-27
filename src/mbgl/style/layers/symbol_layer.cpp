@@ -664,6 +664,21 @@ void SymbolLayer::setTextVariableAnchor(const PropertyValue<std::vector<TextVari
     baseImpl = std::move(impl_);
     observer->onLayerChanged(*this);
 }
+PropertyValue<VariableAnchorOffsetCollection> SymbolLayer::getDefaultTextVariableAnchorOffset() {
+    return TextVariableAnchorOffset::defaultValue();
+}
+
+const PropertyValue<VariableAnchorOffsetCollection>& SymbolLayer::getTextVariableAnchorOffset() const {
+    return impl().layout.get<TextVariableAnchorOffset>();
+}
+
+void SymbolLayer::setTextVariableAnchorOffset(const PropertyValue<VariableAnchorOffsetCollection>& value) {
+    if (value == getTextVariableAnchorOffset()) return;
+    auto impl_ = mutableImpl();
+    impl_->layout.get<TextVariableAnchorOffset>() = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
 PropertyValue<std::vector<TextWritingModeType>> SymbolLayer::getDefaultTextWritingMode() {
     return TextWritingMode::defaultValue();
 }
@@ -1137,6 +1152,7 @@ enum class SymbolProperty : uint8_t {
     TextSize,
     TextTransform,
     TextVariableAnchor,
+    TextVariableAnchorOffset,
     TextWritingMode,
 };
 
@@ -1210,6 +1226,7 @@ constexpr const auto symbolLayerProperties = mapbox::eternal::hash_map<mapbox::e
      {"text-size", toUint8(SymbolProperty::TextSize)},
      {"text-transform", toUint8(SymbolProperty::TextTransform)},
      {"text-variable-anchor", toUint8(SymbolProperty::TextVariableAnchor)},
+     {"text-variable-anchor-offset", toUint8(SymbolProperty::TextVariableAnchorOffset)},
      {"text-writing-mode", toUint8(SymbolProperty::TextWritingMode)}});
 
 StyleProperty getLayerProperty(const SymbolLayer& layer, SymbolProperty property) {
@@ -1350,6 +1367,8 @@ StyleProperty getLayerProperty(const SymbolLayer& layer, SymbolProperty property
             return makeStyleProperty(layer.getTextTransform());
         case SymbolProperty::TextVariableAnchor:
             return makeStyleProperty(layer.getTextVariableAnchor());
+        case SymbolProperty::TextVariableAnchorOffset:
+            return makeStyleProperty(layer.getTextVariableAnchorOffset());
         case SymbolProperty::TextWritingMode:
             return makeStyleProperty(layer.getTextWritingMode());
     }
@@ -1783,6 +1802,16 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
         }
 
         setTextVariableAnchor(*typedValue);
+        return std::nullopt;
+    }
+    if (property == SymbolProperty::TextVariableAnchorOffset) {
+        Error error;
+        const auto& typedValue = convert<PropertyValue<VariableAnchorOffsetCollection>>(value, error, true, false);
+        if (!typedValue) {
+            return error;
+        }
+
+        setTextVariableAnchorOffset(*typedValue);
         return std::nullopt;
     }
     if (property == SymbolProperty::TextWritingMode) {

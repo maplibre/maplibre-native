@@ -35,25 +35,25 @@ layout(location = 1) in vec2 in_weight;
 layout(location = 2) in vec2 in_radius;
 #endif
 
-layout(set = 0, binding = 1) uniform HeatmapDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform HeatmapDrawableUBO {
     mat4 matrix;
     float extrude_scale;
     float pad1;
     vec2 pad2;
 } drawable;
 
-layout(set = 0, binding = 2) uniform HeatmapEvaluatedPropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform HeatmapInterpolateUBO {
+    float weight_t;
+    float radius_t;
+    vec2 pad1;
+} interp;
+
+layout(set = LAYER_SET_INDEX, binding = 0) uniform HeatmapEvaluatedPropsUBO {
     float weight;
     float radius;
     float intensity;
     float pad1;
 } props;
-
-layout(set = 0, binding = 3) uniform HeatmapInterpolateUBO {
-    float weight_t;
-    float radius_t;
-    vec2 pad1;
-} interp;
 
 layout(location = 0) out float frag_weight;
 layout(location = 1) out lowp vec2 frag_extrude;
@@ -98,7 +98,7 @@ void main() {
     // multiply a_pos by 0.5, since we had it * 2 in order to sneak
     // in extrusion data
     gl_Position = drawable.matrix * vec4(floor(in_position * 0.5) + scaled_extrude, 0, 1);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     frag_weight = weight;
     frag_extrude = extrude;
@@ -115,7 +115,7 @@ layout(location = 1) in lowp vec2 frag_extrude;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 2) uniform HeatmapEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform HeatmapEvaluatedPropsUBO {
     float weight;
     float radius;
     float intensity;
@@ -151,7 +151,7 @@ struct ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Vulkan> {
 
 layout(location = 0) in ivec2 in_position;
 
-layout(set = 0, binding = 1) uniform HeatmapTexturePropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform HeatmapTexturePropsUBO {
     mat4 matrix;
     float opacity;
     float pad1, pad2, pad3;
@@ -162,7 +162,7 @@ layout(location = 0) out vec2 frag_position;
 void main() {
 
     gl_Position = props.matrix * vec4(in_position * global.world_size, 0, 1);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     frag_position = in_position;
 }
@@ -173,14 +173,14 @@ void main() {
 layout(location = 0) in vec2 frag_position;
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform HeatmapTexturePropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform HeatmapTexturePropsUBO {
     mat4 matrix;
     float opacity;
     float pad1, pad2, pad3;
 } props;
 
-layout(set = 1, binding = 0) uniform sampler2D image_sampler;
-layout(set = 1, binding = 1) uniform sampler2D color_ramp_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 1) uniform sampler2D color_ramp_sampler;
 
 void main() {
 

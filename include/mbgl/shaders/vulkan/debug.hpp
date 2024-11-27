@@ -19,7 +19,7 @@ struct ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Vulkan> {
 
 layout(location = 0) in ivec2 in_position;
 
-layout(set = 0, binding = 1) uniform DebugUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform DebugUBO {
     mat4 matrix;
     vec4 color;
     float overlay_scale;
@@ -31,7 +31,7 @@ layout(location = 0) out vec2 frag_uv;
 void main() {
 
     gl_Position = debug.matrix * vec4(in_position * debug.overlay_scale, 0, 1);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     // This vertex shader expects a EXTENT x EXTENT quad,
     // The UV co-ordinates for the overlay texture can be calculated using that knowledge
@@ -43,14 +43,14 @@ void main() {
 layout(location = 0) in vec2 frag_uv;
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform DebugUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform DebugUBO {
     mat4 matrix;
     vec4 color;
     float overlay_scale;
     float pad1, pad2, pad3;
 } debug;
 
-layout(set = 1, binding = 0) uniform sampler2D image_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image_sampler;
 
 void main() {
     vec4 overlay_color = texture(image_sampler, frag_uv);

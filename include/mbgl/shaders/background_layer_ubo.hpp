@@ -50,11 +50,5 @@ struct alignas(16) BackgroundPatternLayerUBO {
 };
 static_assert(sizeof(BackgroundPatternLayerUBO) == 64);
 
-enum {
-    idBackgroundDrawableUBO = globalUBOCount,
-    idBackgroundLayerUBO,
-    backgroundUBOCount
-};
-
 } // namespace shaders
 } // namespace mbgl

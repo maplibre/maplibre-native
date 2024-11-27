@@ -9,6 +9,7 @@
 #include <mbgl/util/identity.hpp>
 #include <mbgl/util/monotonic_timer.hpp>
 #include <mbgl/util/traits.hpp>
+#include <mbgl/util/immutable.hpp>
 
 #include <cstdint>
 #include <cstddef>
@@ -150,9 +151,6 @@ public:
     /// Set sub-layer index
     virtual void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
 
-    void setLayerIndex(int32_t value) { layerIndex = value; }
-    int32_t getLayerIndex() const { return layerIndex; }
-
     /// Depth writability for 2D drawables
     DepthMaskType getDepthType() const { return depthType; }
 
@@ -292,7 +290,6 @@ protected:
     DrawPriority drawPriority = 0;
     int32_t lineWidth = 1;
     int32_t subLayerIndex = 0;
-    int32_t layerIndex = 0;
     DepthMaskType depthType; // = DepthMaskType::ReadOnly;
     UniqueDrawableData drawableData{};
     gfx::VertexAttributeArrayPtr vertexAttributes;

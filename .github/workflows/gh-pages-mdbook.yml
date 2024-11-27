@@ -5,11 +5,13 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'docs/mdbook/**'
 
 jobs:
-  build-docs:
+  gh-pages-mdbook-build:
     name: Build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: extractions/setup-just@v2
@@ -27,10 +29,10 @@ jobs:
           name: book
           path: docs/mdbook/book/
 
-  deploy-docs:
-    needs: build-docs
+  gh-pages-mdbook-deploy:
+    needs: gh-pages-mdbook-build
     name: Deploy
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Download book
@@ -39,7 +41,7 @@ jobs:
           name: book
           path: artifacts/book
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4.6.3
+        uses: JamesIves/github-pages-deploy-action@v4.6.9
         with:
           branch: gh-pages
           folder: artifacts/book

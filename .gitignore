@@ -1,7 +1,7 @@
 /mapbox-gl-native-android/MapLibreAndroid/mapbox-gl-native
 /mapbox-gl-native-android/MapLibreAndroidTestApp/mapbox-gl-native
 /platform/android/MapLibreAndroidTestApp/src/main/res/values/developer-config.xml
-/platform/android/local.properties
+
 /platform/android/gradle/configuration.gradle
 /platform/android/arm64-v8a
 /platform/android/armeabi-v7a
@@ -9,7 +9,7 @@
 /platform/android/MapLibreAndroid/build
 /platform/android/MapLibreAndroidTestApp/.cxx
 /platform/android/MapLibreAndroidTestApp/build
-/platform/android/.gradle
+/platform/android/buildSrc/build
 /platform/android/x86
 /platform/android/x86_64
 /cmake-build-debug
@@ -19,13 +19,14 @@
 /platform/windows/vendor/mesa3d/
 *.code-workspace
 
+local.properties
+.gradle
 .DS_Store
 .cache
 compile_commands.json
 /build
 **/.idea
 **/.clwb
-/platform/android/MapLibreAndroidTestApp/local.properties
 /new_offline.db
 *.gpg
 /.vscode
@@ -39,6 +40,7 @@ compile_commands.json
 /platform/ios/platform/ios/benchmark/assets/glyphs/Roboto Condensed Italic,Noto Sans Italic
 /platform/ios/platform/ios/benchmark/assets/glyphs/Noto Sans Regular
 /platform/android/key.json
+/platform/android/site
 node_modules
 # Node binaries.
 /lib

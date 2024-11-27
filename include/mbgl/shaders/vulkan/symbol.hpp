@@ -27,7 +27,7 @@ layout(location = 4) in float in_fade_opacity;
 layout(location = 5) in vec2 in_opacity;
 #endif    
 
-layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform SymbolDrawableUBO {
     mat4 matrix;
     mat4 label_plane_matrix;
     mat4 coord_matrix;
@@ -38,7 +38,7 @@ layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
     vec2 pad;
 } drawable;
 
-layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform SymbolTilePropsUBO {
     bool is_text;
     bool is_halo;
     bool pitch_with_map;
@@ -49,7 +49,7 @@ layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
     float padding;
 } tile;
 
-layout(set = 0, binding = 3) uniform SymbolInterpolateUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 2) uniform SymbolInterpolateUBO {
     float fill_color_t;
     float halo_color_t;
     float opacity_t;
@@ -117,7 +117,7 @@ void main() {
     const vec2 pos0 = projected_pos.xy / projected_pos.w;
     const vec2 posOffset = a_offset * max(a_minFontScale, fontScale) / 32.0 + a_pxoffset / 16.0;
     gl_Position = drawable.coord_matrix * vec4(pos0 + rotation_matrix * posOffset, 0.0, 1.0);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
     
     const vec2 raw_fade_opacity = unpack_opacity(in_fade_opacity);
     const float fade_change = raw_fade_opacity[1] > 0.5 ? global.symbol_fade_change : -global.symbol_fade_change;
@@ -140,7 +140,7 @@ layout(location = 1) in mediump float frag_opacity;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform SymbolTilePropsUBO {
     bool is_text;
     bool is_halo;
     bool pitch_with_map;
@@ -151,7 +151,7 @@ layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
     float padding;
 } tile;
 
-layout(set = 0, binding = 4) uniform SymbolEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform SymbolEvaluatedPropsUBO {
     vec4 text_fill_color;
     vec4 text_halo_color;
     float text_opacity;
@@ -166,7 +166,7 @@ layout(set = 0, binding = 4) uniform SymbolEvaluatedPropsUBO {
     float pad2;
 } props;
 
-layout(set = 1, binding = 0) uniform sampler2D image0_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
 void main() {
 #if defined(OVERDRAW_INSPECTOR)
@@ -222,7 +222,7 @@ layout(location = 8) in vec2 in_halo_width;
 layout(location = 9) in vec2 in_halo_blur;
 #endif  
 
-layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform SymbolDrawableUBO {
     mat4 matrix;
     mat4 label_plane_matrix;
     mat4 coord_matrix;
@@ -233,7 +233,7 @@ layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
     vec2 pad;
 } drawable;
 
-layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform SymbolTilePropsUBO {
     bool is_text;
     bool is_halo;
     bool pitch_with_map;
@@ -244,7 +244,7 @@ layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
     float padding;
 } tile;
 
-layout(set = 0, binding = 3) uniform SymbolInterpolateUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 2) uniform SymbolInterpolateUBO {
     float fill_color_t;
     float halo_color_t;
     float opacity_t;
@@ -339,8 +339,8 @@ void main() {
     const vec2 pos_rot = a_offset / 32.0 * fontScale + a_pxoffset;
     const vec2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     gl_Position = drawable.coord_matrix * vec4(pos0, 0.0, 1.0);
-    gl_Position.y *= -1.0;
-    
+    applySurfaceTransform();
+
     const vec2 raw_fade_opacity = unpack_opacity(in_fade_opacity);
     const float fade_change = raw_fade_opacity[1] > 0.5 ? global.symbol_fade_change : -global.symbol_fade_change;
 
@@ -396,7 +396,7 @@ layout(location = 8) in mediump float frag_halo_blur;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform SymbolDrawableUBO {
     mat4 matrix;
     mat4 label_plane_matrix;
     mat4 coord_matrix;
@@ -407,7 +407,7 @@ layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
     vec2 pad;
 } drawable;
 
-layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform SymbolTilePropsUBO {
     bool is_text;
     bool is_halo;
     bool pitch_with_map;
@@ -418,7 +418,7 @@ layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
     float padding;
 } tile;
 
-layout(set = 0, binding = 4) uniform SymbolEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform SymbolEvaluatedPropsUBO {
     vec4 text_fill_color;
     vec4 text_halo_color;
     float text_opacity;
@@ -433,7 +433,7 @@ layout(set = 0, binding = 4) uniform SymbolEvaluatedPropsUBO {
     float pad2;
 } props;
 
-layout(set = 1, binding = 0) uniform sampler2D image0_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
 void main() {
 
@@ -521,7 +521,7 @@ layout(location = 7) in vec2 in_halo_width;
 layout(location = 8) in vec2 in_halo_blur;
 #endif  
 
-layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform SymbolDrawableUBO {
     mat4 matrix;
     mat4 label_plane_matrix;
     mat4 coord_matrix;
@@ -532,7 +532,7 @@ layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
     vec2 pad;
 } drawable;
 
-layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform SymbolTilePropsUBO {
     bool is_text;
     bool is_halo;
     bool pitch_with_map;
@@ -543,7 +543,7 @@ layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
     float padding;
 } tile;
 
-layout(set = 0, binding = 3) uniform SymbolInterpolateUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 2) uniform SymbolInterpolateUBO {
     float fill_color_t;
     float halo_color_t;
     float opacity_t;
@@ -640,7 +640,7 @@ void main() {
     const vec2 pos_rot = a_offset / 32.0 * fontScale;
     const vec2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     gl_Position = drawable.coord_matrix * vec4(pos0, 0.0, 1.0);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
     
     const vec2 raw_fade_opacity = unpack_opacity(in_fade_opacity);
     const float fade_change = raw_fade_opacity[1] > 0.5 ? global.symbol_fade_change : -global.symbol_fade_change;
@@ -702,7 +702,7 @@ layout(location = 9) flat in int frag_is_icon;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform SymbolDrawableUBO {
     mat4 matrix;
     mat4 label_plane_matrix;
     mat4 coord_matrix;
@@ -713,7 +713,7 @@ layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
     vec2 pad;
 } drawable;
 
-layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform SymbolTilePropsUBO {
     bool is_text;
     bool is_halo;
     bool pitch_with_map;
@@ -724,7 +724,7 @@ layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
     float padding;
 } tile;
 
-layout(set = 0, binding = 4) uniform SymbolEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform SymbolEvaluatedPropsUBO {
     vec4 text_fill_color;
     vec4 text_halo_color;
     float text_opacity;
@@ -739,8 +739,8 @@ layout(set = 0, binding = 4) uniform SymbolEvaluatedPropsUBO {
     float pad2;
 } props;
 
-layout(set = 1, binding = 0) uniform sampler2D glyph_image;
-layout(set = 1, binding = 1) uniform sampler2D icon_image;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D glyph_image;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 1) uniform sampler2D icon_image;
 
 void main() {
 #if defined(OVERDRAW_INSPECTOR)
@@ -808,11 +808,11 @@ struct ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::Vulkan>
 layout(location = 0) in vec2 in_position;
 layout(location = 1) in vec2 in_tex;
 
-layout(set = 0, binding = 1) uniform CustomSymbolIconDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform CustomSymbolIconDrawableUBO {
     mat4 matrix;
 } drawable;
 
-layout(set = 0, binding = 2) uniform CustomSymbolIconParametersUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform CustomSymbolIconParametersUBO {
     vec2 extrude_scale;
     vec2 anchor;
     float angle_degrees;
@@ -862,7 +862,7 @@ void main() {
     }
 
     gl_Position = position;
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     frag_tex = in_tex;
 }
@@ -872,7 +872,7 @@ void main() {
 layout(location = 0) in vec2 frag_tex;
 layout(location = 0) out vec4 out_color;
 
-layout(set = 1, binding = 0) uniform sampler2D image_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image_sampler;
 
 void main() {
 

@@ -44,13 +44,13 @@ layout(location = 6) in vec2 in_offset;
 layout(location = 7) in vec2 in_width;
 #endif
 
-layout(set = 0, binding = 1) uniform LineDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LineDrawableUBO {
     mat4 matrix;
     mediump float ratio;
     float pad1, pad2, pad3;
 } drawable;
 
-layout(set = 0, binding = 2) uniform LineInterpolationUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform LineInterpolationUBO {
     float color_t;
     float blur_t;
     float opacity_t;
@@ -60,7 +60,7 @@ layout(set = 0, binding = 2) uniform LineInterpolationUBO {
     float pad1, pad2;
 } interp;
 
-layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
     float blur;
     float opacity;
@@ -155,7 +155,7 @@ void main() {
 
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
@@ -186,7 +186,7 @@ layout(location = 5) in lowp float frag_opacity;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
     float blur;
     float opacity;
@@ -271,13 +271,13 @@ layout(location = 5) in vec2 in_offset;
 layout(location = 6) in vec2 in_width;
 #endif
 
-layout(set = 0, binding = 1) uniform LineDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LineDrawableUBO {
     mat4 matrix;
     mediump float ratio;
     float pad1, pad2, pad3;
 } drawable;
 
-layout(set = 0, binding = 2) uniform LineInterpolationUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform LineInterpolationUBO {
     float color_t;
     float blur_t;
     float opacity_t;
@@ -287,7 +287,7 @@ layout(set = 0, binding = 2) uniform LineInterpolationUBO {
     float pad1, pad2;
 } interp;
 
-layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
     float blur;
     float opacity;
@@ -376,7 +376,7 @@ void main() {
 
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
@@ -402,11 +402,11 @@ layout(location = 4) in lowp float frag_blur;
 layout(location = 5) in lowp float frag_opacity;
 #endif
 
-layout(set = 1, binding = 0) uniform sampler2D image0_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
     float blur;
     float opacity;
@@ -497,7 +497,7 @@ layout(location = 7) in uvec4 in_pattern_from;
 layout(location = 8) in uvec4 in_pattern_to;
 #endif
 
-layout(set = 0, binding = 1) uniform LineDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LineDrawableUBO {
     mat4 matrix;
     vec4 scale;
     vec2 texsize;
@@ -505,7 +505,7 @@ layout(set = 0, binding = 1) uniform LineDrawableUBO {
     float fade;
 } drawable;
 
-layout(set = 0, binding = 2) uniform LineInterpolationUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform LineInterpolationUBO {
     float blur_t;
     float opacity_t;
     float offset_t;
@@ -516,12 +516,12 @@ layout(set = 0, binding = 2) uniform LineInterpolationUBO {
     float pad1;
 } interp;
 
-layout(set = 0, binding = 3) uniform LinePatternTilePropertiesUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 2) uniform LinePatternTilePropertiesUBO {
     vec4 pattern_from;
     vec4 pattern_to;
 } tile;
 
-layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
     float blur;
     float opacity;
@@ -626,7 +626,7 @@ void main() {
 
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
@@ -663,7 +663,7 @@ layout(location = 7) in mediump vec4 frag_pattern_to;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform LineDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LineDrawableUBO {
     mat4 matrix;
     vec4 scale;
     vec2 texsize;
@@ -671,12 +671,12 @@ layout(set = 0, binding = 1) uniform LineDrawableUBO {
     float fade;
 } drawable;
 
-layout(set = 0, binding = 3) uniform LinePatternTilePropertiesUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 2) uniform LinePatternTilePropertiesUBO {
     vec4 pattern_from;
     vec4 pattern_to;
 } tile;
 
-layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
     float blur;
     float opacity;
@@ -688,7 +688,7 @@ layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
     float pad1;
 } props;
 
-layout(set = 1, binding = 0) uniform sampler2D image0_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
 void main() {
 
@@ -808,7 +808,7 @@ layout(location = 7) in vec2 in_width;
 layout(location = 8) in vec2 in_floorwidth;
 #endif
 
-layout(set = 0, binding = 1) uniform LineSDFDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LineSDFDrawableUBO {
     mat4 matrix;
     vec2 patternscale_a;
     vec2 patternscale_b;
@@ -820,7 +820,7 @@ layout(set = 0, binding = 1) uniform LineSDFDrawableUBO {
     float pad1, pad2, pad3;
 } drawable;
 
-layout(set = 0, binding = 2) uniform LineSDFInterpolationUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform LineSDFInterpolationUBO {
     float color_t;
     float blur_t;
     float opacity_t;
@@ -831,7 +831,7 @@ layout(set = 0, binding = 2) uniform LineSDFInterpolationUBO {
     float pad1;
 } interp;
 
-layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
     float blur;
     float opacity;
@@ -887,9 +887,9 @@ void main() {
 #endif
 
 #ifndef HAS_UNIFORM_u_offset
-    const mediump float offset = unpack_mix_float(in_offset, interp.offset_t);
+    const mediump float offset = unpack_mix_float(in_offset, interp.offset_t) * -1.0;
 #else
-    const mediump float offset = props.offset;
+    const mediump float offset = props.offset * -1.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_width
@@ -919,7 +919,6 @@ void main() {
     // We store these in the least significant bit of in_pos_normal
     mediump vec2 normal = in_pos_normal - 2.0 * pos;
     frag_normal = vec2(normal.x, normal.y * 2.0 - 1.0);
-    frag_normal.y *= -1.0;
 
     // these transformations used to be applied in the JS and native code bases.
     // moved them into the shader for clarity and simplicity.
@@ -942,7 +941,7 @@ void main() {
 
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
@@ -951,8 +950,8 @@ void main() {
 
     frag_width2 = vec2(outset, inset);
 
-    frag_tex_a = vec2(linesofar * drawable.patternscale_a.x / floorwidth, (normal.y * drawable.patternscale_a.y + drawable.tex_y_a) * 2.0);
-    frag_tex_b = vec2(linesofar * drawable.patternscale_b.x / floorwidth, (normal.y * drawable.patternscale_b.y + drawable.tex_y_b) * 2.0);
+    frag_tex_a = vec2(linesofar * drawable.patternscale_a.x / floorwidth, frag_normal.y * drawable.patternscale_a.y + drawable.tex_y_a);
+    frag_tex_b = vec2(linesofar * drawable.patternscale_b.x / floorwidth, frag_normal.y * drawable.patternscale_b.y + drawable.tex_y_b);
 }
 )";
 
@@ -982,7 +981,7 @@ layout(location = 8) in mediump float frag_floorwidth;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform LineSDFDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LineSDFDrawableUBO {
     mat4 matrix;
     vec2 patternscale_a;
     vec2 patternscale_b;
@@ -994,7 +993,7 @@ layout(set = 0, binding = 1) uniform LineSDFDrawableUBO {
     float pad1, pad2, pad3;
 } drawable;
 
-layout(set = 0, binding = 2) uniform LineSDFInterpolationUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform LineSDFInterpolationUBO {
     float color_t;
     float blur_t;
     float opacity_t;
@@ -1005,7 +1004,7 @@ layout(set = 0, binding = 2) uniform LineSDFInterpolationUBO {
     float pad1;
 } interp;
 
-layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
     float blur;
     float opacity;
@@ -1017,7 +1016,7 @@ layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
     float pad1;
 } props;
 
-layout(set = 1, binding = 0) uniform sampler2D image0_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
 void main() {
 
@@ -1050,6 +1049,9 @@ void main() {
     const lowp float floorwidth = frag_floorwidth;
 #endif
 
+    // Calculate the distance of the pixel from the line in pixels.
+    const float dist = length(frag_normal) * frag_width2.x;
+
     // Calculate the antialiasing fade factor. This is either when fading in the
     // line in case of an offset line (`v_width2.y`) or when fading out (`v_width2.x`)
     const float blur2 = (blur + 1.0 / DEVICE_PIXEL_RATIO) * frag_gamma_scale;
@@ -1057,7 +1059,6 @@ void main() {
     const float sdfdist_a = texture(image0_sampler, frag_tex_a).a;
     const float sdfdist_b = texture(image0_sampler, frag_tex_b).a;
     const float sdfdist = mix(sdfdist_a, sdfdist_b, drawable.mix);
-    const float dist = length(frag_normal) * frag_width2.x;
     const float alpha = clamp(min(dist - (frag_width2.y - blur2), frag_width2.x - dist) / blur2, 0.0, 1.0) *
                         smoothstep(0.5 - drawable.sdfgamma / floorwidth, 0.5 + drawable.sdfgamma / floorwidth, sdfdist);
 

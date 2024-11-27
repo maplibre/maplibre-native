@@ -92,3 +92,10 @@ To run the benchmarks (for Android) include the following line on a PR comment:
 ## Profiling
 
 [maplibre-native/docs/mdbook](https://maplibre.org/maplibre-native/docs/book/) describes how Tracy can be used for profiling.
+
+
+## Documentation
+
+We use Dokka for the API documentation.
+
+The documentation site with examples uses MkDocs along with Material for MkDocs. For more information on how to work on the examples, see [`docs/README.md`](./docs/REAME.md`).
