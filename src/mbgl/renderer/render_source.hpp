@@ -87,10 +87,11 @@ public:
 
     virtual std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const = 0;
 
-    virtual FeatureExtensionValue queryFeatureExtensions(const Feature&,
-                                                         const std::string&,
-                                                         const std::string&,
-                                                         const std::optional<std::map<std::string, mbgl::Value>>&) const {
+    virtual FeatureExtensionValue queryFeatureExtensions(
+        const Feature&,
+        const std::string&,
+        const std::string&,
+        const std::optional<std::map<std::string, mbgl::Value>>&) const {
         return {};
     }
 

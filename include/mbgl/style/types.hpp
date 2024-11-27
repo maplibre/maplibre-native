@@ -129,7 +129,7 @@ enum class LightAnchorType : bool {
 
 } // namespace style
 
-template <>                                                                                        \
+template <>
 const char* Enum<style::SymbolAnchorType>::toString(style::SymbolAnchorType t);
 
 } // namespace mbgl
