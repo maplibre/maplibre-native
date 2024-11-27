@@ -1,6 +1,7 @@
 name: MapLibre iOS Bug Report
 description: Report a bug you encountered with MapLibre iOS.
 labels: ["ios"]
+type: "bug"
 body:
   - type: markdown
     attributes:
