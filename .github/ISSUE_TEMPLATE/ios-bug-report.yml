@@ -26,8 +26,8 @@ body:
   - type: input
     id: device
     attributes:
-      label: device
-      description: Device
+      label: Device
+      description: Enter the device that you encountered the issue on.
       placeholder: iPhone 15 Pro
     validations:
       required: true
@@ -42,9 +42,8 @@ body:
   - type: textarea
     id: repro
     attributes:
-      label: What happened?
-      description: Also tell us, what did you expect to happen?
-      placeholder: Tell us what you see!
+      label: Steps to reproduce
+      description: Explain how the issue can be reproduced.
     validations:
       required: true
   - type: textarea
@@ -53,3 +52,9 @@ body:
       label: Relevant log output
       description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
       render: shell
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context (screenshots, videos)
+    validations:
+      required: false
