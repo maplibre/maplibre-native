@@ -14,7 +14,6 @@ body:
       placeholder: e.g. 11.6.2
     validations:
       required: true
-    description: What [version](https://github.com/maplibre/maplibre-native/releases?q=android&expanded=true) are you experiencing this issue with?
   - type: input
     id: android-version
     attributes:
