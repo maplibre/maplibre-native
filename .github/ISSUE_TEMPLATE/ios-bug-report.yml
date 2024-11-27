@@ -53,6 +53,7 @@ body:
   - type: textarea
     id: context
     attributes:
-      label: Additional context (screenshots, videos)
+      label: Additional context
+      description: Additional context such as screenshots or videos that are helpful.
     validations:
       required: false
