@@ -43,13 +43,6 @@ body:
       description: Explain how the issue can be reproduced.
     validations:
       required: true
-  - type: textarea
-    id: repro
-    attributes:
-      label: Steps to reproduce
-      description: Explain how the issue can be reproduced.
-    validations:
-      required: true
   - type: dropdown
     id: renderer
     attributes:
