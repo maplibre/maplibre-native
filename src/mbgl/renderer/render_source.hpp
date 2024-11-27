@@ -90,7 +90,7 @@ public:
     virtual FeatureExtensionValue queryFeatureExtensions(const Feature&,
                                                          const std::string&,
                                                          const std::string&,
-                                                         const std::optional<std::map<std::string, Value>>&) const {
+                                                         const std::optional<std::map<std::string, mbgl::Value>>&) const {
         return {};
     }
 
