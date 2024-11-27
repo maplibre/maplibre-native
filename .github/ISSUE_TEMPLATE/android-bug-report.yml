@@ -44,6 +44,21 @@ body:
     validations:
       required: true
   - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Explain how the issue can be reproduced.
+    validations:
+      required: true
+  - type: dropdown
+    id: renderer
+    attributes:
+      label: What renderer do you see the problem with?
+      multiple: true
+      options:
+        - OpenGL (choose this if you are unsure)
+        - Vulkan
+  - type: textarea
     id: logs
     attributes:
       label: Relevant log output
