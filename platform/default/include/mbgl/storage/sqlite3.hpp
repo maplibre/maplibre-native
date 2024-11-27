@@ -156,6 +156,12 @@ private:
     Statement& stmt;
 };
 
+template <>
+std::string Query::get(int offset);
+
+template <>
+std::optional<std::string> Query::get(int offset);
+
 class Transaction {
 public:
     Transaction(const Transaction&) = delete;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mbgl/util/enum.hpp>
+
 #include <cstdint>
 
 namespace mbgl {
@@ -126,4 +128,8 @@ enum class LightAnchorType : bool {
 };
 
 } // namespace style
+
+template <>                                                                                        \
+const char* Enum<style::SymbolAnchorType>::toString(style::SymbolAnchorType t);
+
 } // namespace mbgl
