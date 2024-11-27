@@ -123,6 +123,8 @@ jobs:
       - uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ${{ github.job }}
+          append-timestamp: false
+          max-size: 5G
 
       - name: restore-gradle-cache
         uses: actions/cache@v4
@@ -229,6 +231,8 @@ jobs:
       - uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ${{ github.job }}
+          append-timestamp: false
+          max-size: 5G
 
       - name: Create data.zip in assets directory
         run: zip -r test/android/app/src/main/assets/data.zip -@ < test/android/app/src/main/assets/to_zip.txt
@@ -283,6 +287,8 @@ jobs:
       - uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ${{ github.job }}
+          append-timestamp: false
+          max-size: 5G
 
       - name: Get CMake and Ninja
         uses: lukka/get-cmake@latest
