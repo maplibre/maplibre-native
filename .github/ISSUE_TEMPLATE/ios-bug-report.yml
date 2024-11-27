@@ -11,7 +11,6 @@ body:
     id: version
     attributes:
       label: MapLibre iOS Version
-      description: MapLibre iOS Version
       placeholder: e.g. 6.8.1
     validations:
       required: true
@@ -19,7 +18,6 @@ body:
     id: ios-version
     attributes:
       label: iOS Version
-      description: MapLibre iOS Version
       placeholder: e.g. 6.8.1
     validations:
       required: true
