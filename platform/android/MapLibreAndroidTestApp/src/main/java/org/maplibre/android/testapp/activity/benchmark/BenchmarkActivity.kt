@@ -190,6 +190,15 @@ class BenchmarkActivity : AppCompatActivity() {
         }
     }
 
+    private fun getThermalStatus(): Int {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+            return powerManager.currentThermalStatus
+        }
+
+        return -1;
+    }
+
     private fun setupMapView() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -263,13 +272,7 @@ class BenchmarkActivity : AppCompatActivity() {
 
         mapView.removeOnDidFinishRenderingFrameListener(listener)
 
-        var thermalStatus = -1;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-            thermalStatus = powerManager.currentThermalStatus
-        }
-
-        return BenchmarkRunResult(fps, encodingTimeStore, renderingTimeStore, thermalStatus)
+        return BenchmarkRunResult(fps, encodingTimeStore, renderingTimeStore, getThermalStatus())
     }
 
     override fun onStart() {
