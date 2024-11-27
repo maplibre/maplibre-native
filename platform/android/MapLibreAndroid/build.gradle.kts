@@ -42,7 +42,7 @@ tasks.withType<DokkaTask> {
     moduleName.set("MapLibre Native Android")
 
     dokkaSourceSets {
-        configureEach {
+        named("main") {
             includes.from("Module.md")
         }
     }
