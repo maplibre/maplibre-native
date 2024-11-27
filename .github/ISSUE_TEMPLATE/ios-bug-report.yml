@@ -16,7 +16,7 @@ body:
     validations:
       required: true
   - type: input
-    id: version
+    id: ios-version
     attributes:
       label: iOS Version
       description: MapLibre iOS Version
