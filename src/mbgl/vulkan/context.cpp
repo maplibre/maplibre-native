@@ -172,7 +172,7 @@ void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueComm
 }
 
 void Context::requestSurfaceUpdate() {
-    if (surfaceUpdateLatency) {
+    if (surfaceUpdateRequested) {
         return;
     }
 
