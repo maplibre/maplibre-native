@@ -1,5 +1,3 @@
-import org.jetbrains.dokka.gradle.DokkaTask
-
 plugins {
     alias(libs.plugins.kotlinter)
     alias(libs.plugins.dokka)
@@ -38,11 +36,11 @@ dependencies {
     androidTestImplementation(libs.testRules)
 }
 
-tasks.withType<DokkaTask> {
+dokka {
     moduleName.set("MapLibre Native Android")
 
     dokkaSourceSets {
-        named("main") {
+        main {
             includes.from("Module.md")
         }
     }
