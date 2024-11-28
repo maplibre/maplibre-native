@@ -42,6 +42,15 @@ dokka {
     dokkaSourceSets {
         main {
             includes.from("Module.md")
+
+            sourceLink {
+                remoteUrl("https://github.com/maplibre/maplibre-native/tree/main/platform/android/")
+                localDirectory.set(rootDir)
+            }
+
+            // TODO add externalDocumentationLinks when these get dokka or javadocs:
+            // - https://github.com/maplibre/maplibre-java
+            // - https://github.com/maplibre/maplibre-gestures-android
         }
     }
 }
