@@ -45,11 +45,11 @@ class HeatmapLayerActivity : AppCompatActivity() {
             }
         )
     }
-    /* ANCHOR: create_earthquake */
+    // # --8<-- [start:createEarthquakeSource]
     private fun createEarthquakeSource(): GeoJsonSource {
         return GeoJsonSource(EARTHQUAKE_SOURCE_ID, URI(EARTHQUAKE_SOURCE_URL))
     }
-    /* ANCHOR_END: create_earthquake */
+    // # --8<-- [end:createEarthquakeSource]
 
     private fun createHeatmapLayer(): HeatmapLayer {
         val layer = HeatmapLayer(HEATMAP_LAYER_ID, EARTHQUAKE_SOURCE_ID)
@@ -188,7 +188,8 @@ class HeatmapLayerActivity : AppCompatActivity() {
         super.onDestroy()
         mapView.onDestroy()
     }
-/* ANCHOR: constants */
+
+    // # --8<-- [start:constants]
     companion object {
         private const val EARTHQUAKE_SOURCE_URL =
             "https://maplibre.org/maplibre-gl-js-docs/assets/earthquakes.geojson"
@@ -197,5 +198,5 @@ class HeatmapLayerActivity : AppCompatActivity() {
         private const val HEATMAP_LAYER_SOURCE = "earthquakes"
         private const val CIRCLE_LAYER_ID = "earthquakes-circle"
     }
-    /* ANCHOR_END: constants */
+    // # --8<-- [end:constants]
 }

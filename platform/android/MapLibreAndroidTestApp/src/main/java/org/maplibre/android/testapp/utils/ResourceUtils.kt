@@ -7,7 +7,7 @@ import java.io.*
 
 object ResourceUtils {
     @JvmStatic
-    /* ANCHOR: read_raw */
+    // # --8<-- [start:readRawResource]
     fun readRawResource(context: Context?, @RawRes rawResource: Int): String {
         var json = ""
         if (context != null) {
@@ -24,7 +24,7 @@ object ResourceUtils {
         }
         return json
     }
-    /* ANCHOR_END: read_raw */
+    // # --8<-- [end:readRawResource]
 
     fun convertDpToPx(context: Context, dp: Float): Float {
         return TypedValue.applyDimension(

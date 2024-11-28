@@ -329,7 +329,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
 
     private fun addParksLayer() {
         // Add a source
-        /* ANCHOR: source */
+        // # --8<-- [start:source]
         val source: Source = try {
             GeoJsonSource("amsterdam-spots", ResourceUtils.readRawResource(this, R.raw.amsterdam))
         } catch (ioException: IOException) {
@@ -348,7 +348,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
             PropertyFactory.fillOpacity(0.3f),
             PropertyFactory.fillAntialias(true)
         )
-        /* ANCHOR_END: source */
+        // # --8<-- [end:source]
 
         // Only show me parks (except westerpark with stroke-width == 3)
         layer.setFilter(
