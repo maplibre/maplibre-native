@@ -25,7 +25,7 @@ plugins {
 
 include(":MapLibreAndroid", ":MapLibreAndroidTestApp", ":MapLibreAndroidLint")
 
-rootProject.name = "MapLibreNativeForAndroid"
+rootProject.name = "MapLibreAndroid"
 
 val renderTestProjectDir = file("$rootDir/../../render-test/android")
 includeBuild(renderTestProjectDir) {
