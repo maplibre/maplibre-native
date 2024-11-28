@@ -146,8 +146,8 @@ jobs:
         run: make android-lib-arm-v8
 
       - name: Build API documentation
-        run: ./gradlew dokkaHtml
-      
+        run: ./gradlew dokkaGenerate
+
       - name: Build Examples documentation
         run: make mkdocs-build
 

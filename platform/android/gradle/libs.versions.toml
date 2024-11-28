@@ -82,14 +82,14 @@ androidxTestExtJUnit = { group = "androidx.test.ext", name = "junit", version = 
 androidxTestCoreKtx = { group = "androidx.test", name = "core-ktx", version = "1.6.1" }
 kotlinxSerializationJson = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.7.2" }
 
-androidGradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin"}
+androidGradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 
 
 [plugins]
 nexusPublishPlugin = { id = "io.github.gradle-nexus.publish-plugin", version = "2.0.0" }
 kotlinter = { id = "org.jmailen.kotlinter", version = "4.4.1" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version = "2.0.20" }
-dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
+dokka = { id = "org.jetbrains.dokka", version = "2.0.0-Beta" }
 kotlinPluginSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "2.0.20" }
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
