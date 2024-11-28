@@ -43,6 +43,7 @@ class QuerySourceFeaturesActivity : AppCompatActivity() {
     }
 
     private fun initStyle(style: Style) {
+        // # --8<-- [start:JsonObject]
         val properties = JsonObject()
         properties.addProperty("key1", "value1")
         val source = GeoJsonSource(
@@ -62,6 +63,7 @@ class QuerySourceFeaturesActivity : AppCompatActivity() {
         val layer = CircleLayer("test-layer", source.id)
             .withFilter(visible)
         style.addLayer(layer)
+        // # --8<-- [end:JsonObject]
 
         // Add a click listener
         maplibreMap.addOnMapClickListener { point: LatLng? ->
