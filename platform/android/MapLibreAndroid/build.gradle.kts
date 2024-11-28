@@ -12,6 +12,7 @@ plugins {
     id("maplibre.android-nitpick")
     id("maplibre.gradle-publish")
     id("maplibre.artifact-settings")
+    id("org.maplibre.ccache-plugin")
 }
 
 dependencies {
@@ -41,7 +42,7 @@ tasks.withType<DokkaTask> {
     moduleName.set("MapLibre Native Android")
 
     dokkaSourceSets {
-        configureEach {
+        named("main") {
             includes.from("Module.md")
         }
     }

@@ -33,7 +33,7 @@ layout(location = 0) out vec2 frag_position;
 void main() {
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     const vec2 epsilon = vec2(1.0) / drawable.dimension;
     const float scale = (drawable.dimension.x - 2.0) / drawable.dimension.x;
@@ -149,7 +149,7 @@ layout(location = 0) out vec2 frag_position;
 void main() {
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     frag_position = vec2(in_texture_position) / 8192.0;
     frag_position.y = 1.0 - frag_position.y; // TODO check this. prepare should ignore the flip

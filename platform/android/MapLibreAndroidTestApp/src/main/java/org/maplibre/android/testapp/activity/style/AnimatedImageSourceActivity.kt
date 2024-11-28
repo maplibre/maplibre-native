@@ -24,7 +24,7 @@ import org.maplibre.android.utils.BitmapUtils
  * with an ImageSource
  *
  *
- * GL-native equivalent of https://maplibre.org/maplibre-gl-js-docs/example/animate-images/
+ * MapLibre Native equivalent of https://maplibre.org/maplibre-gl-js/docs/examples/animate-images/
  *
  */
 class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -40,6 +40,7 @@ class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     override fun onMapReady(map: MapLibreMap) {
+        // --8<-- [start:onMapReady]
         val quad = LatLngQuad(
             LatLng(46.437, -80.425),
             LatLng(46.437, -71.516),
@@ -50,7 +51,7 @@ class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
         val layer = RasterLayer(ID_IMAGE_LAYER, ID_IMAGE_SOURCE)
         map.setStyle(
             Style.Builder()
-                .fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
+                .fromUri(TestStyles.AMERICANA)
                 .withSource(imageSource)
                 .withLayer(layer)
         ) { style: Style? ->
@@ -59,6 +60,7 @@ class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
                 handler.postDelayed(it, 100)
             }
         }
+        // --8<-- [end:onMapReady]
     }
 
     override fun onStart() {
@@ -110,11 +112,13 @@ class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         override fun run() {
+             // --8<-- [start:setImage]
             imageSource.setImage(drawables[drawableIndex++]!!)
             if (drawableIndex > 3) {
                 drawableIndex = 0
             }
             handler.postDelayed(this, 1000)
+             // --8<-- [end:setImage]
         }
 
         init {

@@ -97,7 +97,11 @@ std::unique_ptr<gfx::Context> RendererBackend::createContext() {
 std::vector<const char*> RendererBackend::getLayers() {
     return {
 #ifdef ENABLE_VULKAN_VALIDATION
-        "VK_LAYER_KHRONOS_validation"
+        "VK_LAYER_KHRONOS_validation",
+#endif
+
+#ifdef _WIN32
+        "VK_LAYER_LUNARG_monitor",
 #endif
     };
 }
@@ -557,15 +561,22 @@ void RendererBackend::initDevice() {
 }
 
 void RendererBackend::initSwapchain() {
-    const auto& renderable = getDefaultRenderable();
+    auto& renderable = getDefaultRenderable();
     auto& renderableResource = renderable.getResource<SurfaceRenderableResource>();
     const auto& size = renderable.getSize();
 
-    // use triple buffering if rendering to a surface
+    // buffer resources if rendering to a surface
     // no buffering when using headless
-    maxFrames = renderableResource.getPlatformSurface() ? 3 : 1;
+    maxFrames = renderableResource.getPlatformSurface() ? 2 : 1;
 
     renderableResource.init(size.width, size.height);
+
+    if (renderableResource.hasSurfaceTransformSupport()) {
+        auto& renderableImpl = static_cast<Renderable&>(renderable);
+        const auto& extent = renderableResource.getExtent();
+
+        renderableImpl.setSize({extent.width, extent.height});
+    }
 }
 
 void RendererBackend::initCommandPool() {

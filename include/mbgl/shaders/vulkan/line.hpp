@@ -155,7 +155,7 @@ void main() {
 
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
@@ -376,7 +376,7 @@ void main() {
 
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
@@ -626,7 +626,7 @@ void main() {
 
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
@@ -941,7 +941,7 @@ void main() {
 
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);

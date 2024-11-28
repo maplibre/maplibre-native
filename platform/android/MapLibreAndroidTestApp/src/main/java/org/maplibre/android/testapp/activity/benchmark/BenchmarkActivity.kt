@@ -213,6 +213,7 @@ class BenchmarkActivity : AppCompatActivity() {
                         val benchmarkPair = Pair(benchmarkRun, benchmarkRunResult)
                         // don't store results for fast run
                         if (i != 0) benchmarkResult.runs.add(benchmarkPair)
+                        println(jsonPayload(BenchmarkResult(arrayListOf(benchmarkPair))))
                     }
                 }
 

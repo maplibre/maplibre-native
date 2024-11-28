@@ -1,14 +1,12 @@
 # Zoom Methods
 
-!!! note
-
-    You can find the full source code of this example in [`ManualZoomActivity.kt`](https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/camera/ManualZoomActivity.kt) of the MapLibreAndroidTestApp.
+{{ activity_source_note("ManualZoomActivity.kt") }}
 
 This example shows different methods of zooming in.
 
 <figure markdown="span">
-  <video controls width="250" poster="https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/zoom_methods_thumbnail.jpg">
-    <source src="https://maplibre-native.s3.eu-central-1.amazonaws.com/android-documentation-resources/zoom_methods.mp4" />
+  <video controls width="250" poster="https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/zoom_methods_thumbnail.jpg">
+    <source src="https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/zoom_methods.mp4" />
   </video>
 </figure>
 

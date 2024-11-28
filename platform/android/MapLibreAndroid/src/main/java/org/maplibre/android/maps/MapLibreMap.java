@@ -759,6 +759,24 @@ public final class MapLibreMap {
     nativeMapView.moveBy(x, y, duration);
   }
 
+  /**
+   * Returns the current zoom level.
+   */
+  public double getZoom() {
+    return nativeMapView.getZoom();
+  }
+
+  /**
+   * Zooms the camera to the specified level.
+   * @param zoom              The zoom level to which the camera should move.
+   * @param focalPoint        The point around which to zoom.
+   * @param duration          The duration for the zoom animation
+   */
+  public void setZoom(double zoom, @NonNull PointF focalPoint, long duration ) {
+    notifyDeveloperAnimationListeners();
+    nativeMapView.setZoom(zoom, focalPoint, duration);
+  }
+
   //
   //  Reset North
   //
