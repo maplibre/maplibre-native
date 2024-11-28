@@ -171,6 +171,15 @@ void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueComm
     }
 }
 
+void Context::requestSurfaceUpdate() {
+    if (surfaceUpdateLatency) {
+        return;
+    }
+
+    surfaceUpdateRequested = true;
+    surfaceUpdateLatency = backend.getMaxFrames() * 3;
+}
+
 void Context::waitFrame() const {
     MLN_TRACE_FUNC();
     const auto& device = backend.getDevice();
@@ -203,7 +212,7 @@ void Context::beginFrame() {
         }
     }
 
-    if (platformSurface && surfaceUpdateRequested) {
+    if (platformSurface && surfaceUpdateRequested && --surfaceUpdateLatency == 0) {
         renderableResource.recreateSwapchain();
 
         // we wait for an idle device to recreate the swapchain
