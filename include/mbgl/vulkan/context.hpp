@@ -146,7 +146,7 @@ public:
     void enqueueDeletion(std::function<void(Context&)>&& function);
     void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) const;
 
-    void requestSurfaceUpdate();
+    void requestSurfaceUpdate(bool useDelay = true);
 
 private:
     struct FrameResources {
