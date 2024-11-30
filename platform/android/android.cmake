@@ -154,9 +154,7 @@ target_link_libraries(
         Mapbox::Base::jni.hpp
         mbgl-compiler-options
         $<$<BOOL:${curl_FOUND}>:curl::curl_static>
-        -Wl,--whole-archive
-        mbgl-test
-        -Wl,--no-whole-archive
+        $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
 )
 
 
@@ -209,9 +207,7 @@ target_link_libraries(
     PRIVATE
         Mapbox::Base::jni.hpp
         mbgl-compiler-options
-        -Wl,--whole-archive
-        mbgl-benchmark
-        -Wl,--no-whole-archive
+        $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-benchmark>
 )
 
 add_custom_command(
