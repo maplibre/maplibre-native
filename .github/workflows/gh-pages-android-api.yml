@@ -23,7 +23,7 @@ jobs:
           java-version: "17"
 
       - name: Generate documentation
-        run: ./gradlew dokkaHtml
+        run: ./gradlew dokkaGenerate
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.6.9
@@ -31,4 +31,3 @@ jobs:
           branch: gh-pages
           folder: platform/android/MapLibreAndroid/build/dokka/html
           target-folder: android/api/
-      

@@ -316,8 +316,10 @@ clean:
 
 .PHONY: mkdocs
 mkdocs:
+	docker build -t squidfunk/mkdocs-material docs
 	docker run --rm -it -p 8000:8000 -v ${PWD}:/docs squidfunk/mkdocs-material
 
 .PHONY: mkdocs-build
 mkdocs-build:
+	docker build -t squidfunk/mkdocs-material docs
 	docker run --rm -v ${PWD}:/docs squidfunk/mkdocs-material build --strict
