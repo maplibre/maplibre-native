@@ -46,8 +46,13 @@ struct CaptureWrapper {
         std::ranges::move(items_, items.begin());
     }
     CaptureWrapper(CaptureWrapper&&) = default;
+
+    // coverage:ignore-start
+    /// This copy constructor is required to build, but doesn't seem to be called.
     CaptureWrapper(const CaptureWrapper& other)
         : items(other.items) {}
+    // coverage:ignore-end
+
     std::vector<std::shared_ptr<Tile>> items;
 };
 } // namespace
