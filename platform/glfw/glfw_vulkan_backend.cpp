@@ -13,8 +13,9 @@
 
 class GLFWVulkanRenderableResource final : public mbgl::vulkan::SurfaceRenderableResource {
 public:
-    explicit GLFWVulkanRenderableResource(GLFWVulkanBackend& backend_)
-        : SurfaceRenderableResource(backend_) {}
+    explicit GLFWVulkanRenderableResource(GLFWVulkanBackend& backend_, bool capFrameRate)
+        : SurfaceRenderableResource(backend_,
+                                    capFrameRate ? vk::PresentModeKHR::eFifo : vk::PresentModeKHR::eImmediate) {}
 
     std::vector<const char*> getDeviceExtensions() override { return {VK_KHR_SWAPCHAIN_EXTENSION_NAME}; }
 
@@ -34,16 +35,16 @@ public:
     void bind() override {}
 };
 
-GLFWVulkanBackend::GLFWVulkanBackend(GLFWwindow* window_, const bool)
+GLFWVulkanBackend::GLFWVulkanBackend(GLFWwindow* window_, const bool capFrameRate)
     : mbgl::vulkan::RendererBackend(mbgl::gfx::ContextMode::Unique),
-      mbgl::gfx::Renderable(
+      mbgl::vulkan::Renderable(
           [window_] {
               int fbWidth;
               int fbHeight;
               glfwGetFramebufferSize(window_, &fbWidth, &fbHeight);
               return mbgl::Size{static_cast<uint32_t>(fbWidth), static_cast<uint32_t>(fbHeight)};
           }(),
-          std::make_unique<GLFWVulkanRenderableResource>(*this)),
+          std::make_unique<GLFWVulkanRenderableResource>(*this, capFrameRate)),
       window(window_) {
     init();
 }

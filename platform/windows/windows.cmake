@@ -228,9 +228,8 @@ target_link_libraries(
     mbgl-test-runner
     PRIVATE
         mbgl-compiler-options
-        -Wl,--whole-archive
-        mbgl-test
-        -Wl,--no-whole-archive
+        $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
+        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
 )
 
 add_executable(
@@ -242,8 +241,7 @@ target_link_libraries(
     mbgl-benchmark-runner
     PRIVATE
         mbgl-compiler-options
-        mbgl-benchmark
-        -WHOLEARCHIVE:mbgl-benchmark
+        $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-benchmark>
         $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
         shlwapi
 )

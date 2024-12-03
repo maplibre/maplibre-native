@@ -84,6 +84,20 @@ layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     float pad1;
 } global;
 
+#ifdef USE_SURFACE_TRANSFORM
+layout(set = GLOBAL_SET_INDEX, binding = 1) uniform PlatformParamsUBO {
+    mat2 rotation;
+} platform;
+#endif
+
+void applySurfaceTransform() {
+#ifdef USE_SURFACE_TRANSFORM
+    gl_Position.xy = platform.rotation * gl_Position.xy;
+#endif
+
+    gl_Position.y *= -1.0;
+}
+
 )";
 
     static constexpr auto fragment = R"(
@@ -130,7 +144,7 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform CommonUBO {
 
 void main() {
     gl_Position = ubo.matrix * vec4(in_position, 0, 1);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 }
 )";
 
@@ -170,7 +184,7 @@ layout(location = 0) out vec2 frag_uv;
 
 void main() {
     gl_Position = ubo.matrix * vec4(in_position, 0, 1);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     frag_uv = in_texcoord;
 }

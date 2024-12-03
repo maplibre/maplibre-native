@@ -1,5 +1,3 @@
-import org.jetbrains.dokka.gradle.DokkaTask
-
 plugins {
     alias(libs.plugins.kotlinter)
     alias(libs.plugins.dokka)
@@ -12,6 +10,7 @@ plugins {
     id("maplibre.android-nitpick")
     id("maplibre.gradle-publish")
     id("maplibre.artifact-settings")
+    id("org.maplibre.ccache-plugin")
 }
 
 dependencies {
@@ -37,12 +36,21 @@ dependencies {
     androidTestImplementation(libs.testRules)
 }
 
-tasks.withType<DokkaTask> {
+dokka {
     moduleName.set("MapLibre Native Android")
 
     dokkaSourceSets {
-        configureEach {
+        main {
             includes.from("Module.md")
+
+            sourceLink {
+                remoteUrl("https://github.com/maplibre/maplibre-native/tree/main/platform/android/")
+                localDirectory.set(rootDir)
+            }
+
+            // TODO add externalDocumentationLinks when these get dokka or javadocs:
+            // - https://github.com/maplibre/maplibre-java
+            // - https://github.com/maplibre/maplibre-gestures-android
         }
     }
 }

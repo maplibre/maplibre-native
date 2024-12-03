@@ -38,7 +38,7 @@ This can be found in [`activity_map_options_xml.xml`](https://github.com/maplibr
 
 You can assign any other existing values to the `maplibre...` tags. Then, you only need to create `MapView` and `MapLibreMap` objects with a simple setup in the Activity.
 
-```kotlin
+```kotlin title="MapOptionsXmlActivity.kt"
 --8<-- "MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options/MapOptionsXmlActivity.kt"
 ```
 
@@ -55,8 +55,8 @@ This can be found in [`activity_map_options_runtime.xml`](https://github.com/map
 
 A `MapLibreMapOptions` object must be created and passed to the MapView constructor. All setup is done in the Activity code:
 
-```kotlin
---8<-- "MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options/MapOptionsRuntimeActivity.ktl"
+```kotlin title="MapOptionsRuntimeActivity.kt"
+--8<-- "MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options/MapOptionsRuntimeActivity.kt"
 ```
 
 This can be found in [`MapOptionsRuntimeActivity.kt`](https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options/MapOptionsRuntimeActivity.kt).

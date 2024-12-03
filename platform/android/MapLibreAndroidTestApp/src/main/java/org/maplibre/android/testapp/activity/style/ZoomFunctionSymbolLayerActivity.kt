@@ -61,6 +61,7 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
         }
     }
 
+    // # --8<-- [start:updateSource]
     private fun updateSource(style: Style?) {
         val featureCollection = createFeatureCollection()
         if (source != null) {
@@ -70,6 +71,7 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
             style!!.addSource(source!!)
         }
     }
+    // # --8<-- [end:updateSource]
 
     private fun toggleSymbolLayerVisibility() {
         layer!!.setProperties(
@@ -78,6 +80,7 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
         isShowingSymbolLayer = !isShowingSymbolLayer
     }
 
+    // # --8<-- [start:createFeatureCollection]
     private fun createFeatureCollection(): FeatureCollection {
         val point = if (isInitialPosition) {
             Point.fromLngLat(-74.01618140, 40.701745)
@@ -89,6 +92,7 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
         val feature = Feature.fromGeometry(point, properties)
         return FeatureCollection.fromFeatures(arrayOf(feature))
     }
+    // # --8<-- [end:createFeatureCollection]
 
     private fun addLayer(style: Style) {
         layer = SymbolLayer(LAYER_ID, SOURCE_ID)

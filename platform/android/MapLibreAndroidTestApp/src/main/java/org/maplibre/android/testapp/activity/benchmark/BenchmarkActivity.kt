@@ -2,10 +2,12 @@ package org.maplibre.android.testapp.activity.benchmark
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
+import android.os.PowerManager
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
@@ -188,7 +190,23 @@ class BenchmarkActivity : AppCompatActivity() {
         }
     }
 
+    private fun getThermalStatus(): Int {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+            return powerManager.currentThermalStatus
+        }
+
+        return -1;
+    }
+
     private fun setupMapView() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+            powerManager.addThermalStatusListener {
+                    status -> println("Thermal status changed $status")
+            }
+        }
+        
         mapView = findViewById<View>(R.id.mapView) as MapView
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
             val benchmarkResult = BenchmarkResult(arrayListOf())
@@ -213,6 +231,7 @@ class BenchmarkActivity : AppCompatActivity() {
                         val benchmarkPair = Pair(benchmarkRun, benchmarkRunResult)
                         // don't store results for fast run
                         if (i != 0) benchmarkResult.runs.add(benchmarkPair)
+                        println(jsonPayload(BenchmarkResult(arrayListOf(benchmarkPair))))
                     }
                 }
 
@@ -253,7 +272,7 @@ class BenchmarkActivity : AppCompatActivity() {
 
         mapView.removeOnDidFinishRenderingFrameListener(listener)
 
-        return BenchmarkRunResult(fps, encodingTimeStore, renderingTimeStore)
+        return BenchmarkRunResult(fps, encodingTimeStore, renderingTimeStore, getThermalStatus())
     }
 
     override fun onStart() {

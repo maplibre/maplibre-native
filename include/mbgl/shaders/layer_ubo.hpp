@@ -51,6 +51,7 @@ static_assert(sizeof(GlobalPaintParamsUBO) == 3 * 16);
 
 enum {
     idGlobalPaintParamsUBO,
+    PlatformParamsUBO,
     globalUBOCount,
     idGlobalUBOIndex = globalUBOCount,
     globalUBOCountWithIndex,
