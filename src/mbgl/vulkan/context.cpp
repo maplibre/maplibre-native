@@ -174,6 +174,19 @@ void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueComm
     }
 }
 
+void Context::requestSurfaceUpdate(bool useDelay) {
+    if (surfaceUpdateRequested) {
+        if (!useDelay) {
+            surfaceUpdateLatency = 0;
+        }
+
+        return;
+    }
+
+    surfaceUpdateRequested = true;
+    surfaceUpdateLatency = useDelay ? backend.getMaxFrames() * 3 : 0;
+}
+
 void Context::waitFrame() const {
     MLN_TRACE_FUNC();
     const auto& device = backend.getDevice();
@@ -206,7 +219,7 @@ void Context::beginFrame() {
         }
     }
 
-    if (platformSurface && surfaceUpdateRequested) {
+    if (platformSurface && surfaceUpdateRequested && --surfaceUpdateLatency <= 0) {
         renderableResource.recreateSwapchain();
 
         // we wait for an idle device to recreate the swapchain
@@ -246,14 +259,13 @@ void Context::beginFrame() {
             if (acquireImageResult.result == vk::Result::eSuccess) {
                 renderableResource.setAcquiredImageIndex(acquireImageResult.value);
             } else if (acquireImageResult.result == vk::Result::eSuboptimalKHR) {
+                renderableResource.setAcquiredImageIndex(acquireImageResult.value);
                 requestSurfaceUpdate();
-                beginFrame();
-                return;
             }
 
         } catch (const vk::OutOfDateKHRError& e) {
             // request an update and restart frame
-            requestSurfaceUpdate();
+            requestSurfaceUpdate(false);
             beginFrame();
             return;
         }
@@ -313,7 +325,7 @@ void Context::submitFrame() {
                 requestSurfaceUpdate();
             }
         } catch (const vk::OutOfDateKHRError& e) {
-            requestSurfaceUpdate();
+            requestSurfaceUpdate(false);
         }
     }
 
