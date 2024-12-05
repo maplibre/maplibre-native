@@ -191,16 +191,29 @@ bool LocalGlyphRasterizer::canRasterizeGlyph(const FontStack&, GlyphID glyphID) 
  @param font The font to apply to the codepoint.
  @param metrics Upon return, the metrics match the font’s metrics for the glyph
     representing the codepoint.
+ @param isBold use kCTFontBoldTrait if it is true.
  @returns An image containing the glyph.
  */
-PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics& metrics) {
+PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics& metrics, BOOL isBold) {
     CFStringRefHandle string(CFStringCreateWithCharacters(NULL, reinterpret_cast<UniChar*>(&glyphID), 1));
     if (!string) {
         throw std::runtime_error("Unable to create string from codepoint");
     }
 
+    // Can't use CTFontRefHandle
+    // because the boldFont will be released after it is out of the isBold condition
+    CTFontRef boldFont = NULL;
+    if (isBold)
+    {
+        // Create a bold variant of the font
+        boldFont = CTFontCreateCopyWithSymbolicTraits(font, 0.0, NULL, kCTFontBoldTrait, kCTFontBoldTrait);
+        if (!boldFont) {
+            throw std::runtime_error("Unable to create bold font");
+        }
+    }
+
     CFStringRef keys[] = { kCTFontAttributeName };
-    CFTypeRef values[] = { font };
+    CFTypeRef values[] = { boldFont ?  boldFont : font };
 
     CFDictionaryRefHandle attributes(
         CFDictionaryCreate(kCFAllocatorDefault, (const void**)&keys,
@@ -266,6 +279,11 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
     
     CTLineDraw(*line, *context);
     
+    // Release the bold font if it was created
+    if (boldFont) {
+        CFRelease(boldFont);
+    }
+    
     return rgbaBitmap;
 }
 
@@ -288,8 +306,16 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack& fontStack, GlyphID g
     }
     
     manufacturedGlyph.id = glyphID;
+    BOOL isBold = NO;
+    for (auto& fontName : fontStack) {
+        std::string lowercaseFont = platform::lowercase(fontName);
+        if (lowercaseFont.find("bold") != std::string::npos) {
+            isBold = YES;
+            break;
+        }
+    }
 
-    PremultipliedImage rgbaBitmap = drawGlyphBitmap(glyphID, *font, manufacturedGlyph.metrics);
+    PremultipliedImage rgbaBitmap = drawGlyphBitmap(glyphID, *font, manufacturedGlyph.metrics, isBold);
     
     Size size(manufacturedGlyph.metrics.width, manufacturedGlyph.metrics.height);
     // Copy alpha values from RGBA bitmap into the AlphaImage output
