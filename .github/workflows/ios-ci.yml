@@ -312,16 +312,15 @@ jobs:
       - name: Release (Swift Package Index)
         if: env.make_release
         run: |
-          echo "::add-mask::${{ steps.generate_token.outputs.token }}"
-          release_workflow_id=81221759  # id of release.yml
+          echo "::add-mask::${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}"
+          release_workflow_name=release.yml # github api allows you to pass workflow name instead of id
           curl -L \
             -X POST \
             -H "Accept: application/vnd.github+json" \
-            -H "Authorization: token ${{ steps.generate_token.outputs.token }}" \
+            -H "Authorization: token ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/maplibre/maplibre-gl-native-distribution/actions/workflows/$release_workflow_id/dispatches \
+            https://api.github.com/repos/hudhud-maps/maplibre-gl-native-distribution/actions/workflows/$release_workflow_name/dispatches \
             -d '{"ref":"main","inputs":{
-              "changelog_url": "https://maplibre-native.s3.eu-central-1.amazonaws.com/changelogs/ios-${{ env.version }}.md",
               "version":"${{ env.version }}",
               "download_url":"${{ fromJSON(steps.github_release.outputs.assets)[0].browser_download_url }}"}}'
 
