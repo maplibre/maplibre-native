@@ -124,6 +124,8 @@
 
 - (void)hideCompass:(BOOL)animated {
     animated ? [self animateToAlpha:0] : [self setAlpha:0];
+    self.isAccessibilityElement = NO;
+    self.accessibilityElementsHidden = YES;
 }
 
 - (void)animateToAlpha:(CGFloat)alpha {
