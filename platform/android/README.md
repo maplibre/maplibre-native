@@ -6,7 +6,7 @@ MapLibre Native for Android is a library for embedding interactive map views wit
 
 ## Getting Started
 
-Visit [https://maplibre.org/maplibre-native/docs/book/android/getting-started-guide.html](https://maplibre.org/maplibre-native/docs/book/android/getting-started-guide.html) to view the Getting Started Guide for MapLibre Native for Android.
+Visit [https://maplibre.org/maplibre-native/android/examples/getting-started/](https://maplibre.org/maplibre-native/android/examples/getting-started/) to view the Getting Started Guide for MapLibre Native for Android.
 
 ## Documentation
 
