@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity() {
 ```
 </details>
 
-For more information, refer to the [Android API Documentation](https://maplibre.org/maplibre-native/android/api/), [Android Examples Documentation](https://maplibre.org/maplibre-native/docs/book/android/getting-started-guide.html) or the [MapLibre Native Android `README.md`](platform/android/README.md).
+For more information, refer to the [Android API Documentation](https://maplibre.org/maplibre-native/android/api/), [Android Examples Documentation](https://maplibre.org/maplibre-native/android/examples/getting-started/) or the [MapLibre Native Android `README.md`](platform/android/README.md).
 
 ## iOS
 
