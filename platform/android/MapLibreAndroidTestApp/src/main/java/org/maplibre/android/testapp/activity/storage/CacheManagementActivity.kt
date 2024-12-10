@@ -3,6 +3,7 @@ package org.maplibre.android.testapp.activity.storage
 import android.os.Bundle
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import org.maplibre.android.offline.OfflineManager
 import org.maplibre.android.testapp.databinding.ActivityCacheManagementBinding
@@ -19,7 +20,7 @@ class CacheManagementActivity : AppCompatActivity() {
         binding = ActivityCacheManagementBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val fileSource = OfflineManager.getInstance(this)
+        val fileSource = OfflineManager.getInstance(this, lifecycleScope)
         binding.resetDatabaseButton.setOnClickListener {
             fileSource.resetDatabase(object : OfflineManager.FileSourceCallback {
                 override fun onSuccess() {

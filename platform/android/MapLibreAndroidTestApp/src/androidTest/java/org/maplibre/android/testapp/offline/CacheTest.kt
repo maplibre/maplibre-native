@@ -1,6 +1,7 @@
 package org.maplibre.android.testapp.offline
 
 import android.content.Context
+import androidx.lifecycle.lifecycleScope
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
 import org.maplibre.android.offline.OfflineManager
@@ -25,7 +26,7 @@ class CacheTest {
     @Test
     fun testSetMaximumAmbientCacheSize() {
         rule.activity.runOnUiThread {
-            OfflineManager.getInstance(context).setMaximumAmbientCacheSize(
+            OfflineManager.getInstance(context, rule.activity.lifecycleScope).setMaximumAmbientCacheSize(
                 10000000,
                 object : OfflineManager.FileSourceCallback {
                     override fun onSuccess() {
@@ -44,7 +45,7 @@ class CacheTest {
     @Test
     fun testSetClearAmbientCache() {
         rule.activity.runOnUiThread {
-            OfflineManager.getInstance(context).clearAmbientCache(object : OfflineManager.FileSourceCallback {
+            OfflineManager.getInstance(context, rule.activity.lifecycleScope).clearAmbientCache(object : OfflineManager.FileSourceCallback {
                 override fun onSuccess() {
                     countDownLatch.countDown()
                 }
@@ -60,7 +61,7 @@ class CacheTest {
     @Test
     fun testSetInvalidateAmbientCache() {
         rule.activity.runOnUiThread {
-            OfflineManager.getInstance(context).invalidateAmbientCache(object : OfflineManager.FileSourceCallback {
+            OfflineManager.getInstance(context, rule.activity.lifecycleScope).invalidateAmbientCache(object : OfflineManager.FileSourceCallback {
                 override fun onSuccess() {
                     countDownLatch.countDown()
                 }
@@ -76,7 +77,7 @@ class CacheTest {
     @Test
     fun testSetResetDatabase() {
         rule.activity.runOnUiThread {
-            OfflineManager.getInstance(context).resetDatabase(object : OfflineManager.FileSourceCallback {
+            OfflineManager.getInstance(context, rule.activity.lifecycleScope).resetDatabase(object : OfflineManager.FileSourceCallback {
                 override fun onSuccess() {
                     countDownLatch.countDown()
                 }
@@ -92,7 +93,7 @@ class CacheTest {
     @Test
     fun testSetPackDatabase() {
         rule.activity.runOnUiThread {
-            OfflineManager.getInstance(context).packDatabase(object : OfflineManager.FileSourceCallback {
+            OfflineManager.getInstance(context, rule.activity.lifecycleScope).packDatabase(object : OfflineManager.FileSourceCallback {
                 override fun onSuccess() {
                     countDownLatch.countDown()
                 }

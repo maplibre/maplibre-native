@@ -10,6 +10,7 @@ import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import org.maplibre.android.constants.MapLibreConstants
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
@@ -43,7 +44,7 @@ class DownloadRegionActivity : AppCompatActivity(), OfflineRegion.OfflineRegionO
         binding = ActivityRegionDownloadBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        offlineManager = OfflineManager.getInstance(this)
+        offlineManager = OfflineManager.getInstance(this, lifecycleScope)
         offlineManager.setOfflineMapboxTileCountLimit(Long.MAX_VALUE)
         initUi()
 

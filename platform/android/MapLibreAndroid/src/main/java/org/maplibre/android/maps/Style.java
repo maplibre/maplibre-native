@@ -2,7 +2,6 @@ package org.maplibre.android.maps;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.util.DisplayMetrics;
 import android.util.Pair;
 
@@ -19,7 +18,6 @@ import org.maplibre.android.style.sources.Source;
 import org.maplibre.android.util.DefaultStyle;
 import org.maplibre.android.utils.BitmapUtils;
 
-import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,6 +44,7 @@ public class Style {
   private final HashMap<String, Bitmap> images = new HashMap<>();
   private final Builder builder;
   private boolean fullyLoaded;
+  private final BitmapImageConversionTask bitmapImageConversionTask;
 
   /**
    * Private constructor to build a style object.
@@ -56,6 +55,7 @@ public class Style {
   private Style(@NonNull Builder builder, @NonNull NativeMap nativeMap) {
     this.builder = builder;
     this.nativeMap = nativeMap;
+    this.bitmapImageConversionTask = new BitmapImageConversionTask(nativeMap);
   }
 
   /**
@@ -465,9 +465,13 @@ public class Style {
    * @param bitmap the pre-multiplied Bitmap
    * @param sdf    the flag indicating image is an SDF or template image
    */
-  public void addImageAsync(@NonNull final String name, @NonNull Bitmap bitmap, boolean sdf) {
+  public void addImageAsync(
+          @NonNull final String name,
+          @NonNull Bitmap bitmap,
+          boolean sdf
+  ) {
     validateState("addImage");
-    new BitmapImageConversionTask(nativeMap).execute(new Builder.ImageWrapper(name, bitmap, sdf));
+    bitmapImageConversionTask.execute(new Builder.ImageWrapper(name, bitmap, sdf));
   }
 
   /**
@@ -485,8 +489,7 @@ public class Style {
                             @NonNull List<ImageStretches> stretchY,
                             @Nullable ImageContent content) {
     validateState("addImage");
-    new BitmapImageConversionTask(nativeMap)
-      .execute(new Builder.ImageWrapper(name, bitmap, sdf, stretchX, stretchY, content));
+    bitmapImageConversionTask.execute(new Builder.ImageWrapper(name, bitmap, sdf, stretchX, stretchY, content));
   }
 
   /**
@@ -584,7 +587,7 @@ public class Style {
    */
   public void addImagesAsync(@NonNull HashMap<String, Bitmap> images, boolean sdf) {
     validateState("addImages");
-    new BitmapImageConversionTask(nativeMap).execute(Builder.ImageWrapper.convertToImageArray(images, sdf));
+    bitmapImageConversionTask.execute(Builder.ImageWrapper.convertToImageArray(images, sdf));
   }
 
   /**
@@ -601,8 +604,9 @@ public class Style {
                              @NonNull List<ImageStretches> stretchY,
                              @Nullable ImageContent content) {
     validateState("addImages");
-    new BitmapImageConversionTask(nativeMap)
-      .execute(Builder.ImageWrapper.convertToImageArray(images, sdf, stretchX, stretchY, content));
+    bitmapImageConversionTask.execute(
+            Builder.ImageWrapper.convertToImageArray(images, sdf, stretchX, stretchY, content)
+    );
   }
 
   /**
@@ -719,6 +723,7 @@ public class Style {
     sources.clear();
     layers.clear();
     images.clear();
+    bitmapImageConversionTask.cancelAll();
   }
 
   /**
@@ -1361,34 +1366,6 @@ public class Style {
     return new Image(buffer.array(), pixelRatio, imageWrapper.id,
       bitmap.getWidth(), bitmap.getHeight(), imageWrapper.sdf
     );
-  }
-
-  private static class BitmapImageConversionTask extends AsyncTask<Builder.ImageWrapper, Void, Image[]> {
-
-    private WeakReference<NativeMap> nativeMap;
-
-    BitmapImageConversionTask(NativeMap nativeMap) {
-      this.nativeMap = new WeakReference<>(nativeMap);
-    }
-
-    @NonNull
-    @Override
-    protected Image[] doInBackground(Builder.ImageWrapper... params) {
-      List<Image> images = new ArrayList<>();
-      for (Builder.ImageWrapper param : params) {
-        images.add(toImage(param));
-      }
-      return images.toArray(new Image[images.size()]);
-    }
-
-    @Override
-    protected void onPostExecute(@NonNull Image[] images) {
-      super.onPostExecute(images);
-      NativeMap nativeMap = this.nativeMap.get();
-      if (nativeMap != null && !nativeMap.isDestroyed()) {
-        nativeMap.addImages(images);
-      }
-    }
   }
 
   /**

@@ -1,11 +1,15 @@
 package org.maplibre.android.http;
 
 import androidx.annotation.Keep;
-import androidx.annotation.Nullable;
 
 import org.maplibre.android.MapLibre;
 
 import java.util.concurrent.locks.ReentrantLock;
+
+import kotlin.Unit;
+
+import static org.maplibre.android.http.LocalRequestKt.localRequest;
+
 
 @Keep
 public class NativeHttpRequest implements HttpResponder {
@@ -19,7 +23,13 @@ public class NativeHttpRequest implements HttpResponder {
   private long nativePtr;
 
   @Keep
-  private NativeHttpRequest(long nativePtr, String resourceUrl, String etag, String modified, boolean offlineUsage) {
+  private NativeHttpRequest(
+            long nativePtr,
+            String resourceUrl,
+            String etag,
+            String modified,
+            boolean offlineUsage
+  ) {
     this.nativePtr = nativePtr;
 
     if (resourceUrl.startsWith("local://")) {
@@ -48,30 +58,29 @@ public class NativeHttpRequest implements HttpResponder {
     lock.lock();
     if (nativePtr != 0) {
       nativeOnResponse(responseCode,
-        etag,
-        lastModified,
-        cacheControl,
-        expires,
-        retryAfter,
-        xRateLimitReset,
-        body);
+              etag,
+              lastModified,
+              cacheControl,
+              expires,
+              retryAfter,
+              xRateLimitReset,
+              body
+      );
     }
     lock.unlock();
   }
 
   private void executeLocalRequest(String resourceUrl) {
-    new LocalRequestTask(new LocalRequestTask.OnLocalRequestResponse() {
-      @Override
-      public void onResponse(@Nullable byte[] bytes) {
-        if (bytes != null) {
-          lock.lock();
-          if (nativePtr != 0) {
-            NativeHttpRequest.this.nativeOnResponse(200, null, null, null, null, null, null, bytes);
-          }
-          lock.unlock();
+    localRequest(resourceUrl, bytes -> {
+      if (bytes != null) {
+        lock.lock();
+        if (nativePtr != 0) {
+          NativeHttpRequest.this.nativeOnResponse(200, null, null, null, null, null, null, bytes);
         }
+        lock.unlock();
       }
-    }).execute(resourceUrl);
+      return Unit.INSTANCE;
+    });
   }
 
   public void handleFailure(int type, String errorMessage) {
