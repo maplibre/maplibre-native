@@ -3,6 +3,8 @@
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/constants.hpp>
 
+#include <mbgl/interface/native_apple_interface.h>
+
 #include <unordered_map>
 
 #import <Foundation/Foundation.h>
@@ -200,20 +202,17 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
         throw std::runtime_error("Unable to create string from codepoint");
     }
 
-    // Can't use CTFontRefHandle
-    // because the boldFont will be released after it is out of the isBold condition
-    CTFontRef boldFont = NULL;
-    if (isBold)
-    {
-        // Create a bold variant of the font
-        boldFont = CTFontCreateCopyWithSymbolicTraits(font, 0.0, NULL, kCTFontBoldTrait, kCTFontBoldTrait);
-        if (!boldFont) {
-            throw std::runtime_error("Unable to create bold font");
-        }
+    // Create a bold variant of the font
+    CTFontRefHandle boldFont(CTFontCreateCopyWithSymbolicTraits(font, 0.0, NULL, kCTFontBoldTrait, kCTFontBoldTrait));
+    if (!boldFont) {
+        CFStringRefHandle familyNameHandle(CTFontCopyFamilyName(font));
+        [MLNNativeNetworkManager.sharedManager errorLog:@"Unable to create bold font for %@", *familyNameHandle];
     }
+    
+    CTFontRef drawFont = isBold && boldFont ? *boldFont : font;
 
     CFStringRef keys[] = { kCTFontAttributeName };
-    CFTypeRef values[] = { boldFont ?  boldFont : font };
+    CFTypeRef values[] = { drawFont };
 
     CFDictionaryRefHandle attributes(
         CFDictionaryCreate(kCFAllocatorDefault, (const void**)&keys,
@@ -278,12 +277,7 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
     CGContextSetTextPosition(*context, 0.0, descent);
     
     CTLineDraw(*line, *context);
-    
-    // Release the bold font if it was created
-    if (boldFont) {
-        CFRelease(boldFont);
-    }
-    
+
     return rgbaBitmap;
 }
 
