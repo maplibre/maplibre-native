@@ -58,7 +58,7 @@ jobs:
       - name: Build package
         run: |
           RENDERER=vulkan make apackage
-          RENDERER=opengl make apackage
+          RENDERER=drawable make apackage
 
       - name: Build release Test App
         run: |
