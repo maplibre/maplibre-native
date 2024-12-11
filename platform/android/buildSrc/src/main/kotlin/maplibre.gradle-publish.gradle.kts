@@ -1,4 +1,5 @@
 import org.gradle.kotlin.dsl.get
+import java.util.Locale
 
 plugins {
     `maven-publish`
@@ -43,20 +44,24 @@ project.logger.lifecycle(project.extra["versionName"].toString())
 version = project.extra["versionName"] as String
 group = project.extra["mapLibreArtifactGroupId"] as String
 
-afterEvaluate {
+fun configureMavenPublication(
+    renderer: String,
+    publicationName: String,
+    artifactIdPostfix: String,
+    descriptionPostfix: String,
+) {
     publishing {
         publications {
-            create<MavenPublication>("release") {
-                groupId = this@afterEvaluate.group.toString()
-                artifactId = project.extra["mapLibreArtifactId"].toString()
-                version = this@afterEvaluate.version.toString()
+            create<MavenPublication>(publicationName) {
+                groupId = project.group.toString()
+                artifactId = "${project.extra["mapLibreArtifactId"]}$artifactIdPostfix"
+                version = project.version.toString()
 
-                // Conditional component selection based on environment variable
-                from(components[if (System.getenv("RENDERER")?.lowercase() == "vulkan") "vulkanRelease" else "drawableRelease"])
+                from(components["${renderer}Release"])
 
                 pom {
-                    name.set(project.extra["mapLibreArtifactTitle"].toString())
-                    description.set(project.extra["mapLibreArtifactTitle"].toString())
+                    name.set("${project.extra["mapLibreArtifactTitle"]}$descriptionPostfix")
+                    description.set("${project.extra["mapLibreArtifactTitle"]}$descriptionPostfix")
                     url.set(project.extra["mapLibreArtifactUrl"].toString())
                     licenses {
                         license {
@@ -68,7 +73,7 @@ afterEvaluate {
                         developer {
                             id.set(project.extra["mapLibreDeveloperId"].toString())
                             name.set(project.extra["mapLibreDeveloperName"].toString())
-                            email.set("maplibre@maplibre.org")
+                            email.set("team@maplibre.org")
                         }
                     }
                     scm {
@@ -80,7 +85,24 @@ afterEvaluate {
             }
         }
     }
+}
 
+
+// workaround for https://github.com/gradle/gradle/issues/26091#issuecomment-1836156762
+// https://github.com/gradle-nexus/publish-plugin/issues/208
+tasks {
+    withType<PublishToMavenRepository> {
+        dependsOn(withType<Sign>())
+    }
+}
+
+afterEvaluate {
+    configureMavenPublication("drawable", "opengl", "", "")
+    configureMavenPublication("vulkan", "vulkan", "-vulkan", "(Vulkan)")
+    // Right now this is the same as the first, but in the future we might release a major version
+    // which defaults to Vulkan (or has support for multiple backends). We will keep using only
+    // OpenGL ES with this artifact ID if that happens.
+    configureMavenPublication("drawable", "opengl2", "-opengl", " (OpenGL ES)")
 }
 
 
