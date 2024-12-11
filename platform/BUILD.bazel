@@ -50,6 +50,8 @@ objc_library(
 objc_library(
     name = "macos-objc",
     srcs = [
+        "//platform/darwin:darwin_gltf_hdrs",
+        "//platform/darwin:darwin_gltf_srcs",
         "//platform/darwin:darwin_objc_hdrs",
         "//platform/darwin:darwin_objc_srcs",
         "//platform/darwin:darwin_private_hdrs",
@@ -135,6 +137,7 @@ objc_library(
 objc_library(
     name = "objc-sdk",
     srcs = [
+        "//platform/darwin:darwin_gltf_srcs",
         "//platform/darwin:darwin_objc_srcs",
         "//platform/ios:ios_objc_srcs",
         "//platform/ios:ios_private_hdrs",
@@ -161,6 +164,7 @@ objc_library(
         "CoreGraphics",
         "CoreLocation",
         "QuartzCore",
+        "Accelerate",
     ],
     deps = [
         ":objc-headers",
