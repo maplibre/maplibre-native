@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-#define FILL_EXTRUSION_SHADER_COMMON R"(
+#define FILL_EXTRUSION_SHADER_COMMON \
+    R"(
 
 struct alignas(16) FillExtrusionDrawableUBO {
     /*   0 */ float4x4 matrix;

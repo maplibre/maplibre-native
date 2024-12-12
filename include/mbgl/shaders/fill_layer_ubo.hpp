@@ -10,7 +10,7 @@ namespace shaders {
 
 struct alignas(16) FillDrawableUBO {
     /*  0 */ std::array<float, 4 * 4> matrix;
-    
+
     // Interpolations
     /* 64 */ float color_t;
     /* 68 */ float opacity_t;
@@ -25,7 +25,7 @@ static_assert(sizeof(FillDrawableUBO) == 5 * 16);
 
 struct alignas(16) FillOutlineDrawableUBO {
     /*  0 */ std::array<float, 4 * 4> matrix;
-    
+
     // Interpolations
     /* 64 */ float outline_color_t;
     /* 68 */ float opacity_t;
@@ -43,7 +43,7 @@ struct alignas(16) FillPatternDrawableUBO {
     /* 64 */ std::array<float, 2> pixel_coord_upper;
     /* 72 */ std::array<float, 2> pixel_coord_lower;
     /* 80 */ float tile_ratio;
-    
+
     // Interpolations
     /* 84 */ float pattern_from_t;
     /* 88 */ float pattern_to_t;
@@ -70,7 +70,7 @@ struct alignas(16) FillOutlinePatternDrawableUBO {
     /* 64 */ std::array<float, 2> pixel_coord_upper;
     /* 72 */ std::array<float, 2> pixel_coord_lower;
     /* 80 */ float tile_ratio;
-    
+
     // Interpolations
     /* 84 */ float pattern_from_t;
     /* 88 */ float pattern_to_t;
@@ -110,7 +110,7 @@ struct alignas(16) FillEvaluatedPropsUBO {
     /* 36 */ float fade;
     /* 40 */ float from_scale;
     /* 44 */ float to_scale;
-    /* 48 */ 
+    /* 48 */
 };
 static_assert(sizeof(FillEvaluatedPropsUBO) == 3 * 16);
 

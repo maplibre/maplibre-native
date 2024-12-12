@@ -62,7 +62,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     int i = 0;
     std::vector<CircleDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
 #endif
-    
+
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         assert(drawable.getTileID() || !"Circles only render with tiles");
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
@@ -92,7 +92,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 #else
         const CircleDrawableUBO drawableUBO = {
 #endif
-        
+
             /* .matrix = */ util::cast<float>(matrix),
             /* .extrude_scale = */ extrudeScale,
 
@@ -114,7 +114,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         drawableUniforms.createOrUpdate(idCircleDrawableUBO, &drawableUBO, context, true, false);
 #endif
     });
-        
+
 #if MLN_UBO_CONSOLIDATION
     const size_t drawableUBOVectorSize = sizeof(CircleDrawableUBO) * drawableUBOVector.size();
     if (!drawableUniformBuffer || drawableUniformBuffer->getSize() < drawableUBOVectorSize) {

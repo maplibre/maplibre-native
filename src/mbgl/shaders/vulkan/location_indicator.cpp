@@ -21,14 +21,15 @@ const std::array<TextureInfo, 0> LocationIndicatorShaderSource::textures = {};
 //
 // Location indicator textured
 
-using LocationIndicatorShaderTexturedSource = ShaderSource<BuiltIn::LocationIndicatorTexturedShader, gfx::Backend::Type::Vulkan>;
+using LocationIndicatorShaderTexturedSource =
+    ShaderSource<BuiltIn::LocationIndicatorTexturedShader, gfx::Backend::Type::Vulkan>;
 
 const std::array<UniformBlockInfo, 1> LocationIndicatorShaderTexturedSource::uniforms = {
-        UniformBlockInfo{true, false, sizeof(LocationIndicatorDrawableUBO), idLocationIndicatorDrawableUBO},
+    UniformBlockInfo{true, false, sizeof(LocationIndicatorDrawableUBO), idLocationIndicatorDrawableUBO},
 };
 const std::array<AttributeInfo, 2> LocationIndicatorShaderTexturedSource::attributes = {
-        AttributeInfo{0, gfx::AttributeDataType::Float2, idCommonPosVertexAttribute},
-        AttributeInfo{1, gfx::AttributeDataType::Float2, idCommonTexVertexAttribute},
+    AttributeInfo{0, gfx::AttributeDataType::Float2, idCommonPosVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Float2, idCommonTexVertexAttribute},
 };
 const std::array<TextureInfo, 1> LocationIndicatorShaderTexturedSource::textures = {
     TextureInfo{0, idCommonTexture},

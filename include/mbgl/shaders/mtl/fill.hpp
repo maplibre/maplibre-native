@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-#define FILL_SHADER_COMMON R"(
+#define FILL_SHADER_COMMON \
+    R"(
 
 //
 // Fill

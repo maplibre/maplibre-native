@@ -27,20 +27,19 @@ void LocationIndicatorLayerTweaker::execute(LayerGroupBase& layerGroup, const Pa
 
         switch (static_cast<RenderLocationIndicatorLayer::LocationIndicatorComponentType>(drawable.getType())) {
             case RenderLocationIndicatorLayer::LocationIndicatorComponentType::Circle: {
-                LocationIndicatorDrawableUBO drawableUBO = {
-                    /* .matrix = */ util::cast<float>(projectionCircle),
-                    /* .color = */ props.evaluated.get<AccuracyRadiusColor>()
-                };
-                drawableUniforms.createOrUpdate(idLocationIndicatorDrawableUBO, &drawableUBO, params.context, true, true);
+                LocationIndicatorDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(projectionCircle),
+                                                            /* .color = */ props.evaluated.get<AccuracyRadiusColor>()};
+                drawableUniforms.createOrUpdate(
+                    idLocationIndicatorDrawableUBO, &drawableUBO, params.context, true, true);
                 break;
             }
 
             case RenderLocationIndicatorLayer::LocationIndicatorComponentType::CircleOutline: {
                 LocationIndicatorDrawableUBO drawableUBO = {
                     /* .matrix = */ util::cast<float>(projectionCircle),
-                    /* .color = */ props.evaluated.get<AccuracyRadiusBorderColor>()
-                };
-                drawableUniforms.createOrUpdate(idLocationIndicatorDrawableUBO, &drawableUBO, params.context, true, true);
+                    /* .color = */ props.evaluated.get<AccuracyRadiusBorderColor>()};
+                drawableUniforms.createOrUpdate(
+                    idLocationIndicatorDrawableUBO, &drawableUBO, params.context, true, true);
                 break;
             }
 
@@ -49,14 +48,13 @@ void LocationIndicatorLayerTweaker::execute(LayerGroupBase& layerGroup, const Pa
             case RenderLocationIndicatorLayer::LocationIndicatorComponentType::Puck:
                 [[fallthrough]];
             case RenderLocationIndicatorLayer::LocationIndicatorComponentType::PuckHat: {
-                const LocationIndicatorDrawableUBO drawableUBO = {
-                    /* .matrix = */ util::cast<float>(projectionPuck),
-                    /* .color = */ Color::black()
-                };
-                drawableUniforms.createOrUpdate(idLocationIndicatorDrawableUBO, &drawableUBO, params.context, true, true);
+                const LocationIndicatorDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(projectionPuck),
+                                                                  /* .color = */ Color::black()};
+                drawableUniforms.createOrUpdate(
+                    idLocationIndicatorDrawableUBO, &drawableUBO, params.context, true, true);
                 break;
             }
-                
+
             default:
                 assert(false);
                 break;

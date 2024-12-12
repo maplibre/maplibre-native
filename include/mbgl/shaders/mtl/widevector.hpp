@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-#define WIDEVECTOR_SHADER_PRELUDE R"(
+#define WIDEVECTOR_SHADER_PRELUDE \
+    R"(
 
 enum {
     idWideVectorUniformsUBO = globalUBOCount,

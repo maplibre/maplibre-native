@@ -28,14 +28,14 @@ const std::array<TextureInfo, 0> CollisionBoxShaderSource::textures = {};
 using CollisionCircleShaderSource = ShaderSource<BuiltIn::CollisionCircleShader, gfx::Backend::Type::Metal>;
 
 const std::array<UniformBlockInfo, 2> CollisionCircleShaderSource::uniforms = {
-        UniformBlockInfo{true, false, sizeof(CollisionDrawableUBO), idCollisionDrawableUBO},
-        UniformBlockInfo{true, true, sizeof(CollisionTilePropsUBO), idCollisionTilePropsUBO},
+    UniformBlockInfo{true, false, sizeof(CollisionDrawableUBO), idCollisionDrawableUBO},
+    UniformBlockInfo{true, true, sizeof(CollisionTilePropsUBO), idCollisionTilePropsUBO},
 };
 const std::array<AttributeInfo, 4> CollisionCircleShaderSource::attributes = {
-        AttributeInfo{collisionUBOCount + 0, gfx::AttributeDataType::Short2, idCollisionPosVertexAttribute},
-        AttributeInfo{collisionUBOCount + 1, gfx::AttributeDataType::Short2, idCollisionAnchorPosVertexAttribute},
-        AttributeInfo{collisionUBOCount + 2, gfx::AttributeDataType::Short2, idCollisionExtrudeVertexAttribute},
-        AttributeInfo{collisionUBOCount + 3, gfx::AttributeDataType::UShort2, idCollisionPlacedVertexAttribute},
+    AttributeInfo{collisionUBOCount + 0, gfx::AttributeDataType::Short2, idCollisionPosVertexAttribute},
+    AttributeInfo{collisionUBOCount + 1, gfx::AttributeDataType::Short2, idCollisionAnchorPosVertexAttribute},
+    AttributeInfo{collisionUBOCount + 2, gfx::AttributeDataType::Short2, idCollisionExtrudeVertexAttribute},
+    AttributeInfo{collisionUBOCount + 3, gfx::AttributeDataType::UShort2, idCollisionPlacedVertexAttribute},
 };
 const std::array<TextureInfo, 0> CollisionCircleShaderSource::textures = {};
 

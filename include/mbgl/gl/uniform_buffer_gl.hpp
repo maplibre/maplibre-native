@@ -58,7 +58,7 @@ public:
         UniformBufferArray::operator=(other);
         return *this;
     }
-    
+
     void bind() const;
     void unbind() const;
 

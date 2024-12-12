@@ -69,7 +69,7 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
     int i = 0;
     std::vector<RasterDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
 #endif
-    
+
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!checkTweakDrawable(drawable)) {
             return;
@@ -114,7 +114,7 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
         drawableUniforms.createOrUpdate(idRasterDrawableUBO, &drawableUBO, parameters.context, true, false);
 #endif
     });
-        
+
 #if MLN_UBO_CONSOLIDATION
     auto& context = parameters.context;
     const size_t drawableUBOVectorSize = sizeof(RasterDrawableUBO) * drawableUBOVector.size();

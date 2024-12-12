@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-#define CIRCLE_SHADER_PRELUDE R"(
+#define CIRCLE_SHADER_PRELUDE \
+    R"(
 
 struct alignas(16) CircleDrawableUBO {
     /*   0 */ float4x4 matrix;

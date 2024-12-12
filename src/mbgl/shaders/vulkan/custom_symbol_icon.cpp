@@ -8,7 +8,7 @@ namespace shaders {
 using CustomSymbolIconShaderSource = ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::Vulkan>;
 
 const std::array<UniformBlockInfo, 1> CustomSymbolIconShaderSource::uniforms = {
-        UniformBlockInfo{true, false, sizeof(CustomSymbolIconDrawableUBO), idCustomSymbolDrawableUBO},
+    UniformBlockInfo{true, false, sizeof(CustomSymbolIconDrawableUBO), idCustomSymbolDrawableUBO},
 };
 const std::array<AttributeInfo, 2> CustomSymbolIconShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Float2, idCustomSymbolPosVertexAttribute},

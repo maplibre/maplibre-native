@@ -83,9 +83,7 @@ public:
     void reduceMemoryUsage() override {}
 
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
-    gfx::UniformBufferPtr createUniformBuffer(const void* data,
-                                              std::size_t size,
-                                              bool persisten) override;
+    gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size, bool persisten) override;
 
     gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
 

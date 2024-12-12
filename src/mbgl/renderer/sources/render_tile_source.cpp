@@ -252,17 +252,15 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     };
 
 #if MLN_ENABLE_POLYLINE_DRAWABLES
-    const shaders::LineEvaluatedPropsUBO linePropertiesUBO = {
-        /* .color = */ Color::red(),
-        /* .blur = */ 0.f,
-        /* .opacity = */ 1.f,
-        /* .gapwidth = */ 0.f,
-        /* .offset = */ 0.f,
-        /* .width = */ 4.f,
-        /* .floorwidth = */ 0,
-        /* .expressionMask = */ LineExpressionMask::None,
-        /* .pad1 = */ 0
-    };
+    const shaders::LineEvaluatedPropsUBO linePropertiesUBO = {/* .color = */ Color::red(),
+                                                              /* .blur = */ 0.f,
+                                                              /* .opacity = */ 1.f,
+                                                              /* .gapwidth = */ 0.f,
+                                                              /* .offset = */ 0.f,
+                                                              /* .width = */ 4.f,
+                                                              /* .floorwidth = */ 0,
+                                                              /* .expressionMask = */ LineExpressionMask::None,
+                                                              /* .pad1 = */ 0};
 
     // function to add polylines drawable
     const auto addPolylineDrawable = [&](TileLayerGroup* tileLayerGroup, const RenderTile& tile) {
@@ -290,20 +288,20 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                 const shaders::LineDrawableUBO drawableUBO = {
                     /* .matrix = */ util::cast<float>(matrix),
                     /* .ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
-                    
+
                     /* .color_t = */ 0.f,
                     /* .blur_t = */ 0.f,
                     /* .opacity_t = */ 0.f,
                     /* .gapwidth_t = */ 0.f,
                     /* .offset_t = */ 0.f,
                     /* .width_t = */ 0.f,
-                    /* .pad1 = */ 0
-                };
+                    /* .pad1 = */ 0};
                 auto& drawableUniforms = drawable.mutableUniformBuffers();
                 drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, parameters.context, true, false);
 
 #if !MLN_RENDER_BACKEND_VULKAN
-                drawableUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &linePropertiesUBO, parameters.context, true, true);
+                drawableUniforms.createOrUpdate(
+                    idLineEvaluatedPropsUBO, &linePropertiesUBO, parameters.context, true, true);
 
                 // We would need to set up `idLineExpressionUBO` if the expression mask isn't empty
                 assert(linePropertiesUBO.expressionMask == LineExpressionMask::None);
@@ -377,14 +375,12 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
             const auto& debugBucket = tile.debugBucket;
             if (!debugBucket) continue;
 
-            const DebugUBO outlineUBO = {
-                /* .matrix = */ util::cast<float>(tile.matrix),
-                /* .color = */ Color::white(),
-                /* .overlay_scale = */ 1.0f,
-                /* .pad1 = */ 0,
-                /* .pad2 = */ 0,
-                /* .pad3 = */ 0
-            };
+            const DebugUBO outlineUBO = {/* .matrix = */ util::cast<float>(tile.matrix),
+                                         /* .color = */ Color::white(),
+                                         /* .overlay_scale = */ 1.0f,
+                                         /* .pad1 = */ 0,
+                                         /* .pad2 = */ 0,
+                                         /* .pad3 = */ 0};
             if (0 == updateDrawables(outlineLayerGroup, tileID, outlineUBO)) {
                 addDrawable(outlineLayerGroup,
                             tileID,
@@ -395,14 +391,12 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                             debugBucket->segments);
             }
 
-            const DebugUBO textUBO = {
-                /* .matrix = */ util::cast<float>(tile.matrix),
-                /* .color = */ Color::black(),
-                /* .overlay_scale = */ 1.0f,
-                /* .pad1 = */ 0,
-                /* .pad2 = */ 0,
-                /* .pad3 = */ 0
-            };
+            const DebugUBO textUBO = {/* .matrix = */ util::cast<float>(tile.matrix),
+                                      /* .color = */ Color::black(),
+                                      /* .overlay_scale = */ 1.0f,
+                                      /* .pad1 = */ 0,
+                                      /* .pad2 = */ 0,
+                                      /* .pad3 = */ 0};
             if (0 == updateDrawables(textLayerGroup, tileID, textUBO) && tile.getNeedsRendering()) {
                 addDrawable(textLayerGroup,
                             tileID,
@@ -439,14 +433,12 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
             const auto& debugBucket = tile.debugBucket;
             if (!debugBucket) continue;
 
-            const DebugUBO debugUBO = {
-                /* .matrix = */ util::cast<float>(tile.matrix),
-                /* .color = */ Color::red(),
-                /* .overlay_scale = */ 1.0f,
-                /* .pad1 = */ 0,
-                /* .pad2 = */ 0,
-                /* .pad3 = */ 0
-            };
+            const DebugUBO debugUBO = {/* .matrix = */ util::cast<float>(tile.matrix),
+                                       /* .color = */ Color::red(),
+                                       /* .overlay_scale = */ 1.0f,
+                                       /* .pad1 = */ 0,
+                                       /* .pad2 = */ 0,
+                                       /* .pad3 = */ 0};
             if (0 == updateDrawables(tileLayerGroup, tileID, debugUBO) && tile.getNeedsRendering()) {
 #if MLN_ENABLE_POLYLINE_DRAWABLES
                 addPolylineDrawable(tileLayerGroup, tile);

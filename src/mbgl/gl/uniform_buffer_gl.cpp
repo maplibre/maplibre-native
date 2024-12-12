@@ -127,7 +127,7 @@ void UniformBufferGL::update(const void* data_, std::size_t size_) {
 
 void UniformBufferArrayGL::bind() const {
     MLN_TRACE_FUNC();
-    
+
     for (size_t id = 0; id < allocatedSize(); id++) {
         const auto& uniformBuffer = get(id);
         if (!uniformBuffer) continue;
@@ -143,7 +143,7 @@ void UniformBufferArrayGL::bind() const {
 
 void UniformBufferArrayGL::unbind() const {
     MLN_TRACE_FUNC();
-    
+
     for (size_t id = 0; id < allocatedSize(); id++) {
         const auto& uniformBuffer = get(id);
         if (!uniformBuffer) continue;

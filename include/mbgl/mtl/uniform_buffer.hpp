@@ -44,7 +44,7 @@ public:
 
     void bind(RenderPass& renderPass) const noexcept;
     void unbind(RenderPass& renderPass) const noexcept {};
-    
+
 private:
     gfx::UniqueUniformBuffer copy(const gfx::UniformBuffer& buffer) override {
         return std::make_unique<UniformBuffer>(static_cast<const UniformBuffer&>(buffer).clone());

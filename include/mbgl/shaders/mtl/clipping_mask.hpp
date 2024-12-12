@@ -16,7 +16,8 @@ struct alignas(16) ClipUBO {
 };
 static_assert(sizeof(ClipUBO) == 5 * 16);
 
-#define CLIPPING_MASK_SHADER_PRELUDE R"(
+#define CLIPPING_MASK_SHADER_PRELUDE \
+    R"(
 
 #include <metal_stdlib>
 using namespace metal;

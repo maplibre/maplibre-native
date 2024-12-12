@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-#define SYMBOL_SHADER_COMMON R"(
+#define SYMBOL_SHADER_COMMON \
+    R"(
 
 struct alignas(16) SymbolDrawableUBO {
     /*   0 */ float4x4 matrix;

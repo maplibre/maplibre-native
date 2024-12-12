@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-#define HEATMAP_SHADER_PRELUDE R"(
+#define HEATMAP_SHADER_PRELUDE \
+    R"(
 
 struct alignas(16) HeatmapDrawableUBO {
     /*  0 */ float4x4 matrix;

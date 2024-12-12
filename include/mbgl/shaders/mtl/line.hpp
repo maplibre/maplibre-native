@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-#define LINE_SHADER_COMMON R"(
+#define LINE_SHADER_COMMON \
+    R"(
 
 //
 // Line

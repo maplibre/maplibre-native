@@ -47,7 +47,7 @@ public:
 
     bool getBindFragment() const { return bindFragment; }
     void setBindFragment(bool value) { bindFragment = value; }
-    
+
 protected:
     std::size_t size;
     bool bindVertex = false;
@@ -71,10 +71,14 @@ public:
     const std::shared_ptr<UniformBuffer>& get(const size_t id) const;
 
     /// Set a new uniform buffer element or replace the existing one.
-    virtual const std::shared_ptr<UniformBuffer>& set(const size_t id, std::shared_ptr<UniformBuffer> uniformBuffer, bool bindVertex, bool bindFragment);
+    virtual const std::shared_ptr<UniformBuffer>& set(const size_t id,
+                                                      std::shared_ptr<UniformBuffer> uniformBuffer,
+                                                      bool bindVertex,
+                                                      bool bindFragment);
 
     /// Create and add a new buffer or update an existing one
-    void createOrUpdate(const size_t id, const std::vector<uint8_t>& data, gfx::Context&, bool bindVertex, bool bindFragment);
+    void createOrUpdate(
+        const size_t id, const std::vector<uint8_t>& data, gfx::Context&, bool bindVertex, bool bindFragment);
     virtual void createOrUpdate(
         const size_t id, const void* data, std::size_t size, gfx::Context&, bool bindVertex, bool bindFragment);
     template <typename T>

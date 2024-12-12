@@ -69,7 +69,7 @@ enum {
     globalUBOCount,
 };
 
-#define MLN_UBO_CONSOLIDATION   MLN_RENDER_BACKEND_METAL
+#define MLN_UBO_CONSOLIDATION MLN_RENDER_BACKEND_METAL
 
 } // namespace shaders
 } // namespace mbgl

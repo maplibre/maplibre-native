@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-#define DEBUG_SHADER_PRELUDE R"(
+#define DEBUG_SHADER_PRELUDE \
+    R"(
 
 struct alignas(16) DebugUBO {
     /*  0 */ float4x4 matrix;

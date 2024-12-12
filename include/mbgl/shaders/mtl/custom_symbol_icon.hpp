@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-#define CUSTOM_SYMBOL_ICON_SHADER_PRELUDE R"(
+#define CUSTOM_SYMBOL_ICON_SHADER_PRELUDE \
+    R"(
 
 struct alignas(16) CustomSymbolIconDrawableUBO {
     /*   0 */ float4x4 matrix;

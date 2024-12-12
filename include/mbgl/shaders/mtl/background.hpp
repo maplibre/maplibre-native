@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-#define BACKGROUND_SHADER_COMMON R"(
+#define BACKGROUND_SHADER_COMMON \
+    R"(
 
 //
 // Background

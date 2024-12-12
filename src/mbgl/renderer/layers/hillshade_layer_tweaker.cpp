@@ -59,7 +59,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
     std::vector<HillshadeDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
     std::vector<HillshadeTilePropsUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
 #endif
-    
+
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;
@@ -69,7 +69,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
 
         const auto matrix = getTileMatrix(
             tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, drawable, true);
-        
+
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {
 #else
@@ -77,7 +77,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
 #endif
             /* .matrix = */ util::cast<float>(matrix)
         };
-            
+
 #if MLN_UBO_CONSOLIDATION
         tilePropsUBOVector[i] = {
 #else
@@ -86,7 +86,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
             /* .latrange = */ getLatRange(tileID),
             /* .light = */ getLight(parameters, evaluated)
         };
-            
+
 #if MLN_UBO_CONSOLIDATION
         drawable.setUBOIndex(i++);
 #else
@@ -95,7 +95,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
         drawableUniforms.createOrUpdate(idHillshadeTilePropsUBO, &tilePropsUBO, parameters.context, false, true);
 #endif
     });
-            
+
 #if MLN_UBO_CONSOLIDATION
     auto& context = parameters.context;
     const size_t drawableUBOVectorSize = sizeof(HillshadeDrawableUBO) * drawableUBOVector.size();

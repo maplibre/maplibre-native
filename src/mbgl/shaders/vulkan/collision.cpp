@@ -29,14 +29,14 @@ const std::array<TextureInfo, 0> CollisionBoxShaderSource::textures = {};
 using CollisionCircleShaderSource = ShaderSource<BuiltIn::CollisionCircleShader, gfx::Backend::Type::Vulkan>;
 
 const std::array<UniformBlockInfo, 2> CollisionCircleShaderSource::uniforms = {
-        UniformBlockInfo{true, false, sizeof(CollisionDrawableUBO), idCollisionDrawableUBO},
-        UniformBlockInfo{true, true, sizeof(CollisionTilePropsUBO), idCollisionTilePropsUBO},
+    UniformBlockInfo{true, false, sizeof(CollisionDrawableUBO), idCollisionDrawableUBO},
+    UniformBlockInfo{true, true, sizeof(CollisionTilePropsUBO), idCollisionTilePropsUBO},
 };
 const std::array<AttributeInfo, 4> CollisionCircleShaderSource::attributes = {
-        AttributeInfo{0, gfx::AttributeDataType::Short2, idCollisionPosVertexAttribute},
-        AttributeInfo{1, gfx::AttributeDataType::Short2, idCollisionAnchorPosVertexAttribute},
-        AttributeInfo{2, gfx::AttributeDataType::Short2, idCollisionExtrudeVertexAttribute},
-        AttributeInfo{3, gfx::AttributeDataType::UShort2, idCollisionPlacedVertexAttribute},
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idCollisionPosVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Short2, idCollisionAnchorPosVertexAttribute},
+    AttributeInfo{2, gfx::AttributeDataType::Short2, idCollisionExtrudeVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::UShort2, idCollisionPlacedVertexAttribute},
 };
 const std::array<TextureInfo, 0> CollisionCircleShaderSource::textures = {};
 

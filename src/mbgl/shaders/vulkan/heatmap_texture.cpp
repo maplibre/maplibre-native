@@ -8,11 +8,11 @@ namespace shaders {
 using HeatmapTextureShaderSource = ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Vulkan>;
 
 const std::array<UniformBlockInfo, 2> HeatmapTextureShaderSource::uniforms = {
-        UniformBlockInfo{true, false, sizeof(GlobalPaintParamsUBO), idGlobalPaintParamsUBO},
-        UniformBlockInfo{true, true, sizeof(HeatmapTexturePropsUBO), idHeatmapTexturePropsUBO},
+    UniformBlockInfo{true, false, sizeof(GlobalPaintParamsUBO), idGlobalPaintParamsUBO},
+    UniformBlockInfo{true, true, sizeof(HeatmapTexturePropsUBO), idHeatmapTexturePropsUBO},
 };
 const std::array<AttributeInfo, 1> HeatmapTextureShaderSource::attributes = {
-        AttributeInfo{0, gfx::AttributeDataType::Short2, idHeatmapPosVertexAttribute},
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idHeatmapPosVertexAttribute},
 };
 const std::array<TextureInfo, 2> HeatmapTextureShaderSource::textures = {
     TextureInfo{0, idHeatmapImageTexture},

@@ -62,7 +62,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     std::vector<FillDrawableUnionUBO> drawableUBOVector(layerGroup.getDrawableCount());
     std::vector<FillTilePropsUnionUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
 #endif
-    
+
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;
@@ -111,13 +111,13 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 const FillDrawableUBO drawableUBO = {
 #endif
                     /* .matrix = */ util::cast<float>(matrix),
- 
+
                     /* .color_t = */ std::get<0>(binders->get<FillColor>()->interpolationFactor(zoom)),
                     /* .opacity_t = */ std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom)),
                     /* .pad1 = */ 0,
                     /* .pad2 = */ 0
                 };
-                    
+
 #if !MLN_UBO_CONSOLIDATION
                 drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context, true, false);
 #endif
@@ -130,13 +130,13 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 const FillOutlineDrawableUBO drawableUBO = {
 #endif
                     /* .matrix=*/util::cast<float>(matrix),
-  
+
                     /* .outline_color_t = */ std::get<0>(binders->get<FillOutlineColor>()->interpolationFactor(zoom)),
                     /* .opacity_t = */ std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom)),
                     /* .pad1 = */ 0,
                     /* .pad2 = */ 0
                 };
-                    
+
 #if !MLN_UBO_CONSOLIDATION
                 drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context, true, false);
 #endif
@@ -150,7 +150,8 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 #endif
                     /* .matrix = */ util::cast<float>(matrix),
                     /* .pixel_coord_upper = */ {static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
-                    /* .pixel_coord_lower = */ {static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
+                    /* .pixel_coord_lower = */
+                    {static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
                     /* .tile_ratio = */ tileRatio,
 
                     /* .pattern_from_t = */ std::get<0>(binders->get<FillPattern>()->interpolationFactor(zoom)),
@@ -163,13 +164,16 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 #else
                 const FillPatternTilePropsUBO tilePropsUBO = {
 #endif
-                    /* .pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
-                    /* .pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
-                    /* .texsize = */ {static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
-                    /* .pad1 = */ 0,
-                    /* .pad2 = */ 0
+                    /* .pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr())
+                                                      : std::array<float, 4>{0},
+                        /* .pattern_to = */
+                            patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
+                        /* .texsize = */
+                        {static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
+                        /* .pad1 = */ 0,
+                        /* .pad2 = */ 0
                 };
-                    
+
 #if !MLN_UBO_CONSOLIDATION
                 drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context, true, false);
                 drawableUniforms.createOrUpdate(idFillTilePropsUBO, &tilePropsUBO, context, true, true);
@@ -184,7 +188,8 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 #endif
                     /* .matrix = */ util::cast<float>(matrix),
                     /* .pixel_coord_upper = */ {static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
-                    /* .pixel_coord_lower = */ {static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
+                    /* .pixel_coord_lower = */
+                    {static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
                     /* .tile_ratio = */ tileRatio,
 
                     /* .pattern_from_t = */ std::get<0>(binders->get<FillPattern>()->interpolationFactor(zoom)),
@@ -197,13 +202,16 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 #else
                 const FillOutlinePatternTilePropsUBO tilePropsUBO = {
 #endif
-                    /* .pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
-                    /* .pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
-                    /* .texsize = */ {static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
-                    /* .pad1 = */ 0,
-                    /* .pad2 = */ 0
+                    /* .pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr())
+                                                      : std::array<float, 4>{0},
+                        /* .pattern_to = */
+                            patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
+                        /* .texsize = */
+                        {static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
+                        /* .pad1 = */ 0,
+                        /* .pad2 = */ 0
                 };
-                    
+
 #if !MLN_UBO_CONSOLIDATION
                 drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context, true, false);
                 drawableUniforms.createOrUpdate(idFillTilePropsUBO, &tilePropsUBO, context, true, true);
@@ -222,7 +230,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     /* .pad2 = */ 0,
                     /* .pad3 = */ 0
                 };
-                    
+
 #if !MLN_UBO_CONSOLIDATION
                 drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context, true, false);
 #endif
@@ -239,7 +247,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         drawable.setUBOIndex(i++);
 #endif
     });
-    
+
 #if MLN_UBO_CONSOLIDATION
     const size_t drawableUBOVectorSize = sizeof(FillDrawableUnionUBO) * drawableUBOVector.size();
     if (!drawableUniformBuffer || drawableUniformBuffer->getSize() < drawableUBOVectorSize) {

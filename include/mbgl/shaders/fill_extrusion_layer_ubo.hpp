@@ -13,7 +13,7 @@ struct alignas(16) FillExtrusionDrawableUBO {
     /*  72 */ std::array<float, 2> pixel_coord_lower;
     /*  80 */ float height_factor;
     /*  84 */ float tile_ratio;
-    
+
     // Interpolations
     /*  88 */ float base_t;
     /*  92 */ float height_t;

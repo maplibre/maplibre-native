@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-#define HILLSHADE_SHADER_PRELUDE R"(
+#define HILLSHADE_SHADER_PRELUDE \
+    R"(
 
 struct alignas(16) HillshadeDrawableUBO {
     /*  0 */ float4x4 matrix;
