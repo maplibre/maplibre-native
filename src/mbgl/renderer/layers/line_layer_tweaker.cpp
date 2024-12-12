@@ -266,7 +266,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     /* .pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr())
                                                       : std::array<float, 4>{0},
                         /* .pattern_to = */
-                            patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
+                        patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
                         /* .scale = */
                         {parameters.pixelRatio,
                          1 / tileID.pixelsToTileUnits(1, intZoom),
