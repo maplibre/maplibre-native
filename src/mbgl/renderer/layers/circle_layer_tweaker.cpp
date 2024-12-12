@@ -51,7 +51,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             /* .stroke_opacity = */ constOrDefault<CircleStrokeOpacity>(evaluated),
             /* .scale_with_map = */ scaleWithMap,
             /* .pitch_with_map = */ pitchWithMap,
-            /* .padding = */ 0};
+            /* .pad1 = */ 0};
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
         propertiesUpdated = false;
     }

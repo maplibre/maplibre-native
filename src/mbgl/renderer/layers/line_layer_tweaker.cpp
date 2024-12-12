@@ -318,13 +318,13 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                         /* .tex_y_b = */ posB.y,
                         /* .ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
 
-                        /* .color_t =*/std::get<0>(binders->get<LineColor>()->interpolationFactor(zoom)),
-                        /* .blur_t =*/std::get<0>(binders->get<LineBlur>()->interpolationFactor(zoom)),
-                        /* .opacity_t =*/std::get<0>(binders->get<LineOpacity>()->interpolationFactor(zoom)),
-                        /* .gapwidth_t =*/std::get<0>(binders->get<LineGapWidth>()->interpolationFactor(zoom)),
-                        /* .offset_t =*/std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
-                        /* .width_t =*/std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
-                        /* .floorwidth_t =*/std::get<0>(binders->get<LineFloorWidth>()->interpolationFactor(zoom)),
+                        /* .color_t = */ std::get<0>(binders->get<LineColor>()->interpolationFactor(zoom)),
+                        /* .blur_t = */ std::get<0>(binders->get<LineBlur>()->interpolationFactor(zoom)),
+                        /* .opacity_t = */ std::get<0>(binders->get<LineOpacity>()->interpolationFactor(zoom)),
+                        /* .gapwidth_t = */ std::get<0>(binders->get<LineGapWidth>()->interpolationFactor(zoom)),
+                        /* .offset_t = */ std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
+                        /* .width_t = */ std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
+                        /* .floorwidth_t = */ std::get<0>(binders->get<LineFloorWidth>()->interpolationFactor(zoom)),
                         /* .pad1 = */ 0,
                         /* .pad2 = */ 0
                     };

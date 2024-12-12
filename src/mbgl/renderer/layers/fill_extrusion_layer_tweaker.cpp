@@ -44,7 +44,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
     const FillExtrusionPropsUBO propsUBO = {
         /* .color = */ constOrDefault<FillExtrusionColor>(evaluated),
         /* .light_color = */ FillExtrusionProgram::lightColor(parameters.evaluatedLight),
-        /* .pad = */ 0,
+        /* .pad1 = */ 0,
         /* .light_position = */ FillExtrusionProgram::lightPosition(parameters.evaluatedLight, state),
         /* .base = */ constOrDefault<FillExtrusionBase>(evaluated),
         /* .height = */ constOrDefault<FillExtrusionHeight>(evaluated),
@@ -54,7 +54,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         /* .fade = */ crossfade.t,
         /* .from_scale = */ crossfade.fromScale,
         /* .to_scale = */ crossfade.toScale,
-        /* .pad = */ 0};
+        /* .pad2 = */ 0};
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.createOrUpdate(idFillExtrusionPropsUBO, &propsUBO, context, true, true);
 
@@ -136,8 +136,8 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
 #else
         const FillExtrusionTilePropsUBO tilePropsUBO = {
 #endif
-            /* pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
-            /* pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
+            /* .pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
+            /* .pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
             /* .texsize = */ {static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
             /* .pad1 = */ 0,
             /* .pad2 = */ 0
