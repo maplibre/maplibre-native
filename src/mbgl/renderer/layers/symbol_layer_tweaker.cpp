@@ -74,14 +74,14 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                                   /* .text_opacity = */ constOrDefault<TextOpacity>(evaluated),
                                                   /* .text_halo_width = */ constOrDefault<TextHaloWidth>(evaluated),
                                                   /* .text_halo_blur = */ constOrDefault<TextHaloBlur>(evaluated),
-                                                  /* .pad */ 0,
+                                                  /* .pad1 */ 0,
 
                                                   /* .icon_fill_color = */ constOrDefault<IconColor>(evaluated),
                                                   /* .icon_halo_color = */ constOrDefault<IconHaloColor>(evaluated),
                                                   /* .icon_opacity = */ constOrDefault<IconOpacity>(evaluated),
                                                   /* .icon_halo_width = */ constOrDefault<IconHaloWidth>(evaluated),
                                                   /* .icon_halo_blur = */ constOrDefault<IconHaloBlur>(evaluated),
-                                                  /* .pad */ 0};
+                                                  /* .pad2 */ 0};
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);
         propertiesUpdated = false;
     }
