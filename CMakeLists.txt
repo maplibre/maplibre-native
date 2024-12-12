@@ -1035,6 +1035,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_collision_box.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_collision_circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_custom_symbol_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_debug.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_outline.hpp
@@ -1051,10 +1052,13 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_line_gradient.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_line_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_line_sdf.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_location_indicator.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_location_indicator_textured.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_raster.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_sdf.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_text_and_icon.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_wide_vector.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/background_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/clipping_mask.hpp
