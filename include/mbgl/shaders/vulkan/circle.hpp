@@ -10,10 +10,10 @@ template <>
 struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "CircleShader";
 
-    static const std::array<UniformBlockInfo, 4> uniforms;
+    static const std::array<UniformBlockInfo, 3> uniforms;
     static const std::array<AttributeInfo, 8> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static constexpr std::array<TextureInfo, 0> textures{};
+    static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto vertex = R"(
 
@@ -50,10 +50,7 @@ layout(location = 7) in vec2 in_stroke_opacity;
 layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform CircleDrawableUBO {
     mat4 matrix;
     vec2 extrude_scale;
-    vec2 padding;
-} drawable;
-
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform CircleInterpolateUBO {
+    // Interpolations
     float color_t;
     float radius_t;
     float blur_t;
@@ -61,8 +58,10 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform CircleInterpolateUBO {
     float stroke_color_t;
     float stroke_width_t;
     float stroke_opacity_t;
-    float pad1_;
-} interp;
+    float pad1;
+    float pad2;
+    float pad3;
+} drawable;
 
 layout(set = LAYER_SET_INDEX, binding = 0) uniform CircleEvaluatedPropsUBO {
     vec4 color;
@@ -74,7 +73,7 @@ layout(set = LAYER_SET_INDEX, binding = 0) uniform CircleEvaluatedPropsUBO {
     float stroke_opacity;
     bool scale_with_map;
     bool pitch_with_map;
-    float padding;
+    float pad1;
 } props;
 
 layout(location = 0) out vec2 frag_extrude;
@@ -113,13 +112,13 @@ void main() {
 #if defined(HAS_UNIFORM_u_radius)
     const float radius = props.radius;
 #else
-    const float radius = unpack_mix_float(in_radius, interp.radius_t);
+    const float radius = unpack_mix_float(in_radius, drawable.radius_t);
 #endif
 
 #if defined(HAS_UNIFORM_u_stroke_width)
     const float stroke_width = props.stroke_width;
 #else
-    const float stroke_width = unpack_mix_float(in_stroke_width, interp.stroke_width_t);
+    const float stroke_width = unpack_mix_float(in_stroke_width, drawable.stroke_width_t);
 #endif
 
     // unencode the extrusion vector that we snuck into the a_pos vector
@@ -139,14 +138,14 @@ void main() {
             // whole circle based on the pitch scaling effect at its central point
             const vec4 projected_center = drawable.matrix * vec4(circle_center, 0, 1);
             corner_position += scaled_extrude * (radius + stroke_width) *
-                               (projected_center.w / global.camera_to_center_distance);
+                               (projected_center.w / paintParams.camera_to_center_distance);
         }
 
         gl_Position = drawable.matrix * vec4(corner_position, 0, 1);
     } else {
         gl_Position = drawable.matrix * vec4(circle_center, 0, 1);
 
-        const float factor = props.scale_with_map ? global.camera_to_center_distance : gl_Position.w;
+        const float factor = props.scale_with_map ? paintParams.camera_to_center_distance : gl_Position.w;
         gl_Position.xy += scaled_extrude * (radius + stroke_width) * factor;
     }
 
@@ -160,7 +159,7 @@ void main() {
     frag_extrude = extrude;
 
 #if !defined(HAS_UNIFORM_u_color)
-    frag_color = unpack_mix_color(in_color, interp.color_t);
+    frag_color = unpack_mix_color(in_color, drawable.color_t);
 #endif
 
 #if !defined(HAS_UNIFORM_u_radius)
@@ -168,15 +167,15 @@ void main() {
 #endif
 
 #if !defined(HAS_UNIFORM_u_blur)
-    frag_blur = unpack_mix_float(in_blur, interp.blur_t);
+    frag_blur = unpack_mix_float(in_blur, drawable.blur_t);
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
-    frag_opacity = unpack_mix_float(in_opacity, interp.opacity_t);
+    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
 #endif
 
 #if !defined(HAS_UNIFORM_u_stroke_color)
-    frag_stroke_color = unpack_mix_color(in_stroke_color, interp.stroke_color_t);
+    frag_stroke_color = unpack_mix_color(in_stroke_color, drawable.stroke_color_t);
 #endif
 
 #if !defined(HAS_UNIFORM_u_stroke_width)
@@ -184,7 +183,7 @@ void main() {
 #endif
 
 #if !defined(HAS_UNIFORM_u_stroke_opacity)
-    frag_stroke_opacity = unpack_mix_float(in_stroke_opacity, interp.stroke_opacity_t);
+    frag_stroke_opacity = unpack_mix_float(in_stroke_opacity, drawable.stroke_opacity_t);
 #endif
 }
 )";
@@ -234,7 +233,7 @@ layout(set = LAYER_SET_INDEX, binding = 0) uniform CircleEvaluatedPropsUBO {
     float stroke_opacity;
     bool scale_with_map;
     bool pitch_with_map;
-    float padding;
+    float pad1;
 } props;
 
 void main() {

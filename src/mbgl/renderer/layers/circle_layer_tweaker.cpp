@@ -56,8 +56,13 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         propertiesUpdated = false;
     }
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
-    layerUniforms.set(idCircleEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
+    layerUniforms.set(idCircleEvaluatedPropsUBO, evaluatedPropsUniformBuffer, true, true);
 
+#if MLN_UBO_CONSOLIDATION
+    int i = 0;
+    std::vector<CircleDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
+#endif
+    
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         assert(drawable.getTileID() || !"Circles only render with tiles");
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
@@ -82,28 +87,44 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const auto extrudeScale = pitchWithMap ? std::array<float, 2>{pixelsToTileUnits, pixelsToTileUnits}
                                                : parameters.pixelsToGLUnits;
 
-        // Updated for each drawable on each frame
-        const CircleDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix),
-                                               /* .extrude_scale = */ extrudeScale,
-                                               /* .padding = */ 0};
+#if MLN_UBO_CONSOLIDATION
+        drawableUBOVector[i] = {
+#else
+        const CircleDrawableUBO drawableUBO = {
+#endif
+        
+            /* .matrix = */ util::cast<float>(matrix),
+            /* .extrude_scale = */ extrudeScale,
 
-        auto& drawableUniforms = drawable.mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(idCircleDrawableUBO, &drawableUBO, context);
-
-        const CircleInterpolateUBO interpolateUBO = {
             /* .color_t = */ std::get<0>(binders->get<CircleColor>()->interpolationFactor(zoom)),
             /* .radius_t = */ std::get<0>(binders->get<CircleRadius>()->interpolationFactor(zoom)),
             /* .blur_t = */ std::get<0>(binders->get<CircleBlur>()->interpolationFactor(zoom)),
             /* .opacity_t = */ std::get<0>(binders->get<CircleOpacity>()->interpolationFactor(zoom)),
-            /* .stroke_color_t = */
-            std::get<0>(binders->get<CircleStrokeColor>()->interpolationFactor(zoom)),
-            /* .stroke_width_t = */
-            std::get<0>(binders->get<CircleStrokeWidth>()->interpolationFactor(zoom)),
-            /* .stroke_opacity_t = */
-            std::get<0>(binders->get<CircleStrokeOpacity>()->interpolationFactor(zoom)),
-            /* .padding = */ 0};
-        drawableUniforms.createOrUpdate(idCircleInterpolateUBO, &interpolateUBO, context);
+            /* .stroke_color_t = */ std::get<0>(binders->get<CircleStrokeColor>()->interpolationFactor(zoom)),
+            /* .stroke_width_t = */ std::get<0>(binders->get<CircleStrokeWidth>()->interpolationFactor(zoom)),
+            /* .stroke_opacity_t = */ std::get<0>(binders->get<CircleStrokeOpacity>()->interpolationFactor(zoom)),
+            /* .pad1 = */ 0,
+            /* .pad2 = */ 0,
+            /* .pad3 = */ 0
+        };
+#if MLN_UBO_CONSOLIDATION
+        drawable.setUBOIndex(i++);
+#else
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idCircleDrawableUBO, &drawableUBO, context, true, false);
+#endif
     });
+        
+#if MLN_UBO_CONSOLIDATION
+    const size_t drawableUBOVectorSize = sizeof(CircleDrawableUBO) * drawableUBOVector.size();
+    if (!drawableUniformBuffer || drawableUniformBuffer->getSize() < drawableUBOVectorSize) {
+        drawableUniformBuffer = context.createUniformBuffer(drawableUBOVector.data(), drawableUBOVectorSize, false);
+    } else {
+        drawableUniformBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
+    }
+
+    layerUniforms.set(idCircleDrawableUBO, drawableUniformBuffer, true, false);
+#endif
 }
 
 } // namespace mbgl

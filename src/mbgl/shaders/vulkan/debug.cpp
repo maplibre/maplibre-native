@@ -5,13 +5,15 @@
 namespace mbgl {
 namespace shaders {
 
-const std::array<UniformBlockInfo, 1> ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Vulkan>::uniforms = {
+using DebugShaderSource = ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Vulkan>;
+
+const std::array<UniformBlockInfo, 1> DebugShaderSource::uniforms = {
     UniformBlockInfo{true, true, sizeof(DebugUBO), idDebugUBO},
 };
-const std::array<AttributeInfo, 1> ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Vulkan>::attributes = {
+const std::array<AttributeInfo, 1> DebugShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, idDebugPosVertexAttribute},
 };
-const std::array<TextureInfo, 1> ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Vulkan>::textures = {
+const std::array<TextureInfo, 1> DebugShaderSource::textures = {
     TextureInfo{0, idDebugOverlayTexture},
 };
 

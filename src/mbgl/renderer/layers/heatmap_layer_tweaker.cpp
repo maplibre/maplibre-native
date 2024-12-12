@@ -44,8 +44,13 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
         propertiesUpdated = false;
     }
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
-    layerUniforms.set(idHeatmapEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
+    layerUniforms.set(idHeatmapEvaluatedPropsUBO, evaluatedPropsUniformBuffer, true, true);
 
+#if MLN_UBO_CONSOLIDATION
+    int i = 0;
+    std::vector<HeatmapDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
+#endif
+    
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;
@@ -64,19 +69,37 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
         constexpr bool inViewportPixelUnits = false;
         const auto matrix = getTileMatrix(
             tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, nearClipped, inViewportPixelUnits, drawable);
-        const HeatmapDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix),
-                                                /* .extrude_scale = */ tileID.pixelsToTileUnits(1.0f, zoom),
-                                                /* .padding = */ {0}};
+        
+#if MLN_UBO_CONSOLIDATION
+        drawableUBOVector[i] = {
+#else
+        const HeatmapDrawableUBO drawableUBO = {
+#endif
+            /* .matrix = */ util::cast<float>(matrix),
+            /* .extrude_scale = */ tileID.pixelsToTileUnits(1.0f, zoom),
 
-        auto& drawableUniforms = drawable.mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(idHeatmapDrawableUBO, &drawableUBO, context);
-
-        const HeatmapInterpolateUBO interpolateUBO = {
             /* .weight_t = */ std::get<0>(binders->get<HeatmapWeight>()->interpolationFactor(zoom)),
             /* .radius_t = */ std::get<0>(binders->get<HeatmapRadius>()->interpolationFactor(zoom)),
-            /* .padding = */ {0}};
-        drawableUniforms.createOrUpdate(idHeatmapInterpolateUBO, &interpolateUBO, context);
+            /* .pad1 = */ 0
+        };
+#if MLN_UBO_CONSOLIDATION
+        drawable.setUBOIndex(i++);
+#else
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idHeatmapDrawableUBO, &drawableUBO, context, true, false);
+#endif
     });
+        
+#if MLN_UBO_CONSOLIDATION
+    const size_t drawableUBOVectorSize = sizeof(HeatmapDrawableUBO) * drawableUBOVector.size();
+    if (!drawableUniformBuffer || drawableUniformBuffer->getSize() < drawableUBOVectorSize) {
+        drawableUniformBuffer = context.createUniformBuffer(drawableUBOVector.data(), drawableUBOVectorSize, false);
+    } else {
+        drawableUniformBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
+    }
+
+    layerUniforms.set(idSymbolDrawableUBO, drawableUniformBuffer, true, false);
+#endif
 }
 
 } // namespace mbgl

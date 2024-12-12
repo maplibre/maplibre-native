@@ -442,13 +442,11 @@ void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexce
     if (renderableResource.hasSurfaceTransformSupport()) {
         float surfaceRotation = renderableResource.getRotation();
 
-        struct alignas(16) {
-            alignas(16) std::array<float, 2> rotation0;
-            alignas(16) std::array<float, 2> rotation1;
-        } data;
-
-        data = {{cosf(surfaceRotation), -sinf(surfaceRotation)}, {sinf(surfaceRotation), cosf(surfaceRotation)}};
-        context.globalUniformBuffers.createOrUpdate(shaders::PlatformParamsUBO, &data, sizeof(data), context);
+        const shaders::GlobalPlatformParamsUBO platformUBO = {
+            /* .rotation0 = */ {cosf(surfaceRotation), -sinf(surfaceRotation)},
+            /* .rotation1 = */ {sinf(surfaceRotation), cosf(surfaceRotation)}
+        };
+        context.globalUniformBuffers.createOrUpdate(shaders::idGlobalPlatformParamsUBO, &platformUBO, sizeof(platformUBO), context, true, true);
     }
 
     context.globalUniformBuffers.bindDescriptorSets(renderPassImpl.getEncoder());

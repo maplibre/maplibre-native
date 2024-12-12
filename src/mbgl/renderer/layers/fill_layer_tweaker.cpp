@@ -50,13 +50,19 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         propertiesUpdated = false;
     }
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
-    layerUniforms.set(idFillEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
+    layerUniforms.set(idFillEvaluatedPropsUBO, evaluatedPropsUniformBuffer, true, true);
 
     const auto& translation = evaluated.get<FillTranslate>();
     const auto anchor = evaluated.get<FillTranslateAnchor>();
     const auto zoom = static_cast<float>(parameters.state.getZoom());
     const auto intZoom = parameters.state.getIntegerZoom();
 
+#if MLN_UBO_CONSOLIDATION
+    int i = 0;
+    std::vector<FillDrawableUnionUBO> drawableUBOVector(layerGroup.getDrawableCount());
+    std::vector<FillTilePropsUnionUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
+#endif
+    
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;
@@ -99,90 +105,127 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
         switch (static_cast<RenderFillLayer::FillVariant>(drawable.getType())) {
             case RenderFillLayer::FillVariant::Fill: {
-                const FillDrawableUBO drawableUBO = {/*.matrix=*/util::cast<float>(matrix)};
-                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
-
-                const auto fillInterpolateUBO = FillInterpolateUBO{
+#if MLN_UBO_CONSOLIDATION
+                drawableUBOVector[i].fillDrawableUBO = {
+#else
+                const FillDrawableUBO drawableUBO = {
+#endif
+                    /* .matrix = */ util::cast<float>(matrix),
+ 
                     /* .color_t = */ std::get<0>(binders->get<FillColor>()->interpolationFactor(zoom)),
                     /* .opacity_t = */ std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom)),
-                    0,
-                    0,
+                    /* .pad1 = */ 0,
+                    /* .pad2 = */ 0
                 };
-                drawableUniforms.createOrUpdate(idFillInterpolateUBO, &fillInterpolateUBO, context);
+                    
+#if !MLN_UBO_CONSOLIDATION
+                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context, true, false);
+#endif
                 break;
             }
             case RenderFillLayer::FillVariant::FillOutline: {
-                const FillOutlineDrawableUBO drawableUBO = {/*.matrix=*/util::cast<float>(matrix)};
-                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
-
-                const auto fillOutlineInterpolateUBO = FillOutlineInterpolateUBO{
-                    /* .color_t = */ std::get<0>(binders->get<FillOutlineColor>()->interpolationFactor(zoom)),
+#if MLN_UBO_CONSOLIDATION
+                drawableUBOVector[i].fillOutlineDrawableUBO = {
+#else
+                const FillOutlineDrawableUBO drawableUBO = {
+#endif
+                    /* .matrix=*/util::cast<float>(matrix),
+  
+                    /* .outline_color_t = */ std::get<0>(binders->get<FillOutlineColor>()->interpolationFactor(zoom)),
                     /* .opacity_t = */ std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom)),
-                    0,
-                    0,
+                    /* .pad1 = */ 0,
+                    /* .pad2 = */ 0
                 };
-                drawableUniforms.createOrUpdate(idFillInterpolateUBO, &fillOutlineInterpolateUBO, context);
+                    
+#if !MLN_UBO_CONSOLIDATION
+                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context, true, false);
+#endif
                 break;
             }
             case RenderFillLayer::FillVariant::FillPattern: {
+#if MLN_UBO_CONSOLIDATION
+                drawableUBOVector[i].fillPatternDrawableUBO = {
+#else
                 const FillPatternDrawableUBO drawableUBO = {
-                    /*.matrix=*/util::cast<float>(matrix),
-                    /*.pixel_coord_upper=*/{static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
-                    /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
-                    /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
-                    /*.tile_ratio = */ tileRatio,
-                    0,
-                };
-                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
+#endif
+                    /* .matrix = */ util::cast<float>(matrix),
+                    /* .pixel_coord_upper = */ {static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
+                    /* .pixel_coord_lower = */ {static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
+                    /* .tile_ratio = */ tileRatio,
 
-                const auto fillPatternInterpolateUBO = FillPatternInterpolateUBO{
                     /* .pattern_from_t = */ std::get<0>(binders->get<FillPattern>()->interpolationFactor(zoom)),
                     /* .pattern_to_t = */ std::get<0>(binders->get<FillPattern>()->interpolationFactor(zoom)),
-                    /* .opacity_t = */ std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom)),
-                    0,
+                    /* .opacity_t = */ std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom))
                 };
-                drawableUniforms.createOrUpdate(idFillInterpolateUBO, &fillPatternInterpolateUBO, context);
 
-                const auto fillPatternTilePropsUBO = FillPatternTilePropsUBO{
-                    /* pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
-                    /* pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
+#if MLN_UBO_CONSOLIDATION
+                tilePropsUBOVector[i].fillPatternTilePropsUBO = FillPatternTilePropsUBO {
+#else
+                const FillPatternTilePropsUBO tilePropsUBO = {
+#endif
+                    /* .pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
+                    /* .pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
+                    /* .texsize = */ {static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
+                    /* .pad1 = */ 0,
+                    /* .pad2 = */ 0
                 };
-                drawableUniforms.createOrUpdate(idFillTilePropsUBO, &fillPatternTilePropsUBO, context);
+                    
+#if !MLN_UBO_CONSOLIDATION
+                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context, true, false);
+                drawableUniforms.createOrUpdate(idFillTilePropsUBO, &tilePropsUBO, context, true, true);
+#endif
                 break;
             }
             case RenderFillLayer::FillVariant::FillOutlinePattern: {
+#if MLN_UBO_CONSOLIDATION
+                drawableUBOVector[i].fillOutlinePatternDrawableUBO = {
+#else
                 const FillOutlinePatternDrawableUBO drawableUBO = {
-                    /*.matrix=*/util::cast<float>(matrix),
-                    /*.pixel_coord_upper=*/{static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
-                    /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
-                    /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
-                    /*.tile_ratio = */ tileRatio,
-                    0};
-                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
+#endif
+                    /* .matrix = */ util::cast<float>(matrix),
+                    /* .pixel_coord_upper = */ {static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
+                    /* .pixel_coord_lower = */ {static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
+                    /* .tile_ratio = */ tileRatio,
 
-                const auto fillOutlinePatternInterpolateUBO = FillPatternInterpolateUBO{
                     /* .pattern_from_t = */ std::get<0>(binders->get<FillPattern>()->interpolationFactor(zoom)),
                     /* .pattern_to_t = */ std::get<0>(binders->get<FillPattern>()->interpolationFactor(zoom)),
-                    /* .opacity_t = */ std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom)),
-                    0,
+                    /* .opacity_t = */ std::get<0>(binders->get<FillOpacity>()->interpolationFactor(zoom))
                 };
-                drawableUniforms.createOrUpdate(idFillInterpolateUBO, &fillOutlinePatternInterpolateUBO, context);
 
-                const auto fillOutlinePatternTilePropsUBO = FillOutlinePatternTilePropsUBO{
-                    /* pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
-                    /* pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
+#if MLN_UBO_CONSOLIDATION
+                tilePropsUBOVector[i].fillOutlinePatternTilePropsUBO = FillOutlinePatternTilePropsUBO {
+#else
+                const FillOutlinePatternTilePropsUBO tilePropsUBO = {
+#endif
+                    /* .pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
+                    /* .pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
+                    /* .texsize = */ {static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
+                    /* .pad1 = */ 0,
+                    /* .pad2 = */ 0
                 };
-                drawableUniforms.createOrUpdate(idFillTilePropsUBO, &fillOutlinePatternTilePropsUBO, context);
+                    
+#if !MLN_UBO_CONSOLIDATION
+                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context, true, false);
+                drawableUniforms.createOrUpdate(idFillTilePropsUBO, &tilePropsUBO, context, true, true);
+#endif
                 break;
             }
             case RenderFillLayer::FillVariant::FillOutlineTriangulated: {
+#if MLN_UBO_CONSOLIDATION
+                drawableUBOVector[i].fillOutlineTriangulatedDrawableUBO = {
+#else
                 const FillOutlineTriangulatedDrawableUBO drawableUBO = {
-                    /*.matrix=*/util::cast<float>(matrix),
-                    /*.ratio=*/1.0f / tileID.pixelsToTileUnits(1.0f, parameters.state.getZoom()),
-                    0,
-                    0,
-                    0};
-                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
+#endif
+                    /* .matrix = */ util::cast<float>(matrix),
+                    /* .ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, parameters.state.getZoom()),
+                    /* .pad1 = */ 0,
+                    /* .pad2 = */ 0,
+                    /* .pad3 = */ 0
+                };
+                    
+#if !MLN_UBO_CONSOLIDATION
+                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context, true, false);
+#endif
                 break;
             }
             default: {
@@ -192,7 +235,29 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 break;
             }
         }
+#if MLN_UBO_CONSOLIDATION
+        drawable.setUBOIndex(i++);
+#endif
     });
+    
+#if MLN_UBO_CONSOLIDATION
+    const size_t drawableUBOVectorSize = sizeof(FillDrawableUnionUBO) * drawableUBOVector.size();
+    if (!drawableUniformBuffer || drawableUniformBuffer->getSize() < drawableUBOVectorSize) {
+        drawableUniformBuffer = context.createUniformBuffer(drawableUBOVector.data(), drawableUBOVectorSize, false);
+    } else {
+        drawableUniformBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
+    }
+
+    const size_t tilePropsUBOVectorSize = sizeof(FillTilePropsUnionUBO) * tilePropsUBOVector.size();
+    if (!tilePropsUniformBuffer || tilePropsUniformBuffer->getSize() < tilePropsUBOVectorSize) {
+        tilePropsUniformBuffer = context.createUniformBuffer(tilePropsUBOVector.data(), tilePropsUBOVectorSize, false);
+    } else {
+        tilePropsUniformBuffer->update(tilePropsUBOVector.data(), tilePropsUBOVectorSize);
+    }
+
+    layerUniforms.set(idFillDrawableUBO, drawableUniformBuffer, true, false);
+    layerUniforms.set(idFillTilePropsUBO, tilePropsUniformBuffer, true, true);
+#endif
 }
 
 } // namespace mbgl

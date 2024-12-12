@@ -10,10 +10,10 @@ template <>
 struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "LineShader";
 
-    static const std::array<UniformBlockInfo, 4> uniforms;
+    static const std::array<UniformBlockInfo, 3> uniforms;
     static const std::array<AttributeInfo, 8> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static constexpr std::array<TextureInfo, 0> textures{};
+    static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto vertex = R"(
 
@@ -47,18 +47,15 @@ layout(location = 7) in vec2 in_width;
 layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LineDrawableUBO {
     mat4 matrix;
     mediump float ratio;
-    float pad1, pad2, pad3;
-} drawable;
-
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform LineInterpolationUBO {
+    // Interpolations
     float color_t;
     float blur_t;
     float opacity_t;
     float gapwidth_t;
     float offset_t;
     float width_t;
-    float pad1, pad2;
-} interp;
+    float pad1;
+} drawable;
 
 layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
@@ -91,31 +88,31 @@ layout(location = 5) out lowp float frag_opacity;
 void main() {
 
 #ifndef HAS_UNIFORM_u_color
-    frag_color = unpack_mix_color(in_color, interp.color_t);
+    frag_color = unpack_mix_color(in_color, drawable.color_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_blur
-    frag_blur = unpack_mix_float(in_blur, interp.blur_t);
+    frag_blur = unpack_mix_float(in_blur, drawable.blur_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_opacity
-    frag_opacity = unpack_mix_float(in_opacity, interp.opacity_t);
+    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_gapwidth
-    const mediump float gapwidth = unpack_mix_float(in_gapwidth, interp.gapwidth_t) / 2.0;
+    const mediump float gapwidth = unpack_mix_float(in_gapwidth, drawable.gapwidth_t) / 2.0;
 #else
     const mediump float gapwidth = props.gapwidth / 2.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_offset
-    const lowp float offset = unpack_mix_float(in_offset, interp.offset_t) * -1.0;
+    const lowp float offset = unpack_mix_float(in_offset, drawable.offset_t) * -1.0;
 #else
     const lowp float offset = props.offset * -1.0;
 #endif
         
 #ifndef HAS_UNIFORM_u_width
-    mediump float width = unpack_mix_float(in_width, interp.width_t);
+    mediump float width = unpack_mix_float(in_width, drawable.width_t);
 #else
     mediump float width = props.width;
 #endif
@@ -159,7 +156,7 @@ void main() {
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
-    float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * global.units_to_pixels);
+    float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * paintParams.units_to_pixels);
     frag_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
 
     frag_width2 = vec2(outset, inset);
@@ -241,7 +238,7 @@ template <>
 struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "LineGradientShader";
 
-    static const std::array<UniformBlockInfo, 4> uniforms;
+    static const std::array<UniformBlockInfo, 3> uniforms;
     static const std::array<AttributeInfo, 7> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
@@ -271,21 +268,18 @@ layout(location = 5) in vec2 in_offset;
 layout(location = 6) in vec2 in_width;
 #endif
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LineDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LineGradientDrawableUBO {
     mat4 matrix;
     mediump float ratio;
-    float pad1, pad2, pad3;
-} drawable;
-
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform LineInterpolationUBO {
-    float color_t;
+    // Interpolations
     float blur_t;
     float opacity_t;
     float gapwidth_t;
     float offset_t;
     float width_t;
-    float pad1, pad2;
-} interp;
+    float pad1;
+    float pad2;
+} drawable;
 
 layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
@@ -315,27 +309,27 @@ layout(location = 5) out lowp float frag_opacity;
 void main() {
 
 #ifndef HAS_UNIFORM_u_blur
-    frag_blur = unpack_mix_float(in_blur, interp.blur_t);
+    frag_blur = unpack_mix_float(in_blur, drawable.blur_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_opacity
-    frag_opacity = unpack_mix_float(in_opacity, interp.opacity_t);
+    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_gapwidth
-    mediump float gapwidth = unpack_mix_float(in_gapwidth, interp.gapwidth_t) / 2.0;
+    mediump float gapwidth = unpack_mix_float(in_gapwidth, drawable.gapwidth_t) / 2.0;
 #else
     mediump float gapwidth = props.gapwidth / 2.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_offset
-    const lowp float offset = unpack_mix_float(in_offset, interp.offset_t) * -1.0;
+    const lowp float offset = unpack_mix_float(in_offset, drawable.offset_t) * -1.0;
 #else
     const lowp float offset = props.offset * -1.0;
 #endif
         
 #ifndef HAS_UNIFORM_u_width
-    mediump float width = unpack_mix_float(in_width, interp.width_t);
+    mediump float width = unpack_mix_float(in_width, drawable.width_t);
 #else
     mediump float width = props.width;
 #endif
@@ -380,7 +374,7 @@ void main() {
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
-    float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * global.units_to_pixels);
+    float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * paintParams.units_to_pixels);
     frag_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
 
     frag_width2 = vec2(outset, inset);
@@ -459,7 +453,7 @@ template <>
 struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "LinePatternShader";
 
-    static const std::array<UniformBlockInfo, 5> uniforms;
+    static const std::array<UniformBlockInfo, 4> uniforms;
     static const std::array<AttributeInfo, 9> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
@@ -497,15 +491,10 @@ layout(location = 7) in uvec4 in_pattern_from;
 layout(location = 8) in uvec4 in_pattern_to;
 #endif
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LineDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LinePatternDrawableUBO {
     mat4 matrix;
-    vec4 scale;
-    vec2 texsize;
     float ratio;
-    float fade;
-} drawable;
-
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform LineInterpolationUBO {
+    // Interpolations
     float blur_t;
     float opacity_t;
     float offset_t;
@@ -513,13 +502,7 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform LineInterpolationUBO {
     float width_t;
     float pattern_from_t;
     float pattern_to_t;
-    float pad1;
-} interp;
-
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 2) uniform LinePatternTilePropertiesUBO {
-    vec4 pattern_from;
-    vec4 pattern_to;
-} tile;
+} drawable;
 
 layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
@@ -557,27 +540,27 @@ layout(location = 7) out mediump vec4 frag_pattern_to;
 void main() {
 
 #ifndef HAS_UNIFORM_u_blur
-    frag_blur = unpack_mix_float(in_blur, interp.blur_t);
+    frag_blur = unpack_mix_float(in_blur, drawable.blur_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_opacity
-    frag_opacity = unpack_mix_float(in_opacity, interp.opacity_t);
+    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_gapwidth
-    const mediump float gapwidth = unpack_mix_float(in_gapwidth, interp.gapwidth_t) / 2.0;
+    const mediump float gapwidth = unpack_mix_float(in_gapwidth, drawable.gapwidth_t) / 2.0;
 #else
     const mediump float gapwidth = props.gapwidth / 2.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_offset
-    const lowp float offset = unpack_mix_float(in_offset, interp.offset_t) * -1.0;
+    const lowp float offset = unpack_mix_float(in_offset, drawable.offset_t) * -1.0;
 #else
     const lowp float offset = props.offset * -1.0;
 #endif
         
 #ifndef HAS_UNIFORM_u_width
-    mediump float width = unpack_mix_float(in_width, interp.width_t);
+    mediump float width = unpack_mix_float(in_width, drawable.width_t);
 #else
     mediump float width = props.width;
 #endif
@@ -630,7 +613,7 @@ void main() {
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
-    float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * global.units_to_pixels);
+    float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * paintParams.units_to_pixels);
     frag_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
 
     frag_width2 = vec2(outset, inset);
@@ -663,18 +646,14 @@ layout(location = 7) in mediump vec4 frag_pattern_to;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LineDrawableUBO {
-    mat4 matrix;
-    vec4 scale;
-    vec2 texsize;
-    float ratio;
-    float fade;
-} drawable;
-
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 2) uniform LinePatternTilePropertiesUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform LinePatternTilePropertiesUBO {
     vec4 pattern_from;
     vec4 pattern_to;
-} tile;
+    vec4 scale;
+    vec2 texsize;
+    float fade;
+    float pad1;
+} tileProps;
 
 layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
@@ -710,13 +689,13 @@ void main() {
 #endif
 
 #ifdef HAS_UNIFORM_u_pattern_from
-    const lowp vec4 pattern_from = tile.pattern_from;
+    const lowp vec4 pattern_from = tileProps.pattern_from;
 #else
     const lowp vec4 pattern_from = frag_pattern_from;
 #endif
 
 #ifdef HAS_UNIFORM_u_pattern_to
-    const lowp vec4 pattern_to = tile.pattern_to;
+    const lowp vec4 pattern_to = tileProps.pattern_to;
 #else
     const lowp vec4 pattern_to = frag_pattern_to;
 #endif
@@ -726,10 +705,10 @@ void main() {
     const vec2 pattern_tl_b = pattern_to.xy;
     const vec2 pattern_br_b = pattern_to.zw;
 
-    const float pixelRatio = drawable.scale.x;
-    const float tileZoomRatio = drawable.scale.y;
-    const float fromScale = drawable.scale.z;
-    const float toScale = drawable.scale.w;
+    const float pixelRatio = tileProps.scale.x;
+    const float tileZoomRatio = tileProps.scale.y;
+    const float fromScale = tileProps.scale.z;
+    const float toScale = tileProps.scale.w;
 
     const vec2 display_size_a = vec2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
     const vec2 display_size_b = vec2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
@@ -756,10 +735,10 @@ void main() {
     // the texture coordinate
     const float y_a = 0.5 + (frag_normal.y * clamp(frag_width2.x, 0.0, (pattern_size_a.y + 2.0) / 2.0) / pattern_size_a.y);
     const float y_b = 0.5 + (frag_normal.y * clamp(frag_width2.x, 0.0, (pattern_size_b.y + 2.0) / 2.0) / pattern_size_b.y);
-    const vec2 pos_a = mix(pattern_tl_a / drawable.texsize, pattern_br_a / drawable.texsize, vec2(x_a, y_a));
-    const vec2 pos_b = mix(pattern_tl_b / drawable.texsize, pattern_br_b / drawable.texsize, vec2(x_b, y_b));
+    const vec2 pos_a = mix(pattern_tl_a / tileProps.texsize, pattern_br_a / tileProps.texsize, vec2(x_a, y_a));
+    const vec2 pos_b = mix(pattern_tl_b / tileProps.texsize, pattern_br_b / tileProps.texsize, vec2(x_b, y_b));
 
-    const vec4 color = mix(texture(image0_sampler, pos_a), texture(image0_sampler, pos_b), drawable.fade);
+    const vec4 color = mix(texture(image0_sampler, pos_a), texture(image0_sampler, pos_b), tileProps.fade);
 
     out_color = color * (alpha * opacity);
 }
@@ -812,15 +791,10 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LineSDFDrawableUBO {
     mat4 matrix;
     vec2 patternscale_a;
     vec2 patternscale_b;
-    float ratio;
     float tex_y_a;
     float tex_y_b;
-    float sdfgamma;
-    float mix;
-    float pad1, pad2, pad3;
-} drawable;
-
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform LineSDFInterpolationUBO {
+    float ratio;
+    // Interpolations
     float color_t;
     float blur_t;
     float opacity_t;
@@ -829,7 +803,8 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform LineSDFInterpolationUB
     float width_t;
     float floorwidth_t;
     float pad1;
-} interp;
+    float pad2;
+} drawable;
 
 layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
@@ -868,38 +843,38 @@ layout(location = 8) out mediump float frag_floorwidth;
 void main() {
 
 #ifndef HAS_UNIFORM_u_color
-    frag_color = unpack_mix_color(in_color, interp.color_t);
+    frag_color = unpack_mix_color(in_color, intdrawableerp.color_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_blur
-    frag_blur = unpack_mix_float(in_blur, interp.blur_t);
+    frag_blur = unpack_mix_float(in_blur, drawable.blur_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_opacity
-    frag_opacity = unpack_mix_float(in_opacity, interp.opacity_t);
+    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_floorwidth
-    const float floorwidth = unpack_mix_float(in_floorwidth, interp.floorwidth_t);
+    const float floorwidth = unpack_mix_float(in_floorwidth, drawable.floorwidth_t);
     frag_floorwidth = floorwidth;
 #else
     const float floorwidth = props.floorwidth;
 #endif
 
 #ifndef HAS_UNIFORM_u_offset
-    const mediump float offset = unpack_mix_float(in_offset, interp.offset_t) * -1.0;
+    const mediump float offset = unpack_mix_float(in_offset, drawable.offset_t) * -1.0;
 #else
     const mediump float offset = props.offset * -1.0;
 #endif
 
 #ifndef HAS_UNIFORM_u_width
-    const mediump float width = unpack_mix_float(in_width, interp.width_t);
+    const mediump float width = unpack_mix_float(in_width, drawable.width_t);
 #else
     const mediump float width = props.width;
 #endif
 
 #ifndef HAS_UNIFORM_u_gapwidth
-    const mediump float gapwidth = unpack_mix_float(in_gapwidth, interp.gapwidth_t) / 2.0;
+    const mediump float gapwidth = unpack_mix_float(in_gapwidth, drawable.gapwidth_t) / 2.0;
 #else
     const mediump float gapwidth = props.gapwidth / 2.0;
 #endif
@@ -945,7 +920,7 @@ void main() {
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
-    float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * global.units_to_pixels);
+    float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * paintParams.units_to_pixels);
     frag_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
 
     frag_width2 = vec2(outset, inset);
@@ -981,28 +956,12 @@ layout(location = 8) in mediump float frag_floorwidth;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LineSDFDrawableUBO {
-    mat4 matrix;
-    vec2 patternscale_a;
-    vec2 patternscale_b;
-    float ratio;
-    float tex_y_a;
-    float tex_y_b;
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform LineSDFInterpolationUBO {
     float sdfgamma;
     float mix;
-    float pad1, pad2, pad3;
-} drawable;
-
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform LineSDFInterpolationUBO {
-    float color_t;
-    float blur_t;
-    float opacity_t;
-    float gapwidth_t;
-    float offset_t;
-    float width_t;
-    float floorwidth_t;
     float pad1;
-} interp;
+    float pad2;
+} tileProps;
 
 layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
@@ -1058,9 +1017,9 @@ void main() {
 
     const float sdfdist_a = texture(image0_sampler, frag_tex_a).a;
     const float sdfdist_b = texture(image0_sampler, frag_tex_b).a;
-    const float sdfdist = mix(sdfdist_a, sdfdist_b, drawable.mix);
+    const float sdfdist = mix(sdfdist_a, sdfdist_b, tileProps.mix);
     const float alpha = clamp(min(dist - (frag_width2.y - blur2), frag_width2.x - dist) / blur2, 0.0, 1.0) *
-                        smoothstep(0.5 - drawable.sdfgamma / floorwidth, 0.5 + drawable.sdfgamma / floorwidth, sdfdist);
+                        smoothstep(0.5 - tileProps.sdfgamma / floorwidth, 0.5 + tileProps.sdfgamma / floorwidth, sdfdist);
 
     out_color = color * (alpha * opacity);
 }

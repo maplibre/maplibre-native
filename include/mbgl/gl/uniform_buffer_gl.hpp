@@ -58,6 +58,9 @@ public:
         UniformBufferArray::operator=(other);
         return *this;
     }
+    
+    void bind() const;
+    void unbind() const;
 
 private:
     std::unique_ptr<gfx::UniformBuffer> copy(const gfx::UniformBuffer& uniformBuffers) override {

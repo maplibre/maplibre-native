@@ -6,6 +6,8 @@
 namespace mbgl {
 namespace mtl {
 
+class RenderPass;
+
 class UniformBuffer final : public gfx::UniformBuffer {
 public:
     UniformBuffer(BufferResource&&);
@@ -40,6 +42,9 @@ public:
         return *this;
     }
 
+    void bind(RenderPass& renderPass) const noexcept;
+    void unbind(RenderPass& renderPass) const noexcept {};
+    
 private:
     gfx::UniqueUniformBuffer copy(const gfx::UniformBuffer& buffer) override {
         return std::make_unique<UniformBuffer>(static_cast<const UniformBuffer&>(buffer).clone());

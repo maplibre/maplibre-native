@@ -4,18 +4,16 @@
 namespace mbgl {
 namespace shaders {
 
-const std::array<UniformBlockInfo, 2>
-    ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::Metal>::uniforms = {
+using CustomSymbolIconShaderSource = ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::Metal>;
+
+const std::array<UniformBlockInfo, 1> CustomSymbolIconShaderSource::uniforms = {
         UniformBlockInfo{true, false, sizeof(CustomSymbolIconDrawableUBO), idCustomSymbolDrawableUBO},
-        UniformBlockInfo{true, false, sizeof(CustomSymbolIconParametersUBO), idCustomSymbolParametersUBO},
 };
-const std::array<AttributeInfo, 2> ShaderSource<BuiltIn::CustomSymbolIconShader,
-                                                gfx::Backend::Type::Metal>::attributes = {
-    // always attributes
-    AttributeInfo{customSymbolDrawableUBOCount + 0, gfx::AttributeDataType::Float2, idCustomSymbolPosVertexAttribute},
-    AttributeInfo{customSymbolDrawableUBOCount + 1, gfx::AttributeDataType::Float2, idCustomSymbolTexVertexAttribute},
+const std::array<AttributeInfo, 2> CustomSymbolIconShaderSource::attributes = {
+    AttributeInfo{customSymbolUBOCount + 0, gfx::AttributeDataType::Float2, idCustomSymbolPosVertexAttribute},
+    AttributeInfo{customSymbolUBOCount + 1, gfx::AttributeDataType::Float2, idCustomSymbolTexVertexAttribute},
 };
-const std::array<TextureInfo, 1> ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::Metal>::textures = {
+const std::array<TextureInfo, 1> CustomSymbolIconShaderSource::textures = {
     TextureInfo{0, idCustomSymbolImageTexture},
 };
 

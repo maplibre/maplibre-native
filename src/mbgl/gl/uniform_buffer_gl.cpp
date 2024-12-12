@@ -125,5 +125,32 @@ void UniformBufferGL::update(const void* data_, std::size_t size_) {
     }
 }
 
+void UniformBufferArrayGL::bind() const {
+    MLN_TRACE_FUNC();
+    
+    for (size_t id = 0; id < allocatedSize(); id++) {
+        const auto& uniformBuffer = get(id);
+        if (!uniformBuffer) continue;
+        GLint binding = static_cast<GLint>(id);
+        const auto& uniformBufferGL = static_cast<const UniformBufferGL&>(*uniformBuffer);
+        MBGL_CHECK_ERROR(glBindBufferRange(GL_UNIFORM_BUFFER,
+                                           binding,
+                                           uniformBufferGL.getID(),
+                                           uniformBufferGL.getManagedBuffer().getBindingOffset(),
+                                           uniformBufferGL.getSize()));
+    }
+}
+
+void UniformBufferArrayGL::unbind() const {
+    MLN_TRACE_FUNC();
+    
+    for (size_t id = 0; id < allocatedSize(); id++) {
+        const auto& uniformBuffer = get(id);
+        if (!uniformBuffer) continue;
+        GLint binding = static_cast<GLint>(id);
+        MBGL_CHECK_ERROR(glBindBufferBase(GL_UNIFORM_BUFFER, binding, 0));
+    }
+}
+
 } // namespace gl
 } // namespace mbgl

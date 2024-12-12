@@ -23,7 +23,9 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform DebugUBO {
     mat4 matrix;
     vec4 color;
     float overlay_scale;
-    float pad1, pad2, pad3;
+    float pad1;
+    float pad2;
+    float pad3;
 } debug;
 
 layout(location = 0) out vec2 frag_uv;
@@ -47,7 +49,9 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform DebugUBO {
     mat4 matrix;
     vec4 color;
     float overlay_scale;
-    float pad1, pad2, pad3;
+    float pad1;
+    float pad2;
+    float pad3;
 } debug;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image_sampler;

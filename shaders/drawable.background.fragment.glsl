@@ -1,7 +1,9 @@
-layout (std140) uniform BackgroundLayerUBO {
+layout (std140) uniform BackgroundPropsUBO {
     highp vec4 u_color;
     highp float u_opacity;
-    highp float layer_pad1, layer_pad2, layer_pad3;
+    lowp float props_pad1;
+    lowp float props_pad2;
+    lowp float props_pad3;
 };
 
 void main() {

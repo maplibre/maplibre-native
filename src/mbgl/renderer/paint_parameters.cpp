@@ -139,11 +139,13 @@ void PaintParameters::clearStencil() {
 #endif
 
     const std::vector<shaders::ClipUBO> tileUBO = {
-        shaders::ClipUBO{/*.matrix=*/util::cast<float>(matrixForTile({0, 0, 0})),
-                         /*.stencil_ref=*/0,
-                         /*.pad=*/0,
-                         0,
-                         0}};
+        shaders::ClipUBO {
+            /* .matrix = */ util::cast<float>(matrixForTile({0, 0, 0})),
+            /* .stencil_ref = */ 0,
+            /* .pad1 = */ 0,
+            /* .pad2 = */ 0,
+            /* .pad3 = */ 0
+        }};
     mtlContext.renderTileClippingMasks(*renderPass, staticData, tileUBO);
     context.renderingStats().stencilClears++;
 #elif MLN_RENDER_BACKEND_VULKAN
@@ -191,11 +193,13 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
             tileUBOs.reserve(count);
         }
 
-        tileUBOs.emplace_back(shaders::ClipUBO{/*.matrix=*/util::cast<float>(matrixForTile(tileID)),
-                                               /*.stencil_ref=*/static_cast<uint32_t>(stencilID),
-                                               /*.pad=*/0,
-                                               0,
-                                               0});
+        tileUBOs.emplace_back(shaders::ClipUBO {
+            /* .matrix = */ util::cast<float>(matrixForTile(tileID)),
+            /* .stencil_ref = */ static_cast<uint32_t>(stencilID),
+            /* .pad1 = */ 0,
+            /* .pad2 = */ 0,
+            /* .pad3 = */ 0
+        });
     }
 
     if (!tileUBOs.empty()) {

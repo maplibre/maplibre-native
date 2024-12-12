@@ -52,8 +52,14 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
         propertiesUpdated = false;
     }
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
-    layerUniforms.set(idHillshadeEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
+    layerUniforms.set(idHillshadeEvaluatedPropsUBO, evaluatedPropsUniformBuffer, false, true);
 
+#if MLN_UBO_CONSOLIDATION
+    int i = 0;
+    std::vector<HillshadeDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
+    std::vector<HillshadeTilePropsUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
+#endif
+    
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;
@@ -63,12 +69,52 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
 
         const auto matrix = getTileMatrix(
             tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, drawable, true);
-        HillshadeDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix),
-                                            /* .latrange = */ getLatRange(tileID),
-                                            /* .light = */ getLight(parameters, evaluated)};
+        
+#if MLN_UBO_CONSOLIDATION
+        drawableUBOVector[i] = {
+#else
+        const HillshadeDrawableUBO drawableUBO = {
+#endif
+            /* .matrix = */ util::cast<float>(matrix)
+        };
+            
+#if MLN_UBO_CONSOLIDATION
+        tilePropsUBOVector[i] = {
+#else
+        const HillshadeTilePropsUBO tilePropsUBO = {
+#endif
+            /* .latrange = */ getLatRange(tileID),
+            /* .light = */ getLight(parameters, evaluated)
+        };
+            
+#if MLN_UBO_CONSOLIDATION
+        drawable.setUBOIndex(i++);
+#else
         auto& drawableUniforms = drawable.mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(idHillshadeDrawableUBO, &drawableUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idHillshadeDrawableUBO, &drawableUBO, parameters.context, true, false);
+        drawableUniforms.createOrUpdate(idHillshadeTilePropsUBO, &tilePropsUBO, parameters.context, false, true);
+#endif
     });
+            
+#if MLN_UBO_CONSOLIDATION
+    auto& context = parameters.context;
+    const size_t drawableUBOVectorSize = sizeof(HillshadeDrawableUBO) * drawableUBOVector.size();
+    if (!drawableUniformBuffer || drawableUniformBuffer->getSize() < drawableUBOVectorSize) {
+        drawableUniformBuffer = context.createUniformBuffer(drawableUBOVector.data(), drawableUBOVectorSize, false);
+    } else {
+        drawableUniformBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
+    }
+
+    const size_t tilePropsUBOVectorSize = sizeof(HillshadeTilePropsUBO) * tilePropsUBOVector.size();
+    if (!tilePropsUniformBuffer || tilePropsUniformBuffer->getSize() < tilePropsUBOVectorSize) {
+        tilePropsUniformBuffer = context.createUniformBuffer(tilePropsUBOVector.data(), tilePropsUBOVectorSize, false);
+    } else {
+        tilePropsUniformBuffer->update(tilePropsUBOVector.data(), tilePropsUBOVectorSize);
+    }
+
+    layerUniforms.set(idHillshadeDrawableUBO, drawableUniformBuffer, true, false);
+    layerUniforms.set(idHillshadeTilePropsUBO, tilePropsUniformBuffer, false, true);
+#endif
 }
 
 } // namespace mbgl

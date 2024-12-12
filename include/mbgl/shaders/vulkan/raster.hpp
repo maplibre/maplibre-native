@@ -35,7 +35,8 @@ layout(set = LAYER_SET_INDEX, binding = 0) uniform RasterEvaluatedPropsUBO {
     float brightness_high;
     float saturation_factor;
     float contrast_factor;
-    float pad1, pad2;
+    float pad1;
+    float pad2;
 } props;
 
 layout(location = 0) out vec2 frag_position0;
@@ -74,7 +75,8 @@ layout(set = LAYER_SET_INDEX, binding = 0) uniform RasterEvaluatedPropsUBO {
     float brightness_high;
     float saturation_factor;
     float contrast_factor;
-    float pad1, pad2;
+    float pad1;
+    float pad2;
 } props;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;

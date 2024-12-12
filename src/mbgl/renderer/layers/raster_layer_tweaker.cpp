@@ -63,8 +63,13 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
         propertiesUpdated = false;
     }
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
-    layerUniforms.set(idRasterEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
+    layerUniforms.set(idRasterEvaluatedPropsUBO, evaluatedPropsUniformBuffer, true, true);
 
+#if MLN_UBO_CONSOLIDATION
+    int i = 0;
+    std::vector<RasterDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
+#endif
+    
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!checkTweakDrawable(drawable)) {
             return;
@@ -95,10 +100,32 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
                                    !parameters.state.isChanging());
         }
 
-        const RasterDrawableUBO drawableUBO{/*.matrix = */ util::cast<float>(matrix)};
+#if MLN_UBO_CONSOLIDATION
+        drawableUBOVector[i] = {
+#else
+        const RasterDrawableUBO drawableUBO = {
+#endif
+            /*.matrix = */ util::cast<float>(matrix)
+        };
+#if MLN_UBO_CONSOLIDATION
+        drawable.setUBOIndex(i++);
+#else
         auto& drawableUniforms = drawable.mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(idRasterDrawableUBO, &drawableUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idRasterDrawableUBO, &drawableUBO, parameters.context, true, false);
+#endif
     });
+        
+#if MLN_UBO_CONSOLIDATION
+    auto& context = parameters.context;
+    const size_t drawableUBOVectorSize = sizeof(RasterDrawableUBO) * drawableUBOVector.size();
+    if (!drawableUniformBuffer || drawableUniformBuffer->getSize() < drawableUBOVectorSize) {
+        drawableUniformBuffer = context.createUniformBuffer(drawableUBOVector.data(), drawableUBOVectorSize, false);
+    } else {
+        drawableUniformBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
+    }
+
+    layerUniforms.set(idRasterDrawableUBO, drawableUniformBuffer, true, false);
+#endif
 }
 
 } // namespace mbgl

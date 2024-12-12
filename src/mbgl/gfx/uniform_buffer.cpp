@@ -27,28 +27,37 @@ const std::shared_ptr<UniformBuffer>& UniformBufferArray::get(const size_t id) c
 }
 
 const std::shared_ptr<UniformBuffer>& UniformBufferArray::set(const size_t id,
-                                                              std::shared_ptr<UniformBuffer> uniformBuffer) {
+                                                              std::shared_ptr<UniformBuffer> uniformBuffer,
+                                                              bool bindVertex,
+                                                              bool bindFragment) {
     assert(id < uniformBufferVector.size());
     if (id >= uniformBufferVector.size()) {
         return nullref;
     }
     uniformBufferVector[id] = std::move(uniformBuffer);
+    if (uniformBufferVector[id]) {
+        uniformBufferVector[id]->setBindVertex(bindVertex);
+        uniformBufferVector[id]->setBindFragment(bindFragment);
+    }
     return uniformBufferVector[id];
 }
 
 void UniformBufferArray::createOrUpdate(const size_t id,
                                         const std::vector<uint8_t>& data,
                                         gfx::Context& context,
-                                        bool persistent) {
-    createOrUpdate(id, data.data(), data.size(), context, persistent);
+                                        bool bindVertex,
+                                        bool bindFragment) {
+    createOrUpdate(id, data.data(), data.size(), context, bindVertex, bindFragment);
 }
 
 void UniformBufferArray::createOrUpdate(
-    const size_t id, const void* data, const std::size_t size, gfx::Context& context, bool persistent) {
+    const size_t id, const void* data, const std::size_t size, gfx::Context& context, bool bindVertex, bool bindFragment) {
     if (auto& ubo = get(id); ubo && ubo->getSize() == size) {
         ubo->update(data, size);
     } else {
-        uniformBufferVector[id] = context.createUniformBuffer(data, size, persistent);
+        uniformBufferVector[id] = context.createUniformBuffer(data, size, false);
+        uniformBufferVector[id]->setBindVertex(bindVertex);
+        uniformBufferVector[id]->setBindFragment(bindFragment);
     }
 }
 

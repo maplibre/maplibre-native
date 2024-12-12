@@ -555,28 +555,13 @@ bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
 void Context::bindGlobalUniformBuffers(gfx::RenderPass&) const noexcept {
     MLN_TRACE_FUNC();
 
-    for (size_t id = 0; id < globalUniformBuffers.allocatedSize(); id++) {
-        const auto& globalUniformBuffer = globalUniformBuffers.get(id);
-        if (!globalUniformBuffer) continue;
-        GLint binding = static_cast<GLint>(id);
-        const auto& uniformBufferGL = static_cast<const UniformBufferGL&>(*globalUniformBuffer);
-        MBGL_CHECK_ERROR(glBindBufferRange(GL_UNIFORM_BUFFER,
-                                           binding,
-                                           uniformBufferGL.getID(),
-                                           uniformBufferGL.getManagedBuffer().getBindingOffset(),
-                                           uniformBufferGL.getSize()));
-    }
+    globalUniformBuffers.bind();
 }
 
 void Context::unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept {
     MLN_TRACE_FUNC();
 
-    for (size_t id = 0; id < globalUniformBuffers.allocatedSize(); id++) {
-        const auto& globalUniformBuffer = globalUniformBuffers.get(id);
-        if (!globalUniformBuffer) continue;
-        GLint binding = static_cast<GLint>(id);
-        MBGL_CHECK_ERROR(glBindBufferBase(GL_UNIFORM_BUFFER, binding, 0));
-    }
+    globalUniformBuffers.unbind();
 }
 #endif
 

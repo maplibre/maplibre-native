@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/programs/program_parameters.hpp>
-#include <mbgl/shaders/mtl/background.hpp>
+#include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/hash.hpp>

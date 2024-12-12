@@ -13,7 +13,7 @@ struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Vulkan> {
     static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 1> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static constexpr std::array<TextureInfo, 0> textures{};
+    static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto vertex = R"(
 
@@ -32,11 +32,13 @@ void main() {
     static constexpr auto fragment = R"(
 layout(location = 0) out vec4 out_color;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform BackgroundLayerUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform BackgroundPropsUBO {
     vec4 color;
     float opacity;
-    float pad1, pad2, pad3;
-} layer;
+    float pad1;
+    float pad2;
+    float pad3;
+} props;
 
 void main() {
 
@@ -45,7 +47,7 @@ void main() {
     return;
 #endif
 
-    out_color = layer.color * layer.opacity;
+    out_color = props.color * props.opacity;
 }
 )";
 };
@@ -68,10 +70,12 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform BackgroundPatternDrawa
     vec2 pixel_coord_upper;
     vec2 pixel_coord_lower;
     float tile_units_to_pixels;
-    float pad1, pad2, pad3;
+    float pad1;
+    float pad2;
+    float pad3;
 } drawable;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform BackgroundPatternLayerUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform BackgroundPatternPropsUBO {
     vec2 pattern_tl_a;
     vec2 pattern_br_a;
     vec2 pattern_tl_b;
@@ -82,7 +86,7 @@ layout(set = LAYER_SET_INDEX, binding = 0) uniform BackgroundPatternLayerUBO {
     float scale_b;
     float mix;
     float opacity;
-} layer;
+} props;
 
 layout(location = 0) out vec2 frag_pos_a;
 layout(location = 1) out vec2 frag_pos_b;
@@ -91,12 +95,12 @@ void main() {
 
     frag_pos_a = get_pattern_pos(drawable.pixel_coord_upper,
                                  drawable.pixel_coord_lower,
-                                 layer.scale_a * layer.pattern_size_a,
+                                 props.scale_a * props.pattern_size_a,
                                  drawable.tile_units_to_pixels,
                                  in_position);
     frag_pos_b = get_pattern_pos(drawable.pixel_coord_upper,
                                  drawable.pixel_coord_lower,
-                                 layer.scale_b * layer.pattern_size_b,
+                                 props.scale_b * props.pattern_size_b,
                                  drawable.tile_units_to_pixels,
                                  in_position);
 
@@ -122,7 +126,7 @@ layout(set = LAYER_SET_INDEX, binding = 0) uniform BackgroundPatternLayerUBO {
     float scale_b;
     float mix;
     float opacity;
-} layer;
+} props;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image_sampler;
 
@@ -133,17 +137,17 @@ void main() {
     return;
 #endif
 
-    const vec2 texsize = global.pattern_atlas_texsize;
+    const vec2 texsize = paintParams.pattern_atlas_texsize;
 
     const vec2 imagecoord = mod(frag_pos_a, 1.0);
-    const vec2 pos = mix(layer.pattern_tl_a / texsize, layer.pattern_br_a / texsize, imagecoord);
+    const vec2 pos = mix(props.pattern_tl_a / texsize, props.pattern_br_a / texsize, imagecoord);
     const vec4 color1 = texture(image_sampler, pos);
 
     const vec2 imagecoord_b = mod(frag_pos_b, 1.0);
-    const vec2 pos2 = mix(layer.pattern_tl_b / texsize, layer.pattern_br_b / texsize, imagecoord_b);
+    const vec2 pos2 = mix(props.pattern_tl_b / texsize, props.pattern_br_b / texsize, imagecoord_b);
     const vec4 color2 = texture(image_sampler, pos2);
 
-    out_color = mix(color1, color2, layer.mix) * layer.opacity;
+    out_color = mix(color1, color2, props.mix) * props.opacity;
 }
 )";
 };
