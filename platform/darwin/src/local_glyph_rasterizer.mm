@@ -301,11 +301,11 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack& fontStack, GlyphID g
     
     manufacturedGlyph.id = glyphID;
     BOOL isBold = NO;
-    for (auto& fontName : fontStack) {
-        std::string lowercaseFont = platform::lowercase(fontName);
-        if (lowercaseFont.find("bold") != std::string::npos) {
+    // Only check the first font name to detect if the user prefers using bold
+    if (!fontStack.empty()) {
+        std::string lowercaseFont = platform::lowercase(fontStack.front());
+        if (lowercaseFont.find("bold") != std::string::npos && lowercaseFont.find("semibold") == std::string::npos) {
             isBold = YES;
-            break;
         }
     }
 
