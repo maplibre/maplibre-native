@@ -29,8 +29,7 @@ void LocationIndicatorLayerTweaker::execute(LayerGroupBase& layerGroup, const Pa
             case RenderLocationIndicatorLayer::LocationIndicatorComponentType::Circle: {
                 LocationIndicatorDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(projectionCircle),
                                                             /* .color = */ props.evaluated.get<AccuracyRadiusColor>()};
-                drawableUniforms.createOrUpdate(
-                    idLocationIndicatorDrawableUBO, &drawableUBO, params.context, true, true);
+                drawableUniforms.createOrUpdate(idLocationIndicatorDrawableUBO, &drawableUBO, params.context);
                 break;
             }
 
@@ -38,8 +37,7 @@ void LocationIndicatorLayerTweaker::execute(LayerGroupBase& layerGroup, const Pa
                 LocationIndicatorDrawableUBO drawableUBO = {
                     /* .matrix = */ util::cast<float>(projectionCircle),
                     /* .color = */ props.evaluated.get<AccuracyRadiusBorderColor>()};
-                drawableUniforms.createOrUpdate(
-                    idLocationIndicatorDrawableUBO, &drawableUBO, params.context, true, true);
+                drawableUniforms.createOrUpdate(idLocationIndicatorDrawableUBO, &drawableUBO, params.context);
                 break;
             }
 
@@ -50,8 +48,7 @@ void LocationIndicatorLayerTweaker::execute(LayerGroupBase& layerGroup, const Pa
             case RenderLocationIndicatorLayer::LocationIndicatorComponentType::PuckHat: {
                 const LocationIndicatorDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(projectionPuck),
                                                                   /* .color = */ Color::black()};
-                drawableUniforms.createOrUpdate(
-                    idLocationIndicatorDrawableUBO, &drawableUBO, params.context, true, true);
+                drawableUniforms.createOrUpdate(idLocationIndicatorDrawableUBO, &drawableUBO, params.context);
                 break;
             }
 

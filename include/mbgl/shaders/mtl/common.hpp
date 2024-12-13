@@ -224,6 +224,12 @@ enum {
     globalUBOCount,
 };
 
+enum {
+    idDrawableReservedVertexOnlyUBO = globalUBOCount,
+    idDrawableReservedFragmentOnlyUBO,
+    drawableReservedUBOCount
+};
+
 )";
 
 }

@@ -3,6 +3,14 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/vulkan/shader_program.hpp>
 
+#define RASTER_SHADER_PRELUDE \
+    R"(
+
+#define idRasterDrawableUBO         idDrawableReservedVertexOnlyUBO
+#define idRasterEvaluatedPropsUBO   layerUBOStartId
+
+)"
+
 namespace mbgl {
 namespace shaders {
 
@@ -10,21 +18,20 @@ template <>
 struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "RasterShader";
 
-    static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
-    static constexpr auto vertex = R"(
+    static constexpr auto vertex = RASTER_SHADER_PRELUDE R"(
 
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec2 in_texture_position;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform RasterDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idRasterDrawableUBO) uniform RasterDrawableUBO {
     mat4 matrix;
 } drawable;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform RasterEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = idRasterEvaluatedPropsUBO) uniform RasterEvaluatedPropsUBO {
     vec4 spin_weights;
     vec2 tl_parent;
     float scale_parent;
@@ -57,14 +64,14 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = R"(
+    static constexpr auto fragment = RASTER_SHADER_PRELUDE R"(
 
 layout(location = 0) in vec2 frag_position0;
 layout(location = 1) in vec2 frag_position1;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform RasterEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = idRasterEvaluatedPropsUBO) uniform RasterEvaluatedPropsUBO {
     vec4 spin_weights;
     vec2 tl_parent;
     float scale_parent;

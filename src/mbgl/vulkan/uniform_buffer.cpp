@@ -40,9 +40,7 @@ void UniformBuffer::update(const void* data, std::size_t size_) {
 }
 
 const std::shared_ptr<gfx::UniformBuffer>& UniformBufferArray::set(const size_t id,
-                                                                   std::shared_ptr<gfx::UniformBuffer> uniformBuffer,
-                                                                   bool bindVertex,
-                                                                   bool bindFragment) {
+                                                                   std::shared_ptr<gfx::UniformBuffer> uniformBuffer) {
     if (id >= uniformBufferVector.size()) {
         return nullref;
     }
@@ -56,22 +54,18 @@ const std::shared_ptr<gfx::UniformBuffer>& UniformBufferArray::set(const size_t 
     }
 
     uniformBufferVector[id] = std::move(uniformBuffer);
-    if (uniformBufferVector[id]) {
-        uniformBufferVector[id]->setBindVertex(bindVertex);
-        uniformBufferVector[id]->setBindFragment(bindFragment);
-    }
     return uniformBufferVector[id];
 }
 
 void UniformBufferArray::createOrUpdate(
-    const size_t id, const void* data, std::size_t size, gfx::Context& context, bool bindVertex, bool bindFragment) {
+    const size_t id, const void* data, std::size_t size, gfx::Context& context, bool persistent) {
     if (descriptorSet) {
         if (auto& ubo = get(id); !ubo || ubo->getSize() != size) {
             descriptorSet->markDirty();
         }
     }
 
-    gfx::UniformBufferArray::createOrUpdate(id, data, size, context, bindVertex, bindFragment);
+    gfx::UniformBufferArray::createOrUpdate(id, data, size, context, persistent);
 }
 
 void UniformBufferArray::bindDescriptorSets(CommandEncoder& encoder) {

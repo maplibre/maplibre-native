@@ -6,16 +6,23 @@
 namespace mbgl {
 namespace shaders {
 
+#define HEATMAP_SHADER_PRELUDE \
+    R"(
+
+#define idHeatmapDrawableUBO        idDrawableReservedVertexOnlyUBO
+#define idHeatmapEvaluatedPropsUBO  layerUBOStartId
+
+)"
+
 template <>
 struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "HeatmapShader";
 
-    static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto vertex = R"(
+    static constexpr auto vertex = HEATMAP_SHADER_PRELUDE R"(
 
 // Effective "0" in the kernel density texture to adjust the kernel size to;
 // this empirically chosen number minimizes artifacts on overlapping kernels
@@ -35,7 +42,7 @@ layout(location = 1) in vec2 in_weight;
 layout(location = 2) in vec2 in_radius;
 #endif
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform HeatmapDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idHeatmapDrawableUBO) uniform HeatmapDrawableUBO {
     mat4 matrix;
     float extrude_scale;
     // Interpolations
@@ -44,7 +51,7 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform HeatmapDrawableUBO {
     float pad1;
 } drawable;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform HeatmapEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = idHeatmapEvaluatedPropsUBO) uniform HeatmapEvaluatedPropsUBO {
     float weight;
     float radius;
     float intensity;
@@ -101,7 +108,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = R"(
+    static constexpr auto fragment = HEATMAP_SHADER_PRELUDE R"(
 
 // Gaussian kernel coefficient: 1 / sqrt(2 * PI)
 #define GAUSS_COEF 0.3989422804014327
@@ -111,7 +118,7 @@ layout(location = 1) in lowp vec2 frag_extrude;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform HeatmapEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = idHeatmapEvaluatedPropsUBO) uniform HeatmapEvaluatedPropsUBO {
     float weight;
     float radius;
     float intensity;

@@ -57,7 +57,7 @@ Context::~Context() noexcept {
         stencilStateRenderable = nullptr;
 
         for (size_t i = 0; i < globalUniformBuffers.allocatedSize(); i++) {
-            globalUniformBuffers.set(i, nullptr, false, false);
+            globalUniformBuffers.set(i, nullptr);
         }
 
 #if !defined(NDEBUG)

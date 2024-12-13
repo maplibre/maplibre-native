@@ -10,6 +10,13 @@ namespace shaders {
 #define SYMBOL_SHADER_COMMON \
     R"(
 
+enum {
+    idSymbolDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idSymbolTilePropsUBO = idDrawableReservedFragmentOnlyUBO,
+    idSymbolEvaluatedPropsUBO = drawableReservedUBOCount,
+    symbolUBOCount
+};
+
 struct alignas(16) SymbolDrawableUBO {
     /*   0 */ float4x4 matrix;
     /*  64 */ float4x4 label_plane_matrix;
@@ -64,13 +71,6 @@ struct alignas(16) SymbolEvaluatedPropsUBO {
 };
 static_assert(sizeof(SymbolEvaluatedPropsUBO) == 6 * 16, "wrong size");
 
-enum {
-    idSymbolDrawableUBO = globalUBOCount,
-    idSymbolTilePropsUBO,
-    idSymbolEvaluatedPropsUBO,
-    symbolUBOCount
-};
-
 )"
 
 template <>
@@ -79,8 +79,7 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 4> uniforms;
-    static const std::array<AttributeInfo, 6> attributes;
+     static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -216,7 +215,6 @@ struct ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 4> uniforms;
     static const std::array<AttributeInfo, 10> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
@@ -424,8 +422,7 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 4> uniforms;
-    static const std::array<AttributeInfo, 9> attributes;
+     static const std::array<AttributeInfo, 9> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 

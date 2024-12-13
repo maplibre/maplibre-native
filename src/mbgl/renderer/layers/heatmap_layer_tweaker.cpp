@@ -44,7 +44,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
         propertiesUpdated = false;
     }
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
-    layerUniforms.set(idHeatmapEvaluatedPropsUBO, evaluatedPropsUniformBuffer, true, true);
+    layerUniforms.set(idHeatmapEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
 #if MLN_UBO_CONSOLIDATION
     int i = 0;
@@ -86,7 +86,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
         drawable.setUBOIndex(i++);
 #else
         auto& drawableUniforms = drawable.mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(idHeatmapDrawableUBO, &drawableUBO, context, true, false);
+        drawableUniforms.createOrUpdate(idHeatmapDrawableUBO, &drawableUBO, context);
 #endif
     });
 
@@ -98,7 +98,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
         drawableUniformBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
     }
 
-    layerUniforms.set(idSymbolDrawableUBO, drawableUniformBuffer, true, false);
+    layerUniforms.set(idSymbolDrawableUBO, drawableUniformBuffer);
 #endif
 }
 

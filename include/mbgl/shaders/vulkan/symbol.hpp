@@ -6,16 +6,24 @@
 namespace mbgl {
 namespace shaders {
 
+#define SYMBOL_SHADER_COMMON \
+    R"(
+
+#define idSymbolDrawableUBO         idDrawableReservedVertexOnlyUBO
+#define idSymbolTilePropsUBO        idDrawableReservedFragmentOnlyUBO
+#define idSymbolEvaluatedPropsUBO   layerUBOStartId
+
+)"
+
 template <>
 struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "SymbolIconShader";
 
-    static const std::array<UniformBlockInfo, 4> uniforms;
     static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto vertex = R"(
+    static constexpr auto vertex = SYMBOL_SHADER_COMMON R"(
         
 layout(location = 0) in ivec4 in_pos_offset;
 layout(location = 1) in uvec4 in_data;
@@ -27,7 +35,7 @@ layout(location = 4) in float in_fade_opacity;
 layout(location = 5) in vec2 in_opacity;
 #endif    
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform SymbolDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolDrawableUBO) uniform SymbolDrawableUBO {
     mat4 matrix;
     mat4 label_plane_matrix;
     mat4 coord_matrix;
@@ -128,21 +136,21 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = R"(
+    static constexpr auto fragment = SYMBOL_SHADER_COMMON R"(
 
 layout(location = 0) in mediump vec2 frag_tex;
 layout(location = 1) in mediump float frag_opacity;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform SymbolTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolTilePropsUBO) uniform SymbolTilePropsUBO {
     bool is_text;
     bool is_halo;
     float gamma_scale;
     float pad1;
 } tileProps;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform SymbolEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = idSymbolEvaluatedPropsUBO) uniform SymbolEvaluatedPropsUBO {
     vec4 text_fill_color;
     vec4 text_halo_color;
     float text_opacity;
@@ -180,12 +188,11 @@ template <>
 struct ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "SymbolSDFIconShader";
 
-    static const std::array<UniformBlockInfo, 4> uniforms;
-    static const std::array<AttributeInfo, 10> attributes;
+     static const std::array<AttributeInfo, 10> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto vertex = R"(
+    static constexpr auto vertex = SYMBOL_SHADER_COMMON R"(
         
 layout(location = 0) in ivec4 in_pos_offset;
 layout(location = 1) in uvec4 in_data;
@@ -213,7 +220,7 @@ layout(location = 8) in vec2 in_halo_width;
 layout(location = 9) in vec2 in_halo_blur;
 #endif  
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform SymbolDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolDrawableUBO) uniform SymbolDrawableUBO {
     mat4 matrix;
     mat4 label_plane_matrix;
     mat4 coord_matrix;
@@ -353,7 +360,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = R"(
+    static constexpr auto fragment = SYMBOL_SHADER_COMMON R"(
 
 layout(location = 0) in mediump vec2 frag_tex;
 layout(location = 1) in mediump float frag_fade_opacity;
@@ -382,14 +389,14 @@ layout(location = 8) in mediump float frag_halo_blur;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform SymbolTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolTilePropsUBO) uniform SymbolTilePropsUBO {
     bool is_text;
     bool is_halo;
     float gamma_scale;
     float pad1;
 } tileProps;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform SymbolEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = idSymbolEvaluatedPropsUBO) uniform SymbolEvaluatedPropsUBO {
     vec4 text_fill_color;
     vec4 text_halo_color;
     float text_opacity;
@@ -457,12 +464,11 @@ template <>
 struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "SymbolTextAndIconShader";
 
-    static const std::array<UniformBlockInfo, 4> uniforms;
     static const std::array<AttributeInfo, 9> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
-    static constexpr auto vertex = R"(
+    static constexpr auto vertex = SYMBOL_SHADER_COMMON R"(
         
 #define SDF 1.0
 #define ICON 0.0
@@ -492,7 +498,7 @@ layout(location = 7) in vec2 in_halo_width;
 layout(location = 8) in vec2 in_halo_blur;
 #endif  
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform SymbolDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolDrawableUBO) uniform SymbolDrawableUBO {
     mat4 matrix;
     mat4 label_plane_matrix;
     mat4 coord_matrix;
@@ -637,7 +643,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = R"(
+    static constexpr auto fragment = SYMBOL_SHADER_COMMON R"(
 
 layout(location = 0) in mediump vec2 frag_tex;
 layout(location = 1) in mediump float frag_fade_opacity;
@@ -668,14 +674,14 @@ layout(location = 9) flat in int frag_is_icon;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform SymbolTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolTilePropsUBO) uniform SymbolTilePropsUBO {
     bool is_text;
     bool is_halo;
     float gamma_scale;
     float pad1;
 } tileProps;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform SymbolEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = idSymbolEvaluatedPropsUBO) uniform SymbolEvaluatedPropsUBO {
     vec4 text_fill_color;
     vec4 text_halo_color;
     float text_opacity;

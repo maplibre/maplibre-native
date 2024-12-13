@@ -66,7 +66,13 @@ enum {
 #elif MLN_RENDER_BACKEND_VULKAN
     idGlobalPlatformParamsUBO,
 #endif
-    globalUBOCount,
+    globalUBOCount
+};
+
+enum {
+    idDrawableReservedVertexOnlyUBO = globalUBOCount,
+    idDrawableReservedFragmentOnlyUBO,
+    drawableReservedUBOCount
 };
 
 #define MLN_UBO_CONSOLIDATION MLN_RENDER_BACKEND_METAL

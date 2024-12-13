@@ -10,6 +10,13 @@ namespace shaders {
 #define FILL_EXTRUSION_SHADER_COMMON \
     R"(
 
+enum {
+    idFillExtrusionDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idFillExtrusionTilePropsUBO = drawableReservedUBOCount,
+    idFillExtrusionPropsUBO,
+    fillExtrusionUBOCount
+};
+
 struct alignas(16) FillExtrusionDrawableUBO {
     /*   0 */ float4x4 matrix;
     /*  64 */ float2 pixel_coord_upper;
@@ -55,13 +62,6 @@ struct alignas(16) FillExtrusionPropsUBO {
 };
 static_assert(sizeof(FillExtrusionPropsUBO) == 5 * 16, "wrong size");
 
-enum {
-    idFillExtrusionDrawableUBO = globalUBOCount,
-    idFillExtrusionTilePropsUBO,
-    idFillExtrusionPropsUBO,
-    fillExtrusionUBOCount
-};
-
 )"
 
 template <>
@@ -70,7 +70,6 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
@@ -190,8 +189,7 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Met
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 4> uniforms;
-    static const std::array<AttributeInfo, 6> attributes;
+     static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 

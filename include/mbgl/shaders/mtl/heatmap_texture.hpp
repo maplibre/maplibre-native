@@ -10,6 +10,11 @@ namespace shaders {
 #define HEATMAP_TEXTURE_SHADER_PRELUDE \
     R"(
 
+enum {
+    idHeatmapTexturePropsUBO = drawableReservedUBOCount,
+    heatmapTextureUBOCount
+};
+
 struct alignas(16) HeatmapTexturePropsUBO {
     /*  0 */ float4x4 matrix;
     /* 64 */ float opacity;
@@ -20,11 +25,6 @@ struct alignas(16) HeatmapTexturePropsUBO {
 };
 static_assert(sizeof(HeatmapTexturePropsUBO) == 5 * 16, "wrong size");
 
-enum {
-    idHeatmapTexturePropsUBO = globalUBOCount,
-    heatmapTextureUBOCount
-};
-
 )"
 
 template <>
@@ -33,7 +33,6 @@ struct ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 1> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;

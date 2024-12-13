@@ -10,6 +10,13 @@ namespace shaders {
 #define HILLSHADE_SHADER_PRELUDE \
     R"(
 
+enum {
+    idHillshadeDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idHillshadeTilePropsUBO = idDrawableReservedFragmentOnlyUBO,
+    idHillshadeEvaluatedPropsUBO = drawableReservedUBOCount,
+    hillshadeUBOCount
+};
+
 struct alignas(16) HillshadeDrawableUBO {
     /*  0 */ float4x4 matrix;
     /* 64 */
@@ -32,13 +39,6 @@ struct alignas(16) HillshadeEvaluatedPropsUBO {
 };
 static_assert(sizeof(HillshadeEvaluatedPropsUBO) == 3 * 16, "wrong size");
 
-enum {
-    idHillshadeDrawableUBO = globalUBOCount,
-    idHillshadeTilePropsUBO,
-    idHillshadeEvaluatedPropsUBO,
-    hillshadeUBOCount
-};
-
 )"
 
 template <>
@@ -47,7 +47,6 @@ struct ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 3> uniforms;
     static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;

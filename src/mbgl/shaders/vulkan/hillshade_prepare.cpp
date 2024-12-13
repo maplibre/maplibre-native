@@ -7,10 +7,6 @@ namespace shaders {
 
 using HillshadePrepareShaderSource = ShaderSource<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::Vulkan>;
 
-const std::array<UniformBlockInfo, 2> HillshadePrepareShaderSource::uniforms = {
-    UniformBlockInfo{true, false, sizeof(HillshadePrepareDrawableUBO), idHillshadePrepareDrawableUBO},
-    UniformBlockInfo{true, true, sizeof(HillshadePrepareTilePropsUBO), idHillshadePrepareTilePropsUBO},
-};
 const std::array<AttributeInfo, 2> HillshadePrepareShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, idHillshadePosVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::Short2, idHillshadeTexturePosVertexAttribute},

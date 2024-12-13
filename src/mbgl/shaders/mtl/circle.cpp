@@ -6,11 +6,6 @@ namespace shaders {
 
 using CircleShaderSource = ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>;
 
-const std::array<UniformBlockInfo, 3> CircleShaderSource::uniforms = {
-    UniformBlockInfo{true, false, sizeof(GlobalPaintParamsUBO), idGlobalPaintParamsUBO},
-    UniformBlockInfo{true, false, sizeof(CircleDrawableUBO), idCircleDrawableUBO},
-    UniformBlockInfo{true, true, sizeof(CircleEvaluatedPropsUBO), idCircleEvaluatedPropsUBO},
-};
 const std::array<AttributeInfo, 8> CircleShaderSource::attributes = {
     AttributeInfo{circleUBOCount + 0, gfx::AttributeDataType::Short2, idCirclePosVertexAttribute},
     AttributeInfo{circleUBOCount + 1, gfx::AttributeDataType::Float4, idCircleColorVertexAttribute},

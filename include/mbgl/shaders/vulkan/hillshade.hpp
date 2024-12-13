@@ -6,21 +6,29 @@
 namespace mbgl {
 namespace shaders {
 
+#define HILLSHADE_SHADER_PRELUDE \
+    R"(
+
+#define idHillshadeDrawableUBO          idDrawableReservedVertexOnlyUBO
+#define idHillshadeTilePropsUBO         idDrawableReservedFragmentOnlyUBO
+#define idHillshadeEvaluatedPropsUBO    layerUBOStartId
+
+)"
+
 template <>
 struct ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "HillshadeShader";
 
-    static const std::array<UniformBlockInfo, 3> uniforms;
     static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto vertex = R"(
+    static constexpr auto vertex = HILLSHADE_SHADER_PRELUDE R"(
 
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec2 in_texture_position;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform HillshadeDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idHillshadeDrawableUBO) uniform HillshadeDrawableUBO {
     mat4 matrix;
 } drawable;
 
@@ -36,17 +44,17 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = R"(
+    static constexpr auto fragment = HILLSHADE_SHADER_PRELUDE R"(
 
 layout(location = 0) in vec2 frag_position;
 layout(location = 0) out vec4 out_color;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform HillshadeTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idHillshadeTilePropsUBO) uniform HillshadeTilePropsUBO {
     vec2 latrange;
     vec2 light;
 } tileProps;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform HillshadeEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = idHillshadeEvaluatedPropsUBO) uniform HillshadeEvaluatedPropsUBO {
     vec4 highlight;
     vec4 shadow;
     vec4 accent;

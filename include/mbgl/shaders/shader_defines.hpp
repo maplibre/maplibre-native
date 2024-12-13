@@ -10,94 +10,94 @@ namespace shaders {
 // drawable UBOs
 
 enum {
-    idBackgroundDrawableUBO = globalUBOCount,
-    backgroundDrawableUBOCount
+    idBackgroundDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    backgroundDrawableUBOCount = drawableReservedUBOCount
 };
 
 enum {
-    idCircleDrawableUBO = globalUBOCount,
-    circleDrawableUBOCount
+    idCircleDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    circleDrawableUBOCount = drawableReservedUBOCount
 };
 
 enum {
-    idClippingMaskUBO = globalUBOCount,
-    clippingMaskDrawableUBOCount
+    idClippingMaskUBO = idDrawableReservedVertexOnlyUBO,
+    clippingMaskDrawableUBOCount = drawableReservedUBOCount
 };
 
 enum {
-    idCollisionDrawableUBO = globalUBOCount,
-    idCollisionTilePropsUBO,
+    idCollisionDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idCollisionTilePropsUBO = drawableReservedUBOCount,
     collisionDrawableUBOCount
 };
 
 enum {
-    idCustomSymbolDrawableUBO = globalUBOCount,
-    customSymbolDrawableUBOCount
+    idCustomSymbolDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    customSymbolDrawableUBOCount = drawableReservedUBOCount
 };
 
 enum {
-    idDebugUBO = globalUBOCount,
+    idDebugUBO = drawableReservedUBOCount,
     debugDrawableUBOCount
 };
 
 enum {
-    idFillDrawableUBO = globalUBOCount,
-    idFillTilePropsUBO,
+    idFillDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idFillTilePropsUBO = drawableReservedUBOCount,
     fillDrawableUBOCount
 };
 
 enum {
-    idFillExtrusionDrawableUBO = globalUBOCount,
-    idFillExtrusionTilePropsUBO,
+    idFillExtrusionDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idFillExtrusionTilePropsUBO = drawableReservedUBOCount,
     fillExtrusionDrawableUBOCount
 };
 
 enum {
-    idHeatmapDrawableUBO = globalUBOCount,
-    heatmapDrawableUBOCount
+    idHeatmapDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    heatmapDrawableUBOCount = drawableReservedUBOCount
 };
 
 enum {
-    heatmapTextureDrawableUBOCount = globalUBOCount
+    heatmapTextureDrawableUBOCount = drawableReservedUBOCount
 };
 
 enum {
-    idHillshadeDrawableUBO = globalUBOCount,
-    idHillshadeTilePropsUBO,
-    hillshadeDrawableUBOCount
+    idHillshadeDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idHillshadeTilePropsUBO = idDrawableReservedFragmentOnlyUBO,
+    hillshadeDrawableUBOCount = drawableReservedUBOCount
 };
 
 enum {
-    idHillshadePrepareDrawableUBO = globalUBOCount,
-    idHillshadePrepareTilePropsUBO,
+    idHillshadePrepareDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idHillshadePrepareTilePropsUBO = drawableReservedUBOCount,
     hillshadePrepareDrawableUBOCount
 };
 
 enum {
-    idLineDrawableUBO = globalUBOCount,
-    idLineTilePropsUBO,
-    lineDrawableUBOCount
+    idLineDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idLineTilePropsUBO = idDrawableReservedFragmentOnlyUBO,
+    lineDrawableUBOCount = drawableReservedUBOCount
 };
 
 enum {
-    idLocationIndicatorDrawableUBO = globalUBOCount,
+    idLocationIndicatorDrawableUBO = drawableReservedUBOCount,
     locationIndicatorDrawableUBOCount
 };
 
 enum {
-    idRasterDrawableUBO = globalUBOCount,
-    rasterDrawableUBOCount
+    idRasterDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    rasterDrawableUBOCount = drawableReservedUBOCount
 };
 
 enum {
-    idSymbolDrawableUBO = globalUBOCount,
-    idSymbolTilePropsUBO,
-    symbolDrawableUBOCount
+    idSymbolDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idSymbolTilePropsUBO = idDrawableReservedFragmentOnlyUBO,
+    symbolDrawableUBOCount = drawableReservedUBOCount
 };
 
 enum {
-    idWideVectorUniformsUBO = globalUBOCount,
-    idWideVectorUniformWideVecUBO,
+    idWideVectorUniformsUBO = idDrawableReservedVertexOnlyUBO,
+    idWideVectorUniformWideVecUBO = drawableReservedUBOCount,
     wideVectorDrawableUBOCount
 };
 

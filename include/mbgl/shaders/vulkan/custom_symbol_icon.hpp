@@ -6,21 +6,27 @@
 namespace mbgl {
 namespace shaders {
 
+#define CUSTOM_SYMBOL_ICON_SHADER_PRELUDE \
+    R"(
+
+#define idCustomSymbolDrawableUBO   idDrawableReservedVertexOnlyUBO
+
+)"
+
 template <>
 struct ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "CustomSymbolIconShader";
 
-    static const std::array<UniformBlockInfo, 1> uniforms;
-    static const std::array<AttributeInfo, 2> attributes;
+     static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto vertex = R"(
+    static constexpr auto vertex = CUSTOM_SYMBOL_ICON_SHADER_PRELUDE R"(
 
 layout(location = 0) in vec2 in_position;
 layout(location = 1) in vec2 in_tex;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform CustomSymbolIconDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idCustomSymbolDrawableUBO) uniform CustomSymbolIconDrawableUBO {
     mat4 matrix;
     vec2 extrude_scale;
     vec2 anchor;
@@ -79,7 +85,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = R"(
+    static constexpr auto fragment = CUSTOM_SYMBOL_ICON_SHADER_PRELUDE R"(
 layout(location = 0) in vec2 frag_tex;
 layout(location = 0) out vec4 out_color;
 

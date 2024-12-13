@@ -7,10 +7,6 @@ namespace shaders {
 
 using WideVectorShaderSource = ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Vulkan>;
 
-const std::array<UniformBlockInfo, 2> WideVectorShaderSource::uniforms = {
-    UniformBlockInfo{true, false, sizeof(WideVectorUniformsUBO), idWideVectorUniformsUBO},
-    UniformBlockInfo{true, false, sizeof(WideVectorUniformWideVecUBO), idWideVectorUniformWideVecUBO},
-};
 const std::array<AttributeInfo, 3> WideVectorShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Float3, idWideVectorScreenPos},
     AttributeInfo{1, gfx::AttributeDataType::Float4, idWideVectorColor},

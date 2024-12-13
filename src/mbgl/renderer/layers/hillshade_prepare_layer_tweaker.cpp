@@ -58,8 +58,8 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup, const Pai
             /* .maxzoom = */ static_cast<float>(drawableData.maxzoom)};
 
         auto& drawableUniforms = drawable.mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(idHillshadePrepareDrawableUBO, &drawableUBO, parameters.context, true, false);
-        drawableUniforms.createOrUpdate(idHillshadePrepareTilePropsUBO, &tilePropsUBO, parameters.context, true, true);
+        drawableUniforms.createOrUpdate(idHillshadePrepareDrawableUBO, &drawableUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idHillshadePrepareTilePropsUBO, &tilePropsUBO, parameters.context);
     });
 }
 

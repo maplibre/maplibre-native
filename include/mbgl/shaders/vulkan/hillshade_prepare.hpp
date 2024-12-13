@@ -6,25 +6,32 @@
 namespace mbgl {
 namespace shaders {
 
+#define HILLSHADE_PREPARE_SHADER_PRELUDE \
+    R"(
+
+#define idHillshadePrepareDrawableUBO       idDrawableReservedVertexOnlyUBO
+#define idHillshadePrepareTilePropsUBO      drawableReservedUBOCount
+
+)"
+
 template <>
 struct ShaderSource<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "HillshadePrepareShader";
 
-    static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto vertex = R"(
+    static constexpr auto vertex = HILLSHADE_PREPARE_SHADER_PRELUDE R"(
 
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec2 in_texture_position;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform HillshadePrepareDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idHillshadePrepareDrawableUBO) uniform HillshadePrepareDrawableUBO {
     mat4 matrix;
 } drawable;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform HillshadePrepareTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idHillshadePrepareTilePropsUBO) uniform HillshadePrepareTilePropsUBO {
     vec4 unpack;
     vec2 dimension;
     float zoom;
@@ -44,12 +51,12 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = R"(
+    static constexpr auto fragment = HILLSHADE_PREPARE_SHADER_PRELUDE R"(
 
 layout(location = 0) in vec2 frag_position;
 layout(location = 0) out vec4 out_color;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform HillshadePrepareTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idHillshadePrepareTilePropsUBO) uniform HillshadePrepareTilePropsUBO {
     vec4 unpack;
     vec2 dimension;
     float zoom;

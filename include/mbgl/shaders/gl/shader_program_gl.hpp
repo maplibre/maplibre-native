@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/gl/context.hpp>
-#include <mbgl/gl/uniform_block_gl.hpp>
 #include <mbgl/gl/vertex_attribute_gl.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
@@ -21,7 +20,6 @@ public:
 
     ShaderProgramGL(UniqueProgram&& glProgram_);
     ShaderProgramGL(UniqueProgram&&,
-                    UniformBlockArrayGL&& uniformBlocks,
                     VertexAttributeArrayGL&& attributes,
                     SamplerLocationArray&& samplerLocations);
     ShaderProgramGL(ShaderProgramGL&& other);
@@ -42,8 +40,6 @@ public:
 
     std::optional<size_t> getSamplerLocation(const size_t id) const override;
 
-    const gfx::UniformBlockArray& getUniformBlocks() const override { return uniformBlocks; }
-
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
 
     const gfx::VertexAttributeArray& getInstanceAttributes() const override { return instanceAttributes; }
@@ -51,12 +47,8 @@ public:
     ProgramID getGLProgramID() const { return glProgram; }
 
 protected:
-    gfx::UniformBlockArray& mutableUniformBlocks() override { return uniformBlocks; }
-
-protected:
     UniqueProgram glProgram;
 
-    UniformBlockArrayGL uniformBlocks;
     VertexAttributeArrayGL vertexAttributes;
     VertexAttributeArrayGL instanceAttributes;
     SamplerLocationArray samplerLocations;

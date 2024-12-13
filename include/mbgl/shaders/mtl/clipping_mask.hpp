@@ -22,6 +22,11 @@ static_assert(sizeof(ClipUBO) == 5 * 16);
 #include <metal_stdlib>
 using namespace metal;
 
+enum {
+    idClippingMaskUBO = idDrawableReservedVertexOnlyUBO,
+    clippingMaskUBOCount = drawableReservedUBOCount
+};
+
 struct alignas(16) ClipUBO {
     /*  0 */ float4x4 matrix;
     /* 64 */ uint32_t stencil_ref;
@@ -32,11 +37,6 @@ struct alignas(16) ClipUBO {
 };
 static_assert(sizeof(ClipUBO) == 5 * 16, "wrong size");
 
-enum {
-    idClippingMaskUBO = globalUBOCount,
-    clippingMaskUBOCount
-};
-
 )"
 
 template <>
@@ -45,7 +45,6 @@ struct ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 1> uniforms;
     static const std::array<AttributeInfo, 1> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;

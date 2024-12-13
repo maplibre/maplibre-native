@@ -6,20 +6,27 @@
 namespace mbgl {
 namespace shaders {
 
+#define BACKGROUND_SHADER_COMMON \
+    R"(
+
+#define idBackgroundDrawableUBO     idDrawableReservedVertexOnlyUBO
+#define idBackgroundPropsUBO        layerUBOStartId
+
+)"
+
 template <>
 struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "BackgroundShader";
 
-    static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 1> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto vertex = R"(
+    static constexpr auto vertex = BACKGROUND_SHADER_COMMON R"(
 
 layout(location = 0) in ivec2 in_position;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform BackgroundDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idBackgroundDrawableUBO) uniform BackgroundDrawableUBO {
     mat4 matrix;
 } drawable;
 
@@ -29,10 +36,10 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = R"(
+    static constexpr auto fragment = BACKGROUND_SHADER_COMMON R"(
 layout(location = 0) out vec4 out_color;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform BackgroundPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = idBackgroundPropsUBO) uniform BackgroundPropsUBO {
     vec4 color;
     float opacity;
     float pad1;
@@ -56,16 +63,14 @@ template <>
 struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "BackgroundPatternShader";
 
-    static const std::array<UniformBlockInfo, 3> uniforms;
-    static const std::array<AttributeInfo, 1> attributes;
+     static const std::array<AttributeInfo, 1> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto vertex = R"(
-
+    static constexpr auto vertex = BACKGROUND_SHADER_COMMON R"(
 layout(location = 0) in ivec2 in_position;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform BackgroundPatternDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idBackgroundDrawableUBO) uniform BackgroundPatternDrawableUBO {
     mat4 matrix;
     vec2 pixel_coord_upper;
     vec2 pixel_coord_lower;
@@ -75,7 +80,7 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform BackgroundPatternDrawa
     float pad3;
 } drawable;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform BackgroundPatternPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = idBackgroundPropsUBO) uniform BackgroundPatternPropsUBO {
     vec2 pattern_tl_a;
     vec2 pattern_br_a;
     vec2 pattern_tl_b;
@@ -109,13 +114,13 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = R"(
+    static constexpr auto fragment = BACKGROUND_SHADER_COMMON R"(
 layout(location = 0) in vec2 frag_pos_a;
 layout(location = 1) in vec2 frag_pos_b;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform BackgroundPatternLayerUBO {
+layout(set = LAYER_SET_INDEX, binding = idBackgroundPropsUBO) uniform BackgroundPatternLayerUBO {
     vec2 pattern_tl_a;
     vec2 pattern_br_a;
     vec2 pattern_tl_b;

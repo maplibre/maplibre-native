@@ -56,7 +56,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         /* .to_scale = */ crossfade.toScale,
         /* .pad2 = */ 0};
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
-    layerUniforms.createOrUpdate(idFillExtrusionPropsUBO, &propsUBO, context, true, true);
+    layerUniforms.createOrUpdate(idFillExtrusionPropsUBO, &propsUBO, context);
 
     propertiesUpdated = false;
 
@@ -147,8 +147,8 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         drawable.setUBOIndex(i++);
 #else
         auto& drawableUniforms = drawable.mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(idFillExtrusionDrawableUBO, &drawableUBO, context, true, false);
-        drawableUniforms.createOrUpdate(idFillExtrusionTilePropsUBO, &tilePropsUBO, context, true, true);
+        drawableUniforms.createOrUpdate(idFillExtrusionDrawableUBO, &drawableUBO, context);
+        drawableUniforms.createOrUpdate(idFillExtrusionTilePropsUBO, &tilePropsUBO, context);
 #endif
     });
 
@@ -167,8 +167,8 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         tilePropsUniformBuffer->update(tilePropsUBOVector.data(), tilePropsUBOVectorSize);
     }
 
-    layerUniforms.set(idFillExtrusionDrawableUBO, drawableUniformBuffer, true, false);
-    layerUniforms.set(idFillExtrusionTilePropsUBO, tilePropsUniformBuffer, true, true);
+    layerUniforms.set(idFillExtrusionDrawableUBO, drawableUniformBuffer);
+    layerUniforms.set(idFillExtrusionTilePropsUBO, tilePropsUniformBuffer);
 #endif
 }
 

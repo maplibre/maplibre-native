@@ -63,7 +63,7 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
         propertiesUpdated = false;
     }
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
-    layerUniforms.set(idRasterEvaluatedPropsUBO, evaluatedPropsUniformBuffer, true, true);
+    layerUniforms.set(idRasterEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
 #if MLN_UBO_CONSOLIDATION
     int i = 0;
@@ -111,7 +111,7 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
         drawable.setUBOIndex(i++);
 #else
         auto& drawableUniforms = drawable.mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(idRasterDrawableUBO, &drawableUBO, parameters.context, true, false);
+        drawableUniforms.createOrUpdate(idRasterDrawableUBO, &drawableUBO, parameters.context);
 #endif
     });
 
@@ -124,7 +124,7 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
         drawableUniformBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
     }
 
-    layerUniforms.set(idRasterDrawableUBO, drawableUniformBuffer, true, false);
+    layerUniforms.set(idRasterDrawableUBO, drawableUniformBuffer);
 #endif
 }
 

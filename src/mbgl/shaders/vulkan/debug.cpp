@@ -7,9 +7,6 @@ namespace shaders {
 
 using DebugShaderSource = ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Vulkan>;
 
-const std::array<UniformBlockInfo, 1> DebugShaderSource::uniforms = {
-    UniformBlockInfo{true, true, sizeof(DebugUBO), idDebugUBO},
-};
 const std::array<AttributeInfo, 1> DebugShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, idDebugPosVertexAttribute},
 };

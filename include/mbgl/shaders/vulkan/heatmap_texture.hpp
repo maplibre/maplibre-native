@@ -6,20 +6,26 @@
 namespace mbgl {
 namespace shaders {
 
+#define HEATMAP_TEXTURE_SHADER_PRELUDE \
+    R"(
+
+#define idHeatmapTexturePropsUBO    layerUBOStartId
+
+)"
+
 template <>
 struct ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "HeatmapTextureShader";
 
-    static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 1> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
-    static constexpr auto vertex = R"(
+    static constexpr auto vertex = HEATMAP_TEXTURE_SHADER_PRELUDE R"(
 
 layout(location = 0) in ivec2 in_position;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform HeatmapTexturePropsUBO {
+layout(set = LAYER_SET_INDEX, binding = idHeatmapTexturePropsUBO) uniform HeatmapTexturePropsUBO {
     mat4 matrix;
     float opacity;
     float pad1;
@@ -38,12 +44,12 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = R"(
+    static constexpr auto fragment = HEATMAP_TEXTURE_SHADER_PRELUDE R"(
 
 layout(location = 0) in vec2 frag_position;
 layout(location = 0) out vec4 out_color;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform HeatmapTexturePropsUBO {
+layout(set = LAYER_SET_INDEX, binding = idHeatmapTexturePropsUBO) uniform HeatmapTexturePropsUBO {
     mat4 matrix;
     float opacity;
     float pad1;

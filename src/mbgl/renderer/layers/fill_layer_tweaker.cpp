@@ -50,7 +50,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         propertiesUpdated = false;
     }
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
-    layerUniforms.set(idFillEvaluatedPropsUBO, evaluatedPropsUniformBuffer, true, true);
+    layerUniforms.set(idFillEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
     const auto& translation = evaluated.get<FillTranslate>();
     const auto anchor = evaluated.get<FillTranslateAnchor>();
@@ -119,7 +119,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 };
 
 #if !MLN_UBO_CONSOLIDATION
-                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context, true, false);
+                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
 #endif
                 break;
             }
@@ -138,7 +138,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 };
 
 #if !MLN_UBO_CONSOLIDATION
-                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context, true, false);
+                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
 #endif
                 break;
             }
@@ -175,8 +175,8 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 };
 
 #if !MLN_UBO_CONSOLIDATION
-                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context, true, false);
-                drawableUniforms.createOrUpdate(idFillTilePropsUBO, &tilePropsUBO, context, true, true);
+                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
+                drawableUniforms.createOrUpdate(idFillTilePropsUBO, &tilePropsUBO, context);
 #endif
                 break;
             }
@@ -213,8 +213,8 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 };
 
 #if !MLN_UBO_CONSOLIDATION
-                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context, true, false);
-                drawableUniforms.createOrUpdate(idFillTilePropsUBO, &tilePropsUBO, context, true, true);
+                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
+                drawableUniforms.createOrUpdate(idFillTilePropsUBO, &tilePropsUBO, context);
 #endif
                 break;
             }
@@ -232,7 +232,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 };
 
 #if !MLN_UBO_CONSOLIDATION
-                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context, true, false);
+                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
 #endif
                 break;
             }
@@ -263,8 +263,8 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         tilePropsUniformBuffer->update(tilePropsUBOVector.data(), tilePropsUBOVectorSize);
     }
 
-    layerUniforms.set(idFillDrawableUBO, drawableUniformBuffer, true, false);
-    layerUniforms.set(idFillTilePropsUBO, tilePropsUniformBuffer, true, true);
+    layerUniforms.set(idFillDrawableUBO, drawableUniformBuffer);
+    layerUniforms.set(idFillTilePropsUBO, tilePropsUniformBuffer);
 #endif
 }
 

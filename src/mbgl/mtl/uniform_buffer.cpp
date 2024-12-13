@@ -1,6 +1,7 @@
 #include <mbgl/mtl/uniform_buffer.hpp>
 #include <mbgl/mtl/render_pass.hpp>
 #include <mbgl/mtl/context.hpp>
+#include <mbgl/shaders/layer_ubo.hpp>
 #include <mbgl/util/logging.hpp>
 
 #include <cassert>
@@ -44,10 +45,10 @@ void UniformBufferArray::bind(RenderPass& renderPass) const noexcept {
         if (!uniformBuffer) continue;
         const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer.get());
         const auto& resource = buffer.getBufferResource();
-        if (buffer.getBindVertex()) {
+        if (id != shaders::idDrawableReservedFragmentOnlyUBO) {
             renderPass.bindVertex(resource, 0, id);
         }
-        if (buffer.getBindFragment()) {
+        if (id != shaders::idDrawableReservedVertexOnlyUBO) {
             renderPass.bindFragment(resource, 0, id);
         }
     }

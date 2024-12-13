@@ -10,6 +10,12 @@ namespace shaders {
 #define CIRCLE_SHADER_PRELUDE \
     R"(
 
+enum {
+    idCircleDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idCircleEvaluatedPropsUBO = drawableReservedUBOCount,
+    circleUBOCount
+};
+
 struct alignas(16) CircleDrawableUBO {
     /*   0 */ float4x4 matrix;
     /*  64 */ float2 extrude_scale;
@@ -45,12 +51,6 @@ struct alignas(16) CircleEvaluatedPropsUBO {
 };
 static_assert(sizeof(CircleEvaluatedPropsUBO) == 4 * 16, "wrong size");
 
-enum {
-    idCircleDrawableUBO = globalUBOCount,
-    idCircleEvaluatedPropsUBO,
-    circleUBOCount
-};
-
 )"
 
 template <>
@@ -59,7 +59,6 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 3> uniforms;
     static const std::array<AttributeInfo, 8> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;

@@ -11,8 +11,8 @@ namespace shaders {
     R"(
 
 enum {
-    idWideVectorUniformsUBO = globalUBOCount,
-    idWideVectorUniformWideVecUBO,
+    idWideVectorUniformsUBO = idDrawableReservedVertexOnlyUBO,
+    idWideVectorUniformWideVecUBO = drawableReservedUBOCount,
     wideVectorUBOCount
 };
 
@@ -24,7 +24,6 @@ struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexTri_wideVecPerf";
     static constexpr auto fragmentMainFunction = "fragmentTri_wideVecPerf";
 
-    static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 3> attributes;
     static const std::array<AttributeInfo, 4> instanceAttributes;
     static const std::array<TextureInfo, 0> textures;

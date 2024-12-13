@@ -6,16 +6,24 @@
 namespace mbgl {
 namespace shaders {
 
+#define FILL_EXTRUSION_SHADER_COMMON \
+    R"(
+
+#define idFillExtrusionDrawableUBO      idDrawableReservedVertexOnlyUBO
+#define idFillExtrusionTilePropsUBO     drawableReservedUBOCount
+#define idFillExtrusionPropsUBO         layerUBOStartId
+
+)"
+
 template <>
 struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillExtrusionShader";
 
-    static const std::array<UniformBlockInfo, 2> uniforms;
-    static const std::array<AttributeInfo, 5> attributes;
+      static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto vertex = R"(
+    static constexpr auto vertex = FILL_EXTRUSION_SHADER_COMMON R"(
 
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec4 in_normal_ed;
@@ -32,7 +40,7 @@ layout(location = 3) in vec2 in_base;
 layout(location = 4) in vec2 in_height;
 #endif
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillExtrusionDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionDrawableUBO) uniform FillExtrusionDrawableUBO {
     mat4 matrix;
     vec2 pixel_coord_upper;
     vec2 pixel_coord_lower;
@@ -47,7 +55,7 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillExtrusionDrawableU
     float pad1;
 } drawable;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform FillExtrusionPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExtrusionPropsUBO {
     vec4 color;
     vec4 light_color_pad;
     vec4 light_position_base;
@@ -134,7 +142,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = R"(
+    static constexpr auto fragment = FILL_EXTRUSION_SHADER_COMMON R"(
 
 layout(location = 0) in vec4 frag_color;
 layout(location = 0) out vec4 out_color;
@@ -149,12 +157,11 @@ template <>
 struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillExtrusionPatternShader";
 
-    static const std::array<UniformBlockInfo, 4> uniforms;
     static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto vertex = R"(
+    static constexpr auto vertex = FILL_EXTRUSION_SHADER_COMMON R"(
 
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec4 in_normal_ed;
@@ -175,7 +182,7 @@ layout(location = 4) in uvec4 in_pattern_from;
 layout(location = 5) in uvec4 in_pattern_to;
 #endif
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillExtrusionDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionDrawableUBO) uniform FillExtrusionDrawableUBO {
     mat4 matrix;
     vec2 pixel_coord_upper;
     vec2 pixel_coord_lower;
@@ -190,7 +197,7 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform FillExtrusionDrawableU
     float pad1;
 } drawable;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform FillExtrusionTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionTilePropsUBO) uniform FillExtrusionTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
     vec2 texsize;
@@ -198,7 +205,7 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform FillExtrusionTileProps
     float pad2;
 } tileProps;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform FillExtrusionPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExtrusionPropsUBO {
     vec4 color;
     vec4 light_color_pad;
     vec4 light_position_base;
@@ -311,7 +318,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = R"(
+    static constexpr auto fragment = FILL_EXTRUSION_SHADER_COMMON R"(
 
 layout(location = 0) in mediump vec4 frag_lighting;
 layout(location = 1) in mediump vec2 frag_pos_a;
@@ -327,7 +334,7 @@ layout(location = 4) in mediump vec4 frag_pattern_to;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform FillExtrusionTilePropsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionTilePropsUBO) uniform FillExtrusionTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
     vec2 texsize;
@@ -335,7 +342,7 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform FillExtrusionTileProps
     float pad2;
 } tileProps;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform FillExtrusionPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExtrusionPropsUBO {
     vec4 color;
     vec4 light_color_pad;
     vec4 light_position_base;

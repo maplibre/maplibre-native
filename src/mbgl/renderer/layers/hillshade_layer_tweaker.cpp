@@ -52,7 +52,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
         propertiesUpdated = false;
     }
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
-    layerUniforms.set(idHillshadeEvaluatedPropsUBO, evaluatedPropsUniformBuffer, false, true);
+    layerUniforms.set(idHillshadeEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
 #if MLN_UBO_CONSOLIDATION
     int i = 0;
@@ -91,8 +91,8 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
         drawable.setUBOIndex(i++);
 #else
         auto& drawableUniforms = drawable.mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(idHillshadeDrawableUBO, &drawableUBO, parameters.context, true, false);
-        drawableUniforms.createOrUpdate(idHillshadeTilePropsUBO, &tilePropsUBO, parameters.context, false, true);
+        drawableUniforms.createOrUpdate(idHillshadeDrawableUBO, &drawableUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idHillshadeTilePropsUBO, &tilePropsUBO, parameters.context);
 #endif
     });
 
@@ -112,8 +112,8 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
         tilePropsUniformBuffer->update(tilePropsUBOVector.data(), tilePropsUBOVectorSize);
     }
 
-    layerUniforms.set(idHillshadeDrawableUBO, drawableUniformBuffer, true, false);
-    layerUniforms.set(idHillshadeTilePropsUBO, tilePropsUniformBuffer, false, true);
+    layerUniforms.set(idHillshadeDrawableUBO, drawableUniformBuffer);
+    layerUniforms.set(idHillshadeTilePropsUBO, tilePropsUniformBuffer);
 #endif
 }
 

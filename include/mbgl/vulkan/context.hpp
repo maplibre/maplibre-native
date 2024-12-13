@@ -175,6 +175,7 @@ private:
 
     void buildImageDescriptorSetLayout();
     void buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& layout,
+                                         size_t uniformStartId,
                                          size_t uniformCount,
                                          const std::string& name);
 

@@ -41,17 +41,8 @@ protected:
         return *this;
     }
 
-public:
-    bool getBindVertex() const { return bindVertex; }
-    void setBindVertex(bool value) { bindVertex = value; }
-
-    bool getBindFragment() const { return bindFragment; }
-    void setBindFragment(bool value) { bindFragment = value; }
-
 protected:
     std::size_t size;
-    bool bindVertex = false;
-    bool bindFragment = false;
 };
 
 /// Stores a collection of uniform buffers by id
@@ -72,20 +63,18 @@ public:
 
     /// Set a new uniform buffer element or replace the existing one.
     virtual const std::shared_ptr<UniformBuffer>& set(const size_t id,
-                                                      std::shared_ptr<UniformBuffer> uniformBuffer,
-                                                      bool bindVertex,
-                                                      bool bindFragment);
+                                                      std::shared_ptr<UniformBuffer> uniformBuffer);
 
     /// Create and add a new buffer or update an existing one
     void createOrUpdate(
-        const size_t id, const std::vector<uint8_t>& data, gfx::Context&, bool bindVertex, bool bindFragment);
+        const size_t id, const std::vector<uint8_t>& data, gfx::Context&, bool persistent = false);
     virtual void createOrUpdate(
-        const size_t id, const void* data, std::size_t size, gfx::Context&, bool bindVertex, bool bindFragment);
+        const size_t id, const void* data, std::size_t size, gfx::Context&, bool persistent = false);
     template <typename T>
-    void createOrUpdate(const size_t id, const T* data, gfx::Context& context, bool bindVertex, bool bindFragment)
+    void createOrUpdate(const size_t id, const T* data, gfx::Context& context, bool persistent = false)
         requires(!std::is_pointer_v<T>)
     {
-        createOrUpdate(id, data, sizeof(T), context, bindVertex, bindFragment);
+        createOrUpdate(id, data, sizeof(T), context, persistent);
     }
 
     UniformBufferArray& operator=(UniformBufferArray&&);

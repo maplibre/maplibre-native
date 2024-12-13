@@ -92,7 +92,7 @@ public:
 
     void execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) override {
         auto& layerUniforms = layerGroup.mutableUniformBuffers();
-        layerUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &linePropertiesUBO, parameters.context, true, true);
+        layerUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &linePropertiesUBO, parameters.context);
 
         // We would need to set up `idLineExpressionUBO` if the expression mask isn't empty
         assert(linePropertiesUBO.expressionMask == LineExpressionMask::None);
@@ -106,7 +106,7 @@ public:
             /* .width = */ nullptr,
             /* .floorWidth = */ nullptr,
         };
-        layerUniforms.createOrUpdate(idLineExpressionUBO, &exprUBO, parameters.context, true, true);
+        layerUniforms.createOrUpdate(idLineExpressionUBO, &exprUBO, parameters.context);
     }
 
 private:
@@ -216,7 +216,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         auto updatedCount = tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
             // update existing drawable
             auto& drawableUniforms = drawable.mutableUniformBuffers();
-            drawableUniforms.createOrUpdate(idDebugUBO, &debugUBO, context, true, true);
+            drawableUniforms.createOrUpdate(idDebugUBO, &debugUBO, context);
         });
         return updatedCount;
     };
@@ -245,7 +245,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         for (auto& drawable : debugBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
             auto& drawableUniforms = drawable->mutableUniformBuffers();
-            drawableUniforms.createOrUpdate(idDebugUBO, &debugUBO, context, true, true);
+            drawableUniforms.createOrUpdate(idDebugUBO, &debugUBO, context);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
         }
@@ -297,11 +297,10 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                     /* .width_t = */ 0.f,
                     /* .pad1 = */ 0};
                 auto& drawableUniforms = drawable.mutableUniformBuffers();
-                drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, parameters.context, true, false);
+                drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, parameters.context);
 
 #if !MLN_RENDER_BACKEND_VULKAN
-                drawableUniforms.createOrUpdate(
-                    idLineEvaluatedPropsUBO, &linePropertiesUBO, parameters.context, true, true);
+                drawableUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &linePropertiesUBO, parameters.context);
 
                 // We would need to set up `idLineExpressionUBO` if the expression mask isn't empty
                 assert(linePropertiesUBO.expressionMask == LineExpressionMask::None);
@@ -315,7 +314,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                     /* .width = */ nullptr,
                     /* .floorWidth = */ nullptr,
                 };
-                drawableUniforms.createOrUpdate(idLineExpressionUBO, &exprUBO, parameters.context, true, true);
+                drawableUniforms.createOrUpdate(idLineExpressionUBO, &exprUBO, parameters.context);
 #endif
             };
 

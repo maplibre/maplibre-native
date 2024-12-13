@@ -6,10 +6,6 @@ namespace shaders {
 
 using HeatmapShaderSource = ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal>;
 
-const std::array<UniformBlockInfo, 2> HeatmapShaderSource::uniforms = {
-    UniformBlockInfo{true, false, sizeof(HeatmapDrawableUBO), idHeatmapDrawableUBO},
-    UniformBlockInfo{true, true, sizeof(HeatmapEvaluatedPropsUBO), idHeatmapEvaluatedPropsUBO},
-};
 const std::array<AttributeInfo, 3> HeatmapShaderSource::attributes = {
     AttributeInfo{heatmapUBOCount + 0, gfx::AttributeDataType::Short2, idHeatmapPosVertexAttribute},
     AttributeInfo{heatmapUBOCount + 1, gfx::AttributeDataType::Float2, idHeatmapWeightVertexAttribute},

@@ -521,7 +521,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         return;
     }
     const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
-    const auto& shaderUniforms = shaderMTL.getUniformBlocks();
 
     auto& uploadPass = static_cast<UploadPass&>(uploadPass_);
     auto& contextBase = uploadPass.getContext();

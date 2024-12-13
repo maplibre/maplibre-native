@@ -63,14 +63,14 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
                                                     /* .scale_b = */ crossfade.toScale,
                                                     /* .mix = */ crossfade.t,
                                                     /* .opacity = */ evaluated.get<BackgroundOpacity>()};
-        layerUniforms.createOrUpdate(idBackgroundPropsUBO, &propsUBO, context, true, true);
+        layerUniforms.createOrUpdate(idBackgroundPropsUBO, &propsUBO, context);
     } else {
         const BackgroundPropsUBO propsUBO = {/* .color = */ evaluated.get<BackgroundColor>(),
                                              /* .opacity = */ evaluated.get<BackgroundOpacity>(),
                                              /* .pad1 = */ 0,
                                              /* .pad2 = */ 0,
                                              /* .pad3 = */ 0};
-        layerUniforms.createOrUpdate(idBackgroundPropsUBO, &propsUBO, context, false, true);
+        layerUniforms.createOrUpdate(idBackgroundPropsUBO, &propsUBO, context);
     }
 
 #if MLN_UBO_CONSOLIDATION
@@ -122,7 +122,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
                 /* .pad3 = */ 0
             };
 #if !MLN_UBO_CONSOLIDATION
-            drawableUniforms.createOrUpdate(idBackgroundDrawableUBO, &drawableUBO, context, true, false);
+            drawableUniforms.createOrUpdate(idBackgroundDrawableUBO, &drawableUBO, context);
 #endif
         } else {
 
@@ -134,7 +134,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
                 /* .matrix = */ util::cast<float>(matrix)
             };
 #if !MLN_UBO_CONSOLIDATION
-            drawableUniforms.createOrUpdate(idBackgroundDrawableUBO, &drawableUBO, context, true, false);
+            drawableUniforms.createOrUpdate(idBackgroundDrawableUBO, &drawableUBO, context);
 #endif
         }
 
@@ -151,7 +151,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
         drawableUniformBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
     }
 
-    layerUniforms.set(idBackgroundDrawableUBO, drawableUniformBuffer, true, false);
+    layerUniforms.set(idBackgroundDrawableUBO, drawableUniformBuffer);
 #endif
 }
 

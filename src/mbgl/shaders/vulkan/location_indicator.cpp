@@ -10,9 +10,6 @@ namespace shaders {
 
 using LocationIndicatorShaderSource = ShaderSource<BuiltIn::LocationIndicatorShader, gfx::Backend::Type::Vulkan>;
 
-const std::array<UniformBlockInfo, 1> LocationIndicatorShaderSource::uniforms = {
-    UniformBlockInfo{true, true, sizeof(LocationIndicatorDrawableUBO), idLocationIndicatorDrawableUBO},
-};
 const std::array<AttributeInfo, 1> LocationIndicatorShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Float2, idCommonPosVertexAttribute},
 };
@@ -24,9 +21,6 @@ const std::array<TextureInfo, 0> LocationIndicatorShaderSource::textures = {};
 using LocationIndicatorShaderTexturedSource =
     ShaderSource<BuiltIn::LocationIndicatorTexturedShader, gfx::Backend::Type::Vulkan>;
 
-const std::array<UniformBlockInfo, 1> LocationIndicatorShaderTexturedSource::uniforms = {
-    UniformBlockInfo{true, false, sizeof(LocationIndicatorDrawableUBO), idLocationIndicatorDrawableUBO},
-};
 const std::array<AttributeInfo, 2> LocationIndicatorShaderTexturedSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Float2, idCommonPosVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::Float2, idCommonTexVertexAttribute},

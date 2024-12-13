@@ -10,6 +10,12 @@ namespace shaders {
 #define COLLISION_SHADER_COMMON \
     R"(
 
+enum {
+    idCollisionDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idCollisionTilePropsUBO = drawableReservedUBOCount,
+    collisionUBOCount
+};
+
 struct alignas(16) CollisionDrawableUBO {
     /*  0 */ float4x4 matrix;
     /* 64 */
@@ -24,12 +30,6 @@ struct alignas(16) CollisionTilePropsUBO {
 };
 static_assert(sizeof(CollisionTilePropsUBO) == 16, "wrong size");
 
-enum {
-    idCollisionDrawableUBO = globalUBOCount,
-    idCollisionTilePropsUBO,
-    collisionUBOCount
-};
-
 )"
 
 template <>
@@ -38,7 +38,6 @@ struct ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
@@ -112,7 +111,6 @@ struct ShaderSource<BuiltIn::CollisionCircleShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 4> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;

@@ -10,6 +10,12 @@ namespace shaders {
 #define RASTER_SHADER_PRELUDE \
     R"(
 
+enum {
+    idRasterDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idRasterEvaluatedPropsUBO = drawableReservedUBOCount,
+    rasterUBOCount
+};
+
 struct alignas(16) RasterDrawableUBO {
     /*  0 */ float4x4 matrix;
     /* 64 */
@@ -34,12 +40,6 @@ struct alignas(16) RasterEvaluatedPropsUBO {
 };
 static_assert(sizeof(RasterEvaluatedPropsUBO) == 4 * 16, "wrong size");
 
-enum {
-    idRasterDrawableUBO = globalUBOCount,
-    idRasterEvaluatedPropsUBO,
-    rasterUBOCount
-};
-
 )"
 
 template <>
@@ -48,7 +48,6 @@ struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;

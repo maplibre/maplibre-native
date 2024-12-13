@@ -287,7 +287,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         /* .pad1 = */ 0,
     };
     auto& globalUniforms = context.mutableGlobalUniformBuffers();
-    globalUniforms.createOrUpdate(shaders::idGlobalPaintParamsUBO, &globalPaintParamsUBO, context, true, true);
+    globalUniforms.createOrUpdate(shaders::idGlobalPaintParamsUBO, &globalPaintParamsUBO, context);
 #endif
 
     // - 3D PASS

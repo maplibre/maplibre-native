@@ -7,10 +7,6 @@ namespace shaders {
 
 using RasterShaderSource = ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::Vulkan>;
 
-const std::array<UniformBlockInfo, 2> RasterShaderSource::uniforms = {
-    UniformBlockInfo{true, false, sizeof(RasterDrawableUBO), idRasterDrawableUBO},
-    UniformBlockInfo{true, true, sizeof(RasterEvaluatedPropsUBO), idRasterEvaluatedPropsUBO},
-};
 const std::array<AttributeInfo, 2> RasterShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, idRasterPosVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::Short2, idRasterTexturePosVertexAttribute},

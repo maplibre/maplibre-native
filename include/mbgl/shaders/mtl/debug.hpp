@@ -10,6 +10,11 @@ namespace shaders {
 #define DEBUG_SHADER_PRELUDE \
     R"(
 
+enum {
+    idDebugUBO = drawableReservedUBOCount,
+    debugUBOCount
+};
+
 struct alignas(16) DebugUBO {
     /*  0 */ float4x4 matrix;
     /* 64 */ float4 color;
@@ -21,11 +26,6 @@ struct alignas(16) DebugUBO {
 };
 static_assert(sizeof(DebugUBO) == 6 * 16, "wrong size");
 
-enum {
-    idDebugUBO = globalUBOCount,
-    debugUBOCount
-};
-
 )"
 
 template <>
@@ -34,8 +34,7 @@ struct ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 1> uniforms;
-    static const std::array<AttributeInfo, 1> attributes;
+     static const std::array<AttributeInfo, 1> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 

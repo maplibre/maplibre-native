@@ -56,7 +56,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         propertiesUpdated = false;
     }
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
-    layerUniforms.set(idCircleEvaluatedPropsUBO, evaluatedPropsUniformBuffer, true, true);
+    layerUniforms.set(idCircleEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
 #if MLN_UBO_CONSOLIDATION
     int i = 0;
@@ -111,7 +111,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         drawable.setUBOIndex(i++);
 #else
         auto& drawableUniforms = drawable.mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(idCircleDrawableUBO, &drawableUBO, context, true, false);
+        drawableUniforms.createOrUpdate(idCircleDrawableUBO, &drawableUBO, context);
 #endif
     });
 
@@ -123,7 +123,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         drawableUniformBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
     }
 
-    layerUniforms.set(idCircleDrawableUBO, drawableUniformBuffer, true, false);
+    layerUniforms.set(idCircleDrawableUBO, drawableUniformBuffer);
 #endif
 }
 

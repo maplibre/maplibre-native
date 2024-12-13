@@ -10,12 +10,6 @@ namespace shaders {
 
 using SymbolIconShaderSource = ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Vulkan>;
 
-const std::array<UniformBlockInfo, 4> SymbolIconShaderSource::uniforms = {
-    UniformBlockInfo{true, false, sizeof(GlobalPaintParamsUBO), idGlobalPaintParamsUBO},
-    UniformBlockInfo{true, false, sizeof(SymbolDrawableUBO), idSymbolDrawableUBO},
-    UniformBlockInfo{false, true, sizeof(SymbolTilePropsUBO), idSymbolTilePropsUBO},
-    UniformBlockInfo{false, true, sizeof(SymbolEvaluatedPropsUBO), idSymbolEvaluatedPropsUBO},
-};
 const std::array<AttributeInfo, 6> SymbolIconShaderSource::attributes = {
     // always attributes
     AttributeInfo{0, gfx::AttributeDataType::Short4, idSymbolPosOffsetVertexAttribute},
@@ -36,12 +30,6 @@ const std::array<TextureInfo, 1> SymbolIconShaderSource::textures = {
 
 using SymbolSDFIconShaderSource = ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Vulkan>;
 
-const std::array<UniformBlockInfo, 4> SymbolSDFIconShaderSource::uniforms = {
-    UniformBlockInfo{true, false, sizeof(GlobalPaintParamsUBO), idGlobalPaintParamsUBO},
-    UniformBlockInfo{true, false, sizeof(SymbolDrawableUBO), idSymbolDrawableUBO},
-    UniformBlockInfo{false, true, sizeof(SymbolTilePropsUBO), idSymbolTilePropsUBO},
-    UniformBlockInfo{false, true, sizeof(SymbolEvaluatedPropsUBO), idSymbolEvaluatedPropsUBO},
-};
 const std::array<AttributeInfo, 10> SymbolSDFIconShaderSource::attributes = {
     // always attributes
     AttributeInfo{0, gfx::AttributeDataType::Short4, idSymbolPosOffsetVertexAttribute},
@@ -66,12 +54,6 @@ const std::array<TextureInfo, 1> SymbolSDFIconShaderSource::textures = {
 
 using SymbolTextAndIconShaderSource = ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Vulkan>;
 
-const std::array<UniformBlockInfo, 4> SymbolTextAndIconShaderSource::uniforms = {
-    UniformBlockInfo{true, false, sizeof(GlobalPaintParamsUBO), idGlobalPaintParamsUBO},
-    UniformBlockInfo{true, false, sizeof(SymbolDrawableUBO), idSymbolDrawableUBO},
-    UniformBlockInfo{false, true, sizeof(SymbolTilePropsUBO), idSymbolTilePropsUBO},
-    UniformBlockInfo{false, true, sizeof(SymbolEvaluatedPropsUBO), idSymbolEvaluatedPropsUBO},
-};
 const std::array<AttributeInfo, 9> SymbolTextAndIconShaderSource::attributes = {
     // always attributes
     AttributeInfo{0, gfx::AttributeDataType::Short4, idSymbolPosOffsetVertexAttribute},

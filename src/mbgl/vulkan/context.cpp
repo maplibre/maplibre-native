@@ -113,11 +113,11 @@ void Context::initFrameResources() {
     (void)getDummyTexture();
 
     buildUniformDescriptorSetLayout(
-        globalUniformDescriptorSetLayout, shaders::globalUBOCount, "GlobalUniformDescriptorSetLayout");
+        globalUniformDescriptorSetLayout, 0, shaders::globalUBOCount, "GlobalUniformDescriptorSetLayout");
     buildUniformDescriptorSetLayout(
-        layerUniformDescriptorSetLayout, shaders::maxUBOCountPerLayer, "LayerUniformDescriptorSetLayout");
+        layerUniformDescriptorSetLayout, shaders::layerUBOStartId, shaders::maxUBOCountPerLayer, "LayerUniformDescriptorSetLayout");
     buildUniformDescriptorSetLayout(
-        drawableUniformDescriptorSetLayout, shaders::maxUBOCountPerDrawable, "DrawableUniformDescriptorSetLayout");
+        drawableUniformDescriptorSetLayout, shaders::globalUBOCount, shaders::maxUBOCountPerDrawable, "DrawableUniformDescriptorSetLayout");
     buildImageDescriptorSetLayout();
 }
 
@@ -445,8 +445,7 @@ void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexce
         const shaders::GlobalPlatformParamsUBO platformUBO = {
             /* .rotation0 = */ {cosf(surfaceRotation), -sinf(surfaceRotation)},
             /* .rotation1 = */ {sinf(surfaceRotation), cosf(surfaceRotation)}};
-        context.globalUniformBuffers.createOrUpdate(
-            shaders::idGlobalPlatformParamsUBO, &platformUBO, sizeof(platformUBO), context, true, true);
+        context.globalUniformBuffers.createOrUpdate(shaders::idGlobalPlatformParamsUBO, &platformUBO, sizeof(platformUBO), context);
     }
 
     context.globalUniformBuffers.bindDescriptorSets(renderPassImpl.getEncoder());
@@ -586,13 +585,19 @@ const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
 }
 
 void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& layout,
+                                              size_t uniformStartId,
                                               size_t uniformCount,
                                               const std::string& name) {
     std::vector<vk::DescriptorSetLayoutBinding> bindings;
-    const auto stageFlags = vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex |
-                            vk::ShaderStageFlagBits::eFragment;
-
     for (size_t i = 0; i < uniformCount; ++i) {
+        auto stageFlags = vk::ShaderStageFlags();
+        if (uniformStartId + i != shaders::idDrawableReservedFragmentOnlyUBO) {
+            stageFlags |= vk::ShaderStageFlagBits::eVertex;
+        }
+        if (uniformStartId + i != shaders::idDrawableReservedVertexOnlyUBO) {
+            stageFlags |= vk::ShaderStageFlagBits::eFragment;
+        }
+
         bindings.push_back(vk::DescriptorSetLayoutBinding()
                                .setBinding(i)
                                .setStageFlags(stageFlags)

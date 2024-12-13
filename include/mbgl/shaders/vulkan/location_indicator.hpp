@@ -6,19 +6,25 @@
 namespace mbgl {
 namespace shaders {
 
+#define LOCATION_INDICATOR_SHADER_PRELUDE \
+    R"(
+
+#define idLocationIndicatorDrawableUBO  drawableReservedUBOCount
+
+)"
+
 template <>
 struct ShaderSource<BuiltIn::LocationIndicatorShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "LocationIndicatorShader";
 
-    static const std::array<UniformBlockInfo, 1> uniforms;
     static const std::array<AttributeInfo, 1> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto vertex = R"(
+    static constexpr auto vertex = LOCATION_INDICATOR_SHADER_PRELUDE R"(
 layout(location = 0) in vec2 in_position;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LocationIndicatorDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idLocationIndicatorDrawableUBO) uniform LocationIndicatorDrawableUBO {
     mat4 matrix;
     vec4 color;
 } drawable;
@@ -29,10 +35,10 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = R"(
+    static constexpr auto fragment = LOCATION_INDICATOR_SHADER_PRELUDE R"(
 layout(location = 0) out vec4 out_color;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LocationIndicatorDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idLocationIndicatorDrawableUBO) uniform LocationIndicatorDrawableUBO {
     mat4 matrix;
     vec4 color;
 } drawable;
@@ -47,7 +53,6 @@ template <>
 struct ShaderSource<BuiltIn::LocationIndicatorTexturedShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "LocationIndicatorTexturedShader";
 
-    static const std::array<UniformBlockInfo, 1> uniforms;
     static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
@@ -56,7 +61,7 @@ struct ShaderSource<BuiltIn::LocationIndicatorTexturedShader, gfx::Backend::Type
 layout(location = 0) in vec2 in_position;
 layout(location = 1) in vec2 in_texcoord;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LocationIndicatorDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idLocationIndicatorDrawableUBO) uniform LocationIndicatorDrawableUBO {
     mat4 matrix;
     vec4 color;
 } drawable;

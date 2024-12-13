@@ -6,16 +6,23 @@
 namespace mbgl {
 namespace shaders {
 
+#define CIRCLE_SHADER_PRELUDE \
+    R"(
+
+#define idCircleDrawableUBO         idDrawableReservedVertexOnlyUBO
+#define idCircleEvaluatedPropsUBO   layerUBOStartId
+
+)"
+
 template <>
 struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "CircleShader";
 
-    static const std::array<UniformBlockInfo, 3> uniforms;
-    static const std::array<AttributeInfo, 8> attributes;
+     static const std::array<AttributeInfo, 8> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto vertex = R"(
+    static constexpr auto vertex = CIRCLE_SHADER_PRELUDE R"(
 
 layout(location = 0) in ivec2 in_position;
 
@@ -47,7 +54,7 @@ layout(location = 6) in vec2 in_stroke_width;
 layout(location = 7) in vec2 in_stroke_opacity;
 #endif
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform CircleDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = idCircleDrawableUBO) uniform CircleDrawableUBO {
     mat4 matrix;
     vec2 extrude_scale;
     // Interpolations
@@ -63,7 +70,7 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform CircleDrawableUBO {
     float pad3;
 } drawable;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform CircleEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = idCircleEvaluatedPropsUBO) uniform CircleEvaluatedPropsUBO {
     vec4 color;
     vec4 stroke_color;
     float radius;
@@ -188,7 +195,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = R"(
+    static constexpr auto fragment = CIRCLE_SHADER_PRELUDE R"(
 
 layout(location = 0) in vec2 frag_extrude;
 layout(location = 1) in float frag_antialiasblur;
@@ -223,7 +230,7 @@ layout(location = 8) in lowp float frag_stroke_opacity;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = LAYER_SET_INDEX, binding = 0) uniform CircleEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = idCircleEvaluatedPropsUBO) uniform CircleEvaluatedPropsUBO {
     vec4 color;
     vec4 stroke_color;
     float radius;
