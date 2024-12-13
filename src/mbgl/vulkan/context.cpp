@@ -596,7 +596,7 @@ void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& lay
 
     for (size_t i = 0; i < uniformCount; ++i) {
         bindings.push_back(vk::DescriptorSetLayoutBinding()
-                               .setBinding(i)
+                               .setBinding(static_cast<uint32_t>(i))
                                .setStageFlags(stageFlags)
                                .setDescriptorType(vk::DescriptorType::eUniformBuffer)
                                .setDescriptorCount(1));
