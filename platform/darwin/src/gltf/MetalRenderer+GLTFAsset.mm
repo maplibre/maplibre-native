@@ -187,7 +187,7 @@ void MetalRenderer::computeTransforms(std::shared_ptr<GLTFRenderModel> model) {
     
     
     //
-    auto modelTranslated = matrix_multiply(modelTilted, translationMatrix);
+    auto modelTranslated = matrix_multiply(translationMatrix, modelTilted);
 
     model->_modelMatrix = modelTranslated;
     

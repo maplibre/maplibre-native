@@ -198,6 +198,7 @@ objc_library(
 objc_library(
     name = "ios-sdk",
     hdrs = [
+        "//platform/darwin:darwin_gltf_hdrs",
         "//platform/darwin:darwin_objc_hdrs",
         "//platform/darwin:generated_style_public_hdrs",
         "//platform/ios:ios_sdk_hdrs",

@@ -1,4 +1,5 @@
 MLN_GLTF_HEADERS = [
+    "src/gltf/GLTFModelLayer.h"
 ]
 
 MLN_GLTF_SOURCE = [

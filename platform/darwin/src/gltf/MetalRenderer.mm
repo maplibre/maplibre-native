@@ -99,8 +99,8 @@ void MetalRenderer::render() {
     float aspectRatio = (float)_drawableSize.x / (float)_drawableSize.y;
     simd_float4x4 aspectCorrection = GLTFMatrixFromScale((simd_float3){ 1 / aspectRatio, 1, 1 });
     _projectionMatrix = simd_mul(aspectCorrection, _camera->projectionMatrix());
-    
-    
+        
+    /*
     simd_float4x4 tempMatrix = _projectionMatrix;
     
     // Set the projection matrix from the incoming environment
@@ -117,15 +117,16 @@ void MetalRenderer::render() {
 //    double fov = 0.6435011087932844;
 //    _projectionMatrix = GLTFPerspectiveProjectionMatrixAspectFovRH(fov, aspectRatio, 0.0001, 2);
 
-    
+    */
     
     // The above projection matrix is a perspective matrix.  I think we need an ortho matrix
     float w = ((float)_drawableSize.x) / 2.0;
     float h = ((float)_drawableSize.y) / 2.0;
     float aspect = w/h;
-    _projectionMatrix = GLTFOrthoProjectionMatrix(-w,w,-h*aspect,h*aspect,0.001,250);
-    _projectionMatrix = GLTFOrthoProjectionMatrix(-1*aspect,1*aspect,-1,1,10,-10);
+//    _projectionMatrix = GLTFOrthoProjectionMatrix(-w,w,-h*aspect,h*aspect,0.001,250);
+//    _projectionMatrix = GLTFOrthoProjectionMatrix(-1*aspect,1*aspect,-1,1,10,-10);
 
+    
     
     // ANother projection matrix test
     float fov = _renderingEnvironment->_currentFOVDEG * DEG_RAD; //  0.6435011087932844; // Constant that i found in ML
