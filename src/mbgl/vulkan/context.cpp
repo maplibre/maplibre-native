@@ -114,10 +114,14 @@ void Context::initFrameResources() {
 
     buildUniformDescriptorSetLayout(
         globalUniformDescriptorSetLayout, 0, shaders::globalUBOCount, "GlobalUniformDescriptorSetLayout");
-    buildUniformDescriptorSetLayout(
-        layerUniformDescriptorSetLayout, shaders::layerUBOStartId, shaders::maxUBOCountPerLayer, "LayerUniformDescriptorSetLayout");
-    buildUniformDescriptorSetLayout(
-        drawableUniformDescriptorSetLayout, shaders::globalUBOCount, shaders::maxUBOCountPerDrawable, "DrawableUniformDescriptorSetLayout");
+    buildUniformDescriptorSetLayout(layerUniformDescriptorSetLayout,
+                                    shaders::layerUBOStartId,
+                                    shaders::maxUBOCountPerLayer,
+                                    "LayerUniformDescriptorSetLayout");
+    buildUniformDescriptorSetLayout(drawableUniformDescriptorSetLayout,
+                                    shaders::globalUBOCount,
+                                    shaders::maxUBOCountPerDrawable,
+                                    "DrawableUniformDescriptorSetLayout");
     buildImageDescriptorSetLayout();
 }
 
@@ -445,7 +449,8 @@ void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexce
         const shaders::GlobalPlatformParamsUBO platformUBO = {
             /* .rotation0 = */ {cosf(surfaceRotation), -sinf(surfaceRotation)},
             /* .rotation1 = */ {sinf(surfaceRotation), cosf(surfaceRotation)}};
-        context.globalUniformBuffers.createOrUpdate(shaders::idGlobalPlatformParamsUBO, &platformUBO, sizeof(platformUBO), context);
+        context.globalUniformBuffers.createOrUpdate(
+            shaders::idGlobalPlatformParamsUBO, &platformUBO, sizeof(platformUBO), context);
     }
 
     context.globalUniformBuffers.bindDescriptorSets(renderPassImpl.getEncoder());

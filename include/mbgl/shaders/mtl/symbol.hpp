@@ -79,7 +79,7 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-     static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -422,7 +422,7 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-     static const std::array<AttributeInfo, 9> attributes;
+    static const std::array<AttributeInfo, 9> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 

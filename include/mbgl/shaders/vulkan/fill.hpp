@@ -111,7 +111,7 @@ template <>
 struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillOutlineShader";
 
-     static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -216,7 +216,7 @@ template <>
 struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "FillPatternShader";
 
-     static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 4> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 

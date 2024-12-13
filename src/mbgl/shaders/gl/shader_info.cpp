@@ -18,7 +18,7 @@ TextureInfo::TextureInfo(std::string_view name_, std::size_t id_)
       id(id_) {}
 
 // Background
-using BackgroundShaderInfo= ShaderInfo<BuiltIn::BackgroundShader, gfx::Backend::Type::OpenGL>;
+using BackgroundShaderInfo = ShaderInfo<BuiltIn::BackgroundShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> BackgroundShaderInfo::uniformBlocks = {
     UniformBlockInfo{"BackgroundDrawableUBO", idBackgroundDrawableUBO},
@@ -33,12 +33,12 @@ const std::vector<TextureInfo> BackgroundShaderInfo::textures = {};
 using BackgroundPatternShaderInfo = ShaderInfo<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> BackgroundPatternShaderInfo::uniformBlocks = {
-        UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
-        UniformBlockInfo{"BackgroundPatternDrawableUBO", idBackgroundDrawableUBO},
-        UniformBlockInfo{"BackgroundPatternPropsUBO", idBackgroundPropsUBO},
+    UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"BackgroundPatternDrawableUBO", idBackgroundDrawableUBO},
+    UniformBlockInfo{"BackgroundPatternPropsUBO", idBackgroundPropsUBO},
 };
 const std::vector<AttributeInfo> BackgroundPatternShaderInfo::attributes = {
-        AttributeInfo{"a_pos", idBackgroundPosVertexAttribute},
+    AttributeInfo{"a_pos", idBackgroundPosVertexAttribute},
 };
 const std::vector<TextureInfo> BackgroundPatternShaderInfo::textures = {
     TextureInfo{"u_image", idBackgroundImageTexture},
@@ -68,8 +68,8 @@ const std::vector<TextureInfo> CircleShaderInfo::textures = {};
 using CollisionBoxShaderInfo = ShaderInfo<BuiltIn::CollisionBoxShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> CollisionBoxShaderInfo::uniformBlocks = {
-        UniformBlockInfo{"CollisionDrawableUBO", idCollisionDrawableUBO},
-        UniformBlockInfo{"CollisionTilePropsUBO", idCollisionTilePropsUBO},
+    UniformBlockInfo{"CollisionDrawableUBO", idCollisionDrawableUBO},
+    UniformBlockInfo{"CollisionTilePropsUBO", idCollisionTilePropsUBO},
 };
 const std::vector<AttributeInfo> CollisionBoxShaderInfo::attributes = {
     AttributeInfo{"a_pos", idCollisionPosVertexAttribute},
@@ -84,8 +84,8 @@ const std::vector<TextureInfo> CollisionBoxShaderInfo::textures = {};
 using CollisionCircleShaderInfo = ShaderInfo<BuiltIn::CollisionCircleShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> CollisionCircleShaderInfo::uniformBlocks = {
-        UniformBlockInfo{"CollisionDrawableUBO", idCollisionDrawableUBO},
-        UniformBlockInfo{"CollisionTilePropsUBO", idCollisionTilePropsUBO},
+    UniformBlockInfo{"CollisionDrawableUBO", idCollisionDrawableUBO},
+    UniformBlockInfo{"CollisionTilePropsUBO", idCollisionTilePropsUBO},
 };
 const std::vector<AttributeInfo> CollisionCircleShaderInfo::attributes = {
     AttributeInfo{"a_pos", idCollisionPosVertexAttribute},
@@ -99,7 +99,7 @@ const std::vector<TextureInfo> CollisionCircleShaderInfo::textures = {};
 using CustomSymbolIconShaderInfo = ShaderInfo<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> CustomSymbolIconShaderInfo::uniformBlocks = {
-        UniformBlockInfo{"CustomSymbolIconDrawableUBO", idCustomSymbolDrawableUBO},
+    UniformBlockInfo{"CustomSymbolIconDrawableUBO", idCustomSymbolDrawableUBO},
 };
 const std::vector<AttributeInfo> CustomSymbolIconShaderInfo::attributes = {
     AttributeInfo{"a_pos", idCustomSymbolPosVertexAttribute},
@@ -140,9 +140,9 @@ const std::vector<TextureInfo> FillShaderInfo::textures = {};
 using FillOutlineShaderInfo = ShaderInfo<BuiltIn::FillOutlineShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> FillOutlineShaderInfo::uniformBlocks = {
-        UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
-        UniformBlockInfo{"FillOutlineDrawableUBO", idFillDrawableUBO},
-        UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
+    UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"FillOutlineDrawableUBO", idFillDrawableUBO},
+    UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
 };
 const std::vector<AttributeInfo> FillOutlineShaderInfo::attributes = {
     AttributeInfo{"a_pos", idFillPosVertexAttribute},
@@ -155,10 +155,10 @@ const std::vector<TextureInfo> FillOutlineShaderInfo::textures = {};
 using FillPatternShaderInfo = ShaderInfo<BuiltIn::FillPatternShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> FillPatternShaderInfo::uniformBlocks = {
-        UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
-        UniformBlockInfo{"FillPatternDrawableUBO", idFillDrawableUBO},
-        UniformBlockInfo{"FillPatternTilePropsUBO", idFillTilePropsUBO},
-        UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
+    UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"FillPatternDrawableUBO", idFillDrawableUBO},
+    UniformBlockInfo{"FillPatternTilePropsUBO", idFillTilePropsUBO},
+    UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
 };
 const std::vector<AttributeInfo> FillPatternShaderInfo::attributes = {
     AttributeInfo{"a_pos", idFillPosVertexAttribute},
@@ -174,32 +174,33 @@ const std::vector<TextureInfo> FillPatternShaderInfo::textures = {
 using FillOutlinePatternShaderInfo = ShaderInfo<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> FillOutlinePatternShaderInfo::uniformBlocks = {
-        UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
-        UniformBlockInfo{"FillOutlinePatternDrawableUBO", idFillDrawableUBO},
-        UniformBlockInfo{"FillOutlinePatternTilePropsUBO", idFillTilePropsUBO},
-        UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
+    UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"FillOutlinePatternDrawableUBO", idFillDrawableUBO},
+    UniformBlockInfo{"FillOutlinePatternTilePropsUBO", idFillTilePropsUBO},
+    UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
 };
 const std::vector<AttributeInfo> FillOutlinePatternShaderInfo::attributes = {
-        AttributeInfo{"a_pos", idFillPosVertexAttribute},
-        AttributeInfo{"a_opacity", idFillOpacityVertexAttribute},
-        AttributeInfo{"a_pattern_from", idFillPatternFromVertexAttribute},
-        AttributeInfo{"a_pattern_to", idFillPatternToVertexAttribute},
+    AttributeInfo{"a_pos", idFillPosVertexAttribute},
+    AttributeInfo{"a_opacity", idFillOpacityVertexAttribute},
+    AttributeInfo{"a_pattern_from", idFillPatternFromVertexAttribute},
+    AttributeInfo{"a_pattern_to", idFillPatternToVertexAttribute},
 };
 const std::vector<TextureInfo> FillOutlinePatternShaderInfo::textures = {
     TextureInfo{"u_image", idFillImageTexture},
 };
 
 // Fill Outline Triangulated
-using FillOutlineTriangulatedShaderInfo = ShaderInfo<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::OpenGL>;
+using FillOutlineTriangulatedShaderInfo =
+    ShaderInfo<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> FillOutlineTriangulatedShaderInfo::uniformBlocks = {
-        UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
-        UniformBlockInfo{"FillOutlineTriangulatedDrawableUBO", idFillDrawableUBO},
-        UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
+    UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"FillOutlineTriangulatedDrawableUBO", idFillDrawableUBO},
+    UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
 };
 const std::vector<AttributeInfo> FillOutlineTriangulatedShaderInfo::attributes = {
-        AttributeInfo{"a_pos_normal", idLinePosNormalVertexAttribute},
-        AttributeInfo{"a_data", idLineDataVertexAttribute},
+    AttributeInfo{"a_pos_normal", idLinePosNormalVertexAttribute},
+    AttributeInfo{"a_data", idLineDataVertexAttribute},
 };
 const std::vector<TextureInfo> FillOutlineTriangulatedShaderInfo::textures = {};
 
@@ -207,9 +208,9 @@ const std::vector<TextureInfo> FillOutlineTriangulatedShaderInfo::textures = {};
 using FillExtrusionShaderInfo = ShaderInfo<BuiltIn::FillExtrusionShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> FillExtrusionShaderInfo::uniformBlocks = {
-        UniformBlockInfo{"FillExtrusionDrawableUBO", idFillExtrusionDrawableUBO},
-        UniformBlockInfo{"FillExtrusionTilePropsUBO", idFillExtrusionTilePropsUBO},
-        UniformBlockInfo{"FillExtrusionPropsUBO", idFillExtrusionPropsUBO},
+    UniformBlockInfo{"FillExtrusionDrawableUBO", idFillExtrusionDrawableUBO},
+    UniformBlockInfo{"FillExtrusionTilePropsUBO", idFillExtrusionTilePropsUBO},
+    UniformBlockInfo{"FillExtrusionPropsUBO", idFillExtrusionPropsUBO},
 };
 const std::vector<AttributeInfo> FillExtrusionShaderInfo::attributes = {
     AttributeInfo{"a_pos", idFillExtrusionPosVertexAttribute},
@@ -224,18 +225,18 @@ const std::vector<TextureInfo> FillExtrusionShaderInfo::textures = {};
 using FillExtrusionPatternShaderInfo = ShaderInfo<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> FillExtrusionPatternShaderInfo::uniformBlocks = {
-        UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
-        UniformBlockInfo{"FillExtrusionDrawableUBO", idFillExtrusionDrawableUBO},
-        UniformBlockInfo{"FillExtrusionTilePropsUBO", idFillExtrusionTilePropsUBO},
-        UniformBlockInfo{"FillExtrusionPropsUBO", idFillExtrusionPropsUBO},
+    UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"FillExtrusionDrawableUBO", idFillExtrusionDrawableUBO},
+    UniformBlockInfo{"FillExtrusionTilePropsUBO", idFillExtrusionTilePropsUBO},
+    UniformBlockInfo{"FillExtrusionPropsUBO", idFillExtrusionPropsUBO},
 };
 const std::vector<AttributeInfo> FillExtrusionPatternShaderInfo::attributes = {
-        AttributeInfo{"a_pos", idFillExtrusionPosVertexAttribute},
-        AttributeInfo{"a_normal_ed", idFillExtrusionNormalEdVertexAttribute},
-        AttributeInfo{"a_base", idFillExtrusionBaseVertexAttribute},
-        AttributeInfo{"a_height", idFillExtrusionHeightVertexAttribute},
-        AttributeInfo{"a_pattern_from", idFillExtrusionPatternFromVertexAttribute},
-        AttributeInfo{"a_pattern_to", idFillExtrusionPatternToVertexAttribute},
+    AttributeInfo{"a_pos", idFillExtrusionPosVertexAttribute},
+    AttributeInfo{"a_normal_ed", idFillExtrusionNormalEdVertexAttribute},
+    AttributeInfo{"a_base", idFillExtrusionBaseVertexAttribute},
+    AttributeInfo{"a_height", idFillExtrusionHeightVertexAttribute},
+    AttributeInfo{"a_pattern_from", idFillExtrusionPatternFromVertexAttribute},
+    AttributeInfo{"a_pattern_to", idFillExtrusionPatternToVertexAttribute},
 };
 const std::vector<TextureInfo> FillExtrusionPatternShaderInfo::textures = {
     TextureInfo{"u_image", idFillExtrusionImageTexture},
@@ -259,8 +260,8 @@ const std::vector<TextureInfo> HeatmapShaderInfo::textures = {};
 using HeatmapTextureShaderInfo = ShaderInfo<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> HeatmapTextureShaderInfo::uniformBlocks = {
-        UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
-        UniformBlockInfo{"HeatmapTexturePropsUBO", idHeatmapTexturePropsUBO},
+    UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"HeatmapTexturePropsUBO", idHeatmapTexturePropsUBO},
 };
 const std::vector<AttributeInfo> HeatmapTextureShaderInfo::attributes = {
     AttributeInfo{"a_pos", idHeatmapPosVertexAttribute},
@@ -274,8 +275,8 @@ const std::vector<TextureInfo> HeatmapTextureShaderInfo::textures = {
 using HillshadePrepareShaderInfo = ShaderInfo<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> HillshadePrepareShaderInfo::uniformBlocks = {
-        UniformBlockInfo{"HillshadePrepareDrawableUBO", idHillshadePrepareDrawableUBO},
-        UniformBlockInfo{"HillshadePrepareTilePropsUBO", idHillshadePrepareTilePropsUBO},
+    UniformBlockInfo{"HillshadePrepareDrawableUBO", idHillshadePrepareDrawableUBO},
+    UniformBlockInfo{"HillshadePrepareTilePropsUBO", idHillshadePrepareTilePropsUBO},
 };
 const std::vector<AttributeInfo> HillshadePrepareShaderInfo::attributes = {
     AttributeInfo{"a_pos", idHillshadePosVertexAttribute},
@@ -325,9 +326,9 @@ const std::vector<TextureInfo> LineShaderInfo::textures = {};
 using LineGradientShaderInfo = ShaderInfo<BuiltIn::LineGradientShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> LineGradientShaderInfo::uniformBlocks = {
-        UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
-        UniformBlockInfo{"LineGradientDrawableUBO", idLineDrawableUBO},
-        UniformBlockInfo{"LineEvaluatedPropsUBO", idLineEvaluatedPropsUBO},
+    UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"LineGradientDrawableUBO", idLineDrawableUBO},
+    UniformBlockInfo{"LineEvaluatedPropsUBO", idLineEvaluatedPropsUBO},
 };
 const std::vector<AttributeInfo> LineGradientShaderInfo::attributes = {
     AttributeInfo{"a_pos_normal", idLinePosNormalVertexAttribute},
@@ -346,10 +347,10 @@ const std::vector<TextureInfo> LineGradientShaderInfo::textures = {
 using LinePatternShaderInfo = ShaderInfo<BuiltIn::LinePatternShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> LinePatternShaderInfo::uniformBlocks = {
-        UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
-        UniformBlockInfo{"LinePatternDrawableUBO", idLineDrawableUBO},
-        UniformBlockInfo{"LinePatternTilePropsUBO", idLineTilePropsUBO},
-        UniformBlockInfo{"LineEvaluatedPropsUBO", idLineEvaluatedPropsUBO},
+    UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"LinePatternDrawableUBO", idLineDrawableUBO},
+    UniformBlockInfo{"LinePatternTilePropsUBO", idLineTilePropsUBO},
+    UniformBlockInfo{"LineEvaluatedPropsUBO", idLineEvaluatedPropsUBO},
 };
 const std::vector<AttributeInfo> LinePatternShaderInfo::attributes = {
     AttributeInfo{"a_pos_normal", idLinePosNormalVertexAttribute},
@@ -431,10 +432,10 @@ const std::vector<TextureInfo> SymbolIconShaderInfo::textures = {
 using SymbolSDFIconShaderInfo = ShaderInfo<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> SymbolSDFIconShaderInfo::uniformBlocks = {
-        UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
-        UniformBlockInfo{"SymbolDrawableUBO", idSymbolDrawableUBO},
-        UniformBlockInfo{"SymbolTilePropsUBO", idSymbolTilePropsUBO},
-        UniformBlockInfo{"SymbolEvaluatedPropsUBO", idSymbolEvaluatedPropsUBO},
+    UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"SymbolDrawableUBO", idSymbolDrawableUBO},
+    UniformBlockInfo{"SymbolTilePropsUBO", idSymbolTilePropsUBO},
+    UniformBlockInfo{"SymbolEvaluatedPropsUBO", idSymbolEvaluatedPropsUBO},
 };
 const std::vector<AttributeInfo> SymbolSDFIconShaderInfo::attributes = {
     AttributeInfo{"a_pos_offset", idSymbolPosOffsetVertexAttribute},
@@ -456,21 +457,21 @@ const std::vector<TextureInfo> SymbolSDFIconShaderInfo::textures = {
 using SymbolTextAndIconShaderInfo = ShaderInfo<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> SymbolTextAndIconShaderInfo::uniformBlocks = {
-        UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
-        UniformBlockInfo{"SymbolDrawableUBO", idSymbolDrawableUBO},
-        UniformBlockInfo{"SymbolTilePropsUBO", idSymbolTilePropsUBO},
-        UniformBlockInfo{"SymbolEvaluatedPropsUBO", idSymbolEvaluatedPropsUBO},
+    UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"SymbolDrawableUBO", idSymbolDrawableUBO},
+    UniformBlockInfo{"SymbolTilePropsUBO", idSymbolTilePropsUBO},
+    UniformBlockInfo{"SymbolEvaluatedPropsUBO", idSymbolEvaluatedPropsUBO},
 };
 const std::vector<AttributeInfo> SymbolTextAndIconShaderInfo::attributes = {
-        AttributeInfo{"a_pos_offset", idSymbolPosOffsetVertexAttribute},
-        AttributeInfo{"a_data", idSymbolDataVertexAttribute},
-        AttributeInfo{"a_projected_pos", idSymbolProjectedPosVertexAttribute},
-        AttributeInfo{"a_fade_opacity", idSymbolFadeOpacityVertexAttribute},
-        AttributeInfo{"a_fill_color", idSymbolColorVertexAttribute},
-        AttributeInfo{"a_halo_color", idSymbolHaloColorVertexAttribute},
-        AttributeInfo{"a_opacity", idSymbolOpacityVertexAttribute},
-        AttributeInfo{"a_halo_width", idSymbolHaloWidthVertexAttribute},
-        AttributeInfo{"a_halo_blur", idSymbolHaloBlurVertexAttribute},
+    AttributeInfo{"a_pos_offset", idSymbolPosOffsetVertexAttribute},
+    AttributeInfo{"a_data", idSymbolDataVertexAttribute},
+    AttributeInfo{"a_projected_pos", idSymbolProjectedPosVertexAttribute},
+    AttributeInfo{"a_fade_opacity", idSymbolFadeOpacityVertexAttribute},
+    AttributeInfo{"a_fill_color", idSymbolColorVertexAttribute},
+    AttributeInfo{"a_halo_color", idSymbolHaloColorVertexAttribute},
+    AttributeInfo{"a_opacity", idSymbolOpacityVertexAttribute},
+    AttributeInfo{"a_halo_width", idSymbolHaloWidthVertexAttribute},
+    AttributeInfo{"a_halo_blur", idSymbolHaloBlurVertexAttribute},
 };
 const std::vector<TextureInfo> SymbolTextAndIconShaderInfo::textures = {
     TextureInfo{"u_texture", idSymbolImageTexture},

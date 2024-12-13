@@ -53,11 +53,8 @@ public:
     const std::shared_ptr<gfx::UniformBuffer>& set(const size_t id,
                                                    std::shared_ptr<gfx::UniformBuffer> uniformBuffer) override;
 
-    void createOrUpdate(const size_t id,
-                        const void* data,
-                        std::size_t size,
-                        gfx::Context& context,
-                        bool persistent = false) override;
+    void createOrUpdate(
+        const size_t id, const void* data, std::size_t size, gfx::Context& context, bool persistent = false) override;
 
     void bindDescriptorSets(CommandEncoder& encoder);
     void freeDescriptorSets() { descriptorSet.reset(); }

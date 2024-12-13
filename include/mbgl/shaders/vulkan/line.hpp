@@ -755,7 +755,7 @@ template <>
 struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "LineSDFShader";
 
-     static const std::array<AttributeInfo, 9> attributes;
+    static const std::array<AttributeInfo, 9> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 

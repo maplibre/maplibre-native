@@ -36,16 +36,15 @@ const std::shared_ptr<UniformBuffer>& UniformBufferArray::set(const size_t id,
     return uniformBufferVector[id];
 }
 
-void UniformBufferArray::createOrUpdate(
-    const size_t id, const std::vector<uint8_t>& data, gfx::Context& context, bool persistent) {
+void UniformBufferArray::createOrUpdate(const size_t id,
+                                        const std::vector<uint8_t>& data,
+                                        gfx::Context& context,
+                                        bool persistent) {
     createOrUpdate(id, data.data(), data.size(), context, persistent);
 }
 
-void UniformBufferArray::createOrUpdate(const size_t id,
-                                        const void* data,
-                                        const std::size_t size,
-                                        gfx::Context& context,
-                                        bool persistent) {
+void UniformBufferArray::createOrUpdate(
+    const size_t id, const void* data, const std::size_t size, gfx::Context& context, bool persistent) {
     if (auto& ubo = get(id); ubo && ubo->getSize() == size) {
         ubo->update(data, size);
     } else {

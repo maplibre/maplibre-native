@@ -147,7 +147,7 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-     static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
@@ -439,7 +439,7 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-     static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 4> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 

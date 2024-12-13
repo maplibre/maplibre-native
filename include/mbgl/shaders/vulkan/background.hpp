@@ -63,7 +63,7 @@ template <>
 struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "BackgroundPatternShader";
 
-     static const std::array<AttributeInfo, 1> attributes;
+    static const std::array<AttributeInfo, 1> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 

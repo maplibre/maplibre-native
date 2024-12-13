@@ -19,9 +19,7 @@ public:
     using SamplerLocationArray = std::array<std::optional<size_t>, shaders::maxTextureCountPerShader>;
 
     ShaderProgramGL(UniqueProgram&& glProgram_);
-    ShaderProgramGL(UniqueProgram&&,
-                    VertexAttributeArrayGL&& attributes,
-                    SamplerLocationArray&& samplerLocations);
+    ShaderProgramGL(UniqueProgram&&, VertexAttributeArrayGL&& attributes, SamplerLocationArray&& samplerLocations);
     ShaderProgramGL(ShaderProgramGL&& other);
     ~ShaderProgramGL() noexcept override = default;
 

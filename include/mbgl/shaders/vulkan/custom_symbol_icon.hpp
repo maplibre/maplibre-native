@@ -17,7 +17,7 @@ template <>
 struct ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "CustomSymbolIconShader";
 
-     static const std::array<AttributeInfo, 2> attributes;
+    static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
