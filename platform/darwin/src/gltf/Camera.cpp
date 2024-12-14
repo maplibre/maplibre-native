@@ -23,10 +23,10 @@ Camera::Camera() {
 
 }
 
-simd_float4x4 Camera::projectionMatrix() {
+simd_double4x4 Camera::projectionMatrix() {
     float fov = M_PI / 3; // original
     fov = 0.6435011087932844; // Constant that i found in ML
-    simd_float4x4 matrix = GLTFPerspectiveProjectionMatrixAspectFovRH(fov, 1.0, 0.01, 250);
+    simd_double4x4 matrix = GLTFPerspectiveProjectionMatrixAspectFovRH(fov, 1.0, 0.01, 250);
     return matrix;
 }
 
@@ -53,9 +53,9 @@ void Camera::updateWithTimestep(double timestep) {
     // _distance += _velocity * timestep;
     _velocity *= GLTFViewerOrbitCameraZoomDrag;
     
-    simd_float4x4 pitchRotation = GLTFRotationMatrixFromAxisAngle(GLTFAxisX, -_rotationAngles.y);
-    simd_float4x4 yawRotation = GLTFRotationMatrixFromAxisAngle(GLTFAxisY, -_rotationAngles.x);
-    simd_float4x4 translation = GLTFMatrixFromTranslation((simd_float3){ 0, 0, _distance });
+    simd_double4x4 pitchRotation = GLTFRotationMatrixFromAxisAngleD(GLTFAxisXD, -_rotationAngles.y);
+    simd_double4x4 yawRotation = GLTFRotationMatrixFromAxisAngleD(GLTFAxisYD, -_rotationAngles.x);
+    simd_double4x4 translation = GLTFMatrixFromTranslationD((simd_double3){ 0, 0, _distance });
     _viewMatrix = matrix_invert(matrix_multiply(matrix_multiply(yawRotation, pitchRotation), translation));
 
     

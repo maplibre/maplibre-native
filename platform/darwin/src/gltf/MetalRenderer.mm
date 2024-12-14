@@ -97,9 +97,9 @@ void MetalRenderer::render() {
 
     // Compute the projection matrix
     float aspectRatio = (float)_drawableSize.x / (float)_drawableSize.y;
-    simd_float4x4 aspectCorrection = GLTFMatrixFromScale((simd_float3){ 1 / aspectRatio, 1, 1 });
+    simd_double4x4 aspectCorrection = GLTFMatrixFromScaleD((simd_double3){ 1 / aspectRatio, 1, 1 });
     _projectionMatrix = simd_mul(aspectCorrection, _camera->projectionMatrix());
-        
+    
     /*
     simd_float4x4 tempMatrix = _projectionMatrix;
     
@@ -119,14 +119,53 @@ void MetalRenderer::render() {
 
     */
     
+    /* Stuff with Steve
+    auto environmentMVP  = _metalRenderingEnvironment->_currentProjectionMatrix;
+    double tileSize = 256.0;
+    double zoom = _metalRenderingEnvironment->_currentZoomLevel;
+    double scaleFactor = (20037508.34); // M_PI
+    double worldSize = tileSize / scaleFactor * pow(2.0,zoom);
+    simd_float4x4 scaleMatrix = GLTFMatrixFromScale(simd_make_float3(worldSize, -worldSize, 1.0));
+    simd_float4x4 xlateMatrix = GLTFMatrixFromTranslation(simd_make_float3(20037508.34,-20037508.34,0.0));
+    
+    auto m1 = matrix_multiply(scaleMatrix, xlateMatrix);
+    auto m2 = matrix_multiply(environmentMVP, m1);
+    _projectionMatrix = m2;
+    */
+
+    
+    auto environmentMVP  = _metalRenderingEnvironment->_currentProjectionMatrix;
+    double tileSize = 256.0;
+    double zoom = _metalRenderingEnvironment->_currentZoomLevel;
+    double scaleFactor = (20037508.34); // M_PI
+    double worldSize = tileSize / scaleFactor * pow(2.0,zoom);
+    simd_double4x4 scaleMatrix = GLTFMatrixFromScaleD(simd_make_double3(worldSize, -worldSize, 1.0));
+    simd_double4x4 xlateMatrix = GLTFMatrixFromTranslationD(simd_make_double3(20037508.34,-20037508.34,0.0));
+    
+    auto m1 = matrix_multiply(scaleMatrix, xlateMatrix);
+    auto m2 = matrix_multiply(environmentMVP, m1);
+    _projectionMatrix = m2;
+
+    
+    
+    
+    // Apply a scale to our data first
+               // Note: Can see something with this
+//               const Eigen::Affine3d scaleTrans(Eigen::Scaling(worldSize,-worldSize,1.0));
+//               const Eigen::Affine3d transTrans(Eigen::Translation3d(20037508.34,-20037508.34,0.0));
+//               Eigen::Matrix4d mvp = (inMvp * (scaleTrans * transTrans) ).matrix();
+//    
+    
+    /*
+
+    
     // The above projection matrix is a perspective matrix.  I think we need an ortho matrix
     float w = ((float)_drawableSize.x) / 2.0;
     float h = ((float)_drawableSize.y) / 2.0;
     float aspect = w/h;
 //    _projectionMatrix = GLTFOrthoProjectionMatrix(-w,w,-h*aspect,h*aspect,0.001,250);
-//    _projectionMatrix = GLTFOrthoProjectionMatrix(-1*aspect,1*aspect,-1,1,10,-10);
+    _projectionMatrix = GLTFOrthoProjectionMatrix(-1*aspect,1*aspect,-1,1,10,-10);
 
-    
     
     // ANother projection matrix test
     float fov = _renderingEnvironment->_currentFOVDEG * DEG_RAD; //  0.6435011087932844; // Constant that i found in ML
@@ -134,7 +173,7 @@ void MetalRenderer::render() {
     _projectionMatrix = matrix;
     
     
-    
+    */
     
     
     
@@ -364,7 +403,7 @@ void MetalRenderer::setupMetal() {
     _metalLibrary = [_metalDevice newDefaultLibrary];
     
     //_viewMatrix = matrix_identity_float4x4;
-    _projectionMatrix = matrix_identity_float4x4;
+    _projectionMatrix = matrix_identity_double4x4;
     _colorPixelFormat = MTLPixelFormatBGRA8Unorm;
     _depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
     _sampleCount = 1;

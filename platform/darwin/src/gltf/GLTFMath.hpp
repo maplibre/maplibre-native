@@ -22,8 +22,11 @@ typedef enum {
     GLTFTextureBindIndexBRDFLookup,
 } GLTFMTLTextureBindIndex;
 
-#define DEG_RAD 0.0174533
-#define RAD_DEG 57.2958
+#define DEG_RAD (M_PI/180.0)
+#define RAD_DEG (180.0/M_PI)
+
+//  0.0174533
+// 57.2958
 
 #define GLTFMTLMaximumLightCount 3
 #define GLTFMTLMaximumTextureCount (GLTFTextureBindIndexEmissive + 1)
@@ -35,7 +38,7 @@ typedef struct {
 } GLTFBoundingBox;
 
 typedef struct {
-    simd_float3 center;
+    simd_double3 center;
     float radius;
 } GLTFBoundingSphere;
 
@@ -84,17 +87,29 @@ extern simd_float3 GLTFAxisX;
 extern simd_float3 GLTFAxisY;
 extern simd_float3 GLTFAxisZ;
 
+extern simd_double3 GLTFAxisXD;
+extern simd_double3 GLTFAxisYD;
+extern simd_double3 GLTFAxisZD;
+
 simd_float4x4 GLTFMatrixFromScale(const simd_float3 s);
+
+simd_double4x4 GLTFMatrixFromScaleD(const simd_double3 s);
 
 simd_float4x4 GLTFMatrixFromUniformScale(float s);
 
-GLTFBoundingSphere GLTFBoundingSphereFromBox(const GLTFBoundingBox b);
+simd_double4x4 GLTFMatrixFromUniformScaleD(double s);
+
+GLTFBoundingSphere GLTFBoundingSphereFromBox(GLTFBoundingBox b);
 
 simd_float4x4 GLTFMatrixFromTranslation(simd_float3 t);
 
+simd_double4x4 GLTFMatrixFromTranslationD(simd_double3 t);
+
 simd_float4x4 GLTFRotationMatrixFromAxisAngle(simd_float3 axis, float angle);
 
-simd_float4x4 GLTFPerspectiveProjectionMatrixAspectFovRH(const float fovY, const float aspect, const float nearZ, const float farZ);
+simd_double4x4 GLTFRotationMatrixFromAxisAngleD(simd_double3 axis, double angle);
+
+simd_double4x4 GLTFPerspectiveProjectionMatrixAspectFovRH(const double fovY, const double aspect, const double nearZ, const double farZ);
 
 simd_float4x4 GLTFOrthoProjectionMatrix(const float left,
                                         const float right,
@@ -104,6 +119,8 @@ simd_float4x4 GLTFOrthoProjectionMatrix(const float left,
                                         const float farZ);
 
 simd_float3x3 GLTFMatrixUpperLeft3x3(simd_float4x4 m);
+
+simd_double3x3 GLTFMatrixUpperLeft3x3D(simd_double4x4 m);
 
 GLTFTextureTransform GLTFTextureTransformMakeIdentity(void);
 

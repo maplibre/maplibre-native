@@ -84,8 +84,8 @@ void MetalRenderer::computeRegularizationMatrix(std::shared_ptr<GLTFRenderModel>
     GLTFBoundingSphere bounds = GLTFBoundingSphereFromBox(model->_asset.defaultScene.approximateBounds);
     model->_boundingSphere = bounds;
     float scale = (bounds.radius > 0) ? (1 / (bounds.radius)) : 1;
-    simd_float4x4 centerScale = GLTFMatrixFromUniformScale(scale);
-    simd_float4x4 centerTranslation = GLTFMatrixFromTranslation(-bounds.center);
+    simd_double4x4 centerScale = GLTFMatrixFromUniformScaleD(scale);
+    simd_double4x4 centerTranslation = GLTFMatrixFromTranslationD(-bounds.center);
     
     // This regularization matrix centers the model
     model->_regularizationMatrix = matrix_multiply(centerScale, centerTranslation);
@@ -97,9 +97,46 @@ void MetalRenderer::computeRegularizationMatrix(std::shared_ptr<GLTFRenderModel>
 }
 
 void MetalRenderer::computeTransforms(std::shared_ptr<GLTFRenderModel> model) {
-    
     // New stuff
     
+    auto mdlMatrix = matrix_identity_double4x4;
+
+    // Rotation
+    auto modelRotation = GLTFRotationMatrixFromAxisAngleD(GLTFAxisYD, (model->_gltfModel->_rotationDeg) * DEG_RAD);
+    auto modelRotated = matrix_multiply(modelRotation, mdlMatrix);
+    
+    // Tilt
+  // auto modelEnvironmentTilt = GLTFRotationMatrixFromAxisAngle(GLTFAxisX, _tiltDeg * DEG_RAD);
+//    auto modelTilt = GLTFRotationMatrixFromAxisAngle(GLTFAxisX, -90 * DEG_RAD);
+//    auto modelTilted = matrix_multiply(modelTilt, modelRotated);
+
+    //auto modelTilted = matrix_identity_float4x4;
+    
+    auto modelTilted = GLTFRotationMatrixFromAxisAngleD(GLTFAxisXD, 90 * DEG_RAD);
+    modelTilted = matrix_multiply(modelTilted, modelRotation);
+
+//    auto modelTilted = matrix_multiply(modelEnvironmentTilt, modelRotated);
+
+    simd_double3 xlateVector = simd_make_double3(model->_gltfModel->_xLateX,
+                                                    model->_gltfModel->_xLateY,
+                                                    model->_gltfModel->_xLateZ);
+    
+    auto xLateMatrix = GLTFMatrixFromTranslationD(xlateVector);
+
+    
+    //
+    auto modelTranslated = matrix_multiply(xLateMatrix, modelTilted);
+
+    model->_modelMatrix = modelTranslated;
+    
+    model->_modelViewMatrix = matrix_multiply(_camera->_viewMatrix,
+                                              modelTranslated);
+
+    model->_modelViewMatrix = modelTranslated; // matrix_multiply(_camera->_viewMatrix,
+                                              //modelTranslated);
+
+    
+    return;
     
     
     
@@ -135,12 +172,15 @@ void MetalRenderer::computeTransforms(std::shared_ptr<GLTFRenderModel> model) {
     model->_viewMatrix = matrix_multiply(modelMatrix2, _camera->_viewMatrix);
 */
     
+    
+    
+    /* This is what was working with Steve
+    
     // Compute the model matrix: This was the original
     model->_modelViewMatrix = matrix_multiply(_camera->_viewMatrix,
                                          model->_regularizationMatrix);
 
     // New news
-    #if TEST
     static float rot = 0;
     rot += 0.01;
     static float xLate = 0;
@@ -153,7 +193,6 @@ void MetalRenderer::computeTransforms(std::shared_ptr<GLTFRenderModel> model) {
     }
     rot = 0;
     xLate = 0;
-    #endif
     
     simd_float3 translatedVector = simd_make_float3(model->_gltfModel->_xLateX,
                                                     model->_gltfModel->_xLateY,
@@ -173,18 +212,27 @@ void MetalRenderer::computeTransforms(std::shared_ptr<GLTFRenderModel> model) {
     modelMatrix = matrix_multiply(scaleMatrix, modelMatrix);
 
     // Rotation
-    auto modelEnvironmentRotation = GLTFRotationMatrixFromAxisAngle(GLTFAxisY, (model->_gltfModel->_rotationDeg -_rotationDeg) * DEG_RAD);
+    auto modelEnvironmentRotation = GLTFRotationMatrixFromAxisAngle(GLTFAxisY, (model->_gltfModel->_rotationDeg) * DEG_RAD);
     auto modelRotated = matrix_multiply(modelEnvironmentRotation, modelMatrix);
     
     // Tilt
-    auto modelEnvironmentTilt = GLTFRotationMatrixFromAxisAngle(GLTFAxisX, _tiltDeg * DEG_RAD);
+  // auto modelEnvironmentTilt = GLTFRotationMatrixFromAxisAngle(GLTFAxisX, _tiltDeg * DEG_RAD);
+    auto modelEnvironmentTilt = GLTFRotationMatrixFromAxisAngle(GLTFAxisX, -90 * DEG_RAD);
     auto modelTilted = matrix_multiply(modelEnvironmentTilt, modelRotated);
 
     // This was just debug stuff to rotate in the scene
 //    auto modelRotation = GLTFRotationMatrixFromAxisAngle(GLTFAxisY, -rot);
 //    auto modelRotation2 = matrix_multiply(modelRotation, modelMatrix);
 //
+  
+
+    modelTilted = matrix_identity_float4x4;
     
+    modelTilted = GLTFRotationMatrixFromAxisAngle(GLTFAxisX, 90 * DEG_RAD);
+    modelTilted = matrix_multiply(modelTilted, modelEnvironmentRotation);
+
+//    auto modelTilted = matrix_multiply(modelEnvironmentTilt, modelRotated);
+
     
     //
     auto modelTranslated = matrix_multiply(translationMatrix, modelTilted);
@@ -194,8 +242,12 @@ void MetalRenderer::computeTransforms(std::shared_ptr<GLTFRenderModel> model) {
     model->_modelViewMatrix = matrix_multiply(_camera->_viewMatrix,
                                               modelTranslated);
 
+    model->_modelViewMatrix = modelTranslated; // matrix_multiply(_camera->_viewMatrix,
+                                              //modelTranslated);
+
     
     
+    */
     
     
     
@@ -261,6 +313,39 @@ void MetalRenderer::buildLightListRecursive(GLTFNode *node) {
     }
 }
 
+simd_float4x4 matrix_double_to_float(simd_double4x4 input) {
+    simd_float4x4 tempResult;
+    tempResult.columns[0][0] = input.columns[0][0];
+    tempResult.columns[0][1] = input.columns[0][1];
+    tempResult.columns[0][2] = input.columns[0][2];
+    tempResult.columns[0][3] = input.columns[0][3];
+
+    tempResult.columns[1][0] = input.columns[1][0];
+    tempResult.columns[1][1] = input.columns[1][1];
+    tempResult.columns[1][2] = input.columns[1][2];
+    tempResult.columns[1][3] = input.columns[1][3];
+
+    tempResult.columns[2][0] = input.columns[2][0];
+    tempResult.columns[2][1] = input.columns[2][1];
+    tempResult.columns[2][2] = input.columns[2][2];
+    tempResult.columns[2][3] = input.columns[2][3];
+
+    tempResult.columns[3][0] = input.columns[3][0];
+    tempResult.columns[3][1] = input.columns[3][1];
+    tempResult.columns[3][2] = input.columns[3][2];
+    tempResult.columns[3][3] = input.columns[3][3];
+
+    return tempResult;
+}
+
+simd_float3 double3_to_float3(simd_double3 input) {
+    simd_float3 tempResult;
+    tempResult.x = input.x;
+    tempResult.y = input.y;
+    tempResult.z = input.z;
+    return tempResult;
+
+}
 
 void MetalRenderer::buildRenderListRecursive(std::shared_ptr<GLTFRenderModel> model,
                                              GLTFNode *node,
@@ -273,14 +358,24 @@ void MetalRenderer::buildRenderListRecursive(std::shared_ptr<GLTFRenderModel> mo
         for (GLTFSubmesh *submesh in mesh.submeshes) {
             GLTFMaterial *material = submesh.material;
             
-            simd_float3x3 viewAffine = simd_inverse(GLTFMatrixUpperLeft3x3(model->_modelViewMatrix));
-            simd_float3 cameraPos = model->_modelViewMatrix.columns[3].xyz;
-            simd_float3 cameraWorldPos = matrix_multiply(viewAffine, -cameraPos);
-            
+            simd_double3x3 viewAffine = simd_inverse(GLTFMatrixUpperLeft3x3D(model->_modelViewMatrix));
+            simd_double3 cameraPos = model->_modelViewMatrix.columns[3].xyz;
+            simd_double3 cameraWorldPos = matrix_multiply(viewAffine, -cameraPos);
+            simd_float3 cameraWorldPosF = double3_to_float3(cameraWorldPos);
+
             VertexUniforms vertexUniforms;
             vertexUniforms.modelMatrix = modelMatrix;
-            vertexUniforms.modelViewProjectionMatrix = matrix_multiply(matrix_multiply(_projectionMatrix, model->_modelViewMatrix), modelMatrix);
+//            vertexUniforms.modelViewProjectionMatrix = mvpF;
             vertexUniforms.normalMatrix = GLTFNormalMatrixFromModelMatrix(modelMatrix);
+
+            // TODO: MT: Review this..
+            auto mvp = matrix_multiply(_projectionMatrix, model->_modelViewMatrix);
+            auto mvpF = matrix_double_to_float(mvp);
+            vertexUniforms.modelViewProjectionMatrix = mvpF;
+
+            
+            
+            
             
             FragmentUniforms fragmentUniforms = { 0 };
             fragmentUniforms.normalScale = material.normalTextureScale;
@@ -288,7 +383,7 @@ void MetalRenderer::buildRenderListRecursive(std::shared_ptr<GLTFRenderModel> mo
             fragmentUniforms.occlusionStrength = material.occlusionStrength;
             fragmentUniforms.metallicRoughnessValues = (simd_float2){ material.metalnessFactor, material.roughnessFactor };
             fragmentUniforms.baseColorFactor = material.baseColorFactor;
-            fragmentUniforms.camera = cameraWorldPos;
+            fragmentUniforms.camera = cameraWorldPosF;
             fragmentUniforms.alphaCutoff = material.alphaCutoff;
             fragmentUniforms.envIntensity = 2; // self.lightingEnvironment.intensity;
             

@@ -20,8 +20,8 @@ public:
     double _velocity;
     float _distance;
     Camera();
-    simd_float4x4 projectionMatrix();
-    simd_float4x4 _viewMatrix;
+    simd_double4x4 projectionMatrix();
+    simd_double4x4 _viewMatrix;
     void updateWithTimestep(double timestep);
 
 };

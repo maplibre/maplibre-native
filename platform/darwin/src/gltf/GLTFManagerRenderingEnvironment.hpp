@@ -23,7 +23,10 @@ namespace maplibre { namespace gltf {
         double _currentFOVDEG = 50;
         
         // Environment projection matrix
-        simd_float4x4 _currentProjectionMatrix;
+        simd_double4x4 _currentProjectionMatrix;
+        
+        // Current zoom level
+        double _currentZoomLevel = 1;
 
     };
 

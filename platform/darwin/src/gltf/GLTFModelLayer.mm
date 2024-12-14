@@ -123,69 +123,6 @@ simd_double4x4 toSimdMatrix4D(const MLNMatrix4 & mlMatrix) {
 }
 
 - (void)didMoveToMapView:(MLNMapView *)mapView {
-    MLNBackendResource resource = [mapView backendResource];
-    
-    NSString *shaderSource = @
-"    #include <metal_stdlib>\n"
-"    using namespace metal;\n"
-"    typedef struct\n"
-"    {\n"
-"        vector_float2 position;\n"
-"        vector_float4 color;\n"
-"    } Vertex;\n"
-"    struct RasterizerData\n"
-"    {\n"
-"        float4 position [[position]];\n"
-"        float4 color;\n"
-"    };\n"
-"    vertex RasterizerData\n"
-"    vertexShader(uint vertexID [[vertex_id]],\n"
-"                 constant Vertex *vertices [[buffer(0)]],\n"
-"                 constant vector_uint2 *viewportSizePointer [[buffer(1)]])\n"
-"    {\n"
-"        RasterizerData out;\n"
-"        float2 pixelSpacePosition = vertices[vertexID].position.xy;\n"
-"        vector_float2 viewportSize = vector_float2(*viewportSizePointer);\n"
-"        out.position = vector_float4(0.0, 0.0, 0.0, 1.0);\n"
-"        out.position.xy = pixelSpacePosition / (viewportSize / 2.0);\n"
-"        out.color = vertices[vertexID].color;\n"
-"        return out;\n"
-"    }\n"
-"    fragment float4 fragmentShader(RasterizerData in [[stage_in]])\n"
-"    {\n"
-"        return in.color;\n"
-"    }\n";
-
-    
-    NSError *error = nil;
-    id<MTLDevice> _device = resource.device;
-    id<MTLLibrary> library = [_device newLibraryWithSource:shaderSource options:nil error:&error];
-    NSAssert(library, @"Error compiling shaders: %@", error);
-    id<MTLFunction> vertexFunction = [library newFunctionWithName:@"vertexShader"];
-    id<MTLFunction> fragmentFunction = [library newFunctionWithName:@"fragmentShader"];
-
-    // Configure a pipeline descriptor that is used to create a pipeline state.
-    MTLRenderPipelineDescriptor *pipelineStateDescriptor = [[MTLRenderPipelineDescriptor alloc] init];
-    pipelineStateDescriptor.label = @"Simple Pipeline";
-    pipelineStateDescriptor.vertexFunction = vertexFunction;
-    pipelineStateDescriptor.fragmentFunction = fragmentFunction;
-    pipelineStateDescriptor.colorAttachments[0].pixelFormat = resource.mtkView.colorPixelFormat;
-    pipelineStateDescriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
-    pipelineStateDescriptor.stencilAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
-    
-    _pipelineState = [_device newRenderPipelineStateWithDescriptor:pipelineStateDescriptor
-                                                             error:&error];
-    NSAssert(_pipelineState, @"Failed to create pipeline state: %@", error);
-
-    // Notice that we don't configure the stencilTest property, leaving stencil testing disabled
-    MTLDepthStencilDescriptor *depthStencilDescriptor = [[MTLDepthStencilDescriptor alloc] init];
-    depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionAlways; // Or another value as needed
-    depthStencilDescriptor.depthWriteEnabled = NO;
-
-    _depthStencilStateWithoutStencil = [_device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
-
-    
-    
     
 }
 
@@ -290,43 +227,109 @@ simd_double4x4 toSimdMatrix4D(const MLNMatrix4 & mlMatrix) {
             tempResult._z = 0;
 
             
+            tempResult._x = 1000;
+            tempResult._y = 1000;
+
+            tempResult._x = 1112;
+            tempResult._y = 1112;
+            
+            tempResult._x = 111319.49079327357;
+            tempResult._y = 111325.1428663851;
+
+            tempResult._x = 1113194.9079327357;
+            tempResult._y = 1118889.9748579594;
+            
+            
+            tempResult._x = 5198170.102753558;
+            tempResult._y = 2832006.4886368043;
+            
+            
+            
+            tempResult._x = coordinate._lon * DEG_RAD;
+            double lat = coordinate._lat * DEG_RAD;
+//            if (lat < -PoleLimit) lat = -PoleLimit;
+//            if (lat > PoleLimit) lat = PoleLimit;
+            tempResult._y = log((1.0f+sin(lat))/cos(lat));
+
+            double metersScale = 20037508.34;
+            tempResult._x = tempResult._x * metersScale / M_PI;
+            tempResult._y = tempResult._y * metersScale / M_PI;
+            return tempResult;
+            
+            
+            /*
+            Point3d SphericalMercatorCoordSystem::geographicToLocal3d(const GeoCoord &geo) const
+            {
+                Point3d coord;
+                coord.x() = geo.lon() - originLon;
+                double lat = geo.lat();
+                if (lat < -PoleLimit) lat = -PoleLimit;
+                if (lat > PoleLimit) lat = PoleLimit;
+                coord.y() = log((1.0f+sin(lat))/cos(lat));
+                coord.z() = 0.0;
+                
+                return coord;
+            }
+            */
+            
+            
+            
+            /*
+
+            
+            
             MLNMapProjection *proj = mapView.mapProjection;
             CGPoint p = [proj convertCoordinate:CLLocationCoordinate2DMake(coordinate._lat, coordinate._lon)];
+            
             
             //NSLog(@"ZOOM LEVEL: %f",mapView.zoomLevel);
             //NSLog(@"Meters Per Pixel: %f",proj.metersPerPoint);
 
             
             // The 2.0 is point to pixel scaling
-            double viewportSizeX = resource.mtkView.drawableSize.width / 2.0;
-            double viewportSizeY = resource.mtkView.drawableSize.height / 2.0;
+            double viewportSizeXPoints = resource.mtkView.drawableSize.width / 2.0;
+            double viewportSizeYPoints = resource.mtkView.drawableSize.height / 2.0;
             
-            double halfX = (viewportSizeX / 2.0);
-            double halfY = (viewportSizeY / 2.0);
+            double halfX = (viewportSizeXPoints / 2.0);
+            double halfY = (viewportSizeYPoints / 2.0);
             
             double offsetX = p.x - halfX;
             
-            double projX = offsetX / viewportSizeX;
-            double projY = (viewportSizeY - p.y - halfY) / viewportSizeY;
+            double projX = offsetX / viewportSizeXPoints;
+            double projY = (viewportSizeYPoints - p.y - halfY) / viewportSizeYPoints;
             
-            double aspect = viewportSizeX / viewportSizeY;
+            double aspect = viewportSizeXPoints / viewportSizeYPoints;
             
-            tempResult._x = projX * 2.0 * aspect;
-            tempResult._y = projY * 2.0;
+            tempResult._x = projX * 4.0 * aspect;
+            tempResult._y = projY * 4.0;
+            
+            
+            double x = p.x / viewportSizeXPoints;
+            double y = p.y / viewportSizeYPoints;
+            
+            x = (x * 2) - 1;
+            y = (y * 2) - 1;
+            y = -y;
+            tempResult._x = x;
+            tempResult._y = y;
+            
+            
 
-            tempResult._x = projX;
-            tempResult._y = projY;
+//            tempResult._x = projX;
+//            tempResult._y = projY;
 
-            NSLog(@"P: %f, %f -> %f, %f", p.x, p.y, projX, projY);
+            NSLog(@"P: %f, %f -> %f, %f", p.x, p.y, x, y); // projX, projY, x, y);
 
             return tempResult;
+            */
         });
         
         loadModels = true;
     }
     
     _metalEnvironment->_currentFOVDEG = context.fieldOfView * RAD_DEG;
-    _metalEnvironment->_currentProjectionMatrix = toSimdMatrix4F(context.projectionMatrix);
+    _metalEnvironment->_currentProjectionMatrix = toSimdMatrix4D(context.projectionMatrix);
+    _metalEnvironment->_currentZoomLevel = context.zoomLevel;
     _metalEnvironment->_currentCommandEncoder = self.renderEncoder;
     _metalEnvironment->_currentCommandBuffer = resource.commandBuffer;
     _metalEnvironment->_metalDevice = resource.mtkView.device;
@@ -359,10 +362,10 @@ simd_double4x4 toSimdMatrix4D(const MLNMatrix4 & mlMatrix) {
 
     // Render the image
     _manager->render();
-    
+    /*
     return;
 
-    #if TEST
+    
     
     
     
@@ -406,7 +409,7 @@ simd_double4x4 toSimdMatrix4D(const MLNMatrix4 & mlMatrix) {
                           vertexStart:0
                           vertexCount:3];
     }
-    #endif
+    */
      
 }
 

@@ -39,14 +39,14 @@ namespace maplibre { namespace gltf {
         double _scaling = 1; // Scaling from
         
         // This is the model matrix (rotation, scaling and transformation applied)
-        simd_float4x4 _modelMatrix;
+        simd_double4x4 _modelMatrix;
 
         // This is the model matrix combined with the camera's view matrix
-        simd_float4x4 _modelViewMatrix;
+        simd_double4x4 _modelViewMatrix;
 
         // We probably won't need this in the final thing.  Used to normalize the model to the
         // viewport size
-        simd_float4x4 _regularizationMatrix;
+        simd_double4x4 _regularizationMatrix;
         
         //
         GLTFBoundingSphere _boundingSphere;
@@ -87,7 +87,7 @@ namespace maplibre { namespace gltf {
 
     private:
         // Rendering environment variables
-        simd_float4x4 _projectionMatrix;
+        simd_double4x4 _projectionMatrix;
         int _sampleCount = 1;
         MTLPixelFormat _colorPixelFormat;
         MTLPixelFormat _depthStencilPixelFormat;
