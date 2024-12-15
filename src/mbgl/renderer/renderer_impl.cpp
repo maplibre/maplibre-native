@@ -251,17 +251,20 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         const auto debugGroup = uploadPass->createDebugGroup("layerGroup-upload");
 #endif
 
+        // Update the debug layer groups
+        orchestrator.updateDebugLayerGroups(renderTree, parameters);
+        
         // Tweakers are run in the upload pass so they can set up uniforms.
         parameters.currentLayer = 0;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
             layerGroup.runTweakers(renderTree, parameters);
             parameters.currentLayer++;
         });
-        orchestrator.visitDebugLayerGroups(
-            [&](LayerGroupBase& layerGroup) { layerGroup.runTweakers(renderTree, parameters); });
-
-        // Update the debug layer groups
-        orchestrator.updateDebugLayerGroups(renderTree, parameters);
+        parameters.currentLayer = 0;
+        orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) {
+            layerGroup.runTweakers(renderTree, parameters);
+            parameters.currentLayer++;
+        });
 
         // Give the layers a chance to upload
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
@@ -458,8 +461,11 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         // Renders debug overlays.
         {
             const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
-            orchestrator.visitDebugLayerGroups(
-                [&](LayerGroupBase& layerGroup) { layerGroup.render(orchestrator, parameters); });
+            parameters.currentLayer = 0;
+            orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) {
+                layerGroup.render(orchestrator, parameters);
+                parameters.currentLayer++;
+            });
         }
     };
 #endif // MLN_DRAWABLE_RENDERER

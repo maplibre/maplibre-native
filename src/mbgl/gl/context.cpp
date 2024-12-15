@@ -611,7 +611,7 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<gl::DrawableGLBuilder>(std::move(name));
 }
 
-gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool /*persistent*/) {
+gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool /*persistent*/, bool /*ssbo*/) {
     MLN_TRACE_FUNC();
 
     return std::make_shared<gl::UniformBufferGL>(data, size, *uboAllocator);

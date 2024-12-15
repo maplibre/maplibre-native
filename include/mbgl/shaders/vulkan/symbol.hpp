@@ -35,7 +35,11 @@ layout(location = 4) in float in_fade_opacity;
 layout(location = 5) in vec2 in_opacity;
 #endif    
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolDrawableUBO) uniform SymbolDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct SymbolDrawableUBO {
     mat4 matrix;
     mat4 label_plane_matrix;
     mat4 coord_matrix;
@@ -58,13 +62,17 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolDrawableUBO) uniform Symb
     float opacity_t;
     float halo_width_t;
     float halo_blur_t;
-    float pad1;
-} drawable;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly buffer SymbolDrawableUBOVector {
+    SymbolDrawableUBO drawable_ubo[];
+} drawableVector;
 
 layout(location = 0) out mediump vec2 frag_tex;
 layout(location = 1) out mediump float frag_opacity;
 
 void main() {
+    const SymbolDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
     const vec2 a_pos = in_pos_offset.xy;
     const vec2 a_offset = in_pos_offset.zw;
@@ -143,12 +151,20 @@ layout(location = 1) in mediump float frag_opacity;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolTilePropsUBO) uniform SymbolTilePropsUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct SymbolTilePropsUBO {
     bool is_text;
     bool is_halo;
     float gamma_scale;
     float pad1;
-} tileProps;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idSymbolTilePropsUBO) readonly buffer SymbolTilePropsUBOVector {
+    SymbolTilePropsUBO tile_props_ubo[];
+} tilePropsVector;
 
 layout(set = LAYER_SET_INDEX, binding = idSymbolEvaluatedPropsUBO) uniform SymbolEvaluatedPropsUBO {
     vec4 text_fill_color;
@@ -172,6 +188,8 @@ void main() {
     out_color = vec4(1.0);
     return;
 #endif
+
+    const SymbolTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_opacity)
     const float opacity = (tileProps.is_text ? props.text_opacity : props.icon_opacity) * frag_opacity;
@@ -220,7 +238,11 @@ layout(location = 8) in vec2 in_halo_width;
 layout(location = 9) in vec2 in_halo_blur;
 #endif  
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolDrawableUBO) uniform SymbolDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct SymbolDrawableUBO {
     mat4 matrix;
     mat4 label_plane_matrix;
     mat4 coord_matrix;
@@ -243,8 +265,11 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolDrawableUBO) uniform Symb
     float opacity_t;
     float halo_width_t;
     float halo_blur_t;
-    float pad1;
-} drawable;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly buffer SymbolDrawableUBOVector {
+    SymbolDrawableUBO drawable_ubo[];
+} drawableVector;
 
 layout(location = 0) out mediump vec2 frag_tex;
 layout(location = 1) out mediump float frag_fade_opacity;
@@ -272,6 +297,7 @@ layout(location = 8) out mediump float frag_halo_blur;
 #endif
 
 void main() {
+    const SymbolDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
     const vec2 a_pos = in_pos_offset.xy;
     const vec2 a_offset = in_pos_offset.zw;
@@ -389,12 +415,20 @@ layout(location = 8) in mediump float frag_halo_blur;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolTilePropsUBO) uniform SymbolTilePropsUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct SymbolTilePropsUBO {
     bool is_text;
     bool is_halo;
     float gamma_scale;
     float pad1;
-} tileProps;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idSymbolTilePropsUBO) readonly buffer SymbolTilePropsUBOVector {
+    SymbolTilePropsUBO tile_props_ubo[];
+} tilePropsVector;
 
 layout(set = LAYER_SET_INDEX, binding = idSymbolEvaluatedPropsUBO) uniform SymbolEvaluatedPropsUBO {
     vec4 text_fill_color;
@@ -419,6 +453,8 @@ void main() {
     out_color = vec4(1.0);
     return;
 #endif
+
+    const SymbolTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_fill_color)
     const vec4 fill_color = tileProps.is_text ? props.text_fill_color : props.icon_fill_color;
@@ -498,7 +534,11 @@ layout(location = 7) in vec2 in_halo_width;
 layout(location = 8) in vec2 in_halo_blur;
 #endif  
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolDrawableUBO) uniform SymbolDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct SymbolDrawableUBO {
     mat4 matrix;
     mat4 label_plane_matrix;
     mat4 coord_matrix;
@@ -521,8 +561,11 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolDrawableUBO) uniform Symb
     float opacity_t;
     float halo_width_t;
     float halo_blur_t;
-    float pad1;
-} drawable;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly buffer SymbolDrawableUBOVector {
+    SymbolDrawableUBO drawable_ubo[];
+} drawableVector;
 
 layout(location = 0) out mediump vec2 frag_tex;
 layout(location = 1) out mediump float frag_fade_opacity;
@@ -552,6 +595,7 @@ layout(location = 8) out mediump float frag_halo_blur;
 layout(location = 9) out int frag_is_icon;
 
 void main() {
+    const SymbolDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
     const vec2 a_pos = in_pos_offset.xy;
     const vec2 a_offset = in_pos_offset.zw;
@@ -674,12 +718,20 @@ layout(location = 9) flat in int frag_is_icon;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idSymbolTilePropsUBO) uniform SymbolTilePropsUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct SymbolTilePropsUBO {
     bool is_text;
     bool is_halo;
     float gamma_scale;
     float pad1;
-} tileProps;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idSymbolTilePropsUBO) readonly buffer SymbolTilePropsUBOVector {
+    SymbolTilePropsUBO tile_props_ubo[];
+} tilePropsVector;
 
 layout(set = LAYER_SET_INDEX, binding = idSymbolEvaluatedPropsUBO) uniform SymbolEvaluatedPropsUBO {
     vec4 text_fill_color;
@@ -704,6 +756,8 @@ void main() {
     out_color = vec4(1.0);
     return;
 #endif
+
+    const SymbolTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_fill_color)
     const vec4 fill_color = tileProps.is_text ? props.text_fill_color : props.icon_fill_color;

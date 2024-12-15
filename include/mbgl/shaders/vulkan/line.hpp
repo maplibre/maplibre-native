@@ -52,7 +52,11 @@ layout(location = 6) in vec2 in_offset;
 layout(location = 7) in vec2 in_width;
 #endif
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idLineDrawableUBO) uniform LineDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct LineDrawableUBO {
     mat4 matrix;
     mediump float ratio;
     // Interpolations
@@ -63,7 +67,13 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = idLineDrawableUBO) uniform LineDr
     float offset_t;
     float width_t;
     float pad1;
-} drawable;
+    vec4 pad2;
+    vec4 pad3;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idLineDrawableUBO) readonly buffer LineDrawableUBOVector {
+    LineDrawableUBO drawable_ubo[];
+} drawableVector;
 
 layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEvaluatedPropsUBO {
     vec4 color;
@@ -94,6 +104,7 @@ layout(location = 5) out lowp float frag_opacity;
 #endif
 
 void main() {
+    const LineDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
 #ifndef HAS_UNIFORM_u_color
     frag_color = unpack_mix_color(in_color, drawable.color_t);
@@ -275,7 +286,11 @@ layout(location = 5) in vec2 in_offset;
 layout(location = 6) in vec2 in_width;
 #endif
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idLineDrawableUBO) uniform LineGradientDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct LineGradientDrawableUBO {
     mat4 matrix;
     mediump float ratio;
     // Interpolations
@@ -286,7 +301,13 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = idLineDrawableUBO) uniform LineGr
     float width_t;
     float pad1;
     float pad2;
-} drawable;
+    vec4 pad3;
+    vec4 pad4;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idLineDrawableUBO) readonly buffer LineGradientDrawableUBOVector {
+    LineGradientDrawableUBO drawable_ubo[];
+} drawableVector;
 
 layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEvaluatedPropsUBO {
     vec4 color;
@@ -314,6 +335,7 @@ layout(location = 5) out lowp float frag_opacity;
 #endif
 
 void main() {
+    const LineGradientDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
 #ifndef HAS_UNIFORM_u_blur
     frag_blur = unpack_mix_float(in_blur, drawable.blur_t);
@@ -497,7 +519,11 @@ layout(location = 7) in uvec4 in_pattern_from;
 layout(location = 8) in uvec4 in_pattern_to;
 #endif
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idLineDrawableUBO) uniform LinePatternDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct LinePatternDrawableUBO {
     mat4 matrix;
     float ratio;
     // Interpolations
@@ -508,7 +534,13 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = idLineDrawableUBO) uniform LinePa
     float width_t;
     float pattern_from_t;
     float pattern_to_t;
-} drawable;
+    vec4 pad1;
+    vec4 pad2;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idLineDrawableUBO) readonly buffer LinePatternDrawableUBOVector {
+    LinePatternDrawableUBO drawable_ubo[];
+} drawableVector;
 
 layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEvaluatedPropsUBO {
     vec4 color;
@@ -544,6 +576,7 @@ layout(location = 7) out mediump vec4 frag_pattern_to;
 #endif
 
 void main() {
+    const LinePatternDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
 #ifndef HAS_UNIFORM_u_blur
     frag_blur = unpack_mix_float(in_blur, drawable.blur_t);
@@ -652,14 +685,22 @@ layout(location = 7) in mediump vec4 frag_pattern_to;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idLineTilePropsUBO) uniform LinePatternTilePropertiesUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct LinePatternTilePropertiesUBO {
     vec4 pattern_from;
     vec4 pattern_to;
     vec4 scale;
     vec2 texsize;
     float fade;
     float pad1;
-} tileProps;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idLineTilePropsUBO) readonly buffer LinePatternTilePropertiesUBOVector {
+    LinePatternTilePropertiesUBO tile_props_ubo[];
+} tilePropsVector;
 
 layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEvaluatedPropsUBO {
     vec4 color;
@@ -681,6 +722,8 @@ void main() {
     out_color = vec4(1.0);
     return;
 #endif
+
+    const LinePatternTilePropertiesUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index]; 
 
 #ifdef HAS_UNIFORM_u_blur
     const lowp float blur = props.blur;
@@ -792,7 +835,11 @@ layout(location = 7) in vec2 in_width;
 layout(location = 8) in vec2 in_floorwidth;
 #endif
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idLineDrawableUBO) uniform LineSDFDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct LineSDFDrawableUBO {
     mat4 matrix;
     vec2 patternscale_a;
     vec2 patternscale_b;
@@ -809,7 +856,11 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = idLineDrawableUBO) uniform LineSD
     float floorwidth_t;
     float pad1;
     float pad2;
-} drawable;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idLineDrawableUBO) readonly buffer LineSDFDrawableUBOVector {
+    LineSDFDrawableUBO drawable_ubo[];
+} drawableVector;
 
 layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEvaluatedPropsUBO {
     vec4 color;
@@ -846,6 +897,7 @@ layout(location = 8) out mediump float frag_floorwidth;
 #endif
 
 void main() {
+    const LineSDFDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
 #ifndef HAS_UNIFORM_u_color
     frag_color = unpack_mix_color(in_color, intdrawableerp.color_t);
@@ -961,12 +1013,23 @@ layout(location = 8) in mediump float frag_floorwidth;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idLineTilePropsUBO) uniform LineSDFInterpolationUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct LineSDFTilePropsUBO {
     float sdfgamma;
     float mix;
     float pad1;
     float pad2;
-} tileProps;
+    vec4 pad3;
+    vec4 pad4;
+    vec4 pad5;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idLineTilePropsUBO) readonly buffer LineSDFTilePropsUBOVector {
+    LineSDFTilePropsUBO tile_props_ubo[];
+} tilePropsVector;
 
 layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEvaluatedPropsUBO {
     vec4 color;
@@ -988,6 +1051,8 @@ void main() {
     out_color = vec4(1.0);
     return;
 #endif
+
+    const LineSDFTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
 #ifdef HAS_UNIFORM_u_color
     const lowp vec4 color = props.color;

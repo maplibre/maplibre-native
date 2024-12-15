@@ -27,9 +27,17 @@ struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::Vulkan> {
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec2 in_texture_position;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idRasterDrawableUBO) uniform RasterDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct RasterDrawableUBO {
     mat4 matrix;
-} drawable;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idRasterDrawableUBO) readonly buffer RasterDrawableUBOVector {
+    RasterDrawableUBO drawable_ubo[];
+} drawableVector;
 
 layout(set = LAYER_SET_INDEX, binding = idRasterEvaluatedPropsUBO) uniform RasterEvaluatedPropsUBO {
     vec4 spin_weights;
@@ -50,6 +58,7 @@ layout(location = 0) out vec2 frag_position0;
 layout(location = 1) out vec2 frag_position1;
 
 void main() {
+    const RasterDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
     gl_Position = drawable.matrix * vec4(in_position, 0, 1);
     applySurfaceTransform();

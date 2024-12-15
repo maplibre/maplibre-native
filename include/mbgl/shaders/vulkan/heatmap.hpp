@@ -42,14 +42,22 @@ layout(location = 1) in vec2 in_weight;
 layout(location = 2) in vec2 in_radius;
 #endif
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idHeatmapDrawableUBO) uniform HeatmapDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct HeatmapDrawableUBO {
     mat4 matrix;
     float extrude_scale;
     // Interpolations
     float weight_t;
     float radius_t;
     float pad1;
-} drawable;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idHeatmapDrawableUBO) readonly buffer HeatmapDrawableUBOVector {
+    HeatmapDrawableUBO drawable_ubo[];
+} drawableVector;
 
 layout(set = LAYER_SET_INDEX, binding = idHeatmapEvaluatedPropsUBO) uniform HeatmapEvaluatedPropsUBO {
     float weight;
@@ -62,6 +70,7 @@ layout(location = 0) out float frag_weight;
 layout(location = 1) out lowp vec2 frag_extrude;
 
 void main() {
+    const HeatmapDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_weight)
     const float weight = props.weight;

@@ -29,7 +29,7 @@ struct alignas(16) CustomSymbolIconDrawableUBO {
     /* 108 */ float pad3;
     /* 112 */
 };
-static_assert(sizeof(CustomSymbolIconParametersUBO) == 7 * 16, "wrong size");
+static_assert(sizeof(CustomSymbolIconDrawableUBO) == 7 * 16, "wrong size");
 
 )"
 

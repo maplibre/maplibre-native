@@ -125,7 +125,7 @@ public:
     /// @param data The data to copy, may be `nullptr`
     /// @param size The size of the buffer
     /// @param persistent Performance hint, optimize for few or many uses
-    virtual UniformBufferPtr createUniformBuffer(const void* data, std::size_t size, bool persistent = false) = 0;
+    virtual UniformBufferPtr createUniformBuffer(const void* data, std::size_t size, bool persistent = false, bool ssbo = false) = 0;
 
     /// Get the generic shader with the specified name
     virtual gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) = 0;

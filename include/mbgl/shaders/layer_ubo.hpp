@@ -75,7 +75,7 @@ enum {
     drawableReservedUBOCount
 };
 
-#define MLN_UBO_CONSOLIDATION MLN_RENDER_BACKEND_METAL
+#define MLN_UBO_CONSOLIDATION (MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN)
 
 } // namespace shaders
 } // namespace mbgl

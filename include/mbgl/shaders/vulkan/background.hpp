@@ -26,11 +26,23 @@ struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Vulkan> {
 
 layout(location = 0) in ivec2 in_position;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idBackgroundDrawableUBO) uniform BackgroundDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct BackgroundDrawableUBO {
     mat4 matrix;
-} drawable;
+    vec4 pad1;
+    vec4 pad2;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idBackgroundDrawableUBO) readonly buffer BackgroundDrawableUBOVector {
+    BackgroundDrawableUBO drawable_ubo[];
+} drawableVector;
 
 void main() {
+    const BackgroundDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
+
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
     applySurfaceTransform();
 }
@@ -70,7 +82,11 @@ struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Vulkan
     static constexpr auto vertex = BACKGROUND_SHADER_COMMON R"(
 layout(location = 0) in ivec2 in_position;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idBackgroundDrawableUBO) uniform BackgroundPatternDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct BackgroundPatternDrawableUBO {
     mat4 matrix;
     vec2 pixel_coord_upper;
     vec2 pixel_coord_lower;
@@ -78,7 +94,11 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = idBackgroundDrawableUBO) uniform 
     float pad1;
     float pad2;
     float pad3;
-} drawable;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idBackgroundDrawableUBO) readonly buffer BackgroundPatternDrawableUBOVector {
+    BackgroundPatternDrawableUBO drawable_ubo[];
+} drawableVector;
 
 layout(set = LAYER_SET_INDEX, binding = idBackgroundPropsUBO) uniform BackgroundPatternPropsUBO {
     vec2 pattern_tl_a;
@@ -97,6 +117,7 @@ layout(location = 0) out vec2 frag_pos_a;
 layout(location = 1) out vec2 frag_pos_b;
 
 void main() {
+    const BackgroundPatternDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
     frag_pos_a = get_pattern_pos(drawable.pixel_coord_upper,
                                  drawable.pixel_coord_lower,

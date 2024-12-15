@@ -26,17 +26,17 @@ UniformBuffer::~UniformBuffer() {
 }
 
 void UniformBuffer::update(const void* data, std::size_t size_) {
-    assert(size == size_);
+    /*assert(size == size_);
     if (size != size_ || size != buffer.getSizeInBytes()) {
         Log::Error(
             Event::General,
             "Mismatched size given to UBO update, expected " + std::to_string(size) + ", got " + std::to_string(size_));
         return;
-    }
+    }*/
 
     buffer.getContext().renderingStats().numUniformUpdates++;
     buffer.getContext().renderingStats().uniformUpdateBytes += size_;
-    buffer.update(data, size, /*offset=*/0);
+    buffer.update(data, size_, /*offset=*/0);
 }
 
 const std::shared_ptr<gfx::UniformBuffer>& UniformBufferArray::set(const size_t id,
@@ -73,7 +73,7 @@ void UniformBufferArray::bindDescriptorSets(CommandEncoder& encoder) {
         descriptorSet = std::make_unique<UniformDescriptorSet>(encoder.getContext(), descriptorSetType);
     }
 
-    descriptorSet->update(*this, descriptorStartIndex, descriptorBindingCount);
+    descriptorSet->update(*this, descriptorStartIndex, descriptorStorageCount, descriptorUniformCount);
     descriptorSet->bind(encoder);
 }
 

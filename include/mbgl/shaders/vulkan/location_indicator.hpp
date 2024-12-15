@@ -57,7 +57,7 @@ struct ShaderSource<BuiltIn::LocationIndicatorTexturedShader, gfx::Backend::Type
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto vertex = R"(
+    static constexpr auto vertex = LOCATION_INDICATOR_SHADER_PRELUDE R"(
 layout(location = 0) in vec2 in_position;
 layout(location = 1) in vec2 in_texcoord;
 

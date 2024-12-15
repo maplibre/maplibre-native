@@ -54,7 +54,11 @@ layout(location = 6) in vec2 in_stroke_width;
 layout(location = 7) in vec2 in_stroke_opacity;
 #endif
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idCircleDrawableUBO) uniform CircleDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct CircleDrawableUBO {
     mat4 matrix;
     vec2 extrude_scale;
     // Interpolations
@@ -68,7 +72,11 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = idCircleDrawableUBO) uniform Circ
     float pad1;
     float pad2;
     float pad3;
-} drawable;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idCircleDrawableUBO) readonly buffer CircleDrawableUBOVector {
+    CircleDrawableUBO drawable_ubo[];
+} drawableVector;
 
 layout(set = LAYER_SET_INDEX, binding = idCircleEvaluatedPropsUBO) uniform CircleEvaluatedPropsUBO {
     vec4 color;
@@ -115,6 +123,7 @@ layout(location = 8) out lowp float frag_stroke_opacity;
 #endif
 
 void main() {
+    const CircleDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_radius)
     const float radius = props.radius;

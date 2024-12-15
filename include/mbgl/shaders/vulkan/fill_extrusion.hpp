@@ -40,7 +40,11 @@ layout(location = 3) in vec2 in_base;
 layout(location = 4) in vec2 in_height;
 #endif
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionDrawableUBO) uniform FillExtrusionDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct FillExtrusionDrawableUBO {
     mat4 matrix;
     vec2 pixel_coord_upper;
     vec2 pixel_coord_lower;
@@ -53,7 +57,11 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionDrawableUBO) unifo
     float pattern_from_t;
     float pattern_to_t;
     float pad1;
-} drawable;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) readonly buffer FillExtrusionDrawableUBOVector {
+    FillExtrusionDrawableUBO drawable_ubo[];
+} drawableVector;
 
 layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExtrusionPropsUBO {
     vec4 color;
@@ -72,6 +80,7 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
 layout(location = 0) out mediump vec4 frag_color;
 
 void main() {
+    const FillExtrusionDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_base)
     const float base = props.light_position_base.w;
@@ -182,7 +191,11 @@ layout(location = 4) in uvec4 in_pattern_from;
 layout(location = 5) in uvec4 in_pattern_to;
 #endif
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionDrawableUBO) uniform FillExtrusionDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct FillExtrusionDrawableUBO {
     mat4 matrix;
     vec2 pixel_coord_upper;
     vec2 pixel_coord_lower;
@@ -195,7 +208,11 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionDrawableUBO) unifo
     float pattern_from_t;
     float pattern_to_t;
     float pad1;
-} drawable;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) readonly buffer FillExtrusionDrawableUBOVector {
+    FillExtrusionDrawableUBO drawable_ubo[];
+} drawableVector;
 
 layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionTilePropsUBO) uniform FillExtrusionTilePropsUBO {
     vec4 pattern_from;
@@ -232,6 +249,7 @@ layout(location = 4) out mediump vec4 frag_pattern_to;
 #endif
 
 void main() {
+    const FillExtrusionDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_base)
     const float base = props.light_position_base.w;
@@ -334,13 +352,21 @@ layout(location = 4) in mediump vec4 frag_pattern_to;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionTilePropsUBO) uniform FillExtrusionTilePropsUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct FillExtrusionTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
     vec2 texsize;
     float pad1;
     float pad2;
-} tileProps;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionTilePropsUBO) readonly buffer FillExtrusionTilePropsUBOVector {
+    FillExtrusionTilePropsUBO tile_props_ubo[];
+} tilePropsVector;
 
 layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExtrusionPropsUBO {
     vec4 color;
@@ -364,6 +390,8 @@ void main() {
     out_color = vec4(1.0);
     return;
 #endif
+
+    const FillExtrusionTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_pattern_from)
     const vec4 pattern_from = tileProps.pattern_from;

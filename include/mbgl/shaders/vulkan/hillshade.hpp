@@ -28,13 +28,22 @@ struct ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::Vulkan> {
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec2 in_texture_position;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idHillshadeDrawableUBO) uniform HillshadeDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct HillshadeDrawableUBO {
     mat4 matrix;
-} drawable;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idHillshadeDrawableUBO) readonly buffer HillshadeDrawableUBOVector {
+    HillshadeDrawableUBO drawable_ubo[];
+} drawableVector;
 
 layout(location = 0) out vec2 frag_position;
 
 void main() {
+    const HillshadeDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
     applySurfaceTransform();
@@ -49,10 +58,18 @@ void main() {
 layout(location = 0) in vec2 frag_position;
 layout(location = 0) out vec4 out_color;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idHillshadeTilePropsUBO) uniform HillshadeTilePropsUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct HillshadeTilePropsUBO {
     vec2 latrange;
     vec2 light;
-} tileProps;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idHillshadeTilePropsUBO) readonly buffer HillshadeTilePropsUBOVector {
+    HillshadeTilePropsUBO tile_props_ubo[];
+} tilePropsVector;
 
 layout(set = LAYER_SET_INDEX, binding = idHillshadeEvaluatedPropsUBO) uniform HillshadeEvaluatedPropsUBO {
     vec4 highlight;
@@ -68,6 +85,8 @@ void main() {
     out_color = vec4(1.0);
     return;
 #endif
+
+    const HillshadeTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
     vec4 pixel = texture(image_sampler, frag_position);
 

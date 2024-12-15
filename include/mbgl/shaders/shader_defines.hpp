@@ -101,6 +101,7 @@ enum {
     wideVectorDrawableUBOCount
 };
 
+static constexpr auto layerSSBOStartId = globalUBOCount;
 static constexpr auto layerUBOStartId = std::max({static_cast<size_t>(backgroundDrawableUBOCount),
                                                   static_cast<size_t>(circleDrawableUBOCount),
                                                   static_cast<size_t>(clippingMaskDrawableUBOCount),
@@ -228,6 +229,7 @@ static constexpr auto maxUBOCountPerShader = std::max({static_cast<size_t>(backg
                                                        static_cast<size_t>(symbolUBOCount),
                                                        static_cast<size_t>(wideVectorUBOCount)});
 
+static constexpr auto maxSSBOCountPerLayer = maxUBOCountPerDrawable;
 static constexpr auto maxUBOCountPerLayer = maxUBOCountPerShader - layerUBOStartId;
 
 // Texture defines

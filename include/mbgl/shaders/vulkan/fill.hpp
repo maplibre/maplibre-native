@@ -35,14 +35,23 @@ layout(location = 1) in vec4 in_color;
 layout(location = 2) in vec2 in_opacity;
 #endif
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillDrawableUBO) uniform FillDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct FillDrawableUBO {
     mat4 matrix;
     // Interpolations
     float color_t;
     float opacity_t;
     float pad1;
     float pad2;
-} drawable;
+    vec4 pad3;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buffer FillDrawableUBOVector {
+    FillDrawableUBO drawable_ubo[];
+} drawableVector;
 
 #if !defined(HAS_UNIFORM_u_color)
 layout(location = 0) out vec4 frag_color;
@@ -53,6 +62,7 @@ layout(location = 1) out lowp float frag_opacity;
 #endif
 
 void main() {
+    const FillDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
 #if !defined(HAS_UNIFORM_u_color)
     frag_color = vec4(unpack_mix_color(in_color, drawable.color_t));
@@ -127,14 +137,23 @@ layout(location = 1) in vec4 in_color;
 layout(location = 2) in vec2 in_opacity;
 #endif
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillDrawableUBO) uniform FillOutlineDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct FillOutlineDrawableUBO {
     mat4 matrix;
     // Interpolations
     float outline_color_t;
     float opacity_t;
     float pad1;
     float pad2;
-} drawable;
+    vec4 pad3;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buffer FillOutlineDrawableUBOVector {
+    FillOutlineDrawableUBO drawable_ubo[];
+} drawableVector;
 
 #if !defined(HAS_UNIFORM_u_outline_color)
 layout(location = 0) out vec4 frag_color;
@@ -147,7 +166,8 @@ layout(location = 1) out lowp float frag_opacity;
 layout(location = 2) out vec2 frag_position;
 
 void main() {
-
+    const FillOutlineDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
+    
 #if !defined(HAS_UNIFORM_u_outline_color)
     frag_color = vec4(unpack_mix_color(in_color, drawable.outline_color_t));
 #endif
@@ -236,7 +256,11 @@ layout(location = 2) in mediump uvec4 in_pattern_to;
 layout(location = 3) in vec2 in_opacity;
 #endif
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillDrawableUBO) uniform FillPatternDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct FillPatternDrawableUBO {
     mat4 matrix;
     vec2 pixel_coord_upper;
     vec2 pixel_coord_lower;
@@ -245,15 +269,23 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillDrawableUBO) uniform FillPa
     float pattern_from_t;
     float pattern_to_t;
     float opacity_t;
-} drawable;
+};
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillTilePropsUBO) uniform FillPatternTilePropsUBO {
+layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buffer FillPatternDrawableUBOVector {
+    FillPatternDrawableUBO drawable_ubo[];
+} drawableVector;
+
+struct FillPatternTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
     vec2 texsize;
     float pad1;
     float pad2;
-} tileProps;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idFillTilePropsUBO) readonly buffer FillPatternTilePropsUBOVector {
+    FillPatternTilePropsUBO tile_props_ubo[];
+} tilePropsVector;
 
 layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEvaluatedPropsUBO {
     vec4 color;
@@ -280,6 +312,8 @@ layout(location = 4) out lowp float frag_opacity;
 #endif
 
 void main() {
+    const FillPatternDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
+    const FillPatternTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_pattern_from)
     const vec4 frag_pattern_from = tileProps.pattern_from;
@@ -337,13 +371,21 @@ layout(location = 4) in lowp float frag_opacity;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillTilePropsUBO) uniform FillPatternTilePropsUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct FillPatternTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
     vec2 texsize;
     float pad1;
     float pad2;
-} tileProps;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idFillTilePropsUBO) readonly buffer FillPatternTilePropsUBOVector {
+    FillPatternTilePropsUBO tile_props_ubo[];
+} tilePropsVector;
 
 layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEvaluatedPropsUBO {
     vec4 color;
@@ -362,6 +404,8 @@ void main() {
     out_color = vec4(1.0);
     return;
 #endif
+
+    const FillPatternTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_pattern_from)
     const vec4 pattern_from = tileProps.pattern_from;
@@ -423,7 +467,11 @@ layout(location = 2) in mediump uvec4 in_pattern_to;
 layout(location = 3) in vec2 in_opacity;
 #endif
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillDrawableUBO) uniform FillOutlinePatternDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct FillOutlinePatternDrawableUBO {
     mat4 matrix;
     vec2 pixel_coord_upper;
     vec2 pixel_coord_lower;
@@ -432,15 +480,23 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillDrawableUBO) uniform FillOu
     float pattern_from_t;
     float pattern_to_t;
     float opacity_t;
-} drawable;
+};
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillTilePropsUBO) uniform FillOutlinePatternTilePropsUBO {
+layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buffer FillOutlinePatternDrawableUBOVector {
+    FillOutlinePatternDrawableUBO drawable_ubo[];
+} drawableVector;
+
+struct FillOutlinePatternTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
     vec2 texsize;
     float pad1;
     float pad2;
-} tileProps;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idFillTilePropsUBO) readonly buffer FillOutlinePatternTilePropsUBOVector {
+    FillOutlinePatternTilePropsUBO tile_props_ubo[];
+} tilePropsVector;
 
 layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEvaluatedPropsUBO {
     vec4 color;
@@ -468,6 +524,8 @@ layout(location = 5) out lowp float frag_opacity;
 #endif
 
 void main() {
+    const FillOutlinePatternDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
+    const FillOutlinePatternTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_pattern_from)
     const vec4 frag_pattern_from = tileProps.pattern_from;
@@ -528,13 +586,21 @@ layout(location = 5) in lowp float frag_opacity;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillTilePropsUBO) uniform FillOutlinePatternTilePropsUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct FillOutlinePatternTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
     vec2 texsize;
     float pad1;
     float pad2;
-} tileProps;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idFillTilePropsUBO) readonly buffer FillOutlinePatternTilePropsUBOVector {
+    FillOutlinePatternTilePropsUBO tile_props_ubo[];
+} tilePropsVector;
 
 layout(set = LAYER_SET_INDEX, binding = idFillEvaluatedPropsUBO) uniform FillEvaluatedPropsUBO {
     vec4 color;
@@ -553,6 +619,8 @@ void main() {
     out_color = vec4(1.0);
     return;
 #endif
+
+    const FillOutlinePatternTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_pattern_from)
     const vec4 pattern_from = tileProps.pattern_from;
@@ -606,19 +674,30 @@ struct ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::
 layout(location = 0) in ivec2 in_pos_normal;
 layout(location = 1) in uvec4 in_data;
 
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = idFillDrawableUBO) uniform FillOutlineTriangulatedDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct FillOutlineTriangulatedDrawableUBO {
     mat4 matrix;
     float ratio;
     float pad1,
     float pad2
     float pad3;
-} drawable;
+    vec4 pad1;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idFillDrawableUBO) readonly buffer FillOutlineTriangulatedDrawableUBOVector {
+    FillOutlineTriangulatedDrawableUBO drawable_ubo[];
+} drawableVector;
 
 layout(location = 0) out float frag_width2;
 layout(location = 1) out vec2 frag_normal;
 layout(location = 2) out float frag_gamma_scale;
 
 void main() {
+    const FillOutlineTriangulatedDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
+
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
     float ANTIALIASING = 1.0 / DEVICE_PIXEL_RATIO / 2.0;
