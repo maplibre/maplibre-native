@@ -43,16 +43,18 @@ void DescriptorSet::createDescriptorPool(DescriptorPoolGrowable& growablePool) {
     const auto poolFlags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet;
 #endif
 
-
     std::vector<vk::DescriptorPoolSize> sizes;
     if (growablePool.descriptorStoragePerSet > 0) {
-        sizes.emplace_back(vk::DescriptorPoolSize(vk::DescriptorType::eStorageBuffer, maxSets * growablePool.descriptorStoragePerSet));
+        sizes.emplace_back(
+            vk::DescriptorPoolSize(vk::DescriptorType::eStorageBuffer, maxSets * growablePool.descriptorStoragePerSet));
     }
     if (growablePool.descriptorUniformsPerSet > 0) {
-        sizes.emplace_back(vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer, maxSets * growablePool.descriptorUniformsPerSet));
+        sizes.emplace_back(vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer,
+                                                  maxSets * growablePool.descriptorUniformsPerSet));
     }
     if (growablePool.descriptorTexturesPerSet > 0) {
-        sizes.emplace_back(vk::DescriptorPoolSize(vk::DescriptorType::eCombinedImageSampler, maxSets * growablePool.descriptorTexturesPerSet));
+        sizes.emplace_back(vk::DescriptorPoolSize(vk::DescriptorType::eCombinedImageSampler,
+                                                  maxSets * growablePool.descriptorTexturesPerSet));
     }
 
     const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo(poolFlags).setPoolSizes(sizes).setMaxSets(maxSets);
@@ -163,13 +165,13 @@ void UniformDescriptorSet::update(const gfx::UniformBufferArray& uniforms,
                 .setOffset(bufferResource.getVulkanBufferOffset())
                 .setRange(bufferResource.getSizeInBytes());
         } else {
-            const auto& dummyBuffer = index < descriptorStorageCount ? context.getDummyStorageBuffer() : context.getDummyUniformBuffer();
-            descriptorBufferInfo.setBuffer(dummyBuffer->getVulkanBuffer())
-                .setOffset(0)
-                .setRange(VK_WHOLE_SIZE);
+            const auto& dummyBuffer = index < descriptorStorageCount ? context.getDummyStorageBuffer()
+                                                                     : context.getDummyUniformBuffer();
+            descriptorBufferInfo.setBuffer(dummyBuffer->getVulkanBuffer()).setOffset(0).setRange(VK_WHOLE_SIZE);
         }
 
-        const auto descriptorType = index < descriptorStorageCount ? vk::DescriptorType::eStorageBuffer : vk::DescriptorType::eUniformBuffer;
+        const auto descriptorType = index < descriptorStorageCount ? vk::DescriptorType::eStorageBuffer
+                                                                   : vk::DescriptorType::eUniformBuffer;
 
         const auto writeDescriptorSet = vk::WriteDescriptorSet()
                                             .setBufferInfo(descriptorBufferInfo)

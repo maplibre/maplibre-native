@@ -116,7 +116,7 @@ public:
 #endif
             /* .matrix = */ util::cast<float>(matrix),
             /* .ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
-            
+
             /* .color_t = */ 0.f,
             /* .blur_t = */ 0.f,
             /* .opacity_t = */ 0.f,
@@ -131,7 +131,7 @@ public:
 
         // We would need to set up `idLineExpressionUBO` if the expression mask isn't empty
         assert(propsUBO.expressionMask == LineExpressionMask::None);
-        
+
         const LineExpressionUBO exprUBO = {
             /* .color = */ nullptr,
             /* .blur = */ nullptr,
@@ -241,21 +241,19 @@ public:
         const shaders::FillDrawableUBO drawableUBO = {
 #endif
             /* .matrix = */ util::cast<float>(matrix),
-            
+
             /* .color_t = */ 0.f,
             /* .opacity_t = */ 0.f,
             /* .pad1 = */ 0,
             /* .pad2 = */ 0
         };
 
-        const shaders::FillEvaluatedPropsUBO propsUBO = {
-            /* .color = */ color,
-            /* .outline_color = */ Color::white(),
-            /* .opacity = */ opacity,
-            /* .fade = */ 0.f,
-            /* .from_scale = */ 0.f,
-            /* .to_scale = */ 0.f
-        };
+        const shaders::FillEvaluatedPropsUBO propsUBO = {/* .color = */ color,
+                                                         /* .outline_color = */ Color::white(),
+                                                         /* .opacity = */ opacity,
+                                                         /* .fade = */ 0.f,
+                                                         /* .from_scale = */ 0.f,
+                                                         /* .to_scale = */ 0.f};
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, parameters.context);
         drawableUniforms.createOrUpdate(idFillEvaluatedPropsUBO, &propsUBO, parameters.context);

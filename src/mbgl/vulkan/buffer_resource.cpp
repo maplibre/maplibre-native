@@ -62,7 +62,7 @@ BufferResource::BufferResource(
         const auto& align = deviceProps.limits.minUniformBufferOffsetAlignment;
         bufferWindowSize = (size + align - 1) & ~(align - 1);
 
-        //assert(bufferWindowSize != 0);
+        // assert(bufferWindowSize != 0);
 
         totalSize = bufferWindowSize * backend.getMaxFrames();
     }

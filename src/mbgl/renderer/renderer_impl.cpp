@@ -253,7 +253,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
         // Update the debug layer groups
         orchestrator.updateDebugLayerGroups(renderTree, parameters);
-        
+
         // Tweakers are run in the upload pass so they can set up uniforms.
         parameters.currentLayer = 0;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {

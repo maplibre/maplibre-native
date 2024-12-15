@@ -108,7 +108,7 @@ public:
             /* .floorWidth = */ nullptr,
         };
         layerUniforms.createOrUpdate(idLineExpressionUBO, &exprUBO, context);
-        
+
 #if MLN_UBO_CONSOLIDATION
         int i = 0;
         std::vector<LineDrawableUnionUBO> drawableUBOVector(layerGroup.getDrawableCount());
@@ -140,7 +140,8 @@ public:
                 /* .gapwidth_t = */ 0.f,
                 /* .offset_t = */ 0.f,
                 /* .width_t = */ 0.f,
-                /* .pad1 = */ 0};
+                /* .pad1 = */ 0
+            };
 
 #if MLN_UBO_CONSOLIDATION
             drawable.setUBOIndex(i++);
@@ -153,7 +154,8 @@ public:
 #if MLN_UBO_CONSOLIDATION
         const size_t drawableUBOVectorSize = sizeof(LineDrawableUnionUBO) * drawableUBOVector.size();
         if (!drawableUniformBuffer || drawableUniformBuffer->getSize() < drawableUBOVectorSize) {
-            drawableUniformBuffer = context.createUniformBuffer(drawableUBOVector.data(), drawableUBOVectorSize, false, true);
+            drawableUniformBuffer = context.createUniformBuffer(
+                drawableUBOVector.data(), drawableUBOVectorSize, false, true);
         } else {
             drawableUniformBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
         }
@@ -336,7 +338,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
             drawable->setTileID(tile.getOverscaledTileID());
             tileLayerGroup->addDrawable(renderPass, tile.getOverscaledTileID(), std::move(drawable));
         }
-        
+
         if (!layerTweaker) {
             layerTweaker = std::make_shared<PolylineLayerTweaker>(linePropertiesUBO);
             tileLayerGroup->addLayerTweaker(layerTweaker);
@@ -428,13 +430,12 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                 addPolylineDrawable(tileLayerGroup, tile);
             }
 #else
-            const DebugUBO debugUBO = {
-                    /* .matrix = */ util::cast<float>(tile.matrix),
-                    /* .color = */ Color::red(),
-                    /* .overlay_scale = */ 1.0f,
-                    /* .pad1 = */ 0,
-                    /* .pad2 = */ 0,
-                    /* .pad3 = */ 0};
+            const DebugUBO debugUBO = {/* .matrix = */ util::cast<float>(tile.matrix),
+                                       /* .color = */ Color::red(),
+                                       /* .overlay_scale = */ 1.0f,
+                                       /* .pad1 = */ 0,
+                                       /* .pad2 = */ 0,
+                                       /* .pad3 = */ 0};
 
             if (0 == updateDrawables(tileLayerGroup, tileID, debugUBO) && tile.getNeedsRendering()) {
                 addDrawable(tileLayerGroup,

@@ -73,13 +73,13 @@ void Context::initFrameResources() {
     const auto& device = backend.getDevice();
     const auto frameCount = backend.getMaxFrames();
 
-    descriptorPoolMap.emplace(
-        DescriptorSetType::Global,
-        DescriptorPoolGrowable(globalDescriptorPoolSize, 0, shaders::globalUBOCount, 0));
+    descriptorPoolMap.emplace(DescriptorSetType::Global,
+                              DescriptorPoolGrowable(globalDescriptorPoolSize, 0, shaders::globalUBOCount, 0));
 
     descriptorPoolMap.emplace(
         DescriptorSetType::Layer,
-        DescriptorPoolGrowable(layerDescriptorPoolSize, shaders::maxSSBOCountPerLayer, shaders::maxUBOCountPerLayer, 0));
+        DescriptorPoolGrowable(
+            layerDescriptorPoolSize, shaders::maxSSBOCountPerLayer, shaders::maxUBOCountPerLayer, 0));
 
     descriptorPoolMap.emplace(
         DescriptorSetType::DrawableUniform,
@@ -362,7 +362,8 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
 }
 
 gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool persistent, bool ssbo) {
-    return std::make_shared<UniformBuffer>(createBuffer(data, size, ssbo ? VK_BUFFER_USAGE_STORAGE_BUFFER_BIT : VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, persistent));
+    return std::make_shared<UniformBuffer>(createBuffer(
+        data, size, ssbo ? VK_BUFFER_USAGE_STORAGE_BUFFER_BIT : VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, persistent));
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
@@ -578,7 +579,8 @@ const std::unique_ptr<BufferResource>& Context::getDummyUniformBuffer() {
 
 const std::unique_ptr<BufferResource>& Context::getDummyStorageBuffer() {
     if (!dummyStorageBuffer)
-        dummyStorageBuffer = std::make_unique<BufferResource>(*this, nullptr, 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, false);
+        dummyStorageBuffer = std::make_unique<BufferResource>(
+            *this, nullptr, 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, false);
     return dummyStorageBuffer;
 }
 
@@ -614,7 +616,8 @@ void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& lay
             stageFlags |= vk::ShaderStageFlagBits::eFragment;
         }
 
-        const auto descriptorType = i < storageCount ? vk::DescriptorType::eStorageBuffer : vk::DescriptorType::eUniformBuffer;
+        const auto descriptorType = i < storageCount ? vk::DescriptorType::eStorageBuffer
+                                                     : vk::DescriptorType::eUniformBuffer;
 
         bindings.push_back(vk::DescriptorSetLayoutBinding()
                                .setBinding(static_cast<uint32_t>(i))

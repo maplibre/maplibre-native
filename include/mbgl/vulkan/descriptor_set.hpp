@@ -80,7 +80,10 @@ public:
     UniformDescriptorSet(Context& context_, DescriptorSetType type_);
     virtual ~UniformDescriptorSet() = default;
 
-    void update(const gfx::UniformBufferArray& uniforms, uint32_t descriptorStartIndex, uint32_t descriptorStorageCount, uint32_t descriptorUniformCount);
+    void update(const gfx::UniformBufferArray& uniforms,
+                uint32_t descriptorStartIndex,
+                uint32_t descriptorStorageCount,
+                uint32_t descriptorUniformCount);
 };
 
 class ImageDescriptorSet : public DescriptorSet {

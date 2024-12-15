@@ -364,14 +364,16 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 #if MLN_UBO_CONSOLIDATION
     const size_t drawableUBOVectorSize = sizeof(LineDrawableUnionUBO) * drawableUBOVector.size();
     if (!drawableUniformBuffer || drawableUniformBuffer->getSize() < drawableUBOVectorSize) {
-        drawableUniformBuffer = context.createUniformBuffer(drawableUBOVector.data(), drawableUBOVectorSize, false, true);
+        drawableUniformBuffer = context.createUniformBuffer(
+            drawableUBOVector.data(), drawableUBOVectorSize, false, true);
     } else {
         drawableUniformBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
     }
 
     const size_t tilePropsUBOVectorSize = sizeof(LineTilePropsUnionUBO) * tilePropsUBOVector.size();
     if (!tilePropsUniformBuffer || tilePropsUniformBuffer->getSize() < tilePropsUBOVectorSize) {
-        tilePropsUniformBuffer = context.createUniformBuffer(tilePropsUBOVector.data(), tilePropsUBOVectorSize, false, true);
+        tilePropsUniformBuffer = context.createUniformBuffer(
+            tilePropsUBOVector.data(), tilePropsUBOVectorSize, false, true);
     } else {
         tilePropsUniformBuffer->update(tilePropsUBOVector.data(), tilePropsUBOVectorSize);
     }
