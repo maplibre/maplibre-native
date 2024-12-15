@@ -130,6 +130,8 @@ simd_float3x3 GLTFTextureMatrixFromTransform(GLTFTextureTransform transform);
 
 simd_float4x4 GLTFNormalMatrixFromModelMatrix(simd_float4x4 m);
 
+simd_double4x4 GLTFNormalMatrixFromModelMatrixD(simd_double4x4 m);
+
 
 #ifdef __cplusplus
 }

@@ -372,6 +372,8 @@ void MetalRenderer::buildRenderListRecursive(std::shared_ptr<GLTFRenderModel> mo
             auto mvp = matrix_multiply(_projectionMatrix, model->_modelViewMatrix);
             auto mvpF = matrix_double_to_float(mvp);
             vertexUniforms.modelViewProjectionMatrix = mvpF;
+            auto normalMatrix = GLTFNormalMatrixFromModelMatrixD( model->_modelViewMatrix);
+            vertexUniforms.normalMatrix = matrix_double_to_float(normalMatrix);
 
             
             

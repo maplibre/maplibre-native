@@ -202,3 +202,14 @@ simd_float4x4 GLTFNormalMatrixFromModelMatrix(simd_float4x4 m) {
     } };
     return mout;
 }
+
+simd_double4x4 GLTFNormalMatrixFromModelMatrixD(simd_double4x4 m) {
+    simd_double3x3 nm = simd_inverse(simd_transpose(GLTFMatrixUpperLeft3x3D(m)));
+    simd_double4x4 mout = { {
+        { nm.columns[0][0], nm.columns[0][1], nm.columns[0][2], 0 },
+        { nm.columns[1][0], nm.columns[1][1], nm.columns[1][2], 0 },
+        { nm.columns[2][0], nm.columns[2][1], nm.columns[2][2], 0 },
+        {                0,                0,                0, 1 }
+    } };
+    return mout;
+}
