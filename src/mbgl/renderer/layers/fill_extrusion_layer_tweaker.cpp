@@ -24,15 +24,15 @@ using namespace shaders;
 using namespace style;
 
 void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
+    if (layerGroup.empty()) {
+        return;
+    }
+
     auto& context = parameters.context;
     const auto& props = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties);
     const auto& evaluated = props.evaluated;
     const auto& crossfade = props.crossfade;
     const auto& state = parameters.state;
-
-    if (layerGroup.empty()) {
-        return;
-    }
 
 #if !defined(NDEBUG)
     const auto label = layerGroup.getName() + "-update-uniforms";

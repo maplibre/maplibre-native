@@ -23,12 +23,12 @@ using namespace style;
 using namespace shaders;
 
 void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
-    auto& context = parameters.context;
-    const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
-
     if (layerGroup.empty()) {
         return;
     }
+
+    auto& context = parameters.context;
+    const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
 
 #if !defined(NDEBUG)
     const auto label = layerGroup.getName() + "-update-uniforms";

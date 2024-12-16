@@ -32,11 +32,11 @@ std::array<float, 2> getLight(const PaintParameters& parameters,
 } // namespace
 
 void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
-    const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
-
     if (layerGroup.empty()) {
         return;
     }
+
+    const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
 
 #if !defined(NDEBUG)
     const auto label = layerGroup.getName() + "-update-uniforms";

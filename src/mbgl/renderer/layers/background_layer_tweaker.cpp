@@ -20,12 +20,12 @@ constexpr auto BackgroundPatternShaderName = "BackgroundPatternShader";
 #endif
 
 void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
-    const auto& state = parameters.state;
-    auto& context = parameters.context;
-
     if (layerGroup.empty()) {
         return;
     }
+
+    const auto& state = parameters.state;
+    auto& context = parameters.context;
 
 #if defined(DEBUG)
     const auto label = layerGroup.getName() + "-update-uniforms";

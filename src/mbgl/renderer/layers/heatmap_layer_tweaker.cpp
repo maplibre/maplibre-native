@@ -21,13 +21,13 @@ using namespace style;
 using namespace shaders;
 
 void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
-    auto& context = parameters.context;
-    const auto zoom = static_cast<float>(parameters.state.getZoom());
-    const auto& evaluated = static_cast<const HeatmapLayerProperties&>(*evaluatedProperties).evaluated;
-
     if (layerGroup.empty()) {
         return;
     }
+
+    auto& context = parameters.context;
+    const auto zoom = static_cast<float>(parameters.state.getZoom());
+    const auto& evaluated = static_cast<const HeatmapLayerProperties&>(*evaluatedProperties).evaluated;
 
 #if !defined(NDEBUG)
     const auto label = layerGroup.getName() + "-update-uniforms";

@@ -23,14 +23,14 @@ using namespace style;
 using namespace shaders;
 
 void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
+    if (layerGroup.empty()) {
+        return;
+    }
+
     auto& context = parameters.context;
     const auto& props = static_cast<const FillLayerProperties&>(*evaluatedProperties);
     const auto& evaluated = props.evaluated;
     const auto& crossfade = props.crossfade;
-
-    if (layerGroup.empty()) {
-        return;
-    }
 
 #if !defined(NDEBUG)
     const auto label = layerGroup.getName() + "-update-uniforms";

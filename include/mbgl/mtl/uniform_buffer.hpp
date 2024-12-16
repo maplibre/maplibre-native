@@ -19,7 +19,7 @@ public:
 
     UniformBuffer clone() const { return {buffer.clone()}; }
 
-    void update(const void* data, std::size_t size_) override;
+    void update(const void* data, std::size_t dataSize) override;
 
 protected:
     BufferResource buffer;

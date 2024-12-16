@@ -66,6 +66,10 @@ auto LineLayerTweaker::evaluate([[maybe_unused]] const PaintParameters& paramete
 }
 
 void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
+    if (layerGroup.empty()) {
+        return;
+    }
+
     auto& context = parameters.context;
     const auto& evaluated = static_cast<const LineLayerProperties&>(*evaluatedProperties).evaluated;
     const auto& crossfade = static_cast<const LineLayerProperties&>(*evaluatedProperties).crossfade;

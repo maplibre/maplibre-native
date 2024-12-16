@@ -24,7 +24,7 @@ public:
     UniformBufferGL clone() const { return {*this}; }
 
     // gfx::UniformBuffer
-    void update(const void* data, std::size_t size_) override;
+    void update(const void* data, std::size_t dataSize) override;
 
 private:
     // unique id used for debugging and profiling purposes

@@ -18,6 +18,10 @@ using namespace shaders;
 
 void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
                                  [[maybe_unused]] const PaintParameters& parameters) {
+    if (layerGroup.empty()) {
+        return;
+    }
+
     const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
 
     const auto spinWeights = [](float spin) -> std::array<float, 4> {

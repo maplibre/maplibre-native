@@ -102,25 +102,25 @@ BufferID UniformBufferGL::getID() const {
     }
 }
 
-void UniformBufferGL::update(const void* data_, std::size_t size_) {
-    assert(isManagedAllocation ? managedBuffer.getContents().size() == size_ : size == size_);
+void UniformBufferGL::update(const void* data, std::size_t dataSize) {
+    assert(isManagedAllocation ? dataSize <= managedBuffer.getContents().size() : dataSize <= size);
 
-    if (size != size_ || (isManagedAllocation && managedBuffer.getContents().size() != size_)) {
+    if (dataSize > size || (isManagedAllocation && dataSize > managedBuffer.getContents().size())) {
         Log::Error(
             Event::General,
-            "Mismatched size given to UBO update, expected " + std::to_string(size) + ", got " + std::to_string(size_));
+            "Mismatched size given to UBO update, expected max " + std::to_string(size) + ", got " + std::to_string(dataSize));
         return;
     }
 
-    if (std::memcmp(data_, managedBuffer.getContents().data(), managedBuffer.getContents().size()) == 0) {
+    if (std::memcmp(data, managedBuffer.getContents().data(), dataSize) == 0) {
         return;
     }
 
     if (isManagedAllocation) {
-        managedBuffer.allocate(data_, size);
+        managedBuffer.allocate(data, dataSize);
     } else {
         MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, localID));
-        MBGL_CHECK_ERROR(glBufferSubData(GL_UNIFORM_BUFFER, 0, size_, data_));
+        MBGL_CHECK_ERROR(glBufferSubData(GL_UNIFORM_BUFFER, 0, dataSize, data));
         MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, 0));
     }
 }

@@ -91,6 +91,10 @@ public:
           propsUBO(properties) {}
 
     void execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) override {
+        if (layerGroup.empty()) {
+            return;
+        }
+
         auto& context = parameters.context;
         auto& layerUniforms = layerGroup.mutableUniformBuffers();
         layerUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &propsUBO, context);

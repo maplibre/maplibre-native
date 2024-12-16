@@ -53,13 +53,13 @@ auto getInterpFactor(const SymbolBucket::PaintProperties& paintProps, bool isTex
 } // namespace
 
 void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
-    auto& context = parameters.context;
-    const auto& state = parameters.state;
-    const auto& evaluated = static_cast<const SymbolLayerProperties&>(*evaluatedProperties).evaluated;
-
     if (layerGroup.empty()) {
         return;
     }
+
+    auto& context = parameters.context;
+    const auto& state = parameters.state;
+    const auto& evaluated = static_cast<const SymbolLayerProperties&>(*evaluatedProperties).evaluated;
 
 #if !defined(NDEBUG)
     const auto label = layerGroup.getName() + "-update-uniforms";
