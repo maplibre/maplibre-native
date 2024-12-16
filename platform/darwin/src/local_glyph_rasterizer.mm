@@ -1,5 +1,6 @@
 #include <mbgl/text/local_glyph_rasterizer.hpp>
 #include <mbgl/util/i18n.hpp>
+#include <mbgl/util/logging.hpp>
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/constants.hpp>
 
@@ -206,7 +207,9 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
     CTFontRefHandle boldFont(CTFontCreateCopyWithSymbolicTraits(font, 0.0, NULL, kCTFontBoldTrait, kCTFontBoldTrait));
     if (!boldFont) {
         CFStringRefHandle familyNameHandle(CTFontCopyFamilyName(font));
-        [MLNNativeNetworkManager.sharedManager errorLog:@"Unable to create bold font for %@", *familyNameHandle];
+        NSString* familyName = (__bridge NSString *)(*familyNameHandle);
+        std::string stdFamilyName(familyName.UTF8String);
+        Log::Error(Event::General, "Unable to create bold font for " + stdFamilyName);
     }
     
     CTFontRef drawFont = isBold && boldFont ? *boldFont : font;
