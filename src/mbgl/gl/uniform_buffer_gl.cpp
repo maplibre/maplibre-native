@@ -106,9 +106,9 @@ void UniformBufferGL::update(const void* data, std::size_t dataSize) {
     assert(isManagedAllocation ? dataSize <= managedBuffer.getContents().size() : dataSize <= size);
 
     if (dataSize > size || (isManagedAllocation && dataSize > managedBuffer.getContents().size())) {
-        Log::Error(
-            Event::General,
-            "Mismatched size given to UBO update, expected max " + std::to_string(size) + ", got " + std::to_string(dataSize));
+        Log::Error(Event::General,
+                   "Mismatched size given to UBO update, expected max " + std::to_string(size) + ", got " +
+                       std::to_string(dataSize));
         return;
     }
 
