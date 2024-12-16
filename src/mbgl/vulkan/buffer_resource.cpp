@@ -64,7 +64,10 @@ BufferResource::BufferResource(
 
         assert(bufferWindowSize != 0);
 
-        totalSize = bufferWindowSize * backend.getMaxFrames();
+        const auto frameCount = backend.getMaxFrames();
+        totalSize = bufferWindowSize * frameCount;
+
+        bufferWindowVersions = std::vector<std::uint16_t>(frameCount, 0);
     }
 
     const auto bufferInfo = vk::BufferCreateInfo()
@@ -87,9 +90,7 @@ BufferResource::BufferResource(
     vmaMapMemory(allocator, bufferAllocation->allocation, &bufferAllocation->mappedBuffer);
 
     if (data) {
-        raw.resize(size);
-        std::memcpy(raw.data(), data, size);
-        std::memcpy(static_cast<uint8_t*>(bufferAllocation->mappedBuffer) + getVulkanBufferOffset(), data, size);
+        update(data, size, 0);
     }
 
     if (isValid()) {
@@ -104,12 +105,13 @@ BufferResource::BufferResource(
 
 BufferResource::BufferResource(BufferResource&& other) noexcept
     : context(other.context),
-      raw(std::move(other.raw)),
       size(other.size),
       usage(other.usage),
       persistent(other.persistent),
       bufferAllocation(std::move(other.bufferAllocation)),
-      bufferWindowSize(other.bufferWindowSize) {
+      bufferWindowSize(other.bufferWindowSize),
+      version(other.version),
+      bufferWindowVersions(std::move(other.bufferWindowVersions)) {
     other.bufferAllocation = nullptr;
 }
 
@@ -134,7 +136,7 @@ BufferResource& BufferResource::operator=(BufferResource&& other) noexcept {
         context.renderingStats().numBuffers--;
         context.renderingStats().memBuffers -= size;
     };
-    raw = std::move(other.raw);
+
     size = other.size;
     usage = other.usage;
     persistent = other.persistent;
@@ -152,21 +154,63 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
         return;
     }
 
+    uint8_t* data = static_cast<uint8_t*>(bufferAllocation->mappedBuffer) + getVulkanBufferOffset() + offset;
+    std::memcpy(data, newData, updateSize);
+
     auto& stats = context.renderingStats();
-
-    std::memcpy(raw.data() + offset, newData, updateSize);
-    std::memcpy(
-        static_cast<uint8_t*>(bufferAllocation->mappedBuffer) + getVulkanBufferOffset() + offset, newData, updateSize);
     stats.bufferUpdateBytes += updateSize;
-
     stats.bufferUpdates++;
     version++;
+
+    if (bufferWindowSize) {
+        const auto frameIndex = context.getCurrentFrameResourceIndex();
+        bufferWindowVersions[frameIndex] = version;
+    }
+}
+
+const void* BufferResource::contents() const noexcept {
+    return contents(context.getCurrentFrameResourceIndex());
+}
+
+const void* BufferResource::contents(uint8_t resourceIndex) const noexcept {
+    if (!isValid()) {
+        return nullptr;
+    }
+
+    return static_cast<uint8_t*>(bufferAllocation->mappedBuffer) + getVulkanBufferOffset(resourceIndex);
 }
 
 std::size_t BufferResource::getVulkanBufferOffset() const noexcept {
-    if (bufferWindowSize > 0) return 0;
+    return getVulkanBufferOffset(context.getCurrentFrameResourceIndex());
+}
 
-    return context.getCurrentFrameResourceIndex() * bufferWindowSize;
+std::size_t BufferResource::getVulkanBufferOffset(std::uint8_t resourceIndex) const noexcept {
+    assert(context.getBackend().getMaxFrames() >= resourceIndex);
+    return bufferWindowSize ? resourceIndex * bufferWindowSize : 0;
+}
+
+void BufferResource::updateVulkanBuffer() {
+    const auto frameCount = context.getBackend().getMaxFrames();
+
+    const int8_t currentIndex = context.getCurrentFrameResourceIndex();
+    const int8_t prevIndex = currentIndex == 0 ? frameCount - 1 : currentIndex - 1;
+
+    updateVulkanBuffer(currentIndex, prevIndex);
+}
+
+void BufferResource::updateVulkanBuffer(const int8_t destination, const uint8_t source) {
+    if (!bufferWindowSize) {
+        return;
+    }
+    
+    if (bufferWindowVersions[destination] < bufferWindowVersions[source]) {
+        uint8_t* dstData = static_cast<uint8_t*>(bufferAllocation->mappedBuffer) + bufferWindowSize * destination;
+        uint8_t* srcData = static_cast<uint8_t*>(bufferAllocation->mappedBuffer) + bufferWindowSize * source;
+
+        std::memcpy(dstData, srcData, size);
+
+        bufferWindowVersions[destination] = bufferWindowVersions[source];
+    }
 }
 
 } // namespace vulkan
