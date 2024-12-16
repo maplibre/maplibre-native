@@ -4,7 +4,7 @@
     <string name="maplibre_attributionsIconContentDescription">Atrybucja. Aktywuj, żeby pokazać więcej informacji.</string>
     <string name="maplibre_myLocationViewContentDescription">Widok lokalizacji. Pokazuje twoją pozycję na mapie.</string>
     <string name="maplibre_mapActionDescription">Pokazuje mapę stworzoną za pomocą biblioteki MapLibre. Przesuń mapę za pomocą przeciągnięcia dwoma palcami. Przybliż za pomocą uszczypnięcia dwoma palcami. </string>
-    <string name="maplibre_attributionsDialogTitle">MapLibre Maps SDK dla Androida</string>
+    <string name="maplibre_attributionsDialogTitle">MapLibre Android</string>
     <string name="maplibre_attributionErrorNoBrowser">Nie potrafię otworzyć strony, brak przeglądarki internetowej zainstalowanej na urządzeniu.</string>
     <string name="maplibre_offline_error_region_definition_invalid">Wymagany region nie mieści się w granicach świata: %s</string>
     </resources>

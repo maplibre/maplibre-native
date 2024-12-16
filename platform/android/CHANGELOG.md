@@ -1,10 +1,29 @@
 # Changelog MapLibre Native for Android
 
-## main
+## 11.7.0
+
+This release marks the official release of MapLibre Android with Vulkan support. [Vulkan](https://www.vulkan.org) is a modern graphics API which brings advantages such as improved performance, improved observability and better stability. Specifically, starting with this version we are releasing multiple versions of MapLibre Android:
+
+- `org.maplibre.gl:android-sdk` (still OpenGL ES for now, might default to another rendering backend or might choose depending on device support in a future major release).
+- `org.maplibre.gl:android-sdk-opengl` (OpenGL ES).
+- `org.maplibre.gl:android-sdk-vulkan` (Vulkan).
+
+Stability has proven to be excellent, but there are a few [known issues with Vulkan](https://github.com/maplibre/maplibre-native/issues?q=is%3Aissue%20state%3Aopen%20label%3AVulkan%20type%3ABug) that will be addressed in a future update.
+
+Currently it is not possible to choose a backend at runtime. If you care about supporting devices that only support OpenGL ES and you want to use Vulkan, you will need to produce and ship [multiple APKs](https://developer.android.com/google/play/publishing/multiple-apks). Please see [this issue](https://github.com/maplibre/maplibre-native/issues/3079) if you are interested in choosing a rendering backend during initialization.
+
+Thanks to everyone who helped test the pre-releases!
 
 ### ✨ Features and improvements
 
+- Fix the issue that the empty polyline cannot be updated ([#3046](https://github.com/maplibre/maplibre-native/pull/3046)).
+- feat: add `getZoom` and `setZoom` function support for Android Auto ([#3037](https://github.com/maplibre/maplibre-native/pull/3037)).
+- Use MapLibre Android as attribution string across languages ([#3080](https://github.com/maplibre/maplibre-native/pull/3080)).
+- Use CMake 3.24.0+ for Android ([#3065](https://github.com/maplibre/maplibre-native/pull/3065)).
+
 ### 🐞 Bug fixes
+
+- Fix crash on unsupported attribute type conversion ([#3066](https://github.com/maplibre/maplibre-native/pull/3066)).
 
 ## 11.6.1
 
