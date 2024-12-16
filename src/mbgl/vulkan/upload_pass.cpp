@@ -96,11 +96,11 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
 
             // If it's changed, update it
             if (rawBufSize <= resource.getSizeInBytes()) {
-                if (forceUpdate || vec->isModifiedAfter(resource.getLastUpdated())) {
-                    updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
-                    resource.setLastUpdated(vec->getLastModified());
+                if (vec->isModifiedAfter(resource.getLastUpdated())) {
+                    //updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
+                } else {
+                    return rawData->resource;
                 }
-                return rawData->resource;
             }
         }
         // Otherwise, create a new one
@@ -108,6 +108,10 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
             auto buffer = std::make_unique<VertexBuffer>();
             buffer->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage, /*persistent=*/false);
             vec->setBuffer(std::move(buffer));
+
+            auto* rawData = static_cast<VertexBuffer*>(vec->getBuffer());
+            auto& resource = static_cast<VertexBufferResource&>(*rawData->resource);
+            resource.setLastUpdated(vec->getLastModified());
             return static_cast<VertexBuffer*>(vec->getBuffer())->resource;
         }
     }
