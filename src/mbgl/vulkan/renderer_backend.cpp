@@ -56,7 +56,13 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 #endif
 
 #include "renderdoc_app.h"
-static RENDERDOC_API_1_1_2* g_rdoc_api = nullptr;
+
+static struct {
+    RENDERDOC_API_1_1_2* api = nullptr;
+    bool loop = false;
+    int32_t frameDelay = 0;
+    uint32_t frameCaptureCount = 0;
+} g_rdoc;
 
 #endif
 
@@ -183,13 +189,13 @@ void RendererBackend::initFrameCapture() {
 #ifdef _WIN32
     if (HMODULE mod = GetModuleHandleA("renderdoc.dll")) {
         pRENDERDOC_GetAPI RENDERDOC_GetAPI = (pRENDERDOC_GetAPI)GetProcAddress(mod, "RENDERDOC_GetAPI");
-        int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)&g_rdoc_api);
+        int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)&g_rdoc.api);
         assert(ret == 1);
     }
 #elif __unix__
     if (void* mod = dlopen("librenderdoc.so", RTLD_NOW | RTLD_NOLOAD)) {
         pRENDERDOC_GetAPI RENDERDOC_GetAPI = (pRENDERDOC_GetAPI)dlsym(mod, "RENDERDOC_GetAPI");
-        int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)&g_rdoc_api);
+        int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)&g_rdoc.api);
         assert(ret == 1);
     }
 #endif
@@ -199,19 +205,47 @@ void RendererBackend::initFrameCapture() {
 
 void RendererBackend::startFrameCapture() {
 #ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
-    if (g_rdoc_api) {
+    if (!g_rdoc.api) {
+        return;    
+    }
+
+    if (g_rdoc.loop) {
         RENDERDOC_DevicePointer devicePtr = RENDERDOC_DEVICEPOINTER_FROM_VKINSTANCE(instance->operator VkInstance_T*());
-        g_rdoc_api->StartFrameCapture(devicePtr, nullptr);
+        g_rdoc.api->StartFrameCapture(devicePtr, nullptr);
+    } else {
+
+        if (g_rdoc.frameCaptureCount > 0 && g_rdoc.frameDelay == 0) {
+            g_rdoc.api->TriggerMultiFrameCapture(g_rdoc.frameCaptureCount);
+        }
+        
+        --g_rdoc.frameDelay;
     }
 #endif
 }
 
 void RendererBackend::endFrameCapture() {
 #ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
-    if (g_rdoc_api) {
+    if (g_rdoc.api && g_rdoc.loop) {
         RENDERDOC_DevicePointer devicePtr = RENDERDOC_DEVICEPOINTER_FROM_VKINSTANCE(instance->operator VkInstance_T*());
-        g_rdoc_api->EndFrameCapture(devicePtr, nullptr);
+        g_rdoc.api->EndFrameCapture(devicePtr, nullptr);
     }
+#endif
+}
+
+void RendererBackend::setFrameCaptureLoop(bool value) {
+#ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
+    g_rdoc.loop = value;
+#endif
+}
+
+void RendererBackend::triggerFrameCapture(uint32_t frameCount, uint32_t frameDelay) {
+#ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
+    if (!g_rdoc.api) {
+        return;
+    }
+
+    g_rdoc.frameCaptureCount = frameCount;
+    g_rdoc.frameDelay = frameDelay;
 #endif
 }
 

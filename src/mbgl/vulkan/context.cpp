@@ -559,7 +559,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 const std::unique_ptr<BufferResource>& Context::getDummyVertexBuffer() {
     if (!dummyVertexBuffer)
         dummyVertexBuffer = std::make_unique<BufferResource>(
-            *this, nullptr, 16, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, false);
+            *this, nullptr, 16, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, false);
     return dummyVertexBuffer;
 }
 
