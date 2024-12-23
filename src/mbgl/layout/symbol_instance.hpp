@@ -6,7 +6,9 @@
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
 #include <mbgl/util/bitmask_operations.hpp>
 
+#ifdef __cpp_lib_source_location
 #include <source_location>
+#endif
 
 #if !defined(MLN_SYMBOL_GUARDS)
 #define MLN_SYMBOL_GUARDS 1
@@ -20,8 +22,9 @@
 
 // A temporary shim for partial C++20 support
 #if MLN_SYMBOL_GUARDS
-#if defined(__clang__)
-#if __cplusplus <= 201703L || !__has_builtin(__builtin_source_location)
+#if __cpp_lib_source_location
+#define SYM_GUARD_LOC std::source_location::current()
+#else
 namespace std {
 struct source_location {
     const char* fileName_;
@@ -38,11 +41,6 @@ struct source_location {
     std::source_location {               \
         __FILE__, __FUNCTION__, __LINE__ \
     }
-#else
-#define SYM_GUARD_LOC std::source_location::current()
-#endif
-#else
-#define SYM_GUARD_LOC std::source_location::current()
 #endif
 #else
 #define SYM_GUARD_LOC \

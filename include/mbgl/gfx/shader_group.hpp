@@ -161,7 +161,9 @@ protected:
     using PropertyHashType = std::uint64_t;
 
     std::string getShaderName(const std::string_view& name, const PropertyHashType key) {
-        return (std::ostringstream() << name << '#' << std::hex << key).str();
+        std::ostringstream oss;
+        oss << name << '#' << std::hex << key;
+        return oss.str();
     }
 
     /// Generate a map key for the specified combination of properties

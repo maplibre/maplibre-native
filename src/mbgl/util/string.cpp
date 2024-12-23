@@ -38,7 +38,9 @@ std::string toString(uint64_t t) {
 }
 
 std::string toString(const std::thread::id& t) {
-    return ((std::stringstream{}) << t).str();
+    std::stringstream ss;
+    ss << t;
+    return ss.str();
 }
 
 std::string toString(double t, bool decimal) {
