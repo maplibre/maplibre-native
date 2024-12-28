@@ -38,7 +38,8 @@ int main(int argc, char* argv[]) {
     args::ValueFlag<uint32_t> widthValue(argumentParser, "pixels", "Image width", {'w', "width"});
     args::ValueFlag<uint32_t> heightValue(argumentParser, "pixels", "Image height", {'h', "height"});
 
-    args::ValueFlag<std::string> mapModeValue(argumentParser, "MapMode", "Map mode (e.g. 'static', 'tile', 'continuous')", {'m', "mode"});
+    args::ValueFlag<std::string> mapModeValue(
+        argumentParser, "MapMode", "Map mode (e.g. 'static', 'tile', 'continuous')", {'m', "mode"});
 
     try {
         argumentParser.ParseCLI(argc, argv);
@@ -88,21 +89,19 @@ int main(int argc, char* argv[]) {
             mapMode = MapMode::Tile;
         } else if (modeStr == "continuous") {
             mapMode = MapMode::Continuous;
-        } 
+        }
     }
 
     HeadlessFrontend frontend({width, height}, static_cast<float>(pixelRatio));
-    Map map(frontend,
-            MapObserver::nullObserver(),
-            MapOptions()
-                .withMapMode(mapMode)
-                .withSize(frontend.getSize())
-                .withPixelRatio(static_cast<float>(pixelRatio)),
-            ResourceOptions()
-                .withCachePath(cache_file)
-                .withAssetPath(asset_root)
-                .withApiKey(apikey)
-                .withTileServerOptions(mapTilerConfiguration));
+    Map map(
+        frontend,
+        MapObserver::nullObserver(),
+        MapOptions().withMapMode(mapMode).withSize(frontend.getSize()).withPixelRatio(static_cast<float>(pixelRatio)),
+        ResourceOptions()
+            .withCachePath(cache_file)
+            .withAssetPath(asset_root)
+            .withApiKey(apikey)
+            .withTileServerOptions(mapTilerConfiguration));
 
     if (style.find("://") == std::string::npos) {
         style = std::string("file://") + style;
