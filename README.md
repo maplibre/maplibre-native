@@ -213,7 +213,7 @@ xed platform/ios/MapLibre.xcodeproj
 
 To generate and open the Xcode project.
 
-More information: [`platform/android/CONTRIBUTING.md`](platform/ios/CONTRIBUTING.md).
+More information: [`platform/ios/CONTRIBUTING.md`](platform/ios/CONTRIBUTING.md).
 
 ## Other Platforms
 
