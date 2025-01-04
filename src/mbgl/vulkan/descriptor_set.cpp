@@ -50,7 +50,7 @@ void DescriptorSet::createDescriptorPool(DescriptorPoolGrowable& growablePool) {
     const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo(poolFlags).setPoolSizes(size).setMaxSets(maxSets);
 
     growablePool.pools.emplace_back(device->createDescriptorPoolUnique(descriptorPoolInfo), maxSets);
-    growablePool.currentPoolIndex = growablePool.pools.size() - 1;
+    growablePool.currentPoolIndex = static_cast<int32_t>(growablePool.pools.size() - 1);
 };
 
 void DescriptorSet::allocate() {
@@ -73,7 +73,8 @@ void DescriptorSet::allocate() {
             growablePool.pools.begin(), growablePool.pools.end(), [&](const auto& p) { return !p.unusedSets.empty(); });
 
         if (unusedPoolIt != growablePool.pools.end()) {
-            growablePool.currentPoolIndex = std::distance(growablePool.pools.begin(), unusedPoolIt);
+            growablePool.currentPoolIndex = static_cast<int32_t>(
+                std::distance(growablePool.pools.begin(), unusedPoolIt));
         } else
 #endif
         {
@@ -83,7 +84,8 @@ void DescriptorSet::allocate() {
                                                   [&](const auto& p) { return p.remainingSets >= layouts.size(); });
 
             if (freePoolIt != growablePool.pools.end()) {
-                growablePool.currentPoolIndex = std::distance(growablePool.pools.begin(), freePoolIt);
+                growablePool.currentPoolIndex = static_cast<int32_t>(
+                    std::distance(growablePool.pools.begin(), freePoolIt));
             } else {
                 createDescriptorPool(growablePool);
             }
@@ -161,7 +163,7 @@ void UniformDescriptorSet::update(const gfx::UniformBufferArray& uniforms,
                                             .setBufferInfo(descriptorBufferInfo)
                                             .setDescriptorCount(1)
                                             .setDescriptorType(vk::DescriptorType::eUniformBuffer)
-                                            .setDstBinding(index)
+                                            .setDstBinding(static_cast<uint32_t>(index))
                                             .setDstSet(descriptorSets[frameIndex]);
 
         device->updateDescriptorSets(writeDescriptorSet, nullptr);
@@ -197,7 +199,7 @@ void ImageDescriptorSet::update(const std::array<gfx::Texture2DPtr, shaders::max
                                             .setImageInfo(descriptorImageInfo)
                                             .setDescriptorCount(1)
                                             .setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
-                                            .setDstBinding(id)
+                                            .setDstBinding(static_cast<uint32_t>(id))
                                             .setDstSet(descriptorSets[frameIndex]);
 
         device->updateDescriptorSets(writeDescriptorSet, nullptr);
