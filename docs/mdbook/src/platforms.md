@@ -9,8 +9,8 @@ MapLibre Native uses a monorepo. Source code for all platforms lives in [`maplib
 
 | Platform | Source | Notes |
 |---|---|---|
-| Android | [`platform/android`](https://github.com/maplibre/maplibre-native/tree/main/platform/android) | Intergrates with the C++ core via JNI. |
-| iOS | [`platform/ios`](https://github.com/maplibre/maplibre-native/tree/main/platform/ios), [`platform/darwin`](https://github.com/maplibre/maplibre-native/tree/main/platform/darwin) | Intergrates with the C++ core via Objective-C++.  |
+| Android | [`platform/android`](https://github.com/maplibre/maplibre-native/tree/main/platform/android) | Integrates with the C++ core via JNI. |
+| iOS | [`platform/ios`](https://github.com/maplibre/maplibre-native/tree/main/platform/ios), [`platform/darwin`](https://github.com/maplibre/maplibre-native/tree/main/platform/darwin) | Integrates with the C++ core via Objective-C++.  |
 | Linux | [`platform/linux`](https://github.com/maplibre/maplibre-native/tree/main/platform/linux) | Used for development. Also widely used in production for raster tile generation. |
 | Windows | [`platform/windows`](https://github.com/maplibre/maplibre-native/tree/main/platform/windows) | |
 | macOS | [`platform/macos`](https://github.com/maplibre/maplibre-native/tree/main/platform/macos), [`platform/darwin`](https://github.com/maplibre/maplibre-native/tree/main/platform/darwin)  | Mainly used for development. There is some legacy AppKit code. |
