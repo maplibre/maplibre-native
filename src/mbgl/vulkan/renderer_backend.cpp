@@ -232,13 +232,13 @@ void RendererBackend::endFrameCapture() {
 #endif
 }
 
-void RendererBackend::setFrameCaptureLoop(bool value) {
+void RendererBackend::setFrameCaptureLoop([[maybe_unused]] bool value) {
 #ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
     g_rdoc.loop = value;
 #endif
 }
 
-void RendererBackend::triggerFrameCapture(uint32_t frameCount, uint32_t frameDelay) {
+void RendererBackend::triggerFrameCapture([[maybe_unused]] uint32_t frameCount, [[maybe_unused]] uint32_t frameDelay) {
 #ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
     if (!g_rdoc.api) {
         return;

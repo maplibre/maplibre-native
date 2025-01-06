@@ -107,10 +107,10 @@ BufferResource::BufferResource(BufferResource&& other) noexcept
     : context(other.context),
       size(other.size),
       usage(other.usage),
+      version(other.version),
       persistent(other.persistent),
       bufferAllocation(std::move(other.bufferAllocation)),
       bufferWindowSize(other.bufferWindowSize),
-      version(other.version),
       bufferWindowVersions(std::move(other.bufferWindowVersions)) {
     other.bufferAllocation = nullptr;
 }
