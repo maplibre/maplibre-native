@@ -3,7 +3,9 @@ authors = ["MapLibre Contributors"]
 language = "en"
 multilingual = false
 src = "src"
-title = "MapLibre Native Documentation"
+title = "MapLibre Native Developer Documentation"
 
 [output.html]
 additional-css = ["diff.css"]
+
+[preprocessor.alerts]
