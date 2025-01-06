@@ -3,8 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Page not found - MapLibre Native Developer Documentation</title>
-        <base href="/">
+        <title>Platforms - MapLibre Native Developer Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -153,14 +152,65 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="document-not-found-404"><a class="header" href="#document-not-found-404">Document not found (404)</a></h1>
-<p>This URL is invalid, sorry. Please use the navigation bar or search to continue.</p>
-
+                        <h1 id="platforms"><a class="header" href="#platforms">Platforms</a></h1>
+<p>This page describes the platforms that MapLibre Native is available on.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>MapLibre Native uses a monorepo. Source code for all platforms lives in <a href="https://github.com/maplibre/maplibre-native"><code>maplibre/maplibre-native</code></a> on GitHub.</p>
+<div class="table-wrapper"><table><thead><tr><th>Platform</th><th>Source</th><th>Notes</th></tr></thead><tbody>
+<tr><td>Android</td><td><a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android"><code>platform/android</code></a></td><td>Integrates with the C++ core via JNI.</td></tr>
+<tr><td>iOS</td><td><a href="https://github.com/maplibre/maplibre-native/tree/main/platform/ios"><code>platform/ios</code></a>, <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/darwin"><code>platform/darwin</code></a></td><td>Integrates with the C++ core via Objective-C++.</td></tr>
+<tr><td>Linux</td><td><a href="https://github.com/maplibre/maplibre-native/tree/main/platform/linux"><code>platform/linux</code></a></td><td>Used for development. Also widely used in production for raster tile generation.</td></tr>
+<tr><td>Windows</td><td><a href="https://github.com/maplibre/maplibre-native/tree/main/platform/windows"><code>platform/windows</code></a></td><td></td></tr>
+<tr><td>macOS</td><td><a href="https://github.com/maplibre/maplibre-native/tree/main/platform/macos"><code>platform/macos</code></a>, <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/darwin"><code>platform/darwin</code></a></td><td>Mainly used for development. There is some legacy AppKit code.</td></tr>
+<tr><td>Node.js</td><td><a href="https://github.com/maplibre/maplibre-native/tree/main/platform/node"><code>platform/node</code></a></td><td>Uses <a href="https://github.com/nodejs/nan">NAN</a>. Available as <a href="https://www.npmjs.com/package/@maplibre/maplibre-gl-native">@maplibre/maplibre-gl-native</a> on npm.</td></tr>
+<tr><td>Qt</td><td><a href="https://github.com/maplibre/maplibre-native/tree/main/platform/qt">maplibre/maplibre-qt</a>, <a href="https://github.com/maplibre/maplibre-native"><code>platform/qt</code></a></td><td>Only platform that partially split to another repository.</td></tr>
+</tbody></table>
+</div>
+<p>Of these, <strong>Android</strong> and <strong>iOS</strong> are considered <a href="https://github.com/maplibre/maplibre/blob/main/PROJECT_TIERS.md">core projects</a> of the MapLibre Organization.</p>
+<h3 id="glfw"><a class="header" href="#glfw">GLFW</a></h3>
+<p>You can find an app that uses GLFW in <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/glfw"><code>platform/glfw</code></a>. It works on macOS, Linux and Windows. The app shows an interactive map that can be interacted with. Since GLFW adds relatively little complexity this app is used a lot for development. You can also learn about the C++ API by studying the source code of the GLFW app.</p>
+<h2 id="rendering-backends"><a class="header" href="#rendering-backends">Rendering Backends</a></h2>
+<p>Originally the project only supported OpenGL 2.0. In 2023, the <a href="https://github.com/maplibre/maplibre-native/blob/main/design-proposals/2022-10-27-rendering-modularization.md">renderer was modularized</a> allowing for the implementation of alternate rendering backends. The first alternate rendering backend that was implemented was <a href="https://maplibre.org/news/2024-01-19-metal-support-for-maplibre-native-ios-is-here/">Metal</a>, followed by <a href="https://maplibre.org/news/2024-12-12-maplibre-android-vulkan/">Vulkan</a>. In the future other rendering backends could be implemented such as WebGPU.</p>
+<p>What platfroms support which rendering backend can be found below.</p>
+<div class="table-wrapper"><table><thead><tr><th>Platform</th><th>OpenGL ES 3.0</th><th>Vulkan 1.0</th><th>Metal</th></tr></thead><tbody>
+<tr><td>Android</td><td>✅</td><td>✅</td><td>❌</td></tr>
+<tr><td>iOS</td><td>❌</td><td>❌</td><td>✅</td></tr>
+<tr><td>Linux</td><td>✅</td><td>✅</td><td>❌</td></tr>
+<tr><td>Windows</td><td>✅</td><td>❌</td><td>❌</td></tr>
+<tr><td>macOS</td><td>❌</td><td>✅</td><td>✅<sup class="footnote-reference"><a href="#1">1</a></sup></td></tr>
+<tr><td>Node.js</td><td>✅</td><td>❌</td><td>✅ <sup class="footnote-reference"><a href="#2">2</a></sup></td></tr>
+<tr><td>Qt</td><td>✅</td><td>❌</td><td>❌</td></tr>
+</tbody></table>
+</div>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>Requires MoltenVK. Only available when built via CMake.</p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p>Issue reported, see <a href="https://github.com/maplibre/maplibre-native/issues/2928">#2928</a>.</p>
+</div>
+<h2 id="build-tooling"><a class="header" href="#build-tooling">Build Tooling</a></h2>
+<p>In 2023 we co-opted Bazel as a build tool (generator), mostly due to it having better support for iOS compared to CMake. Some platforms can use CMake as well as Bazel.</p>
+<div class="table-wrapper"><table><thead><tr><th>Platform</th><th>CMake</th><th>Bazel</th></tr></thead><tbody>
+<tr><td>Android</td><td>✅ (via Gradle)</td><td>❌</td></tr>
+<tr><td>iOS</td><td>❌</td><td>✅</td></tr>
+<tr><td>Linux</td><td>✅</td><td>✅</td></tr>
+<tr><td>Windows</td><td>✅</td><td>❌</td></tr>
+<tr><td>macOS</td><td>✅</td><td>✅</td></tr>
+<tr><td>Node.js</td><td>✅</td><td>❌</td></tr>
+<tr><td>Qt</td><td>✅</td><td>❌</td></tr>
+</tbody></table>
+</div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="introduction.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
 
+                            <a rel="next prefetch" href="android/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -168,7 +218,13 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="introduction.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
 
+                    <a rel="next prefetch" href="android/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
             </nav>
 
         </div>

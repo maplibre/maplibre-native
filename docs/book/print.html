@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>MapLibre Native Documentation</title>
+        <title>MapLibre Native Developer Documentation</title>
         <meta name="robots" content="noindex">
 
 
@@ -121,7 +121,7 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title">MapLibre Native Documentation</h1>
+                    <h1 class="menu-title">MapLibre Native Developer Documentation</h1>
 
                     <div class="right-buttons">
                         <a href="print.html" title="Print this book" aria-label="Print this book">
@@ -157,8 +157,256 @@
 <p><em><a href="https://github.com/maplibre/maplibre-native">MapLibre Native</a></em> is a community led fork of <em>Mapbox GL Native</em>. It's a C++ library that powers
 vector maps in native applications on multiple platforms by taking stylesheets that conform to the <em><a href="https://maplibre.org/maplibre-style-spec/">MapLibre Style Specification</a></em>, a fork of the
 Mapbox Style Spec. Since it is derived from Mapbox's original work it also uses <em>Mapbox Vector Tile Specification</em> as its choice of vector tile format.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="design"><a class="header" href="#design">Design</a></h1>
-<p>This section is dedicated to documenting current state of MapLibre Native. <a href="design/./archictural-problems-and-recommendations.html">Architectural Problems and Recommendations</a> section notes recommendations for future improvements from an architectural perspective.</p>
+<p>This documentation is intended for developers of MapLibre Native. If you are interested in <em>using</em> MapLibre Native, check out the <a href="https://github.com/maplibre/maplibre-native?tab=readme-ov-file#maplibre-native">main <code>README.md</code></a> on GitHub.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="platforms"><a class="header" href="#platforms">Platforms</a></h1>
+<p>This page describes the platforms that MapLibre Native is available on.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>MapLibre Native uses a monorepo. Source code for all platforms lives in <a href="https://github.com/maplibre/maplibre-native"><code>maplibre/maplibre-native</code></a> on GitHub.</p>
+<div class="table-wrapper"><table><thead><tr><th>Platform</th><th>Source</th><th>Notes</th></tr></thead><tbody>
+<tr><td>Android</td><td><a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android"><code>platform/android</code></a></td><td>Integrates with the C++ core via JNI.</td></tr>
+<tr><td>iOS</td><td><a href="https://github.com/maplibre/maplibre-native/tree/main/platform/ios"><code>platform/ios</code></a>, <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/darwin"><code>platform/darwin</code></a></td><td>Integrates with the C++ core via Objective-C++.</td></tr>
+<tr><td>Linux</td><td><a href="https://github.com/maplibre/maplibre-native/tree/main/platform/linux"><code>platform/linux</code></a></td><td>Used for development. Also widely used in production for raster tile generation.</td></tr>
+<tr><td>Windows</td><td><a href="https://github.com/maplibre/maplibre-native/tree/main/platform/windows"><code>platform/windows</code></a></td><td></td></tr>
+<tr><td>macOS</td><td><a href="https://github.com/maplibre/maplibre-native/tree/main/platform/macos"><code>platform/macos</code></a>, <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/darwin"><code>platform/darwin</code></a></td><td>Mainly used for development. There is some legacy AppKit code.</td></tr>
+<tr><td>Node.js</td><td><a href="https://github.com/maplibre/maplibre-native/tree/main/platform/node"><code>platform/node</code></a></td><td>Uses <a href="https://github.com/nodejs/nan">NAN</a>. Available as <a href="https://www.npmjs.com/package/@maplibre/maplibre-gl-native">@maplibre/maplibre-gl-native</a> on npm.</td></tr>
+<tr><td>Qt</td><td><a href="https://github.com/maplibre/maplibre-native/tree/main/platform/qt">maplibre/maplibre-qt</a>, <a href="https://github.com/maplibre/maplibre-native"><code>platform/qt</code></a></td><td>Only platform that partially split to another repository.</td></tr>
+</tbody></table>
+</div>
+<p>Of these, <strong>Android</strong> and <strong>iOS</strong> are considered <a href="https://github.com/maplibre/maplibre/blob/main/PROJECT_TIERS.md">core projects</a> of the MapLibre Organization.</p>
+<h3 id="glfw"><a class="header" href="#glfw">GLFW</a></h3>
+<p>You can find an app that uses GLFW in <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/glfw"><code>platform/glfw</code></a>. It works on macOS, Linux and Windows. The app shows an interactive map that can be interacted with. Since GLFW adds relatively little complexity this app is used a lot for development. You can also learn about the C++ API by studying the source code of the GLFW app.</p>
+<h2 id="rendering-backends"><a class="header" href="#rendering-backends">Rendering Backends</a></h2>
+<p>Originally the project only supported OpenGL 2.0. In 2023, the <a href="https://github.com/maplibre/maplibre-native/blob/main/design-proposals/2022-10-27-rendering-modularization.md">renderer was modularized</a> allowing for the implementation of alternate rendering backends. The first alternate rendering backend that was implemented was <a href="https://maplibre.org/news/2024-01-19-metal-support-for-maplibre-native-ios-is-here/">Metal</a>, followed by <a href="https://maplibre.org/news/2024-12-12-maplibre-android-vulkan/">Vulkan</a>. In the future other rendering backends could be implemented such as WebGPU.</p>
+<p>What platfroms support which rendering backend can be found below.</p>
+<div class="table-wrapper"><table><thead><tr><th>Platform</th><th>OpenGL ES 3.0</th><th>Vulkan 1.0</th><th>Metal</th></tr></thead><tbody>
+<tr><td>Android</td><td>✅</td><td>✅</td><td>❌</td></tr>
+<tr><td>iOS</td><td>❌</td><td>❌</td><td>✅</td></tr>
+<tr><td>Linux</td><td>✅</td><td>✅</td><td>❌</td></tr>
+<tr><td>Windows</td><td>✅</td><td>❌</td><td>❌</td></tr>
+<tr><td>macOS</td><td>❌</td><td>✅</td><td>✅<sup class="footnote-reference"><a href="#1">1</a></sup></td></tr>
+<tr><td>Node.js</td><td>✅</td><td>❌</td><td>✅ <sup class="footnote-reference"><a href="#2">2</a></sup></td></tr>
+<tr><td>Qt</td><td>✅</td><td>❌</td><td>❌</td></tr>
+</tbody></table>
+</div>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>Requires MoltenVK. Only available when built via CMake.</p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p>Issue reported, see <a href="https://github.com/maplibre/maplibre-native/issues/2928">#2928</a>.</p>
+</div>
+<h2 id="build-tooling"><a class="header" href="#build-tooling">Build Tooling</a></h2>
+<p>In 2023 we co-opted Bazel as a build tool (generator), mostly due to it having better support for iOS compared to CMake. Some platforms can use CMake as well as Bazel.</p>
+<div class="table-wrapper"><table><thead><tr><th>Platform</th><th>CMake</th><th>Bazel</th></tr></thead><tbody>
+<tr><td>Android</td><td>✅ (via Gradle)</td><td>❌</td></tr>
+<tr><td>iOS</td><td>❌</td><td>✅</td></tr>
+<tr><td>Linux</td><td>✅</td><td>✅</td></tr>
+<tr><td>Windows</td><td>✅</td><td>❌</td></tr>
+<tr><td>macOS</td><td>✅</td><td>✅</td></tr>
+<tr><td>Node.js</td><td>✅</td><td>❌</td></tr>
+<tr><td>Qt</td><td>✅</td><td>❌</td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="maplibre-android-developer-guide"><a class="header" href="#maplibre-android-developer-guide">MapLibre Android Developer Guide</a></h1>
+<p>These instructions are for developers interested in making code-level contributions to MapLibre Native for Android.</p>
+<h2 id="getting-the-source"><a class="header" href="#getting-the-source">Getting the source</a></h2>
+<p>Clone the git repository and pull in submodules:</p>
+<pre><code class="language-bash">git clone git@github.com:maplibre/maplibre-native.git
+cd maplibre-native
+git submodule update --init --recursive
+cd platform/android
+</code></pre>
+<h2 id="requirements"><a class="header" href="#requirements">Requirements</a></h2>
+<p><a href="https://developer.android.com/studio">Android Studio</a> needs to be installed.</p>
+<p>Open the <code>platform/android</code> directory to get started.</p>
+<h2 id="setting-an-api-key"><a class="header" href="#setting-an-api-key">Setting an API Key</a></h2>
+<p><em>The test application (used for development purposes) uses MapTiler vector tiles, which require a MapTiler account and API key.</em></p>
+<p>With the first Gradle invocation, Gradle will take the value of the <code>MLN_API_KEY</code> environment variable and save it to <code>MapLibreAndroidTestApp/src/main/res/values/developer-config.xml</code>. If the environment variable wasn't set, you can edit <code>developer-config.xml</code> manually and add your API key to the <code>api_key</code> resource.</p>
+<h2 id="running-the-testapp"><a class="header" href="#running-the-testapp">Running the TestApp</a></h2>
+<p>Run the configuration for the <code>MapLibreAndroidTestApp</code> module and select a device or emulator to deploy on.</p>
+<p align="left">
+  <img src="https://github.com/maplibre/maplibre-native/assets/649392/5494925e-8cbb-4d5d-8033-8a2f141ede3c" alt="Android TestApp menu" width="15%">   <img src="https://github.com/maplibre/maplibre-native/assets/649392/f169db51-615d-4fca-b297-ac6197bec674" alt="Android TestApp showing Demotiles" width="15%">
+</p>
+<h2 id="kotlin"><a class="header" href="#kotlin">Kotlin</a></h2>
+<p>All new code should be written in <a href="https://kotlinlang.org/">Kotlin</a>.</p>
+<h2 id="style-checking"><a class="header" href="#style-checking">Style Checking</a></h2>
+<p>To check Kotlin style, we use <a href="https://pinterest.github.io/ktlint/">ktlint</a>. This linter is based on the <a href="https://kotlinlang.org/docs/coding-conventions.html">official Kotlin coding conventions</a>. We intergrate with it using the <a href="https://github.com/jeremymailen/kotlinter-gradle">kotlinder</a> Gradle plugin.</p>
+<p>To check the style of all Kotlin source files, use:</p>
+<pre><code>$ ./gradlew checkStyle
+</code></pre>
+<p>To format all Kotlin source files, use:</p>
+<pre><code>$ ./gradlew formatKotlin
+</code></pre>
+<h2 id="benchmarks-in-pull-request"><a class="header" href="#benchmarks-in-pull-request">Benchmarks in Pull Request</a></h2>
+<p>To run the benchmarks (for Android) include the following line on a PR comment:</p>
+<pre><code>!benchmark android
+</code></pre>
+<h2 id="profiling"><a class="header" href="#profiling">Profiling</a></h2>
+<p>See <a href="android//profiling/tracy-profiling.html">Tracy Profiling</a> to understand how Tracy can be used for profiling.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="maplibre-android-tests"><a class="header" href="#maplibre-android-tests">MapLibre Android Tests</a></h1>
+<h2 id="render-tests"><a class="header" href="#render-tests">Render Tests</a></h2>
+<p>To run the render tests for Android, run the configuration for the <code>androidRenderTest.app</code> module.</p>
+<h3 id="filtering-render-tests"><a class="header" href="#filtering-render-tests">Filtering Render Tests</a></h3>
+<p>You can filter the tests to run by passing a flag to the file <code>platform/android/src/test/render_test_runner.cpp</code>:</p>
+<pre><code class="language-cpp">std::vector&lt;std::string&gt; arguments = {..., "-f", "background-color/literal"};
+</code></pre>
+<h3 id="viewing-the-results"><a class="header" href="#viewing-the-results">Viewing the Results</a></h3>
+<p>Once the application quits, use the Device Explorer to navigate to <code>/data/data/org.maplibre.render_test_runner/files</code>.</p>
+<img width="980" alt="image" src="https://github.com/maplibre/maplibre-native/assets/649392/0dc42d4a-6221-46b6-8352-1eb24d466e91">
+<p>Double click <code>android-render-test-runner-style.html</code>. Right click on the opened tab and select <em>Open In &gt; Browser</em>. You should see that a single render test passed.</p>
+<img width="801" alt="image" src="https://github.com/maplibre/maplibre-native/assets/649392/33e88999-7787-492f-afd9-f5a3e3fd61f7">
+<p>Alternatively to download (and open) the results from the command line, use:</p>
+<pre><code>adb shell "run-as org.maplibre.render_test_runner cat files/metrics/android-render-test-runner-style.html" &gt; android-render-test-runner-style.html
+open android-render-test-runner-style.html
+</code></pre>
+<h3 id="updating-the-render-tests"><a class="header" href="#updating-the-render-tests">Updating the Render Tests</a></h3>
+<p>Now let's edit <code>metrics/integration/render-tests/background-color/literal/style.json</code>, change this line:</p>
+<pre><code>        "background-color": "red"
+</code></pre>
+<p>to</p>
+<pre><code>        "background-color": "yellow"
+</code></pre>
+<p>We need to make sure that the new <code>data.zip</code> with the data for the render tests is installed on the device. You can use the following commands:</p>
+<pre><code>tar chf render-test/android/app/src/main/assets/data.zip --format=zip --files-from=render-test/android/app/src/main/assets/to_zip.txt
+adb push render-test/android/app/src/main/assets/data.zip /data/local/tmp/data.zip
+adb shell chmod 777 /data/local/tmp/data.zip
+adb shell "run-as org.maplibre.render_test_runner unzip -o /data/local/tmp/data.zip -d files"
+</code></pre>
+<p>Rerun the render test app and reload the Device Explorer. When you re-open the HTML file with the results you should now see a failing test:</p>
+<img width="685" alt="image" src="https://github.com/maplibre/maplibre-native/assets/649392/303ad75a-cf74-4b8c-927c-c9bd59a79de4">
+<p>Now download the <code>actual.png</code> in <code>metrics/integration/render-tests/background-color/literal</code> with the Device Explorer. Replace the corresponding <code>expected.png</code> on your local file system. Upload the new render test data again and run the test app once more.</p>
+<img width="800" alt="image" src="https://github.com/maplibre/maplibre-native/assets/649392/04734c6a-9cf1-489a-b9bb-8d857581261c">
+<p>Of we don't want to commit this change. But know you can add and debug (Android) render tests.</p>
+<h2 id="instrumentation-tests"><a class="header" href="#instrumentation-tests">Instrumentation Tests</a></h2>
+<p>To run the instrumentation tests, choose the "Instrumentation Tests" run configuration.</p>
+<p>Your device needs remain unlocked for the duration of the tests.</p>
+<h2 id="c-unit-tests"><a class="header" href="#c-unit-tests">C++ Unit Tests</a></h2>
+<p>There is a separate Gradle project that contains a test app which runs the C++ Unit Tests. It does not depend on the Android platform implementations.</p>
+<p>You can find the project in <code>test/android.</code> You can open this project in Android Studio and run the C++ Tests on an Android device or Simulator.</p>
+<p>To run a particular set of tests you can modify the <code>--gtest_filter</code> flag in <code>platform/android/src/test/test_runner.cpp</code>. See the <a href="https://google.github.io/googletest/advanced.html#running-a-subset-of-the-tests">GoogleTest documentation</a> for details how to use this flag.</p>
+<h3 id="aws-device-farm"><a class="header" href="#aws-device-farm">AWS Device Farm</a></h3>
+<p>The instrumentation tests and C++ unit tests are running on AWS Device Farm. To see the results and the logs, go to:</p>
+<p><a href="https://us-west-2.console.aws.amazon.com/devicefarm/home?region=us-east-1#/mobile/projects/20687d72-0e46-403e-8f03-0941850665bc/runs">https://us-west-2.console.aws.amazon.com/devicefarm/home?region=us-east-1#/mobile/projects/20687d72-0e46-403e-8f03-0941850665bc/runs</a>.</p>
+<p>Use the following login details (this is a read-only account):</p>
+<div class="table-wrapper"><table><thead><tr><th></th><th></th></tr></thead><tbody>
+<tr><td>Alias</td><td><code>maplibre</code></td></tr>
+<tr><td>Username</td><td><code>maplibre</code></td></tr>
+<tr><td>Password</td><td><code>maplibre</code></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="documentation-for-maplibre-android"><a class="header" href="#documentation-for-maplibre-android">Documentation for MapLibre Android</a></h1>
+<h2 id="api-documentation"><a class="header" href="#api-documentation">API Documentation</a></h2>
+<p>We use Dokka for the MapLibre Android API documentation. The live documentation site can be found <a href="https://maplibre.org/maplibre-native/android/api/">here</a>.</p>
+<h2 id="examples-documentation"><a class="header" href="#examples-documentation">Examples Documentation</a></h2>
+<p>The documentation site with examples uses MkDocs along with <a href="https://squidfunk.github.io/mkdocs-material/">Material for MkDocs</a>. You can check out the site <a href="https://maplibre.org/maplibre-native/android/examples/">here</a>.</p>
+<h3 id="building"><a class="header" href="#building">Building</a></h3>
+<p>To build the Examples Documentation you need to have Docker installed.</p>
+<p>From <code>platform/android</code>, run:</p>
+<pre><code>make mkdocs
+</code></pre>
+<p>Next, visit <a href="http://localhost:8000/maplibre-native/android/examples/"><code>http://localhost:8000/maplibre-native/android/examples/</code></a>.</p>
+<h3 id="snippets"><a class="header" href="#snippets">Snippets</a></h3>
+<p>We use <a href="https://facelessuser.github.io/pymdown-extensions/extensions/snippets/#snippet-sections">a Markdown extension for snippets</a>. This way code can be referenced instead of copy pasted into the documentation. This avoids code examples from becoming out of date or failing to compile. The syntax is as follows:</p>
+<pre><code class="language-kotlin">// --8&lt;-- [start:fun]
+fun double(x: Int): Int {
+    return 2 * x
+}
+// --8&lt;-- [end:fun]
+</code></pre>
+<p>Next, you'll be able to reference that piece of code in Markdown like so:</p>
+<pre><code>--8&lt;-- "example.kt:fun"
+</code></pre>
+<p>Where <code>example.kt</code> is the path to the file.</p>
+<h3 id="static-assets"><a class="header" href="#static-assets">Static Assets</a></h3>
+<p>Static assets are ideally uploaded to the <a href="https://maplibre-native.s3.eu-central-1.amazonaws.com/index.html#android-documentation-resources/">MapLibre Native S3 Bucket</a>.</p>
+<p>Please open an issue with the ARN of your AWS account to get upload privileges.</p>
+<p>You can use the macro <code>{{ s3_url("filename.example") }}</code> which will use a CDN instead of linking to the S3 bucket directly.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="maplibre-ios-developer-guide"><a class="header" href="#maplibre-ios-developer-guide">MapLibre iOS Developer Guide</a></h1>
+<h2 id="bazel"><a class="header" href="#bazel">Bazel</a></h2>
+<p><a href="https://bazel.build/">Bazel</a> is used for building on iOS.</p>
+<p>You can generate an Xcode project thanks to <a href="https://github.com/MobileNativeFoundation/rules_xcodeproj">rules_xcodeproj</a> intergration.</p>
+<p>You need to install <a href="https://github.com/bazelbuild/bazelisk">bazelisk</a>, which is a wrapper around Bazel which ensures that the version specified in <code>.bazelversion</code> is used.</p>
+<pre><code>brew install bazelisk
+</code></pre>
+<h3 id="creating-configbzl"><a class="header" href="#creating-configbzl">Creating <code>config.bzl</code></a></h3>
+<p>Configure Bazel, otherwise the default config will get used.</p>
+<pre><code>cp platform/darwin/bazel/example_config.bzl platform/darwin/bazel/config.bzl
+</code></pre>
+<p>You need to set your <code>BUNDLE_ID_PREFIX</code> to be unique (ideally use a domain that you own in reverse domain name notation).</p>
+<p>You can keep leave the <code>APPLE_MOBILE_PROVISIONING_PROFILE_NAME</code> alone.</p>
+<p>Set the Team ID to the Team ID of your Apple Developer Account (paid or unpaid both work). If you do not know your Team ID, go to your <a href="https://developer.apple.com/account">Apple Developer account</a>, log in, and scroll down to find your Team ID.</p>
+<p>If you don't already have a developer account, continue this guide and let Xcode generate a provisioning profile for you. You will need to update the Team ID later once a certificate is generated.</p>
+<h2 id="create-the-xcode-project"><a class="header" href="#create-the-xcode-project">Create the Xcode Project</a></h2>
+<p>Run the following commands:</p>
+<pre><code>bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
+xed platform/ios/MapLibre.xcodeproj
+</code></pre>
+<p>Then once in Xcode, click on "MapLibre" on the left, then "App" under Targets, then "Signing &amp; Capabilities" in the tabbed menu.
+Confirm that no errors are shown.</p>
+<img width="921" alt="image" src="https://github.com/polvi/maplibre-native/assets/649392/a1ef30cb-97fc-429a-acee-194436f3fb8a">
+<p>Try to run the example App in the simulator and on a device to confirm your setup works.</p>
+<blockquote>
+<p>[!IMPORTANT]<br />
+The Bazel configuration files are the source of truth of the build configuration. All changes to the build settings need to be done through Bazel, not in Xcode.</p>
+</blockquote>
+<h3 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h3>
+<h4 id="provisioning-profiles"><a class="header" href="#provisioning-profiles">Provisioning Profiles</a></h4>
+<p>If you get a Python <code>KeyError</code> when processing provisioning profiles, you probably have some <em>really</em> old or corrupted profiles.</p>
+<p>Have a look through <code>~/Library/MobileDevice/Provisioning\ Profiles</code> and remove any expired profiles. Removing all profiles here can also resolve some issues.</p>
+<h4 id="cleaning-bazel-environments"><a class="header" href="#cleaning-bazel-environments">Cleaning Bazel environments</a></h4>
+<p>You should almost never have to do this, but sometimes problems can be solved with:</p>
+<pre><code>bazel clean --expunge
+</code></pre>
+<h2 id="using-bazel-from-the-command-line"><a class="header" href="#using-bazel-from-the-command-line">Using Bazel from the Command Line</a></h2>
+<p>It is also possible to build and run the test application in a simulator from the command line without opening Xcode.</p>
+<pre><code>bazel run //platform/ios:App --//:renderer=metal
+</code></pre>
+<p>You can also build targets from the command line. For example, if you want to build your own XCFramework, see the 'Build XCFramework' step in the <a href="ios/../../.github/workflows/ios-ci.yml">iOS CI workflow</a>.</p>
+<h2 id="swift-app"><a class="header" href="#swift-app">Swift App</a></h2>
+<p>There is also an example app built with Swift instead of Objective-C. The target is called <code>MapLibreApp</code> and the source code lives in <code>platform/ios/app-swift</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="ios-tests"><a class="header" href="#ios-tests">iOS Tests</a></h1>
+<h2 id="render-tests-1"><a class="header" href="#render-tests-1">Render Tests</a></h2>
+<p>To run the render tests, run the <code>RenderTest</code> target from iOS.</p>
+<p>When running in a simulator, use</p>
+<pre><code># check for 'DataContainer' of the app with `*.maplibre.RenderTestApp` id
+xcrun simctl listapps booted
+</code></pre>
+<p>to get the data directory of the render test app. This allows you to inspect test results. When adding new tests, the generated expectations and <code>actual.png</code> file can be copied into the source directory from here.</p>
+<h2 id="c-unit-tests-1"><a class="header" href="#c-unit-tests-1">C++ Unit Tests</a></h2>
+<p>Run the tests from the <code>CppUnitTests</code> target in Xcode to run the C++ Unit Tests on iOS.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="ios-documentation"><a class="header" href="#ios-documentation">iOS Documentation</a></h1>
+<p>We use <a href="https://www.swift.org/documentation/docc">DocC</a> for the MapLibre iOS documentation. The live documentation site can be found <a href="https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre/">here</a>.</p>
+<h2 id="resources"><a class="header" href="#resources">Resources</a></h2>
+<p>You need to have <a href="https://github.com/aws/aws-cli">aws-cli</a> installed to download the resources from S3 (see below). Run the following command:</p>
+<pre><code>aws s3 sync --no-sign-request "s3://maplibre-native/ios-documentation-resources" "platform/ios/MapLibre.docc/Resources"
+</code></pre>
+<p>Then, to build the documentation locally, run the following command:</p>
+<pre><code>platform/ios/scripts/docc.sh preview
+</code></pre>
+<p>Resources like images should not be checked in but should be uploaded to the <a href="https://s3.eu-central-1.amazonaws.com/maplibre-native/index.html#ios-documentation-resources/">S3 Bucket</a>. You can share a <code>.zip</code> with all files that should be added in the PR.</p>
+<p>If you want to get direct access you need an AWS account to get permissions to upload files. Create an account and authenticate with aws-cli. Share the account ARN that you can get with</p>
+<pre><code>aws sts get-caller-identity
+</code></pre>
+<h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
+<p>The code samples in the documentation should ideally be compiled on CI so they do not go out of date.</p>
+<p>Fence your example code with</p>
+<pre><code class="language-swift">// #-example-code(LineTapMap)
+...
+// #-end-example-code
+</code></pre>
+<p>Prefix your documentation code block with</p>
+<pre><code class="language-md">&lt;!-- include-example(LineTapMap) --&gt;
+
+```swift
+...
+```
+</code></pre>
+<p>Then the code block will be updated when you run:</p>
+<pre><code class="language-sh">node scripts/update-ios-examples.mjs
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><blockquote>
+<p>[!NOTE]<br />
+These notes are partially outdated since the <a href="https://github.com/maplibre/maplibre-native/blob/main/design-proposals/2022-10-27-rendering-modularization.md">renderer modularization</a>.</p>
+</blockquote>
+<h1 id="design"><a class="header" href="#design">Design</a></h1>
+<p>This section is dedicated to documenting current state of MapLibre Native as of end 2022. <a href="design/./archictural-problems-and-recommendations.html">Architectural Problems and Recommendations</a> section notes recommendations for future improvements from an architectural perspective.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ten-thousand-foot-view"><a class="header" href="#ten-thousand-foot-view">Ten Thousand Foot View</a></h1>
 <p><img src="design/media/ten-thousand-foot-view-diagram.png" alt="" /><br />
 <em>Figure 1: MapLibre Native Components – Ten Thousand Foot view</em></p>
