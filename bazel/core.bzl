@@ -379,6 +379,7 @@ MLN_CORE_SOURCE = [
     "src/mbgl/storage/local_file_source.hpp",
     "src/mbgl/storage/main_resource_loader.hpp",
     "src/mbgl/storage/network_status.cpp",
+    "src/mbgl/storage/pmtiles_file_source.hpp",
     "src/mbgl/storage/resource.cpp",
     "src/mbgl/storage/resource_options.cpp",
     "src/mbgl/storage/resource_transform.cpp",
