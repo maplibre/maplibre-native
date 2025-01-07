@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: MapLibre_Native_Ubuntu_24_04_x84_16_core
     defaults:
       run:
         working-directory: platform/android
@@ -18,8 +18,6 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-
-      - run: echo "cmake.dir=$(dirname "$(dirname "$(command -v cmake)")")" >> local.properties
 
       - uses: actions/setup-java@v4
         with:
@@ -47,6 +45,7 @@ jobs:
       - name: Update version name
         run: |
           RELEASE_VERSION="$( git describe --tags --match=android-v*.*.* --abbrev=0 | sed 's/^android-v//' )"
+          echo version="$RELEASE_VERSION" >> "$GITHUB_ENV"
           echo "Latest version from tag: $RELEASE_VERSION"
           if [ -n "$RELEASE_VERSION" ]; then
             sed -i -e "s/^VERSION_NAME=.*/VERSION_NAME=${RELEASE_VERSION}/" MapLibreAndroid/gradle.properties
@@ -60,17 +59,6 @@ jobs:
           RENDERER=vulkan make apackage
           RENDERER=drawable make apackage
 
-      - name: Build release Test App
-        run: |
-          MAPLIBRE_DEVELOPER_CONFIG_XML='${{ secrets.MAPLIBRE_DEVELOPER_CONFIG_XML }}'
-          if [ -n "${MAPLIBRE_DEVELOPER_CONFIG_XML}" ]; then
-            echo "${MAPLIBRE_DEVELOPER_CONFIG_XML}" > MapLibreAndroidTestApp/src/main/res/values/developer-config.xml
-            make android
-          else
-            echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, skipping apk build..."
-          fi
-        shell: bash
-
       # create github release
       - name: Prepare release
         id: prepare_release
@@ -81,15 +69,15 @@ jobs:
           echo version_tag="$( git describe --tags --match=android-v*.*.* --abbrev=0 )" >> "$GITHUB_OUTPUT"
         shell: bash
 
-      - name: Check if version is valid semver
+      - name: Check if version is pre-release
         id: check_version
         run: |
-          version_tag="${{ steps.prepare_release.outputs.version_tag }}"
-          if [[ $version_tag =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Valid semver: $version_tag"
+          version="${{ env.version }}"
+          if [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Valid semver: $version"
             echo "prerelease=false" >> "$GITHUB_ENV"
           else
-            echo "Invalid semver: $version_tag"
+            echo "Invalid semver: $version"
             echo "prerelease=true" >> "$GITHUB_ENV"
           fi
 

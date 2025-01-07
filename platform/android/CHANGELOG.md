@@ -1,5 +1,20 @@
 # Changelog MapLibre Native for Android
 
+## 11.7.1
+
+> [!NOTE]  
+> We are now releasing OpenGL ES and Vulkan variants of MapLibre Android. See the [11.7.0 release notes](https://github.com/maplibre/maplibre-native/releases/tag/android-v11.7.0) for details.
+
+### ✨ Features and improvements
+
+- Batch up scheduling of deferred deletions ([#3030](https://github.com/maplibre/maplibre-native/pull/3030)).
+- Specify Vulkan version needed in AndroidManifest.xml ([#3095](https://github.com/maplibre/maplibre-native/pull/3095)).
+
+### 🐞 Bug fixes
+
+- Remove `Pass3D` ([#3077](https://github.com/maplibre/maplibre-native/pull/3077)).  
+      Fixes issue where filters applied to fill extrusion layers are not rendered unless a manual zoom is applied to the map ([#3039](https://github.com/maplibre/maplibre-native/issues/3039)).
+
 ## 11.7.0
 
 This release marks the official release of MapLibre Android with Vulkan support. [Vulkan](https://www.vulkan.org) is a modern graphics API which brings advantages such as improved performance, improved observability and better stability. Specifically, starting with this version we are releasing multiple versions of MapLibre Android:
