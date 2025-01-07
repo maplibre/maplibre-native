@@ -328,8 +328,7 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
             .setStencilLoadOp(vk::AttachmentLoadOp::eClear)
             .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
             .setInitialLayout(vk::ImageLayout::eUndefined)
-            .setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)
-    };
+            .setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)};
 
     const vk::AttachmentReference colorAttachmentRef(0, vk::ImageLayout::eColorAttachmentOptimal);
     const vk::AttachmentReference depthAttachmentRef(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
@@ -348,7 +347,7 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
             .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
             .setSrcAccessMask({})
             .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite),
-        
+
         vk::SubpassDependency()
             .setSrcSubpass(VK_SUBPASS_EXTERNAL)
             .setDstSubpass(0)
@@ -359,7 +358,7 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
             .setSrcAccessMask({})
             .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite),
     };
-    
+
     const auto renderPassCreateInfo =
         vk::RenderPassCreateInfo().setAttachments(attachments).setSubpasses(subpass).setDependencies(dependencies);
 

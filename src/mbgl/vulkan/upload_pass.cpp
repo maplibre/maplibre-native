@@ -97,7 +97,7 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
             // If it's changed, update it
             if (rawBufSize <= resource.getSizeInBytes()) {
                 if (vec->isModifiedAfter(resource.getLastUpdated())) {
-                    //updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
+                    // updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
                 } else {
                     return rawData->resource;
                 }

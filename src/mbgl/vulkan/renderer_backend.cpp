@@ -206,18 +206,17 @@ void RendererBackend::initFrameCapture() {
 void RendererBackend::startFrameCapture() {
 #ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
     if (!g_rdoc.api) {
-        return;    
+        return;
     }
 
     if (g_rdoc.loop) {
         RENDERDOC_DevicePointer devicePtr = RENDERDOC_DEVICEPOINTER_FROM_VKINSTANCE(instance->operator VkInstance_T*());
         g_rdoc.api->StartFrameCapture(devicePtr, nullptr);
     } else {
-
         if (g_rdoc.frameCaptureCount > 0 && g_rdoc.frameDelay == 0) {
             g_rdoc.api->TriggerMultiFrameCapture(g_rdoc.frameCaptureCount);
         }
-        
+
         --g_rdoc.frameDelay;
     }
 #endif

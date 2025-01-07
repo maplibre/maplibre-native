@@ -81,7 +81,7 @@ void UniformBufferArray::bindDescriptorSets(CommandEncoder& encoder) {
 
     for (uint32_t i = 0; i < descriptorBindingCount; ++i) {
         const uint32_t index = descriptorStartIndex + i;
-        
+
         if (!uniformBufferVector[index]) {
             continue;
         }

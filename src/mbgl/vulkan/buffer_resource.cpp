@@ -202,7 +202,7 @@ void BufferResource::updateVulkanBuffer(const int8_t destination, const uint8_t 
     if (!bufferWindowSize) {
         return;
     }
-    
+
     if (bufferWindowVersions[destination] < bufferWindowVersions[source]) {
         uint8_t* dstData = static_cast<uint8_t*>(bufferAllocation->mappedBuffer) + bufferWindowSize * destination;
         uint8_t* srcData = static_cast<uint8_t*>(bufferAllocation->mappedBuffer) + bufferWindowSize * source;
