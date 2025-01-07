@@ -17,6 +17,25 @@
 
 namespace mbgl {
 
+// Optional callbacks to be called for a thread in a thread pool
+// The thread running these callbacks assumes the calls are thread safe
+// The thread running these callbacks doesn't handle exceptions thrown out of the callbacks
+// Callbacks are optional and can be useful to bind and unbind OpenGL rendering contexts or
+// to explicitly control thread local storage
+struct ThreadCallbacks {
+    // Called when a thread is created
+    std::function<void()> onThreadBegin = nullptr;
+
+    // Called before a thread is destroyed
+    std::function<void()> onThreadEnd = nullptr;
+
+    // Called when the thread is about to start a task
+    std::function<void()> onTaskBegin = nullptr;
+
+    // Called when the thread ends executing a task
+    std::function<void()> onTaskEnd = nullptr;
+};
+
 class ThreadedSchedulerBase : public Scheduler {
 public:
     /// @brief Schedule a generic task not assigned to any particular owner.
@@ -35,12 +54,25 @@ protected:
     ~ThreadedSchedulerBase() override;
 
     void terminate();
-    std::thread makeSchedulerThread(size_t index);
+
+    // Create a thread to runs tasks
+    // When gatherTasks is true (default), the thread gathers as many tasks as
+    // possible from taggedQueue then run them
+    // When gatherTasks is false, the thread picks one task, runs it then tries to pick another task
+    // gatherTasks==false is useful when the task producing thread is faster than the gathering thread
+    // in which case one gathering thread starves the other threads in the pool
+    // callbackGenerator is optional
+    std::thread makeSchedulerThread(
+        size_t index,
+        bool gatherTasks = true,
+        std::function<ThreadCallbacks()> callbacksGenerator = []() { return ThreadCallbacks{}; },
+        const char* threadNamePrefix = "Worker");
 
     /// @brief Wait until there's nothing pending or in process
     /// Must not be called from a task provided to this scheduler.
     /// @param tag Tag of the owner to identify the collection of tasks to
     // wait for. Not providing a tag waits on tasks owned by the scheduler.
+    /// @note The queue may not be empty if schedule() is called while waitForEmpty() is running
     void waitForEmpty(const util::SimpleIdentity = util::SimpleIdentity::Empty) override;
 
     /// Returns true if called from a thread managed by the scheduler
@@ -74,10 +106,22 @@ protected:
  */
 class ThreadedScheduler : public ThreadedSchedulerBase {
 public:
-    ThreadedScheduler(std::size_t n)
+    // Create a ThreadedScheduler with n threads to runs tasks
+    // When gatherTasks is true (default), the thread gathers as many tasks as
+    // possible from taggedQueue then run them
+    // When gatherTasks is false, the thread picks one task, runs it then tries to pick another task
+    // gatherTasks==false is useful when the task producing thread is faster than the gathering thread
+    // in which case one gathering thread starves the other threads in the pool
+    // callbacks are optional and can be useful to bind and unbind OpenGL rendering contexts or
+    // to explicitly control thread local storage
+    ThreadedScheduler(
+        std::size_t n,
+        bool gatherTasks = true,
+        std::function<ThreadCallbacks()> callbacksGenerator = []() { return ThreadCallbacks{}; },
+        const char* threadNamePrefix = "Worker")
         : threads(n) {
         for (std::size_t i = 0u; i < threads.size(); ++i) {
-            threads[i] = makeSchedulerThread(i);
+            threads[i] = makeSchedulerThread(i, gatherTasks, callbacksGenerator, threadNamePrefix);
         }
     }
 

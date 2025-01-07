@@ -56,26 +56,36 @@ public abstract class MapRenderer implements MapRendererScheduler {
 
     MapRenderer renderer = null;
     String localFontFamily = options.getLocalIdeographFontFamily();
+    boolean multiThreadedGpuResourceUpload = options.getMultiThreadedGpuResourceUploadEnabled();
 
     if (options.getTextureMode()) {
       TextureView textureView = new TextureView(context);
       boolean translucentSurface = options.getTranslucentTextureSurface();
-      renderer = MapRendererFactory.newTextureViewMapRenderer(context, textureView, localFontFamily,
-              translucentSurface, initCallback);
+      renderer = MapRendererFactory.newTextureViewMapRenderer(context,
+                                                              textureView,
+                                                              localFontFamily,
+                                                              multiThreadedGpuResourceUpload,
+                                                              translucentSurface,
+                                                              initCallback);
     } else {
       boolean renderSurfaceOnTop = options.getRenderSurfaceOnTop();
-      renderer = MapRendererFactory.newSurfaceViewMapRenderer(context, localFontFamily,
-              renderSurfaceOnTop, initCallback);
+      renderer = MapRendererFactory.newSurfaceViewMapRenderer(context,
+                                                              localFontFamily,
+                                                              multiThreadedGpuResourceUpload,
+                                                              renderSurfaceOnTop,
+                                                              initCallback);
     }
 
     return renderer;
   }
 
-  public MapRenderer(@NonNull Context context, String localIdeographFontFamily) {
+  public MapRenderer(@NonNull Context context,
+                     String localIdeographFontFamily,
+                     boolean multiThreadedGpuResourceUpload) {
     float pixelRatio = context.getResources().getDisplayMetrics().density;
 
     // Initialize native peer
-    nativeInitialize(this, pixelRatio, localIdeographFontFamily);
+    nativeInitialize(this, pixelRatio, localIdeographFontFamily, multiThreadedGpuResourceUpload);
   }
 
   public abstract View getView();
@@ -164,7 +174,8 @@ public abstract class MapRenderer implements MapRendererScheduler {
 
   private native void nativeInitialize(MapRenderer self,
                                        float pixelRatio,
-                                       String localIdeographFontFamily);
+                                       String localIdeographFontFamily,
+                                       boolean multiThreadedGpuResourceUpload);
 
   @CallSuper
   @Override

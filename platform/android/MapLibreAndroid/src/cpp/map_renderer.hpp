@@ -49,7 +49,8 @@ public:
     MapRenderer(jni::JNIEnv& _env,
                 const jni::Object<MapRenderer>&,
                 jni::jfloat pixelRatio,
-                const jni::String& localIdeographFontFamily);
+                const jni::String& localIdeographFontFamily,
+                jni::jboolean multiThreadedGpuResourceUpload);
 
     ~MapRenderer() override;
 
@@ -128,6 +129,7 @@ private:
 
     float pixelRatio;
     std::optional<std::string> localIdeographFontFamily;
+    bool multiThreadedGpuResourceUpload = false;
 
     TaggedScheduler threadPool;
     const MailboxData mailboxData;

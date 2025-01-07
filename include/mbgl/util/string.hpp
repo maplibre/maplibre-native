@@ -96,6 +96,11 @@ inline float stof(const std::string &str) {
     return std::stof(str);
 }
 
+// returns true if str contains substr
+inline bool contains(const std::string &str, const std::string &substr) {
+    return str.find(substr) != std::string::npos;
+}
+
 } // namespace util
 } // namespace mbgl
 

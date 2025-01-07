@@ -117,7 +117,7 @@ class AttributeBinding {
 public:
     AttributeDescriptor attribute;
     uint32_t vertexStride;
-    const VertexBufferResource* vertexBufferResource;
+    VertexBufferResource* vertexBufferResource;
     uint32_t vertexOffset;
 
     friend bool operator==(const AttributeBinding& lhs, const AttributeBinding& rhs) {
