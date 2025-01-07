@@ -900,7 +900,7 @@ void main() {
     const LineSDFDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
 #ifndef HAS_UNIFORM_u_color
-    frag_color = unpack_mix_color(in_color, intdrawableerp.color_t);
+    frag_color = unpack_mix_color(in_color, drawable.color_t);
 #endif
 
 #ifndef HAS_UNIFORM_u_blur

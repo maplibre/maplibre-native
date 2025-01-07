@@ -33,7 +33,7 @@ struct alignas(16) FillExtrusionDrawableUBO {
     /* 108 */ float pad1;
     /* 112 */
 };
-static_assert(sizeof(FillExtrusionDrawableUBO) == 7 * 16);
+static_assert(sizeof(FillExtrusionDrawableUBO) == 7 * 16, "wrong size");
 
 struct alignas(16) FillExtrusionTilePropsUBO {
     /*  0 */ float4 pattern_from;
@@ -43,7 +43,7 @@ struct alignas(16) FillExtrusionTilePropsUBO {
     /* 44 */ float pad2;
     /* 48 */
 };
-static_assert(sizeof(FillExtrusionTilePropsUBO) == 3 * 16);
+static_assert(sizeof(FillExtrusionTilePropsUBO) == 3 * 16, "wrong size");
 
 /// Evaluated properties that do not depend on the tile
 struct alignas(16) FillExtrusionPropsUBO {
