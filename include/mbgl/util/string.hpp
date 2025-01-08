@@ -100,18 +100,13 @@ inline float stof(const std::string &str) {
 // Note: asked author to clarify license
 
 template <std::size_t ArraySize>
-struct CompileTimeString
-{
+struct CompileTimeString {
     constexpr CompileTimeString() noexcept = default;
 
-    constexpr CompileTimeString(const char(&literal)[ArraySize]) noexcept
-    {
-        std::ranges::copy(literal, data);
-    }
+    constexpr CompileTimeString(const char (&literal)[ArraySize]) noexcept { std::ranges::copy(literal, data); }
 
     template <std::size_t OtherSize>
-    constexpr auto operator+(const CompileTimeString<OtherSize>& other) const noexcept
-    {
+    constexpr auto operator+(const CompileTimeString<OtherSize> &other) const noexcept {
         CompileTimeString<ArraySize + OtherSize - 1> result;
         std::ranges::copy(data, result.data);
         std::ranges::copy(other.data, result.data + ArraySize - 1);
@@ -131,19 +126,16 @@ struct CompileTimeString
     constexpr auto crend() const noexcept { return std::crend(data); }
 
     template <std::size_t OtherSize>
-    constexpr bool operator==(const CompileTimeString<OtherSize>& other) const
-    {
+    constexpr bool operator==(const CompileTimeString<OtherSize> &other) const {
         return as_string_view() == other.as_string_view();
     }
 
-
     constexpr bool starts_with(std::string_view sv) const noexcept { return as_string_view().starts_with(sv); }
     constexpr bool starts_with(char ch) const noexcept { return as_string_view().starts_with(ch); }
-    constexpr bool starts_with(const char* s) const { return as_string_view().starts_with(s); }
+    constexpr bool starts_with(const char *s) const { return as_string_view().starts_with(s); }
 
     template <std::size_t OtherSize>
-    constexpr bool starts_with(const CompileTimeString<OtherSize>& other) const
-    {
+    constexpr bool starts_with(const CompileTimeString<OtherSize> &other) const {
         return starts_with(other.as_string_view());
     }
 
@@ -158,9 +150,8 @@ struct CompileTimeString
     char data[ArraySize];
 };
 
-template<CompileTimeString Str>
-constexpr auto operator""_cts()
-{
+template <CompileTimeString Str>
+constexpr auto operator""_cts() {
     return Str;
 }
 
