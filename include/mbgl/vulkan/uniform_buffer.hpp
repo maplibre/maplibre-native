@@ -42,7 +42,8 @@ public:
         : gfx::UniformBufferArray(std::move(other)),
           descriptorSetType(other.descriptorSetType),
           descriptorStartIndex(other.descriptorStartIndex),
-          descriptorBindingCount(other.descriptorBindingCount),
+          descriptorStorageCount(other.descriptorStorageCount),
+          descriptorUniformCount(other.descriptorUniformCount),
           descriptorSet(std::move(other.descriptorSet)) {}
 
     UniformBufferArray(const UniformBufferArray&) = delete;

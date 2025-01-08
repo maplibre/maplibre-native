@@ -165,8 +165,7 @@ void UniformDescriptorSet::update(const gfx::UniformBufferArray& uniforms,
                 .setOffset(bufferResource.getVulkanBufferOffset())
                 .setRange(bufferResource.getSizeInBytes());
         } else {
-            const auto& dummyBuffer = index < descriptorStorageCount ? context.getDummyStorageBuffer()
-                                                                     : context.getDummyUniformBuffer();
+            const auto& dummyBuffer = context.getDummyBuffer();
             descriptorBufferInfo.setBuffer(dummyBuffer->getVulkanBuffer()).setOffset(0).setRange(VK_WHOLE_SIZE);
         }
 

@@ -6,6 +6,7 @@
 #include <mbgl/util/instrumentation.hpp>
 
 #include <algorithm>
+#include <numeric>
 
 namespace mbgl {
 namespace vulkan {
@@ -59,7 +60,17 @@ BufferResource::BufferResource(
     if (usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT || usage & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) {
         const auto& backend = context.getBackend();
         const auto& deviceProps = backend.getDeviceProperties();
-        const auto& align = deviceProps.limits.minUniformBufferOffsetAlignment;
+
+        vk::DeviceSize align = 0;
+        if (usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT) {
+            align = deviceProps.limits.minUniformBufferOffsetAlignment;
+        } 
+        
+        if (usage & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) {
+            align = align ? std::lcm(align, deviceProps.limits.minStorageBufferOffsetAlignment)
+                          : deviceProps.limits.minStorageBufferOffsetAlignment;
+        }
+
         bufferWindowSize = (size + align - 1) & ~(align - 1);
 
         assert(bufferWindowSize != 0);

@@ -79,7 +79,7 @@ void UniformBufferArray::bindDescriptorSets(CommandEncoder& encoder) {
     const int32_t currentIndex = encoder.getContext().getCurrentFrameResourceIndex();
     const int32_t prevIndex = currentIndex == 0 ? frameCount - 1 : currentIndex - 1;
 
-    for (uint32_t i = 0; i < descriptorBindingCount; ++i) {
+    for (uint32_t i = 0; i < descriptorStorageCount + descriptorUniformCount; ++i) {
         const uint32_t index = descriptorStartIndex + i;
 
         if (!uniformBufferVector[index]) {
