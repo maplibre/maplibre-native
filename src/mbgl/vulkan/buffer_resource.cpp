@@ -64,8 +64,8 @@ BufferResource::BufferResource(
         vk::DeviceSize align = 0;
         if (usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT) {
             align = deviceProps.limits.minUniformBufferOffsetAlignment;
-        } 
-        
+        }
+
         if (usage & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) {
             align = align ? std::lcm(align, deviceProps.limits.minStorageBufferOffsetAlignment)
                           : deviceProps.limits.minStorageBufferOffsetAlignment;
