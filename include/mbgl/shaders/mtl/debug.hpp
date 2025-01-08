@@ -3,12 +3,14 @@
 #include <mbgl/shaders/debug_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mbgl/util/string.hpp>
 
 namespace mbgl {
 namespace shaders {
 
-#define DEBUG_SHADER_PRELUDE \
-    R"(
+using mbgl::util::operator""_cts;
+
+constexpr auto debugShaderPrelude = R"(
 
 enum {
     idDebugUBO = drawableReservedUBOCount,
@@ -26,19 +28,9 @@ struct alignas(16) DebugUBO {
 };
 static_assert(sizeof(DebugUBO) == 6 * 16, "wrong size");
 
-)"
+)"_cts;
 
-template <>
-struct ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "DebugShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
-
-    static const std::array<AttributeInfo, 1> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
-
-    static constexpr auto source = DEBUG_SHADER_PRELUDE R"(
+constexpr auto debugShaderSource = debugShaderPrelude + R"(
 
 struct VertexStage {
     short2 pos [[attribute(debugUBOCount + 0)]];
@@ -73,7 +65,19 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     float4 color = mix(debug.color, overlay_color, overlay_color.a);
     return half4(color);
 }
-)";
+)"_cts;
+
+template <>
+struct ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "DebugShader";
+    static constexpr auto vertexMainFunction = "vertexMain";
+    static constexpr auto fragmentMainFunction = "fragmentMain";
+
+    static const std::array<AttributeInfo, 1> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<TextureInfo, 1> textures;
+
+    static constexpr auto source = debugShaderSource.as_string_view();
 };
 
 } // namespace shaders

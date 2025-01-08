@@ -3,12 +3,14 @@
 #include <mbgl/shaders/heatmap_texture_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mbgl/util/string.hpp>
 
 namespace mbgl {
 namespace shaders {
 
-#define HEATMAP_TEXTURE_SHADER_PRELUDE \
-    R"(
+using mbgl::util::operator""_cts;
+
+constexpr auto heatmapTextureShaderPrelude = R"(
 
 enum {
     idHeatmapTexturePropsUBO = drawableReservedUBOCount,
@@ -25,19 +27,9 @@ struct alignas(16) HeatmapTexturePropsUBO {
 };
 static_assert(sizeof(HeatmapTexturePropsUBO) == 5 * 16, "wrong size");
 
-)"
+)"_cts;
 
-template <>
-struct ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "HeatmapTextureShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
-
-    static const std::array<AttributeInfo, 1> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 2> textures;
-
-    static constexpr auto source = HEATMAP_TEXTURE_SHADER_PRELUDE R"(
+constexpr auto heatmapTextureShaderSource = heatmapTextureShaderPrelude + R"(
 
 struct VertexStage {
     short2 pos [[attribute(heatmapTextureUBOCount + 0)]];
@@ -76,7 +68,19 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     float4 color = color_ramp.sample(color_ramp_sampler, float2(t, 0.5));
     return half4(color * props.opacity);
 }
-)";
+)"_cts;
+
+template <>
+struct ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "HeatmapTextureShader";
+    static constexpr auto vertexMainFunction = "vertexMain";
+    static constexpr auto fragmentMainFunction = "fragmentMain";
+
+    static const std::array<AttributeInfo, 1> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<TextureInfo, 2> textures;
+
+    static constexpr auto source = heatmapTextureShaderSource.as_string_view();
 };
 
 } // namespace shaders

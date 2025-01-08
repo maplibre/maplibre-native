@@ -3,12 +3,14 @@
 #include <mbgl/shaders/raster_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mbgl/util/string.hpp>
 
 namespace mbgl {
 namespace shaders {
 
-#define RASTER_SHADER_PRELUDE \
-    R"(
+using mbgl::util::operator""_cts;
+
+constexpr auto rasterShaderPrelude = R"(
 
 enum {
     idRasterDrawableUBO = idDrawableReservedVertexOnlyUBO,
@@ -40,19 +42,9 @@ struct alignas(16) RasterEvaluatedPropsUBO {
 };
 static_assert(sizeof(RasterEvaluatedPropsUBO) == 4 * 16, "wrong size");
 
-)"
+)"_cts;
 
-template <>
-struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "RasterShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
-
-    static const std::array<AttributeInfo, 2> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 2> textures;
-
-    static constexpr auto source = RASTER_SHADER_PRELUDE R"(
+constexpr auto rasterShaderSource = rasterShaderPrelude + R"(
 
 struct VertexStage {
     short2 pos [[attribute(rasterUBOCount + 0)]];
@@ -131,7 +123,19 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     return half4(half3(mix(high_vec, low_vec, rgb) * color.a), color.a);
 }
-)";
+)"_cts;
+
+template <>
+struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "RasterShader";
+    static constexpr auto vertexMainFunction = "vertexMain";
+    static constexpr auto fragmentMainFunction = "fragmentMain";
+
+    static const std::array<AttributeInfo, 2> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<TextureInfo, 2> textures;
+
+    static constexpr auto source = rasterShaderSource.as_string_view();
 };
 
 } // namespace shaders

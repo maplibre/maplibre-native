@@ -3,12 +3,14 @@
 #include <mbgl/shaders/hillshade_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mbgl/util/string.hpp>
 
 namespace mbgl {
 namespace shaders {
 
-#define HILLSHADE_SHADER_PRELUDE \
-    R"(
+using mbgl::util::operator""_cts;
+
+constexpr auto hillshadeShaderPrelude = R"(
 
 enum {
     idHillshadeDrawableUBO = idDrawableReservedVertexOnlyUBO,
@@ -39,19 +41,9 @@ struct alignas(16) HillshadeEvaluatedPropsUBO {
 };
 static_assert(sizeof(HillshadeEvaluatedPropsUBO) == 3 * 16, "wrong size");
 
-)"
+)"_cts;
 
-template <>
-struct ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "HillshadeShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
-
-    static const std::array<AttributeInfo, 2> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
-
-    static constexpr auto source = HILLSHADE_SHADER_PRELUDE R"(
+constexpr auto hillshadeShaderSource = hillshadeShaderPrelude + R"(
 
 struct VertexStage {
     short2 pos [[attribute(hillshadeUBOCount + 0)]];
@@ -129,7 +121,19 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     return half4(color);
 }
-)";
+)"_cts;
+
+template <>
+struct ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "HillshadeShader";
+    static constexpr auto vertexMainFunction = "vertexMain";
+    static constexpr auto fragmentMainFunction = "fragmentMain";
+
+    static const std::array<AttributeInfo, 2> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<TextureInfo, 1> textures;
+
+    static constexpr auto source = hillshadeShaderSource.as_string_view();
 };
 
 } // namespace shaders

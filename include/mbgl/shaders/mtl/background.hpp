@@ -3,12 +3,14 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/background_layer_ubo.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mbgl/util/string.hpp>
 
 namespace mbgl {
 namespace shaders {
 
-#define BACKGROUND_SHADER_COMMON \
-    R"(
+using mbgl::util::operator""_cts;
+
+constexpr auto backgroundShaderCommon = R"(
 
 enum {
     idBackgroundDrawableUBO = idDrawableReservedVertexOnlyUBO,
@@ -72,19 +74,10 @@ union BackgroundDrawableUnionUBO {
     BackgroundPatternDrawableUBO backgroundPatternDrawableUBO;
 };
 
-)"
+)"_cts;
 
-template <>
-struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "BackgroundShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
+constexpr auto backgroundShaderSource = backgroundShaderCommon + R"(
 
-    static const std::array<AttributeInfo, 1> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
-
-    static constexpr auto source = BACKGROUND_SHADER_COMMON R"(
 #include <metal_stdlib>
 using namespace metal;
 
@@ -115,20 +108,23 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     return half4(props.color * props.opacity);
 }
-)";
-};
+)"_cts;
 
 template <>
-struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "BackgroundPatternShader";
+struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "BackgroundShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
     static const std::array<AttributeInfo, 1> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
+    static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto source = BACKGROUND_SHADER_COMMON R"(
+    static constexpr auto source = backgroundShaderSource.as_string_view();
+};
+
+constexpr auto backgroundPatternShaderSource = backgroundShaderCommon + R"(
+
 #include <metal_stdlib>
 using namespace metal;
 
@@ -186,7 +182,19 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     return half4(mix(color1, color2, props.mix) * props.opacity);
 }
-)";
+)"_cts;
+
+template <>
+struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "BackgroundPatternShader";
+    static constexpr auto vertexMainFunction = "vertexMain";
+    static constexpr auto fragmentMainFunction = "fragmentMain";
+
+    static const std::array<AttributeInfo, 1> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<TextureInfo, 1> textures;
+
+    static constexpr auto source = backgroundPatternShaderSource.as_string_view();
 };
 
 } // namespace shaders

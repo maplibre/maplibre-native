@@ -3,12 +3,14 @@
 #include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mbgl/util/string.hpp>
 
 namespace mbgl {
 namespace shaders {
 
-#define FILL_EXTRUSION_SHADER_COMMON \
-    R"(
+using mbgl::util::operator""_cts;
+
+constexpr auto fillExtrusionShaderCommon = R"(
 
 enum {
     idFillExtrusionDrawableUBO = idDrawableReservedVertexOnlyUBO,
@@ -62,19 +64,10 @@ struct alignas(16) FillExtrusionPropsUBO {
 };
 static_assert(sizeof(FillExtrusionPropsUBO) == 5 * 16, "wrong size");
 
-)"
+)"_cts;
 
-template <>
-struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "FillExtrusionShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
+constexpr auto fillExtrusionShaderSource = fillExtrusionShaderCommon + R"(
 
-    static const std::array<AttributeInfo, 5> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
-
-    static constexpr auto source = FILL_EXTRUSION_SHADER_COMMON R"(
 struct VertexStage {
     short2 pos [[attribute(fillExtrusionUBOCount + 0)]];
     short4 normal_ed [[attribute(fillExtrusionUBOCount + 1)]];
@@ -180,20 +173,23 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]]) {
     return { in.color/*, in.position.z*/ };
 }
-)";
-};
+)"_cts;
 
 template <>
-struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "FillExtrusionPatternShader";
+struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "FillExtrusionShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
+    static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto source = FILL_EXTRUSION_SHADER_COMMON R"(
+    static constexpr auto source = fillExtrusionShaderSource.as_string_view();
+};
+
+constexpr auto fillExtrusionPatternShaderSource = fillExtrusionShaderCommon + R"(
+
 struct VertexStage {
     short2 pos [[attribute(fillExtrusionUBOCount + 0)]];
     short4 normal_ed [[attribute(fillExtrusionUBOCount + 1)]];
@@ -364,7 +360,19 @@ fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]],
 
     return {half4(mix(color1, color2, props.fade) * in.lighting)/*, in.position.z*/};
 }
-)";
+)"_cts;
+
+template <>
+struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "FillExtrusionPatternShader";
+    static constexpr auto vertexMainFunction = "vertexMain";
+    static constexpr auto fragmentMainFunction = "fragmentMain";
+
+    static const std::array<AttributeInfo, 6> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<TextureInfo, 1> textures;
+
+    static constexpr auto source = fillExtrusionPatternShaderSource.as_string_view();
 };
 
 } // namespace shaders
