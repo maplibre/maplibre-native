@@ -51,7 +51,7 @@ public:
 Context::Context(RendererBackend& backend_)
     : gfx::Context(vulkan::maximumVertexBindingCount),
       backend(backend_),
-      globalUniformBuffers(DescriptorSetType::Global, 0, shaders::globalUBOCount) {
+      globalUniformBuffers(DescriptorSetType::Global, 0, 0, shaders::globalUBOCount) {
     if (glslangRefCount++ == 0) {
         glslang::InitializeProcess();
     }
@@ -74,18 +74,20 @@ void Context::initFrameResources() {
     const auto frameCount = backend.getMaxFrames();
 
     descriptorPoolMap.emplace(DescriptorSetType::Global,
-                              DescriptorPoolGrowable(globalDescriptorPoolSize, shaders::globalUBOCount));
+                              DescriptorPoolGrowable(globalDescriptorPoolSize, 0, shaders::globalUBOCount, 0));
 
-    descriptorPoolMap.emplace(DescriptorSetType::Layer,
-                              DescriptorPoolGrowable(layerDescriptorPoolSize, shaders::maxUBOCountPerLayer));
+    descriptorPoolMap.emplace(
+        DescriptorSetType::Layer,
+        DescriptorPoolGrowable(
+            layerDescriptorPoolSize, shaders::maxSSBOCountPerLayer, shaders::maxUBOCountPerLayer, 0));
 
     descriptorPoolMap.emplace(
         DescriptorSetType::DrawableUniform,
-        DescriptorPoolGrowable(drawableUniformDescriptorPoolSize, shaders::maxUBOCountPerDrawable));
+        DescriptorPoolGrowable(drawableUniformDescriptorPoolSize, 0, shaders::maxUBOCountPerDrawable, 0));
 
     descriptorPoolMap.emplace(
         DescriptorSetType::DrawableImage,
-        DescriptorPoolGrowable(drawableImageDescriptorPoolSize, shaders::maxTextureCountPerShader));
+        DescriptorPoolGrowable(drawableImageDescriptorPoolSize, 0, 0, shaders::maxTextureCountPerShader));
 
     // command buffers
     const vk::CommandBufferAllocateInfo allocateInfo(
@@ -113,11 +115,17 @@ void Context::initFrameResources() {
     (void)getDummyTexture();
 
     buildUniformDescriptorSetLayout(
-        globalUniformDescriptorSetLayout, shaders::globalUBOCount, "GlobalUniformDescriptorSetLayout");
-    buildUniformDescriptorSetLayout(
-        layerUniformDescriptorSetLayout, shaders::maxUBOCountPerLayer, "LayerUniformDescriptorSetLayout");
-    buildUniformDescriptorSetLayout(
-        drawableUniformDescriptorSetLayout, shaders::maxUBOCountPerDrawable, "DrawableUniformDescriptorSetLayout");
+        globalUniformDescriptorSetLayout, 0, 0, shaders::globalUBOCount, "GlobalUniformDescriptorSetLayout");
+    buildUniformDescriptorSetLayout(layerUniformDescriptorSetLayout,
+                                    shaders::globalUBOCount,
+                                    shaders::maxSSBOCountPerLayer,
+                                    shaders::maxUBOCountPerLayer,
+                                    "LayerUniformDescriptorSetLayout");
+    buildUniformDescriptorSetLayout(drawableUniformDescriptorSetLayout,
+                                    shaders::globalUBOCount,
+                                    0,
+                                    shaders::maxUBOCountPerDrawable,
+                                    "DrawableUniformDescriptorSetLayout");
     buildImageDescriptorSetLayout();
 }
 
@@ -353,8 +361,9 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<DrawableBuilder>(std::move(name));
 }
 
-gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool persistent) {
-    return std::make_shared<UniformBuffer>(createBuffer(data, size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, persistent));
+gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool persistent, bool ssbo) {
+    return std::make_shared<UniformBuffer>(createBuffer(
+        data, size, ssbo ? VK_BUFFER_USAGE_STORAGE_BUFFER_BIT : VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, persistent));
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
@@ -442,13 +451,11 @@ void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexce
     if (renderableResource.hasSurfaceTransformSupport()) {
         float surfaceRotation = renderableResource.getRotation();
 
-        struct alignas(16) {
-            alignas(16) std::array<float, 2> rotation0;
-            alignas(16) std::array<float, 2> rotation1;
-        } data;
-
-        data = {{cosf(surfaceRotation), -sinf(surfaceRotation)}, {sinf(surfaceRotation), cosf(surfaceRotation)}};
-        context.globalUniformBuffers.createOrUpdate(shaders::PlatformParamsUBO, &data, sizeof(data), context);
+        const shaders::GlobalPlatformParamsUBO platformUBO = {
+            /* .rotation0 = */ {cosf(surfaceRotation), -sinf(surfaceRotation)},
+            /* .rotation1 = */ {sinf(surfaceRotation), cosf(surfaceRotation)}};
+        context.globalUniformBuffers.createOrUpdate(
+            shaders::idGlobalPlatformParamsUBO, &platformUBO, sizeof(platformUBO), context);
     }
 
     context.globalUniformBuffers.bindDescriptorSets(renderPassImpl.getEncoder());
@@ -570,6 +577,13 @@ const std::unique_ptr<BufferResource>& Context::getDummyUniformBuffer() {
     return dummyUniformBuffer;
 }
 
+const std::unique_ptr<BufferResource>& Context::getDummyStorageBuffer() {
+    if (!dummyStorageBuffer)
+        dummyStorageBuffer = std::make_unique<BufferResource>(
+            *this, nullptr, 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, false);
+    return dummyStorageBuffer;
+}
+
 const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
     if (!dummyTexture2D) {
         const Size size(2, 2);
@@ -588,17 +602,27 @@ const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
 }
 
 void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& layout,
+                                              size_t startId,
+                                              size_t storageCount,
                                               size_t uniformCount,
                                               const std::string& name) {
     std::vector<vk::DescriptorSetLayoutBinding> bindings;
-    const auto stageFlags = vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex |
-                            vk::ShaderStageFlagBits::eFragment;
+    for (size_t i = 0; i < storageCount + uniformCount; ++i) {
+        auto stageFlags = vk::ShaderStageFlags();
+        if (startId + i != shaders::idDrawableReservedFragmentOnlyUBO) {
+            stageFlags |= vk::ShaderStageFlagBits::eVertex;
+        }
+        if (startId + i != shaders::idDrawableReservedVertexOnlyUBO) {
+            stageFlags |= vk::ShaderStageFlagBits::eFragment;
+        }
 
-    for (size_t i = 0; i < uniformCount; ++i) {
+        const auto descriptorType = i < storageCount ? vk::DescriptorType::eStorageBuffer
+                                                     : vk::DescriptorType::eUniformBuffer;
+
         bindings.push_back(vk::DescriptorSetLayoutBinding()
                                .setBinding(static_cast<uint32_t>(i))
                                .setStageFlags(stageFlags)
-                               .setDescriptorType(vk::DescriptorType::eUniformBuffer)
+                               .setDescriptorType(descriptorType)
                                .setDescriptorCount(1));
     }
 
@@ -653,6 +677,9 @@ DescriptorPoolGrowable& Context::getDescriptorPool(DescriptorSetType type) {
 const vk::UniquePipelineLayout& Context::getGeneralPipelineLayout() {
     if (generalPipelineLayout) return generalPipelineLayout;
 
+    const auto stages = vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment;
+    const auto pushConstant = vk::PushConstantRange().setSize(sizeof(uint32_t)).setStageFlags(stages);
+
     const std::vector<vk::DescriptorSetLayout> layouts = {
         globalUniformDescriptorSetLayout.get(),
         layerUniformDescriptorSetLayout.get(),
@@ -661,7 +688,7 @@ const vk::UniquePipelineLayout& Context::getGeneralPipelineLayout() {
     };
 
     generalPipelineLayout = backend.getDevice()->createPipelineLayoutUnique(
-        vk::PipelineLayoutCreateInfo().setSetLayouts(layouts));
+        vk::PipelineLayoutCreateInfo().setPushConstantRanges(pushConstant).setSetLayouts(layouts));
 
     backend.setDebugName(generalPipelineLayout.get(), "PipelineLayout_general");
 

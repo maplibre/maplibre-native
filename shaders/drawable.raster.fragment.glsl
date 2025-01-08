@@ -9,8 +9,8 @@ layout (std140) uniform RasterEvaluatedPropsUBO {
     highp float u_brightness_high;
     highp float u_saturation_factor;
     highp float u_contrast_factor;
-    highp float props_pad1;
-    highp float props_pad2;
+    lowp float props_pad1;
+    lowp float props_pad2;
 };
 uniform sampler2D u_image0;
 uniform sampler2D u_image1;

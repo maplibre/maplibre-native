@@ -35,6 +35,13 @@
         "uses_ubos": true
     },
     {
+        "name": "CustomSymbolIconShader",
+        "header": "drawable_custom_symbol_icon",
+        "glsl_vert": "drawable.custom.symbol_icon.vertex.glsl",
+        "glsl_frag": "drawable.custom.symbol_icon.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "DebugShader",
         "header": "drawable_debug",
         "glsl_vert": "drawable.debug.vertex.glsl",
@@ -140,6 +147,20 @@
         "uses_ubos": true
     },
     {
+        "name": "LocationIndicatorShader",
+        "header": "drawable_location_indicator",
+        "glsl_vert": "_empty.glsl",
+        "glsl_frag": "_empty.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "LocationIndicatorTexturedShader",
+        "header": "drawable_location_indicator_textured",
+        "glsl_vert": "_empty.glsl",
+        "glsl_frag": "_empty.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "LineSDFShader",
         "header": "drawable_line_sdf",
         "glsl_vert": "drawable.line_sdf.vertex.glsl",
@@ -175,18 +196,11 @@
         "uses_ubos": true
     },
     {
-        "name": "CustomSymbolIconShader",
-        "header": "drawable_custom_symbol_icon",
-        "glsl_vert": "drawable.custom.symbol_icon.vertex.glsl",
-        "glsl_frag": "drawable.custom.symbol_icon.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
         "name": "WideVectorShader",
         "header": "drawable_wide_vector",
         "glsl_vert": "_empty.glsl",
         "glsl_frag": "_empty.glsl",
-        "uses_ubos": false
+        "uses_ubos": true
     },
 
     {

@@ -1,8 +1,3 @@
-layout (std140) uniform FillInterpolateUBO {
-    highp float u_color_t;
-    highp float u_opacity_t;
-    highp float interp_pad1, interp_pad2;
-};
 layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_color;
     highp vec4 u_outline_color;

@@ -1,25 +1,8 @@
-
-layout (std140) uniform LineSDFDrawableUBO {
-    highp mat4 u_matrix;
-    highp vec2 u_patternscale_a;
-    highp vec2 u_patternscale_b;
-    mediump float u_ratio;
-    highp float u_tex_y_a;
-    highp float u_tex_y_b;
+layout (std140) uniform LineSDFTilePropsUBO {
     highp float u_sdfgamma;
     highp float u_mix;
-    lowp float drawable_pad1, drawable_pad2, drawable_pad3;
-};
-
-layout (std140) uniform LineSDFInterpolationUBO {
-    lowp float u_color_t;
-    lowp float u_blur_t;
-    lowp float u_opacity_t;
-    lowp float u_gapwidth_t;
-    lowp float u_offset_t;
-    lowp float u_width_t;
-    lowp float u_floorwidth_t;
-    highp float interp_pad1;
+    lowp float tileprops_pad1;
+    lowp float tileprops_pad2;
 };
 
 layout (std140) uniform LineEvaluatedPropsUBO {
@@ -30,8 +13,8 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     lowp float u_offset;
     mediump float u_width;
     lowp float u_floorwidth;
-    highp float props_pad1;
-    highp float props_pad2;
+    lowp float props_pad1;
+    lowp float props_pad2;
 };
 
 uniform sampler2D u_image;

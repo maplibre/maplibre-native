@@ -19,8 +19,7 @@
 #include <mbgl/util/std.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
-#include <mbgl/shaders/mtl/symbol_icon.hpp>
-#include <mbgl/shaders/mtl/symbol_sdf.hpp>
+#include <mbgl/shaders/mtl/symbol.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 
 namespace mbgl {
@@ -51,27 +50,16 @@ auto getInterpFactor(const SymbolBucket::PaintProperties& paintProps, bool isTex
     return std::get<N>(getProperty<TText, TIcon>(paintProps, isText)->interpolationFactor(currentZoom));
 }
 
-SymbolInterpolateUBO buildInterpUBO(const SymbolBucket::PaintProperties& paint, const bool t, const float z) {
-    return {/* .fill_color_t = */ getInterpFactor<TextColor, IconColor, 0>(paint, t, z),
-            /* .halo_color_t = */ getInterpFactor<TextHaloColor, IconHaloColor, 0>(paint, t, z),
-            /* .opacity_t = */ getInterpFactor<TextOpacity, IconOpacity, 0>(paint, t, z),
-            /* .halo_width_t = */ getInterpFactor<TextHaloWidth, IconHaloWidth, 0>(paint, t, z),
-            /* .halo_blur_t = */ getInterpFactor<TextHaloBlur, IconHaloBlur, 0>(paint, t, z),
-            /* .padding = */ 0,
-            0,
-            0};
-}
-
 } // namespace
 
 void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
-    auto& context = parameters.context;
-    const auto& state = parameters.state;
-    const auto& evaluated = static_cast<const SymbolLayerProperties&>(*evaluatedProperties).evaluated;
-
     if (layerGroup.empty()) {
         return;
     }
+
+    auto& context = parameters.context;
+    const auto& state = parameters.state;
+    const auto& evaluated = static_cast<const SymbolLayerProperties&>(*evaluatedProperties).evaluated;
 
 #if !defined(NDEBUG)
     const auto label = layerGroup.getName() + "-update-uniforms";
@@ -81,40 +69,30 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     const auto zoom = static_cast<float>(state.getZoom());
 
     if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
-        const SymbolEvaluatedPropsUBO propsUBO = {/*.text_fill_color=*/constOrDefault<TextColor>(evaluated),
-                                                  /*.text_halo_color=*/constOrDefault<TextHaloColor>(evaluated),
-                                                  /*.text_opacity=*/constOrDefault<TextOpacity>(evaluated),
-                                                  /*.text_halo_width=*/constOrDefault<TextHaloWidth>(evaluated),
-                                                  /*.text_halo_blur=*/constOrDefault<TextHaloBlur>(evaluated),
-                                                  /* pad */ 0,
-                                                  /*.icon_fill_color=*/constOrDefault<IconColor>(evaluated),
-                                                  /*.icon_halo_color=*/constOrDefault<IconHaloColor>(evaluated),
-                                                  /*.icon_opacity=*/constOrDefault<IconOpacity>(evaluated),
-                                                  /*.icon_halo_width=*/constOrDefault<IconHaloWidth>(evaluated),
-                                                  /*.icon_halo_blur=*/constOrDefault<IconHaloBlur>(evaluated),
-                                                  /* pad */ 0};
+        const SymbolEvaluatedPropsUBO propsUBO = {/* .text_fill_color = */ constOrDefault<TextColor>(evaluated),
+                                                  /* .text_halo_color = */ constOrDefault<TextHaloColor>(evaluated),
+                                                  /* .text_opacity = */ constOrDefault<TextOpacity>(evaluated),
+                                                  /* .text_halo_width = */ constOrDefault<TextHaloWidth>(evaluated),
+                                                  /* .text_halo_blur = */ constOrDefault<TextHaloBlur>(evaluated),
+                                                  /* .pad1 */ 0,
+
+                                                  /* .icon_fill_color = */ constOrDefault<IconColor>(evaluated),
+                                                  /* .icon_halo_color = */ constOrDefault<IconHaloColor>(evaluated),
+                                                  /* .icon_opacity = */ constOrDefault<IconOpacity>(evaluated),
+                                                  /* .icon_halo_width = */ constOrDefault<IconHaloWidth>(evaluated),
+                                                  /* .icon_halo_blur = */ constOrDefault<IconHaloBlur>(evaluated),
+                                                  /* .pad2 */ 0};
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);
         propertiesUpdated = false;
     }
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.set(idSymbolEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
-    const auto getInterpUBO =
-        [&](const UnwrappedTileID& tileID, bool isText, const SymbolBucket::PaintProperties& paintProps) {
-            auto result = interpUBOs.insert(
-                std::make_pair(InterpUBOKey{tileID, isText}, InterpUBOValue{{}, parameters.frameCount}));
-            if (result.second) {
-                // new item inserted
-                const auto interpolateBuf = buildInterpUBO(paintProps, isText, zoom);
-                result.first->second.ubo = context.createUniformBuffer(&interpolateBuf, sizeof(interpolateBuf));
-            } else if (result.first->second.updatedFrame < parameters.frameCount) {
-                // existing item found, but hasn't been updated this frame
-                const auto interpolateBuf = buildInterpUBO(paintProps, isText, zoom);
-                result.first->second.ubo->update(&interpolateBuf, sizeof(interpolateBuf));
-                result.first->second.updatedFrame = parameters.frameCount;
-            }
-            return result.first->second.ubo;
-        };
+#if MLN_UBO_CONSOLIDATION
+    int i = 0;
+    std::vector<SymbolDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
+    std::vector<SymbolTilePropsUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
+#endif
 
     const auto camDist = state.getCameraToCenterDistance();
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
@@ -171,49 +149,77 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         // Unpitched point labels need to have their rotation applied after projection
         const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
 
-        const SymbolDrawableUBO drawableUBO = {
-            /*.matrix=*/util::cast<float>(matrix),
-            /*.label_plane_matrix=*/util::cast<float>(labelPlaneMatrix),
-            /*.coord_matrix=*/util::cast<float>(glCoordMatrix),
-
-            /*.texsize=*/toArray(getTexSize(drawable, idSymbolImageTexture)),
-            /*.texsize_icon=*/toArray(getTexSize(drawable, idSymbolImageIconTexture)),
-
-            /*.gamma_scale=*/gammaScale,
-            /*.rotate_symbol=*/rotateInShader,
-            /*.pad=*/{0},
-        };
-
         const auto& sizeBinder = isText ? bucket->textSizeBinder : bucket->iconSizeBinder;
         const auto size = sizeBinder->evaluateForZoom(currentZoom);
-        const auto tileUBO = SymbolTilePropsUBO{
-            /* .is_text = */ isText,
-            /* .is_halo = */ symbolData.isHalo,
+
+#if MLN_UBO_CONSOLIDATION
+        drawableUBOVector[i] = {
+#else
+        const SymbolDrawableUBO drawableUBO = {
+#endif
+            /* .matrix = */ util::cast<float>(matrix),
+            /* .label_plane_matrix = */ util::cast<float>(labelPlaneMatrix),
+            /* .coord_matrix = */ util::cast<float>(glCoordMatrix),
+
+            /* .texsize = */ toArray(getTexSize(drawable, idSymbolImageTexture)),
+            /* .texsize_icon = */ toArray(getTexSize(drawable, idSymbolImageIconTexture)),
+
+            /* .is_text_prop = */ isText,
+            /* .rotate_symbol = */ rotateInShader,
             /* .pitch_with_map = */ (symbolData.pitchAlignment == style::AlignmentType::Map),
             /* .is_size_zoom_constant = */ size.isZoomConstant,
             /* .is_size_feature_constant = */ size.isFeatureConstant,
+
             /* .size_t = */ size.sizeT,
             /* .size = */ size.size,
-            /* .padding = */ 0,
+
+            /* .fill_color_t = */ getInterpFactor<TextColor, IconColor, 0>(paintProperties, isText, zoom),
+            /* .halo_color_t = */ getInterpFactor<TextHaloColor, IconHaloColor, 0>(paintProperties, isText, zoom),
+            /* .opacity_t = */ getInterpFactor<TextOpacity, IconOpacity, 0>(paintProperties, isText, zoom),
+            /* .halo_width_t = */ getInterpFactor<TextHaloWidth, IconHaloWidth, 0>(paintProperties, isText, zoom),
+            /* .halo_blur_t = */ getInterpFactor<TextHaloBlur, IconHaloBlur, 0>(paintProperties, isText, zoom),
         };
 
+#if MLN_UBO_CONSOLIDATION
+        tilePropsUBOVector[i] = {
+#else
+        const SymbolTilePropsUBO tilePropsUBO = {
+#endif
+            /* .is_text = */ isText,
+            /* .is_halo = */ symbolData.isHalo,
+            /* .gamma_scale= */ gammaScale,
+            /* .pad1 = */ 0,
+        };
+
+#if MLN_UBO_CONSOLIDATION
+        drawable.setUBOIndex(i++);
+#else
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idSymbolDrawableUBO, &drawableUBO, context);
-        drawableUniforms.createOrUpdate(idSymbolTilePropsUBO, &tileUBO, context);
-        drawableUniforms.set(idSymbolInterpolateUBO, getInterpUBO(tileID, isText, paintProperties));
+        drawableUniforms.createOrUpdate(idSymbolTilePropsUBO, &tilePropsUBO, context);
+#endif
     });
 
-    // Regularly remove UBOs which are not being updated
-    constexpr int pruneFrameInterval = 10;
-    if ((parameters.frameCount % pruneFrameInterval) == 0) {
-        for (auto i = interpUBOs.begin(); i != interpUBOs.end();) {
-            if (i->second.updatedFrame < parameters.frameCount) {
-                i = interpUBOs.erase(i);
-            } else {
-                i++;
-            }
-        }
+#if MLN_UBO_CONSOLIDATION
+    const size_t drawableUBOVectorSize = sizeof(SymbolDrawableUBO) * drawableUBOVector.size();
+    if (!drawableUniformBuffer || drawableUniformBuffer->getSize() < drawableUBOVectorSize) {
+        drawableUniformBuffer = context.createUniformBuffer(
+            drawableUBOVector.data(), drawableUBOVectorSize, false, true);
+    } else {
+        drawableUniformBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
     }
+
+    const size_t tilePropsUBOVectorSize = sizeof(SymbolTilePropsUBO) * tilePropsUBOVector.size();
+    if (!tilePropsUniformBuffer || tilePropsUniformBuffer->getSize() < tilePropsUBOVectorSize) {
+        tilePropsUniformBuffer = context.createUniformBuffer(
+            tilePropsUBOVector.data(), tilePropsUBOVectorSize, false, true);
+    } else {
+        tilePropsUniformBuffer->update(tilePropsUBOVector.data(), tilePropsUBOVectorSize);
+    }
+
+    layerUniforms.set(idSymbolDrawableUBO, drawableUniformBuffer);
+    layerUniforms.set(idSymbolTilePropsUBO, tilePropsUniformBuffer);
+#endif
 }
 
 } // namespace mbgl

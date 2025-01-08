@@ -1,21 +1,11 @@
-layout (std140) uniform FillOutlinePatternDrawableUBO {
-    highp mat4 u_matrix;
-    highp vec2 u_pixel_coord_upper;
-    highp vec2 u_pixel_coord_lower;
-    highp vec2 u_texsize;
-    highp float u_tile_ratio;
-    highp float drawable_pad1;
-};
 layout (std140) uniform FillOutlinePatternTilePropsUBO {
     highp vec4 u_pattern_from;
     highp vec4 u_pattern_to;
+    highp vec2 u_texsize;
+    lowp float tileprops_pad1;
+    lowp float tileprops_pad2;
 };
-layout (std140) uniform FillOutlinePatternInterpolateUBO {
-    highp float u_pattern_from_t;
-    highp float u_pattern_to_t;
-    highp float u_opacity_t;
-    highp float interp_pad1;
-};
+
 layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_color;
     highp vec4 u_outline_color;

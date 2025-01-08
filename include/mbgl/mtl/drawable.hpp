@@ -73,9 +73,6 @@ protected:
 
     void bindInstanceAttributes(RenderPass&) const noexcept;
 
-    void bindUniformBuffers(RenderPass&) const noexcept;
-    void unbindUniformBuffers(RenderPass&) const noexcept {}
-
     void bindTextures(RenderPass&) const noexcept;
     void unbindTextures(RenderPass&) const noexcept;
 

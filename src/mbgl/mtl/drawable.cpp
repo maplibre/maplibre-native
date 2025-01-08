@@ -186,10 +186,15 @@ void Drawable::draw(PaintParameters& parameters) const {
     const auto debugGroup = parameters.encoder->createDebugGroup(debugLabel(*this));
 #endif
 
+    renderPass.unbindVertex(shaders::idGlobalUBOIndex);
+    renderPass.unbindFragment(shaders::idGlobalUBOIndex);
+    encoder->setVertexBytes(&uboIndex, sizeof(uboIndex), shaders::idGlobalUBOIndex);
+    encoder->setFragmentBytes(&uboIndex, sizeof(uboIndex), shaders::idGlobalUBOIndex);
+
     bindAttributes(renderPass);
     bindInstanceAttributes(renderPass);
-    bindUniformBuffers(renderPass);
     bindTextures(renderPass);
+    impl->uniformBuffers.bind(renderPass);
 
     if (!impl->indexes->getBuffer() || impl->indexes->getDirty()) {
         assert(!"Index buffer not uploaded");
@@ -310,8 +315,8 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
     }
 
+    impl->uniformBuffers.unbind(renderPass);
     unbindTextures(renderPass);
-    unbindUniformBuffers(renderPass);
     unbindAttributes(renderPass);
 }
 
@@ -408,29 +413,6 @@ void Drawable::bindInstanceAttributes(RenderPass& renderPass) const noexcept {
             }
         }
         attributeIndex += 1;
-    }
-}
-
-void Drawable::bindUniformBuffers(RenderPass& renderPass) const noexcept {
-    if (shader) {
-        const auto& uniformBlocks = shader->getUniformBlocks();
-        for (size_t id = 0; id < uniformBlocks.allocatedSize(); id++) {
-            const auto& block = uniformBlocks.get(id);
-            if (!block) continue;
-            const auto& uniformBuffer = getUniformBuffers().get(id);
-            if (uniformBuffer) {
-                const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer.get());
-                const auto& resource = buffer.getBufferResource();
-                const auto& mtlBlock = static_cast<const UniformBlock&>(*block);
-
-                if (mtlBlock.getBindVertex()) {
-                    renderPass.bindVertex(resource, /*offset=*/0, block->getIndex());
-                }
-                if (mtlBlock.getBindFragment()) {
-                    renderPass.bindFragment(resource, /*offset=*/0, block->getIndex());
-                }
-            }
-        }
     }
 }
 
@@ -539,7 +521,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         return;
     }
     const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
-    const auto& shaderUniforms = shaderMTL.getUniformBlocks();
 
     auto& uploadPass = static_cast<UploadPass&>(uploadPass_);
     auto& contextBase = uploadPass.getContext();

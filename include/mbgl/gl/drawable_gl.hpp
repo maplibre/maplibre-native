@@ -68,9 +68,6 @@ private:
 
     void uploadTextures() const;
 
-    void bindUniformBuffers() const;
-    void unbindUniformBuffers() const;
-
     void bindTextures() const;
     void unbindTextures() const;
 };

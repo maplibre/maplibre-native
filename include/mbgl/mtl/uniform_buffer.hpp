@@ -6,6 +6,8 @@
 namespace mbgl {
 namespace mtl {
 
+class RenderPass;
+
 class UniformBuffer final : public gfx::UniformBuffer {
 public:
     UniformBuffer(BufferResource&&);
@@ -17,7 +19,7 @@ public:
 
     UniformBuffer clone() const { return {buffer.clone()}; }
 
-    void update(const void* data, std::size_t size_) override;
+    void update(const void* data, std::size_t dataSize) override;
 
 protected:
     BufferResource buffer;
@@ -39,6 +41,9 @@ public:
         gfx::UniformBufferArray::operator=(other);
         return *this;
     }
+
+    void bind(RenderPass& renderPass) const noexcept;
+    void unbind(RenderPass& renderPass) const noexcept {};
 
 private:
     gfx::UniqueUniformBuffer copy(const gfx::UniformBuffer& buffer) override {

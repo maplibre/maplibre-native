@@ -4,7 +4,6 @@
 #include <mbgl/vulkan/context.hpp>
 #include <mbgl/vulkan/renderer_backend.hpp>
 #include <mbgl/vulkan/renderable_resource.hpp>
-#include <mbgl/vulkan/uniform_block.hpp>
 #include <mbgl/vulkan/uniform_buffer.hpp>
 #include <mbgl/vulkan/vertex_attribute.hpp>
 #include <mbgl/programs/program_parameters.hpp>
@@ -240,7 +239,6 @@ void ShaderProgram::initAttribute(const shaders::AttributeInfo& info) {
     // Indexes must be unique, if there's a conflict check the `attributes` array in the shader
     vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
     instanceAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
-    uniformBlocks.visit([&](const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
 #endif
     vertexAttributes.set(info.id, index, info.dataType, 1);
 }
@@ -252,22 +250,8 @@ void ShaderProgram::initInstanceAttribute(const shaders::AttributeInfo& info) {
     // Indexes must not be reused by regular attributes or uniform blocks
     // More than one instance attribute can have the same index, if they share the block
     vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
-    uniformBlocks.visit([&](const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
 #endif
     instanceAttributes.set(info.id, index, info.dataType, 1);
-}
-
-void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
-    const auto index = static_cast<int>(info.index);
-#if !defined(NDEBUG)
-    // Indexes must be unique, if there's a conflict check the `attributes` array in the shader
-    uniformBlocks.visit([&](const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
-#endif
-    if (const auto& block_ = uniformBlocks.set(info.id, index, info.size)) {
-        auto& block = static_cast<UniformBlock&>(*block_);
-        block.setBindVertex(info.vertex);
-        block.setBindFragment(info.fragment);
-    }
 }
 
 void ShaderProgram::initTexture(const shaders::TextureInfo& info) {

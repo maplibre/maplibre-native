@@ -60,7 +60,7 @@ void DrawableGL::draw(PaintParameters& parameters) const {
     context.setColorMode(getColorMode());
     context.setCullFaceMode(getCullFaceMode());
 
-    bindUniformBuffers();
+    impl->uniformBuffers.bind();
     bindTextures();
 
     for (const auto& seg : impl->segments) {
@@ -76,7 +76,7 @@ void DrawableGL::draw(PaintParameters& parameters) const {
 
 #ifndef NDEBUG
     unbindTextures();
-    unbindUniformBuffers();
+    impl->uniformBuffers.unbind();
 #endif
 }
 
@@ -131,34 +131,6 @@ gfx::UniformBufferArray& DrawableGL::mutableUniformBuffers() {
 
 void DrawableGL::setVertexAttrId(const size_t id) {
     impl->vertexAttrId = id;
-}
-
-void DrawableGL::bindUniformBuffers() const {
-    if (shader) {
-        const auto& uniformBlocks = shader->getUniformBlocks();
-        for (size_t id = 0; id < uniformBlocks.allocatedSize(); id++) {
-            const auto& block = uniformBlocks.get(id);
-            if (!block) continue;
-            const auto& uniformBuffer = getUniformBuffers().get(id);
-            if (uniformBuffer) {
-                block->bindBuffer(*uniformBuffer);
-            }
-        }
-    }
-}
-
-void DrawableGL::unbindUniformBuffers() const {
-    if (shader) {
-        const auto& uniformBlocks = shader->getUniformBlocks();
-        for (size_t id = 0; id < uniformBlocks.allocatedSize(); id++) {
-            const auto& block = uniformBlocks.get(id);
-            if (!block) continue;
-            const auto& uniformBuffer = getUniformBuffers().get(id);
-            if (uniformBuffer) {
-                block->unbindBuffer();
-            }
-        }
-    }
 }
 
 struct IndexBufferGL : public gfx::IndexBufferBase {

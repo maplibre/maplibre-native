@@ -18,7 +18,7 @@ public:
 
     UniformBuffer clone() const { return {buffer.clone()}; }
 
-    void update(const void* data, std::size_t size_) override;
+    void update(const void* data, std::size_t dataSize) override;
 
 protected:
     BufferResource buffer;
@@ -30,10 +30,12 @@ public:
     UniformBufferArray() = delete;
     UniformBufferArray(DescriptorSetType descriptorSetType_,
                        uint32_t descriptorStartIndex_,
-                       uint32_t descriptorBindingCount_)
+                       uint32_t descriptorStorageCount_,
+                       uint32_t descriptorUniformCount_)
         : descriptorSetType(descriptorSetType_),
           descriptorStartIndex(descriptorStartIndex_),
-          descriptorBindingCount(descriptorBindingCount_) {}
+          descriptorStorageCount(descriptorStorageCount_),
+          descriptorUniformCount(descriptorUniformCount_) {}
 
     UniformBufferArray(UniformBufferArray&& other)
         : gfx::UniformBufferArray(std::move(other)) {}
@@ -66,7 +68,8 @@ private:
 
     const DescriptorSetType descriptorSetType{DescriptorSetType::DrawableUniform};
     const uint32_t descriptorStartIndex{0};
-    const uint32_t descriptorBindingCount{0};
+    const uint32_t descriptorStorageCount{0};
+    const uint32_t descriptorUniformCount{0};
 
     std::unique_ptr<UniformDescriptorSet> descriptorSet;
 };

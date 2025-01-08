@@ -139,7 +139,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         }
 
         if (!bindUBOs) {
-            bindUniformBuffers(renderPass);
+            uniformBuffers.bind(renderPass);
             bindUBOs = true;
         }
 
@@ -147,18 +147,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     });
 
     if (bindUBOs) {
-        unbindUniformBuffers(renderPass);
-    }
-}
-
-void TileLayerGroup::bindUniformBuffers(RenderPass& renderPass) const noexcept {
-    for (size_t id = 0; id < uniformBuffers.allocatedSize(); id++) {
-        const auto& uniformBuffer = uniformBuffers.get(id);
-        if (!uniformBuffer) continue;
-        const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer.get());
-        const auto& resource = buffer.getBufferResource();
-        renderPass.bindVertex(resource, 0, id);
-        renderPass.bindFragment(resource, 0, id);
+        uniformBuffers.unbind(renderPass);
     }
 }
 

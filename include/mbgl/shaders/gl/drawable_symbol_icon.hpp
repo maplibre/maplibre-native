@@ -22,7 +22,8 @@ layout (std140) uniform GlobalPaintParamsUBO {
     highp float u_symbol_fade_change;
     highp float u_aspect_ratio;
     highp float u_pixel_ratio;
-    highp float global_pad1, global_pad2;
+    highp float u_map_zoom;
+    lowp float global_pad1;
 };
 
 layout (std140) uniform SymbolDrawableUBO {
@@ -33,29 +34,21 @@ layout (std140) uniform SymbolDrawableUBO {
     highp vec2 u_texsize;
     highp vec2 u_texsize_icon;
 
-    highp float u_gamma_scale;
+    bool u_is_text_prop;
     bool u_rotate_symbol;
-    highp vec2 drawable_pad1;
-};
-
-layout (std140) uniform SymbolTilePropsUBO {
-    bool u_is_text;
-    bool u_is_halo;
     bool u_pitch_with_map;
     bool u_is_size_zoom_constant;
     bool u_is_size_feature_constant;
+
     highp float u_size_t; // used to interpolate between zoom stops when size is a composite function
     highp float u_size; // used when size is both zoom and feature constant
-    bool tileprops_pad1;
-};
 
-layout (std140) uniform SymbolInterpolateUBO {
+    // Interpolations
     highp float u_fill_color_t;
     highp float u_halo_color_t;
     highp float u_opacity_t;
     highp float u_halo_width_t;
     highp float u_halo_blur_t;
-    highp float interp_pad1, interp_pad2, interp_pad3;
 };
 
 layout (std140) uniform SymbolEvaluatedPropsUBO {
@@ -64,13 +57,13 @@ layout (std140) uniform SymbolEvaluatedPropsUBO {
     highp float u_text_opacity;
     highp float u_text_halo_width;
     highp float u_text_halo_blur;
-    highp float props_pad1;
+    lowp float props_pad1;
     highp vec4 u_icon_fill_color;
     highp vec4 u_icon_halo_color;
     highp float u_icon_opacity;
     highp float u_icon_halo_width;
     highp float u_icon_halo_blur;
-    highp float props_pad2;
+    lowp float props_pad2;
 };
 
 out vec2 v_tex;
@@ -82,7 +75,7 @@ out lowp float opacity;
 #endif
 
 void main() {
-    highp float u_opacity = u_is_text ? u_text_opacity : u_icon_opacity;
+    highp float u_opacity = u_is_text_prop ? u_text_opacity : u_icon_opacity;
 
     #ifndef HAS_UNIFORM_u_opacity
 opacity = unpack_mix_vec2(a_opacity, u_opacity_t);
@@ -124,7 +117,7 @@ lowp float opacity = u_opacity;
 
     size *= perspective_ratio;
 
-    float fontScale = u_is_text ? size / 24.0 : size;
+    float fontScale = u_is_text_prop ? size / 24.0 : size;
 
     highp float symbol_rotation = 0.0;
     if (u_rotate_symbol) {
@@ -155,12 +148,8 @@ lowp float opacity = u_opacity;
 layout (std140) uniform SymbolTilePropsUBO {
     bool u_is_text;
     bool u_is_halo;
-    bool u_pitch_with_map;
-    bool u_is_size_zoom_constant;
-    bool u_is_size_feature_constant;
-    highp float u_size_t; // used to interpolate between zoom stops when size is a composite function
-    highp float u_size; // used when size is both zoom and feature constant
-    bool tileprops_pad1;
+    highp float u_gamma_scale;
+    lowp float tileprops_pad1;
 };
 
 layout (std140) uniform SymbolEvaluatedPropsUBO {
@@ -169,13 +158,13 @@ layout (std140) uniform SymbolEvaluatedPropsUBO {
     highp float u_text_opacity;
     highp float u_text_halo_width;
     highp float u_text_halo_blur;
-    highp float props_pad1;
+    lowp float props_pad1;
     highp vec4 u_icon_fill_color;
     highp vec4 u_icon_halo_color;
     highp float u_icon_opacity;
     highp float u_icon_halo_width;
     highp float u_icon_halo_blur;
-    highp float props_pad2;
+    lowp float props_pad2;
 };
 
 in vec2 v_tex;
