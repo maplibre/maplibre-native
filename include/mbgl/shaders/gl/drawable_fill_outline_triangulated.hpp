@@ -27,13 +27,18 @@ layout (std140) uniform GlobalPaintParamsUBO {
     highp float u_symbol_fade_change;
     highp float u_aspect_ratio;
     highp float u_pixel_ratio;
-    highp float global_pad1, global_pad2;
+    highp float u_map_zoom;
+    lowp float global_pad1;
 };
+
 layout (std140) uniform FillOutlineTriangulatedDrawableUBO {
     highp mat4 u_matrix;
     mediump float u_ratio;
-    lowp float drawable_pad1, drawable_pad2, drawable_pad3;
+    lowp float drawable_pad1;
+    lowp float drawable_pad2;
+    lowp float drawable_pad3;
 };
+
 layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_color;
     highp vec4 u_outline_color;

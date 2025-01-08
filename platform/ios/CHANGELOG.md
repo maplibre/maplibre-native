@@ -4,6 +4,12 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+## 6.9.0
+
+- Batch up scheduling of deferred deletions ([#3030](https://github.com/maplibre/maplibre-native/pull/3030)).
+- Remove `Pass3D`  ([#3077](https://github.com/maplibre/maplibre-native/pull/3077)).
+- Add bold support for CJK characters ([#3069](https://github.com/maplibre/maplibre-native/pull/3069)).
+
 ## 6.8.1
 
 - Update Bazel dependencies ([#3000](https://github.com/maplibre/maplibre-native/pull/3000)).

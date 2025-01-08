@@ -192,7 +192,7 @@ class HeatmapLayerActivity : AppCompatActivity() {
     // # --8<-- [start:constants]
     companion object {
         private const val EARTHQUAKE_SOURCE_URL =
-            "https://maplibre.org/maplibre-gl-js-docs/assets/earthquakes.geojson"
+            "https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson"
         private const val EARTHQUAKE_SOURCE_ID = "earthquakes"
         private const val HEATMAP_LAYER_ID = "earthquakes-heat"
         private const val HEATMAP_LAYER_SOURCE = "earthquakes"

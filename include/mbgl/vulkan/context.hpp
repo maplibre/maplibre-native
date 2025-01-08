@@ -74,7 +74,10 @@ public:
     void reduceMemoryUsage() override {}
 
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
-    gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size, bool persistent) override;
+    gfx::UniformBufferPtr createUniformBuffer(const void* data,
+                                              std::size_t size,
+                                              bool persistent,
+                                              bool ssbo = false) override;
 
     gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
 
@@ -135,6 +138,7 @@ public:
 
     const std::unique_ptr<BufferResource>& getDummyVertexBuffer();
     const std::unique_ptr<BufferResource>& getDummyUniformBuffer();
+    const std::unique_ptr<BufferResource>& getDummyStorageBuffer();
     const std::unique_ptr<Texture2D>& getDummyTexture();
 
     const vk::DescriptorSetLayout& getDescriptorSetLayout(DescriptorSetType type);
@@ -175,6 +179,8 @@ private:
 
     void buildImageDescriptorSetLayout();
     void buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& layout,
+                                         size_t startId,
+                                         size_t storageCount,
                                          size_t uniformCount,
                                          const std::string& name);
 
@@ -186,6 +192,7 @@ private:
 
     std::unique_ptr<BufferResource> dummyVertexBuffer;
     std::unique_ptr<BufferResource> dummyUniformBuffer;
+    std::unique_ptr<BufferResource> dummyStorageBuffer;
     std::unique_ptr<Texture2D> dummyTexture2D;
     vk::UniqueDescriptorSetLayout globalUniformDescriptorSetLayout;
     vk::UniqueDescriptorSetLayout layerUniformDescriptorSetLayout;

@@ -31,18 +31,13 @@ layout (std140) uniform GlobalPaintParamsUBO {
     highp float u_symbol_fade_change;
     highp float u_aspect_ratio;
     highp float u_pixel_ratio;
-    highp float global_pad1, global_pad2;
+    highp float u_map_zoom;
+    lowp float global_pad1;
 };
-
 layout (std140) uniform LinePatternDrawableUBO {
     highp mat4 u_matrix;
-    mediump vec4 u_scale;
-    highp vec2 u_texsize;
     mediump float u_ratio;
-    highp float u_fade;
-};
-
-layout (std140) uniform LinePatternInterpolationUBO {
+    // Interpolations
     lowp float u_blur_t;
     lowp float u_opacity_t;
     lowp float u_offset_t;
@@ -50,12 +45,15 @@ layout (std140) uniform LinePatternInterpolationUBO {
     lowp float u_width_t;
     lowp float u_pattern_from_t;
     lowp float u_pattern_to_t;
-    highp float interp_pad1;
 };
 
-layout (std140) uniform LinePatternTilePropertiesUBO {
+layout (std140) uniform LinePatternTilePropsUBO {
     lowp vec4 u_pattern_from;
     lowp vec4 u_pattern_to;
+    mediump vec4 u_scale;
+    highp vec2 u_texsize;
+    highp float u_fade;
+    lowp float tileprops_pad1;
 };
 
 layout (std140) uniform LineEvaluatedPropsUBO {
@@ -66,8 +64,8 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     lowp float u_offset;
     mediump float u_width;
     lowp float u_floorwidth;
-    highp float props_pad1;
-    highp float props_pad2;
+    lowp float props_pad1;
+    lowp float props_pad2;
 };
 
 out vec2 v_normal;
@@ -188,28 +186,13 @@ mediump vec4 pattern_to = u_pattern_to;
     v_width2 = vec2(outset, inset);
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform LinePatternDrawableUBO {
-    highp mat4 u_matrix;
-    mediump vec4 u_scale;
-    highp vec2 u_texsize;
-    mediump float u_ratio;
-    highp float u_fade;
-};
-
-layout (std140) uniform LinePatternInterpolationUBO {
-    lowp float u_blur_t;
-    lowp float u_opacity_t;
-    lowp float u_offset_t;
-    lowp float u_gapwidth_t;
-    lowp float u_width_t;
-    lowp float u_pattern_from_t;
-    lowp float u_pattern_to_t;
-    highp float interp_pad1;
-};
-
-layout (std140) uniform LinePatternTilePropertiesUBO {
+    static constexpr const char* fragment = R"(layout (std140) uniform LinePatternTilePropsUBO {
     lowp vec4 u_pattern_from;
     lowp vec4 u_pattern_to;
+    mediump vec4 u_scale;
+    highp vec2 u_texsize;
+    highp float u_fade;
+    lowp float tileprops_pad1;
 };
 
 layout (std140) uniform LineEvaluatedPropsUBO {
@@ -220,8 +203,8 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     lowp float u_offset;
     mediump float u_width;
     lowp float u_floorwidth;
-    highp float props_pad1;
-    highp float props_pad2;
+    lowp float props_pad1;
+    lowp float props_pad2;
 };
 
 uniform sampler2D u_image;

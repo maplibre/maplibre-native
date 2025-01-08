@@ -77,9 +77,6 @@ public:
             for (const auto& attrib : ShaderClass::instanceAttributes) {
                 shader->initInstanceAttribute(attrib);
             }
-            for (const auto& uniform : ShaderClass::uniforms) {
-                shader->initUniformBlock(uniform);
-            }
             for (const auto& texture : ShaderClass::textures) {
                 shader->initTexture(texture);
             }

@@ -21,13 +21,13 @@ using namespace style;
 using namespace shaders;
 
 void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
-    auto& context = parameters.context;
-    const auto zoom = static_cast<float>(parameters.state.getZoom());
-    const auto& evaluated = static_cast<const HeatmapLayerProperties&>(*evaluatedProperties).evaluated;
-
     if (layerGroup.empty()) {
         return;
     }
+
+    auto& context = parameters.context;
+    const auto zoom = static_cast<float>(parameters.state.getZoom());
+    const auto& evaluated = static_cast<const HeatmapLayerProperties&>(*evaluatedProperties).evaluated;
 
 #if !defined(NDEBUG)
     const auto label = layerGroup.getName() + "-update-uniforms";
@@ -45,6 +45,11 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
     }
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.set(idHeatmapEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
+
+#if MLN_UBO_CONSOLIDATION
+    int i = 0;
+    std::vector<HeatmapDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
+#endif
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
@@ -64,19 +69,38 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
         constexpr bool inViewportPixelUnits = false;
         const auto matrix = getTileMatrix(
             tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, nearClipped, inViewportPixelUnits, drawable);
-        const HeatmapDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix),
-                                                /* .extrude_scale = */ tileID.pixelsToTileUnits(1.0f, zoom),
-                                                /* .padding = */ {0}};
 
-        auto& drawableUniforms = drawable.mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(idHeatmapDrawableUBO, &drawableUBO, context);
+#if MLN_UBO_CONSOLIDATION
+        drawableUBOVector[i] = {
+#else
+        const HeatmapDrawableUBO drawableUBO = {
+#endif
+            /* .matrix = */ util::cast<float>(matrix),
+            /* .extrude_scale = */ tileID.pixelsToTileUnits(1.0f, zoom),
 
-        const HeatmapInterpolateUBO interpolateUBO = {
             /* .weight_t = */ std::get<0>(binders->get<HeatmapWeight>()->interpolationFactor(zoom)),
             /* .radius_t = */ std::get<0>(binders->get<HeatmapRadius>()->interpolationFactor(zoom)),
-            /* .padding = */ {0}};
-        drawableUniforms.createOrUpdate(idHeatmapInterpolateUBO, &interpolateUBO, context);
+            /* .pad1 = */ 0
+        };
+#if MLN_UBO_CONSOLIDATION
+        drawable.setUBOIndex(i++);
+#else
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idHeatmapDrawableUBO, &drawableUBO, context);
+#endif
     });
+
+#if MLN_UBO_CONSOLIDATION
+    const size_t drawableUBOVectorSize = sizeof(HeatmapDrawableUBO) * drawableUBOVector.size();
+    if (!drawableUniformBuffer || drawableUniformBuffer->getSize() < drawableUBOVectorSize) {
+        drawableUniformBuffer = context.createUniformBuffer(
+            drawableUBOVector.data(), drawableUBOVectorSize, false, true);
+    } else {
+        drawableUniformBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
+    }
+
+    layerUniforms.set(idHeatmapDrawableUBO, drawableUniformBuffer);
+#endif
 }
 
 } // namespace mbgl

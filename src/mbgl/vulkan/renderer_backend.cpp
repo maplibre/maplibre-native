@@ -12,12 +12,16 @@
 #include <mbgl/shaders/vulkan/circle.hpp>
 #include <mbgl/shaders/vulkan/clipping_mask.hpp>
 #include <mbgl/shaders/vulkan/collision.hpp>
-#include <mbgl/shaders/vulkan/common.hpp>
+#include <mbgl/shaders/vulkan/custom_symbol_icon.hpp>
 #include <mbgl/shaders/vulkan/debug.hpp>
 #include <mbgl/shaders/vulkan/fill.hpp>
+#include <mbgl/shaders/vulkan/fill_extrusion.hpp>
 #include <mbgl/shaders/vulkan/heatmap.hpp>
+#include <mbgl/shaders/vulkan/heatmap_texture.hpp>
 #include <mbgl/shaders/vulkan/hillshade.hpp>
+#include <mbgl/shaders/vulkan/hillshade_prepare.hpp>
 #include <mbgl/shaders/vulkan/line.hpp>
+#include <mbgl/shaders/vulkan/location_indicator.hpp>
 #include <mbgl/shaders/vulkan/raster.hpp>
 #include <mbgl/shaders/vulkan/symbol.hpp>
 #include <mbgl/shaders/vulkan/widevector.hpp>
@@ -665,8 +669,6 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::ClippingMaskProgram,
                   shaders::BuiltIn::CollisionBoxShader,
                   shaders::BuiltIn::CollisionCircleShader,
-                  shaders::BuiltIn::CommonShader,
-                  shaders::BuiltIn::CommonTexturedShader,
                   shaders::BuiltIn::CustomSymbolIconShader,
                   shaders::BuiltIn::DebugShader,
                   shaders::BuiltIn::FillShader,
@@ -684,6 +686,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::LineGradientShader,
                   shaders::BuiltIn::LineSDFShader,
                   shaders::BuiltIn::LinePatternShader,
+                  shaders::BuiltIn::LocationIndicatorShader,
+                  shaders::BuiltIn::LocationIndicatorTexturedShader,
                   shaders::BuiltIn::RasterShader,
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFIconShader,

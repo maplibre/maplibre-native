@@ -4,13 +4,12 @@
 namespace mbgl {
 namespace shaders {
 
-const std::array<UniformBlockInfo, 1> ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Metal>::uniforms = {
-    UniformBlockInfo{true, true, sizeof(DebugUBO), idDebugUBO},
+using DebugShaderSource = ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Metal>;
+
+const std::array<AttributeInfo, 1> DebugShaderSource::attributes = {
+    AttributeInfo{debugUBOCount + 0, gfx::AttributeDataType::Short2, idDebugPosVertexAttribute},
 };
-const std::array<AttributeInfo, 1> ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Metal>::attributes = {
-    AttributeInfo{debugDrawableUBOCount + 0, gfx::AttributeDataType::Short2, idDebugPosVertexAttribute},
-};
-const std::array<TextureInfo, 1> ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Metal>::textures = {
+const std::array<TextureInfo, 1> DebugShaderSource::textures = {
     TextureInfo{0, idDebugOverlayTexture},
 };
 

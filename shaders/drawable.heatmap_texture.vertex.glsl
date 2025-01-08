@@ -9,12 +9,16 @@ layout (std140) uniform GlobalPaintParamsUBO {
     highp float u_symbol_fade_change;
     highp float u_aspect_ratio;
     highp float u_pixel_ratio;
-    highp float global_pad1, global_pad2;
+    highp float u_map_zoom;
+    lowp float global_pad1;
 };
+
 layout (std140) uniform HeatmapTexturePropsUBO {
     highp mat4 u_matrix;
     highp float u_opacity;
-    lowp float props_pad1, props_pad2, props_pad3;
+    lowp float props_pad1;
+    lowp float props_pad2;
+    lowp float props_pad3;
 };
 
 void main() {

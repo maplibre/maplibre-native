@@ -46,7 +46,7 @@
 
 #include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
-#include <mbgl/shaders/common_ubo.hpp>
+#include <mbgl/shaders/location_indicator_ubo.hpp>
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/drawable_impl.hpp>
@@ -1052,7 +1052,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!quadShader) {
-        quadShader = context.getGenericShader(shaders, "CommonTexturedShader");
+        quadShader = context.getGenericShader(shaders, "LocationIndicatorTexturedShader");
     }
 
     if (!quadShader) {
@@ -1061,7 +1061,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!circleShader) {
-        circleShader = context.getGenericShader(shaders, "CommonShader");
+        circleShader = context.getGenericShader(shaders, "LocationIndicatorShader");
     }
 
     if (!circleShader) {

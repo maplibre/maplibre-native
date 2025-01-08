@@ -15,6 +15,7 @@ var app = express();
 app.disable('etag');
 
 app.get('/test', function (req, res) {
+    var content = 'Hello World!';
     if (req.query.modified) {
         res.setHeader('Last-Modified', (new Date(req.query.modified * 1000)).toUTCString());
     }
@@ -27,7 +28,12 @@ app.get('/test', function (req, res) {
     if (req.query.cachecontrol) {
         res.setHeader('Cache-Control', req.query.cachecontrol);
     }
-    res.send('Hello World!');
+    if (req.range()) {
+        const [ range ] = req.range();
+        content = content.substring(range.start, range.end + 1);
+        res.status(206);
+    }
+    res.send(content);
 });
 
 app.get('/stale/*', function() {

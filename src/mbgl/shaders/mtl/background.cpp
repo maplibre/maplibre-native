@@ -1,18 +1,28 @@
 #include <mbgl/shaders/mtl/background.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
-#include <mbgl/shaders/background_layer_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {
 
-const std::array<UniformBlockInfo, 2> ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal>::uniforms = {
-    UniformBlockInfo{true, false, sizeof(BackgroundDrawableUBO), idBackgroundDrawableUBO},
-    UniformBlockInfo{false, true, sizeof(BackgroundLayerUBO), idBackgroundLayerUBO},
-};
-const std::array<AttributeInfo, 1> ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal>::attributes = {
+//
+// Background
+
+using BackgroundShaderSource = ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal>;
+
+const std::array<AttributeInfo, 1> BackgroundShaderSource::attributes = {
     AttributeInfo{backgroundUBOCount + 0, gfx::AttributeDataType::Float3, idBackgroundPosVertexAttribute},
 };
-const std::array<TextureInfo, 0> ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal>::textures = {};
+const std::array<TextureInfo, 0> BackgroundShaderSource::textures = {};
+
+//
+// Background pattern
+
+using BackgroundPatternShaderSource = ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal>;
+
+const std::array<AttributeInfo, 1> BackgroundPatternShaderSource::attributes = {
+    AttributeInfo{backgroundUBOCount + 0, gfx::AttributeDataType::Float3, idBackgroundPosVertexAttribute},
+};
+const std::array<TextureInfo, 1> BackgroundPatternShaderSource::textures = {TextureInfo{0, idBackgroundImageTexture}};
 
 } // namespace shaders
 } // namespace mbgl

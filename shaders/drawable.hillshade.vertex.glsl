@@ -3,8 +3,6 @@ layout (location = 1) in vec2 a_texture_pos;
 
 layout (std140) uniform HillshadeDrawableUBO {
     highp mat4 u_matrix;
-    highp vec2 u_latrange;
-    highp vec2 u_light;
 };
 
 out vec2 v_pos;

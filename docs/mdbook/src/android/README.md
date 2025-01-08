@@ -1,4 +1,4 @@
-# Developing - MapLibre Native for Android
+# MapLibre Android Developer Guide
 
 These instructions are for developers interested in making code-level contributions to MapLibre Native for Android.
 
@@ -33,34 +33,6 @@ Run the configuration for the `MapLibreAndroidTestApp` module and select a devic
   <img src="https://github.com/maplibre/maplibre-native/assets/649392/5494925e-8cbb-4d5d-8033-8a2f141ede3c" alt="Android TestApp menu" width="15%">   <img src="https://github.com/maplibre/maplibre-native/assets/649392/f169db51-615d-4fca-b297-ac6197bec674" alt="Android TestApp showing Demotiles" width="15%">
 </p>
 
-## Render Tests
-
-To run the render tests for Android, run the configuration for the `androidRenderTest.app` module.
-
-More information on working on the render tests can be found [in the wiki](https://github.com/maplibre/maplibre-native/wiki/Working-on-Android-Render-Tests).
-
-## Instrumentation Tests
-
-To run the instrumentation tests, choose the "Instrumentation Tests" run configuration.
-
-Your device needs remain unlocked for the duration of the tests.
-
-## C++ Unit Tests
-
-There is a separate Gradle project that contains a test app which runs the C++ Unit Tests. It does not depend on the Android platform implementations.
-
-You can find the project in `test/android.` You can open this project in Android Studio and run the C++ Tests on an Android device or Simulator.
-
-To run a particular set of tests you can modify the `--gtest_filter` flag in `platform/android/src/test/test_runner.cpp`. See the [GoogleTest documentation](https://google.github.io/googletest/advanced.html#running-a-subset-of-the-tests) for details how to use this flag.
-
-### AWS Device Farm
-
-The instrumentation tests and C++ unit tests are running on AWS Device Farm. To see the results and the logs, go to:
-
-https://us-west-2.console.aws.amazon.com/devicefarm/home?region=us-east-1#/mobile/projects/20687d72-0e46-403e-8f03-0941850665bc/runs
-
-You can log in with the `maplibre` alias, with `maplibre` as username and `maplibre` as password (this is a read-only account).
-
 ## Kotlin
 
 All new code should be written in [Kotlin](https://kotlinlang.org/).
@@ -91,11 +63,4 @@ To run the benchmarks (for Android) include the following line on a PR comment:
 
 ## Profiling
 
-[maplibre-native/docs/mdbook](https://maplibre.org/maplibre-native/docs/book/) describes how Tracy can be used for profiling.
-
-
-## Documentation
-
-We use Dokka for the API documentation.
-
-The documentation site with examples uses MkDocs along with Material for MkDocs. For more information on how to work on the examples, see [`docs/README.md`](./docs/REAME.md`).
+See [Tracy Profiling](/profiling/tracy-profiling.md) to understand how Tracy can be used for profiling.
