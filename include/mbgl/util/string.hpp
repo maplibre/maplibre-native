@@ -7,6 +7,7 @@
 #include <string>
 #include <thread>
 #include <type_traits>
+#include <algorithm>
 
 // Polyfill needed by Qt when building for Android with GCC
 #if defined(__ANDROID__) && defined(__GLIBCXX__)
