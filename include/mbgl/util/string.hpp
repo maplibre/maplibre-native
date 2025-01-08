@@ -96,6 +96,74 @@ inline float stof(const std::string &str) {
     return std::stof(str);
 }
 
+// https://gist.github.com/Baduit/63c4ea0f248451f7047c1b003c8335d5
+// Note: asked author to clarify license
+
+template <std::size_t ArraySize>
+struct CompileTimeString
+{
+    constexpr CompileTimeString() noexcept = default;
+
+    constexpr CompileTimeString(const char(&literal)[ArraySize]) noexcept
+    {
+        std::ranges::copy(literal, data);
+    }
+
+    template <std::size_t OtherSize>
+    constexpr auto operator+(const CompileTimeString<OtherSize>& other) const noexcept
+    {
+        CompileTimeString<ArraySize + OtherSize - 1> result;
+        std::ranges::copy(data, result.data);
+        std::ranges::copy(other.data, result.data + ArraySize - 1);
+        return result;
+    }
+
+    // Don't count the \0 at the end
+    constexpr std::size_t size() const { return ArraySize - 1; }
+
+    constexpr auto begin() noexcept { return std::begin(data); }
+    constexpr auto end() noexcept { return std::end(data); }
+    constexpr auto cbegin() const noexcept { return std::cbegin(data); }
+    constexpr auto cend() const noexcept { return std::cend(data); }
+    constexpr auto rbegin() noexcept { return std::rbegin(data); }
+    constexpr auto rend() noexcept { return std::rend(data); }
+    constexpr auto crbegin() const noexcept { return std::crbegin(data); }
+    constexpr auto crend() const noexcept { return std::crend(data); }
+
+    template <std::size_t OtherSize>
+    constexpr bool operator==(const CompileTimeString<OtherSize>& other) const
+    {
+        return as_string_view() == other.as_string_view();
+    }
+
+
+    constexpr bool starts_with(std::string_view sv) const noexcept { return as_string_view().starts_with(sv); }
+    constexpr bool starts_with(char ch) const noexcept { return as_string_view().starts_with(ch); }
+    constexpr bool starts_with(const char* s) const { return as_string_view().starts_with(s); }
+
+    template <std::size_t OtherSize>
+    constexpr bool starts_with(const CompileTimeString<OtherSize>& other) const
+    {
+        return starts_with(other.as_string_view());
+    }
+
+    // https://en.cppreference.com/w/cpp/language/reference
+    // https://en.cppreference.com/w/cpp/language/member_functions#Member_functions_with_ref-qualifier
+    constexpr operator std::string_view() const & { return as_string_view(); }
+    constexpr operator std::string_view() const && = delete;
+
+    constexpr std::string_view as_string_view() const & { return std::string_view(data, ArraySize - 1); }
+    constexpr std::string_view as_string_view() const && = delete;
+
+    char data[ArraySize];
+};
+
+template<CompileTimeString Str>
+constexpr auto operator""_cts()
+{
+    return Str;
+}
+
 } // namespace util
 } // namespace mbgl
 

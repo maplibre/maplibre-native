@@ -3,12 +3,14 @@
 #include <mbgl/shaders/collision_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mbgl/util/string.hpp>
 
 namespace mbgl {
 namespace shaders {
 
-#define COLLISION_SHADER_COMMON \
-    R"(
+using mbgl::util::operator""_cts;
+
+constexpr auto collisionShaderCommon = R"(
 
 enum {
     idCollisionDrawableUBO = idDrawableReservedVertexOnlyUBO,
@@ -30,19 +32,9 @@ struct alignas(16) CollisionTilePropsUBO {
 };
 static_assert(sizeof(CollisionTilePropsUBO) == 16, "wrong size");
 
-)"
+)"_cts;
 
-template <>
-struct ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "CollisionBoxShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
-
-    static const std::array<AttributeInfo, 5> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
-
-    static constexpr auto source = COLLISION_SHADER_COMMON R"(
+constexpr auto collisionBoxShaderSource = collisionShaderCommon + R"(
 
 struct VertexStage {
     short2 pos [[attribute(collisionUBOCount + 0)]];
@@ -102,20 +94,22 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]]) {
 
     return half4(color);
 }
-)";
-};
+)"_cts;
 
 template <>
-struct ShaderSource<BuiltIn::CollisionCircleShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "CollisionCircleShader";
+struct ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "CollisionBoxShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto source = COLLISION_SHADER_COMMON R"(
+    static constexpr auto source = collisionBoxShaderSource.as_string_view();
+};
+
+constexpr auto collisionCircleShaderSource = collisionShaderCommon + R"(
 
 struct VertexStage {
     short2 pos [[attribute(collisionUBOCount + 0)]];
@@ -195,7 +189,19 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     return half4(opacity_t * color);
 }
-)";
+)"_cts;
+
+template <>
+struct ShaderSource<BuiltIn::CollisionCircleShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "CollisionCircleShader";
+    static constexpr auto vertexMainFunction = "vertexMain";
+    static constexpr auto fragmentMainFunction = "fragmentMain";
+
+    static const std::array<AttributeInfo, 4> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<TextureInfo, 0> textures;
+
+    static constexpr auto source = collisionCircleShaderSource.as_string_view();
 };
 
 } // namespace shaders
