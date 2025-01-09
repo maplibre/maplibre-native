@@ -116,7 +116,6 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 )";
 };
 
-
 template <>
 struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "BackgroundPatternShader";
