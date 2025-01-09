@@ -3,14 +3,11 @@
 #include <mbgl/shaders/line_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
-#include <mbgl/util/string.hpp>
 
 namespace mbgl {
 namespace shaders {
 
-using mbgl::util::operator""_cts;
-
-constexpr auto lineShaderCommon = R"(
+constexpr auto lineShadePrelude = R"(
 
 enum {
     idLineDrawableUBO = idDrawableReservedVertexOnlyUBO,
@@ -173,9 +170,20 @@ union LineTilePropsUnionUBO {
     LineSDFTilePropsUBO lineSDFTilePropsUBO;
 };
 
-)"_cts;
+)";
 
-constexpr auto lineShaderSource = lineShaderCommon + R"(
+template <>
+struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "LineShader";
+    static constexpr auto vertexMainFunction = "vertexMain";
+    static constexpr auto fragmentMainFunction = "fragmentMain";
+
+    static const std::array<AttributeInfo, 8> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<TextureInfo, 0> textures;
+
+    static constexpr auto prelude = lineShadePrelude;
+    static constexpr auto source = R"(
 
 struct VertexStage {
     short2 pos_normal [[attribute(lineUBOCount + 0)]];
@@ -341,22 +349,22 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     return half4(color * (alpha * opacity));
 }
-)"_cts;
+)";
+};
+
 
 template <>
-struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "LineShader";
+struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "LineGradientShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 8> attributes;
+    static const std::array<AttributeInfo, 7> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto source = lineShaderSource.as_string_view();
-};
-
-constexpr auto lineGradientShaderSource = lineShaderCommon + R"(
+    static constexpr auto prelude = lineShadePrelude;
+    static constexpr auto source = R"(
 
 struct VertexStage {
     short2 pos_normal [[attribute(lineUBOCount + 0)]];
@@ -509,22 +517,21 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     return half4(color * (alpha * opacity));
 }
-)"_cts;
+)";
+};
 
 template <>
-struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "LineGradientShader";
+struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "LinePatternShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 7> attributes;
+    static const std::array<AttributeInfo, 9> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto source = lineGradientShaderSource.as_string_view();
-};
-
-constexpr auto linePatternShaderSource = lineShaderCommon + R"(
+    static constexpr auto prelude = lineShadePrelude;
+    static constexpr auto source = R"(
 
 struct VertexStage {
     short2 pos_normal [[attribute(lineUBOCount + 0)]];
@@ -747,11 +754,12 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     return half4(color * alpha * opacity);
 }
-)"_cts;
+)";
+};
 
 template <>
-struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "LinePatternShader";
+struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "LineSDFShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
@@ -759,10 +767,8 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto source = linePatternShaderSource.as_string_view();
-};
-
-constexpr auto lineSDFShaderSource = lineShaderCommon + R"(
+    static constexpr auto prelude = lineShadePrelude;
+    static constexpr auto source = R"(
 
 struct VertexStage {
     short2 pos_normal [[attribute(lineUBOCount + 0)]];
@@ -969,19 +975,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     return half4(color * (alpha * opacity));
 }
-)"_cts;
-
-template <>
-struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "LineSDFShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
-
-    static const std::array<AttributeInfo, 9> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
-
-    static constexpr auto source = lineSDFShaderSource.as_string_view();
+)";
 };
 
 } // namespace shaders

@@ -3,14 +3,11 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/background_layer_ubo.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
-#include <mbgl/util/string.hpp>
 
 namespace mbgl {
 namespace shaders {
 
-using mbgl::util::operator""_cts;
-
-constexpr auto backgroundShaderCommon = R"(
+constexpr auto backgroundShaderPrelude = R"(
 
 enum {
     idBackgroundDrawableUBO = idDrawableReservedVertexOnlyUBO,
@@ -74,12 +71,20 @@ union BackgroundDrawableUnionUBO {
     BackgroundPatternDrawableUBO backgroundPatternDrawableUBO;
 };
 
-)"_cts;
+)";
 
-constexpr auto backgroundShaderSource = backgroundShaderCommon + R"(
+template <>
+struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "BackgroundShader";
+    static constexpr auto vertexMainFunction = "vertexMain";
+    static constexpr auto fragmentMainFunction = "fragmentMain";
 
-#include <metal_stdlib>
-using namespace metal;
+    static const std::array<AttributeInfo, 1> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<TextureInfo, 0> textures;
+
+    static constexpr auto prelude = backgroundShaderPrelude;
+    static constexpr auto source = R"(
 
 struct VertexStage {
     short2 position [[attribute(backgroundUBOCount + 0)]];
@@ -108,25 +113,22 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     return half4(props.color * props.opacity);
 }
-)"_cts;
+)";
+};
+
 
 template <>
-struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "BackgroundShader";
+struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "BackgroundPatternShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
     static const std::array<AttributeInfo, 1> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto source = backgroundShaderSource.as_string_view();
-};
-
-constexpr auto backgroundPatternShaderSource = backgroundShaderCommon + R"(
-
-#include <metal_stdlib>
-using namespace metal;
+    static constexpr auto prelude = backgroundShaderPrelude;
+    static constexpr auto source = R"(
 
 struct VertexStage {
     short2 position [[attribute(backgroundUBOCount + 0)]];
@@ -182,19 +184,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     return half4(mix(color1, color2, props.mix) * props.opacity);
 }
-)"_cts;
-
-template <>
-struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "BackgroundPatternShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
-
-    static const std::array<AttributeInfo, 1> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
-
-    static constexpr auto source = backgroundPatternShaderSource.as_string_view();
+)";
 };
 
 } // namespace shaders

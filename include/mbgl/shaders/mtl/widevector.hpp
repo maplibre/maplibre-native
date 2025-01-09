@@ -3,12 +3,9 @@
 #include <mbgl/shaders/widevector_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
-#include <mbgl/util/string.hpp>
 
 namespace mbgl {
 namespace shaders {
-
-using mbgl::util::operator""_cts;
 
 constexpr auto wideVectorShaderPrelude = R"(
 
@@ -18,11 +15,20 @@ enum {
     wideVectorUBOCount
 };
 
-)"_cts;
+)";
 
-constexpr auto wideVectorShaderSource = wideVectorShaderPrelude + R"(
+template <>
+struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "WideVectorShader";
+    static constexpr auto vertexMainFunction = "vertexTri_wideVecPerf";
+    static constexpr auto fragmentMainFunction = "fragmentTri_wideVecPerf";
 
-#include <metal_stdlib>
+    static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<AttributeInfo, 4> instanceAttributes;
+    static const std::array<TextureInfo, 0> textures;
+
+    static constexpr auto prelude = wideVectorShaderPrelude;
+    static constexpr auto source = R"(
 
 namespace WhirlyKitShader
 {
@@ -572,19 +578,7 @@ fragment float4 fragmentTri_wideVecPerf(
     return vert.color * float4(1,1,1,edgeAlpha * patternAlpha * roundAlpha);
 }
 
-)"_cts;
-
-template <>
-struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "WideVectorShader";
-    static constexpr auto vertexMainFunction = "vertexTri_wideVecPerf";
-    static constexpr auto fragmentMainFunction = "fragmentTri_wideVecPerf";
-
-    static const std::array<AttributeInfo, 3> attributes;
-    static const std::array<AttributeInfo, 4> instanceAttributes;
-    static const std::array<TextureInfo, 0> textures;
-
-    static constexpr auto source = wideVectorShaderSource.as_string_view();
+)";
 };
 
 } // namespace shaders

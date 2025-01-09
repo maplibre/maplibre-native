@@ -48,6 +48,7 @@ public:
                                      std::string_view /*firstAttribName*/) override {
         using ShaderSource = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
         constexpr auto& name = ShaderSource::name;
+        constexpr auto& prelude = ShaderSource::prelude;
         constexpr auto& source = ShaderSource::source;
         constexpr auto& vertMain = ShaderSource::vertexMainFunction;
         constexpr auto& fragMain = ShaderSource::fragmentMainFunction;
@@ -64,7 +65,7 @@ public:
 
             auto& context = static_cast<Context&>(gfxContext);
             // C++26 will allow operator+ with std::string and std::string_view
-            const auto shaderSource = std::string(shaders::prelude) + std::string(source);
+            const auto shaderSource = std::string(shaders::prelude) + std::string(prelude) + std::string(source);
             shader = context.createProgram(
                 ShaderID, shaderName, shaderSource, vertMain, fragMain, programParameters, additionalDefines);
             assert(shader);

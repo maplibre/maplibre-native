@@ -3,14 +3,11 @@
 #include <mbgl/shaders/symbol_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
-#include <mbgl/util/string.hpp>
 
 namespace mbgl {
 namespace shaders {
 
-using mbgl::util::operator""_cts;
-
-constexpr auto symbolShaderCommon = R"(
+constexpr auto symbolShaderPrelude = R"(
 
 enum {
     idSymbolDrawableUBO = idDrawableReservedVertexOnlyUBO,
@@ -73,9 +70,20 @@ struct alignas(16) SymbolEvaluatedPropsUBO {
 };
 static_assert(sizeof(SymbolEvaluatedPropsUBO) == 6 * 16, "wrong size");
 
-)"_cts;
+)";
 
-constexpr auto symbolIconShaderSource = symbolShaderCommon + R"(
+template <>
+struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "SymbolIconShader";
+    static constexpr auto vertexMainFunction = "vertexMain";
+    static constexpr auto fragmentMainFunction = "fragmentMain";
+
+    static const std::array<AttributeInfo, 6> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<TextureInfo, 1> textures;
+
+    static constexpr auto prelude = symbolShaderPrelude;
+    static constexpr auto source = R"(
 
 struct VertexStage {
     float4 pos_offset [[attribute(symbolUBOCount + 0)]];
@@ -199,22 +207,21 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     return half4(image.sample(image_sampler, float2(in.tex)) * opacity);
 }
-)"_cts;
+)";
+};
 
 template <>
-struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "SymbolIconShader";
+struct ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "SymbolSDFIconShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<AttributeInfo, 10> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto source = symbolIconShaderSource.as_string_view();
-};
-
-constexpr auto symbolSDFIconShaderSource = symbolShaderCommon + R"(
+    static constexpr auto prelude = symbolShaderPrelude;
+    static constexpr auto source = R"(
 
 struct VertexStage {
     float4 pos_offset [[attribute(symbolUBOCount + 0)]];
@@ -409,22 +416,21 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     return half4(color * (alpha * opacity * in.fade_opacity));
 }
-)"_cts;
+)";
+};
 
 template <>
-struct ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "SymbolSDFIconShader";
+struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "SymbolTextAndIconShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 10> attributes;
+    static const std::array<AttributeInfo, 9> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
+    static const std::array<TextureInfo, 2> textures;
 
-    static constexpr auto source = symbolSDFIconShaderSource.as_string_view();
-};
-
-constexpr auto symbolTextAndIconShaderSource = symbolShaderCommon + R"(
+    static constexpr auto prelude = symbolShaderPrelude;
+    static constexpr auto source = R"(
 
 #define SDF 1.0
 #define ICON 0.0
@@ -636,19 +642,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     return half4(color * (alpha * opacity * in.fade_opacity));
 }
-)"_cts;
-
-template <>
-struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "SymbolTextAndIconShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
-
-    static const std::array<AttributeInfo, 9> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 2> textures;
-
-    static constexpr auto source = symbolTextAndIconShaderSource.as_string_view();
+)";
 };
 
 } // namespace shaders

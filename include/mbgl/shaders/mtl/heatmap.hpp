@@ -3,12 +3,9 @@
 #include <mbgl/shaders/heatmap_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
-#include <mbgl/util/string.hpp>
 
 namespace mbgl {
 namespace shaders {
-
-using mbgl::util::operator""_cts;
 
 constexpr auto heatmapShaderPrelude = R"(
 
@@ -40,9 +37,20 @@ struct alignas(16) HeatmapEvaluatedPropsUBO {
 };
 static_assert(sizeof(HeatmapEvaluatedPropsUBO) == 16, "wrong size");
 
-)"_cts;
+)";
 
-constexpr auto heatmapShaderSource = heatmapShaderPrelude + R"(
+template <>
+struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "HeatmapShader";
+    static constexpr auto vertexMainFunction = "vertexMain";
+    static constexpr auto fragmentMainFunction = "fragmentMain";
+
+    static const std::array<AttributeInfo, 3> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<TextureInfo, 0> textures;
+
+    static constexpr auto prelude = heatmapShaderPrelude;
+    static constexpr auto source = R"(
 
 struct VertexStage {
     short2 pos [[attribute(heatmapUBOCount + 0)]];
@@ -133,19 +141,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     return half4(val, 1.0, 1.0, 1.0);
 }
-)"_cts;
-
-template <>
-struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "HeatmapShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
-
-    static const std::array<AttributeInfo, 3> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
-
-    static constexpr auto source = heatmapShaderSource.as_string_view();
+)";
 };
 
 } // namespace shaders

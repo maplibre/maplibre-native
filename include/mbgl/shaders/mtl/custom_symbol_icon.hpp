@@ -3,12 +3,9 @@
 #include <mbgl/shaders/custom_drawable_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
-#include <mbgl/util/string.hpp>
 
 namespace mbgl {
 namespace shaders {
-
-using mbgl::util::operator""_cts;
 
 constexpr auto customSymbolIconShaderPrelude = R"(
 
@@ -33,9 +30,20 @@ struct alignas(16) CustomSymbolIconDrawableUBO {
 };
 static_assert(sizeof(CustomSymbolIconDrawableUBO) == 7 * 16, "wrong size");
 
-)"_cts;
+)";
 
-constexpr auto customSymbolIconShaderSource = customSymbolIconShaderPrelude + R"(
+template <>
+struct ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "CustomSymbolIconShader";
+    static constexpr auto vertexMainFunction = "vertexMain";
+    static constexpr auto fragmentMainFunction = "fragmentMain";
+
+    static const std::array<AttributeInfo, 2> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<TextureInfo, 1> textures;
+
+    static constexpr auto prelude = customSymbolIconShaderPrelude;
+    static constexpr auto source = R"(
 
 struct VertexStage {
     float2 a_pos [[attribute(customSymbolUBOCount + 0)]];
@@ -100,19 +108,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     return half4(image.sample(image_sampler, float2(in.tex)));
 }
-)"_cts;
-
-template <>
-struct ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "CustomSymbolIconShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
-
-    static const std::array<AttributeInfo, 2> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
-
-    static constexpr auto source = customSymbolIconShaderSource.as_string_view();
+)";
 };
 
 } // namespace shaders
