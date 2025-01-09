@@ -219,7 +219,8 @@ void SurfaceRenderableResource::initDepthStencil() {
             .setViewType(vk::ImageViewType::e2D)
             .setFormat(depthFormat)
             .setComponents(vk::ComponentMapping()) // defaults to vk::ComponentSwizzle::eIdentity
-            .setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eDepth, 0, 1, 0, 1));
+            .setSubresourceRange(vk::ImageSubresourceRange(
+                vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil, 0, 1, 0, 1));
 
     depthAllocation->imageView = device->createImageViewUnique(imageViewCreateInfo);
 
@@ -307,28 +308,29 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
 
     // create render pass
     const auto colorLayout = surface ? vk::ImageLayout::ePresentSrcKHR : vk::ImageLayout::eTransferSrcOptimal;
-    const auto colorAttachment = vk::AttachmentDescription(vk::AttachmentDescriptionFlags())
-                                     .setFormat(colorFormat)
-                                     .setSamples(vk::SampleCountFlagBits::e1)
-                                     .setLoadOp(vk::AttachmentLoadOp::eClear)
-                                     .setStoreOp(vk::AttachmentStoreOp::eStore)
-                                     .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
-                                     .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
-                                     .setInitialLayout(vk::ImageLayout::eUndefined)
-                                     .setFinalLayout(colorLayout);
+
+    const std::array<vk::AttachmentDescription, 2> attachments = {
+        vk::AttachmentDescription()
+            .setFormat(colorFormat)
+            .setSamples(vk::SampleCountFlagBits::e1)
+            .setLoadOp(vk::AttachmentLoadOp::eClear)
+            .setStoreOp(vk::AttachmentStoreOp::eStore)
+            .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+            .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+            .setInitialLayout(vk::ImageLayout::eUndefined)
+            .setFinalLayout(colorLayout),
+
+        vk::AttachmentDescription()
+            .setFormat(depthFormat)
+            .setSamples(vk::SampleCountFlagBits::e1)
+            .setLoadOp(vk::AttachmentLoadOp::eClear)
+            .setStoreOp(vk::AttachmentStoreOp::eDontCare)
+            .setStencilLoadOp(vk::AttachmentLoadOp::eClear)
+            .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+            .setInitialLayout(vk::ImageLayout::eUndefined)
+            .setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)};
 
     const vk::AttachmentReference colorAttachmentRef(0, vk::ImageLayout::eColorAttachmentOptimal);
-
-    const auto depthAttachment = vk::AttachmentDescription()
-                                     .setFormat(depthFormat)
-                                     .setSamples(vk::SampleCountFlagBits::e1)
-                                     .setLoadOp(vk::AttachmentLoadOp::eClear)
-                                     .setStoreOp(vk::AttachmentStoreOp::eDontCare)
-                                     .setStencilLoadOp(vk::AttachmentLoadOp::eClear)
-                                     .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
-                                     .setInitialLayout(vk::ImageLayout::eUndefined)
-                                     .setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
-
     const vk::AttachmentReference depthAttachmentRef(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
 
     const auto subpass = vk::SubpassDescription()
@@ -337,28 +339,28 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
                              .setColorAttachments(colorAttachmentRef)
                              .setPDepthStencilAttachment(&depthAttachmentRef);
 
-    const auto subpassSrcStageMask = vk::PipelineStageFlags() | vk::PipelineStageFlagBits::eColorAttachmentOutput |
-                                     vk::PipelineStageFlagBits::eLateFragmentTests;
+    const std::array<vk::SubpassDependency, 2> dependencies = {
+        vk::SubpassDependency()
+            .setSrcSubpass(VK_SUBPASS_EXTERNAL)
+            .setDstSubpass(0)
+            .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+            .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
+            .setSrcAccessMask({})
+            .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite),
 
-    const auto subpassDstStageMask = vk::PipelineStageFlags() | vk::PipelineStageFlagBits::eColorAttachmentOutput |
-                                     vk::PipelineStageFlagBits::eEarlyFragmentTests;
+        vk::SubpassDependency()
+            .setSrcSubpass(VK_SUBPASS_EXTERNAL)
+            .setDstSubpass(0)
+            .setSrcStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests |
+                             vk::PipelineStageFlagBits::eLateFragmentTests)
+            .setDstStageMask(vk::PipelineStageFlagBits::eEarlyFragmentTests |
+                             vk::PipelineStageFlagBits::eLateFragmentTests)
+            .setSrcAccessMask({})
+            .setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite),
+    };
 
-    const auto subpassSrcAccessMask = vk::AccessFlags() | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
-
-    const auto subpassDstAccessMask = vk::AccessFlags() | vk::AccessFlagBits::eColorAttachmentWrite |
-                                      vk::AccessFlagBits::eDepthStencilAttachmentWrite;
-
-    const auto subpassDependency = vk::SubpassDependency()
-                                       .setSrcSubpass(VK_SUBPASS_EXTERNAL)
-                                       .setDstSubpass(0)
-                                       .setSrcStageMask(subpassSrcStageMask)
-                                       .setDstStageMask(subpassDstStageMask)
-                                       .setSrcAccessMask(subpassSrcAccessMask)
-                                       .setDstAccessMask(subpassDstAccessMask);
-
-    const std::array<vk::AttachmentDescription, 2> attachments = {colorAttachment, depthAttachment};
     const auto renderPassCreateInfo =
-        vk::RenderPassCreateInfo().setAttachments(attachments).setSubpasses(subpass).setDependencies(subpassDependency);
+        vk::RenderPassCreateInfo().setAttachments(attachments).setSubpasses(subpass).setDependencies(dependencies);
 
     renderPass = device->createRenderPassUnique(renderPassCreateInfo);
 

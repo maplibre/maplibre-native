@@ -563,25 +563,14 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     return true;
 }
 
-const std::unique_ptr<BufferResource>& Context::getDummyVertexBuffer() {
-    if (!dummyVertexBuffer)
-        dummyVertexBuffer = std::make_unique<BufferResource>(
-            *this, nullptr, 16, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, false);
-    return dummyVertexBuffer;
-}
+const std::unique_ptr<BufferResource>& Context::getDummyBuffer() {
+    if (!dummyBuffer) {
+        const uint32_t usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT |
+                               VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+        dummyBuffer = std::make_unique<BufferResource>(*this, nullptr, 16, usage, false);
+    }
 
-const std::unique_ptr<BufferResource>& Context::getDummyUniformBuffer() {
-    if (!dummyUniformBuffer)
-        dummyUniformBuffer = std::make_unique<BufferResource>(
-            *this, nullptr, 16, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, false);
-    return dummyUniformBuffer;
-}
-
-const std::unique_ptr<BufferResource>& Context::getDummyStorageBuffer() {
-    if (!dummyStorageBuffer)
-        dummyStorageBuffer = std::make_unique<BufferResource>(
-            *this, nullptr, 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, false);
-    return dummyStorageBuffer;
+    return dummyBuffer;
 }
 
 const std::unique_ptr<Texture2D>& Context::getDummyTexture() {

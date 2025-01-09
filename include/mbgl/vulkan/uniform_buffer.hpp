@@ -15,6 +15,7 @@ public:
     ~UniformBuffer() override;
 
     const BufferResource& getBufferResource() const { return buffer; }
+    BufferResource& mutableBufferResource() { return buffer; }
 
     UniformBuffer clone() const { return {buffer.clone()}; }
 
@@ -37,14 +38,21 @@ public:
           descriptorStorageCount(descriptorStorageCount_),
           descriptorUniformCount(descriptorUniformCount_) {}
 
-    UniformBufferArray(UniformBufferArray&& other)
-        : gfx::UniformBufferArray(std::move(other)) {}
+    UniformBufferArray(UniformBufferArray&& other) noexcept
+        : gfx::UniformBufferArray(std::move(other)),
+          descriptorSetType(other.descriptorSetType),
+          descriptorStartIndex(other.descriptorStartIndex),
+          descriptorStorageCount(other.descriptorStorageCount),
+          descriptorUniformCount(other.descriptorUniformCount),
+          descriptorSet(std::move(other.descriptorSet)) {}
+
     UniformBufferArray(const UniformBufferArray&) = delete;
 
-    UniformBufferArray& operator=(UniformBufferArray&& other) {
+    UniformBufferArray& operator=(UniformBufferArray&& other) noexcept {
         gfx::UniformBufferArray::operator=(std::move(other));
         return *this;
     }
+
     UniformBufferArray& operator=(const UniformBufferArray& other) {
         gfx::UniformBufferArray::operator=(other);
         return *this;
