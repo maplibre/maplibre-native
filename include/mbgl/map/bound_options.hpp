@@ -12,6 +12,7 @@ namespace mbgl {
  */
 struct BoundOptions {
     /// Sets the latitude and longitude bounds to which the camera center are constrained
+    /// If ConstrainMode is set to Screen these bounds describe what can be shown on screen.
     BoundOptions& withLatLngBounds(LatLngBounds b) {
         bounds = b;
         return *this;
@@ -38,6 +39,7 @@ struct BoundOptions {
     }
 
     /// Constrain the center of the camera to be within these bounds.
+    /// If ConstrainMode is set to Screen these bounds describe what can be shown on screen.
     std::optional<LatLngBounds> bounds;
 
     /// Maximum zoom level allowed.

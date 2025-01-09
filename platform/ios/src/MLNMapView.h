@@ -916,6 +916,13 @@ vertically on the map.
 @property (nonatomic) double maximumZoomLevel;
 
 /**
+ * The maximum bounds of the map that can be shown on screen.
+ *
+ * @param MLNCoordinateBounds the bounds to constrain the screen to.
+ */
+@property (nonatomic) MLNCoordinateBounds maximumScreenBounds;
+
+/**
  The heading of the map, measured in degrees clockwise from true north.
 
  The value `0` means that the top edge of the map view corresponds to true
