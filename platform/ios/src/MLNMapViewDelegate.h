@@ -245,9 +245,9 @@ NS_ASSUME_NONNULL_BEGIN
  affecting performance.
 
  @param mapView The map view that has just redrawn.
+ @param fullyRendered A Boolean value indicating whether the map is fully rendered or not.
  */
 - (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView fullyRendered:(BOOL)fullyRendered;
-
 /**
  Tells the delegate that the map view has just redrawn.
 
@@ -258,13 +258,14 @@ NS_ASSUME_NONNULL_BEGIN
  affecting performance.
 
  @param mapView The map view that has just redrawn.
- @param frameTimeNanos The time taken to render the frame, in nanoseconds
+ @param fullyRendered A Boolean value indicating whether the map is fully rendered or not.
+ @param frameEncodingTime The time taken to encode the frame, in milliseconds.
+ @param frameRenderingTime The time taken to render the frame, in milliseconds.
  */
 - (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView
                          fullyRendered:(BOOL)fullyRendered
                      frameEncodingTime:(double)frameEncodingTime
                     frameRenderingTime:(double)frameRenderingTime;
-
 /**
  Tells the delegate that the map view is entering an idle state, and no more
  drawing will be necessary until new data is loaded or there is some interaction
