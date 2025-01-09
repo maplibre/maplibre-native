@@ -61,9 +61,9 @@ public:
     /// the given closure to this scheduler, the consequent calls of the
     /// returned closure are ignored.
     ///
-    /// If this scheduler is already deleted by the time the returnded closure
+    /// If this scheduler is already deleted by the time the returned closure
     /// is first invoked, the call is ignored.
-    Scheduler::Task bindOnce(Task);
+    Scheduler::Task bindOnce(Task&&);
 
     /// Enqueues the given |task| for execution into this scheduler's task queue
     /// and then enqueues the |reply| with the captured task result to the

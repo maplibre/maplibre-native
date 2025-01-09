@@ -5,7 +5,7 @@
 
 namespace mbgl {
 
-Scheduler::Task Scheduler::bindOnce(Scheduler::Task fn) {
+Scheduler::Task Scheduler::bindOnce(Scheduler::Task&& fn) {
     assert(fn);
     return [scheduler = makeWeakPtr(), scheduled = std::move(fn)]() mutable {
         if (!scheduled) return; // Repeated call.
