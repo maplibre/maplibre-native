@@ -125,7 +125,8 @@ MLN_EXPORT
  source cannot be clustered.
 
  @param identifier A string that uniquely identifies the source.
- @param dataSource An object conforming to MLNComputedShapeSourceDataSource protocol that will provide the shape data.
+ @param dataSource An object conforming to MLNComputedShapeSourceDataSource protocol that will
+ provide the shape data.
  @param options An `NSDictionary` of options for this source.
  */
 - (instancetype)initWithIdentifier:(NSString *)identifier
