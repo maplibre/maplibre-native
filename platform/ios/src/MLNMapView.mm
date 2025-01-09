@@ -3867,6 +3867,21 @@ static void *windowScreenContext = &windowScreenContext;
     return *self.mbglMap.getBounds().maxZoom;
 }
 
+- (void)setMaximumScreenBounds:(MLNCoordinateBounds)maximumScreenBounds
+{
+    mbgl::LatLng sw = {maximumScreenBounds.sw.latitude, maximumScreenBounds.sw.longitude};
+    mbgl::LatLng ne = {maximumScreenBounds.ne.latitude, maximumScreenBounds.ne.longitude};
+    mbgl::BoundOptions newBounds = mbgl::BoundOptions().withLatLngBounds(mbgl::LatLngBounds::hull(sw, ne));
+
+    self.mbglMap.setBounds(newBounds);
+    self.mbglMap.setConstrainMode(mbgl::ConstrainMode::Screen);
+}
+
+- (MLNCoordinateBounds)maximumScreenBounds
+{
+    return MLNCoordinateBoundsFromLatLngBounds(*self.mbglMap.getBounds().bounds);;
+}
+
 - (CGFloat)minimumPitch
 {
     return *self.mbglMap.getBounds().minPitch;

@@ -1,8 +1,13 @@
 # Changelog for MapLibre Native for iOS
 
-MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-native/blob/master/CONTRIBUTING.md) to get started.
+MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
-## main
+## 6.10.0
+
+- Fix icon label isn't centered with the icon for CJK/local glyphy on iOS ([#3108](https://github.com/maplibre/maplibre-native/pull/3108)).
+- Add support for [PMTiles](https://docs.protomaps.com/pmtiles/) with `pmtiles://` URL scheme ([#2882](https://github.com/maplibre/maplibre-native/pull/2882)).
+- Consolidate UBOs ([#3089](https://github.com/maplibre/maplibre-native/pull/3089)).
+- Allow constraining camera to maximum bounds ([#2475](https://github.com/maplibre/maplibre-native/pull/2475)).
 
 ## 6.9.0
 
