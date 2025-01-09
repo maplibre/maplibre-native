@@ -7,6 +7,7 @@
 - [Android](./android/README.md)
   - [Tests](./android/android-tests.md)
   - [Documentation](./android/android-documentation.md)
+  - [Benchmark](./android/benchmark.md)
 
 - [iOS](./ios/README.md)
   - [Tests](ios/ios-tests.md)
