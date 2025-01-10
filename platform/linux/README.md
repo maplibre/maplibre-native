@@ -19,9 +19,6 @@ cd maplibre-native
 # Install build tools
 apt install build-essential clang cmake ccache ninja-build pkg-config
 
-# Install rust toolchain (default options should be sufficient)
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-
 # Install system dependencies
 apt install libcurl4-openssl-dev libglfw3-dev libuv1-dev libpng-dev libicu-dev libjpeg-turbo8-dev libwebp-dev xvfb
 ```
