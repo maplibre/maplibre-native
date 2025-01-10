@@ -70,6 +70,8 @@ public:
 
     void startFrameCapture();
     void endFrameCapture();
+    void setFrameCaptureLoop(bool value);
+    void triggerFrameCapture(uint32_t frameCount = 1, uint32_t frameDelay = 0);
 
 protected:
     std::unique_ptr<gfx::Context> createContext() override;

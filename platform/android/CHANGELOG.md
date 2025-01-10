@@ -1,5 +1,21 @@
 # Changelog MapLibre Native for Android
 
+## 11.8.0
+
+> [!NOTE]  
+> We are now releasing OpenGL ES and Vulkan variants of MapLibre Android. See the [11.7.0 release notes](https://github.com/maplibre/maplibre-native/releases/tag/android-v11.7.0) for details.
+
+### ✨ Features and improvements
+
+- Add PMTiles support ([#2882](https://github.com/maplibre/maplibre-native/pull/2882)).
+- Consolidate UBOs ([#3089](https://github.com/maplibre/maplibre-native/pull/3089)).
+
+### 🐞 Bug fixes
+
+- (Vulkan) Fix in-flight frame update Vulkan ([#3122](https://github.com/maplibre/maplibre-native/pull/3122)). Fixes jittery labels and some similar issues.
+
+We have a new feature in the C++ Core to constrain the screen (instead of the center of the camera) to some bounds ([#2475](https://github.com/maplibre/maplibre-native/pull/2475)). This functionality still has to be exposed to Android. If you are interested in implementing this, see [this issue](https://github.com/maplibre/maplibre-native/issues/3128).
+
 ## 11.7.1
 
 > [!NOTE]  

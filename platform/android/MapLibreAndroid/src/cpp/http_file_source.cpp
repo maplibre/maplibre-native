@@ -161,7 +161,7 @@ void HTTPRequest::onResponse(jni::JNIEnv& env,
         response.expires = util::parseTimestamp(jni::Make<std::string>(env, expires).c_str());
     }
 
-    if (code == 200) {
+    if (code == 200 || code == 206) {
         if (body) {
             auto data = std::make_shared<std::string>(body.Length(env), char());
             jni::GetArrayRegion(env, *body, 0, data->size(), reinterpret_cast<jbyte*>(&(*data)[0]));

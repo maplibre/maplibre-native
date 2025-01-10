@@ -74,6 +74,22 @@ void UniformBufferArray::bindDescriptorSets(CommandEncoder& encoder) {
     }
 
     descriptorSet->update(*this, descriptorStartIndex, descriptorStorageCount, descriptorUniformCount);
+
+    const auto frameCount = encoder.getContext().getBackend().getMaxFrames();
+    const int32_t currentIndex = encoder.getContext().getCurrentFrameResourceIndex();
+    const int32_t prevIndex = currentIndex == 0 ? frameCount - 1 : currentIndex - 1;
+
+    for (uint32_t i = 0; i < descriptorStorageCount + descriptorUniformCount; ++i) {
+        const uint32_t index = descriptorStartIndex + i;
+
+        if (!uniformBufferVector[index]) {
+            continue;
+        }
+
+        auto& buff = static_cast<UniformBuffer*>(uniformBufferVector[index].get())->mutableBufferResource();
+        buff.updateVulkanBuffer(currentIndex, prevIndex);
+    }
+
     descriptorSet->bind(encoder);
 }
 
