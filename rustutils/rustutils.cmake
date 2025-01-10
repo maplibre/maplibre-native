@@ -1,5 +1,5 @@
 # Include guard
-if(TARGET rustutils AND MLN_USE_RUST)
+if(TARGET rustutils)
     return()
 endif()
 
