@@ -202,7 +202,9 @@ jobs:
 
       - name: Install cxxbridge-cmd (compile)
         if: ${{ github.ref == 'refs/heads/rust' || github.event.pull_request.base.ref == 'rust' }}
-        run: cargo install cxxbridge-cmd
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: cxxbridge-cmd
 
       - name: Cache Bazel
         uses: actions/cache@v4
