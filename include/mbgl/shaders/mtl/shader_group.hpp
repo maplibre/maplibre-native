@@ -64,8 +64,7 @@ public:
             addAdditionalDefines(propertiesAsUniforms, additionalDefines);
 
             auto& context = static_cast<Context&>(gfxContext);
-            // C++26 will allow operator+ with std::string and std::string_view
-            const auto shaderSource = std::string(shaders::prelude) + std::string(prelude) + std::string(source);
+            const auto shaderSource = std::string(shaders::prelude) + prelude + source;
             shader = context.createProgram(
                 ShaderID, shaderName, shaderSource, vertMain, fragMain, programParameters, additionalDefines);
             assert(shader);
