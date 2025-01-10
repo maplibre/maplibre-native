@@ -7,8 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
-#define CIRCLE_SHADER_PRELUDE \
-    R"(
+constexpr auto circleShaderPrelude = R"(
 
 enum {
     idCircleDrawableUBO = idDrawableReservedVertexOnlyUBO,
@@ -51,7 +50,7 @@ struct alignas(16) CircleEvaluatedPropsUBO {
 };
 static_assert(sizeof(CircleEvaluatedPropsUBO) == 4 * 16, "wrong size");
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal> {
@@ -63,7 +62,9 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto source = CIRCLE_SHADER_PRELUDE R"(
+    static constexpr auto prelude = circleShaderPrelude;
+    static constexpr auto source = R"(
+
 struct VertexStage {
     short2 position [[attribute(circleUBOCount + 0)]];
 

@@ -7,8 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
-#define HEATMAP_TEXTURE_SHADER_PRELUDE \
-    R"(
+constexpr auto heatmapTextureShaderPrelude = R"(
 
 enum {
     idHeatmapTexturePropsUBO = drawableReservedUBOCount,
@@ -25,7 +24,7 @@ struct alignas(16) HeatmapTexturePropsUBO {
 };
 static_assert(sizeof(HeatmapTexturePropsUBO) == 5 * 16, "wrong size");
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal> {
@@ -37,7 +36,8 @@ struct ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
-    static constexpr auto source = HEATMAP_TEXTURE_SHADER_PRELUDE R"(
+    static constexpr auto prelude = heatmapTextureShaderPrelude;
+    static constexpr auto source = R"(
 
 struct VertexStage {
     short2 pos [[attribute(heatmapTextureUBOCount + 0)]];

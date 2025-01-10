@@ -7,8 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
-#define CUSTOM_SYMBOL_ICON_SHADER_PRELUDE \
-    R"(
+constexpr auto customSymbolIconShaderPrelude = R"(
 
 enum {
     idCustomSymbolDrawableUBO = idDrawableReservedVertexOnlyUBO,
@@ -31,7 +30,7 @@ struct alignas(16) CustomSymbolIconDrawableUBO {
 };
 static_assert(sizeof(CustomSymbolIconDrawableUBO) == 7 * 16, "wrong size");
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::Metal> {
@@ -43,7 +42,9 @@ struct ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::Metal> 
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto source = CUSTOM_SYMBOL_ICON_SHADER_PRELUDE R"(
+    static constexpr auto prelude = customSymbolIconShaderPrelude;
+    static constexpr auto source = R"(
+
 struct VertexStage {
     float2 a_pos [[attribute(customSymbolUBOCount + 0)]];
     float2 a_tex [[attribute(customSymbolUBOCount + 1)]];

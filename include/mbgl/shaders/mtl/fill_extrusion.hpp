@@ -7,8 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
-#define FILL_EXTRUSION_SHADER_COMMON \
-    R"(
+constexpr auto fillExtrusionShaderPrelude = R"(
 
 enum {
     idFillExtrusionDrawableUBO = idDrawableReservedVertexOnlyUBO,
@@ -62,7 +61,7 @@ struct alignas(16) FillExtrusionPropsUBO {
 };
 static_assert(sizeof(FillExtrusionPropsUBO) == 5 * 16, "wrong size");
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Metal> {
@@ -74,7 +73,9 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto source = FILL_EXTRUSION_SHADER_COMMON R"(
+    static constexpr auto prelude = fillExtrusionShaderPrelude;
+    static constexpr auto source = R"(
+
 struct VertexStage {
     short2 pos [[attribute(fillExtrusionUBOCount + 0)]];
     short4 normal_ed [[attribute(fillExtrusionUBOCount + 1)]];
@@ -193,7 +194,9 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Met
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto source = FILL_EXTRUSION_SHADER_COMMON R"(
+    static constexpr auto prelude = fillExtrusionShaderPrelude;
+    static constexpr auto source = R"(
+
 struct VertexStage {
     short2 pos [[attribute(fillExtrusionUBOCount + 0)]];
     short4 normal_ed [[attribute(fillExtrusionUBOCount + 1)]];
