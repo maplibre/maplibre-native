@@ -12,13 +12,19 @@
 #include <mbgl/shaders/vulkan/circle.hpp>
 #include <mbgl/shaders/vulkan/clipping_mask.hpp>
 #include <mbgl/shaders/vulkan/collision.hpp>
+#include <mbgl/shaders/vulkan/custom_symbol_icon.hpp>
 #include <mbgl/shaders/vulkan/debug.hpp>
 #include <mbgl/shaders/vulkan/fill.hpp>
+#include <mbgl/shaders/vulkan/fill_extrusion.hpp>
 #include <mbgl/shaders/vulkan/heatmap.hpp>
+#include <mbgl/shaders/vulkan/heatmap_texture.hpp>
 #include <mbgl/shaders/vulkan/hillshade.hpp>
+#include <mbgl/shaders/vulkan/hillshade_prepare.hpp>
 #include <mbgl/shaders/vulkan/line.hpp>
+#include <mbgl/shaders/vulkan/location_indicator.hpp>
 #include <mbgl/shaders/vulkan/raster.hpp>
 #include <mbgl/shaders/vulkan/symbol.hpp>
+#include <mbgl/shaders/vulkan/widevector.hpp>
 
 #include <cassert>
 #include <string>
@@ -54,7 +60,13 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 #endif
 
 #include "renderdoc_app.h"
-static RENDERDOC_API_1_1_2* g_rdoc_api = nullptr;
+
+static struct {
+    RENDERDOC_API_1_1_2* api = nullptr;
+    bool loop = false;
+    int32_t frameDelay = 0;
+    uint32_t frameCaptureCount = 0;
+} g_rdoc;
 
 #endif
 
@@ -95,17 +107,31 @@ std::unique_ptr<gfx::Context> RendererBackend::createContext() {
 std::vector<const char*> RendererBackend::getLayers() {
     return {
 #ifdef ENABLE_VULKAN_VALIDATION
-        "VK_LAYER_KHRONOS_validation"
+        "VK_LAYER_KHRONOS_validation",
+#endif
+
+#ifdef _WIN32
+        "VK_LAYER_LUNARG_monitor",
 #endif
     };
 }
 
 std::vector<const char*> RendererBackend::getInstanceExtensions() {
-    return {};
+    return {
+#ifdef __APPLE__
+        "VK_KHR_portability_enumeration"
+#endif
+    };
 }
 
 std::vector<const char*> RendererBackend::getDeviceExtensions() {
-    return getDefaultRenderable().getResource<SurfaceRenderableResource>().getDeviceExtensions();
+    auto extensions = getDefaultRenderable().getResource<SurfaceRenderableResource>().getDeviceExtensions();
+
+#ifdef __APPLE__
+    extensions.push_back("VK_KHR_portability_subset");
+#endif
+
+    return extensions;
 }
 
 std::vector<const char*> RendererBackend::getDebugExtensions() {
@@ -167,13 +193,13 @@ void RendererBackend::initFrameCapture() {
 #ifdef _WIN32
     if (HMODULE mod = GetModuleHandleA("renderdoc.dll")) {
         pRENDERDOC_GetAPI RENDERDOC_GetAPI = (pRENDERDOC_GetAPI)GetProcAddress(mod, "RENDERDOC_GetAPI");
-        int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)&g_rdoc_api);
+        int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)&g_rdoc.api);
         assert(ret == 1);
     }
 #elif __unix__
     if (void* mod = dlopen("librenderdoc.so", RTLD_NOW | RTLD_NOLOAD)) {
         pRENDERDOC_GetAPI RENDERDOC_GetAPI = (pRENDERDOC_GetAPI)dlsym(mod, "RENDERDOC_GetAPI");
-        int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)&g_rdoc_api);
+        int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)&g_rdoc.api);
         assert(ret == 1);
     }
 #endif
@@ -183,17 +209,46 @@ void RendererBackend::initFrameCapture() {
 
 void RendererBackend::startFrameCapture() {
 #ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
-    if (g_rdoc_api) {
-        g_rdoc_api->StartFrameCapture(nullptr, nullptr);
+    if (!g_rdoc.api) {
+        return;
+    }
+
+    if (g_rdoc.loop) {
+        RENDERDOC_DevicePointer devicePtr = RENDERDOC_DEVICEPOINTER_FROM_VKINSTANCE(instance->operator VkInstance_T*());
+        g_rdoc.api->StartFrameCapture(devicePtr, nullptr);
+    } else {
+        if (g_rdoc.frameCaptureCount > 0 && g_rdoc.frameDelay == 0) {
+            g_rdoc.api->TriggerMultiFrameCapture(g_rdoc.frameCaptureCount);
+        }
+
+        --g_rdoc.frameDelay;
     }
 #endif
 }
 
 void RendererBackend::endFrameCapture() {
 #ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
-    if (g_rdoc_api) {
-        g_rdoc_api->EndFrameCapture(nullptr, nullptr);
+    if (g_rdoc.api && g_rdoc.loop) {
+        RENDERDOC_DevicePointer devicePtr = RENDERDOC_DEVICEPOINTER_FROM_VKINSTANCE(instance->operator VkInstance_T*());
+        g_rdoc.api->EndFrameCapture(devicePtr, nullptr);
     }
+#endif
+}
+
+void RendererBackend::setFrameCaptureLoop([[maybe_unused]] bool value) {
+#ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
+    g_rdoc.loop = value;
+#endif
+}
+
+void RendererBackend::triggerFrameCapture([[maybe_unused]] uint32_t frameCount, [[maybe_unused]] uint32_t frameDelay) {
+#ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
+    if (!g_rdoc.api) {
+        return;
+    }
+
+    g_rdoc.frameCaptureCount = frameCount;
+    g_rdoc.frameDelay = frameDelay;
 #endif
 }
 
@@ -322,8 +377,14 @@ void RendererBackend::initInstance() {
 
     // Vulkan 1.1 on Android is supported on 71% of devices (compared to 1.3 with 6%) as of April 23 2024
     // https://vulkan.gpuinfo.org/
+#ifdef __APPLE__
+    vk::InstanceCreateFlags instanceFlags = vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
+#else
+    vk::InstanceCreateFlags instanceFlags = {};
+#endif
+
     vk::ApplicationInfo appInfo("maplibre-native", 1, "maplibre-native", 1, VK_API_VERSION_1_0);
-    vk::InstanceCreateInfo createInfo(vk::InstanceCreateFlags(), &appInfo);
+    vk::InstanceCreateInfo createInfo(instanceFlags, &appInfo);
 
     const auto& layers = getLayers();
 
@@ -443,13 +504,15 @@ void RendererBackend::initDevice() {
 
         const auto& queues = candidate.getQueueFamilyProperties();
 
+        // Use to test on specific GPU type (if multiple)
+        // if (candidate.getProperties().deviceType != vk::PhysicalDeviceType::eIntegratedGpu) return false;
+
         for (auto i = 0u; i < queues.size(); ++i) {
             const auto& queue = queues[i];
 
             if (queue.queueCount == 0) continue;
 
             if (queue.queueFlags & vk::QueueFlagBits::eGraphics) graphicsQueueIndex = i;
-
             if (surface && candidate.getSurfaceSupportKHR(i, surface)) presentQueueIndex = i;
 
             if (graphicsQueueIndex != -1 && (!surface || presentQueueIndex != -1)) break;
@@ -476,9 +539,9 @@ void RendererBackend::initDevice() {
             }
         }
 
-        physicalDeviceProperties = physicalDevice.getProperties();
-
         if (!physicalDevice) throw std::runtime_error("No suitable GPU found");
+
+        physicalDeviceProperties = physicalDevice.getProperties();
     };
 
     pickPhysicalDevice();
@@ -492,25 +555,35 @@ void RendererBackend::initDevice() {
     if (surface && graphicsQueueIndex != presentQueueIndex)
         queueCreateInfos.emplace_back(vk::DeviceQueueCreateFlags(), presentQueueIndex, 1, &queuePriority);
 
-    const auto& supportedDeviceFeatures = physicalDevice.getFeatures();
+    [[maybe_unused]] const auto& supportedDeviceFeatures = physicalDevice.getFeatures();
+    physicalDeviceFeatures = vk::PhysicalDeviceFeatures();
 
-    vk::PhysicalDeviceFeatures enabledDeviceFeatures;
-
+    // TODO
+    // - WideLines disabled on Android (20.77% device coverage https://vulkan.gpuinfo.org/listfeaturescore10.php)
+    // - Rework this to a dynamic toggle based on MLN_TRIANGULATE_FILL_OUTLINES/MLN_ENABLE_POLYLINE_DRAWABLES
+#if !defined(__ANDROID__) && !defined(__APPLE__)
     if (supportedDeviceFeatures.wideLines) {
-        enabledDeviceFeatures.setWideLines(true);
+        physicalDeviceFeatures.setWideLines(true);
 
         // more wideLines info
         // physicalDeviceProperties.limits.lineWidthRange;
         // physicalDeviceProperties.limits.lineWidthGranularity;
     } else {
-        mbgl::Log::Error(mbgl::Event::Render, "Wide line support not available");
+        mbgl::Log::Error(mbgl::Event::Render, "Feature not available: wideLines");
+    }
+#endif
+
+    if (supportedDeviceFeatures.samplerAnisotropy) {
+        physicalDeviceFeatures.setSamplerAnisotropy(true);
+    } else {
+        mbgl::Log::Error(mbgl::Event::Render, "Feature not available: samplerAnisotropy");
     }
 
     auto createInfo = vk::DeviceCreateInfo()
                           .setQueueCreateInfos(queueCreateInfos)
                           .setEnabledExtensionCount(static_cast<uint32_t>(extensions.size()))
                           .setPpEnabledExtensionNames(extensions.data())
-                          .setPEnabledFeatures(&enabledDeviceFeatures);
+                          .setPEnabledFeatures(&physicalDeviceFeatures);
 
     // this is not needed for newer implementations
     createInfo.setPEnabledLayerNames(layers);
@@ -525,13 +598,21 @@ void RendererBackend::initDevice() {
 }
 
 void RendererBackend::initSwapchain() {
-    const auto& renderable = getDefaultRenderable();
+    auto& renderable = getDefaultRenderable();
     auto& renderableResource = renderable.getResource<SurfaceRenderableResource>();
     const auto& size = renderable.getSize();
+
+    // buffer resources if rendering to a surface
+    // no buffering when using headless
+    maxFrames = renderableResource.getPlatformSurface() ? 2 : 1;
+
     renderableResource.init(size.width, size.height);
 
-    if (renderableResource.getPlatformSurface()) {
-        maxFrames = renderableResource.getImageCount();
+    if (renderableResource.hasSurfaceTransformSupport()) {
+        auto& renderableImpl = static_cast<Renderable&>(renderable);
+        const auto& extent = renderableResource.getExtent();
+
+        renderableImpl.setSize({extent.width, extent.height});
     }
 }
 
@@ -605,6 +686,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::LineGradientShader,
                   shaders::BuiltIn::LineSDFShader,
                   shaders::BuiltIn::LinePatternShader,
+                  shaders::BuiltIn::LocationIndicatorShader,
+                  shaders::BuiltIn::LocationIndicatorTexturedShader,
                   shaders::BuiltIn::RasterShader,
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFIconShader,

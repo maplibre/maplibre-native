@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
 <%- propertyDoc(enumName(property), property, type, 'enum').wrap(80, 1) %>
 
- Values of this type are used in the `MLN<%- camelize(type) %>StyleLayer.<%- camelizeWithLeadingLowercase(property.name) %>`
+ Values of this type are used in the ``MLN<%- camelize(type) %>StyleLayer/<%- camelizeWithLeadingLowercase(property.name) %>``
  property.
  */
 typedef NS_ENUM(NSUInteger, MLN<%- camelize(enumName(property)) %>) {
@@ -42,7 +42,7 @@ typedef NS_ENUM(NSUInteger, MLN<%- camelize(enumName(property)) %>) {
 /**
 <%- propertyDoc(enumName(property), property, type, 'enum').wrap(80, 1) %>
 
- Values of this type are used in the `MLN<%- camelize(type) %>StyleLayer.<%- camelizeWithLeadingLowercase(enumName(property)) %>`
+ Values of this type are used in the ``MLN<%- camelize(type) %>StyleLayer/<%- camelizeWithLeadingLowercase(enumName(property)) %>``
  property.
  */
 typedef NS_ENUM(NSUInteger, MLN<%- camelize(enumName(property)) %>) {
@@ -65,10 +65,10 @@ typedef NS_ENUM(NSUInteger, MLN<%- camelize(enumName(property)) %>) {
 <%- doc.wrap(80, 1) %>
 
  You can access an existing <%- type %> style layer using the
- `-[MLNStyle layerWithIdentifier:]` method if you know its identifier;
- otherwise, find it using the `MLNStyle.layers` property. You can also create a
+ ``MLNStyle/layerWithIdentifier:`` method if you know its identifier;
+ otherwise, find it using the ``MLNStyle/layers`` property. You can also create a
  new <%- type %> style layer and add it to the style using a method such as
- `-[MLNStyle addLayer:]`.
+ ``MLNStyle/addLayer:``.
 <% if (examples) { -%>
 
  #### Related examples
@@ -93,8 +93,8 @@ MLN_EXPORT
 Returns a <%- type %> style layer initialized with an identifier.
 
 After initializing and configuring the style layer, add it to a map view’s
-style using the `-[MLNStyle addLayer:]` or
-`-[MLNStyle insertLayer:belowLayer:]` method.
+style using the ``MLNStyle/addLayer:`` or
+``MLNStyle/insertLayer:belowLayer:`` method.
 
 @param identifier A string that uniquely identifies the source in the style to
 which it is added.
@@ -106,8 +106,8 @@ which it is added.
  Returns a <%- type %> style layer initialized with an identifier and source.
 
  After initializing and configuring the style layer, add it to a map view’s
- style using the `-[MLNStyle addLayer:]` or
- `-[MLNStyle insertLayer:belowLayer:]` method.
+ style using the ``MLNStyle/addLayer:`` or
+ ``MLNStyle/insertLayer:belowLayer:`` method.
 
  @param identifier A string that uniquely identifies the source in the style to
     which it is added.
@@ -172,7 +172,7 @@ which it is added.
 <% if (enumProperties) { -%>
 /**
  Methods for wrapping an enumeration value for a style layer attribute in an
- `MLN<%- camelize(type) %>StyleLayer` object and unwrapping its raw value.
+ ``MLN<%- camelize(type) %>StyleLayer`` object and unwrapping its raw value.
  */
 @interface NSValue (MLN<%- camelize(type) %>StyleLayerAdditions)
 
@@ -188,7 +188,7 @@ which it is added.
 + (instancetype)valueWithMLN<%- camelize(enumName(property)) %>:(MLN<%- camelize(enumName(property)) %>)<%- objCName(property) %>;
 
 /**
- The `MLN<%- camelize(enumName(property)) %>` enumeration representation of the value.
+ The ``MLN<%- camelize(enumName(property)) %>`` enumeration representation of the value.
  */
 @property (readonly) MLN<%- camelize(enumName(property)) %> MLN<%- camelize(enumName(property)) %>Value;
 

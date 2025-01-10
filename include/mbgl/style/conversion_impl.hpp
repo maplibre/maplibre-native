@@ -315,6 +315,18 @@ struct ValueFactory<Color> {
     static Value make(const Color& color) { return color.serialize(); }
 };
 
+template <>
+struct ValueFactory<Padding> {
+    static Value make(const Padding& padding) { return padding.serialize(); }
+};
+
+template <>
+struct ValueFactory<VariableAnchorOffsetCollection> {
+    static Value make(const VariableAnchorOffsetCollection& variableAnchorOffset) {
+        return variableAnchorOffset.serialize();
+    }
+};
+
 template <typename T>
 struct ValueFactory<T, typename std::enable_if_t<(!std::is_enum_v<T> && !is_linear_container<T>::value)>> {
     static Value make(const T& arg) { return {arg}; }
@@ -361,12 +373,17 @@ Value makeValue(T&& arg) {
 
 template <typename T>
 StyleProperty makeStyleProperty(const PropertyValue<T>& value) {
-    return value.match([](const Undefined&) -> StyleProperty { return {}; },
-                       [](const Color& c) -> StyleProperty { return {makeValue(c), StyleProperty::Kind::Expression}; },
-                       [](const PropertyExpression<T>& fn) -> StyleProperty {
-                           return {fn.getExpression().serialize(), StyleProperty::Kind::Expression};
-                       },
-                       [](const auto& t) -> StyleProperty { return {makeValue(t), StyleProperty::Kind::Constant}; });
+    return value.match(
+        [](const Undefined&) -> StyleProperty { return {}; },
+        [](const Color& c) -> StyleProperty { return {makeValue(c), StyleProperty::Kind::Expression}; },
+        [](const Padding& p) -> StyleProperty { return {makeValue(p), StyleProperty::Kind::Expression}; },
+        [](const VariableAnchorOffsetCollection& v) -> StyleProperty {
+            return {makeValue(v), StyleProperty::Kind::Expression};
+        },
+        [](const PropertyExpression<T>& fn) -> StyleProperty {
+            return {fn.getExpression().serialize(), StyleProperty::Kind::Expression};
+        },
+        [](const auto& t) -> StyleProperty { return {makeValue(t), StyleProperty::Kind::Constant}; });
 }
 
 inline StyleProperty makeStyleProperty(const TransitionOptions& value) {

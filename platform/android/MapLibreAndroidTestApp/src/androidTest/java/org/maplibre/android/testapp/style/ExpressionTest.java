@@ -55,11 +55,13 @@ import static org.maplibre.android.style.expressions.Expression.stop;
 import static org.maplibre.android.style.expressions.Expression.string;
 import static org.maplibre.android.style.expressions.Expression.switchCase;
 import static org.maplibre.android.style.expressions.Expression.toColor;
+import static org.maplibre.android.style.expressions.Expression.toPadding;
 import static org.maplibre.android.style.expressions.Expression.zoom;
 import static org.maplibre.android.style.layers.PropertyFactory.circleColor;
 import static org.maplibre.android.style.layers.PropertyFactory.fillAntialias;
 import static org.maplibre.android.style.layers.PropertyFactory.fillColor;
 import static org.maplibre.android.style.layers.PropertyFactory.fillOutlineColor;
+import static org.maplibre.android.style.layers.PropertyFactory.iconPadding;
 import static org.maplibre.android.style.layers.PropertyFactory.textColor;
 import static org.maplibre.android.style.layers.PropertyFactory.textField;
 import static org.maplibre.android.testapp.action.MapLibreMapAction.invoke;
@@ -776,6 +778,93 @@ public class ExpressionTest extends EspressoTest {
 
       Expression output = layer.getCircleColor().getExpression();
       assertArrayEquals("Expression should match", input.toArray(), output.toArray());
+    });
+  }
+
+  @Test
+  public void testToPaddingExpression() {
+    validateTestSetup();
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
+      LatLng latLng = new LatLng(51, 17);
+      maplibreMap.getStyle().addSource(
+              new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()))
+      );
+
+      SymbolLayer layer = new SymbolLayer("layer", "source");
+      maplibreMap.getStyle().addLayer(layer);
+
+      // Automatic usage with iconPadding property, analogous to testGetExpressionWrapping()
+      {
+        Expression input = get("value");
+        layer.setProperties(iconPadding(input));
+
+        Expression expectedOuput = toPadding(input);
+        Expression output = layer.getIconPadding().getExpression();
+        assertNotNull(output);
+        assertArrayEquals("Expression should match", expectedOuput.toArray(), output.toArray());
+      }
+
+      // Same within interpolate expression
+      {
+        Expression input = interpolate(
+                exponential(0.5f), zoom(),
+                stop(-0.1, get("value")),
+                stop(0, get("value"))
+        );
+        layer.setProperties(iconPadding(input));
+
+        Expression expectedOutput = interpolate(
+                exponential(0.5f), zoom(),
+                stop(-0.1, toPadding(get("value"))),
+                stop(0, toPadding(get("value")))
+        );
+        Expression output = layer.getIconPadding().getExpression();
+        assertNotNull(output);
+        assertArrayEquals("Expression should match", expectedOutput.toArray(), output.toArray());
+      }
+    });
+  }
+
+  @Test
+  public void testToPaddingResult() {
+    validateTestSetup();
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
+      LatLng latLng = new LatLng(51, 17);
+      maplibreMap.getStyle().addSource(
+              new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()))
+      );
+
+      SymbolLayer layer = new SymbolLayer("layer", "source");
+      maplibreMap.getStyle().addLayer(layer);
+
+      Expression input = Expression.toPadding(Expression.literal(new Float[] { 7.5f, 10.0f, 1.0f}));
+      layer.setProperties(iconPadding(input));
+
+      assertNull("Expression should be null", layer.getIconPadding().getExpression());
+      assertArrayEquals(
+              "Padding value should match",
+              new Float[] { 7.5f, 10.0f, 1.0f, 10.0f },
+              layer.getIconPadding().getValue());
+    });
+  }
+
+  @Test
+  public void testToPaddingError() {
+    validateTestSetup();
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
+      LatLng latLng = new LatLng(51, 17);
+      maplibreMap.getStyle().addSource(
+              new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()))
+      );
+
+      SymbolLayer layer = new SymbolLayer("layer", "source");
+      maplibreMap.getStyle().addLayer(layer);
+
+      Expression input = toPadding(literal("invalid"));
+      layer.setProperties(iconPadding(input));
+
+      assertNull("Expression should be null", layer.getIconPadding().getExpression());
+      assertNull("Padding value should be null", layer.getIconPadding().getValue());
     });
   }
 

@@ -34,7 +34,6 @@ target_sources(
     PRIVATE
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/collator.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/number_format.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/layermanager/layer_manager.cpp
@@ -52,6 +51,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_database.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_download.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/online_file_source.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/$<IF:$<BOOL:${MLN_WITH_PMTILES}>,pmtiles_file_source.cpp,pmtiles_file_source_stub.cpp>
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/sqlite3.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/bidi.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/local_glyph_rasterizer.cpp
@@ -79,6 +79,14 @@ target_compile_definitions(
         CURL_STATICLIB
         USE_STD_FILESYSTEM
 )
+
+if(MLN_WITH_OPENGL)
+    target_sources(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
+    )
+endif()
 
 if(MLN_WITH_EGL)
     find_package(unofficial-angle CONFIG REQUIRED)
@@ -123,12 +131,6 @@ elseif(MLN_WITH_OSMESA)
             OSMesa::libGLESv2
     )
 elseif(MLN_WITH_VULKAN)
-    target_include_directories(
-        mbgl-core
-        PRIVATE
-            ${PROJECT_SOURCE_DIR}/vendor/Vulkan-Headers/include
-    )
-
     target_sources(
         mbgl-core
         PRIVATE
@@ -227,9 +229,8 @@ target_link_libraries(
     mbgl-test-runner
     PRIVATE
         mbgl-compiler-options
-        -Wl,--whole-archive
-        mbgl-test
-        -Wl,--no-whole-archive
+        $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
+        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
 )
 
 add_executable(
@@ -241,8 +242,7 @@ target_link_libraries(
     mbgl-benchmark-runner
     PRIVATE
         mbgl-compiler-options
-        mbgl-benchmark
-        -WHOLEARCHIVE:mbgl-benchmark
+        $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-benchmark>
         $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
         shlwapi
 )
@@ -262,6 +262,12 @@ target_link_libraries(
     PRIVATE
         mbgl-compiler-options
         mbgl-render-test
+        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
+)
+
+target_link_libraries(
+    mbgl-expression-test
+    PRIVATE
         $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
 )
 

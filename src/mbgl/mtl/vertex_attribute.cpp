@@ -14,36 +14,25 @@ namespace mtl {
 
 const gfx::UniqueVertexBufferResource& VertexAttribute::getBuffer(gfx::VertexAttribute& attrib_,
                                                                   UploadPass& uploadPass,
-                                                                  const gfx::BufferUsageType usage) {
+                                                                  const gfx::BufferUsageType usage,
+                                                                  bool forceUpdate) {
     if (!attrib_.getBuffer()) {
         auto& attrib = static_cast<VertexAttribute&>(attrib_);
         if (attrib.sharedRawData) {
-            return uploadPass.getBuffer(attrib.sharedRawData, usage);
+            return uploadPass.getBuffer(attrib.sharedRawData, usage, forceUpdate);
         } else {
             if (!attrib.rawData.empty()) {
                 auto buffer = uploadPass.createVertexBufferResource(
                     attrib.rawData.data(), attrib.rawData.size(), usage, false);
                 attrib.setBuffer(std::move(buffer));
                 attrib.setRawData({});
+                attrib_.setDirty(false);
             } else {
                 assert(false);
             }
         }
     }
     return attrib_.getBuffer();
-}
-
-bool VertexAttributeArray::isDirty() const {
-    return std::any_of(attrs.begin(), attrs.end(), [](const auto& attr) {
-        if (attr) {
-            // If we have shared data, the dirty flag from that overrides ours
-            const auto& attrib = static_cast<const VertexAttribute&>(*attr);
-            if (const auto& shared = attrib.getSharedRawData()) {
-                return shared->getDirty();
-            }
-        }
-        return attr && attr->isDirty();
-    });
 }
 
 } // namespace mtl

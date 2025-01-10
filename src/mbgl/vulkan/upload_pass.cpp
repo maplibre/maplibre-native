@@ -84,7 +84,8 @@ struct VertexBuffer : public gfx::VertexBufferBase {
 static const std::unique_ptr<gfx::VertexBufferResource> noBuffer;
 
 const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVectorBasePtr& vec,
-                                                             const gfx::BufferUsageType usage) {
+                                                             const gfx::BufferUsageType usage,
+                                                             [[maybe_unused]] bool forceUpdate) {
     if (vec) {
         const auto* rawBufPtr = vec->getRawData();
         const auto rawBufSize = vec->getRawCount() * vec->getRawSize();
@@ -95,11 +96,11 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
 
             // If it's changed, update it
             if (rawBufSize <= resource.getSizeInBytes()) {
-                if (vec->getDirty()) {
-                    updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
-                    vec->setDirty(false);
+                if (vec->isModifiedAfter(resource.getLastUpdated())) {
+                    // updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
+                } else {
+                    return rawData->resource;
                 }
-                return rawData->resource;
             }
         }
         // Otherwise, create a new one
@@ -107,7 +108,10 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
             auto buffer = std::make_unique<VertexBuffer>();
             buffer->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage, /*persistent=*/false);
             vec->setBuffer(std::move(buffer));
-            vec->setDirty(false);
+
+            auto* rawData = static_cast<VertexBuffer*>(vec->getBuffer());
+            auto& resource = static_cast<VertexBufferResource&>(*rawData->resource);
+            resource.setLastUpdated(vec->getLastModified());
             return static_cast<VertexBuffer*>(vec->getBuffer())->resource;
         }
     }
@@ -122,6 +126,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const gfx::VertexAttributeArray& defaults,
     const gfx::VertexAttributeArray& overrides,
     const gfx::BufferUsageType usage,
+    const std::optional<std::chrono::duration<double>> lastUpdate,
     /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>&) {
     gfx::AttributeBindingArray bindings;
 
@@ -147,7 +152,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         }
 
         // If the attribute references data shared with a bucket, get the corresponding buffer.
-        if (const auto& buffer = getBuffer(effectiveAttr.getSharedRawData(), usage)) {
+        if (const auto& buffer = getBuffer(effectiveAttr.getSharedRawData(), usage, !lastUpdate)) {
             assert(effectiveAttr.getSharedStride() * effectiveAttr.getSharedVertexOffset() <
                    effectiveAttr.getSharedRawData()->getRawSize() * effectiveAttr.getSharedRawData()->getRawCount());
 
@@ -163,7 +168,8 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         assert(effectiveAttr.getStride() > 0);
 
         // Otherwise, turn the data managed by the attribute into a buffer.
-        if (const auto& buffer = VertexAttribute::getBuffer(effectiveAttr, *this, gfx::BufferUsageType::StaticDraw)) {
+        if (const auto& buffer = VertexAttribute::getBuffer(
+                effectiveAttr, *this, gfx::BufferUsageType::StaticDraw, !lastUpdate)) {
             bindings[index] = {
                 /*.attribute = */ {effectiveAttr.getDataType(), /*offset=*/0},
                 /*.vertexStride = */ static_cast<uint32_t>(effectiveAttr.getStride()),
@@ -175,8 +181,11 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
 
         assert(false);
     };
-
-    defaults.resolve(overrides, resolveAttr);
+    // This version is called when the attribute is available, but isn't being used by the shader
+    const auto missingAttr = [&](const size_t, auto& attr_) -> void {
+        attr_->setDirty(false);
+    };
+    defaults.resolve(overrides, resolveAttr, missingAttr);
 
     return bindings;
 }

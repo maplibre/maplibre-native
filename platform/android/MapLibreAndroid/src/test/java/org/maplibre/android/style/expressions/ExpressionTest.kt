@@ -1126,6 +1126,14 @@ class ExpressionTest {
 
     @Test
     @Throws(Exception::class)
+    fun testToPadding() {
+        val expected = arrayOf<Any>("to-padding", "value")
+        val actual = Expression.toPadding(Expression.literal("value")).toArray()
+        Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun testLet() {
         val expected = arrayOf<Any>("let", "letName", "value")
         val actual =

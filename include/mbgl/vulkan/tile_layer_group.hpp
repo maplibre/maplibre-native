@@ -25,11 +25,7 @@ public:
     void render(RenderOrchestrator&, PaintParameters&) override;
 
     const gfx::UniformBufferArray& getUniformBuffers() const override { return uniformBuffers; };
-
     gfx::UniformBufferArray& mutableUniformBuffers() override { return uniformBuffers; };
-
-    void bindUniformBuffers(RenderPass&) const noexcept;
-    void unbindUniformBuffers(RenderPass&) const noexcept {}
 
 protected:
     UniformBufferArray uniformBuffers;

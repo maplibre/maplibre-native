@@ -8,7 +8,7 @@ namespace mbgl {
 namespace shaders {
 
 struct ClipUBO {
-    matf4 matrix;
+    mat4 matrix;
     std::uint32_t stencil_ref;
 };
 
@@ -16,13 +16,12 @@ template <>
 struct ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "ClippingMaskProgram";
 
-    static constexpr std::array<UniformBlockInfo, 0> uniforms{};
     static const std::array<AttributeInfo, 1> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static constexpr std::array<TextureInfo, 0> textures{};
+    static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto vertex = R"(
-        layout(location = 0) in vec2 position;
+        layout(location = 0) in ivec2 position;
 
         layout(push_constant) uniform constants {
             mat4 matrix;

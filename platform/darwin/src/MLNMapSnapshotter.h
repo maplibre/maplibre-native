@@ -68,7 +68,8 @@ MLN_EXPORT
 
  @param styleURL URL of the map style to snapshot. The URL may be a full HTTP,
     HTTPS URL, canonical URL or a path to a local file relative to
-    the application’s resource path. Specify `nil` for the default style.
+    the application's resource path. Specify `nil` for the default style.
+ @param camera The camera representing the viewport visible in the snapshot.
  @param size The image size.
  */
 - (instancetype)initWithStyleURL:(nullable NSURL *)styleURL
@@ -227,7 +228,7 @@ typedef void (^MLNMapSnapshotCompletionHandler)(MLNMapSnapshot *_Nullable snapsh
 
  #### Related examples
  TODO: Create a static map snapshot, learn how to use the
- `MLNMapSnapshotter` to generate a static image based on an `MLNMapView`
+ ``MLNMapSnapshotter`` to generate a static image based on an ``MLNMapSnapshotter``
  object's style, camera, and view bounds.
  */
 MLN_EXPORT
@@ -267,7 +268,7 @@ MLN_EXPORT
 /**
  Starts the snapshot creation and executes the specified blocks with the result
  on the specified queue. Use this option if you want to add custom drawing on
- top of the resulting `MLNMapSnapshot`.
+ top of the resulting ``MLNMapSnapshot``.
 
  @param overlayHandler The block to call after the base map finishes drawing but
     before certain built-in overlays draw. The block can use Core Graphics to

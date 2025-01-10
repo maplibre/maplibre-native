@@ -3,13 +3,14 @@
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gfx/context.hpp>
 
+#define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
+
 #ifdef _WIN32
 #define VK_USE_PLATFORM_WIN32_KHR
 #elif defined(__ANDROID__)
 #define VK_USE_PLATFORM_ANDROID_KHR
 #endif
 
-#define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
 #include <vulkan/vulkan.hpp>
 
 #define VMA_VULKAN_VERSION 1000000
@@ -47,6 +48,7 @@ public:
     uint32_t getMaxFrames() const { return maxFrames; }
     const VmaAllocator& getAllocator() const { return allocator; }
     const vk::PhysicalDeviceProperties& getDeviceProperties() const { return physicalDeviceProperties; }
+    const vk::PhysicalDeviceFeatures& getDeviceFeatures() const { return physicalDeviceFeatures; }
     int32_t getGraphicsQueueIndex() const { return graphicsQueueIndex; }
     int32_t getPresentQueueIndex() const { return presentQueueIndex; }
 
@@ -68,6 +70,8 @@ public:
 
     void startFrameCapture();
     void endFrameCapture();
+    void setFrameCaptureLoop(bool value);
+    void triggerFrameCapture(uint32_t frameCount = 1, uint32_t frameDelay = 0);
 
 protected:
     std::unique_ptr<gfx::Context> createContext() override;
@@ -97,6 +101,7 @@ protected:
     vk::PhysicalDevice physicalDevice;
     vk::UniqueDevice device;
     vk::PhysicalDeviceProperties physicalDeviceProperties;
+    vk::PhysicalDeviceFeatures physicalDeviceFeatures;
 
     int32_t graphicsQueueIndex = -1;
     int32_t presentQueueIndex = -1;

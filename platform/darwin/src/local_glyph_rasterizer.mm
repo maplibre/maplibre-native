@@ -1,7 +1,10 @@
 #include <mbgl/text/local_glyph_rasterizer.hpp>
 #include <mbgl/util/i18n.hpp>
+#include <mbgl/util/logging.hpp>
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/constants.hpp>
+
+#include <mbgl/interface/native_apple_interface.h>
 
 #include <unordered_map>
 
@@ -191,16 +194,28 @@ bool LocalGlyphRasterizer::canRasterizeGlyph(const FontStack&, GlyphID glyphID) 
  @param font The font to apply to the codepoint.
  @param metrics Upon return, the metrics match the font’s metrics for the glyph
     representing the codepoint.
+ @param isBold use kCTFontBoldTrait if it is true.
  @returns An image containing the glyph.
  */
-PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics& metrics) {
+PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics& metrics, BOOL isBold) {
     CFStringRefHandle string(CFStringCreateWithCharacters(NULL, reinterpret_cast<UniChar*>(&glyphID), 1));
     if (!string) {
         throw std::runtime_error("Unable to create string from codepoint");
     }
 
+    // Create a bold variant of the font
+    CTFontRefHandle boldFont(CTFontCreateCopyWithSymbolicTraits(font, 0.0, NULL, kCTFontBoldTrait, kCTFontBoldTrait));
+    if (!boldFont) {
+        CFStringRefHandle familyNameHandle(CTFontCopyFamilyName(font));
+        NSString* familyName = (__bridge NSString *)(*familyNameHandle);
+        std::string stdFamilyName(familyName.UTF8String);
+        Log::Error(Event::General, "Unable to create bold font for " + stdFamilyName);
+    }
+    
+    CTFontRef drawFont = isBold && boldFont ? *boldFont : font;
+
     CFStringRef keys[] = { kCTFontAttributeName };
-    CFTypeRef values[] = { font };
+    CFTypeRef values[] = { drawFont };
 
     CFDictionaryRefHandle attributes(
         CFDictionaryCreate(kCFAllocatorDefault, (const void**)&keys,
@@ -234,6 +249,7 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
     constexpr const size_t bitsPerComponent = 8;
     constexpr const size_t bytesPerPixel = 4;
     const size_t bytesPerRow = bytesPerPixel * size.width;
+    const auto bitmapInfo = static_cast<uint32_t>(kCGBitmapByteOrderDefault) | static_cast<uint32_t>(kCGImageAlphaPremultipliedLast);
 
     CGContextHandle context(CGBitmapContextCreate(
         rgbaBitmap.data.get(),
@@ -242,8 +258,7 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
         bitsPerComponent,
         bytesPerRow,
         *colorSpace,
-        // NOLINTNEXTLINE(bugprone-suspicious-enum-usage)
-        kCGBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast));
+        bitmapInfo));
     if (!context) {
         throw std::runtime_error("CGBitmapContextCreate failed");
     }
@@ -257,7 +272,7 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
     
     // Mimic glyph PBF metrics.
     metrics.left = Glyph::borderSize;
-    metrics.top = 4;
+    metrics.top = -Glyph::borderSize;
     
     // Move the text upward to avoid clipping off descenders.
     CGFloat descent;
@@ -265,7 +280,7 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
     CGContextSetTextPosition(*context, 0.0, descent);
     
     CTLineDraw(*line, *context);
-    
+
     return rgbaBitmap;
 }
 
@@ -288,8 +303,16 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack& fontStack, GlyphID g
     }
     
     manufacturedGlyph.id = glyphID;
+    BOOL isBold = NO;
+    // Only check the first font name to detect if the user prefers using bold
+    if (!fontStack.empty()) {
+        std::string lowercaseFont = platform::lowercase(fontStack.front());
+        if (lowercaseFont.find("bold") != std::string::npos && lowercaseFont.find("semibold") == std::string::npos) {
+            isBold = YES;
+        }
+    }
 
-    PremultipliedImage rgbaBitmap = drawGlyphBitmap(glyphID, *font, manufacturedGlyph.metrics);
+    PremultipliedImage rgbaBitmap = drawGlyphBitmap(glyphID, *font, manufacturedGlyph.metrics, isBold);
     
     Size size(manufacturedGlyph.metrics.width, manufacturedGlyph.metrics.height);
     // Copy alpha values from RGBA bitmap into the AlphaImage output

@@ -6,16 +6,23 @@
 namespace mbgl {
 namespace shaders {
 
+#define HEATMAP_SHADER_PRELUDE \
+    R"(
+
+#define idHeatmapDrawableUBO        idDrawableReservedVertexOnlyUBO
+#define idHeatmapEvaluatedPropsUBO  layerUBOStartId
+
+)"
+
 template <>
 struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Vulkan> {
     static constexpr const char* name = "HeatmapShader";
 
-    static const std::array<UniformBlockInfo, 3> uniforms;
     static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static constexpr std::array<TextureInfo, 0> textures{};
+    static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto vertex = R"(
+    static constexpr auto vertex = HEATMAP_SHADER_PRELUDE R"(
 
 // Effective "0" in the kernel density texture to adjust the kernel size to;
 // this empirically chosen number minimizes artifacts on overlapping kernels
@@ -25,7 +32,7 @@ const float ZERO = 1.0 / 255.0 / 16.0;
 // Gaussian kernel coefficient: 1 / sqrt(2 * PI)
 #define GAUSS_COEF 0.3989422804014327
 
-layout(location = 0) in vec2 in_position;
+layout(location = 0) in ivec2 in_position;
 
 #if !defined(HAS_UNIFORM_u_weight)
 layout(location = 1) in vec2 in_weight;
@@ -35,41 +42,46 @@ layout(location = 1) in vec2 in_weight;
 layout(location = 2) in vec2 in_radius;
 #endif
 
-layout(set = 0, binding = 1) uniform HeatmapDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct HeatmapDrawableUBO {
     mat4 matrix;
     float extrude_scale;
+    // Interpolations
+    float weight_t;
+    float radius_t;
     float pad1;
-    vec2 pad2;
-} drawable;
+};
 
-layout(set = 0, binding = 2) uniform HeatmapEvaluatedPropsUBO {
+layout(std140, set = LAYER_SET_INDEX, binding = idHeatmapDrawableUBO) readonly buffer HeatmapDrawableUBOVector {
+    HeatmapDrawableUBO drawable_ubo[];
+} drawableVector;
+
+layout(set = LAYER_SET_INDEX, binding = idHeatmapEvaluatedPropsUBO) uniform HeatmapEvaluatedPropsUBO {
     float weight;
     float radius;
     float intensity;
     float pad1;
 } props;
 
-layout(set = 0, binding = 3) uniform HeatmapInterpolateUBO {
-    float weight_t;
-    float radius_t;
-    vec2 pad1;
-} interp;
-
 layout(location = 0) out float frag_weight;
 layout(location = 1) out lowp vec2 frag_extrude;
 
 void main() {
+    const HeatmapDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_weight)
     const float weight = props.weight;
 #else
-    const float weight = unpack_mix_float(in_weight, interp.weight_t);
+    const float weight = unpack_mix_float(in_weight, drawable.weight_t);
 #endif
 
 #if defined(HAS_UNIFORM_u_radius)
     const float radius = props.radius;
 #else
-    const float radius = unpack_mix_float(in_radius, interp.radius_t);
+    const float radius = unpack_mix_float(in_radius, drawable.radius_t);
 #endif
 
     // unencode the extrusion vector that we snuck into the a_pos vector
@@ -98,14 +110,14 @@ void main() {
     // multiply a_pos by 0.5, since we had it * 2 in order to sneak
     // in extrusion data
     gl_Position = drawable.matrix * vec4(floor(in_position * 0.5) + scaled_extrude, 0, 1);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     frag_weight = weight;
     frag_extrude = extrude;
 }
 )";
 
-    static constexpr auto fragment = R"(
+    static constexpr auto fragment = HEATMAP_SHADER_PRELUDE R"(
 
 // Gaussian kernel coefficient: 1 / sqrt(2 * PI)
 #define GAUSS_COEF 0.3989422804014327
@@ -115,7 +127,7 @@ layout(location = 1) in lowp vec2 frag_extrude;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 2) uniform HeatmapEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = idHeatmapEvaluatedPropsUBO) uniform HeatmapEvaluatedPropsUBO {
     float weight;
     float radius;
     float intensity;
@@ -134,64 +146,6 @@ void main() {
     const float val = frag_weight * props.intensity * GAUSS_COEF * exp(d);
 
     out_color = vec4(val, 1.0, 1.0, 1.0);
-}
-)";
-};
-
-template <>
-struct ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Vulkan> {
-    static constexpr const char* name = "HeatmapTextureShader";
-
-    static const std::array<UniformBlockInfo, 2> uniforms;
-    static const std::array<AttributeInfo, 1> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 2> textures;
-
-    static constexpr auto vertex = R"(
-
-layout(location = 0) in vec2 in_position;
-
-layout(set = 0, binding = 1) uniform HeatmapTexturePropsUBO {
-    mat4 matrix;
-    float opacity;
-    float pad1, pad2, pad3;
-} props;
-
-layout(location = 0) out vec2 frag_position;
-
-void main() {
-
-    gl_Position = props.matrix * vec4(in_position * global.world_size, 0, 1);
-    gl_Position.y *= -1.0;
-
-    frag_position = in_position;
-}
-)";
-
-    static constexpr auto fragment = R"(
-
-layout(location = 0) in vec2 frag_position;
-layout(location = 0) out vec4 out_color;
-
-layout(set = 0, binding = 1) uniform HeatmapTexturePropsUBO {
-    mat4 matrix;
-    float opacity;
-    float pad1, pad2, pad3;
-} props;
-
-layout(set = 1, binding = 0) uniform sampler2D image_sampler;
-layout(set = 1, binding = 1) uniform sampler2D color_ramp_sampler;
-
-void main() {
-
-#if defined(OVERDRAW_INSPECTOR)
-    out_color = vec4(1.0);
-    return;
-#endif
-
-    const float t = texture(image_sampler, frag_position).r;
-    const vec4 color = texture(color_ramp_sampler, vec2(t, 0.5));
-    out_color = color * props.opacity;
 }
 )";
 };

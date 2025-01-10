@@ -202,8 +202,8 @@ class RuntimeStyleActivity : AppCompatActivity() {
                     true
                 }
 
-                R.id.action_add_satellite_layer -> {
-                    addSatelliteLayer()
+                R.id.action_add_raster_source_layer -> {
+                    addRasterSourceLayer()
                     true
                 }
 
@@ -329,6 +329,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
 
     private fun addParksLayer() {
         // Add a source
+        // # --8<-- [start:source]
         val source: Source = try {
             GeoJsonSource("amsterdam-spots", ResourceUtils.readRawResource(this, R.raw.amsterdam))
         } catch (ioException: IOException) {
@@ -347,6 +348,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
             PropertyFactory.fillOpacity(0.3f),
             PropertyFactory.fillAntialias(true)
         )
+        // # --8<-- [end:source]
 
         // Only show me parks (except westerpark with stroke-width == 3)
         layer.setFilter(
@@ -501,13 +503,14 @@ class RuntimeStyleActivity : AppCompatActivity() {
         ).show()
     }
 
-    private fun addSatelliteLayer() {
-        // Add a source
-        val source: Source = RasterSource("my-raster-source", "maptiler://sources/satellite", 512)
-        maplibreMap.style!!.addSource(source)
+    private fun addRasterSourceLayer() {
+        // Take note of Tile Usage Policy https://operations.osmfoundation.org/policies/tiles/
+        val osmTileSet = TileSet("osm", "https://tile.openstreetmap.org/{z}/{x}/{y}.png")
+        osmTileSet.attribution = "OSM Contributors"
+        val source = RasterSource("osm", osmTileSet, 128)
+        val layer = RasterLayer("osm-layer", "osm")
 
-        // Add a layer
-        maplibreMap.style!!.addLayer(RasterLayer("satellite-layer", "my-raster-source"))
+        maplibreMap.setStyle(Style.Builder().withSource(source).withLayer(layer))
     }
 
     private fun updateWaterColorOnZoom() {

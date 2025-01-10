@@ -13,7 +13,9 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:debuggable="true"
+        tools:ignore="HardcodedDebugMode">
         <activity
             android:name=".activity.FeatureOverviewActivity"
             android:exported="true"
@@ -871,6 +873,18 @@
             <meta-data
                 android:name="@string/category"
                 android:value="@string/category_maplayout" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity> <!-- Events -->
+        <activity
+            android:name="org.maplibre.android.testapp.activity.events.ObserverActivity"
+            android:description="@string/description_observer_activity"
+            android:exported="true"
+            android:label="@string/activity_observer_activity" >
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_events" />
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.FeatureOverviewActivity" />

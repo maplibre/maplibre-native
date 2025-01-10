@@ -80,5 +80,3 @@ jobs:
       
       - name: Generate Xcode project for macOS
         run: bazel run //platform/macos:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
-        
-        

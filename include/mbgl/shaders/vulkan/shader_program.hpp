@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/vulkan/uniform_block.hpp>
 #include <mbgl/vulkan/vertex_attribute.hpp>
 #include <mbgl/vulkan/renderer_backend.hpp>
 #include <mbgl/vulkan/pipeline.hpp>
@@ -51,12 +50,14 @@ using UniqueShaderProgram = std::unique_ptr<ShaderProgram>;
 
 class ShaderProgram final : public gfx::ShaderProgramBase {
 public:
-    ShaderProgram(const std::string& name,
+    ShaderProgram(shaders::BuiltIn shaderID,
+                  const std::string& name,
                   const std::string_view& vertex,
                   const std::string_view& fragment,
                   const ProgramParameters& programParameters,
                   const mbgl::unordered_map<std::string, std::string>& additionalDefines,
-                  RendererBackend& backend);
+                  RendererBackend& backend,
+                  gfx::ContextObserver& observer);
     ~ShaderProgram() noexcept override;
 
     static constexpr std::string_view Name{"GenericVulkanShader"};
@@ -68,13 +69,10 @@ public:
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
     const gfx::VertexAttributeArray& getInstanceAttributes() const override { return instanceAttributes; }
 
-    const gfx::UniformBlockArray& getUniformBlocks() const override { return uniformBlocks; }
-    gfx::UniformBlockArray& mutableUniformBlocks() override { return uniformBlocks; }
     bool hasTextures() const;
 
     void initAttribute(const shaders::AttributeInfo&);
     void initInstanceAttribute(const shaders::AttributeInfo&);
-    void initUniformBlock(const shaders::UniformBlockInfo&);
     void initTexture(const shaders::TextureInfo&);
 
 protected:
@@ -85,7 +83,6 @@ protected:
     vk::UniqueShaderModule fragmentShader;
     std::unordered_map<std::size_t, vk::UniquePipeline> pipelines;
 
-    UniformBlockArray uniformBlocks;
     VertexAttributeArray vertexAttributes;
     VertexAttributeArray instanceAttributes;
     std::array<std::optional<size_t>, shaders::maxTextureCountPerShader> textureBindings;

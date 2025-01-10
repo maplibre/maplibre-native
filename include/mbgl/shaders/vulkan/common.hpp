@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/shaders/shader_source.hpp>
+#include <mbgl/shaders/vulkan/shader_program.hpp>
 
 namespace mbgl {
 namespace shaders {
@@ -66,7 +67,17 @@ vec2 get_pattern_pos(const vec2 pixel_coord_upper, const vec2 pixel_coord_lower,
     return (tile_units_to_pixels * pos + offset) / pattern_size;
 }
 
-layout(set = 0, binding = 0) uniform GlobalPaintParamsUBO {
+#define GLOBAL_SET_INDEX            0
+#define LAYER_SET_INDEX             1
+#define DRAWABLE_UBO_SET_INDEX      2
+#define DRAWABLE_IMAGE_SET_INDEX    3
+
+#define idDrawableReservedVertexOnlyUBO         0
+#define idDrawableReservedFragmentOnlyUBO       1
+#define drawableReservedUBOCount                2
+#define layerUBOStartId                         3
+
+layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     vec2 pattern_atlas_texsize;
     vec2 units_to_pixels;
     vec2 world_size;
@@ -74,9 +85,23 @@ layout(set = 0, binding = 0) uniform GlobalPaintParamsUBO {
     float symbol_fade_change;
     float aspect_ratio;
     float pixel_ratio;
-    float zoom;
+    float map_zoom;
     float pad1;
-} global;
+} paintParams;
+
+#ifdef USE_SURFACE_TRANSFORM
+layout(set = GLOBAL_SET_INDEX, binding = 1) uniform GlobalPlatformParamsUBO {
+    mat2 rotation;
+} platformParams;
+#endif
+
+void applySurfaceTransform() {
+#ifdef USE_SURFACE_TRANSFORM
+    gl_Position.xy = platformParams.rotation * gl_Position.xy;
+#endif
+
+    gl_Position.y *= -1.0;
+}
 
 )";
 
@@ -85,7 +110,17 @@ layout(set = 0, binding = 0) uniform GlobalPaintParamsUBO {
 #define M_PI 3.1415926535897932384626433832795
 #define SDF_PX 8.0
 
-layout(set = 0, binding = 0) uniform GlobalPaintParamsUBO {
+#define GLOBAL_SET_INDEX            0
+#define LAYER_SET_INDEX             1
+#define DRAWABLE_UBO_SET_INDEX      2
+#define DRAWABLE_IMAGE_SET_INDEX    3
+
+#define idDrawableReservedVertexOnlyUBO         0
+#define idDrawableReservedFragmentOnlyUBO       1
+#define drawableReservedUBOCount                2
+#define layerUBOStartId                         3
+
+layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     vec2 pattern_atlas_texsize;
     vec2 units_to_pixels;
     vec2 world_size;
@@ -93,9 +128,9 @@ layout(set = 0, binding = 0) uniform GlobalPaintParamsUBO {
     float symbol_fade_change;
     float aspect_ratio;
     float pixel_ratio;
-    float zoom;
+    float map_zoom;
     float pad1;
-} global;
+} paintParams;
 
 )";
 };

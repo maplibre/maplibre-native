@@ -35,7 +35,10 @@ void android_main(struct android_app* app) {
 
             int finishedTestCount = 0;
             std::function<void()> testStatus = [&]() {
-                ALooper_pollAll(0, &outFd, &outEvents, reinterpret_cast<void**>(&source));
+                auto result = ALooper_pollOnce(0, &outFd, &outEvents, reinterpret_cast<void**>(&source));
+                if (result == ALOOPER_POLL_ERROR) {
+                    throw std::runtime_error("ALooper_pollOnce returned an error");
+                }
 
                 if (source != nullptr) {
                     source->process(app, source);
@@ -50,13 +53,21 @@ void android_main(struct android_app* app) {
             return result;
         };
 
+#if MLN_RENDER_BACKEND_VULKAN
+        auto result = runTestWithManifest("/metrics/android-vulkan-render-test-runner-metrics.json");
+        result = runTestWithManifest("/metrics/android-vulkan-render-test-runner-style.json") && result;
+#else
         auto result = runTestWithManifest("/metrics/android-render-test-runner-metrics.json");
         result = runTestWithManifest("/metrics/android-render-test-runner-style.json") && result;
+#endif
         mbgl::Log::Info(mbgl::Event::General, "All tests are finished!");
         changeState(env, app, result);
     }
     while (true) {
-        ALooper_pollAll(0, &outFd, &outEvents, reinterpret_cast<void**>(&source));
+        auto result = ALooper_pollOnce(0, &outFd, &outEvents, reinterpret_cast<void**>(&source));
+        if (result == ALOOPER_POLL_ERROR) {
+            throw std::runtime_error("ALooper_pollOnce returned an error");
+        }
 
         if (source != nullptr) {
             source->process(app, source);

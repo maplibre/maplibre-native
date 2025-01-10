@@ -15,24 +15,16 @@ class RenderPass;
 struct ImageAllocation {
     const VmaAllocator& allocator;
     VmaAllocation allocation{};
-    VkImage image{};
+    vk::Image image{};
     vk::UniqueImageView imageView{};
 
     ImageAllocation() = delete;
     ImageAllocation(ImageAllocation&) = delete;
     ImageAllocation& operator=(const ImageAllocation& other) = delete;
+    ImageAllocation(ImageAllocation&& other) = default;
 
     ImageAllocation(const VmaAllocator& allocator_)
         : allocator(allocator_) {}
-
-    ImageAllocation(ImageAllocation&& other) noexcept
-        : allocator(other.allocator),
-          allocation(other.allocation),
-          image(other.image),
-          imageView(std::move(other.imageView)) {
-        other.image = nullptr;
-        other.allocation = nullptr;
-    }
 
     ~ImageAllocation() { destroy(); }
 
@@ -66,6 +58,8 @@ public:
     size_t getDataSize() const noexcept override;
     size_t getPixelStride() const noexcept override;
     size_t numChannels() const noexcept override;
+
+    bool isDirty() const { return samplerStateDirty || textureDirty; }
 
     void create() noexcept override;
 
@@ -103,6 +97,9 @@ private:
     void transitionToTransferLayout(const vk::UniqueCommandBuffer&);
     void transitionToShaderReadLayout(const vk::UniqueCommandBuffer&);
     void transitionToGeneralLayout(const vk::UniqueCommandBuffer&);
+
+    uint32_t getMipLevels() const;
+    void generateMips(const vk::UniqueCommandBuffer& buffer);
 
 private:
     Context& context;

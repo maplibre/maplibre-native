@@ -26,6 +26,11 @@ public:
     ~BackgroundLayerTweaker() override = default;
 
     void execute(LayerGroupBase&, const PaintParameters&) override;
+
+protected:
+#if MLN_UBO_CONSOLIDATION
+    gfx::UniformBufferPtr drawableUniformBuffer;
+#endif
 };
 
 } // namespace mbgl

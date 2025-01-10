@@ -1,15 +1,13 @@
 #include <mbgl/shaders/vulkan/circle.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
+#include <mbgl/shaders/circle_layer_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {
 
-const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Vulkan>::uniforms = {
-    UniformBlockInfo{true, false, sizeof(GlobalPaintParamsUBO), idGlobalPaintParamsUBO},
-    UniformBlockInfo{true, false, sizeof(CircleDrawableUBO), idCircleDrawableUBO},
-    UniformBlockInfo{true, true, sizeof(CircleEvaluatedPropsUBO), idCircleEvaluatedPropsUBO},
-    UniformBlockInfo{true, false, sizeof(CircleInterpolateUBO), idCircleInterpolateUBO},
-};
-const std::array<AttributeInfo, 8> ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Vulkan>::attributes = {
+using CircleShaderSource = ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Vulkan>;
+
+const std::array<AttributeInfo, 8> CircleShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, idCirclePosVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::Float4, idCircleColorVertexAttribute},
     AttributeInfo{2, gfx::AttributeDataType::Float2, idCircleRadiusVertexAttribute},
@@ -19,6 +17,7 @@ const std::array<AttributeInfo, 8> ShaderSource<BuiltIn::CircleShader, gfx::Back
     AttributeInfo{6, gfx::AttributeDataType::Float2, idCircleStrokeWidthVertexAttribute},
     AttributeInfo{7, gfx::AttributeDataType::Float2, idCircleStrokeOpacityVertexAttribute},
 };
+const std::array<TextureInfo, 0> CircleShaderSource::textures = {};
 
 } // namespace shaders
 } // namespace mbgl

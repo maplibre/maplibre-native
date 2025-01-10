@@ -1,8 +1,69 @@
 # Changelog for MapLibre Native for iOS
 
-MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-native/blob/master/CONTRIBUTING.md) to get started.
+MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
-## main
+## 6.10.0
+
+- Fix icon label isn't centered with the icon for CJK/local glyphy on iOS ([#3108](https://github.com/maplibre/maplibre-native/pull/3108)).
+- Add support for [PMTiles](https://docs.protomaps.com/pmtiles/) with `pmtiles://` URL scheme ([#2882](https://github.com/maplibre/maplibre-native/pull/2882)).
+- Consolidate UBOs ([#3089](https://github.com/maplibre/maplibre-native/pull/3089)).
+- Allow constraining camera to maximum bounds ([#2475](https://github.com/maplibre/maplibre-native/pull/2475)).
+
+## 6.9.0
+
+- Batch up scheduling of deferred deletions ([#3030](https://github.com/maplibre/maplibre-native/pull/3030)).
+- Remove `Pass3D`  ([#3077](https://github.com/maplibre/maplibre-native/pull/3077)).
+- Add bold support for CJK characters ([#3069](https://github.com/maplibre/maplibre-native/pull/3069)).
+
+## 6.8.1
+
+- Update Bazel dependencies ([#3000](https://github.com/maplibre/maplibre-native/pull/3000)).
+- Reuse allocated descriptor sets ([#3002](https://github.com/maplibre/maplibre-native/pull/3002)).
+- Line SDF shader fix ([#3010](https://github.com/maplibre/maplibre-native/pull/3010)).
+- Revert "Encode the style URL in iOS. This change was causing several regressions with styles not loading ([#3024](https://github.com/maplibre/maplibre-native/pull/3024)).
+
+## 6.8.0
+
+### Features
+
+- Add support for `text-variable-anchor-offset` property ([#2921](https://github.com/maplibre/maplibre-native/pull/2921)).
+- Encode the style URL in iOS ([#2965](https://github.com/maplibre/maplibre-native/pull/2965)).
+
+### Rendering Improvements
+
+- Revert index buffers to dirty flag instead of timestamps ([#2927](https://github.com/maplibre/maplibre-native/pull/2927)).
+- Group descriptor sets by binding frequency ([#2892](https://github.com/maplibre/maplibre-native/pull/2892)).
+- Change `parameters.currentLayer` to index instead of layerIndex ([#2956](https://github.com/maplibre/maplibre-native/pull/2956)).
+
+## 6.7.1
+
+- Fix line atlas, which was causing an issue with `line-pattern`s ([#2908](https://github.com/maplibre/maplibre-native/pull/2908)).
+
+## 6.7.0
+
+- Add array support for icon-padding ([#2845](https://github.com/maplibre/maplibre-native/pull/2845)).
+  More information can be found in the [MapLibre Style Spec Documentation](https://maplibre.org/maplibre-style-spec/types/#padding). This is the first (code) contribution from [@random3940](https://github.com/random3940)! 🎉
+- Fix updates hillshade geometry ([#2842](https://github.com/maplibre/maplibre-native/pull/2842)).
+- Use `thread_local` for thread local scheduler ([#2863](https://github.com/maplibre/maplibre-native/pull/2863)).
+
+## 6.6.0
+
+- Add `textFitWidth` and `textFitHeight` properties to sprites ([#2780](https://github.com/maplibre/maplibre-native/pull/2780)).
+  More information can be found in the [MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/sprite/#text-fit-properties).
+- Toggle tile cache final API ([#2723](https://github.com/maplibre/maplibre-native/pull/2723)).
+  Using this API can reduce memory usage at the cost of having to parse tile data again when the zoom level changes.
+- Fixed annotation delay in demo app for 120Hz devices ([#2775](https://github.com/maplibre/maplibre-native/pull/2775)).
+  Some users reported synchronization issues when panning the map. The issue is only present on devices with ProMotion (120Hz) displays and can be fixed by updating the Info.plist for your app (see [Apple documentation](https://developer.apple.com/documentation/quartzcore/optimizing_promotion_refresh_rates_for_iphone_13_pro_and_ipad_pro?language=objc)). 
+- Use timestamps for attribute updates ([#2629](https://github.com/maplibre/maplibre-native/pull/2629)).
+- Reuse prefetched tiles to avoid empty screen ([#2668](https://github.com/maplibre/maplibre-native/pull/2668)).
+- Cleanup mbgl/actor/mailbox* implementation for repetition in ensuring valid weakScheduler exists before usage ([#2733](https://github.com/maplibre/maplibre-native/pull/2733)).
+- Fix raster masking bug ([#2798](https://github.com/maplibre/maplibre-native/pull/2798)).
+- Ensure that all depth values are rendered before any color values ([#2811](https://github.com/maplibre/maplibre-native/pull/2811)).
+- Move UBO updates from render layers to tweakers ([#2703](https://github.com/maplibre/maplibre-native/pull/2703)).
+- Fix update time not being set when only drawable indexes are set ([#2743](https://github.com/maplibre/maplibre-native/pull/2743)).
+- Add guard blocks and checks to `SymbolInstance` ([#2744](https://github.com/maplibre/maplibre-native/pull/2744)).
+- Fix accidental regression conditional layer evaluation ([#2705](https://github.com/maplibre/maplibre-native/pull/2705)).
+- Use C++20 ([#2659](https://github.com/maplibre/maplibre-native/pull/2659)).
 
 ## 6.5.4
 

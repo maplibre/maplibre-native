@@ -93,6 +93,7 @@ public:
                             const std::optional<std::string>& stateKey);
 
     void setTileCacheEnabled(bool);
+    bool getTileCacheEnabled() const;
     void reduceMemoryUse();
     void dumpDebugLogs();
     void collectPlacedSymbolData(bool);
@@ -105,7 +106,6 @@ public:
     bool addLayerGroup(LayerGroupBasePtr);
     bool removeLayerGroup(const LayerGroupBasePtr&);
     size_t numLayerGroups() const noexcept;
-    int32_t maxLayerIndex() const;
     void updateLayerIndex(LayerGroupBasePtr, int32_t newIndex);
 
     template <typename Func /* void(LayerGroupBase&) */>
@@ -113,6 +113,15 @@ public:
         for (auto& pair : layerGroupsByLayerIndex) {
             if (pair.second) {
                 f(*pair.second);
+            }
+        }
+    }
+
+    template <typename Func /* void(LayerGroupBase&) */>
+    void visitLayerGroupsReversed(Func f) {
+        for (auto rit = layerGroupsByLayerIndex.rbegin(); rit != layerGroupsByLayerIndex.rend(); ++rit) {
+            if (rit->second) {
+                f(*rit->second);
             }
         }
     }
@@ -168,11 +177,13 @@ private:
                                                const std::unordered_map<std::string, const RenderLayer*>&) const;
 
     // GlyphManagerObserver implementation.
+    void onGlyphsLoaded(const FontStack&, const GlyphRange&) override;
     void onGlyphsError(const FontStack&, const GlyphRange&, std::exception_ptr) override;
-
+    void onGlyphsRequested(const FontStack&, const GlyphRange&) override;
     // RenderSourceObserver implementation.
     void onTileChanged(RenderSource&, const OverscaledTileID&) override;
     void onTileError(RenderSource&, const OverscaledTileID&, std::exception_ptr) override;
+    void onTileAction(RenderSource&, TileOperation, const OverscaledTileID&, const std::string&) override;
 
     // ImageManagerObserver implementation
     void onStyleImageMissing(const std::string&, const std::function<void()>&) override;

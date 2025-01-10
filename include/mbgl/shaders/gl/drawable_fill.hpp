@@ -10,12 +10,13 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillShader";
     static constexpr const char* vertex = R"(layout (std140) uniform FillDrawableUBO {
     highp mat4 u_matrix;
-};
-layout (std140) uniform FillInterpolateUBO {
+    // Interpolations
     highp float u_color_t;
     highp float u_opacity_t;
-    highp float interp_pad1, interp_pad2;
+    lowp float drawable_pad1;
+    lowp float drawable_pad2;
 };
+
 layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_color;
     highp vec4 u_outline_color;
@@ -51,12 +52,7 @@ lowp float opacity = u_opacity;
     gl_Position = u_matrix * vec4(a_pos, 0, 1);
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform FillInterpolateUBO {
-    highp float u_color_t;
-    highp float u_opacity_t;
-    highp float interp_pad1, interp_pad2;
-};
-layout (std140) uniform FillEvaluatedPropsUBO {
+    static constexpr const char* fragment = R"(layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_color;
     highp vec4 u_outline_color;
     highp float u_opacity;

@@ -46,11 +46,10 @@ _NODISCARD constexpr std::chrono::duration<_Rep, _Period> abs(const std::chrono:
                                                                : _Dur;
 }
 #else
-template <
-    class Rep,
-    class Period,
-    class = std::enable_if_t<std::chrono::duration<Rep, Period>::min() < std::chrono::duration<Rep, Period>::zero()>>
-constexpr std::chrono::duration<Rep, Period> abs(std::chrono::duration<Rep, Period> d) {
+template <class Rep, class Period>
+constexpr std::chrono::duration<Rep, Period> abs(std::chrono::duration<Rep, Period> d)
+    requires(std::chrono::duration<Rep, Period>::min() < std::chrono::duration<Rep, Period>::zero())
+{
     return d >= d.zero() ? d : -d;
 }
 #endif

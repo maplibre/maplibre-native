@@ -13,9 +13,12 @@ struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::OpenGL
     highp vec2 u_pixel_coord_upper;
     highp vec2 u_pixel_coord_lower;
     highp float u_tile_units_to_pixels;
-    highp float drawable_pad1, drawable_pad2, drawable_pad3;
+    lowp float drawable_pad1;
+    lowp float drawable_pad2;
+    lowp float drawable_pad3;
 };
-layout (std140) uniform BackgroundPatternLayerUBO {
+
+layout (std140) uniform BackgroundPatternPropsUBO {
     highp vec2 u_pattern_tl_a;
     highp vec2 u_pattern_br_a;
     highp vec2 u_pattern_tl_b;
@@ -47,10 +50,11 @@ void main() {
     highp float u_symbol_fade_change;
     highp float u_aspect_ratio;
     highp float u_pixel_ratio;
-    highp float global_pad1, global_pad2;
+    highp float u_map_zoom;
+    lowp float global_pad1;
 };
 
-layout (std140) uniform BackgroundPatternLayerUBO {
+layout (std140) uniform BackgroundPatternPropsUBO {
     highp vec2 u_pattern_tl_a;
     highp vec2 u_pattern_br_a;
     highp vec2 u_pattern_tl_b;

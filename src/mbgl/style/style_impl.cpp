@@ -28,8 +28,6 @@
 namespace mbgl {
 namespace style {
 
-static Observer nullObserver;
-
 Style::Impl::Impl(std::shared_ptr<FileSource> fileSource_, float pixelRatio, const TaggedScheduler& threadPool_)
     : fileSource(std::move(fileSource_)),
       spriteLoader(std::make_unique<SpriteLoader>(pixelRatio, threadPool_)),
@@ -388,6 +386,7 @@ void Style::Impl::onSpriteLoaded(std::optional<style::Sprite> sprite,
         spritesLoadingStatus["default"] = true;
     }
     observer->onUpdate(); // For *-pattern properties.
+    observer->onSpriteLoaded(sprite);
 }
 
 void Style::Impl::onSpriteError(std::optional<style::Sprite> sprite, std::exception_ptr error) {
@@ -401,6 +400,11 @@ void Style::Impl::onSpriteError(std::optional<style::Sprite> sprite, std::except
     }
     // Unblock rendering tiles (even though sprite request has failed).
     observer->onUpdate();
+    observer->onSpriteError(sprite, error);
+}
+
+void Style::Impl::onSpriteRequested(const std::optional<style::Sprite>& sprite) {
+    observer->onSpriteRequested(sprite);
 }
 
 void Style::Impl::onLayerChanged(Layer& layer) {

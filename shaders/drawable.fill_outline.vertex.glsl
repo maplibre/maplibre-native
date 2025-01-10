@@ -6,17 +6,19 @@ layout (std140) uniform GlobalPaintParamsUBO {
     highp float u_symbol_fade_change;
     highp float u_aspect_ratio;
     highp float u_pixel_ratio;
-    highp float global_pad1, global_pad2;
+    highp float u_map_zoom;
+    lowp float global_pad1;
 };
+
 layout (std140) uniform FillOutlineDrawableUBO {
     highp mat4 u_matrix;
-};
-layout (std140) uniform FillOutlineInterpolateUBO {
+    // Interpolations
     highp float u_outline_color_t;
     highp float u_opacity_t;
-    highp float interp_pad1;
-    highp float interp_pad2;
+    lowp float drawable_pad1;
+    lowp float drawable_pad2;
 };
+
 layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_color;
     highp vec4 u_outline_color;

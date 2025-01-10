@@ -22,7 +22,8 @@ public:
 
     static const gfx::UniqueVertexBufferResource& getBuffer(gfx::VertexAttribute&,
                                                             UploadPass&,
-                                                            const gfx::BufferUsageType);
+                                                            const gfx::BufferUsageType,
+                                                            bool forceUpdate);
 };
 
 /// Stores a collection of vertex attributes by name
@@ -39,7 +40,7 @@ public:
     VertexAttributeArray& operator=(const VertexAttributeArray& other) = delete;
 
     /// Indicates whether any values have changed
-    bool isDirty() const override;
+    bool isModifiedAfter(std::chrono::duration<double> time) const;
 
 private:
     gfx::UniqueVertexAttribute create(int index, gfx::AttributeDataType dataType, std::size_t count) const override {

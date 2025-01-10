@@ -27,6 +27,7 @@ RUN    apt-get update \
         python3 \
         python3-pip \
         python-is-python3 \
+        clang-tidy \
     && : # end of the RUN cmd - easier to keep a colon at the end of the list, than to keep the backslashes in check
 
 # This could also be `.../releases/latest/download/bazelisk-linux-amd64` for the latest version, but for predictability better hardcode it

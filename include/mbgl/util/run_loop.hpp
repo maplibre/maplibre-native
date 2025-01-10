@@ -47,6 +47,8 @@ public:
     void runOnce();
     void stop();
 
+    void updateTime();
+
     /// Platform integration callback for platforms that do not have full
     /// run loop integration or don't want to block at the Mapbox GL Native
     /// loop. It will be called from any thread and is up to the platform
@@ -137,6 +139,7 @@ private:
 
     std::unique_ptr<Impl> impl;
     ::mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
+    // Do not add members here, see `WeakPtrFactory`
 };
 
 } // namespace util

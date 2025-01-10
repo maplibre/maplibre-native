@@ -29,6 +29,7 @@ public:
     RenderTiles getRenderTiles() const override;
     RenderTiles getRenderTilesSortedByYPosition() const override;
     const Tile* getRenderedTile(const UnwrappedTileID&) const override;
+    Immutable<std::vector<RenderTile>> getRawRenderTiles() const override { return renderTiles; }
 
     std::unordered_map<std::string, std::vector<Feature>> queryRenderedFeatures(
         const ScreenLineString& geometry,
@@ -47,7 +48,7 @@ public:
                             const std::optional<std::string>&,
                             const std::optional<std::string>&) override;
 
-    void enableCache(bool) override;
+    void setCacheEnabled(bool) override;
     void reduceMemoryUse() override;
     void dumpDebugLogs() const override;
 
@@ -90,6 +91,8 @@ private:
     std::optional<Tileset> cachedTileset;
 };
 
+class PolylineLayerTweaker;
+
 class TileSourceRenderItem : public RenderItem {
 public:
     TileSourceRenderItem(Immutable<std::vector<RenderTile>> renderTiles_, std::string name_)
@@ -108,6 +111,8 @@ private:
 
     Immutable<std::vector<RenderTile>> renderTiles;
     std::string name;
+
+    mutable std::shared_ptr<PolylineLayerTweaker> layerTweaker;
 };
 
 } // namespace mbgl

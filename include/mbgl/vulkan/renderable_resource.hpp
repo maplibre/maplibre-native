@@ -16,6 +16,11 @@ protected:
     ~RenderableResource() override = default;
 
 public:
+    virtual void swap() {
+        // Renderable resources that require a swap function to be called
+        // explicitly can override this method.
+    }
+
     const vk::Extent2D& getExtent() const { return extent; }
     const vk::UniqueRenderPass& getRenderPass() const { return renderPass; }
     virtual const vk::UniqueFramebuffer& getFramebuffer() const = 0;
@@ -29,14 +34,17 @@ protected:
 
 class SurfaceRenderableResource : public RenderableResource {
 protected:
-    explicit SurfaceRenderableResource(RendererBackend& backend_)
-        : RenderableResource(backend_) {}
+    explicit SurfaceRenderableResource(RendererBackend& backend_, vk::PresentModeKHR mode = vk::PresentModeKHR::eFifo)
+        : RenderableResource(backend_),
+          presentMode(mode) {}
     ~SurfaceRenderableResource() override;
 
     void initColor(uint32_t w, uint32_t h);
     void initSwapchain(uint32_t w, uint32_t h);
 
     void initDepthStencil();
+
+    void swap() override;
 
 public:
     virtual void createPlatformSurface() = 0;
@@ -51,12 +59,24 @@ public:
     void setAcquiredImageIndex(uint32_t index) { acquiredImageIndex = index; };
     const vk::Image getAcquiredImage() const;
 
+    bool hasSurfaceTransformSupport() const;
+    bool didSurfaceTransformUpdate() const;
+
+    // rotation needed to align framebuffer contents with device surface
+    float getRotation();
+
+    void setSurfaceTransformPollingInterval(int32_t value) { surfaceTransformPollingInterval = value; }
+    int32_t getSurfaceTransformPollingInterval() const { return surfaceTransformPollingInterval; }
+
     void init(uint32_t w, uint32_t h);
     void recreateSwapchain();
 
 protected:
     vk::UniqueSurfaceKHR surface;
     vk::UniqueSwapchainKHR swapchain;
+    vk::PresentModeKHR presentMode;
+
+    vk::SurfaceCapabilitiesKHR capabilities;
 
     uint32_t acquiredImageIndex{0};
 
@@ -70,6 +90,18 @@ protected:
 
     UniqueImageAllocation depthAllocation;
     vk::Format depthFormat{vk::Format::eUndefined};
+
+    int32_t surfaceTransformPollingInterval{-1};
+};
+
+class Renderable : public gfx::Renderable {
+protected:
+    Renderable(const Size size_, std::unique_ptr<gfx::RenderableResource> resource_)
+        : gfx::Renderable(size_, std::move(resource_)) {}
+    virtual ~Renderable() override = default;
+
+public:
+    void setSize(const Size& size_) { size = size_; }
 };
 
 } // namespace vulkan

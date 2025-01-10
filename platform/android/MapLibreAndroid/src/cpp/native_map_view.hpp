@@ -5,6 +5,7 @@
 #include <mbgl/map/map.hpp>
 #include <mbgl/util/noncopyable.hpp>
 #include <mbgl/util/run_loop.hpp>
+#include <mbgl/tile/tile_operation.hpp>
 #include <mbgl/storage/network_status.hpp>
 
 #include "annotation/marker.hpp"
@@ -192,8 +193,6 @@ public:
 
     jni::Local<jni::Array<jni::jlong>> addMarkers(jni::JNIEnv&, const jni::Array<jni::Object<Marker>>&);
 
-    void setTileCacheEnabled(JNIEnv&, jni::jboolean);
-
     void onLowMemory(JNIEnv& env);
 
     void setDebug(JNIEnv&, jni::jboolean);
@@ -292,9 +291,32 @@ public:
 
     jni::jint getPrefetchZoomDelta(JNIEnv&);
 
+    void setTileCacheEnabled(JNIEnv&, jni::jboolean);
+
+    jni::jboolean getTileCacheEnabled(JNIEnv&);
+
     mbgl::Map& getMap();
 
     void triggerRepaint(JNIEnv&);
+
+    // Shader compilation
+    void onRegisterShaders(mbgl::gfx::ShaderRegistry&) override;
+    void onPreCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type, const std::string&) override;
+    void onPostCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type, const std::string&) override;
+    void onShaderCompileFailed(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type, const std::string&) override;
+
+    // Glyph requests
+    void onGlyphsLoaded(const mbgl::FontStack&, const mbgl::GlyphRange&) override;
+    void onGlyphsError(const mbgl::FontStack&, const mbgl::GlyphRange&, std::exception_ptr) override;
+    void onGlyphsRequested(const mbgl::FontStack&, const mbgl::GlyphRange&) override;
+
+    // Tile requests
+    void onTileAction(mbgl::TileOperation, const mbgl::OverscaledTileID&, const std::string&) override;
+
+    // Sprite requests
+    void onSpriteLoaded(const std::optional<mbgl::style::Sprite>&) override;
+    void onSpriteError(const std::optional<mbgl::style::Sprite>&, std::exception_ptr) override;
+    void onSpriteRequested(const std::optional<mbgl::style::Sprite>&) override;
 
 private:
     std::unique_ptr<AndroidRendererFrontend> rendererFrontend;

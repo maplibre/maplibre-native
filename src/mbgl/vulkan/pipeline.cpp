@@ -9,37 +9,37 @@ namespace vulkan {
 vk::Format PipelineInfo::vulkanFormat(const gfx::AttributeDataType& value) {
     switch (value) {
         case gfx::AttributeDataType::Byte:
-            return vk::Format::eR8Sscaled;
+            return vk::Format::eR8Sint;
         case gfx::AttributeDataType::Byte2:
-            return vk::Format::eR8G8Sscaled;
+            return vk::Format::eR8G8Sint;
         case gfx::AttributeDataType::Byte3:
-            return vk::Format::eR8G8B8Sscaled;
+            return vk::Format::eR8G8B8Sint;
         case gfx::AttributeDataType::Byte4:
-            return vk::Format::eR8G8B8A8Sscaled;
+            return vk::Format::eR8G8B8A8Sint;
         case gfx::AttributeDataType::UByte:
-            return vk::Format::eR8Uscaled;
+            return vk::Format::eR8Uint;
         case gfx::AttributeDataType::UByte2:
-            return vk::Format::eR8G8Uscaled;
+            return vk::Format::eR8G8Uint;
         case gfx::AttributeDataType::UByte3:
-            return vk::Format::eR8G8B8Uscaled;
+            return vk::Format::eR8G8B8Uint;
         case gfx::AttributeDataType::UByte4:
-            return vk::Format::eR8G8B8A8Uscaled;
+            return vk::Format::eR8G8B8A8Uint;
         case gfx::AttributeDataType::Short:
-            return vk::Format::eR16Sscaled;
+            return vk::Format::eR16Sint;
         case gfx::AttributeDataType::Short2:
-            return vk::Format::eR16G16Sscaled;
+            return vk::Format::eR16G16Sint;
         case gfx::AttributeDataType::Short3:
-            return vk::Format::eR16G16B16Sscaled;
+            return vk::Format::eR16G16B16Sint;
         case gfx::AttributeDataType::Short4:
-            return vk::Format::eR16G16B16A16Sscaled;
+            return vk::Format::eR16G16B16A16Sint;
         case gfx::AttributeDataType::UShort:
-            return vk::Format::eR16Uscaled;
+            return vk::Format::eR16Uint;
         case gfx::AttributeDataType::UShort2:
-            return vk::Format::eR16G16Uscaled;
+            return vk::Format::eR16G16Uint;
         case gfx::AttributeDataType::UShort3:
-            return vk::Format::eR16G16B16Uscaled;
+            return vk::Format::eR16G16B16Uint;
         case gfx::AttributeDataType::UShort4:
-            return vk::Format::eR16G16B16A16Uscaled;
+            return vk::Format::eR16G16B16A16Uint;
         case gfx::AttributeDataType::Int:
             return vk::Format::eR32Sint;
         case gfx::AttributeDataType::Int2:
@@ -401,7 +401,7 @@ std::size_t PipelineInfo::hash() const {
                       vertexInputHash);
 }
 
-void PipelineInfo::setDynamicValues(const vk::UniqueCommandBuffer& buffer) const {
+void PipelineInfo::setDynamicValues(const RendererBackend& backend, const vk::UniqueCommandBuffer& buffer) const {
     if (dynamicValues.blendConstants.has_value()) {
         buffer->setBlendConstants(dynamicValues.blendConstants.value().data());
     }
@@ -412,12 +412,12 @@ void PipelineInfo::setDynamicValues(const vk::UniqueCommandBuffer& buffer) const
         buffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, dynamicValues.stencilRef);
     }
 
-    if (wideLines) {
+    if (backend.getDeviceFeatures().wideLines && wideLines) {
         buffer->setLineWidth(dynamicValues.lineWidth);
     }
 }
 
-std::vector<vk::DynamicState> PipelineInfo::getDynamicStates() const {
+std::vector<vk::DynamicState> PipelineInfo::getDynamicStates(const RendererBackend& backend) const {
     std::vector<vk::DynamicState> dynamicStates;
 
     if (usesBlendConstants()) {
@@ -430,7 +430,7 @@ std::vector<vk::DynamicState> PipelineInfo::getDynamicStates() const {
         dynamicStates.push_back(vk::DynamicState::eStencilReference);
     }
 
-    if (wideLines) {
+    if (backend.getDeviceFeatures().wideLines && wideLines) {
         dynamicStates.push_back(vk::DynamicState::eLineWidth);
     }
 

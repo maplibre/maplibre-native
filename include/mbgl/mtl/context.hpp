@@ -66,7 +66,8 @@ public:
     BufferResource createBuffer(
         const void* data, std::size_t size, gfx::BufferUsageType usage, bool isIndexBuffer, bool persistent) const;
 
-    UniqueShaderProgram createProgram(std::string name,
+    UniqueShaderProgram createProgram(shaders::BuiltIn shaderID,
+                                      std::string name,
                                       std::string_view source,
                                       std::string_view vertexName,
                                       std::string_view fragmentName,
@@ -82,7 +83,10 @@ public:
     void reduceMemoryUsage() override {}
 
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
-    gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size, bool persistent) override;
+    gfx::UniformBufferPtr createUniformBuffer(const void* data,
+                                              std::size_t size,
+                                              bool persistent = false,
+                                              bool ssbo = false) override;
 
     gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
 
@@ -127,10 +131,7 @@ public:
     virtual bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&,
                                               const void* data,
                                               std::size_t size,
-                                              bool persistent);
-
-    /// Get an empty buffer to act as a placeholder
-    const BufferResource& getEmptyBuffer();
+                                              bool persistent) override;
 
     /// Get a reusable buffer containing the standard fixed tile vertices (+/- `util::EXTENT`)
     const BufferResource& getTileVertexBuffer();
