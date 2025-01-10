@@ -2,7 +2,6 @@
 
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/util/instrumentation.hpp>
-#include <mbgl/util/unique_function.hpp>
 
 #include <cassert>
 
