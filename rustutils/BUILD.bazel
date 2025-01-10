@@ -1,16 +1,33 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_static_library")
-load("//bazel:rust_cxx_bridge.bzl", "rust_cxx_bridge")
-
-package(default_visibility = ["//visibility:public"])
-
-rust_cxx_bridge(
-    name = "bridge",
-    src = "src/lib.rs",
-)
+load("@rules_rust//rust:defs.bzl", "rust_static_library")
 
 rust_static_library(
     name = "rustutils",
-    srcs = ["src/lib.rs"],
-    edition = "2021",
+    srcs = [
+        "src/lib.rs",
+    ],
+    crate_name = "rustutils",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@crates//:csscolorparser",
+        "@crates//:cxx",
+    ],
+)
+
+# Link the Rust static library to the C++ library
+cc_library(
+    name = "rustutilslib",
+    srcs = [
+        "cpp/src/lib.rs.cc"
+    ],
+    hdrs = [
+        "cpp/include/rustutils/lib.hpp"
+    ],
+    includes = [
+        "cpp/include"
+    ],
+    deps = [
+        ":rustutils",
+    ],
+    visibility = ["//visibility:public"],
 )

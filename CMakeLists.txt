@@ -17,6 +17,7 @@ option(MLN_LEGACY_RENDERER "Include the legacy rendering pathway" ON)
 option(MLN_DRAWABLE_RENDERER "Include the drawable rendering pathway" OFF)
 option(MLN_USE_UNORDERED_DENSE "Use ankerl dense containers for performance" ON)
 option(MLN_USE_TRACY "Enable Tracy instrumentation" OFF)
+option(MLN_USE_RUST "Use components in Rust" OFF)
 
 if (MLN_WITH_CLANG_TIDY)
     find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
@@ -940,7 +941,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/bounding_volumes.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/chrono.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/client_options.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/util/color.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/color$<IF:$<BOOL:${MLN_USE_RUST}>,.rs.cpp,.cpp>
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/constants.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/convert.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/event.cpp
@@ -1443,6 +1444,7 @@ target_include_directories(
 )
 
 include(${PROJECT_SOURCE_DIR}/vendor/boost.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/csscolorparser.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/earcut.hpp.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/eternal.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/mapbox-base.cmake)
@@ -1457,19 +1459,7 @@ include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/metal-cpp.cmake)
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/corrosion)
-
-corrosion_import_crate(MANIFEST_PATH rustutils/Cargo.toml)
-# rustutils_bridge is a set of .h headers generated from rustutils crate
-corrosion_add_cxxbridge(rustutils_bridge CRATE rustutils FILES lib.rs)
-set_target_properties(
-        rustutils
-        rustutils_bridge
-        PROPERTIES
-        INTERFACE_MAPLIBRE_NAME "Rust Utils"
-        INTERFACE_MAPLIBRE_AUTHOR "MapLibre Contributors"
-        INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/rustutils/LICENSE-MIT
-)
+include(${PROJECT_SOURCE_DIR}/rustutils/rustutils.cmake)
 
 target_link_libraries(
     mbgl-core
@@ -1490,8 +1480,8 @@ target_link_libraries(
         mbgl-vendor-unique_resource
         mbgl-vendor-vector-tile
         mbgl-vendor-wagyu
-        rustutils_bridge
         $<$<BOOL:${MLN_WITH_METAL}>:mbgl-vendor-metal-cpp>
+        $<IF:$<BOOL:${MLN_USE_RUST}>,mbgl-rustutils,mbgl-vendor-csscolorparser>
     PUBLIC
         Mapbox::Base
         Mapbox::Base::Extras::expected-lite
@@ -1501,13 +1491,10 @@ target_link_libraries(
         Mapbox::Base::variant
         $<$<BOOL:${MLN_USE_TRACY}>:TracyClient>
         unordered_dense
-        rustutils
 )
 
-export(TARGETS
-    rustutils_bridge
+set(EXPORT_TARGETS
     mbgl-core
-    rustutils
     mapbox-base
     mapbox-base-cheap-ruler-cpp
     mapbox-base-extras-expected-lite
@@ -1534,9 +1521,15 @@ export(TARGETS
     mbgl-vendor-wagyu
     mbgl-vendor-metal-cpp
     unordered_dense
-
-    FILE MapboxCoreTargets.cmake
 )
+
+if(MLN_USE_RUST)
+    list(APPEND EXPORT_TARGETS mbgl-rustutils rustutils)
+else()
+    list(APPEND EXPORT_TARGETS mbgl-vendor-csscolorparser)
+endif()
+
+export(TARGETS ${EXPORT_TARGETS} FILE MapboxCoreTargets.cmake)
 
 if(MLN_WITH_VULKAN)
     include(${PROJECT_SOURCE_DIR}/vendor/vulkan.cmake)

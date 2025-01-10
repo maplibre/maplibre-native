@@ -584,7 +584,6 @@ MLN_CORE_SOURCE = [
     "src/mbgl/util/bounding_volumes.cpp",
     "src/mbgl/util/chrono.cpp",
     "src/mbgl/util/client_options.cpp",
-    "src/mbgl/util/color.cpp",
     "src/mbgl/util/constants.cpp",
     "src/mbgl/util/convert.cpp",
     "src/mbgl/util/event.cpp",
@@ -652,7 +651,14 @@ MLN_CORE_SOURCE = [
     "src/mbgl/util/version.cpp",
     "src/mbgl/util/version.hpp",
     "src/mbgl/util/work_request.cpp",
-]
+] + select({
+    "//:rust": [
+        "src/mbgl/util/color.rs.cpp",
+    ],
+    "//conditions:default": [
+        "src/mbgl/util/color.cpp",
+    ]
+})
 
 MLN_CORE_HEADERS = [
     "include/mbgl/gfx/context.hpp",

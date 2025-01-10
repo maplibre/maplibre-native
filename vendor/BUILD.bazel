@@ -56,6 +56,20 @@ cc_library(
     visibility = ["//visibility:public"],
 )
 
+# vendor/csscolorparser
+cc_library(
+    name = "csscolorparser",
+    srcs = glob(
+        [
+            "csscolorparser/**/*.hpp",
+            "csscolorparser/**/*.cpp",
+        ],
+    ),
+    copts = CPP_FLAGS,
+    includes = ["csscolorparser"],
+    visibility = ["//visibility:public"],
+)
+
 # vendor/wagyu-files.json
 cc_library(
     name = "wagyu",

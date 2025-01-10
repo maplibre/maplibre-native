@@ -61,13 +61,23 @@ darwin_config(
     name = "darwin_config",
 )
 
-bazel_dep(name = "rules_rust", version = "0.49.1")
+bazel_dep(name = "rules_rust", version = "0.56.0")
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
-rust.toolchain(versions = ["1.80.0"])
+
+rust.toolchain(
+    edition = "2021",
+    versions = ["1.80.0"]
+)
 use_repo(rust, "rust_toolchains")
 
 register_toolchains("@rust_toolchains//:all")
 
-crate_repositories = use_extension("//bazel:extension.bzl", "crate_repositories")
-use_repo(crate_repositories, "crates.io")
+crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
+
+crate.from_cargo(
+    name = "crates",
+    cargo_lockfile = "//rustutils:Cargo.lock",
+    manifests = ["//rustutils:Cargo.toml"],
+)
+use_repo(crate, "crates")
