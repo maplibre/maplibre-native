@@ -657,7 +657,7 @@ MLN_CORE_SOURCE = [
     ],
     "//conditions:default": [
         "src/mbgl/util/color.cpp",
-    ]
+    ],
 })
 
 MLN_CORE_HEADERS = [

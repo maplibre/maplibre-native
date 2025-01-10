@@ -1,5 +1,5 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary")
-load("@bazel_skylib//rules:common_settings.bzl", "string_flag", "bool_flag")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
 load("@npm//:defs.bzl", "npm_link_all_packages")
 load(
     "//bazel:core.bzl",
@@ -154,8 +154,8 @@ cc_library(
         ],
         "//conditions:default": [
             "//vendor:csscolorparser",
-        ]
-    })
+        ],
+    }),
 )
 
 genrule(

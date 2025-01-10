@@ -24,6 +24,11 @@ repos:
   hooks:
     - id: swiftformat
       args: [--swiftversion, "5.8"]
+-   repo: https://github.com/doublify/pre-commit-rust
+    rev: master
+    hooks:
+    -   id: fmt
+    -   id: cargo-check
 ci:
   # sometimes fails https://github.com/keith/pre-commit-buildifier/issues/13
   skip: [buildifier]

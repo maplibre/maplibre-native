@@ -18,16 +18,16 @@ rust_static_library(
 cc_library(
     name = "rustutilslib",
     srcs = [
-        "cpp/src/lib.rs.cc"
+        "cpp/src/lib.rs.cc",
     ],
     hdrs = [
-        "cpp/include/rustutils/lib.hpp"
+        "cpp/include/rustutils/lib.hpp",
     ],
     includes = [
-        "cpp/include"
+        "cpp/include",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":rustutils",
     ],
-    visibility = ["//visibility:public"],
 )
