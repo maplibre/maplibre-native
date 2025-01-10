@@ -8,11 +8,6 @@ set -x
 export CCACHE_DIR="$GITHUB_WORKSPACE/.ccache"
 export PATH="$QT_ROOT_DIR/bin:$PATH"
 
-echo "Downloading and installing Rust..."
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
-# this script is being ran under sudo, so $HOME is incorrect and this won't work :  . "$HOME/.cargo/env"
-. "/home/runner/.cargo/env"
-
 mkdir build && cd build
 qt-cmake ../source/ \
   -G Ninja \
