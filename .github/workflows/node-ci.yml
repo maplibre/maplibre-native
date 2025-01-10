@@ -173,14 +173,6 @@ jobs:
         run: |
           cmake --version
 
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Cache Rust build artifacts
-        if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
-        uses: Swatinem/rust-cache@v2
-        # TODO: ensure right directories are being cached
-
       - name: Set up ccache (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
         uses: hendrikmuhs/ccache-action@v1

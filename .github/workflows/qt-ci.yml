@@ -49,19 +49,14 @@ on:
       - ".gitmodules"
       - "!**/*.md"
 
-#
-#
-# FIXME: reenable this
-#
-#concurrency:
-#  # cancel jobs on PRs only
-#  group: ${{ github.workflow }}-${{ github.ref }}
-#  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+concurrency:
+  # cancel jobs on PRs only
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   build:
     strategy:
-      fail-fast: false  # FIXME: delete!
       matrix:
         include:
           - name: Linux
@@ -210,14 +205,6 @@ jobs:
         with:
           arch: ${{ matrix.compiler_type }}
           toolset: ${{ matrix.compiler_version }}
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Cache Rust build artifacts
-        if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
-        uses: Swatinem/rust-cache@v2
-        # TODO: ensure right directories are being cached
 
       - name: Setup ninja
         uses: seanmiddleditch/gha-setup-ninja@v5

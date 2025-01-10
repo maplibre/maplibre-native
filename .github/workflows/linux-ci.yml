@@ -201,6 +201,7 @@ jobs:
             x11-xserver-utils
 
       - name: Install cxxbridge-cmd (compile)
+        if: ${{ github.ref == 'refs/heads/rust' || github.event.pull_request.base.ref == 'rust' }}
         run: cargo install cxxbridge-cmd
 
       - name: Cache Bazel
