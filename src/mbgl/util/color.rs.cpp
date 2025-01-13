@@ -1,3 +1,5 @@
+// This is an interface-compatible file analogous to color.cpp
+// which is conditionally compiled when the optional Rust build flag is enabled.
 #include <cmath>
 
 #include <mbgl/util/color.hpp>
