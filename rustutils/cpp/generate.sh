@@ -4,5 +4,5 @@
 
 set -e
 
-cxxbridge rustutils/src/lib.rs --header > rustutils/lib.h
+cxxbridge rustutils/src/lib.rs --header > rustutils/cpp/include/rustutils/lib.hpp
 cxxbridge rustutils/src/lib.rs > rustutils/cpp/src/lib.rs.cc
