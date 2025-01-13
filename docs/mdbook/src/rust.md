@@ -4,15 +4,9 @@ We have added experimental support for intergrating Rust code into the source tr
 
 ## Rust Bridge
 
-The Rust bridge lives in `rustutils`. To regenerate the C++ bridge run the following script from the root of the repository.
+The Rust bridge lives in the root `rustutils` directory.
 
-```
-rustutils/cpp/generate.sh
-```
-
-Check in the generated files under `rustutils/cpp`.
-
-We might intergrate this generation process into the build, but the tools to do so are experimental and immature as of January 2025.
+We use [CXX](https://cxx.rs/) to allow interop between Rust and C++.
 
 ## Building
 
@@ -25,6 +19,12 @@ rustup target add --toolchain stable-x86_64-unknown-linux-gnu aarch64-linux-andr
 ```
 
 See [Platform Support](https://doc.rust-lang.org/nightly/rustc/platform-support.html) in the Rust documentation for more details. You will get a descriptive error message when the correct toolchain is not available, so we don't list all possible combinations here.
+
+You also need to have cxxbridge installed:
+
+```
+cargo install cxxbridge
+```
 
 ### CMake
 
@@ -39,3 +39,29 @@ Note that when [generating an Xcode project](./ios/README.md) you should not pas
 ```
 bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal --//:use_rust"
 ```
+
+## Creating a new Module
+
+To create a new module:
+
+1. Add a new source file to `rustutils/src/example.rs`.
+2. Implement it, see the [CXX documentation](https://cxx.rs/index.html) or see `rustutils/src/color.rs` for an example.
+3. Create a C++ source file that will use the generated C++ header. See `src/mbgl/util/color.rs.cpp` for an example. Import the generated header with
+    ```
+    #include <rustutils/example.hpp>
+    ```
+4. Conditionally include either the `*.rs.cpp` file or the `*.cpp` file it replaces in CMake and Bazel. Here is what it looks like for CMake:
+    ```
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/color$<IF:$<BOOL:${MLN_USE_RUST}>,.rs.cpp,.cpp>
+    ```
+    And here for Bazel:
+    ```
+    select({
+      "//:rust": [
+          "src/mbgl/util/color.rs.cpp",
+      ],
+      "//conditions:default": [
+          "src/mbgl/util/color.cpp",
+      ],
+    })
+    ```

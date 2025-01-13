@@ -1,10 +1,10 @@
 [package]
 name = "rustutils"
 version = "0.1.0"
-authors = ["Yuri Astrakhan <YuriAstrakhan@gmail.com>", "MapLibre contributors"]
+authors = ["MapLibre contributors"]
 description = "Core Rust utilities for MapLibre Native"
 edition = "2021"
-license = "MIT OR Apache-2.0"
+license = "BSD-2-Clause"
 repository = "https://github.com/maplibre/maplibre-native"
 
 [lib]

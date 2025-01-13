@@ -5,7 +5,7 @@
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/string.hpp>
 
-#include <rustutils/lib.hpp>
+#include <rustutils/color.hpp>
 
 namespace mbgl {
 

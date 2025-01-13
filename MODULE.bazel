@@ -1,6 +1,6 @@
 module(name = "maplibre")
 
-bazel_dep(name = "apple_support", version = "1.17.0", repo_name = "build_bazel_apple_support")
+bazel_dep(name = "apple_support", version = "1.17.1", repo_name = "build_bazel_apple_support")
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "platforms", version = "0.0.10")
 bazel_dep(name = "rules_apple", version = "3.16.1", repo_name = "build_bazel_rules_apple")
@@ -66,7 +66,9 @@ bazel_dep(name = "rules_rust", version = "0.56.0")
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(
     edition = "2021",
-    versions = ["1.80.0"],
+    versions = [
+        "1.79.0"
+    ],
 )
 use_repo(rust, "rust_toolchains")
 

@@ -1,10 +1,26 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@rules_rust//rust:defs.bzl", "rust_static_library")
 
+genrule(
+    name = "cpp_bindings",
+    srcs = [
+        "src/color.rs",
+    ],
+    outs = [
+        "cpp/include/rustutils/color.hpp",
+        "cpp/src/color.rs.cpp"
+    ],
+    cmd = "./$(location generate.sh) $(@D) $(SRCS)",
+    tools = [
+        ":generate.sh",
+    ],
+)
+
 rust_static_library(
     name = "rustutils",
     srcs = [
         "src/lib.rs",
+        "src/color.rs"
     ],
     crate_name = "rustutils",
     visibility = ["//visibility:public"],
@@ -14,14 +30,10 @@ rust_static_library(
     ],
 )
 
-# Link the Rust static library to the C++ library
 cc_library(
     name = "rustutilslib",
     srcs = [
-        "cpp/src/lib.rs.cc",
-    ],
-    hdrs = [
-        "cpp/include/rustutils/lib.hpp",
+        ":cpp_bindings"
     ],
     includes = [
         "cpp/include",

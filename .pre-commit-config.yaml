@@ -24,11 +24,13 @@ repos:
   hooks:
     - id: swiftformat
       args: [--swiftversion, "5.8"]
--   repo: https://github.com/doublify/pre-commit-rust
-    rev: v1.0
+-   repo: local
     hooks:
-    -   id: fmt
-    -   id: cargo-check
+    -   id: rustfmt
+        name: rustfmt
+        entry: rustfmt --edition 2021
+        language: rust
+        types: [rust]
 ci:
   # sometimes fails https://github.com/keith/pre-commit-buildifier/issues/13
   skip: [buildifier]
