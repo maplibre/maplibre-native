@@ -1,4 +1,3 @@
-# Ubuntu version should match SWIFT version below
 FROM ubuntu:22.04
 
 # Install build tools and dependencies
