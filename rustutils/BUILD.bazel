@@ -8,7 +8,7 @@ genrule(
     ],
     outs = [
         "cpp/include/rustutils/color.hpp",
-        "cpp/src/color.rs.cpp"
+        "cpp/src/color.rs.cpp",
     ],
     cmd = "./$(location generate.sh) $(@D) $(SRCS)",
     tools = [
@@ -19,8 +19,8 @@ genrule(
 rust_static_library(
     name = "rustutils",
     srcs = [
+        "src/color.rs",
         "src/lib.rs",
-        "src/color.rs"
     ],
     crate_name = "rustutils",
     visibility = ["//visibility:public"],
@@ -33,7 +33,7 @@ rust_static_library(
 cc_library(
     name = "rustutilslib",
     srcs = [
-        ":cpp_bindings"
+        ":cpp_bindings",
     ],
     includes = [
         "cpp/include",
