@@ -66,8 +66,11 @@ bazel_dep(name = "rules_rust", version = "0.56.0")
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(
     edition = "2021",
-    versions = [
-        "1.79.0"
+    extra_target_triples = [
+        "aarch64-apple-ios-sim",
+        "x86_64-apple-ios",
+        "aarch64-apple-darwin",
+        "x86_64-apple-darwin",
     ],
 )
 use_repo(rust, "rust_toolchains")
