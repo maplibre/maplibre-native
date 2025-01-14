@@ -13,10 +13,12 @@
 
 namespace mbgl {
 
-HTTPRequest::HTTPRequest(HTTPFileSource::Impl* context, const Resource& resource, FileSource::Callback callback)
+HTTPRequest::HTTPRequest(HTTPFileSource::Impl* context,
+                         const Resource& resource,
+                         FileSource::CopyableCallback<void(Response)> callback)
     : m_context(context),
       m_resource(resource),
-      m_callback(callback) {
+      m_callback(std::move(callback)) {
     m_context->request(this);
 }
 

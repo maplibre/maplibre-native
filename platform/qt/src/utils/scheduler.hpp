@@ -39,7 +39,7 @@ private:
     std::mutex m_taskQueueMutex;
     std::condition_variable cvEmpty;
     std::atomic<std::size_t> pendingItems;
-    std::queue<std::function<void()>> m_taskQueue;
+    std::queue<Task> m_taskQueue;
     mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
     // Do not add members here, see `WeakPtrFactory`
 };

@@ -27,7 +27,7 @@ void Scheduler::schedule(mbgl::util::SimpleIdentity, Task&& function) {
 }
 
 void Scheduler::processEvents() {
-    std::queue<std::function<void()>> taskQueue;
+    std::queue<Task> taskQueue;
     {
         const std::unique_lock<std::mutex> lock(m_taskQueueMutex);
         std::swap(taskQueue, m_taskQueue);
