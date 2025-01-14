@@ -28,7 +28,7 @@ repos:
     hooks:
     -   id: rustfmt
         name: rustfmt
-        entry: rustfmt --edition 2021
+        entry: bash -c 'cd rustutils && cargo fmt' --
         language: rust
         types: [rust]
 ci:
