@@ -163,7 +163,12 @@ jobs:
 
       - name: Run render test
         id: render_test
-        run: xvfb-run -a build/mbgl-render-test-runner --manifestPath=metrics/linux-${{ matrix.renderer }}.json
+        run: |
+          renderer="${{ matrix.renderer }}"
+          if [[ "$renderer" == *-rust ]]; then
+            renderer=${renderer%-rust}
+          fi
+          xvfb-run -a build/mbgl-render-test-runner --manifestPath=metrics/linux-"$renderer".json
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure'
