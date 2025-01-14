@@ -52,7 +52,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        renderer: [legacy, drawable, vulkan]
+        renderer: [legacy, drawable, vulkan, drawable-rust]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -90,6 +90,11 @@ jobs:
 
       - if: matrix.renderer == 'drawable'
         run: echo renderer_flag_cmake=-DMLN_DRAWABLE_RENDERER=ON >> "$GITHUB_ENV"
+
+      - if: matrix.renderer == 'drawable-rust'
+        run: |
+          echo renderer_flag_cmake=-DMLN_DRAWABLE_RENDERER=ON MLN_WITH_RUST=ON >> "$GITHUB_ENV"
+          cargo install cxxbridge-cmd
 
       - if: matrix.renderer == 'legacy'
         run: echo renderer_flag_cmake=-DMLN_LEGACY_RENDERER=ON >> "$GITHUB_ENV"
@@ -200,12 +205,6 @@ jobs:
             xvfb \
             x11-xserver-utils
 
-      - name: Install cxxbridge-cmd (compile)
-        if: ${{ github.ref == 'refs/heads/rust' || github.event.pull_request.base.ref == 'rust' }}
-        uses: baptiste0928/cargo-install@v3
-        with:
-          crate: cxxbridge-cmd
-
       - name: Cache Bazel
         uses: actions/cache@v4
         with:
@@ -238,6 +237,14 @@ jobs:
         with:
           name: coverage-report
           path: ${{ env.coverage_report }}
+
+  linux-rust:
+    if: needs.pre_job.outputs.should_skip != 'true'
+    needs: pre_job
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
 
   linux-ci-result:
     name: Linux CI Result
