@@ -238,14 +238,6 @@ jobs:
           name: coverage-report
           path: ${{ env.coverage_report }}
 
-  linux-rust:
-    if: needs.pre_job.outputs.should_skip != 'true'
-    needs: pre_job
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-
   linux-ci-result:
     name: Linux CI Result
     if: needs.pre_job.outputs.should_skip != 'true' && always()
