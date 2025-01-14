@@ -47,6 +47,9 @@ typedef struct {
     simd_float4x4 modelMatrix;
     simd_float4x4 modelViewProjectionMatrix;
     simd_float4x4 normalMatrix;
+    float scaleFactor;
+    float brightness;
+    simd_float3 lightDirection;
 } VertexUniforms;
 
 typedef struct {

@@ -11,10 +11,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface GLTFModelLayer : MLNCustomStyleLayer
 
+-(void)loadModelFromJSON:(NSString *)modelMetadataFilename;
+
 -(void)loadModel:(NSString *)appResourceFilename
              lat:(double)lat
              lon:(double)lon
-     rotationDeg:(double)rotationDeg;
+     rotationDeg:(double)rotationDeg
+     scaleFactor:(float)scaleFactor
+      brightness:(float)brightness;
 
 @end
 

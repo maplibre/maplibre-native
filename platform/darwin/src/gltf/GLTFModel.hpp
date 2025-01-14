@@ -29,6 +29,9 @@ namespace maplibre { namespace gltf {
         // The URL for the model, used by the loader
         std::string _modelURL;
         
+        // The brightness
+        float _brightness = 1.0;
+        
         // This is a hack to deal with passing in the translation vector.
         // NEed to reconcile this with the renderable model's version of it
         double _xLateX = 0;

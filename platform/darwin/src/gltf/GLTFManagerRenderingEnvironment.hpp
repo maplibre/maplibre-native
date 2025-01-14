@@ -28,6 +28,9 @@ namespace maplibre { namespace gltf {
         // Current zoom level
         double _currentZoomLevel = 1;
 
+        //
+        simd_float3 _lightDirection;
+
     };
 
 }}

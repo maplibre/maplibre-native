@@ -53,7 +53,9 @@ std::shared_ptr<GLTFRenderModel> MetalRenderer::createRenderModel(GLTFAsset *ass
     std::shared_ptr<GLTFRenderModel> tempResult = std::make_shared<GLTFRenderModel>();
     tempResult->_asset = asset;
     tempResult->_gltfModel = model;
-    
+    tempResult->_scaling = model->_scaleFactor;
+    tempResult->_brightness = model->_brightness;
+
     computeRegularizationMatrix(tempResult);
     computeTransforms(tempResult);
     addDefaultLights(tempResult);
@@ -374,6 +376,10 @@ void MetalRenderer::buildRenderListRecursive(std::shared_ptr<GLTFRenderModel> mo
             vertexUniforms.modelViewProjectionMatrix = mvpF;
             auto normalMatrix = GLTFNormalMatrixFromModelMatrixD( model->_modelViewMatrix);
             vertexUniforms.normalMatrix = matrix_double_to_float(normalMatrix);
+
+            vertexUniforms.scaleFactor = model->_scaling;
+            vertexUniforms.brightness = model->_brightness;
+            vertexUniforms.lightDirection = _renderingEnvironment->_lightDirection;
 
             
             

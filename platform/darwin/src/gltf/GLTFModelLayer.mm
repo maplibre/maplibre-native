@@ -24,9 +24,18 @@ using namespace maplibre::gltf;
 @property CLLocationCoordinate2D modelCoordinate;
 @property double modelRotation;
 @property BOOL modelLoaded;
+@property float modelScale;
+@property float brightness;
+
 @end
 
 @implementation GLTFModelMetadata
+-(id)init {
+    if (self = [super init]) {
+        self.brightness = 1.0;
+    }
+    return self;
+}
 @end
 
 @interface GLTFModelLayer () {
@@ -162,15 +171,55 @@ simd_double4x4 toSimdMatrix4D(const MLNMatrix4 & mlMatrix) {
 
 }
 
+-(void)loadModelFromJSON:(NSString *)modelMetadataFilename {
+    
+    NSError *error = nil;
+    NSData *dat = [NSData dataWithContentsOfFile:modelMetadataFilename];
+    NSDictionary *d = [NSJSONSerialization JSONObjectWithData:dat
+                                                      options:0
+                                                        error:&error];
+    NSArray *models = [d objectForKey:@"models"];
+    for (NSDictionary *model in models) {
+        
+        NSString *modelFilename = [model objectForKey:@"name"];
+        double lat = [[model objectForKey:@"lat"] doubleValue];
+        double lon = [[model objectForKey:@"lon"] doubleValue];
+        double rot = [[model objectForKey:@"rot"] doubleValue];
+        double scale = [[model objectForKey:@"scale_factor"] doubleValue];
+        double brightnessCoefficient = [[model objectForKey:@"brightness"] doubleValue];
+        if (brightnessCoefficient == 0) {
+            brightnessCoefficient = 1.0;
+        }
+        //NSString *bundleFilename = [[NSBundle mainBundle] pathForResource:modelFilename ofType:nil];
+        [self loadModel:modelFilename
+                    lat:lat
+                    lon:lon
+            rotationDeg:rot
+            scaleFactor:scale
+             brightness:brightnessCoefficient];
+    }
+    
+}
+
+
 -(void)loadModel:(NSString *)appResourceFilename
              lat:(double)lat
              lon:(double)lon
-        rotationDeg:(double)rotationDeg {
+        rotationDeg:(double)rotationDeg
+     scaleFactor:(float)scaleFactor
+      brightness:(float)brightness {
+    
+    if (brightness == 0) {
+        brightness = 1.0;
+    }
     
     GLTFModelMetadata *modelMetadata = [[GLTFModelMetadata alloc] init];
     modelMetadata.modelPath = appResourceFilename;
     modelMetadata.modelCoordinate = CLLocationCoordinate2DMake(lat, lon);
-    modelMetadata.modelRotation = rotationDeg;
+    modelMetadata.modelRotation = -rotationDeg;
+    modelMetadata.modelScale = scaleFactor;
+    modelMetadata.brightness = brightness;
+
     [self.models addObject:modelMetadata];
     
     if (self.managerCreated) {
@@ -178,6 +227,7 @@ simd_double4x4 toSimdMatrix4D(const MLNMatrix4 & mlMatrix) {
     }
     
 }
+
 
 
 -(void)addModel:(GLTFModelMetadata *)modelMetadata {
@@ -195,7 +245,9 @@ simd_double4x4 toSimdMatrix4D(const MLNMatrix4 & mlMatrix) {
     model->_referenceLon = modelMetadata.modelCoordinate.longitude;
     model->_modelURL = modelURL;
     model->_rotationDeg = modelMetadata.modelRotation;
-    model->_scaleFactor = 1.0; // Models are in meters
+    model->_brightness = modelMetadata.brightness;
+    model->_scaleFactor = modelMetadata.modelScale;
+//    model->_scaleFactor = 1.0; // Models are in meters
     
     _manager->addModel(model);
     
@@ -335,7 +387,8 @@ simd_double4x4 toSimdMatrix4D(const MLNMatrix4 & mlMatrix) {
     _metalEnvironment->_metalDevice = resource.mtkView.device;
     _metalEnvironment->_currentDrawable = resource.mtkView.currentDrawable;
     _metalEnvironment->_currentRenderPassDescriptor = resource.mtkView.currentRenderPassDescriptor;
-    
+    _metalEnvironment->_lightDirection = simd_make_float3(000.0, 10000.0, 10000.0);
+
     // TODO: Remove this..  This is legacy
     _manager->setRenderingEnvironmentVariables(_metalEnvironment);
 

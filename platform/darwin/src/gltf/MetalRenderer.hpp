@@ -37,7 +37,8 @@ namespace maplibre { namespace gltf {
         simd_float3 _translationVector; // This might need to be a doubles vector
         double _rotationDeg = 0; // Rotation around the zAxis (if applicable)
         double _scaling = 1; // Scaling from
-        
+        float _brightness = 1.0; // Brightness
+
         // This is the model matrix (rotation, scaling and transformation applied)
         simd_double4x4 _modelMatrix;
 
