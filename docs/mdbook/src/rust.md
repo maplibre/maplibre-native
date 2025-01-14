@@ -10,7 +10,9 @@ We use [CXX](https://cxx.rs/) to allow interop between Rust and C++.
 
 ## Building
 
-You need to have the correct Rust toolchain(s) installed. See [Install Rust](https://www.rust-lang.org/tools/install) to install Rust.
+### CMake
+
+When building with CMake, need to have the correct Rust toolchain(s) installed. See [Install Rust](https://www.rust-lang.org/tools/install) to install Rust.
 
 You can use `rustup` to manage toolchains. Which toolchain you needs depends on your host platform and for what platform you are trying to build. If your host and target platform are the same, you probably have the correct toolchain installed after installing Rust. For example when building for **Android** and building on a **x84 Linux** host you would use the following command:
 
@@ -23,12 +25,10 @@ See [Platform Support](https://doc.rust-lang.org/nightly/rustc/platform-support.
 You also need to have cxxbridge installed:
 
 ```
-cargo install cxxbridge
+cargo install cxxbridge-cmd
 ```
 
-### CMake
-
-Set `MLN_USE_RUST=ON` when generating a configuration with CMake.
+Set `-DMLN_USE_RUST=ON` when generating a configuration with CMake.
 
 ### Bazel
 
