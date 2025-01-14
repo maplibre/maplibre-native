@@ -32,7 +32,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 if("${QT_VERSION_MAJOR}" STREQUAL "")
-    find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
+    find_package(QT NAMES Qt6 COMPONENTS Core REQUIRED)
 else()
     find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
 endif()

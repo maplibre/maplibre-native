@@ -7,8 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
-#define WIDEVECTOR_SHADER_PRELUDE \
-    R"(
+constexpr auto wideVectorShaderPrelude = R"(
 
 enum {
     idWideVectorUniformsUBO = idDrawableReservedVertexOnlyUBO,
@@ -16,7 +15,7 @@ enum {
     wideVectorUBOCount
 };
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Metal> {
@@ -28,8 +27,8 @@ struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Metal> {
     static const std::array<AttributeInfo, 4> instanceAttributes;
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto source = WIDEVECTOR_SHADER_PRELUDE R"(
-#include <metal_stdlib>
+    static constexpr auto prelude = wideVectorShaderPrelude;
+    static constexpr auto source = R"(
 
 namespace WhirlyKitShader
 {

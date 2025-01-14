@@ -16,11 +16,7 @@ struct alignas(16) ClipUBO {
 };
 static_assert(sizeof(ClipUBO) == 5 * 16);
 
-#define CLIPPING_MASK_SHADER_PRELUDE \
-    R"(
-
-#include <metal_stdlib>
-using namespace metal;
+constexpr auto clippingMaskShaderPrelude = R"(
 
 enum {
     idClippingMaskUBO = idDrawableReservedVertexOnlyUBO,
@@ -37,7 +33,7 @@ struct alignas(16) ClipUBO {
 };
 static_assert(sizeof(ClipUBO) == 5 * 16, "wrong size");
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Metal> {
@@ -49,7 +45,9 @@ struct ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto source = CLIPPING_MASK_SHADER_PRELUDE R"(
+    static constexpr auto prelude = clippingMaskShaderPrelude;
+    static constexpr auto source = R"(
+
 struct VertexStage {
     short2 position [[attribute(clippingMaskUBOCount + 0)]];
 };

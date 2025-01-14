@@ -136,9 +136,7 @@ public:
                                  RenderStaticData& staticData,
                                  const std::vector<shaders::ClipUBO>& tileUBOs);
 
-    const std::unique_ptr<BufferResource>& getDummyVertexBuffer();
-    const std::unique_ptr<BufferResource>& getDummyUniformBuffer();
-    const std::unique_ptr<BufferResource>& getDummyStorageBuffer();
+    const std::unique_ptr<BufferResource>& getDummyBuffer();
     const std::unique_ptr<Texture2D>& getDummyTexture();
 
     const vk::DescriptorSetLayout& getDescriptorSetLayout(DescriptorSetType type);
@@ -190,9 +188,7 @@ private:
     vulkan::UniformBufferArray globalUniformBuffers;
     std::unordered_map<DescriptorSetType, DescriptorPoolGrowable> descriptorPoolMap;
 
-    std::unique_ptr<BufferResource> dummyVertexBuffer;
-    std::unique_ptr<BufferResource> dummyUniformBuffer;
-    std::unique_ptr<BufferResource> dummyStorageBuffer;
+    std::unique_ptr<BufferResource> dummyBuffer;
     std::unique_ptr<Texture2D> dummyTexture2D;
     vk::UniqueDescriptorSetLayout globalUniformDescriptorSetLayout;
     vk::UniqueDescriptorSetLayout layerUniformDescriptorSetLayout;

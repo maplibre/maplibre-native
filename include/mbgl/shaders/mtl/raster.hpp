@@ -7,8 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
-#define RASTER_SHADER_PRELUDE \
-    R"(
+constexpr auto rasterShaderPrelude = R"(
 
 enum {
     idRasterDrawableUBO = idDrawableReservedVertexOnlyUBO,
@@ -40,7 +39,7 @@ struct alignas(16) RasterEvaluatedPropsUBO {
 };
 static_assert(sizeof(RasterEvaluatedPropsUBO) == 4 * 16, "wrong size");
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::Metal> {
@@ -52,7 +51,8 @@ struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
-    static constexpr auto source = RASTER_SHADER_PRELUDE R"(
+    static constexpr auto prelude = rasterShaderPrelude;
+    static constexpr auto source = R"(
 
 struct VertexStage {
     short2 pos [[attribute(rasterUBOCount + 0)]];

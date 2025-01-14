@@ -7,8 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
-#define COLLISION_SHADER_COMMON \
-    R"(
+constexpr auto collisionShaderPrelude = R"(
 
 enum {
     idCollisionDrawableUBO = idDrawableReservedVertexOnlyUBO,
@@ -30,7 +29,7 @@ struct alignas(16) CollisionTilePropsUBO {
 };
 static_assert(sizeof(CollisionTilePropsUBO) == 16, "wrong size");
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Metal> {
@@ -42,7 +41,8 @@ struct ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto source = COLLISION_SHADER_COMMON R"(
+    static constexpr auto prelude = collisionShaderPrelude;
+    static constexpr auto source = R"(
 
 struct VertexStage {
     short2 pos [[attribute(collisionUBOCount + 0)]];
@@ -115,7 +115,8 @@ struct ShaderSource<BuiltIn::CollisionCircleShader, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto source = COLLISION_SHADER_COMMON R"(
+    static constexpr auto prelude = collisionShaderPrelude;
+    static constexpr auto source = R"(
 
 struct VertexStage {
     short2 pos [[attribute(collisionUBOCount + 0)]];
