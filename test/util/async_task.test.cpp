@@ -217,7 +217,7 @@ TEST(AsyncTask, MultipleSequencedSchedulers) {
             refs[i] = Scheduler::GetSequenced();
         }
         refs[j].reset();
-        
+
         // Check that exactly N unique schedulers are produced.
         // Note that this relies on no other threads requesting schedulers.
         for (std::size_t i = 0; i < kSchedulersCount; ++i) {
