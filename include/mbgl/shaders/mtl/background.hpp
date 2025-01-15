@@ -7,8 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
-#define BACKGROUND_SHADER_COMMON \
-    R"(
+constexpr auto backgroundShaderPrelude = R"(
 
 enum {
     idBackgroundDrawableUBO = idDrawableReservedVertexOnlyUBO,
@@ -72,7 +71,7 @@ union BackgroundDrawableUnionUBO {
     BackgroundPatternDrawableUBO backgroundPatternDrawableUBO;
 };
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
@@ -84,9 +83,8 @@ struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto source = BACKGROUND_SHADER_COMMON R"(
-#include <metal_stdlib>
-using namespace metal;
+    static constexpr auto prelude = backgroundShaderPrelude;
+    static constexpr auto source = R"(
 
 struct VertexStage {
     short2 position [[attribute(backgroundUBOCount + 0)]];
@@ -128,9 +126,8 @@ struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal>
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto source = BACKGROUND_SHADER_COMMON R"(
-#include <metal_stdlib>
-using namespace metal;
+    static constexpr auto prelude = backgroundShaderPrelude;
+    static constexpr auto source = R"(
 
 struct VertexStage {
     short2 position [[attribute(backgroundUBOCount + 0)]];

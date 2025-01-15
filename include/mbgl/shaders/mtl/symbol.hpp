@@ -7,8 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
-#define SYMBOL_SHADER_COMMON \
-    R"(
+constexpr auto symbolShaderPrelude = R"(
 
 enum {
     idSymbolDrawableUBO = idDrawableReservedVertexOnlyUBO,
@@ -71,7 +70,7 @@ struct alignas(16) SymbolEvaluatedPropsUBO {
 };
 static_assert(sizeof(SymbolEvaluatedPropsUBO) == 6 * 16, "wrong size");
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
@@ -83,7 +82,9 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto source = SYMBOL_SHADER_COMMON R"(
+    static constexpr auto prelude = symbolShaderPrelude;
+    static constexpr auto source = R"(
+
 struct VertexStage {
     float4 pos_offset [[attribute(symbolUBOCount + 0)]];
     float4 data [[attribute(symbolUBOCount + 1)]];
@@ -219,7 +220,9 @@ struct ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto source = SYMBOL_SHADER_COMMON R"(
+    static constexpr auto prelude = symbolShaderPrelude;
+    static constexpr auto source = R"(
+
 struct VertexStage {
     float4 pos_offset [[attribute(symbolUBOCount + 0)]];
     float4 data [[attribute(symbolUBOCount + 1)]];
@@ -426,7 +429,9 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
-    static constexpr auto source = SYMBOL_SHADER_COMMON R"(
+    static constexpr auto prelude = symbolShaderPrelude;
+    static constexpr auto source = R"(
+
 #define SDF 1.0
 #define ICON 0.0
 

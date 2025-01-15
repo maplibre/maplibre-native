@@ -7,8 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
-#define HILLSHADE_SHADER_PRELUDE \
-    R"(
+constexpr auto hillshadeShaderPrelude = R"(
 
 enum {
     idHillshadeDrawableUBO = idDrawableReservedVertexOnlyUBO,
@@ -39,7 +38,7 @@ struct alignas(16) HillshadeEvaluatedPropsUBO {
 };
 static_assert(sizeof(HillshadeEvaluatedPropsUBO) == 3 * 16, "wrong size");
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::Metal> {
@@ -51,7 +50,8 @@ struct ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto source = HILLSHADE_SHADER_PRELUDE R"(
+    static constexpr auto prelude = hillshadeShaderPrelude;
+    static constexpr auto source = R"(
 
 struct VertexStage {
     short2 pos [[attribute(hillshadeUBOCount + 0)]];

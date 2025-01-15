@@ -7,8 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
-#define FILL_SHADER_COMMON \
-    R"(
+constexpr auto fillShaderPrelude = R"(
 
 enum {
     idFillDrawableUBO = idDrawableReservedVertexOnlyUBO,
@@ -139,7 +138,7 @@ union FillTilePropsUnionUBO {
     FillOutlinePatternTilePropsUBO fillOutlinePatternTilePropsUBO;
 };
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
@@ -151,7 +150,8 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto source = FILL_SHADER_COMMON R"(
+    static constexpr auto prelude = fillShaderPrelude;
+    static constexpr auto source = R"(
 
 struct VertexStage {
     short2 position [[attribute(fillUBOCount + 0)]];
@@ -225,7 +225,9 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto source = FILL_SHADER_COMMON R"(
+    static constexpr auto prelude = fillShaderPrelude;
+    static constexpr auto source = R"(
+
 struct VertexStage {
     short2 position [[attribute(fillUBOCount + 0)]];
     float4 outline_color [[attribute(fillUBOCount + 1)]];
@@ -302,7 +304,9 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto source = FILL_SHADER_COMMON R"(
+    static constexpr auto prelude = fillShaderPrelude;
+    static constexpr auto source = R"(
+
 struct VertexStage {
     short2 position [[attribute(fillUBOCount + 0)]];
 
@@ -443,7 +447,8 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto source = FILL_SHADER_COMMON R"(
+    static constexpr auto prelude = fillShaderPrelude;
+    static constexpr auto source = R"(
 
 struct VertexStage {
     short2 position [[attribute(fillUBOCount + 0)]];
@@ -597,7 +602,9 @@ struct ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto source = FILL_SHADER_COMMON R"(
+    static constexpr auto prelude = fillShaderPrelude;
+    static constexpr auto source = R"(
+
 struct VertexStage {
     short2 pos_normal [[attribute(fillUBOCount + 0)]];
     uchar4 data [[attribute(fillUBOCount + 1)]];

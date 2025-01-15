@@ -7,8 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
-#define DEBUG_SHADER_PRELUDE \
-    R"(
+constexpr auto debugShaderPrelude = R"(
 
 enum {
     idDebugUBO = drawableReservedUBOCount,
@@ -26,7 +25,7 @@ struct alignas(16) DebugUBO {
 };
 static_assert(sizeof(DebugUBO) == 6 * 16, "wrong size");
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Metal> {
@@ -38,7 +37,8 @@ struct ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto source = DEBUG_SHADER_PRELUDE R"(
+    static constexpr auto prelude = debugShaderPrelude;
+    static constexpr auto source = R"(
 
 struct VertexStage {
     short2 pos [[attribute(debugUBOCount + 0)]];

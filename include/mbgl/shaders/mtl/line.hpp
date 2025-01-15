@@ -7,8 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
-#define LINE_SHADER_COMMON \
-    R"(
+constexpr auto lineShadePrelude = R"(
 
 enum {
     idLineDrawableUBO = idDrawableReservedVertexOnlyUBO,
@@ -171,7 +170,7 @@ union LineTilePropsUnionUBO {
     LineSDFTilePropsUBO lineSDFTilePropsUBO;
 };
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal> {
@@ -183,7 +182,9 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto source = LINE_SHADER_COMMON R"(
+    static constexpr auto prelude = lineShadePrelude;
+    static constexpr auto source = R"(
+
 struct VertexStage {
     short2 pos_normal [[attribute(lineUBOCount + 0)]];
     uchar4 data [[attribute(lineUBOCount + 1)]];
@@ -361,7 +362,9 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto source = LINE_SHADER_COMMON R"(
+    static constexpr auto prelude = lineShadePrelude;
+    static constexpr auto source = R"(
+
 struct VertexStage {
     short2 pos_normal [[attribute(lineUBOCount + 0)]];
     uchar4 data [[attribute(lineUBOCount + 1)]];
@@ -526,7 +529,9 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto source = LINE_SHADER_COMMON R"(
+    static constexpr auto prelude = lineShadePrelude;
+    static constexpr auto source = R"(
+
 struct VertexStage {
     short2 pos_normal [[attribute(lineUBOCount + 0)]];
     uchar4 data [[attribute(lineUBOCount + 1)]];
@@ -761,7 +766,9 @@ struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto source = LINE_SHADER_COMMON R"(
+    static constexpr auto prelude = lineShadePrelude;
+    static constexpr auto source = R"(
+
 struct VertexStage {
     short2 pos_normal [[attribute(lineUBOCount + 0)]];
     uchar4 data [[attribute(lineUBOCount + 1)]];
