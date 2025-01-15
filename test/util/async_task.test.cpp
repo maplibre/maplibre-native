@@ -206,25 +206,22 @@ TEST(AsyncTask, SequencedScheduler) {
 }
 
 TEST(AsyncTask, MultipleSequencedSchedulers) {
+    constexpr std::size_t kSchedulersCount = 10; // must match the value in the scheduler
+
     std::vector<std::shared_ptr<Scheduler>> schedulers;
 
-    // must match the value in the scheduler
-    constexpr std::size_t kSchedulersCount = 10;
+    // Regression check, the scheduler assignment was previously sensitive to the state of the weak references.
+    // If expired weak references followed a still-valid one, both after the last-used index, the index would
+    // be incremented multiple times.
+    auto temp = Scheduler::GetSequenced();
+    temp = Scheduler::GetSequenced();
 
-    for (std::size_t j = 0; j < kSchedulersCount; ++j) {
-        std::vector<std::shared_ptr<Scheduler>> refs(kSchedulersCount);
-        for (std::size_t i = 0; i < refs.size(); ++i) {
-            refs[i] = Scheduler::GetSequenced();
-        }
-        refs[j].reset();
-
-        // Check that exactly N unique schedulers are produced.
-        // Note that this relies on no other threads requesting schedulers.
-        for (std::size_t i = 0; i < kSchedulersCount; ++i) {
-            auto scheduler = Scheduler::GetSequenced();
-            EXPECT_TRUE(std::ranges::find(schedulers, scheduler) == schedulers.end());
-            schedulers.emplace_back(std::move(scheduler));
-        }
-        EXPECT_EQ(schedulers.front(), Scheduler::GetSequenced());
+    // Check that exactly N unique schedulers are produced.
+    // Note that this relies on no other threads requesting schedulers.
+    for (std::size_t i = 0; i < kSchedulersCount; ++i) {
+        auto scheduler = Scheduler::GetSequenced();
+        EXPECT_TRUE(std::ranges::find(schedulers, scheduler) == schedulers.end());
+        schedulers.emplace_back(std::move(scheduler));
     }
+    EXPECT_EQ(schedulers.front(), Scheduler::GetSequenced());
 }
