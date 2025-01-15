@@ -25,6 +25,7 @@ const std::map<std::string, std::optional<Color>> testCases = {
     {"#123", Color(0.067f, 0.133f, 0.2f, 1.0f)},             // Short hex format
     {"rgb(-10, 0, 0)", Color(0.0f, 0.0f, 0.0f, 1.0f)},       // Clamped to 0
     {"rgba(300, 0, 0, 1.0)", Color(1.0f, 0.0f, 0.0f, 1.0f)}, // Clamped to 1
+    {"rgba(100,100,100,0.2)", Color(20.0f / 255, 20.0f / 255, 20.0f / 255, 0.2f)},
     // {"#GGGGGG", Color(0.0f, 0.0f, 0.0f, 1.0f)}, // Treated as fallback black
     // not supported right now
     // {"#0F0F", Color(0.0f, 1.0f, 0.0f, 1.0f)},
