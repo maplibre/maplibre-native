@@ -50,8 +50,8 @@ public class VulkanTextureViewRenderThread extends TextureViewRenderThread {
               break;
             }
 
-            if (surfaceTexture != null && !paused && requestRender &&
-                    (surface == null || this.sizeChanged)) {
+            if (surfaceTexture != null && !paused && requestRender
+                    && (surface == null || this.sizeChanged)) {
 
               w = width;
               h = height;
