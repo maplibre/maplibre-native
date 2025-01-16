@@ -22,3 +22,5 @@
 
 - [Profiling applications that use MapLibre Native](./profiling/README.md)
   - [Tracy profiling](./profiling/tracy-profiling.md)
+
+- [Rust](./rust.md)
