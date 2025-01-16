@@ -12,8 +12,7 @@ namespace mbgl {
 std::optional<Color> Color::parse(const std::string& s) {
     const auto css_color = rustutils::parse_css_color(s);
     if (css_color.success) {
-        const float factor = css_color.a / 255;
-        return {{css_color.r * factor, css_color.g * factor, css_color.b * factor, css_color.a}};
+        return {{css_color.r * css_color.a, css_color.g * css_color.a, css_color.b * css_color.a, css_color.a}};
     } else {
         return {};
     }
