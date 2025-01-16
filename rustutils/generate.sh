@@ -12,6 +12,9 @@ if [ "$#" -lt 2 ]; then
   exit 1
 fi
 
+# Use CXXBRIDGE_CMD environment variable if set, otherwise fallback to "cxxbridge"
+CXXBRIDGE_CMD="${CXXBRIDGE_CMD:-cxxbridge}"
+
 output_dir="$1"
 shift
 
@@ -27,6 +30,6 @@ mkdir -p "$output_dir/cpp/src"
 
 for input_file in "$@"; do
   base_name=$(basename "$input_file" .rs)
-  cxxbridge "$input_file" --header > "$output_dir/cpp/include/rustutils/${base_name}.hpp"
-  cxxbridge "$input_file" > "$output_dir/cpp/src/${base_name}.rs.cpp"
+  "$CXXBRIDGE_CMD" "$input_file" --header > "$output_dir/cpp/include/rustutils/${base_name}.hpp"
+  "$CXXBRIDGE_CMD" "$input_file" > "$output_dir/cpp/src/${base_name}.rs.cpp"
 done

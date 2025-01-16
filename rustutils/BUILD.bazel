@@ -10,9 +10,11 @@ genrule(
         "cpp/include/rustutils/color.hpp",
         "cpp/src/color.rs.cpp",
     ],
-    cmd = "./$(location generate.sh) $(@D) $(SRCS)",
+    cmd = "CXXBRIDGE_CMD=$(location @cxx.rs//:codegen) ./$(location :generate.sh) $(@D) $(SRCS)",
+    # Using the cxxbridge binary built by Bazel
     tools = [
         ":generate.sh",
+        "@cxx.rs//:codegen",
     ],
 )
 

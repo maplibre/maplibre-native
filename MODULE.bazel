@@ -62,6 +62,12 @@ darwin_config(
 )
 
 bazel_dep(name = "rules_rust", version = "0.56.0")
+bazel_dep(name = "cxx.rs", version = "1.0.136")
+git_override(
+    module_name = "cxx.rs",
+    commit = "d54e44698c3fa5833a861cb3ae502533b92f2f57",
+    remote = "https://github.com/dtolnay/cxx.git",
+)
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(
@@ -69,6 +75,7 @@ rust.toolchain(
     extra_target_triples = [
         "aarch64-apple-ios-sim",
         "x86_64-apple-ios",
+        "aarch64-apple-ios",
         "aarch64-apple-darwin",
         "x86_64-apple-darwin",
     ],
