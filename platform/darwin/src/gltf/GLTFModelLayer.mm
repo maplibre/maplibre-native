@@ -47,6 +47,12 @@ using namespace maplibre::gltf;
 @property NSMutableArray *models;
 @property BOOL managerCreated;
 
+// Would be nice to change this to a vec3 or something similar at some point
+@property BOOL lightSet;
+@property float lightX;
+@property float lightY;
+@property float lightZ;
+
 
 @end
 
@@ -134,6 +140,22 @@ simd_double4x4 toSimdMatrix4D(const MLNMatrix4 & mlMatrix) {
 - (void)didMoveToMapView:(MLNMapView *)mapView {
     
 }
+
+// This sets the relative light position for all the models being rendered
+// The light position is in meters from the origin of the model.
+-(void)setLightPositionX:(float)x y:(float)y z:(float)z {
+    
+    self.lightSet = YES;
+    self.lightX = x;
+    self.lightY = y;
+    self.lightZ = z;
+    
+    if (_metalEnvironment != nullptr) {
+        _metalEnvironment->_lightDirection = simd_make_float3(_lightX, _lightY, _lightZ);
+    }
+    
+}
+
 
 -(void)loadModels {
     
@@ -267,6 +289,10 @@ simd_double4x4 toSimdMatrix4D(const MLNMatrix4 & mlMatrix) {
         // Setup the metal environment for the model rendering
         _metalEnvironment = std::make_shared<GLTFManagerRenderingEnvironmentMetal>();
 
+        if (self.lightSet) {
+            _metalEnvironment->_lightDirection = simd_make_float3(_lightX, _lightY, _lightZ);
+        }
+        
         // Create the GLTF Manager
         _manager = std::make_shared<GLTFManager>(RenderingEnvironmentMetal);
         _manager->setRenderingEnvironmentVariables(_metalEnvironment);
@@ -278,25 +304,6 @@ simd_double4x4 toSimdMatrix4D(const MLNMatrix4 & mlMatrix) {
             tempResult._y = 0;
             tempResult._z = 0;
 
-            
-            tempResult._x = 1000;
-            tempResult._y = 1000;
-
-            tempResult._x = 1112;
-            tempResult._y = 1112;
-            
-            tempResult._x = 111319.49079327357;
-            tempResult._y = 111325.1428663851;
-
-            tempResult._x = 1113194.9079327357;
-            tempResult._y = 1118889.9748579594;
-            
-            
-            tempResult._x = 5198170.102753558;
-            tempResult._y = 2832006.4886368043;
-            
-            
-            
             tempResult._x = coordinate._lon * DEG_RAD;
             double lat = coordinate._lat * DEG_RAD;
 //            if (lat < -PoleLimit) lat = -PoleLimit;
@@ -308,72 +315,6 @@ simd_double4x4 toSimdMatrix4D(const MLNMatrix4 & mlMatrix) {
             tempResult._y = tempResult._y * metersScale / M_PI;
             return tempResult;
             
-            
-            /*
-            Point3d SphericalMercatorCoordSystem::geographicToLocal3d(const GeoCoord &geo) const
-            {
-                Point3d coord;
-                coord.x() = geo.lon() - originLon;
-                double lat = geo.lat();
-                if (lat < -PoleLimit) lat = -PoleLimit;
-                if (lat > PoleLimit) lat = PoleLimit;
-                coord.y() = log((1.0f+sin(lat))/cos(lat));
-                coord.z() = 0.0;
-                
-                return coord;
-            }
-            */
-            
-            
-            
-            /*
-
-            
-            
-            MLNMapProjection *proj = mapView.mapProjection;
-            CGPoint p = [proj convertCoordinate:CLLocationCoordinate2DMake(coordinate._lat, coordinate._lon)];
-            
-            
-            //NSLog(@"ZOOM LEVEL: %f",mapView.zoomLevel);
-            //NSLog(@"Meters Per Pixel: %f",proj.metersPerPoint);
-
-            
-            // The 2.0 is point to pixel scaling
-            double viewportSizeXPoints = resource.mtkView.drawableSize.width / 2.0;
-            double viewportSizeYPoints = resource.mtkView.drawableSize.height / 2.0;
-            
-            double halfX = (viewportSizeXPoints / 2.0);
-            double halfY = (viewportSizeYPoints / 2.0);
-            
-            double offsetX = p.x - halfX;
-            
-            double projX = offsetX / viewportSizeXPoints;
-            double projY = (viewportSizeYPoints - p.y - halfY) / viewportSizeYPoints;
-            
-            double aspect = viewportSizeXPoints / viewportSizeYPoints;
-            
-            tempResult._x = projX * 4.0 * aspect;
-            tempResult._y = projY * 4.0;
-            
-            
-            double x = p.x / viewportSizeXPoints;
-            double y = p.y / viewportSizeYPoints;
-            
-            x = (x * 2) - 1;
-            y = (y * 2) - 1;
-            y = -y;
-            tempResult._x = x;
-            tempResult._y = y;
-            
-            
-
-//            tempResult._x = projX;
-//            tempResult._y = projY;
-
-            NSLog(@"P: %f, %f -> %f, %f", p.x, p.y, x, y); // projX, projY, x, y);
-
-            return tempResult;
-            */
         });
         
         loadModels = true;
@@ -387,7 +328,9 @@ simd_double4x4 toSimdMatrix4D(const MLNMatrix4 & mlMatrix) {
     _metalEnvironment->_metalDevice = resource.mtkView.device;
     _metalEnvironment->_currentDrawable = resource.mtkView.currentDrawable;
     _metalEnvironment->_currentRenderPassDescriptor = resource.mtkView.currentRenderPassDescriptor;
-    _metalEnvironment->_lightDirection = simd_make_float3(000.0, 10000.0, 10000.0);
+    if (self.lightSet) {
+        _metalEnvironment->_lightDirection = simd_make_float3(_lightX, _lightY, _lightZ);
+    }
 
     // TODO: Remove this..  This is legacy
     _manager->setRenderingEnvironmentVariables(_metalEnvironment);
@@ -399,10 +342,7 @@ simd_double4x4 toSimdMatrix4D(const MLNMatrix4 & mlMatrix) {
     vector_uint2 _viewportSize;
     _viewportSize.x = resource.mtkView.drawableSize.width;
     _viewportSize.y = resource.mtkView.drawableSize.height;
-
     _manager->setDrawableSize(_viewportSize.x, _viewportSize.y);
-    _manager->_metersPerPixel = 0.05;
-    
     
     MLNMapProjection *proj2 = mapView.mapProjection;
     _manager->_metersPerPixel = proj2.metersPerPoint / 2.0;
@@ -412,57 +352,8 @@ simd_double4x4 toSimdMatrix4D(const MLNMatrix4 & mlMatrix) {
     float timestep = (1 / 60.0f);
     _manager->updateScene(timestep);
         
-
     // Render the image
     _manager->render();
-    /*
-    return;
-
-    
-    
-    
-    
-    MLNMapProjection *proj = mapView.mapProjection;
-    CGPoint p = [proj convertCoordinate:CLLocationCoordinate2DMake(43, -70)];
-    NSLog(@"P: %f, %f", p.x, p.y);
-    
-    // Use the supplied render command encoder to encode commands
-    id<MTLRenderCommandEncoder> renderEncoder = self.renderEncoder;
-    if(renderEncoder != nil)
-    {
-        
-        typedef struct
-        {
-            vector_float2 position;
-            vector_float4 color;
-        } Vertex;
-
-        static const Vertex triangleVertices[] =
-        {
-            // 2D positions,    RGBA colors
-            { {  250,  -250 }, { 1, 0, 0, 1 } },
-            { { -250,  -250 }, { 0, 1, 0, 1 } },
-            { {    0,   250 }, { 0, 0, 1, 1 } },
-        };
-
-        [renderEncoder setRenderPipelineState:_pipelineState];
-        [renderEncoder setDepthStencilState:_depthStencilStateWithoutStencil];
-
-        // Pass in the parameter data.
-        [renderEncoder setVertexBytes:triangleVertices
-                               length:sizeof(triangleVertices)
-                               atIndex:0];
-        
-        [renderEncoder setVertexBytes:&_viewportSize
-                               length:sizeof(_viewportSize)
-                               atIndex:1];
-        
-        // Draw the triangle.
-        [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle
-                          vertexStart:0
-                          vertexCount:3];
-    }
-    */
      
 }
 

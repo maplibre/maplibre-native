@@ -31,6 +31,10 @@ namespace maplibre { namespace gltf {
         //
         simd_float3 _lightDirection;
 
+        GLTFManagerRenderingEnvironment() {
+            _lightDirection = simd_make_float3(0.0, 10000.0, 10000.0);
+        }
+
     };
 
 }}

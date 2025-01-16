@@ -11,6 +11,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface GLTFModelLayer : MLNCustomStyleLayer
 
+// This sets the relative light position for all the models being rendered
+// The light position is in meters from the origin of the model.
+-(void)setLightPositionX:(float)x y:(float)y z:(float)z;
+
 -(void)loadModelFromJSON:(NSString *)modelMetadataFilename;
 
 -(void)loadModel:(NSString *)appResourceFilename
