@@ -6,7 +6,8 @@ if [ ! -d /app/.github ] || [ ! -d ~/.cache ]; then
     echo "       From the root of this repo, run the following command."
     echo "       You may add any command to perform in the container at the end of this command."
     echo " "
-    echo '  docker run --rm -it -v "$PWD:/app/" -v "$PWD/docker/.cache:/home/'"$USERNAME"'/.cache" maplibre-native-image'
+    # shellcheck disable=SC2016
+    echo '  docker run --rm -it -v "$PWD:/app/" -v "$PWD/docker/.cache:'"$HOME"'/.cache" maplibre-native-image'
     exit 1
 fi
 
