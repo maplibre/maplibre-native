@@ -5,6 +5,7 @@
 #include <mbgl/vulkan/texture2d.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/instrumentation.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
 
 #include <cassert>
 #include <math.h>
@@ -186,7 +187,16 @@ void UniformDescriptorSet::update(const gfx::UniformBufferArray& uniforms,
 }
 
 ImageDescriptorSet::ImageDescriptorSet(Context& context_)
-    : DescriptorSet(context_, DescriptorSetType::DrawableImage) {}
+    : DescriptorSet(context_, DescriptorSetType::DrawableImage),
+      lastModified(0.0) {}
+
+void ImageDescriptorSet::markDirty(bool value) {
+    DescriptorSet::markDirty(value);
+
+    if (value) {
+        lastModified = util::MonotonicTimer::now();
+    }
+}
 
 void ImageDescriptorSet::update(const std::array<gfx::Texture2DPtr, shaders::maxTextureCountPerShader>& textures) {
     MLN_TRACE_FUNC();

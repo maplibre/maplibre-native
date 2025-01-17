@@ -60,6 +60,7 @@ public:
     size_t numChannels() const noexcept override;
 
     bool isDirty() const { return samplerStateDirty || textureDirty; }
+    bool isModifiedAfter(const std::chrono::duration<double>& t) const { return t < lastModified; }
 
     void create() noexcept override;
 
@@ -112,6 +113,7 @@ private:
     std::shared_ptr<PremultipliedImage> imageData{nullptr};
     bool textureDirty{true};
     bool samplerStateDirty{true};
+    std::chrono::duration<double> lastModified{0};
 
     SharedImageAllocation imageAllocation;
     vk::ImageLayout imageLayout{vk::ImageLayout::eUndefined};
