@@ -8,6 +8,9 @@ struct MapLibreNavigationView: View {
                 NavigationLink("SimpleMap") {
                     SimpleMap().edgesIgnoringSafeArea(.all)
                 }
+                NavigationLink("CustomStyleLayerExample") {
+                    CustomStyleLayerExample().edgesIgnoringSafeArea(.all)
+                }
                 NavigationLink("LineTapMap") {
                     LineTapMap().edgesIgnoringSafeArea(.all)
                 }
