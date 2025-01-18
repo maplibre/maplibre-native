@@ -1,23 +1,22 @@
+import Foundation
 import MapLibre
+import MetalKit
 import SwiftUI
 import UIKit
-import Foundation
-import MetalKit
 
 // #-example-code(CustomStyleLayerExample)
 struct CustomStyleLayerExample: UIViewRepresentable {
-   
     func makeCoordinator() -> CustomStyleLayerExample.Coordinator {
         Coordinator(self)
     }
-        
+
     final class Coordinator: NSObject, MLNMapViewDelegate {
         var control: CustomStyleLayerExample
-        
+
         init(_ control: CustomStyleLayerExample) {
             self.control = control
         }
-        
+
         func mapViewDidFinishLoadingMap(_ mapView: MLNMapView) {
             let mapOverlay = CustomStyleLayer(identifier: "test-overlay")
             let style = mapView.style!
@@ -34,51 +33,49 @@ struct CustomStyleLayerExample: UIViewRepresentable {
     func updateUIView(_: MLNMapView, context _: Context) {}
 }
 
-
 class CustomStyleLayer: MLNCustomStyleLayer {
-    
     private var pipelineState: MTLRenderPipelineState?
     private var depthStencilStateWithoutStencil: MTLDepthStencilState?
-    
+
     override func didMove(to mapView: MLNMapView) {
         let resource = mapView.backendResource()
-           
+
         let shaderSource = """
         #include <metal_stdlib>
         using namespace metal;
-        
+
         typedef struct
         {
            vector_float2 position;
            vector_float4 color;
         } Vertex;
-        
+
         struct RasterizerData
         {
            float4 position [[position]];
            float4 color;
         };
-        
+
         struct Uniforms 
         { 
            float4x4 matrix; 
         };
-        
+
         vertex RasterizerData
         vertexShader(uint vertexID [[vertex_id]],
                     constant Vertex *vertices [[buffer(0)]],
                     constant Uniforms &uniforms [[buffer(1)]])
         {
            RasterizerData out;
-        
+
            const float4 position = uniforms.matrix * float4(float2(vertices[vertexID].position.xy), 1, 1);
 
            out.position = position;  
            out.color = vertices[vertexID].color;
-        
+
            return out;
         }
-        
+
         fragment float4 fragmentShader(RasterizerData in [[stage_in]])
         {
            return in.color;
@@ -104,7 +101,7 @@ class CustomStyleLayer: MLNCustomStyleLayer {
         do {
             pipelineState = try device?.makeRenderPipelineState(descriptor: pipelineStateDescriptor)
         } catch {
-           assert(false, "Failed to create pipeline state: \(error)")
+            assertionFailure("Failed to create pipeline state: \(error)")
         }
 
         // Notice that we don't configure the stencilTest property, leaving stencil testing disabled
@@ -115,22 +112,20 @@ class CustomStyleLayer: MLNCustomStyleLayer {
         depthStencilStateWithoutStencil = device!.makeDepthStencilState(descriptor: depthStencilDescriptor)
     }
 
-    override func willMove(from mapView: MLNMapView) {
-        
-    }
+    override func willMove(from _: MLNMapView) {}
 
     override func draw(in mapView: MLNMapView, with context: MLNStyleLayerDrawingContext) {
         // Use the supplied render command encoder to encode commands
-        guard let renderEncoder = self.renderEncoder else {
+        guard let renderEncoder else {
             return
         }
-        
+
         let resource = mapView.backendResource()
-        
+
         let p1 = project(CLLocationCoordinate2D(latitude: 25.0, longitude: 12.5))
         let p2 = project(CLLocationCoordinate2D(latitude: 0.0, longitude: 0.0))
         let p3 = project(CLLocationCoordinate2D(latitude: 0.0, longitude: 25.0))
-        
+
         struct Vertex {
             var position: vector_float2
             var color: vector_float4
@@ -139,45 +134,45 @@ class CustomStyleLayer: MLNCustomStyleLayer {
         let triangleVertices: [Vertex] = [
             Vertex(position: vector_float2(Float(p1.x), Float(p1.y)), color: vector_float4(1, 0, 0, 1)),
             Vertex(position: vector_float2(Float(p2.x), Float(p2.y)), color: vector_float4(0, 1, 0, 1)),
-            Vertex(position: vector_float2(Float(p3.x), Float(p3.y)), color: vector_float4(0, 0, 1, 1))
+            Vertex(position: vector_float2(Float(p3.x), Float(p3.y)), color: vector_float4(0, 0, 1, 1)),
         ]
 
         // Convert the projection matrix to float from double, and scale it to match our projection
         var projectionMatrix = convertMatrix(context.projectionMatrix)
         let worldSize = 512.0 * pow(2.0, context.zoomLevel)
-        projectionMatrix.m00 = projectionMatrix.m00 * Float(worldSize);
-        projectionMatrix.m11 = projectionMatrix.m11 * Float(worldSize);
-                
+        projectionMatrix.m00 = projectionMatrix.m00 * Float(worldSize)
+        projectionMatrix.m11 = projectionMatrix.m11 * Float(worldSize)
+
         renderEncoder.setRenderPipelineState(pipelineState!)
         renderEncoder.setDepthStencilState(depthStencilStateWithoutStencil)
-        
+
         // Pass in the parameter data.
         renderEncoder.setVertexBytes(triangleVertices, length: MemoryLayout<Vertex>.size * triangleVertices.count, index: 0)
         renderEncoder.setVertexBytes(&projectionMatrix, length: MemoryLayout<float4x4>.size, index: 1)
- 
+
         // Draw the triangle.
         renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
     }
-    
+
     func project(_ coordinate: CLLocationCoordinate2D) -> CGPoint {
         // We project the coordinates into the space 0 to 1 and then scale these when drawing based on the current zoom level
         let worldSize = 1.0
         let x = (180.0 + coordinate.longitude) / 360.0 * worldSize
         let yi = log(tan((45.0 + coordinate.latitude / 2.0) * Double.pi / 180.0))
         let y = (180.0 - yi * (180.0 / Double.pi)) / 360.0 * worldSize
-        
+
         return CGPoint(x: x, y: y)
     }
-    
+
     struct MLNMatrix4f {
         var m00, m01, m02, m03: Float
         var m10, m11, m12, m13: Float
         var m20, m21, m22, m23: Float
         var m30, m31, m32, m33: Float
     }
-    
+
     func convertMatrix(_ mat: MLNMatrix4) -> MLNMatrix4f {
-         return MLNMatrix4f(
+        MLNMatrix4f(
             m00: Float(mat.m00), m01: Float(mat.m01), m02: Float(mat.m02), m03: Float(mat.m03),
             m10: Float(mat.m10), m11: Float(mat.m11), m12: Float(mat.m12), m13: Float(mat.m13),
             m20: Float(mat.m20), m21: Float(mat.m21), m22: Float(mat.m22), m23: Float(mat.m23),
