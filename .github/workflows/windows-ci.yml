@@ -103,7 +103,7 @@ jobs:
           CMAKE_CXX_COMPILER_LAUNCHER: "${{ env.SCCACHE_PATH }}"
           RENDERER: "${{ matrix.renderer }}"
           RENDERING_MODE: "${{ matrix.rendering_mode }}"
-        timeout-minutes: 5
+        timeout-minutes: 60
         run: |
           cmake --version
           & ${{ github.workspace }}\.github\scripts\windows-ci_configure_wrapper.ps1
