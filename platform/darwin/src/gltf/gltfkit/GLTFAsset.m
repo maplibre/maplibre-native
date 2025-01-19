@@ -253,7 +253,7 @@
     GLTFBinaryHeader header;
     [assetData getBytes:&header length:sizeof(GLTFBinaryHeader)];
     
-    NSInteger offset = sizeof(GLTFBinaryHeader);
+    NSUInteger offset = sizeof(GLTFBinaryHeader);
     while (offset < header.length && offset < assetData.length) {
         GLTFBinaryChunk *chunk = [GLTFBinaryChunk new];
         struct {
@@ -355,7 +355,7 @@
     
     NSMutableArray *buffers = [NSMutableArray arrayWithCapacity:buffersMap.count];
     for (NSDictionary *properties in buffersMap) {
-        NSUInteger byteLength = [properties[@"byteLength"] integerValue];
+        NSInteger byteLength = [properties[@"byteLength"] integerValue];
 
         NSString *uri = properties[@"uri"];
         NSData *data = nil;
@@ -1064,7 +1064,7 @@
         if (_usesKHRLights) {
             NSDictionary *lightProperties = node.extensions[GLTFExtensionKHRLights];
             NSNumber *lightIdentifierValue = lightProperties[@"light"];
-            if (lightIdentifierValue && lightIdentifierValue.integerValue < _lights.count) {
+            if (lightIdentifierValue && lightIdentifierValue.unsignedIntValue < _lights.count) {
                 node.light = _lights[lightIdentifierValue.integerValue];
             }
         }
@@ -1094,16 +1094,16 @@
     
     for (GLTFSkin *skin in _skins) {
         NSMutableArray *nodes = [NSMutableArray arrayWithCapacity:skin.jointNodes.count];
-        for (NSInteger i = 0; i < skin.jointNodes.count; ++i) {
+        for (NSUInteger i = 0; i < skin.jointNodes.count; ++i) {
             NSNumber *jointIndexValue = (NSNumber *)skin.jointNodes[i];
-            if (jointIndexValue != nil && jointIndexValue.intValue < _nodes.count) {
+            if (jointIndexValue != nil && jointIndexValue.unsignedIntegerValue < _nodes.count) {
                 [nodes addObject:_nodes[jointIndexValue.intValue]];
             }
         }
         skin.jointNodes = [nodes copy];
 
         NSNumber *skeletonIndexValue = (NSNumber *)skin.skeletonRootNode;
-        if (skeletonIndexValue != nil && skeletonIndexValue.intValue < _nodes.count) {
+        if (skeletonIndexValue != nil && skeletonIndexValue.unsignedIntegerValue < _nodes.count) {
             skin.skeletonRootNode = _nodes[skeletonIndexValue.intValue];
         }
     }
@@ -1129,11 +1129,11 @@
         [samplersProperties enumerateObjectsUsingBlock:^(NSDictionary *samplerProperties, NSUInteger index, BOOL *stop) {
             GLTFAnimationSampler *sampler = [[GLTFAnimationSampler alloc] init];
             NSNumber *inputIndexValue = samplerProperties[@"input"];
-            if (inputIndexValue && inputIndexValue.integerValue < _accessors.count) {
+            if (inputIndexValue && inputIndexValue.unsignedIntegerValue < _accessors.count) {
                 sampler.inputAccessor = _accessors[inputIndexValue.integerValue];
             }
             NSNumber *outputIndexValue = samplerProperties[@"output"];
-            if (outputIndexValue && outputIndexValue.integerValue < _accessors.count) {
+            if (outputIndexValue && outputIndexValue.unsignedIntegerValue < _accessors.count) {
                 sampler.outputAccessor = _accessors[outputIndexValue.integerValue];
             }
             if (samplerProperties[@"interpolation"]) {
@@ -1149,12 +1149,12 @@
         [channelsProperties enumerateObjectsUsingBlock:^(NSDictionary *channelProperties, NSUInteger index, BOOL *stop) {
             GLTFAnimationChannel *channel = [GLTFAnimationChannel new];
             NSNumber *samplerIndexValue = channelProperties[@"sampler"];
-            if (samplerIndexValue && samplerIndexValue.integerValue < samplers.count) {
+            if (samplerIndexValue && samplerIndexValue.unsignedIntegerValue < samplers.count) {
                 channel.sampler = samplers[samplerIndexValue.integerValue];
             }
             NSDictionary *targetProperties = channelProperties[@"target"];
             NSNumber *targetNodeIndexValue = targetProperties[@"node"];
-            if (targetNodeIndexValue && targetNodeIndexValue.integerValue < _nodes.count) {
+            if (targetNodeIndexValue && targetNodeIndexValue.unsignedIntegerValue < _nodes.count) {
                 channel.targetNode = _nodes[targetNodeIndexValue.integerValue];
             }
             channel.targetPath = targetProperties[@"path"];
@@ -1187,7 +1187,7 @@
         
         NSNumber *inverseBindMatricesAccessorIndexValue = properties[@"inverseBindMatrices"];
         if (inverseBindMatricesAccessorIndexValue != nil) {
-            NSInteger inverseBindMatricesAccessorIndex = inverseBindMatricesAccessorIndexValue.integerValue;
+            NSUInteger inverseBindMatricesAccessorIndex = inverseBindMatricesAccessorIndexValue.unsignedIntegerValue;
             if (inverseBindMatricesAccessorIndex < _accessors.count) {
                 skin.inverseBindMatricesAccessor = _accessors[inverseBindMatricesAccessorIndex];
             }
@@ -1243,7 +1243,7 @@
         if (_usesKHRLights) {
             NSDictionary *lightProperties = scene.extensions[GLTFExtensionKHRLights];
             NSNumber *lightIdentifierValue = lightProperties[@"light"];
-            if (lightIdentifierValue != nil && lightIdentifierValue.integerValue < _lights.count) {
+            if (lightIdentifierValue != nil && lightIdentifierValue.unsignedIntegerValue < _lights.count) {
                 scene.ambientLight = _lights[lightIdentifierValue.integerValue];
             }
         }

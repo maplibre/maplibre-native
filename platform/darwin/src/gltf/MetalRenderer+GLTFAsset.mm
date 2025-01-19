@@ -381,11 +381,7 @@ void MetalRenderer::buildRenderListRecursive(std::shared_ptr<GLTFRenderModel> mo
             vertexUniforms.brightness = model->_brightness;
             vertexUniforms.lightDirection = _renderingEnvironment->_lightDirection;
 
-            
-            
-            
-            
-            FragmentUniforms fragmentUniforms = { 0 };
+            FragmentUniforms fragmentUniforms;
             fragmentUniforms.normalScale = material.normalTextureScale;
             fragmentUniforms.emissiveFactor = material.emissiveFactor;
             fragmentUniforms.occlusionStrength = material.occlusionStrength;
@@ -417,7 +413,7 @@ void MetalRenderer::buildRenderListRecursive(std::shared_ptr<GLTFRenderModel> mo
             }
 
             // TODO: Make this more efficient. Iterating the light list for every submesh is pretty silly.
-            for (int lightIndex = 0; lightIndex < _currentLightNodes.count; ++lightIndex) {
+            for (unsigned int lightIndex = 0; lightIndex < _currentLightNodes.count; ++lightIndex) {
                 GLTFNode *lightNode = _currentLightNodes[lightIndex];
                 GLTFKHRLight *light = lightNode.light;
                 if (light.type == GLTFKHRLightTypeDirectional) {
@@ -589,7 +585,7 @@ void MetalRenderer::bindTexturesForMaterial(GLTFMaterial *material,
 
 id<MTLBuffer> MetalRenderer::dequeueReusableBufferOfLength(size_t length) {
     int indexToReuse = -1;
-    for (int i = 0; i < _bufferPool.count; ++i) {
+    for (unsigned int i = 0; i < _bufferPool.count; ++i) {
         if (_bufferPool[i].length >= length) {
             indexToReuse = i;
         }
