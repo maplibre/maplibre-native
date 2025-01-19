@@ -95,92 +95,17 @@ void MetalRenderer::update(float timeSinceLastDraw) {
 // Render
 void MetalRenderer::render() {
 
-    // Compute the projection matrix
-    float aspectRatio = (float)_drawableSize.x / (float)_drawableSize.y;
-    simd_double4x4 aspectCorrection = GLTFMatrixFromScaleD((simd_double3){ 1 / aspectRatio, 1, 1 });
-    _projectionMatrix = simd_mul(aspectCorrection, _camera->projectionMatrix());
-    
-    /*
-    simd_float4x4 tempMatrix = _projectionMatrix;
-    
-    // Set the projection matrix from the incoming environment
-    _projectionMatrix = _metalRenderingEnvironment->_currentProjectionMatrix;
-
-    // Remove the translation
-    _projectionMatrix.columns[3][0] = tempMatrix.columns[3][0];
-    _projectionMatrix.columns[3][1] = tempMatrix.columns[3][1];
-    _projectionMatrix.columns[3][2] = tempMatrix.columns[3][2];
-    _projectionMatrix.columns[3][3] = tempMatrix.columns[3][3];
-    
-    
-    // Moved this to the camera projectionMatrix
-//    double fov = 0.6435011087932844;
-//    _projectionMatrix = GLTFPerspectiveProjectionMatrixAspectFovRH(fov, aspectRatio, 0.0001, 2);
-
-    */
-    
-    /* Stuff with Steve
     auto environmentMVP  = _metalRenderingEnvironment->_currentProjectionMatrix;
     double tileSize = 256.0;
     double zoom = _metalRenderingEnvironment->_currentZoomLevel;
     double scaleFactor = (20037508.34); // M_PI
-    double worldSize = tileSize / scaleFactor * pow(2.0,zoom);
-    simd_float4x4 scaleMatrix = GLTFMatrixFromScale(simd_make_float3(worldSize, -worldSize, 1.0));
-    simd_float4x4 xlateMatrix = GLTFMatrixFromTranslation(simd_make_float3(20037508.34,-20037508.34,0.0));
-    
-    auto m1 = matrix_multiply(scaleMatrix, xlateMatrix);
-    auto m2 = matrix_multiply(environmentMVP, m1);
-    _projectionMatrix = m2;
-    */
-
-    
-    auto environmentMVP  = _metalRenderingEnvironment->_currentProjectionMatrix;
-    double tileSize = 256.0;
-    double zoom = _metalRenderingEnvironment->_currentZoomLevel;
-    double scaleFactor = (20037508.34); // M_PI
-    double worldSize = tileSize / scaleFactor * pow(2.0,zoom);
+    double worldSize = (tileSize / scaleFactor) * pow(2.0, zoom);
     simd_double4x4 scaleMatrix = GLTFMatrixFromScaleD(simd_make_double3(worldSize, -worldSize, 1.0));
     simd_double4x4 xlateMatrix = GLTFMatrixFromTranslationD(simd_make_double3(20037508.34,-20037508.34,0.0));
     
     auto m1 = matrix_multiply(scaleMatrix, xlateMatrix);
     auto m2 = matrix_multiply(environmentMVP, m1);
     _projectionMatrix = m2;
-
-    
-    
-    
-    // Apply a scale to our data first
-               // Note: Can see something with this
-//               const Eigen::Affine3d scaleTrans(Eigen::Scaling(worldSize,-worldSize,1.0));
-//               const Eigen::Affine3d transTrans(Eigen::Translation3d(20037508.34,-20037508.34,0.0));
-//               Eigen::Matrix4d mvp = (inMvp * (scaleTrans * transTrans) ).matrix();
-//    
-    
-    /*
-
-    
-    // The above projection matrix is a perspective matrix.  I think we need an ortho matrix
-    float w = ((float)_drawableSize.x) / 2.0;
-    float h = ((float)_drawableSize.y) / 2.0;
-    float aspect = w/h;
-//    _projectionMatrix = GLTFOrthoProjectionMatrix(-w,w,-h*aspect,h*aspect,0.001,250);
-    _projectionMatrix = GLTFOrthoProjectionMatrix(-1*aspect,1*aspect,-1,1,10,-10);
-
-    
-    // ANother projection matrix test
-    float fov = _renderingEnvironment->_currentFOVDEG * DEG_RAD; //  0.6435011087932844; // Constant that i found in ML
-    simd_float4x4 matrix = GLTFPerspectiveProjectionMatrixAspectFovRH(fov, aspect, 0.01, 250);
-    _projectionMatrix = matrix;
-    
-    
-    */
-    
-    
-    
-    // Check to see if we're drawing directly or using another command buffer
-    bool _existingCommandBuffer = _metalRenderingEnvironment->_currentCommandBuffer != nullptr;
-    
-    id <CAMetalDrawable> currentDrawable = nil;
     
     // Internal command buffer
     id <MTLCommandBuffer> internalCommandBuffer = [_internalMetalCommandQueue commandBuffer];
@@ -276,9 +201,6 @@ void MetalRenderer::encodeMainPass(id<MTLCommandBuffer> commandBuffer) {
     for (auto m: _models) {
         [renderEncoder pushDebugGroup:@"Draw glTF Scene"];
         renderScene(m, m->_asset.defaultScene, commandBuffer, renderEncoder);
-        //    [self.renderer renderScene:self.asset.defaultScene
-        //                 commandBuffer:commandBuffer
-        //                commandEncoder:renderEncoder];
         [renderEncoder popDebugGroup];
     }
     
@@ -402,10 +324,9 @@ void MetalRenderer::setupMetal() {
     _internalMetalCommandQueue = [_metalDevice newCommandQueue];
     _metalLibrary = [_metalDevice newDefaultLibrary];
     
-    //_viewMatrix = matrix_identity_float4x4;
     _projectionMatrix = matrix_identity_double4x4;
     _colorPixelFormat = MTLPixelFormatBGRA8Unorm;
-    _depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
+   _depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
     _sampleCount = 1;
     _drawableSize = {1, 1};
     
@@ -462,12 +383,12 @@ void MetalRenderer::updateFramebufferSize() {
     textureDescriptor.usage = MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead;
     _colorTexture = [_metalDevice newTextureWithDescriptor:textureDescriptor];
 
-    textureDescriptor.textureType = _sampleCount > 1 ? MTLTextureType2DMultisample : MTLTextureType2D;
-    textureDescriptor.pixelFormat = _depthStencilPixelFormat;
-    textureDescriptor.sampleCount = _sampleCount;
-    textureDescriptor.storageMode = MTLStorageModePrivate;
-    textureDescriptor.usage = MTLTextureUsageRenderTarget;
-    _depthStencilTexture = [_metalDevice newTextureWithDescriptor:textureDescriptor];
+   textureDescriptor.textureType = _sampleCount > 1 ? MTLTextureType2DMultisample : MTLTextureType2D;
+   textureDescriptor.pixelFormat = _depthStencilPixelFormat;
+   textureDescriptor.sampleCount = _sampleCount;
+   textureDescriptor.storageMode = MTLStorageModePrivate;
+   textureDescriptor.usage = MTLTextureUsageRenderTarget;
+   _depthStencilTexture = [_metalDevice newTextureWithDescriptor:textureDescriptor];
     
     textureDescriptor.width = _drawableSize.x / 2;
     textureDescriptor.height = _drawableSize.y / 2;
@@ -593,7 +514,6 @@ id<MTLRenderPipelineState> MetalRenderer::renderPipelineStateForSubmesh(GLTFSubm
     if (pipeline == nil) {
         GLTFMTLShaderBuilder *shaderBuilder = [[GLTFMTLShaderBuilder alloc] init];
         pipeline = [shaderBuilder renderPipelineStateForSubmesh: submesh
-                                           // lightingEnvironment:self.lightingEnvironment
                                                colorPixelFormat:_colorPixelFormat
                                         depthStencilPixelFormat:_depthStencilPixelFormat
                                                     sampleCount:_sampleCount
