@@ -60,64 +60,40 @@ jobs:
       matrix:
         include:
           - name: Linux
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             build_type: RelWithDebInfo
-            qt_version: 5.15.2
-            qt_target: desktop
-            compiler: ""
-          - name: Linux
-            os: ubuntu-22.04
-            build_type: RelWithDebInfo
-            qt_version: 6.7.0
+            qt_version: 6.8.1
             qt_target: desktop
             compiler: ""
           - name: Linux_GCC13
             os: ubuntu-24.04
             build_type: RelWithDebInfo
-            qt_version: 6.7.0
+            qt_version: 6.8.1
             qt_target: desktop
             compiler: "gcc-13"
           - name: macOS
-            os: macos-13
-            build_type: RelWithDebInfo
-            qt_version: 5.15.2
-            qt_target: desktop
-            deployment_target: 10.15
-            deployment_arch: "x86_64"
-            compiler: ""
-          - name: macOS
             os: macos-14
             build_type: RelWithDebInfo
-            qt_version: 6.7.0
+            qt_version: 6.8.1
             qt_target: desktop
-            deployment_target: 11.0
+            deployment_target: 12.0
             deployment_arch: "x86_64;arm64"
             compiler: ""
-          - name: macOS_LLVM18
+          - name: macOS_LLVM
             os: macos-14
             build_type: RelWithDebInfo
-            qt_version: 6.7.0
+            qt_version: 6.8.1
             qt_target: desktop
-            deployment_target: 11.0
+            deployment_target: 12.0
             deployment_arch: "arm64"
             compiler: "llvm"
-          - name: win64_msvc2019
+          - name: win64_msvc2022
             os: windows-2022
             build_type: "RelWithDebInfo"
             compiler_type: x64
-            compiler_version: 14.29
-            qt_version: 5.15.2
+            qt_version: 6.8.1
             qt_target: desktop
-            qt_arch: win64_msvc2019_64
-            qt_tools: ""
-          - name: win64_msvc2019
-            os: windows-2022
-            build_type: "RelWithDebInfo"
-            compiler_type: x64
-            compiler_version: 14.29
-            qt_version: 6.7.0
-            qt_target: desktop
-            qt_arch: win64_msvc2019_64
+            qt_arch: win64_msvc2022_64
             qt_tools: ""
     runs-on: ${{ matrix.os }}
     env:
@@ -200,11 +176,10 @@ jobs:
           xcode-version: latest-stable
 
       - name: Setup MSVC
-        if: matrix.qt_arch == 'win64_msvc2019_64'
+        if: matrix.qt_arch == 'win64_msvc2022_64'
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: ${{ matrix.compiler_type }}
-          toolset: ${{ matrix.compiler_version }}
 
       - name: Setup ninja
         uses: seanmiddleditch/gha-setup-ninja@v5
@@ -219,15 +194,6 @@ jobs:
           arch: ${{ matrix.qt_arch }}
           tools: ${{ matrix.qt_tools }}
           extra: --base https://mirrors.ocf.berkeley.edu/qt/
-
-      - name: Update ccache
-        if: runner.os == 'Windows'
-        shell: bash
-        run: |
-          # version is pinned due to issues with caching MSVC in 4.8
-          choco.exe install ccache --version=4.7.5 --no-progress
-          ccache.exe --version
-          echo "CCACHE_CONFIGPATH=C:/Users/runneradmin/AppData/Roaming/ccache/ccache.conf" >> "$GITHUB_ENV"
 
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1
@@ -249,16 +215,12 @@ jobs:
             -DMLN_WITH_QT=ON
           ninja
 
-      - name: Build maplibre-native (Linux, Qt5)
-        if: runner.os == 'Linux' && matrix.qt_version == '5.15.2'
-        uses: ./source/.github/actions/qt5-build
-
       - name: Build maplibre-native (Linux, Qt6)
-        if: runner.os == 'Linux' && matrix.qt_version != '5.15.2' && matrix.compiler == ''
+        if: runner.os == 'Linux' && matrix.compiler == ''
         uses: ./source/.github/actions/qt6-build
 
       - name: Build maplibre-native (Linux, Qt6, custom compiler)
-        if: runner.os == 'Linux' && matrix.qt_version != '5.15.2' && matrix.compiler != ''
+        if: runner.os == 'Linux' && matrix.compiler != ''
         run: |
           mkdir build && cd build
           qt-cmake ../source/ \
@@ -270,7 +232,7 @@ jobs:
           ninja
 
       - name: Build maplibre-native (Linux, Qt6, custom compiler, internal libraries)
-        if: runner.os == 'Linux' && matrix.qt_version != '5.15.2' && matrix.compiler != ''
+        if: runner.os == 'Linux' && matrix.compiler != ''
         run: |
           mkdir build-internal && cd build-internal
           qt-cmake ../source/ \
@@ -284,7 +246,7 @@ jobs:
           ninja
 
       - name: Run tests (Linux)
-        if: runner.os == 'Linux' && matrix.qt_version != '5.15.2' && matrix.compiler != ''
+        if: runner.os == 'Linux' && matrix.compiler != ''
         uses: coactions/setup-xvfb@v1
         with:
           run: ctest --output-on-failure

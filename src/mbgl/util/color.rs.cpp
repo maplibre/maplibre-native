@@ -1,17 +1,18 @@
+// This is an interface-compatible file analogous to color.cpp
+// which is conditionally compiled when the optional Rust build flag is enabled.
+#include <cmath>
+
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/string.hpp>
 
-#include <csscolorparser/csscolorparser.hpp>
+#include <rustutils/color.hpp>
 
 namespace mbgl {
 
 std::optional<Color> Color::parse(const std::string& s) {
-    const auto css_color = CSSColorParser::parse(s);
-
-    // Premultiply the color.
-    if (css_color) {
-        const float factor = css_color->a / 255;
-        return {{css_color->r * factor, css_color->g * factor, css_color->b * factor, css_color->a}};
+    const auto css_color = rustutils::parse_css_color(s);
+    if (css_color.success) {
+        return {{css_color.r * css_color.a, css_color.g * css_color.a, css_color.b * css_color.a, css_color.a}};
     } else {
         return {};
     }
