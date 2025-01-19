@@ -25,7 +25,7 @@ void GLTFRenderer::update(float timeSinceLastDraw) {
 }
 
 // Render
-void GLTFRenderer::render() {
+ void GLTFRenderer::render() {
     // Base class does nothing
 }
 
