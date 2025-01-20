@@ -18,7 +18,10 @@
 
 #else
 
-typedef struct {
-} MLNBackendResource;
+#import <Foundation/Foundation.h>
+
+@interface MLNBackendResource : NSObject
+
+@end
 
 #endif

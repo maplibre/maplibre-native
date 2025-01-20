@@ -38,6 +38,7 @@ class CustomStyleLayer: MLNCustomStyleLayer {
     private var depthStencilStateWithoutStencil: MTLDepthStencilState?
 
     override func didMove(to mapView: MLNMapView) {
+#if MLN_RENDER_BACKEND_METAL
         let resource = mapView.backendResource()
 
         let shaderSource = """
@@ -110,17 +111,17 @@ class CustomStyleLayer: MLNCustomStyleLayer {
         depthStencilDescriptor.isDepthWriteEnabled = false
 
         depthStencilStateWithoutStencil = device!.makeDepthStencilState(descriptor: depthStencilDescriptor)
+#endif
     }
 
     override func willMove(from _: MLNMapView) {}
 
     override func draw(in mapView: MLNMapView, with context: MLNStyleLayerDrawingContext) {
+#if MLN_RENDER_BACKEND_METAL
         // Use the supplied render command encoder to encode commands
         guard let renderEncoder else {
             return
         }
-
-        let resource = mapView.backendResource()
 
         let p1 = project(CLLocationCoordinate2D(latitude: 25.0, longitude: 12.5))
         let p2 = project(CLLocationCoordinate2D(latitude: 0.0, longitude: 0.0))
@@ -152,6 +153,7 @@ class CustomStyleLayer: MLNCustomStyleLayer {
 
         // Draw the triangle.
         renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
+#endif
     }
 
     func project(_ coordinate: CLLocationCoordinate2D) -> CGPoint {
