@@ -1,5 +1,9 @@
 name: 'get-pr-number'
 description: 'Gets the PR number from an artifact'
+inputs:
+  platform-name:
+    description: "Name of the target platform"
+    required: true
 outputs:
   pr-number:
     description: "PR number or empty string"
@@ -9,7 +13,7 @@ runs:
   steps:
     - uses: ./.github/actions/download-workflow-run-artifact
       with:
-        artifact-name: pr-number
+        artifact-name: pr-number-${{ inputs.platform-name }}
 
     - run: touch ./pr_number
       shell: bash

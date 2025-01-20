@@ -63,6 +63,8 @@ jobs:
 
       - uses: ./.github/actions/get-pr-number
         id: get-pr-number
+        with:
+          platform-name: "ios"
 
       - uses: ./.github/actions/download-workflow-run-artifact
         with:

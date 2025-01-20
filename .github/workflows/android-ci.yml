@@ -184,6 +184,8 @@ jobs:
 
       - if: github.event_name == 'pull_request'
         uses: ./.github/actions/save-pr-number
+        with:
+          platform-name: "android"
 
       - name: Build Instrumentation Tests, copy to platform/android
         run: |

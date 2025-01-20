@@ -37,6 +37,8 @@ jobs:
 
       - uses: ./.github/actions/get-pr-number
         id: get-pr-number
+        with:
+          platform-name: "linux-vulkan"
 
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
@@ -134,6 +136,8 @@ jobs:
 
       - uses: ./.github/actions/get-pr-number
         id: get-pr-number
+        with:
+          platform-name: "linux-vulkan"
 
       - uses: ./.github/actions/download-workflow-run-artifact
         with:

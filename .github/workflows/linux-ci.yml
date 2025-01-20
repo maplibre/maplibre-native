@@ -178,6 +178,8 @@ jobs:
 
       - if: github.event_name == 'pull_request'
         uses: ./.github/actions/save-pr-number
+        with:
+          platform-name: "linux-${{ matrix.renderer }}"
 
   linux-coverage:
     runs-on: ubuntu-22.04
