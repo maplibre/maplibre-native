@@ -84,7 +84,7 @@
     }
 
     pipelineDescriptor.depthAttachmentPixelFormat = depthStencilPixelFormat;
-//    pipelineDescriptor.stencilAttachmentPixelFormat = depthStencilPixelFormat;
+    pipelineDescriptor.stencilAttachmentPixelFormat = depthStencilPixelFormat;
     
     id<MTLRenderPipelineState> pipeline = [device newRenderPipelineStateWithDescriptor:pipelineDescriptor error:&error];
     if (!pipeline) {

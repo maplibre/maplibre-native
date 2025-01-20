@@ -106,9 +106,8 @@ void MetalRenderer::render() {
     auto m1 = matrix_multiply(scaleMatrix, xlateMatrix);
     auto m2 = matrix_multiply(environmentMVP, m1);
     _projectionMatrix = m2;
-    
-    // Internal command buffer
-    id <MTLCommandBuffer> internalCommandBuffer = [_internalMetalCommandQueue commandBuffer];
+
+    // id <MTLCommandBuffer> internalCommandBuffer = [_internalMetalCommandQueue commandBuffer];
 //    
 //    if (_existingCommandBuffer) {
 //        commandBuffer = _metalRenderingEnvironment->_currentCommandBuffer;
@@ -118,10 +117,10 @@ void MetalRenderer::render() {
 //        currentDrawable = _metalRenderingEnvironment->_currentDrawable;
 //    }
 //    
-    encodeMainPass(internalCommandBuffer);
-    if (_useBloomPass) {
-        encodeBloomPasses(internalCommandBuffer);
-    }
+    encodeMainPass(_metalRenderingEnvironment->_currentCommandBuffer);
+    // if (_useBloomPass) {
+    //     encodeBloomPasses(internalCommandBuffer);
+    // }
     
 //    [internalCommandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
 //        dispatch_async(dispatch_get_main_queue(), ^{
@@ -129,26 +128,12 @@ void MetalRenderer::render() {
 //        });
 //    }];
 
-    [internalCommandBuffer commit];
 
     // This will write out the tone mapping
     //id<MTLCommandBuffer> externalBuffer = _metalRenderingEnvironment->_currentCommandBuffer;
     //encodeTonemappingPass(externalBuffer);
-
-    // TESTING
-    [_metalRenderingEnvironment->_currentCommandEncoder pushDebugGroup:@"Post-process (Tonemapping)"];
-    [_metalRenderingEnvironment->_currentCommandEncoder setDepthStencilState:_fullscreenTransfterDepthStencilState];
-    drawFullscreenPassWithPipeline(_tonemapPipelineState,_metalRenderingEnvironment->_currentCommandEncoder,_colorTexture);
-    [_metalRenderingEnvironment->_currentCommandEncoder popDebugGroup];
-   // [_metalRenderingEnvironment->_currentCommandEncoder endEncoding];
     
-    
-
-//    if (!_existingCommandBuffer) {
-//        [commandBuffer presentDrawable:currentDrawable];
-//    }
-    
-    
+    // Internal command buffer
 
 }
 
@@ -177,26 +162,7 @@ void MetalRenderer::setRenderingEnvironemnt(std::shared_ptr<GLTFManagerRendering
 // RENDERING
 void MetalRenderer::encodeMainPass(id<MTLCommandBuffer> commandBuffer) {
     
-    MTLRenderPassDescriptor *pass = newRenderPassDescriptor();
-    id <MTLRenderCommandEncoder> renderEncoder = [commandBuffer renderCommandEncoderWithDescriptor:pass];
-    
-    /*
-    if (self.lightingEnvironment != nil) {
-        [renderEncoder pushDebugGroup:@"Draw Backdrop"];
-        [self drawSkyboxWithCommandEncoder:renderEncoder];
-        [renderEncoder popDebugGroup];
-    }
-     */
-    
-    /*
-    long timedOut = dispatch_semaphore_wait(_frameBoundarySemaphore, dispatch_time(0, 10 * NSEC_PER_SEC));
-    if (timedOut) {
-        NSLog(@"Failed to receive frame boundary signal before timing out; calling signalFrameCompletion manually. "
-              "Remember to call signalFrameCompletion on GLTFMTLRenderer from the completion handler of the command buffer "
-              "into which you encode the work for drawing assets");
-        signalFrameCompletion();
-    }
-*/
+    id <MTLRenderCommandEncoder> renderEncoder = _metalRenderingEnvironment->_currentCommandEncoder;
     
     for (auto m: _models) {
         [renderEncoder pushDebugGroup:@"Draw glTF Scene"];
@@ -204,7 +170,6 @@ void MetalRenderer::encodeMainPass(id<MTLCommandBuffer> commandBuffer) {
         [renderEncoder popDebugGroup];
     }
     
-    [renderEncoder endEncoding];
 
 }
 
