@@ -4,10 +4,10 @@
 
 @interface MLNBackendResource : NSObject
 
-@property(nonatomic, strong) MTKView *mtkView;
-@property(nonatomic, strong) id<MTLDevice> device;
-@property(nonatomic, strong) MTLRenderPassDescriptor *renderPassDescriptor;
-@property(nonatomic, strong) id<MTLCommandBuffer> commandBuffer;
+@property (nonatomic, strong) MTKView *mtkView;
+@property (nonatomic, strong) id<MTLDevice> device;
+@property (nonatomic, strong) MTLRenderPassDescriptor *renderPassDescriptor;
+@property (nonatomic, strong) id<MTLCommandBuffer> commandBuffer;
 
 - (instancetype)initWithMTKView:(MTKView *)mtkView
                          device:(id<MTLDevice>)device
