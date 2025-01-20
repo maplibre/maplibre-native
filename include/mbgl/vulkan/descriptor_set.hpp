@@ -97,7 +97,6 @@ public:
     void update(const std::array<gfx::Texture2DPtr, shaders::maxTextureCountPerShader>& textures);
 
 protected:
-
     std::chrono::duration<double> lastModified;
 };
 
