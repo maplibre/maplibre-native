@@ -318,17 +318,20 @@ simd_double4x4 toSimdMatrix4D(const MLNMatrix4 & mlMatrix) {
     }
     
     _metalEnvironment->_currentFOVDEG = context.fieldOfView * RAD_DEG;
-    _metalEnvironment->_currentProjectionMatrix = toSimdMatrix4D(context.projectionMatrix);
+    _metalEnvironment->_currentProjectionMatrix = toSimdMatrix4D(context.nearClippedProjMatrix);
     _metalEnvironment->_currentZoomLevel = context.zoomLevel;
     _metalEnvironment->_currentCommandEncoder = self.renderEncoder;
     _metalEnvironment->_currentCommandBuffer = resource.commandBuffer;
     _metalEnvironment->_metalDevice = resource.mtkView.device;
     _metalEnvironment->_currentDrawable = resource.mtkView.currentDrawable;
     _metalEnvironment->_currentRenderPassDescriptor = resource.mtkView.currentRenderPassDescriptor;
+    _metalEnvironment->_depthStencilTexture = resource.mtkView.currentRenderPassDescriptor.depthAttachment.texture;
+    _metalEnvironment->_colorTexture = resource.mtkView.currentRenderPassDescriptor.colorAttachments[0].texture;
+
     if (self.lightSet) {
         _metalEnvironment->_lightDirection = simd_make_float3(_lightX, _lightY, _lightZ);
     }
-
+    
     // TODO: Remove this..  This is legacy
     _manager->setRenderingEnvironmentVariables(_metalEnvironment);
 

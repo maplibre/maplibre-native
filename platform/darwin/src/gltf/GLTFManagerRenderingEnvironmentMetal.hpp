@@ -30,8 +30,8 @@ namespace maplibre { namespace gltf {
         // TBD: These are placeholders as we noodle how to integrate with ML
         // Depth descriptor: If this is null, then use an internal depth
         id<MTLTexture> _depthStencilTexture = nullptr;
-                
-                
+
+        id<MTLTexture> _colorTexture = nullptr;      
     };
 
 }}

@@ -259,20 +259,20 @@ MTLRenderPassDescriptor* MetalRenderer::newRenderPassDescriptor() {
     MTLRenderPassDescriptor *pass = [MTLRenderPassDescriptor renderPassDescriptor];
     if (_sampleCount > 1) {
         pass.colorAttachments[0].texture = _multisampleColorTexture;
-        pass.colorAttachments[0].resolveTexture = _colorTexture;
-        pass.colorAttachments[0].loadAction = MTLLoadActionClear;
+        pass.colorAttachments[0].resolveTexture = _metalRenderingEnvironment->_colorTexture;
+        pass.colorAttachments[0].loadAction = MTLLoadActionLoad;
         pass.colorAttachments[0].storeAction = MTLStoreActionMultisampleResolve;
         pass.colorAttachments[0].clearColor = MTLClearColorMake(1, 0, 0, 0);
     } else {
-        pass.colorAttachments[0].texture = _colorTexture;
-        pass.colorAttachments[0].loadAction = MTLLoadActionClear;
+        pass.colorAttachments[0].texture = _metalRenderingEnvironment->_colorTexture;
+        pass.colorAttachments[0].loadAction = MTLLoadActionLoad;
         pass.colorAttachments[0].storeAction = MTLStoreActionStore;
         pass.colorAttachments[0].clearColor = MTLClearColorMake(1, 0, 0, 0);
 
     }
-    pass.depthAttachment.texture = _depthStencilTexture;
-    pass.depthAttachment.loadAction = MTLLoadActionClear;
-    pass.depthAttachment.storeAction = MTLStoreActionDontCare;
+    pass.depthAttachment.texture = _metalRenderingEnvironment->_depthStencilTexture;
+    pass.depthAttachment.loadAction = MTLLoadActionLoad;
+    pass.depthAttachment.storeAction = MTLStoreActionStore;
     
     return pass;
 }
