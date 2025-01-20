@@ -121,8 +121,8 @@ void DescriptorSet::allocate() {
     dirty = std::vector(descriptorSets.size(), true);
 }
 
-void DescriptorSet::markDirty(bool value) {
-    std::fill(dirty.begin(), dirty.end(), value);
+void DescriptorSet::markDirty() {
+    std::fill(dirty.begin(), dirty.end(), true);
 }
 
 void DescriptorSet::bind(CommandEncoder& encoder) {
@@ -190,12 +190,10 @@ ImageDescriptorSet::ImageDescriptorSet(Context& context_)
     : DescriptorSet(context_, DescriptorSetType::DrawableImage),
       lastModified(0.0) {}
 
-void ImageDescriptorSet::markDirty(bool value) {
-    DescriptorSet::markDirty(value);
+void ImageDescriptorSet::markDirty() {
+    DescriptorSet::markDirty();
 
-    if (value) {
-        lastModified = util::MonotonicTimer::now();
-    }
+    lastModified = util::MonotonicTimer::now();
 }
 
 void ImageDescriptorSet::update(const std::array<gfx::Texture2DPtr, shaders::maxTextureCountPerShader>& textures) {

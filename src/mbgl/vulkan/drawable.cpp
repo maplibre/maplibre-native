@@ -437,7 +437,7 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
             if (!texture) continue;
             const auto textureImpl = static_cast<const Texture2D*>(texture.get());
             if (textureImpl->isModifiedAfter(impl->imageDescriptorSet->getLastModified())) {
-                impl->imageDescriptorSet->markDirty(true);
+                impl->imageDescriptorSet->markDirty();
                 break;
             }
         }
