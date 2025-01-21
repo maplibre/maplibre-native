@@ -19,7 +19,9 @@
 #else
 
 #import <Foundation/Foundation.h>
+#import "MLNFoundation.h"
 
+MLN_EXPORT
 @interface MLNBackendResource : NSObject
 
 @end
