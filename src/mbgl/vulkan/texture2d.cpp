@@ -362,7 +362,9 @@ void Texture2D::createTexture() {
     context.renderingStats().numCreatedTextures++;
     context.renderingStats().numActiveTextures++;
     context.renderingStats().memTextures += getDataSize();
+
     textureDirty = false;
+    lastModified = util::MonotonicTimer::now();
 }
 
 void Texture2D::createSampler() {
@@ -392,6 +394,7 @@ void Texture2D::createSampler() {
     sampler = context.getBackend().getDevice()->createSampler(samplerCreateInfo);
 
     samplerStateDirty = false;
+    lastModified = util::MonotonicTimer::now();
 }
 
 void Texture2D::destroyTexture() {
