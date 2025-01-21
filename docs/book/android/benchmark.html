@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>iOS - MapLibre Native Developer Documentation</title>
+        <title>Benchmark - MapLibre Native Developer Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -152,59 +152,90 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="maplibre-ios-developer-guide"><a class="header" href="#maplibre-ios-developer-guide">MapLibre iOS Developer Guide</a></h1>
-<h2 id="bazel"><a class="header" href="#bazel">Bazel</a></h2>
-<p><a href="https://bazel.build/">Bazel</a> is used for building on iOS.</p>
-<p>You can generate an Xcode project thanks to <a href="https://github.com/MobileNativeFoundation/rules_xcodeproj">rules_xcodeproj</a> intergration.</p>
-<p>You need to install <a href="https://github.com/bazelbuild/bazelisk">bazelisk</a>, which is a wrapper around Bazel which ensures that the version specified in <code>.bazelversion</code> is used.</p>
-<pre><code>brew install bazelisk
+                        <h1 id="benchmark"><a class="header" href="#benchmark">Benchmark</a></h1>
+<p>We have created a rendering performance benchmark for Android. The logic for this benchmark is encapsulated in <code>BenchMarkActivity.kt</code>.</p>
+<h2 id="styles"><a class="header" href="#styles">Styles</a></h2>
+<p>We have hardcoded various styles, which you can override with a <code>developer-config.xml</code> by adding some XML with the following structure:</p>
+<pre><code>&lt;array name="benchmark_style_names"&gt;
+  &lt;item&gt;Americana&lt;/item&gt;
+&lt;/array&gt;
+&lt;array name="benchmark_style_urls"&gt;
+  &lt;item&gt;https://americanamap.org/style.json&lt;/item&gt;
+&lt;/array&gt;
 </code></pre>
-<h3 id="creating-configbzl"><a class="header" href="#creating-configbzl">Creating <code>config.bzl</code></a></h3>
-<p>Configure Bazel, otherwise the default config will get used.</p>
-<pre><code>cp platform/darwin/bazel/example_config.bzl platform/darwin/bazel/config.bzl
+<h2 id="retrieving-results"><a class="header" href="#retrieving-results">Retrieving Results</a></h2>
+<p>Results are logged to the console as they come in. After the benchmark is done running a <code>benchmark_results.json</code> file is generated. You can pull it off the device with for example adb:</p>
+<pre><code>adb shell "run-as org.maplibre.android.testapp cat files/benchmark_results.json" \
+  &gt; benchmark_results.json
 </code></pre>
-<p>You need to set your <code>BUNDLE_ID_PREFIX</code> to be unique (ideally use a domain that you own in reverse domain name notation).</p>
-<p>You can keep leave the <code>APPLE_MOBILE_PROVISIONING_PROFILE_NAME</code> alone.</p>
-<p>Set the Team ID to the Team ID of your Apple Developer Account (paid or unpaid both work). If you do not know your Team ID, go to your <a href="https://developer.apple.com/account">Apple Developer account</a>, log in, and scroll down to find your Team ID.</p>
-<p>If you don't already have a developer account, continue this guide and let Xcode generate a provisioning profile for you. You will need to update the Team ID later once a certificate is generated.</p>
-<h2 id="create-the-xcode-project"><a class="header" href="#create-the-xcode-project">Create the Xcode Project</a></h2>
-<p>Run the following commands:</p>
-<pre><code>bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
-xed platform/ios/MapLibre.xcodeproj
+<h2 id="results"><a class="header" href="#results">Results</a></h2>
+<p>The <code>benchmark_results.json</code> containing the benchmark results will have the following structure.</p>
+<pre><code class="language-json">{
+  "results": [
+    {
+      "styleName": "AWS Open Data Standard Light",
+      "syncRendering": true,
+      "thermalState": 0,
+      "fps": 34.70237085812839,
+      "avgEncodingTime": 19.818289053808947,
+      "avgRenderingTime": 7.7432454899654255,
+      "low1pEncodingTime": 91.72538138784371,
+      "low1pRenderingTime": 26.573758581509203
+    },
+  ],
+  "deviceManufacturer": "samsung",
+  "model": "SM-G973F",
+  "renderer": "drawable",
+  "debugBuild": true,
+  "gitRevision": "fc95b79880223e34c2ce80339f698d095e3d63cd",
+  "timestamp": 1736454325393
+}
 </code></pre>
-<p>Then once in Xcode, click on "MapLibre" on the left, then "App" under Targets, then "Signing &amp; Capabilities" in the tabbed menu.
-Confirm that no errors are shown.</p>
-<img width="921" alt="image" src="https://github.com/polvi/maplibre-native/assets/649392/a1ef30cb-97fc-429a-acee-194436f3fb8a">
-<p>Try to run the example App in the simulator and on a device to confirm your setup works.</p>
-<blockquote>
-<p>[!IMPORTANT]<br />
-The Bazel configuration files are the source of truth of the build configuration. All changes to the build settings need to be done through Bazel, not in Xcode.</p>
-</blockquote>
-<h3 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h3>
-<h4 id="provisioning-profiles"><a class="header" href="#provisioning-profiles">Provisioning Profiles</a></h4>
-<p>If you get a Python <code>KeyError</code> when processing provisioning profiles, you probably have some <em>really</em> old or corrupted profiles.</p>
-<p>Have a look through <code>~/Library/MobileDevice/Provisioning\ Profiles</code> and remove any expired profiles. Removing all profiles here can also resolve some issues.</p>
-<h4 id="cleaning-bazel-environments"><a class="header" href="#cleaning-bazel-environments">Cleaning Bazel environments</a></h4>
-<p>You should almost never have to do this, but sometimes problems can be solved with:</p>
-<pre><code>bazel clean --expunge
+<p>The meaning of the keys is as follows.</p>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Description</th></tr></thead><tbody>
+<tr><td>styleName</td><td>Name of the style being benchmarked</td></tr>
+<tr><td>syncRendering</td><td>Whether synchronous rendering was used</td></tr>
+<tr><td>thermalState</td><td>Thermal state of the device during benchmark</td></tr>
+<tr><td>fps</td><td>Average frames per second achieved during the benchmark</td></tr>
+<tr><td>avgEncodingTime</td><td>Average time taken for encoding in milliseconds</td></tr>
+<tr><td>avgRenderingTime</td><td>Average time taken for rendering in milliseconds</td></tr>
+<tr><td>low1pEncodingTime</td><td>1st percentile (worst case) encoding time in milliseconds</td></tr>
+<tr><td>low1pRenderingTime</td><td>1st percentile (worst case) rendering time in milliseconds</td></tr>
+<tr><td>deviceManufacturer</td><td>Manufacturer of the test device</td></tr>
+<tr><td>model</td><td>Model number/name of the test device</td></tr>
+<tr><td>renderer</td><td>Type of renderer used (<code>drawable</code> for Open GL ES, <code>vulkan</code> for Vulkan, <code>legacy</code> for the legacy Open GL ES rendering backend)</td></tr>
+<tr><td>debugBuild</td><td>Whether the build was a debug build</td></tr>
+<tr><td>gitRevision</td><td>Git commit hash of the code version</td></tr>
+<tr><td>timestamp</td><td>Unix timestamp of when the benchmark was run</td></tr>
+</tbody></table>
+</div>
+<h2 id="large-scale-benchmarks-on-aws-device-farm"><a class="header" href="#large-scale-benchmarks-on-aws-device-farm">Large Scale Benchmarks on AWS Device Farm</a></h2>
+<p>Sometimes we do a large scale benchmark across a variety of devices on AWS Device Farm. We ran one such test in <a href="https://github.com/maplibre/maplibre-native/issues/2787#issuecomment-2466948888">November 2024</a> to compare the performance of the then new Vulkan rendering backend against the OpenGL ES backend. There are some scripts in the repo to kick off the tests and to collect and plot the results:</p>
+<pre><code>scripts/aws-device-farm/aws-device-farm-run.sh
+scripts/aws-device-farm/collect-benchmark-outputs.mjs
+scripts/aws-device-farm/update-benchmark-db.mjs
+scripts/aws-device-farm/plot-android-benchmark-results.py
 </code></pre>
-<h2 id="using-bazel-from-the-command-line"><a class="header" href="#using-bazel-from-the-command-line">Using Bazel from the Command Line</a></h2>
-<p>It is also possible to build and run the test application in a simulator from the command line without opening Xcode.</p>
-<pre><code>bazel run //platform/ios:App --//:renderer=metal
+<h2 id="continuous-benchmarking"><a class="header" href="#continuous-benchmarking">Continuous Benchmarking</a></h2>
+<p>We are running the Android benchmark on every merge with <code>main</code>.</p>
+<p>You can find the results per commit <a href="https://maplibre-native.s3.eu-central-1.amazonaws.com/index.html#android-benchmark-render/">here</a> or pull them from our public S3 bucket:</p>
+<pre><code>aws s3 sync s3://maplibre-native/android-benchmark-render/ .
 </code></pre>
-<p>You can also build targets from the command line. For example, if you want to build your own XCFramework, see the 'Build XCFramework' step in the <a href="../../.github/workflows/ios-ci.yml">iOS CI workflow</a>.</p>
-<h2 id="swift-app"><a class="header" href="#swift-app">Swift App</a></h2>
-<p>There is also an example app built with Swift instead of Objective-C. The target is called <code>MapLibreApp</code> and the source code lives in <code>platform/ios/app-swift</code>.</p>
+<h2 id="benchmarks-in-pull-request"><a class="header" href="#benchmarks-in-pull-request">Benchmarks in Pull Request</a></h2>
+<p>To run the benchmarks (for Android) include the following line on a PR comment:</p>
+<pre><code>!benchmark android
+</code></pre>
+<p>A file with the benchmark results will be added to the workflow summary, which you can compare with the previous results in the bucket.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../android/benchmark.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../android/android-documentation.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../ios/ios-tests.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../ios/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -214,11 +245,11 @@ The Bazel configuration files are the source of truth of the build configuration
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../android/benchmark.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../android/android-documentation.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../ios/ios-tests.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../ios/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

@@ -235,10 +235,6 @@ cd platform/android
 <p>To format all Kotlin source files, use:</p>
 <pre><code>$ ./gradlew formatKotlin
 </code></pre>
-<h2 id="benchmarks-in-pull-request"><a class="header" href="#benchmarks-in-pull-request">Benchmarks in Pull Request</a></h2>
-<p>To run the benchmarks (for Android) include the following line on a PR comment:</p>
-<pre><code>!benchmark android
-</code></pre>
 <h2 id="profiling"><a class="header" href="#profiling">Profiling</a></h2>
 <p>See <a href="android//profiling/tracy-profiling.html">Tracy Profiling</a> to understand how Tracy can be used for profiling.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="maplibre-android-tests"><a class="header" href="#maplibre-android-tests">MapLibre Android Tests</a></h1>
@@ -318,6 +314,80 @@ fun double(x: Int): Int {
 <p>Static assets are ideally uploaded to the <a href="https://maplibre-native.s3.eu-central-1.amazonaws.com/index.html#android-documentation-resources/">MapLibre Native S3 Bucket</a>.</p>
 <p>Please open an issue with the ARN of your AWS account to get upload privileges.</p>
 <p>You can use the macro <code>{{ s3_url("filename.example") }}</code> which will use a CDN instead of linking to the S3 bucket directly.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="benchmark"><a class="header" href="#benchmark">Benchmark</a></h1>
+<p>We have created a rendering performance benchmark for Android. The logic for this benchmark is encapsulated in <code>BenchMarkActivity.kt</code>.</p>
+<h2 id="styles"><a class="header" href="#styles">Styles</a></h2>
+<p>We have hardcoded various styles, which you can override with a <code>developer-config.xml</code> by adding some XML with the following structure:</p>
+<pre><code>&lt;array name="benchmark_style_names"&gt;
+  &lt;item&gt;Americana&lt;/item&gt;
+&lt;/array&gt;
+&lt;array name="benchmark_style_urls"&gt;
+  &lt;item&gt;https://americanamap.org/style.json&lt;/item&gt;
+&lt;/array&gt;
+</code></pre>
+<h2 id="retrieving-results"><a class="header" href="#retrieving-results">Retrieving Results</a></h2>
+<p>Results are logged to the console as they come in. After the benchmark is done running a <code>benchmark_results.json</code> file is generated. You can pull it off the device with for example adb:</p>
+<pre><code>adb shell "run-as org.maplibre.android.testapp cat files/benchmark_results.json" \
+  &gt; benchmark_results.json
+</code></pre>
+<h2 id="results"><a class="header" href="#results">Results</a></h2>
+<p>The <code>benchmark_results.json</code> containing the benchmark results will have the following structure.</p>
+<pre><code class="language-json">{
+  "results": [
+    {
+      "styleName": "AWS Open Data Standard Light",
+      "syncRendering": true,
+      "thermalState": 0,
+      "fps": 34.70237085812839,
+      "avgEncodingTime": 19.818289053808947,
+      "avgRenderingTime": 7.7432454899654255,
+      "low1pEncodingTime": 91.72538138784371,
+      "low1pRenderingTime": 26.573758581509203
+    },
+  ],
+  "deviceManufacturer": "samsung",
+  "model": "SM-G973F",
+  "renderer": "drawable",
+  "debugBuild": true,
+  "gitRevision": "fc95b79880223e34c2ce80339f698d095e3d63cd",
+  "timestamp": 1736454325393
+}
+</code></pre>
+<p>The meaning of the keys is as follows.</p>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Description</th></tr></thead><tbody>
+<tr><td>styleName</td><td>Name of the style being benchmarked</td></tr>
+<tr><td>syncRendering</td><td>Whether synchronous rendering was used</td></tr>
+<tr><td>thermalState</td><td>Thermal state of the device during benchmark</td></tr>
+<tr><td>fps</td><td>Average frames per second achieved during the benchmark</td></tr>
+<tr><td>avgEncodingTime</td><td>Average time taken for encoding in milliseconds</td></tr>
+<tr><td>avgRenderingTime</td><td>Average time taken for rendering in milliseconds</td></tr>
+<tr><td>low1pEncodingTime</td><td>1st percentile (worst case) encoding time in milliseconds</td></tr>
+<tr><td>low1pRenderingTime</td><td>1st percentile (worst case) rendering time in milliseconds</td></tr>
+<tr><td>deviceManufacturer</td><td>Manufacturer of the test device</td></tr>
+<tr><td>model</td><td>Model number/name of the test device</td></tr>
+<tr><td>renderer</td><td>Type of renderer used (<code>drawable</code> for Open GL ES, <code>vulkan</code> for Vulkan, <code>legacy</code> for the legacy Open GL ES rendering backend)</td></tr>
+<tr><td>debugBuild</td><td>Whether the build was a debug build</td></tr>
+<tr><td>gitRevision</td><td>Git commit hash of the code version</td></tr>
+<tr><td>timestamp</td><td>Unix timestamp of when the benchmark was run</td></tr>
+</tbody></table>
+</div>
+<h2 id="large-scale-benchmarks-on-aws-device-farm"><a class="header" href="#large-scale-benchmarks-on-aws-device-farm">Large Scale Benchmarks on AWS Device Farm</a></h2>
+<p>Sometimes we do a large scale benchmark across a variety of devices on AWS Device Farm. We ran one such test in <a href="https://github.com/maplibre/maplibre-native/issues/2787#issuecomment-2466948888">November 2024</a> to compare the performance of the then new Vulkan rendering backend against the OpenGL ES backend. There are some scripts in the repo to kick off the tests and to collect and plot the results:</p>
+<pre><code>scripts/aws-device-farm/aws-device-farm-run.sh
+scripts/aws-device-farm/collect-benchmark-outputs.mjs
+scripts/aws-device-farm/update-benchmark-db.mjs
+scripts/aws-device-farm/plot-android-benchmark-results.py
+</code></pre>
+<h2 id="continuous-benchmarking"><a class="header" href="#continuous-benchmarking">Continuous Benchmarking</a></h2>
+<p>We are running the Android benchmark on every merge with <code>main</code>.</p>
+<p>You can find the results per commit <a href="https://maplibre-native.s3.eu-central-1.amazonaws.com/index.html#android-benchmark-render/">here</a> or pull them from our public S3 bucket:</p>
+<pre><code>aws s3 sync s3://maplibre-native/android-benchmark-render/ .
+</code></pre>
+<h2 id="benchmarks-in-pull-request"><a class="header" href="#benchmarks-in-pull-request">Benchmarks in Pull Request</a></h2>
+<p>To run the benchmarks (for Android) include the following line on a PR comment:</p>
+<pre><code>!benchmark android
+</code></pre>
+<p>A file with the benchmark results will be added to the workflow summary, which you can compare with the previous results in the bucket.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="maplibre-ios-developer-guide"><a class="header" href="#maplibre-ios-developer-guide">MapLibre iOS Developer Guide</a></h1>
 <h2 id="bazel"><a class="header" href="#bazel">Bazel</a></h2>
 <p><a href="https://bazel.build/">Bazel</a> is used for building on iOS.</p>
