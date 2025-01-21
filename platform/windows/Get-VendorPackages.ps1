@@ -25,6 +25,7 @@ switch($Renderer)
     'OSMesa' { $renderer_packages = @();                         break }
     'OpenGL' { $renderer_packages = @('opengl-registry');        break }
 	'Vulkan' { $renderer_packages = @();                         break }
+	'All'    { $renderer_packages = @('egl', 'opengl-registry'); break }
 }
 
 if(-not (Test-Path ('{0}\vcpkg.exe' -f $vcpkg_temp_dir)))
