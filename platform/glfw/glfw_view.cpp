@@ -3,6 +3,7 @@
 #include "glfw_renderer_frontend.hpp"
 #include "ny_route.hpp"
 #include "test_writer.hpp"
+#include "example_custom_drawable_style_layer.h"
 
 #include <mbgl/annotation/annotation.hpp>
 #include <mbgl/gfx/backend.hpp>
@@ -365,6 +366,9 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                 break;
             case GLFW_KEY_C:
                 view->clearAnnotations();
+                break;
+            case GLFW_KEY_V:
+                view->toggleCustomDrawableStyle();
                 break;
             case GLFW_KEY_I:
                 view->resetDatabaseCallback();
@@ -821,6 +825,21 @@ void GLFWView::popAnnotation() {
 
     map->removeAnnotation(annotationIDs.back());
     annotationIDs.pop_back();
+}
+
+void GLFWView::toggleCustomDrawableStyle() {
+
+    auto &style = map->getStyle();
+
+    const std::string identifier = "ExampleCustomDrawableStyleLayer";
+    const auto &existingLayer = style.getLayer(identifier);
+
+    if (!existingLayer) {
+        style.addLayer(std::move(std::make_unique<mbgl::style::CustomDrawableLayer>(
+            identifier, std::make_unique<ExampleCustomDrawableStyleLayerHost>())));
+    } else {
+        style.removeLayer(identifier);
+    }
 }
 
 void GLFWView::makeSnapshot(bool withOverlay) {
