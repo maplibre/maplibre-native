@@ -60,7 +60,7 @@ public:
 
     void allocate();
 
-    void markDirty(bool value = true);
+    virtual void markDirty();
     void bind(CommandEncoder& encoder);
 
 protected:
@@ -91,7 +91,13 @@ public:
     ImageDescriptorSet(Context& context_);
     virtual ~ImageDescriptorSet() = default;
 
+    void markDirty() override;
+    const std::chrono::duration<double>& getLastModified() const { return lastModified; }
+
     void update(const std::array<gfx::Texture2DPtr, shaders::maxTextureCountPerShader>& textures);
+
+protected:
+    std::chrono::duration<double> lastModified;
 };
 
 } // namespace vulkan
