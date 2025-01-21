@@ -1,6 +1,6 @@
 module(name = "maplibre")
 
-bazel_dep(name = "apple_support", version = "1.17.0", repo_name = "build_bazel_apple_support")
+bazel_dep(name = "apple_support", version = "1.17.1", repo_name = "build_bazel_apple_support")
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "platforms", version = "0.0.10")
 bazel_dep(name = "rules_apple", version = "3.16.1", repo_name = "build_bazel_rules_apple")
@@ -60,3 +60,34 @@ darwin_config = use_repo_rule("//platform/darwin:bazel/darwin_config_repository_
 darwin_config(
     name = "darwin_config",
 )
+
+bazel_dep(name = "rules_rust", version = "0.56.0")
+bazel_dep(name = "cxx.rs", version = "1.0.136")
+git_override(
+    module_name = "cxx.rs",
+    commit = "d54e44698c3fa5833a861cb3ae502533b92f2f57",
+    remote = "https://github.com/dtolnay/cxx.git",
+)
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2021",
+    extra_target_triples = [
+        "aarch64-apple-ios-sim",
+        "x86_64-apple-ios",
+        "aarch64-apple-ios",
+        "aarch64-apple-darwin",
+        "x86_64-apple-darwin",
+    ],
+)
+use_repo(rust, "rust_toolchains")
+
+register_toolchains("@rust_toolchains//:all")
+
+crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
+crate.from_cargo(
+    name = "crates",
+    cargo_lockfile = "//rustutils:Cargo.lock",
+    manifests = ["//rustutils:Cargo.toml"],
+)
+use_repo(crate, "crates")

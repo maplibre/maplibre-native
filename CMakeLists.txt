@@ -17,6 +17,7 @@ option(MLN_LEGACY_RENDERER "Include the legacy rendering pathway" ON)
 option(MLN_DRAWABLE_RENDERER "Include the drawable rendering pathway" OFF)
 option(MLN_USE_UNORDERED_DENSE "Use ankerl dense containers for performance" ON)
 option(MLN_USE_TRACY "Enable Tracy instrumentation" OFF)
+option(MLN_USE_RUST "Use components in Rust" OFF)
 
 if (MLN_WITH_CLANG_TIDY)
     find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
@@ -940,7 +941,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/bounding_volumes.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/chrono.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/client_options.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/util/color.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/color$<IF:$<BOOL:${MLN_USE_RUST}>,.rs.cpp,.cpp>
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/constants.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/convert.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/event.cpp
@@ -1459,6 +1460,10 @@ include(${PROJECT_SOURCE_DIR}/vendor/unordered_dense.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
 
+if(MLN_USE_RUST)
+include(${PROJECT_SOURCE_DIR}/rustutils/rustutils.cmake)
+endif()
+
 target_link_libraries(
     mbgl-core
     PRIVATE
@@ -1469,7 +1474,6 @@ target_link_libraries(
         Mapbox::Base::cheap-ruler-cpp
         mbgl-compiler-options
         mbgl-vendor-boost
-        mbgl-vendor-csscolorparser
         mbgl-vendor-earcut.hpp
         mbgl-vendor-eternal
         $<$<BOOL:${MLN_WITH_METAL}>:mbgl-vendor-metal-cpp>
@@ -1480,6 +1484,8 @@ target_link_libraries(
         mbgl-vendor-unique_resource
         mbgl-vendor-vector-tile
         mbgl-vendor-wagyu
+        $<$<BOOL:${MLN_WITH_METAL}>:mbgl-vendor-metal-cpp>
+        $<IF:$<BOOL:${MLN_USE_RUST}>,mbgl-rustutils,mbgl-vendor-csscolorparser>
     PUBLIC
         Mapbox::Base
         Mapbox::Base::Extras::expected-lite
@@ -1492,9 +1498,8 @@ target_link_libraries(
         unordered_dense
 )
 
-export(TARGETS
+set(EXPORT_TARGETS
     mbgl-core
-
     mapbox-base
     mapbox-base-cheap-ruler-cpp
     mapbox-base-extras-expected-lite
@@ -1510,7 +1515,6 @@ export(TARGETS
     mapbox-base-variant
     mbgl-compiler-options
     mbgl-vendor-boost
-    mbgl-vendor-csscolorparser
     mbgl-vendor-earcut.hpp
     mbgl-vendor-eternal
     mbgl-vendor-metal-cpp
@@ -1523,9 +1527,15 @@ export(TARGETS
     mbgl-vendor-vector-tile
     mbgl-vendor-wagyu
     unordered_dense
-
-    FILE MapboxCoreTargets.cmake
 )
+
+if(MLN_USE_RUST)
+    list(APPEND EXPORT_TARGETS mbgl-rustutils rustutils)
+else()
+    list(APPEND EXPORT_TARGETS mbgl-vendor-csscolorparser)
+endif()
+
+export(TARGETS ${EXPORT_TARGETS} FILE MapboxCoreTargets.cmake)
 
 if(MLN_WITH_VULKAN)
     include(${PROJECT_SOURCE_DIR}/vendor/vulkan.cmake)
