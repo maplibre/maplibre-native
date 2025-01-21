@@ -29,6 +29,7 @@ on:
 permissions:
   id-token: write         # needed for AWS
   contents: write         # allow making a release
+  pages: write
 
 jobs:
   pre_job:
@@ -134,7 +135,7 @@ jobs:
       - name: Build CppUnitTests .ipa and .xctest for AWS Device Farm
         run: |
           set -e
-          bazel run --//:renderer=metal //platform/ios:xcodeproj
+          bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
           build_dir="$(mktemp -d)"
           xcodebuild build-for-testing  -scheme CppUnitTests -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
           ios_cpp_test_app_dir="$(dirname "$(find "$build_dir" -name CppUnitTestsApp.app)")"
