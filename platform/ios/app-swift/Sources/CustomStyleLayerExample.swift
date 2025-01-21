@@ -38,122 +38,122 @@ class CustomStyleLayer: MLNCustomStyleLayer {
     private var depthStencilStateWithoutStencil: MTLDepthStencilState?
 
     override func didMove(to mapView: MLNMapView) {
-#if MLN_RENDER_BACKEND_METAL
-        let resource = mapView.backendResource()
+        #if MLN_RENDER_BACKEND_METAL
+            let resource = mapView.backendResource()
 
-        let shaderSource = """
-        #include <metal_stdlib>
-        using namespace metal;
+            let shaderSource = """
+            #include <metal_stdlib>
+            using namespace metal;
 
-        typedef struct
-        {
-           vector_float2 position;
-           vector_float4 color;
-        } Vertex;
+            typedef struct
+            {
+               vector_float2 position;
+               vector_float4 color;
+            } Vertex;
 
-        struct RasterizerData
-        {
-           float4 position [[position]];
-           float4 color;
-        };
+            struct RasterizerData
+            {
+               float4 position [[position]];
+               float4 color;
+            };
 
-        struct Uniforms 
-        { 
-           float4x4 matrix; 
-        };
+            struct Uniforms 
+            { 
+               float4x4 matrix; 
+            };
 
-        vertex RasterizerData
-        vertexShader(uint vertexID [[vertex_id]],
-                    constant Vertex *vertices [[buffer(0)]],
-                    constant Uniforms &uniforms [[buffer(1)]])
-        {
-           RasterizerData out;
+            vertex RasterizerData
+            vertexShader(uint vertexID [[vertex_id]],
+                        constant Vertex *vertices [[buffer(0)]],
+                        constant Uniforms &uniforms [[buffer(1)]])
+            {
+               RasterizerData out;
 
-           const float4 position = uniforms.matrix * float4(float2(vertices[vertexID].position.xy), 1, 1);
+               const float4 position = uniforms.matrix * float4(float2(vertices[vertexID].position.xy), 1, 1);
 
-           out.position = position;  
-           out.color = vertices[vertexID].color;
+               out.position = position;  
+               out.color = vertices[vertexID].color;
 
-           return out;
-        }
+               return out;
+            }
 
-        fragment float4 fragmentShader(RasterizerData in [[stage_in]])
-        {
-           return in.color;
-        }
-        """
+            fragment float4 fragmentShader(RasterizerData in [[stage_in]])
+            {
+               return in.color;
+            }
+            """
 
-        var error: NSError?
-        let device = resource.device
-        let library = try? device?.makeLibrary(source: shaderSource, options: nil)
-        assert(library != nil, "Error compiling shaders: \(String(describing: error))")
-        let vertexFunction = library?.makeFunction(name: "vertexShader")
-        let fragmentFunction = library?.makeFunction(name: "fragmentShader")
+            var error: NSError?
+            let device = resource.device
+            let library = try? device?.makeLibrary(source: shaderSource, options: nil)
+            assert(library != nil, "Error compiling shaders: \(String(describing: error))")
+            let vertexFunction = library?.makeFunction(name: "vertexShader")
+            let fragmentFunction = library?.makeFunction(name: "fragmentShader")
 
-        // Configure a pipeline descriptor that is used to create a pipeline state.
-        let pipelineStateDescriptor = MTLRenderPipelineDescriptor()
-        pipelineStateDescriptor.label = "Simple Pipeline"
-        pipelineStateDescriptor.vertexFunction = vertexFunction
-        pipelineStateDescriptor.fragmentFunction = fragmentFunction
-        pipelineStateDescriptor.colorAttachments[0].pixelFormat = resource.mtkView.colorPixelFormat
-        pipelineStateDescriptor.depthAttachmentPixelFormat = .depth32Float_stencil8
-        pipelineStateDescriptor.stencilAttachmentPixelFormat = .depth32Float_stencil8
+            // Configure a pipeline descriptor that is used to create a pipeline state.
+            let pipelineStateDescriptor = MTLRenderPipelineDescriptor()
+            pipelineStateDescriptor.label = "Simple Pipeline"
+            pipelineStateDescriptor.vertexFunction = vertexFunction
+            pipelineStateDescriptor.fragmentFunction = fragmentFunction
+            pipelineStateDescriptor.colorAttachments[0].pixelFormat = resource.mtkView.colorPixelFormat
+            pipelineStateDescriptor.depthAttachmentPixelFormat = .depth32Float_stencil8
+            pipelineStateDescriptor.stencilAttachmentPixelFormat = .depth32Float_stencil8
 
-        do {
-            pipelineState = try device?.makeRenderPipelineState(descriptor: pipelineStateDescriptor)
-        } catch {
-            assertionFailure("Failed to create pipeline state: \(error)")
-        }
+            do {
+                pipelineState = try device?.makeRenderPipelineState(descriptor: pipelineStateDescriptor)
+            } catch {
+                assertionFailure("Failed to create pipeline state: \(error)")
+            }
 
-        // Notice that we don't configure the stencilTest property, leaving stencil testing disabled
-        let depthStencilDescriptor = MTLDepthStencilDescriptor()
-        depthStencilDescriptor.depthCompareFunction = .always // Or another value as needed
-        depthStencilDescriptor.isDepthWriteEnabled = false
+            // Notice that we don't configure the stencilTest property, leaving stencil testing disabled
+            let depthStencilDescriptor = MTLDepthStencilDescriptor()
+            depthStencilDescriptor.depthCompareFunction = .always // Or another value as needed
+            depthStencilDescriptor.isDepthWriteEnabled = false
 
-        depthStencilStateWithoutStencil = device!.makeDepthStencilState(descriptor: depthStencilDescriptor)
-#endif
+            depthStencilStateWithoutStencil = device!.makeDepthStencilState(descriptor: depthStencilDescriptor)
+        #endif
     }
 
     override func willMove(from _: MLNMapView) {}
 
-    override func draw(in mapView: MLNMapView, with context: MLNStyleLayerDrawingContext) {
-#if MLN_RENDER_BACKEND_METAL
-        // Use the supplied render command encoder to encode commands
-        guard let renderEncoder else {
-            return
-        }
+    override func draw(in _: MLNMapView, with context: MLNStyleLayerDrawingContext) {
+        #if MLN_RENDER_BACKEND_METAL
+            // Use the supplied render command encoder to encode commands
+            guard let renderEncoder else {
+                return
+            }
 
-        let p1 = project(CLLocationCoordinate2D(latitude: 25.0, longitude: 12.5))
-        let p2 = project(CLLocationCoordinate2D(latitude: 0.0, longitude: 0.0))
-        let p3 = project(CLLocationCoordinate2D(latitude: 0.0, longitude: 25.0))
+            let p1 = project(CLLocationCoordinate2D(latitude: 25.0, longitude: 12.5))
+            let p2 = project(CLLocationCoordinate2D(latitude: 0.0, longitude: 0.0))
+            let p3 = project(CLLocationCoordinate2D(latitude: 0.0, longitude: 25.0))
 
-        struct Vertex {
-            var position: vector_float2
-            var color: vector_float4
-        }
+            struct Vertex {
+                var position: vector_float2
+                var color: vector_float4
+            }
 
-        let triangleVertices: [Vertex] = [
-            Vertex(position: vector_float2(Float(p1.x), Float(p1.y)), color: vector_float4(1, 0, 0, 1)),
-            Vertex(position: vector_float2(Float(p2.x), Float(p2.y)), color: vector_float4(0, 1, 0, 1)),
-            Vertex(position: vector_float2(Float(p3.x), Float(p3.y)), color: vector_float4(0, 0, 1, 1)),
-        ]
+            let triangleVertices: [Vertex] = [
+                Vertex(position: vector_float2(Float(p1.x), Float(p1.y)), color: vector_float4(1, 0, 0, 1)),
+                Vertex(position: vector_float2(Float(p2.x), Float(p2.y)), color: vector_float4(0, 1, 0, 1)),
+                Vertex(position: vector_float2(Float(p3.x), Float(p3.y)), color: vector_float4(0, 0, 1, 1)),
+            ]
 
-        // Convert the projection matrix to float from double, and scale it to match our projection
-        var projectionMatrix = convertMatrix(context.projectionMatrix)
-        let worldSize = 512.0 * pow(2.0, context.zoomLevel)
-        projectionMatrix.m00 = projectionMatrix.m00 * Float(worldSize)
-        projectionMatrix.m11 = projectionMatrix.m11 * Float(worldSize)
+            // Convert the projection matrix to float from double, and scale it to match our projection
+            var projectionMatrix = convertMatrix(context.projectionMatrix)
+            let worldSize = 512.0 * pow(2.0, context.zoomLevel)
+            projectionMatrix.m00 = projectionMatrix.m00 * Float(worldSize)
+            projectionMatrix.m11 = projectionMatrix.m11 * Float(worldSize)
 
-        renderEncoder.setRenderPipelineState(pipelineState!)
-        renderEncoder.setDepthStencilState(depthStencilStateWithoutStencil)
+            renderEncoder.setRenderPipelineState(pipelineState!)
+            renderEncoder.setDepthStencilState(depthStencilStateWithoutStencil)
 
-        // Pass in the parameter data.
-        renderEncoder.setVertexBytes(triangleVertices, length: MemoryLayout<Vertex>.size * triangleVertices.count, index: 0)
-        renderEncoder.setVertexBytes(&projectionMatrix, length: MemoryLayout<float4x4>.size, index: 1)
+            // Pass in the parameter data.
+            renderEncoder.setVertexBytes(triangleVertices, length: MemoryLayout<Vertex>.size * triangleVertices.count, index: 0)
+            renderEncoder.setVertexBytes(&projectionMatrix, length: MemoryLayout<float4x4>.size, index: 1)
 
-        // Draw the triangle.
-        renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
-#endif
+            // Draw the triangle.
+            renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
+        #endif
     }
 
     func project(_ coordinate: CLLocationCoordinate2D) -> CGPoint {
