@@ -24,7 +24,7 @@ MLN_GLTF_SOURCE = [
     "src/gltf/GLTFMTLRenderItem.h",
     "src/gltf/GLTFMTLRenderItem.m",
     "src/gltf/GLTFRenderer.hpp",
-    "src/gltf/GLTFRenderer.mm",
+    "src/gltf/GLTFRenderer.cpp",
     "src/gltf/MetalRenderer+GLTFAsset.mm",
     "src/gltf/gltfkit/GLTFAsset.h",
     "src/gltf/gltfkit/GLTFAsset.m",
