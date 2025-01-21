@@ -1066,18 +1066,12 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     //                                  tileURLTemplates:@[@"pmtiles://https://oliverwipfli.ch/data/foursquare-os-places-10M-2024-11-20.pmtiles"]
     //                                           options:nil];
 
-    // Add the source to the map style
     [self.mapView.style addSource:foursquareSource];
 
-    // Initialize the circle style layer
     MLNCircleStyleLayer *circleLayer = [[MLNCircleStyleLayer alloc] initWithIdentifier:@"foursquare-10M" source:foursquareSource];
     circleLayer.sourceLayerIdentifier = @"place";
     circleLayer.maximumZoomLevel = 11;
-
-    // Set the circle color
     circleLayer.circleColor = [NSExpression expressionForConstantValue:[UIColor colorWithRed:0.8 green:0.2 blue:0.2 alpha:1.0]];
-    
-    // Set the circle opacity with interpolation
     circleLayer.circleOpacity = [NSExpression expressionWithMLNJSONObject:@[
         @"interpolate",
         @[@"linear"],
@@ -1086,8 +1080,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         @11, @0.5,
         @14, @1.0
     ]];
-
-    // Set the circle radius with interpolation
     circleLayer.circleRadius = [NSExpression expressionWithMLNJSONObject:@[
         @"interpolate",
         @[@"linear"],
@@ -1097,8 +1089,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         @16, @4,
         @18, @8
     ]];
-
-    // Add the layer to the map style
     [self.mapView.style addLayer:circleLayer];
 }
 
