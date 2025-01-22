@@ -41,7 +41,7 @@ void MetalRenderer::setDrawableSize(int width, int height) {
         return;
     }
     _drawableSize = {width, height};
-    updateFramebufferSize();
+    // updateFramebufferSize();
 }
 
 // Set the current drawable
