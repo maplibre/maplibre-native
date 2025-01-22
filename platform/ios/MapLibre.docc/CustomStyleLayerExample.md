@@ -1,10 +1,16 @@
-import Foundation
-import MapLibre
-import MetalKit
-import SwiftUI
-import UIKit
+# Custom Style Layers (Metal API)
 
-// #-example-code(CustomStyleLayerExample)
+Creating a Custom Style Layer with Metal
+
+Custom style layers allow you to draw directly with Metal, enabling you to render specialized shapes, custom geometry, or apply advanced visual effects that go beyond what is possible with standard style layers.
+
+Below you can find an example of how to create a custom style layer with ``MLNCustomStyleLayer``. In this implementation, a SwiftUI view wraps an ``MLNMapView`` and appends a subclassed custom style layer once the map loads. The layer’s ``MLNCustomStyleLayer/didMoveToMapView:`` method handles initialization, including compiling Metal shaders and creating a [`MTLRenderPipelineState`](https://developer.apple.com/documentation/metal/mtlrenderpipelinestate?language=objc) for subsequent draw operations. The ``MLNCustomStyleLayer/willMoveFromMapView:`` method provides a place to release or invalidate resources when the layer is removed from the map, while the ``MLNCustomStyleLayer/drawInMapView:withContext:`` method encodes the drawing commands using a [`MTLRenderCommandEncoder`](https://developer.apple.com/documentation/metal/mtlrendercommandencoder) and the map’s projection matrix. By projecting latitude/longitude coordinates into a normalized 0–1 space and then transforming them into tile coordinates, the layer ensures that rendered geometry aligns correctly with the base map.
+
+![](CustomStyleLayerExample.png)
+
+<!-- include-example(CustomStyleLayerExample) -->
+
+```swift
 struct CustomStyleLayerExample: UIViewRepresentable {
     func makeCoordinator() -> CustomStyleLayerExample.Coordinator {
         Coordinator(self)
@@ -183,5 +189,4 @@ class CustomStyleLayer: MLNCustomStyleLayer {
         )
     }
 }
-
-// #-end-example-code
+```
