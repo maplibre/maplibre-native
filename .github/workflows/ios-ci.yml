@@ -29,7 +29,6 @@ on:
 permissions:
   id-token: write         # needed for AWS
   contents: write         # allow making a release
-  pages: write
 
 jobs:
   pre_job:
@@ -199,15 +198,6 @@ jobs:
         working-directory: .
         run: |
           HOSTING_BASE_PATH="maplibre-native/ios/latest" platform/ios/scripts/docc.sh
-
-      - name: Deploy DocC documentation (main) 🚀
-        if: github.ref == 'refs/heads/main'
-        uses: JamesIves/github-pages-deploy-action@v4.7.2
-        continue-on-error: true
-        with:
-          branch: gh-pages
-          folder: build/docs
-          target-folder: ios/latest/
 
   ios-release:
     runs-on: macos-14
