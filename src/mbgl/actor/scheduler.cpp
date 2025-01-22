@@ -59,11 +59,11 @@ std::shared_ptr<Scheduler> Scheduler::GetSequenced() {
 
     if (auto scheduler = weaks[lastUsedIndex].lock()) {
         return scheduler;
-    } else {
-        auto result = std::make_shared<SequencedScheduler>();
-        weaks[lastUsedIndex] = result;
-        return result;
     }
+
+    auto result = std::make_shared<SequencedScheduler>();
+    weaks[lastUsedIndex] = result;
+    return result;
 }
 
 } // namespace mbgl
