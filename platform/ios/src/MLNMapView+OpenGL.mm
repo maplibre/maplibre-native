@@ -253,6 +253,6 @@ EAGLContext* MLNMapViewOpenGLImpl::getEAGLContext() {
     return resource.context;
 }
 
-MLNBackendResource MLNMapViewOpenGLImpl::getObject() {
-    return MLNBackendResource();
+MLNBackendResource* MLNMapViewOpenGLImpl::getObject() {
+    return [[MLNBackendResource alloc] init];
 }

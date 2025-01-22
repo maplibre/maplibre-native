@@ -227,13 +227,12 @@ void MLNMapViewMetalImpl::layoutChanged() {
              static_cast<uint32_t>(mapView.bounds.size.height * scaleFactor) };
 }
 
-MLNBackendResource MLNMapViewMetalImpl::getObject() {
+MLNBackendResource* MLNMapViewMetalImpl::getObject() {
     auto& resource = getResource<MLNMapViewMetalRenderableResource>();
     auto renderPassDescriptor = resource.getRenderPassDescriptor().get();
-    return {
-        resource.mtlView,
-        resource.mtlView.device,
-        [MTLRenderPassDescriptor renderPassDescriptor],
-        resource.commandBuffer
-    };
+
+    return [[MLNBackendResource alloc] initWithMTKView:resource.mtlView
+                                                device:resource.mtlView.device
+                                  renderPassDescriptor:[MTLRenderPassDescriptor renderPassDescriptor]
+                                         commandBuffer:resource.commandBuffer];
 }

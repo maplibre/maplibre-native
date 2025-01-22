@@ -2120,7 +2120,7 @@ vertically on the map.
  */
 @property (nonatomic) MLNMapDebugMaskOptions debugMask;
 
-- (MLNBackendResource)backendResource;
+- (MLNBackendResource *)backendResource;
 @end
 
 NS_ASSUME_NONNULL_END
