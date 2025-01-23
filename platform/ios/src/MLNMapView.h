@@ -2113,6 +2113,11 @@ vertically on the map.
 // MARK: Debugging the Map
 
 /**
+Triggers a repaint of the map.
+ */
+- (void)triggerRepaint;
+
+/**
  The options that determine which debugging aids are shown on the map.
 
  These options are all disabled by default and should remain disabled in
