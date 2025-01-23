@@ -2110,12 +2110,8 @@ vertically on the map.
                                          predicate:(nullable NSPredicate *)predicate
     NS_SWIFT_NAME(visibleFeatures(in:styleLayerIdentifiers:predicate:));
 
-// MARK: Debugging the Map
 
-/**
-Triggers a repaint of the map.
- */
-- (void)triggerRepaint;
+// MARK: Debugging the Map
 
 /**
  The options that determine which debugging aids are shown on the map.
@@ -2126,6 +2122,13 @@ Triggers a repaint of the map.
 @property (nonatomic) MLNMapDebugMaskOptions debugMask;
 
 - (MLNBackendResource)backendResource;
+
+ /**
+  Triggers a repaint of the map.
+ */
+- (void)triggerRepaint;
+
+
 @end
 
 NS_ASSUME_NONNULL_END
