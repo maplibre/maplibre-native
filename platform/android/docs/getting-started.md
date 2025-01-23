@@ -1,6 +1,8 @@
 # Quickstart
 
-1. Add bintray Maven repositories to your project-level Gradle file (usually `<project>/<app-module>/build.gradle`).
+To follow this example from scratch, in Android Studio create a new "Empty Views Activity" and then select "Kotlin" as the language.  Select "Groovy DSL" as the build configuration language.
+
+1. If you have an older project, you'll need to add bintray Maven repositories to your project-level Gradle file (usually `<project>/<app-module>/build.gradle`).  Add `mavenCentral()` to where repositories are already defined in that file, something like this:
 
     ```gradle
     allprojects {
@@ -11,13 +13,15 @@
     }
     ```
 
-2. Add the library as a dependency into your module Gradle file (usually `<project>/<app-module>/build.gradle`). Replace `<version>` with the [latest MapLibre Android version](https://github.com/maplibre/maplibre-native/releases?q=android-v11&expanded=true) (e.g.: `org.maplibre.gl:android-sdk:11.5.2`):
+   A newly-created app will likely already have `mavenCentral()` in a top-level `settings.gradle` file, and you won't need to add it.
+
+2. Add the library as a dependency into your module Gradle file (usually `<project>/<app-module>/build.gradle`). Replace `<version>` with the [latest MapLibre Android version](https://github.com/maplibre/maplibre-native/releases?q=android-v11&expanded=true) (e.g.: `org.maplibre.gl:android-sdk:11.8.0`):
 
     ```gradle
     dependencies {
         ...
         implementation 'org.maplibre.gl:android-sdk:<version>'
-        ...
+
     }
     ```
 
@@ -35,17 +39,16 @@
     ...
     ```
 
-5. Initialize the `MapView` in your `MainActivity` file by following the example below:
+5. Initialize the `MapView` in your `MainActivity` file by following the example below.  If modifying a newly-created "Empty Views Activity" example, it replaces all the Kotlin code after the "package" line.
 
     ```kotlin
     import androidx.appcompat.app.AppCompatActivity
     import android.os.Bundle
     import android.view.LayoutInflater
-    import org.maplibre.android.Maplibre
+    import org.maplibre.android.MapLibre
     import org.maplibre.android.camera.CameraPosition
     import org.maplibre.android.geometry.LatLng
     import org.maplibre.android.maps.MapView
-    import org.maplibre.android.testapp.R
 
     class MainActivity : AppCompatActivity() {
 
