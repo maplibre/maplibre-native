@@ -5,6 +5,7 @@
 #include <mbgl/vulkan/texture2d.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/instrumentation.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
 
 #include <cassert>
 #include <math.h>
@@ -120,8 +121,8 @@ void DescriptorSet::allocate() {
     dirty = std::vector(descriptorSets.size(), true);
 }
 
-void DescriptorSet::markDirty(bool value) {
-    std::fill(dirty.begin(), dirty.end(), value);
+void DescriptorSet::markDirty() {
+    std::fill(dirty.begin(), dirty.end(), true);
 }
 
 void DescriptorSet::bind(CommandEncoder& encoder) {
@@ -186,7 +187,14 @@ void UniformDescriptorSet::update(const gfx::UniformBufferArray& uniforms,
 }
 
 ImageDescriptorSet::ImageDescriptorSet(Context& context_)
-    : DescriptorSet(context_, DescriptorSetType::DrawableImage) {}
+    : DescriptorSet(context_, DescriptorSetType::DrawableImage),
+      lastModified(0.0) {}
+
+void ImageDescriptorSet::markDirty() {
+    DescriptorSet::markDirty();
+
+    lastModified = util::MonotonicTimer::now();
+}
 
 void ImageDescriptorSet::update(const std::array<gfx::Texture2DPtr, shaders::maxTextureCountPerShader>& textures) {
     MLN_TRACE_FUNC();

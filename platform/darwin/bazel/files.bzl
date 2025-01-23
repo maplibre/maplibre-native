@@ -161,6 +161,7 @@ MLN_DARWIN_PRIVATE_HEADERS = [
 
 MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/MLNAttributionInfo.mm",
+    "src/MLNBackendResource.mm",
     "src/MLNComputedShapeSource.mm",
     "src/MLNCustomStyleLayer.mm",
     "src/MLNDefaultStyle.mm",

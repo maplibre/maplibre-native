@@ -23,7 +23,9 @@ public class VulkanTextureViewRenderThread extends TextureViewRenderThread {
 
       while (true) {
         Runnable event = null;
-        boolean initialize = false;
+        boolean createSurface = false;
+        boolean destroySurface = false;
+        boolean sizeChanged = false;
         int w = -1;
         int h = -1;
 
@@ -41,20 +43,28 @@ public class VulkanTextureViewRenderThread extends TextureViewRenderThread {
               break;
             }
 
-            if (destroySurface) {
-              destroySurface = false;
-              mapRenderer.onSurfaceDestroyed();
+            if (this.destroySurface) {
               surface = null;
+              destroySurface = true;
+              this.destroySurface = false;
               break;
             }
 
-            if (surfaceTexture != null && !paused && requestRender && surface == null) {
+            if (surfaceTexture != null && !paused && requestRender
+                    && (surface == null || this.sizeChanged)) {
 
               w = width;
               h = height;
-              surface = new Surface(surfaceTexture);
 
-              initialize = true;
+              if (surface == null) {
+                surface = new Surface(surfaceTexture);
+                createSurface = true;
+              }
+
+              if (this.sizeChanged) {
+                sizeChanged = true;
+                this.sizeChanged = false;
+              }
 
               // Reset the request render flag now, so we can catch new requests
               // while rendering
@@ -81,12 +91,17 @@ public class VulkanTextureViewRenderThread extends TextureViewRenderThread {
           continue;
         }
 
-        if (initialize) {
+        if (createSurface) {
           mapRenderer.onSurfaceCreated(surface);
-          mapRenderer.onSurfaceChanged( w, h);
-
-          initialize = false;
+          mapRenderer.onSurfaceChanged(w, h);
+          createSurface = false;
           continue;
+        }
+
+        if (destroySurface) {
+          mapRenderer.onSurfaceDestroyed();
+          destroySurface = false;
+          break;
         }
 
         // If the surface size has changed inform the map renderer.

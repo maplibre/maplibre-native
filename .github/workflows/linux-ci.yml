@@ -37,6 +37,7 @@ jobs:
       - name: Get all Linux files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files
+        
         uses: tj-actions/changed-files@v45
         with:
           files_yaml_from_source_file: .github/changed-files.yml
@@ -52,7 +53,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        renderer: [legacy, drawable, vulkan]
+        renderer: [legacy, drawable, vulkan, drawable-rust]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -90,6 +91,11 @@ jobs:
 
       - if: matrix.renderer == 'drawable'
         run: echo renderer_flag_cmake=-DMLN_DRAWABLE_RENDERER=ON >> "$GITHUB_ENV"
+
+      - if: matrix.renderer == 'drawable-rust'
+        run: |
+          echo "renderer_flag_cmake=-DMLN_DRAWABLE_RENDERER=ON -DMLN_USE_RUST=ON" >> "$GITHUB_ENV"
+          cargo install cxxbridge-cmd
 
       - if: matrix.renderer == 'legacy'
         run: echo renderer_flag_cmake=-DMLN_LEGACY_RENDERER=ON >> "$GITHUB_ENV"
@@ -158,7 +164,12 @@ jobs:
 
       - name: Run render test
         id: render_test
-        run: xvfb-run -a build/mbgl-render-test-runner --manifestPath=metrics/linux-${{ matrix.renderer }}.json
+        run: |
+          renderer="${{ matrix.renderer }}"
+          if [[ "$renderer" == *-rust ]]; then
+            renderer=${renderer%-rust}
+          fi
+          xvfb-run -a build/mbgl-render-test-runner --manifestPath=metrics/linux-"$renderer".json
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure'

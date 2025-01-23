@@ -2121,13 +2121,12 @@ vertically on the map.
  */
 @property (nonatomic) MLNMapDebugMaskOptions debugMask;
 
-- (MLNBackendResource)backendResource;
+- (MLNBackendResource *)backendResource;
 
  /**
   Triggers a repaint of the map.
  */
 - (void)triggerRepaint;
-
 
 @end
 

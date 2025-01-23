@@ -7366,7 +7366,7 @@ static void *windowScreenContext = &windowScreenContext;
     _mbglMap->triggerRepaint();
 }
 
-- (MLNBackendResource)backendResource {
+- (MLNBackendResource *)backendResource {
     return _mbglView->getObject();
 }
 

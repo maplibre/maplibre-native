@@ -1,0 +1,19 @@
+[package]
+name = "rustutils"
+version = "0.1.0"
+authors = ["MapLibre contributors"]
+description = "Core Rust utilities for MapLibre Native"
+edition = "2021"
+license = "BSD-2-Clause"
+repository = "https://github.com/maplibre/maplibre-native"
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+csscolorparser = "0.6.2"
+cxx = "1"
+
+[profile.release]
+lto = true
+codegen-units = 1

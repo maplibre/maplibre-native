@@ -33,11 +33,11 @@ docker build \
 ```bash
 # Run all build commands using the docker container.
 # You can also execute build commands from inside the docker container by starting it without the build command.
-docker run --rm -it -v "$PWD:/app/" -v "$PWD/docker/.cache:/home/user/.cache" maplibre-native-image
+docker run --rm -it -v "$PWD:/app/" -v "$PWD/docker/.cache:/home/ubuntu/.cache" maplibre-native-image
 ```
 
 You can also use the container to run just one specific commands, e.g. `cmake` or `bazel`. Any downloaded dependencies will be cached in the `docker/.cache` directory.
 
 ```bash
-docker run --rm -it -v "$PWD:/app/" -v "$PWD/docker/.cache:/home/user/.cache" maplibre-native-image cmake ...
+docker run --rm -it -v "$PWD:/app/" -v "$PWD/docker/.cache:/home/ubuntu/.cache" maplibre-native-image cmake ...
 ``` 
