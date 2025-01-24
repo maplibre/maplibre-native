@@ -20,10 +20,10 @@ pub fn parse_css_color(css_str: &str) -> ffi::ParsedColor {
         .parse::<Color>()
         .map(|color| ffi::ParsedColor {
             success: true,
-            r: color.r as f32,
-            g: color.g as f32,
-            b: color.b as f32,
-            a: color.a as f32,
+            r: color.r,
+            g: color.g,
+            b: color.b,
+            a: color.a,
         })
         .unwrap_or_else(|_| ffi::ParsedColor {
             success: false,

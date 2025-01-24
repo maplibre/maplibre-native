@@ -29,10 +29,6 @@ jobs:
           # test-fmt:
           cargo fmt --all -- --check
           #
-          # Run cargo clippy
-          # clippy:
-          cargo clippy --workspace --all-targets -- -D warnings
-          #
           # Quick compile
           # check:
           RUSTFLAGS='-D warnings' cargo check --workspace --all-targets
@@ -40,6 +36,10 @@ jobs:
           # Run all tests
           # test:
           cargo test --workspace --all-targets
+          #
+          # Run cargo clippy
+          # clippy:
+          cargo clippy --workspace --all-targets -- -D warnings
           #
           # Test documentation
           # test-doc:
