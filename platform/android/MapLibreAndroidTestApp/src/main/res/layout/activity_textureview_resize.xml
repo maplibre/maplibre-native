@@ -26,4 +26,3 @@
         app:layout_anchorGravity="bottom"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
-

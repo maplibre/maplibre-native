@@ -32,4 +32,3 @@ verify the font list and run download.sh
 
 4. tiles
 run download.sh
-
