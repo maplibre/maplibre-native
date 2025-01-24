@@ -47,5 +47,3 @@ public class MapLibreMapAction implements ViewAction {
     void onInvokeAction(@NonNull UiController uiController, @NonNull MapLibreMap maplibreMap);
   }
 }
-
-

@@ -58,4 +58,3 @@ class CcachePlugin : Plugin<Project> {
         }
     }
 }
-

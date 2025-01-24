@@ -106,4 +106,3 @@
     return [[MLNCameraTransitionNaNZoomMapView alloc] initWithFrame:rect styleURL:styleURL];
 }
 @end
-

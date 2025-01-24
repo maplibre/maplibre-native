@@ -119,4 +119,3 @@ MLNMatrix4 MLNMatrix4Make(std::array<double, 16>  array) {
     };
     return mat4;
 }
-

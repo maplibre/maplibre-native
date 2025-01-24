@@ -612,4 +612,3 @@ uprv_eastrncpy(uint8_t *dst, const uint8_t *src, int32_t n)
   }
   return orig_dst;
 }
-
