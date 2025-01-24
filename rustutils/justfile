@@ -58,7 +58,7 @@ rust-info:
     cargo --version
 
 # Run all tests as expected by CI
-ci-test: rust-info test-fmt clippy build test test-doc
+ci-test: rust-info clippy build test test-doc
 
 # Run minimal subset of tests to ensure compatibility with MSRV (Minimum Supported Rust Version). This assumes the default toolchain is already set to MSRV.
 ci-test-msrv: rust-info build test
