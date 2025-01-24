@@ -17,38 +17,17 @@ jobs:
     name: Rust tests
     runs-on: ubuntu-latest
     steps:
+      - uses: taiki-e/install-action@v2
+        with: { tool: just }
       - uses: actions/checkout@v4
-      - name: Test rustutils
-        run: |
-          # Eventually this script should be moved to a justfile as a "ci-test" recipe
-          # rust-info:
-          rustc --version
-          cargo --version
-          #
-          # Test code formatting
-          # test-fmt:
-          cargo fmt --all -- --check
-          #
-          # Quick compile
-          # check:
-          RUSTFLAGS='-D warnings' cargo check --workspace --all-targets
-          #
-          # Run all tests
-          # test:
-          cargo test --workspace --all-targets
-          #
-          # Run cargo clippy
-          # clippy:
-          cargo clippy --workspace --all-targets -- -D warnings
-          #
-          # Test documentation
-          # test-doc:
-          RUSTDOCFLAGS="-D warnings" cargo doc --no-deps
+      - run: just -v ci-test
 
   msrv:
-    name: Rust tests MSRV
+    name: Rust tests MSRV (Minimal Supported Rust Version)
     runs-on: ubuntu-latest
     steps:
+      - uses: taiki-e/install-action@v2
+        with: { tool: just }
       - uses: actions/checkout@v4
       - name: Read crate metadata
         id: metadata
@@ -57,19 +36,4 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ steps.metadata.outputs.rust-version }}
-          components: rustfmt
-      - name: Test rustutils
-        working-directory: rustutils/
-        run: |
-          # Eventually this script should be moved to a justfile as a "ci-test-msrv" recipe
-          # rust-info:
-          rustc --version
-          cargo --version
-          #
-          # Quick compile
-          # check:
-          RUSTFLAGS='-D warnings' cargo check --workspace --all-targets
-          #
-          # Run all tests
-          # test:
-          cargo test --workspace --all-targets
+      - run: just ci-test-msrv
