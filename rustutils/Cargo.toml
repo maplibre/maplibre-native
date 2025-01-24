@@ -13,7 +13,7 @@ rust-version = "1.78.0"
 crate-type = ["staticlib"]
 
 [dependencies]
-csscolorparser = "0.6.2"
+csscolorparser = "0.7.0"
 cxx = "1"
 
 [profile.release]
