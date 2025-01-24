@@ -1,5 +1,5 @@
 [package]
-name = "rustlib"
+name = "maplibre-native-autocxx"
 version = "0.1.0"
 authors = ["Yuri Astrakhan <YuriAstrakhan@gmail.com>", "MapLibre contributors"]
 description = "MapLibre Native Rust library"
