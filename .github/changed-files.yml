@@ -1,5 +1,6 @@
 linux:
   - 'src/**'
+  - 'rustutils/**'
   - 'test/**'
   - 'render-test/**'
   - 'expression-test/**'
@@ -12,6 +13,7 @@ linux:
   - 'BUILD.bazel'
   - '.bazelrc'
   - '.bazelversion'
+  - '!**/*.md'
 windows:
   - '.github/workflows/windows-ci.yml'
   - 'src/**'
@@ -24,11 +26,11 @@ windows:
   - 'metrics/**'
   - 'vendor/**'
   - '.gitmodules'
-  - '!**/*.md'
   - 'WORKSPACE'
   - 'BUILD.bazel'
   - '.bazelrc'
   - '.bazelversion'
+  - '!**/*.md'
 ios:
   - 'platform/ios/**'
   - 'platform/darwin/**'
@@ -44,12 +46,12 @@ ios:
   - 'test/**'
   - 'vendor/**'
   - '.gitmodules'
-  - '!**/*.md'
   - 'WORKSPACE'
   - 'BUILD.bazel'
   - '.bazelrc'
   - '.bazelversion'
   - 'pnpm-lock.yaml'
+  - '!**/*.md'
 android:
   - 'CMakeLists.txt'
   - 'platform/android/**'
