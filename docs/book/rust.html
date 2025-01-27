@@ -153,7 +153,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="rust"><a class="header" href="#rust">Rust</a></h1>
-<p>We have added experimental support for intergrating Rust code into the source tree.</p>
+<p>We have added experimental support for integrating Rust code into the source tree.</p>
 <h2 id="rust-bridge"><a class="header" href="#rust-bridge">Rust Bridge</a></h2>
 <p>The Rust bridge lives in the root <code>rustutils</code> directory.</p>
 <p>We use <a href="https://cxx.rs/">CXX</a> to allow interop between Rust and C++.</p>
@@ -161,32 +161,40 @@
 <h3 id="cmake"><a class="header" href="#cmake">CMake</a></h3>
 <p>When building with CMake, need to have the correct Rust toolchain(s) installed. See <a href="https://www.rust-lang.org/tools/install">Install Rust</a> to install Rust.</p>
 <p>You can use <code>rustup</code> to manage toolchains. Which toolchain you needs depends on your host platform and for what platform you are trying to build. If your host and target platform are the same, you probably have the correct toolchain installed after installing Rust. For example when building for <strong>Android</strong> and building on a <strong>x84 Linux</strong> host you would use the following command:</p>
-<pre><code>rustup target add --toolchain stable-x86_64-unknown-linux-gnu aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+<pre><code class="language-shell">rustup target add --toolchain stable-x86_64-unknown-linux-gnu aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
 </code></pre>
 <p>See <a href="https://doc.rust-lang.org/nightly/rustc/platform-support.html">Platform Support</a> in the Rust documentation for more details. You will get a descriptive error message when the correct toolchain is not available, so we don't list all possible combinations here.</p>
 <p>You also need to have cxxbridge installed:</p>
-<pre><code>cargo install cxxbridge-cmd
+<pre><code class="language-shell">cargo install cxxbridge-cmd
 </code></pre>
 <p>Set <code>-DMLN_USE_RUST=ON</code> when generating a configuration with CMake.</p>
 <h3 id="bazel"><a class="header" href="#bazel">Bazel</a></h3>
 <p>Pass the <code>--//:use_rust</code> flag to Bazel commands.</p>
 <p>Note that when <a href="./ios/README.html">generating an Xcode project</a> you should not pass this option to Bazel directly, but as follows:</p>
-<pre><code>bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal --//:use_rust"
+<pre><code class="language-shell">bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal --//:use_rust"
 </code></pre>
+<h2 id="just"><a class="header" href="#just">Just</a></h2>
+<p>For the Rust subproject, we suggest installing <a href="https://github.com/casey/just#readme">just</a>, a modern alternative to <code>make</code>. The <code>justfile</code> in the root directory contains a number of useful commands for building and testing the Rust code.  The same commands can be run directly, but <code>just</code> provides a more convenient interface.</p>
+<ul>
+<li>Install <code>just</code> with <code>cargo install just</code></li>
+<li>Run <code>just</code> in the <code>/rustutils</code> dir to see a list of available commands</li>
+<li>Some common commands: <code>just check</code>, <code>just test</code>, <code>just fmt</code></li>
+<li>To run the same steps as used by CI, run <code>just ci-test</code></li>
+</ul>
 <h2 id="creating-a-new-module"><a class="header" href="#creating-a-new-module">Creating a new Module</a></h2>
 <p>To create a new module:</p>
 <ol>
 <li>Add a new source file to <code>rustutils/src/example.rs</code>.</li>
 <li>Implement it, see the <a href="https://cxx.rs/index.html">CXX documentation</a> or see <code>rustutils/src/color.rs</code> for an example.</li>
 <li>Create a C++ source file that will use the generated C++ header. See <code>src/mbgl/util/color.rs.cpp</code> for an example. Import the generated header with
-<pre><code>#include &lt;rustutils/example.hpp&gt;
+<pre><code class="language-cpp">#include &lt;rustutils/example.hpp&gt;
 </code></pre>
 </li>
 <li>Conditionally include either the <code>*.rs.cpp</code> file or the <code>*.cpp</code> file it replaces in CMake and Bazel. Here is what it looks like for CMake:
-<pre><code>${PROJECT_SOURCE_DIR}/src/mbgl/util/color$&lt;IF:$&lt;BOOL:${MLN_USE_RUST}&gt;,.rs.cpp,.cpp&gt;
+<pre><code class="language-cmake">${PROJECT_SOURCE_DIR}/src/mbgl/util/color$&lt;IF:$&lt;BOOL:${MLN_USE_RUST}&gt;,.rs.cpp,.cpp&gt;
 </code></pre>
 And here for Bazel:
-<pre><code>select({
+<pre><code class="language-bazel">select({
   "//:rust": [
       "src/mbgl/util/color.rs.cpp",
   ],
