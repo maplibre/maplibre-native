@@ -1,4 +1,4 @@
-# Mapbox GL Test App
+# MapLibre GL Test App
 
 ## Building
 
