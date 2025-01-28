@@ -2110,7 +2110,6 @@ vertically on the map.
                                          predicate:(nullable NSPredicate *)predicate
     NS_SWIFT_NAME(visibleFeatures(in:styleLayerIdentifiers:predicate:));
 
-
 // MARK: Debugging the Map
 
 /**
@@ -2123,9 +2122,9 @@ vertically on the map.
 
 - (MLNBackendResource *)backendResource;
 
- /**
-  Triggers a repaint of the map.
- */
+/**
+ Triggers a repaint of the map.
+*/
 - (void)triggerRepaint;
 
 @end
