@@ -2,26 +2,28 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
-    let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let project_root = PathBuf::from(manifest_dir)
-        .parent()
-        .unwrap() // "platform/"
-        .parent()
-        .unwrap() // "maplibre-native/"
-        .to_path_buf();
+    let project_root = {
+        let manifest = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
+        let root = manifest.join("maplibre-native-src");
+        if root.is_symlink() || root.is_dir() {
+            // Use the symlinked directory to allow packaging
+            root
+        } else {
+            // Modeled from the kuzu project
+            // If the path is not directory, this is probably an in-source build on windows where the symlink is unreadable.
+            manifest.parent().unwrap().parent().unwrap().to_path_buf()
+        }
+    };
 
-    let mut cmake_cfg = cmake::Config::new(&project_root);
-
-    cmake_cfg
+    let build_dir = cmake::Config::new(&project_root)
         .generator("Ninja")
         .define("CMAKE_C_COMPILER_LAUNCHER", "ccache")
         .define("CMAKE_CXX_COMPILER_LAUNCHER", "ccache")
         .define("MLN_WITH_CORE_ONLY", "ON")
-        .build_target("mbgl-core");
+        .build_target("mbgl-core")
+        .build();
 
-    let build_output = cmake_cfg.build();
-
-    let lib_dir = build_output.join("build");
+    let lib_dir = build_dir.join("build");
     println!("cargo:rustc-link-search=native={}", lib_dir.display());
     println!("cargo:rustc-link-lib=static=mbgl-core");
 
