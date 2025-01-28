@@ -41,4 +41,3 @@ Each method uses `MapLibreMap.animateCamera`, but with a different `CameraUpdate
 ```kotlin
 --8<-- "MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/camera/ManualZoomActivity.kt:zoomToPoint"
 ```
-

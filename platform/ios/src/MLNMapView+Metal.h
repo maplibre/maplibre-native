@@ -43,6 +43,6 @@ class MLNMapViewMetalImpl final : public MLNMapViewImpl,
   void deleteView() override;
   UIImage* snapshot() override;
   void layoutChanged() override;
-  MLNBackendResource getObject() override;
+  MLNBackendResource* getObject() override;
   // End implementation of MLNMapViewImpl
 };

@@ -53,14 +53,6 @@ To format all Kotlin source files, use:
 $ ./gradlew formatKotlin
 ```
 
-## Benchmarks in Pull Request
-
-To run the benchmarks (for Android) include the following line on a PR comment:
-
-```
-!benchmark android
-```
-
 ## Profiling
 
 See [Tracy Profiling](/profiling/tracy-profiling.md) to understand how Tracy can be used for profiling.

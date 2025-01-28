@@ -72,7 +72,7 @@
 }
 
 - (void)didMoveToMapView:(MLNMapView *)mapView {
-    MLNBackendResource resource = [mapView backendResource];
+    MLNBackendResource* resource = [mapView backendResource];
     
     NSString *shaderSource = @
 "    #include <metal_stdlib>\n"
@@ -140,7 +140,7 @@
     id<MTLRenderCommandEncoder> renderEncoder = self.renderEncoder;
     if(renderEncoder != nil)
     {
-        MLNBackendResource resource = [mapView backendResource];
+        MLNBackendResource* resource = [mapView backendResource];
         
         vector_uint2 _viewportSize;
         _viewportSize.x = resource.mtkView.drawableSize.width;

@@ -85,6 +85,30 @@ MLN_EXPORT
                   configurationURL:(NSURL *)configurationURL NS_DESIGNATED_INITIALIZER;
 
 /**
+ Returns a vector tile source initialized with an identifier and a
+ string-based configuration URL.
+
+ After initializing and configuring the source, add it to a map view’s style
+ using the ``MLNStyle/addSource:`` method.
+
+ The string may be a full HTTP or HTTPS URL or a canonical URL. The string should
+ point to a JSON file that conforms to the
+ <a href="https://github.com/mapbox/tilejson-spec/">TileJSON specification</a>.
+
+ This constructor can be used for URLs that cause problems with `NSURL`’s URL
+ parsing behavior. For example, URLs starting with `pmtiles://https://` were
+ not parsed correctly on iOS 17.
+
+ @param identifier A string that uniquely identifies the source in the style to
+    which it is added.
+ @param configurationURLString A string to a TileJSON configuration file
+    describing the source’s contents and other metadata.
+ @return An initialized vector tile source.
+ */
+- (instancetype)initWithIdentifier:(NSString *)identifier
+            configurationURLString:(NSString *)configurationURLString NS_DESIGNATED_INITIALIZER;
+
+/**
  Returns a vector tile source initialized an identifier, tile URL templates, and
  options.
 

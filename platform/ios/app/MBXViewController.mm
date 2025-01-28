@@ -108,6 +108,7 @@ typedef NS_ENUM(NSInteger, MBXSettingsRuntimeStylingRows) {
 #if MLN_DRAWABLE_RENDERER
     MBXSettingsRuntimeStylingCustomDrawableLayer,
 #endif
+    MBXSettingsRuntimeStylingAddFoursquarePOIsPMTiles
 };
 
 typedef NS_ENUM(NSInteger, MBXSettingsMiscellaneousRows) {
@@ -460,6 +461,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 #if MLN_DRAWABLE_RENDERER
                 @"Add Custom Drawable Layer",
 #endif
+                @"Add FourSquare POIs PMTiles Layer"
             ]];
             break;
         case MBXSettingsMiscellaneous:
@@ -687,6 +689,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                     [self addCustomDrawableLayer];
                     break;
 #endif
+                case MBXSettingsRuntimeStylingAddFoursquarePOIsPMTiles:
+                    [self addFoursquarePOIsPMTilesLayer];
+                    break;
                 default:
                     NSAssert(NO, @"All runtime styling setting rows should be implemented");
                     break;
@@ -1046,6 +1051,45 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.mapView addAnnotations:annotations];
 
     [self.mapView showAnnotations:annotations animated:YES];
+}
+
+// MARK: - Foursquare PMTiles Implementation
+/*
+  Add the new method that creates the PMTiles vector source and circle layer.
+*/
+- (void)addFoursquarePOIsPMTilesLayer {
+    MLNVectorTileSource *foursquareSource = [[MLNVectorTileSource alloc] initWithIdentifier:@"foursquare-10M" configurationURLString:@"pmtiles://https://oliverwipfli.ch/data/foursquare-os-places-10M-2024-11-20.pmtiles"];
+
+    // Also works
+    // MLNVectorTileSource *foursquareSource =
+    //   [[MLNVectorTileSource alloc] initWithIdentifier:@"foursquare-10M"
+    //                                  tileURLTemplates:@[@"pmtiles://https://oliverwipfli.ch/data/foursquare-os-places-10M-2024-11-20.pmtiles"]
+    //                                           options:nil];
+
+    [self.mapView.style addSource:foursquareSource];
+
+    MLNCircleStyleLayer *circleLayer = [[MLNCircleStyleLayer alloc] initWithIdentifier:@"foursquare-10M" source:foursquareSource];
+    circleLayer.sourceLayerIdentifier = @"place";
+    circleLayer.maximumZoomLevel = 11;
+    circleLayer.circleColor = [NSExpression expressionForConstantValue:[UIColor colorWithRed:0.8 green:0.2 blue:0.2 alpha:1.0]];
+    circleLayer.circleOpacity = [NSExpression expressionWithMLNJSONObject:@[
+        @"interpolate",
+        @[@"linear"],
+        @[@"zoom"],
+        @6, @0.5,
+        @11, @0.5,
+        @14, @1.0
+    ]];
+    circleLayer.circleRadius = [NSExpression expressionWithMLNJSONObject:@[
+        @"interpolate",
+        @[@"linear"],
+        @[@"zoom"],
+        @6, @1,
+        @11, @3,
+        @16, @4,
+        @18, @8
+    ]];
+    [self.mapView.style addLayer:circleLayer];
 }
 
 - (void)styleBuildingExtrusions

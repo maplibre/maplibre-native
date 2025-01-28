@@ -51,9 +51,40 @@ jobs:
         run: |
           Write-Host "Changed file(s): ${{ steps.changed-files.outputs.windows_all_changed_files }}"
 
-  windows-build-and-test:
+  windows-get-or-build-dependencies:
     if: needs.pre-job.outputs.should_skip != 'true'
     needs: pre-job
+    runs-on: windows-2022
+    steps:
+      - run: |
+          git config --system core.longpaths true
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Export GitHub Actions cache environment variables
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - name: Acquire/Build Maplibre Native Core Dependencies
+        env:
+          CI: 1
+          VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+        timeout-minutes: 60
+        run: |
+          & ${{ github.workspace }}\platform\windows\Get-VendorPackages.ps1 -Triplet ${{ env.VSCMD_ARG_TGT_ARCH }}-windows -Renderer All
+
+
+  windows-build-and-test:
+#    if: needs.pre-job.outputs.should_skip != 'true'
+    needs: windows-get-or-build-dependencies
     strategy:
       matrix:
         renderer: [opengl, egl, vulkan, osmesa]
@@ -98,12 +129,12 @@ jobs:
         env:
           CI: 1
           VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
-          VCPKG_KEEP_ENV_VARS: "CMAKE_CXX_COMPILER_LAUNCHER;CMAKE_C_COMPILER_LAUNCHER"
+#          VCPKG_KEEP_ENV_VARS: "CMAKE_CXX_COMPILER_LAUNCHER;CMAKE_C_COMPILER_LAUNCHER"
           CMAKE_C_COMPILER_LAUNCHER: "${{ env.SCCACHE_PATH }}"
           CMAKE_CXX_COMPILER_LAUNCHER: "${{ env.SCCACHE_PATH }}"
           RENDERER: "${{ matrix.renderer }}"
           RENDERING_MODE: "${{ matrix.rendering_mode }}"
-        timeout-minutes: 5
+        timeout-minutes: 60
         run: |
           cmake --version
           & ${{ github.workspace }}\.github\scripts\windows-ci_configure_wrapper.ps1

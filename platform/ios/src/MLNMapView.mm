@@ -7361,7 +7361,7 @@ static void *windowScreenContext = &windowScreenContext;
     return _annotationViewReuseQueueByIdentifier[identifier];
 }
 
-- (MLNBackendResource)backendResource {
+- (MLNBackendResource*)backendResource {
     return _mbglView->getObject();
 }
 

@@ -543,4 +543,3 @@ public class EGLLogWrapper implements EGL11 {
     }
   }
 }
-
