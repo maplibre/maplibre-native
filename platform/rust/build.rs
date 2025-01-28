@@ -4,8 +4,10 @@ use std::path::PathBuf;
 fn main() {
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let project_root = PathBuf::from(manifest_dir)
-        .parent().unwrap() // "platform/"
-        .parent().unwrap() // "maplibre-native/"
+        .parent()
+        .unwrap() // "platform/"
+        .parent()
+        .unwrap() // "maplibre-native/"
         .to_path_buf();
 
     let mut cmake_cfg = cmake::Config::new(&project_root);
@@ -26,6 +28,6 @@ fn main() {
     // cxx build
     let mut cxx = cxx_build::bridge("src/lib.rs");
     cxx.include(project_root.join("include"))
-       .flag_if_supported("-std=c++20")
-       .compile("maplibre_rust_bindings");
+        .flag_if_supported("-std=c++20")
+        .compile("maplibre_rust_bindings");
 }
