@@ -27,12 +27,16 @@ repos:
       args: [--swiftversion, "5.8"]
 -   repo: local
     hooks:
-    -   id: rustfmt
-        name: rustfmt
+    -   id: rustfmt_utils
+        name: rustfmt rustutils
         entry: bash -c 'cd rustutils && cargo fmt' --
+        language: rust
+        types: [rust]
+    -   id: rustfmt_platform
+        name: rustfmt rust platform
+        entry: bash -c 'cd platform/rust && cargo fmt' --
         language: rust
         types: [rust]
 ci:
   # sometimes fails https://github.com/keith/pre-commit-buildifier/issues/13
   skip: [buildifier]
-  
