@@ -7361,7 +7361,12 @@ static void *windowScreenContext = &windowScreenContext;
     return _annotationViewReuseQueueByIdentifier[identifier];
 }
 
-- (MLNBackendResource*)backendResource {
+- (void)triggerRepaint
+{
+    _mbglMap->triggerRepaint();
+}
+
+- (MLNBackendResource *)backendResource {
     return _mbglView->getObject();
 }
 
@@ -7525,5 +7530,7 @@ static void *windowScreenContext = &windowScreenContext;
     MLNLogDebug(@"Setting showsHeading: %@", MLNStringFromBOOL(showsHeading));
     self.showsUserHeadingIndicator = showsHeading;
 }
+
+
 
 @end
