@@ -132,9 +132,8 @@ void MetalRenderer::render() {
     // This will write out the tone mapping
     //id<MTLCommandBuffer> externalBuffer = _metalRenderingEnvironment->_currentCommandBuffer;
     //encodeTonemappingPass(externalBuffer);
-    
-    // Internal command buffer
 
+    clearDepth(_metalRenderingEnvironment->_currentCommandEncoder);
 }
 
 // Load a model
@@ -299,6 +298,7 @@ void MetalRenderer::setupMetal() {
     
     loadBloomPipelines();
     loadTonemapPipeline();
+    loadDepthClearPipeline();
     
     _opaqueRenderItems = [NSMutableArray array];
     _transparentRenderItems = [NSMutableArray array];
@@ -466,6 +466,58 @@ void MetalRenderer::loadTonemapPipeline() {
     if (_tonemapPipelineState == nil) {
         NSLog(@"Error occurred when creating render pipeline state: %@", error);
     }
+}
+
+void MetalRenderer::loadDepthClearPipeline() {
+    MTLDepthStencilDescriptor *depthStencilDescriptor = [[MTLDepthStencilDescriptor alloc] init];
+
+    depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionAlways;
+    depthStencilDescriptor.depthWriteEnabled = YES;
+    depthStencilDescriptor.label = @"depthStencilClear";
+    _depthStencilClearState = [_metalDevice newDepthStencilStateWithDescriptor:depthStencilDescriptor];
+
+    MTLRenderPipelineDescriptor *renderPipelineDescriptor = [[MTLRenderPipelineDescriptor alloc] init];
+
+    renderPipelineDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+    renderPipelineDescriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
+    renderPipelineDescriptor.stencilAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
+    renderPipelineDescriptor.rasterSampleCount = _sampleCount;
+
+    renderPipelineDescriptor.vertexFunction = [_metalLibrary newFunctionWithName:@"vertex_depth_clear"];
+    renderPipelineDescriptor.vertexFunction.label = @"vertexDepthClear";
+
+    renderPipelineDescriptor.fragmentFunction = [_metalLibrary newFunctionWithName:@"fragment_depth_clear"];
+    renderPipelineDescriptor.fragmentFunction.label = @"fragmentDepthClear";
+
+    MTLVertexDescriptor *vertexDescriptor = [[MTLVertexDescriptor alloc] init];
+    vertexDescriptor.attributes[0].format = MTLVertexFormatFloat2;
+    vertexDescriptor.attributes[0].offset = 0;
+    vertexDescriptor.attributes[0].bufferIndex = 0;
+    vertexDescriptor.layouts[0].stepRate = 1;
+    vertexDescriptor.layouts[0].stepFunction = MTLVertexStepFunctionPerVertex;
+    vertexDescriptor.layouts[0].stride = 8;
+
+    renderPipelineDescriptor.vertexDescriptor = vertexDescriptor;
+
+    NSError* error = NULL;
+    renderPipelineDescriptor.label = @"pipelineDepthClear";
+    _pipelineDepthClearState = [_metalDevice newRenderPipelineStateWithDescriptor:renderPipelineDescriptor error:&error];
+}
+
+void MetalRenderer::clearDepth(id<MTLRenderCommandEncoder> renderEncoder) {
+    [renderEncoder setDepthStencilState:_depthStencilClearState];
+    [renderEncoder setRenderPipelineState:_pipelineDepthClearState];
+
+    const float clearCoords[8] = {
+        -1, -1,
+        1, -1,
+        -1, 1,
+        1, 1
+    };
+
+    [renderEncoder setVertexBytes:clearCoords length:sizeof(float) * 8 atIndex:0];
+    [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
+
 }
 
 void MetalRenderer::enqueueReusableBuffer(id<MTLBuffer> buffer) {
