@@ -25,7 +25,7 @@ public:
 };
 
 using ShapeAnnotationGeometry =
-    variant<LineString<double>, Polygon<double>, MultiLineString<double>, MultiPolygon<double>>;
+    std::variant<LineString<double>, Polygon<double>, MultiLineString<double>, MultiPolygon<double>>;
 
 class LineAnnotation {
 public:
@@ -61,6 +61,6 @@ public:
     style::PropertyValue<Color> outlineColor;
 };
 
-using Annotation = variant<SymbolAnnotation, LineAnnotation, FillAnnotation>;
+using Annotation = std::variant<SymbolAnnotation, LineAnnotation, FillAnnotation>;
 
 } // namespace mbgl
