@@ -1,16 +1,15 @@
 use std::env;
 use std::path::PathBuf;
 
-//noinspection RsConstantConditionIf
 fn main() {
     let project_root = {
         let manifest = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
         let root = manifest.join("core-src");
         if root.is_symlink() || root.is_dir() {
-            // Use the symlinked directory to allow packaging
+            // Use the symlinked directory to allow crate packaging
             root
         } else {
-            // Modeled from the kuzu project
+            // Modeled from the kuzu project.
             // If the path is not directory, this is probably an in-source build on windows where the symlink is unreadable.
             manifest.parent().unwrap().parent().unwrap().to_path_buf()
         }
@@ -37,6 +36,11 @@ fn main() {
     // cxx build
     let mut cxx = cxx_build::bridge("src/lib.rs");
     cxx.include(project_root.join("include"))
+        .file("src/wrapper.cc")
         .flag_if_supported("-std=c++20")
         .compile("maplibre_rust_bindings");
+
+    println!("cargo:rerun-if-changed=src/lib.rs");
+    println!("cargo:rerun-if-changed=src/wrapper.cc");
+    println!("cargo:rerun-if-changed=include/wrapper.h");
 }

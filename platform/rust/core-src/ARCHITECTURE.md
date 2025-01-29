@@ -1,1 +1,0 @@
-../../../ARCHITECTURE.md
