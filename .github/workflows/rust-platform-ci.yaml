@@ -1,4 +1,4 @@
-name: rust-ci
+name: rust-platform-ci
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 
 defaults:
   run:
-    working-directory: rustutils/
+    working-directory: platform/rust/
 
 jobs:
   test:
