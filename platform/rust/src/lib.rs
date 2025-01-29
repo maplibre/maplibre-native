@@ -20,7 +20,7 @@ mod ffi {
 }
 
 // Re-export native functions that do not need safety wrappers.
-pub use ffi::{get_42, ceil_log2};
+pub use ffi::{ceil_log2, get_42};
 
 #[cfg(test)]
 mod tests {
