@@ -1,6 +1,7 @@
 use std::env;
 use std::path::PathBuf;
 
+//noinspection RsConstantConditionIf
 fn main() {
     let project_root = {
         let manifest = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
@@ -25,7 +26,13 @@ fn main() {
 
     let lib_dir = build_dir.join("build");
     println!("cargo:rustc-link-search=native={}", lib_dir.display());
-    println!("cargo:rustc-link-lib=static=mbgl-core");
+    if rustversion::cfg!(since(1.82)) {
+        // `cargo test` wouldn't work with Rust v1.82+ without this
+        // FIXME: this MIGHT significantly increase the size of the final binary, needs to be tested
+        println!("cargo:rustc-link-lib=static:+whole-archive=mbgl-core");
+    } else {
+        println!("cargo:rustc-link-lib=static=mbgl-core");
+    }
 
     // cxx build
     let mut cxx = cxx_build::bridge("src/lib.rs");
