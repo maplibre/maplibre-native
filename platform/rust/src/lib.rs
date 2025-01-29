@@ -1,10 +1,8 @@
-// platform/rust/src/lib.rs
-
-#[cxx::bridge(namespace = "mbgl::util")]
+#[cxx::bridge]
 mod ffi {
-    // cxx allows including C++ headers directly:
+    // C++ types exposed to Rust.
     unsafe extern "C++" {
-        include!("mbgl/math/log2.hpp");
+        include!("maplibre-native/include/wrapper.h");
 
         // We specify the C++ namespace and the free function name exactly.
         // cxx can bind free functions directly if they have a compatible signature.
@@ -12,18 +10,28 @@ mod ffi {
         //   "uint32_t ceil_log2(uint64_t x);"
         //
         // We'll express that to Rust as (u64 -> u32).
+        #[namespace = "mbgl::util"]
         pub fn ceil_log2(x: u64) -> u32;
+
+        // A function defined in the C++ rust wrapper rather than the core lib.
+        #[namespace = "ml::rust"]
+        pub fn get_42() -> u32;
     }
 }
 
-/// A safe Rust wrapper so you can call `ceil_log2` from your code:
-pub fn ceil_log2(x: u64) -> u32 {
-    ffi::ceil_log2(x)
-}
+// Re-export native functions that do not need safety wrappers.
+pub use ffi::{get_42, ceil_log2};
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_rust_wrapper() {
+        let result = get_42();
+        assert_eq!(result, 42, "get_42() = 42");
+    }
+
     #[test]
     fn test_log2() {
         let result = ceil_log2(1);

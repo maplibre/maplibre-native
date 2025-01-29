@@ -1,10 +1,11 @@
 [package]
-name = "maplibre-native-cxx"
+name = "maplibre-native"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 cxx = "1.0"
+clap = { version = "4.5.27", features = ["derive", "env"] }
 
 [build-dependencies]
 cmake = "0.1"
