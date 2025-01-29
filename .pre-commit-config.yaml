@@ -6,22 +6,22 @@ repos:
       args: [--allow-multiple-documents, --unsafe]
     - id: end-of-file-fixer
 - repo: https://github.com/pre-commit/mirrors-clang-format
-  rev: v19.1.4
+  rev: v19.1.7
   hooks:
   - id: clang-format
     files: '.*\.(hpp|cpp|h)'
     exclude: '(vendor/.*|darwin/include/mbgl/storage/reachability.h)'
 - repo: https://github.com/keith/pre-commit-buildifier
-  rev: 7.3.1
+  rev: 8.0.1
   hooks:
     - id: buildifier
 - repo: https://github.com/Mateusz-Grzelinski/actionlint-py
-  rev: v1.7.4.20
+  rev: v1.7.7.23
   hooks:
     - id: actionlint
       additional_dependencies: [shellcheck-py]
 - repo: https://github.com/nicklockwood/SwiftFormat
-  rev: "0.55.3"
+  rev: "0.55.5"
   hooks:
     - id: swiftformat
       args: [--swiftversion, "5.8"]
