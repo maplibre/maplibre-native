@@ -64,7 +64,7 @@ Map::Impl::~Impl() {
     // Explicitly reset the RendererFrontend first to ensure it releases
     // All shared resources (AnnotationManager)
     rendererFrontend.reset();
-};
+}
 
 // MARK: - Map::Impl StyleObserver
 
@@ -212,12 +212,10 @@ void Map::Impl::onWillStartRenderingMap() {
 void Map::Impl::onDidFinishRenderingMap() {
     if (mode == MapMode::Continuous && loading) {
         observer.onDidFinishRenderingMap(MapObserver::RenderMode::Full);
-        if (loading) {
-            loading = false;
-            observer.onDidFinishLoadingMap();
-        }
+        loading = false;
+        observer.onDidFinishLoadingMap();
     }
-};
+}
 
 void Map::Impl::jumpTo(const CameraOptions& camera) {
     cameraMutated = true;
@@ -225,7 +223,7 @@ void Map::Impl::jumpTo(const CameraOptions& camera) {
     onUpdate();
 }
 
-void Map::Impl::onStyleImageMissing(const std::string& id, const std::function<void()>& done) {
+void Map::Impl::onStyleImageMissing(const std::string& id, Scheduler::Task&& done) {
     if (!style->getImage(id)) observer.onStyleImageMissing(id);
 
     done();

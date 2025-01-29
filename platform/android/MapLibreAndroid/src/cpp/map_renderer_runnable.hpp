@@ -23,7 +23,7 @@ public:
 
     static void registerNative(jni::JNIEnv&);
 
-    MapRendererRunnable(jni::JNIEnv&, std::function<void()>);
+    MapRendererRunnable(jni::JNIEnv&, Scheduler::Task&&);
 
     // Only for jni registration, unused
     MapRendererRunnable(jni::JNIEnv&) { assert(false); }
@@ -37,7 +37,7 @@ public:
 
 private:
     jni::Global<jni::Object<MapRendererRunnable>> javaPeer;
-    std::function<void()> function;
+    Scheduler::Task function;
 };
 
 } // namespace android

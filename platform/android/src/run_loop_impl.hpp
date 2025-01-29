@@ -16,7 +16,7 @@ struct ALooper;
 namespace mbgl {
 namespace util {
 
-using WatchCallback = std::function<void(int, RunLoop::Event)>;
+using WatchCallback = std23::move_only_function<void(int, RunLoop::Event)>;
 
 template <typename T>
 class Thread;

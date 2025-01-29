@@ -231,7 +231,7 @@ void ImageManager::checkMissingAndNotify(ImageRequestor& requestor, const ImageR
 
     if (!missingDependencies.empty()) {
         ImageRequestor* requestorPtr = &requestor;
-        assert(!missingImageRequestors.count(requestorPtr));
+        assert(!missingImageRequestors.contains(requestorPtr));
         missingImageRequestors.emplace(requestorPtr, pair);
 
         for (const auto& dependency : missingDependencies) {
@@ -260,7 +260,7 @@ void ImageManager::checkMissingAndNotify(ImageRequestor& requestor, const ImageR
                 requestor.addPendingRequest(missingImage);
             }
 
-            auto removePendingRequests = [this, missingImage] {
+            Scheduler::Task removePendingRequests = [this, missingImage] {
                 std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
                 auto existingRequest = requestedImages.find(missingImage);
                 if (existingRequest == requestedImages.end()) {
@@ -271,8 +271,8 @@ void ImageManager::checkMissingAndNotify(ImageRequestor& requestor, const ImageR
                     req->removePendingRequest(missingImage);
                 }
             };
-            observer->onStyleImageMissing(missingImage,
-                                          Scheduler::GetCurrent()->bindOnce(std::move(removePendingRequests)));
+            Scheduler::Task bindRemove = Scheduler::GetCurrent()->bindOnce(std::move(removePendingRequests));
+            observer->onStyleImageMissing(missingImage, std::move(bindRemove));
         }
     } else {
         // Associate requestor with an image that was provided by the client.

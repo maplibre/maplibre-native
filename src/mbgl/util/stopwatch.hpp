@@ -21,10 +21,10 @@ namespace util {
         std::stringstream messageStream;    \
         messageStream << message;           \
         watch->report(messageStream.str()); \
-    } while (0);
+    } while (0)
 #else
-#define MBGL_TIMING_START(watch)
-#define MBGL_TIMING_FINISH(watch, message)
+#define MBGL_TIMING_START(watch) ((void)0)
+#define MBGL_TIMING_FINISH(watch, message) ((void)0)
 #endif
 
 #ifndef DISABLE_STOPWATCH

@@ -24,6 +24,8 @@ namespace android {
  */
 class FileSource {
 public:
+    using Callback = std23::move_only_function<void()>;
+
     static constexpr auto Name() { return "org/maplibre/android/storage/FileSource"; };
 
     struct ResourceTransformCallback {
@@ -93,7 +95,7 @@ private:
     mbgl::ResourceOptions resourceOptions;
     mbgl::ClientOptions clientOptions;
     std::unique_ptr<Actor<ResourceTransform::TransformCallback>> resourceTransform;
-    std::function<void()> pathChangeCallback;
+    Callback pathChangeCallback;
     std::shared_ptr<mbgl::DatabaseFileSource> databaseSource;
     std::shared_ptr<mbgl::FileSource> onlineSource;
     std::shared_ptr<mbgl::FileSource> resourceLoader;

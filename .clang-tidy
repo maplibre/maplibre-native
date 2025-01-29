@@ -113,7 +113,8 @@ Checks: [
     -performance-enum-size,
     -misc-include-cleaner,
     -readability-redundant-inline-specifier,
-    -readability-avoid-nested-conditional-operator
+    -readability-avoid-nested-conditional-operator,
+    -cppcoreguidelines-pro-type-static-cast-downcast  # no RTTI
 ]
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'

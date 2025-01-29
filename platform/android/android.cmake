@@ -8,6 +8,7 @@ target_compile_definitions(
 )
 
 include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/nontype_functional.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
 
 # cmake-format: off
@@ -107,6 +108,7 @@ target_link_libraries(
         jnigraphics
         log
         mbgl-vendor-icu
+        mbgl-vendor-nontype_functional
         mbgl-vendor-sqlite
         z
 )
