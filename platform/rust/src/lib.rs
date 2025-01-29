@@ -17,7 +17,7 @@ mod ffi {
 }
 
 /// A safe Rust wrapper so you can call `ceil_log2` from your code:
-pub fn our_log(x: u64) -> u32 {
+pub fn ceil_log2(x: u64) -> u32 {
     ffi::ceil_log2(x)
 }
 
@@ -26,13 +26,13 @@ mod tests {
     use super::*;
     #[test]
     fn test_log2() {
-        let result = our_log(1);
+        let result = ceil_log2(1);
         assert_eq!(result, 0, "log2(1) = 0 bits needed");
 
-        let result = our_log(2);
+        let result = ceil_log2(2);
         assert_eq!(result, 1, "log2(2) = 1 bit needed");
 
-        let result = our_log(3);
+        let result = ceil_log2(3);
         assert_eq!(result, 2, "log2(3) -> 2 bits needed");
     }
 }

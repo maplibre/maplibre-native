@@ -5,7 +5,7 @@ use std::path::PathBuf;
 fn main() {
     let project_root = {
         let manifest = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
-        let root = manifest.join("maplibre-native-src");
+        let root = manifest.join("core-src");
         if root.is_symlink() || root.is_dir() {
             // Use the symlinked directory to allow packaging
             root
