@@ -204,6 +204,10 @@ gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t
         createBuffer(data, size, gfx::BufferUsageType::StaticDraw, /*isIndexBuffer=*/false, persistent));
 }
 
+UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
+    return std::make_unique<UniformBufferArray>();
+}
+
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
     const auto shaderGroup = shaders.getShaderGroup(name);
     auto shader = shaderGroup ? shaderGroup->getOrCreateShader(*this, {}) : gfx::ShaderProgramBasePtr{};

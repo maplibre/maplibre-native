@@ -620,6 +620,10 @@ gfx::UniformBufferPtr Context::createUniformBuffer(const void* data,
     return std::make_shared<gl::UniformBufferGL>(data, size, *uboAllocator);
 }
 
+UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
+    return std::make_unique<UniformBufferArray>();
+}
+
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
     MLN_TRACE_FUNC();
 

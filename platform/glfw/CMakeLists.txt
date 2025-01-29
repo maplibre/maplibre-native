@@ -21,6 +21,7 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_renderer_frontend.cpp
     ${PROJECT_SOURCE_DIR}/platform/glfw/settings_json.cpp
     ${PROJECT_SOURCE_DIR}/platform/glfw/test_writer.cpp
+    ${PROJECT_SOURCE_DIR}/platform/glfw/example_custom_drawable_style_layer.cpp
     ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/map/map_snapshotter.cpp
 )
 

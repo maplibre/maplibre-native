@@ -54,5 +54,9 @@ void UniformBufferArray::bind(RenderPass& renderPass) const noexcept {
     }
 }
 
+void UniformBufferArray::bind(gfx::RenderPass& renderPass) {
+    bind(static_cast<RenderPass&>(renderPass));
+}
+
 } // namespace mtl
 } // namespace mbgl
