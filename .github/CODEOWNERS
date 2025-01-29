@@ -1,0 +1,29 @@
+# CODEOWNERS
+#
+# This file is used to define individuals or teams that are responsible for code
+# in this repository. Each line in this file specifies a path and the GitHub
+# username(s) or team(s) that are responsible for that path.
+#
+# Syntax:
+# - Lines starting with '#' are comments.
+# - Each line specifies a file pattern followed by one or more owners.
+# - File patterns are relative to the repository root.
+# - Owners can be individual GitHub usernames or team names (in the form of @org/team-name).
+# - Use teams where possible, as they are easier to maintain.
+# - Each owner must be separated by one or more spaces.
+# - Blank lines are ignored.
+#
+# Example:
+# *                @username        # Owner of the entire repository
+# /docs/*          @docsteam        # Team responsible for the /docs directory
+# /src/**/*.js     @frontendteam    # Team responsible for all JavaScript files in /src
+#
+# The CODEOWNERS file helps ensure that code reviews are assigned to the right people,
+# making it easier to maintain code quality and streamline the review process.
+#
+# For more details, refer to the GitHub documentation on CODEOWNERS:
+# https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners
+
+* @pointrlabs/rd
+
+.github/* @pointrlabs/devops
