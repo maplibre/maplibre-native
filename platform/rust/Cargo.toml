@@ -7,6 +7,9 @@ edition = "2021"
 cxx = "1.0"
 clap = { version = "4.5.27", features = ["derive", "env"] }
 
+[dev-dependencies]
+insta = { version = "1.42.1" }
+
 [build-dependencies]
 cmake = "0.1"
 cxx-build = "1.0"
