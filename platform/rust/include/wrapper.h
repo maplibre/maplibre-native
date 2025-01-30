@@ -18,11 +18,11 @@ std::unique_ptr<TileServerOptions> TileServerOptions_maplibre();
 std::unique_ptr<TileServerOptions> TileServerOptions_maptiler();
 
 // TileServerOptions Optional<string> helpers (not supported yet by cxx)
-const int8_t * TileServerOptions_sourceVersionPrefix(const TileServerOptions& self);
-const int8_t * TileServerOptions_styleVersionPrefix(const TileServerOptions& self);
-const int8_t * TileServerOptions_spritesVersionPrefix(const TileServerOptions& self);
-const int8_t * TileServerOptions_glyphsVersionPrefix(const TileServerOptions& self);
-const int8_t * TileServerOptions_tileVersionPrefix(const TileServerOptions& self);
+const int8_t* TileServerOptions_sourceVersionPrefix(const TileServerOptions& self);
+const int8_t* TileServerOptions_styleVersionPrefix(const TileServerOptions& self);
+const int8_t* TileServerOptions_spritesVersionPrefix(const TileServerOptions& self);
+const int8_t* TileServerOptions_glyphsVersionPrefix(const TileServerOptions& self);
+const int8_t* TileServerOptions_tileVersionPrefix(const TileServerOptions& self);
 
 } // namespace rust
 } // namespace ml
