@@ -4,7 +4,7 @@ use std::fmt::Debug;
 
 use cxx::UniquePtr;
 
-#[cxx::bridge(namespace = "ml::rust")]
+#[cxx::bridge(namespace = "ml::bridge")]
 mod ffi {
     // C++ types exposed to Rust.
     unsafe extern "C++" {
@@ -19,7 +19,7 @@ mod ffi {
         #[namespace = "mbgl::util"]
         pub fn ceil_log2(x: u64) -> u32;
 
-        // A function defined in the C++ rust wrapper rather than the core lib.
+        // A function defined in the C++ Rust wrapper rather than the core lib.
         pub fn get_42() -> u32;
 
         #[namespace = "mbgl"]
@@ -314,7 +314,7 @@ mod tests {
             source_template: "/{domain}.json",
             source_domain_name: "",
             source_version_prefix: Some(
-                "0\xe9\x9f",
+                "/v4",
             ),
             style_template: "/styles/v1{path}",
             style_domain_name: "styles",
@@ -328,7 +328,7 @@ mod tests {
             tile_template: "{path}",
             tile_domain_name: "tiles",
             tile_version_prefix: Some(
-                "0\xe9\x9f",
+                "/v4",
             ),
             api_key_parameter_name: "access_token",
             requires_api_key: true,

@@ -1,4 +1,5 @@
 use clap::Parser;
+use maplibre_native::TileServerOptions;
 
 /// MapLibre Native render tool
 #[derive(Parser, Debug)]
@@ -69,7 +70,10 @@ struct Args {
 }
 
 fn main() {
-    let args = Args::parse();
+    // let args = Args::parse();
+    // println!("Parsed arguments: {:?}", args);
 
-    println!("Parsed arguments: {:?}", args);
+    let s = TileServerOptions::default_maplibre();
+    let val = s.source_version_prefix();
+    println!("Parsed arguments: {:?}", val);
 }

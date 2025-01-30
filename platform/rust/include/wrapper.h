@@ -4,7 +4,7 @@
 #include "mbgl/util/tile_server_options.hpp"
 
 namespace ml {
-namespace rust {
+namespace bridge {
 
 uint32_t get_42();
 
@@ -24,5 +24,5 @@ const int8_t* TileServerOptions_spritesVersionPrefix(const TileServerOptions& se
 const int8_t* TileServerOptions_glyphsVersionPrefix(const TileServerOptions& self);
 const int8_t* TileServerOptions_tileVersionPrefix(const TileServerOptions& self);
 
-} // namespace rust
+} // namespace bridge
 } // namespace ml
