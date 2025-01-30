@@ -44,6 +44,10 @@ fmt:
 test:
     cargo test --all-targets --workspace
 
+# Run all tests and accept the changes. Requires cargo-insta to be installed.
+test-accept:
+    cargo insta test --accept
+
 # Test documentation
 test-doc:
     RUSTDOCFLAGS="-D warnings" cargo doc --no-deps
