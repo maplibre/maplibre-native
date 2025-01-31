@@ -13,5 +13,14 @@ public:
 
 protected:
 
-    void loadExternalGeometry(Interface& interface);
+    void createDrawables(Interface& interface);
+    void generateCommonGeometry(Interface& interface);
+    void loadCommonGeometry(Interface& interface);
+
+    void updateDrawables(Interface& interface);
+
+protected:
+
+    float commonGeometryBearing = 0.0f;
+    mbgl::util::SimpleIdentity commonGeometryID;
 };

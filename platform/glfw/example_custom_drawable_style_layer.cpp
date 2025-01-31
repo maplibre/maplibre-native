@@ -3,6 +3,7 @@
 #include <mbgl/style/layer.hpp>
 #include <mbgl/style/layers/custom_drawable_layer.hpp>
 #include <mbgl/util/io.hpp>
+#include <mbgl/gfx/drawable.hpp>
 
 #include <memory>
 #include <cmath>
@@ -20,12 +21,20 @@ void ExampleCustomDrawableStyleLayerHost::deinitialize() {
 
 }
     
-void ExampleCustomDrawableStyleLayerHost::update(Interface &interface) {
-        
+void ExampleCustomDrawableStyleLayerHost::update(Interface& interface) {
+
     // if we have built our drawable(s) already, either update or skip
-    if (interface.getDrawableCount())
+    if (interface.getDrawableCount() == 0) {
+        createDrawables(interface);
         return;
-        
+    }
+
+    updateDrawables(interface);
+}
+
+void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) {
+    
+#if 1
     constexpr float extent = mbgl::util::EXTENT;
 
     // add classic polylines
@@ -196,6 +205,38 @@ void ExampleCustomDrawableStyleLayerHost::update(Interface &interface) {
         interface.addSymbol(position);
     }
 
+    {
+        using namespace mbgl;
+
+        GeometryCoordinate position{static_cast<int16_t>(extent * 0.5f), static_cast<int16_t>(extent * 0.5f)};
+
+        // load image
+        std::shared_ptr<PremultipliedImage> image = std::make_shared<PremultipliedImage>(
+            mbgl::decodeImage(mbgl::util::read_file("rocket.png")));
+
+        // set symbol options
+        Interface::SymbolOptions options;
+        options.texture = interface.context.createTexture2D();
+        options.texture->setImage(image);
+        options.texture->setSamplerConfiguration(
+            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+
+        const float xspan = options.textureCoordinates[1][0] - options.textureCoordinates[0][0];
+        const float yspan = options.textureCoordinates[1][1] - options.textureCoordinates[0][1];
+        assert(xspan > 0.0f && yspan > 0.0f);
+        options.size = {static_cast<uint32_t>(image->size.width * xspan),
+                        static_cast<uint32_t>(image->size.height * yspan)};
+
+        options.anchor = {0.5f, 0.95f};
+        options.angleDegrees = 45.0f;
+        options.scaleWithMap = true;
+        options.pitchWithMap = false;
+        interface.setSymbolOptions(options);
+
+        // add symbol
+        interface.addSymbol(position);
+    }
+
     // add polylines using wide vectors using geographic coordinates
     {
         using namespace mbgl;
@@ -278,15 +319,128 @@ void ExampleCustomDrawableStyleLayerHost::update(Interface &interface) {
         interface.addPolyline(polyline_tile[1]);
 
     }
+#endif
 
-    // add external geometry using geographic coordinates
-    loadExternalGeometry(interface);
+    generateCommonGeometry(interface);
+    loadCommonGeometry(interface);
 
     // finish
     interface.finish();
 }
 
-void ExampleCustomDrawableStyleLayerHost::loadExternalGeometry(Interface& interface) {
-   
-    interface.add3D();
+static mbgl::Point<double> project(const mbgl::LatLng& c, const mbgl::TransformState& s) {
+    mbgl::LatLng unwrappedLatLng = c.wrapped();
+    unwrappedLatLng.unwrapForShortestPath(s.getLatLng(mbgl::LatLng::Wrapped));
+    return mbgl::Projection::project(unwrappedLatLng, s.getScale());
+}
+
+// mapbox::cheap_ruler::CheapRuler (mapbox/cheap_ruler.hpp)
+static mbgl::Point<double> rulerDestination(double latitude, mbgl::Point<double> origin, double dist, double bearing_) {
+    // Values that define WGS84 ellipsoid model of the Earth
+    static constexpr double RE = 6378.137;            // equatorial radius
+    static constexpr double FE = 1.0 / 298.257223563; // flattening
+
+    static constexpr double E2 = FE * (2 - FE);
+    static constexpr double RAD = M_PI / 180.0;
+
+    double m = 1000.;
+
+    // Curvature formulas from https://en.wikipedia.org/wiki/Earth_radius#Meridional
+    double mul = RAD * RE * m;
+    double coslat = std::cos(latitude * RAD);
+    double w2 = 1 / (1 - E2 * (1 - coslat * coslat));
+    double w = std::sqrt(w2);
+
+    // multipliers for converting longitude and latitude degrees into distance
+    double kx = mul * w * coslat;        // based on normal radius of curvature
+    double ky = mul * w * w2 * (1 - E2); // based on meridonal radius of curvature
+
+    auto a = bearing_ * RAD;
+
+    double dx = std::sin(a) * dist;
+    double dy = std::cos(a) * dist;
+
+    return mbgl::Point<double>(origin.x + dx / kx, origin.y + dy / ky);
+}
+
+void ExampleCustomDrawableStyleLayerHost::generateCommonGeometry(Interface& interface) {
+
+    constexpr bool useTextures = true;
+    constexpr float radius = 500.0f; // meters
+    const mbgl::LatLng location{37.78, -122.47};
+
+    Interface::CommonGeometryOptions options;
+
+    options.color = mbgl::Color::green();
+
+    if (useTextures) {
+        // load image
+        std::shared_ptr<mbgl::PremultipliedImage> image = std::make_shared<mbgl::PremultipliedImage>(
+            mbgl::decodeImage(mbgl::util::read_file("rocket.png")));
+
+        options.texture = interface.context.createTexture2D();
+        options.texture->setImage(image);
+        options.texture->setSamplerConfiguration({mbgl::gfx::TextureFilterType::Linear,
+                                                  mbgl::gfx::TextureWrapType::Clamp,
+                                                  mbgl::gfx::TextureWrapType::Clamp});
+    }
+
+    using VertexVector = mbgl::gfx::VertexVector<Interface::CommonGeometryVertex>;
+    const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
+    VertexVector& vertices = *sharedVertices;
+
+    using TriangleIndexVector = mbgl::gfx::IndexVector<mbgl::gfx::Triangles>;
+    const std::shared_ptr<TriangleIndexVector> sharedIndices = std::make_shared<TriangleIndexVector>();
+    TriangleIndexVector& indices = *sharedIndices;
+
+    const unsigned long numVtxCircumference = 72;
+    const float bearingStep = 360.0f / static_cast<float>(numVtxCircumference - 1);
+    const mbgl::Point<double> centerPoint(location.longitude(), location.latitude());
+    mbgl::Point<double> center = project(location, interface.state);
+    
+    commonGeometryBearing += 0.1f;
+
+    mbgl::mat4 projMatrix;
+    interface.state.getProjMatrix(projMatrix);
+    
+    mbgl::mat4 matrix = mbgl::matrix::identity4();
+    mbgl::matrix::translate(matrix, matrix, center.x, center.y, 0.0);
+    mbgl::matrix::rotate_z(matrix, matrix, commonGeometryBearing);
+    mbgl::matrix::multiply(options.matrix, projMatrix, matrix);
+
+    vertices.emplace_back(Interface::CommonGeometryVertex{0.0f, 0.0f, 0.0f, 0.5, 0.5});
+    for (unsigned long i = 1; i <= numVtxCircumference; ++i) {
+        const float bearing_ = static_cast<float>(i - 1) * bearingStep;
+        const mbgl::Point<double> poc = rulerDestination(location.latitude(), centerPoint, radius, bearing_);
+        const mbgl::Point<double> point = project(mbgl::LatLng(poc.y, poc.x), interface.state) - center;
+
+        Interface::CommonGeometryVertex vertex;
+
+        vertex.position = {static_cast<float>(point.x), static_cast<float>(point.y), 0.0f};
+
+        const float rad = mbgl::util::deg2radf(bearing_);
+        vertex.texcoords = {(1.0f + sinf(rad)) / 2.0f, (1.0f - cosf(rad)) / 2.0f};
+        
+        vertices.emplace_back(std::move(vertex));
+    }
+
+    for (uint16_t i = 1; i < vertices.elements() - 1; ++i) {
+        indices.emplace_back(0, i, static_cast<uint16_t>(i + 1));
+    }
+    indices.emplace_back(0, static_cast<uint16_t>(vertices.elements() - 1), 1);
+
+    interface.setCommonGeometryOptions(options);
+    commonGeometryID = interface.addCommonGeometry(sharedVertices, sharedIndices);
+}
+
+void ExampleCustomDrawableStyleLayerHost::loadCommonGeometry(Interface& interface) {
+    // TODO obj?
+}
+
+void ExampleCustomDrawableStyleLayerHost::updateDrawables(Interface& interface) {
+
+    interface.removeDrawable(commonGeometryID);
+    generateCommonGeometry(interface);
+
+    interface.finish();
 }

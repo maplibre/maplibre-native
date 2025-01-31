@@ -35,7 +35,7 @@ class CustomDrawableLayerHost::Interface {
 public:
     enum class LineShaderType {
         Classic,
-        MetalWideVector
+        WideVector
     };
 
     struct LineOptions {
@@ -62,6 +62,19 @@ public:
         float angleDegrees{.0f};
         bool scaleWithMap{false};
         bool pitchWithMap{false};
+    };
+
+    struct CommonGeometryVertex {
+        std::array<float, 3> position;
+        std::array<float, 2> texcoords;
+    };
+
+    struct CommonGeometryOptions {
+        mat4 matrix = matrix::identity4();
+        Color color;
+
+        // using a texture will override the color
+        gfx::Texture2DPtr texture;
     };
 
 public:
@@ -110,6 +123,13 @@ public:
     void setSymbolOptions(const SymbolOptions& options);
 
     /**
+     * @brief Set the common geometry options
+     *
+     * @param options
+     */
+    void setCommonGeometryOptions(const CommonGeometryOptions& options);
+
+    /**
      * @brief Add a polyline
      *
      * @param coordinates in tile range
@@ -141,11 +161,16 @@ public:
      */
     bool addSymbol(const GeometryCoordinate& point);
 
+    util::SimpleIdentity addCommonGeometry(std::shared_ptr<gfx::VertexVector<CommonGeometryVertex>> vertices,
+                           std::shared_ptr<gfx::IndexVector<gfx::Triangles>> indices);
+
     /**
      * @brief Finish the current drawable building session
      *
      */
     void finish();
+
+    void removeDrawable(const util::SimpleIdentity& id);
 
 public:
     RenderLayer& layer;
@@ -162,13 +187,16 @@ private:
     gfx::ShaderPtr lineShaderWideVector() const;
     gfx::ShaderPtr fillShaderDefault() const;
     gfx::ShaderPtr symbolShaderDefault() const;
+    gfx::ShaderPtr commonShaderDefault() const;
+    gfx::ShaderPtr commonTexturedShaderDefault() const;
 
     enum class BuilderType {
         None,
         LineClassic,
         LineWideVector,
         Fill,
-        Symbol
+        Symbol,
+        CommonGeometry
     };
 
     std::unique_ptr<gfx::DrawableBuilder> createBuilder(const std::string& name, gfx::ShaderPtr shader) const;
@@ -177,13 +205,10 @@ private:
     std::unique_ptr<gfx::DrawableBuilder> builder;
     std::optional<OverscaledTileID> tileID;
 
-    gfx::ShaderPtr lineShader;
-    gfx::ShaderPtr fillShader;
-    gfx::ShaderPtr symbolShader;
-
     LineOptions lineOptions;
     FillOptions fillOptions;
     SymbolOptions symbolOptions;
+    CommonGeometryOptions commonGeometryOptions;
 
     BuilderType builderType{BuilderType::None};
 };

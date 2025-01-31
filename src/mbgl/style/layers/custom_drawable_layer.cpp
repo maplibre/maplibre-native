@@ -29,6 +29,10 @@
 #include <mbgl/util/projection.hpp>
 #include <mbgl/util/mat4.hpp>
 #include <mbgl/renderer/render_tile.hpp>
+#include <mbgl/gfx/uniform_buffer.hpp>
+
+// TODO rename
+#include <mbgl/shaders/location_indicator_ubo.hpp>
 
 #include <cmath>
 
@@ -90,7 +94,9 @@ const LayerTypeInfo* CustomDrawableLayer::Impl::staticTypeInfo() noexcept {
 class LineDrawableTweaker : public gfx::DrawableTweaker {
 public:
     LineDrawableTweaker(const shaders::LineEvaluatedPropsUBO& properties)
-        : propsUBO(properties) {}
+        : propsUBO(properties) 
+    {}
+
     ~LineDrawableTweaker() override = default;
 
     void init(gfx::Drawable&) override {}
@@ -100,13 +106,38 @@ public:
             return;
         }
 
+        if (!layerUniforms) {
+            layerUniforms = parameters.context.createLayerUniformBufferArray();
+        }
+
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto zoom = parameters.state.getZoom();
-        mat4 tileMatrix;
-        parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
 
         const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
+
+        // We would need to set up `idLineExpressionUBO` if the expression mask isn't empty
+        assert(propsUBO.expressionMask == LineExpressionMask::None);
+
+        if (!expressionUniformBuffer) {
+            const LineExpressionUBO exprUBO = {
+                /* .color = */ nullptr,
+                /* .blur = */ nullptr,
+                /* .opacity = */ nullptr,
+                /* .gapwidth = */ nullptr,
+                /* .offset = */ nullptr,
+                /* .width = */ nullptr,
+                /* .floorWidth = */ nullptr,
+            };
+
+            expressionUniformBuffer = parameters.context.createUniformBuffer(&exprUBO, sizeof(exprUBO));
+#if MLN_UBO_CONSOLIDATION
+            layerUniforms->set(idLineExpressionUBO, expressionUniformBuffer);
+#else
+            auto& drawableUniforms = drawable.mutableUniformBuffers();
+            drawableUniforms.set(idLineExpressionUBO, expressionUniformBuffer);
+#endif
+        }
 
 #if MLN_UBO_CONSOLIDATION
         shaders::LineDrawableUnionUBO drawableUBO;
@@ -125,27 +156,36 @@ public:
             /* .width_t = */ 0.f,
             /* .pad1 = */ 0
         };
-        auto& drawableUniforms = drawable.mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, parameters.context, true);
+
+#if MLN_UBO_CONSOLIDATION
+        if (!drawableUniformBuffer) {
+            drawableUniformBuffer = parameters.context.createUniformBuffer(
+                &drawableUBO, sizeof(drawableUBO), false, true);
+
+            layerUniforms->set(idLineDrawableUBO, drawableUniformBuffer);
+            drawable.setUBOIndex(0);
+        } else {
+            drawableUniformBuffer->update(&drawableUBO, sizeof(drawableUBO));
+        }
+
+        layerUniforms->createOrUpdate(idLineEvaluatedPropsUBO, &propsUBO, sizeof(propsUBO), parameters.context);
+        layerUniforms->bind(*parameters.renderPass);
+#else
+        
+        drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, parameters.context);
         drawableUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &propsUBO, parameters.context);
-
-        // We would need to set up `idLineExpressionUBO` if the expression mask isn't empty
-        assert(propsUBO.expressionMask == LineExpressionMask::None);
-
-        const LineExpressionUBO exprUBO = {
-            /* .color = */ nullptr,
-            /* .blur = */ nullptr,
-            /* .opacity = */ nullptr,
-            /* .gapwidth = */ nullptr,
-            /* .offset = */ nullptr,
-            /* .width = */ nullptr,
-            /* .floorWidth = */ nullptr,
-        };
-        drawableUniforms.createOrUpdate(idLineExpressionUBO, &exprUBO, parameters.context);
+#endif
     };
 
 private:
     shaders::LineEvaluatedPropsUBO propsUBO;
+
+#if MLN_UBO_CONSOLIDATION
+    gfx::UniqueUniformBufferArray layerUniforms;
+    gfx::UniformBufferPtr drawableUniformBuffer;
+#endif
+
+    gfx::UniformBufferPtr expressionUniformBuffer;
 };
 
 class WideVectorDrawableTweaker : public gfx::DrawableTweaker {
@@ -217,7 +257,9 @@ class FillDrawableTweaker : public gfx::DrawableTweaker {
 public:
     FillDrawableTweaker(const Color& color_, float opacity_)
         : color(color_),
-          opacity(opacity_) {}
+          opacity(opacity_)
+    {}
+
     ~FillDrawableTweaker() override = default;
 
     void init(gfx::Drawable&) override {}
@@ -227,15 +269,23 @@ public:
             return;
         }
 
-        const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-        mat4 tileMatrix;
-        parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
+        if (!layerUniforms) {
+            layerUniforms = parameters.context.createLayerUniformBufferArray();
+        }
 
+        const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
+        const shaders::FillEvaluatedPropsUBO propsUBO = {/* .color = */ color,
+                                                         /* .outline_color = */ Color::white(),
+                                                         /* .opacity = */ opacity,
+                                                         /* .fade = */ 0.f,
+                                                         /* .from_scale = */ 0.f,
+                                                         /* .to_scale = */ 0.f};
+
 #if MLN_UBO_CONSOLIDATION
-        shaders::FillDrawableUnionUBO drawableUBO;
+        FillDrawableUnionUBO drawableUBO;
         drawableUBO.fillDrawableUBO = {
 #else
         const shaders::FillDrawableUBO drawableUBO = {
@@ -248,20 +298,34 @@ public:
             /* .pad2 = */ 0
         };
 
-        const shaders::FillEvaluatedPropsUBO propsUBO = {/* .color = */ color,
-                                                         /* .outline_color = */ Color::white(),
-                                                         /* .opacity = */ opacity,
-                                                         /* .fade = */ 0.f,
-                                                         /* .from_scale = */ 0.f,
-                                                         /* .to_scale = */ 0.f};
+#if MLN_UBO_CONSOLIDATION
+        if (!drawableUniformBuffer) {
+            drawableUniformBuffer = parameters.context.createUniformBuffer(
+                &drawableUBO, sizeof(drawableUBO), false, true);
+            
+            layerUniforms->set(idFillDrawableUBO, drawableUniformBuffer);
+            drawable.setUBOIndex(0);
+        } else {
+            drawableUniformBuffer->update(&drawableUBO, sizeof(drawableUBO));
+        }
+
+        layerUniforms->createOrUpdate(idFillEvaluatedPropsUBO, &propsUBO, sizeof(propsUBO), parameters.context);
+        layerUniforms->bind(*parameters.renderPass);
+#else
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, parameters.context);
         drawableUniforms.createOrUpdate(idFillEvaluatedPropsUBO, &propsUBO, parameters.context);
+#endif
     };
 
 private:
     Color color;
     float opacity;
+
+#if MLN_UBO_CONSOLIDATION
+    gfx::UniqueUniformBufferArray layerUniforms;
+    gfx::UniformBufferPtr drawableUniformBuffer;
+#endif
 };
 
 class SymbolDrawableTweaker : public gfx::DrawableTweaker {
@@ -278,8 +342,6 @@ public:
         }
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-        mat4 tileMatrix;
-        parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
 
         const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
@@ -312,6 +374,31 @@ public:
 
 private:
     CustomDrawableLayerHost::Interface::SymbolOptions options;
+};
+
+class CommonGeometryDrawableTweaker : public gfx::DrawableTweaker {
+public:
+    CommonGeometryDrawableTweaker(const CustomDrawableLayerHost::Interface::CommonGeometryOptions& options_)
+        : options(options_) {}
+    ~CommonGeometryDrawableTweaker() override = default;
+
+    void init(gfx::Drawable&) override {}
+
+    void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
+        if (!drawable.getTileID().has_value()) {
+            return;
+        }
+
+        // TODO rename
+        LocationIndicatorDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(options.matrix),
+                                                    /* .color = */ options.color};
+
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idLocationIndicatorDrawableUBO, &drawableUBO, parameters.context);
+    };
+
+private:
+    CustomDrawableLayerHost::Interface::CommonGeometryOptions options;
 };
 
 CustomDrawableLayerHost::Interface::Interface(RenderLayer& layer_,
@@ -364,6 +451,11 @@ void CustomDrawableLayerHost::Interface::setSymbolOptions(const SymbolOptions& o
     symbolOptions = options;
 }
 
+void CustomDrawableLayerHost::Interface::setCommonGeometryOptions(const CommonGeometryOptions& options) {
+    finish();
+    commonGeometryOptions = options;
+}
+
 bool CustomDrawableLayerHost::Interface::updateBuilder(BuilderType type,
                                                        const std::string& name,
                                                        gfx::ShaderPtr shader) {
@@ -385,7 +477,7 @@ bool CustomDrawableLayerHost::Interface::addPolyline(const LineString<double>& c
             return false;
         } break;
 
-        case LineShaderType::MetalWideVector: {
+        case LineShaderType::WideVector: {
             // build wide vector polyline with Geo coordinates
             if (!updateBuilder(BuilderType::LineWideVector, "custom-lines-widevector", lineShaderWideVector()))
                 return false;
@@ -408,7 +500,7 @@ bool CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
             builder->addPolyline(coordinates, lineOptions.geometry);
         } break;
 
-        case LineShaderType::MetalWideVector: {
+        case LineShaderType::WideVector: {
             // build wide vector polyline
             if (!updateBuilder(BuilderType::LineWideVector, "custom-lines-widevector", lineShaderWideVector()))
                 return false;
@@ -526,6 +618,66 @@ bool CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& poi
     return true;
 }
 
+util::SimpleIdentity CustomDrawableLayerHost::Interface::addCommonGeometry(
+    std::shared_ptr<gfx::VertexVector<CommonGeometryVertex>> vertices,
+    std::shared_ptr<gfx::IndexVector<gfx::Triangles>> indices) {
+
+    if (!vertices || !indices) {
+        return util::SimpleIdentity::Empty;
+    }
+
+    if (commonGeometryOptions.texture) {
+        if (!updateBuilder(BuilderType::CommonGeometry, "common-textured-geometry", commonTexturedShaderDefault())) {
+            return util::SimpleIdentity::Empty;
+        }
+    } else {
+        if (!updateBuilder(BuilderType::CommonGeometry, "common-geometry", commonShaderDefault())) {
+            return util::SimpleIdentity::Empty;
+        }
+    }
+
+    setTileID({0, 0, 0});
+
+    SegmentVector<CommonGeometryVertex> triangleSegments;
+    triangleSegments.emplace_back(Segment<CommonGeometryVertex>{0, 0, vertices->elements(), indices->elements()});
+     
+    // add to builder
+    auto attrs = context.createVertexAttributeArray();
+    if (const auto& attr = attrs->set(idCommonPosVertexAttribute)) {
+        attr->setSharedRawData(vertices,
+                               offsetof(CommonGeometryVertex, position),
+                               /*vertexOffset=*/0,
+                               sizeof(CommonGeometryVertex),
+                               gfx::AttributeDataType::Float3);
+    }
+
+    if (const auto& attr = attrs->set(idCommonTexVertexAttribute)) {
+        attr->setSharedRawData(vertices,
+                               offsetof(CommonGeometryVertex, texcoords),
+                               /*vertexOffset=*/0,
+                               sizeof(CommonGeometryVertex),
+                               gfx::AttributeDataType::Float2);
+    }
+
+    builder->setVertexAttributes(std::move(attrs));
+    builder->setRawVertices({}, vertices->elements(), gfx::AttributeDataType::Float3);
+    builder->setSegments(gfx::Triangles(), indices, triangleSegments.data(), triangleSegments.size());
+
+    // texture
+    if (commonGeometryOptions.texture) {
+        builder->setTexture(commonGeometryOptions.texture, shaders::idCommonTexture);
+    }
+
+    builder->addTweaker(std::make_shared<CommonGeometryDrawableTweaker>(commonGeometryOptions));
+
+    const auto& id = builder->getCurrentDrawable(true)->getID();
+
+    // flush current builder drawable
+    builder->flush(context);
+
+    return id;
+}
+
 void CustomDrawableLayerHost::Interface::finish() {
     if (builder && !builder->empty()) {
         // flush current builder drawable
@@ -588,10 +740,19 @@ void CustomDrawableLayerHost::Interface::finish() {
                 // finish building symbols
                 finish_(nullptr);
                 break;
+
+            case BuilderType::CommonGeometry:
+                finish_(nullptr);
+                break;
             default:
                 break;
         }
     }
+}
+
+void CustomDrawableLayerHost::Interface::removeDrawable(const util::SimpleIdentity& id) {
+    TileLayerGroup* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
+    tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) { return drawable.getID() == id; });
 }
 
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
@@ -628,6 +789,16 @@ gfx::ShaderPtr CustomDrawableLayerHost::Interface::fillShaderDefault() const {
 
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::symbolShaderDefault() const {
     return context.getGenericShader(shaders, "CustomSymbolIconShader");
+}
+
+gfx::ShaderPtr CustomDrawableLayerHost::Interface::commonShaderDefault() const {
+    // TODO rename
+    return context.getGenericShader(shaders, "LocationIndicatorShader");
+}
+
+gfx::ShaderPtr CustomDrawableLayerHost::Interface::commonTexturedShaderDefault() const {
+    // TODO rename
+    return context.getGenericShader(shaders, "LocationIndicatorTexturedShader");
 }
 
 std::unique_ptr<gfx::DrawableBuilder> CustomDrawableLayerHost::Interface::createBuilder(const std::string& name,
