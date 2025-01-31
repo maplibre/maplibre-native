@@ -24,7 +24,7 @@ public:
     virtual void init(Drawable&) = 0;
 
     /// Called just before rendering
-    virtual void execute(Drawable&, const PaintParameters&) = 0;
+    virtual void execute(Drawable&, PaintParameters&) = 0;
 };
 
 using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
