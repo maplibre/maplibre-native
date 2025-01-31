@@ -1,0 +1,16 @@
+[package]
+name = "maplibre-native"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cxx = "1.0"
+clap = { version = "4.5.27", features = ["derive", "env"] }
+
+[dev-dependencies]
+insta = { version = "1.42.1" }
+
+[build-dependencies]
+cmake = "0.1"
+cxx-build = "1.0"
+rustversion = "1.0.19"
