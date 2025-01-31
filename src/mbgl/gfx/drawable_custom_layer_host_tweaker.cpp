@@ -16,7 +16,7 @@ namespace mbgl {
 namespace gfx {
 
 void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& drawable,
-                                             const mbgl::PaintParameters& paintParameters) {
+                                             mbgl::PaintParameters& paintParameters) {
     // custom drawing
     auto& context = paintParameters.context;
     context.resetState(paintParameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
@@ -35,6 +35,7 @@ void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& dra
     paintParameters.backend.getDefaultRenderable().getResource<gfx::RenderableResource>().bind();
 
     context.setDirtyState();
+    context.bindGlobalUniformBuffers(*paintParameters.renderPass);
 }
 
 } // namespace gfx

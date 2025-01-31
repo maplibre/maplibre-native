@@ -34,7 +34,7 @@ void DrawableAtlasesTweaker::init(gfx::Drawable& drawable) {
     setupTextures(drawable, true);
 }
 
-void DrawableAtlasesTweaker::execute(gfx::Drawable& drawable, const PaintParameters& parameters) {
+void DrawableAtlasesTweaker::execute(gfx::Drawable& drawable, PaintParameters& parameters) {
     const bool transformed = rotationAlignment == style::AlignmentType::Map || parameters.state.getPitch() != 0;
     const bool linearFilterForIcons = isText ? (parameters.state.isChanging() || transformed || !textSizeIsZoomConstant)
                                              : (sdfIcons || parameters.state.isChanging() || iconScaled || transformed);
