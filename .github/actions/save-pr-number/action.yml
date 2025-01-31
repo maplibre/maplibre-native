@@ -14,3 +14,4 @@ runs:
         with:
           name: pr-number
           path: ./pr_number
+          overwrite: true
