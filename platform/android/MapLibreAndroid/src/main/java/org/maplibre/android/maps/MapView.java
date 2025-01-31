@@ -311,10 +311,9 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
 
     addView(renderView, 0);
 
-    boolean crossSourceCollisions = options.getCrossSourceCollisions();
-    nativeMapView = new NativeMapView(
-            getContext(), getPixelRatio(), crossSourceCollisions, this, mapChangeReceiver, mapRenderer
-    );
+    boolean crossSourceCollisions = maplibreMapOptions.getCrossSourceCollisions();
+    nativeMapView = MapLibre.getModuleProvider().createNativeMapView(getContext(),
+      getPixelRatio(), crossSourceCollisions, this, mapChangeReceiver, mapRenderer);
   }
 
   private void onSurfaceCreated() {
@@ -518,6 +517,15 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   @UiThread
   public View getRenderView() {
     return renderView;
+  }
+
+  /**
+   * Returns the underlying native map instance.
+   * The type of NativeMap returned is determined by the ModuleProvider's
+   * `createNativeMapView` method.
+   */
+  public NativeMap getNativeMap() {
+    return nativeMapView;
   }
 
   @Override
