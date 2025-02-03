@@ -2,6 +2,14 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## 6.11.0
+
+- Add NSString initializer MLNVectorTileSource ([#3163](https://github.com/maplibre/maplibre-native/pull/3163)).
+- Support defining a custom style layer from iOS Swift ([#3154](https://github.com/maplibre/maplibre-native/pull/3154)).
+- Add iOS trigger repaint method ([#3182](https://github.com/maplibre/maplibre-native/pull/3182)).
+- Bind global uniform buffers at the end of the custom layer tweaker ([#3186](https://github.com/maplibre/maplibre-native/pull/3186)).
+- Change runtime error to the nullptr returning ([#3184](https://github.com/maplibre/maplibre-native/pull/3184)).
+
 ## 6.10.0
 
 - Fix icon label isn't centered with the icon for CJK/local glyphy on iOS ([#3108](https://github.com/maplibre/maplibre-native/pull/3108)).
