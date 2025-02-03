@@ -1,6 +1,6 @@
 # Release MapLibre Android
 
-We make MapLibre Android releases as a downloadable asset on [GitHub](https://github.com/maplibre/maplibre-native/releases?q=android&expanded=true) as well as to [Maven Central](https://central.sonatype.com/artifact/org.maplibre.gl/android-sdk/versions). Specifically we make use of a Sonartype OSSHR repository provided by Maven Central.
+We make MapLibre Android releases as a downloadable asset on [GitHub](https://github.com/maplibre/maplibre-native/releases?q=android&expanded=true) as well as to [Maven Central](https://central.sonatype.com/artifact/org.maplibre.gl/android-sdk/versions). Specifically we make use of a Sonatype OSSHR repository provided by Maven Central.
 
 Also see the current [release policy](../release-policy.md).
 
