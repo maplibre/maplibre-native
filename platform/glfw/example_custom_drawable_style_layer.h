@@ -17,10 +17,6 @@ protected:
     void generateCommonGeometry(Interface& interface);
     void loadCommonGeometry(Interface& interface);
 
-    void updateDrawables(Interface& interface);
-
 protected:
 
-    float commonGeometryBearing = 0.0f;
-    mbgl::util::SimpleIdentity commonGeometryID;
 };

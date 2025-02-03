@@ -33,6 +33,7 @@ public:
 
 class CustomDrawableLayerHost::Interface {
 public:
+
     enum class LineShaderType {
         Classic,
         WideVector
@@ -40,12 +41,12 @@ public:
 
     struct LineOptions {
         gfx::PolylineGeneratorOptions geometry;
+
         float blur = 0.f;
         float opacity = 1.f;
         float gapWidth = 0.f;
         float offset = 0.f;
         float width = 1.f;
-        LineShaderType shaderType = LineShaderType::Classic;
         Color color;
     };
 
@@ -58,7 +59,6 @@ public:
         Size size;
         gfx::Texture2DPtr texture;
         std::array<float, 2> anchor{0.5f, 0.5f};
-        std::array<std::array<float, 2>, 2> textureCoordinates{{{0, 0}, {1, 1}}};
         float angleDegrees{.0f};
         bool scaleWithMap{false};
         bool pitchWithMap{false};
@@ -76,6 +76,14 @@ public:
         // using a texture will override the color
         gfx::Texture2DPtr texture;
     };
+
+    template <typename T>
+    using TweakerCallback = std::function<void(mbgl::gfx::Drawable&, const mbgl::PaintParameters&, T&)>;
+
+    using LineTweakerCallback = TweakerCallback<LineOptions>;
+    using FillTweakerCallback = TweakerCallback<FillOptions>;
+    using SymbolTweakerCallback = TweakerCallback<SymbolOptions>;
+    using CommonGeometryTweakerCallback = TweakerCallback<CommonGeometryOptions>;
 
 public:
     /// @brief Construct a new Interface object (internal core use only)
@@ -129,37 +137,50 @@ public:
      */
     void setCommonGeometryOptions(const CommonGeometryOptions& options);
 
+    void setLineTweakerCallback(LineTweakerCallback&& callback) { lineTweakerCallback = callback; }
+    void setFillTweakerCallback(FillTweakerCallback&& callback) { fillTweakerCallback = callback; }
+    void setSymbolTweakerCallback(SymbolTweakerCallback&& callback) { symbolTweakerCallback = callback; }
+    void setCommonGeometryTweakerCallback(CommonGeometryTweakerCallback&& callback) {
+        commonGeometryTweakerCallback = callback;
+    }
+
     /**
      * @brief Add a polyline
      *
      * @param coordinates in tile range
-     * @return true if the polyline was added
+     * @param shaderType
+     * @return a valid util::SimpleIdentity if the polyline was added
      */
-    bool addPolyline(const GeometryCoordinates& coordinates);
+    util::SimpleIdentity addPolyline(const GeometryCoordinates& coordinates,
+                                     LineShaderType shaderType = LineShaderType::Classic);
 
     /**
      * @brief Add a polyline
      *
      * @param coordinates Geographic coordinates
-     * @return true if the polyline was added
+     * @param shaderType
+     * @return a valid util::SimpleIdentity if the poline was added
      */
-    bool addPolyline(const LineString<double>& coordinates);
+    util::SimpleIdentity addPolyline(const LineString<double>& coordinates,
+                                     LineShaderType shaderType = LineShaderType::Classic);
 
     /**
      * @brief Add a multipolygon area fill
      *
      * @param geometry a collection of rings with optional holes
-     * @return true if the fill was added
+     * @return a valid util::SimpleIdentity if the fill was added
      */
-    bool addFill(const GeometryCollection& geometry);
+    util::SimpleIdentity addFill(const GeometryCollection& geometry);
 
     /**
      * @brief Add a symbol
      *
      * @param point
-     * @return true if the symbol was added
+     * @param textureCoordinates (optional mapping)
+     * @return a valid util::SimpleIdentity if the symbol was added
      */
-    bool addSymbol(const GeometryCoordinate& point);
+    util::SimpleIdentity addSymbol(const GeometryCoordinate& point,
+                                   const std::array<std::array<float, 2>, 2>& textureCoordinates = {{{0, 0}, {1, 1}}});
 
     util::SimpleIdentity addCommonGeometry(std::shared_ptr<gfx::VertexVector<CommonGeometryVertex>> vertices,
                            std::shared_ptr<gfx::IndexVector<gfx::Triangles>> indices);
@@ -209,6 +230,11 @@ private:
     FillOptions fillOptions;
     SymbolOptions symbolOptions;
     CommonGeometryOptions commonGeometryOptions;
+
+    LineTweakerCallback lineTweakerCallback;
+    FillTweakerCallback fillTweakerCallback;
+    SymbolTweakerCallback symbolTweakerCallback;
+    CommonGeometryTweakerCallback commonGeometryTweakerCallback;
 
     BuilderType builderType{BuilderType::None};
 };

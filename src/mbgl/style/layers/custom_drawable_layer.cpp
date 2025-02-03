@@ -93,9 +93,10 @@ const LayerTypeInfo* CustomDrawableLayer::Impl::staticTypeInfo() noexcept {
 
 class LineDrawableTweaker : public gfx::DrawableTweaker {
 public:
-    LineDrawableTweaker(const shaders::LineEvaluatedPropsUBO& properties)
-        : propsUBO(properties) 
-    {}
+    LineDrawableTweaker(const CustomDrawableLayerHost::Interface::LineOptions& options_,
+                        CustomDrawableLayerHost::Interface::LineTweakerCallback&& callback_)
+        : options(options_),
+          callback(callback_) {}
 
     ~LineDrawableTweaker() override = default;
 
@@ -104,6 +105,10 @@ public:
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
             return;
+        }
+
+        if (callback) {
+            callback(drawable, parameters, options);
         }
 
         if (!layerUniforms) {
@@ -115,6 +120,16 @@ public:
 
         const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
+
+        const shaders::LineEvaluatedPropsUBO propsUBO = {options.color,
+                                                         options.blur,
+                                                         options.opacity,
+                                                         options.gapWidth,
+                                                         options.offset,
+                                                         options.width,
+                                                         /*floorwidth=*/0.0f,
+                                                         LineExpressionMask::None,
+                                                         0};
 
         // We would need to set up `idLineExpressionUBO` if the expression mask isn't empty
         assert(propsUBO.expressionMask == LineExpressionMask::None);
@@ -178,7 +193,8 @@ public:
     };
 
 private:
-    shaders::LineEvaluatedPropsUBO propsUBO;
+    CustomDrawableLayerHost::Interface::LineOptions options;
+    CustomDrawableLayerHost::Interface::LineTweakerCallback callback;
 
 #if MLN_UBO_CONSOLIDATION
     gfx::UniqueUniformBufferArray layerUniforms;
@@ -190,14 +206,20 @@ private:
 
 class WideVectorDrawableTweaker : public gfx::DrawableTweaker {
 public:
-    WideVectorDrawableTweaker(const CustomDrawableLayerHost::Interface::LineOptions& options_)
-        : options(options_) {}
+    WideVectorDrawableTweaker(const CustomDrawableLayerHost::Interface::LineOptions& options_,
+                              CustomDrawableLayerHost::Interface::LineTweakerCallback&& callback_)
+        : options(options_),
+          callback(callback_) {}
 
     void init(gfx::Drawable&) override {}
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
             return;
+        }
+
+        if (callback) {
+            callback(drawable, parameters, options);
         }
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
@@ -251,14 +273,15 @@ public:
 
 private:
     CustomDrawableLayerHost::Interface::LineOptions options;
+    CustomDrawableLayerHost::Interface::LineTweakerCallback callback;
 };
 
 class FillDrawableTweaker : public gfx::DrawableTweaker {
 public:
-    FillDrawableTweaker(const Color& color_, float opacity_)
-        : color(color_),
-          opacity(opacity_)
-    {}
+    FillDrawableTweaker(const CustomDrawableLayerHost::Interface::FillOptions& options_,
+                        CustomDrawableLayerHost::Interface::FillTweakerCallback&& callback_)
+        : options(options_),
+          callback(callback_) {}
 
     ~FillDrawableTweaker() override = default;
 
@@ -269,6 +292,10 @@ public:
             return;
         }
 
+        if (callback) {
+            callback(drawable, parameters, options);
+        }
+
         if (!layerUniforms) {
             layerUniforms = parameters.context.createLayerUniformBufferArray();
         }
@@ -277,9 +304,9 @@ public:
         const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
-        const shaders::FillEvaluatedPropsUBO propsUBO = {/* .color = */ color,
+        const shaders::FillEvaluatedPropsUBO propsUBO = {/* .color = */ options.color,
                                                          /* .outline_color = */ Color::white(),
-                                                         /* .opacity = */ opacity,
+                                                         /* .opacity = */ options.opacity,
                                                          /* .fade = */ 0.f,
                                                          /* .from_scale = */ 0.f,
                                                          /* .to_scale = */ 0.f};
@@ -319,8 +346,8 @@ public:
     };
 
 private:
-    Color color;
-    float opacity;
+    CustomDrawableLayerHost::Interface::FillOptions options;
+    CustomDrawableLayerHost::Interface::FillTweakerCallback callback;
 
 #if MLN_UBO_CONSOLIDATION
     gfx::UniqueUniformBufferArray layerUniforms;
@@ -330,8 +357,10 @@ private:
 
 class SymbolDrawableTweaker : public gfx::DrawableTweaker {
 public:
-    SymbolDrawableTweaker(const CustomDrawableLayerHost::Interface::SymbolOptions& options_)
-        : options(options_) {}
+    SymbolDrawableTweaker(const CustomDrawableLayerHost::Interface::SymbolOptions& options_,
+                          CustomDrawableLayerHost::Interface::SymbolTweakerCallback&& callback_)
+        : options(options_),
+          callback(callback_) {}
     ~SymbolDrawableTweaker() override = default;
 
     void init(gfx::Drawable&) override {}
@@ -339,6 +368,10 @@ public:
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
             return;
+        }
+
+        if (callback) {
+            callback(drawable, parameters, options);
         }
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
@@ -374,12 +407,16 @@ public:
 
 private:
     CustomDrawableLayerHost::Interface::SymbolOptions options;
+    CustomDrawableLayerHost::Interface::SymbolTweakerCallback callback;
 };
 
 class CommonGeometryDrawableTweaker : public gfx::DrawableTweaker {
 public:
-    CommonGeometryDrawableTweaker(const CustomDrawableLayerHost::Interface::CommonGeometryOptions& options_)
-        : options(options_) {}
+    CommonGeometryDrawableTweaker(
+        const CustomDrawableLayerHost::Interface::CommonGeometryOptions& options_,
+        CustomDrawableLayerHost::Interface::CommonGeometryTweakerCallback&& callback_)
+        : options(options_),
+          callback(callback_) {}
     ~CommonGeometryDrawableTweaker() override = default;
 
     void init(gfx::Drawable&) override {}
@@ -387,6 +424,10 @@ public:
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
             return;
+        }
+
+        if (callback) {
+            callback(drawable, parameters, options);
         }
 
         // TODO rename
@@ -399,6 +440,7 @@ public:
 
 private:
     CustomDrawableLayerHost::Interface::CommonGeometryOptions options;
+    CustomDrawableLayerHost::Interface::CommonGeometryTweakerCallback callback;
 };
 
 CustomDrawableLayerHost::Interface::Interface(RenderLayer& layer_,
@@ -470,17 +512,18 @@ bool CustomDrawableLayerHost::Interface::updateBuilder(BuilderType type,
     return true;
 };
 
-bool CustomDrawableLayerHost::Interface::addPolyline(const LineString<double>& coordinates) {
-    switch (lineOptions.shaderType) {
+util::SimpleIdentity CustomDrawableLayerHost::Interface::addPolyline(const LineString<double>& coordinates,
+                                                                     LineShaderType shaderType) {
+    switch (shaderType) {
         case LineShaderType::Classic: {
             // TODO: build classic polyline with Geo coordinates
-            return false;
+            return util::SimpleIdentity::Empty;
         } break;
 
         case LineShaderType::WideVector: {
             // build wide vector polyline with Geo coordinates
             if (!updateBuilder(BuilderType::LineWideVector, "custom-lines-widevector", lineShaderWideVector()))
-                return false;
+                return util::SimpleIdentity::Empty;
 
             // geographic coordinates require tile {0, 0, 0}
             setTileID({0, 0, 0});
@@ -489,32 +532,38 @@ bool CustomDrawableLayerHost::Interface::addPolyline(const LineString<double>& c
         } break;
     }
 
-    return true;
+    return builder->getCurrentDrawable(true)->getID();
 }
 
-bool CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& coordinates) {
-    switch (lineOptions.shaderType) {
+util::SimpleIdentity CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& coordinates,
+                                                                     LineShaderType shaderType) {
+    switch (shaderType) {
         case LineShaderType::Classic: {
             // build classic polyline with Tile coordinates
-            if (!updateBuilder(BuilderType::LineClassic, "custom-lines", lineShaderDefault())) return false;
+            if (!updateBuilder(BuilderType::LineClassic, "custom-lines", lineShaderDefault())) {
+                return util::SimpleIdentity::Empty;
+            }
+
             builder->addPolyline(coordinates, lineOptions.geometry);
         } break;
 
         case LineShaderType::WideVector: {
             // build wide vector polyline
             if (!updateBuilder(BuilderType::LineWideVector, "custom-lines-widevector", lineShaderWideVector()))
-                return false;
+                return util::SimpleIdentity::Empty;
 
             builder->addWideVectorPolylineLocal(coordinates, lineOptions.geometry);
         } break;
     }
 
-    return true;
+    return builder->getCurrentDrawable(true)->getID();
 }
 
-bool CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geometry) {
+util::SimpleIdentity CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geometry) {
     // build fill
-    if (!updateBuilder(BuilderType::Fill, "custom-fill", fillShaderDefault())) return false;
+    if (!updateBuilder(BuilderType::Fill, "custom-fill", fillShaderDefault())) {
+        return util::SimpleIdentity::Empty;
+    }
 
     // provision buffers for fill vertices, indexes and segments
     using VertexVector = gfx::VertexVector<FillLayoutVertex>;
@@ -543,15 +592,20 @@ bool CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
     builder->setRawVertices({}, vertices.elements(), gfx::AttributeDataType::Short2);
     builder->setSegments(gfx::Triangles(), sharedTriangles, triangleSegments.data(), triangleSegments.size());
 
+    const auto& id = builder->getCurrentDrawable(true)->getID();
+
     // flush current builder drawable
     builder->flush(context);
 
-    return true;
+    return id;
 }
 
-bool CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& point) {
+util::SimpleIdentity CustomDrawableLayerHost::Interface::addSymbol(
+    const GeometryCoordinate& point, const std::array<std::array<float, 2>, 2>& textureCoordinates) {
     // build symbol
-    if (!updateBuilder(BuilderType::Symbol, "custom-symbol", symbolShaderDefault())) return false;
+    if (!updateBuilder(BuilderType::Symbol, "custom-symbol", symbolShaderDefault())) {
+        return util::SimpleIdentity::Empty;
+    }
 
     // temporary: buffers
     struct CustomSymbolIcon {
@@ -569,7 +623,7 @@ bool CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& poi
         for (int x = 0; x <= 1; ++x) {
             vertices.emplace_back(
                 CustomSymbolIcon{{static_cast<float>(point.x * 2 + x), static_cast<float>(point.y * 2 + y)},
-                                 {symbolOptions.textureCoordinates[x][0], symbolOptions.textureCoordinates[y][1]}});
+                                 {textureCoordinates[x][0], textureCoordinates[y][1]}});
         }
     }
 
@@ -609,13 +663,15 @@ bool CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& poi
     }
 
     // create symbol tweaker
-    auto tweaker = std::make_shared<SymbolDrawableTweaker>(symbolOptions);
+    auto tweaker = std::make_shared<SymbolDrawableTweaker>(symbolOptions, std::move(symbolTweakerCallback));
     builder->addTweaker(tweaker);
+
+    const auto& id = builder->getCurrentDrawable(true)->getID();
 
     // flush current builder drawable
     builder->flush(context);
 
-    return true;
+    return id;
 }
 
 util::SimpleIdentity CustomDrawableLayerHost::Interface::addCommonGeometry(
@@ -636,6 +692,7 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addCommonGeometry(
         }
     }
 
+    // geographic coordinates require tile {0, 0, 0}
     setTileID({0, 0, 0});
 
     SegmentVector<CommonGeometryVertex> triangleSegments;
@@ -668,7 +725,8 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addCommonGeometry(
         builder->setTexture(commonGeometryOptions.texture, shaders::idCommonTexture);
     }
 
-    builder->addTweaker(std::make_shared<CommonGeometryDrawableTweaker>(commonGeometryOptions));
+    builder->addTweaker(std::make_shared<CommonGeometryDrawableTweaker>(commonGeometryOptions,
+                                                                        std::move(commonGeometryTweakerCallback)));
 
     const auto& id = builder->getCurrentDrawable(true)->getID();
 
@@ -704,16 +762,7 @@ void CustomDrawableLayerHost::Interface::finish() {
                 // finish building classic lines
 
                 // create line tweaker
-                const shaders::LineEvaluatedPropsUBO linePropertiesUBO = {lineOptions.color,
-                                                                          lineOptions.blur,
-                                                                          lineOptions.opacity,
-                                                                          lineOptions.gapWidth,
-                                                                          lineOptions.offset,
-                                                                          lineOptions.width,
-                                                                          /*floorwidth=*/0,
-                                                                          LineExpressionMask::None,
-                                                                          0};
-                auto tweaker = std::make_shared<LineDrawableTweaker>(linePropertiesUBO);
+                auto tweaker = std::make_shared<LineDrawableTweaker>(lineOptions, std::move(lineTweakerCallback));
 
                 // finish drawables
                 finish_(tweaker);
@@ -722,7 +771,7 @@ void CustomDrawableLayerHost::Interface::finish() {
                 // finish building wide vector lines
 
                 // create line tweaker
-                auto tweaker = std::make_shared<WideVectorDrawableTweaker>(lineOptions);
+                auto tweaker = std::make_shared<WideVectorDrawableTweaker>(lineOptions, std::move(lineTweakerCallback));
 
                 // finish drawables
                 finish_(tweaker);
@@ -731,7 +780,7 @@ void CustomDrawableLayerHost::Interface::finish() {
                 // finish building fills
 
                 // create fill tweaker
-                auto tweaker = std::make_shared<FillDrawableTweaker>(fillOptions.color, fillOptions.opacity);
+                auto tweaker = std::make_shared<FillDrawableTweaker>(fillOptions, std::move(fillTweakerCallback));
 
                 // finish drawables
                 finish_(tweaker);

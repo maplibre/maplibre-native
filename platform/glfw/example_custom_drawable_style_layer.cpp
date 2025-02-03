@@ -28,13 +28,10 @@ void ExampleCustomDrawableStyleLayerHost::update(Interface& interface) {
         createDrawables(interface);
         return;
     }
-
-    updateDrawables(interface);
 }
 
 void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) {
     
-#if 1
     constexpr float extent = mbgl::util::EXTENT;
 
     // add classic polylines
@@ -46,12 +43,12 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
             
         constexpr auto numLines = 6;
         Interface::LineOptions options[numLines] {
-            {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/8.0f,     /*shaderType=*/{}, /*color=*/Color::red() },
-            {/*geometry=*/{},   /*blur=*/4.0f,  /*opacity=*/1.0f, /*gapWidth=*/2.0f, /*offset=*/-1.0f,  /*width=*/4.0f,     /*shaderType=*/{}, /*color=*/Color::blue() },
-            {/*geometry=*/{},   /*blur=*/16.0f, /*opacity=*/1.0f, /*gapWidth=*/1.0f, /*offset=*/2.0f,   /*width=*/16.0f,    /*shaderType=*/{}, /*color=*/Color(1.f, 0.5f, 0, 0.5f) },
-            {/*geometry=*/{},   /*blur=*/2.0f,  /*opacity=*/1.0f, /*gapWidth=*/1.0f, /*offset=*/-2.0f,  /*width=*/2.0f,     /*shaderType=*/{}, /*color=*/Color(1.f, 1.f, 0, 0.3f) },
-            {/*geometry=*/{},   /*blur=*/0.5f,  /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/0.5f,   /*width=*/0.5f,     /*shaderType=*/{}, /*color=*/Color::black() },
-            {/*geometry=*/{},   /*blur=*/24.0f, /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/-5.0f,  /*width=*/24.0f,    /*shaderType=*/{}, /*color=*/Color(1.f, 0, 1.f, 0.2f) },
+            {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/8.0f,     /*color=*/Color::red() },
+            {/*geometry=*/{},   /*blur=*/4.0f,  /*opacity=*/1.0f, /*gapWidth=*/2.0f, /*offset=*/-1.0f,  /*width=*/4.0f,     /*color=*/Color::blue() },
+            {/*geometry=*/{},   /*blur=*/16.0f, /*opacity=*/1.0f, /*gapWidth=*/1.0f, /*offset=*/2.0f,   /*width=*/16.0f,    /*color=*/Color(1.f, 0.5f, 0, 0.5f) },
+            {/*geometry=*/{},   /*blur=*/2.0f,  /*opacity=*/1.0f, /*gapWidth=*/1.0f, /*offset=*/-2.0f,  /*width=*/2.0f,     /*color=*/Color(1.f, 1.f, 0, 0.3f) },
+            {/*geometry=*/{},   /*blur=*/0.5f,  /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/0.5f,   /*width=*/0.5f,     /*color=*/Color::black() },
+            {/*geometry=*/{},   /*blur=*/24.0f, /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/-5.0f,  /*width=*/24.0f,    /*color=*/Color(1.f, 0, 1.f, 0.2f) },
         };
 
         for(auto& opt: options) {
@@ -77,7 +74,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
             interface.setLineOptions(options[index]);
                 
             // add polyline
-            interface.addPolyline(polyline);
+            interface.addPolyline(polyline, Interface::LineShaderType::Classic);
         }
     }
 
@@ -90,12 +87,12 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
             
         constexpr auto numLines = 6;
         Interface::LineOptions options[numLines] {
-            {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/8.0f,     /*shaderType=*/Interface::LineShaderType::Classic, /*color=*/Color::red() },
-            {/*geometry=*/{},   /*blur=*/4.0f,  /*opacity=*/1.0f, /*gapWidth=*/2.0f, /*offset=*/-1.0f,  /*width=*/4.0f,     /*shaderType=*/Interface::LineShaderType::Classic, /*color=*/Color::blue() },
-            {/*geometry=*/{},   /*blur=*/16.0f, /*opacity=*/1.0f, /*gapWidth=*/1.0f, /*offset=*/2.0f,   /*width=*/16.0f,    /*shaderType=*/Interface::LineShaderType::Classic, /*color=*/Color(1.f, 0.5f, 0, 0.5f) },
-            {/*geometry=*/{},   /*blur=*/2.0f,  /*opacity=*/1.0f, /*gapWidth=*/1.0f, /*offset=*/-2.0f,  /*width=*/2.0f,     /*shaderType=*/Interface::LineShaderType::Classic, /*color=*/Color(1.f, 1.f, 0, 0.3f) },
-            {/*geometry=*/{},   /*blur=*/0.5f,  /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/0.5f,   /*width=*/0.5f,     /*shaderType=*/Interface::LineShaderType::Classic, /*color=*/Color::black() },
-            {/*geometry=*/{},   /*blur=*/24.0f, /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/-5.0f,  /*width=*/24.0f,    /*shaderType=*/Interface::LineShaderType::Classic, /*color=*/Color(1.f, 0, 1.f, 0.2f) },
+            {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/8.0f,     /*color=*/Color::red() },
+            {/*geometry=*/{},   /*blur=*/4.0f,  /*opacity=*/1.0f, /*gapWidth=*/2.0f, /*offset=*/-1.0f,  /*width=*/4.0f,     /*color=*/Color::blue() },
+            {/*geometry=*/{},   /*blur=*/16.0f, /*opacity=*/1.0f, /*gapWidth=*/1.0f, /*offset=*/2.0f,   /*width=*/16.0f,    /*color=*/Color(1.f, 0.5f, 0, 0.5f) },
+            {/*geometry=*/{},   /*blur=*/2.0f,  /*opacity=*/1.0f, /*gapWidth=*/1.0f, /*offset=*/-2.0f,  /*width=*/2.0f,     /*color=*/Color(1.f, 1.f, 0, 0.3f) },
+            {/*geometry=*/{},   /*blur=*/0.5f,  /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/0.5f,   /*width=*/0.5f,     /*color=*/Color::black() },
+            {/*geometry=*/{},   /*blur=*/24.0f, /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/-5.0f,  /*width=*/24.0f,    /*color=*/Color(1.f, 0, 1.f, 0.2f) },
         };
 
         for(auto& opt: options) {
@@ -188,9 +185,9 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
         options.texture->setSamplerConfiguration(
             {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
 
-        options.textureCoordinates = {{{0.0f, 0.08f}, {1.0f, 0.9f}}};
-        const float xspan = options.textureCoordinates[1][0] - options.textureCoordinates[0][0];
-        const float yspan = options.textureCoordinates[1][1] - options.textureCoordinates[0][1];
+        const std::array<std::array<float, 2>, 2> textureCoordinates = {{{0.0f, 0.08f}, {1.0f, 0.9f}}};
+        const float xspan = textureCoordinates[1][0] - textureCoordinates[0][0];
+        const float yspan = textureCoordinates[1][1] - textureCoordinates[0][1];
         assert(xspan > 0.0f && yspan > 0.0f);
         options.size = {static_cast<uint32_t>(image->size.width * xspan),
                         static_cast<uint32_t>(image->size.height * yspan)};
@@ -202,7 +199,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
         interface.setSymbolOptions(options);
 
         // add symbol
-        interface.addSymbol(position);
+        interface.addSymbol(position, textureCoordinates);
     }
 
     {
@@ -221,11 +218,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
         options.texture->setSamplerConfiguration(
             {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
 
-        const float xspan = options.textureCoordinates[1][0] - options.textureCoordinates[0][0];
-        const float yspan = options.textureCoordinates[1][1] - options.textureCoordinates[0][1];
-        assert(xspan > 0.0f && yspan > 0.0f);
-        options.size = {static_cast<uint32_t>(image->size.width * xspan),
-                        static_cast<uint32_t>(image->size.height * yspan)};
+        options.size = {static_cast<uint32_t>(image->size.width), static_cast<uint32_t>(image->size.height)};
 
         options.anchor = {0.5f, 0.95f};
         options.angleDegrees = 45.0f;
@@ -248,7 +241,6 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
                                           /*gapWidth=*/0.0f,
                                           /*offset=*/0.0f,
                                           /*width=*/12.0f,
-                                          /*shaderType=*/Interface::LineShaderType::Classic,
                                           /*color=*/{.0f, .0f, .0f, .5f}};
 
         options.geometry.beginCap = style::LineCapType::Square;
@@ -272,7 +264,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
             // New York
             {-74.04454331829972, 40.6892168305434},
         };
-        interface.addPolyline(polyline_geo);
+        interface.addPolyline(polyline_geo, Interface::LineShaderType::Classic);
     }
         
     // add polylines using wide vectors in tile coordinates
@@ -288,7 +280,6 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
                                        /*gapWidth=*/0.0f,
                                        /*offset=*/0.0f,
                                        /*width=*/7.0f,
-                                       /*shaderType=*/Interface::LineShaderType::Classic,
                                        /*color=*/{1.0f, 0, 0, .5f}};
 
         options.geometry.beginCap = style::LineCapType::Round;
@@ -315,11 +306,10 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
             
         options.geometry.type = FeatureType::Polygon;
         interface.setLineOptions(options);
-        interface.addPolyline(polyline_tile[0]);
-        interface.addPolyline(polyline_tile[1]);
+        interface.addPolyline(polyline_tile[0], Interface::LineShaderType::Classic);
+        interface.addPolyline(polyline_tile[1], Interface::LineShaderType::Classic);
 
     }
-#endif
 
     generateCommonGeometry(interface);
     loadCommonGeometry(interface);
@@ -334,39 +324,9 @@ static mbgl::Point<double> project(const mbgl::LatLng& c, const mbgl::TransformS
     return mbgl::Projection::project(unwrappedLatLng, s.getScale());
 }
 
-// mapbox::cheap_ruler::CheapRuler (mapbox/cheap_ruler.hpp)
-static mbgl::Point<double> rulerDestination(double latitude, mbgl::Point<double> origin, double dist, double bearing_) {
-    // Values that define WGS84 ellipsoid model of the Earth
-    static constexpr double RE = 6378.137;            // equatorial radius
-    static constexpr double FE = 1.0 / 298.257223563; // flattening
-
-    static constexpr double E2 = FE * (2 - FE);
-    static constexpr double RAD = M_PI / 180.0;
-
-    double m = 1000.;
-
-    // Curvature formulas from https://en.wikipedia.org/wiki/Earth_radius#Meridional
-    double mul = RAD * RE * m;
-    double coslat = std::cos(latitude * RAD);
-    double w2 = 1 / (1 - E2 * (1 - coslat * coslat));
-    double w = std::sqrt(w2);
-
-    // multipliers for converting longitude and latitude degrees into distance
-    double kx = mul * w * coslat;        // based on normal radius of curvature
-    double ky = mul * w * w2 * (1 - E2); // based on meridonal radius of curvature
-
-    auto a = bearing_ * RAD;
-
-    double dx = std::sin(a) * dist;
-    double dy = std::cos(a) * dist;
-
-    return mbgl::Point<double>(origin.x + dx / kx, origin.y + dy / ky);
-}
-
 void ExampleCustomDrawableStyleLayerHost::generateCommonGeometry(Interface& interface) {
-
     constexpr bool useTextures = true;
-    constexpr float radius = 500.0f; // meters
+    constexpr float itemScale = 10.0f;
     const mbgl::LatLng location{37.78, -122.47};
 
     Interface::CommonGeometryOptions options;
@@ -395,32 +355,16 @@ void ExampleCustomDrawableStyleLayerHost::generateCommonGeometry(Interface& inte
 
     const unsigned long numVtxCircumference = 72;
     const float bearingStep = 360.0f / static_cast<float>(numVtxCircumference - 1);
-    const mbgl::Point<double> centerPoint(location.longitude(), location.latitude());
-    mbgl::Point<double> center = project(location, interface.state);
-    
-    commonGeometryBearing += 0.1f;
 
-    mbgl::mat4 projMatrix;
-    interface.state.getProjMatrix(projMatrix);
-    
-    mbgl::mat4 matrix = mbgl::matrix::identity4();
-    mbgl::matrix::translate(matrix, matrix, center.x, center.y, 0.0);
-    mbgl::matrix::rotate_z(matrix, matrix, commonGeometryBearing);
-    mbgl::matrix::multiply(options.matrix, projMatrix, matrix);
+    vertices.emplace_back(Interface::CommonGeometryVertex{0.0f, 0.0f, 0.0f, 0.5f, 0.5f});
 
-    vertices.emplace_back(Interface::CommonGeometryVertex{0.0f, 0.0f, 0.0f, 0.5, 0.5});
     for (unsigned long i = 1; i <= numVtxCircumference; ++i) {
-        const float bearing_ = static_cast<float>(i - 1) * bearingStep;
-        const mbgl::Point<double> poc = rulerDestination(location.latitude(), centerPoint, radius, bearing_);
-        const mbgl::Point<double> point = project(mbgl::LatLng(poc.y, poc.x), interface.state) - center;
+        const float rad = mbgl::util::deg2radf((i - 1) * bearingStep);
 
         Interface::CommonGeometryVertex vertex;
+        vertex.position = {sinf(rad) / 2.0f, cosf(rad) / 2.0f, 0.0f};
+        vertex.texcoords = {0.5f + vertex.position[0], 0.5f - vertex.position[1]};
 
-        vertex.position = {static_cast<float>(point.x), static_cast<float>(point.y), 0.0f};
-
-        const float rad = mbgl::util::deg2radf(bearing_);
-        vertex.texcoords = {(1.0f + sinf(rad)) / 2.0f, (1.0f - cosf(rad)) / 2.0f};
-        
         vertices.emplace_back(std::move(vertex));
     }
 
@@ -430,17 +374,30 @@ void ExampleCustomDrawableStyleLayerHost::generateCommonGeometry(Interface& inte
     indices.emplace_back(0, static_cast<uint16_t>(vertices.elements() - 1), 1);
 
     interface.setCommonGeometryOptions(options);
-    commonGeometryID = interface.addCommonGeometry(sharedVertices, sharedIndices);
+
+    interface.setCommonGeometryTweakerCallback([=, commonGeometryBearing = 0.0f](
+                                                   mbgl::gfx::Drawable& drawable,
+                                                   const mbgl::PaintParameters& params,
+                                                   Interface::CommonGeometryOptions& currentOptions) mutable {
+        mbgl::Point<double> center = project(location, params.state);
+
+        commonGeometryBearing += 0.1f;
+        float scale = itemScale * static_cast<float>(std::pow(
+                                      2.f, params.state.getZoom() - drawable.getTileID()->toUnwrapped().canonical.z));
+
+        mbgl::mat4 projMatrix;
+        params.state.getProjMatrix(projMatrix);
+
+        mbgl::mat4 matrix = mbgl::matrix::identity4();
+        mbgl::matrix::translate(matrix, matrix, center.x, center.y, 0.0);
+        mbgl::matrix::rotate_z(matrix, matrix, commonGeometryBearing);
+        mbgl::matrix::scale(matrix, matrix, scale * params.pixelsToGLUnits[0], scale * params.pixelsToGLUnits[0], 1.0f);
+        mbgl::matrix::multiply(currentOptions.matrix, projMatrix, matrix);
+    });
+
+    interface.addCommonGeometry(sharedVertices, sharedIndices);
 }
 
 void ExampleCustomDrawableStyleLayerHost::loadCommonGeometry(Interface& interface) {
-    // TODO obj?
-}
-
-void ExampleCustomDrawableStyleLayerHost::updateDrawables(Interface& interface) {
-
-    interface.removeDrawable(commonGeometryID);
-    generateCommonGeometry(interface);
-
-    interface.finish();
+    
 }
