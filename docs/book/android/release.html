@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Android Map Rendering Data Flow - MapLibre Native Developer Documentation</title>
+        <title>Release - MapLibre Native Developer Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -220,122 +220,59 @@
 }
 
 </style>
-<h1 id="android-map-rendering-data-flow"><a class="header" href="#android-map-rendering-data-flow">Android Map Rendering Data Flow</a></h1>
-<p><img src="media/android-data-flow.jpg" alt="" /><br />
-<em>Figure 5: Simplified data flow diagram of initializing a map in Android</em></p>
-<p>Figure 5 shows a simplified data flow diagram of initializing a map. The
-device section of this data flow diagram is based on Android platform.</p>
-<p>Before the map initialization request makes it to MapLibre Native
-Core, the request initializes a set of peer components in the platform
-or device runtime. Especially for Android, we have parts written in C++
-using <em>Android Native Development Kit</em> and parts written in Java.</p>
-<p>A map initialization starts with initializing a map in an Android View.
-A View occupies a rectangular area on the screen and is responsible for
-drawing and event handling. In this diagram this is denoted as a Map
-View inside the device runtime. This view is also responsible for
-initiating a Device Map Renderer which subsequently initializes a GL
-Thread worker. This thread is a render loop that takes UI events from
-the Android View and passes it downstream to get the rendered map.</p>
-<p>On the native C++ side of the device code, we see a peer Map View
-component. This one is a wrapper class between the Android Map View and
-the generic Map Component. For Android, this maintains the JNI method
-contract established from the Java runtime. The render thread this
-document talked about before is seen in the form of <em>MapRenderer</em>. This
-is an Actor that passes the rendering events from the device runtime to
-<em>MapLibre Native</em> renderer.</p>
-<p><img src="media/workflow-of-rendering-tiles.jpg" alt="" /><br />
-<em>Figure 6: Workflow of rendering tiles</em></p>
-<p>Before the frame-by-frame map rendering
-starts with <em>MapLibre Native</em> renderer, the generic map component
-gets initialized. Rendering each frame of a map tile or initializing the
-map view requires a set of <em>Transforms.</em> Through transform basic
-mutations like rotation, tilt, projection is accomplished. Transforms
-are essential for every aspect of rendering such as resizing the
-viewport, setting initial map camera, changes in map camera due to tilt,
-zoom, and movement. Each of these operations manifest into a set of
-<em>Transforms</em> that gets applied to the to-be-rendered map tile or already
-rendered map tile. The <em>Transform</em> class noted in the diagram however
-does not represent a single or multitude of transformations. A Map View
-like other components inside MapLibre works as a state machine. The
-<em>Transform</em> class maintains the current set of global transforms applied
-to the map. To simplify to change the camera orientation, zoom, or pitch
-a Map View will update the state of the Transform class. And the
-Transform class will use observers to send a transform event to
-<em>MapLibre Native</em> renderer. This overall transform directive, such as
-change camera location from point A to point B will translate to a set
-of transformations deduced by the <em>Renderer</em> component.</p>
-<p>Along initializing the <em>Transform</em> state, the Map View will also
-initialize the <em>Style</em> sub-component. The Style component here also
-follows a state machine-esque behaviour. It holds the current state of
-used Styles for the Map View along with layers, glyphs, and sources. A
-change in style or initialization of style translates to re-loading the
-<em>Glyph Atlas</em>, <em>Sources, and Layers.</em> A <em>Glyph Atlas</em> is a combined
-image all glyphs. The renderer slices the necessary glyph by bounding
-boxes whenever necessary. Different sources are loaded differently. For
-Tilesets, the tile data is loaded but not rendered right away. For
-client provided data sources such as GeoJSON, the data is loaded from
-the file source or code. Then these sources are organized into layers
-dictated by the style and the layers are sent for rendering through the
-actors.</p>
-<p>The key philosophy of rendering tiles is tiles are rendered layer by
-layer. A collection of tiles is called a tile set. To optimize tile
-rendering, MapLibre Native only renders <em>dirty</em> tiles. A dirty tile
-is a tile rendered in the viewport that has changed due to user
-interaction. To initiate this process, MapLibre Native loads the
-tileset to be rendered first. In a rendering request, if the tileset is
-already loaded, MapLibre Native will use a cached tile set.</p>
-<p>The next decision to make here is which tiles are to be rendered on the
-viewport. To deduce this, MapLibre Native translates the device
-viewport coordinates<sup class="footnote-reference"><a href="#20">1</a></sup> to a tile cover. A tile cover loads all the
-tiles that will rendered to current viewport. If the viewport already
-has all the tiles that is needed to be rendered by the deduced tile
-cover, there are no <em>dirty</em> tiles. If the tile cover somehow has a
-single or all new tiles to be rendered in the viewport, the existing
-tiles displayed in the viewport are deduced to be <em>dirty.</em> And only
-these tiles are replaced instead of a complete re-render.</p>
-<p>Moving to the render flow now. The render flow is depicted in Figure 7.
-The diagram introduces a new component block named a <em>Tile Renderer.</em>
-These diagrams might look verbose but in reality, they are a simplified
-version of the actual code flow.</p>
-<p>The render workflow stays the same as the initialization workflow up to
-<em>reaching the Render Orchestrator.</em> This time instead of initializing
-the <em>render orchestrator</em>, the flow uses the render orchestrator to
-create a <em>Render Tree.</em> A render tree is a tree of to-be-rendered items
-in order. This includes rendering items from layers, sources, line
-atlas, and pattern atlas. A render orchestrator does not render anything
-by itself. It orchestrates render items for the <em>renderer</em>.</p>
-<p>In the render loop ran by the <em>Renderer</em>, each render request ends in
-<em>creating a new render tree, and the render function.</em> The render
-function uses a glyph manager for fetching glyphs and font stacks that
-contains said glyphs. Sources and Layers are translated to
-<em>RenderSource</em> and <em>RenderLayer</em> objects.</p>
-<p><em>For the sake of restating, a layer is composed of a set of sources.</em></p>
-<p><img src="media/android-rendering-map-tiles.jpg" alt="" /><br />
-<em>Figure 7: Simplified data flow diagram of rendering map tiles</em></p>
-<p>A <em>RenderSource</em> is produced from a single
-source that has an internal <em>update</em> method. This method produces the
-<em>tile pyramid</em> to render for said source if the source is a
-<em>TileSource</em>. For brevity, this document only talks about tile sources.
-There are other types such as GeoJSON sources. They work in a similar
-manner as the tile source.</p>
-<hr />
-<div class="footnote-definition" id="20"><sup class="footnote-definition-label">1</sup>
-<p>Viewport coordinates are derived from the coordinate system of
-the device screen. Anything rendered inside a unit cube of local
-space is translated to screen space of actual pixels. The tiles are
-rendered in a local space before rendered back to screen. We will
-see more about that in Coordinate System section.</p>
-</div>
+<h1 id="release-maplibre-android"><a class="header" href="#release-maplibre-android">Release MapLibre Android</a></h1>
+<p>We make MapLibre Android releases as a downloadable asset on <a href="https://github.com/maplibre/maplibre-native/releases?q=android&amp;expanded=true">GitHub</a> as well as to <a href="https://central.sonatype.com/artifact/org.maplibre.gl/android-sdk/versions">Maven Central</a>. Specifically we make use of a Sonatype OSSHR repository provided by Maven Central.</p>
+<p>Also see the current <a href="../release-policy.html">release policy</a>.</p>
+<h2 id="making-a-release"><a class="header" href="#making-a-release">Making a release</a></h2>
+<p>To make an Android release, do the following:</p>
+<ol>
+<li>
+<p>Prepare a PR.</p>
+<ul>
+<li>
+<p>Update <a href="https://github.com/maplibre/maplibre-native/blob/main/platform/android/CHANGELOG.md"><code>CHANGELOG.md</code></a> in a PR, see for example <a href="https://github.com/maplibre/maplibre-native/pull/3194">this PR</a>. The changelog should contain links to all relevant PRs for Android since the last release. You can use the script below with a <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens">GitHub access token</a> with the <code>public_repo</code> scope. You will need to filter out PRs that do not relate to Android and categorize PRs as features or bugfixes.</p>
+<pre><code>GITHUB_ACCESS_TOKEN=... node scripts/generate-changelog.mjs android
+</code></pre>
+<p>The heading in the changelog must match <code>## &lt;VERSION&gt;</code> exactly, or it will not be picked up. For example, for version 9.6.0:</p>
+<pre><code class="language-md">## 9.6.0
+</code></pre>
+</li>
+<li>
+<p>Update <code>android/MapLibreAndroid/gradle.properties</code> with the new version.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Once the pull request updating the changelog is merged, tag the commit:</p>
+<ul>
+<li>Create a tag locally, with for example:
+<pre><code>git tag -a android-v9.6.0 -m "Release android-v9.6.0"
+</code></pre>
+</li>
+<li>You need write access to push the tag, use for example:
+<pre><code>git push --atomic origin main android-v9.6.0
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>Once the tag is pushed, you can run the <a href="https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/android-release.yml"><code>android-release.yml</code></a> workflow.</p>
+<ul>
+<li>Open the <a href="https://github.com/maplibre/maplibre-native/actions/workflows/android-release.yml">android-release</a> workflow page.</li>
+<li>Press <em>Run workflow</em> and select the tag you pushed.</li>
+</ul>
+</li>
+</ol>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../design/archictural-problems-and-recommendations.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../android/benchmark.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../design/geometry-tile-worker.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../ios/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -345,11 +282,11 @@ see more about that in Coordinate System section.</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../design/archictural-problems-and-recommendations.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../android/benchmark.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../design/geometry-tile-worker.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../ios/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
