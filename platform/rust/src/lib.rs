@@ -172,55 +172,61 @@ mod ffi {
 // Re-export native functions that do not need safety wrappers.
 pub use ffi::{ceil_log2, get_42, TileServerOptions};
 
-unsafe fn to_opt<'a>(value: *const c_char) -> Option<&'a CStr> {
-    value.as_ref().map(|v| CStr::from_ptr(v))
-}
-
 // Add more methods to make usage more ergonomic
 impl TileServerOptions {
+    /// Convert a pointer to a C string to an optional Rust &CStr with lifetime of &self.
+    ///
+    /// # Safety
+    /// The &CStr will remain valid as long as the TileServerOptions `&self` remains valid.
+    /// If some code tries to modify self, it will need to use &mut self,
+    /// which will not compile unless there are no &CStr references, as they use the same lifetime.
+    unsafe fn to_opt(&self, value: *const c_char) -> Option<&CStr> {
+        value.as_ref().map(|v| CStr::from_ptr(v))
+    }
+
     /// Create a new default configuration
     pub fn new() -> UniquePtr<TileServerOptions> {
-        crate::ffi::TileServerOptions_new()
+        ffi::TileServerOptions_new()
     }
 
     /// Get the tile server options configured for MapLibre.
     pub fn default_mapbox() -> UniquePtr<TileServerOptions> {
-        crate::ffi::TileServerOptions_mapbox()
+        ffi::TileServerOptions_mapbox()
     }
 
     /// Get the tile server options configured for Mapbox.
     pub fn default_maplibre() -> UniquePtr<TileServerOptions> {
-        crate::ffi::TileServerOptions_maplibre()
+        ffi::TileServerOptions_maplibre()
     }
 
     /// Get the tile server options configured for MapTiler.
     pub fn default_maptiler() -> UniquePtr<TileServerOptions> {
-        crate::ffi::TileServerOptions_maptiler()
+        ffi::TileServerOptions_maptiler()
     }
 
     /// Gets the source version prefix.
     pub fn source_version_prefix(&self) -> Option<&CStr> {
-        unsafe { to_opt(crate::ffi::TileServerOptions_sourceVersionPrefix(self)) }
+        unsafe { self.to_opt(ffi::TileServerOptions_sourceVersionPrefix(self)) }
     }
 
     /// Gets the style version prefix.
     pub fn style_version_prefix(&self) -> Option<&CStr> {
-        unsafe { to_opt(crate::ffi::TileServerOptions_styleVersionPrefix(self)) }
+        unsafe { self.to_opt(ffi::TileServerOptions_styleVersionPrefix(self)) }
     }
 
     /// Gets the sprites version prefix.
     pub fn sprites_version_prefix(&self) -> Option<&CStr> {
-        unsafe { to_opt(crate::ffi::TileServerOptions_spritesVersionPrefix(self)) }
+        unsafe { self.to_opt(ffi::TileServerOptions_spritesVersionPrefix(self)) }
     }
 
     /// Gets the glyphs version prefix.
     pub fn glyphs_version_prefix(&self) -> Option<&CStr> {
-        unsafe { to_opt(crate::ffi::TileServerOptions_glyphsVersionPrefix(self)) }
+        unsafe { self.to_opt(ffi::TileServerOptions_glyphsVersionPrefix(self)) }
     }
 
     /// Gets the tile version prefix.
     pub fn tile_version_prefix(&self) -> Option<&CStr> {
-        unsafe { to_opt(crate::ffi::TileServerOptions_tileVersionPrefix(self)) }
+        unsafe { self.to_opt(ffi::TileServerOptions_tileVersionPrefix(self)) }
     }
 }
 
