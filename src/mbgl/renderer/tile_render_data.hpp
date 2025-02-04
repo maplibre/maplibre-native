@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/texture.hpp>
+#include <mbgl/gfx/dynamic_texture.hpp>
 #include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/style/layer_impl.hpp>
 
@@ -27,6 +28,8 @@ public:
 #if MLN_DRAWABLE_RENDERER
     gfx::Texture2DPtr glyph;
     gfx::Texture2DPtr icon;
+    
+    std::optional<gfx::TextureHandle> glyphHandle;
 #else
     std::optional<gfx::Texture> glyph;
     std::optional<gfx::Texture> icon;

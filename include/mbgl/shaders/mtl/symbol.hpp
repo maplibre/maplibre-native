@@ -21,27 +21,28 @@ struct alignas(16) SymbolDrawableUBO {
     /*  64 */ float4x4 label_plane_matrix;
     /* 128 */ float4x4 coord_matrix;
 
-    /* 192 */ float2 texsize;
-    /* 200 */ float2 texsize_icon;
+    /* 192 */ float4 tex_region;
+    /* 208 */ float2 texsize;
+    /* 216 */ float2 texsize_icon;
     
-    /* 208 */ /*bool*/ int is_text_prop;
-    /* 212 */ /*bool*/ int rotate_symbol;
-    /* 216 */ /*bool*/ int pitch_with_map;
-    /* 220 */ /*bool*/ int is_size_zoom_constant;
-    /* 224 */ /*bool*/ int is_size_feature_constant;
+    /* 220 */ /*bool*/ int is_text_prop;
+    /* 224 */ /*bool*/ int rotate_symbol;
+    /* 228 */ /*bool*/ int pitch_with_map;
+    /* 232 */ /*bool*/ int is_size_zoom_constant;
+    /* 240 */ /*bool*/ int is_size_feature_constant;
     
-    /* 228 */ float size_t;
-    /* 232 */ float size;
+    /* 244 */ float size_t;
+    /* 248 */ float size;
     
     // Interpolations
-    /* 236 */ float fill_color_t;
-    /* 240 */ float halo_color_t;
-    /* 244 */ float opacity_t;
-    /* 248 */ float halo_width_t;
-    /* 252 */ float halo_blur_t;
-    /* 256 */
+    /* 252 */ float fill_color_t;
+    /* 256 */ float halo_color_t;
+    /* 260 */ float opacity_t;
+    /* 264 */ float halo_width_t;
+    /* 268 */ float halo_blur_t;
+    /* 272 */
 };
-static_assert(sizeof(SymbolDrawableUBO) == 16 * 16, "wrong size");
+static_assert(sizeof(SymbolDrawableUBO) == 17 * 16, "wrong size");
 
 struct alignas(16) SymbolTilePropsUBO {
     /*  0 */ /*bool*/ int is_text;
@@ -360,7 +361,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if !defined(HAS_UNIFORM_u_opacity)
         .opacity      = half(unpack_mix_float(vertx.opacity, drawable.opacity_t)),
 #endif
-        .tex          = half2(a_tex / drawable.texsize),
+        .tex          = half2((drawable.tex_region.xy + a_tex) / drawable.texsize),
+        //.tex          = half2(a_tex / drawable.texsize),
         .gamma_scale  = half(position.w),
         .fontScale    = half(fontScale),
         .fade_opacity = half(max(0.0, min(1.0, fade_opacity[0] + fade_change))),
@@ -562,7 +564,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     return {
         .position     = position,
-        .tex          = half2(a_tex / (is_icon ? drawable.texsize_icon : drawable.texsize)),
+        .tex          = half2(is_icon ? a_tex / drawable.texsize_icon : (drawable.tex_region.xy + a_tex) / drawable.texsize),
+        //.tex          = half2(a_tex / (is_icon ? drawable.texsize_icon : drawable.texsize)),
         .gamma_scale  = half(gamma_scale),
         .fontScale    = half(fontScale),
         .fade_opacity = half(max(0.0, min(1.0, fade_opacity[0] + fade_change))),

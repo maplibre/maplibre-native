@@ -18,6 +18,8 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/std.hpp>
 
+#include <mapbox/shelf-pack.hpp>
+
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/shaders/mtl/symbol.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
@@ -152,6 +154,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const auto& sizeBinder = isText ? bucket->textSizeBinder : bucket->iconSizeBinder;
         const auto size = sizeBinder->evaluateForZoom(currentZoom);
 
+        auto tex_region = drawable.getTextureHandle(idSymbolImageTexture)->getBin();
+        
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {
 #else
@@ -161,6 +165,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             /* .label_plane_matrix = */ util::cast<float>(labelPlaneMatrix),
             /* .coord_matrix = */ util::cast<float>(glCoordMatrix),
 
+            /* .tex_region = */ {tex_region->x, tex_region->y, tex_region->w, tex_region->h},
+            // /* .tex_region = */ {0, 0, 0, 0},
             /* .texsize = */ toArray(getTexSize(drawable, idSymbolImageTexture)),
             /* .texsize_icon = */ toArray(getTexSize(drawable, idSymbolImageIconTexture)),
 

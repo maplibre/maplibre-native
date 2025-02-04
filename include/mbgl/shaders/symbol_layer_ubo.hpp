@@ -10,27 +10,28 @@ struct alignas(16) SymbolDrawableUBO {
     /*  64 */ std::array<float, 4 * 4> label_plane_matrix;
     /* 128 */ std::array<float, 4 * 4> coord_matrix;
 
-    /* 192 */ std::array<float, 2> texsize;
-    /* 200 */ std::array<float, 2> texsize_icon;
+    /* 192 */ std::array<float, 4> tex_region;
+    /* 208 */ std::array<float, 2> texsize;
+    /* 216 */ std::array<float, 2> texsize_icon;
 
-    /* 208 */ /*bool*/ int is_text_prop;
-    /* 212 */ /*bool*/ int rotate_symbol;
-    /* 216 */ /*bool*/ int pitch_with_map;
-    /* 220 */ /*bool*/ int is_size_zoom_constant;
-    /* 224 */ /*bool*/ int is_size_feature_constant;
+    /* 220 */ /*bool*/ int is_text_prop;
+    /* 224 */ /*bool*/ int rotate_symbol;
+    /* 228 */ /*bool*/ int pitch_with_map;
+    /* 232 */ /*bool*/ int is_size_zoom_constant;
+    /* 240 */ /*bool*/ int is_size_feature_constant;
 
-    /* 228 */ float size_t;
-    /* 232 */ float size;
+    /* 244 */ float size_t;
+    /* 248 */ float size;
 
     // Interpolations
-    /* 236 */ float fill_color_t;
-    /* 240 */ float halo_color_t;
-    /* 244 */ float opacity_t;
-    /* 248 */ float halo_width_t;
-    /* 252 */ float halo_blur_t;
-    /* 256 */
+    /* 252 */ float fill_color_t;
+    /* 256 */ float halo_color_t;
+    /* 260 */ float opacity_t;
+    /* 264 */ float halo_width_t;
+    /* 268 */ float halo_blur_t;
+    /* 272 */
 };
-static_assert(sizeof(SymbolDrawableUBO) == 16 * 16);
+static_assert(sizeof(SymbolDrawableUBO) == 17 * 16);
 
 struct alignas(16) SymbolTilePropsUBO {
     /*  0 */ /*bool*/ int is_text;

@@ -1133,7 +1133,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         if (bucket.hasSdfIconData() && atlases->icon) {
             addRenderables(bucket.sdfIcon, SymbolType::IconSDF);
         }
-        if (bucket.hasTextData() && atlases->glyph) {
+        if (bucket.hasTextData() && atlases->glyphHandle) {
             addRenderables(bucket.text, SymbolType::Text);
         }
 

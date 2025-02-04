@@ -1,6 +1,7 @@
 #include <mbgl/gfx/drawable_atlases_tweaker.hpp>
 
 #include <mbgl/gfx/drawable.hpp>
+#include <mbgl/gfx/dynamic_texture.hpp>
 #include <mbgl/renderer/tile_render_data.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
@@ -12,8 +13,8 @@ void DrawableAtlasesTweaker::setupTextures(gfx::Drawable& drawable, const bool l
     if (const auto& shader = drawable.getShader()) {
         if (glyphTextureId) {
             if (atlases) {
-                atlases->glyph->setSamplerConfiguration(
-                    {TextureFilterType::Linear, TextureWrapType::Clamp, TextureWrapType::Clamp});
+                /*atlases->glyph->setSamplerConfiguration(
+                    {TextureFilterType::Linear, TextureWrapType::Clamp, TextureWrapType::Clamp});*/
                 atlases->icon->setSamplerConfiguration(
                     {linearFilterForIcons ? TextureFilterType::Linear : TextureFilterType::Nearest,
                      TextureWrapType::Clamp,
@@ -21,10 +22,14 @@ void DrawableAtlasesTweaker::setupTextures(gfx::Drawable& drawable, const bool l
             }
             if (iconTextureId && shader->getSamplerLocation(*iconTextureId)) {
                 assert(*glyphTextureId != *iconTextureId);
-                drawable.setTexture(atlases ? atlases->glyph : nullptr, *glyphTextureId);
+                drawable.setTexture(atlases ? atlases->glyphHandle->getParent()->getTextureAtlas() : nullptr, *glyphTextureId);
+                drawable.setTextureHandle(atlases->glyphHandle, *glyphTextureId);
+                //drawable.setTexture(atlases ? atlases->glyph : nullptr, *glyphTextureId);
                 drawable.setTexture(atlases ? atlases->icon : nullptr, *iconTextureId);
             } else {
-                drawable.setTexture(atlases ? (isText ? atlases->glyph : atlases->icon) : nullptr, *glyphTextureId);
+                //drawable.setTexture(atlases ? (isText ? atlases->glyph : atlases->icon) : nullptr, *glyphTextureId);
+                drawable.setTexture(atlases ? (isText ? atlases->glyphHandle->getParent()->getTextureAtlas() : atlases->icon) : nullptr, *glyphTextureId);
+                drawable.setTextureHandle(atlases->glyphHandle, *glyphTextureId);
             }
         }
     }
