@@ -177,7 +177,7 @@ public:
 
     /// Unbind the global uniform buffers
     virtual void unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept = 0;
-    
+
     std::unique_ptr<gfx::DynamicTexture>& getDynamicTexture() {
         if (!dynamicTexture) {
             dynamicTexture = std::make_unique<gfx::DynamicTexture>(*this, Size{4096, 4096});

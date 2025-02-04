@@ -20,12 +20,12 @@ class DynamicTexture {
 public:
     DynamicTexture(Context& context, Size size);
     ~DynamicTexture() = default;
-    
+
     const Texture2DPtr& getTextureAtlas();
-    
+
     std::optional<TextureHandle> addImage(const AlphaImage& image);
     void removeTexture(TextureHandle& texHandle);
-    
+
 private:
     Texture2DPtr textureAtlas;
     mapbox::ShelfPack shelfPack;
@@ -33,13 +33,15 @@ private:
 
 class TextureHandle {
 public:
-    TextureHandle(mapbox::Bin* bin_, DynamicTexture* parent_): bin(bin_), parent(parent_) {};
+    TextureHandle(mapbox::Bin* bin_, DynamicTexture* parent_)
+        : bin(bin_),
+          parent(parent_) {};
     ~TextureHandle() = default;
 
     mapbox::Bin* getBin() { return bin; }
     DynamicTexture* getParent() { return parent; }
     void removeFromParent() { parent->removeTexture(*this); }
-    
+
 private:
     mapbox::Bin* bin;
     DynamicTexture* parent;

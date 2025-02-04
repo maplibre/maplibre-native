@@ -100,8 +100,9 @@ void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
         if (atlasTextures->glyphHandle) {
             atlasTextures->glyphHandle->removeFromParent();
         }
-        atlasTextures->glyphHandle = uploadPass.getContext().getDynamicTexture()->addImage(*layoutResult->glyphAtlasImage);
-        
+        atlasTextures->glyphHandle = uploadPass.getContext().getDynamicTexture()->addImage(
+            *layoutResult->glyphAtlasImage);
+
         /*atlasTextures->glyph = uploadPass.getContext().createTexture2D();
         atlasTextures->glyph->setSamplerConfiguration(
             {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});

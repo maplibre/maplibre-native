@@ -28,7 +28,7 @@ public:
 #if MLN_DRAWABLE_RENDERER
     gfx::Texture2DPtr glyph;
     gfx::Texture2DPtr icon;
-    
+
     std::optional<gfx::TextureHandle> glyphHandle;
 #else
     std::optional<gfx::Texture> glyph;

@@ -8,7 +8,7 @@ DynamicTexture::DynamicTexture(Context& context, Size size) {
     mapbox::ShelfPack::ShelfPackOptions options;
     options.autoResize = false;
     shelfPack = mapbox::ShelfPack(size.width, size.height, options);
-    
+
     textureAtlas = context.createTexture2D();
     textureAtlas->setSize(size);
     textureAtlas->setFormat(TexturePixelType::Alpha, TextureChannelDataType::UnsignedByte);

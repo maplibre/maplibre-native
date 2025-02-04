@@ -155,7 +155,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const auto size = sizeBinder->evaluateForZoom(currentZoom);
 
         auto tex_region = drawable.getTextureHandle(idSymbolImageTexture)->getBin();
-        
+
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {
 #else

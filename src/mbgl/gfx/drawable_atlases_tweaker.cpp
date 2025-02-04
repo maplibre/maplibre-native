@@ -22,13 +22,16 @@ void DrawableAtlasesTweaker::setupTextures(gfx::Drawable& drawable, const bool l
             }
             if (iconTextureId && shader->getSamplerLocation(*iconTextureId)) {
                 assert(*glyphTextureId != *iconTextureId);
-                drawable.setTexture(atlases ? atlases->glyphHandle->getParent()->getTextureAtlas() : nullptr, *glyphTextureId);
+                drawable.setTexture(atlases ? atlases->glyphHandle->getParent()->getTextureAtlas() : nullptr,
+                                    *glyphTextureId);
                 drawable.setTextureHandle(atlases->glyphHandle, *glyphTextureId);
-                //drawable.setTexture(atlases ? atlases->glyph : nullptr, *glyphTextureId);
+                // drawable.setTexture(atlases ? atlases->glyph : nullptr, *glyphTextureId);
                 drawable.setTexture(atlases ? atlases->icon : nullptr, *iconTextureId);
             } else {
-                //drawable.setTexture(atlases ? (isText ? atlases->glyph : atlases->icon) : nullptr, *glyphTextureId);
-                drawable.setTexture(atlases ? (isText ? atlases->glyphHandle->getParent()->getTextureAtlas() : atlases->icon) : nullptr, *glyphTextureId);
+                // drawable.setTexture(atlases ? (isText ? atlases->glyph : atlases->icon) : nullptr, *glyphTextureId);
+                drawable.setTexture(
+                    atlases ? (isText ? atlases->glyphHandle->getParent()->getTextureAtlas() : atlases->icon) : nullptr,
+                    *glyphTextureId);
                 drawable.setTextureHandle(atlases->glyphHandle, *glyphTextureId);
             }
         }
