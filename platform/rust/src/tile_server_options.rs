@@ -2,23 +2,12 @@ use std::ffi::{c_char, CStr, CString};
 use std::fmt;
 use std::fmt::Debug;
 
-use cxx::{CxxString, UniquePtr};
+use cxx::UniquePtr;
 
 use crate::ffi;
 
 /// Configuration options for a tile server.
 pub struct TileServerOptions(UniquePtr<ffi::TileServerOptions>);
-
-/// Convert a C string pointer to the Rust &CStr with lifetime of &self.
-///
-/// # Safety
-/// * as_ptr() inside C++ std::string is guaranteed to be null-terminated.
-/// * The &CStr will remain valid as long as the TileServerOptions `&self` remains valid.
-///   If some code tries to modify self, it will need to use &mut self,
-///   which will not compile unless there are no &CStr references, as they use the same lifetime.
-unsafe fn to_c_str(value: &CxxString) -> &CStr {
-    CStr::from_ptr(value.as_ptr().cast())
-}
 
 /// Convert an optional C string to a pointer.
 fn opt_to_ptr(value: Option<&CString>) -> *const c_char {
@@ -64,7 +53,7 @@ impl TileServerOptions {
 
     /// Gets the base URL.
     pub fn base_url(self: &TileServerOptions) -> &CStr {
-        unsafe { to_c_str(self.0.baseURL()) }
+        self.0.baseURL().as_c_str()
     }
 
     /// Sets the scheme alias for the tile server. For example maptiler:// for MapTiler.
@@ -75,7 +64,7 @@ impl TileServerOptions {
 
     /// Gets the URI scheme alias.
     pub fn uri_scheme_alias(self: &TileServerOptions) -> &CStr {
-        unsafe { to_c_str(self.0.uriSchemeAlias()) }
+        self.0.uriSchemeAlias().as_c_str()
     }
 
     /// Sets the template for sources.
@@ -99,12 +88,12 @@ impl TileServerOptions {
 
     /// Gets the source template.
     pub fn source_template(self: &TileServerOptions) -> &CStr {
-        unsafe { to_c_str(self.0.sourceTemplate()) }
+        self.0.sourceTemplate().as_c_str()
     }
 
     /// Gets the source domain name.
     pub fn source_domain_name(self: &TileServerOptions) -> &CStr {
-        unsafe { to_c_str(self.0.sourceDomainName()) }
+        self.0.sourceDomainName().as_c_str()
     }
 
     /// Gets the source version prefix.
@@ -134,12 +123,12 @@ impl TileServerOptions {
 
     /// Gets the style template.
     pub fn style_template(self: &TileServerOptions) -> &CStr {
-        unsafe { to_c_str(self.0.styleTemplate()) }
+        self.0.styleTemplate().as_c_str()
     }
 
     /// Gets the style domain name.
     pub fn style_domain_name(self: &TileServerOptions) -> &CStr {
-        unsafe { to_c_str(self.0.styleDomainName()) }
+        self.0.styleDomainName().as_c_str()
     }
 
     /// Gets the style version prefix.
@@ -169,12 +158,12 @@ impl TileServerOptions {
 
     /// Gets the sprites template.
     pub fn sprites_template(self: &TileServerOptions) -> &CStr {
-        unsafe { to_c_str(self.0.spritesTemplate()) }
+        self.0.spritesTemplate().as_c_str()
     }
 
     /// Gets the sprites domain name.
     pub fn sprites_domain_name(self: &TileServerOptions) -> &CStr {
-        unsafe { to_c_str(self.0.spritesDomainName()) }
+        self.0.spritesDomainName().as_c_str()
     }
 
     /// Gets the sprites version prefix.
@@ -204,12 +193,12 @@ impl TileServerOptions {
 
     /// Gets the glyphs template.
     pub fn glyphs_template(self: &TileServerOptions) -> &CStr {
-        unsafe { to_c_str(self.0.glyphsTemplate()) }
+        self.0.glyphsTemplate().as_c_str()
     }
 
     /// Gets the glyphs domain name.
     pub fn glyphs_domain_name(self: &TileServerOptions) -> &CStr {
-        unsafe { to_c_str(self.0.glyphsDomainName()) }
+        self.0.glyphsDomainName().as_c_str()
     }
 
     /// Gets the glyphs version prefix.
@@ -240,12 +229,12 @@ impl TileServerOptions {
 
     /// Gets the tile template.
     pub fn tile_template(self: &TileServerOptions) -> &CStr {
-        unsafe { to_c_str(self.0.tileTemplate()) }
+        self.0.tileTemplate().as_c_str()
     }
 
     /// Gets the tile domain name.
     pub fn tile_domain_name(self: &TileServerOptions) -> &CStr {
-        unsafe { to_c_str(self.0.tileDomainName()) }
+        self.0.tileDomainName().as_c_str()
     }
 
     /// Gets the tile version prefix.
@@ -266,7 +255,7 @@ impl TileServerOptions {
 
     /// Gets the API key parameter name.
     pub fn api_key_parameter_name(self: &TileServerOptions) -> &CStr {
-        unsafe { to_c_str(self.0.apiKeyParameterName()) }
+        self.0.apiKeyParameterName().as_c_str()
     }
 
     /// Sets if an API key is required.
@@ -298,7 +287,7 @@ impl TileServerOptions {
 
     /// Gets the default style.
     pub fn default_style(self: &TileServerOptions) -> &CStr {
-        unsafe { to_c_str(self.0.defaultStyle()) }
+        self.0.defaultStyle().as_c_str()
     }
 }
 
