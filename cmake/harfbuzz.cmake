@@ -29,19 +29,19 @@ if (MLN_TEXT_SHAPING_HARFBUZZ)
     set_target_properties(
         freetype
         PROPERTIES
-            INTERFACE_MAPBOX_NAME "freetype"
-            INTERFACE_MAPBOX_URL "https://github.com/freetype/freetype"
-            INTERFACE_MAPBOX_AUTHOR "David Turner, Robert Wilhelm, Werner Lemberg and FreeType contributors"
-            INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/vendor/freetype/docs/FTL.TXT
+            INTERFACE_MAPLIBRE_NAME "freetype"
+            INTERFACE_MAPLIBRE_URL "https://github.com/freetype/freetype"
+            INTERFACE_MAPLIBRE_AUTHOR "David Turner, Robert Wilhelm, Werner Lemberg and FreeType contributors"
+            INTERFACE_MAPLIBRE_LICENSE ${PROJECT_SOURCE_DIR}/vendor/freetype/docs/FTL.TXT
     )
 
     set_target_properties(
         harfbuzz
         PROPERTIES
-            INTERFACE_MAPBOX_NAME "harfbuzz"
-            INTERFACE_MAPBOX_URL "https://github.com/harfbuzz/harfbuzz"
-            INTERFACE_MAPBOX_AUTHOR ${PROJECT_SOURCE_DIR}/vendor/harfbuzz/AUTHORS
-            INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/vendor/harfbuzz/COPYING
+            INTERFACE_MAPLIBRE_NAME "harfbuzz"
+            INTERFACE_MAPLIBRE_URL "https://github.com/harfbuzz/harfbuzz"
+            INTERFACE_MAPLIBRE_AUTHOR ${PROJECT_SOURCE_DIR}/vendor/harfbuzz/AUTHORS
+            INTERFACE_MAPLIBRE_LICENSE ${PROJECT_SOURCE_DIR}/vendor/harfbuzz/COPYING
     )
 
     target_include_directories(
