@@ -6,6 +6,7 @@ use cxx::{CxxString, UniquePtr};
 
 use crate::ffi;
 
+/// Configuration options for a tile server.
 pub struct TileServerOptions(UniquePtr<ffi::TileServerOptions>);
 
 /// Convert a C string pointer to the Rust &CStr with lifetime of &self.
@@ -17,6 +18,11 @@ pub struct TileServerOptions(UniquePtr<ffi::TileServerOptions>);
 /// which will not compile unless there are no &CStr references, as they use the same lifetime.
 unsafe fn to_c_str(value: &CxxString) -> &CStr {
     CStr::from_ptr(value.as_ptr().cast())
+}
+
+/// Convert an optional C string to a pointer.
+fn opt_to_ptr(value: Option<&CString>) -> *const c_char {
+    value.map(|v| v.as_ptr()).unwrap_or(std::ptr::null())
 }
 
 impl TileServerOptions {
@@ -81,15 +87,11 @@ impl TileServerOptions {
     ) -> &mut Self {
         unsafe {
             // Slightly inefficient because CString allocation is than copied to std::string
-            let version_prefix = version_prefix
-                .as_ref()
-                .map(|v| v.as_ptr())
-                .unwrap_or(std::ptr::null());
             ffi::TileServerOptions_withSourceTemplate(
                 self.0.pin_mut(),
                 source_template,
                 domain_name,
-                version_prefix,
+                opt_to_ptr(version_prefix.as_ref()),
             );
         }
         self
@@ -120,15 +122,11 @@ impl TileServerOptions {
     ) -> &mut Self {
         unsafe {
             // Slightly inefficient because CString allocation is than copied to std::string
-            let version_prefix = version_prefix
-                .as_ref()
-                .map(|v| v.as_ptr())
-                .unwrap_or(std::ptr::null());
             ffi::TileServerOptions_withStyleTemplate(
                 self.0.pin_mut(),
                 style_template,
                 domain_name,
-                version_prefix,
+                opt_to_ptr(version_prefix.as_ref()),
             );
         }
         self
@@ -159,15 +157,11 @@ impl TileServerOptions {
     ) -> &mut Self {
         unsafe {
             // Slightly inefficient because CString allocation is than copied to std::string
-            let version_prefix = version_prefix
-                .as_ref()
-                .map(|v| v.as_ptr())
-                .unwrap_or(std::ptr::null());
             ffi::TileServerOptions_withSpritesTemplate(
                 self.0.pin_mut(),
                 sprites_template,
                 domain_name,
-                version_prefix,
+                opt_to_ptr(version_prefix.as_ref()),
             );
         }
         self
@@ -198,15 +192,11 @@ impl TileServerOptions {
     ) -> &mut Self {
         unsafe {
             // Slightly inefficient because CString allocation is than copied to std::string
-            let version_prefix = version_prefix
-                .as_ref()
-                .map(|v| v.as_ptr())
-                .unwrap_or(std::ptr::null());
             ffi::TileServerOptions_withGlyphsTemplate(
                 self.0.pin_mut(),
                 glyphs_template,
                 domain_name,
-                version_prefix,
+                opt_to_ptr(version_prefix.as_ref()),
             );
         }
         self
@@ -238,15 +228,11 @@ impl TileServerOptions {
     ) -> &mut Self {
         unsafe {
             // Slightly inefficient because CString allocation is than copied to std::string
-            let version_prefix = version_prefix
-                .as_ref()
-                .map(|v| v.as_ptr())
-                .unwrap_or(std::ptr::null());
             ffi::TileServerOptions_withTileTemplate(
                 self.0.pin_mut(),
                 tile_template,
                 domain_name,
-                version_prefix,
+                opt_to_ptr(version_prefix.as_ref()),
             );
         }
         self
@@ -340,6 +326,12 @@ impl Debug for TileServerOptions {
             .field("requires_api_key", &self.requires_api_key())
             .field("default_style", &self.default_style())
             .finish()
+    }
+}
+
+impl Default for TileServerOptions {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
