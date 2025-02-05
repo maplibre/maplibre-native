@@ -3,9 +3,8 @@ pub use tile_server_options::TileServerOptions;
 
 #[cxx::bridge(namespace = "ml::bridge")]
 mod ffi {
-    // C++ types exposed to Rust.
     unsafe extern "C++" {
-        include!("maplibre-native/include/wrapper.h");
+        include!("maplibre-native/include/tile_server_options.h");
 
         #[namespace = "mbgl"]
         type TileServerOptions;
@@ -16,17 +15,17 @@ mod ffi {
         fn TileServerOptions_maptiler() -> UniquePtr<TileServerOptions>;
 
         fn TileServerOptions_withBaseURL(obj: Pin<&mut TileServerOptions>, value: &str);
-        fn baseURL(self: &TileServerOptions) -> &CxxString;
+        fn baseURL(&self) -> &CxxString;
         fn TileServerOptions_withUriSchemeAlias(obj: Pin<&mut TileServerOptions>, value: &str);
-        fn uriSchemeAlias(self: &TileServerOptions) -> &CxxString;
+        fn uriSchemeAlias(&self) -> &CxxString;
         unsafe fn TileServerOptions_withSourceTemplate(
             obj: Pin<&mut TileServerOptions>,
             source_template: &str,
             domain_name: &str,
             version_prefix: *const i8,
         );
-        fn sourceTemplate(self: &TileServerOptions) -> &CxxString;
-        fn sourceDomainName(self: &TileServerOptions) -> &CxxString;
+        fn sourceTemplate(&self) -> &CxxString;
+        fn sourceDomainName(&self) -> &CxxString;
         unsafe fn TileServerOptions_sourceVersionPrefix(value: &TileServerOptions) -> *const i8;
         unsafe fn TileServerOptions_withStyleTemplate(
             obj: Pin<&mut TileServerOptions>,
@@ -34,8 +33,8 @@ mod ffi {
             domain_name: &str,
             version_prefix: *const i8,
         );
-        fn styleTemplate(self: &TileServerOptions) -> &CxxString;
-        fn styleDomainName(self: &TileServerOptions) -> &CxxString;
+        fn styleTemplate(&self) -> &CxxString;
+        fn styleDomainName(&self) -> &CxxString;
         unsafe fn TileServerOptions_styleVersionPrefix(value: &TileServerOptions) -> *const i8;
         unsafe fn TileServerOptions_withSpritesTemplate(
             obj: Pin<&mut TileServerOptions>,
@@ -43,8 +42,8 @@ mod ffi {
             domain_name: &str,
             version_prefix: *const i8,
         );
-        fn spritesTemplate(self: &TileServerOptions) -> &CxxString;
-        fn spritesDomainName(self: &TileServerOptions) -> &CxxString;
+        fn spritesTemplate(&self) -> &CxxString;
+        fn spritesDomainName(&self) -> &CxxString;
         unsafe fn TileServerOptions_spritesVersionPrefix(value: &TileServerOptions) -> *const i8;
         unsafe fn TileServerOptions_withGlyphsTemplate(
             obj: Pin<&mut TileServerOptions>,
@@ -52,8 +51,8 @@ mod ffi {
             domain_name: &str,
             version_prefix: *const i8,
         );
-        fn glyphsTemplate(self: &TileServerOptions) -> &CxxString;
-        fn glyphsDomainName(self: &TileServerOptions) -> &CxxString;
+        fn glyphsTemplate(&self) -> &CxxString;
+        fn glyphsDomainName(&self) -> &CxxString;
         unsafe fn TileServerOptions_glyphsVersionPrefix(value: &TileServerOptions) -> *const i8;
         unsafe fn TileServerOptions_withTileTemplate(
             obj: Pin<&mut TileServerOptions>,
@@ -61,16 +60,16 @@ mod ffi {
             domain_name: &str,
             version_prefix: *const i8,
         );
-        fn tileTemplate(self: &TileServerOptions) -> &CxxString;
-        fn tileDomainName(self: &TileServerOptions) -> &CxxString;
+        fn tileTemplate(&self) -> &CxxString;
+        fn tileDomainName(&self) -> &CxxString;
         unsafe fn TileServerOptions_tileVersionPrefix(value: &TileServerOptions) -> *const i8;
         unsafe fn TileServerOptions_withApiKeyParameterName(
             obj: Pin<&mut TileServerOptions>,
             value: &str,
         );
-        fn apiKeyParameterName(self: &TileServerOptions) -> &CxxString;
+        fn apiKeyParameterName(&self) -> &CxxString;
         fn TileServerOptions_setRequiresApiKey(obj: Pin<&mut TileServerOptions>, value: bool);
-        fn requiresApiKey(self: &TileServerOptions) -> bool;
+        fn requiresApiKey(&self) -> bool;
 
         // /// Gets the default styles.
         // const std::vector<mbgl::util::DefaultStyle> defaultStyles() const;
@@ -78,8 +77,8 @@ mod ffi {
         // /// Sets the collection default styles.
         // TileServerOptions& withDefaultStyles(std::vector<mbgl::util::DefaultStyle> styles);
 
-        // fn withDefaultStyle(self: &TileServerOptions);
+        // fn withDefaultStyle(&self);
         unsafe fn TileServerOptions_withDefaultStyle(obj: Pin<&mut TileServerOptions>, value: &str);
-        fn defaultStyle(self: &TileServerOptions) -> &CxxString;
+        fn defaultStyle(&self) -> &CxxString;
     }
 }

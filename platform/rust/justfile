@@ -57,7 +57,7 @@ docs:
     cargo doc --no-deps --open
 
 # Print Rust version information
-rust-info:
+@rust-info:
     rustc --version
     cargo --version
 

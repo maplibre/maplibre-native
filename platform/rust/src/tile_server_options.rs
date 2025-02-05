@@ -14,8 +14,8 @@ pub struct TileServerOptions(UniquePtr<ffi::TileServerOptions>);
 /// # Safety
 /// * as_ptr() inside C++ std::string is guaranteed to be null-terminated.
 /// * The &CStr will remain valid as long as the TileServerOptions `&self` remains valid.
-/// If some code tries to modify self, it will need to use &mut self,
-/// which will not compile unless there are no &CStr references, as they use the same lifetime.
+///   If some code tries to modify self, it will need to use &mut self,
+///   which will not compile unless there are no &CStr references, as they use the same lifetime.
 unsafe fn to_c_str(value: &CxxString) -> &CStr {
     CStr::from_ptr(value.as_ptr().cast())
 }

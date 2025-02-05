@@ -1,12 +1,9 @@
 #pragma once
 #include "rust/cxx.h"
-#include "mbgl/math/log2.hpp"
 #include "mbgl/util/tile_server_options.hpp"
 
 namespace ml {
 namespace bridge {
-
-uint32_t get_42();
 
 using namespace mbgl;
 

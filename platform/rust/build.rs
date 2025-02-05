@@ -42,5 +42,5 @@ fn main() {
 
     println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=src/wrapper.cc");
-    println!("cargo:rerun-if-changed=include/wrapper.h");
+    println!("cargo:rerun-if-changed=include/tile_server_options.h");
 }
