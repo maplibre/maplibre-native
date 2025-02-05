@@ -44,5 +44,52 @@ inline const int8_t* TileServerOptions_tileVersionPrefix(const TileServerOptions
     return get_raw_str_ptr(self.tileVersionPrefix());
 }
 
+// TileServerOptions setters
+inline void TileServerOptions_withBaseURL(TileServerOptions& self, const rust::Str value) {
+    self.withBaseURL((std::string)value);
+}
+inline void TileServerOptions_withUriSchemeAlias(TileServerOptions& self, const rust::Str value) {
+    self.withUriSchemeAlias((std::string)value);
+}
+inline void TileServerOptions_withSourceTemplate(TileServerOptions& self, const rust::Str source_template, const rust::Str domain_name, const int8_t* version_prefix) {
+    self.withSourceTemplate(
+        (std::string)source_template,
+        (std::string)domain_name,
+        (version_prefix ? std::string((const char*)version_prefix) : std::optional<std::string>{}));
+}
+inline void TileServerOptions_withStyleTemplate(TileServerOptions& self, const rust::Str style_template, const rust::Str domain_name, const int8_t* version_prefix) {
+    self.withStyleTemplate(
+        (std::string)style_template,
+        (std::string)domain_name,
+        (version_prefix ? std::string((const char*)version_prefix) : std::optional<std::string>{}));
+}
+inline void TileServerOptions_withSpritesTemplate(TileServerOptions& self, const rust::Str sprites_template, const rust::Str domain_name, const int8_t* version_prefix) {
+    self.withSpritesTemplate(
+        (std::string)sprites_template,
+        (std::string)domain_name,
+        (version_prefix ? std::string((const char*)version_prefix) : std::optional<std::string>{}));
+}
+inline void TileServerOptions_withGlyphsTemplate(TileServerOptions& self, const rust::Str glyphs_template, const rust::Str domain_name, const int8_t* version_prefix) {
+    self.withGlyphsTemplate(
+        (std::string)glyphs_template,
+        (std::string)domain_name,
+        (version_prefix ? std::string((const char*)version_prefix) : std::optional<std::string>{}));
+}
+inline void TileServerOptions_withTileTemplate(TileServerOptions& self, const rust::Str tile_template, const rust::Str domain_name, const int8_t* version_prefix) {
+    self.withTileTemplate(
+        (std::string)tile_template,
+        (std::string)domain_name,
+        (version_prefix ? std::string((const char*)version_prefix) : std::optional<std::string>{}));
+}
+inline void TileServerOptions_withApiKeyParameterName(TileServerOptions& self, const rust::Str value) {
+    self.withApiKeyParameterName((std::string)value);
+}
+inline void TileServerOptions_setRequiresApiKey(TileServerOptions& self, bool value) {
+    self.setRequiresApiKey(value);
+}
+inline void TileServerOptions_withDefaultStyle(TileServerOptions& self, const rust::Str value) {
+    self.withDefaultStyle((std::string)value);
+}
+
 } // namespace bridge
 } // namespace ml
