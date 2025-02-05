@@ -20,8 +20,8 @@ RunLoop* RunLoop::Get() {
 }
 
 RunLoop::RunLoop(Type)
-  : impl(std::make_unique<Impl>()) {
-    assert(!Scheduler::GetCurrent());
+    : impl(std::make_unique<Impl>()) {
+    assert(!Scheduler::GetCurrent(false));
     Scheduler::SetCurrent(this);
     impl->async = std::make_unique<AsyncTask>(std::bind(&RunLoop::process, this));
 }
@@ -47,8 +47,7 @@ void RunLoop::stop() {
     invoke([&] { CFRunLoopStop(CFRunLoopGetCurrent()); });
 }
 
-std::size_t RunLoop::waitForEmpty(Milliseconds timeout) {
-    const auto startTime = mbgl::util::MonotonicTimer::now();
+void RunLoop::waitForEmpty([[maybe_unused]] const SimpleIdentity tag) {
     while (true) {
         std::size_t remaining;
         {
@@ -56,10 +55,8 @@ std::size_t RunLoop::waitForEmpty(Milliseconds timeout) {
             remaining = defaultQueue.size() + highPriorityQueue.size();
         }
 
-        const auto elapsed = mbgl::util::MonotonicTimer::now() - startTime;
-        const auto elapsedMillis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
-        if (remaining == 0 || (Milliseconds::zero() < timeout && timeout <= elapsedMillis)) {
-            return remaining;
+        if (remaining == 0) {
+            return;
         }
 
         runOnce();

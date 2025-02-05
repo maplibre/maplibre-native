@@ -1,4 +1,4 @@
-package com.mapbox.mapboxsdk.style.expressions
+package org.maplibre.android.style.expressions
 
 import android.graphics.Color
 import org.maplibre.geojson.Point
@@ -10,7 +10,6 @@ import org.maplibre.android.utils.ColorUtils
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.maplibre.android.style.expressions.Expression
 import org.robolectric.RobolectricTestRunner
 import java.util.*
 
@@ -1122,6 +1121,14 @@ class ExpressionTest {
     fun testToColor() {
         val expected = arrayOf<Any>("to-color", "value")
         val actual = Expression.toColor(Expression.literal("value")).toArray()
+        Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testToPadding() {
+        val expected = arrayOf<Any>("to-padding", "value")
+        val actual = Expression.toPadding(Expression.literal("value")).toArray()
         Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
     }
 

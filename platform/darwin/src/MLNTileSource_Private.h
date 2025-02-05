@@ -6,7 +6,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 namespace mbgl {
-    class Tileset;
+class Tileset;
 }
 
 @class MLNAttributionInfo;
@@ -28,11 +28,14 @@ namespace mbgl {
  @param fontSize The default text size in points, or 0 to use the default.
  @param linkColor The default link color, or `nil` to use the default.
  */
-- (NSArray<MLNAttributionInfo *> *)attributionInfosWithFontSize:(CGFloat)fontSize linkColor:(nullable MLNColor *)linkColor;
+- (NSArray<MLNAttributionInfo *> *)attributionInfosWithFontSize:(CGFloat)fontSize
+                                                      linkColor:(nullable MLNColor *)linkColor;
 
 @end
 
 MLN_EXPORT
-mbgl::Tileset MLNTileSetFromTileURLTemplates(NSArray<NSString *> *tileURLTemplates, NSDictionary<MLNTileSourceOption, id> * _Nullable options);
+mbgl::Tileset MLNTileSetFromTileURLTemplates(
+    NSArray<NSString *> *tileURLTemplates,
+    NSDictionary<MLNTileSourceOption, id> *_Nullable options);
 
 NS_ASSUME_NONNULL_END

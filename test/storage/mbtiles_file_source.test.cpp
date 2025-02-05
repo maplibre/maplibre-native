@@ -4,30 +4,16 @@
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/run_loop.hpp>
 
+#include <filesystem>
+
 #include <climits>
 #include <gtest/gtest.h>
-
-#if defined(WIN32)
-#include <Windows.h>
-#ifndef PATH_MAX
-#define PATH_MAX MAX_PATH
-#endif /* PATH_MAX */
-#else
-#include <unistd.h>
-#endif
 
 namespace {
 
 std::string toAbsoluteURL(const std::string &fileName) {
-    char buff[PATH_MAX + 1];
-#ifdef _MSC_VER
-    char *cwd = _getcwd(buff, PATH_MAX + 1);
-#else
-    char *cwd = getcwd(buff, PATH_MAX + 1);
-#endif
-    std::string url = {"mbtiles://" + std::string(cwd) + "/test/fixtures/storage/mbtiles/" + fileName};
-    assert(url.size() <= PATH_MAX);
-    return url;
+    auto path = std::filesystem::current_path() / "test/fixtures/storage/mbtiles" / fileName;
+    return "mbtiles://" + path.string();
 }
 
 } // namespace

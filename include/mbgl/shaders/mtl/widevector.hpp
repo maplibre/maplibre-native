@@ -1,12 +1,21 @@
 #pragma once
 
-#include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/mtl/common.hpp>
-#include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/shaders/widevector_ubo.hpp>
+#include <mbgl/shaders/shader_source.hpp>
+#include <mbgl/shaders/mtl/shader_program.hpp>
 
 namespace mbgl {
 namespace shaders {
+
+constexpr auto wideVectorShaderPrelude = R"(
+
+enum {
+    idWideVectorUniformsUBO = idDrawableReservedVertexOnlyUBO,
+    idWideVectorUniformWideVecUBO = drawableReservedUBOCount,
+    wideVectorUBOCount
+};
+
+)";
 
 template <>
 struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Metal> {
@@ -14,23 +23,12 @@ struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexTri_wideVecPerf";
     static constexpr auto fragmentMainFunction = "fragmentTri_wideVecPerf";
 
-    static constexpr std::array<UniformBlockInfo, 2> uniforms{
-        UniformBlockInfo{true, false, sizeof(WideVectorUniformsUBO), idWideVectorUniformsUBO},
-        UniformBlockInfo{true, false, sizeof(WideVectorUniformWideVecUBO), idWideVectorUniformWideVecUBO},
-    };
-    static constexpr std::array<AttributeInfo, 3> attributes{
-        AttributeInfo{wideVectorUBOCount + 0, gfx::AttributeDataType::Float3, idWideVectorScreenPos},
-        AttributeInfo{wideVectorUBOCount + 1, gfx::AttributeDataType::Float4, idWideVectorColor},
-        AttributeInfo{wideVectorUBOCount + 2, gfx::AttributeDataType::Int, idWideVectorIndex}};
-    static constexpr std::array<AttributeInfo, 4> instanceAttributes{
-        AttributeInfo{wideVectorUBOCount + 3, gfx::AttributeDataType::Float3, idWideVectorInstanceCenter},
-        AttributeInfo{wideVectorUBOCount + 3, gfx::AttributeDataType::Float4, idWideVectorInstanceColor},
-        AttributeInfo{wideVectorUBOCount + 3, gfx::AttributeDataType::Int, idWideVectorInstancePrevious},
-        AttributeInfo{wideVectorUBOCount + 3, gfx::AttributeDataType::Int, idWideVectorInstanceNext}};
-    static constexpr std::array<TextureInfo, 0> textures{};
+    static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<AttributeInfo, 4> instanceAttributes;
+    static const std::array<TextureInfo, 0> textures;
 
+    static constexpr auto prelude = wideVectorShaderPrelude;
     static constexpr auto source = R"(
-#include <metal_stdlib>
 
 namespace WhirlyKitShader
 {
@@ -112,9 +110,9 @@ typedef struct
 struct VertexTriWideVecB
 {
     // x, y offset around the center
-    float3 screenPos [[attribute(3)]];
-    float4 color [[attribute(4)]];
-    int index [[attribute(5)]];
+    float3 screenPos [[attribute(wideVectorUBOCount + 0)]];
+    float4 color [[attribute(wideVectorUBOCount + 1)]];
+    int index [[attribute(wideVectorUBOCount + 2)]];
 };
 
 // Wide vector vertex passed to fragment shader (new version)
@@ -221,10 +219,10 @@ constant constexpr float4 discardPt(0,0,-1e6,NAN);
 // Performance version of wide vector shader
 vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
           thread const VertexTriWideVecB vert [[ stage_in ]],
-          constant Uniforms &uniforms [[ buffer(1) ]],
-          constant UniformWideVec &wideVec [[ buffer(2) ]],
+          constant Uniforms &uniforms [[ buffer(idWideVectorUniformsUBO) ]],
+          constant UniformWideVec &wideVec [[ buffer(idWideVectorUniformWideVecUBO) ]],
           uint instanceID [[ instance_id ]],
-          constant VertexTriWideVecInstance *wideVecInsts   [[ buffer(6) ]])
+          constant VertexTriWideVecInstance *wideVecInsts   [[ buffer(wideVectorUBOCount + 3) ]])
 {
     ProjVertexTriWideVecPerf outVert = {
         .position = discardPt,
@@ -563,7 +561,7 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
 // Fragment shader that takes the back of the globe into account
 fragment float4 fragmentTri_wideVecPerf(
             ProjVertexTriWideVecPerf vert [[stage_in]],
-            constant Uniforms &uniforms [[ buffer(1) ]])
+            constant Uniforms &uniforms [[ buffer(idWideVectorUniformsUBO) ]])
 {
     float patternAlpha = 1.0;
 

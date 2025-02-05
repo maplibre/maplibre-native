@@ -1,6 +1,6 @@
 #pragma once
 
-#include "glyph.hpp"
+#include <mbgl/text/glyph.hpp>
 
 #include <string>
 #include <vector>

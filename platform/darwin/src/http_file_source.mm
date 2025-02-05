@@ -146,10 +146,7 @@ NSString *HTTPFileSource::Impl::getUserAgent() const {
 
     NSBundle *sdkBundle = HTTPFileSource::Impl::getSDKBundle();
     if (sdkBundle) {
-        NSString *versionString = sdkBundle.infoDictionary[@"MLNSemanticVersionString"];
-        if (!versionString) {
-            versionString = sdkBundle.infoDictionary[@"CFBundleShortVersionString"];
-        }
+        NSString *versionString = sdkBundle.infoDictionary[@"CFBundleShortVersionString"];
         if (versionString) {
             [userAgentComponents addObject:[NSString stringWithFormat:@"%@/%@",
                                             sdkBundle.infoDictionary[@"CFBundleName"], versionString]];
@@ -267,6 +264,13 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, 
             [req addValue:@(util::rfc1123(*resource.priorModified).c_str())
                  forHTTPHeaderField:@"If-Modified-Since"];
         }
+        
+        if (resource.dataRange) {
+            NSString *rangeHeader = [NSString stringWithFormat:@"bytes=%lld-%lld",
+                                     static_cast<long long>(resource.dataRange->first),
+                                     static_cast<long long>(resource.dataRange->second)];
+            [req setValue:rangeHeader forHTTPHeaderField:@"Range"];
+        }
 
         [req addValue:impl->userAgent forHTTPHeaderField:@"User-Agent"];
 
@@ -363,7 +367,7 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, 
                         response.etag = std::string([etag UTF8String]);
                     }
 
-                    if (responseCode == 200) {
+                    if (responseCode == 200 || responseCode == 206) {
                         response.data = std::make_shared<std::string>((const char *)[data bytes], [data length]);
                     } else if (responseCode == 204 || (responseCode == 404 && isTile)) {
                         response.noContent = true;

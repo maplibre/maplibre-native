@@ -1,18 +1,18 @@
-#import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
+#import <Foundation/Foundation.h>
 
 #import "MLNFoundation.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- The `MLNCompassDirectionFormatter` class provides properly formatted
+ The ``MLNCompassDirectionFormatter`` class provides properly formatted
  descriptions of absolute headings. For example, a value of `90` may be
  formatted as “east”, depending on the locale.
 
  Use this class to create localized heading strings when displaying directions
  irrespective of the user’s current location. To format a direction relative to
- the user’s current location, use `MLNClockDirectionFormatter` instead.
+ the user’s current location, use ``MLNClockDirectionFormatter`` instead.
  */
 MLN_EXPORT
 @interface MLNCompassDirectionFormatter : NSFormatter
@@ -34,9 +34,11 @@ MLN_EXPORT
 - (NSString *)stringFromDirection:(CLLocationDirection)direction;
 
 /**
- This method is not supported for the `MLNDirectionFormatter` class.
+ This method is not supported for the ``MLNCompassDirectionFormatter`` class.
  */
-- (BOOL)getObjectValue:(out id __nullable * __nullable)obj forString:(NSString *)string errorDescription:(out NSString * __nullable * __nullable)error;
+- (BOOL)getObjectValue:(out id __nullable *__nullable)obj
+             forString:(NSString *)string
+      errorDescription:(out NSString *__nullable *__nullable)error;
 
 @end
 

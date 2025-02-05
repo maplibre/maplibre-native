@@ -72,6 +72,73 @@ EvaluationResult toColor(const Value& colorValue) {
         });
 }
 
+EvaluationResult toPadding(const Value& paddingValue) {
+    return paddingValue.match(
+        [](const Padding& padding) -> EvaluationResult { return padding; },
+        [&](const std::vector<Value>& components) -> EvaluationResult {
+            const std::size_t len = components.size();
+            const bool isNumeric = std::all_of(components.begin(), components.end(), [](const Value& item) -> bool {
+                return item.template is<double>();
+            });
+            if ((len >= 1 && len <= 4) && isNumeric) {
+                float componentsAsFloats[4] = {0};
+                for (std::size_t i = 0; i < len; i++) {
+                    componentsAsFloats[i] = static_cast<float>(components[i].template get<double>());
+                }
+                return Padding(std::span<float>(componentsAsFloats, len));
+            } else {
+                return EvaluationError{"Invalid padding value " + stringify(paddingValue) +
+                                       ": expected an array containing from one to four "
+                                       "numeric values."};
+            }
+        },
+        [](const double number) -> EvaluationResult { return Padding(static_cast<float>(number)); },
+        [&](const auto&) -> EvaluationResult {
+            return EvaluationError{"Could not parse padding from value '" + stringify(paddingValue) + "'"};
+        });
+}
+
+EvaluationResult toVariableAnchorOffset(const Value& value) {
+    return value.match(
+        [&](const VariableAnchorOffsetCollection& anchorOffset) -> EvaluationResult { return anchorOffset; },
+        [&](const std::vector<Value>& components) -> EvaluationResult {
+            if (components.size() % 2 != 0) {
+                return EvaluationError{"Invalid variableAnchorOffset value " + stringify(components) +
+                                       ": expected an array containing an even number of values."};
+            }
+
+            std::vector<AnchorOffsetPair> anchorOffsets;
+            for (std::size_t i = 0; i < components.size(); i += 2) {
+                const auto& anchorTypeValue = components[i];
+                const auto& offsetArray = components[i + 1];
+
+                if (!anchorTypeValue.is<std::string>() || !offsetArray.is<std::vector<Value>>() ||
+                    offsetArray.get<std::vector<Value>>().size() != 2) {
+                    return EvaluationError{"Invalid variableAnchorOffset value " + stringify(components) +
+                                           ": expected a string value as the first and an array with two elements as "
+                                           "the second element of each pair."};
+                }
+
+                const auto anchor = Enum<SymbolAnchorType>::toEnum(anchorTypeValue.get<std::string>());
+                if (!anchor) {
+                    return EvaluationError{"Invalid variableAnchorOffsetCollection value " + stringify(components) +
+                                           ": unknown anchor type '" + anchorTypeValue.get<std::string>() + "'"};
+                }
+
+                const auto& offset = offsetArray.get<std::vector<Value>>();
+                const auto x = static_cast<float>(offset[0].template get<double>());
+                const auto y = static_cast<float>(offset[1].template get<double>());
+
+                anchorOffsets.emplace_back(*anchor, std::array<float, 2>{{x, y}});
+            }
+
+            return VariableAnchorOffsetCollection(std::move(anchorOffsets));
+        },
+        [&](const auto&) -> EvaluationResult {
+            return EvaluationError{"Could not parse variableAnchorOffset from '" + stringify(value) + "'"};
+        });
+}
+
 EvaluationResult toFormatted(const Value& formattedValue) {
     return Formatted(toString(formattedValue).c_str());
 }
@@ -89,6 +156,10 @@ CoerceFunction getCoerceFunction(const type::Type& t) {
         return toBoolean;
     } else if (t.is<type::ColorType>()) {
         return toColor;
+    } else if (t.is<type::PaddingType>()) {
+        return toPadding;
+    } else if (t.is<type::VariableAnchorOffsetCollectionType>()) {
+        return toVariableAnchorOffset;
     } else if (t.is<type::NumberType>()) {
         return toNumber;
     } else if (t.is<type::StringType>()) {
@@ -133,23 +204,29 @@ mbgl::Value Coercion::serialize() const {
 };
 
 std::string Coercion::getOperator() const {
-    auto s = getType().match([](const type::BooleanType&) -> std::string_view { return "to-boolean"; },
-                             [](const type::ColorType&) -> std::string_view { return "to-color"; },
-                             [](const type::NumberType&) -> std::string_view { return "to-number"; },
-                             [](const type::StringType&) -> std::string_view { return "to-string"; },
-                             [](const auto&) noexcept -> std::string_view {
-                                 assert(false);
-                                 return "";
-                             });
+    auto s = getType().match(
+        [](const type::BooleanType&) -> std::string_view { return "to-boolean"; },
+        [](const type::ColorType&) -> std::string_view { return "to-color"; },
+        [](const type::PaddingType&) -> std::string_view { return "to-padding"; },
+        [](const type::NumberType&) -> std::string_view { return "to-number"; },
+        [](const type::StringType&) -> std::string_view { return "to-string"; },
+        [](const type::VariableAnchorOffsetCollectionType&) -> std::string_view { return "to-variableanchoroffset"; },
+        [](const auto&) noexcept -> std::string_view {
+            assert(false);
+            return "";
+        });
     return std::string(s);
 }
 
 using namespace mbgl::style::conversion;
 ParseResult Coercion::parse(const Convertible& value, ParsingContext& ctx) {
-    static std::unordered_map<std::string, type::Type> types{{"to-boolean", type::Boolean},
-                                                             {"to-color", type::Color},
-                                                             {"to-number", type::Number},
-                                                             {"to-string", type::String}};
+    static std::unordered_map<std::string, type::Type> types{
+        {"to-boolean", type::Boolean},
+        {"to-color", type::Color},
+        {"to-padding", type::Padding},
+        {"to-number", type::Number},
+        {"to-string", type::String},
+        {"to-variableanchoroffset", type::VariableAnchorOffsetCollection}};
 
     std::size_t length = arrayLength(value);
 
@@ -170,8 +247,9 @@ ParseResult Coercion::parse(const Convertible& value, ParsingContext& ctx) {
 
     /**
      * Special form for error-coalescing coercion expressions "to-number",
-     * "to-color".  Since these coercions can fail at runtime, they accept
-     * multiple arguments, only evaluating one at a time until one succeeds.
+     * "to-color", "to-padding".  Since these coercions can fail at runtime,
+     * they accept multiple arguments, only evaluating one at a time until
+     * one succeeds.
      */
 
     std::vector<std::unique_ptr<Expression>> parsed;

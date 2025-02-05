@@ -5,8 +5,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- The `MLNAnnotationImage` class is responsible for presenting point-based
- annotations visually on an `MLNMapView` instance. Annotation image objects pair
+ The ``MLNAnnotationImage`` class is responsible for presenting point-based
+ annotations visually on an ``MLNMapView`` instance. Annotation image objects pair
  `NSImage` objects with annotation-related metadata. They may be recycled later
  and put into a reuse queue that is maintained by the map view.
  */
@@ -24,7 +24,8 @@ MLN_EXPORT
  @return The initialized annotation image object or `nil` if there was a problem
     initializing the object.
  */
-+ (instancetype)annotationImageWithImage:(NSImage *)image reuseIdentifier:(NSString *)reuseIdentifier;
++ (instancetype)annotationImageWithImage:(NSImage *)image
+                         reuseIdentifier:(NSString *)reuseIdentifier;
 
 // MARK: Getting and Setting Attributes
 

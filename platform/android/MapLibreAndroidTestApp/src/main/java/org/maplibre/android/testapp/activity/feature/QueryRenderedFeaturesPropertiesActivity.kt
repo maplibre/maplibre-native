@@ -17,6 +17,7 @@ import org.maplibre.android.maps.MapLibreMap.InfoWindowAdapter
 import org.maplibre.android.maps.MapLibreMap.OnMapClickListener
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import timber.log.Timber
 
 /**
@@ -61,7 +62,7 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
         mapView = findViewById<View>(R.id.mapView) as MapView
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
-            maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
+            maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style? ->
                 this@QueryRenderedFeaturesPropertiesActivity.maplibreMap = maplibreMap
 
                 // Add custom window adapter
@@ -160,7 +161,7 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (maplibreMap != null) {
+        if (this::maplibreMap.isInitialized) {
             maplibreMap.removeOnMapClickListener(mapClickListener)
         }
         mapView.onDestroy()
@@ -171,7 +172,7 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
         mapView.onLowMemory()
     }
 
-    private class CustomMarker internal constructor(
+    private class CustomMarker constructor(
         baseMarkerOptions: BaseMarkerOptions<*, *>?,
         val features: List<Feature>?
     ) : Marker(baseMarkerOptions)

@@ -7,6 +7,7 @@
 #include <mbgl/renderer/tile_render_data.hpp>
 #include <mbgl/tile/vector_tile.hpp>
 #include <mbgl/util/constants.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/math.hpp>
 
 #if MLN_DRAWABLE_RENDERER
@@ -27,6 +28,13 @@
 #include <mbgl/renderer/layer_tweaker.hpp>
 
 #include <unordered_set>
+
+#if MLN_RENDER_BACKEND_METAL || (MLN_RENDER_BACKEND_VULKAN && defined(__ANDROID__))
+#define MLN_ENABLE_POLYLINE_DRAWABLES 1
+#else
+#define MLN_ENABLE_POLYLINE_DRAWABLES 0
+#endif
+
 #endif
 
 namespace mbgl {
@@ -47,6 +55,127 @@ void TileSourceRenderItem::render(PaintParameters& parameters) const {
 }
 
 #if MLN_DRAWABLE_RENDERER
+
+#if MLN_ENABLE_POLYLINE_DRAWABLES
+class PolylineLayerImpl : public Layer::Impl {
+public:
+    PolylineLayerImpl()
+        : Layer::Impl("", "") {}
+    bool hasLayoutDifference(const Layer::Impl&) const override { return false; }
+    void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const override {}
+
+    const LayerTypeInfo* getTypeInfo() const noexcept final { return staticTypeInfo(); }
+    static const LayerTypeInfo* staticTypeInfo() noexcept {
+        const static LayerTypeInfo typeInfo{"debugPolyline",
+                                            LayerTypeInfo::Source::NotRequired,
+                                            LayerTypeInfo::Pass3D::NotRequired,
+                                            LayerTypeInfo::Layout::NotRequired,
+                                            LayerTypeInfo::FadingTiles::NotRequired,
+                                            LayerTypeInfo::CrossTileIndex::NotRequired,
+                                            LayerTypeInfo::TileKind::NotRequired};
+        return &typeInfo;
+    }
+};
+
+class PolylineLayerProperties : public style::LayerProperties {
+public:
+    PolylineLayerProperties()
+        : LayerProperties(makeMutable<PolylineLayerImpl>()) {}
+    expression::Dependency getDependencies() const noexcept override { return expression::Dependency::None; }
+};
+
+class PolylineLayerTweaker : public LayerTweaker {
+public:
+    PolylineLayerTweaker(const shaders::LineEvaluatedPropsUBO& properties)
+        : LayerTweaker("debug-polyline", makeMutable<PolylineLayerProperties>()),
+          propsUBO(properties) {}
+
+    void execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) override {
+        if (layerGroup.empty()) {
+            return;
+        }
+
+        auto& context = parameters.context;
+        auto& layerUniforms = layerGroup.mutableUniformBuffers();
+        layerUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &propsUBO, context);
+
+        // We would need to set up `idLineExpressionUBO` if the expression mask isn't empty
+        assert(propsUBO.expressionMask == LineExpressionMask::None);
+
+        const LineExpressionUBO exprUBO = {
+            /* .color = */ nullptr,
+            /* .blur = */ nullptr,
+            /* .opacity = */ nullptr,
+            /* .gapwidth = */ nullptr,
+            /* .offset = */ nullptr,
+            /* .width = */ nullptr,
+            /* .floorWidth = */ nullptr,
+        };
+        layerUniforms.createOrUpdate(idLineExpressionUBO, &exprUBO, context);
+
+#if MLN_UBO_CONSOLIDATION
+        int i = 0;
+        std::vector<LineDrawableUnionUBO> drawableUBOVector(layerGroup.getDrawableCount());
+#endif
+        visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
+            if (!drawable.getTileID().has_value()) {
+                return;
+            }
+
+            const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+            const auto zoom = parameters.state.getZoom();
+            mat4 tileMatrix;
+            parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
+
+            const auto matrix = LayerTweaker::getTileMatrix(
+                tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
+
+#if MLN_UBO_CONSOLIDATION
+            drawableUBOVector[i].lineDrawableUBO = {
+#else
+            const shaders::LineDrawableUBO drawableUBO = {
+#endif
+                /* .matrix = */ util::cast<float>(matrix),
+                /* .ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
+
+                /* .color_t = */ 0.f,
+                /* .blur_t = */ 0.f,
+                /* .opacity_t = */ 0.f,
+                /* .gapwidth_t = */ 0.f,
+                /* .offset_t = */ 0.f,
+                /* .width_t = */ 0.f,
+                /* .pad1 = */ 0
+            };
+
+#if MLN_UBO_CONSOLIDATION
+            drawable.setUBOIndex(i++);
+#else
+            auto& drawableUniforms = drawable.mutableUniformBuffers();
+            drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);
+#endif
+        });
+
+#if MLN_UBO_CONSOLIDATION
+        const size_t drawableUBOVectorSize = sizeof(LineDrawableUnionUBO) * drawableUBOVector.size();
+        if (!drawableUniformBuffer || drawableUniformBuffer->getSize() < drawableUBOVectorSize) {
+            drawableUniformBuffer = context.createUniformBuffer(
+                drawableUBOVector.data(), drawableUBOVectorSize, false, true);
+        } else {
+            drawableUniformBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
+        }
+        layerUniforms.set(idLineDrawableUBO, drawableUniformBuffer);
+#endif
+    }
+
+private:
+    shaders::LineEvaluatedPropsUBO propsUBO;
+
+#if MLN_UBO_CONSOLIDATION
+    gfx::UniformBufferPtr drawableUniformBuffer;
+#endif
+};
+#endif
+
 void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGroups,
                                                 PaintParameters& parameters) const {
     if (!(parameters.debugOptions &
@@ -56,7 +185,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     }
 
     auto& context = parameters.context;
-    const auto renderPass = RenderPass::None;
+    const auto renderPass = RenderPass::Translucent;
     auto& shaders = *parameters.staticData.shaders;
 
     // initialize debug builder
@@ -65,6 +194,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     if (!debugShader) {
         return;
     }
+
+    const auto drawableName = "debug-" + name;
     std::unique_ptr<gfx::DrawableBuilder> debugBuilder = [&]() -> std::unique_ptr<gfx::DrawableBuilder> {
         auto builder = context.createDrawableBuilder("debug-builder");
         builder->setShader(debugShader);
@@ -73,11 +204,12 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         builder->setColorMode(gfx::ColorMode::unblended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setVertexAttrId(idDebugPosVertexAttribute);
+        builder->setDrawableName(drawableName);
 
         return builder;
     }();
 
-#if MLN_RENDER_BACKEND_METAL
+#if MLN_ENABLE_POLYLINE_DRAWABLES
     // initialize polyline builder
     gfx::ShaderPtr polylineShader;
     const auto createPolylineShader = [&]() -> gfx::ShaderPtr {
@@ -102,19 +234,21 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         builder->setColorMode(gfx::ColorMode::alphaBlended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setVertexAttrId(idLinePosNormalVertexAttribute);
+        builder->setDrawableName(drawableName);
 
         return builder;
     };
 #endif
 
     // add or get the layer group for a debug type
-    const auto addOrGetLayerGroupForType = [&debugLayerGroups, &context](
-                                               DebugType type,
-                                               const std::string&& layerName) -> DebugLayerGroupMap::const_iterator {
+    const auto addOrGetLayerGroupForType =
+        [&debugLayerGroups, &context](DebugType type, std::string&& layerName) -> DebugLayerGroupMap::const_iterator {
         auto it = debugLayerGroups.find(type);
         if (it == debugLayerGroups.end()) {
-            auto inserted = debugLayerGroups.insert(std::make_pair(
-                type, context.createTileLayerGroup(static_cast<int32_t>(type), /*initialCapacity=*/64, layerName)));
+            auto inserted = debugLayerGroups.insert(
+                std::make_pair(type,
+                               context.createTileLayerGroup(
+                                   static_cast<int32_t>(type), /*initialCapacity=*/64, std::move(layerName))));
             assert(inserted.second);
             it = inserted.first;
         }
@@ -179,56 +313,19 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         }
     };
 
-#if MLN_RENDER_BACKEND_METAL
+#if MLN_ENABLE_POLYLINE_DRAWABLES
+    const shaders::LineEvaluatedPropsUBO linePropertiesUBO = {/* .color = */ Color::red(),
+                                                              /* .blur = */ 0.f,
+                                                              /* .opacity = */ 1.f,
+                                                              /* .gapwidth = */ 0.f,
+                                                              /* .offset = */ 0.f,
+                                                              /* .width = */ 4.f,
+                                                              /* .floorwidth = */ 0,
+                                                              /* .expressionMask = */ LineExpressionMask::None,
+                                                              /* .pad1 = */ 0};
+
     // function to add polylines drawable
     const auto addPolylineDrawable = [&](TileLayerGroup* tileLayerGroup, const RenderTile& tile) {
-        class PolylineDrawableTweaker : public gfx::DrawableTweaker {
-        public:
-            PolylineDrawableTweaker(const shaders::LineEvaluatedPropsUBO& properties)
-                : linePropertiesUBO(properties) {}
-            ~PolylineDrawableTweaker() override = default;
-
-            void init(gfx::Drawable&) override {}
-
-            void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
-                if (!drawable.getTileID().has_value()) {
-                    return;
-                }
-
-                const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-                const auto zoom = parameters.state.getZoom();
-                mat4 tileMatrix;
-                parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
-
-                const auto matrix = LayerTweaker::getTileMatrix(
-                    tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
-
-                const shaders::LineDrawableUBO drawableUBO = {/*matrix = */ util::cast<float>(matrix),
-                                                              /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
-                                                              0,
-                                                              0,
-                                                              0};
-                const shaders::LineInterpolationUBO lineInterpolationUBO = {/*color_t =*/0.f,
-                                                                            /*blur_t =*/0.f,
-                                                                            /*opacity_t =*/0.f,
-                                                                            /*gapwidth_t =*/0.f,
-                                                                            /*offset_t =*/0.f,
-                                                                            /*width_t =*/0.f,
-                                                                            0,
-                                                                            0};
-                auto& drawableUniforms = drawable.mutableUniformBuffers();
-                drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, parameters.context);
-                drawableUniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
-                drawableUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &linePropertiesUBO, parameters.context);
-
-                // We would need to set up `idLineExpressionUBO` if the expression mask isn't empty
-                assert(linePropertiesUBO.expressionMask == LineExpressionMask::None);
-            };
-
-        private:
-            shaders::LineEvaluatedPropsUBO linePropertiesUBO;
-        };
-
         GeometryCoordinates coords{{0, 0}, {util::EXTENT, 0}, {util::EXTENT, util::EXTENT}, {0, util::EXTENT}, {0, 0}};
         gfx::PolylineGeneratorOptions options;
         options.type = FeatureType::Polygon;
@@ -239,24 +336,16 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         }
         polylineBuilder->addPolyline(coords, options);
 
-        // create line tweaker
-        const shaders::LineEvaluatedPropsUBO linePropertiesUBO = {/*color*/ Color::red(),
-                                                                  /*blur*/ 0.f,
-                                                                  /*opacity*/ 1.f,
-                                                                  /*gapwidth*/ 0.f,
-                                                                  /*offset*/ 0.f,
-                                                                  /*width*/ 4.f,
-                                                                  /*floorwidth*/ 0,
-                                                                  LineExpressionMask::None,
-                                                                  0};
-        auto tweaker = std::make_shared<PolylineDrawableTweaker>(linePropertiesUBO);
-
         // finish
         polylineBuilder->flush(context);
         for (auto& drawable : polylineBuilder->clearDrawables()) {
             drawable->setTileID(tile.getOverscaledTileID());
-            drawable->addTweaker(tweaker);
             tileLayerGroup->addDrawable(renderPass, tile.getOverscaledTileID(), std::move(drawable));
+        }
+
+        if (!layerTweaker) {
+            layerTweaker = std::make_shared<PolylineLayerTweaker>(linePropertiesUBO);
+            tileLayerGroup->addLayerTweaker(layerTweaker);
         }
     };
 #endif
@@ -271,7 +360,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         // erase drawables that are not in the current tile set
         for (auto& lg : {outlineLayerGroup, textLayerGroup}) {
             lg->removeDrawablesIf([&](gfx::Drawable& drawable) {
-                return !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
+                return drawable.getName() == drawableName &&
+                       !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
             });
         }
 
@@ -281,12 +371,12 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
             const auto& debugBucket = tile.debugBucket;
             if (!debugBucket) continue;
 
-            const DebugUBO outlineUBO{/*matrix = */ util::cast<float>(tile.matrix),
-                                      /*color = */ Color::white(),
-                                      /*overlay_scale = */ 1.0f,
-                                      0,
-                                      0,
-                                      0};
+            const DebugUBO outlineUBO = {/* .matrix = */ util::cast<float>(tile.matrix),
+                                         /* .color = */ Color::white(),
+                                         /* .overlay_scale = */ 1.0f,
+                                         /* .pad1 = */ 0,
+                                         /* .pad2 = */ 0,
+                                         /* .pad3 = */ 0};
             if (0 == updateDrawables(outlineLayerGroup, tileID, outlineUBO)) {
                 addDrawable(outlineLayerGroup,
                             tileID,
@@ -297,12 +387,12 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                             debugBucket->segments);
             }
 
-            const DebugUBO textUBO{/*matrix = */ util::cast<float>(tile.matrix),
-                                   /*color = */ Color::black(),
-                                   /*overlay_scale = */ 1.0f,
-                                   0,
-                                   0,
-                                   0};
+            const DebugUBO textUBO = {/* .matrix = */ util::cast<float>(tile.matrix),
+                                      /* .color = */ Color::black(),
+                                      /* .overlay_scale = */ 1.0f,
+                                      /* .pad1 = */ 0,
+                                      /* .pad2 = */ 0,
+                                      /* .pad3 = */ 0};
             if (0 == updateDrawables(textLayerGroup, tileID, textUBO) && tile.getNeedsRendering()) {
                 addDrawable(textLayerGroup,
                             tileID,
@@ -326,7 +416,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 
         // erase drawables that are not in the current tile set
         tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
-            return !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
+            return drawable.getName() == drawableName &&
+                   !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
         });
 
         // add new drawables and update existing ones
@@ -338,16 +429,19 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
             const auto& debugBucket = tile.debugBucket;
             if (!debugBucket) continue;
 
-            const DebugUBO debugUBO{/*matrix = */ util::cast<float>(tile.matrix),
-                                    /*color = */ Color::red(),
-                                    /*overlay_scale = */ 1.0f,
-                                    0,
-                                    0,
-                                    0};
-            if (0 == updateDrawables(tileLayerGroup, tileID, debugUBO) && tile.getNeedsRendering()) {
-#if MLN_RENDER_BACKEND_METAL
+#if MLN_ENABLE_POLYLINE_DRAWABLES
+            if (0 == tileLayerGroup->getDrawableCount(renderPass, tileID) && tile.getNeedsRendering()) {
                 addPolylineDrawable(tileLayerGroup, tile);
+            }
 #else
+            const DebugUBO debugUBO = {/* .matrix = */ util::cast<float>(tile.matrix),
+                                       /* .color = */ Color::red(),
+                                       /* .overlay_scale = */ 1.0f,
+                                       /* .pad1 = */ 0,
+                                       /* .pad2 = */ 0,
+                                       /* .pad3 = */ 0};
+
+            if (0 == updateDrawables(tileLayerGroup, tileID, debugUBO) && tile.getNeedsRendering()) {
                 addDrawable(tileLayerGroup,
                             tileID,
                             debugUBO,
@@ -355,8 +449,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                             vertices,
                             indexes,
                             segments);
-#endif
             }
+#endif
         }
     } else {
         // if tile borders are not required, erase layer group
@@ -365,9 +459,9 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 }
 #endif
 
-RenderTileSource::RenderTileSource(Immutable<style::Source::Impl> impl_, std::shared_ptr<Scheduler> threadPool_)
+RenderTileSource::RenderTileSource(Immutable<style::Source::Impl> impl_, const TaggedScheduler& threadPool_)
     : RenderSource(std::move(impl_)),
-      tilePyramid(std::move(threadPool_)),
+      tilePyramid(threadPool_),
       renderTiles(makeMutable<std::vector<RenderTile>>()) {
     tilePyramid.setObserver(this);
 }
@@ -383,6 +477,8 @@ std::unique_ptr<RenderItem> RenderTileSource::createRenderItem() {
 }
 
 void RenderTileSource::prepare(const SourcePrepareParameters& parameters) {
+    MLN_TRACE_FUNC();
+    MLN_ZONE_STR(baseImpl->id);
     bearing = static_cast<float>(parameters.transform.state.getBearing());
     filteredRenderTiles = nullptr;
     renderTilesSortedByY = nullptr;
@@ -476,6 +572,10 @@ void RenderTileSource::removeFeatureState(const std::optional<std::string>& sour
     featureState.removeState(sourceLayerID, featureID, stateKey);
 }
 
+void RenderTileSource::setCacheEnabled(bool enable) {
+    tilePyramid.setCacheEnabled(enable);
+}
+
 void RenderTileSource::reduceMemoryUse() {
     tilePyramid.reduceMemoryUse();
 }
@@ -486,8 +586,8 @@ void RenderTileSource::dumpDebugLogs() const {
 
 // RenderTileSetSource implementation
 
-RenderTileSetSource::RenderTileSetSource(Immutable<style::Source::Impl> impl_, std::shared_ptr<Scheduler> threadPool_)
-    : RenderTileSource(std::move(impl_), std::move(threadPool_)) {}
+RenderTileSetSource::RenderTileSetSource(Immutable<style::Source::Impl> impl_, const TaggedScheduler& threadPool_)
+    : RenderTileSource(std::move(impl_), threadPool_) {}
 
 RenderTileSetSource::~RenderTileSetSource() = default;
 

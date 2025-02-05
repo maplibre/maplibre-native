@@ -59,17 +59,9 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack&, GlyphID glyphID) {
     }
 
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
-#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
     glyph.metrics.width = impl->metrics->horizontalAdvance(glyphID.complex.code);
 #else
-    glyph.metrics.width = impl->metrics->width(glyphID.complex.code);
-#endif
-#else
-#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
     glyph.metrics.width = impl->metrics->horizontalAdvance(glyphID);
-#else
-    glyph.metrics.width = impl->metrics->width(glyphID);
-#endif
 #endif
     glyph.metrics.height = impl->metrics->height();
     glyph.metrics.left = 3;
@@ -91,13 +83,8 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack&, GlyphID glyphID) {
     painter.drawText(QPointF(0, 20), QString(QChar(glyphID)));
 #endif
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
     auto img = std::make_unique<uint8_t[]>(image.sizeInBytes());
     memcpy(img.get(), image.constBits(), image.sizeInBytes());
-#else
-    auto img = std::make_unique<uint8_t[]>(image.byteCount());
-    memcpy(img.get(), image.constBits(), image.byteCount());
-#endif
 
     glyph.bitmap = AlphaImage{size, std::move(img)};
 

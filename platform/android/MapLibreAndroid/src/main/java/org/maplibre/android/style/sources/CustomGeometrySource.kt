@@ -9,7 +9,6 @@ import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.geometry.LatLngBounds.Companion.from
 import org.maplibre.android.style.expressions.Expression
 import java.lang.ref.WeakReference
-import java.util.Arrays
 import java.util.Locale
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadFactory
@@ -19,7 +18,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
-import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 /**
@@ -108,7 +106,7 @@ class CustomGeometrySource @UiThread constructor(id: String?, options: CustomGeo
     fun querySourceFeatures(filter: Expression?): List<Feature> {
         checkThread()
         val features = querySourceFeatures(filter?.toArray())
-        return if (features != null) Arrays.asList(*features) else ArrayList()
+        return listOf(*features)
     }
 
     @Keep
@@ -246,18 +244,17 @@ class CustomGeometrySource @UiThread constructor(id: String?, options: CustomGeo
 
     internal class TileID(var z: Int, var x: Int, var y: Int) {
         override fun hashCode(): Int {
-            return Arrays.hashCode(intArrayOf(z, x, y))
+            return intArrayOf(z, x, y).contentHashCode()
         }
 
-        override fun equals(`object`: Any?): Boolean {
-            if (`object` === this) {
+        override fun equals(other: Any?): Boolean {
+            if (other === this) {
                 return true
             }
-            if (`object` == null || javaClass != `object`.javaClass) {
+            if (other == null || javaClass != other.javaClass) {
                 return false
             }
-            if (`object` is TileID) {
-                val other = `object`
+            if (other is TileID) {
                 return z == other.z && x == other.x && y == other.y
             }
             return false
@@ -299,7 +296,7 @@ class CustomGeometrySource @UiThread constructor(id: String?, options: CustomGeo
             if (!isCancelled()) {
                 val data = provider!!.getFeaturesForBounds(from(id.z, id.x, id.y), id.z)
                 val source = sourceRef.get()
-                if (!isCancelled() && source != null && data != null) {
+                if (!isCancelled() && source != null) {
                     source.setTileData(id, data)
                 }
             }
@@ -324,14 +321,14 @@ class CustomGeometrySource @UiThread constructor(id: String?, options: CustomGeo
             return cancelled!!.get()
         }
 
-        override fun equals(o: Any?): Boolean {
-            if (this === o) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) {
                 return true
             }
-            if (o == null || javaClass != o.javaClass) {
+            if (other == null || javaClass != other.javaClass) {
                 return false
             }
-            val request = o as GeometryTileRequest
+            val request = other as GeometryTileRequest
             return id == request.id
         }
     }

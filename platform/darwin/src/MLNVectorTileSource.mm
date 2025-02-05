@@ -28,6 +28,17 @@
     return self = [super initWithPendingSource:std::move(source)];
 }
 
+- (instancetype)initWithIdentifier:(NSString *)identifier
+            configurationURLString:(NSString *)configurationURLString
+{
+    auto source = std::make_unique<mbgl::style::VectorSource>(
+        identifier.UTF8String,
+        configurationURLString.UTF8String
+    );
+    
+    return self = [super initWithPendingSource:std::move(source)];
+}
+
 - (instancetype)initWithIdentifier:(NSString *)identifier tileURLTemplates:(NSArray<NSString *> *)tileURLTemplates options:(nullable NSDictionary<MLNTileSourceOption, id> *)options {
     mbgl::Tileset tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, options);
     auto source = std::make_unique<mbgl::style::VectorSource>(identifier.UTF8String, tileSet);
@@ -95,7 +106,7 @@ static NSArray * const MLNMapboxStreetsLanguages = @[
 ];
 
 /**
- Like `MLNMapboxStreetsLanguages`, but deanglicized for use with
+ Like ``MLNMapboxStreetsLanguages``, but deanglicized for use with
  `+[NSBundle preferredLocalizationsFromArray:forPreferences:]`.
  */
 static NSArray * const MLNMapboxStreetsAlternativeLanguages = @[

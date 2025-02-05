@@ -3,6 +3,7 @@
 #include <cmath>
 #include <array>
 #include <limits>
+#include <numbers>
 
 #include <mbgl/util/geometry.hpp>
 
@@ -26,7 +27,7 @@ T angle_to(const Point<S>& a, const Point<S>& b) {
 // Reflect an angle around 0 degrees
 template <typename T>
 std::array<T, 2> flip(const std::array<T, 2>& c) {
-    return {{static_cast<T>(2 * M_PI - c[0]), static_cast<T>(2 * M_PI - c[1])}};
+    return {{static_cast<T>(2 * std::numbers::pi - c[0]), static_cast<T>(2 * std::numbers::pi - c[1])}};
 }
 
 template <typename T, typename S1, typename S2>

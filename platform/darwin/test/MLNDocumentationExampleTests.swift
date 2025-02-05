@@ -27,7 +27,7 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
     // Mock MLNOfflineStorage singleton so that it doesn't start long-running tasks that could interfere with other tests.
     fileprivate class MLNOfflineStorageMock {
         static let shared = MLNOfflineStorageMock()
-        func addPack(for: MLNOfflineRegion, withContext: Data, completionHandler: MLNOfflinePackAdditionCompletionHandler? = nil) {
+        func addPack(for _: MLNOfflineRegion, withContext _: Data, completionHandler: MLNOfflinePackAdditionCompletionHandler? = nil) {
             XCTAssert(MLNOfflineStorage.shared.responds(to: #selector(MLNOfflineStorage.shared.addPack(for:withContext:completionHandler:))))
             if let completionHandler {
                 completionHandler(nil, NSError(domain: "MLNDocumentationExampleError", code: 0, userInfo: [NSLocalizedDescriptionKey: "\(#function) is mocked and not functional."]))
@@ -182,7 +182,7 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
         // URL requires setting an access token. So this identically named
         // subclass of MLNRasterDEMSource swaps in a nonexistent URL.
         class MLNRasterDEMSource: MapLibre.MLNRasterDEMSource {
-            override init(identifier: String, configurationURL: URL, tileSize: CGFloat = 256) {
+            override init(identifier: String, configurationURL _: URL, tileSize: CGFloat = 256) {
                 let bogusURL = URL(string: "https://example.com/raster-rgb.json")!
                 super.init(identifier: identifier, configurationURL: bogusURL, tileSize: tileSize)
             }
@@ -541,8 +541,8 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
                 throw ExampleError.featureIsNotACluster
             }
 
-            // Currently the only supported class that conforms to `MLNCluster` is
-            // `MLNPointFeatureCluster`
+            // Currently the only supported class that conforms to ``MLNCluster`` is
+            // ``MLNPointFeatureCluster``
             guard cluster is MLNPointFeatureCluster else {
                 throw ExampleError.unexpectedFeatureType
             }

@@ -44,7 +44,7 @@ public:
 
     void init(Drawable&) override;
 
-    void execute(Drawable&, const PaintParameters&) override;
+    void execute(Drawable&, PaintParameters&) override;
 
 protected:
     void setupTextures(Drawable&, const bool);

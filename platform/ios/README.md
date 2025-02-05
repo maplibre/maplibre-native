@@ -7,8 +7,8 @@ Embed interactive maps with scalable, customizable vector maps into iOS Applicat
 ## Documentation
 
 - See the [Getting Started](https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre-native-for-ios/gettingstarted) Guide in the documentation.
-- [MapLibre Native iOS Documentation](https://maplibre.org/maplibre-native/ios/api/)
+- [MapLibre Native iOS Documentation](https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre/)
 
 # Contributing
 
-See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for instructions on how to build the project or how to work on the documentation.
+See the [MapLibre iOS Developer Guide](https://maplibre.org/maplibre-native/docs/book/ios) for instructions on how to build the project or how to work on the documentation.

@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.MapLibre
 import org.maplibre.android.geometry.LatLng
@@ -15,6 +16,7 @@ import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.RasterLayer
 import org.maplibre.android.style.sources.ImageSource
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.utils.BitmapUtils
 
 /**
@@ -22,12 +24,12 @@ import org.maplibre.android.utils.BitmapUtils
  * with an ImageSource
  *
  *
- * GL-native equivalent of https://maplibre.org/maplibre-gl-js-docs/example/animate-images/
+ * MapLibre Native equivalent of https://maplibre.org/maplibre-gl-js/docs/examples/animate-images/
  *
  */
 class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
-    private val handler = Handler()
+    private val handler = Handler(Looper.getMainLooper())
     private var runnable: Runnable? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +40,7 @@ class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     override fun onMapReady(map: MapLibreMap) {
+        // --8<-- [start:onMapReady]
         val quad = LatLngQuad(
             LatLng(46.437, -80.425),
             LatLng(46.437, -71.516),
@@ -48,7 +51,7 @@ class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
         val layer = RasterLayer(ID_IMAGE_LAYER, ID_IMAGE_SOURCE)
         map.setStyle(
             Style.Builder()
-                .fromUri(Style.getPredefinedStyle("Streets"))
+                .fromUri(TestStyles.AMERICANA)
                 .withSource(imageSource)
                 .withLayer(layer)
         ) { style: Style? ->
@@ -57,6 +60,7 @@ class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
                 handler.postDelayed(it, 100)
             }
         }
+        // --8<-- [end:onMapReady]
     }
 
     override fun onStart() {
@@ -108,11 +112,13 @@ class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         override fun run() {
+             // --8<-- [start:setImage]
             imageSource.setImage(drawables[drawableIndex++]!!)
             if (drawableIndex > 3) {
                 drawableIndex = 0
             }
             handler.postDelayed(this, 1000)
+             // --8<-- [end:setImage]
         }
 
         init {

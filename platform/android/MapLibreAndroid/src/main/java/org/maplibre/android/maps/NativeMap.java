@@ -55,6 +55,7 @@ interface NativeMap {
   @NonNull
   CameraPosition getCameraPosition();
 
+  // Note for implementors: the ordering of the padding is left, top, right, bottom
   CameraPosition getCameraForLatLngBounds(@NonNull LatLngBounds bounds, int[] padding, double bearing, double pitch);
 
   CameraPosition getCameraForGeometry(@NonNull Geometry geometry, int[] padding, double bearing, double pitch);
@@ -232,6 +233,10 @@ interface NativeMap {
 
   @IntRange(from = 0)
   int getPrefetchZoomDelta();
+
+  void setTileCacheEnabled(boolean enabled);
+
+  boolean getTileCacheEnabled();
 
   void setGestureInProgress(boolean inProgress);
 

@@ -1,0 +1,5 @@
+{
+  "render-tests/fill-extrusion-color/function": "Layer Z Fighting: https://github.com/maplibre/maplibre-native/issues/1847",
+  "render-tests/tilejson-bounds/default": "flaky on CI",
+  "render-tests/icon-text-fit/textFit-grid-long": "Needs to be investigated"
+}

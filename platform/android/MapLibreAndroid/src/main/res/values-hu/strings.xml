@@ -2,7 +2,7 @@
 <resources>
     <string name="maplibre_myLocationViewContentDescription">Hely nézet. Megmutatja, hol vagy a térképen.</string>
     <string name="maplibre_mapActionDescription">Egy MapLibre-szal készült térkép megjelenítése. Húzd két ujjadat a görgetéshez. Csippentsd össze a nagyításhoz.</string>
-    <string name="maplibre_attributionsDialogTitle">MapLibre Maps SDK Androidhoz</string>
+    <string name="maplibre_attributionsDialogTitle">MapLibre Android</string>
     <string name="maplibre_attributionErrorNoBrowser">Nincs webböngésző telepítve a készüléken, nem lehet megnyitni weboldalt.</string>
     <string name="maplibre_offline_error_region_definition_invalid">A megadott OfflineRegionDefinition nem fér bele a világ kereteibe: %s</string>
     </resources>

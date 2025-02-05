@@ -2,7 +2,7 @@
 
 Requesting precise location with ``MLNLocationManager``.
 
-## Overview
+> Note: This example uses SwiftUI.
 
 This example shows how to request a precise location with ``MLNLocationManager``.
 
@@ -58,17 +58,17 @@ class PrivacyExampleViewModel: NSObject, ObservableObject {
 class PrivacyExampleCoordinator: NSObject, MLNMapViewDelegate {
     @ObservedObject private var mapViewModel: PrivacyExampleViewModel
     private var pannedToUserLocation = false
-    
+
     init(mapViewModel: PrivacyExampleViewModel) {
         self.mapViewModel = mapViewModel
         super.init()
     }
-    
+
     @MainActor func mapView(_: MLNMapView, didChangeLocationManagerAuthorization manager: MLNLocationManager) {
         guard let accuracySetting = manager.accuracyAuthorization else {
             return
         }
-        
+
         switch accuracySetting() {
         case .fullAccuracy:
             mapViewModel.locationAccuracy = .fullAccuracy
@@ -93,14 +93,14 @@ class PrivacyExampleCoordinator: NSObject, MLNMapViewDelegate {
 
 struct PrivacyExampleRepresentable: UIViewRepresentable {
     @ObservedObject var mapViewModel: PrivacyExampleViewModel
-    
+
     func makeCoordinator() -> PrivacyExampleCoordinator {
         PrivacyExampleCoordinator(mapViewModel: mapViewModel)
     }
 
     func makeUIView(context: Context) -> MLNMapView {
         let mapView = MLNMapView()
-        
+
         mapView.delegate = context.coordinator
         mapView.showsUserLocation = true
         return mapView
@@ -119,7 +119,7 @@ struct PrivacyExampleRepresentable: UIViewRepresentable {
 
 struct LocationPrivacyExampleView: View {
     @StateObject private var viewModel = PrivacyExampleViewModel()
-    
+
     var body: some View {
         VStack {
             PrivacyExampleRepresentable(mapViewModel: viewModel)

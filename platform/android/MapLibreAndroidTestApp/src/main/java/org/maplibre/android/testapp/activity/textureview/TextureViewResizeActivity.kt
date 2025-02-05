@@ -7,6 +7,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.maplibre.android.maps.*
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test resizing a [android.view.TextureView] backed map on the fly.
@@ -32,17 +33,17 @@ class TextureViewResizeActivity : AppCompatActivity() {
     private fun setupMapView(savedInstanceState: Bundle?) {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(OnMapReadyCallback { maplibreMap: MapLibreMap -> setupMap(maplibreMap) })
+        mapView.getMapAsync { setupMap(it) }
     }
 
     private fun setupMap(maplibreMap: MapLibreMap) {
-        maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
     }
 
     private fun setupFab() {
         val fabDebug = findViewById<FloatingActionButton>(R.id.fabResize)
         fabDebug.setOnClickListener { view: View? ->
-            if (mapView != null) {
+            if (this::mapView.isInitialized) {
                 val parent = findViewById<View>(R.id.coordinator_layout)
                 val width = if (parent.width == mapView.width) parent.width / 2 else parent.width
                 val height =

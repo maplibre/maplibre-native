@@ -2,7 +2,9 @@ package org.maplibre.android.snapshotter
 
 import android.content.Context
 import android.graphics.*
+import android.os.Build
 import android.os.Handler
+import android.os.Looper
 import android.text.Html
 import android.text.TextUtils
 import android.view.View
@@ -11,6 +13,7 @@ import android.widget.TextView
 import androidx.annotation.Keep
 import androidx.annotation.UiThread
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.toBitmap
 import org.maplibre.android.R
 import org.maplibre.android.attribution.AttributionLayout
 import org.maplibre.android.attribution.AttributionMeasure
@@ -141,10 +144,8 @@ open class MapSnapshotter(context: Context, options: Options) {
         /**
          * @return The base of our API endpoint
          */
-        @get:Deprecated("use {@link #getApiBaseUri()} instead")
         var apiBaseUri: String? = null
             private set
-            get() = field
 
         var builder: Style.Builder? = null
             private set
@@ -515,15 +516,7 @@ open class MapSnapshotter(context: Context, options: Options) {
             drawAttribution(canvas, measure, anchorPoint)
         } else {
             val snapshot = mapSnapshot.bitmap
-            Logger.e(
-                TAG,
-                String.format(
-                    "Could not generate attribution for snapshot size: %s x %s." + " You are required to provide your own attribution for the used sources: %s",
-                    snapshot.width,
-                    snapshot.height,
-                    mapSnapshot.attributions
-                )
-            )
+            Logger.e(TAG, "Could not generate attribution for snapshot size: ${snapshot.width} x ${snapshot.height}. You are required to provide your own attribution for the used sources: ${mapSnapshot.attributions.joinToString()}")
         }
     }
 
@@ -544,7 +537,17 @@ open class MapSnapshotter(context: Context, options: Options) {
         textView.textSize = 10 * scale
         textView.setTextColor(textColor)
         textView.setBackgroundResource(R.drawable.maplibre_rounded_corner)
-        textView.text = Html.fromHtml(createAttributionString(mapSnapshot, shortText))
+        val attributionString = createAttributionString(mapSnapshot, shortText)
+        if (attributionString == "") {
+            Logger.w(
+                TAG,
+                String.format(
+                    "Attribution string is empty. Make sure you provide your own attribution for the used sources if needed.",
+                )
+            )
+            return TextView(context)
+        }
+        textView.text = fromHTML(attributionString)
         textView.measure(widthMeasureSpec, heightMeasureSpec)
         textView.layout(0, 0, textView.measuredWidth, textView.measuredHeight)
         return textView
@@ -569,7 +572,7 @@ open class MapSnapshotter(context: Context, options: Options) {
      * @return the scaled large logo
      */
     private fun createScaledLogo(snapshot: Bitmap): Logo {
-        val logo = BitmapFactory.decodeResource(context.resources, R.drawable.maplibre_logo_icon, null)
+        val logo = context.resources.getDrawable(R.drawable.maplibre_logo_icon, null)?.toBitmap()!!
         val scale = calculateLogoScale(snapshot, logo)
         val matrix = Matrix()
         matrix.postScale(scale, scale)
@@ -611,7 +614,7 @@ open class MapSnapshotter(context: Context, options: Options) {
      */
     @Keep
     protected fun onSnapshotReady(snapshot: MapSnapshot) {
-        Handler().post {
+        Handler(Looper.getMainLooper()).post {
             if (callback != null) {
                 addOverlay(snapshot)
                 callback!!.onSnapshotReady(snapshot)
@@ -627,7 +630,7 @@ open class MapSnapshotter(context: Context, options: Options) {
      */
     @Keep
     protected fun onSnapshotFailed(reason: String) {
-        Handler().post {
+        Handler(Looper.getMainLooper()).post {
             if (errorHandler != null) {
                 errorHandler!!.onError(reason)
                 reset()
@@ -769,4 +772,10 @@ open class MapSnapshotter(context: Context, options: Options) {
         private const val TAG = "Mbgl-MapSnapshotter"
         private const val LOGO_MARGIN_DP = 4
     }
+}
+
+fun fromHTML(source: String) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+    Html.fromHtml(source, Html.FROM_HTML_MODE_LEGACY)
+} else {
+    Html.fromHtml(source)
 }

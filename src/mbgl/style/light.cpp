@@ -56,7 +56,7 @@ constexpr uint8_t toUint8(T t) noexcept {
     return uint8_t(mbgl::underlying_type(t));
 }
 
-MAPBOX_ETERNAL_CONSTEXPR const auto properties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
+constexpr const auto properties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
     {{"anchor", toUint8(Property::Anchor)},
      {"color", toUint8(Property::Color)},
      {"intensity", toUint8(Property::Intensity)},

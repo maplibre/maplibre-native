@@ -31,6 +31,7 @@ class GeometryTileWorker {
 public:
     GeometryTileWorker(ActorRef<GeometryTileWorker> self,
                        ActorRef<GeometryTile> parent,
+                       const TaggedScheduler& scheduler_,
                        OverscaledTileID,
                        std::string,
                        const std::atomic<bool>&,
@@ -74,6 +75,7 @@ private:
 
     ActorRef<GeometryTileWorker> self;
     ActorRef<GeometryTile> parent;
+    TaggedScheduler scheduler;
 
     const OverscaledTileID id;
     const std::string sourceID;

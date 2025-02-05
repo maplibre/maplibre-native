@@ -23,6 +23,7 @@ import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonOptions
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.databinding.ActivityMapsnapshotterWithinExpressionBinding
+import org.maplibre.android.testapp.styles.TestStyles.getPredefinedStyleWithFallback
 
 /**
  * An Activity that showcases the use of MapSnapshotter with 'within' expression
@@ -107,7 +108,7 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
         // Setup style with additional layers,
         // using streets as a base style
         maplibreMap.setStyle(
-            Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
+            Style.Builder().fromUri(getPredefinedStyleWithFallback("Streets"))
         ) {
             binding.mapView.addOnCameraDidChangeListener(cameraListener)
         }
@@ -115,7 +116,7 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
         val options = MapSnapshotter.Options(binding.imageView.measuredWidth / 2, binding.imageView.measuredHeight / 2)
             .withCameraPosition(maplibreMap.cameraPosition)
             .withPixelRatio(2.0f).withStyleBuilder(
-                Style.Builder().fromUri(Style.getPredefinedStyle("Streets")).withSources(
+                Style.Builder().fromUri(getPredefinedStyleWithFallback("Streets")).withSources(
                     GeoJsonSource(
                         POINT_ID,
                         LineString.fromLngLats(coordinates)
@@ -186,9 +187,9 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
         super.onSaveInstanceState(outState, outPersistentState)
         binding.mapView.onSaveInstanceState(outState)
     }
-
-    private fun bufferLineStringGeometry(): Polygon {
+        private fun bufferLineStringGeometry(): Polygon {
         // TODO replace static data by Turf#Buffer: mapbox-java/issues/987
+        // # --8<-- [start:fromJson]
         return FeatureCollection.fromJson(
             """
             {
@@ -249,6 +250,7 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
             }
             """.trimIndent()
         ).features()!![0].geometry() as Polygon
+        // # --8<-- [end:fromJson]
     }
 
     companion object {

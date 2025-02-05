@@ -2,7 +2,7 @@
 
 Demonstrating adding ``MLNPolyline`` annotations and responding to user input.
 
-## Overview
+> Note: This example uses SwiftUI.
 
 This example draws a line from the tapped location to the center of the map. Handling the tap is done by the `Coordinator` class. It converts the location on the view to a geographic coordinate. It removes existing annotations before adding the new line.
 

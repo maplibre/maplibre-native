@@ -96,6 +96,7 @@ public:
     bool hasTextCollisionBoxData() const;
     bool hasTextCollisionCircleData() const;
     bool hasFormatSectionOverrides() const;
+    bool hasVariableTextAnchors() const;
 
     void sortFeatures(float angle);
     // Returns references to the `symbolInstances` items, sorted by viewport Y.
@@ -104,6 +105,10 @@ public:
     // `sortKeyRange` range; returns references to all the symbols if
     // |sortKeyRange| is `std::nullopt`.
     SymbolInstanceReferences getSymbols(const std::optional<SortKeyRange>& sortKeyRange = std::nullopt) const;
+
+#if MLN_SYMBOL_GUARDS
+    bool check(std::source_location) override;
+#endif
 
     Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout;
     const std::string bucketLeaderID;
@@ -146,6 +151,19 @@ public:
             sharedDynamicVertices->release();
             sharedOpacityVertices->release();
         }
+
+        void updateModified() {
+            if (sharedVertices) {
+                sharedVertices->updateModified();
+            }
+            if (sharedDynamicVertices) {
+                sharedDynamicVertices->updateModified();
+            }
+            if (sharedOpacityVertices) {
+                sharedOpacityVertices->updateModified();
+            }
+        }
+
         std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
         VertexVector& vertices() { return *sharedVertices; }
         const VertexVector& vertices() const { return *sharedVertices; }

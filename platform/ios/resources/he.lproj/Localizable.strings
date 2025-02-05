@@ -77,7 +77,7 @@
 "ROAD_REF_A11Y_FMT" = "כביש %@";
 
 /* Action sheet title */
-"SDK_NAME" = "MapLibre Maps SDK for iOS";
+"SDK_NAME" = "MapLibre Native iOS";
 
 /* User-friendly error description */
 "STYLE_NOT_FOUND_DESC" = "טעינת המפה נכשלה - לא ניתן למצוא את הסגנון או שהסגנון אינו תואם.";
@@ -111,4 +111,3 @@
 
 /* Default user location annotation title */
 "USER_DOT_TITLE" = "אתה נמצא כאן";
-

@@ -15,7 +15,8 @@ public:
     GeoJSONTile(const OverscaledTileID&,
                 std::string sourceID,
                 const TileParameters&,
-                std::shared_ptr<style::GeoJSONData>);
+                std::shared_ptr<style::GeoJSONData>,
+                TileObserver* observer = nullptr);
 
     void updateData(std::shared_ptr<style::GeoJSONData> data, bool needsRelayout = false);
 
@@ -24,6 +25,7 @@ public:
 private:
     std::shared_ptr<style::GeoJSONData> data;
     mapbox::base::WeakPtrFactory<GeoJSONTile> weakFactory{this};
+    // Do not add members here, see `WeakPtrFactory`
 };
 
 } // namespace mbgl

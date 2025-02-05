@@ -1,12 +1,12 @@
 #import <UIKit/UIKit.h>
 
+#import "MLNBackendResource.h"
 #import "MLNCompassButton.h"
 #import "MLNFoundation.h"
 #import "MLNGeometry.h"
 #import "MLNMapCamera.h"
-#import "MLNTypes.h"
 #import "MLNStyle.h"
-#import "MLNBackendResource.h"
+#import "MLNTypes.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class MLNMapProjection;
 @class MLNPolyline;
 @class MLNPolygon;
+@class MLNScaleBar;
 @class MLNShape;
 
 @protocol MLNMapViewDelegate;
@@ -25,7 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol MLNFeature;
 @protocol MLNLocationManager;
 
-/** Options for `MLNMapView.decelerationRate`. */
+/** Options for ``MLNMapView/decelerationRate``. */
 typedef CGFloat MLNMapViewDecelerationRate NS_TYPED_EXTENSIBLE_ENUM;
 
 /** The default deceleration rate for a map view. */
@@ -39,105 +40,109 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNMapViewDecelerationRate MLNMapViewDecelera
 
 /**
  The vertical alignment of an annotation within a map view. Used with
- `MLNMapView.userLocationVerticalAlignment`.
+ ``MLNMapView/userLocationVerticalAlignment``.
  */
 typedef NS_ENUM(NSUInteger, MLNAnnotationVerticalAlignment) {
-    /** Aligns the annotation vertically in the center of the map view. */
-    MLNAnnotationVerticalAlignmentCenter = 0,
-    /** Aligns the annotation vertically at the top of the map view. */
-    MLNAnnotationVerticalAlignmentTop,
-    /** Aligns the annotation vertically at the bottom of the map view. */
-    MLNAnnotationVerticalAlignmentBottom,
+  /** Aligns the annotation vertically in the center of the map view. */
+  MLNAnnotationVerticalAlignmentCenter = 0,
+  /** Aligns the annotation vertically at the top of the map view. */
+  MLNAnnotationVerticalAlignmentTop,
+  /** Aligns the annotation vertically at the bottom of the map view. */
+  MLNAnnotationVerticalAlignmentBottom,
 };
 
 /**
  The position of scale bar, compass, logo and attribution in a map view. Used with
- `MLNMapView.scaleBarPosition`,
- `MLNMapView.compassViewPosition`,
- `MLNMapView.logoViewPosition`,
- `MLNMapView.attributionButtonPosition`.
+ ``MLNMapView/scaleBarPosition``,
+ ``MLNMapView/compassViewPosition``,
+ ``MLNMapView/logoViewPosition``,
+ ``MLNMapView/attributionButtonPosition``.
  */
 typedef NS_ENUM(NSUInteger, MLNOrnamentPosition) {
-    /** Place the ornament in the top left of the map view. */
-    MLNOrnamentPositionTopLeft = 0,
-    /** Place the ornament in the top right of the map view. */
-    MLNOrnamentPositionTopRight,
-    /** Place the ornament in the bottom left of the map view. */
-    MLNOrnamentPositionBottomLeft,
-    /** Place the ornament in the bottom right of the map view. */
-    MLNOrnamentPositionBottomRight,
+  /** Place the ornament in the top left of the map view. */
+  MLNOrnamentPositionTopLeft = 0,
+  /** Place the ornament in the top right of the map view. */
+  MLNOrnamentPositionTopRight,
+  /** Place the ornament in the bottom left of the map view. */
+  MLNOrnamentPositionBottomLeft,
+  /** Place the ornament in the bottom right of the map view. */
+  MLNOrnamentPositionBottomRight,
 };
 
 /**
  The mode used to track the user location on the map. Used with
- `MLNMapView.userTrackingMode`.
+ ``MLNMapView/userTrackingMode``.
 
  #### Related examples
  - TODO: Switch between user tracking modes</a> example to learn how to toggle modes and
  how each mode behaves.
  */
 typedef NS_ENUM(NSUInteger, MLNUserTrackingMode) {
-    /** The map does not follow the user location. */
-    MLNUserTrackingModeNone              = 0,
-    /** The map follows the user location. This tracking mode falls back
-        to `MLNUserTrackingModeNone` if the user pans the map view. */
-    MLNUserTrackingModeFollow,
-    /**
-        The map follows the user location and rotates when the heading changes.
-        The default user location annotation displays a fan-shaped indicator with
-        the current heading. The heading indicator represents the direction the
-        device is facing, which is sized according to the reported accuracy.
+  /** The map does not follow the user location. */
+  MLNUserTrackingModeNone = 0,
+  /** The map follows the user location. This tracking mode falls back
+      to ``MLNUserTrackingMode/MLNUserTrackingModeNone`` if the user pans the map view. */
+  MLNUserTrackingModeFollow,
+  /**
+      The map follows the user location and rotates when the heading changes.
+      The default user location annotation displays a fan-shaped indicator with
+      the current heading. The heading indicator represents the direction the
+      device is facing, which is sized according to the reported accuracy.
 
-        This tracking mode is disabled if the user pans the map view, but
-        remains enabled if the user zooms in. If the user rotates the map
-        view, this tracking mode will fall back to `MLNUserTrackingModeFollow`.
-     */
-    MLNUserTrackingModeFollowWithHeading,
-    /**
-        The map follows the user location and rotates when the course changes.
-        Course represents the direction in which the device is traveling.
-        The default user location annotation shows a puck-shaped indicator
-        that rotates as the course changes.
+      This tracking mode is disabled if the user pans the map view, but
+      remains enabled if the user zooms in. If the user rotates the map
+      view, this tracking mode will fall back to ``MLNUserTrackingModeFollow``.
+   */
+  MLNUserTrackingModeFollowWithHeading,
+  /**
+      The map follows the user location and rotates when the course changes.
+      Course represents the direction in which the device is traveling.
+      The default user location annotation shows a puck-shaped indicator
+      that rotates as the course changes.
 
-        This tracking mode is disabled if the user pans the map view, but
-        remains enabled if the user zooms in. If the user rotates the map view,
-        this tracking mode will fall back to `MLNUserTrackingModeFollow`.
-     */
-    MLNUserTrackingModeFollowWithCourse,
+      This tracking mode is disabled if the user pans the map view, but
+      remains enabled if the user zooms in. If the user rotates the map view,
+      this tracking mode will fall back to ``MLNUserTrackingModeFollow``.
+   */
+  MLNUserTrackingModeFollowWithCourse,
 };
 
 typedef NS_ENUM(NSUInteger, MLNPanScrollingMode) {
-    /** The map allows the user to only scroll horizontally. */
-    MLNPanScrollingModeHorizontal               = 0,
-    /** The map allows the user to only scroll vertically. */
-    MLNPanScrollingModeVertical,
-    /** The map allows the user to scroll both horizontally and vertically. */
-    MLNPanScrollingModeDefault
+  /** The map allows the user to only scroll horizontally. */
+  MLNPanScrollingModeHorizontal = 0,
+  /** The map allows the user to only scroll vertically. */
+  MLNPanScrollingModeVertical,
+  /** The map allows the user to scroll both horizontally and vertically. */
+  MLNPanScrollingModeDefault
 };
 
-/** Options for `MLNMapView.preferredFramesPerSecond`. */
+/** Options for ``MLNMapView/preferredFramesPerSecond``. */
 typedef NSInteger MLNMapViewPreferredFramesPerSecond NS_TYPED_EXTENSIBLE_ENUM;
 
 /**
  The default frame rate. This can be either 30 FPS or 60 FPS, depending on
  device capabilities.
  */
-FOUNDATION_EXTERN MLN_EXPORT const MLNMapViewPreferredFramesPerSecond MLNMapViewPreferredFramesPerSecondDefault;
+FOUNDATION_EXTERN MLN_EXPORT const MLNMapViewPreferredFramesPerSecond
+    MLNMapViewPreferredFramesPerSecondDefault;
 
 /** A conservative frame rate; typically 30 FPS. */
-FOUNDATION_EXTERN MLN_EXPORT const MLNMapViewPreferredFramesPerSecond MLNMapViewPreferredFramesPerSecondLowPower;
+FOUNDATION_EXTERN MLN_EXPORT const MLNMapViewPreferredFramesPerSecond
+    MLNMapViewPreferredFramesPerSecondLowPower;
 
 /** The maximum supported frame rate; typically 60 FPS. */
-FOUNDATION_EXTERN MLN_EXPORT const MLNMapViewPreferredFramesPerSecond MLNMapViewPreferredFramesPerSecondMaximum;
+FOUNDATION_EXTERN MLN_EXPORT const MLNMapViewPreferredFramesPerSecond
+    MLNMapViewPreferredFramesPerSecondMaximum;
 
-FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const MLNMissingLocationServicesUsageDescriptionException;
+FOUNDATION_EXTERN MLN_EXPORT
+    MLNExceptionName const MLNMissingLocationServicesUsageDescriptionException;
 FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const MLNUserLocationAnnotationTypeException;
 
 /**
  An interactive, customizable map view with an interface similar to the one
  provided by Apple’s MapKit.
 
- Using `MLNMapView`, you can embed the map inside a view, allow users to
+ Using ``MLNMapView``, you can embed the map inside a view, allow users to
  manipulate it with standard gestures, animate the map between different
  viewpoints, and present information in the form of annotations and overlays.
 
@@ -149,26 +154,26 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const MLNUserLocationAnnotationTyp
  <a href="https://maplibre.org/maputnik/">Maputnik</a>.
 
 
- Because `MLNMapView` loads asynchronously, several delegate methods are available
+ Because ``MLNMapView`` loads asynchronously, several delegate methods are available
  for receiving map-related updates. These methods can be used to ensure that certain operations
  have completed before taking any additional actions. Information on these methods is located
- in the `MLNMapViewDelegate` protocol documentation.
+ in the ``MLNMapViewDelegate`` protocol documentation.
 
- Adding your own gesture recognizer to `MLNMapView` will block the corresponding
- gesture recognizer built into `MLNMapView`. To avoid conflicts, define which
+ Adding your own gesture recognizer to ``MLNMapView`` will block the corresponding
+ gesture recognizer built into ``MLNMapView``. To avoid conflicts, define which
  gesture takes precedence. For example, you can create your own
- `UITapGestureRecognizer` that will be invoked only if the default `MLNMapView`
+ `UITapGestureRecognizer` that will be invoked only if the default ``MLNMapView``
  tap gesture fails:
 
  ```swift
- let mapTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(myCustomFunction))
- for recognizer in mapView.gestureRecognizers! where recognizer is UITapGestureRecognizer {
-     mapTapGestureRecognizer.require(toFail: recognizer)
+ let mapTapGestureRecognizer = UITapGestureRecognizer(target: self, action:
+ #selector(myCustomFunction)) for recognizer in mapView.gestureRecognizers! where recognizer is
+ UITapGestureRecognizer { mapTapGestureRecognizer.require(toFail: recognizer)
  }
  mapView.addGestureRecognizer(mapTapGestureRecognizer)
  ```
 
- @note You are responsible for getting permission to use the map data and for
+ > Note: You are responsible for getting permission to use the map data and for
  ensuring that your use adheres to the relevant terms of use.
  */
 MLN_EXPORT
@@ -196,9 +201,9 @@ MLN_EXPORT
  @return An initialized map view.
 
  #### Related examples
- 
- - TODO: initialize an `MLNMapView` with a custom style
- - TODO: how to initialize an `MLNMapView` with a third-party tile source
+
+ - TODO: initialize an ``MLNMapView`` with a custom style
+ - TODO: how to initialize an ``MLNMapView`` with a third-party tile source
  */
 - (instancetype)initWithFrame:(CGRect)frame styleURL:(nullable NSURL *)styleURL;
 
@@ -212,7 +217,7 @@ MLN_EXPORT
  annotations displayed on the map, such as the styles to apply to individual
  annotations.
  */
-@property(nonatomic, weak, nullable) IBOutlet id<MLNMapViewDelegate> delegate;
+@property (nonatomic, weak, nullable) IBOutlet id<MLNMapViewDelegate> delegate;
 
 // MARK: Configuring the Map’s Appearance
 
@@ -225,8 +230,8 @@ MLN_EXPORT
  If the style is loading, this property is set to `nil` until the style finishes
  loading. If the style has failed to load, this property is set to `nil`.
  Because the style loads asynchronously, you should manipulate it in the
- `-[MLNMapViewDelegate mapView:didFinishLoadingStyle:]` or
- `-[MLNMapViewDelegate mapViewDidFinishLoadingMap:]` method. It is not possible
+ ``MLNMapViewDelegate/mapView:didFinishLoadingStyle:`` or
+ ``MLNMapViewDelegate/mapViewDidFinishLoadingMap:`` method. It is not possible
  to manipulate the style before it has finished loading.
  */
 @property (nonatomic, readonly, nullable) MLNStyle *style;
@@ -263,11 +268,11 @@ MLN_EXPORT
 /**
  A boolean value that indicates if whether the map view should automatically
  adjust its content insets.
- 
+
  When this property is set to `YES` the map automatically updates its
  `contentInset` property to account for any area not covered by navigation bars,
  tab bars, toolbars, and other ancestors that obscure the map view.
- 
+
  */
 @property (assign) BOOL automaticallyAdjustsContentInset;
 
@@ -291,7 +296,7 @@ MLN_EXPORT
  A control indicating the scale of the map. The scale bar is positioned in the
  upper-left corner. Enable the scale bar via `showsScale`.
  */
-@property (nonatomic, readonly) UIView *scaleBar;
+@property (nonatomic, readonly) MLNScaleBar *scaleBar;
 
 /**
  Sets whether the scale uses styles that make it easier to read on a dark styled map
@@ -304,7 +309,8 @@ MLN_EXPORT
 @property (nonatomic, assign) BOOL scaleBarUsesMetricSystem;
 
 /**
- The position of the scale bar. The default value is `MLNOrnamentPositionTopLeft`.
+ The position of the scale bar. The default value is
+ ``MLNOrnamentPosition/MLNOrnamentPositionTopLeft``.
  */
 @property (nonatomic, assign) MLNOrnamentPosition scaleBarPosition;
 
@@ -320,7 +326,8 @@ MLN_EXPORT
 @property (nonatomic, readonly) MLNCompassButton *compassView;
 
 /**
- The position of the compass view. The default value is `MLNOrnamentPositionTopRight`.
+ The position of the compass view. The default value is
+ ``MLNOrnamentPosition/MLNOrnamentPositionTopRight``.
  */
 @property (nonatomic, assign) MLNOrnamentPosition compassViewPosition;
 
@@ -336,7 +343,8 @@ MLN_EXPORT
 @property (nonatomic, readonly) UIImageView *logoView;
 
 /**
- The position of the logo view. The default value is `MLNOrnamentPositionBottomLeft`.
+ The position of the logo view. The default value is
+ ``MLNOrnamentPosition/MLNOrnamentPositionBottomLeft``.
  */
 @property (nonatomic, assign) MLNOrnamentPosition logoViewPosition;
 
@@ -345,7 +353,6 @@ MLN_EXPORT
  */
 @property (nonatomic, assign) CGPoint logoViewMargins;
 
-
 /**
  A view showing legally required copyright notices,
  positioned at the bottom-right of the map view.
@@ -353,7 +360,7 @@ MLN_EXPORT
  If you choose to reimplement this view, assign the `-showAttribution:` method
  as the action for your view to present the default notices and settings.
 
- @note Attribution is often required for many vector sources,
+ > Note: Attribution is often required for many vector sources,
     OpenStreetMap data, or other data such as satellite or terrain
     data. If that applies to this map view, do not hide this view or remove
     any notices from it.
@@ -362,7 +369,8 @@ MLN_EXPORT
 @property (nonatomic, readonly) UIButton *attributionButton;
 
 /**
- The position of the attribution button. The default value is `MLNOrnamentPositionBottomRight`.
+ The position of the attribution button. The default value is
+ ``MLNOrnamentPosition/MLNOrnamentPositionBottomRight``.
  */
 @property (nonatomic, assign) MLNOrnamentPosition attributionButtonPosition;
 
@@ -384,11 +392,11 @@ MLN_EXPORT
  The preferred frame rate at which the map view is rendered.
 
  The default value for this property is
- `MLNMapViewPreferredFramesPerSecondDefault`, which will adaptively set the
+ ``MLNMapViewPreferredFramesPerSecondDefault``, which will adaptively set the
  preferred frame rate based on the capability of the user’s device to maintain
  a smooth experience.
 
- In addition to the provided `MLNMapViewPreferredFramesPerSecond` options, this
+ In addition to the provided ``MLNMapViewPreferredFramesPerSecond`` options, this
  property can be set to arbitrary integer values.
 
  @see `CADisplayLink.preferredFramesPerSecond`
@@ -397,15 +405,26 @@ MLN_EXPORT
 
 /**
  A Boolean value indicating whether the map should prefetch tiles.
- 
+
  When this property is set to `YES`, the map view prefetches tiles designed for
  a low zoom level and displays them until receiving more detailed tiles for the
  current zoom level. The prefetched tiles typically contain simplified versions
  of each shape, improving the map view’s perceived performance.
- 
+
  The default value of this property is `YES`.
  */
 @property (nonatomic, assign) BOOL prefetchesTiles;
+
+/**
+ A Boolean value indicating whether the map may cache tiles for different zoom levels or not.
+
+ When this property is set to `YES`,  the map view consumes more memory and
+ provide a smoother user experience when zoom in/out.
+
+ The default value of this property is `YES`.
+ */
+
+@property (nonatomic, assign) BOOL tileCacheEnabled;
 
 // MARK: Displaying the User’s Location
 
@@ -414,13 +433,13 @@ MLN_EXPORT
  location-related updates.
 
  To receive the current user location, implement the
- `-[MLNMapViewDelegate mapView:didUpdateUserLocation:]` and
- `-[MLNMapViewDelegate mapView:didFailToLocateUserWithError:]` methods.
+ ``MLNMapViewDelegate/mapView:didUpdateUserLocation:`` and
+ ``MLNMapViewDelegate/mapView:didFailToLocateUserWithError:`` methods.
 
  If setting this property to `nil` or if no custom manager is provided this
  property is set to the default location manager.
 
- `MLNMapView` uses a default location manager. If you want to substitute your
+ ``MLNMapView`` uses a default location manager. If you want to substitute your
  own location manager, you should do so by setting this property before setting
  `showsUserLocation` to `YES`. To restore the default location manager,
  set this property to `nil`.
@@ -450,6 +469,16 @@ MLN_EXPORT
 @property (nonatomic, assign) BOOL showsUserLocation;
 
 /**
+ A Boolean value indicating whether the map may request authorization to use location services.
+
+ Setting this property to `YES` causes the map view to use the Core Location
+ framework to request authorization when authorizationStatus == kCLAuthorizationStatusNotDetermined.
+
+ The default value of this property is `YES`.
+ */
+@property (nonatomic, assign) BOOL shouldRequestAuthorizationToUseLocationServices;
+
+/**
  A Boolean value indicating whether the device’s current location is visible in
  the map view.
 
@@ -465,7 +494,7 @@ MLN_EXPORT
 
 /**
  The mode used to track the user location. The default value is
- `MLNUserTrackingModeNone`.
+ ``MLNUserTrackingMode/MLNUserTrackingModeNone``.
 
  Changing the value of this property updates the map view with an animated
  transition. If you don’t want to animate the change, use the
@@ -473,13 +502,13 @@ MLN_EXPORT
 
  #### Related examples
  - TODO: Customize the user location annotation and learn how to customize the
- default user location annotation shown by `MLNUserTrackingMode`.
+ default user location annotation shown by ``MLNUserTrackingMode``.
  */
 @property (nonatomic, assign) MLNUserTrackingMode userTrackingMode;
 
 /**
  Deprecated. Sets the mode used to track the user location, with an optional transition.
- 
+
  To specify a completion handler to execute after the animation finishes, use
  the `-setUserTrackingMode:animated:completionHandler:` method.
 
@@ -490,7 +519,9 @@ MLN_EXPORT
     affects the initial transition; subsequent changes to the user location or
     heading are always animated.
  */
-- (void)setUserTrackingMode:(MLNUserTrackingMode)mode animated:(BOOL)animated __attribute__((deprecated("Use `-setUserTrackingMode:animated:completionHandler:` instead.")));
+- (void)setUserTrackingMode:(MLNUserTrackingMode)mode
+                   animated:(BOOL)animated
+    __attribute__((deprecated("Use `-setUserTrackingMode:animated:completionHandler:` instead.")));
 
 /**
  Sets the mode used to track the user location, with an optional transition and
@@ -504,17 +535,21 @@ MLN_EXPORT
     heading are always animated.
  @param completion The block executed after the animation finishes.
  */
-- (void)setUserTrackingMode:(MLNUserTrackingMode)mode animated:(BOOL)animated completionHandler:(nullable void (^)(void))completion;
+- (void)setUserTrackingMode:(MLNUserTrackingMode)mode
+                   animated:(BOOL)animated
+          completionHandler:(nullable void (^)(void))completion;
 
 /**
  The vertical alignment of the user location annotation within the receiver. The
- default value is `MLNAnnotationVerticalAlignmentCenter`.
+ default value is ``MLNAnnotationVerticalAlignment/MLNAnnotationVerticalAlignmentCenter``.
 
  Changing the value of this property updates the map view with an animated
  transition. If you don’t want to animate the change, use the
  `-setUserLocationVerticalAlignment:animated:` method instead.
  */
-@property (nonatomic, assign) MLNAnnotationVerticalAlignment userLocationVerticalAlignment __attribute__((deprecated("Use `-[MLNMapViewDelegate mapViewUserLocationAnchorPoint:]` instead.")));
+@property (nonatomic, assign) MLNAnnotationVerticalAlignment userLocationVerticalAlignment
+    __attribute__((deprecated("Use ``MLNMapViewDelegate/mapViewUserLocationAnchorPoint:`` instead.")
+                       ));
 
 /**
  Sets the vertical alignment of the user location annotation within the
@@ -525,7 +560,10 @@ MLN_EXPORT
     position within the map view. If `NO`, the user location annotation
     instantaneously moves to its new position.
  */
-- (void)setUserLocationVerticalAlignment:(MLNAnnotationVerticalAlignment)alignment animated:(BOOL)animated __attribute__((deprecated("Use `-[MLNMapViewDelegate mapViewUserLocationAnchorPoint:]` instead.")));
+- (void)setUserLocationVerticalAlignment:(MLNAnnotationVerticalAlignment)alignment
+                                animated:(BOOL)animated
+    __attribute__((
+        deprecated("Use ``MLNMapViewDelegate/mapViewUserLocationAnchorPoint:`` instead.")));
 
 /**
  Updates the position of the user location annotation view by retreiving the user's last
@@ -547,11 +585,11 @@ MLN_EXPORT
  Setting this property to `YES` causes the default user location annotation to
  appear and always show an arrow-shaped heading indicator, if heading is
  available. This property does not rotate the map; for that, see
- `MLNUserTrackingModeFollowWithHeading`.
+ ``MLNUserTrackingMode/MLNUserTrackingModeFollowWithHeading``.
 
- This property has no effect when `userTrackingMode` is
- `MLNUserTrackingModeFollowWithHeading` or
- `MLNUserTrackingModeFollowWithCourse`.
+ This property has no effect when ``userTrackingMode`` is
+ ``MLNUserTrackingMode/MLNUserTrackingModeFollowWithHeading`` or
+ ``MLNUserTrackingMode/MLNUserTrackingModeFollowWithCourse``.
 
  The default value of this property is `NO`.
  */
@@ -575,7 +613,7 @@ MLN_EXPORT
  to fit both foci optimally within the viewport.
 
  This property has no effect if the `userTrackingMode` property is set to a
- value other than `MLNUserTrackingModeFollowWithCourse`.
+ value other than ``MLNUserTrackingMode/MLNUserTrackingModeFollowWithCourse``.
 
  Changing the value of this property updates the map view with an animated
  transition. If you don’t want to animate the change, use the
@@ -595,8 +633,8 @@ MLN_EXPORT
  to fit both foci optimally within the viewport.
 
  This method has no effect if the `userTrackingMode` property is set to a value
- other than `MLNUserTrackingModeFollowWithCourse`.
- 
+ other than ``MLNUserTrackingMode/MLNUserTrackingModeFollowWithCourse``.
+
  To specify a completion handler to execute after the animation finishes, use
  the `-setTargetCoordinate:animated:completionHandler:` method.
 
@@ -604,7 +642,9 @@ MLN_EXPORT
  @param animated If `YES`, the map animates to fit the target within the map
     view. If `NO`, the map fits the target instantaneously.
  */
-- (void)setTargetCoordinate:(CLLocationCoordinate2D)targetCoordinate animated:(BOOL)animated __attribute__((deprecated("Use `-setTargetCoordinate:animated:completionHandler:` instead.")));
+- (void)setTargetCoordinate:(CLLocationCoordinate2D)targetCoordinate
+                   animated:(BOOL)animated
+    __attribute__((deprecated("Use `-setTargetCoordinate:animated:completionHandler:` instead.")));
 
 /**
  Sets the geographic coordinate that is the subject of observation as the user
@@ -619,14 +659,16 @@ MLN_EXPORT
  to fit both foci optimally within the viewport.
 
  This method has no effect if the `userTrackingMode` property is set to a value
- other than `MLNUserTrackingModeFollowWithCourse`.
+ other than ``MLNUserTrackingMode/MLNUserTrackingModeFollowWithCourse``.
 
  @param targetCoordinate The target coordinate to fit within the viewport.
  @param animated If `YES`, the map animates to fit the target within the map
     view. If `NO`, the map fits the target instantaneously.
  @param completion The block executed after the animation finishes.
  */
-- (void)setTargetCoordinate:(CLLocationCoordinate2D)targetCoordinate animated:(BOOL)animated completionHandler:(nullable void (^)(void))completion;
+- (void)setTargetCoordinate:(CLLocationCoordinate2D)targetCoordinate
+                   animated:(BOOL)animated
+          completionHandler:(nullable void (^)(void))completion;
 
 // MARK: Configuring How the User Interacts with the Map
 
@@ -642,7 +684,7 @@ MLN_EXPORT
  value of this property to `NO`, you may still change the map zoom
  programmatically.
  */
-@property(nonatomic, getter=isZoomEnabled) BOOL zoomEnabled;
+@property (nonatomic, getter=isZoomEnabled) BOOL zoomEnabled;
 
 /**
  A Boolean value that determines whether the user may scroll around the map,
@@ -655,7 +697,7 @@ MLN_EXPORT
  value of this property to `NO`, you may still change the map location
  programmatically.
  */
-@property(nonatomic, getter=isScrollEnabled) BOOL scrollEnabled;
+@property (nonatomic, getter=isScrollEnabled) BOOL scrollEnabled;
 
 /**
  The scrolling mode the user is allowed to use to interact with the map.
@@ -664,10 +706,10 @@ MLN_EXPORT
  restricting a user's ability to scroll vertically.
 `MLNPanScrollingModeVertical` only allows the user to scroll vertically on the map,
  restricting a user's ability to scroll horizontally.
- `MLNPanScrollingModeDefault` allows the user to scroll both horizontally and vertically
- on the map.
+ ``MLNPanScrollingMode/MLNPanScrollingModeDefault`` allows the user to scroll both horizontally and
+vertically on the map.
 
- By default, this property is set to `MLNPanScrollingModeDefault`.
+ By default, this property is set to ``MLNPanScrollingMode/MLNPanScrollingModeDefault``.
  */
 @property (nonatomic, assign) MLNPanScrollingMode panScrollingMode;
 
@@ -682,7 +724,7 @@ MLN_EXPORT
  value of this property to `NO`, you may still rotate the map
  programmatically.
  */
-@property(nonatomic, getter=isRotateEnabled) BOOL rotateEnabled;
+@property (nonatomic, getter=isRotateEnabled) BOOL rotateEnabled;
 
 /**
  A Boolean value that determines whether the user may change the pitch (tilt) of
@@ -697,13 +739,13 @@ MLN_EXPORT
 
  The default value of this property is `YES`.
  */
-@property(nonatomic, getter=isPitchEnabled) BOOL pitchEnabled;
+@property (nonatomic, getter=isPitchEnabled) BOOL pitchEnabled;
 
 /**
- A Boolean value that determines whether gestures are anchored to the center coordinate of the map while rotating or zooming.
- Default value is set to NO.
+ A Boolean value that determines whether gestures are anchored to the center coordinate of the map
+ while rotating or zooming. Default value is set to NO.
  */
-@property(nonatomic) BOOL anchorRotateOrZoomGesturesToCenterCoordinate;
+@property (nonatomic) BOOL anchorRotateOrZoomGesturesToCenterCoordinate;
 
 /**
  A Boolean value that determines whether the user will receive haptic feedback
@@ -716,18 +758,18 @@ MLN_EXPORT
  This feature requires a device that supports haptic feedback, running iOS 10 or
  newer.
  */
-@property(nonatomic, getter=isHapticFeedbackEnabled) BOOL hapticFeedbackEnabled;
+@property (nonatomic, getter=isHapticFeedbackEnabled) BOOL hapticFeedbackEnabled;
 
 /**
  A floating-point value that determines the rate of deceleration after the user
  lifts their finger.
 
- Your application can use the `MLNMapViewDecelerationRateNormal` and
- `MLNMapViewDecelerationRateFast` constants as reference points for reasonable
- deceleration rates. `MLNMapViewDecelerationRateImmediate` can be used to
+ Your application can use the ``MLNMapViewDecelerationRateNormal`` and
+ ``MLNMapViewDecelerationRateFast`` constants as reference points for reasonable
+ deceleration rates. ``MLNMapViewDecelerationRateImmediate`` can be used to
  disable deceleration entirely.
  */
-@property(nonatomic) CGFloat decelerationRate;
+@property (nonatomic) CGFloat decelerationRate;
 
 // MARK: Manipulating the Viewpoint
 
@@ -747,7 +789,7 @@ MLN_EXPORT
  Changes the center coordinate of the map and optionally animates the change.
 
  Changing the center coordinate centers the map on the new coordinate without
- changing the current zoom level. For animated changes, wait until the map view has 
+ changing the current zoom level. For animated changes, wait until the map view has
  finished loading before calling this method.
 
  @param coordinate The new center coordinate for the map.
@@ -755,14 +797,14 @@ MLN_EXPORT
     location or `NO` if you want the map to display the new location
     immediately.
 
- @note The behavior of this method is undefined if called in response to
+ > Note: The behavior of this method is undefined if called in response to
  `UIApplicationWillTerminateNotification`.
  */
 - (void)setCenterCoordinate:(CLLocationCoordinate2D)coordinate animated:(BOOL)animated;
 
 /**
  Changes the center coordinate and zoom level of the map and optionally animates
- the change. For animated changes, wait until the map view has 
+ the change. For animated changes, wait until the map view has
  finished loading before calling this method.
 
  @param centerCoordinate The new center coordinate for the map.
@@ -771,14 +813,16 @@ MLN_EXPORT
     zooming to the new location or `NO` if you want the map to display the new
     location immediately.
 
- @note The behavior of this method is undefined if called in response to
+ > Note: The behavior of this method is undefined if called in response to
  `UIApplicationWillTerminateNotification`.
  */
-- (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate zoomLevel:(double)zoomLevel animated:(BOOL)animated;
+- (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate
+                  zoomLevel:(double)zoomLevel
+                   animated:(BOOL)animated;
 
 /**
  Changes the center coordinate, zoom level, and direction of the map and
- optionally animates the change. For animated changes, wait until the map view has 
+ optionally animates the change. For animated changes, wait until the map view has
  finished loading before calling this method.
 
  @param centerCoordinate The new center coordinate for the map.
@@ -789,14 +833,17 @@ MLN_EXPORT
     zooming, and rotating to the new location or `NO` if you want the map to
     display the new location immediately.
 
- @note The behavior of this method is undefined if called in response to
+ > Note: The behavior of this method is undefined if called in response to
  `UIApplicationWillTerminateNotification`.
  */
-- (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate zoomLevel:(double)zoomLevel direction:(CLLocationDirection)direction animated:(BOOL)animated;
+- (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate
+                  zoomLevel:(double)zoomLevel
+                  direction:(CLLocationDirection)direction
+                   animated:(BOOL)animated;
 
 /**
  Changes the center coordinate, zoom level, and direction of the map, calling a
- completion handler at the end of an optional animation. For animated changes, 
+ completion handler at the end of an optional animation. For animated changes,
  wait until the map view has finished loading before calling this method.
 
  @param centerCoordinate The new center coordinate for the map.
@@ -808,10 +855,14 @@ MLN_EXPORT
     display the new location immediately.
  @param completion The block executed after the animation finishes.
 
- @note The behavior of this method is undefined if called in response to
+ > Note: The behavior of this method is undefined if called in response to
  `UIApplicationWillTerminateNotification`.
  */
-- (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate zoomLevel:(double)zoomLevel direction:(CLLocationDirection)direction animated:(BOOL)animated completionHandler:(nullable void (^)(void))completion;
+- (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate
+                  zoomLevel:(double)zoomLevel
+                  direction:(CLLocationDirection)direction
+                   animated:(BOOL)animated
+          completionHandler:(nullable void (^)(void))completion;
 
 /** The zoom level of the receiver.
 
@@ -863,6 +914,13 @@ MLN_EXPORT
  * is 25.5.
  */
 @property (nonatomic) double maximumZoomLevel;
+
+/**
+ * The maximum bounds of the map that can be shown on screen.
+ *
+ * @param MLNCoordinateBounds the bounds to constrain the screen to.
+ */
+@property (nonatomic) MLNCoordinateBounds maximumScreenBounds;
 
 /**
  The heading of the map, measured in degrees clockwise from true north.
@@ -963,7 +1021,7 @@ MLN_EXPORT
  specify some longitudes less than −180 degrees or greater than 180 degrees. For
  example, to show both Tokyo and San Francisco simultaneously, you could set the
  visible bounds to extend from (35.68476, −220.24257) to (37.78428, −122.41310).
- 
+
  To specify a completion handler to execute after the animation finishes, use
  the `-setVisibleCoordinateBounds:edgePadding:animated:completionHandler:` method.
 
@@ -973,7 +1031,11 @@ MLN_EXPORT
  @param animated Specify `YES` to animate the change by smoothly scrolling and
     zooming or `NO` to immediately display the given bounds.
  */
-- (void)setVisibleCoordinateBounds:(MLNCoordinateBounds)bounds edgePadding:(UIEdgeInsets)insets animated:(BOOL)animated __attribute__((deprecated("Use `-setVisibleCoordinateBounds:edgePadding:animated:completionHandler:` instead.")));
+- (void)setVisibleCoordinateBounds:(MLNCoordinateBounds)bounds
+                       edgePadding:(UIEdgeInsets)insets
+                          animated:(BOOL)animated
+    __attribute__((deprecated(
+        "Use `-setVisibleCoordinateBounds:edgePadding:animated:completionHandler:` instead.")));
 
 /**
  Changes the receiver’s viewport to fit the given coordinate bounds with some
@@ -991,7 +1053,10 @@ MLN_EXPORT
     zooming or `NO` to immediately display the given bounds.
  @param completion The block executed after the animation finishes.
  */
-- (void)setVisibleCoordinateBounds:(MLNCoordinateBounds)bounds edgePadding:(UIEdgeInsets)insets animated:(BOOL)animated completionHandler:(nullable void (^)(void))completion;
+- (void)setVisibleCoordinateBounds:(MLNCoordinateBounds)bounds
+                       edgePadding:(UIEdgeInsets)insets
+                          animated:(BOOL)animated
+                 completionHandler:(nullable void (^)(void))completion;
 
 /**
  Changes the receiver’s viewport to fit all of the given coordinates with some
@@ -1010,7 +1075,10 @@ MLN_EXPORT
  @param animated Specify `YES` to animate the change by smoothly scrolling and
     zooming or `NO` to immediately display the given bounds.
  */
-- (void)setVisibleCoordinates:(const CLLocationCoordinate2D *)coordinates count:(NSUInteger)count edgePadding:(UIEdgeInsets)insets animated:(BOOL)animated;
+- (void)setVisibleCoordinates:(const CLLocationCoordinate2D *)coordinates
+                        count:(NSUInteger)count
+                  edgePadding:(UIEdgeInsets)insets
+                     animated:(BOOL)animated;
 
 /**
  Changes the receiver’s viewport to fit all of the given coordinates with some
@@ -1033,7 +1101,13 @@ MLN_EXPORT
  @param function The timing function to animate the change.
  @param completion The block executed after the animation finishes.
  */
-- (void)setVisibleCoordinates:(const CLLocationCoordinate2D *)coordinates count:(NSUInteger)count edgePadding:(UIEdgeInsets)insets direction:(CLLocationDirection)direction duration:(NSTimeInterval)duration animationTimingFunction:(nullable CAMediaTimingFunction *)function completionHandler:(nullable void (^)(void))completion;
+- (void)setVisibleCoordinates:(const CLLocationCoordinate2D *)coordinates
+                        count:(NSUInteger)count
+                  edgePadding:(UIEdgeInsets)insets
+                    direction:(CLLocationDirection)direction
+                     duration:(NSTimeInterval)duration
+      animationTimingFunction:(nullable CAMediaTimingFunction *)function
+            completionHandler:(nullable void (^)(void))completion;
 
 /**
  Sets the visible region so that the map displays the specified annotations.
@@ -1047,7 +1121,7 @@ MLN_EXPORT
  @param animated `YES` if you want the map region change to be animated, or `NO`
     if you want the map to display the new region immediately without animations.
  */
-- (void)showAnnotations:(NSArray<id <MLNAnnotation>> *)annotations animated:(BOOL)animated;
+- (void)showAnnotations:(NSArray<id<MLNAnnotation>> *)annotations animated:(BOOL)animated;
 
 /**
  Deprecated. Sets the visible region so that the map displays the specified
@@ -1055,7 +1129,7 @@ MLN_EXPORT
 
  Calling this method updates the value in the `visibleCoordinateBounds` property
  and potentially other properties to reflect the new map region.
- 
+
  To specify a completion handler to execute after the animation finishes, use
  the `-showAnnotations:edgePadding:animated:completionHandler:` method.
 
@@ -1065,7 +1139,11 @@ MLN_EXPORT
  @param animated `YES` if you want the map region change to be animated, or `NO`
     if you want the map to display the new region immediately without animations.
  */
-- (void)showAnnotations:(NSArray<id <MLNAnnotation>> *)annotations edgePadding:(UIEdgeInsets)insets animated:(BOOL)animated __attribute__((deprecated("Use `-showAnnotations:edgePadding:animated:completionHandler:` instead.")));
+- (void)showAnnotations:(NSArray<id<MLNAnnotation>> *)annotations
+            edgePadding:(UIEdgeInsets)insets
+               animated:(BOOL)animated
+    __attribute__((
+        deprecated("Use `-showAnnotations:edgePadding:animated:completionHandler:` instead.")));
 
 /**
  Sets the visible region so that the map displays the specified annotations with
@@ -1082,7 +1160,10 @@ MLN_EXPORT
     if you want the map to display the new region immediately without animations.
  @param completion The block executed after the animation finishes.
  */
-- (void)showAnnotations:(NSArray<id <MLNAnnotation>> *)annotations edgePadding:(UIEdgeInsets)insets animated:(BOOL)animated completionHandler:(nullable void (^)(void))completion;
+- (void)showAnnotations:(NSArray<id<MLNAnnotation>> *)annotations
+            edgePadding:(UIEdgeInsets)insets
+               animated:(BOOL)animated
+      completionHandler:(nullable void (^)(void))completion;
 
 /**
  A camera representing the current viewpoint of the map.
@@ -1091,7 +1172,7 @@ MLN_EXPORT
 
 /**
  Moves the viewpoint to a different location with respect to the map with an
- optional transition animation. For animated changes, wait until the map view has 
+ optional transition animation. For animated changes, wait until the map view has
  finished loading before calling this method.
 
  @param camera The new viewpoint.
@@ -1106,7 +1187,7 @@ MLN_EXPORT
 
 /**
  Moves the viewpoint to a different location with respect to the map with an
- optional transition duration and timing function. For animated changes, wait 
+ optional transition duration and timing function. For animated changes, wait
  until the map view has finished loading before calling this method.
 
  @param camera The new viewpoint.
@@ -1121,11 +1202,13 @@ MLN_EXPORT
  - TODO: Camera animation: learn how to create a timed animation that
  rotates around a central point for a specific duration.
  */
-- (void)setCamera:(MLNMapCamera *)camera withDuration:(NSTimeInterval)duration animationTimingFunction:(nullable CAMediaTimingFunction *)function;
+- (void)setCamera:(MLNMapCamera *)camera
+               withDuration:(NSTimeInterval)duration
+    animationTimingFunction:(nullable CAMediaTimingFunction *)function;
 
 /**
  Moves the viewpoint to a different location with respect to the map with an
- optional transition duration and timing function. For animated changes, wait 
+ optional transition duration and timing function. For animated changes, wait
  until the map view has finished loading before calling this method.
 
  @param camera The new viewpoint.
@@ -1137,12 +1220,15 @@ MLN_EXPORT
     is `0`, this parameter is ignored.
  @param completion The block to execute after the animation finishes.
  */
-- (void)setCamera:(MLNMapCamera *)camera withDuration:(NSTimeInterval)duration animationTimingFunction:(nullable CAMediaTimingFunction *)function completionHandler:(nullable void (^)(void))completion;
+- (void)setCamera:(MLNMapCamera *)camera
+               withDuration:(NSTimeInterval)duration
+    animationTimingFunction:(nullable CAMediaTimingFunction *)function
+          completionHandler:(nullable void (^)(void))completion;
 
 /**
  Moves the viewpoint to a different location with respect to the map with an
  optional transition duration and timing function, and optionally some additional
- padding on each side. For animated changes, wait until the map view has 
+ padding on each side. For animated changes, wait until the map view has
  finished loading before calling this method.
 
  @param camera The new viewpoint.
@@ -1156,7 +1242,11 @@ MLN_EXPORT
  around the returned camera object if it were set as the receiver’s camera.
  @param completion The block to execute after the animation finishes.
  */
-- (void)setCamera:(MLNMapCamera *)camera withDuration:(NSTimeInterval)duration animationTimingFunction:(nullable CAMediaTimingFunction *)function edgePadding:(UIEdgeInsets)edgePadding completionHandler:(nullable void (^)(void))completion;
+- (void)setCamera:(MLNMapCamera *)camera
+               withDuration:(NSTimeInterval)duration
+    animationTimingFunction:(nullable CAMediaTimingFunction *)function
+                edgePadding:(UIEdgeInsets)edgePadding
+          completionHandler:(nullable void (^)(void))completion;
 
 /**
  Moves the viewpoint to a different location using a transition animation that
@@ -1185,7 +1275,9 @@ MLN_EXPORT
     is based on the length of the flight path.
  @param completion The block to execute after the animation finishes.
  */
-- (void)flyToCamera:(MLNMapCamera *)camera withDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion;
+- (void)flyToCamera:(MLNMapCamera *)camera
+         withDuration:(NSTimeInterval)duration
+    completionHandler:(nullable void (^)(void))completion;
 
 /**
  Moves the viewpoint to a different location using a transition animation that
@@ -1205,8 +1297,10 @@ MLN_EXPORT
     `-setCamera:animated:` would have a midpoint at a higher altitude.
  @param completion The block to execute after the animation finishes.
  */
-- (void)flyToCamera:(MLNMapCamera *)camera withDuration:(NSTimeInterval)duration peakAltitude:(CLLocationDistance)peakAltitude completionHandler:(nullable void (^)(void))completion;
-
+- (void)flyToCamera:(MLNMapCamera *)camera
+         withDuration:(NSTimeInterval)duration
+         peakAltitude:(CLLocationDistance)peakAltitude
+    completionHandler:(nullable void (^)(void))completion;
 
 /**
  Moves the viewpoint to a different location using a transition animation that
@@ -1216,16 +1310,18 @@ MLN_EXPORT
  the user find his or her bearings even after traversing a great distance.
 
  @param camera The new viewpoint.
+ @param insets The minimum padding (in screen points) that would be visible
+    around the returned camera object if it were set as the receiver's camera.
  @param duration The amount of time, measured in seconds, that the transition
     animation should take. Specify `0` to jump to the new viewpoint
     instantaneously. Specify a negative value to use the default duration, which
     is based on the length of the flight path.
- @param edgePadding The minimum padding (in screen points) that would be visible
- around the returned camera object if it were set as the receiver’s camera.
  @param completion The block to execute after the animation finishes.
  */
-- (void)flyToCamera:(MLNMapCamera *)camera edgePadding:(UIEdgeInsets)insets withDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion;
-
+- (void)flyToCamera:(MLNMapCamera *)camera
+          edgePadding:(UIEdgeInsets)insets
+         withDuration:(NSTimeInterval)duration
+    completionHandler:(nullable void (^)(void))completion;
 /**
  Returns the camera that best fits the given coordinate bounds.
 
@@ -1235,7 +1331,7 @@ MLN_EXPORT
     including the entire coordinate bounds. The camera object uses the current
     direction and pitch.
 
- @note The behavior of this method is undefined if called in response to
+ > Note: The behavior of this method is undefined if called in response to
  `UIApplicationWillTerminateNotification`; you may receive a `nil` return value
  depending on the order of notification delivery.
  */
@@ -1253,11 +1349,12 @@ MLN_EXPORT
     including the entire coordinate bounds. The camera object uses the current
     direction and pitch.
 
- @note The behavior of this method is undefined if called in response to
+ > Note: The behavior of this method is undefined if called in response to
  `UIApplicationWillTerminateNotification`; you may receive a `nil` return value
  depending on the order of notification delivery.
  */
-- (MLNMapCamera *)cameraThatFitsCoordinateBounds:(MLNCoordinateBounds)bounds edgePadding:(UIEdgeInsets)insets;
+- (MLNMapCamera *)cameraThatFitsCoordinateBounds:(MLNCoordinateBounds)bounds
+                                     edgePadding:(UIEdgeInsets)insets;
 
 /**
  Returns the camera that best fits the given coordinate bounds with some
@@ -1274,11 +1371,13 @@ MLN_EXPORT
     including the entire coordinate bounds. The initial camera's pitch and
     direction will be honored.
 
- @note The behavior of this method is undefined if called in response to
+ > Note: The behavior of this method is undefined if called in response to
  `UIApplicationWillTerminateNotification`; you may receive a `nil` return value
  depending on the order of notification delivery.
  */
-- (MLNMapCamera *)camera:(MLNMapCamera *)camera fittingCoordinateBounds:(MLNCoordinateBounds)bounds edgePadding:(UIEdgeInsets)insets;
+- (MLNMapCamera *)camera:(MLNMapCamera *)camera
+    fittingCoordinateBounds:(MLNCoordinateBounds)bounds
+                edgePadding:(UIEdgeInsets)insets;
 
 /**
  Returns the camera that best fits the given shape with some additional padding
@@ -1293,11 +1392,13 @@ MLN_EXPORT
     (close to the ground) as possible while still including the entire shape.
     The initial camera's pitch and direction will be honored.
 
- @note The behavior of this method is undefined if called in response to
+ > Note: The behavior of this method is undefined if called in response to
  `UIApplicationWillTerminateNotification`; you may receive a `nil` return value
  depending on the order of notification delivery.
  */
-- (MLNMapCamera *)camera:(MLNMapCamera *)camera fittingShape:(MLNShape *)shape edgePadding:(UIEdgeInsets)insets;
+- (MLNMapCamera *)camera:(MLNMapCamera *)camera
+            fittingShape:(MLNShape *)shape
+             edgePadding:(UIEdgeInsets)insets;
 
 /**
  Returns the camera that best fits the given shape with some additional padding
@@ -1312,11 +1413,13 @@ MLN_EXPORT
     (close to the ground) as possible while still including the entire shape.
     The camera object uses the current pitch.
 
- @note The behavior of this method is undefined if called in response to
+ > Note: The behavior of this method is undefined if called in response to
  `UIApplicationWillTerminateNotification`; you may receive a `nil` return value
  depending on the order of notification delivery.
  */
-- (MLNMapCamera *)cameraThatFitsShape:(MLNShape *)shape direction:(CLLocationDirection)direction edgePadding:(UIEdgeInsets)insets;
+- (MLNMapCamera *)cameraThatFitsShape:(MLNShape *)shape
+                            direction:(CLLocationDirection)direction
+                          edgePadding:(UIEdgeInsets)insets;
 
 /**
  Returns the point in this view’s coordinate system on which to “anchor” in
@@ -1325,7 +1428,7 @@ MLN_EXPORT
  For example, a pinch-to-zoom gesture would anchor the map at the midpoint of
  the pinch.
 
- If the `userTrackingMode` property is not `MLNUserTrackingModeNone`, the
+ If the ``userTrackingMode`` property is not ``MLNUserTrackingMode/MLNUserTrackingModeNone``, the
  user annotation is used as the anchor point.
 
  Subclasses may override this method to provide specialized behavior - for
@@ -1346,13 +1449,13 @@ MLN_EXPORT
  view’s frame. Otherwise, those properties are inset, excluding part of the
  frame from the viewport. For instance, if the only the top edge is inset, the
  map center is effectively shifted downward.
- 
+
  When the map view’s superview is an instance of `UIViewController` whose
  `automaticallyAdjustsScrollViewInsets` property is `YES`, the value of this
  property may be overridden at any time.
- 
+
  The usage of `automaticallyAdjustsScrollViewInsets` has been deprecated
- use the map view’s property `MLNMapView.automaticallyAdjustsContentInset`instead.
+ use the map view’s property ``MLNMapView/automaticallyAdjustsContentInset``instead.
 
  Changing the value of this property updates the map view immediately. If you
  want to animate the change, use the `-setContentInset:animated:completionHandler:`
@@ -1386,10 +1489,10 @@ MLN_EXPORT
  When the map view’s superview is an instance of `UIViewController` whose
  `automaticallyAdjustsScrollViewInsets` property is `YES`, the value of this
  property may be overridden at any time.
- 
+
  The usage of `automaticallyAdjustsScrollViewInsets` has been deprecated
- use the map view’s property `MLNMapView.automaticallyAdjustsContentInset`instead.
- 
+ use the map view’s property ``MLNMapView/automaticallyAdjustsContentInset``instead.
+
  To specify a completion handler to execute after the animation finishes, use
  the `-setContentInset:animated:completionHandler:` method.
 
@@ -1398,7 +1501,9 @@ MLN_EXPORT
     the content inset or `NO` if you want the map to inset the content
     immediately.
  */
-- (void)setContentInset:(UIEdgeInsets)contentInset animated:(BOOL)animated __attribute__((deprecated("Use `-setContentInset:animated:completionHandler:` instead.")));
+- (void)setContentInset:(UIEdgeInsets)contentInset
+               animated:(BOOL)animated
+    __attribute__((deprecated("Use `-setContentInset:animated:completionHandler:` instead.")));
 
 /**
  Sets the distance from the edges of the map view’s frame to the edges of the
@@ -1414,9 +1519,9 @@ MLN_EXPORT
  When the map view’s superview is an instance of `UIViewController` whose
  `automaticallyAdjustsScrollViewInsets` property is `YES`, the value of this
  property may be overridden at any time.
- 
+
  The usage of `automaticallyAdjustsScrollViewInsets` has been deprecated
- use the map view’s property `MLNMapView.automaticallyAdjustsContentInset`instead.
+ use the map view’s property ``MLNMapView/automaticallyAdjustsContentInset``instead.
 
  @param contentInset The new values to inset the content by.
  @param animated Specify `YES` if you want the map view to animate the change to
@@ -1424,7 +1529,9 @@ MLN_EXPORT
     immediately.
  @param completion The block executed after the animation finishes.
  */
-- (void)setContentInset:(UIEdgeInsets)contentInset animated:(BOOL)animated completionHandler:(nullable void (^)(void))completion;
+- (void)setContentInset:(UIEdgeInsets)contentInset
+               animated:(BOOL)animated
+      completionHandler:(nullable void (^)(void))completion;
 
 // MARK: Converting Geographic Coordinates
 
@@ -1456,7 +1563,8 @@ MLN_EXPORT
  #### Related examples
  - TODO: Point conversion: learn how to convert a map coordinate to a `CGPoint` object.
  */
-- (CGPoint)convertCoordinate:(CLLocationCoordinate2D)coordinate toPointToView:(nullable UIView *)view;
+- (CGPoint)convertCoordinate:(CLLocationCoordinate2D)coordinate
+               toPointToView:(nullable UIView *)view;
 
 /**
  Converts a rectangle in the given view’s coordinate system to a geographic
@@ -1507,51 +1615,51 @@ MLN_EXPORT
  Returns the new map projection instance initialized with the map view,
  i.e. with the current camera state.
  */
-- (MLNMapProjection*)mapProjection;
+- (MLNMapProjection *)mapProjection;
 
 // MARK: Annotating the Map
 
 /**
  The complete list of annotations associated with the receiver. (read-only)
 
- The objects in this array must adopt the `MLNAnnotation` protocol. If no
+ The objects in this array must adopt the ``MLNAnnotation`` protocol. If no
  annotations are associated with the map view, the value of this property is
  `nil`.
  */
-@property (nonatomic, readonly, nullable) NSArray<id <MLNAnnotation>> *annotations;
+@property (nonatomic, readonly, nullable) NSArray<id<MLNAnnotation>> *annotations;
 
 /**
  Adds an annotation to the map view.
 
- @note `MLNMultiPolyline`, `MLNMultiPolygon`, `MLNShapeCollection`, and
-    `MLNPointCollection` objects cannot be added to the map view at this time.
+ > Note: ``MLNMultiPolyline``, ``MLNMultiPolyline``, ``MLNMultiPolyline``, and
+    ``MLNPointCollection`` objects cannot be added to the map view at this time.
     Any multipoint, multipolyline, multipolygon, shape or point collection
     object that is specified is silently ignored.
 
  @param annotation The annotation object to add to the receiver. This object
-    must conform to the `MLNAnnotation` protocol. The map view retains the
+    must conform to the ``MLNAnnotation`` protocol. The map view retains the
     annotation object.
 
  #### Related examples
  - TODO: add a line annotation from GeoJSON.
- - TODO: add an annotation to an `MLNMapView` object.
+ - TODO: add an annotation to an ``MLNMapView`` object.
  */
-- (void)addAnnotation:(id <MLNAnnotation>)annotation;
+- (void)addAnnotation:(id<MLNAnnotation>)annotation;
 
 /**
  Adds an array of annotations to the map view.
 
- @note `MLNMultiPolyline`, `MLNMultiPolygon`, and `MLNShapeCollection` objects
-    cannot be added to the map view at this time. Nor can `MLNMultiPoint`
-    objects that are not instances of `MLNPolyline` or `MLNPolygon`. Any
+ > Note: ``MLNMultiPolyline``, ``MLNMultiPolyline``, and ``MLNMultiPolyline`` objects
+    cannot be added to the map view at this time. Nor can ``MLNMultiPoint``
+    objects that are not instances of ``MLNPolyline`` or ``MLNPolyline``. Any
     multipoint, multipolyline, multipolygon, or shape collection objects that
     are specified are silently ignored.
 
  @param annotations An array of annotation objects. Each object in the array
-    must conform to the `MLNAnnotation` protocol. The map view retains each
+    must conform to the ``MLNAnnotation`` protocol. The map view retains each
     individual annotation object.
  */
-- (void)addAnnotations:(NSArray<id <MLNAnnotation>> *)annotations;
+- (void)addAnnotations:(NSArray<id<MLNAnnotation>> *)annotations;
 
 /**
  Removes an annotation from the map view, deselecting it if it is selected.
@@ -1561,9 +1669,9 @@ MLN_EXPORT
  this method only when you want to hide or delete a given annotation.
 
  @param annotation The annotation object to remove. This object must conform
-    to the `MLNAnnotation` protocol
+    to the ``MLNAnnotation`` protocol
  */
-- (void)removeAnnotation:(id <MLNAnnotation>)annotation;
+- (void)removeAnnotation:(id<MLNAnnotation>)annotation;
 
 /**
  Removes an array of annotations from the map view, deselecting any selected
@@ -1574,23 +1682,23 @@ MLN_EXPORT
  call this method only when you want to hide or delete the given annotations.
 
  @param annotations The array of annotation objects to remove. Objects in the
-    array must conform to the `MLNAnnotation` protocol.
+    array must conform to the ``MLNAnnotation`` protocol.
  */
-- (void)removeAnnotations:(NSArray<id <MLNAnnotation>> *)annotations;
+- (void)removeAnnotations:(NSArray<id<MLNAnnotation>> *)annotations;
 
 /**
- Returns an `MLNAnnotationView` if the given annotation is currently associated
+ Returns an ``MLNAnnotationView`` if the given annotation is currently associated
  with a view, otherwise nil.
 
  @param annotation The annotation associated with the view.
-    Annotation must conform to the `MLNAnnotation` protocol.
+    Annotation must conform to the ``MLNAnnotation`` protocol.
  */
-- (nullable MLNAnnotationView *)viewForAnnotation:(id <MLNAnnotation>)annotation;
+- (nullable MLNAnnotationView *)viewForAnnotation:(id<MLNAnnotation>)annotation;
 
 /**
  Returns a reusable annotation image object associated with its identifier.
 
- For performance reasons, you should generally reuse `MLNAnnotationImage`
+ For performance reasons, you should generally reuse ``MLNAnnotationImage``
  objects for identical-looking annotations in your map views. Dequeueing
  saves time and memory during performance-critical operations such as
  scrolling.
@@ -1603,14 +1711,15 @@ MLN_EXPORT
 
  #### Related examples
  - TODO: Add annotation views and images: learn how to most efficiently
- reuse an `MLNAnnotationImage`.
+ reuse an ``MLNAnnotationImage``.
  */
-- (nullable __kindof MLNAnnotationImage *)dequeueReusableAnnotationImageWithIdentifier:(NSString *)identifier;
+- (nullable __kindof MLNAnnotationImage *)dequeueReusableAnnotationImageWithIdentifier:
+    (NSString *)identifier;
 
 /**
  Returns a reusable annotation view object associated with its identifier.
 
- For performance reasons, you should generally reuse `MLNAnnotationView`
+ For performance reasons, you should generally reuse ``MLNAnnotationView``
  objects for identical-looking annotations in your map views. Dequeueing
  saves time and memory during performance-critical operations such as
  scrolling.
@@ -1621,28 +1730,29 @@ MLN_EXPORT
  @return An annotation view object with the given identifier, or `nil` if no
     such object exists in the reuse queue.
  */
-- (nullable __kindof MLNAnnotationView *)dequeueReusableAnnotationViewWithIdentifier:(NSString *)identifier;
+- (nullable __kindof MLNAnnotationView *)dequeueReusableAnnotationViewWithIdentifier:
+    (NSString *)identifier;
 
 /**
  The complete list of annotations associated with the receiver that are
  currently visible.
 
- The objects in this array must adopt the `MLNAnnotation` protocol. If no
+ The objects in this array must adopt the ``MLNAnnotation`` protocol. If no
  annotations are associated with the map view or if no annotations associated
  with the map view are currently visible, the value of this property is `nil`.
  */
-@property (nonatomic, readonly, nullable) NSArray<id <MLNAnnotation>> *visibleAnnotations;
+@property (nonatomic, readonly, nullable) NSArray<id<MLNAnnotation>> *visibleAnnotations;
 
 /**
  Returns the list of annotations associated with the receiver that intersect with
  the given rectangle.
 
  @param rect A rectangle expressed in the map view’s coordinate system.
- @return An array of objects that adopt the `MLNAnnotation` protocol or `nil` if
+ @return An array of objects that adopt the ``MLNAnnotation`` protocol or `nil` if
     no annotations associated with the map view are currently visible in the
     rectangle.
  */
-- (nullable NSArray<id <MLNAnnotation>> *)visibleAnnotationsInRect:(CGRect)rect;
+- (nullable NSArray<id<MLNAnnotation>> *)visibleAnnotationsInRect:(CGRect)rect;
 
 // MARK: Managing Annotation Selections
 
@@ -1652,14 +1762,14 @@ MLN_EXPORT
  Assigning a new array to this property selects only the first annotation in
  the array.
 
- If the annotation is of type `MLNPointAnnotation` and is offscreen, the camera
+ If the annotation is of type ``MLNPointAnnotation`` and is offscreen, the camera
  will animate to bring the annotation and its callout just on screen. If you
  need finer control, consider using `-selectAnnotation:animated:`.
 
- @note In versions prior to `4.0.0` if the annotation was offscreen it was not
+ > Note: In versions prior to `4.0.0` if the annotation was offscreen it was not
  selected.
  */
-@property (nonatomic, copy) NSArray<id <MLNAnnotation>> *selectedAnnotations;
+@property (nonatomic, copy) NSArray<id<MLNAnnotation>> *selectedAnnotations;
 
 /**
  Deprecated. Selects an annotation and displays its callout view.
@@ -1669,21 +1779,27 @@ MLN_EXPORT
 
  | `animated` parameter | Effect |
  |------------------|--------|
- | `NO`             | The annotation is selected, and the callout is presented. However the map is not panned to bring the annotation or callout into view. The presentation of the callout is NOT animated. |
- | `YES`            | The annotation is selected, and the callout is presented. If the annotation is not visible (or is partially visible) *and* is of type `MLNPointAnnotation`, the map is panned so that the annotation and its callout are brought into view. The annotation is *not* centered within the viewport. |
+ | `NO`             | The annotation is selected, and the callout is presented. However the map is
+ not panned to bring the annotation or callout into view. The presentation of the callout is NOT
+ animated. | | `YES`            | The annotation is selected, and the callout is presented. If the
+ annotation is not visible (or is partially visible) *and* is of type ``MLNPointAnnotation``, the
+ map is panned so that the annotation and its callout are brought into view. The annotation is *not*
+ centered within the viewport. |
 
  Note that a selection initiated by a single tap gesture is always animated.
- 
+
  To specify a completion handler to execute after the animation finishes, use
  the `-selectAnnotation:animated:completionHandler:` method.
 
  @param annotation The annotation object to select.
  @param animated If `YES`, the annotation and callout view are animated on-screen.
 
- @note In versions prior to `4.0.0` selecting an offscreen annotation did not
+ > Note: In versions prior to `4.0.0` selecting an offscreen annotation did not
  change the camera.
  */
-- (void)selectAnnotation:(id <MLNAnnotation>)annotation animated:(BOOL)animated __attribute__((deprecated("Use `-selectAnnotation:animated:completionHandler:` instead.")));
+- (void)selectAnnotation:(id<MLNAnnotation>)annotation
+                animated:(BOOL)animated
+    __attribute__((deprecated("Use `-selectAnnotation:animated:completionHandler:` instead.")));
 
 /**
  Selects an annotation and displays its callout view with an optional completion
@@ -1694,8 +1810,12 @@ MLN_EXPORT
 
  | `animated` parameter | Effect |
  |------------------|--------|
- | `NO`             | The annotation is selected, and the callout is presented. However the map is not panned to bring the annotation or callout into view. The presentation of the callout is NOT animated. |
- | `YES`            | The annotation is selected, and the callout is presented. If the annotation is not visible (or is partially visible) *and* is of type `MLNPointAnnotation`, the map is panned so that the annotation and its callout are brought into view. The annotation is *not* centered within the viewport. |
+ | `NO`             | The annotation is selected, and the callout is presented. However the map is
+ not panned to bring the annotation or callout into view. The presentation of the callout is NOT
+ animated. | | `YES`            | The annotation is selected, and the callout is presented. If the
+ annotation is not visible (or is partially visible) *and* is of type ``MLNPointAnnotation``, the
+ map is panned so that the annotation and its callout are brought into view. The annotation is *not*
+ centered within the viewport. |
 
  Note that a selection initiated by a single tap gesture is always animated.
 
@@ -1703,10 +1823,12 @@ MLN_EXPORT
  @param animated If `YES`, the annotation and callout view are animated on-screen.
  @param completion The block executed after the animation finishes.
 
- @note In versions prior to `4.0.0` selecting an offscreen annotation did not
+ > Note: In versions prior to `4.0.0` selecting an offscreen annotation did not
  change the camera.
  */
-- (void)selectAnnotation:(id <MLNAnnotation>)annotation animated:(BOOL)animated completionHandler:(nullable void (^)(void))completion;
+- (void)selectAnnotation:(id<MLNAnnotation>)annotation
+                animated:(BOOL)animated
+       completionHandler:(nullable void (^)(void))completion;
 
 /**
  :nodoc:
@@ -1715,11 +1837,17 @@ MLN_EXPORT
  change.
 
  @param annotation The annotation object to select.
- @param moveIntoView If the annotation is not visible (or is partially visible) *and* is of type `MLNPointAnnotation`, the map is panned so that the annotation and its callout are brought into view. The annotation is *not* centered within the viewport.
- @param animateSelection If `YES`, the annotation's selection state and callout view's presentation are animated.
+ @param moveIntoView If the annotation is not visible (or is partially visible) *and* is of type
+ ``MLNPointAnnotation``, the map is panned so that the annotation and its callout are brought into
+ view. The annotation is *not* centered within the viewport.
+ @param animateSelection If `YES`, the annotation's selection state and callout view's presentation
+ are animated.
  @param completion The block executed after the animation finishes.
  */
-- (void)selectAnnotation:(id <MLNAnnotation>)annotation moveIntoView:(BOOL)moveIntoView animateSelection:(BOOL)animateSelection completionHandler:(nullable void (^)(void))completion;
+- (void)selectAnnotation:(id<MLNAnnotation>)annotation
+            moveIntoView:(BOOL)moveIntoView
+        animateSelection:(BOOL)animateSelection
+       completionHandler:(nullable void (^)(void))completion;
 
 /**
  Deselects an annotation and hides its callout view.
@@ -1727,18 +1855,18 @@ MLN_EXPORT
  @param annotation The annotation object to deselect.
  @param animated If `YES`, the callout view is animated offscreen.
  */
-- (void)deselectAnnotation:(nullable id <MLNAnnotation>)annotation animated:(BOOL)animated;
+- (void)deselectAnnotation:(nullable id<MLNAnnotation>)annotation animated:(BOOL)animated;
 
 // MARK: Overlaying the Map
 
 /**
  The complete list of overlays associated with the receiver. (read-only)
 
- The objects in this array must adopt the `MLNOverlay` protocol. If no
+ The objects in this array must adopt the ``MLNOverlay`` protocol. If no
  overlays are associated with the map view, the value of this property is
  empty array.
  */
-@property (nonatomic, readonly, nonnull) NSArray<id <MLNOverlay>> *overlays;
+@property (nonatomic, readonly, nonnull) NSArray<id<MLNOverlay>> *overlays;
 
 /**
  Adds a single overlay object to the map.
@@ -1746,8 +1874,8 @@ MLN_EXPORT
  To remove an overlay from a map, use the `-removeOverlay:` method.
 
  @param overlay The overlay object to add. This object must conform to the
-    `MLNOverlay` protocol. */
-- (void)addOverlay:(id <MLNOverlay>)overlay;
+    ``MLNOverlay`` protocol. */
+- (void)addOverlay:(id<MLNOverlay>)overlay;
 
 /**
  Adds an array of overlay objects to the map.
@@ -1755,9 +1883,9 @@ MLN_EXPORT
  To remove multiple overlays from a map, use the `-removeOverlays:` method.
 
  @param overlays An array of objects, each of which must conform to the
-    `MLNOverlay` protocol.
+    ``MLNOverlay`` protocol.
  */
-- (void)addOverlays:(NSArray<id <MLNOverlay>> *)overlays;
+- (void)addOverlays:(NSArray<id<MLNOverlay>> *)overlays;
 
 /**
  Removes a single overlay object from the map.
@@ -1767,17 +1895,17 @@ MLN_EXPORT
 
  @param overlay The overlay object to remove.
  */
-- (void)removeOverlay:(id <MLNOverlay>)overlay;
+- (void)removeOverlay:(id<MLNOverlay>)overlay;
 
 /**
  Removes one or more overlay objects from the map.
 
  If a given overlay object is not associated with the map view, it is ignored.
 
- @param overlays An array of objects, each of which conforms to the `MLNOverlay`
+ @param overlays An array of objects, each of which conforms to the ``MLNOverlay``
     protocol.
  */
-- (void)removeOverlays:(NSArray<id <MLNOverlay>> *)overlays;
+- (void)removeOverlays:(NSArray<id<MLNOverlay>> *)overlays;
 
 // MARK: Accessing the Underlying Map Data
 
@@ -1790,14 +1918,15 @@ MLN_EXPORT
  information about searching for map features, see that method’s documentation.
 
  @param point A point expressed in the map view’s coordinate system.
- @return An array of objects conforming to the `MLNFeature` protocol that
+ @return An array of objects conforming to the ``MLNFeature`` protocol that
     represent features in the sources used by the current style.
 
  #### Related examples
  - TODO: Select a feature within a layer: to learn how to query an
- `MLNMapView` object for visible `MLNFeature` objects.
+ ``MLNMapView`` object for visible ``MLNMapView`` objects.
  */
-- (NSArray<id <MLNFeature>> *)visibleFeaturesAtPoint:(CGPoint)point NS_SWIFT_NAME(visibleFeatures(at:));
+- (NSArray<id<MLNFeature>> *)visibleFeaturesAtPoint:(CGPoint)point
+    NS_SWIFT_NAME(visibleFeatures(at:));
 
 /**
  Returns an array of rendered map features that intersect with a given point,
@@ -1813,10 +1942,13 @@ MLN_EXPORT
  @param styleLayerIdentifiers A set of strings that correspond to the names
     of layers defined in the current style. Only the features contained in
     these layers are included in the returned array.
- @return An array of objects conforming to the `MLNFeature` protocol that
+ @return An array of objects conforming to the ``MLNFeature`` protocol that
     represent features in the sources used by the current style.
  */
-- (NSArray<id <MLNFeature>> *)visibleFeaturesAtPoint:(CGPoint)point inStyleLayersWithIdentifiers:(nullable NSSet<NSString *> *)styleLayerIdentifiers NS_SWIFT_NAME(visibleFeatures(at:styleLayerIdentifiers:));
+- (NSArray<id<MLNFeature>> *)visibleFeaturesAtPoint:(CGPoint)point
+                       inStyleLayersWithIdentifiers:
+                           (nullable NSSet<NSString *> *)styleLayerIdentifiers
+    NS_SWIFT_NAME(visibleFeatures(at:styleLayerIdentifiers:));
 
 /**
  Returns an array of rendered map features that intersect with a given point,
@@ -1825,8 +1957,8 @@ MLN_EXPORT
  Each object in the returned array represents a feature rendered by the
  current style and provides access to attributes specified by the relevant map
  content sources. The returned array includes features loaded by
- `MLNShapeSource` and `MLNVectorTileSource` objects but does not include
- anything from `MLNRasterTileSource` objects, or from video or canvas sources,
+ ``MLNShapeSource`` and ``MLNShapeSource`` objects but does not include
+ anything from ``MLNRasterTileSource`` objects, or from video or canvas sources,
  which are unsupported by this SDK.
 
  The returned features are drawn by a style layer in the current style. For
@@ -1836,7 +1968,7 @@ MLN_EXPORT
  property set to `bus`. If you pass a point corresponding to the location of a
  bus stop into this method, the bus stop feature does not appear in the
  resulting array. On the other hand, if the style does include bus stops, an
- `MLNFeature` object representing that bus stop is returned and its
+ ``MLNFeature`` object representing that bus stop is returned and its
  `featureAttributes` dictionary has the `maki` key set to `bus` (along with
  other attributes). The dictionary contains only the attributes provided by the
  tile source; it does not include computed attribute values or rules about how
@@ -1859,31 +1991,28 @@ MLN_EXPORT
 
  Only visible features are returned. To obtain features regardless of
  visibility, use the
- `-[MLNVectorTileSource featuresInSourceLayersWithIdentifiers:predicate:]` and
- `-[MLNShapeSource featuresMatchingPredicate:]` methods on the relevant sources.
+ ``MLNVectorTileSource/featuresInSourceLayersWithIdentifiers:predicate:`` and
+ ``MLNShapeSource/featuresMatchingPredicate:`` methods on the relevant sources.
 
  The returned features may also include features corresponding to annotations.
- These features are not object-equal to the `MLNAnnotation` objects that were
+ These features are not object-equal to the ``MLNAnnotation`` objects that were
  originally added to the map. To query the map for annotations, use
- `visibleAnnotations` or `-[MLNMapView visibleAnnotationsInRect:]`.
+ `visibleAnnotations` or ``MLNMapView/visibleAnnotationsInRect:``.
 
- @note Layer identifiers are not guaranteed to exist across styles or different
-    versions of the same style. Applications that use this API must first set
-    the style URL to an explicitly versioned style using a convenience method
-    like `+[MLNStyle outdoorsStyleURLWithVersion:]`, `MLNMapView`’s “Style URL”
-    inspectable in Interface Builder, or a manually constructed `NSURL`. This
-    approach also avoids layer identifer name changes that will occur in the
-    default style’s layers over time.
 
  @param point A point expressed in the map view’s coordinate system.
  @param styleLayerIdentifiers A set of strings that correspond to the names of
     layers defined in the current style. Only the features contained in these
     layers are included in the returned array.
  @param predicate A predicate to filter the returned features.
- @return An array of objects conforming to the `MLNFeature` protocol that
+ @return An array of objects conforming to the ``MLNFeature`` protocol that
     represent features in the sources used by the current style.
  */
-- (NSArray<id <MLNFeature>> *)visibleFeaturesAtPoint:(CGPoint)point inStyleLayersWithIdentifiers:(nullable NSSet<NSString *> *)styleLayerIdentifiers predicate:(nullable NSPredicate *)predicate NS_SWIFT_NAME(visibleFeatures(at:styleLayerIdentifiers:predicate:));
+- (NSArray<id<MLNFeature>> *)visibleFeaturesAtPoint:(CGPoint)point
+                       inStyleLayersWithIdentifiers:
+                           (nullable NSSet<NSString *> *)styleLayerIdentifiers
+                                          predicate:(nullable NSPredicate *)predicate
+    NS_SWIFT_NAME(visibleFeatures(at:styleLayerIdentifiers:predicate:));
 
 /**
  Returns an array of rendered map features that intersect with the given
@@ -1895,10 +2024,10 @@ MLN_EXPORT
  information about searching for map features, see that method’s documentation.
 
  @param rect A rectangle expressed in the map view’s coordinate system.
- @return An array of objects conforming to the `MLNFeature` protocol that
+ @return An array of objects conforming to the ``MLNFeature`` protocol that
     represent features in the sources used by the current style.
  */
-- (NSArray<id <MLNFeature>> *)visibleFeaturesInRect:(CGRect)rect NS_SWIFT_NAME(visibleFeatures(in:));
+- (NSArray<id<MLNFeature>> *)visibleFeaturesInRect:(CGRect)rect NS_SWIFT_NAME(visibleFeatures(in:));
 
 /**
  Returns an array of rendered map features that intersect with the given
@@ -1914,10 +2043,13 @@ MLN_EXPORT
  @param styleLayerIdentifiers A set of strings that correspond to the names of
     layers defined in the current style. Only the features contained in these
     layers are included in the returned array.
- @return An array of objects conforming to the `MLNFeature` protocol that
+ @return An array of objects conforming to the ``MLNFeature`` protocol that
     represent features in the sources used by the current style.
  */
-- (NSArray<id <MLNFeature>> *)visibleFeaturesInRect:(CGRect)rect inStyleLayersWithIdentifiers:(nullable NSSet<NSString *> *)styleLayerIdentifiers NS_SWIFT_NAME(visibleFeatures(in:styleLayerIdentifiers:));
+- (NSArray<id<MLNFeature>> *)visibleFeaturesInRect:(CGRect)rect
+                      inStyleLayersWithIdentifiers:
+                          (nullable NSSet<NSString *> *)styleLayerIdentifiers
+    NS_SWIFT_NAME(visibleFeatures(in:styleLayerIdentifiers:));
 
 /**
  Returns an array of rendered map features that intersect with the given
@@ -1927,8 +2059,8 @@ MLN_EXPORT
  Each object in the returned array represents a feature rendered by the
  current style and provides access to attributes specified by the relevant map
  content sources. The returned array includes features loaded by
- `MLNShapeSource` and `MLNVectorTileSource` objects but does not include
- anything from `MLNRasterTileSource` objects, or from video or canvas sources,
+ ``MLNShapeSource`` and ``MLNShapeSource`` objects but does not include
+ anything from ``MLNRasterTileSource`` objects, or from video or canvas sources,
  which are unsupported by this SDK.
 
  The returned features are drawn by a style layer in the current style. For
@@ -1936,7 +2068,7 @@ MLN_EXPORT
  but none of the specified style layers includes features that have the `maki`
  property set to `bus`. If you pass a rectangle containing the location of a bus
  stop into this method, the bus stop feature does not appear in the resulting
- array. On the other hand, if the style does include bus stops, an `MLNFeature`
+ array. On the other hand, if the style does include bus stops, an ``MLNFeature``
  object representing that bus stop is returned and its `featureAttributes`
  dictionary has the `maki` key set to `bus` (along with other attributes). The
  dictionary contains only the attributes provided by the tile source; it does
@@ -1961,34 +2093,22 @@ MLN_EXPORT
 
  Only visible features are returned. To obtain features regardless of
  visibility, use the
- `-[MLNVectorTileSource featuresInSourceLayersWithIdentifiers:predicate:]` and
- `-[MLNShapeSource featuresMatchingPredicate:]` methods on the relevant sources.
-
- @note Layer identifiers are not guaranteed to exist across styles or different
- versions of the same style. Applications that use this API must first set the
- style URL to an explicitly versioned style using a convenience method like
- `+[MLNStyle outdoorsStyleURLWithVersion:]`, `MLNMapView`’s “Style URL”
- inspectable in Interface Builder, or a manually constructed `NSURL`. This
- approach also avoids layer identifer name changes that will occur in the
- default style’s layers over time.
-
- @note Layer identifiers are not guaranteed to exist across styles or different
-    versions of the same style. Applications that use this API must first set
-    the style URL to an explicitly versioned style using a convenience method
-    like `+[MLNStyle outdoorsStyleURLWithVersion:]`, `MLNMapView`’s “Style URL”
-    inspectable in Interface Builder, or a manually constructed `NSURL`. This
-    approach also avoids layer identifer name changes that will occur in the
-    default style’s layers over time.
+ ``MLNVectorTileSource/featuresInSourceLayersWithIdentifiers:predicate:`` and
+ ``MLNShapeSource/featuresMatchingPredicate:`` methods on the relevant sources.
 
  @param rect A rectangle expressed in the map view’s coordinate system.
  @param styleLayerIdentifiers A set of strings that correspond to the names of
     layers defined in the current style. Only the features contained in these
     layers are included in the returned array.
  @param predicate A predicate to filter the returned features.
- @return An array of objects conforming to the `MLNFeature` protocol that
+ @return An array of objects conforming to the ``MLNFeature`` protocol that
     represent features in the sources used by the current style.
  */
-- (NSArray<id <MLNFeature>> *)visibleFeaturesInRect:(CGRect)rect inStyleLayersWithIdentifiers:(nullable NSSet<NSString *> *)styleLayerIdentifiers predicate:(nullable NSPredicate *)predicate NS_SWIFT_NAME(visibleFeatures(in:styleLayerIdentifiers:predicate:));
+- (NSArray<id<MLNFeature>> *)visibleFeaturesInRect:(CGRect)rect
+                      inStyleLayersWithIdentifiers:
+                          (nullable NSSet<NSString *> *)styleLayerIdentifiers
+                                         predicate:(nullable NSPredicate *)predicate
+    NS_SWIFT_NAME(visibleFeatures(in:styleLayerIdentifiers:predicate:));
 
 // MARK: Debugging the Map
 
@@ -2000,8 +2120,13 @@ MLN_EXPORT
  */
 @property (nonatomic) MLNMapDebugMaskOptions debugMask;
 
+- (MLNBackendResource *)backendResource;
 
-- (MLNBackendResource)backendResource;
+/**
+ Triggers a repaint of the map.
+*/
+- (void)triggerRepaint;
+
 @end
 
 NS_ASSUME_NONNULL_END

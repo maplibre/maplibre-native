@@ -14,8 +14,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
-import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test activity showcasing using the scrollBy Camera API by moving x,y pixels above Grenada, Spain.
@@ -46,24 +46,26 @@ class ScrollByActivity : AppCompatActivity(), OnMapReadyCallback {
             PixelBarChangeListener(textViewY, R.string.scrollby_y_value)
         )
         mapView = findViewById(R.id.mapView)
-        mapView.setTag(true)
+        mapView.tag = true
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
     }
 
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
-        maplibreMap.setStyle(Style.getPredefinedStyle("Pastel"))
+        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Pastel"))
         val uiSettings = maplibreMap.uiSettings
         uiSettings.isLogoEnabled = false
         uiSettings.isAttributionEnabled = false
         val fab = findViewById<FloatingActionButton>(R.id.fab)
         fab.setColorFilter(ContextCompat.getColor(this@ScrollByActivity, R.color.primary))
-        fab.setOnClickListener { view: View? ->
+        fab.setOnClickListener { _: View? ->
+            // # --8<-- [start:scrollBy]
             maplibreMap.scrollBy(
-                (seekBarX!!.progress * MULTIPLIER_PER_PIXEL).toFloat(),
-                (seekBarY!!.progress * MULTIPLIER_PER_PIXEL).toFloat()
+                (seekBarX.progress * MULTIPLIER_PER_PIXEL).toFloat(),
+                (seekBarY.progress * MULTIPLIER_PER_PIXEL).toFloat()
             )
+            // # --8<-- [end:scrollBy]
         }
     }
 
@@ -105,15 +107,14 @@ class ScrollByActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
-                onBackPressed()
+                onBackPressedDispatcher.onBackPressed()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    private class PixelBarChangeListener
-    internal constructor(
+    private class PixelBarChangeListener(
         private val valueView: TextView,
         @field:StringRes @param:StringRes
         private val prefixTextResource: Int

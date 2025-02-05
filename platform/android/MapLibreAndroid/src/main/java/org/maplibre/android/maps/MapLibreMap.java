@@ -15,11 +15,11 @@ import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 import androidx.annotation.UiThread;
 
-import com.mapbox.android.gestures.AndroidGesturesManager;
-import com.mapbox.android.gestures.MoveGestureDetector;
-import com.mapbox.android.gestures.RotateGestureDetector;
-import com.mapbox.android.gestures.ShoveGestureDetector;
-import com.mapbox.android.gestures.StandardScaleGestureDetector;
+import org.maplibre.android.gestures.AndroidGesturesManager;
+import org.maplibre.android.gestures.MoveGestureDetector;
+import org.maplibre.android.gestures.RotateGestureDetector;
+import org.maplibre.android.gestures.ShoveGestureDetector;
+import org.maplibre.android.gestures.StandardScaleGestureDetector;
 import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.Geometry;
 import org.maplibre.android.MapStrictMode;
@@ -322,6 +322,26 @@ public final class MapLibreMap {
   @IntRange(from = 0)
   public int getPrefetchZoomDelta() {
     return nativeMapView.getPrefetchZoomDelta();
+  }
+
+  /**
+   * Indicating whether the map may cache tiles for different zoom levels or not.
+   *
+   * @param enabled true causes the map view to consume more memory and have a smoother user
+   * experience when zoom in/out. The default value of this property is `true`.
+   */
+  public void setTileCacheEnabled(boolean enabled) {
+    nativeMapView.setTileCacheEnabled(enabled);
+  }
+
+  /**
+   * Check whether tile cache is enabled or not.
+   *
+   * @return true if enabled
+   * @see MapLibreMap#setTileCacheEnabled(boolean)
+   */
+  public boolean getTileCacheEnabled() {
+    return nativeMapView.getTileCacheEnabled();
   }
 
   //
@@ -737,6 +757,24 @@ public final class MapLibreMap {
   public void scrollBy(float x, float y, long duration) {
     notifyDeveloperAnimationListeners();
     nativeMapView.moveBy(x, y, duration);
+  }
+
+  /**
+   * Returns the current zoom level.
+   */
+  public double getZoom() {
+    return nativeMapView.getZoom();
+  }
+
+  /**
+   * Zooms the camera to the specified level.
+   * @param zoom              The zoom level to which the camera should move.
+   * @param focalPoint        The point around which to zoom.
+   * @param duration          The duration for the zoom animation
+   */
+  public void setZoom(double zoom, @NonNull PointF focalPoint, long duration ) {
+    notifyDeveloperAnimationListeners();
+    nativeMapView.setZoom(zoom, focalPoint, duration);
   }
 
   //
@@ -1526,7 +1564,7 @@ public final class MapLibreMap {
    * Get a camera position that fits a provided bounds and padding and the current camera tilt and bearing.
    *
    * @param latLngBounds the bounds to set the map with
-   * @param padding      the padding to apply to the bounds
+   * @param padding      the padding to apply to the bounds (in left, top, right, bottom order)
    * @return the camera position that fits the bounds and padding
    */
   @Nullable
@@ -1559,7 +1597,7 @@ public final class MapLibreMap {
    * Get a camera position that fits a provided bounds, padding, bearing and tilt.
    *
    * @param latLngBounds the bounds to set the map with
-   * @param padding      the padding to apply to the bounds
+   * @param padding      the padding to apply to the bounds (in left, top, right, bottom order)
    * @param bearing      the bearing to transform the camera position with
    * @param tilt         to transform the camera position with
    * @return the camera position that fits the bounds, bearing and tilt

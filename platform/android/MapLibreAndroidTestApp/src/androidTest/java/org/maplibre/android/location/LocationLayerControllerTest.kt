@@ -30,14 +30,15 @@ import org.maplibre.android.testapp.utils.TestingAsyncUtils
 import org.maplibre.android.utils.BitmapUtils
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.notNullValue
+import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.testapp.styles.TestStyles
 import kotlin.math.abs
 
 @RunWith(AndroidJUnit4ClassRunner::class)
@@ -154,7 +155,7 @@ class LocationLayerControllerTest : EspressoTest() {
                 component.isLocationComponentEnabled = true
                 component.renderMode = RenderMode.NORMAL
                 component.forceLocationUpdate(location)
-                styleChangeIdlingResource.waitForStyle(maplibreMap, Style.getPredefinedStyle("Bright"))
+                styleChangeIdlingResource.waitForStyle(maplibreMap, TestStyles.getPredefinedStyleWithFallback("Bright"))
                 TestingAsyncUtils.waitForLayer(uiController, mapView)
 
                 assertThat(component.renderMode, `is`(equalTo(RenderMode.NORMAL)))
@@ -456,7 +457,7 @@ class LocationLayerControllerTest : EspressoTest() {
                 component.isLocationComponentEnabled = true
                 component.renderMode = RenderMode.NORMAL
                 component.forceLocationUpdate(location)
-                styleChangeIdlingResource.waitForStyle(maplibreMap, Style.getPredefinedStyle("Bright"))
+                styleChangeIdlingResource.waitForStyle(maplibreMap, TestStyles.getPredefinedStyleWithFallback("Bright"))
                 TestingAsyncUtils.waitForLayer(uiController, mapView)
 
                 assertThat(component.renderMode, `is`(equalTo(RenderMode.NORMAL)))
@@ -503,7 +504,7 @@ class LocationLayerControllerTest : EspressoTest() {
                     `is`(true)
                 )
 
-                maplibreMap.setStyle(Style.Builder().fromUrl(Style.getPredefinedStyle("Bright")))
+                maplibreMap.setStyle(Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Bright")))
                 TestingAsyncUtils.waitForLayer(uiController, mapView)
 
                 assertThat(
@@ -675,7 +676,7 @@ class LocationLayerControllerTest : EspressoTest() {
                 assertThat(
                     Math.abs(zoom - maplibreMap.cameraPosition.zoom) < 0.1 &&
                         Math.abs(target.latitude - maplibreMap.cameraPosition.target!!.latitude) < 0.1 &&
-                        Math.abs(target!!.longitude - maplibreMap.cameraPosition.target!!.longitude) < 0.1,
+                        Math.abs(target.longitude - maplibreMap.cameraPosition.target!!.longitude) < 0.1,
                     `is`(true)
                 )
 
@@ -721,7 +722,7 @@ class LocationLayerControllerTest : EspressoTest() {
                 assertThat(
                     abs(zoom - maplibreMap.cameraPosition.zoom) < 0.1 &&
                         abs(target.latitude - maplibreMap.cameraPosition.target!!.latitude) < 0.1 &&
-                        abs(target!!.longitude - maplibreMap.cameraPosition.target!!.longitude) < 0.1,
+                        abs(target.longitude - maplibreMap.cameraPosition.target!!.longitude) < 0.1,
                     `is`(true)
                 )
 

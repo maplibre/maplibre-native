@@ -169,12 +169,7 @@ public:
 
     void setStencilTiles(RenderTiles);
 
-    void updateLayerIndex(int32_t value) override {
-        layerIndex = value;
-        for (auto* drawable : sortedDrawables) {
-            drawable->setLayerIndex(value);
-        }
-    }
+    void updateLayerIndex(int32_t value) override { layerIndex = value; }
 
 protected:
     // When stencil clipping is enabled for the layer, this is the set
@@ -245,12 +240,7 @@ public:
 
     std::size_t clearDrawables() override;
 
-    void updateLayerIndex(int32_t value) override {
-        layerIndex = value;
-        for (auto& drawable : drawables) {
-            drawable->setLayerIndex(value);
-        }
-    }
+    void updateLayerIndex(int32_t value) override { layerIndex = value; }
 
 protected:
     using DrawableCollection = std::set<gfx::UniqueDrawable, gfx::DrawableLessByPriority>;

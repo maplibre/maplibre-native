@@ -37,6 +37,8 @@ public:
 
     void update(std::shared_ptr<UpdateParameters>) override;
 
+    const TaggedScheduler& getThreadPool() const override;
+
     // Feature querying
     std::vector<Feature> queryRenderedFeatures(const ScreenCoordinate&, const RenderedQueryOptions&) const;
     std::vector<Feature> queryRenderedFeatures(const ScreenBox&, const RenderedQueryOptions&) const;
@@ -52,6 +54,8 @@ public:
                                                  const std::optional<std::map<std::string, mbgl::Value>>& args) const;
 
     // Memory
+    void setTileCacheEnabled(bool);
+    bool getTileCacheEnabled() const;
     void reduceMemoryUse();
 
 private:

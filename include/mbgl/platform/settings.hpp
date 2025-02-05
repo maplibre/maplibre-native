@@ -7,13 +7,13 @@
 namespace mbgl {
 namespace platform {
 
-#define DECLARE_MAPBOX_SETTING(name, value) constexpr const char* name = "mapbox_" #value
+#define DECLARE_MAPLIBRE_SETTING(name, value) constexpr const char* name = "maplibre_" #value
 
 // The value for EXPERIMENTAL_THREAD_PRIORITY_* keys, must be a double.
-DECLARE_MAPBOX_SETTING(EXPERIMENTAL_THREAD_PRIORITY_WORKER, thread_priority_worker);
-DECLARE_MAPBOX_SETTING(EXPERIMENTAL_THREAD_PRIORITY_FILE, thread_priority_file);
-DECLARE_MAPBOX_SETTING(EXPERIMENTAL_THREAD_PRIORITY_NETWORK, thread_priority_network);
-DECLARE_MAPBOX_SETTING(EXPERIMENTAL_THREAD_PRIORITY_DATABASE, thread_priority_database);
+DECLARE_MAPLIBRE_SETTING(EXPERIMENTAL_THREAD_PRIORITY_WORKER, thread_priority_worker);
+DECLARE_MAPLIBRE_SETTING(EXPERIMENTAL_THREAD_PRIORITY_FILE, thread_priority_file);
+DECLARE_MAPLIBRE_SETTING(EXPERIMENTAL_THREAD_PRIORITY_NETWORK, thread_priority_network);
+DECLARE_MAPLIBRE_SETTING(EXPERIMENTAL_THREAD_PRIORITY_DATABASE, thread_priority_database);
 
 /// Settings class provides non-persistent, in-process key-value storage.
 class Settings final {

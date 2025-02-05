@@ -26,10 +26,10 @@ struct SpriteLoader::Data {
     std::unique_ptr<AsyncRequest> spriteRequest;
 };
 
-SpriteLoader::SpriteLoader(float pixelRatio_)
+SpriteLoader::SpriteLoader(float pixelRatio_, const TaggedScheduler& threadPool_)
     : pixelRatio(pixelRatio_),
       observer(&nullObserver),
-      threadPool(Scheduler::GetBackground()) {}
+      threadPool(threadPool_) {}
 
 SpriteLoader::~SpriteLoader() = default;
 
@@ -39,6 +39,8 @@ void SpriteLoader::load(const std::optional<style::Sprite> sprite, FileSource& f
         observer->onSpriteLoaded(std::nullopt, {});
         return;
     }
+
+    observer->onSpriteRequested(sprite);
 
     std::string id = sprite->id;
     std::string url = sprite->spriteURL;
@@ -93,25 +95,25 @@ void SpriteLoader::emitSpriteLoadedIfComplete(style::Sprite sprite) {
         std::exception_ptr error;
     };
 
-    auto parseClosure = [sprite = sprite, image = data->image, json = data->json]() -> ParseResult {
-        try {
-            return {parseSprite(sprite.id, *image, *json), nullptr};
-        } catch (...) {
-            return {{}, std::current_exception()};
-        }
-    };
+    threadPool.scheduleAndReplyValue(
+        /* parseClosure */
+        [sprite = sprite, image = data->image, json = data->json]() -> ParseResult {
+            try {
+                return {parseSprite(sprite.id, *image, *json), nullptr};
+            } catch (...) {
+                return {{}, std::current_exception()};
+            }
+        },
+        /* resultClosure */
+        [this, sprite = sprite, weak = weakFactory.makeWeakPtr()](ParseResult result) {
+            if (!weak) return; // This instance has been deleted.
 
-    auto resultClosure = [this, sprite = sprite, weak = weakFactory.makeWeakPtr()](ParseResult result) {
-        if (!weak) return; // This instance has been deleted.
-
-        if (result.error) {
-            observer->onSpriteError(std::optional(sprite), result.error);
-            return;
-        }
-        observer->onSpriteLoaded(std::optional(sprite), std::move(result.images));
-    };
-
-    threadPool->scheduleAndReplyValue(parseClosure, resultClosure);
+            if (result.error) {
+                observer->onSpriteError(std::optional(sprite), result.error);
+                return;
+            }
+            observer->onSpriteLoaded(std::optional(sprite), std::move(result.images));
+        });
 }
 
 void SpriteLoader::setObserver(SpriteLoaderObserver* observer_) {

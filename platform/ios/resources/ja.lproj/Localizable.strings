@@ -41,7 +41,7 @@
 "MAP_A11Y_VALUE" = "ズーム %1$d倍\n%2$ld ピン現れる";
 
 /* Action sheet title */
-"SDK_NAME" = "MapLibre Maps SDK for iOS";
+"SDK_NAME" = "MapLibre Native iOS";
 
 /* Telemetry prompt message */
 "TELEMETRY_DISABLED_MSG" = "You can help make OpenStreetMap and Mapbox maps better by contributing anonymous usage data.";
@@ -72,4 +72,3 @@
 
 /* Default user location annotation title */
 "USER_DOT_TITLE" = "現在位置";
-

@@ -53,7 +53,7 @@ MSVC_FLAGS = [
     "/wd4435",  # (boost) Object layout under /vd2 will change due to virtual base
     "/wd4702",  # Unreachable code
     "/wd4710",  # Function not inlined
-    "/wd5041",  # out-of-line definition for constexpr static data member is not needed and is deprecated in C++17
+    "/wd5041",  # out-of-line definition for constexpr static data member is not needed and is deprecated since C++17
     "/wd4946",  # reinterpret_cast used between related classes
     "/wd4459",  # declaration of 'x' hides global declaration
     "/wd4373",  # virtual function overrides 'x', previous versions of the compiler did not override when parameters only differed by const/volatile qualifiers
@@ -86,19 +86,21 @@ GCC_CLANG_CPP_FLAGS = [
     "-fexceptions",
     "-fno-rtti",
     "-ftemplate-depth=1024",
-    "-std=c++17",
+    "-std=c++20",
 ]
 
 MSVC_CPP_FLAGS = [
     "/EHsc",
-    "/std:c++17",
+    "/std:c++20",
     "/GR-",
     "/permissive-",
     "/utf-8",
 ]
 
 CPP_FLAGS = select({
-    "//conditions:default": GCC_CLANG_CPP_FLAGS + WARNING_FLAGS["ios"],
+    "//conditions:default": GCC_CLANG_CPP_FLAGS,
+    "@platforms//os:ios": GCC_CLANG_CPP_FLAGS + WARNING_FLAGS["ios"] + ["-fvisibility=hidden"],
+    "@platforms//os:macos": GCC_CLANG_CPP_FLAGS + WARNING_FLAGS["macos"] + ["-fvisibility=hidden"],
     "@platforms//os:linux": GCC_CLANG_CPP_FLAGS + WARNING_FLAGS["linux"],
     "@platforms//os:windows": MSVC_CPP_FLAGS + WARNING_FLAGS["windows"],
 })

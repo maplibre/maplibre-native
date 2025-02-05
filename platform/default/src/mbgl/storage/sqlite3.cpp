@@ -69,7 +69,8 @@ public:
     ~DatabaseImpl() {
         const int error = sqlite3_close(db);
         if (error != SQLITE_OK) {
-            mbgl::Log::Error(mbgl::Event::Database, error, "Failed to close database: %s", sqlite3_errmsg(db));
+            mbgl::Log::Error(
+                mbgl::Event::Database, error, std::string("Failed to close database: ") + sqlite3_errmsg(db));
         }
     }
 
@@ -108,7 +109,7 @@ public:
 
 #ifndef NDEBUG
 void logSqlMessage(void*, const int err, const char* msg) {
-    mbgl::Log::Record(mbgl::EventSeverity::Debug, mbgl::Event::Database, err, "%s", msg);
+    mbgl::Log::Record(mbgl::EventSeverity::Debug, mbgl::Event::Database, std::to_string(err) + msg);
 }
 #endif
 
@@ -130,7 +131,7 @@ MBGL_CONSTRUCTOR(initialize) {
 #endif
 }
 
-mapbox::util::variant<Database, Exception> Database::tryOpen(const std::string& filename, int flags) {
+std::variant<Database, Exception> Database::tryOpen(const std::string& filename, int flags) {
     sqlite3* db = nullptr;
     const int error = sqlite3_open_v2(filename.c_str(), &db, flags | SQLITE_OPEN_URI, nullptr);
     if (error != SQLITE_OK) {
@@ -143,10 +144,10 @@ mapbox::util::variant<Database, Exception> Database::tryOpen(const std::string& 
 
 Database Database::open(const std::string& filename, int flags) {
     auto result = tryOpen(filename, flags);
-    if (result.is<Exception>()) {
-        throw std::move(result.get<Exception>());
+    if (std::holds_alternative<Exception>(result)) {
+        throw std::move(std::get<Exception>(result));
     } else {
-        return std::move(result.get<Database>());
+        return std::move(std::get<Database>(result));
     }
 }
 

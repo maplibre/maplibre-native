@@ -39,7 +39,7 @@ LocalGlyphRasterizer::LocalGlyphRasterizer() {
     static auto& javaClass = jni::Class<LocalGlyphRasterizer>::Singleton(*env);
     static auto constructor = javaClass.GetConstructor(*env);
 
-    javaObject = jni::NewGlobal(*env, javaClass.New(*env, constructor));
+    javaObject = jni::NewGlobal<jni::EnvAttachingDeleter>(*env, javaClass.New(*env, constructor));
 }
 
 PremultipliedImage LocalGlyphRasterizer::drawGlyphBitmap(const std::string& fontFamily,

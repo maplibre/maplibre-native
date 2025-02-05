@@ -9,7 +9,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  An offline region defined by a style URL, geographic shape, and
  range of zoom levels.
- 
+
  ### Example
  ```swift
  var coordinates = [
@@ -17,13 +17,13 @@ NS_ASSUME_NONNULL_BEGIN
      CLLocationCoordinate2D(latitude: 45.534611, longitude: -122.708873),
      CLLocationCoordinate2D(latitude: 45.530883, longitude: -122.678833)
  ]
- 
+
  let triangle = MLNPolygon(coordinates: &coordinates, count: UInt(coordinates.count))
- let region = MLNShapeOfflineRegion(styleURL: MLNStyle.lightStyleURL, shape: triangle, fromZoomLevel: 11, toZoomLevel: 14)
- let context = "Triangle Region".data(using: .utf8)
+ let region = MLNShapeOfflineRegion(styleURL: MLNStyle.lightStyleURL, shape: triangle,
+ fromZoomLevel: 11, toZoomLevel: 14) let context = "Triangle Region".data(using: .utf8)
  MLNOfflineStorage.shared.addPack(for: region, withContext: context!)
  ```
- 
+
  This class requires fewer resources than MLNTilePyramidOfflineRegion
  for irregularly shaped regions.
  */
@@ -39,14 +39,14 @@ MLN_EXPORT
 /**
  The minimum zoom level for which to download tiles and other resources.
 
- For more information about zoom levels, `-[MLNMapView zoomLevel]`.
+ For more information about zoom levels, ``MLNMapView/zoomLevel``.
  */
 @property (nonatomic, readonly) double minimumZoomLevel;
 
 /**
  The maximum zoom level for which to download tiles and other resources.
 
- For more information about zoom levels, `-[MLNMapView zoomLevel]`.
+ For more information about zoom levels, ``MLNMapView/zoomLevel``.
  */
 @property (nonatomic, readonly) double maximumZoomLevel;
 
@@ -56,7 +56,7 @@ MLN_EXPORT
  Initializes a newly created offline region with the given style URL, geometry,
  and range of zoom levels.
 
- This is the designated initializer for `MLNShapeOfflineRegion`.
+ This is the designated initializer for ``MLNShapeOfflineRegion``.
 
  @param styleURL URL of the map style for which to download resources. The URL
     may be a full HTTP or HTTPS URL or a canonical URL.
@@ -79,7 +79,10 @@ MLN_EXPORT
     level, the download covers zoom levels up to the tile source’s maximum zoom
     level.
  */
-- (instancetype)initWithStyleURL:(nullable NSURL *)styleURL shape:(MLNShape *)shape fromZoomLevel:(double)minimumZoomLevel toZoomLevel:(double)maximumZoomLevel NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithStyleURL:(nullable NSURL *)styleURL
+                           shape:(MLNShape *)shape
+                   fromZoomLevel:(double)minimumZoomLevel
+                     toZoomLevel:(double)maximumZoomLevel NS_DESIGNATED_INITIALIZER;
 
 @end
 

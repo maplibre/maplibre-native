@@ -31,6 +31,7 @@ import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import java.util.Random
 
 class LocationModesActivity :
@@ -53,6 +54,7 @@ class LocationModesActivity :
     @RenderMode.Mode
     private var renderMode = RenderMode.NORMAL
     private var lastLocation: Location? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location_layer_mode)
@@ -79,7 +81,7 @@ class LocationModesActivity :
         if (savedInstanceState != null) {
             cameraMode = savedInstanceState.getInt(SAVED_STATE_CAMERA)
             renderMode = savedInstanceState.getInt(SAVED_STATE_RENDER)
-            lastLocation = savedInstanceState.getParcelable(SAVED_STATE_LOCATION)
+            lastLocation = savedInstanceState.getParcelable(SAVED_STATE_LOCATION, Location::class.java)
         }
         mapView.onCreate(savedInstanceState)
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
@@ -118,7 +120,7 @@ class LocationModesActivity :
     @SuppressLint("MissingPermission")
     override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
-        maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
+        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style? ->
             locationComponent = maplibreMap.locationComponent
             locationComponent!!.activateLocationComponent(
                 LocationComponentActivationOptions
@@ -229,9 +231,7 @@ class LocationModesActivity :
             if (defaultStyle) R.style.maplibre_LocationComponent else R.style.CustomLocationComponent
         )
         if (defaultStyle) {
-            val padding: IntArray
-            padding =
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            val padding: IntArray = if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                     intArrayOf(0, 750, 0, 0)
                 } else {
                     intArrayOf(0, 250, 0, 0)
@@ -249,8 +249,8 @@ class LocationModesActivity :
         }
         maplibreMap.getStyle { style: Style ->
             val styleUrl =
-                Style.getPredefinedStyle(
-                    if (Style.getPredefinedStyle("Bright") == style.uri) {
+                TestStyles.getPredefinedStyleWithFallback(
+                    if (TestStyles.getPredefinedStyleWithFallback("Bright") == style.uri) {
                         "Bright"
                     } else {
                         "Pastel"

@@ -1,5 +1,4 @@
 load("//bazel:flags.bzl", "CPP_FLAGS")
-load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
 
 # vendor/mapbox-base-files.json
 cc_library(
@@ -45,7 +44,6 @@ cc_library(
         "mapbox-base/include",
     ],
     visibility = ["//visibility:public"],
-    deps = ["optional"],
 )
 
 # vendor/parsedate
@@ -55,15 +53,6 @@ cc_library(
     hdrs = glob(["parsedate/**/*.hpp"]),
     copts = CPP_FLAGS,
     includes = ["parsedate"],
-    visibility = ["//visibility:public"],
-)
-
-# vendor/optional
-cc_library(
-    name = "optional",
-    hdrs = glob(["mapbox-base/deps/optional/*.hpp"]),
-    copts = CPP_FLAGS,
-    includes = ["mapbox-base/deps/optional"],
     visibility = ["//visibility:public"],
 )
 
@@ -79,7 +68,6 @@ cc_library(
     copts = CPP_FLAGS,
     includes = ["csscolorparser"],
     visibility = ["//visibility:public"],
-    deps = ["optional"],
 )
 
 # vendor/wagyu-files.json
@@ -166,6 +154,15 @@ cc_library(
     visibility = ["//visibility:public"],
 )
 
+# vendor/pmtiles-files.json
+cc_library(
+    name = "pmtiles",
+    hdrs = ["PMTiles/cpp/pmtiles.hpp"],
+    copts = CPP_FLAGS,
+    includes = ["PMTiles/cpp"],
+    visibility = ["//visibility:public"],
+)
+
 # vendor/polylabel-files.json
 cc_library(
     name = "polylabel",
@@ -230,7 +227,6 @@ cc_library(
     ],
 )
 
-
 filegroup(
     name = "srcs",
     srcs = glob(["**"]),
@@ -285,14 +281,14 @@ cc_library(
         "freetype/src/pshinter/pshinter.c",
         "freetype/src/psnames/psnames.c",
         "freetype/src/raster/raster.c",
+        "freetype/src/sdf/sdf.c",
         "freetype/src/sfnt/sfnt.c",
         "freetype/src/smooth/smooth.c",
+        "freetype/src/svg/svg.c",
         "freetype/src/truetype/truetype.c",
         "freetype/src/type1/type1.c",
         "freetype/src/type42/type42.c",
         "freetype/src/winfonts/winfnt.c",
-        "freetype/src/sdf/sdf.c",
-        "freetype/src/svg/svg.c",
     ],
     hdrs = glob([
         "freetype/include/freetype/*.h",
@@ -486,7 +482,7 @@ cc_library(
         "freetype/src/sdf/*.c",
         "freetype/src/svg/*.h",
         "freetype/src/svg/*.c",
-    ]) ,
+    ]),
     copts = [
         "-Wno-covered-switch-default",
         "-DFT_CONFIG_OPTION_SYSTEM_ZLIB",
@@ -499,9 +495,12 @@ cc_library(
         "-DHAVE_STDINT_H=1",
         "-DFT_DISABLE_BROTLI=ON",
         "-DFT_DISABLE_PNG=ON",
-        "-Ifreetype/include"
+        "-Ifreetype/include",
     ],
-    includes = ["freetype/include", "freetype/include/freetype/config"],
+    includes = [
+        "freetype/include",
+        "freetype/include/freetype/config",
+    ],
     visibility = ["//visibility:public"],
     deps = [
     ],
@@ -845,13 +844,17 @@ HARFBUZZ_HDRS = [
 ]
 
 HARFBUZZ_SRCS = [
-    "harfbuzz/src/harfbuzz.cc"
+    "harfbuzz/src/harfbuzz.cc",
 ]
 
 cc_library(
     name = "harfbuzz",
     srcs = HARFBUZZ_SRCS,
-    hdrs = HARFBUZZ_HDRS + glob(["freetype/include/*", "freetype/include/freetype/*", "freetype/include/freetype/config/*"]),
+    hdrs = HARFBUZZ_HDRS + glob([
+        "freetype/include/*",
+        "freetype/include/freetype/*",
+        "freetype/include/freetype/config/*",
+    ]),
     defines = [
         "HAVE_OT",
         "HAVE_FREETYPE",
@@ -861,7 +864,8 @@ cc_library(
         "HB_TINY",
     ],
     includes = [
-        "harfbuzz/src", "freetype/include"
+        "freetype/include",
+        "harfbuzz/src",
     ],
     visibility = ["//visibility:public"],
 )

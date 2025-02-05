@@ -71,7 +71,7 @@
 "ROAD_REF_A11Y_FMT" = "Route %@";
 
 /* Action sheet title */
-"SDK_NAME" = "MapLibre Maps SDK for iOS";
+"SDK_NAME" = "MapLibre Native iOS";
 
 /* User-friendly error description */
 "STYLE_NOT_FOUND_DESC" = "The map failed to load because the style can’t be found or is incompatible.";
@@ -105,4 +105,3 @@
 
 /* Default user location annotation title */
 "USER_DOT_TITLE" = "You Are Here";
-

@@ -1,5 +1,6 @@
 #include "freetype.hpp"
-#include "glyph.hpp"
+
+#include <mbgl/text/glyph.hpp>
 
 #include <cstring>
 

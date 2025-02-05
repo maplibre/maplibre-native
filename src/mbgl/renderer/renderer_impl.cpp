@@ -17,6 +17,7 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_tweaker.hpp>
@@ -35,7 +36,7 @@
 constexpr auto EnableMetalCapture = 0;
 constexpr auto CaptureFrameStart = 0; // frames are 0-based
 constexpr auto CaptureFrameCount = 1;
-#else // !MLN_RENDER_BACKEND_METAL
+#elif MLN_RENDER_BACKEND_OPENGL
 #include <mbgl/gl/defines.hpp>
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gl/drawable_gl.hpp>
@@ -58,7 +59,7 @@ RendererObserver& nullObserver() {
 Renderer::Impl::Impl(gfx::RendererBackend& backend_,
                      float pixelRatio_,
                      const std::optional<std::string>& localFontFamily_)
-    : orchestrator(!backend_.contextIsShared(), localFontFamily_),
+    : orchestrator(!backend_.contextIsShared(), backend_.getThreadPool(), localFontFamily_),
       backend(backend_),
       observer(&nullObserver()),
       pixelRatio(pixelRatio_) {}
@@ -67,13 +68,34 @@ Renderer::Impl::~Impl() {
     assert(gfx::BackendScope::exists());
 };
 
+void Renderer::Impl::onPreCompileShader(shaders::BuiltIn shaderID,
+                                        gfx::Backend::Type type,
+                                        const std::string& additionalDefines) {
+    observer->onPreCompileShader(shaderID, type, additionalDefines);
+}
+
+void Renderer::Impl::onPostCompileShader(shaders::BuiltIn shaderID,
+                                         gfx::Backend::Type type,
+                                         const std::string& additionalDefines) {
+    observer->onPostCompileShader(shaderID, type, additionalDefines);
+}
+
+void Renderer::Impl::onShaderCompileFailed(shaders::BuiltIn shaderID,
+                                           gfx::Backend::Type type,
+                                           const std::string& additionalDefines) {
+    observer->onShaderCompileFailed(shaderID, type, additionalDefines);
+}
+
 void Renderer::Impl::setObserver(RendererObserver* observer_) {
     observer = observer_ ? observer_ : &nullObserver();
 }
 
 void Renderer::Impl::render(const RenderTree& renderTree,
                             [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters) {
+    MLN_TRACE_FUNC();
     auto& context = backend.getContext();
+    context.setObserver(this);
+
 #if MLN_RENDER_BACKEND_METAL
     if constexpr (EnableMetalCapture) {
         const auto& mtlBackend = static_cast<mtl::RendererBackend&>(backend);
@@ -229,14 +251,20 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         const auto debugGroup = uploadPass->createDebugGroup("layerGroup-upload");
 #endif
 
-        // Tweakers are run in the upload pass so they can set up uniforms.
-        orchestrator.visitLayerGroups(
-            [&](LayerGroupBase& layerGroup) { layerGroup.runTweakers(renderTree, parameters); });
-        orchestrator.visitDebugLayerGroups(
-            [&](LayerGroupBase& layerGroup) { layerGroup.runTweakers(renderTree, parameters); });
-
         // Update the debug layer groups
         orchestrator.updateDebugLayerGroups(renderTree, parameters);
+
+        // Tweakers are run in the upload pass so they can set up uniforms.
+        parameters.currentLayer = 0;
+        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
+            layerGroup.runTweakers(renderTree, parameters);
+            parameters.currentLayer++;
+        });
+        parameters.currentLayer = 0;
+        orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) {
+            layerGroup.runTweakers(renderTree, parameters);
+            parameters.currentLayer++;
+        });
 
         // Give the layers a chance to upload
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
@@ -258,7 +286,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         /* .symbol_fade_change = */ parameters.symbolFadeChange,
         /* .aspect_ratio = */ parameters.state.getSize().aspectRatio(),
         /* .pixel_ratio = */ parameters.pixelRatio,
-        /* .zoom = */ static_cast<float>(parameters.state.getZoom()),
+        /* .map_zoom = */ static_cast<float>(parameters.state.getZoom()),
         /* .pad1 = */ 0,
     };
     auto& globalUniforms = context.mutableGlobalUniformBuffers();
@@ -276,13 +304,14 @@ void Renderer::Impl::render(const RenderTree& renderTree,
             const auto debugGroup(parameters.encoder->createDebugGroup("common-3d"));
             parameters.pass = RenderPass::Pass3D;
 
-            if (!parameters.staticData.depthRenderbuffer ||
-                parameters.staticData.depthRenderbuffer->getSize() != parameters.staticData.backendSize) {
-                parameters.staticData.depthRenderbuffer =
-                    parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(
-                        parameters.staticData.backendSize);
-            }
-            parameters.staticData.depthRenderbuffer->setShouldClear(true);
+            // TODO is this needed?
+            // if (!parameters.staticData.depthRenderbuffer ||
+            //    parameters.staticData.depthRenderbuffer->getSize() != parameters.staticData.backendSize) {
+            //    parameters.staticData.depthRenderbuffer =
+            //        parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(
+            //            parameters.staticData.backendSize);
+            //}
+            // parameters.staticData.depthRenderbuffer->setShouldClear(true);
         }
     };
 
@@ -292,10 +321,12 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         assert(parameters.pass == RenderPass::Pass3D);
 
         // draw layer groups, 3D pass
-        const auto maxLayerIndex = orchestrator.maxLayerIndex();
+        parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
             layerGroup.render(orchestrator, parameters);
-            parameters.currentLayer = maxLayerIndex - layerGroup.getLayerIndex();
+            if (parameters.currentLayer > 0) {
+                parameters.currentLayer--;
+            }
         });
     };
 #endif // MLN_DRAWABLE_RENDERER
@@ -345,30 +376,31 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     // Drawables
     const auto drawableOpaquePass = [&] {
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-opaque"));
-        const auto maxLayerIndex = orchestrator.maxLayerIndex();
         parameters.pass = RenderPass::Opaque;
-        parameters.currentLayer = 0;
-        parameters.depthRangeSize = 1 -
-                                    (maxLayerIndex + 3) * PaintParameters::numSublayers * PaintParameters::depthEpsilon;
+        parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * PaintParameters::numSublayers *
+                                            PaintParameters::depthEpsilon;
 
         // draw layer groups, opaque pass
-        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            parameters.currentLayer = layerGroup.getLayerIndex();
+        parameters.currentLayer = 0;
+        orchestrator.visitLayerGroupsReversed([&](LayerGroupBase& layerGroup) {
             layerGroup.render(orchestrator, parameters);
+            parameters.currentLayer++;
         });
     };
 
     const auto drawableTranslucentPass = [&] {
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-translucent"));
-        const auto maxLayerIndex = orchestrator.maxLayerIndex();
         parameters.pass = RenderPass::Translucent;
-        parameters.depthRangeSize = 1 -
-                                    (maxLayerIndex + 3) * PaintParameters::numSublayers * PaintParameters::depthEpsilon;
+        parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * PaintParameters::numSublayers *
+                                            PaintParameters::depthEpsilon;
 
         // draw layer groups, translucent pass
+        parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            parameters.currentLayer = maxLayerIndex - layerGroup.getLayerIndex();
             layerGroup.render(orchestrator, parameters);
+            if (parameters.currentLayer > 0) {
+                parameters.currentLayer--;
+            }
         });
 
         // Finally, render any legacy layers which have not been converted to drawables.
@@ -429,13 +461,10 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         // Renders debug overlays.
         {
             const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
+            parameters.currentLayer = 0;
             orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) {
-                visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
-                    for (const auto& tweaker : drawable.getTweakers()) {
-                        tweaker->execute(drawable, parameters);
-                    }
-                    drawable.draw(parameters);
-                });
+                layerGroup.render(orchestrator, parameters);
+                parameters.currentLayer++;
             });
         }
     };
@@ -502,10 +531,10 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     parameters.renderPass.reset();
 
     const auto startRendering = util::MonotonicTimer::now().count();
+    // present submits render commands
     parameters.encoder->present(parameters.backend.getDefaultRenderable());
     const auto renderingTime = util::MonotonicTimer::now().count() - startRendering;
 
-    // CommandEncoder destructor submits render commands.
     parameters.encoder.reset();
     context.endFrame();
 
@@ -539,6 +568,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     }
 
     frameCount += 1;
+    MLN_END_FRAME();
 }
 
 void Renderer::Impl::reduceMemoryUse() {

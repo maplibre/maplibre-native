@@ -2,6 +2,10 @@
 
 #include <mbgl/shaders/shader_defines.hpp>
 
+#include <memory>
+#include <vector>
+#include <array>
+
 namespace mbgl {
 namespace gfx {
 
@@ -25,7 +29,7 @@ protected:
 
 public:
     virtual ~UniformBuffer() = default;
-    virtual void update(const void* data, std::size_t size_) = 0;
+    virtual void update(const void* data, std::size_t dataSize) = 0;
 
     std::size_t getSize() const { return size; }
 
@@ -58,16 +62,16 @@ public:
     const std::shared_ptr<UniformBuffer>& get(const size_t id) const;
 
     /// Set a new uniform buffer element or replace the existing one.
-    const std::shared_ptr<UniformBuffer>& set(const size_t id, std::shared_ptr<UniformBuffer> uniformBuffer);
+    virtual const std::shared_ptr<UniformBuffer>& set(const size_t id, std::shared_ptr<UniformBuffer> uniformBuffer);
 
     /// Create and add a new buffer or update an existing one
     void createOrUpdate(const size_t id, const std::vector<uint8_t>& data, gfx::Context&, bool persistent = false);
-    void createOrUpdate(const size_t id, const void* data, std::size_t size, gfx::Context&, bool persistent = false);
+    virtual void createOrUpdate(
+        const size_t id, const void* data, std::size_t size, gfx::Context&, bool persistent = false);
     template <typename T>
-    std::enable_if_t<!std::is_pointer_v<T>> createOrUpdate(const size_t id,
-                                                           const T* data,
-                                                           gfx::Context& context,
-                                                           bool persistent = false) {
+    void createOrUpdate(const size_t id, const T* data, gfx::Context& context, bool persistent = false)
+        requires(!std::is_pointer_v<T>)
+    {
         createOrUpdate(id, data, sizeof(T), context, persistent);
     }
 

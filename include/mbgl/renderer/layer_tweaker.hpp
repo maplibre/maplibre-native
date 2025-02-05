@@ -23,10 +23,10 @@ class LayerProperties;
 enum class TranslateAnchorType : bool;
 } // namespace style
 
-class TransformState;
 class LayerGroupBase;
 class PaintParameters;
 class RenderTree;
+class TransformState;
 class UnwrappedTileID;
 
 /**

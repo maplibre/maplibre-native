@@ -224,7 +224,7 @@ public:
     virtual void eachChild(const std::function<void(const Expression&)>&) const = 0;
 
     virtual bool operator==(const Expression&) const = 0;
-    bool operator!=(const Expression& rhs) const noexcept { return !operator==(rhs); }
+    bool operator!=(const Expression&) const = default;
 
     Kind getKind() const noexcept { return kind; };
     const type::Type& getType() const noexcept { return type; };
@@ -282,9 +282,11 @@ protected:
         return *lhs == *rhs;
     }
 
-    template <typename T, typename = std::enable_if_t<std::is_scalar_v<T>>>
+    template <typename T>
     static bool childEqual(const std::pair<T, std::unique_ptr<Expression>>& lhs,
-                           const std::pair<T, std::unique_ptr<Expression>>& rhs) noexcept {
+                           const std::pair<T, std::unique_ptr<Expression>>& rhs) noexcept
+        requires(std::is_scalar_v<T>)
+    {
         return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
     }
 
@@ -294,9 +296,11 @@ protected:
         return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
     }
 
-    template <typename T, typename = std::enable_if_t<!std::is_scalar_v<T>>>
+    template <typename T>
     static bool childEqual(const std::pair<T, std::shared_ptr<Expression>>& lhs,
-                           const std::pair<T, std::shared_ptr<Expression>>& rhs) noexcept {
+                           const std::pair<T, std::shared_ptr<Expression>>& rhs) noexcept
+        requires(!std::is_scalar_v<T>)
+    {
 #if __clang_major__ > 16
         // On older compilers, this assignment doesn't do overload resolution
         // in the same way that `lhs==rhs` does and produces ambiguity errors.

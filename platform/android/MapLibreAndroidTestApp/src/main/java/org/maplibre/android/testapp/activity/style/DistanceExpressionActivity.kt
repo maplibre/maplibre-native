@@ -17,6 +17,7 @@ import org.maplibre.android.style.layers.PropertyFactory.*
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.databinding.ActivityWithinExpressionBinding
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.turf.TurfConstants
 import org.maplibre.turf.TurfTransformation
 
@@ -50,13 +51,12 @@ class DistanceExpressionActivity : AppCompatActivity() {
     }
 
     private fun setupStyle() {
+        // --8<-- [start:FillLayer]
         val center = Point.fromLngLat(lon, lat)
         val circle = TurfTransformation.circle(center, 150.0, TurfConstants.UNIT_METRES)
-        // Setup style with additional layers,
-        // using Streets as a base style
         maplibreMap.setStyle(
             Style.Builder()
-                .fromUri(Style.getPredefinedStyle("Streets"))
+                .fromUri(TestStyles.OPENFREEMAP_BRIGHT)
                 .withSources(
                     GeoJsonSource(
                         POINT_ID,
@@ -70,24 +70,26 @@ class DistanceExpressionActivity : AppCompatActivity() {
                             fillOpacity(0.5f),
                             fillColor(Color.parseColor("#3bb2d0"))
                         ),
-                    "poi-label"
+                    "poi"
                 )
+            // --8<-- [end:FillLayer]
         ) { style ->
-            // Show only POI labels inside circle radius using distance expression
-            val symbolLayer = style.getLayer("poi_z16") as SymbolLayer
-            symbolLayer.setFilter(
-                lt(
-                    distance(
-                        Point.fromLngLat(lon, lat)
-                    ),
-                    150
-                )
-            )
-
-            // Hide other types of labels to highlight POI labels
-            (style.getLayer("road_label") as SymbolLayer?)?.setProperties(visibility(NONE))
-            (style.getLayer("airport-label-major") as SymbolLayer?)?.setProperties(visibility(NONE))
-            (style.getLayer("poi_transit") as SymbolLayer?)?.setProperties(visibility(NONE))
+            // --8<-- [start:distanceExpression]
+            for (layer in style.layers) {
+                if (layer is SymbolLayer) {
+                    if (layer.id.startsWith("poi")) {
+                        layer.setFilter(lt(
+                            distance(
+                                Point.fromLngLat(lon, lat)
+                            ),
+                            150
+                        ))
+                    } else {
+                        layer.setProperties(visibility(NONE))
+                    }
+                }
+            }
+            // --8<-- [end:distanceExpression]
         }
     }
 
@@ -123,7 +125,7 @@ class DistanceExpressionActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
         super.onSaveInstanceState(outState, outPersistentState)
-        outState?.let {
+        outState.let {
             binding.mapView.onSaveInstanceState(it)
         }
     }

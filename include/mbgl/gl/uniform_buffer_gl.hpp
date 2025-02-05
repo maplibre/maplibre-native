@@ -24,9 +24,16 @@ public:
     UniformBufferGL clone() const { return {*this}; }
 
     // gfx::UniformBuffer
-    void update(const void* data, std::size_t size_) override;
+    void update(const void* data, std::size_t dataSize) override;
 
 private:
+    // unique id used for debugging and profiling purposes
+    // localID should not be used as unique id because a const buffer pool is managed using IBufferAllocator
+// Currently unique IDs for constant buffers are only used when Tracy profiling is enabled
+#ifdef MLN_TRACY_ENABLE
+    int64_t uniqueDebugId = -1;
+#endif
+
     // If the requested UBO size is too large for the allocator, the UBO will manage its own allocation
     bool isManagedAllocation = false;
     BufferID localID;
@@ -51,6 +58,9 @@ public:
         UniformBufferArray::operator=(other);
         return *this;
     }
+
+    void bind() const;
+    void unbind() const;
 
 private:
     std::unique_ptr<gfx::UniformBuffer> copy(const gfx::UniformBuffer& uniformBuffers) override {
