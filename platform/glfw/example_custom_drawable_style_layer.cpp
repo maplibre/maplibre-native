@@ -1,16 +1,23 @@
-#include "example_custom_drawable_style_layer.h"
+#include "example_custom_drawable_style_layer.hpp"
 
 #include <mbgl/style/layer.hpp>
 #include <mbgl/style/layers/custom_drawable_layer.hpp>
 #include <mbgl/util/io.hpp>
 #include <mbgl/gfx/drawable.hpp>
+#include <mbgl/util/logging.hpp>
 
 #include <memory>
 #include <cmath>
 #include <filesystem>
 
-ExampleCustomDrawableStyleLayerHost::ExampleCustomDrawableStyleLayerHost() {
-    
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tiny_obj_loader.h"
+
+ExampleCustomDrawableStyleLayerHost::ExampleCustomDrawableStyleLayerHost(const std::string& assetsPath_)
+    : assetsPath(assetsPath_) {}
+
+ExampleCustomDrawableStyleLayerHost::~ExampleCustomDrawableStyleLayerHost() {
+
 }
     
 void ExampleCustomDrawableStyleLayerHost::initialize() {
@@ -28,6 +35,12 @@ void ExampleCustomDrawableStyleLayerHost::update(Interface& interface) {
         createDrawables(interface);
         return;
     }
+}
+
+mbgl::Point<double> ExampleCustomDrawableStyleLayerHost::project(const mbgl::LatLng& c, const mbgl::TransformState& s) {
+    mbgl::LatLng unwrappedLatLng = c.wrapped();
+    unwrappedLatLng.unwrapForShortestPath(s.getLatLng(mbgl::LatLng::Wrapped));
+    return mbgl::Projection::project(unwrappedLatLng, s.getScale());
 }
 
 void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) {
@@ -172,25 +185,21 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
         // set tile
         interface.setTileID({11, 327, 789});
 
-        GeometryCoordinate position {static_cast<int16_t>(extent* 0.5f), static_cast<int16_t>(extent* 0.5f)};
+        GeometryCoordinate position {static_cast<int16_t>(extent* 0.0f), static_cast<int16_t>(extent* 0.5f)};
 
         // load image
         std::shared_ptr<PremultipliedImage> image = std::make_shared<PremultipliedImage>(
-            mbgl::decodeImage(mbgl::util::read_file("rocket.png")));
+            mbgl::decodeImage(mbgl::util::read_file(assetsPath + "puck_hat.png")));
 
         // set symbol options
         Interface::SymbolOptions options;
         options.texture = interface.context.createTexture2D();
         options.texture->setImage(image);
         options.texture->setSamplerConfiguration(
-            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Repeat, gfx::TextureWrapType::Repeat});
 
-        const std::array<std::array<float, 2>, 2> textureCoordinates = {{{0.0f, 0.08f}, {1.0f, 0.9f}}};
-        const float xspan = textureCoordinates[1][0] - textureCoordinates[0][0];
-        const float yspan = textureCoordinates[1][1] - textureCoordinates[0][1];
-        assert(xspan > 0.0f && yspan > 0.0f);
-        options.size = {static_cast<uint32_t>(image->size.width * xspan),
-                        static_cast<uint32_t>(image->size.height * yspan)};
+        const std::array<std::array<float, 2>, 2> textureCoordinates = {{{0.0f, 0.0f}, {10.0f, 10.0f}}};
+        options.size = {static_cast<uint32_t>(image->size.width), static_cast<uint32_t>(image->size.height)};
 
         options.anchor = {0.5f, 0.95f};
         options.angleDegrees = 45.0f;
@@ -205,11 +214,11 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
     {
         using namespace mbgl;
 
-        GeometryCoordinate position{static_cast<int16_t>(extent * 0.5f), static_cast<int16_t>(extent * 0.5f)};
+        GeometryCoordinate position{static_cast<int16_t>(extent * 1.0f), static_cast<int16_t>(extent * 0.5f)};
 
         // load image
         std::shared_ptr<PremultipliedImage> image = std::make_shared<PremultipliedImage>(
-            mbgl::decodeImage(mbgl::util::read_file("rocket.png")));
+            mbgl::decodeImage(mbgl::util::read_file(assetsPath + "puck_hat.png")));
 
         // set symbol options
         Interface::SymbolOptions options;
@@ -318,38 +327,25 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
     interface.finish();
 }
 
-static mbgl::Point<double> project(const mbgl::LatLng& c, const mbgl::TransformState& s) {
-    mbgl::LatLng unwrappedLatLng = c.wrapped();
-    unwrappedLatLng.unwrapForShortestPath(s.getLatLng(mbgl::LatLng::Wrapped));
-    return mbgl::Projection::project(unwrappedLatLng, s.getScale());
-}
-
 void ExampleCustomDrawableStyleLayerHost::generateCommonGeometry(Interface& interface) {
-    constexpr bool useTextures = true;
     constexpr float itemScale = 10.0f;
     const mbgl::LatLng location{37.78, -122.47};
 
     Interface::CommonGeometryOptions options;
 
-    options.color = mbgl::Color::green();
+    // load image
+    std::shared_ptr<mbgl::PremultipliedImage> image = std::make_shared<mbgl::PremultipliedImage>(
+        mbgl::decodeImage(mbgl::util::read_file(assetsPath + "puck.png")));
+    
+    options.texture = interface.context.createTexture2D();
+    options.texture->setImage(image);
+    options.texture->setSamplerConfiguration({mbgl::gfx::TextureFilterType::Linear,
+                                                mbgl::gfx::TextureWrapType::Clamp,
+                                                mbgl::gfx::TextureWrapType::Clamp});
 
-    if (useTextures) {
-        // load image
-        std::shared_ptr<mbgl::PremultipliedImage> image = std::make_shared<mbgl::PremultipliedImage>(
-            mbgl::decodeImage(mbgl::util::read_file("rocket.png")));
-
-        options.texture = interface.context.createTexture2D();
-        options.texture->setImage(image);
-        options.texture->setSamplerConfiguration({mbgl::gfx::TextureFilterType::Linear,
-                                                  mbgl::gfx::TextureWrapType::Clamp,
-                                                  mbgl::gfx::TextureWrapType::Clamp});
-    }
-
-    using VertexVector = mbgl::gfx::VertexVector<Interface::CommonGeometryVertex>;
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
 
-    using TriangleIndexVector = mbgl::gfx::IndexVector<mbgl::gfx::Triangles>;
     const std::shared_ptr<TriangleIndexVector> sharedIndices = std::make_shared<TriangleIndexVector>();
     TriangleIndexVector& indices = *sharedIndices;
 
@@ -375,29 +371,157 @@ void ExampleCustomDrawableStyleLayerHost::generateCommonGeometry(Interface& inte
 
     interface.setCommonGeometryOptions(options);
 
-    interface.setCommonGeometryTweakerCallback([=, commonGeometryBearing = 0.0f](
+    interface.setCommonGeometryTweakerCallback([=, rotation = 0.0f](
                                                    mbgl::gfx::Drawable& drawable,
                                                    const mbgl::PaintParameters& params,
                                                    Interface::CommonGeometryOptions& currentOptions) mutable {
-        mbgl::Point<double> center = project(location, params.state);
+        const mbgl::Point<double>& center = project(location, params.state);
 
-        commonGeometryBearing += 0.1f;
-        float scale = itemScale * static_cast<float>(std::pow(
-                                      2.f, params.state.getZoom() - drawable.getTileID()->toUnwrapped().canonical.z));
-
-        mbgl::mat4 projMatrix;
-        params.state.getProjMatrix(projMatrix);
+        rotation += 0.1f;
+        const float scale = itemScale *
+                      static_cast<float>(
+                          std::pow(2.f, params.state.getZoom() - drawable.getTileID()->toUnwrapped().canonical.z)) *
+                      params.pixelsToGLUnits[0];
 
         mbgl::mat4 matrix = mbgl::matrix::identity4();
         mbgl::matrix::translate(matrix, matrix, center.x, center.y, 0.0);
-        mbgl::matrix::rotate_z(matrix, matrix, commonGeometryBearing);
-        mbgl::matrix::scale(matrix, matrix, scale * params.pixelsToGLUnits[0], scale * params.pixelsToGLUnits[0], 1.0f);
-        mbgl::matrix::multiply(currentOptions.matrix, projMatrix, matrix);
+        mbgl::matrix::rotate_z(matrix, matrix, rotation);
+        mbgl::matrix::scale(matrix, matrix, scale, scale, 1.0f);
+        mbgl::matrix::multiply(currentOptions.matrix, params.state.getProjectionMatrix(), matrix);
     });
 
-    interface.addCommonGeometry(sharedVertices, sharedIndices);
+    interface.addCommonGeometry(sharedVertices, sharedIndices, false);
 }
 
 void ExampleCustomDrawableStyleLayerHost::loadCommonGeometry(Interface& interface) {
-    
+    constexpr float itemScale = 0.1f;
+    constexpr std::array<float, 3> itemRotation = { 90.0f, 0.0f, 0.0f };
+    const mbgl::LatLng location{37.76, -122.47};
+
+    Interface::CommonGeometryOptions options;
+
+    interface.setCommonGeometryTweakerCallback([=](mbgl::gfx::Drawable& drawable,
+                                                   const mbgl::PaintParameters& params,
+                                                   Interface::CommonGeometryOptions& currentOptions) mutable {
+        const mbgl::Point<double>& center = project(location, params.state);
+
+        const float scale = itemScale *
+                            static_cast<float>(std::pow(
+                                2.f, params.state.getZoom() - drawable.getTileID()->toUnwrapped().canonical.z)) *
+                            params.pixelsToGLUnits[0];
+
+        mbgl::mat4 matrix = mbgl::matrix::identity4();
+        mbgl::matrix::translate(matrix, matrix, center.x, center.y, 0.0);
+        mbgl::matrix::rotate_x(matrix, matrix, mbgl::util::deg2radf(itemRotation[0]));
+        mbgl::matrix::rotate_y(matrix, matrix, mbgl::util::deg2radf(itemRotation[1]));
+        mbgl::matrix::rotate_z(matrix, matrix, mbgl::util::deg2radf(itemRotation[2]));
+        mbgl::matrix::scale(matrix, matrix, scale, scale, scale);
+        mbgl::matrix::multiply(currentOptions.matrix, params.state.getProjectionMatrix(), matrix);
+    });
+
+    const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
+    const std::shared_ptr<TriangleIndexVector> sharedIndices = std::make_shared<TriangleIndexVector>();
+
+    //importObj(interface, "../../_deps/tinyobjloader-src/models/cube.obj", *sharedVertices, *sharedIndices, options);
+    importObj(interface, assetsPath + "sphere.obj", *sharedVertices, *sharedIndices, options);
+
+    interface.setCommonGeometryOptions(options);
+    interface.addCommonGeometry(sharedVertices, sharedIndices, true);
+}
+
+void ExampleCustomDrawableStyleLayerHost::importObj(Interface& interface,
+                                                    const std::string& filename,
+                                                    VertexVector& vertices,
+                                                    TriangleIndexVector& indices,
+                                                    Interface::CommonGeometryOptions& options) {
+    tinyobj::ObjReaderConfig readerConfig;
+
+    readerConfig.triangulate = true;
+    readerConfig.vertex_color = false;
+
+    tinyobj::ObjReader reader;
+
+    if (!reader.ParseFromFile(filename, readerConfig)) {
+        if (!reader.Error().empty()) {
+            mbgl::Log::Error(mbgl::Event::General, reader.Error());
+        }
+
+        assert(false);
+        throw std::runtime_error(std::string("Cannot read obj file ") + filename);
+    }
+
+    if (!reader.Warning().empty()) {
+        mbgl::Log::Error(mbgl::Event::General, reader.Warning());
+    }
+
+    const tinyobj::attrib_t& attributes = reader.GetAttrib();
+    const std::vector<tinyobj::shape_t>& shapes = reader.GetShapes();
+
+    if (attributes.texcoords.empty()) {
+        options.color = mbgl::Color::green();
+    } else {
+        // TODO parse material
+
+        options.texture = createCheckerboardTexture(interface, 32, 32, 40, {255, 255, 255, 255}, {0, 0, 0, 255});
+    }
+
+    for (const auto& shape : shapes) {
+        const auto shapeIndexStart = static_cast<uint16_t>(indices.elements());
+
+        for (uint16_t face = 0; face < shape.mesh.indices.size(); face += 3) {
+            for (size_t i = 0; i < 3; ++i) {
+                const tinyobj::index_t index = shape.mesh.indices[face + i];
+
+                Interface::CommonGeometryVertex vertex = {};
+
+                std::copy(attributes.vertices.begin() + vertex.position.size() * index.vertex_index,
+                          attributes.vertices.begin() + vertex.position.size() * (index.vertex_index + 1),
+                          vertex.position.begin());
+
+                if (!attributes.texcoords.empty()) {
+                    std::copy(attributes.texcoords.begin() + vertex.texcoords.size() * index.texcoord_index,
+                              attributes.texcoords.begin() + vertex.texcoords.size() * (index.texcoord_index + 1),
+                              vertex.texcoords.begin());
+                }
+
+                vertices.emplace_back(std::move(vertex));
+            }
+
+            indices.emplace_back(shapeIndexStart + face, shapeIndexStart + face + 1, shapeIndexStart + face + 2);
+        }
+    }
+}
+
+mbgl::gfx::Texture2DPtr ExampleCustomDrawableStyleLayerHost::createCheckerboardTexture(
+    Interface& interface,
+    uint16_t wb,
+    uint16_t hb,
+    uint16_t blockSize,
+    const std::array<uint8_t, 4>& color1,
+    const std::array<uint8_t, 4>& color2) {
+
+    std::shared_ptr<mbgl::PremultipliedImage> image = std::make_shared<mbgl::PremultipliedImage>(
+        mbgl::Size(wb * blockSize, hb * blockSize));
+
+    constexpr uint8_t pixelSize = sizeof(uint8_t) * 4;
+
+    for (uint16_t row = 0; row < hb; ++row) {
+        for (uint16_t blockRow = 0; blockRow < blockSize; ++blockRow) {
+            for (uint16_t col = 0; col < wb; ++col) {
+                for (uint16_t blockCol = 0; blockCol < blockSize; ++blockCol) {
+                    auto index = (row * blockSize + blockRow) * image->stride() +
+                                 (col * blockSize + blockCol) * pixelSize;
+
+                    memcpy(image->data.get() + index, (row + col) % 2 == 0 ? color1.data() : color2.data(), pixelSize);
+                }
+            }
+        }
+    }
+
+    auto texture = interface.context.createTexture2D();
+    texture->setSamplerConfiguration(
+        {mbgl::gfx::TextureFilterType::Linear, mbgl::gfx::TextureWrapType::Clamp, mbgl::gfx::TextureWrapType::Clamp});
+    texture->setImage(std::move(image));
+
+    return texture;
 }

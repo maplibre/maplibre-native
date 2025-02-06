@@ -3,7 +3,6 @@
 #include "glfw_renderer_frontend.hpp"
 #include "ny_route.hpp"
 #include "test_writer.hpp"
-#include "example_custom_drawable_style_layer.h"
 
 #include <mbgl/annotation/annotation.hpp>
 #include <mbgl/gfx/backend.hpp>
@@ -28,6 +27,10 @@
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/string.hpp>
+
+#ifndef MBGL_LAYER_CUSTOM_DISABLE_ALL
+#include "example_custom_drawable_style_layer.hpp"
+#endif
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -67,7 +70,7 @@ using namespace std::numbers;
 #ifdef ENABLE_LOCATION_INDICATOR
 
 namespace {
-const std::string mbglPuckAssetsPath{MAPBOX_PUCK_ASSETS_PATH};
+const std::string mbglPuckAssetsPath{MLN_ASSETS_PATH};
 
 mbgl::Color premultiply(mbgl::Color c) {
     c.r *= c.a;
@@ -829,6 +832,7 @@ void GLFWView::popAnnotation() {
 
 void GLFWView::toggleCustomDrawableStyle() {
 
+#ifndef MBGL_LAYER_CUSTOM_DISABLE_ALL
     auto &style = map->getStyle();
 
     const std::string identifier = "ExampleCustomDrawableStyleLayer";
@@ -836,10 +840,12 @@ void GLFWView::toggleCustomDrawableStyle() {
 
     if (!existingLayer) {
         style.addLayer(std::move(std::make_unique<mbgl::style::CustomDrawableLayer>(
-            identifier, std::make_unique<ExampleCustomDrawableStyleLayerHost>())));
+            identifier, std::make_unique<ExampleCustomDrawableStyleLayerHost>(MLN_ASSETS_PATH))));
     } else {
         style.removeLayer(identifier);
     }
+
+#endif
 }
 
 void GLFWView::makeSnapshot(bool withOverlay) {

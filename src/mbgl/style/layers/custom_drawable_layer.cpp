@@ -676,7 +676,7 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addSymbol(
 
 util::SimpleIdentity CustomDrawableLayerHost::Interface::addCommonGeometry(
     std::shared_ptr<gfx::VertexVector<CommonGeometryVertex>> vertices,
-    std::shared_ptr<gfx::IndexVector<gfx::Triangles>> indices) {
+    std::shared_ptr<gfx::IndexVector<gfx::Triangles>> indices, bool is3D) {
 
     if (!vertices || !indices) {
         return util::SimpleIdentity::Empty;
@@ -719,6 +719,13 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addCommonGeometry(
     builder->setVertexAttributes(std::move(attrs));
     builder->setRawVertices({}, vertices->elements(), gfx::AttributeDataType::Float3);
     builder->setSegments(gfx::Triangles(), indices, triangleSegments.data(), triangleSegments.size());
+
+    builder->setEnableDepth(true);
+
+    if (is3D) {
+        builder->setDepthType(gfx::DepthMaskType::ReadWrite);
+        builder->setIs3D(true);
+    }
 
     // texture
     if (commonGeometryOptions.texture) {

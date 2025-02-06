@@ -183,7 +183,7 @@ public:
                                    const std::array<std::array<float, 2>, 2>& textureCoordinates = {{{0, 0}, {1, 1}}});
 
     util::SimpleIdentity addCommonGeometry(std::shared_ptr<gfx::VertexVector<CommonGeometryVertex>> vertices,
-                           std::shared_ptr<gfx::IndexVector<gfx::Triangles>> indices);
+                           std::shared_ptr<gfx::IndexVector<gfx::Triangles>> indices, bool is3D);
 
     /**
      * @brief Finish the current drawable building session
