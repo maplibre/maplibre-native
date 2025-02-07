@@ -5,7 +5,7 @@
 namespace mbgl {
 namespace android {
 
-MapRendererRunnable::MapRendererRunnable(jni::JNIEnv& env, std::function<void()> function_)
+MapRendererRunnable::MapRendererRunnable(jni::JNIEnv& env, Scheduler::Task&& function_)
     : function(std::move(function_)) {
     // Create the Java peer and hold on to a global reference
     // Not using a weak reference here as this might oerflow
