@@ -41,7 +41,8 @@ fn main() {
     ];
     for entry in WalkDir::new(project_root.join("vendor")) {
         let entry = entry.unwrap();
-        if entry.file_type().is_dir() && !entry.path_is_symlink() && entry.file_name() == "include" {
+        if entry.file_type().is_dir() && !entry.path_is_symlink() && entry.file_name() == "include"
+        {
             include_dirs.push(entry.path().to_path_buf());
         }
     }
