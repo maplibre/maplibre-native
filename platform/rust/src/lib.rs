@@ -83,8 +83,9 @@ mod ffi {
     }
 
     unsafe extern "C++" {
-        include!("map_renderer.h");
+        include!("maplibre-native/include/map_renderer.h");
 
+        #[namespace = ""]
         type MapRenderer;
     }
 }
