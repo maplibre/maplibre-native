@@ -839,8 +839,8 @@ void GLFWView::toggleCustomDrawableStyle() {
     const auto &existingLayer = style.getLayer(identifier);
 
     if (!existingLayer) {
-        style.addLayer(std::move(std::make_unique<mbgl::style::CustomDrawableLayer>(
-            identifier, std::make_unique<ExampleCustomDrawableStyleLayerHost>(MLN_ASSETS_PATH))));
+        style.addLayer(std::make_unique<mbgl::style::CustomDrawableLayer>(
+            identifier, std::make_unique<ExampleCustomDrawableStyleLayerHost>(MLN_ASSETS_PATH)));
     } else {
         style.removeLayer(identifier);
     }

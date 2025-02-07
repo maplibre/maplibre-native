@@ -111,7 +111,6 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             }
         };
 
-        const auto depthMode = parameters.depthModeFor3D();
         if (stencil3d) {
             stencilMode3d = parameters.stencilModeFor3D();
             encoder->setStencilReferenceValue(stencilMode3d.ref);
@@ -139,16 +138,12 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         }
 
         if (!bindUBOs) {
-            uniformBuffers.bind(renderPass);
+            uniformBuffers.bindMtl(renderPass);
             bindUBOs = true;
         }
 
         drawable.draw(parameters);
     });
-
-    if (bindUBOs) {
-        uniformBuffers.unbind(renderPass);
-    }
 }
 
 } // namespace mtl

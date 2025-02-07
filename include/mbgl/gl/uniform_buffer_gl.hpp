@@ -62,7 +62,7 @@ public:
     void bind() const;
     void unbind() const;
 
-    void bind(gfx::RenderPass& renderPass) override { bind(); }
+    void bind(gfx::RenderPass&) override { bind(); }
 
 private:
     std::unique_ptr<gfx::UniformBuffer> copy(const gfx::UniformBuffer& uniformBuffers) override {
