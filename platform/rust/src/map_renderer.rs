@@ -16,7 +16,7 @@ impl MapRenderer {
     }
 
     pub fn set_size(&mut self, width: u32, height: u32) -> &mut Self {
-        ffi::MapRenderer_setSize(self.0.pin_mut(), width,height);
+        ffi::MapRenderer_setSize(self.0.pin_mut(), width, height);
         self
     }
 

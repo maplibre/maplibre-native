@@ -1,8 +1,8 @@
-mod tile_server_options;
 mod map_renderer;
+mod tile_server_options;
 
-pub use tile_server_options::TileServerOptions;
 pub use map_renderer::MapRenderer;
+pub use tile_server_options::TileServerOptions;
 
 #[cxx::bridge(namespace = "ml::bridge")]
 mod ffi {
