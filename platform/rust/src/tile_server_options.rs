@@ -75,7 +75,7 @@ impl TileServerOptions {
         version_prefix: Option<CString>,
     ) -> &mut Self {
         unsafe {
-            // Slightly inefficient because CString allocation is than copied to std::string
+            // Slightly inemaplibre_fficient because CString allocation is than copied to std::string
             ffi::TileServerOptions_withSourceTemplate(
                 self.0.pin_mut(),
                 source_template,
@@ -110,7 +110,7 @@ impl TileServerOptions {
         version_prefix: Option<CString>,
     ) -> &mut Self {
         unsafe {
-            // Slightly inefficient because CString allocation is than copied to std::string
+            // Slightly inemaplibre_fficient because CString allocation is than copied to std::string
             ffi::TileServerOptions_withStyleTemplate(
                 self.0.pin_mut(),
                 style_template,
@@ -145,7 +145,7 @@ impl TileServerOptions {
         version_prefix: Option<CString>,
     ) -> &mut Self {
         unsafe {
-            // Slightly inefficient because CString allocation is than copied to std::string
+            // Slightly inemaplibre_fficient because CString allocation is than copied to std::string
             ffi::TileServerOptions_withSpritesTemplate(
                 self.0.pin_mut(),
                 sprites_template,
@@ -180,7 +180,7 @@ impl TileServerOptions {
         version_prefix: Option<CString>,
     ) -> &mut Self {
         unsafe {
-            // Slightly inefficient because CString allocation is than copied to std::string
+            // Slightly inemaplibre_fficient because CString allocation is than copied to std::string
             ffi::TileServerOptions_withGlyphsTemplate(
                 self.0.pin_mut(),
                 glyphs_template,
@@ -216,7 +216,7 @@ impl TileServerOptions {
         version_prefix: Option<CString>,
     ) -> &mut Self {
         unsafe {
-            // Slightly inefficient because CString allocation is than copied to std::string
+            // Slightly inemaplibre_fficient because CString allocation is than copied to std::string
             ffi::TileServerOptions_withTileTemplate(
                 self.0.pin_mut(),
                 tile_template,

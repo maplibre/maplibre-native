@@ -54,5 +54,18 @@ private:
     std::string styleUrl;
 };
 
+// MapRenderer constructor helpers
+inline std::unique_ptr<MapRenderer> MapRenderer_new() {
+    return std::make_unique<MapRenderer>();
+}
+
+inline void MapRenderer_setSize(MapRenderer& self, uint32_t width, uint32_t height) {
+    self.set_size(width, height);
+}
+
+inline std::unique_ptr<std::vector<uint8_t>> MapRenderer_render(MapRenderer& self) {
+    return std::make_unique<std::vector<uint8_t>>(self.render());
+}
+
 } // namespace bridge
 } // namespace ml

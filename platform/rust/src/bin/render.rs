@@ -1,5 +1,6 @@
+use std::fs;
 use clap::Parser;
-use maplibre_native::TileServerOptions;
+use maplibre_native::{MapRenderer, TileServerOptions};
 
 /// MapLibre Native render tool
 #[derive(Parser, Debug)]
@@ -73,7 +74,13 @@ fn main() {
     // let args = Args::parse();
     // println!("Parsed arguments: {:?}", args);
 
-    let s = TileServerOptions::default_maplibre();
-    let val = s.source_version_prefix();
-    println!("Parsed arguments: {:?}", val);
+    // let s = TileServerOptions::default_maplibre();
+    // let val = s.source_version_prefix();
+    // println!("Parsed arguments: {:?}", val);
+
+    let mut map = MapRenderer::new();
+    map.set_size(512, 512);
+    let data = map.render();
+
+    fs::write("out.png", data.as_slice()).unwrap();
 }
