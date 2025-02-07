@@ -425,7 +425,7 @@ public:
 
     void init(gfx::Drawable&) override {}
 
-    void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
+    void execute(gfx::Drawable& drawable, PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
             return;
         }
