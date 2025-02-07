@@ -10,9 +10,9 @@ fn main() {
         //     // Use the symlinked directory to allow crate packaging
         //     root
         // } else {
-            // Modeled from the kuzu project.
-            // If the path is not directory, this is probably an in-source build on windows where the symlink is unreadable.
-            manifest.parent().unwrap().parent().unwrap().to_path_buf()
+        // Modeled from the kuzu project.
+        // If the path is not directory, this is probably an in-source build on windows where the symlink is unreadable.
+        manifest.parent().unwrap().parent().unwrap().to_path_buf()
         // }
     };
 
