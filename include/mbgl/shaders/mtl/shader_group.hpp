@@ -70,7 +70,8 @@ public:
             assert(shader);
             if (!shader || !registerShader(shader, shaderName)) {
                 assert(false);
-                throw std::runtime_error("Failed to register " + shaderName + " with shader group!");
+                Log::Error(Event::Shader, "Failed to register " + shaderName + " with shader group!");
+                return nullptr;
             }
 
             using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;

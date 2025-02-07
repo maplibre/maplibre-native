@@ -1,5 +1,26 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+### ✨ Features and improvements
+
+### 🐞 Bug fixes
+
+## 11.8.1
+
+> [!NOTE]  
+> We are now releasing OpenGL ES and Vulkan variants of MapLibre Android. See the [11.7.0 release notes](https://github.com/maplibre/maplibre-native/releases/tag/android-v11.7.0) for details.
+
+### ✨ Features and improvements
+
+- Bind global uniform buffers at the end of the custom layer tweaker ([#3186](https://github.com/maplibre/maplibre-native/pull/3186)).
+
+### 🐞 Bug fixes
+
+- (Vulkan) Fix TextureMode crash ([#3144](https://github.com/maplibre/maplibre-native/pull/3144)).
+- (Vulkan) Use timestamps for image descriptor updates ([#3152](https://github.com/maplibre/maplibre-native/pull/3152)).
+- Change runtime error to the nullptr returning ([#3184](https://github.com/maplibre/maplibre-native/pull/3184)).
+
 ## 11.8.0
 
 > [!NOTE]  
