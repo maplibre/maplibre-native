@@ -111,9 +111,11 @@ public:
             callback(drawable, parameters, options);
         }
 
+#if MLN_UBO_CONSOLIDATION
         if (!layerUniforms) {
             layerUniforms = parameters.context.createLayerUniformBufferArray();
         }
+#endif
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto zoom = parameters.state.getZoom();
@@ -186,7 +188,7 @@ public:
         layerUniforms->createOrUpdate(idLineEvaluatedPropsUBO, &propsUBO, sizeof(propsUBO), parameters.context);
         layerUniforms->bind(*parameters.renderPass);
 #else
-        
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, parameters.context);
         drawableUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &propsUBO, parameters.context);
 #endif
@@ -296,9 +298,11 @@ public:
             callback(drawable, parameters, options);
         }
 
+#if MLN_UBO_CONSOLIDATION
         if (!layerUniforms) {
             layerUniforms = parameters.context.createLayerUniformBufferArray();
         }
+#endif
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto matrix = LayerTweaker::getTileMatrix(
@@ -410,14 +414,14 @@ private:
     CustomDrawableLayerHost::Interface::SymbolTweakerCallback callback;
 };
 
-class CommonGeometryDrawableTweaker : public gfx::DrawableTweaker {
+class GeometryDrawableTweaker : public gfx::DrawableTweaker {
 public:
-    CommonGeometryDrawableTweaker(
-        const CustomDrawableLayerHost::Interface::CommonGeometryOptions& options_,
-        CustomDrawableLayerHost::Interface::CommonGeometryTweakerCallback&& callback_)
+    GeometryDrawableTweaker(
+        const CustomDrawableLayerHost::Interface::GeometryOptions& options_,
+        CustomDrawableLayerHost::Interface::GeometryTweakerCallback&& callback_)
         : options(options_),
           callback(callback_) {}
-    ~CommonGeometryDrawableTweaker() override = default;
+    ~GeometryDrawableTweaker() override = default;
 
     void init(gfx::Drawable&) override {}
 
@@ -439,8 +443,8 @@ public:
     };
 
 private:
-    CustomDrawableLayerHost::Interface::CommonGeometryOptions options;
-    CustomDrawableLayerHost::Interface::CommonGeometryTweakerCallback callback;
+    CustomDrawableLayerHost::Interface::GeometryOptions options;
+    CustomDrawableLayerHost::Interface::GeometryTweakerCallback callback;
 };
 
 CustomDrawableLayerHost::Interface::Interface(RenderLayer& layer_,
@@ -493,9 +497,9 @@ void CustomDrawableLayerHost::Interface::setSymbolOptions(const SymbolOptions& o
     symbolOptions = options;
 }
 
-void CustomDrawableLayerHost::Interface::setCommonGeometryOptions(const CommonGeometryOptions& options) {
+void CustomDrawableLayerHost::Interface::setGeometryOptions(const GeometryOptions& options) {
     finish();
-    commonGeometryOptions = options;
+    geometryOptions = options;
 }
 
 bool CustomDrawableLayerHost::Interface::updateBuilder(BuilderType type,
@@ -674,20 +678,20 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addSymbol(
     return id;
 }
 
-util::SimpleIdentity CustomDrawableLayerHost::Interface::addCommonGeometry(
-    std::shared_ptr<gfx::VertexVector<CommonGeometryVertex>> vertices,
+util::SimpleIdentity CustomDrawableLayerHost::Interface::addGeometry(
+    std::shared_ptr<gfx::VertexVector<GeometryVertex>> vertices,
     std::shared_ptr<gfx::IndexVector<gfx::Triangles>> indices, bool is3D) {
 
     if (!vertices || !indices) {
         return util::SimpleIdentity::Empty;
     }
 
-    if (commonGeometryOptions.texture) {
-        if (!updateBuilder(BuilderType::CommonGeometry, "common-textured-geometry", commonTexturedShaderDefault())) {
+    if (geometryOptions.texture) {
+        if (!updateBuilder(BuilderType::CommonGeometry, "texture-geometry", texturedGeometryShaderDefault())) {
             return util::SimpleIdentity::Empty;
         }
     } else {
-        if (!updateBuilder(BuilderType::CommonGeometry, "common-geometry", commonShaderDefault())) {
+        if (!updateBuilder(BuilderType::CommonGeometry, "color-geometry", geometryShaderDefault())) {
             return util::SimpleIdentity::Empty;
         }
     }
@@ -695,24 +699,24 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addCommonGeometry(
     // geographic coordinates require tile {0, 0, 0}
     setTileID({0, 0, 0});
 
-    SegmentVector<CommonGeometryVertex> triangleSegments;
-    triangleSegments.emplace_back(Segment<CommonGeometryVertex>{0, 0, vertices->elements(), indices->elements()});
+    SegmentVector<GeometryVertex> triangleSegments;
+    triangleSegments.emplace_back(Segment<GeometryVertex>{0, 0, vertices->elements(), indices->elements()});
      
     // add to builder
     auto attrs = context.createVertexAttributeArray();
-    if (const auto& attr = attrs->set(idCommonPosVertexAttribute)) {
+    if (const auto& attr = attrs->set(idLocationIndicatorPosVertexAttribute)) {
         attr->setSharedRawData(vertices,
-                               offsetof(CommonGeometryVertex, position),
+                               offsetof(GeometryVertex, position),
                                /*vertexOffset=*/0,
-                               sizeof(CommonGeometryVertex),
+                               sizeof(GeometryVertex),
                                gfx::AttributeDataType::Float3);
     }
 
-    if (const auto& attr = attrs->set(idCommonTexVertexAttribute)) {
+    if (const auto& attr = attrs->set(idLocationIndicatorTexVertexAttribute)) {
         attr->setSharedRawData(vertices,
-                               offsetof(CommonGeometryVertex, texcoords),
+                               offsetof(GeometryVertex, texcoords),
                                /*vertexOffset=*/0,
-                               sizeof(CommonGeometryVertex),
+                               sizeof(GeometryVertex),
                                gfx::AttributeDataType::Float2);
     }
 
@@ -728,12 +732,11 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addCommonGeometry(
     }
 
     // texture
-    if (commonGeometryOptions.texture) {
-        builder->setTexture(commonGeometryOptions.texture, shaders::idCommonTexture);
+    if (geometryOptions.texture) {
+        builder->setTexture(geometryOptions.texture, shaders::idLocationIndicatorTexture);
     }
 
-    builder->addTweaker(std::make_shared<CommonGeometryDrawableTweaker>(commonGeometryOptions,
-                                                                        std::move(commonGeometryTweakerCallback)));
+    builder->addTweaker(std::make_shared<GeometryDrawableTweaker>(geometryOptions, std::move(geometryTweakerCallback)));
 
     const auto& id = builder->getCurrentDrawable(true)->getID();
 
@@ -847,12 +850,12 @@ gfx::ShaderPtr CustomDrawableLayerHost::Interface::symbolShaderDefault() const {
     return context.getGenericShader(shaders, "CustomSymbolIconShader");
 }
 
-gfx::ShaderPtr CustomDrawableLayerHost::Interface::commonShaderDefault() const {
+gfx::ShaderPtr CustomDrawableLayerHost::Interface::geometryShaderDefault() const {
     // TODO rename
     return context.getGenericShader(shaders, "LocationIndicatorShader");
 }
 
-gfx::ShaderPtr CustomDrawableLayerHost::Interface::commonTexturedShaderDefault() const {
+gfx::ShaderPtr CustomDrawableLayerHost::Interface::texturedGeometryShaderDefault() const {
     // TODO rename
     return context.getGenericShader(shaders, "LocationIndicatorTexturedShader");
 }

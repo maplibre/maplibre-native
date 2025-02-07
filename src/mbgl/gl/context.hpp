@@ -125,7 +125,7 @@ public:
                                               bool persistent = false,
                                               bool ssbo = false) override;
 
-    UniqueUniformBufferArray createLayerUniformBufferArray() override;
+    gfx::UniqueUniformBufferArray createLayerUniformBufferArray() override;
 
     gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
 

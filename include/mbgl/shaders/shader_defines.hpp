@@ -256,6 +256,11 @@ enum {
 };
 
 enum {
+    idLocationIndicatorTexture,
+    locationIndicatorTextureCount
+};
+
+enum {
     idCustomSymbolImageTexture,
     customSymbolTextureCount
 };
@@ -315,6 +320,7 @@ static constexpr uint32_t maxTextureCountPerShader = std::max({static_cast<uint3
                                                                static_cast<uint32_t>(heatmapTextureCount),
                                                                static_cast<uint32_t>(hillshadeTextureCount),
                                                                static_cast<uint32_t>(lineTextureCount),
+                                                               static_cast<uint32_t>(locationIndicatorTextureCount),
                                                                static_cast<uint32_t>(rasterTextureCount),
                                                                static_cast<uint32_t>(symbolTextureCount)});
 
@@ -432,6 +438,12 @@ enum {
 };
 
 enum {
+    idLocationIndicatorPosVertexAttribute,
+    idLocationIndicatorTexVertexAttribute,
+    locationIndicatorVertexAttributeCount
+};
+
+enum {
     idRasterPosVertexAttribute,
     idRasterTexturePosVertexAttribute,
     rasterVertexAttributeCount
@@ -484,6 +496,7 @@ static constexpr uint32_t maxVertexAttributeCountPerShader = std::max({
     static_cast<uint32_t>(heatmapVertexAttributeCount),
     static_cast<uint32_t>(hillshadeVertexAttributeCount),
     static_cast<uint32_t>(lineVertexAttributeCount),
+    static_cast<uint32_t>(locationIndicatorVertexAttributeCount),
     static_cast<uint32_t>(rasterVertexAttributeCount),
     static_cast<uint32_t>(symbolVertexAttributeCount),
     static_cast<uint32_t>(wideVectorAttributeCount),

@@ -620,8 +620,8 @@ gfx::UniformBufferPtr Context::createUniformBuffer(const void* data,
     return std::make_shared<gl::UniformBufferGL>(data, size, *uboAllocator);
 }
 
-UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
-    return std::make_unique<UniformBufferArray>();
+gfx::UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
+    return std::make_unique<UniformBufferArrayGL>();
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {

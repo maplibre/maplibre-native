@@ -322,6 +322,30 @@ const std::vector<AttributeInfo> LineShaderInfo::attributes = {
 };
 const std::vector<TextureInfo> LineShaderInfo::textures = {};
 
+// Location Indicator
+using LocationIndicatorInfo = ShaderInfo<BuiltIn::LocationIndicatorShader, gfx::Backend::Type::OpenGL>;
+
+const std::vector<UniformBlockInfo> LocationIndicatorInfo::uniformBlocks = {
+    UniformBlockInfo{"LocationIndicatorDrawableUBO", idLocationIndicatorDrawableUBO},
+};
+const std::vector<AttributeInfo> LocationIndicatorInfo::attributes = {
+    AttributeInfo{"a_pos", idLocationIndicatorPosVertexAttribute},
+};
+const std::vector<TextureInfo> LocationIndicatorInfo::textures = {};
+
+using LocationIndicatorTexturedInfo = ShaderInfo<BuiltIn::LocationIndicatorTexturedShader, gfx::Backend::Type::OpenGL>;
+
+const std::vector<UniformBlockInfo> LocationIndicatorTexturedInfo::uniformBlocks = {
+    UniformBlockInfo{"LocationIndicatorDrawableUBO", idLocationIndicatorDrawableUBO},
+};
+const std::vector<AttributeInfo> LocationIndicatorTexturedInfo::attributes = {
+    AttributeInfo{"a_pos", idLocationIndicatorPosVertexAttribute},
+    AttributeInfo{"a_uv", idLocationIndicatorTexVertexAttribute},
+};
+const std::vector<TextureInfo> LocationIndicatorTexturedInfo::textures = {
+    TextureInfo{"u_image", idLocationIndicatorTexture},
+};
+
 // Line Gradient
 using LineGradientShaderInfo = ShaderInfo<BuiltIn::LineGradientShader, gfx::Backend::Type::OpenGL>;
 
