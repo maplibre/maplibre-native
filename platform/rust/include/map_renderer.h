@@ -10,6 +10,9 @@
 #include <vector>
 #include <stdexcept>
 
+namespace ml {
+namespace bridge {
+
 class MapRenderer {
 public:
     MapRenderer() {}
@@ -50,3 +53,6 @@ private:
     std::string assetRoot = ".";
     std::string styleUrl;
 };
+
+} // namespace bridge
+} // namespace ml

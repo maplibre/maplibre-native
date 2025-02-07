@@ -54,11 +54,11 @@ fn main() {
         // .include(project_root.join("vendor/mapbox-base/deps/geometry.hpp/include"))
         // .include(project_root.join("vendor/mapbox-base/include"))
         // .include(project_root.join("vendor/mapbox-base/deps/variant/include"))
-        .file("src/wrapper.cc")
+        .file("src/wrapper.cpp")
         .flag_if_supported("-std=c++20")
         .compile("maplibre_rust_bindings");
 
     println!("cargo:rerun-if-changed=src/lib.rs");
-    println!("cargo:rerun-if-changed=src/wrapper.cc");
+    println!("cargo:rerun-if-changed=src/wrapper.cpp");
     println!("cargo:rerun-if-changed=include/tile_server_options.h");
 }
