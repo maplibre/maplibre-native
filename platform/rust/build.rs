@@ -6,21 +6,22 @@ fn main() {
     let project_root = {
         let manifest = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
         let root = manifest.join("core-src");
-        if root.is_symlink() || root.is_dir() {
-            // Use the symlinked directory to allow crate packaging
-            root
-        } else {
+        // if root.is_symlink() || root.is_dir() {
+        //     // Use the symlinked directory to allow crate packaging
+        //     root
+        // } else {
             // Modeled from the kuzu project.
             // If the path is not directory, this is probably an in-source build on windows where the symlink is unreadable.
             manifest.parent().unwrap().parent().unwrap().to_path_buf()
-        }
+        // }
     };
 
     let build_dir = cmake::Config::new(&project_root)
         .generator("Ninja")
         .define("CMAKE_C_COMPILER_LAUNCHER", "ccache")
         .define("CMAKE_CXX_COMPILER_LAUNCHER", "ccache")
-        .define("MLN_WITH_CORE_ONLY", "ON")
+        // .define("MLN_WITH_CORE_ONLY", "ON")
+        // .define("MLN_USE_RUST", "ON")
         .build_target("mbgl-core")
         .build();
 
@@ -30,8 +31,17 @@ fn main() {
         // `cargo test` wouldn't work with Rust v1.82+ without this
         // FIXME: this MIGHT significantly increase the size of the final binary, needs to be tested
         println!("cargo:rustc-link-lib=static:+whole-archive=mbgl-core");
+
+        println!("cargo:rustc-link-lib=static:+whole-archive=mbgl-rustutils");
+        println!("cargo:rustc-link-lib=static:+whole-archive=mbgl-vendor-csscolorparser");
+        // println!("cargo:rustc-link-lib=static:+whole-archive=rustutils");
+        println!("cargo:rustc-link-lib=static:+whole-archive=mbgl-vendor-nunicode");
+        println!("cargo:rustc-link-lib=static:+whole-archive=mbgl-vendor-parsedate");
+        println!("cargo:rustc-link-lib=static:+whole-archive=mbgl-vendor-sqlite");
+        // println!("cargo:rustc-link-lib=static:+whole-archive=icu");
     } else {
         println!("cargo:rustc-link-lib=static=mbgl-core");
+        todo!("link to other libs");
     }
 
     // recursively find all "/include" dirs
