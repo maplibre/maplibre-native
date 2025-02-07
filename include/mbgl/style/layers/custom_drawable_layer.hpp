@@ -64,12 +64,12 @@ public:
         bool pitchWithMap{false};
     };
 
-    struct CommonGeometryVertex {
+    struct GeometryVertex {
         std::array<float, 3> position;
         std::array<float, 2> texcoords;
     };
 
-    struct CommonGeometryOptions {
+    struct GeometryOptions {
         mat4 matrix = matrix::identity4();
         Color color;
 
@@ -83,7 +83,7 @@ public:
     using LineTweakerCallback = TweakerCallback<LineOptions>;
     using FillTweakerCallback = TweakerCallback<FillOptions>;
     using SymbolTweakerCallback = TweakerCallback<SymbolOptions>;
-    using CommonGeometryTweakerCallback = TweakerCallback<CommonGeometryOptions>;
+    using GeometryTweakerCallback = TweakerCallback<GeometryOptions>;
 
 public:
     /// @brief Construct a new Interface object (internal core use only)
@@ -131,18 +131,16 @@ public:
     void setSymbolOptions(const SymbolOptions& options);
 
     /**
-     * @brief Set the common geometry options
+     * @brief Set the geometry options
      *
      * @param options
      */
-    void setCommonGeometryOptions(const CommonGeometryOptions& options);
+    void setGeometryOptions(const GeometryOptions& options);
 
     void setLineTweakerCallback(LineTweakerCallback&& callback) { lineTweakerCallback = callback; }
     void setFillTweakerCallback(FillTweakerCallback&& callback) { fillTweakerCallback = callback; }
     void setSymbolTweakerCallback(SymbolTweakerCallback&& callback) { symbolTweakerCallback = callback; }
-    void setCommonGeometryTweakerCallback(CommonGeometryTweakerCallback&& callback) {
-        commonGeometryTweakerCallback = callback;
-    }
+    void setGeometryTweakerCallback(GeometryTweakerCallback&& callback) { geometryTweakerCallback = callback; }
 
     /**
      * @brief Add a polyline
@@ -182,7 +180,7 @@ public:
     util::SimpleIdentity addSymbol(const GeometryCoordinate& point,
                                    const std::array<std::array<float, 2>, 2>& textureCoordinates = {{{0, 0}, {1, 1}}});
 
-    util::SimpleIdentity addCommonGeometry(std::shared_ptr<gfx::VertexVector<CommonGeometryVertex>> vertices,
+    util::SimpleIdentity addGeometry(std::shared_ptr<gfx::VertexVector<GeometryVertex>> vertices,
                            std::shared_ptr<gfx::IndexVector<gfx::Triangles>> indices, bool is3D);
 
     /**
@@ -208,8 +206,8 @@ private:
     gfx::ShaderPtr lineShaderWideVector() const;
     gfx::ShaderPtr fillShaderDefault() const;
     gfx::ShaderPtr symbolShaderDefault() const;
-    gfx::ShaderPtr commonShaderDefault() const;
-    gfx::ShaderPtr commonTexturedShaderDefault() const;
+    gfx::ShaderPtr geometryShaderDefault() const;
+    gfx::ShaderPtr texturedGeometryShaderDefault() const;
 
     enum class BuilderType {
         None,
@@ -229,12 +227,12 @@ private:
     LineOptions lineOptions;
     FillOptions fillOptions;
     SymbolOptions symbolOptions;
-    CommonGeometryOptions commonGeometryOptions;
+    GeometryOptions geometryOptions;
 
     LineTweakerCallback lineTweakerCallback;
     FillTweakerCallback fillTweakerCallback;
     SymbolTweakerCallback symbolTweakerCallback;
-    CommonGeometryTweakerCallback commonGeometryTweakerCallback;
+    GeometryTweakerCallback geometryTweakerCallback;
 
     BuilderType builderType{BuilderType::None};
 };

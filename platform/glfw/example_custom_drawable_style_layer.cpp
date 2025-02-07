@@ -320,18 +320,18 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
 
     }
 
-    generateCommonGeometry(interface);
-    loadCommonGeometry(interface);
+    generateGeometry(interface);
+    loadGeometry(interface);
 
     // finish
     interface.finish();
 }
 
-void ExampleCustomDrawableStyleLayerHost::generateCommonGeometry(Interface& interface) {
+void ExampleCustomDrawableStyleLayerHost::generateGeometry(Interface& interface) {
     constexpr float itemScale = 10.0f;
     const mbgl::LatLng location{37.78, -122.47};
 
-    Interface::CommonGeometryOptions options;
+    Interface::GeometryOptions options;
 
     // load image
     std::shared_ptr<mbgl::PremultipliedImage> image = std::make_shared<mbgl::PremultipliedImage>(
@@ -339,9 +339,8 @@ void ExampleCustomDrawableStyleLayerHost::generateCommonGeometry(Interface& inte
     
     options.texture = interface.context.createTexture2D();
     options.texture->setImage(image);
-    options.texture->setSamplerConfiguration({mbgl::gfx::TextureFilterType::Linear,
-                                                mbgl::gfx::TextureWrapType::Clamp,
-                                                mbgl::gfx::TextureWrapType::Clamp});
+    options.texture->setSamplerConfiguration(
+        {mbgl::gfx::TextureFilterType::Linear, mbgl::gfx::TextureWrapType::Clamp, mbgl::gfx::TextureWrapType::Clamp});
 
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
@@ -352,12 +351,12 @@ void ExampleCustomDrawableStyleLayerHost::generateCommonGeometry(Interface& inte
     const unsigned long numVtxCircumference = 72;
     const float bearingStep = 360.0f / static_cast<float>(numVtxCircumference - 1);
 
-    vertices.emplace_back(Interface::CommonGeometryVertex{0.0f, 0.0f, 0.0f, 0.5f, 0.5f});
+    vertices.emplace_back(Interface::GeometryVertex{0.0f, 0.0f, 0.0f, 0.5f, 0.5f});
 
     for (unsigned long i = 1; i <= numVtxCircumference; ++i) {
         const float rad = mbgl::util::deg2radf((i - 1) * bearingStep);
 
-        Interface::CommonGeometryVertex vertex;
+        Interface::GeometryVertex vertex;
         vertex.position = {sinf(rad) / 2.0f, cosf(rad) / 2.0f, 0.0f};
         vertex.texcoords = {0.5f + vertex.position[0], 0.5f - vertex.position[1]};
 
@@ -369,19 +368,17 @@ void ExampleCustomDrawableStyleLayerHost::generateCommonGeometry(Interface& inte
     }
     indices.emplace_back(0, static_cast<uint16_t>(vertices.elements() - 1), 1);
 
-    interface.setCommonGeometryOptions(options);
+    interface.setGeometryOptions(options);
 
-    interface.setCommonGeometryTweakerCallback([=, rotation = 0.0f](
+    interface.setGeometryTweakerCallback([=, rotation = 0.0f](
                                                    mbgl::gfx::Drawable& drawable,
                                                    const mbgl::PaintParameters& params,
-                                                   Interface::CommonGeometryOptions& currentOptions) mutable {
+                                                   Interface::GeometryOptions& currentOptions) mutable {
         const mbgl::Point<double>& center = project(location, params.state);
 
         rotation += 0.1f;
-        const float scale = itemScale *
-                      static_cast<float>(
-                          std::pow(2.f, params.state.getZoom() - drawable.getTileID()->toUnwrapped().canonical.z)) *
-                      params.pixelsToGLUnits[0];
+        const float scale = itemScale * static_cast<float>(std::pow(2.f, params.state.getZoom())) *
+                            params.pixelsToGLUnits[0];
 
         mbgl::mat4 matrix = mbgl::matrix::identity4();
         mbgl::matrix::translate(matrix, matrix, center.x, center.y, 0.0);
@@ -390,24 +387,22 @@ void ExampleCustomDrawableStyleLayerHost::generateCommonGeometry(Interface& inte
         mbgl::matrix::multiply(currentOptions.matrix, params.state.getProjectionMatrix(), matrix);
     });
 
-    interface.addCommonGeometry(sharedVertices, sharedIndices, false);
+    interface.addGeometry(sharedVertices, sharedIndices, false);
 }
 
-void ExampleCustomDrawableStyleLayerHost::loadCommonGeometry(Interface& interface) {
+void ExampleCustomDrawableStyleLayerHost::loadGeometry(Interface& interface) {
     constexpr float itemScale = 0.1f;
     constexpr std::array<float, 3> itemRotation = { 90.0f, 0.0f, 0.0f };
     const mbgl::LatLng location{37.76, -122.47};
 
-    Interface::CommonGeometryOptions options;
+    Interface::GeometryOptions options;
 
-    interface.setCommonGeometryTweakerCallback([=](mbgl::gfx::Drawable& drawable,
+    interface.setGeometryTweakerCallback([=](mbgl::gfx::Drawable& drawable,
                                                    const mbgl::PaintParameters& params,
-                                                   Interface::CommonGeometryOptions& currentOptions) mutable {
+                                                   Interface::GeometryOptions& currentOptions) mutable {
         const mbgl::Point<double>& center = project(location, params.state);
 
-        const float scale = itemScale *
-                            static_cast<float>(std::pow(
-                                2.f, params.state.getZoom() - drawable.getTileID()->toUnwrapped().canonical.z)) *
+        const float scale = itemScale * static_cast<float>(std::pow(2.f, params.state.getZoom())) *
                             params.pixelsToGLUnits[0];
 
         mbgl::mat4 matrix = mbgl::matrix::identity4();
@@ -425,15 +420,15 @@ void ExampleCustomDrawableStyleLayerHost::loadCommonGeometry(Interface& interfac
     //importObj(interface, "../../_deps/tinyobjloader-src/models/cube.obj", *sharedVertices, *sharedIndices, options);
     importObj(interface, assetsPath + "sphere.obj", *sharedVertices, *sharedIndices, options);
 
-    interface.setCommonGeometryOptions(options);
-    interface.addCommonGeometry(sharedVertices, sharedIndices, true);
+    interface.setGeometryOptions(options);
+    interface.addGeometry(sharedVertices, sharedIndices, true);
 }
 
 void ExampleCustomDrawableStyleLayerHost::importObj(Interface& interface,
                                                     const std::string& filename,
                                                     VertexVector& vertices,
                                                     TriangleIndexVector& indices,
-                                                    Interface::CommonGeometryOptions& options) {
+                                                    Interface::GeometryOptions& options) {
     tinyobj::ObjReaderConfig readerConfig;
 
     readerConfig.triangulate = true;
@@ -472,7 +467,7 @@ void ExampleCustomDrawableStyleLayerHost::importObj(Interface& interface,
             for (size_t i = 0; i < 3; ++i) {
                 const tinyobj::index_t index = shape.mesh.indices[face + i];
 
-                Interface::CommonGeometryVertex vertex = {};
+                Interface::GeometryVertex vertex = {};
 
                 std::copy(attributes.vertices.begin() + vertex.position.size() * index.vertex_index,
                           attributes.vertices.begin() + vertex.position.size() * (index.vertex_index + 1),

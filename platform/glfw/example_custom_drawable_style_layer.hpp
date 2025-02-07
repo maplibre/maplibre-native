@@ -4,7 +4,7 @@
 
 class ExampleCustomDrawableStyleLayerHost : public mbgl::style::CustomDrawableLayerHost {
 public:
-    using VertexVector = mbgl::gfx::VertexVector<Interface::CommonGeometryVertex>;
+    using VertexVector = mbgl::gfx::VertexVector<Interface::GeometryVertex>;
     using TriangleIndexVector = mbgl::gfx::IndexVector<mbgl::gfx::Triangles>;
 
     ExampleCustomDrawableStyleLayerHost(const std::string& assetsPath);
@@ -19,13 +19,13 @@ protected:
     mbgl::Point<double> project(const mbgl::LatLng& c, const mbgl::TransformState& s);
 
     void createDrawables(Interface& interface);
-    void generateCommonGeometry(Interface& interface);
-    void loadCommonGeometry(Interface& interface);
+    void generateGeometry(Interface& interface);
+    void loadGeometry(Interface& interface);
     void importObj(Interface& interface,
                    const std::string& filename,
                    VertexVector& vertices,
                    TriangleIndexVector& indices,
-                   Interface::CommonGeometryOptions& options);
+                   Interface::GeometryOptions& options);
 
     mbgl::gfx::Texture2DPtr createCheckerboardTexture(Interface& interface,
                                                       uint16_t wb,
