@@ -144,6 +144,8 @@ TEST(OrderIndependentHash, Shaders) {
                       BuiltIn::LineGradientShader,
                       BuiltIn::LinePatternShader,
                       BuiltIn::LineSDFShader,
+                      BuiltIn::LocationIndicatorShader,
+                      BuiltIn::LocationIndicatorTexturedShader,
                       BuiltIn::RasterShader,
                       BuiltIn::SymbolIconShader,
                       BuiltIn::SymbolSDFIconShader,
