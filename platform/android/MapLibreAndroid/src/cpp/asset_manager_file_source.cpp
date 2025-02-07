@@ -71,7 +71,7 @@ AssetManagerFileSource::AssetManagerFileSource(jni::JNIEnv& env,
 AssetManagerFileSource::~AssetManagerFileSource() = default;
 
 std::unique_ptr<AsyncRequest> AssetManagerFileSource::request(const Resource& resource,
-                                                              CopyableCallback<void(Response)> callback) {
+                                                              std::function<void(Response)> callback) {
     auto req = std::make_unique<FileSourceRequest>(std::move(callback));
 
     impl->actor().invoke(&Impl::request, resource.url, req->actor());

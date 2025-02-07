@@ -61,7 +61,7 @@ StubFileSource::StubFileSource(const ResourceOptions& resourceOptions_,
 StubFileSource::~StubFileSource() = default;
 
 std::unique_ptr<AsyncRequest> StubFileSource::request(const Resource& resource,
-                                                      CopyableCallback<void(Response)> callback) {
+                                                      std::function<void(Response)> callback) {
     auto req = std::make_unique<StubFileRequest>(*this);
     if (type == ResponseType::Synchronous) {
         std::optional<Response> res = response(resource);

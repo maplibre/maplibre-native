@@ -15,7 +15,7 @@ namespace mbgl {
 
 HTTPRequest::HTTPRequest(HTTPFileSource::Impl* context,
                          const Resource& resource,
-                         FileSource::CopyableCallback<void(Response)> callback)
+                         std::function<void(Response)> callback)
     : m_context(context),
       m_resource(resource),
       m_callback(std::move(callback)) {

@@ -55,7 +55,7 @@ private:
 
 class HTTPRequest : public AsyncRequest {
 public:
-    HTTPRequest(FileSource::CopyableCallback<void(Response)> callback_)
+    HTTPRequest(std::function<void(Response)> callback_)
         : shared(std::make_shared<HTTPRequestShared>(response, async)),
           callback(std::move(callback_)) {
     }
@@ -71,7 +71,7 @@ public:
     NSURLSessionDataTask* task = nil;
 
 private:
-    FileSource::CopyableCallback<void(Response)> callback;
+    std::function<void(Response)> callback;
     Response response;
 
     util::AsyncTask async { [this] {
@@ -248,7 +248,7 @@ NSURL *resourceURL(const Resource& resource) {
     return url;
 }
     
-std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, CopyableCallback<void(Response)> callback) {
+std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, std::function<void(Response)> callback) {
     auto request = std::make_unique<HTTPRequest>(std::move(callback));
     auto shared = request->shared; // Explicit copy so that it also gets copied into the completion handler block below.
 

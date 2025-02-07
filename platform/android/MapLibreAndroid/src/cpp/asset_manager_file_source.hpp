@@ -23,7 +23,7 @@ public:
                            const ClientOptions);
     ~AssetManagerFileSource() override;
 
-    std::unique_ptr<AsyncRequest> request(const Resource&, CopyableCallback<void(Response)>) override;
+    std::unique_ptr<AsyncRequest> request(const Resource&, std::function<void(Response)>) override;
     bool canRequest(const Resource&) const override;
 
     void setResourceOptions(ResourceOptions options) override;

@@ -36,12 +36,6 @@ enum FileSourceType : uint8_t {
 // GeoJSONSource, RasterSource, VectorSource, CustomGeometrySource and other *Sources.
 class FileSource {
 public:
-    template <typename T = void()>
-    using Callback = std23::move_only_function<T>;
-    template <typename T = void()>
-    using CopyableCallback = std::function<T>;
-    using ExceptionCallback = Callback<void(std::exception_ptr)>;
-
     FileSource& operator=(const FileSource&) = delete;
     virtual ~FileSource() = default;
 
@@ -50,7 +44,7 @@ public:
     /// RunLoop. The request may be cancelled before completion by releasing the
     /// returned AsyncRequest. If the request is cancelled before the callback
     /// is executed, the callback will not be executed.
-    virtual std::unique_ptr<AsyncRequest> request(const Resource&, CopyableCallback<void(Response)>) = 0;
+    virtual std::unique_ptr<AsyncRequest> request(const Resource&, std::function<void(Response)>) = 0;
 
     /// Allows to forward response from one source to another.
     /// Optionally, callback can be provided to receive notification for forward

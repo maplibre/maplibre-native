@@ -37,9 +37,7 @@ constexpr const char* ONLINE_STATUS_KEY = "online-status";
 class OnlineFileSourceThread;
 
 struct OnlineFileRequest {
-    using Callback = FileSource::CopyableCallback<void(Response)>;
-
-    OnlineFileRequest(Resource resource_, Callback&& callback_, OnlineFileSourceThread& impl_);
+    OnlineFileRequest(Resource resource_, std::function<void(Response)>&& callback_, OnlineFileSourceThread& impl_);
     ~OnlineFileRequest();
 
     void networkIsReachableAgain();
@@ -56,7 +54,7 @@ struct OnlineFileRequest {
     Resource resource;
     std::unique_ptr<AsyncRequest> request;
     util::Timer timer;
-    Callback callback;
+    std::function<void(Response)> callback;
 
     std::function<void()> cancelCallback = nullptr;
     std::shared_ptr<Mailbox> mailbox;
@@ -320,7 +318,7 @@ public:
               resourceOptions.clone(),
               clientOptions.clone())) {}
 
-    std::unique_ptr<AsyncRequest> request(CopyableCallback<void(Response)> callback, Resource res) {
+    std::unique_ptr<AsyncRequest> request(std::function<void(Response)> callback, Resource res) {
         auto req = std::make_unique<FileSourceRequest>(std::move(callback));
         req->onCancel(
             [actorRef = thread->actor(), req = req.get()]() { actorRef.invoke(&OnlineFileSourceThread::cancel, req); });
@@ -429,7 +427,9 @@ private:
     const std::unique_ptr<util::Thread<OnlineFileSourceThread>> thread;
 };
 
-OnlineFileRequest::OnlineFileRequest(Resource resource_, Callback&& callback_, OnlineFileSourceThread& impl_)
+OnlineFileRequest::OnlineFileRequest(Resource resource_,
+                                     std::function<void(Response)>&& callback_,
+                                     OnlineFileSourceThread& impl_)
     : impl(impl_),
       resource(std::move(resource_)),
       callback(std::move(callback_)) {
@@ -617,7 +617,7 @@ OnlineFileSource::OnlineFileSource(const ResourceOptions& resourceOptions, const
 OnlineFileSource::~OnlineFileSource() = default;
 
 std::unique_ptr<AsyncRequest> OnlineFileSource::request(const Resource& resource,
-                                                        CopyableCallback<void(Response)> callback) {
+                                                        std::function<void(Response)> callback) {
     Resource res = resource;
     const TileServerOptions options = impl->getResourceOptions().tileServerOptions();
 

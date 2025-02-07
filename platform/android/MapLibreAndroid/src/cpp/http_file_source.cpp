@@ -39,7 +39,7 @@ class HTTPRequest : public AsyncRequest {
 public:
     static constexpr auto Name() { return "org/maplibre/android/http/NativeHttpRequest"; };
 
-    HTTPRequest(jni::JNIEnv&, const Resource&, FileSource::CopyableCallback<void(Response)>);
+    HTTPRequest(jni::JNIEnv&, const Resource&, std::function<void(Response)>);
     ~HTTPRequest() override;
 
     void onFailure(jni::JNIEnv&, int type, const jni::String& message);
@@ -57,7 +57,7 @@ public:
 
 private:
     Resource resource;
-    FileSource::CopyableCallback<void(Response)> callback;
+    std::function<void(Response)> callback;
     Response response;
 
     util::AsyncTask async{[this] {
@@ -88,9 +88,7 @@ void RegisterNativeHTTPRequest(jni::JNIEnv& env) {
 
 } // namespace android
 
-HTTPRequest::HTTPRequest(jni::JNIEnv& env,
-                         const Resource& resource_,
-                         FileSource::CopyableCallback<void(Response)> callback_)
+HTTPRequest::HTTPRequest(jni::JNIEnv& env, const Resource& resource_, std::function<void(Response)> callback_)
     : resource(resource_),
       callback(std::move(callback_)) {
     std::string dataRangeStr;
@@ -224,7 +222,7 @@ HTTPFileSource::HTTPFileSource(const ResourceOptions& resourceOptions, const Cli
 HTTPFileSource::~HTTPFileSource() = default;
 
 std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource,
-                                                      CopyableCallback<void(Response)> callback) {
+                                                      std::function<void(Response)> callback) {
     return std::make_unique<HTTPRequest>(*impl->env, resource, std::move(callback));
 }
 
