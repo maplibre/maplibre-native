@@ -1,5 +1,6 @@
 use std::env;
 use std::path::PathBuf;
+use walkdir::WalkDir;
 
 fn main() {
     let project_root = {
@@ -33,9 +34,25 @@ fn main() {
         println!("cargo:rustc-link-lib=static=mbgl-core");
     }
 
+    // recursively find all "/include" dirs
+    let mut include_dirs = vec![
+        project_root.join("include"),
+        project_root.join("platform/default/include"),
+    ];
+    for entry in WalkDir::new(project_root.join("vendor")) {
+        let entry = entry.unwrap();
+        if entry.file_type().is_dir() && !entry.path_is_symlink() && entry.file_name() == "include" {
+            include_dirs.push(entry.path().to_path_buf());
+        }
+    }
+
     // cxx build
-    let mut cxx = cxx_build::bridge("src/lib.rs");
-    cxx.include(project_root.join("include"))
+    cxx_build::bridge("src/lib.rs")
+        .includes(include_dirs)
+        // .include(project_root.join("include"))
+        // .include(project_root.join("vendor/mapbox-base/deps/geometry.hpp/include"))
+        // .include(project_root.join("vendor/mapbox-base/include"))
+        // .include(project_root.join("vendor/mapbox-base/deps/variant/include"))
         .file("src/wrapper.cc")
         .flag_if_supported("-std=c++20")
         .compile("maplibre_rust_bindings");

@@ -14,3 +14,4 @@ insta = { version = "1.42.1" }
 cmake = "0.1"
 cxx-build = "1.0.138"
 rustversion = "1.0.19"
+walkdir = "2.5.0"

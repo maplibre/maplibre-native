@@ -81,4 +81,10 @@ mod ffi {
         unsafe fn TileServerOptions_withDefaultStyle(obj: Pin<&mut TileServerOptions>, value: &str);
         fn defaultStyle(&self) -> &CxxString;
     }
+
+    unsafe extern "C++" {
+        include!("map_renderer.h");
+
+        type MapRenderer;
+    }
 }
