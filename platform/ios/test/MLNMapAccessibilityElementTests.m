@@ -35,14 +35,14 @@
     };
     MLNPlaceFeatureAccessibilityElement *element = [[MLNPlaceFeatureAccessibilityElement alloc] initWithAccessibilityContainer:self feature:feature];
     XCTAssertEqualObjects(element.accessibilityValue, @"village green");
-    
+
     feature = [[MLNPointFeature alloc] init];
     feature.attributes = @{
         @"maki": @"cat",
     };
     element = [[MLNPlaceFeatureAccessibilityElement alloc] initWithAccessibilityContainer:self feature:feature];
     XCTAssertEqualObjects(element.accessibilityValue, @"cat");
-    
+
     feature = [[MLNPointFeature alloc] init];
     feature.attributes = @{
         @"elevation_ft": @31337,
@@ -67,7 +67,7 @@
     };
     MLNRoadFeatureAccessibilityElement *element = [[MLNRoadFeatureAccessibilityElement alloc] initWithAccessibilityContainer:self feature:roadFeature];
     XCTAssertEqualObjects(element.accessibilityValue, @"Route 42, One way, southwest to northeast");
-    
+
     CLLocationCoordinate2D opposingCoordinates[] = {
         CLLocationCoordinate2DMake(2, 1),
         CLLocationCoordinate2DMake(1, 0),

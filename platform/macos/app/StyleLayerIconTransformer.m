@@ -40,7 +40,7 @@
     if ([layer isKindOfClass:[MLNHillshadeStyleLayer class]]) {
         return [NSImage imageNamed:@"hillshade"];
     }
-    
+
     return nil;
 }
 

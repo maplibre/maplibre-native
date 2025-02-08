@@ -19,27 +19,27 @@ public:
     {
         swapchain->setDevice(backend.getDevice().get());
     }
-    
+
     void setBackendSize(mbgl::Size size_) {
         size = size_;
         swapchain->setDrawableSize({static_cast<CGFloat>(size.width), static_cast<CGFloat>(size.height)});
         buffersInvalid = true;
     }
-    
+
     mbgl::Size getSize() const {
         return size;
     }
-    
+
     void bind() override {
         surface = NS::TransferPtr(swapchain->nextDrawable());
         auto texSize = mbgl::Size{
             static_cast<uint32_t>(swapchain->drawableSize().width),
             static_cast<uint32_t>(swapchain->drawableSize().height)};
-        
+
         commandBuffer = NS::TransferPtr(commandQueue->commandBuffer());
         renderPassDescriptor = NS::TransferPtr(MTL::RenderPassDescriptor::renderPassDescriptor());
         renderPassDescriptor->colorAttachments()->object(0)->setTexture(surface->texture());
-        
+
         if (buffersInvalid || !depthTexture || !stencilTexture) {
             buffersInvalid = false;
             depthTexture = rendererBackend.getContext().createTexture2D();
@@ -49,7 +49,7 @@ public:
                                                   {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
             static_cast<mtl::Texture2D*>(depthTexture.get())->setUsage(
                                                                        MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
-            
+
             stencilTexture = rendererBackend.getContext().createTexture2D();
             stencilTexture->setSize(texSize);
             stencilTexture->setFormat(gfx::TexturePixelType::Stencil, gfx::TextureChannelDataType::UnsignedByte);
@@ -58,7 +58,7 @@ public:
             static_cast<mtl::Texture2D*>(stencilTexture.get())
             ->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
         }
-        
+
         if (depthTexture) {
             depthTexture->create();
             if (auto* depthTarget = renderPassDescriptor->depthAttachment()) {
@@ -72,34 +72,34 @@ public:
             }
         }
     }
-    
+
     void swap() override {
         commandBuffer->presentDrawable(surface.get());
         commandBuffer->commit();
         commandBuffer.reset();
         renderPassDescriptor.reset();
     }
-    
+
     const mtl::RendererBackend& getBackend() const override {
         return rendererBackend;
     }
-    
+
     const mtl::MTLCommandBufferPtr& getCommandBuffer() const override {
         return commandBuffer;
     }
-    
+
     mtl::MTLBlitPassDescriptorPtr getUploadPassDescriptor() const override {
         return NS::TransferPtr(MTL::BlitPassDescriptor::alloc()->init());
     }
-    
+
     const mtl::MTLRenderPassDescriptorPtr& getRenderPassDescriptor() const override {
         return renderPassDescriptor;
     }
-    
+
     const CAMetalLayerPtr& getSwapchain() const {
         return swapchain;
     }
-    
+
 private:
     MetalBackend &rendererBackend;
     MTLCommandQueuePtr commandQueue;

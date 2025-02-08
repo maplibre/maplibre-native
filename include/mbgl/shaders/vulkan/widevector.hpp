@@ -26,7 +26,7 @@ struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Vulkan> {
 
 /** Expressions are used to change values like width and opacity over zoom levels. **/
 #define WKSExpStops 8
-    
+
 // Line Joins
 // These are assumed to match WideVectorLineJoinType
 #define WKSVertexLineJoinMiter          0
@@ -117,7 +117,7 @@ vec3 viewPos(const mat4 &mat, vec3 vec) {
 
 float2 screenPos_MVP(const Uniforms &u, float3 viewPos) {
     const float4 p4 = float4(viewPos, 1.0);
-    
+
     // Use the MVP matrix
     const float4 s = u.mvpMatrix * p4;
 

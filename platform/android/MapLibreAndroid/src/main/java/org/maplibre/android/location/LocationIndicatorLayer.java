@@ -18,7 +18,7 @@ import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.layers.PropertyValue;
 
 /**
- * 
+ *
  *
  * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-location-indicator">The online documentation</a>
  */

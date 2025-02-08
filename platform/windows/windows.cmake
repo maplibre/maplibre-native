@@ -118,7 +118,7 @@ elseif(MLN_WITH_OSMESA)
             ${PROJECT_SOURCE_DIR}/platform/windows/src/headless_backend_osmesa.cpp
             ${PROJECT_SOURCE_DIR}/platform/windows/src/gl_functions.cpp
     )
-    
+
     set_property(
         SOURCE ${PROJECT_SOURCE_DIR}/platform/windows/src/headless_backend_osmesa.cpp
         PROPERTY INCLUDE_DIRECTORIES ${OSMesa_INCLUDE_DIRS}

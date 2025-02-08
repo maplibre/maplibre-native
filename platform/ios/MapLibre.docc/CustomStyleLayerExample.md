@@ -63,9 +63,9 @@ class CustomStyleLayer: MLNCustomStyleLayer {
                float4 color;
             };
 
-            struct Uniforms 
-            { 
-               float4x4 matrix; 
+            struct Uniforms
+            {
+               float4x4 matrix;
             };
 
             vertex RasterizerData
@@ -77,7 +77,7 @@ class CustomStyleLayer: MLNCustomStyleLayer {
 
                const float4 position = uniforms.matrix * float4(float2(vertices[vertexID].position.xy), 1, 1);
 
-               out.position = position;  
+               out.position = position;
                out.color = vertices[vertexID].color;
 
                return out;
