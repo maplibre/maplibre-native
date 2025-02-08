@@ -4,16 +4,54 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
-// Helper that returns a new cmake::Config with common settings.
 fn create_cmake_config(project_root: &Path) -> cmake::Config {
     let mut cfg = cmake::Config::new(project_root);
     cfg.generator("Ninja");
     cfg.define("CMAKE_C_COMPILER_LAUNCHER", "ccache");
     cfg.define("CMAKE_CXX_COMPILER_LAUNCHER", "ccache");
     cfg.define("MLN_DRAWABLE_RENDERER", "ON");
-    cfg.define("MLN_WITH_OPENGL", "OFF");
-    cfg.define("MLN_WITH_METAL", "ON");
-    cfg.define("MLN_WITH_VULKAN", "OFF");
+
+    // Check Cargo feature flags.
+    let (metal_enabled, opengl_enabled, vulkan_enabled) = {
+        let metal = env::var("CARGO_FEATURE_METAL").is_ok();
+        let opengl = env::var("CARGO_FEATURE_OPENGL").is_ok();
+        let vulkan = env::var("CARGO_FEATURE_VULKAN").is_ok();
+        if !metal && !opengl && !vulkan {
+            // No renderer feature explicitly enabled:
+            if cfg!(target_os = "ios") || cfg!(target_os = "macos") {
+                (true, false, false) // default to Metal on Apple platforms
+            } else {
+                (false, false, true) // default to Vulkan otherwise
+            }
+        } else {
+            (metal, opengl, vulkan)
+        }
+    };
+
+    // Ensure that only one of the renderer features is enabled.
+    let num_enabled = (metal_enabled as u8) + (opengl_enabled as u8) + (vulkan_enabled as u8);
+    if num_enabled > 1 {
+        panic!(
+            "Features 'metal', 'opengl', and 'vulkan' are mutually exclusive. \
+             Please enable only one renderer."
+        );
+    }
+
+    // Configure renderer-specific options.
+    if opengl_enabled {
+        cfg.define("MLN_WITH_OPENGL", "ON");
+        cfg.define("MLN_WITH_METAL", "OFF");
+        cfg.define("MLN_WITH_VULKAN", "OFF");
+    } else if metal_enabled {
+        cfg.define("MLN_WITH_OPENGL", "OFF");
+        cfg.define("MLN_WITH_METAL", "ON");
+        cfg.define("MLN_WITH_VULKAN", "OFF");
+    } else if vulkan_enabled {
+        cfg.define("MLN_WITH_OPENGL", "OFF");
+        cfg.define("MLN_WITH_METAL", "OFF");
+        cfg.define("MLN_WITH_VULKAN", "ON");
+    }
+
     cfg.define("MLN_WITH_WERROR", "OFF");
     cfg
 }

@@ -15,3 +15,8 @@ cmake = "0.1"
 cxx-build = "1.0.138"
 rustversion = "1.0.19"
 walkdir = "2.5.0"
+
+[features]
+metal = [] # default on Apple platforms, do not add to default features
+opengl = []
+vulkan = []  # default on other platforms
