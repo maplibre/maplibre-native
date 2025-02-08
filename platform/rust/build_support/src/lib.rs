@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 /// Parses the contents of mbgl-core-deps.txt and returns Cargo linker instructions.
 ///
@@ -51,8 +51,9 @@ pub fn parse_deps(deps_contents: &str, static_lib_base: &Path) -> Vec<String> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::path::PathBuf;
+
+    use super::*;
 
     #[test]
     fn test_parse_deps() {

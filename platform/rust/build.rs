@@ -1,10 +1,8 @@
-use std::collections::HashSet;
-use std::env;
-use std::fs;
 use std::path::{Path, PathBuf};
-use walkdir::WalkDir;
+use std::{env, fs};
 
 use build_support::parse_deps;
+use walkdir::WalkDir;
 
 /// Helper that returns a new cmake::Config with common settings.
 /// It selects the renderer based on Cargo features: the user must enable exactly one of:
