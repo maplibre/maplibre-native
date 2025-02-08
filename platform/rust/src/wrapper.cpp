@@ -30,7 +30,7 @@ std::vector<uint8_t> MapRenderer::render() {
     }
 
     // Load style and set camera
-    map.getStyle().loadURL(styleUrl);
+    map.getStyle().loadURL("https://demotiles.maplibre.org/style.json");
     map.jumpTo(cameraOptions);
 
     // Set debug flags

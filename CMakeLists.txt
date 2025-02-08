@@ -1585,3 +1585,5 @@ endif()
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)
 add_subdirectory(${PROJECT_SOURCE_DIR}/benchmark)
 add_subdirectory(${PROJECT_SOURCE_DIR}/render-test)
+
+include(cmake/mbgl-core-deps.cmake)
