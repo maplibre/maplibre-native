@@ -4,40 +4,40 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
+use build_support::parse_deps;
+
+/// Helper that returns a new cmake::Config with common settings.
+/// It selects the renderer based on Cargo features: the user must enable exactly one of:
+/// "metal", "opengl", or "vulkan". If none are explicitly enabled, on iOS/macOS the default is metal,
+/// and on all other platforms the default is vulkan.
 fn create_cmake_config(project_root: &Path) -> cmake::Config {
     let mut cfg = cmake::Config::new(project_root);
     cfg.generator("Ninja");
     cfg.define("CMAKE_C_COMPILER_LAUNCHER", "ccache");
     cfg.define("CMAKE_CXX_COMPILER_LAUNCHER", "ccache");
     cfg.define("MLN_DRAWABLE_RENDERER", "ON");
+    cfg.define("MLN_WITH_OPENGL", "OFF");
 
-    // Check Cargo feature flags.
     let (metal_enabled, opengl_enabled, vulkan_enabled) = {
         let metal = env::var("CARGO_FEATURE_METAL").is_ok();
         let opengl = env::var("CARGO_FEATURE_OPENGL").is_ok();
         let vulkan = env::var("CARGO_FEATURE_VULKAN").is_ok();
         if !metal && !opengl && !vulkan {
-            // No renderer feature explicitly enabled:
             if cfg!(target_os = "ios") || cfg!(target_os = "macos") {
-                (true, false, false) // default to Metal on Apple platforms
+                (true, false, false)
             } else {
-                (false, false, true) // default to Vulkan otherwise
+                (false, false, true)
             }
         } else {
             (metal, opengl, vulkan)
         }
     };
 
-    // Ensure that only one of the renderer features is enabled.
     let num_enabled = (metal_enabled as u8) + (opengl_enabled as u8) + (vulkan_enabled as u8);
     if num_enabled > 1 {
-        panic!(
-            "Features 'metal', 'opengl', and 'vulkan' are mutually exclusive. \
-             Please enable only one renderer."
-        );
+        panic!("Features 'metal', 'opengl', and 'vulkan' are mutually exclusive. Please enable only one.");
     }
 
-    // Configure renderer-specific options.
     if opengl_enabled {
         cfg.define("MLN_WITH_OPENGL", "ON");
         cfg.define("MLN_WITH_METAL", "OFF");
@@ -74,41 +74,10 @@ fn main() {
     let deps_contents = fs::read_to_string(&deps_file)
         .unwrap_or_else(|_| panic!("Failed to read {}", deps_file.display()));
 
-    // Parse linker flags from the deps file.
-    let tokens: Vec<&str> = deps_contents.split_whitespace().collect();
-    let mut token_iter = tokens.iter().peekable();
-    let mut added_search_paths = HashSet::new();
-
-    while let Some(&token) = token_iter.next() {
-        if token == "-framework" {
-            if let Some(&framework) = token_iter.next() {
-                println!("cargo:rustc-link-lib=framework={}", framework);
-            } else {
-                panic!("Expected a framework name after '-framework'");
-            }
-        } else if token.starts_with("-l") {
-            let libname = &token[2..];
-            println!("cargo:rustc-link-lib={}", libname);
-        } else if token.ends_with(".a") {
-            let lib_path = Path::new(token);
-            let file_stem = lib_path.file_stem().expect("Library file has no stem");
-            let file_stem = file_stem.to_str().expect("Library file stem is not UTF-8");
-            let lib_name = file_stem.strip_prefix("lib").unwrap_or(file_stem);
-
-            // The .a libraries are located relative to the build_dir's "build" subdirectory.
-            let static_lib_base = deps_build_dir.join("build");
-            let search_dir = match lib_path.parent() {
-                Some(parent) if !parent.as_os_str().is_empty() => static_lib_base.join(parent),
-                _ => static_lib_base.clone(),
-            };
-            if added_search_paths.insert(search_dir.clone()) {
-                println!("cargo:rustc-link-search=native={}", search_dir.display());
-            }
-            println!("cargo:rustc-link-lib=static={}", lib_name);
-        } else {
-            // Pass any other token directly to the linker.
-            println!("cargo:rustc-link-arg={}", token);
-        }
+    // Parse the deps file into a list of Cargo instructions.
+    let instructions = parse_deps(&deps_contents, &deps_build_dir.join("build"));
+    for instr in instructions {
+        println!("{}", instr);
     }
 
     // ------------------------------------------------------------------------
@@ -117,8 +86,6 @@ fn main() {
     let core_build_dir = create_cmake_config(&project_root)
         .build_target("mbgl-core")
         .build();
-
-    // Static libraries are placed in the "build" subdirectory.
     let static_lib_base = core_build_dir.join("build");
     println!(
         "cargo:rustc-link-search=native={}",

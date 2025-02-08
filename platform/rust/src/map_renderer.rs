@@ -1,7 +1,3 @@
-use std::ffi::{c_char, CStr, CString};
-use std::fmt;
-use std::fmt::Debug;
-
 use cxx::{CxxVector, UniquePtr};
 
 use crate::ffi;
@@ -32,8 +28,4 @@ impl Default for MapRenderer {
 }
 
 #[cfg(test)]
-mod tests {
-    use insta::assert_debug_snapshot;
-
-    use super::*;
-}
+mod tests {}

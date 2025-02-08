@@ -1,5 +1,5 @@
 use clap::Parser;
-use maplibre_native::{MapRenderer, TileServerOptions};
+use maplibre_native::MapRenderer;
 use std::fs;
 
 /// MapLibre Native render tool
