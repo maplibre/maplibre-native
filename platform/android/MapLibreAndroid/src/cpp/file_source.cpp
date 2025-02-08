@@ -30,13 +30,13 @@ FileSource::FileSource(jni::JNIEnv& _env,
 
     mbgl::FileSourceManager::get()->registerFileSourceFactory(
         mbgl::FileSourceType::Asset,
-        [](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions& clientOptions) {
+        [](const mbgl::ResourceOptions& resourceOptions_, const mbgl::ClientOptions& clientOptions_) {
             auto env{android::AttachEnv()};
             std::unique_ptr<mbgl::FileSource> assetFileSource;
             if (android::MapLibre::hasInstance(*env)) {
                 auto assetManager = android::MapLibre::getAssetManager(*env);
                 assetFileSource = std::make_unique<AssetManagerFileSource>(
-                    *env, assetManager, resourceOptions.clone(), clientOptions.clone());
+                    *env, assetManager, resourceOptions_.clone(), clientOptions_.clone());
             }
             return assetFileSource;
         });
@@ -161,7 +161,7 @@ void FileSource::setResourceCachePath(jni::JNIEnv& env,
             pathChangeCallback = {};
         });
 
-    databaseSource->setDatabasePath(newPath + DATABASE_FILE, pathChangeCallback);
+    databaseSource->setDatabasePath(newPath + DATABASE_FILE, std::move(pathChangeCallback));
 }
 
 void FileSource::resume(jni::JNIEnv&) {

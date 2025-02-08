@@ -547,7 +547,8 @@ PMTilesFileSource::PMTilesFileSource(const ResourceOptions& resourceOptions, con
           resourceOptions.clone(),
           clientOptions.clone())) {}
 
-std::unique_ptr<AsyncRequest> PMTilesFileSource::request(const Resource& resource, FileSource::Callback callback) {
+std::unique_ptr<AsyncRequest> PMTilesFileSource::request(const Resource& resource,
+                                                         std::function<void(Response)> callback) {
     auto req = std::make_unique<FileSourceRequest>(std::move(callback));
 
     // assume if there is a tile request, that the pmtiles file has been validated

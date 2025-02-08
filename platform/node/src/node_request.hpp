@@ -22,7 +22,7 @@ struct NodeAsyncRequest : public mbgl::AsyncRequest {
 
 class NodeRequest : public Nan::ObjectWrap {
 public:
-    NodeRequest(mbgl::FileSource::Callback, NodeAsyncRequest*);
+    NodeRequest(std::function<void(mbgl::Response)>, NodeAsyncRequest*);
     ~NodeRequest() override;
 
     static Nan::Persistent<v8::Function> constructor;
@@ -34,7 +34,7 @@ public:
 
     void unrefRequest();
 
-    mbgl::FileSource::Callback callback;
+    std::function<void(mbgl::Response)> callback;
     NodeAsyncRequest* asyncRequest;
     Nan::AsyncResource* asyncResource = new Nan::AsyncResource("mbgl:execute");
 };

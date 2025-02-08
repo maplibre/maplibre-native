@@ -186,7 +186,7 @@ private:
     void onTileAction(RenderSource&, TileOperation, const OverscaledTileID&, const std::string&) override;
 
     // ImageManagerObserver implementation
-    void onStyleImageMissing(const std::string&, const std::function<void()>&) override;
+    void onStyleImageMissing(const std::string&, Scheduler::Task&&) override;
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) override;
 
 #if MLN_DRAWABLE_RENDERER
