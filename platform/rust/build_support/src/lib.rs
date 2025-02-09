@@ -10,19 +10,18 @@ use std::path::Path;
 pub fn parse_deps(deps_contents: &str, static_lib_base: &Path) -> Vec<String> {
     let mut instructions = Vec::new();
     let mut added_search_paths = HashSet::new();
-    let tokens: Vec<&str> = deps_contents.split_whitespace().collect();
-    let mut token_iter = tokens.iter().peekable();
+    let mut token_iter = deps_contents.split_whitespace().peekable();
 
-    while let Some(&token) = token_iter.next() {
+    while let Some(token) = token_iter.next() {
         if token == "-framework" {
-            if let Some(&framework) = token_iter.next() {
-                instructions.push(format!("cargo:rustc-link-lib=framework={}", framework));
+            if let Some(framework) = token_iter.next() {
+                instructions.push(format!("cargo:rustc-link-lib=framework={framework}"));
             } else {
                 panic!("Expected a framework name after '-framework'");
             }
         } else if token.starts_with("-l") {
             let libname = &token[2..];
-            instructions.push(format!("cargo:rustc-link-lib={}", libname));
+            instructions.push(format!("cargo:rustc-link-lib={libname}"));
         } else if token.ends_with(".a") {
             let lib_path = Path::new(token);
             let file_stem = lib_path.file_stem().expect("Library file has no stem");
@@ -41,9 +40,10 @@ pub fn parse_deps(deps_contents: &str, static_lib_base: &Path) -> Vec<String> {
                     search_dir.display()
                 ));
             }
-            instructions.push(format!("cargo:rustc-link-lib=static={}", lib_name));
+            instructions.push(format!("cargo:rustc-link-lib=static={lib_name}"));
         } else {
-            instructions.push(format!("cargo:rustc-link-arg={}", token));
+            // FIXME: should not use args by default, maybe with a feature flag?
+            instructions.push(format!("cargo:rustc-link-arg={token}"));
         }
     }
     instructions

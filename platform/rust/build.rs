@@ -4,6 +4,16 @@ use std::{env, fs};
 use build_support::parse_deps;
 use walkdir::WalkDir;
 
+trait CfgBool {
+    fn define_bool(&mut self, key: &str, value: bool);
+}
+
+impl CfgBool for cmake::Config {
+    fn define_bool(&mut self, key: &str, value: bool) {
+        self.define(key, if value { "ON" } else { "OFF" });
+    }
+}
+
 /// Helper that returns a new cmake::Config with common settings.
 /// It selects the renderer based on Cargo features: the user must enable exactly one of:
 /// "metal", "opengl", or "vulkan". If none are explicitly enabled, on iOS/macOS the default is metal,
@@ -13,44 +23,29 @@ fn create_cmake_config(project_root: &Path) -> cmake::Config {
     cfg.generator("Ninja");
     cfg.define("CMAKE_C_COMPILER_LAUNCHER", "ccache");
     cfg.define("CMAKE_CXX_COMPILER_LAUNCHER", "ccache");
-    cfg.define("MLN_DRAWABLE_RENDERER", "ON");
-    cfg.define("MLN_WITH_OPENGL", "OFF");
+    cfg.define_bool("MLN_DRAWABLE_RENDERER", true);
+    cfg.define_bool("MLN_WITH_OPENGL", false);
 
-    let (metal_enabled, opengl_enabled, vulkan_enabled) = {
-        let metal = env::var("CARGO_FEATURE_METAL").is_ok();
-        let opengl = env::var("CARGO_FEATURE_OPENGL").is_ok();
-        let vulkan = env::var("CARGO_FEATURE_VULKAN").is_ok();
-        if !metal && !opengl && !vulkan {
-            if cfg!(target_os = "ios") || cfg!(target_os = "macos") {
-                (true, false, false)
-            } else {
-                (false, false, true)
-            }
+    let with_opengl = env::var("CARGO_FEATURE_OPENGL").is_ok();
+    let mut with_metal = env::var("CARGO_FEATURE_METAL").is_ok();
+    let mut with_vulkan = env::var("CARGO_FEATURE_VULKAN").is_ok();
+
+    if !with_opengl && !with_metal && !with_vulkan {
+        if cfg!(any(target_os = "ios", target_os = "macos")) {
+            with_metal = true;
         } else {
-            (metal, opengl, vulkan)
+            with_vulkan = true;
         }
-    };
+    }
 
-    let num_enabled = (metal_enabled as u8) + (opengl_enabled as u8) + (vulkan_enabled as u8);
-    if num_enabled > 1 {
+    if ((with_metal as u8) + (with_opengl as u8) + (with_vulkan as u8)) > 1 {
         panic!("Features 'metal', 'opengl', and 'vulkan' are mutually exclusive. Please enable only one.");
     }
 
-    if opengl_enabled {
-        cfg.define("MLN_WITH_OPENGL", "ON");
-        cfg.define("MLN_WITH_METAL", "OFF");
-        cfg.define("MLN_WITH_VULKAN", "OFF");
-    } else if metal_enabled {
-        cfg.define("MLN_WITH_OPENGL", "OFF");
-        cfg.define("MLN_WITH_METAL", "ON");
-        cfg.define("MLN_WITH_VULKAN", "OFF");
-    } else if vulkan_enabled {
-        cfg.define("MLN_WITH_OPENGL", "OFF");
-        cfg.define("MLN_WITH_METAL", "OFF");
-        cfg.define("MLN_WITH_VULKAN", "ON");
-    }
-
-    cfg.define("MLN_WITH_WERROR", "OFF");
+    cfg.define_bool("MLN_WITH_OPENGL",  with_opengl);
+    cfg.define_bool("MLN_WITH_METAL",  with_metal);
+    cfg.define_bool("MLN_WITH_VULKAN",  with_vulkan);
+    cfg.define_bool("MLN_WITH_WERROR", false);
     cfg
 }
 
@@ -73,13 +68,12 @@ fn main() {
         .unwrap_or_else(|_| panic!("Failed to read {}", deps_file.display()));
 
     // Parse the deps file into a list of Cargo instructions.
-    let instructions = parse_deps(&deps_contents, &deps_build_dir.join("build"));
-    for instr in instructions {
-        println!("{}", instr);
+    for instr in parse_deps(&deps_contents, &deps_build_dir.join("build")) {
+        println!("{instr}");
     }
 
     // ------------------------------------------------------------------------
-    // 2. Build the actual "mbgl-core" target.
+    // 2. Build the actual "mbgl-core" static library target.
     // ------------------------------------------------------------------------
     let core_build_dir = create_cmake_config(&project_root)
         .build_target("mbgl-core")
@@ -93,6 +87,7 @@ fn main() {
     // ------------------------------------------------------------------------
     // 3. Gather include directories and build the C++ bridge using cxx_build.
     // ------------------------------------------------------------------------
+    // TODO: This is a temporary solution. We should get this list from CMake as well.
     let mut include_dirs = vec![
         project_root.join("include"),
         project_root.join("platform/default/include"),

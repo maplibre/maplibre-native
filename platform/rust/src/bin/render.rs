@@ -1,7 +1,7 @@
 use std::fs;
 
 use clap::Parser;
-use maplibre_native::MapRenderer;
+use maplibre_native::ImageRendererOptions;
 
 /// MapLibre Native render tool
 #[derive(Parser, Debug)]
@@ -79,9 +79,7 @@ fn main() {
     // let val = s.source_version_prefix();
     // println!("Parsed arguments: {:?}", val);
 
-    let mut map = MapRenderer::new();
-    map.set_size(512, 512);
-    let data = map.render();
-
+    let mut map = ImageRendererOptions::new().build_static_renderer();
+    let data = map.render_static(512, 512);
     fs::write("out.png", data.as_slice()).unwrap();
 }
