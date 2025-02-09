@@ -9,6 +9,21 @@ pub use tile_server_options::TileServerOptions;
 
 #[cxx::bridge(namespace = "ml::bridge")]
 mod ffi {
+    // CXX validates this type against the C++ definition during compilation
+    #[repr(u32)]
+    enum MapMode {
+        Continuous,
+        Static,
+        Tile,
+    }
+
+    unsafe extern "C++" {
+        include!("mbgl/map/mode.hpp");
+
+        #[namespace = "mbgl"]
+        type MapMode;
+    }
+
     unsafe extern "C++" {
         include!("maplibre-native/include/tile_server_options.h");
 
