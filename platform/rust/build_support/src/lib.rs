@@ -24,8 +24,7 @@ pub fn parse_deps(deps_contents: &str, static_lib_base: &Path, include_args: boo
             } else {
                 panic!("Expected a framework name after '-framework'");
             }
-        } else if token.starts_with("-l") {
-            let libname = &token[2..];
+        } else if let Some(libname) = token.strip_prefix("-l") {
             instructions.push(format!("cargo:rustc-link-lib={libname}"));
         } else if token.ends_with(".a") {
             let lib_path = Path::new(token);

@@ -144,7 +144,19 @@ impl ImageRenderer<Static> {
 
 impl ImageRenderer<Tile> {
     pub fn render_tile(&mut self, zoom: f64, x: u64, y: u64) -> Image {
-        // TODO: set tile location
+        let (lat, lon) = coords_to_lat_lon(zoom, x, y);
+        ffi::MapRenderer_setCamera(self.0.pin_mut(), lat, lon, zoom, 0.0, 0.0);
         Image(ffi::MapRenderer_render(self.0.pin_mut()))
     }
+}
+
+fn coords_to_lat_lon(zoom: f64, x: u64, y: u64) -> (f64, f64) {
+    let size = 256.0 * 2.0_f64.powf(zoom);
+    let bc = size / 360.0;
+    let cc = size / (2.0 * std::f64::consts::PI);
+    let zc = size / 2.0;
+    let g = (y as f64 - zc) / -cc;
+    let lon = (x as f64 - zc) / bc;
+    let lat = 180.0 / std::f64::consts::PI * (2.0 * g.exp().atan() - 0.5 * std::f64::consts::PI);
+    (lat, lon)
 }

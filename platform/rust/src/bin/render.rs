@@ -1,7 +1,7 @@
 use std::fs;
 
 use clap::Parser;
-use maplibre_native::{ImageRendererOptions, MapDebugOptions};
+use maplibre_native::ImageRendererOptions;
 
 /// MapLibre Native render tool
 #[derive(Parser, Debug)]
@@ -79,8 +79,9 @@ fn main() {
     // let val = s.source_version_prefix();
     // println!("Parsed arguments: {:?}", val);
 
-    let mut map = ImageRendererOptions::new().build_static_renderer();
+    let mut map = ImageRendererOptions::new().build_tile_renderer();
     map.set_style_url("https://demotiles.maplibre.org/style.json");
-    let data = map.render_static();
+    let data = map.render_tile(1.0, 0, 0);
+    // let data = map.render_static();
     fs::write("out.png", data.as_slice()).unwrap();
 }
