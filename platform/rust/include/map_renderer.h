@@ -15,13 +15,10 @@ namespace bridge {
 
 class MapRenderer {
 public:
-    explicit MapRenderer(
-        std::unique_ptr<mbgl::HeadlessFrontend> frontendInstance,
-        std::unique_ptr<mbgl::Map> mapInstance
-    )
+    explicit MapRenderer(std::unique_ptr<mbgl::HeadlessFrontend> frontendInstance,
+                         std::unique_ptr<mbgl::Map> mapInstance)
         : frontend(std::move(frontendInstance)),
-          map(std::move(mapInstance))
-         {}
+          map(std::move(mapInstance)) {}
     ~MapRenderer() {}
 
     std::string render() {
@@ -36,36 +33,30 @@ public:
     std::unique_ptr<mbgl::Map> map;
 };
 
-inline std::unique_ptr<MapRenderer> MapRenderer_new(
-            mbgl::MapMode mapMode,
-            uint32_t width,
-            uint32_t height,
-            float pixelRatio,
-            const rust::Str cachePath,
-            const rust::Str assetRoot,
-            const rust::Str apiKey
-) {
-
+inline std::unique_ptr<MapRenderer> MapRenderer_new(mbgl::MapMode mapMode,
+                                                    uint32_t width,
+                                                    uint32_t height,
+                                                    float pixelRatio,
+                                                    const rust::Str cachePath,
+                                                    const rust::Str assetRoot,
+                                                    const rust::Str apiKey) {
     mbgl::Size size = {width, height};
 
     auto frontend = std::make_unique<mbgl::HeadlessFrontend>(size, pixelRatio);
 
     auto tileServerOptions = TileServerOptions::MapTilerConfiguration();
     ResourceOptions resourceOptions;
-    resourceOptions
-        .withCachePath((std::string)cachePath)
+    resourceOptions.withCachePath((std::string)cachePath)
         .withAssetPath((std::string)assetRoot)
-        .withApiKey((std::string)apiKey).withTileServerOptions(
-        tileServerOptions);
+        .withApiKey((std::string)apiKey)
+        .withTileServerOptions(tileServerOptions);
 
     auto map = std::make_unique<mbgl::Map>(*frontend,
-            MapObserver::nullObserver(),
-            MapOptions().withMapMode(mapMode).withSize(size).withPixelRatio(pixelRatio),
-            resourceOptions);
+                                           MapObserver::nullObserver(),
+                                           MapOptions().withMapMode(mapMode).withSize(size).withPixelRatio(pixelRatio),
+                                           resourceOptions);
 
-    return std::make_unique<MapRenderer>(
-        std::move(frontend),
-        std::move(map));
+    return std::make_unique<MapRenderer>(std::move(frontend), std::move(map));
 }
 
 inline std::unique_ptr<std::string> MapRenderer_render(MapRenderer& self) {
@@ -76,7 +67,8 @@ inline void MapRenderer_setDebugFlags(MapRenderer& self, mbgl::MapDebugOptions d
     self.map->setDebug(debugFlags);
 }
 
-inline void MapRenderer_setCamera(MapRenderer& self, double lat, double lon, double zoom, double bearing, double pitch) {
+inline void MapRenderer_setCamera(
+    MapRenderer& self, double lat, double lon, double zoom, double bearing, double pitch) {
     // TODO: decide if this is the right approach, or if we want to cache camera options in the instance,
     //       and have several setters for each property.
     mbgl::CameraOptions cameraOptions;
@@ -85,10 +77,10 @@ inline void MapRenderer_setCamera(MapRenderer& self, double lat, double lon, dou
 }
 
 inline void MapRenderer_setStyleUrl(MapRenderer& self, const rust::Str styleUrl) {
-// FIXME: this logic should be moved to the Rust side
-//    if (styleUrl.find("://") == std::string::npos) {
-//        styleUrl = "file://" + styleUrl;
-//    }
+    // FIXME: this logic should be moved to the Rust side
+    //    if (styleUrl.find("://") == std::string::npos) {
+    //        styleUrl = "file://" + styleUrl;
+    //    }
     self.map->getStyle().loadURL((std::string)styleUrl);
 }
 
