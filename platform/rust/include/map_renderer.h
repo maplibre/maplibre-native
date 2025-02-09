@@ -44,16 +44,23 @@ inline std::unique_ptr<MapRenderer> MapRenderer_new(mbgl::MapMode mapMode,
 
     auto frontend = std::make_unique<mbgl::HeadlessFrontend>(size, pixelRatio);
 
+    // TODO: fix this to use the correct tile server options
     auto tileServerOptions = TileServerOptions::MapTilerConfiguration();
+
     ResourceOptions resourceOptions;
     resourceOptions.withCachePath((std::string)cachePath)
         .withAssetPath((std::string)assetRoot)
         .withApiKey((std::string)apiKey)
         .withTileServerOptions(tileServerOptions);
 
+    MapOptions mapOptions;
+     mapOptions.withMapMode(mapMode)
+        .withSize(size)
+        .withPixelRatio(pixelRatio);
+
     auto map = std::make_unique<mbgl::Map>(*frontend,
                                            MapObserver::nullObserver(),
-                                           MapOptions().withMapMode(mapMode).withSize(size).withPixelRatio(pixelRatio),
+                                           mapOptions,
                                            resourceOptions);
 
     return std::make_unique<MapRenderer>(std::move(frontend), std::move(map));
@@ -69,7 +76,8 @@ inline void MapRenderer_setDebugFlags(MapRenderer& self, mbgl::MapDebugOptions d
 
 inline void MapRenderer_setCamera(
     MapRenderer& self, double lat, double lon, double zoom, double bearing, double pitch) {
-    // TODO: decide if this is the right approach, or if we want to cache camera options in the instance,
+    // TODO: decide if this is the right approach,
+    //       or if we want to cache camera options in the instance,
     //       and have several setters for each property.
     mbgl::CameraOptions cameraOptions;
     cameraOptions.withCenter(mbgl::LatLng{lat, lon}).withZoom(zoom).withBearing(bearing).withPitch(pitch);
@@ -77,10 +85,6 @@ inline void MapRenderer_setCamera(
 }
 
 inline void MapRenderer_setStyleUrl(MapRenderer& self, const rust::Str styleUrl) {
-    // FIXME: this logic should be moved to the Rust side
-    //    if (styleUrl.find("://") == std::string::npos) {
-    //        styleUrl = "file://" + styleUrl;
-    //    }
     self.map->getStyle().loadURL((std::string)styleUrl);
 }
 

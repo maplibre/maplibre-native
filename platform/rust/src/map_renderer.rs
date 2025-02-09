@@ -1,5 +1,5 @@
 use std::marker::PhantomData;
-
+use std::path::Path;
 use cxx::{CxxString, UniquePtr};
 
 use crate::ffi;
@@ -105,7 +105,13 @@ impl<S> ImageRenderer<S> {
     }
 
     pub fn set_style_url(&mut self, url: &str) {
+        assert!(url.contains("://"));
         ffi::MapRenderer_setStyleUrl(self.0.pin_mut(), url);
+    }
+
+    pub fn set_style_path(&mut self, path: impl AsRef<Path>) {
+        let path = path.as_ref().to_str().expect("Path is not valid UTF-8");
+        ffi::MapRenderer_setStyleUrl(self.0.pin_mut(), &format!("file://{path}"));
     }
 }
 
