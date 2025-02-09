@@ -14,6 +14,7 @@ mod ffi {
     //
 
     #[repr(u32)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
     enum MapMode {
         Continuous,
         Static,
@@ -21,6 +22,7 @@ mod ffi {
     }
 
     #[repr(u32)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
     enum MapDebugOptions {
         NoDebug = 0,
         TileBorders = 0b0000_0010, // 1 << 1
@@ -123,11 +125,17 @@ mod ffi {
 
         type MapRenderer;
 
-        fn MapRenderer_new() -> UniquePtr<MapRenderer>;
+        // MapRenderer_new(mbgl::MapMode mapMode, uint32_t width, uint32_t height, float pixelRatio, const rust::Str cachePath)
+        fn MapRenderer_new(
+            mapMode: MapMode,
+            width: u32,
+            height: u32,
+            pixelRatio: f32,
+            cachePath: &str,
+            assetRoot: &str,
+            apiKey: &str,
+        ) -> UniquePtr<MapRenderer>;
         fn MapRenderer_render(obj: Pin<&mut MapRenderer>) -> UniquePtr<CxxString>;
-        fn MapRenderer_setSize(obj: Pin<&mut MapRenderer>, width: u32, height: u32);
-        fn MapRenderer_setPixelRatio(obj: Pin<&mut MapRenderer>, ratio: f32);
-        fn MapRenderer_setMapMode(obj: Pin<&mut MapRenderer>, mode: MapMode);
         fn MapRenderer_setDebugFlags(obj: Pin<&mut MapRenderer>, flags: MapDebugOptions);
         fn MapRenderer_setCamera(
             obj: Pin<&mut MapRenderer>,
@@ -137,9 +145,6 @@ mod ffi {
             bearing: f64,
             pitch: f64,
         );
-        fn MapRenderer_setApiKey(obj: Pin<&mut MapRenderer>, key: &str);
-        fn MapRenderer_setCachePath(obj: Pin<&mut MapRenderer>, path: &str);
-        fn MapRenderer_setAssetRoot(obj: Pin<&mut MapRenderer>, path: &str);
         fn MapRenderer_setStyleUrl(obj: Pin<&mut MapRenderer>, url: &str);
     }
 }

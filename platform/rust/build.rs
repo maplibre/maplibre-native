@@ -109,7 +109,9 @@ fn main() {
     // ------------------------------------------------------------------------
     // 4. Instruct Cargo when to re-run the build script.
     // ------------------------------------------------------------------------
+
     println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=src/wrapper.cpp");
     println!("cargo:rerun-if-changed=include/tile_server_options.h");
+    println!("cargo:rerun-if-changed=include/map_renderer.h");
 }

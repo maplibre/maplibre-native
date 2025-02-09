@@ -80,6 +80,7 @@ fn main() {
     // println!("Parsed arguments: {:?}", val);
 
     let mut map = ImageRendererOptions::new().build_static_renderer();
-    let data = map.render_static(512, 512);
+    map.set_style_url("https://demotiles.maplibre.org/style.json");
+    let data = map.render_static();
     fs::write("out.png", data.as_slice()).unwrap();
 }
