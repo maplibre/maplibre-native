@@ -21,11 +21,6 @@ public:
           map(std::move(mapInstance)) {}
     ~MapRenderer() {}
 
-    std::string render() {
-        auto image = frontend->render(*map).image;
-        return encodePNG(image);
-    }
-
 public:
     mbgl::util::RunLoop runLoop;
     // Due to CXX limitations, make all these public and access them from the regular functions below
@@ -62,7 +57,8 @@ inline std::unique_ptr<MapRenderer> MapRenderer_new(mbgl::MapMode mapMode,
 }
 
 inline std::unique_ptr<std::string> MapRenderer_render(MapRenderer& self) {
-    return std::make_unique<std::string>(self.render());
+    auto image = encodePNG(self.frontend->render(*self.map).image);
+    return std::make_unique<std::string>(image);
 }
 
 inline void MapRenderer_setDebugFlags(MapRenderer& self, mbgl::MapDebugOptions debugFlags) {
