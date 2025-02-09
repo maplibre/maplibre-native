@@ -75,7 +75,7 @@ class MapLibreTest {
                 .thenReturn(typedArray)
         expectedException.expect(MapLibreConfigurationException::class.java)
         expectedException.expectMessage("""
-    
+
     Using MapView requires calling MapLibre.getInstance(Context context, String apiKey, WellKnownTileServer wellKnownTileServer) before inflating or creating the view.
     """.trimIndent())
         MapView(context!!)

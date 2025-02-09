@@ -17,7 +17,7 @@ static MLNMapView *mapView;
 
 - (void)setUp {
     [super setUp];
-    
+
     [MLNSettings setApiKey:@"pk.feedcafedeadbeefbadebede"];
     NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"one-liner" withExtension:@"json"];
     mapView = [[MLNMapView alloc] initWithFrame:CGRectMake(0, 0, 64, 64) styleURL:styleURL];
@@ -155,7 +155,7 @@ static MLNMapView *mapView;
 - (void)testTileCache {
     mapView.tileCacheEnabled = NO;
     XCTAssertEqual(mapView.tileCacheEnabled, NO);
-    
+
     mapView.tileCacheEnabled = YES;
     XCTAssertEqual(mapView.tileCacheEnabled, YES);
 }

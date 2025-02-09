@@ -12,7 +12,7 @@
 - (void)testEyeCoordinateInitialization {
     CLLocationCoordinate2D fountainSquare = CLLocationCoordinate2DMake(39.10152215, -84.5124439696089);
     CLLocationCoordinate2D unionTerminal = CLLocationCoordinate2DMake(39.10980955, -84.5352778794236);
-    
+
     MLNMapCamera *camera = [MLNMapCamera cameraLookingAtCenterCoordinate:fountainSquare
                                                        fromEyeCoordinate:fountainSquare
                                                              eyeAltitude:1000];
@@ -30,7 +30,7 @@
     // https://github.com/maplibre/maplibre-native/issues/1303
     // XCTAssertEqual(camera.heading, 0, @"Camera directly over center coordinate should be unrotated.");
     // XCTAssertEqual(camera.heading, mkCamera.heading, @"Camera directly over center coordinate should have same heading as MapKit.");
-    
+
     camera = [MLNMapCamera cameraLookingAtCenterCoordinate:fountainSquare
                                          fromEyeCoordinate:unionTerminal
                                                eyeAltitude:1000];
@@ -61,13 +61,13 @@
                                                                  heading:0];
     XCTAssertEqualWithAccuracy(camera.altitude, 10000, 0.01, @"Untilted camera should use distance verbatim.");
     XCTAssertEqualWithAccuracy(camera.altitude, mkCamera.altitude, 0.01, @"Untilted camera altitude should match MapKit.");
-    
+
     camera = [MLNMapCamera cameraLookingAtCenterCoordinate:fountainSquare
                                                   altitude:10000
                                                      pitch:0
                                                    heading:0];
     XCTAssertEqual(camera.altitude, 10000, @"Untilted camera should use altitude verbatim.");
-    
+
     camera = [MLNMapCamera cameraLookingAtCenterCoordinate:fountainSquare
                                             acrossDistance:10000
                                                      pitch:60
@@ -78,7 +78,7 @@
                                                     heading:0];
     XCTAssertEqualWithAccuracy(camera.altitude, 5000, 0.01, @"Tilted camera altitude should account for pitch.");
     XCTAssertEqualWithAccuracy(camera.altitude, mkCamera.altitude, 0.01, @"Tilted camera altitude should match MapKit.");
-    
+
     camera = [MLNMapCamera cameraLookingAtCenterCoordinate:fountainSquare
                                                   altitude:10000
                                                      pitch:60
@@ -94,7 +94,7 @@
     camera.viewingDistance = 10000;
     XCTAssertEqual(camera.altitude, 10000);
     XCTAssertEqual(camera.viewingDistance, 10000);
-    
+
     camera.pitch = 60;
     camera.altitude = 10000;
     XCTAssertEqual(camera.altitude, 10000);

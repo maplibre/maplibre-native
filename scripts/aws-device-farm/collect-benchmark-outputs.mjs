@@ -46,8 +46,8 @@ await writeResultsToOutputDir();
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * 
- * @param {string} directory 
+ *
+ * @param {string} directory
  */
 async function unzipFilesInDirectory(directory) {
   try {

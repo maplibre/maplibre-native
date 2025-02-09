@@ -244,7 +244,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
     NSLayoutConstraint* _firstMapLayout;
     NSArray<NSLayoutConstraint*>* _secondMapLayout;
-    
+
     NSDictionary* _pointFeatures;
     NSLock* _loadLock;
 }
@@ -304,7 +304,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         }
     }
     [self.mapView addGestureRecognizer:singleTap];
-    
+
     // Display a secondary map on any connected external display.
     // https://developer.apple.com/documentation/uikit/windows_and_screens/displaying_content_on_a_connected_screen?language=objc
     self.helperWindows = [NSMutableArray array];
@@ -545,7 +545,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
             }
 
             self.mapView.debugMask = self.currentState.debugMask;
-            
+
             break;
         case MBXSettingsAnnotations:
             switch (indexPath.row)
@@ -910,10 +910,10 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         MLNPointAnnotation *annot = [[MLNPointAnnotation alloc] init];
         annot.coordinate = self.mapView.centerCoordinate;
         [self.mapView addAnnotation:annot];
-        
+
         // Move the annotation to a point that is offscreen.
         CGPoint point = CGPointMake(self.view.frame.origin.x - 200, CGRectGetMidY(self.view.frame));
-        
+
         CLLocationCoordinate2D coord = [self.mapView convertPoint:point toCoordinateFromView:self.view];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             [UIView animateWithDuration:10 animations:^{
@@ -927,7 +927,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     for (int featureIndex = 0; featureIndex < featuresCount; ++featureIndex) {
         double deltaLongitude = featureIndex * 0.01;
         double deltaLatitude = -featureIndex * 0.01;
-        
+
         // Pacific Northwest triangle
         //
         CLLocationCoordinate2D triangleCoordinates[3] =
@@ -936,11 +936,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
             CLLocationCoordinate2DMake(46 + deltaLatitude, -122 + deltaLongitude),
             CLLocationCoordinate2DMake(46 + deltaLatitude, -121 + deltaLongitude)
         };
-        
+
         MLNPolygon *triangle = [MLNPolygon polygonWithCoordinates:triangleCoordinates count:3];
-        
+
         [self.mapView addAnnotation:triangle];
-        
+
         // West coast polyline
         //
         CLLocationCoordinate2D lineCoordinates[4] = {
@@ -951,7 +951,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         };
         MLNPolyline *line = [MLNPolyline polylineWithCoordinates:lineCoordinates count:4];
         [self.mapView addAnnotation:line];
-        
+
         // Orcas Island, WA hike polyline
         //
         NSDictionary *hike = [NSJSONSerialization JSONObjectWithData:
@@ -959,23 +959,23 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                                [[NSBundle mainBundle] pathForResource:@"polyline" ofType:@"geojson"]]
                                                              options:0
                                                                error:nil];
-        
+
         NSArray *hikeCoordinatePairs = hike[@"features"][0][@"geometry"][@"coordinates"];
-        
+
         CLLocationCoordinate2D *polylineCoordinates = (CLLocationCoordinate2D *)malloc([hikeCoordinatePairs count] * sizeof(CLLocationCoordinate2D));
-        
+
         for (NSUInteger i = 0; i < [hikeCoordinatePairs count]; i++)
         {
             polylineCoordinates[i] = CLLocationCoordinate2DMake([hikeCoordinatePairs[i][1] doubleValue] + deltaLatitude, [hikeCoordinatePairs[i][0] doubleValue] + deltaLongitude);
         }
-        
+
         MLNPolyline *polyline = [MLNPolyline polylineWithCoordinates:polylineCoordinates
                                                                count:[hikeCoordinatePairs count]];
-        
+
         [self.mapView addAnnotation:polyline];
-        
+
         free(polylineCoordinates);
-        
+
         // PA/NJ/DE polygons
         //
         NSDictionary *threestates = [NSJSONSerialization JSONObjectWithData:
@@ -983,28 +983,28 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                                       [[NSBundle mainBundle] pathForResource:@"threestates" ofType:@"geojson"]]
                                                                     options:0
                                                                       error:nil];
-        
+
         for (NSDictionary *feature in threestates[@"features"])
         {
             NSArray *stateCoordinatePairs = feature[@"geometry"][@"coordinates"];
-            
+
             while ([stateCoordinatePairs count] == 1) stateCoordinatePairs = stateCoordinatePairs[0];
-            
+
             CLLocationCoordinate2D *polygonCoordinates = (CLLocationCoordinate2D *)malloc([stateCoordinatePairs count] * sizeof(CLLocationCoordinate2D));
-            
+
             for (NSUInteger i = 0; i < [stateCoordinatePairs count]; i++)
             {
                 polygonCoordinates[i] = CLLocationCoordinate2DMake([stateCoordinatePairs[i][1] doubleValue] + deltaLatitude, [stateCoordinatePairs[i][0] doubleValue] + deltaLongitude);
             }
-            
+
             MLNPolygon *polygon = [MLNPolygon polygonWithCoordinates:polygonCoordinates count:[stateCoordinatePairs count]];
             polygon.title = feature[@"properties"][@"NAME"];
-            
+
             [self.mapView addAnnotation:polygon];
-            
+
             free(polygonCoordinates);
         }
-        
+
         // Null Island polygon with an interior hole
         //
         CLLocationCoordinate2D innerCoordinates[] = {
@@ -1579,10 +1579,10 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                                                                          URL:[self radarImageURL:0]];
 
     [self.mapView.style addSource:imageSource];
-    
+
     MLNRasterStyleLayer *rasterLayer = [[MLNRasterStyleLayer alloc] initWithIdentifier:@"style-raster-image-layer-id" source:imageSource];
     [self.mapView.style addLayer:rasterLayer];
-    
+
     [NSTimer scheduledTimerWithTimeInterval:1.0
                                      target:self
                                    selector:@selector(updateAnimatedImageSource:)
@@ -1609,7 +1609,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         [timer invalidate];
         return;
     }
-    
+
     static int radarSuffix = 0;
     [imageSource setValue:[self radarImageURL:radarSuffix] forKey:@"URL"];
     radarSuffix = (radarSuffix + 1) % 5;
@@ -1640,7 +1640,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     MLNPolylineFeature *routeLine = [MLNPolylineFeature polylineWithCoordinates:coords count:count];
 
     NSDictionary *sourceOptions = @{ MLNShapeSourceOptionLineDistanceMetrics: @YES };
-    
+
     MLNShapeSource *routeSource = [[MLNShapeSource alloc] initWithIdentifier:@"style-route-source" shape:routeLine options:sourceOptions];
 
     MLNLineStyleLayer *baseRouteLayer = [[MLNLineStyleLayer alloc] initWithIdentifier:@"style-base-route-layer" source:routeSource];
@@ -1739,7 +1739,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     routeLayer.lineOpacity = [NSExpression expressionForConstantValue:@0.8];
     routeLayer.lineCap = [NSExpression expressionForConstantValue:@"round"];
     routeLayer.lineJoin = [NSExpression expressionForConstantValue:@"round"];
-    
+
     [self removeLayer:baseRouteLayer.identifier];
     [self removeLayer:routeLayer.identifier];
     [self removeSource:routeSource.identifier];
@@ -1785,12 +1785,12 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     fillStyleLayer.fillColor = [NSExpression mgl_expressionForConditional:[NSPredicate predicateWithFormat:@"fill == YES"]
                                                            trueExpression:[NSExpression expressionForConstantValue:[UIColor greenColor]]
                                                          falseExpresssion:[NSExpression expressionForConstantValue:[UIColor redColor]]];
-                                                               
-    
+
+
 
     // source, identity function that sets any feature with an "opacity" attribute to use that value and anything without to 1.0
     fillStyleLayer.fillOpacity = [NSExpression mgl_expressionForConditional:[NSPredicate predicateWithFormat:@"opacity != nil"]
-                                                             trueExpression:[NSExpression expressionForKeyPath:@"opacity"] 
+                                                             trueExpression:[NSExpression expressionForKeyPath:@"opacity"]
                                                            falseExpresssion:[NSExpression expressionForConstantValue:@1.0]];
     [self.mapView.style addLayer:fillStyleLayer];
 }
@@ -1974,21 +1974,21 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.mapView removeAnnotations:self.mapView.annotations];
     CLLocationCoordinate2D sw = CLLocationCoordinate2DMake(48, 11);
     CLLocationCoordinate2D ne = CLLocationCoordinate2DMake(50, 12);
-    
+
     UIEdgeInsets padding = UIEdgeInsetsMake(200, 200, 0, 0);
     MLNMapCamera *cameraWithoutPadding = [self.mapView cameraThatFitsCoordinateBounds:MLNCoordinateBoundsMake(sw, ne)
                                                                           edgePadding:padding];
-    
-    
+
+
     MLNPointAnnotation *annotation = [MLNPointAnnotation new];
     annotation.coordinate = cameraWithoutPadding.centerCoordinate;
     annotation.title = @"Bounds center";
     [self.mapView addAnnotation: annotation];
-    
+
     __weak MBXViewController *weakSelf = self;
     [self.mapView flyToCamera:cameraWithoutPadding edgePadding:padding withDuration:5 completionHandler:^{
         [weakSelf.mapView flyToCamera:cameraWithoutPadding edgePadding:UIEdgeInsetsZero withDuration:5 completionHandler:^{
-            
+
         }];
     }];
 }
@@ -2191,7 +2191,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 {
     self.styleNames = [NSMutableArray array];
     self.styleURLs = [NSMutableArray array];
-    
+
     /// Style that does not require an `apiKey` nor any further configuration
     [self.styleNames addObject:@"MapLibre Basic"];
     [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
@@ -2202,14 +2202,14 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     {
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
-            
+
             for (MLNDefaultStyle* predefinedStyle in [MLNStyle predefinedStyles]){
                 [self.styleNames addObject:predefinedStyle.name];
                 [self.styleURLs addObject:predefinedStyle.url];
             }
         });
     }
-    
+
     NSAssert(self.styleNames.count == self.styleURLs.count, @"Style names and URLs don’t match.");
 }
 
@@ -2670,7 +2670,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 }
 
 - (void)restoreMapState:(__unused NSNotification *)notification {
-    
+
     if ([self isUITesting]) {
         return;
     }

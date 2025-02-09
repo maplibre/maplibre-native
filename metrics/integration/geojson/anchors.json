@@ -6,7 +6,7 @@
             "anchor": "center"
         },
         "geometry": {
-            "type": "Point", 
+            "type": "Point",
             "coordinates": [ 0, 0 ]
         }
     }, {
@@ -15,7 +15,7 @@
             "anchor": "left"
         },
         "geometry": {
-            "type": "Point", 
+            "type": "Point",
             "coordinates": [ 30, 0 ]
         }
     }, {
@@ -24,7 +24,7 @@
             "anchor": "top-left"
         },
         "geometry": {
-            "type": "Point", 
+            "type": "Point",
             "coordinates": [ 20, -15 ]
         }
     }, {
@@ -33,7 +33,7 @@
             "anchor": "top"
         },
         "geometry": {
-            "type": "Point", 
+            "type": "Point",
             "coordinates": [ 0, -25 ]
         }
     }, {
@@ -42,7 +42,7 @@
             "anchor": "top-right"
         },
         "geometry": {
-            "type": "Point", 
+            "type": "Point",
             "coordinates": [ -20, -15 ]
         }
     }, {
@@ -51,7 +51,7 @@
             "anchor": "right"
         },
         "geometry": {
-            "type": "Point", 
+            "type": "Point",
             "coordinates": [ -30, 0 ]
         }
     }, {
@@ -60,7 +60,7 @@
             "anchor": "bottom-left"
         },
         "geometry": {
-            "type": "Point", 
+            "type": "Point",
             "coordinates": [ 20, 15 ]
         }
     }, {
@@ -69,7 +69,7 @@
             "anchor": "bottom"
         },
         "geometry": {
-            "type": "Point", 
+            "type": "Point",
             "coordinates": [ 0, 25 ]
         }
     }, {
@@ -78,7 +78,7 @@
             "anchor": "bottom-right"
         },
         "geometry": {
-            "type": "Point", 
+            "type": "Point",
             "coordinates": [ -20, 15 ]
         }
     }]

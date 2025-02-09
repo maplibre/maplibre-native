@@ -222,7 +222,7 @@ function(add_node_module NAME)
                     COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/platform/windows/vendor/mesa3d/${_ARCH}/osmesa.dll"    "${_OUTPUT_PATH}"
                 )
             endif()
-                
+
             unset(_ARCH)
         endif()
     endforeach()
