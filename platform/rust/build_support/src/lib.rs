@@ -12,9 +12,10 @@ pub fn parse_deps(deps_contents: &str, static_lib_base: &Path, include_args: boo
     let mut added_search_paths = HashSet::new();
     let mut token_iter = deps_contents.split_whitespace().peekable();
 
-    instructions.push(format!(
-        "cargo::warning=debugging cmake string = {deps_contents}"
-    ));
+    // FIXME: For debugging - need to figure out why tests do not compile
+    // instructions.push(format!(
+    //     "cargo::warning=debugging cmake string = {deps_contents}"
+    // ));
 
     while let Some(token) = token_iter.next() {
         if token == "-framework" {

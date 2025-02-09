@@ -10,7 +10,7 @@
 #include <vector>
 #include <stdexcept>
 
-namespace ml {
+namespace mln {
 namespace bridge {
 
 class MapRenderer {
@@ -83,4 +83,4 @@ inline void MapRenderer_setStyleUrl(MapRenderer& self, const rust::Str url) {
 }
 
 } // namespace bridge
-} // namespace ml
+} // namespace mln

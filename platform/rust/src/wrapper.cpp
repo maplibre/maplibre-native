@@ -2,7 +2,7 @@
 #include "maplibre-native/include/map_renderer.h"
 #include "maplibre-native/src/lib.rs.h"
 
-namespace ml {
+namespace mln {
 namespace bridge {
 
 std::string MapRenderer::render() {
@@ -39,4 +39,4 @@ std::string MapRenderer::render() {
 }
 
 } // namespace bridge
-} // namespace ml
+} // namespace mln

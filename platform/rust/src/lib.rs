@@ -7,9 +7,12 @@ mod tile_server_options;
 pub use map_renderer::{Image, ImageRenderer, ImageRendererOptions, Static, Tile};
 pub use tile_server_options::TileServerOptions;
 
-#[cxx::bridge(namespace = "ml::bridge")]
+#[cxx::bridge(namespace = "mln::bridge")]
 mod ffi {
-    // CXX validates this type against the C++ definition during compilation
+    //
+    // CXX validates enum types against the C++ definition during compilation
+    //
+
     #[repr(u32)]
     enum MapMode {
         Continuous,
@@ -17,17 +20,29 @@ mod ffi {
         Tile,
     }
 
+    #[repr(u32)]
+    enum MapDebugOptions {
+        NoDebug = 0,
+        TileBorders = 0b0000_0010, // 1 << 1
+        ParseStatus = 0b0000_0100, // 1 << 2
+        Timestamps = 0b0000_1000,  // 1 << 3
+        Collision = 0b0001_0000,  // 1 << 4
+        Overdraw = 0b0010_0000,  // 1 << 5
+        StencilClip = 0b0100_0000,  // 1 << 6
+        DepthBuffer = 0b1000_0000,  // 1 << 7
+    }
+
+    #[namespace = "mbgl"]
     unsafe extern "C++" {
         include!("mbgl/map/mode.hpp");
 
-        #[namespace = "mbgl"]
         type MapMode;
+        type MapDebugOptions;
     }
 
     unsafe extern "C++" {
         include!("maplibre-native/include/tile_server_options.h");
 
-        #[namespace = "mbgl"]
         type TileServerOptions;
 
         fn TileServerOptions_new() -> UniquePtr<TileServerOptions>;
@@ -106,7 +121,6 @@ mod ffi {
     unsafe extern "C++" {
         include!("maplibre-native/include/map_renderer.h");
 
-        #[namespace = "ml::bridge"]
         type MapRenderer;
 
         fn MapRenderer_new() -> UniquePtr<MapRenderer>;

@@ -2,7 +2,7 @@
 #include "rust/cxx.h"
 #include "mbgl/util/tile_server_options.hpp"
 
-namespace ml {
+namespace mln {
 namespace bridge {
 
 using namespace mbgl;
@@ -100,4 +100,4 @@ inline void TileServerOptions_withDefaultStyle(TileServerOptions& self, const ru
 }
 
 } // namespace bridge
-} // namespace ml
+} // namespace mln
