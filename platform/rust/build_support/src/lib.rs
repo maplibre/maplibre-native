@@ -7,10 +7,14 @@ use std::path::Path;
 ///
 /// * `deps_contents` - The contents of the dependency file as a string.
 /// * `static_lib_base` - The base directory where the static libraries reside.
-pub fn parse_deps(deps_contents: &str, static_lib_base: &Path) -> Vec<String> {
+pub fn parse_deps(deps_contents: &str, static_lib_base: &Path, include_args: bool) -> Vec<String> {
     let mut instructions = Vec::new();
     let mut added_search_paths = HashSet::new();
     let mut token_iter = deps_contents.split_whitespace().peekable();
+
+    instructions.push(format!(
+        "cargo::warning=debugging cmake string = {deps_contents}"
+    ));
 
     while let Some(token) = token_iter.next() {
         if token == "-framework" {
@@ -37,13 +41,15 @@ pub fn parse_deps(deps_contents: &str, static_lib_base: &Path) -> Vec<String> {
             if added_search_paths.insert(search_dir.clone()) {
                 instructions.push(format!(
                     "cargo:rustc-link-search=native={}",
-                    search_dir.display()
+                    search_dir.to_str().expect("Search path is not valid UTF-8")
                 ));
             }
             instructions.push(format!("cargo:rustc-link-lib=static={lib_name}"));
-        } else {
+        } else if include_args {
             // FIXME: should not use args by default, maybe with a feature flag?
             instructions.push(format!("cargo:rustc-link-arg={token}"));
+        } else {
+            instructions.push(format!("cargo::warning=Ignoring cmake token = {token}"));
         }
     }
     instructions
@@ -64,14 +70,65 @@ mod tests {
         //   - "some_arg" (an extra linker argument)
         let deps_content = "-lsqlite3 libmbgl-core.a -framework AppKit some_arg";
         let base_dir = PathBuf::from("/build_dir/build");
-        let instructions = parse_deps(deps_content, &base_dir);
-        let expected = vec![
-            "cargo:rustc-link-lib=sqlite3".to_string(),
-            format!("cargo:rustc-link-search=native={}", base_dir.display()),
-            "cargo:rustc-link-lib=static=mbgl-core".to_string(),
-            "cargo:rustc-link-lib=framework=AppKit".to_string(),
-            "cargo:rustc-link-arg=some_arg".to_string(),
+        let instructions = parse_deps(deps_content, &base_dir, true);
+        let expected = [
+            "cargo:rustc-link-lib=sqlite3",
+            "cargo:rustc-link-search=native=/build_dir/build",
+            "cargo:rustc-link-lib=static=mbgl-core",
+            "cargo:rustc-link-lib=framework=AppKit",
+            "cargo:rustc-link-arg=some_arg",
         ];
+        assert_eq!(instructions, expected);
+    }
+
+    #[test]
+    fn long_parse() {
+        let v = "-ffunction-sections -fdata-sections -fPIC -m64   libmbgl-core.a  libmbgl-vendor-parsedate.a  libmbgl-vendor-csscolorparser.a  vendor/glslang/glslang/libglslang.a  vendor/glslang/SPIRV/libSPIRV.a  vendor/glslang/glslang/libMachineIndependent.a  vendor/glslang/glslang/OSDependent/Unix/libOSDependent.a  vendor/glslang/glslang/libGenericCodeGen.a  vendor/glslang/glslang/libglslang-default-resource-limits.a  /usr/lib/x86_64-linux-gnu/libcurl.so  /usr/lib/x86_64-linux-gnu/libjpeg.so  -luv  -lpthread  -lrt  /usr/lib/x86_64-linux-gnu/libX11.so  /usr/lib/x86_64-linux-gnu/libXext.so  -lwebp  /usr/lib/x86_64-linux-gnu/libicui18n.so  /usr/lib/x86_64-linux-gnu/libicuuc.so  -ldl  /usr/lib/x86_64-linux-gnu/libpng.so  /usr/lib/x86_64-linux-gnu/libz.so  libmbgl-vendor-nunicode.a  libmbgl-vendor-sqlite.a  -lgcc  -lgcc_s  -lc  -lgcc  -lgcc_s  -lstdc++  -lm  -lgcc_s  -lgcc  -lc  -lgcc_s  -lgcc";
+        let base_dir = PathBuf::from("/build_dir/build");
+        let instructions = parse_deps(v, &base_dir, true);
+        let expected = [
+            "-ffunction-sections",
+            "-fdata-sections",
+            "-fPIC",
+            "-m64",
+            "cargo:rustc-link-search=native=mbgl-core",
+            "cargo:rustc-link-search=native=mbgl-vendor-parsedate",
+            "cargo:rustc-link-search=native=mbgl-vendor-csscolorparser",
+            "cargo:rustc-link-search=native=glslang",
+            "cargo:rustc-link-search=native=SPIRV",
+            "cargo:rustc-link-search=native=MachineIndependent",
+            "cargo:rustc-link-search=native=OSDependent",
+            "cargo:rustc-link-search=native=GenericCodeGen",
+            "cargo:rustc-link-search=native=glslang-default-resource-limits",
+            "/usr/lib/x86_64-linux-gnu/libcurl.so",
+            "/usr/lib/x86_64-linux-gnu/libjpeg.so",
+            "cargo:rustc-link-lib=uv",
+            "cargo:rustc-link-lib=pthread",
+            "cargo:rustc-link-lib=rt",
+            "/usr/lib/x86_64-linux-gnu/libX11.so",
+            "/usr/lib/x86_64-linux-gnu/libXext.so",
+            "cargo:rustc-link-lib=webp",
+            "/usr/lib/x86_64-linux-gnu/libicui18n.so",
+            "/usr/lib/x86_64-linux-gnu/libicuuc.so",
+            "cargo:rustc-link-lib=dl",
+            "/usr/lib/x86_64-linux-gnu/libpng.so",
+            "/usr/lib/x86_64-linux-gnu/libz.so",
+            "cargo:rustc-link-search=native=mbgl-vendor-nunicode",
+            "cargo:rustc-link-search=native=mbgl-vendor-sqlite",
+            "cargo:rustc-link-lib=gcc",
+            "cargo:rustc-link-lib=gcc_s",
+            "cargo:rustc-link-lib=c",
+            "cargo:rustc-link-lib=gcc",
+            "cargo:rustc-link-lib=gcc_s",
+            "cargo:rustc-link-lib=stdc++",
+            "cargo:rustc-link-lib=m",
+            "cargo:rustc-link-lib=gcc_s",
+            "cargo:rustc-link-lib=gcc",
+            "cargo:rustc-link-lib=c",
+            "cargo:rustc-link-lib=gcc_s",
+            "cargo:rustc-link-lib=gcc",
+        ];
+
         assert_eq!(instructions, expected);
     }
 }

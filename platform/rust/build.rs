@@ -68,7 +68,7 @@ fn main() {
         .unwrap_or_else(|_| panic!("Failed to read {}", deps_file.display()));
 
     // Parse the deps file into a list of Cargo instructions.
-    for instr in parse_deps(&deps_contents, &deps_build_dir.join("build")) {
+    for instr in parse_deps(&deps_contents, &deps_build_dir.join("build"), true) {
         println!("{instr}");
     }
 

@@ -1,5 +1,6 @@
-use cxx::{CxxVector, UniquePtr};
 use std::marker::PhantomData;
+
+use cxx::{CxxVector, UniquePtr};
 
 use crate::ffi;
 use crate::ffi::MapRenderer_setSize;

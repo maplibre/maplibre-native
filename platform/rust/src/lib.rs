@@ -1,3 +1,6 @@
+// FIXME: Remove this before merging
+#![allow(unused)]
+
 mod map_renderer;
 mod tile_server_options;
 
@@ -92,38 +95,22 @@ mod ffi {
         type MapRenderer;
 
         fn MapRenderer_new() -> UniquePtr<MapRenderer>;
-
-        //     void set_size(uint32_t width, uint32_t height) { size = {width, height}; }
-        //
-        //     void set_pixel_ratio(float ratio) { pixelRatio = ratio; }
-        //
-        //     void set_map_mode(uint32_t mode) { mapMode = static_cast<mbgl::MapMode>(mode); }
-        //
-        //     void set_debug_flags(uint32_t flags) { debugFlags = static_cast<mbgl::MapDebugOptions>(flags); }
-        //
-        //     void set_camera(double lat, double lon, double zoom, double bearing, double pitch) {
-        //         cameraOptions.withCenter(mbgl::LatLng{lat, lon}).withZoom(zoom).withBearing(bearing).withPitch(pitch);
-        //     }
-        //
-        //     void set_api_key(const std::string& key) { apiKey = key; }
-        //
-        //     void set_cache_path(const std::string& path) { cachePath = path; }
-        //
-        //     void set_asset_root(const std::string& path) { assetRoot = path; }
-        //
-        //     void set_style_url(const std::string& url) { styleUrl = url; }
-        //
-        //     // Main rendering method
-        //     std::vector<uint8_t> render();
-
-        // fn set_size(&self, width: u32, height: u32);
-        // fn set_pixel_ratio(&self, ratio: f64);
-        // fn set_map_mode(&self, mode: u32);
-        // fn set_debug_flags(&self, flags: u32);
-        // fn set_camera(&self, lat: f64, lon: f64, zoom: f64, bearing: f64, pitch: f64);
-        // fn set_api_key(&self, key: &str);
-
-        fn MapRenderer_setSize(obj: Pin<&mut MapRenderer>, width: u32, height: u32);
         fn MapRenderer_render(obj: Pin<&mut MapRenderer>) -> UniquePtr<CxxVector<u8>>;
+        fn MapRenderer_setSize(obj: Pin<&mut MapRenderer>, width: u32, height: u32);
+        fn MapRenderer_setPixelRatio(obj: Pin<&mut MapRenderer>, ratio: f32);
+        fn MapRenderer_setMapMode(obj: Pin<&mut MapRenderer>, mode: u32);
+        fn MapRenderer_setDebugFlags(obj: Pin<&mut MapRenderer>, flags: u32);
+        fn MapRenderer_setCamera(
+            obj: Pin<&mut MapRenderer>,
+            lat: f64,
+            lon: f64,
+            zoom: f64,
+            bearing: f64,
+            pitch: f64,
+        );
+        fn MapRenderer_setApiKey(obj: Pin<&mut MapRenderer>, key: &str);
+        fn MapRenderer_setCachePath(obj: Pin<&mut MapRenderer>, path: &str);
+        fn MapRenderer_setAssetRoot(obj: Pin<&mut MapRenderer>, path: &str);
+        fn MapRenderer_setStyleUrl(obj: Pin<&mut MapRenderer>, url: &str);
     }
 }

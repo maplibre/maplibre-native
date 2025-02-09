@@ -18,31 +18,13 @@ public:
     MapRenderer() {}
     ~MapRenderer() {}
 
-    void set_size(uint32_t width, uint32_t height) { size = {width, height}; }
-
-    void set_pixel_ratio(float ratio) { pixelRatio = ratio; }
-
-    void set_map_mode(uint32_t mode) { mapMode = static_cast<mbgl::MapMode>(mode); }
-
-    void set_debug_flags(uint32_t flags) { debugFlags = static_cast<mbgl::MapDebugOptions>(flags); }
-
-    void set_camera(double lat, double lon, double zoom, double bearing, double pitch) {
-        cameraOptions.withCenter(mbgl::LatLng{lat, lon}).withZoom(zoom).withBearing(bearing).withPitch(pitch);
-    }
-
-    void set_api_key(const std::string& key) { apiKey = key; }
-
-    void set_cache_path(const std::string& path) { cachePath = path; }
-
-    void set_asset_root(const std::string& path) { assetRoot = path; }
-
-    void set_style_url(const std::string& url) { styleUrl = url; }
-
-    // Main rendering method
     std::vector<uint8_t> render();
 
 private:
     mbgl::util::RunLoop runLoop;
+
+// Due to CXX limitations, make all these public and access them with regular functions
+public:
     mbgl::Size size{512, 512};
     float pixelRatio = 1.0f;
     mbgl::MapMode mapMode = mbgl::MapMode::Static;
@@ -59,13 +41,29 @@ inline std::unique_ptr<MapRenderer> MapRenderer_new() {
     return std::make_unique<MapRenderer>();
 }
 
-inline void MapRenderer_setSize(MapRenderer& self, uint32_t width, uint32_t height) {
-    self.set_size(width, height);
-}
-
 inline std::unique_ptr<std::vector<uint8_t>> MapRenderer_render(MapRenderer& self) {
     return std::make_unique<std::vector<uint8_t>>(self.render());
 }
+
+inline void MapRenderer_setSize(MapRenderer& self, uint32_t width, uint32_t height) { self.size = {width, height}; }
+
+inline void MapRenderer_setPixelRatio(MapRenderer& self, float ratio) { self.pixelRatio = ratio; }
+
+inline void MapRenderer_setMapMode(MapRenderer& self, uint32_t mode) { self.mapMode = static_cast<mbgl::MapMode>(mode); }
+
+inline void MapRenderer_setDebugFlags(MapRenderer& self, uint32_t flags) { self.debugFlags = static_cast<mbgl::MapDebugOptions>(flags); }
+
+inline void MapRenderer_setCamera(MapRenderer& self, double lat, double lon, double zoom, double bearing, double pitch) {
+    self.cameraOptions.withCenter(mbgl::LatLng{lat, lon}).withZoom(zoom).withBearing(bearing).withPitch(pitch);
+}
+
+inline void MapRenderer_setApiKey(MapRenderer& self, const rust::Str key) { self.apiKey = (std::string)key; }
+
+inline void MapRenderer_setCachePath(MapRenderer& self, const rust::Str path) { self.cachePath = (std::string)path; }
+
+inline void MapRenderer_setAssetRoot(MapRenderer& self, const rust::Str path) { self.assetRoot = (std::string)path; }
+
+inline void MapRenderer_setStyleUrl(MapRenderer& self, const rust::Str url) { self.styleUrl = (std::string)url; }
 
 } // namespace bridge
 } // namespace ml
