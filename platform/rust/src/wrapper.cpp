@@ -3,7 +3,5 @@
 #include "maplibre-native/src/lib.rs.h"
 
 namespace mln {
-namespace bridge {
-
-} // namespace bridge
+namespace bridge {} // namespace bridge
 } // namespace mln
