@@ -127,8 +127,8 @@ mod ffi {
         fn MapRenderer_render(obj: Pin<&mut MapRenderer>) -> UniquePtr<CxxString>;
         fn MapRenderer_setSize(obj: Pin<&mut MapRenderer>, width: u32, height: u32);
         fn MapRenderer_setPixelRatio(obj: Pin<&mut MapRenderer>, ratio: f32);
-        fn MapRenderer_setMapMode(obj: Pin<&mut MapRenderer>, mode: u32);
-        fn MapRenderer_setDebugFlags(obj: Pin<&mut MapRenderer>, flags: u32);
+        fn MapRenderer_setMapMode(obj: Pin<&mut MapRenderer>, mode: MapMode);
+        fn MapRenderer_setDebugFlags(obj: Pin<&mut MapRenderer>, flags: MapDebugOptions);
         fn MapRenderer_setCamera(
             obj: Pin<&mut MapRenderer>,
             lat: f64,

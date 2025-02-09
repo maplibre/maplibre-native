@@ -53,12 +53,12 @@ inline void MapRenderer_setPixelRatio(MapRenderer& self, float ratio) {
     self.pixelRatio = ratio;
 }
 
-inline void MapRenderer_setMapMode(MapRenderer& self, uint32_t mode) {
-    self.mapMode = static_cast<mbgl::MapMode>(mode);
+inline void MapRenderer_setMapMode(MapRenderer& self, mbgl::MapMode mode) {
+    self.mapMode = mode;
 }
 
-inline void MapRenderer_setDebugFlags(MapRenderer& self, uint32_t flags) {
-    self.debugFlags = static_cast<mbgl::MapDebugOptions>(flags);
+inline void MapRenderer_setDebugFlags(MapRenderer& self, MapDebugOptions flags) {
+    self.debugFlags = flags;
 }
 
 inline void MapRenderer_setCamera(
