@@ -26,10 +26,10 @@ mod ffi {
         TileBorders = 0b0000_0010, // 1 << 1
         ParseStatus = 0b0000_0100, // 1 << 2
         Timestamps = 0b0000_1000,  // 1 << 3
-        Collision = 0b0001_0000,  // 1 << 4
-        Overdraw = 0b0010_0000,  // 1 << 5
-        StencilClip = 0b0100_0000,  // 1 << 6
-        DepthBuffer = 0b1000_0000,  // 1 << 7
+        Collision = 0b0001_0000,   // 1 << 4
+        Overdraw = 0b0010_0000,    // 1 << 5
+        StencilClip = 0b0100_0000, // 1 << 6
+        DepthBuffer = 0b1000_0000, // 1 << 7
     }
 
     #[namespace = "mbgl"]
