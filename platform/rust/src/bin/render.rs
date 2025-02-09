@@ -1,7 +1,7 @@
 use std::fs;
 
 use clap::Parser;
-use maplibre_native::ImageRendererOptions;
+use maplibre_native::{ImageRendererOptions, MapDebugOptions};
 
 /// MapLibre Native render tool
 #[derive(Parser, Debug)]

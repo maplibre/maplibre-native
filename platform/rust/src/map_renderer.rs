@@ -105,22 +105,34 @@ impl<S> ImageRenderer<S> {
         Self(map, PhantomData)
     }
 
-    pub fn set_style_url(&mut self, url: &str) {
+    pub fn set_style_url(&mut self, url: &str) -> &mut Self {
         assert!(url.contains("://"));
         ffi::MapRenderer_setStyleUrl(self.0.pin_mut(), url);
+        self
     }
 
-    pub fn set_style_path(&mut self, path: impl AsRef<Path>) {
+    pub fn set_style_path(&mut self, path: impl AsRef<Path>) -> &mut Self {
+        // TODO: check if the file exists?
         let path = path.as_ref().to_str().expect("Path is not valid UTF-8");
         ffi::MapRenderer_setStyleUrl(self.0.pin_mut(), &format!("file://{path}"));
+        self
     }
 
-    pub fn set_camera(&mut self, lat: f64, lon: f64, zoom: f64, bearing: f64, pitch: f64) {
+    pub fn set_camera(
+        &mut self,
+        lat: f64,
+        lon: f64,
+        zoom: f64,
+        bearing: f64,
+        pitch: f64,
+    ) -> &mut Self {
         ffi::MapRenderer_setCamera(self.0.pin_mut(), lat, lon, zoom, bearing, pitch);
+        self
     }
 
-    pub fn set_debug_flags(&mut self, flags: MapDebugOptions) {
+    pub fn set_debug_flags(&mut self, flags: MapDebugOptions) -> &mut Self {
         ffi::MapRenderer_setDebugFlags(self.0.pin_mut(), flags);
+        self
     }
 }
 
