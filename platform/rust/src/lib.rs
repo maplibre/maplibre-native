@@ -4,6 +4,7 @@
 mod map_renderer;
 mod tile_server_options;
 
+pub use ffi::MapDebugOptions;
 pub use map_renderer::{Image, ImageRenderer, ImageRendererOptions, Static, Tile};
 pub use tile_server_options::TileServerOptions;
 

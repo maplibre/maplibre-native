@@ -3,7 +3,7 @@ use std::path::Path;
 
 use cxx::{CxxString, UniquePtr};
 
-use crate::ffi;
+use crate::{ffi, MapDebugOptions};
 use crate::ffi::MapMode;
 
 /// A rendered map image.
@@ -113,6 +113,14 @@ impl<S> ImageRenderer<S> {
     pub fn set_style_path(&mut self, path: impl AsRef<Path>) {
         let path = path.as_ref().to_str().expect("Path is not valid UTF-8");
         ffi::MapRenderer_setStyleUrl(self.0.pin_mut(), &format!("file://{path}"));
+    }
+
+    pub fn set_camera(&mut self, lat: f64, lon: f64, zoom: f64, bearing: f64, pitch: f64) {
+        ffi::MapRenderer_setCamera(self.0.pin_mut(), lat, lon, zoom, bearing, pitch);
+    }
+
+    pub fn set_debug_flags(&mut self, flags: MapDebugOptions) {
+        ffi::MapRenderer_setDebugFlags(self.0.pin_mut(), flags);
     }
 }
 
