@@ -3,8 +3,8 @@ use std::path::Path;
 
 use cxx::{CxxString, UniquePtr};
 
-use crate::{ffi, MapDebugOptions};
 use crate::ffi::MapMode;
+use crate::{ffi, MapDebugOptions};
 
 /// A rendered map image.
 ///
