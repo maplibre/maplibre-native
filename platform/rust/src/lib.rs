@@ -1,7 +1,7 @@
 mod map_renderer;
 mod tile_server_options;
 
-pub use map_renderer::{ImageRenderer, ImageRendererOptions, Static, Tile, Image};
+pub use map_renderer::{Image, ImageRenderer, ImageRendererOptions, Static, Tile};
 pub use tile_server_options::TileServerOptions;
 
 #[cxx::bridge(namespace = "ml::bridge")]

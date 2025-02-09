@@ -42,9 +42,9 @@ fn create_cmake_config(project_root: &Path) -> cmake::Config {
         panic!("Features 'metal', 'opengl', and 'vulkan' are mutually exclusive. Please enable only one.");
     }
 
-    cfg.define_bool("MLN_WITH_OPENGL",  with_opengl);
-    cfg.define_bool("MLN_WITH_METAL",  with_metal);
-    cfg.define_bool("MLN_WITH_VULKAN",  with_vulkan);
+    cfg.define_bool("MLN_WITH_OPENGL", with_opengl);
+    cfg.define_bool("MLN_WITH_METAL", with_metal);
+    cfg.define_bool("MLN_WITH_VULKAN", with_vulkan);
     cfg.define_bool("MLN_WITH_WERROR", false);
     cfg
 }

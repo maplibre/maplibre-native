@@ -1,5 +1,5 @@
-use std::marker::PhantomData;
 use cxx::{CxxVector, UniquePtr};
+use std::marker::PhantomData;
 
 use crate::ffi;
 use crate::ffi::MapRenderer_setSize;
@@ -33,7 +33,7 @@ pub struct ImageRenderer<State>(UniquePtr<ffi::MapRenderer>, PhantomData<State>)
 
 impl<State> ImageRenderer<State> {
     /// Private constructor.
-    fn new(_pixel_ratio: f32/*, mode: Mode*/) -> Self {
+    fn new(_pixel_ratio: f32 /*, mode: Mode*/) -> Self {
         let map = ffi::MapRenderer_new();
         // map.set_pixel_ratio(self.pixel_ratio);
         // map.set_mode(self.mode);
@@ -44,7 +44,7 @@ impl<State> ImageRenderer<State> {
 impl ImageRenderer<Static> {
     pub fn render_static(&mut self, width: u32, height: u32) -> Image {
         MapRenderer_setSize(self.0.pin_mut(), width, height);
-        Image(ffi::MapRenderer_render(self.0.pin_mut()) )
+        Image(ffi::MapRenderer_render(self.0.pin_mut()))
     }
 }
 
@@ -52,7 +52,7 @@ impl ImageRenderer<Tile> {
     pub fn render_tile(&mut self, zoom: f64, x: u64, y: u64) -> Image {
         MapRenderer_setSize(self.0.pin_mut(), 512, 512);
         // TODO: set tile location
-        Image(ffi::MapRenderer_render(self.0.pin_mut()) )
+        Image(ffi::MapRenderer_render(self.0.pin_mut()))
     }
 }
 
