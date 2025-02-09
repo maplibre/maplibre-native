@@ -25,7 +25,7 @@ BOOL MLNEdgeInsetsIsZero(UIEdgeInsets edgeInsets) {
         {
             self = [self imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         }
-        
+
         if (auto content = styleImage.getContent())
         {
             UIEdgeInsets capInsets = UIEdgeInsetsMake(content->top / scale,
@@ -56,7 +56,7 @@ BOOL MLNEdgeInsetsIsZero(UIEdgeInsets edgeInsets) {
     }
 
     self = [self initWithCGImage:image scale:scale orientation:UIImageOrientationUp];
-    
+
     CGImageRelease(image);
     return self;
 }
@@ -72,7 +72,7 @@ BOOL MLNEdgeInsetsIsZero(UIEdgeInsets edgeInsets) {
             self.capInsets.top * self.scale, (self.size.height - self.capInsets.bottom) * self.scale,
         });
     }
-    
+
     std::optional<mbgl::style::ImageContent> imageContent;
     if (!MLNEdgeInsetsIsZero(self.capInsets))
     {
@@ -83,7 +83,7 @@ BOOL MLNEdgeInsetsIsZero(UIEdgeInsets edgeInsets) {
             .bottom = static_cast<float>((self.size.height - self.capInsets.bottom) * self.scale),
         };
     }
-    
+
     BOOL isTemplate = self.renderingMode == UIImageRenderingModeAlwaysTemplate;
     return std::make_unique<mbgl::style::Image>([identifier UTF8String],
                                                 self.mgl_premultipliedImage,

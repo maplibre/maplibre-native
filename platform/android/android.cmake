@@ -152,7 +152,7 @@ target_include_directories(
 # this is needed because Android is not officially supported
 # https://discourse.cmake.org/t/error-when-crosscompiling-with-whole-archive-target-link/9394
 # https://cmake.org/cmake/help/latest/release/3.24.html#generator-expressions
-set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE 
+set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE
 "-Wl,--whole-archive <LIBRARY> -Wl,--no-whole-archive"
 )
 set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE_SUPPORTED True)

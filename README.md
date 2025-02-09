@@ -173,7 +173,7 @@ MapLibre Native can also be built on [Linux](platform/linux/README.md), [Windows
 
 ## Contributing
 
-> [!NOTE]  
+> [!NOTE]
 > This section is only relevant for people who want to contribute to MapLibre Native.
 
 MapLibre Native has at its core a C++ library. This is where the bulk of development is currently happening.

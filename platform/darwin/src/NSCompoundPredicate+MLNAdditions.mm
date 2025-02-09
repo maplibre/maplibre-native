@@ -30,18 +30,18 @@
             NSPredicate *subpredicate = self.subpredicates.firstObject;
             return @[@"!", subpredicate.mgl_jsonExpressionObject];
         }
-            
+
         case NSAndPredicateType: {
             NSArray *subarrays = [self.subpredicates valueForKeyPath:@"mgl_jsonExpressionObject"];
             return [@[@"all"] arrayByAddingObjectsFromArray:subarrays];
         }
-            
+
         case NSOrPredicateType: {
             NSArray *subarrays = [self.subpredicates valueForKeyPath:@"mgl_jsonExpressionObject"];
             return [@[@"any"] arrayByAddingObjectsFromArray:subarrays];
         }
     }
-    
+
     [NSException raise:@"Compound predicate type not handled"
                 format:@""];
     return nil;

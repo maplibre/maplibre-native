@@ -1,23 +1,23 @@
 ---
 Checks: [
-    android-*,	
+    android-*,
     boost-*,
     bugprone-*,
-    clang-analyzer-core*,	
-    clang-analyzer-cplusplus*,	
-    clang-analyzer-deadcode*,	
-    clang-analyzer-optin.cplusplus*,	
-    clang-analyzer-optin.performance.Padding,	
-    clang-analyzer-security*,	
+    clang-analyzer-core*,
+    clang-analyzer-cplusplus*,
+    clang-analyzer-deadcode*,
+    clang-analyzer-optin.cplusplus*,
+    clang-analyzer-optin.performance.Padding,
+    clang-analyzer-security*,
     clang-diagnostic-*,
     cppcoreguidelines-avoid-goto,
     cppcoreguidelines-no-malloc,
     google-*,
     llvm-*,
-    misc-*,	
-    modernize-*,	
-    performance-*,	
-    portability-*,	
+    misc-*,
+    modernize-*,
+    performance-*,
+    portability-*,
     readability-*,
     -bugprone-branch-clone,
     -bugprone-easily-swappable-parameters,
@@ -118,6 +118,6 @@ Checks: [
 ]
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
-CheckOptions:	
-  - key:   performance-unnecessary-value-param.AllowedTypes	
+CheckOptions:
+  - key:   performance-unnecessary-value-param.AllowedTypes
     value: 'exception_ptr'

@@ -452,7 +452,7 @@ operator in the MapLibre Style Spec.
 
 **Format string syntax:** `mgl_attributed({x, y, z})`
 
-Concatenates and returns the array of `MLNAttributedExpression` objects, for use 
+Concatenates and returns the array of `MLNAttributedExpression` objects, for use
 with the `MLNSymbolStyleLayer.text` property.
 
 `MLNAttributedExpression.attributes` valid attributes.

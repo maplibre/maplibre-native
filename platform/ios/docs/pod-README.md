@@ -92,6 +92,6 @@ class ViewController: UIViewController {
 }
 ```
 
-Full API documentation is included in this package, within the `documentation` folder. 
+Full API documentation is included in this package, within the `documentation` folder.
 
 We welcome your [bug reports, feature requests, and contributions](https://github.com/maplibre/maplibre-native/issues).
