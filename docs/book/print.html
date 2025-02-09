@@ -1519,7 +1519,7 @@ The heading in the changelog must match <code>## &lt;VERSION&gt;</code> exactly,
 
 </style>
 <h1 id="ten-thousand-foot-view"><a class="header" href="#ten-thousand-foot-view">Ten Thousand Foot View</a></h1>
-<p><img src="design/media/ten-thousand-foot-view-diagram.png" alt="" /><br />
+<p><img src="design/media/ten-thousand-foot-view-diagram.png" alt="" />
 <em>Figure 1: MapLibre Native Components – Ten Thousand Foot view</em></p>
 <p>From ten thousand foot, MapLibre Native is composed of <em>Map View</em> and a
 <em>Renderer</em>. MapLibre Native supports iOS, Android, Linux, QT, MacOS,
@@ -1875,7 +1875,7 @@ measured in degree angles instead of meters. Because angular distance
 stays the same if we move the angle across the axis of earth.</p>
 <p>Figure 2 shows rendering map tile through the rendering spaces and
 transformations below:</p>
-<p><img src="design/media/rendering-spaces-and-transformations-for-map-tiles.png" alt="" /><br />
+<p><img src="design/media/rendering-spaces-and-transformations-for-map-tiles.png" alt="" />
 <em>Figure 2: Rendering Spaces and Transformations for Map Tiles</em></p>
 <h2 id="world-coordinates"><a class="header" href="#world-coordinates">World Coordinates</a></h2>
 <p>World Coordinates for maps start with <em>Geographic Coordinate Systems</em>.
@@ -2002,7 +2002,7 @@ requires map center, bearing, and pitch.</p>
 move the 3D plane with tiles, rather moves the camera atop the defined
 position named center. In the rendering world, this is not the center of
 the 3D plane we render tiles on, rather the position of the camera.</em></p>
-<p><img src="design/media/perspective-frustum.png" alt="" /><br />
+<p><img src="design/media/perspective-frustum.png" alt="" />
 <em>Figure 3: Perspective Frustum (Sourced from learnopengl.com)</em></p>
 <p>The benefit of tile coordinates continues here. The camera representation
 we use here, to be specific the view matrix, can directly take the tile
@@ -2469,7 +2469,7 @@ for future improvement. This document intends to address the first.</p>
 <h2 id="recommendations"><a class="header" href="#recommendations">Recommendations</a></h2>
 <p>This document proposes the following component architecture for MapLibre
 Native to address the architectural shortcomings.</p>
-<p><img src="design/media/proposed-architecture-of-maplibre-gl.png" alt="" /><br />
+<p><img src="design/media/proposed-architecture-of-maplibre-gl.png" alt="" />
 <em>Figure 4: Proposed Architecture of MapLibre Native</em></p>
 <p>Proposed architecture of MapLibre Native in Figure 4 addresses the
 aforementioned problems by:</p>
@@ -2617,7 +2617,7 @@ languages.</p>
 
 </style>
 <h1 id="android-map-rendering-data-flow"><a class="header" href="#android-map-rendering-data-flow">Android Map Rendering Data Flow</a></h1>
-<p><img src="design/media/android-data-flow.jpg" alt="" /><br />
+<p><img src="design/media/android-data-flow.jpg" alt="" />
 <em>Figure 5: Simplified data flow diagram of initializing a map in Android</em></p>
 <p>Figure 5 shows a simplified data flow diagram of initializing a map. The
 device section of this data flow diagram is based on Android platform.</p>
@@ -2639,7 +2639,7 @@ contract established from the Java runtime. The render thread this
 document talked about before is seen in the form of <em>MapRenderer</em>. This
 is an Actor that passes the rendering events from the device runtime to
 <em>MapLibre Native</em> renderer.</p>
-<p><img src="design/media/workflow-of-rendering-tiles.jpg" alt="" /><br />
+<p><img src="design/media/workflow-of-rendering-tiles.jpg" alt="" />
 <em>Figure 6: Workflow of rendering tiles</em></p>
 <p>Before the frame-by-frame map rendering
 starts with <em>MapLibre Native</em> renderer, the generic map component
@@ -2706,7 +2706,7 @@ function uses a glyph manager for fetching glyphs and font stacks that
 contains said glyphs. Sources and Layers are translated to
 <em>RenderSource</em> and <em>RenderLayer</em> objects.</p>
 <p><em>For the sake of restating, a layer is composed of a set of sources.</em></p>
-<p><img src="design/media/android-rendering-map-tiles.jpg" alt="" /><br />
+<p><img src="design/media/android-rendering-map-tiles.jpg" alt="" />
 <em>Figure 7: Simplified data flow diagram of rendering map tiles</em></p>
 <p>A <em>RenderSource</em> is produced from a single
 source that has an internal <em>update</em> method. This method produces the
@@ -2790,7 +2790,7 @@ see more about that in Coordinate System section.</p>
 
 </style>
 <h1 id="geometry-tile-worker"><a class="header" href="#geometry-tile-worker">Geometry Tile Worker</a></h1>
-<p><img src="design/media/geometry-tile-worker-state-machine.jpg" alt="" /><br />
+<p><img src="design/media/geometry-tile-worker-state-machine.jpg" alt="" />
 <em>Figure 8: Simplified Geometry Tile Worker State Machine</em></p>
 <p>Going back to Geometry Tile Worker, it is
 a state machine. The main principle is that Geometry Tile Worker should

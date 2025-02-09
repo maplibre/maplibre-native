@@ -221,7 +221,7 @@
 
 </style>
 <h1 id="android-map-rendering-data-flow"><a class="header" href="#android-map-rendering-data-flow">Android Map Rendering Data Flow</a></h1>
-<p><img src="media/android-data-flow.jpg" alt="" /><br />
+<p><img src="media/android-data-flow.jpg" alt="" />
 <em>Figure 5: Simplified data flow diagram of initializing a map in Android</em></p>
 <p>Figure 5 shows a simplified data flow diagram of initializing a map. The
 device section of this data flow diagram is based on Android platform.</p>
@@ -243,7 +243,7 @@ contract established from the Java runtime. The render thread this
 document talked about before is seen in the form of <em>MapRenderer</em>. This
 is an Actor that passes the rendering events from the device runtime to
 <em>MapLibre Native</em> renderer.</p>
-<p><img src="media/workflow-of-rendering-tiles.jpg" alt="" /><br />
+<p><img src="media/workflow-of-rendering-tiles.jpg" alt="" />
 <em>Figure 6: Workflow of rendering tiles</em></p>
 <p>Before the frame-by-frame map rendering
 starts with <em>MapLibre Native</em> renderer, the generic map component
@@ -310,7 +310,7 @@ function uses a glyph manager for fetching glyphs and font stacks that
 contains said glyphs. Sources and Layers are translated to
 <em>RenderSource</em> and <em>RenderLayer</em> objects.</p>
 <p><em>For the sake of restating, a layer is composed of a set of sources.</em></p>
-<p><img src="media/android-rendering-map-tiles.jpg" alt="" /><br />
+<p><img src="media/android-rendering-map-tiles.jpg" alt="" />
 <em>Figure 7: Simplified data flow diagram of rendering map tiles</em></p>
 <p>A <em>RenderSource</em> is produced from a single
 source that has an internal <em>update</em> method. This method produces the
