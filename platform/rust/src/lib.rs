@@ -110,7 +110,7 @@ mod ffi {
         type MapRenderer;
 
         fn MapRenderer_new() -> UniquePtr<MapRenderer>;
-        fn MapRenderer_render(obj: Pin<&mut MapRenderer>) -> UniquePtr<CxxVector<u8>>;
+        fn MapRenderer_render(obj: Pin<&mut MapRenderer>) -> UniquePtr<CxxString>;
         fn MapRenderer_setSize(obj: Pin<&mut MapRenderer>, width: u32, height: u32);
         fn MapRenderer_setPixelRatio(obj: Pin<&mut MapRenderer>, ratio: f32);
         fn MapRenderer_setMapMode(obj: Pin<&mut MapRenderer>, mode: u32);

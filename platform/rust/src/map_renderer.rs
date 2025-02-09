@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use cxx::{CxxVector, UniquePtr};
+use cxx::{CxxString, UniquePtr};
 
 use crate::ffi;
 use crate::ffi::MapRenderer_setSize;
@@ -57,10 +57,10 @@ impl ImageRenderer<Tile> {
     }
 }
 
-pub struct Image(UniquePtr<CxxVector<u8>>);
+pub struct Image(UniquePtr<CxxString>);
 
 impl Image {
     pub fn as_slice(&self) -> &[u8] {
-        self.0.as_ref().unwrap().as_slice()
+        self.0.as_bytes()
     }
 }

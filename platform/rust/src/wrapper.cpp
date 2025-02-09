@@ -5,12 +5,7 @@
 namespace ml {
 namespace bridge {
 
-std::vector<uint8_t> stringToByteVector(const std::string& input) {
-    // Construct a vector of uint8_t from the string’s data
-    return std::vector<uint8_t>(input.begin(), input.end());
-}
-
-std::vector<uint8_t> MapRenderer::render() {
+std::string MapRenderer::render() {
     // Setup frontend and map
     HeadlessFrontend frontend(size, pixelRatio);
 
@@ -40,7 +35,7 @@ std::vector<uint8_t> MapRenderer::render() {
 
     // Render and encode
     auto image = frontend.render(map).image;
-    return stringToByteVector(encodePNG(image));
+    return encodePNG(image);
 }
 
 } // namespace bridge

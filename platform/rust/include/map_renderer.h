@@ -18,7 +18,7 @@ public:
     MapRenderer() {}
     ~MapRenderer() {}
 
-    std::vector<uint8_t> render();
+    std::string render();
 
 private:
     mbgl::util::RunLoop runLoop;
@@ -41,8 +41,8 @@ inline std::unique_ptr<MapRenderer> MapRenderer_new() {
     return std::make_unique<MapRenderer>();
 }
 
-inline std::unique_ptr<std::vector<uint8_t>> MapRenderer_render(MapRenderer& self) {
-    return std::make_unique<std::vector<uint8_t>>(self.render());
+inline std::unique_ptr<std::string> MapRenderer_render(MapRenderer& self) {
+    return std::make_unique<std::string>(self.render());
 }
 
 inline void MapRenderer_setSize(MapRenderer& self, uint32_t width, uint32_t height) {
