@@ -1,6 +1,6 @@
+use cxx::{CxxString, UniquePtr};
 use std::marker::PhantomData;
 use std::path::Path;
-use cxx::{CxxString, UniquePtr};
 
 use crate::ffi;
 use crate::ffi::MapMode;

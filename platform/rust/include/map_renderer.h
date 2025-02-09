@@ -54,14 +54,9 @@ inline std::unique_ptr<MapRenderer> MapRenderer_new(mbgl::MapMode mapMode,
         .withTileServerOptions(tileServerOptions);
 
     MapOptions mapOptions;
-     mapOptions.withMapMode(mapMode)
-        .withSize(size)
-        .withPixelRatio(pixelRatio);
+    mapOptions.withMapMode(mapMode).withSize(size).withPixelRatio(pixelRatio);
 
-    auto map = std::make_unique<mbgl::Map>(*frontend,
-                                           MapObserver::nullObserver(),
-                                           mapOptions,
-                                           resourceOptions);
+    auto map = std::make_unique<mbgl::Map>(*frontend, MapObserver::nullObserver(), mapOptions, resourceOptions);
 
     return std::make_unique<MapRenderer>(std::move(frontend), std::move(map));
 }
