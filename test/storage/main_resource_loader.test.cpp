@@ -633,7 +633,7 @@ TEST(MainResourceLoader, SetResourceCachePath) {
 }
 
 // Test that a stale cache file that has must-revalidate set will trigger a response.
-TEST(MainResourceLoader, TEST_REQUIRES_SERVER(RespondToStaleMustRevalidate)) {
+TEST(MainResourceLoader, TEST_REQUIRES_SERVER(RespondToStaleMustRevalidateIfConnected)) {
     util::RunLoop loop;
     MainResourceLoader fs(ResourceOptions{}, ClientOptions{});
 
@@ -652,6 +652,9 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(RespondToStaleMustRevalidate)) {
     std::unique_ptr<AsyncRequest> req;
     std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
         FileSourceType::Database, ResourceOptions{}, ClientOptions{});
+
+    NetworkStatus::Set(NetworkStatus::Status::Online);
+
     dbfs->forward(resource, response, [&] {
         req = fs.request(resource, [&](Response res) {
             req.reset();
@@ -712,6 +715,57 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(RespondToStaleMustRevalidate)) {
     });
 
     loop.run();
+}
+
+// Test that a stale cache file that has must-revalidate set can be used if we can't get new data from the network
+TEST(MainResourceLoader, TEST_REQUIRES_SERVER(RespondToStaleCanBeUsedIfConnected)) {
+    util::RunLoop loop;
+    MainResourceLoader fs(ResourceOptions{}, ClientOptions{});
+
+    Resource resource{Resource::Unknown, "http://127.0.0.1:3000/revalidate-same"};
+    resource.loadingMethod = Resource::LoadingMethod::All;
+
+    // using namespace std::chrono_literals;
+
+    // Put an existing value in the cache that has expired, and has must-revalidate set.
+    Response response;
+    response.data = std::make_shared<std::string>("Cached value");
+    response.modified = Timestamp(Seconds(1417392000)); // December 1, 2014
+    response.expires = Timestamp(Seconds(1417392000));
+    response.mustRevalidate = true;
+    response.etag.emplace("snowfall");
+    std::unique_ptr<AsyncRequest> req;
+    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+        FileSourceType::Database, ResourceOptions{}, ClientOptions{});
+
+    NetworkStatus::Set(NetworkStatus::Status::Offline);
+
+    dbfs->forward(resource, response, [&] {
+        req = fs.request(resource, [&](Response res) {
+            req.reset();
+            ASSERT_FALSE(res.error.get());
+            ASSERT_TRUE(res.data.get());
+            EXPECT_EQ("Cached value", *res.data);
+            ASSERT_TRUE(res.expires);
+            EXPECT_EQ(Timestamp{Seconds(1417392000)}, *res.expires);
+            EXPECT_TRUE(res.mustRevalidate);
+            ASSERT_TRUE(res.modified);
+            EXPECT_EQ(Timestamp{Seconds(1417392000)}, *res.modified);
+            ASSERT_TRUE(res.etag);
+            EXPECT_EQ("snowfall", *res.etag);
+
+            resource.priorEtag = res.etag;
+            resource.priorModified = res.modified;
+            resource.priorExpires = res.expires;
+            resource.priorData = res.data;
+
+            loop.stop();
+        });
+    });
+
+    loop.run();
+
+    NetworkStatus::Set(NetworkStatus::Status::Online);
 }
 
 // Test that requests for expired resources have lower priority than requests for new resources

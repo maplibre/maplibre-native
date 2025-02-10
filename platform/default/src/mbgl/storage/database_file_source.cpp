@@ -2,6 +2,7 @@
 #include <mbgl/storage/database_file_source.hpp>
 #include <mbgl/storage/file_source_manager.hpp>
 #include <mbgl/storage/file_source_request.hpp>
+#include <mbgl/storage/network_status.hpp>
 #include <mbgl/storage/offline_database.hpp>
 #include <mbgl/storage/offline_download.hpp>
 #include <mbgl/storage/resource_options.hpp>
