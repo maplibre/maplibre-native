@@ -77,12 +77,10 @@ fn main() {
     // ------------------------------------------------------------------------
     let core_build_dir = create_cmake_config(&project_root)
         .build_target("mbgl-core")
-        .build();
-    let static_lib_base = core_build_dir.join("build");
-    println!(
-        "cargo:rustc-link-search=native={}",
-        static_lib_base.display()
-    );
+        .build()
+        .join("build");
+    let static_lib_base = core_build_dir.to_str().unwrap();
+    println!("cargo:rustc-link-search=native={static_lib_base}",);
 
     // ------------------------------------------------------------------------
     // 3. Gather include directories and build the C++ bridge using cxx_build.
@@ -105,6 +103,9 @@ fn main() {
         .file("src/wrapper.cpp")
         .flag_if_supported("-std=c++20")
         .compile("maplibre_rust_bindings");
+
+    // Link mbgl-core after the bridge - or else `cargo test` won't be able to find the symbols.
+    println!("cargo:rustc-link-lib=static=mbgl-core");
 
     // ------------------------------------------------------------------------
     // 4. Instruct Cargo when to re-run the build script.
