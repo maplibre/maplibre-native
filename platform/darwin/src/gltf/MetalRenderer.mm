@@ -132,8 +132,6 @@ void MetalRenderer::render() {
     // This will write out the tone mapping
     //id<MTLCommandBuffer> externalBuffer = _metalRenderingEnvironment->_currentCommandBuffer;
     //encodeTonemappingPass(externalBuffer);
-
-    clearDepth(_metalRenderingEnvironment->_currentCommandEncoder);
 }
 
 // Load a model
