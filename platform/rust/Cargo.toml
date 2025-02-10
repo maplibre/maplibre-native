@@ -1,0 +1,29 @@
+[package]
+name = "maplibre-native"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cxx = "1.0.138"
+clap = { version = "4.5.27", features = ["derive", "env"] }
+
+[dev-dependencies]
+insta = { version = "1.42.1" }
+
+[build-dependencies]
+cmake = "0.1"
+cxx-build = "1.0.138"
+rustversion = "1.0.19"
+walkdir = "2.5.0"
+build_support = { path = "./build_support" }
+
+[features]
+metal = [] # default on Apple platforms, do not add to default features
+opengl = []
+vulkan = []  # default on other platforms
+
+[workspace]
+members = [
+    "build_support",
+    "."
+]
