@@ -1,9 +1,5 @@
 name: 'save-pr-number'
 description: 'Saves the current PR number as artifact'
-inputs:
-  platform-name:
-    description: "Name of the target platform"
-    required: true
 runs:
   using: "composite"
   steps:
@@ -16,5 +12,6 @@ runs:
       - name: Upload pr_number
         uses: actions/upload-artifact@v4
         with:
-          name: pr-number-${{ inputs.platform-name }}
+          name: pr-number
           path: ./pr_number
+          overwrite: true

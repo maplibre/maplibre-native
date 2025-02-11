@@ -193,8 +193,6 @@ jobs:
 
       - if: github.event_name == 'pull_request'
         uses: ./.github/actions/save-pr-number
-        with:
-          platform-name: "ios"
 
       - name: Build DocC documentation
         working-directory: .

@@ -84,8 +84,6 @@ jobs:
 
       - uses: ./.github/actions/get-pr-number
         id: get-pr-number
-        with:
-          platform-name: "android"
 
       - name: Generate token
         id: generate_token
