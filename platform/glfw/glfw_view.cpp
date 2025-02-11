@@ -831,7 +831,6 @@ void GLFWView::popAnnotation() {
 }
 
 void GLFWView::toggleCustomDrawableStyle() {
-
 #ifndef MBGL_LAYER_CUSTOM_DISABLE_ALL
     auto &style = map->getStyle();
 

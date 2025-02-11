@@ -16,20 +16,13 @@
 ExampleCustomDrawableStyleLayerHost::ExampleCustomDrawableStyleLayerHost(const std::string& assetsPath_)
     : assetsPath(assetsPath_) {}
 
-ExampleCustomDrawableStyleLayerHost::~ExampleCustomDrawableStyleLayerHost() {
+ExampleCustomDrawableStyleLayerHost::~ExampleCustomDrawableStyleLayerHost() {}
 
-}
-    
-void ExampleCustomDrawableStyleLayerHost::initialize() {
+void ExampleCustomDrawableStyleLayerHost::initialize() {}
 
-}
+void ExampleCustomDrawableStyleLayerHost::deinitialize() {}
 
-void ExampleCustomDrawableStyleLayerHost::deinitialize() {
-
-}
-    
 void ExampleCustomDrawableStyleLayerHost::update(Interface& interface) {
-
     // if we have built our drawable(s) already, either update or skip
     if (interface.getDrawableCount() == 0) {
         createDrawables(interface);
@@ -44,32 +37,67 @@ mbgl::Point<double> ExampleCustomDrawableStyleLayerHost::project(const mbgl::Lat
 }
 
 void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) {
-    
     constexpr float extent = mbgl::util::EXTENT;
 
     // add classic polylines
     {
         using namespace mbgl;
-            
+
         // set tile
         interface.setTileID({11, 327, 792});
-            
+
         constexpr auto numLines = 6;
-        Interface::LineOptions options[numLines] {
-            {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/8.0f,     /*color=*/Color::red() },
-            {/*geometry=*/{},   /*blur=*/4.0f,  /*opacity=*/1.0f, /*gapWidth=*/2.0f, /*offset=*/-1.0f,  /*width=*/4.0f,     /*color=*/Color::blue() },
-            {/*geometry=*/{},   /*blur=*/16.0f, /*opacity=*/1.0f, /*gapWidth=*/1.0f, /*offset=*/2.0f,   /*width=*/16.0f,    /*color=*/Color(1.f, 0.5f, 0, 0.5f) },
-            {/*geometry=*/{},   /*blur=*/2.0f,  /*opacity=*/1.0f, /*gapWidth=*/1.0f, /*offset=*/-2.0f,  /*width=*/2.0f,     /*color=*/Color(1.f, 1.f, 0, 0.3f) },
-            {/*geometry=*/{},   /*blur=*/0.5f,  /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/0.5f,   /*width=*/0.5f,     /*color=*/Color::black() },
-            {/*geometry=*/{},   /*blur=*/24.0f, /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/-5.0f,  /*width=*/24.0f,    /*color=*/Color(1.f, 0, 1.f, 0.2f) },
+        Interface::LineOptions options[numLines]{
+            {/*geometry=*/{},
+             /*blur=*/0.0f,
+             /*opacity=*/1.0f,
+             /*gapWidth=*/0.0f,
+             /*offset=*/0.0f,
+             /*width=*/8.0f,
+             /*color=*/Color::red()},
+            {/*geometry=*/{},
+             /*blur=*/4.0f,
+             /*opacity=*/1.0f,
+             /*gapWidth=*/2.0f,
+             /*offset=*/-1.0f,
+             /*width=*/4.0f,
+             /*color=*/Color::blue()},
+            {/*geometry=*/{},
+             /*blur=*/16.0f,
+             /*opacity=*/1.0f,
+             /*gapWidth=*/1.0f,
+             /*offset=*/2.0f,
+             /*width=*/16.0f,
+             /*color=*/Color(1.f, 0.5f, 0, 0.5f)},
+            {/*geometry=*/{},
+             /*blur=*/2.0f,
+             /*opacity=*/1.0f,
+             /*gapWidth=*/1.0f,
+             /*offset=*/-2.0f,
+             /*width=*/2.0f,
+             /*color=*/Color(1.f, 1.f, 0, 0.3f)},
+            {/*geometry=*/{},
+             /*blur=*/0.5f,
+             /*opacity=*/0.5f,
+             /*gapWidth=*/1.0f,
+             /*offset=*/0.5f,
+             /*width=*/0.5f,
+             /*color=*/Color::black()},
+            {/*geometry=*/{},
+             /*blur=*/24.0f,
+             /*opacity=*/0.5f,
+             /*gapWidth=*/1.0f,
+             /*offset=*/-5.0f,
+             /*width=*/24.0f,
+             /*color=*/Color(1.f, 0, 1.f, 0.2f)},
         };
 
-        for(auto& opt: options) {
+        for (auto& opt : options) {
             opt.geometry.beginCap = style::LineCapType::Butt;
             opt.geometry.endCap = style::LineCapType::Butt;
             opt.geometry.joinType = style::LineJoinType::Miter;
         }
-            
+
         constexpr auto numPoints = 10;
         GeometryCoordinates polyline;
         for (auto ipoint{0}; ipoint < numPoints; ++ipoint) {
@@ -77,15 +105,15 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
                 static_cast<int16_t>(ipoint * extent / numPoints),
                 static_cast<int16_t>(std::sin(ipoint * 2 * M_PI / numPoints) * extent / numLines / 2.f));
         }
-            
-        for (auto index {0}; index <  numLines; ++index) {
-            for(auto &p : polyline) {
+
+        for (auto index{0}; index < numLines; ++index) {
+            for (auto& p : polyline) {
                 p.y += extent / numLines;
             }
-                
+
             // set property values
             interface.setLineOptions(options[index]);
-                
+
             // add polyline
             interface.addPolyline(polyline, Interface::LineShaderType::Classic);
         }
@@ -94,26 +122,62 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
     // add wide vector polylines with tile coordinates
     {
         using namespace mbgl;
-            
+
         // set tile
         interface.setTileID({11, 327, 792});
-            
+
         constexpr auto numLines = 6;
-        Interface::LineOptions options[numLines] {
-            {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/8.0f,     /*color=*/Color::red() },
-            {/*geometry=*/{},   /*blur=*/4.0f,  /*opacity=*/1.0f, /*gapWidth=*/2.0f, /*offset=*/-1.0f,  /*width=*/4.0f,     /*color=*/Color::blue() },
-            {/*geometry=*/{},   /*blur=*/16.0f, /*opacity=*/1.0f, /*gapWidth=*/1.0f, /*offset=*/2.0f,   /*width=*/16.0f,    /*color=*/Color(1.f, 0.5f, 0, 0.5f) },
-            {/*geometry=*/{},   /*blur=*/2.0f,  /*opacity=*/1.0f, /*gapWidth=*/1.0f, /*offset=*/-2.0f,  /*width=*/2.0f,     /*color=*/Color(1.f, 1.f, 0, 0.3f) },
-            {/*geometry=*/{},   /*blur=*/0.5f,  /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/0.5f,   /*width=*/0.5f,     /*color=*/Color::black() },
-            {/*geometry=*/{},   /*blur=*/24.0f, /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/-5.0f,  /*width=*/24.0f,    /*color=*/Color(1.f, 0, 1.f, 0.2f) },
+        Interface::LineOptions options[numLines]{
+            {/*geometry=*/{},
+             /*blur=*/0.0f,
+             /*opacity=*/1.0f,
+             /*gapWidth=*/0.0f,
+             /*offset=*/0.0f,
+             /*width=*/8.0f,
+             /*color=*/Color::red()},
+            {/*geometry=*/{},
+             /*blur=*/4.0f,
+             /*opacity=*/1.0f,
+             /*gapWidth=*/2.0f,
+             /*offset=*/-1.0f,
+             /*width=*/4.0f,
+             /*color=*/Color::blue()},
+            {/*geometry=*/{},
+             /*blur=*/16.0f,
+             /*opacity=*/1.0f,
+             /*gapWidth=*/1.0f,
+             /*offset=*/2.0f,
+             /*width=*/16.0f,
+             /*color=*/Color(1.f, 0.5f, 0, 0.5f)},
+            {/*geometry=*/{},
+             /*blur=*/2.0f,
+             /*opacity=*/1.0f,
+             /*gapWidth=*/1.0f,
+             /*offset=*/-2.0f,
+             /*width=*/2.0f,
+             /*color=*/Color(1.f, 1.f, 0, 0.3f)},
+            {/*geometry=*/{},
+             /*blur=*/0.5f,
+             /*opacity=*/0.5f,
+             /*gapWidth=*/1.0f,
+             /*offset=*/0.5f,
+             /*width=*/0.5f,
+             /*color=*/Color::black()},
+            {/*geometry=*/{},
+             /*blur=*/24.0f,
+             /*opacity=*/0.5f,
+             /*gapWidth=*/1.0f,
+             /*offset=*/-5.0f,
+             /*width=*/24.0f,
+             /*color=*/Color(1.f, 0, 1.f, 0.2f)},
         };
 
-        for(auto& opt: options) {
+        for (auto& opt : options) {
             opt.geometry.beginCap = style::LineCapType::Butt;
             opt.geometry.endCap = style::LineCapType::Butt;
             opt.geometry.joinType = style::LineJoinType::Miter;
         }
-            
+
         constexpr auto numPoints = 10;
         GeometryCoordinates polyline;
         for (auto ipoint{0}; ipoint < numPoints; ++ipoint) {
@@ -121,30 +185,30 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
                 static_cast<int16_t>(ipoint * extent / numPoints),
                 static_cast<int16_t>(std::sin(ipoint * 2 * M_PI / numPoints) * extent / numLines / 2.f));
         }
-            
-        for (auto index {0}; index <  numLines; ++index) {
-            for(auto &p : polyline) {
+
+        for (auto index{0}; index < numLines; ++index) {
+            for (auto& p : polyline) {
                 if (0 == index) p.y += 0.25f * extent / numLines;
                 p.y += extent / numLines;
             }
-                
+
             // set property values
             interface.setLineOptions(options[index]);
-                
+
             // add polyline
             interface.addPolyline(polyline);
-                
+
             // add clone
-            for(auto &p : polyline) {
+            for (auto& p : polyline) {
                 p.y += 0.05f * extent / numLines;
             }
             interface.addPolyline(polyline);
-            for(auto &p : polyline) {
+            for (auto& p : polyline) {
                 p.y -= 0.05f * extent / numLines;
             }
         }
     }
-        
+
     // add fill polygon
     {
         using namespace mbgl;
@@ -155,19 +219,19 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
         GeometryCollection geometry{
             {
                 // ring 1
-                {static_cast<int16_t>(extent* 0.1f), static_cast<int16_t>(extent* 0.2f)},
-                {static_cast<int16_t>(extent* 0.5f), static_cast<int16_t>(extent* 0.5f)},
-                {static_cast<int16_t>(extent* 0.7f), static_cast<int16_t>(extent* 0.5f)},
-                {static_cast<int16_t>(extent* 0.5f), static_cast<int16_t>(extent* 1.0f)},
-                {static_cast<int16_t>(extent* 0.0f), static_cast<int16_t>(extent* 0.5f)},
-                {static_cast<int16_t>(extent* 0.1f), static_cast<int16_t>(extent* 0.2f)},
+                {static_cast<int16_t>(extent * 0.1f), static_cast<int16_t>(extent * 0.2f)},
+                {static_cast<int16_t>(extent * 0.5f), static_cast<int16_t>(extent * 0.5f)},
+                {static_cast<int16_t>(extent * 0.7f), static_cast<int16_t>(extent * 0.5f)},
+                {static_cast<int16_t>(extent * 0.5f), static_cast<int16_t>(extent * 1.0f)},
+                {static_cast<int16_t>(extent * 0.0f), static_cast<int16_t>(extent * 0.5f)},
+                {static_cast<int16_t>(extent * 0.1f), static_cast<int16_t>(extent * 0.2f)},
             },
             {
                 // ring 2
-                {static_cast<int16_t>(extent* 0.1f), static_cast<int16_t>(extent* 0.25f)},
-                {static_cast<int16_t>(extent* 0.15f), static_cast<int16_t>(extent* 0.5f)},
-                {static_cast<int16_t>(extent* 0.25f), static_cast<int16_t>(extent* 0.45f)},
-                {static_cast<int16_t>(extent* 0.1f), static_cast<int16_t>(extent* 0.25f)},
+                {static_cast<int16_t>(extent * 0.1f), static_cast<int16_t>(extent * 0.25f)},
+                {static_cast<int16_t>(extent * 0.15f), static_cast<int16_t>(extent * 0.5f)},
+                {static_cast<int16_t>(extent * 0.25f), static_cast<int16_t>(extent * 0.45f)},
+                {static_cast<int16_t>(extent * 0.1f), static_cast<int16_t>(extent * 0.25f)},
             },
         };
 
@@ -177,7 +241,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
         // add fill
         interface.addFill(geometry);
     }
-        
+
     // add symbol
     {
         using namespace mbgl;
@@ -185,7 +249,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
         // set tile
         interface.setTileID({11, 327, 789});
 
-        GeometryCoordinate position {static_cast<int16_t>(extent* 0.0f), static_cast<int16_t>(extent* 0.5f)};
+        GeometryCoordinate position{static_cast<int16_t>(extent * 0.0f), static_cast<int16_t>(extent * 0.5f)};
 
         // load image
         std::shared_ptr<PremultipliedImage> image = std::make_shared<PremultipliedImage>(
@@ -258,7 +322,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
         options.geometry.type = FeatureType::LineString;
         interface.setLineOptions(options);
 
-        LineString<double> polyline_geo {
+        LineString<double> polyline_geo{
             // San Francisco
             {-122.38186800073211, 37.77466003457463},
             {-122.3869373450997, 37.774352128895615},
@@ -275,11 +339,11 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
         };
         interface.addPolyline(polyline_geo, Interface::LineShaderType::Classic);
     }
-        
+
     // add polylines using wide vectors in tile coordinates
     {
         using namespace mbgl;
-            
+
         // set tile
         interface.setTileID({11, 327, 790});
 
@@ -294,30 +358,29 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
         options.geometry.beginCap = style::LineCapType::Round;
         options.geometry.endCap = style::LineCapType::Round;
         options.geometry.joinType = style::LineJoinType::Round;
-            
+
         // add polyline with tile coordinates
         GeometryCollection polyline_tile{
             {
                 // ring 1
-                {static_cast<int16_t>(extent* 0.1f), static_cast<int16_t>(extent* 0.2f)},
-                {static_cast<int16_t>(extent* 0.5f), static_cast<int16_t>(extent* 0.5f)},
-                {static_cast<int16_t>(extent* 0.7f), static_cast<int16_t>(extent* 0.5f)},
-                {static_cast<int16_t>(extent* 0.5f), static_cast<int16_t>(extent* 1.0f)},
-                {static_cast<int16_t>(extent* 0.0f), static_cast<int16_t>(extent* 0.5f)},
+                {static_cast<int16_t>(extent * 0.1f), static_cast<int16_t>(extent * 0.2f)},
+                {static_cast<int16_t>(extent * 0.5f), static_cast<int16_t>(extent * 0.5f)},
+                {static_cast<int16_t>(extent * 0.7f), static_cast<int16_t>(extent * 0.5f)},
+                {static_cast<int16_t>(extent * 0.5f), static_cast<int16_t>(extent * 1.0f)},
+                {static_cast<int16_t>(extent * 0.0f), static_cast<int16_t>(extent * 0.5f)},
             },
             {
                 // ring 2
-                {static_cast<int16_t>(extent* 0.1f), static_cast<int16_t>(extent* 0.25f)},
-                {static_cast<int16_t>(extent* 0.15f), static_cast<int16_t>(extent* 0.5f)},
-                {static_cast<int16_t>(extent* 0.25f), static_cast<int16_t>(extent* 0.45f)},
+                {static_cast<int16_t>(extent * 0.1f), static_cast<int16_t>(extent * 0.25f)},
+                {static_cast<int16_t>(extent * 0.15f), static_cast<int16_t>(extent * 0.5f)},
+                {static_cast<int16_t>(extent * 0.25f), static_cast<int16_t>(extent * 0.45f)},
             },
         };
-            
+
         options.geometry.type = FeatureType::Polygon;
         interface.setLineOptions(options);
         interface.addPolyline(polyline_tile[0], Interface::LineShaderType::Classic);
         interface.addPolyline(polyline_tile[1], Interface::LineShaderType::Classic);
-
     }
 
     generateGeometry(interface);
@@ -336,7 +399,7 @@ void ExampleCustomDrawableStyleLayerHost::generateGeometry(Interface& interface)
     // load image
     std::shared_ptr<mbgl::PremultipliedImage> image = std::make_shared<mbgl::PremultipliedImage>(
         mbgl::decodeImage(mbgl::util::read_file(assetsPath + "puck.png")));
-    
+
     options.texture = interface.context.createTexture2D();
     options.texture->setImage(image);
     options.texture->setSamplerConfiguration(
@@ -370,10 +433,9 @@ void ExampleCustomDrawableStyleLayerHost::generateGeometry(Interface& interface)
 
     interface.setGeometryOptions(options);
 
-    interface.setGeometryTweakerCallback([=, rotation = 0.0f](
-                                                   [[maybe_unused]] mbgl::gfx::Drawable& drawable,
-                                                   const mbgl::PaintParameters& params,
-                                                   Interface::GeometryOptions& currentOptions) mutable {
+    interface.setGeometryTweakerCallback([=, rotation = 0.0f]([[maybe_unused]] mbgl::gfx::Drawable& drawable,
+                                                              const mbgl::PaintParameters& params,
+                                                              Interface::GeometryOptions& currentOptions) mutable {
         const mbgl::Point<double>& center = project(location, params.state);
 
         rotation += 0.1f;
@@ -392,14 +454,14 @@ void ExampleCustomDrawableStyleLayerHost::generateGeometry(Interface& interface)
 
 void ExampleCustomDrawableStyleLayerHost::loadGeometry(Interface& interface) {
     constexpr float itemScale = 0.1f;
-    constexpr std::array<float, 3> itemRotation = { 90.0f, 0.0f, 0.0f };
+    constexpr std::array<float, 3> itemRotation = {90.0f, 0.0f, 0.0f};
     const mbgl::LatLng location{37.76, -122.47};
 
     Interface::GeometryOptions options;
 
     interface.setGeometryTweakerCallback([=]([[maybe_unused]] mbgl::gfx::Drawable& drawable,
-                                                   const mbgl::PaintParameters& params,
-                                                   Interface::GeometryOptions& currentOptions) mutable {
+                                             const mbgl::PaintParameters& params,
+                                             Interface::GeometryOptions& currentOptions) mutable {
         const mbgl::Point<double>& center = project(location, params.state);
 
         const float scale = itemScale * static_cast<float>(std::pow(2.f, params.state.getZoom())) *
@@ -417,7 +479,7 @@ void ExampleCustomDrawableStyleLayerHost::loadGeometry(Interface& interface) {
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     const std::shared_ptr<TriangleIndexVector> sharedIndices = std::make_shared<TriangleIndexVector>();
 
-    //importObj(interface, "../../_deps/tinyobjloader-src/models/cube.obj", *sharedVertices, *sharedIndices, options);
+    // importObj(interface, "../../_deps/tinyobjloader-src/models/cube.obj", *sharedVertices, *sharedIndices, options);
     importObj(interface, assetsPath + "sphere.obj", *sharedVertices, *sharedIndices, options);
 
     interface.setGeometryOptions(options);
@@ -494,7 +556,6 @@ mbgl::gfx::Texture2DPtr ExampleCustomDrawableStyleLayerHost::createCheckerboardT
     uint16_t blockSize,
     const std::array<uint8_t, 4>& color1,
     const std::array<uint8_t, 4>& color2) {
-
     std::shared_ptr<mbgl::PremultipliedImage> image = std::make_shared<mbgl::PremultipliedImage>(
         mbgl::Size(wb * blockSize, hb * blockSize));
 

@@ -89,11 +89,8 @@ std::unique_ptr<gfx::TextureResource> UploadPass::createTextureResource(const Si
     throw std::runtime_error("UploadPass::createTextureResource not implemented on Metal!");
 }
 
-void UploadPass::updateTextureResource(gfx::TextureResource&,
-                                       const Size,
-                                       const void*,
-                                       gfx::TexturePixelType,
-                                       gfx::TextureChannelDataType) {
+void UploadPass::updateTextureResource(
+    gfx::TextureResource&, const Size, const void*, gfx::TexturePixelType, gfx::TextureChannelDataType) {
     assert(false);
     throw std::runtime_error("UploadPass::updateTextureResource not implemented on Metal!");
 }

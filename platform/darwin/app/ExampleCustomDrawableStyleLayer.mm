@@ -129,7 +129,7 @@ public:
 
                 // add polyline
                 interface.addPolyline(polyline, Interface::LineShaderType::WideVector);
-                
+
                 // add clone
                 for(auto &p : polyline) {
                     p.y += 0.05f * extent / numLines;

@@ -26,7 +26,7 @@ add_executable(
 
 if(MLN_DRAWABLE_RENDERER)
     target_sources(mbgl-glfw PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/example_custom_drawable_style_layer.cpp)
-    
+
     include(${PROJECT_SOURCE_DIR}/vendor/tinyobjloader.cmake)
 
     target_link_libraries(

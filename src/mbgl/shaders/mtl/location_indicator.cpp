@@ -6,11 +6,11 @@ namespace shaders {
 
 using LocationIndicatorShaderSource = ShaderSource<BuiltIn::LocationIndicatorShader, gfx::Backend::Type::Metal>;
 
-const std::array<AttributeInfo, 1> LocationIndicatorShaderSource::attributes = {
-    AttributeInfo{locationIndicatorUBOCount + 0, gfx::AttributeDataType::Float2, idLocationIndicatorPosVertexAttribute}
-};
+const std::array<AttributeInfo, 1> LocationIndicatorShaderSource::attributes = {AttributeInfo{
+    locationIndicatorUBOCount + 0, gfx::AttributeDataType::Float2, idLocationIndicatorPosVertexAttribute}};
 
-using LocationIndicatorTexturedShaderSource = ShaderSource<BuiltIn::LocationIndicatorTexturedShader, gfx::Backend::Type::Metal>;
+using LocationIndicatorTexturedShaderSource =
+    ShaderSource<BuiltIn::LocationIndicatorTexturedShader, gfx::Backend::Type::Metal>;
 
 const std::array<AttributeInfo, 2> LocationIndicatorTexturedShaderSource::attributes = {
     AttributeInfo{locationIndicatorUBOCount + 0, gfx::AttributeDataType::Float2, idLocationIndicatorPosVertexAttribute},

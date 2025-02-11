@@ -333,7 +333,7 @@ public:
         if (!drawableUniformBuffer) {
             drawableUniformBuffer = parameters.context.createUniformBuffer(
                 &drawableUBO, sizeof(drawableUBO), false, true);
-            
+
             layerUniforms->set(idFillDrawableUBO, drawableUniformBuffer);
             drawable.setUBOIndex(0);
         } else {
@@ -416,9 +416,8 @@ private:
 
 class GeometryDrawableTweaker : public gfx::DrawableTweaker {
 public:
-    GeometryDrawableTweaker(
-        const CustomDrawableLayerHost::Interface::GeometryOptions& options_,
-        CustomDrawableLayerHost::Interface::GeometryTweakerCallback&& callback_)
+    GeometryDrawableTweaker(const CustomDrawableLayerHost::Interface::GeometryOptions& options_,
+                            CustomDrawableLayerHost::Interface::GeometryTweakerCallback&& callback_)
         : options(options_),
           callback(callback_) {}
     ~GeometryDrawableTweaker() override = default;
@@ -680,8 +679,8 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addSymbol(
 
 util::SimpleIdentity CustomDrawableLayerHost::Interface::addGeometry(
     std::shared_ptr<gfx::VertexVector<GeometryVertex>> vertices,
-    std::shared_ptr<gfx::IndexVector<gfx::Triangles>> indices, bool is3D) {
-
+    std::shared_ptr<gfx::IndexVector<gfx::Triangles>> indices,
+    bool is3D) {
     if (!vertices || !indices) {
         return util::SimpleIdentity::Empty;
     }
@@ -701,7 +700,7 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addGeometry(
 
     SegmentVector<GeometryVertex> triangleSegments;
     triangleSegments.emplace_back(Segment<GeometryVertex>{0, 0, vertices->elements(), indices->elements()});
-     
+
     // add to builder
     auto attrs = context.createVertexAttributeArray();
     if (const auto& attr = attrs->set(idLocationIndicatorPosVertexAttribute)) {
