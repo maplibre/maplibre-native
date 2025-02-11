@@ -40,7 +40,7 @@
 }
 
 - (GLTFBoundingBox)approximateBounds {
-    GLTFBoundingBox sceneBounds = { 0 };
+    GLTFBoundingBox sceneBounds = { 0, 0 };
     for (GLTFNode *node in self.nodes) {
         GLTFBoundingBox nodeBounds = node.approximateBounds;
         GLTFBoundingBoxUnion(&sceneBounds, nodeBounds);

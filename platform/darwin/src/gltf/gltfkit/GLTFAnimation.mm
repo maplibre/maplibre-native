@@ -15,6 +15,7 @@
 //
 
 #import "GLTFAnimation.h"
+#include "GLTFUtilities.h"
 #import "GLTFAccessor.h"
 #import "GLTFBufferView.h"
 #import "GLTFBuffer.h"
@@ -27,11 +28,11 @@
 }
 
 - (const void *)inputValues {
-    return [self.inputAccessor.bufferView.buffer contents] + self.inputAccessor.bufferView.offset + self.inputAccessor.offset;
+    return (uint8_t*)[self.inputAccessor.bufferView.buffer contents] + self.inputAccessor.bufferView.offset + self.inputAccessor.offset;
 }
 
 - (const void *)outputValues {
-    return [self.outputAccessor.bufferView.buffer contents] + self.outputAccessor.bufferView.offset + self.outputAccessor.offset;
+    return (uint8_t*)[self.outputAccessor.bufferView.buffer contents] + self.outputAccessor.bufferView.offset + self.outputAccessor.offset;
 }
 
 - (int)keyFrameCount {
@@ -48,14 +49,14 @@
 
 - (NSTimeInterval)startTime {
     GLTFAnimationSampler *sampler = self.sampler;
-    const float *timeValues = sampler.inputValues;
+    const float *timeValues = (const float*)sampler.inputValues;
     float startTime = timeValues[0];
     return startTime;
 }
 
 - (NSTimeInterval)endTime {
     GLTFAnimationSampler *sampler = self.sampler;
-    const float *timeValues = sampler.inputValues;
+    const float *timeValues = (const float*)sampler.inputValues;
     int keyFrameCount = sampler.keyFrameCount;
     float endTime = timeValues[keyFrameCount - 1];
     return endTime;
@@ -81,7 +82,7 @@
         
         int keyFrameCount = sampler.keyFrameCount;
         
-        const float *timeValues = sampler.inputValues;
+        const float *timeValues = (const float*)sampler.inputValues;
         
         float minTime = timeValues[0];
         float maxTime = timeValues[keyFrameCount - 1];
@@ -115,7 +116,7 @@
                     NSLog(@"WARNING: Only float accessors are supported for rotation animations. This will only be reported once.");
                 });
             }
-            const GLTFQuaternion *rotationValues = sampler.outputValues;
+            const GLTFQuaternion *rotationValues = (const GLTFQuaternion*)sampler.outputValues;
             
             GLTFQuaternion previousRotation = rotationValues[previousKeyFrame];
             GLTFQuaternion nextRotation = rotationValues[nextKeyFrame];
@@ -123,11 +124,11 @@
 
             target.rotationQuaternion = interpRotation;
         } else if ([path isEqualToString:@"translation"]) {
-            const GLTFVector3 *translationValues = sampler.outputValues;
+            const GLTFVector3 *translationValues = (const GLTFVector3*)sampler.outputValues;
             
             GLTFVector3 previousTranslation = translationValues[previousKeyFrame];
             GLTFVector3 nextTranslation = translationValues[nextKeyFrame];
-            
+
             GLTFVector3 interpTranslation = (GLTFVector3) {
                 ((1 - frameProgress) * previousTranslation.x) + (frameProgress * nextTranslation.x),
                 ((1 - frameProgress) * previousTranslation.y) + (frameProgress * nextTranslation.y),
@@ -136,7 +137,7 @@
 
             target.translation = (simd_float3){ interpTranslation.x, interpTranslation.y, interpTranslation.z };
         } else if ([path isEqualToString:@"scale"]) {
-            const float *scaleValues = sampler.outputValues;
+            const float *scaleValues = (const float*)sampler.outputValues;
             
             float previousScale = scaleValues[previousKeyFrame];
             float nextScale = scaleValues[nextKeyFrame];
@@ -151,7 +152,7 @@
                     NSLog(@"WARNING: Only scalar float accessors are supported for weight animations. This will only be reported once.");
                 });
             }
-            const float *weightValues = sampler.outputValues;
+            const float *weightValues = (const float*)sampler.outputValues;
             
             long weightCount = sampler.outputAccessor.count / keyFrameCount;
             

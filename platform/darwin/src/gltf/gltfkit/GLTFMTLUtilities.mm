@@ -29,11 +29,12 @@ MTLPrimitiveType GLTFMTLPrimitiveTypeForPrimitiveType(GLTFPrimitiveType gltfType
         case GLTFPrimitiveTypeTriangleStrip:
             return MTLPrimitiveTypeTriangleStrip;
             
-            // Not supported; need to duplicate first element and restitch into tri strip, respectively
+        // Not supported; need to duplicate first element and restitch into tri strip, respectively
         case GLTFPrimitiveTypeLineLoop:
         case GLTFPrimitiveTypeTriangleFan:
         default:
-            return -1;
+            NSLog(@"Unsupported primitive type function %d", (int)gltfType);
+            return MTLPrimitiveTypePoint;
     }
 }
 

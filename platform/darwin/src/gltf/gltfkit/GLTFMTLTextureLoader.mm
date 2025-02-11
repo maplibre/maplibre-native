@@ -77,7 +77,7 @@ __fp16 *GLTFMTLConvertImageToRGBA16F(CGImageRef image)
     vImageConverter_Release(converter);
     CFRelease(srcData);
 
-    return dstPixels;
+    return (__fp16*)dstPixels;
 }
 
 unsigned char *GLTFMTLConvertImageToRGBA8U(CGImageRef image)
@@ -108,7 +108,7 @@ unsigned char *GLTFMTLConvertImageToRGBA8U(CGImageRef image)
         .bitsPerComponent = sizeof(unsigned char) * 8,
         .bitsPerPixel = sizeof(unsigned char) * 8 * 4,
         .colorSpace = dstColorSpace,
-        .bitmapInfo = kCGBitmapByteOrder32Big | kCGImageAlphaLast
+        .bitmapInfo = (CGBitmapInfo)kCGBitmapByteOrder32Big | (CGBitmapInfo)kCGImageAlphaLast
     };
     
     vImage_Error error = kvImageNoError;
@@ -138,7 +138,7 @@ unsigned char *GLTFMTLConvertImageToRGBA8U(CGImageRef image)
     vImageConverter_Release(converter);
     CFRelease(srcData);
     
-    return dstPixels;
+    return (unsigned char*)dstPixels;
 }
 
 @interface GLTFMTLTextureLoader ()
@@ -201,7 +201,7 @@ unsigned char *GLTFMTLConvertImageToRGBA8U(CGImageRef image)
                                                                                          height:height
                                                                                       mipmapped:mipmapped];
 
-    id<MTLTexture> texture = [self newTextureWithBytes:dstBytes
+    id<MTLTexture> texture = [self newTextureWithBytes:(const unsigned char*)dstBytes
                                            bytesPerRow:bytesPerRow
                                             descriptor:descriptor
                                                options:options

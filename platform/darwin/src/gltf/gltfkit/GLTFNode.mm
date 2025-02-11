@@ -119,11 +119,11 @@
 }
 
 - (GLTFBoundingBox)_approximateBoundsRecursive:(simd_float4x4)transform {
-    GLTFBoundingBox bounds = { 0 };
+    GLTFBoundingBox bounds = { 0, 0 };
     
     if (self.mesh != nil) {
         for (GLTFSubmesh *submesh in self.mesh.submeshes) {
-            GLTFBoundingBox submeshBounds = { 0 };
+            GLTFBoundingBox submeshBounds = { 0, 0 };
             GLTFAccessor *positionAccessor = submesh.accessorsForAttributes[GLTFAttributeSemanticPosition];
             GLTFValueRange positionRange = positionAccessor.valueRange;
             submeshBounds.minPoint.x = positionRange.minValue[0];

@@ -9,7 +9,6 @@
 #import <Metal/Metal.h>
 #import "MLNBackendResource.h"
 #import "MLNMapView.h"
-#import "MLNMapProjection.h"
 #include <memory>
 #import "GLTFManagerRenderingEnvironmentMetal.hpp"
 #import "GLTFManager.hpp"
@@ -344,11 +343,6 @@ simd_double4x4 toSimdMatrix4D(const MLNMatrix4 & mlMatrix) {
     _viewportSize.y = resource.mtkView.drawableSize.height;
     _manager->setDrawableSize(_viewportSize.x, _viewportSize.y);
     
-    MLNMapProjection *proj2 = mapView.mapProjection;
-    _manager->_metersPerPixel = proj2.metersPerPoint / 2.0;
-    _manager->setTiltDeg(90-mapView.camera.pitch);
-    _manager->setRotationDeg(-mapView.camera.heading);
-
     float timestep = (1 / 60.0f);
     _manager->updateScene(timestep);
         

@@ -15,6 +15,7 @@
 //
 
 #import "GLTFUtilities.h"
+#include "GLTFEnums.h"
 
 bool GLTFBoundingBoxIsEmpty(GLTFBoundingBox b) {
     return (b.minPoint.x == b.maxPoint.x) && (b.minPoint.y == b.maxPoint.y) && (b.minPoint.z == b.maxPoint.z);
@@ -115,7 +116,7 @@ GLTFDataDimension GLTFDataDimensionForName(NSString *name) {
         return GLTFDataDimensionMatrix4x4;
     }
     
-    return -1;
+    return GLTFDataDimensionUnknown;
 }
 
 size_t GLTFSizeOfDataType(GLTFDataType type) {

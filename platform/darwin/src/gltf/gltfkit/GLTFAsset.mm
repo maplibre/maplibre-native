@@ -15,6 +15,7 @@
 //
 
 #import "GLTFAsset.h"
+#include "GLTFEnums.h"
 #import "GLTFAnimation.h"
 #import "GLTFAccessor.h"
 #import "GLTFBinaryChunk.h"
@@ -263,11 +264,11 @@
         
         [assetData getBytes:&chunkHeader range:NSMakeRange(offset, sizeof(chunkHeader))];
         
-        NSData *chunkData = [NSData dataWithBytesNoCopy:(void *)(assetData.bytes + offset + sizeof(chunkHeader))
+        NSData *chunkData = [NSData dataWithBytesNoCopy:(void *)((uint8_t*)assetData.bytes + offset + sizeof(chunkHeader))
                                                  length:chunkHeader.length
                                            freeWhenDone:NO];
         chunk.data = chunkData;
-        chunk.chunkType = chunkHeader.type;
+        chunk.chunkType = (GLTFChunkType)chunkHeader.type;
         
         [chunks addObject:chunk];
         
@@ -296,7 +297,7 @@
     NSMutableArray *accessors = [NSMutableArray arrayWithCapacity:accessorsMap.count];
     for (NSDictionary *properties in accessorsMap) {
         GLTFAccessor *accessor = [[GLTFAccessor alloc] init];
-        accessor.componentType = [properties[@"componentType"] integerValue];
+        accessor.componentType = (GLTFDataType)[properties[@"componentType"] integerValue];
         accessor.dimension = GLTFDataDimensionForName(properties[@"type"]);
         accessor.offset = [properties[@"byteOffset"] integerValue];
         accessor.count = [properties[@"count"] integerValue];
@@ -315,7 +316,7 @@
                 NSLog(@"WARNING: Accessor had misaligned offset %d, which is not a multiple of %d. Building auxiliary buffer of length %d and continuing...",
                       (int)dataOffset, (int)alignment, (int)length);
                 id<GLTFBuffer> buffer = [_bufferAllocator newBufferWithLength:length];
-                memcpy(buffer.contents, accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset, buffer.length);
+                memcpy(buffer.contents, (uint8_t*)accessor.bufferView.buffer.contents + accessor.bufferView.offset + accessor.offset, buffer.length);
                 _buffers = [_buffers arrayByAddingObject:buffer];
 
                 GLTFBufferView *bufferView = [GLTFBufferView new];
@@ -329,7 +330,7 @@
             }
         }
 
-        __block GLTFValueRange valueRange = { 0 };
+        __block GLTFValueRange valueRange = { {}, {} };
         NSArray *minValues = properties[@"min"];
         [minValues enumerateObjectsUsingBlock:^(NSNumber *num, NSUInteger index, BOOL *stop) {
             valueRange.minValue[index] = num.floatValue;
@@ -408,7 +409,7 @@
         bufferView.length = [properties[@"byteLength"] integerValue];
         bufferView.stride = [properties[@"byteStride"] integerValue];
         bufferView.offset = [properties[@"byteOffset"] integerValue];
-        bufferView.target = [properties[@"target"] integerValue];
+        bufferView.target = (GLTFTarget)[properties[@"target"] integerValue];
 
 //        if ((bufferView.buffer != nil) && (bufferView.offset % 16 != 0)) {
 //            NSLog(@"WARNING: Buffer view %d had misaligned offset of %d. Creating auxilliary buffer of length %d and continuing...",
@@ -435,10 +436,10 @@
     NSMutableArray *samplers = [NSMutableArray arrayWithCapacity:samplersMap.count];
     for (NSDictionary *properties in samplersMap) {
         GLTFTextureSampler *sampler = [[GLTFTextureSampler alloc] init];
-        sampler.minFilter = [properties[@"minFilter"] integerValue] ?: sampler.minFilter;
-        sampler.magFilter = [properties[@"magFilter"] integerValue] ?: sampler.magFilter;
-        sampler.sAddressMode = [properties[@"wrapS"] integerValue] ?: sampler.sAddressMode;
-        sampler.tAddressMode = [properties[@"wrapT"] integerValue] ?: sampler.tAddressMode;
+        sampler.minFilter = (GLTFSamplingFilter)([properties[@"minFilter"] integerValue] ?: sampler.minFilter);
+        sampler.magFilter = (GLTFSamplingFilter)([properties[@"magFilter"] integerValue] ?: sampler.magFilter);
+        sampler.sAddressMode = (GLTFAddressMode)([properties[@"wrapS"] integerValue] ?: sampler.sAddressMode);
+        sampler.tAddressMode = (GLTFAddressMode)([properties[@"wrapT"] integerValue] ?: sampler.tAddressMode);
         sampler.name = properties[@"name"];
         sampler.extensions = properties[@"extensions"];
         sampler.extras = properties[@"extras"];
@@ -510,10 +511,10 @@
             texture.image = _images[imageIndex];
         }
 
-        texture.format = [properties[@"format"] integerValue] ?: texture.format;
-        texture.internalFormat = [properties[@"internalFormat"] integerValue] ?: texture.internalFormat;
-        texture.target = [properties[@"target"] integerValue] ?: texture.target;
-        texture.type = [properties[@"type"] integerValue] ?: texture.type;
+        texture.format = (GLTFTextureFormat)([properties[@"format"] integerValue] ?: texture.format);
+        texture.internalFormat = (GLTFTextureFormat)([properties[@"internalFormat"] integerValue] ?: texture.internalFormat);
+        texture.target = (GLTFTextureTarget)([properties[@"target"] integerValue] ?: texture.target);
+        texture.type = (GLTFTextureType)([properties[@"type"] integerValue] ?: texture.type);
         texture.name = properties[@"name"];
         texture.extensions = properties[@"extensions"];
         texture.extras = properties[@"extras"];
@@ -665,12 +666,12 @@
             NSUInteger indexAccessorIndex = [submeshProperties[@"indices"] intValue];
             if (indexAccessorIndex < _accessors.count) {
                 GLTFAccessor *indexAccessor = _accessors[indexAccessorIndex];
-                if (indexAccessor.componentType == GLTFTextureTypeUChar) {
+                if (indexAccessor.componentType == (GLTFDataType)GLTFTextureTypeUChar) {
                     // Fix up 8-bit indices, since they're unsupported in modern APIs
-                    uint8_t *sourceIndices = indexAccessor.bufferView.buffer.contents + indexAccessor.offset + indexAccessor.bufferView.offset;
+                    uint8_t *sourceIndices = (uint8_t*)indexAccessor.bufferView.buffer.contents + indexAccessor.offset + indexAccessor.bufferView.offset;
                     
                     id<GLTFBuffer> shortBuffer = [_bufferAllocator newBufferWithLength:indexAccessor.count * sizeof(uint16_t)];
-                    uint16_t *destIndices = shortBuffer.contents;
+                    uint16_t *destIndices = (uint16_t*)shortBuffer.contents;
                     for (int i = 0; i < indexAccessor.count; ++i) {
                         destIndices[i] = (uint16_t)sourceIndices[i];
                     }
