@@ -1,5 +1,7 @@
 #include "example_custom_drawable_style_layer.hpp"
 
+#if MLN_DRAWABLE_RENDERER
+
 #include <mbgl/style/layer.hpp>
 #include <mbgl/style/layers/custom_drawable_layer.hpp>
 #include <mbgl/util/io.hpp>
@@ -591,3 +593,5 @@ mbgl::gfx::Texture2DPtr ExampleCustomDrawableStyleLayerHost::createCheckerboardT
 
     return texture;
 }
+
+#endif
