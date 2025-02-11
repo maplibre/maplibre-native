@@ -23,19 +23,18 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef struct __attribute__((packed)) {
-    float x, y, z;
+  float x, y, z;
 } GLTFVector3;
 
 typedef struct __attribute__((packed)) {
-    float x, y, z, w;
+  float x, y, z, w;
 } GLTFVector4;
 
 typedef struct __attribute__((packed)) {
-    GLTFVector4 columns[4];
+  GLTFVector4 columns[4];
 } GLTFMatrix4;
 
 typedef simd_quatf GLTFQuaternion;
-
 
 extern bool GLTFBoundingBoxIsEmpty(GLTFBoundingBox b);
 
@@ -43,24 +42,18 @@ extern GLTFBoundingBox *GLTFBoundingBoxUnion(GLTFBoundingBox *a, GLTFBoundingBox
 
 extern void GLTFBoundingBoxTransform(GLTFBoundingBox *b, simd_float4x4 transform);
 
-
 extern GLTFQuaternion GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll);
-
-
-
-
 
 extern simd_float3x3 GLTFMatrixUpperLeft3x3(simd_float4x4);
 
 extern simd_float4x4 GLTFNormalMatrixFromModelMatrix(simd_float4x4);
 
-
-
 extern GLTFDataDimension GLTFDataDimensionForName(NSString *name);
 
 extern size_t GLTFSizeOfDataType(GLTFDataType type);
 
-extern size_t GLTFSizeOfComponentTypeWithDimension(GLTFDataType baseType, GLTFDataDimension dimension);
+extern size_t GLTFSizeOfComponentTypeWithDimension(GLTFDataType baseType,
+                                                   GLTFDataDimension dimension);
 
 extern NSInteger GLTFComponentCountForDimension(GLTFDataDimension dimension);
 

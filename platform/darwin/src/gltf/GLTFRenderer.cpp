@@ -18,14 +18,13 @@ GLTFRenderer::~GLTFRenderer() {
     // Base class does nothing
 }
 
-
 // Update any animations
 void GLTFRenderer::update(float timeSinceLastDraw) {
     // Base class does nothing
 }
 
 // Render
- void GLTFRenderer::render() {
+void GLTFRenderer::render() {
     // Base class does nothing
 }
 
@@ -35,18 +34,11 @@ void GLTFRenderer::setDrawableSize(int width, int height) {
 }
 
 // Protected items
-void GLTFRenderer::loadBloomPipelines() {
-    
-}
+void GLTFRenderer::loadBloomPipelines() {}
 
-void GLTFRenderer::loadTonemapPipeline() {
-    
-}
+void GLTFRenderer::loadTonemapPipeline() {}
 
-void GLTFRenderer::updateFramebufferSize() {
-    
-}
-
+void GLTFRenderer::updateFramebufferSize() {}
 
 // Load a model
 void GLTFRenderer::loadGLTFModel(std::shared_ptr<GLTFModel> model) {
@@ -68,13 +60,10 @@ void GLTFRenderer::setRotationDeg(double rotationDeg) {
     _rotationDeg = rotationDeg;
 }
 
-
-
 // Use bloom pass
 void GLTFRenderer::setUseBloomPass(bool useBloomPass) {
     _useBloomPass = useBloomPass;
 }
-
 
 // Set the rendering environemnt variables
 void GLTFRenderer::setRenderingEnvironemnt(std::shared_ptr<GLTFManagerRenderingEnvironment> renderingEnvironment) {

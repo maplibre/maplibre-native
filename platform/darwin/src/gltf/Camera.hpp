@@ -11,7 +11,8 @@
 #include <stdio.h>
 #include <simd/simd.h>
 
-namespace maplibre { namespace gltf {
+namespace maplibre {
+namespace gltf {
 
 class Camera {
 public:
@@ -23,10 +24,9 @@ public:
     simd_double4x4 projectionMatrix();
     simd_double4x4 _viewMatrix;
     void updateWithTimestep(double timestep);
-
 };
 
-}}
-
+} // namespace gltf
+} // namespace maplibre
 
 #endif /* Camera_hpp */

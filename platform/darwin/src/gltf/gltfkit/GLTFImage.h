@@ -14,8 +14,8 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
-#import "GLTFObject.h"
 #import "GLTFBufferView.h"
+#import "GLTFObject.h"
 
 #import <Foundation/Foundation.h>
 
@@ -24,13 +24,13 @@ NS_ASSUME_NONNULL_BEGIN
 @interface GLTFImage : GLTFObject
 
 /// A reference to a buffer view containing image data, if url is nil
-@property (nonatomic, strong) GLTFBufferView * _Nullable bufferView;
+@property (nonatomic, strong) GLTFBufferView *_Nullable bufferView;
 
 /// The MIME type of the data contained in this image's buffer view
-@property (nonatomic, copy) NSString * _Nullable mimeType;
+@property (nonatomic, copy) NSString *_Nullable mimeType;
 
 /// A file URL, if the URI was not a decodable data-uri; otherwise nil
-@property (nonatomic, copy) NSURL * _Nullable url;
+@property (nonatomic, copy) NSURL *_Nullable url;
 
 /// A data object containing the data encoded in the image's data-uri, if present; otherwise nil
 @property (nonatomic, strong) NSData *imageData;

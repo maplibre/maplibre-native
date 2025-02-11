@@ -6,13 +6,12 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "gltfkit/GLTFNode.h"
 #import "gltfkit/GLTFMesh.h"
+#import "gltfkit/GLTFNode.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-
-@interface GLTFMTLRenderItem: NSObject
+@interface GLTFMTLRenderItem : NSObject
 @property (nonatomic) NSString *label;
 @property (nonatomic) GLTFNode *node;
 @property (nonatomic, strong) GLTFSubmesh *submesh;

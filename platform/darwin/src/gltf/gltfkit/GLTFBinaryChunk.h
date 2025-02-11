@@ -19,14 +19,14 @@
 extern const UInt32 GLTFBinaryMagic;
 
 typedef NS_ENUM(NSInteger, GLTFChunkType) {
-    GLTFChunkTypeJSON   = 0x4E4F534A,
-    GLTFChunkTypeBinary = 0x004E4942
+  GLTFChunkTypeJSON = 0x4E4F534A,
+  GLTFChunkTypeBinary = 0x004E4942
 };
 
 typedef struct {
-    UInt32 magic;
-    UInt32 version;
-    UInt32 length;
+  UInt32 magic;
+  UInt32 version;
+  UInt32 length;
 } GLTFBinaryHeader;
 
 @interface GLTFBinaryChunk : NSObject

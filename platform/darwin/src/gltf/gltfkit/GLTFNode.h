@@ -14,32 +14,32 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
+#import <simd/simd.h>
+#import "GLTFNodeVisitor.h"
 #import "GLTFObject.h"
 #import "GLTFUtilities.h"
-#import "GLTFNodeVisitor.h"
-#import <simd/simd.h>
 
 NS_ASSUME_NONNULL_BEGIN
-
 
 @class GLTFCamera, GLTFSkin, GLTFMesh;
 @class GLTFKHRLight;
 
 @interface GLTFNode : GLTFObject <GLTFNodeVisitable>
-@property (nonatomic, weak) GLTFCamera * _Nullable camera;
-@property (nonatomic, weak) GLTFKHRLight * _Nullable light;
-@property (nonatomic, weak) GLTFNode * _Nullable parent;
+@property (nonatomic, weak) GLTFCamera *_Nullable camera;
+@property (nonatomic, weak) GLTFKHRLight *_Nullable light;
+@property (nonatomic, weak) GLTFNode *_Nullable parent;
 @property (nonatomic, copy) NSArray<GLTFNode *> *children;
-@property (nonatomic, weak) GLTFSkin * _Nullable skin;
-@property (nonatomic, copy) NSString * _Nullable jointName;
-@property (nonatomic, weak) GLTFMesh * _Nullable mesh;
+@property (nonatomic, weak) GLTFSkin *_Nullable skin;
+@property (nonatomic, copy) NSString *_Nullable jointName;
+@property (nonatomic, weak) GLTFMesh *_Nullable mesh;
 @property (nonatomic, copy) NSArray<NSNumber *> *morphTargetWeights;
 @property (nonatomic, assign) GLTFQuaternion rotationQuaternion;
 @property (nonatomic, assign) simd_float3 scale;
 @property (nonatomic, assign) simd_float3 translation;
 @property (nonatomic, assign) simd_float4x4 localTransform;
 @property (nonatomic, readonly, assign) simd_float4x4 globalTransform;
-@property (nonatomic, readonly, assign) GLTFBoundingBox approximateBounds; // axis-aligned; in local coordinates
+@property (nonatomic, readonly, assign)
+    GLTFBoundingBox approximateBounds;  // axis-aligned; in local coordinates
 
 - (void)addChildNode:(GLTFNode *)node;
 - (void)removeFromParent;

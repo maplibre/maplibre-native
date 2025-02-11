@@ -14,9 +14,9 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
+#import "GLTFNodeVisitor.h"
 #import "GLTFObject.h"
 #import "GLTFUtilities.h"
-#import "GLTFNodeVisitor.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -25,7 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface GLTFScene : GLTFObject <GLTFNodeVisitable>
 @property (nonatomic, copy) NSArray<GLTFNode *> *nodes;
-@property (nonatomic, weak) GLTFKHRLight * _Nullable ambientLight;
+@property (nonatomic, weak) GLTFKHRLight *_Nullable ambientLight;
 @property (nonatomic, readonly, assign) GLTFBoundingBox approximateBounds;
 
 - (void)addNode:(GLTFNode *)node;

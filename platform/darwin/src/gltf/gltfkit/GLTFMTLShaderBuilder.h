@@ -27,12 +27,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface GLTFMTLShaderBuilder : NSObject
 
-- (id<MTLRenderPipelineState>)renderPipelineStateForSubmesh:(GLTFSubmesh *)submesh
-                                      //  lightingEnvironment:(GLTFMTLLightingEnvironment * _Nullable)lightingEnvironment
-                                           colorPixelFormat:(MTLPixelFormat)colorPixelFormat
-                                    depthStencilPixelFormat:(MTLPixelFormat)depthStencilPixelFormat
-                                                sampleCount:(int)sampleCount
-                                                     device:(id<MTLDevice>)device;
+- (id<MTLRenderPipelineState>)
+    renderPipelineStateForSubmesh:(GLTFSubmesh *)submesh
+                 //  lightingEnvironment:(GLTFMTLLightingEnvironment * _Nullable)lightingEnvironment
+                 colorPixelFormat:(MTLPixelFormat)colorPixelFormat
+          depthStencilPixelFormat:(MTLPixelFormat)depthStencilPixelFormat
+                      sampleCount:(int)sampleCount
+                           device:(id<MTLDevice>)device;
 
 @end
 

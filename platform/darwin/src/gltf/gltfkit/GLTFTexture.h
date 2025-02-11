@@ -14,11 +14,10 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
-#import "GLTFObject.h"
-#import "GLTFEnums.h"
-#import "../GLTFMath.hpp"
 #import <simd/simd.h>
-
+#import "../GLTFMath.hpp"
+#import "GLTFEnums.h"
+#import "GLTFObject.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -61,6 +60,4 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-
 NS_ASSUME_NONNULL_END
-

@@ -24,9 +24,9 @@ NS_ASSUME_NONNULL_BEGIN
 @class GLTFParameter;
 
 typedef NS_ENUM(NSInteger, GLTFAlphaMode) {
-    GLTFAlphaModeOpaque,
-    GLTFAlphaModeMask,
-    GLTFAlphaModeBlend,
+  GLTFAlphaModeOpaque,
+  GLTFAlphaModeMask,
+  GLTFAlphaModeBlend,
 };
 
 @interface GLTFMaterial : GLTFObject
@@ -38,23 +38,27 @@ typedef NS_ENUM(NSInteger, GLTFAlphaMode) {
 @property (nonatomic, assign) float occlusionStrength;
 @property (nonatomic, assign) simd_float3 emissiveFactor;
 
-@property (nonatomic, assign) float glossinessFactor; // Only used by KHR_materials_pbrSpecularGlossiness extension
-@property (nonatomic, assign) simd_float3 specularFactor; // Only used by KHR_materials_pbrSpecularGlossiness extension
+@property (nonatomic, assign)
+    float glossinessFactor;  // Only used by KHR_materials_pbrSpecularGlossiness extension
+@property (nonatomic, assign)
+    simd_float3 specularFactor;  // Only used by KHR_materials_pbrSpecularGlossiness extension
 
-@property (nonatomic, strong) GLTFTextureInfo * _Nullable baseColorTexture;
-@property (nonatomic, strong) GLTFTextureInfo * _Nullable metallicRoughnessTexture;
-@property (nonatomic, strong) GLTFTextureInfo * _Nullable normalTexture;
-@property (nonatomic, strong) GLTFTextureInfo * _Nullable emissiveTexture;
-@property (nonatomic, strong) GLTFTextureInfo * _Nullable occlusionTexture;
+@property (nonatomic, strong) GLTFTextureInfo* _Nullable baseColorTexture;
+@property (nonatomic, strong) GLTFTextureInfo* _Nullable metallicRoughnessTexture;
+@property (nonatomic, strong) GLTFTextureInfo* _Nullable normalTexture;
+@property (nonatomic, strong) GLTFTextureInfo* _Nullable emissiveTexture;
+@property (nonatomic, strong) GLTFTextureInfo* _Nullable occlusionTexture;
 
-@property (nonatomic, assign) BOOL hasTextureTransforms; // Only used when KHR_texture_transform extension is present
+@property (nonatomic, assign)
+    BOOL hasTextureTransforms;  // Only used when KHR_texture_transform extension is present
 
 @property (nonatomic, assign, getter=isDoubleSided) BOOL doubleSided;
 
 @property (nonatomic, assign) GLTFAlphaMode alphaMode;
-@property (nonatomic, assign) float alphaCutoff; // Only used when `alphaMode` == GLTFAlphaModeMask
+@property (nonatomic, assign) float alphaCutoff;  // Only used when `alphaMode` == GLTFAlphaModeMask
 
-@property (nonatomic, assign, getter=isUnlit) BOOL unlit; // Only used when KHR_materials_unlit extension is present
+@property (nonatomic, assign, getter=isUnlit)
+    BOOL unlit;  // Only used when KHR_materials_unlit extension is present
 
 @end
 

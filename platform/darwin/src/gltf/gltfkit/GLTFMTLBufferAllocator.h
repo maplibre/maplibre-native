@@ -14,20 +14,20 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
-#import "GLTFBuffer.h"
-#import "GLTFBufferAllocator.h"
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
+#import "GLTFBuffer.h"
+#import "GLTFBufferAllocator.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface GLTFMTLBuffer : NSObject<GLTFBuffer>
+@interface GLTFMTLBuffer : NSObject <GLTFBuffer>
 
 @property (nonatomic, readonly) id<MTLBuffer> buffer;
 
 @end
 
-@interface GLTFMTLBufferAllocator : NSObject<GLTFBufferAllocator>
+@interface GLTFMTLBufferAllocator : NSObject <GLTFBufferAllocator>
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device;
 

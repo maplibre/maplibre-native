@@ -14,8 +14,8 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
-#import "GLTFObject.h"
 #import "GLTFEnums.h"
+#import "GLTFObject.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

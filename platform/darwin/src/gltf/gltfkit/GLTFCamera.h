@@ -14,8 +14,8 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
-#import "GLTFObject.h"
 #import "GLTFEnums.h"
+#import "GLTFObject.h"
 
 #import <simd/simd.h>
 
@@ -26,10 +26,10 @@ NS_ASSUME_NONNULL_BEGIN
 @interface GLTFCamera : GLTFObject
 @property (nonatomic, assign) GLTFCameraType cameraType;
 
-@property (nonatomic, assign) float aspectRatio; // Only applicable when type is perspective
-@property (nonatomic, assign) float yfov;        // Only applicable when type is perspective
-@property (nonatomic, assign) float xmag;        // Only applicable when type is orthographic
-@property (nonatomic, assign) float ymag;        // Only applicable when type is orthographic
+@property (nonatomic, assign) float aspectRatio;  // Only applicable when type is perspective
+@property (nonatomic, assign) float yfov;         // Only applicable when type is perspective
+@property (nonatomic, assign) float xmag;         // Only applicable when type is orthographic
+@property (nonatomic, assign) float ymag;         // Only applicable when type is orthographic
 @property (nonatomic, assign) float znear;
 @property (nonatomic, assign) float zfar;
 

@@ -19,10 +19,10 @@
 #import <simd/simd.h>
 
 typedef NS_ENUM(NSInteger, GLTFKHRLightType) {
-    GLTFKHRLightTypeAmbient,
-    GLTFKHRLightTypeDirectional,
-    GLTFKHRLightTypePoint,
-    GLTFKHRLightTypeSpot,
+  GLTFKHRLightTypeAmbient,
+  GLTFKHRLightTypeDirectional,
+  GLTFKHRLightTypePoint,
+  GLTFKHRLightTypeSpot,
 };
 
 @interface GLTFKHRLight : GLTFObject

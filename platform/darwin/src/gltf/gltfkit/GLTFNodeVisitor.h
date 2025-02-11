@@ -20,9 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class GLTFNode;
 
-typedef NS_ENUM(NSInteger, GLTFVisitationStrategy) {
-    GLTFVisitationStrategyDepthFirst
-};
+typedef NS_ENUM(NSInteger, GLTFVisitationStrategy) { GLTFVisitationStrategyDepthFirst };
 
 typedef void (^GLTFNodeVisitor)(GLTFNode *node, int depth, BOOL *stop);
 

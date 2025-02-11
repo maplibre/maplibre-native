@@ -46,7 +46,7 @@ extern NSString *const GLTFAttributeSemanticMetallic;
 @property (nonatomic, assign) NSInteger stride;
 @end
 
-@interface GLTFVertexDescriptor: NSObject
+@interface GLTFVertexDescriptor : NSObject
 @property (nonatomic, copy) NSArray<GLTFVertexAttribute *> *attributes;
 @property (nonatomic, copy) NSArray<GLTFBufferLayout *> *bufferLayouts;
 @end

@@ -14,10 +14,9 @@ typedef void (^GLTFModelLoaderCompletionHandler)(GLTFAsset *asset);
 
 @interface GLTFModelLoader : NSObject
 
--(void)loadURL:(NSURL *)assetURL
-withCompletionHandler:(GLTFModelLoaderCompletionHandler)completionHandler
-bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator;
-
+- (void)loadURL:(NSURL *)assetURL
+    withCompletionHandler:(GLTFModelLoaderCompletionHandler)completionHandler
+          bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator;
 
 @end
 

@@ -22,15 +22,14 @@ typedef enum {
     GLTFTextureBindIndexBRDFLookup,
 } GLTFMTLTextureBindIndex;
 
-#define DEG_RAD (M_PI/180.0)
-#define RAD_DEG (180.0/M_PI)
+#define DEG_RAD (M_PI / 180.0)
+#define RAD_DEG (180.0 / M_PI)
 
 //  0.0174533
 // 57.2958
 
 #define GLTFMTLMaximumLightCount 3
 #define GLTFMTLMaximumTextureCount (GLTFTextureBindIndexEmissive + 1)
-
 
 typedef struct {
     simd_float3 minPoint;
@@ -41,7 +40,6 @@ typedef struct {
     simd_double3 center;
     float radius;
 } GLTFBoundingSphere;
-
 
 typedef struct {
     simd_float4x4 modelMatrix;
@@ -112,14 +110,13 @@ simd_float4x4 GLTFRotationMatrixFromAxisAngle(simd_float3 axis, float angle);
 
 simd_double4x4 GLTFRotationMatrixFromAxisAngleD(simd_double3 axis, double angle);
 
-simd_double4x4 GLTFPerspectiveProjectionMatrixAspectFovRH(const double fovY, const double aspect, const double nearZ, const double farZ);
+simd_double4x4 GLTFPerspectiveProjectionMatrixAspectFovRH(const double fovY,
+                                                          const double aspect,
+                                                          const double nearZ,
+                                                          const double farZ);
 
-simd_float4x4 GLTFOrthoProjectionMatrix(const float left,
-                                        const float right,
-                                        const float bottom,
-                                        const float top,
-                                        const float nearZ,
-                                        const float farZ);
+simd_float4x4 GLTFOrthoProjectionMatrix(
+    const float left, const float right, const float bottom, const float top, const float nearZ, const float farZ);
 
 simd_float3x3 GLTFMatrixUpperLeft3x3(simd_float4x4 m);
 
@@ -134,7 +131,6 @@ simd_float3x3 GLTFTextureMatrixFromTransform(GLTFTextureTransform transform);
 simd_float4x4 GLTFNormalMatrixFromModelMatrix(simd_float4x4 m);
 
 simd_double4x4 GLTFNormalMatrixFromModelMatrixD(simd_double4x4 m);
-
 
 #ifdef __cplusplus
 }

@@ -25,7 +25,6 @@ NS_ASSUME_NONNULL_BEGIN
 extern "C" {
 #endif
 
-
 extern MTLPrimitiveType GLTFMTLPrimitiveTypeForPrimitiveType(GLTFPrimitiveType gltfType);
 
 extern MTLBlendOperation GLTFMTLBlendOperationForBlendFunction(GLTFBlendFunction f);
@@ -44,9 +43,11 @@ extern MTLSamplerMipFilter GLTFMTLSamplerMipFilterForSamplingFilter(GLTFSampling
 
 extern MTLSamplerAddressMode GLTFMTLSamplerAddressModeForSamplerAddressMode(GLTFAddressMode mode);
 
-extern NSString *GLTFMTLTypeNameForType(GLTFDataType baseType, GLTFDataDimension dimension, BOOL packedIfPossible);
+extern NSString *GLTFMTLTypeNameForType(GLTFDataType baseType, GLTFDataDimension dimension,
+                                        BOOL packedIfPossible);
 
-extern MTLVertexFormat GLTFMTLVertexFormatForComponentTypeAndDimension(GLTFDataType baseType, GLTFDataDimension dimension);
+extern MTLVertexFormat GLTFMTLVertexFormatForComponentTypeAndDimension(GLTFDataType baseType,
+                                                                       GLTFDataDimension dimension);
 
 #ifdef __cplusplus
 }

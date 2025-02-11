@@ -14,8 +14,8 @@
 //  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
-#import "GLTFObject.h"
 #import "GLTFEnums.h"
+#import "GLTFObject.h"
 
 #import <simd/simd.h>
 
@@ -24,8 +24,8 @@ NS_ASSUME_NONNULL_BEGIN
 @class GLTFBufferView;
 
 typedef struct {
-    float minValue[16];
-    float maxValue[16];
+  float minValue[16];
+  float maxValue[16];
 } GLTFValueRange;
 
 @interface GLTFAccessor : GLTFObject
