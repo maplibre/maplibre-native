@@ -176,14 +176,13 @@ void LayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) {
 #if !defined(NDEBUG)
         const auto debugGroup = parameters.encoder->createDebugGroup(drawable.getName().c_str());
 #endif
-
-        for (const auto& tweaker : drawable.getTweakers()) {
-            tweaker->execute(drawable, parameters);
-        }
-
         if (!bindUBOs) {
             uniformBuffers.bind();
             bindUBOs = true;
+        }
+
+        for (const auto& tweaker : drawable.getTweakers()) {
+            tweaker->execute(drawable, parameters);
         }
 
         drawable.draw(parameters);
