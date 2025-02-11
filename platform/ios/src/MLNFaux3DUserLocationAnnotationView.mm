@@ -32,7 +32,7 @@ const CGFloat MLNUserLocationApproximateZoomThreshold = 7.0;
     CALayer *_dotBorderLayer;
     CALayer *_dotLayer;
     CALayer *_haloLayer;
-    
+
     CALayer *_approximateLayer;
 
     CLLocationDirection _oldHeadingAccuracy;
@@ -70,17 +70,17 @@ const CGFloat MLNUserLocationApproximateZoomThreshold = 7.0;
         } else {
             [self drawPreciseLocationPuck];
         }
-        
+
     }
 
-    
+
 }
 
 - (void)drawPreciseLocationPuck {
     if (_approximateModeActivated) {
         [_approximateLayer removeFromSuperlayer];
         _approximateLayer = nil;
-        
+
         _approximateModeActivated = NO;
     }
     (self.mapView.userTrackingMode == MLNUserTrackingModeFollowWithCourse) ? [self drawPuck] : [self drawDot];
@@ -92,28 +92,28 @@ const CGFloat MLNUserLocationApproximateZoomThreshold = 7.0;
 {
     UIColor *puckArrowFillColor = tintColor;
     UIColor *puckArrowStrokeColor = tintColor;
-    
+
     UIColor *approximateFillColor = tintColor;
-    
+
     UIColor *accuracyFillColor = tintColor;
     UIColor *haloFillColor = tintColor;
     UIColor *dotFillColor = tintColor;
     UIColor *headingFillColor = tintColor;
-    
+
     if ([self.mapView.delegate respondsToSelector:@selector(mapViewStyleForDefaultUserLocationAnnotationView:)]) {
         MLNUserLocationAnnotationViewStyle *style = [self.mapView.delegate mapViewStyleForDefaultUserLocationAnnotationView:self.mapView];
-        
+
         puckArrowFillColor = style.puckArrowFillColor ? style.puckArrowFillColor : puckArrowFillColor;
-        
+
         if (@available(iOS 14, *)) {
             approximateFillColor = style.approximateHaloFillColor ? style.approximateHaloFillColor : approximateFillColor;
-        } 
-        
+        }
+
         haloFillColor = style.haloFillColor ? style.haloFillColor : haloFillColor;
         dotFillColor = style.puckFillColor ? style.puckFillColor : dotFillColor;
         headingFillColor = style.puckFillColor ? style.puckFillColor : headingFillColor;
     }
-    
+
     if (_puckModeActivated)
     {
         _puckArrow.fillColor = [puckArrowFillColor CGColor];
@@ -130,7 +130,7 @@ const CGFloat MLNUserLocationApproximateZoomThreshold = 7.0;
         _dotLayer.backgroundColor = [dotFillColor CGColor];
         [_headingIndicatorLayer updateTintColor:[headingFillColor CGColor]];
     }
-    
+
 }
 
 - (void)updatePitch
@@ -204,12 +204,12 @@ const CGFloat MLNUserLocationApproximateZoomThreshold = 7.0;
 
         [self updateFrameWithSize:MLNUserLocationAnnotationPuckSize];
     }
-    
+
     UIColor *arrowColor = self.mapView.tintColor;
     UIColor *puckShadowColor = UIColor.blackColor;
     CGFloat shadowOpacity = 0.25;
 
-    
+
     if ([self.mapView.delegate respondsToSelector:@selector(mapViewStyleForDefaultUserLocationAnnotationView:)]) {
         MLNUserLocationAnnotationViewStyle *style = [self.mapView.delegate mapViewStyleForDefaultUserLocationAnnotationView:self.mapView];
         arrowColor = style.puckArrowFillColor ? style.puckArrowFillColor : arrowColor;
@@ -298,13 +298,13 @@ const CGFloat MLNUserLocationApproximateZoomThreshold = 7.0;
 
         [self updateFrameWithSize:MLNUserLocationAnnotationDotSize];
     }
-    
+
     UIColor *haloColor = self.mapView.tintColor;
     UIColor *puckBackgroundColor = self.mapView.tintColor;
     UIColor *puckShadowColor = UIColor.blackColor;
     CGFloat shadowOpacity = 0.25;
 
-    
+
     if ([self.mapView.delegate respondsToSelector:@selector(mapViewStyleForDefaultUserLocationAnnotationView:)]) {
         MLNUserLocationAnnotationViewStyle *style = [self.mapView.delegate mapViewStyleForDefaultUserLocationAnnotationView:self.mapView];
         haloColor = style.haloFillColor ? style.haloFillColor : haloColor;
@@ -520,12 +520,12 @@ const CGFloat MLNUserLocationApproximateZoomThreshold = 7.0;
 
         [self updateFaux3DEffect];
     }
-    
+
 }
 
 - (void)drawApproximate
 {
-    
+
     if ( ! _approximateModeActivated)
     {
         self.layer.sublayers = nil;
@@ -537,15 +537,15 @@ const CGFloat MLNUserLocationApproximateZoomThreshold = 7.0;
         _haloLayer = nil;
         _puckDot = nil;
         _puckArrow = nil;
-        
+
         _approximateModeActivated = YES;
     }
-    
+
     UIColor *backgroundColor = self.mapView.tintColor;
     UIColor *strokeColor = UIColor.blackColor;
     CGFloat borderSize = 2.0;
     CGFloat opacity = 0.25;
-    
+
     if ([self.mapView.delegate respondsToSelector:@selector(mapViewStyleForDefaultUserLocationAnnotationView:)]) {
         MLNUserLocationAnnotationViewStyle *style = [self.mapView.delegate mapViewStyleForDefaultUserLocationAnnotationView:self.mapView];
         if (@available(iOS 14, *)) {
@@ -578,7 +578,7 @@ const CGFloat MLNUserLocationApproximateZoomThreshold = 7.0;
             borderSize = 1.0;
         }
         _approximateLayer.borderWidth = borderSize;
-        
+
         if (self.mapView.zoomLevel >= MLNUserLocationApproximateZoomThreshold) {
             CGFloat accuracyRingSize = [self calculateAccuracyRingSize: self.mapView.zoomLevel];
 
@@ -595,7 +595,7 @@ const CGFloat MLNUserLocationApproximateZoomThreshold = 7.0;
 
             [CATransaction commit];
         }
-        
+
         // store accuracy and zoom so we're not redrawing unchanged location updates
         _oldHorizontalAccuracy = self.userLocation.location.horizontalAccuracy;
         _oldZoom = self.mapView.zoomLevel;

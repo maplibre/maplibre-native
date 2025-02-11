@@ -4,7 +4,7 @@
 
 In this example we will look at various types of data-driven styling.
 
-The examples with 'Source' in the title apply data-driven styling the [parks of Amsterdam](https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/res/raw/amsterdam.geojson). Those examples often are based on the somewhat arbitrary `stroke-width` property part of the GeoJSON features. These examples are therefore most interesting to learn about the Kotlin API that can be used for data-driven styling. 
+The examples with 'Source' in the title apply data-driven styling the [parks of Amsterdam](https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/res/raw/amsterdam.geojson). Those examples often are based on the somewhat arbitrary `stroke-width` property part of the GeoJSON features. These examples are therefore most interesting to learn about the Kotlin API that can be used for data-driven styling.
 
 !!! tip
     Refer to the [MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/) for more information about [expressions](https://maplibre.org/maplibre-style-spec/expressions/) such as [`interpolate`](https://maplibre.org/maplibre-style-spec/expressions/#interpolate) and [`step`](https://maplibre.org/maplibre-style-spec/expressions/#step).

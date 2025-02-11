@@ -11,7 +11,7 @@ https://api.maptiler.com/maps/streets/?key=[key]#6/50.9262/9.2280
 
 To download assets:
 
-1. Style: 
+1. Style:
 https://api.maptiler.com/maps/streets/style.json?key=[key]
 replace urls with assets urls
 - sprites: asset://sprites/streets

@@ -22,7 +22,7 @@ struct alignas(16) FillExtrusionDrawableUBO {
     /*  72 */ float2 pixel_coord_lower;
     /*  80 */ float height_factor;
     /*  84 */ float tile_ratio;
-    
+
     // Interpolations
     /*  88 */ float base_t;
     /*  92 */ float height_t;
@@ -299,7 +299,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 pos = normal.x == 1.0 && normal.y == 0.0 && normal.z == 16384.0
         ? float2(vertx.pos) // extrusion top
         : float2(edgedistance, z * drawable.height_factor); // extrusion side
-    
+
     float4 lighting = float4(0.0, 0.0, 0.0, 1.0);
     float directional = clamp(dot(normal / 16383.0, props.light_position_base.xyz), 0.0, 1.0);
     directional = mix((1.0 - props.light_intensity), max((0.5 + props.light_intensity), 1.0), directional);
@@ -314,7 +314,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     lighting.rgb += clamp(directional * props.light_color_pad.rgb, mix(float3(0.0), float3(0.3), 1.0 - props.light_color_pad.rgb), float3(1.0));
     lighting *= props.opacity;
-    
+
     return {
         .position       = position,
         .lighting       = lighting,

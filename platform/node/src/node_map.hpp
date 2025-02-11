@@ -103,7 +103,7 @@ struct NodeFileSource : public mbgl::FileSource {
     NodeFileSource(NodeMap* nodeMap_)
         : nodeMap(nodeMap_) {}
     ~NodeFileSource() override = default;
-    std::unique_ptr<mbgl::AsyncRequest> request(const mbgl::Resource&, mbgl::FileSource::Callback) final;
+    std::unique_ptr<mbgl::AsyncRequest> request(const mbgl::Resource&, std::function<void(mbgl::Response)>) final;
     bool canRequest(const mbgl::Resource&) const override;
     void setResourceOptions(mbgl::ResourceOptions) override;
     mbgl::ResourceOptions getResourceOptions() override;

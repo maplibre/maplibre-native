@@ -14,7 +14,7 @@
     return nil;
 }
 
-- (NSString *)description {    
+- (NSString *)description {
     if (self.rawLayer) {
         return [NSString stringWithFormat:
                 @"<%@: %p; identifier = %@; sourceIdentifier = %@; "

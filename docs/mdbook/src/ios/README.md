@@ -4,7 +4,7 @@
 
 [Bazel](https://bazel.build/) is used for building on iOS.
 
-You can generate an Xcode project thanks to [rules_xcodeproj](https://github.com/MobileNativeFoundation/rules_xcodeproj) intergration. 
+You can generate an Xcode project thanks to [rules_xcodeproj](https://github.com/MobileNativeFoundation/rules_xcodeproj) intergration.
 
 You need to install [bazelisk](https://github.com/bazelbuild/bazelisk), which is a wrapper around Bazel which ensures that the version specified in `.bazelversion` is used.
 
@@ -37,14 +37,14 @@ bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_fl
 xed platform/ios/MapLibre.xcodeproj
 ```
 
-Then once in Xcode, click on "MapLibre" on the left, then "App" under Targets, then "Signing & Capabilities" in the tabbed menu. 
+Then once in Xcode, click on "MapLibre" on the left, then "App" under Targets, then "Signing & Capabilities" in the tabbed menu.
 Confirm that no errors are shown.
 
 <img width="921" alt="image" src="https://github.com/polvi/maplibre-native/assets/649392/a1ef30cb-97fc-429a-acee-194436f3fb8a">
 
 Try to run the example App in the simulator and on a device to confirm your setup works.
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > The Bazel configuration files are the source of truth of the build configuration. All changes to the build settings need to be done through Bazel, not in Xcode.
 
 ### Troubleshooting

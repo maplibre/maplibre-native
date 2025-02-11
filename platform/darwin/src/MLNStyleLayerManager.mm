@@ -70,7 +70,7 @@ LayerManagerDarwin::LayerManagerDarwin() {
 #elif !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
     addLayerType(std::make_unique<CustomStyleLayerPeerFactory>());
 #endif
-    
+
 #if MLN_DRAWABLE_RENDERER
 #if defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_RUNTIME)
     addLayerTypeCoreOnly(std::make_unique<CustomDrawableLayerFactory>());

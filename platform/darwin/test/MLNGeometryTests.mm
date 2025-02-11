@@ -22,7 +22,7 @@
     XCTAssertEqualWithAccuracy(180, MLNDegreesFromRadians(M_PI), 1e-5);
     XCTAssertEqualWithAccuracy(360, MLNDegreesFromRadians(2 * M_PI), 1e-5);
     XCTAssertEqualWithAccuracy(720, MLNDegreesFromRadians(4 * M_PI), 1e-5);
-    
+
     XCTAssertEqualWithAccuracy(-360, MLNDegreesFromRadians(MLNRadiansFromDegrees(-360)), 1e-4);
     XCTAssertEqualWithAccuracy(-180, MLNDegreesFromRadians(MLNRadiansFromDegrees(-180)), 1e-5);
     XCTAssertEqualWithAccuracy(-90, MLNDegreesFromRadians(MLNRadiansFromDegrees(-90)), 1e-5);
@@ -38,17 +38,17 @@
     CGSize tallSize = CGSizeMake(600, 1200);
     CGSize midSize = CGSizeMake(600, 800);
     CGSize shortSize = CGSizeMake(600, 400);
-    
+
     XCTAssertEqualWithAccuracy(1800, MLNAltitudeForZoomLevel(MLNZoomLevelForAltitude(1800, 0, 0, midSize), 0, 0, midSize), 1e-8);
     XCTAssertLessThan(MLNZoomLevelForAltitude(1800, 0, 0, midSize), MLNZoomLevelForAltitude(1800, 0, 0, tallSize));
     XCTAssertGreaterThan(MLNZoomLevelForAltitude(1800, 0, 0, midSize), MLNZoomLevelForAltitude(1800, 0, 0, shortSize));
-    
+
     XCTAssertEqualWithAccuracy(0, MLNZoomLevelForAltitude(MLNAltitudeForZoomLevel(0, 0, 0, midSize), 0, 0, midSize), 1e-8);
     XCTAssertEqualWithAccuracy(18, MLNZoomLevelForAltitude(MLNAltitudeForZoomLevel(18, 0, 0, midSize), 0, 0, midSize), 1e-8);
-    
+
     XCTAssertEqualWithAccuracy(0, MLNZoomLevelForAltitude(MLNAltitudeForZoomLevel(0, 0, 40, midSize), 0, 40, midSize), 1e-8);
     XCTAssertEqualWithAccuracy(18, MLNZoomLevelForAltitude(MLNAltitudeForZoomLevel(18, 0, 40, midSize), 0, 40, midSize), 1e-8);
-    
+
     XCTAssertEqualWithAccuracy(0, MLNZoomLevelForAltitude(MLNAltitudeForZoomLevel(0, 60, 40, midSize), 60, 40, midSize), 1e-8);
     XCTAssertEqualWithAccuracy(18, MLNZoomLevelForAltitude(MLNAltitudeForZoomLevel(18, 60, 40, midSize), 60, 40, midSize), 1e-8);
 }
@@ -166,7 +166,7 @@
 
 - (void)testMLNMapPoint {
     MLNMapPoint point = MLNMapPointForCoordinate(CLLocationCoordinate2DMake(37.936, -80.425), 0.0);
-    
+
     MLNMapPoint roundTrippedPoint = [NSValue valueWithMLNMapPoint:point].MLNMapPointValue;
     XCTAssertEqual(point.x, roundTrippedPoint.x);
     XCTAssertEqual(point.y, roundTrippedPoint.y);

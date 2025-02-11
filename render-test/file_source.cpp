@@ -32,7 +32,8 @@ ProxyFileSource::ProxyFileSource(std::shared_ptr<FileSource> defaultResourceLoad
 
 ProxyFileSource::~ProxyFileSource() = default;
 
-std::unique_ptr<AsyncRequest> ProxyFileSource::request(const Resource& resource, Callback callback) {
+std::unique_ptr<AsyncRequest> ProxyFileSource::request(const Resource& resource,
+                                                       std::function<void(Response)> callback) {
     auto transformed = resource;
 
     // If offline, force always loading the resource from the cache

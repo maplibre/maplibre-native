@@ -94,16 +94,14 @@ TEST(Actor, DestructionBlocksOnSend) {
 
         void waitForEmpty(const util::SimpleIdentity) override { assert(false); }
 
-        void schedule(std::function<void()>&&) final {
+        void schedule(Task&&) final {
             promise.set_value();
             future.wait();
             std::this_thread::sleep_for(1ms);
             waited = true;
         }
 
-        void schedule(const util::SimpleIdentity, std::function<void()>&& fn) override final {
-            schedule(std::move(fn));
-        }
+        void schedule(const util::SimpleIdentity, Task&& fn) override final { schedule(std::move(fn)); }
 
         mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
