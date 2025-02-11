@@ -39,7 +39,7 @@ void UniformBuffer::update(const void* data, std::size_t dataSize) {
     buffer.update(data, dataSize, /*offset=*/0);
 }
 
-void UniformBufferArray::bind(RenderPass& renderPass) const noexcept {
+void UniformBufferArray::bindMtl(RenderPass& renderPass) const noexcept {
     for (size_t id = 0; id < allocatedSize(); id++) {
         const auto& uniformBuffer = get(id);
         if (!uniformBuffer) continue;
@@ -55,7 +55,7 @@ void UniformBufferArray::bind(RenderPass& renderPass) const noexcept {
 }
 
 void UniformBufferArray::bind(gfx::RenderPass& renderPass) {
-    bind(static_cast<RenderPass&>(renderPass));
+    bindMtl(static_cast<RenderPass&>(renderPass));
 }
 
 } // namespace mtl

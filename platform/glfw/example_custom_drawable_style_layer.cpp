@@ -351,7 +351,7 @@ void ExampleCustomDrawableStyleLayerHost::generateGeometry(Interface& interface)
     const unsigned long numVtxCircumference = 72;
     const float bearingStep = 360.0f / static_cast<float>(numVtxCircumference - 1);
 
-    vertices.emplace_back(Interface::GeometryVertex{0.0f, 0.0f, 0.0f, 0.5f, 0.5f});
+    vertices.emplace_back(Interface::GeometryVertex{{0.0f, 0.0f, 0.0f}, {0.5f, 0.5f}});
 
     for (unsigned long i = 1; i <= numVtxCircumference; ++i) {
         const float rad = mbgl::util::deg2radf((i - 1) * bearingStep);
@@ -371,7 +371,7 @@ void ExampleCustomDrawableStyleLayerHost::generateGeometry(Interface& interface)
     interface.setGeometryOptions(options);
 
     interface.setGeometryTweakerCallback([=, rotation = 0.0f](
-                                                   mbgl::gfx::Drawable& drawable,
+                                                   [[maybe_unused]] mbgl::gfx::Drawable& drawable,
                                                    const mbgl::PaintParameters& params,
                                                    Interface::GeometryOptions& currentOptions) mutable {
         const mbgl::Point<double>& center = project(location, params.state);
@@ -397,7 +397,7 @@ void ExampleCustomDrawableStyleLayerHost::loadGeometry(Interface& interface) {
 
     Interface::GeometryOptions options;
 
-    interface.setGeometryTweakerCallback([=](mbgl::gfx::Drawable& drawable,
+    interface.setGeometryTweakerCallback([=]([[maybe_unused]] mbgl::gfx::Drawable& drawable,
                                                    const mbgl::PaintParameters& params,
                                                    Interface::GeometryOptions& currentOptions) mutable {
         const mbgl::Point<double>& center = project(location, params.state);

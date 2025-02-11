@@ -230,7 +230,7 @@ RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureC
     return std::make_shared<RenderTarget>(*this, size, type);
 }
 
-void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {}
+void Context::resetState(gfx::DepthMode, gfx::ColorMode) {}
 
 bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
                                            const void* data,
@@ -370,7 +370,6 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         vertDesc->layouts()->setObject(layoutDesc.get(), ShaderClass::attributes[0].index);
 
         // Create a render pipeline state, telling Metal how to render the primitives
-        const auto& renderPassDescriptor = mtlRenderPass.getDescriptor();
         const std::size_t hash = mbgl::util::hash(ShaderClass::attributes[0].index,
                                                   0,
                                                   MTL::VertexFormatShort2,
@@ -464,7 +463,7 @@ std::unique_ptr<gfx::TextureResource> Context::createTextureResource(Size,
     return nullptr;
 }
 
-std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size size) {
+std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size) {
     return std::make_unique<RenderbufferResource>();
 }
 
@@ -480,7 +479,7 @@ gfx::VertexAttributeArrayPtr Context::createVertexAttributeArray() const {
 #if !defined(NDEBUG)
 void Context::visualizeStencilBuffer() {}
 
-void Context::visualizeDepthBuffer(float depthRangeSize) {}
+void Context::visualizeDepthBuffer(float) {}
 #endif // !defined(NDEBUG)
 
 void Context::clearStencilBuffer(int32_t) {
@@ -630,7 +629,7 @@ MTLDepthStencilStatePtr Context::makeDepthStencilState(const gfx::DepthMode& dep
 
 void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexcept {
     auto& mtlRenderPass = static_cast<mtl::RenderPass&>(renderPass);
-    globalUniformBuffers.bind(mtlRenderPass);
+    globalUniformBuffers.bindMtl(mtlRenderPass);
 }
 
 } // namespace mtl

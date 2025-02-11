@@ -13,10 +13,10 @@ public:
     void initialize() override;
     void deinitialize() override;
 
-    void update(Interface& interface);
+    void update(Interface& interface) override;
 
 protected:
-    mbgl::Point<double> project(const mbgl::LatLng& c, const mbgl::TransformState& s);
+    static mbgl::Point<double> project(const mbgl::LatLng& c, const mbgl::TransformState& s);
 
     void createDrawables(Interface& interface);
     void generateGeometry(Interface& interface);
