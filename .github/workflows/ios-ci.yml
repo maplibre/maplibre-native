@@ -92,8 +92,8 @@ jobs:
       - name: Lint plist files
         run: bazel run //platform/ios:lint-plists --//:renderer=metal
 
-      # - name: Running iOS tests
-      #   run: bazel test //platform/ios/test:ios_test --test_output=errors --//:renderer=metal
+      - name: Running iOS tests
+        run: bazel test //platform/ios/test:ios_test --test_output=errors --//:renderer=metal
 
       # tsan run fails with 'Interceptors are not working. This may be because ThreadSanitizer is loaded too late...'
       #- name: Running iOS UI tests (Thread Sanitizer)
