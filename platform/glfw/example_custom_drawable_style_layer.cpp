@@ -55,6 +55,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
              /*offset=*/0.0f,
              /*width=*/8.0f,
              /*color=*/Color::red()},
+
             {/*geometry=*/{},
              /*blur=*/4.0f,
              /*opacity=*/1.0f,
@@ -62,6 +63,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
              /*offset=*/-1.0f,
              /*width=*/4.0f,
              /*color=*/Color::blue()},
+
             {/*geometry=*/{},
              /*blur=*/16.0f,
              /*opacity=*/1.0f,
@@ -69,6 +71,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
              /*offset=*/2.0f,
              /*width=*/16.0f,
              /*color=*/Color(1.f, 0.5f, 0, 0.5f)},
+
             {/*geometry=*/{},
              /*blur=*/2.0f,
              /*opacity=*/1.0f,
@@ -76,6 +79,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
              /*offset=*/-2.0f,
              /*width=*/2.0f,
              /*color=*/Color(1.f, 1.f, 0, 0.3f)},
+
             {/*geometry=*/{},
              /*blur=*/0.5f,
              /*opacity=*/0.5f,
@@ -83,6 +87,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
              /*offset=*/0.5f,
              /*width=*/0.5f,
              /*color=*/Color::black()},
+
             {/*geometry=*/{},
              /*blur=*/24.0f,
              /*opacity=*/0.5f,
@@ -135,6 +140,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
              /*offset=*/0.0f,
              /*width=*/8.0f,
              /*color=*/Color::red()},
+
             {/*geometry=*/{},
              /*blur=*/4.0f,
              /*opacity=*/1.0f,
@@ -142,6 +148,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
              /*offset=*/-1.0f,
              /*width=*/4.0f,
              /*color=*/Color::blue()},
+
             {/*geometry=*/{},
              /*blur=*/16.0f,
              /*opacity=*/1.0f,
@@ -149,6 +156,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
              /*offset=*/2.0f,
              /*width=*/16.0f,
              /*color=*/Color(1.f, 0.5f, 0, 0.5f)},
+
             {/*geometry=*/{},
              /*blur=*/2.0f,
              /*opacity=*/1.0f,
@@ -156,6 +164,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
              /*offset=*/-2.0f,
              /*width=*/2.0f,
              /*color=*/Color(1.f, 1.f, 0, 0.3f)},
+
             {/*geometry=*/{},
              /*blur=*/0.5f,
              /*opacity=*/0.5f,
@@ -163,6 +172,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
              /*offset=*/0.5f,
              /*width=*/0.5f,
              /*color=*/Color::black()},
+
             {/*geometry=*/{},
              /*blur=*/24.0f,
              /*opacity=*/0.5f,
@@ -196,13 +206,13 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
             interface.setLineOptions(options[index]);
 
             // add polyline
-            interface.addPolyline(polyline);
+            interface.addPolyline(polyline, Interface::LineShaderType::WideVector);
 
             // add clone
             for (auto& p : polyline) {
                 p.y += 0.05f * extent / numLines;
             }
-            interface.addPolyline(polyline);
+            interface.addPolyline(polyline, Interface::LineShaderType::WideVector);
             for (auto& p : polyline) {
                 p.y -= 0.05f * extent / numLines;
             }
@@ -337,7 +347,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
             // New York
             {-74.04454331829972, 40.6892168305434},
         };
-        interface.addPolyline(polyline_geo, Interface::LineShaderType::Classic);
+        interface.addPolyline(polyline_geo, Interface::LineShaderType::WideVector);
     }
 
     // add polylines using wide vectors in tile coordinates

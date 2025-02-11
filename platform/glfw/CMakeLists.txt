@@ -22,18 +22,16 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/platform/glfw/settings_json.cpp
     ${PROJECT_SOURCE_DIR}/platform/glfw/test_writer.cpp
     ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/map/map_snapshotter.cpp
+    ${PROJECT_SOURCE_DIR}/platform/glfw/example_custom_drawable_style_layer.cpp
 )
 
-if(MLN_DRAWABLE_RENDERER)
-    target_sources(mbgl-glfw PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/example_custom_drawable_style_layer.cpp)
 
-    include(${PROJECT_SOURCE_DIR}/vendor/tinyobjloader.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/tinyobjloader.cmake)
 
-    target_link_libraries(
-        mbgl-glfw
-        PRIVATE tinyobjloader
-    )
-endif()
+target_link_libraries(
+    mbgl-glfw
+    PRIVATE tinyobjloader
+)
 
 set_property(
     SOURCE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_view.cpp
@@ -98,10 +96,12 @@ target_include_directories(
     PRIVATE ${PROJECT_SOURCE_DIR}/src
 )
 
+include(${PROJECT_SOURCE_DIR}/vendor/tinyobjloader.cmake)
+
 # Use target_link_directories when we move away from CMake 3.10.
 target_link_libraries(
     mbgl-glfw
-    PRIVATE $<$<BOOL:${GLFW_LIBRARY_DIRS}>:-L${GLFW_LIBRARY_DIRS}>
+    PRIVATE $<$<BOOL:${GLFW_LIBRARY_DIRS}>:-L${GLFW_LIBRARY_DIRS}> tinyobjloader
 )
 
 if(WIN32)
