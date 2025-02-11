@@ -125,6 +125,11 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             return;
         }
 
+        if (!bindUBOs) {
+            uniformBuffers.bindMtl(renderPass);
+            bindUBOs = true;
+        }
+
         for (const auto& tweaker : drawable.getTweakers()) {
             tweaker->execute(drawable, parameters);
         }
@@ -135,11 +140,6 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         if (features3d) {
             const auto state = getDepthStencilState(drawable.getEnableDepth(), drawable.getEnableStencil());
             renderPass.setDepthStencilState(state);
-        }
-
-        if (!bindUBOs) {
-            uniformBuffers.bindMtl(renderPass);
-            bindUBOs = true;
         }
 
         drawable.draw(parameters);

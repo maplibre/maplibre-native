@@ -213,10 +213,10 @@ public:
             options.texture->setImage(image);
             options.texture->setSamplerConfiguration(
                 {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-            const std::array<std::array<float, 2>, 2> textureCoordinates = {{{0.0f, 0.08f}, {1.0f, 0.9f}}};
-            const float xspan = textureCoordinates[1][0] - textureCoordinates[0][0];
-            const float yspan = textureCoordinates[1][1] - textureCoordinates[0][1];
-            assert(xspan > 0.0f && yspan > 0.0f);
+            constexpr std::array<std::array<float, 2>, 2> textureCoordinates = {{{0.0f, 0.08f}, {1.0f, 0.9f}}};
+            constexpr float xspan = textureCoordinates[1][0] - textureCoordinates[0][0];
+            constexpr float yspan = textureCoordinates[1][1] - textureCoordinates[0][1];
+            static_assert(xspan > 0.0f && yspan > 0.0f);
             options.size = {static_cast<uint32_t>(image->size.width * 0.2f * xspan),
                             static_cast<uint32_t>(image->size.height * 0.2f * yspan)};
             options.anchor = {0.5f, 0.95f};

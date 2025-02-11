@@ -55,14 +55,14 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
         }
-
-        for (const auto& tweaker : drawable.getTweakers()) {
-            tweaker->execute(drawable, parameters);
-        }
-
+        
         if (!bindUBOs) {
             uniformBuffers.bindDescriptorSets(encoder);
             bindUBOs = true;
+        }
+
+        for (const auto& tweaker : drawable.getTweakers()) {
+            tweaker->execute(drawable, parameters);
         }
 
         drawable.draw(parameters);

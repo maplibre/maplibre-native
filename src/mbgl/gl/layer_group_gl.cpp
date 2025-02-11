@@ -115,6 +115,11 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         const auto debugGroupTile = parameters.encoder->createDebugGroup(labelPtr);
 #endif
 
+        if (!bindUBOs) {
+            uniformBuffers.bind();
+            bindUBOs = true;
+        }
+
         for (const auto& tweaker : drawable.getTweakers()) {
             tweaker->execute(drawable, parameters);
         }
@@ -124,11 +129,6 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         // 2D drawables will set their own stencil mode within `draw`.
         if (features3d) {
             context.setStencilMode(drawable.getEnableStencil() ? stencilMode3d : gfx::StencilMode::disabled());
-        }
-
-        if (!bindUBOs) {
-            uniformBuffers.bind();
-            bindUBOs = true;
         }
 
         drawable.draw(parameters);

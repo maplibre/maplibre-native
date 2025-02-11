@@ -51,13 +51,13 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             return;
         }
 
-        for (const auto& tweaker : drawable.getTweakers()) {
-            tweaker->execute(drawable, parameters);
-        }
-
         if (!bindUBOs) {
             uniformBuffers.bindMtl(renderPass);
             bindUBOs = true;
+        }
+
+        for (const auto& tweaker : drawable.getTweakers()) {
+            tweaker->execute(drawable, parameters);
         }
 
         drawable.draw(parameters);
