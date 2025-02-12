@@ -6,14 +6,13 @@
 namespace mbgl {
 namespace shaders {
 
-#define SYMBOL_SHADER_COMMON \
-    R"(
+constexpr auto symbolShaderPrelude = R"(
 
 #define idSymbolDrawableUBO         idDrawableReservedVertexOnlyUBO
 #define idSymbolTilePropsUBO        idDrawableReservedFragmentOnlyUBO
 #define idSymbolEvaluatedPropsUBO   layerUBOStartId
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Vulkan> {
@@ -23,7 +22,8 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Vulkan> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto vertex = SYMBOL_SHADER_COMMON R"(
+    static constexpr auto prelude = symbolShaderPrelude;
+    static constexpr auto vertex = R"(
 
 layout(location = 0) in ivec4 in_pos_offset;
 layout(location = 1) in uvec4 in_data;
@@ -144,7 +144,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = SYMBOL_SHADER_COMMON R"(
+    static constexpr auto fragment = R"(
 
 layout(location = 0) in mediump vec2 frag_tex;
 layout(location = 1) in mediump float frag_opacity;
@@ -210,7 +210,8 @@ struct ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Vulkan> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto vertex = SYMBOL_SHADER_COMMON R"(
+    static constexpr auto prelude = symbolShaderPrelude;
+    static constexpr auto vertex = R"(
 
 layout(location = 0) in ivec4 in_pos_offset;
 layout(location = 1) in uvec4 in_data;
@@ -386,7 +387,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = SYMBOL_SHADER_COMMON R"(
+    static constexpr auto fragment = R"(
 
 layout(location = 0) in mediump vec2 frag_tex;
 layout(location = 1) in mediump float frag_fade_opacity;
@@ -504,7 +505,8 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Vulkan
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
-    static constexpr auto vertex = SYMBOL_SHADER_COMMON R"(
+    static constexpr auto prelude = symbolShaderPrelude;
+    static constexpr auto vertex = R"(
 
 #define SDF 1.0
 #define ICON 0.0
@@ -687,7 +689,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = SYMBOL_SHADER_COMMON R"(
+    static constexpr auto fragment = R"(
 
 layout(location = 0) in mediump vec2 frag_tex;
 layout(location = 1) in mediump float frag_fade_opacity;

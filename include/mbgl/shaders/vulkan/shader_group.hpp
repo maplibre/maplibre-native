@@ -47,6 +47,7 @@ public:
                                      std::string_view /*firstAttribName*/) override {
         using ShaderSource = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Vulkan>;
         constexpr auto& name = ShaderSource::name;
+        constexpr auto& prelude = ShaderSource::prelude;
         constexpr auto& vert = ShaderSource::vertex;
         constexpr auto& frag = ShaderSource::fragment;
 
@@ -60,8 +61,13 @@ public:
             DefinesMap additionalDefines;
             addAdditionalDefines(propertiesAsUniforms, additionalDefines);
 
+            const std::string preludeSource(prelude);
+            const std::string vertexSource = preludeSource + vert;
+            const std::string fragmentSource = preludeSource + frag;
+
             auto& context = static_cast<Context&>(gfxContext);
-            shader = context.createProgram(ShaderID, shaderName, vert, frag, programParameters, additionalDefines);
+            shader = context.createProgram(
+                ShaderID, shaderName, vertexSource, fragmentSource, programParameters, additionalDefines);
             assert(shader);
             if (!shader || !registerShader(shader, shaderName)) {
                 assert(false);

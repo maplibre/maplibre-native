@@ -6,12 +6,7 @@
 namespace mbgl {
 namespace shaders {
 
-#define LOCATION_INDICATOR_SHADER_PRELUDE \
-    R"(
-
-#define idLocationIndicatorDrawableUBO  drawableReservedUBOCount
-
-)"
+constexpr auto locationIndicatorShaderPrelude = R"(#define idLocationIndicatorDrawableUBO  drawableReservedUBOCount)";
 
 template <>
 struct ShaderSource<BuiltIn::LocationIndicatorShader, gfx::Backend::Type::Vulkan> {
@@ -21,7 +16,8 @@ struct ShaderSource<BuiltIn::LocationIndicatorShader, gfx::Backend::Type::Vulkan
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto vertex = LOCATION_INDICATOR_SHADER_PRELUDE R"(
+    static constexpr auto prelude = locationIndicatorShaderPrelude;
+    static constexpr auto vertex = R"(
 layout(location = 0) in vec2 in_position;
 
 layout(set = DRAWABLE_UBO_SET_INDEX, binding = idLocationIndicatorDrawableUBO) uniform LocationIndicatorDrawableUBO {
@@ -35,7 +31,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = LOCATION_INDICATOR_SHADER_PRELUDE R"(
+    static constexpr auto fragment = R"(
 layout(location = 0) out vec4 out_color;
 
 layout(set = DRAWABLE_UBO_SET_INDEX, binding = idLocationIndicatorDrawableUBO) uniform LocationIndicatorDrawableUBO {
@@ -57,7 +53,8 @@ struct ShaderSource<BuiltIn::LocationIndicatorTexturedShader, gfx::Backend::Type
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto vertex = LOCATION_INDICATOR_SHADER_PRELUDE R"(
+    static constexpr auto prelude = locationIndicatorShaderPrelude;
+    static constexpr auto vertex = R"(
 layout(location = 0) in vec2 in_position;
 layout(location = 1) in vec2 in_texcoord;
 
