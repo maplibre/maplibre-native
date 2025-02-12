@@ -16,7 +16,6 @@
 #include <mbgl/shaders/vulkan/shader_program.hpp>
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/util/variant.hpp>
 #include <mbgl/util/hash.hpp>
 #include <mbgl/util/instrumentation.hpp>
 

@@ -14,7 +14,7 @@ namespace mbgl {
 namespace style {
 
 RasterSource::RasterSource(std::string id,
-                           variant<std::string, Tileset> urlOrTileset_,
+                           std::variant<std::string, Tileset> urlOrTileset_,
                            uint16_t tileSize,
                            SourceType sourceType)
     : Source(makeMutable<Impl>(sourceType, std::move(id), tileSize)),
@@ -26,16 +26,16 @@ const RasterSource::Impl& RasterSource::impl() const {
     return static_cast<const Impl&>(*baseImpl);
 }
 
-const variant<std::string, Tileset>& RasterSource::getURLOrTileset() const {
+const std::variant<std::string, Tileset>& RasterSource::getURLOrTileset() const {
     return urlOrTileset;
 }
 
 std::optional<std::string> RasterSource::getURL() const {
-    if (urlOrTileset.is<Tileset>()) {
+    if (std::holds_alternative<Tileset>(urlOrTileset)) {
         return {};
     }
 
-    return urlOrTileset.get<std::string>();
+    return std::get<std::string>(urlOrTileset);
 }
 
 uint16_t RasterSource::getTileSize() const {
@@ -43,8 +43,8 @@ uint16_t RasterSource::getTileSize() const {
 }
 
 void RasterSource::loadDescription(FileSource& fileSource) {
-    if (urlOrTileset.is<Tileset>()) {
-        baseImpl = makeMutable<Impl>(impl(), urlOrTileset.get<Tileset>());
+    if (std::holds_alternative<Tileset>(urlOrTileset)) {
+        baseImpl = makeMutable<Impl>(impl(), std::get<Tileset>(urlOrTileset));
         loaded = true;
         observer->onSourceLoaded(*this);
         return;
@@ -54,7 +54,7 @@ void RasterSource::loadDescription(FileSource& fileSource) {
         return;
     }
 
-    const auto& rawURL = urlOrTileset.get<std::string>();
+    const auto& rawURL = std::get<std::string>(urlOrTileset);
     const auto& url = util::mapbox::canonicalizeSourceURL(fileSource.getResourceOptions().tileServerOptions(), rawURL);
 
     req = fileSource.request(Resource::source(url), [this, url, &fileSource](const Response& res) {

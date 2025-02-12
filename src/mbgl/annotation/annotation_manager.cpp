@@ -55,7 +55,7 @@ AnnotationID AnnotationManager::addAnnotation(const Annotation& annotation) {
     CHECK_ANNOTATIONS_ENABLED_AND_RETURN(nextID++);
     std::lock_guard<std::mutex> lock(mutex);
     AnnotationID id = nextID++;
-    Annotation::visit(annotation, [&](const auto& annotation_) { this->add(id, annotation_); });
+    std::visit([&](const auto& annotation_) { this->add(id, annotation_); }, annotation);
     dirty = true;
     return id;
 }
@@ -63,7 +63,7 @@ AnnotationID AnnotationManager::addAnnotation(const Annotation& annotation) {
 bool AnnotationManager::updateAnnotation(const AnnotationID& id, const Annotation& annotation) {
     CHECK_ANNOTATIONS_ENABLED_AND_RETURN(true);
     std::lock_guard<std::mutex> lock(mutex);
-    Annotation::visit(annotation, [&](const auto& annotation_) { this->update(id, annotation_); });
+    std::visit([&](const auto& annotation_) { this->update(id, annotation_); }, annotation);
     return dirty;
 }
 
