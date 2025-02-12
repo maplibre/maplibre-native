@@ -55,7 +55,7 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
         }
-        
+
         if (!bindUBOs) {
             uniformBuffers.bindDescriptorSets(encoder);
             bindUBOs = true;
