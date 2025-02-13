@@ -11,9 +11,7 @@ const std::array<AttributeInfo, 2> CustomGeometryShaderSource::attributes = {
     AttributeInfo{customGeometryUBOCount + 1, gfx::AttributeDataType::Float2, idCustomGeometryTexVertexAttribute},
 };
 
-const std::array<TextureInfo, 1> CustomGeometryShaderSource::textures = {
-    TextureInfo{0, idCustomGeometryTexture}
-};
+const std::array<TextureInfo, 1> CustomGeometryShaderSource::textures = {TextureInfo{0, idCustomGeometryTexture}};
 
 } // namespace shaders
 } // namespace mbgl

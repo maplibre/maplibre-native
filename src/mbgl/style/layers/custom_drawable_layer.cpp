@@ -514,7 +514,6 @@ bool CustomDrawableLayerHost::Interface::updateBuilder(BuilderType type,
 
 util::SimpleIdentity CustomDrawableLayerHost::Interface::addPolyline(const LineString<double>& coordinates,
                                                                      LineShaderType shaderType) {
-
 #if !MLN_RENDER_BACKEND_METAL
     shaderType = LineShaderType::Classic;
 #endif
@@ -542,7 +541,6 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addPolyline(const LineS
 
 util::SimpleIdentity CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& coordinates,
                                                                      LineShaderType shaderType) {
-
 #if !MLN_RENDER_BACKEND_METAL
     shaderType = LineShaderType::Classic;
 #endif
