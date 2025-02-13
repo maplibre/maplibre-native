@@ -14,6 +14,8 @@
 #include <mbgl/shaders/mtl/circle.hpp>
 #include <mbgl/shaders/mtl/clipping_mask.hpp>
 #include <mbgl/shaders/mtl/collision.hpp>
+#include <mbgl/shaders/mtl/custom_geometry.hpp>
+#include <mbgl/shaders/mtl/custom_symbol_icon.hpp>
 #include <mbgl/shaders/mtl/debug.hpp>
 #include <mbgl/shaders/mtl/fill.hpp>
 #include <mbgl/shaders/mtl/fill_extrusion.hpp>
@@ -129,6 +131,8 @@ TEST(OrderIndependentHash, Shaders) {
                       BuiltIn::CircleShader,
                       BuiltIn::CollisionBoxShader,
                       BuiltIn::CollisionCircleShader,
+                      BuiltIn::CustomGeometryShader,
+                      BuiltIn::CustomSymbolIconShader,
                       BuiltIn::DebugShader,
                       BuiltIn::FillShader,
                       BuiltIn::FillOutlineShader,

@@ -26,13 +26,11 @@
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/shaders/widevector_ubo.hpp>
+#include <mbgl/shaders/custom_geometry_ubo.hpp>
 #include <mbgl/util/projection.hpp>
 #include <mbgl/util/mat4.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/gfx/uniform_buffer.hpp>
-
-// TODO rename
-#include <mbgl/shaders/location_indicator_ubo.hpp>
 
 #include <cmath>
 
@@ -433,12 +431,11 @@ public:
             callback(drawable, parameters, options);
         }
 
-        // TODO rename
-        LocationIndicatorDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(options.matrix),
-                                                    /* .color = */ options.color};
+        CustomGeometryDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(options.matrix),
+                                                 /* .color = */ options.color};
 
         auto& drawableUniforms = drawable.mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(idLocationIndicatorDrawableUBO, &drawableUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idCustomGeometryDrawableUBO, &drawableUBO, parameters.context);
     };
 
 private:
@@ -517,6 +514,11 @@ bool CustomDrawableLayerHost::Interface::updateBuilder(BuilderType type,
 
 util::SimpleIdentity CustomDrawableLayerHost::Interface::addPolyline(const LineString<double>& coordinates,
                                                                      LineShaderType shaderType) {
+
+#if !MLN_RENDER_BACKEND_METAL
+    shaderType = LineShaderType::Classic;
+#endif
+
     switch (shaderType) {
         case LineShaderType::Classic: {
             // TODO: build classic polyline with Geo coordinates
@@ -540,6 +542,11 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addPolyline(const LineS
 
 util::SimpleIdentity CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& coordinates,
                                                                      LineShaderType shaderType) {
+
+#if !MLN_RENDER_BACKEND_METAL
+    shaderType = LineShaderType::Classic;
+#endif
+
     switch (shaderType) {
         case LineShaderType::Classic: {
             // build classic polyline with Tile coordinates
@@ -685,14 +692,8 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addGeometry(
         return util::SimpleIdentity::Empty;
     }
 
-    if (geometryOptions.texture) {
-        if (!updateBuilder(BuilderType::CommonGeometry, "texture-geometry", texturedGeometryShaderDefault())) {
-            return util::SimpleIdentity::Empty;
-        }
-    } else {
-        if (!updateBuilder(BuilderType::CommonGeometry, "color-geometry", geometryShaderDefault())) {
-            return util::SimpleIdentity::Empty;
-        }
+    if (!updateBuilder(BuilderType::Geometry, "custom-geometry", geometryShaderDefault())) {
+        return util::SimpleIdentity::Empty;
     }
 
     // geographic coordinates require tile {0, 0, 0}
@@ -703,7 +704,7 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addGeometry(
 
     // add to builder
     auto attrs = context.createVertexAttributeArray();
-    if (const auto& attr = attrs->set(idLocationIndicatorPosVertexAttribute)) {
+    if (const auto& attr = attrs->set(idCustomGeometryPosVertexAttribute)) {
         attr->setSharedRawData(vertices,
                                offsetof(GeometryVertex, position),
                                /*vertexOffset=*/0,
@@ -711,7 +712,7 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addGeometry(
                                gfx::AttributeDataType::Float3);
     }
 
-    if (const auto& attr = attrs->set(idLocationIndicatorTexVertexAttribute)) {
+    if (const auto& attr = attrs->set(idCustomGeometryTexVertexAttribute)) {
         attr->setSharedRawData(vertices,
                                offsetof(GeometryVertex, texcoords),
                                /*vertexOffset=*/0,
@@ -730,10 +731,16 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addGeometry(
         builder->setIs3D(true);
     }
 
-    // texture
-    if (geometryOptions.texture) {
-        builder->setTexture(geometryOptions.texture, shaders::idLocationIndicatorTexture);
+    // white texture
+    if (!geometryOptions.texture) {
+        auto image = std::make_shared<PremultipliedImage>(mbgl::Size(2, 2));
+        image->fill(255);
+
+        geometryOptions.texture = context.createTexture2D();
+        geometryOptions.texture->setImage(std::move(image));
     }
+
+    builder->setTexture(geometryOptions.texture, shaders::idCustomGeometryTexture);
 
     builder->addTweaker(std::make_shared<GeometryDrawableTweaker>(geometryOptions, std::move(geometryTweakerCallback)));
 
@@ -799,7 +806,7 @@ void CustomDrawableLayerHost::Interface::finish() {
                 finish_(nullptr);
                 break;
 
-            case BuilderType::CommonGeometry:
+            case BuilderType::Geometry:
                 finish_(nullptr);
                 break;
             default:
@@ -850,13 +857,7 @@ gfx::ShaderPtr CustomDrawableLayerHost::Interface::symbolShaderDefault() const {
 }
 
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::geometryShaderDefault() const {
-    // TODO rename
-    return context.getGenericShader(shaders, "LocationIndicatorShader");
-}
-
-gfx::ShaderPtr CustomDrawableLayerHost::Interface::texturedGeometryShaderDefault() const {
-    // TODO rename
-    return context.getGenericShader(shaders, "LocationIndicatorTexturedShader");
+    return context.getGenericShader(shaders, "CustomGeometryShader");
 }
 
 std::unique_ptr<gfx::DrawableBuilder> CustomDrawableLayerHost::Interface::createBuilder(const std::string& name,

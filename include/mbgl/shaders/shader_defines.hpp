@@ -31,6 +31,11 @@ enum {
 };
 
 enum {
+    idCustomGeometryDrawableUBO = drawableReservedUBOCount,
+    customGeometryDrawableUBOCount
+};
+
+enum {
     idCustomSymbolDrawableUBO = idDrawableReservedVertexOnlyUBO,
     customSymbolDrawableUBOCount = drawableReservedUBOCount
 };
@@ -106,6 +111,7 @@ static constexpr uint32_t layerUBOStartId = std::max({static_cast<uint32_t>(back
                                                       static_cast<uint32_t>(circleDrawableUBOCount),
                                                       static_cast<uint32_t>(clippingMaskDrawableUBOCount),
                                                       static_cast<uint32_t>(collisionDrawableUBOCount),
+                                                      static_cast<uint32_t>(customGeometryDrawableUBOCount),
                                                       static_cast<uint32_t>(customSymbolDrawableUBOCount),
                                                       static_cast<uint32_t>(debugDrawableUBOCount),
                                                       static_cast<uint32_t>(fillDrawableUBOCount),
@@ -146,6 +152,10 @@ enum {
 
 enum {
     collisionUBOCount = getLayerStartValue(collisionDrawableUBOCount)
+};
+
+enum {
+    customGeometryUBOCount = getLayerStartValue(customGeometryDrawableUBOCount)
 };
 
 enum {
@@ -251,13 +261,8 @@ enum {
 };
 
 enum {
-    idCommonTexture,
-    commonTextureCount
-};
-
-enum {
-    idLocationIndicatorTexture,
-    locationIndicatorTextureCount
+    idCustomGeometryTexture,
+    customGeometryTextureCount
 };
 
 enum {
@@ -292,6 +297,11 @@ enum {
 };
 
 enum {
+    idLocationIndicatorTexture,
+    locationIndicatorTextureCount
+};
+
+enum {
     idLineImageTexture,
     lineTextureCount
 };
@@ -312,7 +322,7 @@ static constexpr uint32_t maxTextureCountPerShader = std::max({static_cast<uint3
                                                                static_cast<uint32_t>(circleTextureCount),
                                                                static_cast<uint32_t>(clippingMaskTextureCount),
                                                                static_cast<uint32_t>(collisionTextureCount),
-                                                               static_cast<uint32_t>(commonTextureCount),
+                                                               static_cast<uint32_t>(customGeometryTextureCount),
                                                                static_cast<uint32_t>(customSymbolTextureCount),
                                                                static_cast<uint32_t>(debugTextureCount),
                                                                static_cast<uint32_t>(fillTextureCount),
@@ -360,9 +370,9 @@ enum {
 };
 
 enum {
-    idCommonPosVertexAttribute,
-    idCommonTexVertexAttribute,
-    commonVertexAttributeCount
+    idCustomGeometryPosVertexAttribute,
+    idCustomGeometryTexVertexAttribute,
+    customGeometryVertexAttributeCount
 };
 
 enum {
@@ -488,7 +498,7 @@ static constexpr uint32_t maxVertexAttributeCountPerShader = std::max({
     static_cast<uint32_t>(circleVertexAttributeCount),
     static_cast<uint32_t>(clippingMaskVertexAttributeCount),
     static_cast<uint32_t>(collisionVertexAttributeCount),
-    static_cast<uint32_t>(commonVertexAttributeCount),
+    static_cast<uint32_t>(customGeometryVertexAttributeCount),
     static_cast<uint32_t>(customSymbolVertexAttributeCount),
     static_cast<uint32_t>(debugVertexAttributeCount),
     static_cast<uint32_t>(fillVertexAttributeCount),

@@ -15,6 +15,7 @@
 #include <mbgl/shaders/mtl/circle.hpp>
 #include <mbgl/shaders/mtl/clipping_mask.hpp>
 #include <mbgl/shaders/mtl/collision.hpp>
+#include <mbgl/shaders/mtl/custom_geometry.hpp>
 #include <mbgl/shaders/mtl/custom_symbol_icon.hpp>
 #include <mbgl/shaders/mtl/debug.hpp>
 #include <mbgl/shaders/mtl/fill.hpp>
@@ -106,6 +107,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::ClippingMaskProgram,
                   shaders::BuiltIn::CollisionBoxShader,
                   shaders::BuiltIn::CollisionCircleShader,
+                  shaders::BuiltIn::CustomGeometryShader,
                   shaders::BuiltIn::CustomSymbolIconShader,
                   shaders::BuiltIn::DebugShader,
                   shaders::BuiltIn::FillShader,

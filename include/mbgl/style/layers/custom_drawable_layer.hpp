@@ -70,9 +70,7 @@ public:
 
     struct GeometryOptions {
         mat4 matrix = matrix::identity4();
-        Color color;
-
-        // using a texture will override the color
+        Color color = Color::white();
         gfx::Texture2DPtr texture;
     };
 
@@ -207,7 +205,6 @@ private:
     gfx::ShaderPtr fillShaderDefault() const;
     gfx::ShaderPtr symbolShaderDefault() const;
     gfx::ShaderPtr geometryShaderDefault() const;
-    gfx::ShaderPtr texturedGeometryShaderDefault() const;
 
     enum class BuilderType {
         None,
@@ -215,7 +212,7 @@ private:
         LineWideVector,
         Fill,
         Symbol,
-        CommonGeometry
+        Geometry
     };
 
     std::unique_ptr<gfx::DrawableBuilder> createBuilder(const std::string& name, gfx::ShaderPtr shader) const;

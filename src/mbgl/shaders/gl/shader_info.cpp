@@ -95,6 +95,20 @@ const std::vector<AttributeInfo> CollisionCircleShaderInfo::attributes = {
 };
 const std::vector<TextureInfo> CollisionCircleShaderInfo::textures = {};
 
+// Custom Geometry
+using CustomGeometryInfo = ShaderInfo<BuiltIn::CustomGeometryShader, gfx::Backend::Type::OpenGL>;
+
+const std::vector<UniformBlockInfo> CustomGeometryInfo::uniformBlocks = {
+    UniformBlockInfo{"CustomGeometryDrawableUBO", idCustomGeometryDrawableUBO},
+};
+const std::vector<AttributeInfo> CustomGeometryInfo::attributes = {
+    AttributeInfo{"a_pos", idCustomGeometryPosVertexAttribute},
+    AttributeInfo{"a_uv", idCustomGeometryTexVertexAttribute},
+};
+const std::vector<TextureInfo> CustomGeometryInfo::textures = {
+    TextureInfo{"u_image", idCustomGeometryTexture},
+};
+
 // Custom Symbol Icon
 using CustomSymbolIconShaderInfo = ShaderInfo<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::OpenGL>;
 

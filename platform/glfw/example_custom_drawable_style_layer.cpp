@@ -445,20 +445,29 @@ void ExampleCustomDrawableStyleLayerHost::generateGeometry(Interface& interface)
 
     interface.setGeometryOptions(options);
 
-    interface.setGeometryTweakerCallback([=, rotation = 0.0f]([[maybe_unused]] mbgl::gfx::Drawable& drawable,
-                                                              const mbgl::PaintParameters& params,
-                                                              Interface::GeometryOptions& currentOptions) mutable {
+    interface.setGeometryTweakerCallback([=, frameCount = 0]([[maybe_unused]] mbgl::gfx::Drawable& drawable,
+                                                             const mbgl::PaintParameters& params,
+                                                             Interface::GeometryOptions& currentOptions) mutable {
+        frameCount++;
+
         const mbgl::Point<double>& center = project(location, params.state);
 
-        rotation += 0.1f;
         const float scale = itemScale * static_cast<float>(std::pow(2.f, params.state.getZoom())) *
                             params.pixelsToGLUnits[0];
 
         mbgl::mat4 matrix = mbgl::matrix::identity4();
         mbgl::matrix::translate(matrix, matrix, center.x, center.y, 0.0);
-        mbgl::matrix::rotate_z(matrix, matrix, rotation);
+        mbgl::matrix::rotate_z(matrix, matrix, frameCount * 0.05f);
         mbgl::matrix::scale(matrix, matrix, scale, scale, 1.0f);
         mbgl::matrix::multiply(currentOptions.matrix, params.state.getProjectionMatrix(), matrix);
+
+        if (frameCount % 100 == 0) {
+            if (currentOptions.color.g > 0.0f) {
+                currentOptions.color = mbgl::Color::red();
+            } else {
+                currentOptions.color = mbgl::Color::white();
+            }
+        }
     });
 
     interface.addGeometry(sharedVertices, sharedIndices, false);
