@@ -24,8 +24,8 @@ std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>
                                                    const TaggedScheduler& threadPool_) {
     switch (impl->type) {
         case SourceType::Vector:
-            return std::make_unique<RenderVectorSource>(staticImmutableCast<VectorSource::Impl>(impl),
-                                                        std::move(threadPool_));
+            // the TileSet isn't available yet, so we can't make different sources by format
+            return std::make_unique<RenderVectorSource>(staticImmutableCast<VectorSource::Impl>(impl), std::move(threadPool_));
         case SourceType::Raster:
             return std::make_unique<RenderRasterSource>(staticImmutableCast<RasterSource::Impl>(impl),
                                                         std::move(threadPool_));
