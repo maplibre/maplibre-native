@@ -427,10 +427,10 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     }
 
     // Prepare. Update all matrices and generate data that we should upload to the GPU.
-    for (const auto& entry : renderSources) {
+    for (const auto& [name, renderSource] : renderSources) {
         MLN_TRACE_ZONE(prepare source);
-        if (entry.second->isEnabled()) {
-            entry.second->prepare({.transform = renderTreeParameters->transformParams,
+        if (renderSource->isEnabled()) {
+            renderSource->prepare({.transform = renderTreeParameters->transformParams,
                                    .debugOptions = updateParameters->debugOptions,
                                    .imageManager = *imageManager});
         }

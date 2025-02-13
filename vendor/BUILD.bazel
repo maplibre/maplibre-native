@@ -145,6 +145,48 @@ cc_library(
     visibility = ["//visibility:public"],
 )
 
+# vendor/maplibre-tile-spec
+
+cc_library(
+    name = "simde",
+    hdrs = glob(["maplibre-tile-spec/vendor/simde/simde/**/*.h"]),
+    includes = ["maplibre-tile-spec/vendor/simde"],
+    visibility = ["//visibility:public"],
+)
+cc_library(
+    name = "FastPFOR",
+    deps = [":simde"],
+    srcs = glob([
+        "maplibre-tile-spec/vendor/fastpfor/src/*.c",
+        "maplibre-tile-spec/vendor/fastpfor/src/*.cpp",
+    ]),
+    hdrs = glob(["maplibre-tile-spec/vendor/fastpfor/headers/*.h"]),
+    includes = ["maplibre-tile-spec/vendor/fastpfor/headers"],
+    cxxopts = CPP_FLAGS,
+    copts = ["-DSIMDE_ENABLE_NATIVE_ALIASES"],
+    visibility = ["//visibility:public"],
+)
+cc_library(
+    name = "maplibre-tile-spec",
+    deps = [":FastPFOR"],
+    srcs = glob([
+        "maplibre-tile-spec/cpp/src/**/*.cpp",
+        "maplibre-tile-spec/cpp/src/**/*.hpp",
+    ]),
+    hdrs = glob([
+        "maplibre-tile-spec/cpp/include/**/*.hpp",
+    ]),
+    defines = [
+        "MLT_WITH_JSON=0",
+    ],
+    copts = CPP_FLAGS,
+    includes = [
+        "maplibre-tile-spec/cpp/include",
+        "maplibre-tile-spec/cpp/src",
+    ],
+    visibility = ["//visibility:public"],
+)
+
 # vendor/metal-cpp.json
 cc_library(
     name = "metal-cpp",
