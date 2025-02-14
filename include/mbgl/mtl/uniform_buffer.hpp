@@ -43,7 +43,7 @@ public:
     }
 
     void bind(RenderPass& renderPass) const noexcept;
-    void unbind(RenderPass& renderPass) const noexcept {};
+    void unbind(RenderPass&) const noexcept {}
 
 private:
     gfx::UniqueUniformBuffer copy(const gfx::UniformBuffer& buffer) override {

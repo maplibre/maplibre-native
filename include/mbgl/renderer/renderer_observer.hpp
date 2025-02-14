@@ -1,15 +1,15 @@
 #pragma once
 
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/util/font_stack.hpp>
-#include <mbgl/text/glyph_range.hpp>
-#include <mbgl/tile/tile_operation.hpp>
+#include <mbgl/actor/scheduler.hpp>
 #include <mbgl/gfx/backend.hpp>
 #include <mbgl/shaders/shader_source.hpp>
+#include <mbgl/text/glyph_range.hpp>
+#include <mbgl/tile/tile_id.hpp>
+#include <mbgl/tile/tile_operation.hpp>
+#include <mbgl/util/font_stack.hpp>
 
 #include <cstdint>
 #include <exception>
-#include <functional>
 #include <string>
 
 namespace mbgl {
@@ -55,8 +55,7 @@ public:
     virtual void onDidFinishRenderingMap() {}
 
     /// Style is missing an image
-    using StyleImageMissingCallback = std::function<void()>;
-    virtual void onStyleImageMissing(const std::string&, const StyleImageMissingCallback& done) { done(); }
+    virtual void onStyleImageMissing(const std::string&, Scheduler::Task&& done) { done(); }
     virtual void onRemoveUnusedStyleImages(const std::vector<std::string>&) {}
 
     // Entry point for custom shader registration

@@ -33,7 +33,7 @@ using CTLineRefHandle = CFHandle<CTLineRef, CFTypeRef, CFRelease>;
  Draws glyphs applying fonts that are installed on the system or bundled with
  the application. This is a more flexible and performant alternative to
  typesetting text using glyph sheets downloaded from a server.
- 
+
  This implementation is similar to the local glyph rasterization in GL JS:
   - Only CJK glyphs are drawn locally, because it’s much more noticeable when a
     non-CJK font mismatches the style than when a CJK font mismatches the style.
@@ -41,7 +41,7 @@ using CTLineRefHandle = CFHandle<CTLineRef, CFTypeRef, CFRelease>;
     does work with variable-width fonts.)
   - Fallback fonts can be specified globally, similar to the seldom-used
     advanced font preferences in most Web browsers.
- 
+
  This is a first step toward fully local font rendering:
  <https://github.com/mapbox/mapbox-gl-native/issues/7862>. Further improvements:
   - Make sure the font size is 24 points (`util::ONE_EM`) at all times, not the
@@ -65,13 +65,13 @@ class LocalGlyphRasterizer::Impl {
 public:
     /**
      Creates a new rasterizer with the given font names as a fallback.
-     
+
      The fallback font names can also be specified in the style as a font stack
      or in the `MLNIdeographicFontFamilyName` key of
      `NSUserDefaults.standardUserDefaults`. The font stack takes precedence,
      followed by the `MLNIdeographicFontFamilyName` user default, then finally
      the `fallbackFontNames_` parameter as a last resort.
-     
+
      @param fallbackFontNames_ A list of font names, one per line. Each font
         name can be the PostScript name or display name of a specific font face
         or a font family name. Set this parameter to `nullptr` to disable local
@@ -85,24 +85,24 @@ public:
             fallbackFontNames = [fallbackFontNames ?: @[] arrayByAddingObjectsFromArray:[@(fallbackFontNames_->c_str()) componentsSeparatedByString:@"\n"]];
         }
     }
-    
+
     /**
      Returns whether local glyph rasterization is enabled globally.
-     
+
      The developer can disable local glyph rasterization by specifying no
      fallback font names.
      */
     bool isEnabled() { return fallbackFontNames; }
-    
+
     /**
      Creates a font descriptor representing the given font stack and any global
      fallback fonts.
-     
+
      @param fontStack The font stack that takes precedence.
      @returns A font descriptor representing the first font in the font stack
         with a cascade list representing the rest of the fonts in the font stack
         and any fallback fonts. The font descriptor is not cached.
-     
+
      @post The caller is responsible for releasing the font descriptor.
      */
     CTFontDescriptorRef createFontDescriptor(const FontStack& fontStack) {
@@ -117,14 +117,14 @@ public:
             }
         }
         [fontNames addObjectsFromArray:fallbackFontNames];
-        
+
         if (!fontNames.count) {
             NSDictionary *fontAttributes = @{
                 (NSString *)kCTFontSizeAttribute: @(util::ONE_EM),
             };
             return CTFontDescriptorCreateWithAttributes((CFDictionaryRef)fontAttributes);
         }
-        
+
         // Apply the first font name to the returned font descriptor; apply the
         // rest of the font names to the cascade list.
         CFStringRef mainFontName = (__bridge CFStringRef)fontNames.firstObject;
@@ -137,11 +137,11 @@ public:
                 // font display names and font family names.
                 (NSString *)kCTFontNameAttribute: name,
             };
-            
+
             CTFontDescriptorRefHandle descriptor(CTFontDescriptorCreateWithAttributes((CFDictionaryRef)fontAttributes));
             CFArrayAppendValue(*fallbackDescriptors, *descriptor);
         }
-        
+
         CFStringRef keys[] = {
             kCTFontSizeAttribute,
             kCTFontNameAttribute,
@@ -160,7 +160,7 @@ public:
                 &kCFTypeDictionaryValueCallBacks));
         return CTFontDescriptorCreateWithAttributes(*attributes);
     }
-    
+
 private:
     NSArray<NSString *> *fallbackFontNames;
 };
@@ -174,7 +174,7 @@ LocalGlyphRasterizer::~LocalGlyphRasterizer()
 
 /**
  Returns whether the rasterizer can rasterize a glyph for the given codepoint.
- 
+
  @param glyphID A font-agnostic Unicode codepoint, not a glyph index.
  @returns Whether a glyph for the codepoint can be rasterized.
  */
@@ -189,7 +189,7 @@ bool LocalGlyphRasterizer::canRasterizeGlyph(const FontStack&, GlyphID glyphID) 
 /**
  Draws the given codepoint into an image, gathers metrics about the glyph, and
  returns the image.
- 
+
  @param glyphID A font-agnostic Unicode codepoint, not a glyph index.
  @param font The font to apply to the codepoint.
  @param metrics Upon return, the metrics match the font’s metrics for the glyph
@@ -211,7 +211,7 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
         std::string stdFamilyName(familyName.UTF8String);
         Log::Error(Event::General, "Unable to create bold font for " + stdFamilyName);
     }
-    
+
     CTFontRef drawFont = isBold && boldFont ? *boldFont : font;
 
     CFStringRef keys[] = { kCTFontAttributeName };
@@ -234,18 +234,18 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
     if (!line) {
         throw std::runtime_error("Unable to create line from attributed string");
     }
-    
+
     Size size(35, 35);
     metrics.width = size.width;
     metrics.height = size.height;
-    
+
     PremultipliedImage rgbaBitmap(size);
-    
+
     CGColorSpaceHandle colorSpace(CGColorSpaceCreateDeviceRGB());
     if (!colorSpace) {
         throw std::runtime_error("CGColorSpaceCreateDeviceRGB failed");
     }
-    
+
     constexpr const size_t bitsPerComponent = 8;
     constexpr const size_t bytesPerPixel = 4;
     const size_t bytesPerRow = bytesPerPixel * size.width;
@@ -262,23 +262,23 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
     if (!context) {
         throw std::runtime_error("CGBitmapContextCreate failed");
     }
-    
+
     CFArrayRef glyphRuns = CTLineGetGlyphRuns(*line);
     CTRunRef glyphRun = (CTRunRef)CFArrayGetValueAtIndex(glyphRuns, 0);
     CFRange wholeRunRange = CFRangeMake(0, CTRunGetGlyphCount(glyphRun));
     CGSize advances[wholeRunRange.length];
     CTRunGetAdvances(glyphRun, wholeRunRange, advances);
     metrics.advance = std::round(advances[0].width);
-    
+
     // Mimic glyph PBF metrics.
     metrics.left = Glyph::borderSize;
     metrics.top = -Glyph::borderSize;
-    
+
     // Move the text upward to avoid clipping off descenders.
     CGFloat descent;
     CTRunGetTypographicBounds(glyphRun, wholeRunRange, NULL, &descent, NULL);
     CGContextSetTextPosition(*context, 0.0, descent);
-    
+
     CTLineDraw(*line, *context);
 
     return rgbaBitmap;
@@ -287,7 +287,7 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
 /**
  Returns all the information mbgl needs about a glyph representation of the
  given codepoint.
- 
+
  @param fontStack The best matching font in this font stack is applied to the
     codepoint.
  @param glyphID A font-agnostic Unicode codepoint, not a glyph index.
@@ -301,7 +301,7 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack& fontStack, GlyphID g
     if (!font) {
         return manufacturedGlyph;
     }
-    
+
     manufacturedGlyph.id = glyphID;
     BOOL isBold = NO;
     // Only check the first font name to detect if the user prefers using bold
@@ -313,7 +313,7 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack& fontStack, GlyphID g
     }
 
     PremultipliedImage rgbaBitmap = drawGlyphBitmap(glyphID, *font, manufacturedGlyph.metrics, isBold);
-    
+
     Size size(manufacturedGlyph.metrics.width, manufacturedGlyph.metrics.height);
     // Copy alpha values from RGBA bitmap into the AlphaImage output
     manufacturedGlyph.bitmap = AlphaImage(size);

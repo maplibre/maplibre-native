@@ -21,7 +21,7 @@ enum {
 
 struct alignas(16) FillDrawableUBO {
     /*  0 */ float4x4 matrix;
-    
+
     // Interpolations
     /* 64 */ float color_t;
     /* 68 */ float opacity_t;
@@ -36,7 +36,7 @@ static_assert(sizeof(FillDrawableUBO) == 5 * 16, "wrong size");
 
 struct alignas(16) FillOutlineDrawableUBO {
     /*  0 */ float4x4 matrix;
-    
+
     // Interpolations
     /* 64 */ float outline_color_t;
     /* 68 */ float opacity_t;
@@ -54,7 +54,7 @@ struct alignas(16) FillPatternDrawableUBO {
     /* 64 */ float2 pixel_coord_upper;
     /* 72 */ float2 pixel_coord_lower;
     /* 80 */ float tile_ratio;
-    
+
     // Interpolations
     /* 84 */ float pattern_from_t;
     /* 88 */ float pattern_to_t;
@@ -81,7 +81,7 @@ struct alignas(16) FillOutlinePatternDrawableUBO {
     /* 64 */ float2 pixel_coord_upper;
     /* 72 */ float2 pixel_coord_lower;
     /* 80 */ float tile_ratio;
-    
+
     // Interpolations
     /* 84 */ float pattern_from_t;
     /* 88 */ float pattern_to_t;

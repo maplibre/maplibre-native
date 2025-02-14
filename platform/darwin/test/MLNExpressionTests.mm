@@ -65,7 +65,7 @@ using namespace std::string_literals;
     NSDictionary *stops = @{@11.0f: initialValue,
                             @14.0f: @6.0f,
                             @20.0f: @18.0f };
-    
+
     NSExpression *steppingExpression = [
         NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
         fromExpression:[NSExpression expressionForConstantValue:initialValue]
@@ -82,7 +82,7 @@ using namespace std::string_literals;
     NSExpression *constantExpression = [NSExpression expressionWithFormat:@"%@", [MLNColor redColor]];
     NSExpression *stops = [NSExpression expressionForConstantValue:@{@18: constantExpression}];
     NSExpression *functionExpression;
-    
+
     if (@available(iOS 15, *)) {
         // How to create expressions with iOS 15
         functionExpression = [NSExpression
@@ -97,7 +97,7 @@ using namespace std::string_literals;
                               stops];
     }
     //#-end-example-code
-    
+
     XCTAssertNotNil(functionExpression);
     NSLog(@"%s %@", __FUNCTION__, functionExpression);
 }
@@ -111,7 +111,7 @@ using namespace std::string_literals;
                                    @20.0f: @1.0f };
     NSExpression *stops = [NSExpression expressionForConstantValue:opacityStops];
     NSExpression *functionExpression;
-    
+
     if (@available(iOS 15, *)) {
         // How to create expressions with iOS 15
         functionExpression = [NSExpression
@@ -126,7 +126,7 @@ using namespace std::string_literals;
                               stops];
     }
     //#-end-example-code
-    
+
     XCTAssertNotNil(functionExpression);
     NSLog(@"%s %@", __FUNCTION__, functionExpression);
 }
@@ -158,7 +158,7 @@ using namespace std::string_literals;
     // we warn the user to this effect in -[NSExpression mgl_constantMBGLValue],
     // we just check that things are in the ballpark here with integer values
     // and some lower-precision checks.
-    
+
     MLNAssertConstantEqualsValue(@-1.0f, -1.0, @"Float NSNumber should convert to double.");
     MLNAssertConstantEqualsValue(@1.0f, 1.0, @"Float NSNumber should convert to double.");
     MLNAssertConstantEqualsValueWithAccuracy(@-23.232342f, -23.232342, 0.000001, @"Float NSNumber should convert to double.");
@@ -216,14 +216,14 @@ using namespace std::string_literals;
     XCTAssertEqual([NSExpression expressionForConstantValue:@"Polygon"].mgl_featureType, mbgl::FeatureType::Polygon);
     XCTAssertEqual([NSExpression expressionForConstantValue:@"Unknown"].mgl_featureType, mbgl::FeatureType::Unknown);
     XCTAssertEqual([NSExpression expressionForConstantValue:@""].mgl_featureType, mbgl::FeatureType::Unknown);
-    
+
     XCTAssertEqual([NSExpression expressionForConstantValue:@1].mgl_featureType, mbgl::FeatureType::Point);
     XCTAssertEqual([NSExpression expressionForConstantValue:@2].mgl_featureType, mbgl::FeatureType::LineString);
     XCTAssertEqual([NSExpression expressionForConstantValue:@3].mgl_featureType, mbgl::FeatureType::Polygon);
     XCTAssertEqual([NSExpression expressionForConstantValue:@0].mgl_featureType, mbgl::FeatureType::Unknown);
     XCTAssertEqual([NSExpression expressionForConstantValue:@-1].mgl_featureType, mbgl::FeatureType::Unknown);
     XCTAssertEqual([NSExpression expressionForConstantValue:@4].mgl_featureType, mbgl::FeatureType::Unknown);
-    
+
     XCTAssertEqual([NSExpression expressionForConstantValue:nil].mgl_featureType, mbgl::FeatureType::Unknown);
 }
 
@@ -870,7 +870,7 @@ using namespace std::string_literals;
 #else
         NSExpression *expression = [NSExpression expressionWithFormat:@"CAST(x, 'NSColor')"];
 #endif
-        
+
         NSArray *jsonExpression = @[@"to-color", @[@"get", @"x"]];
         XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
         XCTAssertEqualObjects([NSExpression expressionWithMLNJSONObject:jsonExpression], expression);
@@ -1014,7 +1014,7 @@ using namespace std::string_literals;
         XCTAssertEqualObjects(compatibilityExpression.mgl_jsonExpressionObject, jsonExpression);
         XCTAssertEqualObjects([NSExpression expressionWithMLNJSONObject:jsonExpression], expression);
     }
-    
+
 }
 
 - (void)testConditionalExpressionObject {
@@ -1232,7 +1232,7 @@ using namespace std::string_literals;
                                                                                   fontNames:nil
                                                                                    fontScale:@(1.2)];
         NSExpression *expression = [NSExpression expressionWithFormat:@"mgl_attributed:(%@)", MLNConstantExpression(attribute1)];
-        
+
         NSExpression *compatibilityExpression = [NSExpression expressionForFunction:@"mgl_attributed:" arguments:@[MLNConstantExpression(attribute1)]];
         NSArray *jsonExpression = @[@"format", @"foo", @{@"font-scale": @1.2}];
         XCTAssertEqualObjects(compatibilityExpression.mgl_jsonExpressionObject, expression.mgl_jsonExpressionObject);
@@ -1245,7 +1245,7 @@ using namespace std::string_literals;
                                                                                        attributes:@{ MLNFontScaleAttribute: MLNConstantExpression(@(1.2)),
                                                                                                      MLNFontColorAttribute: MLNConstantExpression(@"yellow") }] ;
         NSExpression *expression = [NSExpression expressionWithFormat:@"mgl_attributed:(%@)", MLNConstantExpression(attribute1)];
-        
+
         NSExpression *compatibilityExpression = [NSExpression expressionForFunction:@"mgl_attributed:" arguments:@[MLNConstantExpression(attribute1)]];
         NSArray *jsonExpression = @[ @"format", @"foo", @{ @"font-scale": @1.2, @"text-color": @"yellow" } ];
         XCTAssertEqualObjects(compatibilityExpression.mgl_jsonExpressionObject, expression.mgl_jsonExpressionObject);
@@ -1256,7 +1256,7 @@ using namespace std::string_literals;
     {
         MLNAttributedExpression *attribute1 = [[MLNAttributedExpression alloc] initWithExpression:[NSExpression expressionForConstantValue:@"foo"]] ;
         NSExpression *expression = [NSExpression expressionWithFormat:@"mgl_attributed:(%@)", MLNConstantExpression(attribute1)];
-        
+
         NSArray *jsonExpression = @[ @"format", @"foo", @{ } ];
         XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
         XCTAssertEqualObjects([NSExpression expressionWithMLNJSONObject:jsonExpression], expression);
@@ -1269,7 +1269,7 @@ using namespace std::string_literals;
                                                                                                      MLNFontNamesAttribute: fontNames
                                                                                                      }] ;
         NSExpression *expression = [NSExpression expressionWithFormat:@"mgl_attributed:(%@)", MLNConstantExpression(attribute1)];
-        
+
         NSArray *jsonExpression = @[ @"format", @"foo", @{ @"font-scale": @1.2, @"text-color": @"yellow" , @"text-font" : @[ @"literal", @[ @"DIN Offc Pro Bold", @"Arial Unicode MS Bold" ]]} ];
         XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
         XCTAssertEqualObjects([NSExpression expressionWithMLNJSONObject:jsonExpression], expression);
@@ -1282,7 +1282,7 @@ using namespace std::string_literals;
                                                                                                      MLNFontNamesAttribute: fontNames
                                                                                                      }] ;
         NSExpression *expression = [NSExpression expressionWithFormat:@"mgl_attributed:(%@)", MLNConstantExpression(attribute1)];
-        
+
         NSArray *jsonExpression = @[ @"format", @"foo", @{ @"font-scale": @1.2, @"text-color": @[@"rgb", @255, @0, @0] , @"text-font" : @[ @"literal", @[ @"DIN Offc Pro Bold", @"Arial Unicode MS Bold" ]]} ];
         XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
         XCTAssertEqualObjects([NSExpression expressionWithMLNJSONObject:jsonExpression], expression);
@@ -1295,7 +1295,7 @@ using namespace std::string_literals;
                                                                                                      MLNFontNamesAttribute: fontNames
                                                                                                      }] ;
         NSExpression *expression = [NSExpression expressionWithFormat:@"mgl_attributed:(%@)", MLNConstantExpression(attribute1)];
-        
+
         NSArray *jsonExpression = @[ @"format", @[@"to-string", @[@"get", @"x"]], @{ @"font-scale": @1.2, @"text-color": @[@"rgb", @255, @0, @0] , @"text-font" : @[ @"literal", @[ @"DIN Offc Pro Bold", @"Arial Unicode MS Bold" ]]} ];
         XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
         XCTAssertEqualObjects([NSExpression expressionWithMLNJSONObject:jsonExpression], expression);
@@ -1500,7 +1500,7 @@ using namespace std::string_literals;
         NSExpression *expression = [NSExpression mgl_expressionForConditional:[NSPredicate predicateWithFormat:@"1 = 2"]
                                                                trueExpression:MLNConstantExpression(@YES)
                                                              falseExpresssion:MLNConstantExpression(@NO)];
-        
+
         NSArray *jsonExpression = @[@"case", @[@"==", @1, @2], @YES, @NO];
         XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
         XCTAssertEqualObjects([NSExpression expressionWithMLNJSONObject:jsonExpression], expression);

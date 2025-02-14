@@ -131,7 +131,7 @@ static NSString * const MBXOfflinePacksTableViewActiveCellReuseIdentifier = @"Ac
 
 - (IBAction)invalidatePacks:(id)sender {
     for (MLNOfflinePack *pack in [MLNOfflineStorage sharedOfflineStorage].packs) {
-        
+
         CFTimeInterval start = CACurrentMediaTime();
         [[MLNOfflineStorage sharedOfflineStorage] invalidatePack:pack withCompletionHandler:^(NSError * _Nullable error) {
             CFTimeInterval end = CACurrentMediaTime();

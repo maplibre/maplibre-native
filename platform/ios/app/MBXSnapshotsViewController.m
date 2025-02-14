@@ -21,7 +21,7 @@
     MLNMapSnapshotter* topLeftSnapshotter;
     MLNMapSnapshotter* topCenterSnapshotter;
     MLNMapSnapshotter* topRightSnapshotter;
-    
+
     // Bottom row
     MLNMapSnapshotter* bottomLeftSnapshotter;
     MLNMapSnapshotter* bottomCenterSnapshotter;
@@ -48,7 +48,7 @@
     mapCamera.centerCoordinate = coordinates;
     MLNMapSnapshotOptions* options = [[MLNMapSnapshotOptions alloc] initWithStyleURL:[[MLNStyle predefinedStyle:@"Hybrid"] url] camera:mapCamera size:CGSizeMake(imageView.frame.size.width, imageView.frame.size.height)];
     options.zoomLevel = 10;
-    
+
     // Create and start the snapshotter
     __weak UIImageView *weakImageView = imageView;
     MLNMapSnapshotter* snapshotter = [[MLNMapSnapshotter alloc] initWithOptions:options];
@@ -59,7 +59,7 @@
             weakImageView.image = snapshot.image;
         }
     }];
-    
+
     return snapshotter;
 }
 

@@ -13,7 +13,7 @@
 #endif
 
     [MLNSettings useWellKnownTileServer:MLNMapTiler];
-    
+
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.rootViewController = [MBXBenchViewController new];
     [self.window makeKeyAndVisible];
