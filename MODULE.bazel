@@ -1,12 +1,12 @@
 module(name = "maplibre")
 
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
-bazel_dep(name = "platforms", version = "0.0.10")
+bazel_dep(name = "platforms", version = "0.0.11")
 bazel_dep(name = "rules_apple", version = "3.19.0")
 bazel_dep(name = "rules_swift", version = "2.5.0")
 bazel_dep(name = "rules_xcodeproj", version = "2.10.0")
 bazel_dep(name = "aspect_rules_js", version = "2.1.3")
-bazel_dep(name = "rules_nodejs", version = "6.3.2")
+bazel_dep(name = "rules_nodejs", version = "6.3.3")
 bazel_dep(name = "libuv", version = "1.48.0")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node", dev_dependency = True)
@@ -64,7 +64,7 @@ bazel_dep(name = "rules_rust", version = "0.56.0")
 bazel_dep(name = "cxx.rs", version = "1.0.136")
 git_override(
     module_name = "cxx.rs",
-    commit = "d54e44698c3fa5833a861cb3ae502533b92f2f57",
+    commit = "fb8fdc0b20ddca8df80f6638bc773dc4824a8092",
     remote = "https://github.com/dtolnay/cxx.git",
 )
 
