@@ -3,9 +3,6 @@ startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
 
 common --enable_platform_specific_config
 
-# TODO: remove once issues with yanked versions are resolved
-common --allow_yanked_versions
-
 coverage --experimental_ui_max_stdouterr_bytes=10485760
 
 common:macos --linkopt=-L/opt/homebrew/lib
