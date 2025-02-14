@@ -7,7 +7,7 @@ bazel_dep(name = "rules_apple", version = "3.16.1", repo_name = "build_bazel_rul
 bazel_dep(name = "rules_swift", version = "2.2.3", repo_name = "build_bazel_rules_swift")
 bazel_dep(name = "rules_xcodeproj", version = "2.10.0")
 bazel_dep(name = "aspect_rules_js", version = "2.1.3")
-bazel_dep(name = "rules_nodejs", version = "6.3.2")
+bazel_dep(name = "rules_nodejs", version = "6.3.3")
 bazel_dep(name = "libuv", version = "1.48.0")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node", dev_dependency = True)
