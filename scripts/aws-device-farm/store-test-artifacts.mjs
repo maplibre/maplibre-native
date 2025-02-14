@@ -82,7 +82,7 @@ await storeRunArtifacts(runArn, outputDir);
 
 /**
  * Looks for the run with the provided ARN and returns the test spec output.
- * 
+ *
  * @param {string[]} arnArr
  * @param {string} outputDir
  * @returns string

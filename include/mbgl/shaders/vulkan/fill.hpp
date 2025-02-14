@@ -167,7 +167,7 @@ layout(location = 2) out vec2 frag_position;
 
 void main() {
     const FillOutlineDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
-    
+
 #if !defined(HAS_UNIFORM_u_outline_color)
     frag_color = vec4(unpack_mix_color(in_color, drawable.outline_color_t));
 #endif
@@ -331,9 +331,9 @@ void main() {
     frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
 #endif
 
-    const vec2 pattern_tl_a = frag_pattern_from.xy; 
-    const vec2 pattern_br_a = frag_pattern_from.zw; 
-    const vec2 pattern_tl_b = frag_pattern_to.xy; 
+    const vec2 pattern_tl_a = frag_pattern_from.xy;
+    const vec2 pattern_br_a = frag_pattern_from.zw;
+    const vec2 pattern_tl_b = frag_pattern_to.xy;
     const vec2 pattern_br_b = frag_pattern_to.zw;
 
     const float pixelRatio = paintParams.pixel_ratio;
@@ -543,9 +543,9 @@ void main() {
     frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
 #endif
 
-    const vec2 pattern_tl_a = frag_pattern_from.xy; 
-    const vec2 pattern_br_a = frag_pattern_from.zw; 
-    const vec2 pattern_tl_b = frag_pattern_to.xy; 
+    const vec2 pattern_tl_a = frag_pattern_from.xy;
+    const vec2 pattern_br_a = frag_pattern_from.zw;
+    const vec2 pattern_tl_b = frag_pattern_to.xy;
     const vec2 pattern_br_b = frag_pattern_to.zw;
 
     const float pixelRatio = paintParams.pixel_ratio;

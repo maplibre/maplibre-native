@@ -32,7 +32,7 @@ See instructions in [docker/README.md](../../docker/README.md) to build in a doc
 ## Build
 
 ```bash
-# Run from the root of the project to init the build  
+# Run from the root of the project to init the build
 cmake -B build -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -DMLN_WITH_CLANG_TIDY=OFF -DMLN_WITH_COVERAGE=OFF -DMLN_DRAWABLE_RENDERER=ON -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON
 
 # Build mbgl-render using all available CPUs
@@ -61,7 +61,7 @@ You'll need to simulate an X server to do any rendering. Install `xvfb` and `xau
 xvfb-run -a ./build/bin/mbgl-render --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --output out.png
 ```
 
-### Using your own style/tiles 
+### Using your own style/tiles
 
 You can also use the `mbgl-render` command to render images from your own style or tile set. To do so, you will need a data source and a style JSON file.
 
@@ -75,7 +75,7 @@ wget https://gist.githubusercontent.com/louwers/d7607270cbd6e3faa05222a09bcb8f7d
 Note that this style is totally inadequate for any real use beyond testing your custom setup. Replace the source URL `mbtiles:///path/to/zurich_switzerland.mbtiles` with the actual path to your `.mbtiles` file. You can use this command if you downloaded both files to the working directory:
 
 ```bash
-sed -i "s#/path/to#$PWD#" style.json 
+sed -i "s#/path/to#$PWD#" style.json
 ```
 
 Next, run the following command.

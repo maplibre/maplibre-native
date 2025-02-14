@@ -26,7 +26,7 @@ function parseCSSColor(/** @type {string} **/ str) {
 }
 
 /**
- * @param {any} property 
+ * @param {any} property
  */
 function isLightProperty(property) {
   return property['light-property'] === true;
@@ -40,7 +40,7 @@ function isOverridable(property) {
 };
 
 /**
- * @param {any} property 
+ * @param {any} property
  * @returns {string}
  */
 function expressionType(property) {
@@ -69,8 +69,8 @@ function expressionType(property) {
 };
 
 /**
- * 
- * @param {any} property 
+ *
+ * @param {any} property
  * @returns {string}
  */
 function evaluatedType(property) {
@@ -124,8 +124,8 @@ function evaluatedType(property) {
 };
 
 /**
- * @param {any} property 
- * @param {any} type 
+ * @param {any} property
+ * @param {any} type
  */
 function attributeUniformType(property, type) {
     /** @type {Record<string, string[]>} **/
@@ -156,7 +156,7 @@ function attributeUniformType(property, type) {
 }
 
 /**
- * @param {any} property 
+ * @param {any} property
  */
 function layoutPropertyType(property) {
   switch (property['property-type']) {
@@ -169,10 +169,10 @@ function layoutPropertyType(property) {
 };
 
 /**
- * 
- * @param {any} property 
- * @param {any} type 
- * @returns 
+ *
+ * @param {any} property
+ * @param {any} type
+ * @returns
  */
 function paintPropertyType(property, type) {
   switch (property['property-type']) {
@@ -190,7 +190,7 @@ function paintPropertyType(property, type) {
 };
 
 /**
- * @param {any} property 
+ * @param {any} property
  */
 function propertyValueType(property) {
   switch (property['property-type']) {
@@ -202,8 +202,8 @@ function propertyValueType(property) {
 };
 
 /**
- * @param {any} property 
- * @param {number} num 
+ * @param {any} property
+ * @param {number} num
  * @returns {string}
  */
 function formatNumber(property, num = 0) {
@@ -215,7 +215,7 @@ function formatNumber(property, num = 0) {
 }
 
 /**
- * @param {any} property 
+ * @param {any} property
  */
 function defaultValue(property) {
   // https://github.com/mapbox/mapbox-gl-native/issues/5258

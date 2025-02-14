@@ -35,7 +35,7 @@ namespace WhirlyKitShader
 
 /** Expressions are used to change values like width and opacity over zoom levels. **/
 #define WKSExpStops 8
-    
+
 // Line Joins
 // These are assumed to match WideVectorLineJoinType
 typedef enum {
@@ -202,7 +202,7 @@ float3 viewPos(constant simd::float4x4 &mat, float3 vec) {
 
 float2 screenPos_MVP(constant Uniforms &u, float3 viewPos) {
     const float4 p4 = float4(viewPos, 1.0);
-    
+
     // Use the MVP matrix
     const float4 s = u.mvpMatrix * p4;
 
@@ -228,7 +228,7 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
         .position = discardPt,
         .roundJoin = false,
     };
-    
+
     // Vertex index within the instance, 0-11
     // Odd indexes are on the left, evens are on the right.
     const int whichVert = (vert.index >> 16) & 0xffff;
@@ -313,7 +313,7 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
             centers[ii].norm = float2(-centers[ii].nDir.y, centers[ii].nDir.x);
         }
     }
-    
+
     // Pull out the center line offset, or calculate one
     float centerLine = wideVec.offset;
 
@@ -331,7 +331,7 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
     // If we're on the far end of the body segment, we need this and the next two segments.
     // Otherwise we need the previous, this, and the next segment.
     if (instValid[interIdx] && instValid[interIdx+1] && instValid[interIdx+2]) {
-        
+
         // Don't even bother computing intersections for very acute angles or very small turns
         dotProd = dot(centers[interIdx+1].nDir, centers[interIdx+2].nDir);
         if (-wideVecMaxTurnThreshold < dotProd &&
@@ -354,7 +354,7 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
                     }
                 }
             }
-            
+
             // Intersect the left or right sides of prev-this and this-next, plus offset
             thread const CenterInfo &prev = centers[interIdx+0];
             thread const CenterInfo &cur  = centers[interIdx+1];
@@ -385,7 +385,7 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
                         offsetCenter = i2.interPt;
                     }
                 }
-                
+
                 const float2 interVec = (interPt - offsetCenter) / screenScale;
                 const float interDist2 = length_squared(interVec);
                 const float maxClipDist2 = (maxAdjDist * wideVec.interClipLimit) *

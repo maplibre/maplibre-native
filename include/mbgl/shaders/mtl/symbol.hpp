@@ -23,16 +23,16 @@ struct alignas(16) SymbolDrawableUBO {
 
     /* 192 */ float2 texsize;
     /* 200 */ float2 texsize_icon;
-    
+
     /* 208 */ /*bool*/ int is_text_prop;
     /* 212 */ /*bool*/ int rotate_symbol;
     /* 216 */ /*bool*/ int pitch_with_map;
     /* 220 */ /*bool*/ int is_size_zoom_constant;
     /* 224 */ /*bool*/ int is_size_feature_constant;
-    
+
     /* 228 */ float size_t;
     /* 232 */ float size;
-    
+
     // Interpolations
     /* 236 */ float fill_color_t;
     /* 240 */ float halo_color_t;

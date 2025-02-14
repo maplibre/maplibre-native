@@ -30,4 +30,4 @@ gh workflow run ios-ci.yml -f release=pre --ref main
 
 Or run the workflow from the Actions tab on GitHub.
 
-The items under the `## main` heading in `platform/ios/CHANGELOG.md` will be used as changelog for the pre-release. 
+The items under the `## main` heading in `platform/ios/CHANGELOG.md` will be used as changelog for the pre-release.

@@ -37,7 +37,7 @@ void main() {
     // make anchor relative to (0.5, 0.5) and corners in range (-1, -1) to (1, 1)
     vec2 anchor = (u_anchor - vec2(0.5, 0.5)) * 2.0;
 
-    // decode center 
+    // decode center
     vec2 center = floor(a_pos * 0.5);
 
     // rotate extrusion around anchor

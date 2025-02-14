@@ -29,7 +29,7 @@ NSString * const kMLNDownloadPerformanceEvent = @"mobile.performance_trace";
         _events = [NSMutableDictionary dictionary];
         _eventsQueue = dispatch_queue_create("org.maplibre.network-configuration", DISPATCH_QUEUE_CONCURRENT);
     }
-    
+
     return self;
 }
 
@@ -141,7 +141,7 @@ NSString * const kMLNDownloadPerformanceEvent = @"mobile.performance_trace";
 
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self.metricsDelegate networkConfiguration:self didGenerateMetricEvent:eventAttributes];
-            });            
+            });
         }
     }
 }
@@ -156,25 +156,25 @@ NSString * const kMLNDownloadPerformanceEvent = @"mobile.performance_trace";
     NSDateFormatter* iso8601Formatter = [[NSDateFormatter alloc] init];
     iso8601Formatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";
     NSString *createdDate = [iso8601Formatter stringFromDate:[NSDate date]];
-    
+
     NSMutableArray *attributes = [NSMutableArray array];
     [attributes addObject:@{ @"name" : @"requestUrl" , @"value" : urlString }];
     [attributes addObject:@{ @"name" : MLNResourceType , @"value" : [parameters objectForKey:MLNResourceType] }];
-    
+
     if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
         NSInteger responseCode = [(NSHTTPURLResponse *)response statusCode];
         [attributes addObject:@{ @"name" : @"responseCode", @"value" : @(responseCode)}];
     }
-    
+
     BOOL isWIFIOn = [[MLNReachability reachabilityWithHostName:response.URL.host] isReachableViaWiFi];
     [attributes addObject:@{ @"name" : @"wifiOn", @"value" : @(isWIFIOn)}];
-    
+
     if (action) {
         [attributes addObject:@{ @"name" : @"action" , @"value" : action }];
     }
-    
+
     double elapsedTimeInMS = elapsedTime * 1000.0;
-    
+
     return @{
              @"event" : kMLNDownloadPerformanceEvent,
              @"created" : createdDate,
@@ -188,11 +188,11 @@ NSString * const kMLNDownloadPerformanceEvent = @"mobile.performance_trace";
 
 - (nullable NSDictionary*)eventDictionaryForKey:(nonnull NSString*)key {
     __block NSDictionary *dictionary;
-    
+
     dispatch_sync(self.eventsQueue, ^{
         dictionary = [self.events objectForKey:key];
     });
-    
+
     return dictionary;
 }
 

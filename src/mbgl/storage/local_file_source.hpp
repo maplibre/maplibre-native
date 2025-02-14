@@ -16,7 +16,7 @@ public:
     LocalFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions);
     ~LocalFileSource() override;
 
-    std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
+    std::unique_ptr<AsyncRequest> request(const Resource&, std::function<void(Response)>) override;
     bool canRequest(const Resource&) const override;
     void pause() override;
     void resume() override;

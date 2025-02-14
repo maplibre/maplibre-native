@@ -116,7 +116,7 @@ async function loadResults(dir) {
 
 /**
  * @param {string} dbPath
- * @param {any[]} results 
+ * @param {any[]} results
  */
 function updateDb(dbPath, results) {
   const db = new DatabaseSync(dbPath);
@@ -171,7 +171,7 @@ function updateDb(dbPath, results) {
   for (const run of results) {
     for (const [index, result] of run.results.entries()) {
       const id = `${run.timestamp}-${index}`;
-      const { 
+      const {
         deviceManufacturer,
         gitRevision,
         model,

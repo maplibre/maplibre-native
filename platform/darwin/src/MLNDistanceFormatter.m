@@ -12,12 +12,12 @@ static const double FEET_PER_MILE = YARDS_PER_MILE * 3.0;
 - (NSString *)stringFromDistance:(CLLocationDistance)distance {
     double miles = distance / METERS_PER_MILE;
     double feet = miles * FEET_PER_MILE;
-    
+
     NSLengthFormatterUnit unit = NSLengthFormatterUnitMillimeter;
     [self unitStringFromMeters:distance usedUnit:&unit];
-    
+
     self.numberFormatter.roundingIncrement = @0.25;
-    
+
     if (unit == NSLengthFormatterUnitYard) {
         if (miles > 0.2) {
             unit = NSLengthFormatterUnitMile;

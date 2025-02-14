@@ -13,7 +13,7 @@
 
 namespace {
 bool acceptsURL(const std::string& url) {
-    return 0 == url.rfind(mbgl::util::FILE_PROTOCOL, 0);
+    return url.starts_with(mbgl::util::FILE_PROTOCOL);
 }
 } // namespace
 
@@ -75,7 +75,8 @@ LocalFileSource::LocalFileSource(const ResourceOptions& resourceOptions, const C
 
 LocalFileSource::~LocalFileSource() = default;
 
-std::unique_ptr<AsyncRequest> LocalFileSource::request(const Resource& resource, Callback callback) {
+std::unique_ptr<AsyncRequest> LocalFileSource::request(const Resource& resource,
+                                                       std::function<void(Response)> callback) {
     auto req = std::make_unique<FileSourceRequest>(std::move(callback));
 
     impl->actor().invoke(&Impl::request, resource, req->actor());
