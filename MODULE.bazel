@@ -60,7 +60,7 @@ darwin_config(
     name = "darwin_config",
 )
 
-bazel_dep(name = "rules_rust", version = "0.56.0")
+bazel_dep(name = "rules_rust", version = "0.57.1")
 bazel_dep(name = "cxx.rs", version = "1.0.136")
 git_override(
     module_name = "cxx.rs",
