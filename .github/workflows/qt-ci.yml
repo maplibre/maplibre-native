@@ -182,7 +182,7 @@ jobs:
           arch: ${{ matrix.compiler_type }}
 
       - name: Setup ninja
-        uses: seanmiddleditch/gha-setup-ninja@v5
+        uses: seanmiddleditch/gha-setup-ninja@v6
 
       - name: Download Qt
         uses: jurplel/install-qt-action@v4
