@@ -54,6 +54,14 @@ http_archive(
     urls = ["https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.zip"],
 )
 
+new_git_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
+
+new_git_repository(
+    name = "tinyobjloader",
+    remote = "https://github.com/tinyobjloader/tinyobjloader.git",
+    branch = "release",
+)
+
 darwin_config = use_repo_rule("//platform/darwin:bazel/darwin_config_repository_rule.bzl", "darwin_config")
 
 darwin_config(

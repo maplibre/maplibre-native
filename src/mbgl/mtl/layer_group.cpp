@@ -43,7 +43,6 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     const auto debugGroup = parameters.encoder->createDebugGroup(getName() + "-render");
 #endif
 
-    auto& context = static_cast<Context&>(parameters.context);
     auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
 
     bool bindUBOs = false;
@@ -52,21 +51,17 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             return;
         }
 
+        if (!bindUBOs) {
+            uniformBuffers.bindMtl(renderPass);
+            bindUBOs = true;
+        }
+
         for (const auto& tweaker : drawable.getTweakers()) {
             tweaker->execute(drawable, parameters);
         }
 
-        if (!bindUBOs) {
-            uniformBuffers.bind(renderPass);
-            bindUBOs = true;
-        }
-
         drawable.draw(parameters);
     });
-
-    if (bindUBOs) {
-        uniformBuffers.unbind(renderPass);
-    }
 }
 
 } // namespace mtl

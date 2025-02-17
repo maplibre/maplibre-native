@@ -125,6 +125,8 @@ public:
                                               bool persistent = false,
                                               bool ssbo = false) override;
 
+    gfx::UniqueUniformBufferArray createLayerUniformBufferArray() override;
+
     gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
 
     TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) override;

@@ -113,6 +113,7 @@ private:
     void clearAnnotations();
     void popAnnotation();
 
+    void toggleCustomDrawableStyle();
     void makeSnapshot(bool withOverlay = false);
 
     mbgl::AnnotationIDs annotationIDs;

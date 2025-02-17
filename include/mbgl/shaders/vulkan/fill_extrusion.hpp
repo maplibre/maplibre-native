@@ -6,14 +6,13 @@
 namespace mbgl {
 namespace shaders {
 
-#define FILL_EXTRUSION_SHADER_COMMON \
-    R"(
+constexpr auto fillExtrusionShaderPrelude = R"(
 
 #define idFillExtrusionDrawableUBO      idDrawableReservedVertexOnlyUBO
 #define idFillExtrusionTilePropsUBO     drawableReservedUBOCount
 #define idFillExtrusionPropsUBO         layerUBOStartId
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan> {
@@ -23,7 +22,8 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto vertex = FILL_EXTRUSION_SHADER_COMMON R"(
+    static constexpr auto prelude = fillExtrusionShaderPrelude;
+    static constexpr auto vertex = R"(
 
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec4 in_normal_ed;
@@ -151,7 +151,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = FILL_EXTRUSION_SHADER_COMMON R"(
+    static constexpr auto fragment = R"(
 
 layout(location = 0) in vec4 frag_color;
 layout(location = 0) out vec4 out_color;
@@ -170,7 +170,8 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vul
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto vertex = FILL_EXTRUSION_SHADER_COMMON R"(
+    static constexpr auto prelude = fillExtrusionShaderPrelude;
+    static constexpr auto vertex = R"(
 
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec4 in_normal_ed;
@@ -336,7 +337,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = FILL_EXTRUSION_SHADER_COMMON R"(
+    static constexpr auto fragment = R"(
 
 layout(location = 0) in mediump vec4 frag_lighting;
 layout(location = 1) in mediump vec2 frag_pos_a;

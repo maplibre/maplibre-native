@@ -48,7 +48,6 @@ public:
                     /*gapWidth=*/0.0f,
                     /*offset=*/0.0f,
                     /*width=*/8.0f,
-                    /*shaderType*/ {},
                     /*color=*/Color::red(),
                 },
                 {
@@ -58,7 +57,6 @@ public:
                     /*gapWidth=*/2.0f,
                     /*offset=*/-1.0f,
                     /*width=*/4.0f,
-                    {},
                     /*color=*/Color::blue(),
                 },
                 {
@@ -68,7 +66,6 @@ public:
                     /*gapWidth=*/1.0f,
                     /*offset=*/2.0f,
                     /*width=*/16.0f,
-                    {},
                     /*color=*/Color(1.f, 0.5f, 0, 0.5f),
                 },
                 {
@@ -78,7 +75,6 @@ public:
                     /*gapWidth=*/1.0f,
                     /*offset=*/-2.0f,
                     /*width=*/2.0f,
-                    {},
                     /*color=*/Color(1.f, 1.f, 0, 0.3f),
                 },
                 {
@@ -88,7 +84,6 @@ public:
                     /*gapWidth=*/1.0f,
                     /*offset=*/0.5f,
                     /*width=*/0.5f,
-                    {},
                     /*color=*/Color::black(),
                 },
                 {
@@ -98,7 +93,6 @@ public:
                     /*gapWidth=*/1.0f,
                     /*offset=*/-5.0f,
                     /*width=*/24.0f,
-                    {},
                     /*color=*/Color(1.f, 0, 1.f, 0.2f),
                 },
             };
@@ -125,7 +119,7 @@ public:
                 interface.setLineOptions(options[index]);
 
                 // add polyline
-                interface.addPolyline(polyline);
+                interface.addPolyline(polyline, Interface::LineShaderType::Classic);
             }
         }
 
@@ -219,10 +213,10 @@ public:
             options.texture->setImage(image);
             options.texture->setSamplerConfiguration(
                 {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-            options.textureCoordinates = {{{0.0f, 0.08f}, {1.0f, 0.9f}}};
-            const float xspan = options.textureCoordinates[1][0] - options.textureCoordinates[0][0];
-            const float yspan = options.textureCoordinates[1][1] - options.textureCoordinates[0][1];
-            assert(xspan > 0.0f && yspan > 0.0f);
+            constexpr std::array<std::array<float, 2>, 2> textureCoordinates = {{{0.0f, 0.08f}, {1.0f, 0.9f}}};
+            constexpr float xspan = textureCoordinates[1][0] - textureCoordinates[0][0];
+            constexpr float yspan = textureCoordinates[1][1] - textureCoordinates[0][1];
+            static_assert(xspan > 0.0f && yspan > 0.0f);
             options.size = {static_cast<uint32_t>(image->size.width * 0.2f * xspan),
                             static_cast<uint32_t>(image->size.height * 0.2f * yspan)};
             options.anchor = {0.5f, 0.95f};
@@ -232,7 +226,7 @@ public:
             interface.setSymbolOptions(options);
 
             // add symbol
-            interface.addSymbol(position);
+            interface.addSymbol(position, textureCoordinates);
         }
 
         // finish

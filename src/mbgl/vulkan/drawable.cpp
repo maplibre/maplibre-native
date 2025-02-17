@@ -260,23 +260,30 @@ void Drawable::draw(PaintParameters& parameters) const {
         sizeof(uboIndex),
         &uboIndex);
 
-    if (is3D) {
-        impl->pipelineInfo.setDepthMode(impl->depthFor3D);
-        impl->pipelineInfo.setStencilMode(impl->stencilFor3D);
-    } else {
-        if (enableDepth) {
+    if (enableDepth) {
+        if (impl->depthFor3D.has_value()) {
+            impl->pipelineInfo.setDepthMode(impl->depthFor3D.value());
+        } else if (is3D) {
+            impl->pipelineInfo.setDepthMode(parameters.depthModeFor3D());
+        } else {
             const auto& depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
             impl->pipelineInfo.setDepthMode(depthMode);
-        } else {
-            impl->pipelineInfo.setDepthMode(gfx::DepthMode::disabled());
         }
+    } else {
+        impl->pipelineInfo.setDepthMode(gfx::DepthMode::disabled());
+    }
 
-        if (enableStencil) {
+    if (enableStencil) {
+        if (impl->stencilFor3D.has_value()) {
+            impl->pipelineInfo.setStencilMode(impl->stencilFor3D.value());
+        } else if (is3D) {
+            impl->pipelineInfo.setStencilMode(parameters.stencilModeFor3D());
+        } else {
             const auto& stencilMode = parameters.stencilModeForClipping(tileID->toUnwrapped());
             impl->pipelineInfo.setStencilMode(stencilMode);
-        } else {
-            impl->pipelineInfo.setStencilMode(gfx::StencilMode::disabled());
         }
+    } else {
+        impl->pipelineInfo.setStencilMode(gfx::StencilMode::disabled());
     }
 
     impl->pipelineInfo.setRenderable(renderPass_.getDescriptor().renderable);

@@ -3,6 +3,7 @@
 #include <mbgl/vulkan/context.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/vulkan/command_encoder.hpp>
+#include <mbgl/vulkan/render_pass.hpp>
 
 #include <cassert>
 
@@ -66,6 +67,10 @@ void UniformBufferArray::createOrUpdate(
     }
 
     gfx::UniformBufferArray::createOrUpdate(id, data, size, context, persistent);
+}
+
+void UniformBufferArray::bind(gfx::RenderPass& renderPass) {
+    bindDescriptorSets(static_cast<RenderPass&>(renderPass).getEncoder());
 }
 
 void UniformBufferArray::bindDescriptorSets(CommandEncoder& encoder) {

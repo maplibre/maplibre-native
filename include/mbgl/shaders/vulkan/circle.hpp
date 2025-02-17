@@ -6,13 +6,12 @@
 namespace mbgl {
 namespace shaders {
 
-#define CIRCLE_SHADER_PRELUDE \
-    R"(
+constexpr auto circleShaderPrelude = R"(
 
 #define idCircleDrawableUBO         idDrawableReservedVertexOnlyUBO
 #define idCircleEvaluatedPropsUBO   layerUBOStartId
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Vulkan> {
@@ -22,7 +21,8 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Vulkan> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto vertex = CIRCLE_SHADER_PRELUDE R"(
+    static constexpr auto prelude = circleShaderPrelude;
+    static constexpr auto vertex = R"(
 
 layout(location = 0) in ivec2 in_position;
 
@@ -204,7 +204,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = CIRCLE_SHADER_PRELUDE R"(
+    static constexpr auto fragment = R"(
 
 layout(location = 0) in vec2 frag_extrude;
 layout(location = 1) in float frag_antialiasblur;

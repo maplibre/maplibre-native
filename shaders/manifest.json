@@ -35,6 +35,13 @@
         "uses_ubos": true
     },
     {
+        "name": "CustomGeometryShader",
+        "header": "drawable_custom_geometry",
+        "glsl_vert": "drawable.custom_geometry.vertex.glsl",
+        "glsl_frag": "drawable.custom_geometry.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "CustomSymbolIconShader",
         "header": "drawable_custom_symbol_icon",
         "glsl_vert": "drawable.custom.symbol_icon.vertex.glsl",
@@ -149,15 +156,15 @@
     {
         "name": "LocationIndicatorShader",
         "header": "drawable_location_indicator",
-        "glsl_vert": "_empty.glsl",
-        "glsl_frag": "_empty.glsl",
+        "glsl_vert": "drawable.location_indicator.vertex.glsl",
+        "glsl_frag": "drawable.location_indicator.fragment.glsl",
         "uses_ubos": true
     },
     {
         "name": "LocationIndicatorTexturedShader",
         "header": "drawable_location_indicator_textured",
-        "glsl_vert": "_empty.glsl",
-        "glsl_frag": "_empty.glsl",
+        "glsl_vert": "drawable.location_indicator_textured.vertex.glsl",
+        "glsl_frag": "drawable.location_indicator_textured.fragment.glsl",
         "uses_ubos": true
     },
     {
