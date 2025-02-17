@@ -12,10 +12,6 @@ TileRenderData::~TileRenderData() = default;
 #if MLN_DRAWABLE_RENDERER
 static gfx::Texture2DPtr noTexture;
 
-const gfx::Texture2DPtr& TileRenderData::getGlyphAtlasTexture() const {
-    return atlasTextures ? atlasTextures->glyph : noTexture;
-}
-
 const gfx::Texture2DPtr& TileRenderData::getIconAtlasTexture() const {
     return atlasTextures ? atlasTextures->icon : noTexture;
 }

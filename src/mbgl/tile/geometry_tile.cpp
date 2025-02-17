@@ -95,24 +95,6 @@ void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
 
     assert(atlasTextures);
 
-    if (layoutResult->glyphAtlasImage && layoutResult->glyphAtlasImage->valid()) {
-#if MLN_DRAWABLE_RENDERER
-        if (atlasTextures->glyphHandle) {
-            atlasTextures->glyphHandle->removeFromParent();
-        }
-        atlasTextures->glyphHandle = uploadPass.getContext().getDynamicTexture()->addImage(
-            *layoutResult->glyphAtlasImage);
-
-        /*atlasTextures->glyph = uploadPass.getContext().createTexture2D();
-        atlasTextures->glyph->setSamplerConfiguration(
-            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-        atlasTextures->glyph->upload(*layoutResult->glyphAtlasImage);*/
-#else
-        atlasTextures->glyph = uploadPass.createTexture(*layoutResult->glyphAtlasImage);
-#endif
-        layoutResult->glyphAtlasImage = {};
-    }
-
     if (layoutResult->iconAtlas.image.valid()) {
 #if MLN_DRAWABLE_RENDERER
         atlasTextures->icon = uploadPass.getContext().createTexture2D();
@@ -209,9 +191,11 @@ GeometryTile::~GeometryTile() {
     }
 
     if (layoutResult) {
-        if (atlasTextures->glyphHandle) {
-            atlasTextures->glyphHandle->removeFromParent();
-            atlasTextures->glyphHandle = std::nullopt;
+        for (const auto& glyphPositionMapEntry : layoutResult->glyphPositions) {
+            for (const auto& glyphPositionEntry : glyphPositionMapEntry.second) {
+                const GlyphPosition& glyphPosition = glyphPositionEntry.second;
+                gfx::Context::getDynamicTexture()->removeTexture(glyphPosition.handle);
+            }
         }
         threadPool.runOnRenderThread(
             [layoutResult_{std::move(layoutResult)}, atlasTextures_{std::move(atlasTextures)}]() {});

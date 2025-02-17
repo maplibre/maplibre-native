@@ -56,6 +56,8 @@ RendererObserver& nullObserver() {
 
 } // namespace
 
+std::unique_ptr<gfx::DynamicTexture> gfx::Context::dynamicTexture = nullptr;
+
 Renderer::Impl::Impl(gfx::RendererBackend& backend_,
                      float pixelRatio_,
                      const std::optional<std::string>& localFontFamily_)
@@ -95,6 +97,10 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     MLN_TRACE_FUNC();
     auto& context = backend.getContext();
     context.setObserver(this);
+    
+    if (!gfx::Context::getDynamicTexture()) {
+        gfx::Context::createDynamicTexture(context);
+    }
 
 #if MLN_RENDER_BACKEND_METAL
     if constexpr (EnableMetalCapture) {

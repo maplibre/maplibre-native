@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/gfx/texture.hpp>
-#include <mbgl/gfx/dynamic_texture.hpp>
 #include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/style/layer_impl.hpp>
 
@@ -26,10 +25,7 @@ class SourcePrepareParameters;
 class TileAtlasTextures {
 public:
 #if MLN_DRAWABLE_RENDERER
-    gfx::Texture2DPtr glyph;
     gfx::Texture2DPtr icon;
-
-    std::optional<gfx::TextureHandle> glyphHandle;
 #else
     std::optional<gfx::Texture> glyph;
     std::optional<gfx::Texture> icon;
@@ -41,7 +37,6 @@ public:
     virtual ~TileRenderData();
 
 #if MLN_DRAWABLE_RENDERER
-    const gfx::Texture2DPtr& getGlyphAtlasTexture() const;
     const gfx::Texture2DPtr& getIconAtlasTexture() const;
 #else
     const gfx::Texture& getGlyphAtlasTexture() const;

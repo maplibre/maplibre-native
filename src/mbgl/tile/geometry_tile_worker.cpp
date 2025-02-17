@@ -498,16 +498,16 @@ void GeometryTileWorker::finalizeLayout() {
     MBGL_TIMING_START(watch)
     std::optional<AlphaImage> glyphAtlasImage;
     ImageAtlas iconAtlas = makeImageAtlas(imageMap, patternMap, versionMap);
+    GlyphPositions glyphPositions;
     if (!layouts.empty()) {
-        GlyphAtlas glyphAtlas = makeGlyphAtlas(glyphMap);
-        glyphAtlasImage = std::move(glyphAtlas.image);
+        glyphPositions = uploadGlyphs(glyphMap);
 
         for (auto& layout : layouts) {
             if (obsolete) {
                 return;
             }
 
-            layout->prepareSymbols(glyphMap, glyphAtlas.positions, imageMap, iconAtlas.iconPositions);
+            layout->prepareSymbols(glyphMap, glyphPositions, imageMap, iconAtlas.iconPositions);
 
             if (!layout->hasSymbolInstances()) {
                 continue;
@@ -531,7 +531,7 @@ void GeometryTileWorker::finalizeLayout() {
 
     parent.invoke(&GeometryTile::onLayout,
                   std::make_shared<GeometryTile::LayoutResult>(
-                      std::move(renderData), std::move(featureIndex), std::move(glyphAtlasImage), std::move(iconAtlas)),
+                      std::move(renderData), std::move(featureIndex), std::move(glyphPositions), std::move(iconAtlas)),
                   correlationID);
 }
 

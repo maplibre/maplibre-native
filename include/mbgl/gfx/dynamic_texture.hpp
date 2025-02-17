@@ -23,28 +23,25 @@ public:
 
     const Texture2DPtr& getTextureAtlas();
 
-    std::optional<TextureHandle> addImage(const AlphaImage& image);
-    void removeTexture(TextureHandle& texHandle);
+    std::optional<TextureHandle> addImage(const AlphaImage& image, int32_t id = -1);
+    void removeTexture(const TextureHandle& texHandle);
 
 private:
     Texture2DPtr textureAtlas;
     mapbox::ShelfPack shelfPack;
+    std::mutex mutex;
 };
 
 class TextureHandle {
 public:
-    TextureHandle(mapbox::Bin* bin_, DynamicTexture* parent_)
-        : bin(bin_),
-          parent(parent_) {};
+    TextureHandle(mapbox::Bin* bin_)
+        : bin(bin_) {};
     ~TextureHandle() = default;
 
-    mapbox::Bin* getBin() { return bin; }
-    DynamicTexture* getParent() { return parent; }
-    void removeFromParent() { parent->removeTexture(*this); }
+    mapbox::Bin* getBin() const { return bin; }
 
 private:
     mapbox::Bin* bin;
-    DynamicTexture* parent;
 };
 
 } // namespace gfx

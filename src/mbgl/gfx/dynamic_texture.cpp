@@ -22,17 +22,22 @@ const Texture2DPtr& DynamicTexture::getTextureAtlas() {
     return textureAtlas;
 }
 
-std::optional<TextureHandle> DynamicTexture::addImage(const AlphaImage& image) {
-    mapbox::Bin* bin = shelfPack.packOne(-1, image.size.width, image.size.height);
+std::optional<TextureHandle> DynamicTexture::addImage(const AlphaImage& image, int32_t id) {
+    mutex.lock();
+    mapbox::Bin* bin = shelfPack.packOne(id, image.size.width, image.size.height);
     if (!bin) {
+        mutex.unlock();
         return std::nullopt;
     }
     textureAtlas->uploadSubRegion(image.data.get(), image.size, bin->x, bin->y);
-    return TextureHandle(bin, this);
+    mutex.unlock();
+    return TextureHandle(bin);
 }
 
-void DynamicTexture::removeTexture(TextureHandle& texHandle) {
+void DynamicTexture::removeTexture(const TextureHandle& texHandle) {
+    mutex.lock();
     shelfPack.unref(*texHandle.getBin());
+    mutex.unlock();
 }
 
 } // namespace gfx
