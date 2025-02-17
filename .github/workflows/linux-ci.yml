@@ -111,6 +111,14 @@ jobs:
           cmake -B build -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON ${{ env.renderer_flag_cmake }}
           cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
 
+      # test rust platform
+      - if: matrix.renderer == 'drawable-rust'
+        uses: taiki-e/install-action@v2
+        with: { tool: just }
+      - if: matrix.renderer == 'drawable-rust'
+        run: just -v ci-test
+        working-directory: platform/rust
+
       # mbgl-render (used for size test) & mbgl-benchmark-runner
 
       - name: Upload mbgl-render as artifact
