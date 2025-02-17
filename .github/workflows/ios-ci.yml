@@ -332,13 +332,30 @@ jobs:
         run: |
           VERSION=${{ env.version }} COCOAPODS_TRUNK_TOKEN=${{ secrets.COCOAPODS_PASSWORD }} pod trunk push MapLibre.podspec
 
+  ios-build-cmake:
+    needs: pre_job
+    runs-on: macos-14
+    if: needs.pre_job.outputs.should_skip != 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Configure build with CMake
+        run: cmake --preset ios
+
+      - name: Build mbgl-core
+        run: cmake --build build-ios --target mbgl-core
+
   ios-ci-result:
     runs-on: ubuntu-latest
     if: needs.pre_job.outputs.should_skip != 'true' && always()
     needs:
       - pre_job
       - ios-build
+      - ios-build-cmake
     steps:
       - name: Mark result as failed
-        if: needs.ios-build.result != 'success'
+        if: needs.ios-build.result != 'success' || needs.ios-build-cmake.result != 'success'
         run: exit 1

@@ -10,7 +10,7 @@ namespace mtl {
 
 class VertexBufferResource : public gfx::VertexBufferResource {
 public:
-    VertexBufferResource() noexcept = default;
+    VertexBufferResource() noexcept = delete;
     VertexBufferResource(BufferResource&&) noexcept;
     VertexBufferResource(VertexBufferResource&& other) noexcept
         : buffer(std::move(other.buffer)) {}

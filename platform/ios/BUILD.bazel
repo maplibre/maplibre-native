@@ -18,7 +18,7 @@ load(
     "MLN_IOS_PUBLIC_OBJCPP_SOURCE",
     "MLN_IOS_PUBLIC_OBJC_SOURCE",
     "MLN_IOS_SDK_HEADERS",
-    "MLN_PUBLIC_IOS_APP_SOPURCE",
+    "MLN_PUBLIC_IOS_APP_SOURCE",
 )
 load("//platform/ios/bazel:macros.bzl", "info_plist")
 load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
@@ -60,7 +60,7 @@ filegroup(
 
 filegroup(
     name = "ios_app_srcs",
-    srcs = MLN_PUBLIC_IOS_APP_SOPURCE,
+    srcs = MLN_PUBLIC_IOS_APP_SOURCE,
     visibility = ["//visibility:public"],
 )
 
@@ -350,7 +350,7 @@ exports_files(
     MLN_IOS_PUBLIC_OBJCPP_METAL_SOURCE +
     MLN_IOS_PUBLIC_OBJCPP_OPENGL_SOURCE +
     MLN_IOS_PUBLIC_OBJC_SOURCE +
-    MLN_PUBLIC_IOS_APP_SOPURCE,
+    MLN_PUBLIC_IOS_APP_SOURCE,
 )
 
 js_library(

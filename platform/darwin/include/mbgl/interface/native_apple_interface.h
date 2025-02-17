@@ -32,7 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (MLNNativeNetworkManager *)sharedManager;
 
-@property (nonatomic, weak) id<MLNNativeNetworkDelegate> delegate;
+@property (nonatomic, assign) id<MLNNativeNetworkDelegate> delegate;
 
 @property (nonatomic, readonly) NSURLSessionConfiguration *sessionConfiguration;
 
