@@ -97,7 +97,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     MLN_TRACE_FUNC();
     auto& context = backend.getContext();
     context.setObserver(this);
-    
+
     if (!gfx::Context::getDynamicTexture()) {
         gfx::Context::createDynamicTexture(context);
     }

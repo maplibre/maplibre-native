@@ -20,10 +20,13 @@ void DrawableAtlasesTweaker::setupTextures(gfx::Drawable& drawable, const bool l
             }
             if (iconTextureId && shader->getSamplerLocation(*iconTextureId)) {
                 assert(*glyphTextureId != *iconTextureId);
-                drawable.setTexture(atlases ? gfx::Context::getDynamicTexture()->getTextureAtlas() : nullptr, *glyphTextureId);
+                drawable.setTexture(atlases ? gfx::Context::getDynamicTexture()->getTextureAtlas() : nullptr,
+                                    *glyphTextureId);
                 drawable.setTexture(atlases ? atlases->icon : nullptr, *iconTextureId);
             } else {
-                drawable.setTexture(atlases ? (isText ? gfx::Context::getDynamicTexture()->getTextureAtlas() : atlases->icon) : nullptr, *glyphTextureId);
+                drawable.setTexture(
+                    atlases ? (isText ? gfx::Context::getDynamicTexture()->getTextureAtlas() : atlases->icon) : nullptr,
+                    *glyphTextureId);
             }
         }
     }

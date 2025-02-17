@@ -181,10 +181,8 @@ public:
     static void createDynamicTexture(Context& context) {
         dynamicTexture = std::make_unique<gfx::DynamicTexture>(context, Size{4096, 4096});
     }
-    
-    static std::unique_ptr<gfx::DynamicTexture>& getDynamicTexture() {
-        return dynamicTexture;
-    }
+
+    static std::unique_ptr<gfx::DynamicTexture>& getDynamicTexture() { return dynamicTexture; }
 #endif
 
 protected:
