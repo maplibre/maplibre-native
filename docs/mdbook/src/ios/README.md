@@ -79,7 +79,7 @@ There is also an example app built with Swift instead of Objective-C. The target
 
 ## CMake
 
-It is also possible to generate an Xcode project using Xcode. As of February 2025 only the `mbgl-core` target is supported.
+It is also possible to generate an Xcode project using CMake. As of February 2025 only the `mbgl-core` and `ios-sdk-static` targets are supported.
 
 ```
 cmake --preset ios
