@@ -391,8 +391,8 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
 
         options.geometry.type = FeatureType::Polygon;
         interface.setLineOptions(options);
-        interface.addPolyline(polyline_tile[0], Interface::LineShaderType::Classic);
-        interface.addPolyline(polyline_tile[1], Interface::LineShaderType::Classic);
+        interface.addPolyline(polyline_tile[0], Interface::LineShaderType::WideVector);
+        interface.addPolyline(polyline_tile[1], Interface::LineShaderType::WideVector);
     }
 
     generateGeometry(interface);
