@@ -86,7 +86,7 @@ public:
               featureIndex(std::move(featureIndex_)),
               glyphPositions(std::move(glyphPositions_)),
               iconAtlas(std::move(iconAtlas_)) {}
-        
+
         ~LayoutResult();
     };
     void onLayout(std::shared_ptr<LayoutResult>, uint64_t correlationID);
