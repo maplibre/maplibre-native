@@ -24,13 +24,12 @@ const Texture2DPtr& DynamicTexture::getTextureAtlas() {
 
 std::optional<TextureHandle> DynamicTexture::addImage(const AlphaImage& image, int32_t id) {
     mutex.lock();
-    mapbox::Bin* bin = shelfPack.getBin(id);
+    mapbox::Bin* bin = shelfPack.packOne(id, image.size.width, image.size.height);
     if (!bin) {
-        bin = shelfPack.packOne(id, image.size.width, image.size.height);
-        if (!bin) {
-            mutex.unlock();
-            return std::nullopt;
-        }
+        mutex.unlock();
+        return std::nullopt;
+    }
+    if (bin->refcount() == 1) {
         textureAtlas->uploadSubRegion(image.data.get(), image.size, bin->x, bin->y);
     }
     mutex.unlock();
@@ -39,13 +38,15 @@ std::optional<TextureHandle> DynamicTexture::addImage(const AlphaImage& image, i
 
 void DynamicTexture::removeTexture(const TextureHandle& texHandle) {
     mutex.lock();
+    auto refcount = shelfPack.unref(*texHandle.getBin());
 #if !defined(NDEBUG)
-    Size size = Size(texHandle.getBin()->w, texHandle.getBin()->h);
-    std::unique_ptr<uint8_t[]> data = std::make_unique<uint8_t[]>(size.area());
-    memset(data.get(), 0, size.area());
-    textureAtlas->uploadSubRegion(data.get(), size, texHandle.getBin()->x, texHandle.getBin()->y);
+    if (refcount == 0) {
+        Size size = Size(texHandle.getBin()->w, texHandle.getBin()->h);
+        std::unique_ptr<uint8_t[]> data = std::make_unique<uint8_t[]>(size.area());
+        memset(data.get(), 0, size.area());
+        textureAtlas->uploadSubRegion(data.get(), size, texHandle.getBin()->x, texHandle.getBin()->y);
+    }
 #endif
-    shelfPack.unref(*texHandle.getBin());
     mutex.unlock();
 }
 

@@ -191,14 +191,17 @@ GeometryTile::~GeometryTile() {
     }
 
     if (layoutResult) {
-        for (const auto& glyphPositionMapEntry : layoutResult->glyphPositions) {
-            for (const auto& glyphPositionEntry : glyphPositionMapEntry.second) {
-                const GlyphPosition& glyphPosition = glyphPositionEntry.second;
-                gfx::Context::getDynamicTexture()->removeTexture(glyphPosition.handle);
-            }
-        }
         threadPool.runOnRenderThread(
             [layoutResult_{std::move(layoutResult)}, atlasTextures_{std::move(atlasTextures)}]() {});
+    }
+}
+
+GeometryTile::LayoutResult::~LayoutResult() {
+    for (const auto& glyphPositionMapEntry : glyphPositions) {
+        for (const auto& glyphPositionEntry : glyphPositionMapEntry.second) {
+            const GlyphPosition& glyphPosition = glyphPositionEntry.second;
+            gfx::Context::getDynamicTexture()->removeTexture(glyphPosition.handle);
+        }
     }
 }
 
