@@ -387,8 +387,6 @@ void Drawable::setVertexAttrId(const size_t id) {
 }
 
 void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
-    const auto& encoder = renderPass.getMetalEncoder();
-
     NS::UInteger attributeIndex = 0;
     for (const auto& binding : impl->attributeBindings) {
         const auto* buffer = static_cast<const mtl::VertexBufferResource*>(binding ? binding->vertexBufferResource
@@ -402,8 +400,6 @@ void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
 }
 
 void Drawable::bindInstanceAttributes(RenderPass& renderPass) const noexcept {
-    const auto& encoder = renderPass.getMetalEncoder();
-
     NS::UInteger attributeIndex = 0;
     for (const auto& binding : impl->instanceBindings) {
         if (binding.has_value()) {
@@ -520,7 +516,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         assert(false);
         return;
     }
-    const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
 
     auto& uploadPass = static_cast<UploadPass&>(uploadPass_);
     auto& contextBase = uploadPass.getContext();

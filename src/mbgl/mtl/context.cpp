@@ -366,7 +366,6 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         vertDesc->layouts()->setObject(layoutDesc.get(), ShaderClass::attributes[0].index);
 
         // Create a render pipeline state, telling Metal how to render the primitives
-        const auto& renderPassDescriptor = mtlRenderPass.getDescriptor();
         const std::size_t hash = mbgl::util::hash(ShaderClass::attributes[0].index,
                                                   0,
                                                   MTL::VertexFormatShort2,

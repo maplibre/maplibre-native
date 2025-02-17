@@ -1,0 +1,50 @@
+{
+  "version": 10,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 19,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "ios",
+      "displayName": "iOS",
+      "generator": "Xcode",
+      "description": "Create Xcode project for iOS",
+      "binaryDir": "${sourceDir}/build-ios",
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "iOS",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "MLN_WITH_METAL": "ON",
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_DRAWABLE_RENDERER": "ON"
+      }
+    },
+    {
+      "name": "macos",
+      "displayName": "macOS",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-macos",
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "Darwin",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "MLN_WITH_METAL": "ON",
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_DRAWABLE_RENDERER": "ON"
+      }
+    },
+    {
+      "name": "macos-vulkan",
+      "displayName": "macOS",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-macos-vulkan",
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "Darwin",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "MLN_WITH_VULKAN": "ON",
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_DRAWABLE_RENDERER": "ON"
+      }
+    }
+  ]
+}

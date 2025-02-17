@@ -43,7 +43,6 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     const auto debugGroup = parameters.encoder->createDebugGroup(getName() + "-render");
 #endif
 
-    auto& context = static_cast<Context&>(parameters.context);
     auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
 
     bool bindUBOs = false;

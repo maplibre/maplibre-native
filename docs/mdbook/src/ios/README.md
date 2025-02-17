@@ -76,3 +76,12 @@ You can also build targets from the command line. For example, if you want to bu
 ## Swift App
 
 There is also an example app built with Swift instead of Objective-C. The target is called `MapLibreApp` and the source code lives in `platform/ios/app-swift`.
+
+## CMake
+
+It is also possible to generate an Xcode project using Xcode. As of February 2025 only the `mbgl-core` target is supported.
+
+```
+cmake --preset ios
+xed build-ios/MapLibre\ Native.xcodeproj
+```

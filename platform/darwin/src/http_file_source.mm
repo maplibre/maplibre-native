@@ -280,7 +280,7 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, 
             [MLNNativeNetworkManager.sharedManager startDownloadEvent:url.relativePath type:@"tile"];
         }
 
-        __block NSURLSession *session;
+        __block NSURLSession *session = nil;
 
         // Use the delegate's session if there is one, otherwise use the one that
         // was created when this class was constructed.
