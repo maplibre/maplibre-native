@@ -24,18 +24,27 @@ const Texture2DPtr& DynamicTexture::getTextureAtlas() {
 
 std::optional<TextureHandle> DynamicTexture::addImage(const AlphaImage& image, int32_t id) {
     mutex.lock();
-    mapbox::Bin* bin = shelfPack.packOne(id, image.size.width, image.size.height);
+    mapbox::Bin* bin = shelfPack.getBin(id);
     if (!bin) {
-        mutex.unlock();
-        return std::nullopt;
+        bin = shelfPack.packOne(id, image.size.width, image.size.height);
+        if (!bin) {
+            mutex.unlock();
+            return std::nullopt;
+        }
+        textureAtlas->uploadSubRegion(image.data.get(), image.size, bin->x, bin->y);
     }
-    textureAtlas->uploadSubRegion(image.data.get(), image.size, bin->x, bin->y);
     mutex.unlock();
     return TextureHandle(bin);
 }
 
 void DynamicTexture::removeTexture(const TextureHandle& texHandle) {
     mutex.lock();
+#if !defined(NDEBUG)
+    Size size = Size(texHandle.getBin()->w, texHandle.getBin()->h);
+    std::unique_ptr<uint8_t[]> data = std::make_unique<uint8_t[]>(size.area());
+    memset(data.get(), 0, size.area());
+    textureAtlas->uploadSubRegion(data.get(), size, texHandle.getBin()->x, texHandle.getBin()->y);
+#endif
     shelfPack.unref(*texHandle.getBin());
     mutex.unlock();
 }
