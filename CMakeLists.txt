@@ -147,6 +147,7 @@ endif()
 if(MLN_DRAWABLE_RENDERER)
     list(APPEND INCLUDE_FILES
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/context.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/custom_puck.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_impl.hpp
@@ -476,6 +477,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/color_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/command_encoder.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/cull_face_mode.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/custom_puck.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/debug_group.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/depth_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/draw_mode.hpp
@@ -1095,6 +1097,8 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/command_encoder.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/context.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/context.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/custom_puck.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/custom_puck.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/fence.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/fence.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/debugging_extension.cpp

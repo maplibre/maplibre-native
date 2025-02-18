@@ -193,6 +193,12 @@ public abstract class MapRenderer implements MapRendererScheduler {
 
   private native void nativeSetSwapBehaviorFlush(boolean flush);
 
+  public native void nativeSetCustomPuckState(double lat,
+                                              double lon,
+                                              double bearing,
+                                              float iconScale,
+                                              boolean cameraTracking);
+
   private long timeElapsed;
 
   private void updateFps() {

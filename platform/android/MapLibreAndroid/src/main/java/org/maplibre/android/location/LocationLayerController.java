@@ -73,6 +73,10 @@ final class LocationLayerController {
     initializeComponents(style, options);
   }
 
+  LocationLayerRenderer getLocationLayerRenderer() {
+    return locationLayerRenderer;
+  }
+
   void initializeComponents(Style style, LocationComponentOptions options) {
     this.positionManager = new LocationComponentPositionManager(style, options.layerAbove(), options.layerBelow());
     locationLayerRenderer.initializeComponents(style);

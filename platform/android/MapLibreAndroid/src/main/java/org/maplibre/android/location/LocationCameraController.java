@@ -197,7 +197,7 @@ final class LocationCameraController {
     return cameraMode;
   }
 
-  private void setBearing(float bearing) {
+  void setBearing(float bearing) {
     if (isTransitioning) {
       return;
     }
@@ -206,7 +206,7 @@ final class LocationCameraController {
     onCameraMoveInvalidateListener.onInvalidateCameraMove();
   }
 
-  private void setLatLng(@NonNull LatLng latLng) {
+  void setLatLng(@NonNull LatLng latLng) {
     if (isTransitioning) {
       return;
     }
@@ -329,7 +329,7 @@ final class LocationCameraController {
     isEnabled = enabled;
   }
 
-  private boolean isLocationTracking() {
+  boolean isLocationTracking() {
     return cameraMode == CameraMode.TRACKING
       || cameraMode == CameraMode.TRACKING_COMPASS
       || cameraMode == CameraMode.TRACKING_GPS
@@ -344,7 +344,7 @@ final class LocationCameraController {
       || cameraMode == CameraMode.TRACKING_GPS_NORTH;
   }
 
-  private boolean isLocationBearingTracking() {
+  boolean isLocationBearingTracking() {
     return cameraMode == CameraMode.TRACKING_GPS
       || cameraMode == CameraMode.TRACKING_GPS_NORTH
       || cameraMode == CameraMode.NONE_GPS;

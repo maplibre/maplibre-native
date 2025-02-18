@@ -29,6 +29,10 @@ public:
     bool supportFreeThreadedUpload() override;
     std::shared_ptr<gl::UploadThreadContext> createUploadThreadContext() override;
 
+    gfx::CustomPuckState getCurrentCustomPuckState() const override {
+        return getCustomPuckState();
+    }
+
     // mbgl::gfx::RendererBackend implementation
 public:
     mbgl::gfx::Renderable& getDefaultRenderable() override { return *this; }

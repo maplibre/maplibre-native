@@ -1,4 +1,5 @@
 #include "android_renderer_backend.hpp"
+#include <mbgl/util/logging.hpp>
 #include <cassert>
 
 namespace mbgl {
@@ -16,6 +17,14 @@ void AndroidRendererBackend::markContextLost() {}
 
 void AndroidRendererBackend::setSwapBehavior(gfx::Renderable::SwapBehaviour swapBehaviour_) {
     swapBehaviour = swapBehaviour_;
+}
+
+void AndroidRendererBackend::setPuckBitmap(const PremultipliedImage& image) {
+    if (!getImpl().customPuck) {
+        Log::Debug(Event::Android, "Custom puck not enabled");
+        return;
+    }
+    getImpl().customPuck->setPuckBitmap(image);
 }
 
 } // namespace android

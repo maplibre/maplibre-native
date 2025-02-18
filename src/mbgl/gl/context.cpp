@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/gl/command_encoder.hpp>
+#include <mbgl/gl/custom_puck.hpp>
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/draw_scope_resource.hpp>
 #include <mbgl/gl/enum.hpp>
@@ -237,7 +238,9 @@ UniqueProgram Context::createProgram(ShaderID vertexShader, ShaderID fragmentSha
     // position attribute is always first and always enabled. The integrity of
     // this assumption is verified in AttributeLocations::queryLocations and
     // AttributeLocations::getFirstAttribName.
-    MBGL_CHECK_ERROR(glBindAttribLocation(result, 0, location0AttribName));
+    if (location0AttribName != nullptr) {
+        MBGL_CHECK_ERROR(glBindAttribLocation(result, 0, location0AttribName));
+    }
 
     linkProgram(result);
 
@@ -269,6 +272,10 @@ void Context::verifyProgramLinkage(ProgramID program_) {
     }
 
     throw std::runtime_error("program failed to link");
+}
+
+std::unique_ptr<gfx::CustomPuck> Context::createCustomPuck() {
+    return std::make_unique<gl::CustomPuck>(*this);
 }
 
 UniqueTexture Context::createUniqueTexture(const Size& size,

@@ -532,6 +532,19 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     context.unbindGlobalUniformBuffers(*parameters.renderPass);
 #endif
 
+    if (!backend.customPuck) {
+        backend.customPuck = context.createCustomPuck();
+        if (backend.customPuck == nullptr) {
+            Log::Error(
+                Event::Render,
+                "Failed to create a custom puck. Make sure CustomPuck is implemented for the used rendering API.");
+        }
+        assert(backend.customPuck != nullptr);
+    }
+    if (backend.customPuck) {
+        backend.customPuck->draw(updateParameters->transformState);
+    }
+
     // Ends the RenderPass
     parameters.renderPass.reset();
 

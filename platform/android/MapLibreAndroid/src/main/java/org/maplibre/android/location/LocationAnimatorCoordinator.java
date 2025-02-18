@@ -1,6 +1,7 @@
 package org.maplibre.android.location;
 
 import android.animation.Animator;
+import android.content.Context;
 import android.location.Location;
 import android.os.SystemClock;
 import android.util.SparseArray;
@@ -14,6 +15,7 @@ import androidx.annotation.VisibleForTesting;
 
 import org.maplibre.android.log.Logger;
 import org.maplibre.android.maps.MapLibreMap;
+import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.Projection;
 
 import java.util.ArrayList;
@@ -59,6 +61,7 @@ final class LocationAnimatorCoordinator {
   private final MapLibreAnimatorSetProvider animatorSetProvider;
   private boolean compassAnimationEnabled;
   private boolean accuracyAnimationEnabled;
+  private LocationAnimatorCustomPuck customPuck = null;
 
   @VisibleForTesting
   int maxAnimationFps = Integer.MAX_VALUE;
@@ -66,11 +69,29 @@ final class LocationAnimatorCoordinator {
   @VisibleForTesting
   final SparseArray<MapLibreAnimator.AnimationsValueChangeListener> listeners = new SparseArray<>();
 
-  LocationAnimatorCoordinator(@NonNull Projection projection, @NonNull MapLibreAnimatorSetProvider animatorSetProvider,
-                              @NonNull MapLibreAnimatorProvider animatorProvider) {
+  LocationAnimatorCoordinator(@NonNull Context context,
+                              MapView mapView,
+                              @NonNull Projection projection,
+                              @NonNull MapLibreAnimatorSetProvider animatorSetProvider,
+                              @NonNull MapLibreAnimatorProvider animatorProvider,
+                              @NonNull LocationLayerRenderer locationLayerRenderer,
+                              @NonNull LocationCameraController locationCameraController,
+                              @NonNull LocationAnimatorCustomPuckOptions customPuckAnimationOptions) {
     this.projection = projection;
     this.animatorProvider = animatorProvider;
     this.animatorSetProvider = animatorSetProvider;
+
+    if (customPuckAnimationOptions.customPuckAnimationEnabled) {
+      if (mapView == null) {
+        throw new IllegalArgumentException("Unexpected null MapView when using a custom puck.");
+      }
+      customPuck = new LocationAnimatorCustomPuck(
+        context,
+        mapView,
+        locationLayerRenderer,
+        locationCameraController,
+        customPuckAnimationOptions);
+    }
   }
 
   void updateAnimatorListenerHolders(@NonNull Set<AnimatorListenerHolder> listenerHolders) {
@@ -111,7 +132,15 @@ final class LocationAnimatorCoordinator {
     // generate targets for layer
     LatLng[] latLngValues = getLatLngValues(previousLayerLatLng, newLocations);
     Float[] bearingValues = getBearingValues(previousLayerBearing, newLocations);
-    updateLayerAnimators(latLngValues, bearingValues);
+    if (customPuck == null) {
+      updateLayerAnimators(latLngValues, bearingValues);
+    } else {
+      customPuck.updateLocation(
+        newLocation.getLatitude(),
+        newLocation.getLongitude(),
+        newLocation.getBearing(),
+        newLocation.getTime());
+    }
 
     // replace the animation start with the camera's previous value
     latLngValues[0] = previousCameraLatLng;
@@ -120,7 +149,9 @@ final class LocationAnimatorCoordinator {
     } else {
       bearingValues = getBearingValues(previousCameraBearing, newLocations);
     }
-    updateCameraAnimators(latLngValues, bearingValues);
+    if (customPuck == null) {
+      updateCameraAnimators(latLngValues, bearingValues);
+    }
 
     LatLng targetLatLng = new LatLng(newLocation);
     boolean snap = immediateAnimation(projection, previousCameraLatLng, targetLatLng)
@@ -150,11 +181,13 @@ final class LocationAnimatorCoordinator {
       animationDuration = Math.min(animationDuration, MAX_ANIMATION_DURATION_MS);
     }
 
-    playAnimators(animationDuration,
-      ANIMATOR_LAYER_LATLNG,
-      ANIMATOR_LAYER_GPS_BEARING,
-      ANIMATOR_CAMERA_LATLNG,
-      ANIMATOR_CAMERA_GPS_BEARING);
+    if (customPuck == null) {
+      playAnimators(animationDuration,
+        ANIMATOR_LAYER_LATLNG,
+        ANIMATOR_LAYER_GPS_BEARING,
+        ANIMATOR_CAMERA_LATLNG,
+        ANIMATOR_CAMERA_GPS_BEARING);
+    }
 
     previousLocation = newLocation;
   }

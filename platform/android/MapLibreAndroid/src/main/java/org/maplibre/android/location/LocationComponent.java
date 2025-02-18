@@ -101,6 +101,7 @@ import static org.maplibre.android.location.modes.RenderMode.GPS;
 public final class LocationComponent {
   private static final String TAG = "Mbgl-LocationComponent";
 
+  private final MapView mapView;
   @NonNull
   private final MapLibreMap maplibreMap;
   @NonNull
@@ -187,15 +188,19 @@ public final class LocationComponent {
   private long fastestInterval;
   private long lastUpdateTime;
 
+   private LocationAnimatorCustomPuckOptions customPuckAnimationOptions
+    = new LocationAnimatorCustomPuckOptions();
+
   /**
    * Internal use.
    * <p>
    * To get the component object use {@link MapLibreMap#getLocationComponent()}.
    */
-  public LocationComponent(@NonNull MapLibreMap maplibreMap,
+  public LocationComponent(@NonNull MapView mapView,
                            @NonNull Transform transform,
                            @NonNull List<MapLibreMap.OnDeveloperAnimationListener> developerAnimationListeners) {
-    this.maplibreMap = maplibreMap;
+    this.mapView = mapView;
+    this.maplibreMap = mapView.getMapLibreMap();
     this.transform = transform;
     developerAnimationListeners.add(developerAnimationListener);
   }
@@ -203,6 +208,7 @@ public final class LocationComponent {
   // used for creating a spy
   LocationComponent() {
     //noinspection ConstantConditions
+    mapView = null;
     maplibreMap = null;
     transform = null;
   }
@@ -219,6 +225,7 @@ public final class LocationComponent {
                     @NonNull StaleStateManager staleStateManager,
                     @NonNull CompassEngine compassEngine,
                     boolean useSpecializedLocationLayer) {
+    this.mapView = null;
     this.maplibreMap = maplibreMap;
     this.transform = transform;
     developerAnimationListeners.add(developerAnimationListener);
@@ -248,6 +255,11 @@ public final class LocationComponent {
       }
       options = LocationComponentOptions.createFromAttributes(activationOptions.context(), styleRes);
     }
+
+    customPuckAnimationOptions.customPuckAnimationEnabled = activationOptions.customPuckAnimationEnabled();
+    customPuckAnimationOptions.animationIntervalMS = activationOptions.customPuckAnimationIntervalMS();
+    customPuckAnimationOptions.lagMS = activationOptions.customPuckLagMS();
+    customPuckAnimationOptions.iconScale = activationOptions.customPuckIconScale();
 
     // Initialize the LocationComponent with Context, the map's `Style`, and either custom LocationComponentOptions
     // or backup options created from default/custom attributes
@@ -1179,9 +1191,14 @@ public final class LocationComponent {
       context, maplibreMap, transform, cameraTrackingChangedListener, options, onCameraMoveInvalidateListener);
 
     locationAnimatorCoordinator = new LocationAnimatorCoordinator(
+      context,
+      mapView,
       maplibreMap.getProjection(),
       MapLibreAnimatorSetProvider.getInstance(),
-      MapLibreAnimatorProvider.getInstance()
+      MapLibreAnimatorProvider.getInstance(),
+      locationLayerController.getLocationLayerRenderer(),
+      locationCameraController,
+      customPuckAnimationOptions
     );
     locationAnimatorCoordinator.setTrackingAnimationDurationMultiplier(options
       .trackingAnimationDurationMultiplier());

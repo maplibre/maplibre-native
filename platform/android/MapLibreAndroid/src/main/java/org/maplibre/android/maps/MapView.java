@@ -92,6 +92,10 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   private Bundle savedInstanceState;
   private boolean isStarted;
 
+  private double customPuckLatestLat = 0.0;
+  private double customPuckLatestLon = 0.0;
+  private double customPuckLatestBearing = 0.0;
+
   @UiThread
   public MapView(@NonNull Context context) {
     super(context);
@@ -175,7 +179,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     mapKeyListener = new MapKeyListener(transform, uiSettings, mapGestureDetector);
 
     // LocationComponent
-    maplibreMap.injectLocationComponent(new LocationComponent(maplibreMap, transform, developerAnimationListeners));
+    maplibreMap.injectLocationComponent(new LocationComponent(this, transform, developerAnimationListeners));
 
     // Ensure this view is interactable
     setClickable(true);
@@ -437,6 +441,45 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     if (mapRenderer != null) {
       mapRenderer.onDestroy();
     }
+  }
+
+  /**
+   * set the custom puck state
+   *
+   */
+  public void setCustomPuckState(double lat,
+                                 double lon,
+                                 double bearing,
+                                 float iconScale,
+                                 boolean cameraTracking) {
+    mapRenderer.nativeSetCustomPuckState(lat, lon, bearing, iconScale, cameraTracking);
+    customPuckLatestLat = lat;
+    customPuckLatestLon = lon;
+    customPuckLatestBearing = bearing;
+  }
+
+  /**
+   * Access the interpolated custom puck latest latitude.
+   *
+   */
+  public double getCustomPuckLatestLatitude() {
+    return customPuckLatestLat;
+  }
+
+  /**
+   * Access the interpolated custom puck latest longitude.
+   *
+   */
+  public double getCustomPuckLatestLongitude() {
+    return customPuckLatestLon;
+  }
+
+  /**
+   * Access the interpolated custom puck latest bearing.
+   *
+   */
+  public double getCustomPuckLatestBearing() {
+    return customPuckLatestBearing;
   }
 
   /**
@@ -1501,7 +1544,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   @Nullable
-  MapLibreMap getMapLibreMap() {
+  public MapLibreMap getMapLibreMap() {
     return maplibreMap;
   }
 

@@ -169,6 +169,8 @@ public:
 
     RendererBackend& getBackend() { return backend; }
 
+    std::unique_ptr<gfx::CustomPuck> createCustomPuck() override;
+
 private:
     RendererBackend& backend;
     bool cleanupOnDestruction = true;
