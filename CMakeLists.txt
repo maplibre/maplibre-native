@@ -26,8 +26,8 @@ if (MLN_WITH_CLANG_TIDY)
     else()
         message(STATUS "Found clang-tidy at ${CLANG_TIDY_COMMAND}")
     endif()
-    # TODO: there are options which are only available on GCC(e.g. -Werror=maybe-uninitialized), 
-    # that's why we need to disable this `unknown-warning-option` here. 
+    # TODO: there are options which are only available on GCC(e.g. -Werror=maybe-uninitialized),
+    # that's why we need to disable this `unknown-warning-option` here.
     # We could check if current compiler supports particular flag before enabling it.
     set(CLANG_TIDY_COMMAND "${CLANG_TIDY_COMMAND};--extra-arg=-Wno-unknown-warning-option;--extra-arg=-Wno-pragmas")
 endif()
@@ -999,7 +999,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/tile_cover_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/tile_cover_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/tile_range.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/util/default_style.cpp    
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/default_style.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/tile_server_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/tiny_sdf.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/tiny_sdf.hpp
@@ -1022,7 +1022,7 @@ if(MLN_WITH_OPENGL)
             "MLN_DRAWABLE_RENDERER=$<BOOL:${MLN_DRAWABLE_RENDERER}>"
             "MLN_USE_UNORDERED_DENSE=$<BOOL:${MLN_USE_UNORDERED_DENSE}>"
     )
-    list(APPEND 
+    list(APPEND
         INCLUDE_FILES
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/renderable_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/renderer_backend.hpp
@@ -1087,7 +1087,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_sdf_text.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_text_and_icon.hpp
     )
-    list(APPEND 
+    list(APPEND
         SRC_FILES
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/attribute.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/attribute.hpp
@@ -1194,7 +1194,7 @@ if(MLN_WITH_METAL)
         PUBLIC
             "MLN_USE_UNORDERED_DENSE=$<BOOL:${MLN_USE_UNORDERED_DENSE}>"
     )
-    list(APPEND 
+    list(APPEND
         INCLUDE_FILES
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/command_encoder.hpp
@@ -1233,7 +1233,7 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_program.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/symbol.hpp
             )
-    list(APPEND 
+    list(APPEND
         SRC_FILES
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/command_encoder.cpp
@@ -1276,7 +1276,7 @@ if(MLN_WITH_METAL)
     if (METAL_FRAMEWORK)
         target_link_libraries(mbgl-core PRIVATE ${METAL_FRAMEWORK})
     endif()
-    
+
 endif()
 
 if(MLN_WITH_VULKAN)
@@ -1288,7 +1288,7 @@ if(MLN_WITH_VULKAN)
             MLN_RENDER_BACKEND_VULKAN=1
     )
 
-    list(APPEND 
+    list(APPEND
         INCLUDE_FILES
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/command_encoder.hpp
@@ -1329,7 +1329,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/widevector.hpp
     )
 
-    list(APPEND 
+    list(APPEND
         SRC_FILES
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/command_encoder.cpp
@@ -1372,7 +1372,7 @@ if(MLN_WITH_VULKAN)
 endif()
 
 if(MLN_DRAWABLE_RENDERER)
-    list(APPEND 
+    list(APPEND
     SRC_FILES
         ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_drawable_layer_factory.cpp
@@ -1450,6 +1450,8 @@ include(${PROJECT_SOURCE_DIR}/vendor/csscolorparser.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/earcut.hpp.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/eternal.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/mapbox-base.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/metal-cpp.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/nontype_functional.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/parsedate.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/pmtiles.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/polylabel.cmake)
@@ -1459,7 +1461,6 @@ include(${PROJECT_SOURCE_DIR}/vendor/unique_resource.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/unordered_dense.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
-include(${PROJECT_SOURCE_DIR}/vendor/metal-cpp.cmake)
 
 if(MLN_USE_RUST)
 include(${PROJECT_SOURCE_DIR}/rustutils/rustutils.cmake)
@@ -1477,6 +1478,7 @@ target_link_libraries(
         mbgl-vendor-boost
         mbgl-vendor-earcut.hpp
         mbgl-vendor-eternal
+        $<$<BOOL:${MLN_WITH_METAL}>:mbgl-vendor-metal-cpp>
         mbgl-vendor-parsedate
         mbgl-vendor-pmtiles
         mbgl-vendor-polylabel
@@ -1493,6 +1495,7 @@ target_link_libraries(
         Mapbox::Base::geojson.hpp
         Mapbox::Base::geometry.hpp
         Mapbox::Base::variant
+        mbgl-vendor-nontype_functional
         $<$<BOOL:${MLN_USE_TRACY}>:TracyClient>
         unordered_dense
 )
@@ -1516,6 +1519,8 @@ set(EXPORT_TARGETS
     mbgl-vendor-boost
     mbgl-vendor-earcut.hpp
     mbgl-vendor-eternal
+    mbgl-vendor-metal-cpp
+    mbgl-vendor-nontype_functional
     mbgl-vendor-parsedate
     mbgl-vendor-pmtiles
     mbgl-vendor-polylabel
@@ -1523,7 +1528,6 @@ set(EXPORT_TARGETS
     mbgl-vendor-unique_resource
     mbgl-vendor-vector-tile
     mbgl-vendor-wagyu
-    mbgl-vendor-metal-cpp
     unordered_dense
 )
 

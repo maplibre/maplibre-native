@@ -306,7 +306,7 @@ void main() {
     const vec2 pos = normal.x == 1.0 && normal.y == 0.0 && normal.z == 16384.0
         ? vec2(in_position) // extrusion top
         : vec2(edgedistance, z * drawable.height_factor); // extrusion side
-    
+
     vec4 lighting = vec4(0.0, 0.0, 0.0, 1.0);
     float directional = clamp(dot(normal / 16383.0, props.light_position_base.xyz), 0.0, 1.0);
     directional = mix((1.0 - props.light_intensity), max((0.5 + props.light_intensity), 1.0), directional);

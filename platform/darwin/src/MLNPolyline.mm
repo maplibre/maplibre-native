@@ -70,7 +70,7 @@
     CLLocationCoordinate2D *coordinates = self.coordinates;
     CLLocationDistance middle = [self length] / 2.0;
     CLLocationDistance traveled = 0.0;
-    
+
     if (count > 1 || middle > traveled) {
         for (NSUInteger i = 0; i < count; i++) {
 
@@ -79,7 +79,7 @@
 
             MLNRadianCoordinate2D from = MLNRadianCoordinateFromLocationCoordinate(coordinates[i]);
             MLNRadianCoordinate2D to = MLNRadianCoordinateFromLocationCoordinate(coordinates[i + nextIndex]);
-            
+
             if (traveled >= middle) {
                 double overshoot = middle - traveled;
                 if (overshoot == 0) {
@@ -93,7 +93,7 @@
                 return CLLocationCoordinate2DMake(MLNDegreesFromRadians(otherCoordinate.latitude),
                                                   MLNDegreesFromRadians(otherCoordinate.longitude));
             }
-            
+
             traveled += (MLNDistanceBetweenRadianCoordinates(from, to) * mbgl::util::EARTH_RADIUS_M);
         }
     }
@@ -104,14 +104,14 @@
 - (CLLocationDistance)length
 {
     CLLocationDistance length = 0.0;
-    
+
     NSUInteger count = self.pointCount;
     CLLocationCoordinate2D *coordinates = self.coordinates;
-    
-    for (NSUInteger i = 0; i < count - 1; i++) {        
+
+    for (NSUInteger i = 0; i < count - 1; i++) {
         length += (MLNDistanceBetweenRadianCoordinates(MLNRadianCoordinateFromLocationCoordinate(coordinates[i]),                                                  MLNRadianCoordinateFromLocationCoordinate(coordinates[i + 1])) * mbgl::util::EARTH_RADIUS_M);
     }
-    
+
     return length;
 }
 

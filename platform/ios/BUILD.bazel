@@ -1,9 +1,9 @@
 load("@aspect_rules_js//js:defs.bzl", "js_library")
-load("@build_bazel_rules_apple//apple:apple.bzl", "apple_static_xcframework", "apple_xcframework")
-load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application", "ios_framework")
-load("@build_bazel_rules_apple//apple:resources.bzl", "apple_resource_bundle")
-load("@build_bazel_rules_apple//apple:versioning.bzl", "apple_bundle_version")
 load("@darwin_config//:config.bzl", "BUNDLE_ID_PREFIX")
+load("@rules_apple//apple:apple.bzl", "apple_static_xcframework", "apple_xcframework")
+load("@rules_apple//apple:ios.bzl", "ios_application", "ios_framework")
+load("@rules_apple//apple:resources.bzl", "apple_resource_bundle")
+load("@rules_apple//apple:versioning.bzl", "apple_bundle_version")
 load(
     "@rules_xcodeproj//xcodeproj:defs.bzl",
     "top_level_target",

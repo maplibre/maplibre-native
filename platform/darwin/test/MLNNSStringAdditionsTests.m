@@ -19,7 +19,7 @@
 
     XCTAssertEqualObjects([@"Improve the map" mgl_titleCasedStringWithLocale:locale], @"Improve the Map");
     XCTAssertEqualObjects([@"Improve The Map" mgl_titleCasedStringWithLocale:locale], @"Improve The Map");
-    
+
     XCTAssertEqualObjects([@"Improve a map" mgl_titleCasedStringWithLocale:locale], @"Improve a Map");
     XCTAssertEqualObjects([@"Improve A Map" mgl_titleCasedStringWithLocale:locale], @"Improve A Map");
 
@@ -57,7 +57,7 @@
     XCTAssertEqualObjects([@"北京" mgl_stringByTransliteratingIntoScript:@"Jpan"], @"ベ̌イ ジーング");
     XCTAssertEqualObjects([@"北京" mgl_stringByTransliteratingIntoScript:@"Kore"], @"베̌이 지̄늑");
     XCTAssertEqualObjects([@"北京" mgl_stringByTransliteratingIntoScript:@"Fake"], @"北京");
-    
+
     XCTAssertEqualObjects([@"九龍" mgl_stringByTransliteratingIntoScript:@"Latn"], @"jiǔ lóng");
     XCTAssertEqualObjects([@"九龍" mgl_stringByTransliteratingIntoScript:@"Hans"], @"九龙");
     XCTAssertEqualObjects([@"九龍" mgl_stringByTransliteratingIntoScript:@"Hant"], @"九龍");

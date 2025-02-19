@@ -88,7 +88,7 @@ This should produce an `out.png` map tile image with the default MapLibre stylin
 
 ![Sample image of world from mbgl-render command](/misc/sample-maplibre-style-mbgl-render-out.png)
 
-### Using your own style/tiles 
+### Using your own style/tiles
 
 You can also use the `mbgl-render` command to render images from your own style or tile set. To do so, you will need a data source and a style JSON file.
 

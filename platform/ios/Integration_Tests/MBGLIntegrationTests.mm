@@ -86,12 +86,12 @@
     void(^addRemoveGLLayer)(void) = ^{
 
         __weak id retrievedLayer = nil;
-        
+
         @autoreleasepool {
             MLNCustomStyleLayer *layer = [[MLNCustomStyleLayer alloc] initWithIdentifier:@"gl-layer"];
             [self.style insertLayer:layer atIndex:0];
             layer = nil;
-            
+
             [self waitForMapViewToBeRendered];
 
             retrievedLayer = [self.style layerWithIdentifier:@"gl-layer"];
@@ -113,10 +113,10 @@
     MLNCustomStyleLayer *layer = [[MLNCustomStyleLayer alloc] initWithIdentifier:@"gl-layer"];
     [self.style insertLayer:layer atIndex:0];
     [self waitForMapViewToBeRendered];
-    
+
     [self.style removeLayer:layer];
     [self waitForMapViewToBeRendered];
-    
+
     [self.style insertLayer:layer atIndex:0];
     [self waitForMapViewToBeRendered];
 
@@ -180,7 +180,7 @@
 
 - (void)testOpenGLLayerDoesNotLeakWhenMapViewDeallocs {
     __weak id weakLayer;
- 
+
     @autoreleasepool {
 
         NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"one-liner" withExtension:@"json"];

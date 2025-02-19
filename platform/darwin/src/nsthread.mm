@@ -30,7 +30,7 @@ void setCurrentThreadPriority(double priority) {
         Log::Warning(Event::General, "Invalid thread priority was provided");
         return;
     }
-    
+
     if (priority < 0.25) {
         [NSThread currentThread].qualityOfService = NSQualityOfServiceBackground;
     } else if (priority < 0.5) {

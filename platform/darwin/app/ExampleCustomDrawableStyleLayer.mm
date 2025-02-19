@@ -35,27 +35,27 @@ public:
         layerRef = styleLayer;
         layer = nil;
     }
-    
+
     void initialize() override {
         if (layerRef == nil) return;
         else if (layer == nil) layer = layerRef;
     }
-    
+
     void update(Interface& interface) override {
-        
+
         // if we have built our drawable(s) already, either update or skip
         if (interface.getDrawableCount())
             return;
-        
+
         constexpr float extent = mbgl::util::EXTENT;
 
         // add classic polylines
         {
             using namespace mbgl;
-            
+
             // set tile
             interface.setTileID({11, 327, 792});
-            
+
             constexpr auto numLines = 6;
             Interface::LineOptions options[numLines] {
                 {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/8.0f,     /*shaderType=*/{}, /*color=*/Color::red() },
@@ -70,21 +70,21 @@ public:
                 opt.geometry.endCap = style::LineCapType::Butt;
                 opt.geometry.joinType = style::LineJoinType::Miter;
             }
-            
+
             constexpr auto numPoints = 10;
             GeometryCoordinates polyline;
             for (auto ipoint{0}; ipoint < numPoints; ++ipoint) {
                 polyline.emplace_back(ipoint * extent / numPoints, std::sin(ipoint * 2 * M_PI / numPoints) * extent / numLines / 2.f);
             }
-            
+
             for (auto index {0}; index <  numLines; ++index) {
                 for(auto &p : polyline) {
                     p.y += extent / numLines;
                 }
-                
+
                 // set property values
                 interface.setLineOptions(options[index]);
-                
+
                 // add polyline
                 interface.addPolyline(polyline);
             }
@@ -93,10 +93,10 @@ public:
         // add wide vector polylines with tile coordinates
         {
             using namespace mbgl;
-            
+
             // set tile
             interface.setTileID({11, 327, 792});
-            
+
             constexpr auto numLines = 6;
             Interface::LineOptions options[numLines] {
                 {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/8.0f,     /*shaderType=*/Interface::LineShaderType::MetalWideVector, /*color=*/Color::red() },
@@ -111,25 +111,25 @@ public:
                 opt.geometry.endCap = style::LineCapType::Butt;
                 opt.geometry.joinType = style::LineJoinType::Miter;
             }
-            
+
             constexpr auto numPoints = 10;
             GeometryCoordinates polyline;
             for (auto ipoint{0}; ipoint < numPoints; ++ipoint) {
                 polyline.emplace_back(ipoint * extent / numPoints, std::sin(ipoint * 2 * M_PI / numPoints) * extent / numLines / 2.f);
             }
-            
+
             for (auto index {0}; index <  numLines; ++index) {
                 for(auto &p : polyline) {
                     if (0 == index) p.y += 0.25f * extent / numLines;
                     p.y += extent / numLines;
                 }
-                
+
                 // set property values
                 interface.setLineOptions(options[index]);
-                
+
                 // add polyline
                 interface.addPolyline(polyline);
-                
+
                 // add clone
                 for(auto &p : polyline) {
                     p.y += 0.05f * extent / numLines;
@@ -140,7 +140,7 @@ public:
                 }
             }
         }
-        
+
         // add fill polygon
         {
             using namespace mbgl;
@@ -173,7 +173,7 @@ public:
             // add fill
             interface.addFill(geometry);
         }
-        
+
         // add symbol
         {
             using namespace mbgl;
@@ -182,7 +182,7 @@ public:
             interface.setTileID({11, 327, 789});
 
             GeometryCoordinate position {static_cast<int16_t>(extent* 0.5f), static_cast<int16_t>(extent* 0.5f)};
-            
+
             // load image
             UIImage *assetImage = [UIImage imageNamed:@"pin"];
             assert(assetImage.CGImage != NULL);
@@ -237,11 +237,11 @@ public:
             };
             interface.addPolyline(polyline_geo);
         }
-        
+
         // add polylines using wide vectors in tile coordinates
         {
             using namespace mbgl;
-            
+
             // set tile
             interface.setTileID({11, 327, 790});
 
@@ -250,7 +250,7 @@ public:
             options.geometry.beginCap = style::LineCapType::Round;
             options.geometry.endCap = style::LineCapType::Round;
             options.geometry.joinType = style::LineJoinType::Round;
-            
+
             // add polyline with tile coordinates
             GeometryCollection polyline_tile{
                 {
@@ -268,21 +268,21 @@ public:
                     {static_cast<int16_t>(extent* 0.25f), static_cast<int16_t>(extent* 0.45f)},
                 },
             };
-            
+
             options.geometry.type = FeatureType::Polygon;
             interface.setLineOptions(options);
             interface.addPolyline(polyline_tile[0]);
             interface.addPolyline(polyline_tile[1]);
 
         }
-        
+
         // finish
         interface.finish();
     }
-    
+
     void deinitialize() override {
         if (layer == nil) return;
-        
+
         layerRef = layer;
         layer = nil;
     }

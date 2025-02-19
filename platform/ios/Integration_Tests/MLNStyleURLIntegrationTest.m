@@ -11,7 +11,7 @@
 }
 
 - (void)predefinedStylesLoadingTest {
-    
+
     for (MLNDefaultStyle* style in [MLNStyle predefinedStyles]) {
         NSString* styleName = style.name;
         self.mapView.styleURL = [[MLNStyle predefinedStyle:styleName] url];
