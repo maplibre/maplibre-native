@@ -3159,6 +3159,46 @@ static void *windowScreenContext = &windowScreenContext;
     return _rendererFrontend->getTileCacheEnabled();
 }
 
+- (void)setTileLodMinRadius:(double)radius
+{
+    self.mbglMap.setTileLodMinRadius(radius);
+}
+
+- (double)tileLodMinRadius
+{
+    return self.mbglMap.getTileLodMinRadius();
+}
+
+- (void)setTileLodScale:(double)scale
+{
+    self.mbglMap.setTileLodScale(scale);
+}
+
+- (double)tileLodScale
+{
+    return self.mbglMap.getTileLodScale();
+}
+
+- (void)setTileLodPitchThreshold:(double)threshold
+{
+    self.mbglMap.setTileLodPitchThreshold(threshold);
+}
+
+- (double)tileLodPitchThreshold
+{
+    return self.mbglMap.getTileLodPitchThreshold();
+}
+
+- (void)setTileLodZoomShift:(double)shift
+{
+    self.mbglMap.setTileLodZoomShift(shift);
+}
+
+- (double)tileLodZoomShift
+{
+    return self.mbglMap.getTileLodZoomShift();
+}
+
 // MARK: - Accessibility -
 
 - (NSString *)accessibilityValue
