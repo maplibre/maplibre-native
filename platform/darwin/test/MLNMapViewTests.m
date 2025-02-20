@@ -195,7 +195,7 @@
 
     // Test setting style JSON
     NSString *newStyleJSON = @"{\"version\": 8, \"sources\": {}, \"layers\": []}";
-    self.mapView.styleJSON = newStyleJSON;
+    self.mapView = [[MLNMapView alloc] initWithFrame:CGRectMake(0, 0, 64, 64) styleJSON:newStyleJSON];
 
     // Verify the style was updated
     NSString *updatedStyleJSON = self.mapView.styleJSON;
