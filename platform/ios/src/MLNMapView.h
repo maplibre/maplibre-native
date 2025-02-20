@@ -253,6 +253,8 @@ MLN_EXPORT
  */
 @property (nonatomic, null_resettable) NSURL *styleURL;
 
+@property (nonatomic, nullable) NSString *styleJSON;
+
 /**
  Reloads the style.
 

@@ -569,6 +569,19 @@ public:
     self.mbglMap.getStyle().loadURL([[styleURL absoluteString] UTF8String]);
 }
 
+- (NSString *)styleJSON
+{
+    NSString *styleJSONString = @(self.mbglMap.getStyle().getJSON().c_str()).mgl_stringOrNilIfEmpty;
+    return styleJSONString;
+}
+
+- (void)setStyleJSON:(NSString *)styleJSON
+{
+    self.style = nil;
+    self.styleURL = nil;
+    self.mbglMap.getStyle().loadJSON([styleJSON UTF8String]);
+}
+
 - (IBAction)reloadStyle:(__unused id)sender {
     MLNLogInfo(@"Reloading style.");
     NSURL *styleURL = self.styleURL;

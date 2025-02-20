@@ -70,6 +70,11 @@ MLN_EXPORT
  */
 @property (readonly, copy, nullable) NSString *name;
 
+/**
+ * The json of the style
+ */
+@property (readonly, copy, nullable) NSString *styleJSON;
+
 // MARK: Managing Sources
 
 /**

@@ -422,4 +422,19 @@
     XCTAssertFalse(self.style.performsPlacementTransitions, @"Enabling placement transitions should be NO.");
 }
 
+- (void)testStyleJSON {
+    // Test getting style JSON
+    NSString *styleJSON = self.style.styleJSON;
+    XCTAssertNotNil(styleJSON, @"Style JSON should not be nil");
+
+    // Verify the JSON is valid
+    NSError *error = nil;
+    id jsonObject = [NSJSONSerialization JSONObjectWithData:[styleJSON dataUsingEncoding:NSUTF8StringEncoding]
+                                                   options:0
+                                                     error:&error];
+    XCTAssertNil(error, @"Style JSON should be valid JSON");
+    XCTAssertNotNil(jsonObject, @"Style JSON should parse to a valid object");
+    XCTAssertTrue([jsonObject isKindOfClass:[NSDictionary class]], @"Style JSON should represent a dictionary");
+}
+
 @end
