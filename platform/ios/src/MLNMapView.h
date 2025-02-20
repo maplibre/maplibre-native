@@ -253,6 +253,14 @@ MLN_EXPORT
  */
 @property (nonatomic, null_resettable) NSURL *styleURL;
 
+/**
+ * The style JSON representation of the map.
+ *
+ * This property can be used to get the current style as a JSON string or set a new style from a
+ * JSON string. The JSON must conform to the MapLibre Style Specification.
+ *
+ * @see https://maplibre.org/maplibre-style-spec/
+ */
 @property (nonatomic, nullable) NSString *styleJSON;
 
 /**

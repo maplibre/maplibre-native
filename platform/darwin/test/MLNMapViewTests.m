@@ -8,8 +8,6 @@
     #define MLNEdgeInsetsZero NSEdgeInsetsZero
 #endif
 
-//static MLNMapView *mapView;
-
 @interface MLNMapViewTests : XCTestCase <MLNMapViewDelegate>
 
 @property (nonatomic) MLNMapView *mapView;
