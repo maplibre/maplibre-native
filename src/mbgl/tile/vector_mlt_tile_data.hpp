@@ -3,17 +3,22 @@
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/util/containers.hpp>
 
-#include <protozero/pbf_reader.hpp>
-
 #include <unordered_map>
 #include <functional>
 #include <utility>
 
+namespace mlt {
+    class MapLibreTile;
+    class Feature;
+    class Layer;
+}
+
 namespace mbgl {
+using MapLibreTile = mlt::MapLibreTile;
 
 class VectorMLTTileFeature : public GeometryTileFeature {
 public:
-    VectorMLTTileFeature(/*const mapbox::vector_tile::layer&, const protozero::data_view&*/);
+    VectorMLTTileFeature(std::shared_ptr<const MapLibreTile>, const mlt::Feature&, std::uint32_t extent);
 
     FeatureType getType() const override;
     std::optional<Value> getValue(const std::string& key) const override;
@@ -22,27 +27,31 @@ public:
     const GeometryCollection& getGeometries() const override;
 
 private:
-    //mapbox::vector_tile::feature feature;
+    const std::shared_ptr<const MapLibreTile> tile;
+    const mlt::Feature& feature;
+    const std::uint32_t extent;
     mutable std::optional<GeometryCollection> lines;
     mutable std::optional<PropertyMap> properties;
 };
 
 class VectorMLTTileLayer : public GeometryTileLayer {
 public:
-    VectorMLTTileLayer(std::shared_ptr<const std::string> data, const protozero::data_view&);
+    VectorMLTTileLayer(std::shared_ptr<const MapLibreTile>, const mlt::Layer&);
 
     std::size_t featureCount() const override;
     std::unique_ptr<GeometryTileFeature> getFeature(std::size_t i) const override;
     std::string getName() const override;
 
 private:
-    std::shared_ptr<const std::string> data;
-    //mapbox::vector_tile::layer layer;
+    const std::shared_ptr<const MapLibreTile> tile;
+    const mlt::Layer& layer;
 };
 
 class VectorMLTTileData : public GeometryTileData {
 public:
     VectorMLTTileData(std::shared_ptr<const std::string> data);
+    VectorMLTTileData(const VectorMLTTileData&);
+    VectorMLTTileData(VectorMLTTileData&&) = default;
 
     std::unique_ptr<GeometryTileData> clone() const override;
     std::unique_ptr<GeometryTileLayer> getLayer(const std::string& name) const override;
@@ -50,9 +59,8 @@ public:
     std::vector<std::string> layerNames() const;
 
 private:
-    std::shared_ptr<const std::string> data;
-    mutable bool parsed = false;
-    mutable mbgl::unordered_map<std::string, const protozero::data_view> layers;
+    mutable std::shared_ptr<const std::string> data;
+    mutable std::shared_ptr<const MapLibreTile> tile;
 };
 
 } // namespace mbgl
