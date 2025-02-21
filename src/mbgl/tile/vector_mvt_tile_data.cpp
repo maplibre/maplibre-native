@@ -12,8 +12,7 @@
 namespace mbgl {
 
 VectorMVTTileFeature::VectorMVTTileFeature(const mapbox::vector_tile::layer& layer, const protozero::data_view& view)
-    : feature(view, layer) {
-}
+    : feature(view, layer) {}
 
 FeatureType VectorMVTTileFeature::getType() const {
     switch (feature.getType()) {

@@ -8,17 +8,17 @@
 #include <utility>
 
 namespace mlt {
-    class MapLibreTile;
-    class Feature;
-    class Layer;
-}
+class MapLibreTile;
+class Feature;
+class Layer;
+} // namespace mlt
 
 namespace mbgl {
 using MapLibreTile = mlt::MapLibreTile;
 
 class VectorMLTTileFeature : public GeometryTileFeature {
 public:
-    VectorMLTTileFeature(std::shared_ptr<const MapLibreTile>, const mlt::Feature&, std::uint32_t extent);
+    VectorMLTTileFeature(std::shared_ptr<const MapLibreTile>, const mlt::Feature&, std::uint32_t extent, int version);
 
     FeatureType getType() const override;
     std::optional<Value> getValue(const std::string& key) const override;
@@ -30,6 +30,7 @@ private:
     const std::shared_ptr<const MapLibreTile> tile;
     const mlt::Feature& feature;
     const std::uint32_t extent;
+    const int version;
     mutable std::optional<GeometryCollection> lines;
     mutable std::optional<PropertyMap> properties;
 };
