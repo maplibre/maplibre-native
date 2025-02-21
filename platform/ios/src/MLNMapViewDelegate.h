@@ -1,8 +1,8 @@
 #import <UIKit/UIKit.h>
 
+#import <MLNTileOperation.h>
 #import "MLNCameraChangeReason.h"
 #import "Mapbox.h"
-#import <MLNTileOperation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -328,25 +328,41 @@ NS_ASSUME_NONNULL_BEGIN
 
 // MARK: Shader Compilation
 
-- (void)mapView:(MLNMapView *)mapView shaderWillCompile:(NSInteger)id backend:(NSInteger)backend defines:(NSString *)defines;
-- (void)mapView:(MLNMapView *)mapView shaderDidCompile:(NSInteger)id backend:(NSInteger)backend defines:(NSString *)defines;
-- (void)mapView:(MLNMapView *)mapView shaderDidFailCompile:(NSInteger)id backend:(NSInteger)backend defines:(NSString *)defines;
+- (void)mapView:(MLNMapView *)mapView
+    shaderWillCompile:(NSInteger)id
+              backend:(NSInteger)backend
+              defines:(NSString *)defines;
+- (void)mapView:(MLNMapView *)mapView
+    shaderDidCompile:(NSInteger)id
+             backend:(NSInteger)backend
+             defines:(NSString *)defines;
+- (void)mapView:(MLNMapView *)mapView
+    shaderDidFailCompile:(NSInteger)id
+                 backend:(NSInteger)backend
+                 defines:(NSString *)defines;
 
 // MARK: Glyph Requests
 
-- (void)mapView:(MLNMapView *)mapView glyphsWillLoad:(NSArray<NSString*>*)fontStack range:(NSRange)range;
-- (void)mapView:(MLNMapView *)mapView glyphsDidLoad:(NSArray<NSString*>*)fontStack range:(NSRange)range;
-- (void)mapView:(MLNMapView *)mapView glyphsDidError:(NSArray<NSString*>*)fontStack range:(NSRange)range;
+- (void)mapView:(MLNMapView *)mapView
+    glyphsWillLoad:(NSArray<NSString *> *)fontStack
+             range:(NSRange)range;
+- (void)mapView:(MLNMapView *)mapView
+    glyphsDidLoad:(NSArray<NSString *> *)fontStack
+            range:(NSRange)range;
+- (void)mapView:(MLNMapView *)mapView
+    glyphsDidError:(NSArray<NSString *> *)fontStack
+             range:(NSRange)range;
 
 // MARK: Tile Requests
 
-- (void)mapView:(MLNMapView *)mapView tileDidTriggerAction:(MLNTileOperation)operation
-              x:(NSInteger)x
-              y:(NSInteger)y
-              z:(NSInteger)z
-           wrap:(NSInteger)wrap
-    overscaledZ:(NSInteger)overscaledZ
-       sourceID:(NSString *)sourceID;
+- (void)mapView:(MLNMapView *)mapView
+    tileDidTriggerAction:(MLNTileOperation)operation
+                       x:(NSInteger)x
+                       y:(NSInteger)y
+                       z:(NSInteger)z
+                    wrap:(NSInteger)wrap
+             overscaledZ:(NSInteger)overscaledZ
+                sourceID:(NSString *)sourceID;
 
 // MARK: Sprite Requests
 

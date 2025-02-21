@@ -114,7 +114,7 @@ bool MLNMapViewImpl::onCanRemoveUnusedStyleImage(const std::string &imageIdentif
 }
 
 void MLNMapViewImpl::onRegisterShaders(mbgl::gfx::ShaderRegistry& shaders) {
-    
+
 }
 
 void MLNMapViewImpl::onPreCompileShader(mbgl::shaders::BuiltIn shaderID, mbgl::gfx::Backend::Type backend, const std::string& defines) {
@@ -137,7 +137,7 @@ void MLNMapViewImpl::onGlyphsLoaded(const mbgl::FontStack& fontStack, const mbgl
     std::for_each(fontStack.begin(), fontStack.end(), ^(const std::string& str) {
         [fontStackCopy addObject:[NSString stringWithUTF8String:str.c_str()]];
     });
-    
+
     [mapView glyphsDidLoad:fontStackCopy range:NSMakeRange(range.first, range.second - range.first)];
 }
 
@@ -146,7 +146,7 @@ void MLNMapViewImpl::onGlyphsError(const mbgl::FontStack& fontStack, const mbgl:
     std::for_each(fontStack.begin(), fontStack.end(), ^(const std::string& str) {
         [fontStackCopy addObject:[NSString stringWithUTF8String:str.c_str()]];
     });
-    
+
     [mapView glyphsDidError:fontStackCopy range:NSMakeRange(range.first, range.second - range.first)];
 }
 
@@ -155,7 +155,7 @@ void MLNMapViewImpl::onGlyphsRequested(const mbgl::FontStack& fontStack, const m
     std::for_each(fontStack.begin(), fontStack.end(), ^(const std::string& str) {
         [fontStackCopy addObject:[NSString stringWithUTF8String:str.c_str()]];
     });
-    
+
     [mapView glyphsWillLoad:fontStackCopy range:NSMakeRange(range.first, range.second - range.first)];
 }
 
@@ -174,7 +174,7 @@ void MLNMapViewImpl::onSpriteLoaded(const std::optional<mbgl::style::Sprite>& sp
         [mapView spriteDidLoad:nil url:nil];
         return;
     }
-    
+
     [mapView spriteDidLoad:[NSString stringWithUTF8String:spriteID.value().id.c_str()]
                        url:[NSString stringWithUTF8String:spriteID.value().spriteURL.c_str()]];
 }
@@ -184,7 +184,7 @@ void MLNMapViewImpl::onSpriteError(const std::optional<mbgl::style::Sprite>& spr
         [mapView spriteDidError:nil url:nil];
         return;
     }
-    
+
     [mapView spriteDidError:[NSString stringWithUTF8String:spriteID.value().id.c_str()]
                         url:[NSString stringWithUTF8String:spriteID.value().spriteURL.c_str()]];
 }
@@ -194,7 +194,7 @@ void MLNMapViewImpl::onSpriteRequested(const std::optional<mbgl::style::Sprite>&
         [mapView spriteWillLoad:nil url:nil];
         return;
     }
-    
+
     [mapView spriteWillLoad:[NSString stringWithUTF8String:spriteID.value().id.c_str()]
                         url:[NSString stringWithUTF8String:spriteID.value().spriteURL.c_str()]];
 }
