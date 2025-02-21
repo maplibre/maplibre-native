@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Design - MapLibre Native Developer Documentation</title>
+        <title>Development Apps - MapLibre Native Developer Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -220,25 +220,37 @@
 }
 
 </style>
-<div class="mdbook-alerts mdbook-alerts-note">
-<p class="mdbook-alerts-title">
-  <span class="mdbook-alerts-icon"></span>
-  note
+<h1 id="development-apps"><a class="header" href="#development-apps">Development Apps</a></h1>
+<p>There are two iOS apps available in the repo that you can use for MapLibre Native development. One Objective-C based app and a Swift based app.</p>
+<h2 id="objective-c-app"><a class="header" href="#objective-c-app">Objective-C App</a></h2>
+<p>This app is available as "App" in the <a href="./README.html">generated Xcode project</a>.</p>
+<p>The source code lives in <code>platform/ios/app</code>.</p>
+<p>You can also build and run it from the command line with:</p>
+<pre><code>bazel run --//:renderer=metal //platform/ios:App
+</code></pre>
+<p align="center">
+  <img width="300" alt="Objective-C app screenshot" src="https://github.com/user-attachments/assets/aeb0cb5e-1f6c-439e-8668-22ee0a0b11f2" />
 </p>
-<p>These notes are partially outdated since the <a href="https://github.com/maplibre/maplibre-native/blob/main/design-proposals/2022-10-27-rendering-modularization.md">renderer modularization</a>.</p>
-</div>
-<h1 id="design"><a class="header" href="#design">Design</a></h1>
-<p>This section is dedicated to documenting current state of MapLibre Native as of end 2022. <a href="./archictural-problems-and-recommendations.html">Architectural Problems and Recommendations</a> section notes recommendations for future improvements from an architectural perspective.</p>
+<h2 id="swift-app"><a class="header" href="#swift-app">Swift App</a></h2>
+<p>The Swift App is mainly used to demo usage patterns in the <a href="./ios-documentation.html#examples">example documentation</a>.</p>
+<p>This app is available as "MapLibreApp" in the <a href="./README.html">generated Xcode project</a>.</p>
+<p>The source code lives in <code>platform/ios/swift-app</code>.</p>
+<p align="center">
+  <img width="300" alt="Swift app screenshot" src="https://github.com/user-attachments/assets/87f4cea4-40dd-4744-a935-c7cebd6887f1" />
+</p>
+<p>You can also build and run it from the command line with:</p>
+<pre><code>bazel run --//:renderer=metal //platform/ios/app-swift:MapLibreApp
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../ios/dev-apps.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../ios/release.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../design/ten-thousand-foot-view.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../design/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -248,11 +260,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../ios/dev-apps.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../ios/release.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../design/ten-thousand-foot-view.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../design/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
