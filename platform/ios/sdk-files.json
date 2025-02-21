@@ -183,6 +183,7 @@
         "MLNMapCamera.h": "platform/darwin/src/MLNMapCamera.h",
         "MLNForegroundStyleLayer.h": "platform/darwin/src/MLNForegroundStyleLayer.h",
         "MLNOfflineRegion.h": "platform/darwin/src/MLNOfflineRegion.h",
+        "MLNTileOperation.h": "platform/darwin/src/MLNTileOperation.h",
         "MLNMapViewDelegate.h": "platform/ios/src/MLNMapViewDelegate.h",
         "MLNDistanceFormatter.h": "platform/darwin/src/MLNDistanceFormatter.h",
         "MLNCustomStyleLayer.h": "platform/darwin/src/MLNCustomStyleLayer.h",
