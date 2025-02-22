@@ -1268,6 +1268,7 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/raster.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/symbol.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/widevector.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/mtl/custom_layer_render_parameters.cpp
     )
 
     find_library(METAL_FRAMEWORK Metal)
@@ -1372,12 +1373,12 @@ endif()
 if(MLN_DRAWABLE_RENDERER)
     list(APPEND
     SRC_FILES
-        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_drawable_layer_factory.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_drawable_layer.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_drawable_layer.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer.cpp
     )
 endif()
 
