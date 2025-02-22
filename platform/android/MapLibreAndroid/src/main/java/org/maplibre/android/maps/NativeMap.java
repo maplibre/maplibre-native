@@ -25,7 +25,7 @@ import org.maplibre.android.style.sources.Source;
 
 import java.util.List;
 
-interface NativeMap {
+public interface NativeMap {
 
   //
   // Lifecycle API
