@@ -346,7 +346,7 @@ jobs:
         run: cmake --preset ios
 
       - name: Build mbgl-core
-        run: cmake --build build-ios --target mbgl-core
+        run: cmake --build build-ios --target mbgl-core ios-sdk-static app
 
   ios-ci-result:
     runs-on: ubuntu-latest
