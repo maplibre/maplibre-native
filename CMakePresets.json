@@ -17,7 +17,8 @@
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
         "MLN_WITH_METAL": "ON",
         "MLN_WITH_OPENGL": "OFF",
-        "MLN_DRAWABLE_RENDERER": "ON"
+        "MLN_DRAWABLE_RENDERER": "ON",
+        "MLN_WITH_RTTI": "ON"
       }
     },
     {

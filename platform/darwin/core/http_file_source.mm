@@ -86,7 +86,6 @@ class HTTPFileSource::Impl {
 public:
     Impl(const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
         : resourceOptions(resourceOptions_.clone()), clientOptions(clientOptions_.clone()) {
-        @autoreleasepool {
             NSURLSessionConfiguration *sessionConfig = MLNNativeNetworkManager.sharedManager.sessionConfiguration;
             session = [NSURLSession sessionWithConfiguration:sessionConfig];
 
@@ -95,8 +94,6 @@ public:
             } else {
                 userAgent = sessionConfig.HTTPAdditionalHeaders[@"User-Agent"];
             }
-
-        }
     }
 
     void setResourceOptions(ResourceOptions options);

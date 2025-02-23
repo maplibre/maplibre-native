@@ -3,7 +3,7 @@ if(TARGET mbgl-vendor-calloutview)
 endif()
 
 add_library(
-    mbgl-vendor-calloutview INTERFACE ${CMAKE_CURRENT_LIST_DIR}/SMCalloutView/SMCalloutView.m
+    mbgl-vendor-calloutview ${CMAKE_CURRENT_LIST_DIR}/SMCalloutView/SMCalloutView.m
 )
 
 target_include_directories(

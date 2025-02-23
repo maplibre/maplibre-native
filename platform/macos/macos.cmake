@@ -11,6 +11,13 @@ set_target_properties(mbgl-core PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH[vari
 
 set_target_properties(mbgl-core PROPERTIES XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC YES)
 
+target_link_libraries(
+    mbgl-core
+    PRIVATE
+        "-framework AppKit"
+)
+
+
 if(MLN_WITH_OPENGL)
     find_package(OpenGL REQUIRED)
 

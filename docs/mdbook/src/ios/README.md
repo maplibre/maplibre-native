@@ -73,15 +73,20 @@ bazel run //platform/ios:App --//:renderer=metal
 
 You can also build targets from the command line. For example, if you want to build your own XCFramework, see the 'Build XCFramework' step in the [iOS CI workflow](../../.github/workflows/ios-ci.yml).
 
-## Swift App
-
-There is also an example app built with Swift instead of Objective-C. The target is called `MapLibreApp` and the source code lives in `platform/ios/app-swift`.
-
 ## CMake
 
-It is also possible to generate an Xcode project using CMake. As of February 2025 only the `mbgl-core` and `ios-sdk-static` targets are supported.
+It is also possible to generate an Xcode project using CMake. As of February 2025, targets `mbgl-core`, `ios-sdk-static` and `app` (Objective-C development app) are supported.
 
 ```
 cmake --preset ios
 xed build-ios/MapLibre\ Native.xcodeproj
+```
+
+## Distribution
+
+MapLibre iOS is distributed as an XCFramework via the [maplibre/maplibre-gl-native-distribution](https://github.com/maplibre/maplibre-gl-native-distribution) repository. See [Release MapLibre iOS](./release.md) for the release process. Refer to the [`ios-ci.yml`](https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/ios-ci.yml) workflow for an up-to-date recipe for building an XCFramework. As of February 2025 we use:
+
+```
+bazel build --compilation_mode=opt --features=dead_strip,thin_lto --objc_enable_binary_stripping \
+  --apple_generate_dsym --output_groups=+dsyms --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
 ```

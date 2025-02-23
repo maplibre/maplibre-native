@@ -3,9 +3,9 @@ enable_language(OBJC OBJCXX Swift)
 target_link_libraries(
     mbgl-core
     PRIVATE
-        "-framework AppKit"
         "-framework CoreGraphics"
         "-framework CoreLocation"
+        "-framework CoreImage"
         "-framework SystemConfiguration"
         mbgl-vendor-icu
         sqlite3
@@ -15,18 +15,18 @@ target_link_libraries(
 target_sources(
     mbgl-core
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/platform/darwin/src/async_task.cpp
-        ${PROJECT_SOURCE_DIR}/platform/darwin/src/collator.mm
-        ${PROJECT_SOURCE_DIR}/platform/darwin/src/http_file_source.mm
-        ${PROJECT_SOURCE_DIR}/platform/darwin/src/image.mm
-        ${PROJECT_SOURCE_DIR}/platform/darwin/src/local_glyph_rasterizer.mm
-        ${PROJECT_SOURCE_DIR}/platform/darwin/src/logging_nslog.mm
-        ${PROJECT_SOURCE_DIR}/platform/darwin/src/native_apple_interface.m
-        ${PROJECT_SOURCE_DIR}/platform/darwin/src/nsthread.mm
-        ${PROJECT_SOURCE_DIR}/platform/darwin/src/number_format.mm
-        ${PROJECT_SOURCE_DIR}/platform/darwin/src/run_loop.cpp
-        ${PROJECT_SOURCE_DIR}/platform/darwin/src/string_nsstring.mm
-        ${PROJECT_SOURCE_DIR}/platform/darwin/src/timer.cpp
+        ${PROJECT_SOURCE_DIR}/platform/darwin/core/async_task.cpp
+        ${PROJECT_SOURCE_DIR}/platform/darwin/core/collator.mm
+        ${PROJECT_SOURCE_DIR}/platform/darwin/core/http_file_source.mm
+        ${PROJECT_SOURCE_DIR}/platform/darwin/core/image.mm
+        ${PROJECT_SOURCE_DIR}/platform/darwin/core/local_glyph_rasterizer.mm
+        ${PROJECT_SOURCE_DIR}/platform/darwin/core/logging_nslog.mm
+        ${PROJECT_SOURCE_DIR}/platform/darwin/core/native_apple_interface.m
+        ${PROJECT_SOURCE_DIR}/platform/darwin/core/nsthread.mm
+        ${PROJECT_SOURCE_DIR}/platform/darwin/core/number_format.mm
+        ${PROJECT_SOURCE_DIR}/platform/darwin/core/run_loop.cpp
+        ${PROJECT_SOURCE_DIR}/platform/darwin/core/string_nsstring.mm
+        ${PROJECT_SOURCE_DIR}/platform/darwin/core/timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/layermanager/layer_manager.cpp
@@ -134,4 +134,31 @@ add_custom_command(
 
 add_custom_target(mbgl-darwin-style-code
     DEPENDS ${MLN_GENERATED_DARWIN_STYLE_SOURCE} ${MLN_GENERATED_DARWIN_STYLE_HEADERS}
+)
+
+add_library(
+    custom-layer-examples
+    "${CMAKE_CURRENT_LIST_DIR}/app/ExampleCustomDrawableStyleLayer.mm"
+    "${CMAKE_CURRENT_LIST_DIR}/app/CustomStyleLayerExample.m"
+)
+
+target_link_libraries(
+    custom-layer-examples
+    PUBLIC ios-sdk-static
+    PRIVATE mbgl-core
+)
+
+if(MLN_WITH_METAL)
+    target_compile_definitions(
+        custom-layer-examples
+        PRIVATE MLN_RENDER_BACKEND_METAL=1
+    )
+endif()
+
+target_include_directories(
+    custom-layer-examples
+    PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/app"
+    PRIVATE
+        "${PROJECT_SOURCE_DIR}/src" # FIXME: should not use private headers
 )
