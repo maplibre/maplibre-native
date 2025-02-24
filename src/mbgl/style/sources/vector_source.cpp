@@ -15,7 +15,7 @@ namespace mbgl {
 namespace style {
 
 VectorSource::VectorSource(std::string id,
-                           variant<std::string, Tileset> urlOrTileset_,
+                           std::variant<std::string, Tileset> urlOrTileset_,
                            std::optional<float> maxZoom_,
                            std::optional<float> minZoom_)
     : Source(makeMutable<Impl>(std::move(id))),
@@ -29,21 +29,21 @@ const VectorSource::Impl& VectorSource::impl() const {
     return static_cast<const Impl&>(*baseImpl);
 }
 
-const variant<std::string, Tileset>& VectorSource::getURLOrTileset() const {
+const std::variant<std::string, Tileset>& VectorSource::getURLOrTileset() const {
     return urlOrTileset;
 }
 
 std::optional<std::string> VectorSource::getURL() const {
-    if (urlOrTileset.is<Tileset>()) {
+    if (std::holds_alternative<Tileset>(urlOrTileset)) {
         return {};
     }
 
-    return urlOrTileset.get<std::string>();
+    return std::get<std::string>(urlOrTileset);
 }
 
 void VectorSource::loadDescription(FileSource& fileSource) {
-    if (urlOrTileset.is<Tileset>()) {
-        baseImpl = makeMutable<Impl>(impl(), urlOrTileset.get<Tileset>());
+    if (std::holds_alternative<Tileset>(urlOrTileset)) {
+        baseImpl = makeMutable<Impl>(impl(), std::get<Tileset>(urlOrTileset));
         loaded = true;
         observer->onSourceLoaded(*this);
         return;
@@ -53,7 +53,7 @@ void VectorSource::loadDescription(FileSource& fileSource) {
         return;
     }
 
-    const auto& rawURL = urlOrTileset.get<std::string>();
+    const auto& rawURL = std::get<std::string>(urlOrTileset);
     const auto& url = util::mapbox::canonicalizeSourceURL(fileSource.getResourceOptions().tileServerOptions(), rawURL);
 
     req = fileSource.request(Resource::source(url), [this, url, &fileSource](const Response& res) {

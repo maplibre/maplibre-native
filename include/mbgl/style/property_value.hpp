@@ -10,7 +10,7 @@ namespace style {
 template <class T>
 class PropertyValue {
 private:
-    using Value = variant<Undefined, T, PropertyExpression<T>>;
+    using Value = std::variant<Undefined, T, PropertyExpression<T>>;
 
     Value value;
 
@@ -29,37 +29,43 @@ public:
     PropertyValue(PropertyExpression<T> expression) noexcept
         : value(std::move(expression)) {}
 
-    bool isUndefined() const noexcept { return value.template is<Undefined>(); }
+    bool isUndefined() const noexcept { return std::holds_alternative<Undefined>(value); }
 
-    bool isConstant() const noexcept { return value.template is<T>(); }
+    bool isConstant() const noexcept { return std::holds_alternative<T>(value); }
 
-    bool isExpression() const noexcept { return value.template is<PropertyExpression<T>>(); }
+    bool isExpression() const noexcept { return std::holds_alternative<PropertyExpression<T>>(value); }
 
     bool isDataDriven() const noexcept {
-        return value.match([](const Undefined&) { return false; },
-                           [](const T&) { return false; },
-                           [](const PropertyExpression<T>& fn) { return !fn.isFeatureConstant(); });
+        return std::visit(overloaded{[](const Undefined&) { return false; },
+                                     [](const T&) { return false; },
+                                     [](const PropertyExpression<T>& fn) {
+                                         return !fn.isFeatureConstant();
+                                     }},
+                          value);
     }
 
     bool isZoomConstant() const noexcept {
-        return value.match([](const Undefined&) { return true; },
-                           [](const T&) { return true; },
-                           [](const PropertyExpression<T>& fn) { return fn.isZoomConstant(); });
+        return std::visit(overloaded{[](const Undefined&) { return true; },
+                                     [](const T&) { return true; },
+                                     [](const PropertyExpression<T>& fn) {
+                                         return fn.isZoomConstant();
+                                     }},
+                          value);
     }
 
-    const T& asConstant() const noexcept { return value.template get<T>(); }
+    const T& asConstant() const noexcept { return std::get<T>(value); }
 
-    PropertyExpression<T>& asExpression() noexcept { return value.template get<PropertyExpression<T>>(); }
-    const PropertyExpression<T>& asExpression() const noexcept { return value.template get<PropertyExpression<T>>(); }
+    PropertyExpression<T>& asExpression() noexcept { return std::get<PropertyExpression<T>>(value); }
+    const PropertyExpression<T>& asExpression() const noexcept { return std::get<PropertyExpression<T>>(value); }
 
     template <class... Ts>
     auto match(Ts&&... ts) const {
-        return value.match(std::forward<Ts>(ts)...);
+        return std::visit(overloaded{std::forward<Ts>(ts)...}, value);
     }
 
     template <typename Evaluator>
     auto evaluate(const Evaluator& evaluator, TimePoint = {}) const {
-        return Value::visit(value, evaluator);
+        return std::visit(evaluator, value);
     }
 
     bool hasDataDrivenPropertyDifference(const PropertyValue<T>& other) const noexcept {
@@ -68,9 +74,12 @@ public:
 
     using Dependency = style::expression::Dependency;
     Dependency getDependencies() const noexcept {
-        return value.match([](const Undefined&) { return Dependency::None; },
-                           [](const T&) { return Dependency::None; },
-                           [](const PropertyExpression<T>& ex) { return ex.getDependencies(); });
+        return std::visit(overloaded{[](const Undefined&) { return Dependency::None; },
+                                     [](const T&) { return Dependency::None; },
+                                     [](const PropertyExpression<T>& ex) {
+                                         return ex.getDependencies();
+                                     }},
+                          value);
     }
 };
 

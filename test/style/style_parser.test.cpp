@@ -309,9 +309,9 @@ TEST(StyleParser, ZoomCurve) {
 
     auto expr1 = interpolate(linear(), literal(0.0), 0.0, zoomInterp(), 0.0, zoomInterp());
     ASSERT_TRUE(expr1);
-    ASSERT_TRUE(findZoomCurveChecked(*expr1).is<std::nullptr_t>());
+    ASSERT_TRUE(std::holds_alternative<std::nullptr_t>(findZoomCurveChecked(*expr1)));
 
     auto expr2 = interpolate(linear(), zoom(), 0.0, literal(0.0), 0.0, zoomInterp());
     ASSERT_TRUE(expr2);
-    ASSERT_TRUE(findZoomCurveChecked(*expr2).is<std::nullptr_t>());
+    ASSERT_TRUE(std::holds_alternative<std::nullptr_t>(findZoomCurveChecked(*expr2)));
 }
