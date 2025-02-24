@@ -2315,40 +2315,40 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 {
     NSString* tileStr = [NSString stringWithFormat:@"(x: %ld, y: %ld, z: %ld, wrap: %ld, overscaledZ: %ld, sourceID: %@)",
                          x, y, z, wrap, overscaledZ, sourceID];
-    
+
     switch (operation) {
         case MLNTileOperationRequestedFromCache:
             NSLog(@"Requesting tile %@ from cache", tileStr);
             break;
-            
+
         case MLNTileOperationRequestedFromNetwork:
             NSLog(@"Requesting tile %@ from network", tileStr);
             break;
-            
+
         case MLNTileOperationLoadFromCache:
             NSLog(@"Loading tile %@, requested from the cache", tileStr);
             break;
-            
+
         case MLNTileOperationLoadFromNetwork:
             NSLog(@"Loading tile %@, requested from the network", tileStr);
             break;
-            
+
         case MLNTileOperationStartParse:
             NSLog(@"Parsing tile %@", tileStr);
             break;
-            
+
         case MLNTileOperationEndParse:
             NSLog(@"Completed parsing tile %@", tileStr);
             break;
-            
+
         case MLNTileOperationError:
             NSLog(@"An error occured during proccessing for tile %@", tileStr);
             break;
-            
+
         case MLNTileOperationCancelled:
             NSLog(@"Pending work on tile %@", tileStr);
             break;
-            
+
         case MLNTileOperationNullOp:
             NSLog(@"An unknown tile operation was emitted for tile %@", tileStr);
             break;

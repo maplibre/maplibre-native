@@ -5,10 +5,10 @@ import UIKit
 // #-example-code(ObserverExample)
 class ObserverExampleView: UIViewController, MLNMapViewDelegate {
     var mapView: MLNMapView!
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         mapView = MLNMapView(frame: view.bounds, styleURL: AMERICANA_STYLE)
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
@@ -21,13 +21,13 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
 
         mapView.delegate = self
     }
-    
+
     // MARK: - MLNMapViewDelegate methods
 
     func mapView(_: MLNMapView, shaderWillCompile id: Int, backend: Int, defines: String) {
         print("A new shader is being compiled - shaderID:\(id), backend type:\(backend), program configuration:\(defines)")
     }
-    
+
     func mapView(_: MLNMapView, shaderDidCompile id: Int, backend: Int, defines: String) {
         print("A shader has been compiled - shaderID:\(id), backend type:\(backend), program configuration:\(defines)")
     }
@@ -35,7 +35,7 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
     func mapView(_: MLNMapView, glyphsWillLoad fontStack: [String], range: NSRange) {
         print("Glyphs are being requested for the font stack \(fontStack), ranging from \(range.location) to \(range.location + range.length)")
     }
-    
+
     func mapView(_: MLNMapView, glyphsDidLoad fontStack: [String], range: NSRange) {
         print("Glyphs have been loaded for the font stack \(fontStack), ranging from \(range.location) to \(range.location + range.length)")
     }
@@ -46,59 +46,48 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
                  z: Int,
                  wrap: Int,
                  overscaledZ: Int,
-                 sourceID: String) {
-        let tileStr = String(format:"(x: %ld, y: %ld, z: %ld, wrap: %ld, overscaledZ: %ld, sourceID: %@)",
+                 sourceID: String)
+    {
+        let tileStr = String(format: "(x: %ld, y: %ld, z: %ld, wrap: %ld, overscaledZ: %ld, sourceID: %@)",
                              x, y, z, wrap, overscaledZ, sourceID)
-        
-        switch (operation) {
+
+        switch operation {
         case MLNTileOperation.requestedFromCache:
             print("Requesting tile \(tileStr) from cache")
-            break
-                
+
         case MLNTileOperation.requestedFromNetwork:
             print("Requesting tile \(tileStr) from network")
-            break
-                
+
         case MLNTileOperation.loadFromCache:
             print("Loading tile \(tileStr), requested from the cache")
-            break
-            
+
         case MLNTileOperation.loadFromNetwork:
             print("Loading tile \(tileStr), requested from the network")
-            break
-        
+
         case MLNTileOperation.startParse:
             print("Parsing tile \(tileStr)")
-            break
-            
+
         case MLNTileOperation.endParse:
             print("Completed parsing tile \(tileStr)")
-            break
-            
+
         case MLNTileOperation.error:
             print("An error occured during proccessing for tile \(tileStr)")
-            break
-        
+
         case MLNTileOperation.cancelled:
             print("Pending work on tile \(tileStr)")
-            break
-            
+
         case MLNTileOperation.nullOp:
             print("An unknown tile operation was emitted for tile \(tileStr)")
             break
-            
+
         @unknown default:
             assertionFailure()
         }
     }
 
-    func mapView(_: MLNMapView, spriteWillLoad _: String, url _: String) {
-        
-    }
-    
-    func mapView(_: MLNMapView, spriteDidLoad _: String, url _: String) {
-        
-    }
+    func mapView(_: MLNMapView, spriteWillLoad _: String, url _: String) {}
+
+    func mapView(_: MLNMapView, spriteDidLoad _: String, url _: String) {}
 }
 
 // #-end-example-code
