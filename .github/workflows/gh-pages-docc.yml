@@ -67,7 +67,7 @@ jobs:
           rm docs.zip
 
       - name: Deploy DocC documentation (main) 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.7.2
+        uses: JamesIves/github-pages-deploy-action@v4.7.3
         with:
           branch: gh-pages
           folder: build/docs
