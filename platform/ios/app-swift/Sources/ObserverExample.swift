@@ -78,16 +78,19 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
 
         case MLNTileOperation.nullOp:
             print("An unknown tile operation was emitted for tile \(tileStr)")
-            break
 
         @unknown default:
             assertionFailure()
         }
     }
 
-    func mapView(_: MLNMapView, spriteWillLoad _: String, url _: String) {}
+    func mapView(_: MLNMapView, spriteWillLoad id: String, url: String) {
+        print("The sprite \(id) has been requested from \(url)")
+    }
 
-    func mapView(_: MLNMapView, spriteDidLoad _: String, url _: String) {}
+    func mapView(_: MLNMapView, spriteDidLoad id: String, url: String) {
+        print("The sprite \(id) has been loaded from \(url)")
+    }
 }
 
 // #-end-example-code
