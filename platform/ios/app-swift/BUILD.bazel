@@ -1,9 +1,9 @@
-load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application")
+load("@darwin_config//:config.bzl", "BUNDLE_ID_PREFIX")
+load("@rules_apple//apple:ios.bzl", "ios_application")
 load(
-    "@build_bazel_rules_swift//swift:swift.bzl",
+    "@rules_swift//swift:swift.bzl",
     "swift_library",
 )
-load("@darwin_config//:config.bzl", "BUNDLE_ID_PREFIX")
 load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
 
 configure_device_profiles()

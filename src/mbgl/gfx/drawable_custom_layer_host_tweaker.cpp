@@ -8,6 +8,7 @@
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/style/layers/mtl/custom_layer_render_parameters.hpp>
+#include <mbgl/mtl/render_pass.hpp>
 #endif
 
 #include <memory>
@@ -23,6 +24,9 @@ void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& dra
                        paintParameters.colorModeForRenderPass());
 
 #if MLN_RENDER_BACKEND_METAL
+    const auto& mtlRenderPass = static_cast<mtl::RenderPass*>(paintParameters.renderPass.get());
+    mtlRenderPass->resetState();
+
     style::mtl::CustomLayerRenderParameters parameters(paintParameters);
 #else
     style::CustomLayerRenderParameters parameters(paintParameters);

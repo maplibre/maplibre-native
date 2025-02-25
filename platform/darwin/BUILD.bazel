@@ -1,6 +1,6 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary")
 load(
-    "@build_bazel_rules_swift//swift:swift.bzl",
+    "@rules_swift//swift:swift.bzl",
     "swift_library",
 )
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
@@ -204,7 +204,6 @@ objc_library(
     ],
     hdrs = [
         "include/mbgl/interface/native_apple_interface.h",
-        "include/mbgl/storage/reachability.h",
         "include/mbgl/util/image+MLNAdditions.hpp",
     ],
     copts = WARNING_FLAGS["ios"] + MAPLIBRE_FLAGS + [
@@ -243,7 +242,6 @@ objc_library(
     }),
     hdrs = [
         "include/mbgl/interface/native_apple_interface.h",
-        "include/mbgl/storage/reachability.h",
         "include/mbgl/util/image+MLNAdditions.hpp",
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
