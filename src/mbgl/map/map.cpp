@@ -527,4 +527,36 @@ FreeCameraOptions Map::getFreeCameraOptions() const {
     return impl->transform.getFreeCameraOptions();
 }
 
+void Map::setTileLodMinRadius(double radius) {
+    impl->tileLodMinRadius = radius;
+}
+
+double Map::getTileLodMinRadius() const {
+    return impl->tileLodMinRadius;
+}
+
+void Map::setTileLodScale(double scale) {
+    impl->tileLodScale = scale;
+}
+
+double Map::getTileLodScale() const {
+    return impl->tileLodScale;
+}
+
+void Map::setTileLodPitchThreshold(double threshold) {
+    impl->tileLodPitchThreshold = threshold;
+}
+
+double Map::getTileLodPitchThreshold() const {
+    return impl->tileLodPitchThreshold;
+}
+
+void Map::setTileLodZoomShift(double shift) {
+    impl->tileLodZoomShift = shift;
+}
+
+double Map::getTileLodZoomShift() const {
+    return impl->tileLodZoomShift;
+}
+
 } // namespace mbgl
