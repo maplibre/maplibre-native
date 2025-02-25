@@ -101,7 +101,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/vendor/calloutview.cmake")
 target_link_libraries(
     ios-sdk-static
         PUBLIC mbgl-core
-        PRIVATE mbgl-vendor-calloutview mbgl-vendor-metal-cpp mbgl-vendor-polylabel
+        PRIVATE mbgl-compiler-options mbgl-vendor-calloutview mbgl-vendor-metal-cpp mbgl-vendor-polylabel
         "-framework CoreText"
         "-framework CoreImage"
         "-framework CoreGraphics"

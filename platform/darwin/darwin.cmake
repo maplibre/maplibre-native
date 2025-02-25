@@ -146,7 +146,7 @@ add_library(
 target_link_libraries(
     custom-layer-examples
     PUBLIC ios-sdk-static
-    PRIVATE mbgl-core
+    PRIVATE mbgl-compiler-options mbgl-core
 )
 
 if(MLN_WITH_METAL)
