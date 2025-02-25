@@ -10,29 +10,19 @@ endif()
 set_target_properties(mbgl-core PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH[variant=Debug] "YES")
 
 set_target_properties(mbgl-core PROPERTIES XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC YES)
+find_package(PkgConfig REQUIRED)
+
+pkg_search_module(LIBUV libuv REQUIRED)
+
+if (NOT LIBUV_FOUND)
+    message(FATAL_ERROR "libuv not found! Install it via Homebrew: brew install libuv")
+endif()
 
 if(MLN_WITH_OPENGL)
-    find_package(OpenGL REQUIRED)
-
-    target_compile_definitions(
-        mbgl-core
-        PUBLIC GL_SILENCE_DEPRECATION
-    )
-    target_sources(
-        mbgl-core
-        PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
-            ${PROJECT_SOURCE_DIR}/platform/darwin/src/gl_functions.cpp ${PROJECT_SOURCE_DIR}/platform/darwin/src/headless_backend_cgl.mm
-    )
-    target_link_libraries(
-        mbgl-core
-        PRIVATE OpenGL::GL
-    )
+    message(FATAL_ERROR "OpenGL ES it not supported for macOS")
 endif()
 
 if(MLN_WITH_METAL)
-    find_package(OpenGL REQUIRED)
-
     target_sources(
         mbgl-core
         PRIVATE
@@ -63,7 +53,7 @@ endif()
 target_sources(
     mbgl-core
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/platform/darwin/src/async_task.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/async_task.cpp
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/collator.mm
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/http_file_source.mm
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/image.mm
@@ -72,9 +62,9 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/native_apple_interface.m
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/nsthread.mm
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/number_format.mm
-        ${PROJECT_SOURCE_DIR}/platform/darwin/src/run_loop.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/run_loop.cpp
         ${PROJECT_SOURCE_DIR}/platform/darwin/src/string_nsstring.mm
-        ${PROJECT_SOURCE_DIR}/platform/darwin/src/timer.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/layermanager/layer_manager.cpp
@@ -115,6 +105,7 @@ target_include_directories(
     mbgl-core
     PRIVATE
         ${PROJECT_SOURCE_DIR}/platform/darwin/include ${PROJECT_SOURCE_DIR}/platform/darwin/src ${PROJECT_SOURCE_DIR}/platform/macos/src
+        ${LIBUV_INCLUDE_DIRS}
 )
 
 include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
@@ -129,6 +120,7 @@ target_link_libraries(
         mbgl-vendor-icu
         sqlite3
         z
+        ${LIBUV_LINK_LIBRARIES}
 )
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
