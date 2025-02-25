@@ -252,8 +252,8 @@ void Drawable::draw(PaintParameters& parameters) const {
             const auto stencilMode = enableStencil ? parameters.stencilModeForClipping(tileID->toUnwrapped())
                                                    : gfx::StencilMode::disabled();
             impl->depthStencilState = context.makeDepthStencilState(depthMode, stencilMode, renderable);
-            assert(newStencilMode);
-            impl->previousStencilMode = *newStencilMode;
+            // FIXME: https://github.com/maplibre/maplibre-native/issues/3248
+            if (newStencilMode) impl->previousStencilMode = *newStencilMode;
         }
         renderPass.setDepthStencilState(impl->depthStencilState);
         renderPass.setStencilReference(impl->previousStencilMode.ref);
