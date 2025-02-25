@@ -138,6 +138,7 @@ add_custom_target(mbgl-darwin-style-code
 
 add_library(
     custom-layer-examples
+    EXCLUDE_FROM_ALL
     "${CMAKE_CURRENT_LIST_DIR}/app/ExampleCustomDrawableStyleLayer.mm"
     "${CMAKE_CURRENT_LIST_DIR}/app/CustomStyleLayerExample.m"
 )
