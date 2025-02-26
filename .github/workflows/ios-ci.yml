@@ -343,7 +343,7 @@ jobs:
           fetch-depth: 0
 
       - name: Configure build with CMake
-        run: cmake --preset ios -DDEVELOPMENT_TEAM_ID=${{ env.MAPLIBRE_APPLE_TEAM_ID }}
+        run: cmake --preset ios
 
       - name: Build mbgl-core
         run: cmake --build build-ios --target mbgl-core ios-sdk-static app
