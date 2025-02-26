@@ -78,7 +78,7 @@ You can also build targets from the command line. For example, if you want to bu
 It is also possible to generate an Xcode project using CMake. As of February 2025, targets `mbgl-core`, `ios-sdk-static` and `app` (Objective-C development app) are supported.
 
 ```
-cmake --preset ios
+cmake --preset ios -DDEVELOPMENT_TEAM_ID=YOUR_TEAM_ID
 xed build-ios/MapLibre\ Native.xcodeproj
 ```
 

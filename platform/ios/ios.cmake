@@ -116,3 +116,9 @@ target_link_options(ios-sdk-static INTERFACE -ObjC)
 add_dependencies(ios-sdk-static mbgl-darwin-style-code)
 
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/app")
+
+set(DEVELOPMENT_TEAM_ID "" CACHE STRING "Apple Development Team ID")
+
+if(NOT DEVELOPMENT_TEAM_ID)
+    message(WARNING "No Apple Developer Team ID set! Please set DEVELOPMENT_TEAM_ID (e.g., -DDEVELOPMENT_TEAM_ID=YOUR_TEAM_ID).")
+endif()

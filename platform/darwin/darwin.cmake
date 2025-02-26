@@ -125,6 +125,8 @@ find_program(BAZEL bazel REQUIRED)
 add_custom_command(
     OUTPUT ${MLN_GENERATED_DARWIN_STYLE_SOURCE} ${MLN_GENERATED_DARWIN_STYLE_HEADERS}
     COMMAND ${BAZEL} build //platform/darwin:generated_code
+    COMMAND ${CMAKE_COMMAND} -E rm -R
+        "${PROJECT_SOURCE_DIR}/bazel-bin/platform/darwin/src"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${PROJECT_SOURCE_DIR}/bazel-bin/platform/darwin/src"
         ${MLN_GENERATED_DARWIN_CODE_DIR}
