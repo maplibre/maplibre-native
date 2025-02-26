@@ -5,7 +5,7 @@
 #include <mbgl/test/fake_file_source.hpp>
 #include <mbgl/tile/tile_loader_impl.hpp>
 #include <mbgl/tile/vector_tile.hpp>
-#include <mbgl/tile/vector_tile_data.hpp>
+#include <mbgl/tile/vector_mvt_tile_data.hpp>
 
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/annotation/annotation_manager.hpp>

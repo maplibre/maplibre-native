@@ -38,6 +38,13 @@ std::optional<Tileset> Converter<Tileset>::operator()(const Convertible& value, 
         }
     }
 
+    auto formatValue = objectMember(value, "format");
+    if (formatValue) {
+        if (std::optional<std::string> format = toString(*formatValue)) {
+            result.format = std::move(*format);
+        }
+    }
+
     auto encodingValue = objectMember(value, "encoding");
     if (encodingValue) {
         std::optional<std::string> encoding = toString(*encodingValue);
