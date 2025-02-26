@@ -459,7 +459,7 @@ void ExampleCustomDrawableStyleLayerHost::generateGeometry(Interface& interface)
         mbgl::matrix::translate(matrix, matrix, center.x, center.y, 0.0);
         mbgl::matrix::rotate_z(matrix, matrix, frameCount * 0.05f);
         mbgl::matrix::scale(matrix, matrix, scale, scale, 1.0f);
-        mbgl::matrix::multiply(currentOptions.matrix, params.state.getProjectionMatrix(), matrix);
+        mbgl::matrix::multiply(currentOptions.matrix, params.transformParams.nearClippedProjMatrix, matrix);
 
         if (frameCount % 100 == 0) {
             if (currentOptions.color.g > 0.0f) {
@@ -494,7 +494,7 @@ void ExampleCustomDrawableStyleLayerHost::loadGeometry(Interface& interface) {
         mbgl::matrix::rotate_y(matrix, matrix, mbgl::util::deg2radf(itemRotation[1]));
         mbgl::matrix::rotate_z(matrix, matrix, mbgl::util::deg2radf(itemRotation[2]));
         mbgl::matrix::scale(matrix, matrix, scale, scale, scale);
-        mbgl::matrix::multiply(currentOptions.matrix, params.state.getProjectionMatrix(), matrix);
+        mbgl::matrix::multiply(currentOptions.matrix, params.transformParams.nearClippedProjMatrix, matrix);
     });
 
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
