@@ -522,7 +522,7 @@ public:
     return self;
 }
 
-- (instancetype)initWithFrame:(CGRect)frame styleJSON:(nullable NSString *)styleJSON
+- (instancetype)initWithFrame:(CGRect)frame styleJSON:(NSString *)styleJSON
 {
     if (self = [super initWithFrame:frame])
     {
@@ -588,8 +588,12 @@ public:
     return styleJSONString;
 }
 
-- (void)setStyleJSON:(NSString *)styleJSON
-{
+- (void)setStyleJSON:(NSString *)styleJSON {
+    if (!styleJSON) {
+        [NSException raise:NSInvalidArgumentException format:@"Style JSON cannot be nil."];
+        return;
+    }
+
     self.style = nil;
     self.styleURL = nil;
     self.mbglMap.getStyle().loadJSON([styleJSON UTF8String]);

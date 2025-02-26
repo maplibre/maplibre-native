@@ -217,7 +217,7 @@ MLN_EXPORT
  *        Specify `nil` for the default style.
  * @return An initialized map view.
  */
-- (instancetype)initWithFrame:(CGRect)frame styleJSON:(nullable NSString *)styleJSON;
+- (instancetype)initWithFrame:(CGRect)frame styleJSON:(NSString *)styleJSON;
 
 // MARK: Accessing the Delegate
 
