@@ -204,7 +204,6 @@ objc_library(
     ],
     hdrs = [
         "include/mbgl/interface/native_apple_interface.h",
-        "include/mbgl/storage/reachability.h",
         "include/mbgl/util/image+MLNAdditions.hpp",
     ],
     copts = WARNING_FLAGS["ios"] + MAPLIBRE_FLAGS + [
@@ -243,7 +242,6 @@ objc_library(
     }),
     hdrs = [
         "include/mbgl/interface/native_apple_interface.h",
-        "include/mbgl/storage/reachability.h",
         "include/mbgl/util/image+MLNAdditions.hpp",
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
