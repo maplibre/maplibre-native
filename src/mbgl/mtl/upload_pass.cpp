@@ -165,11 +165,6 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     gfx::AttributeBindingArray bindings;
     bindings.resize(defaults.allocatedSize());
 
-    constexpr std::size_t align = 16;
-    constexpr std::uint8_t padding = 0;
-
-    uint32_t vertexStride = 0;
-
     // For each attribute in the program, with the corresponding default and optional override...
     const auto resolveAttr = [&](const size_t id, auto& default_, auto& override_) -> void {
         auto& effectiveAttr = override_ ? *override_ : default_;

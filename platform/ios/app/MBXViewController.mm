@@ -13,7 +13,7 @@
 #import "MBXState.h"
 #import "MLNSettings.h"
 
-#import "platform/ios/src/MLNMapView_Private.h"
+#import "MLNMapView_Private.h"
 
 #import "CustomStyleLayerExample.h"
 

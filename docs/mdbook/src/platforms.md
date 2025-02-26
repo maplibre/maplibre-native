@@ -48,9 +48,12 @@ In 2023 we co-opted Bazel as a build tool (generator), mostly due to it having b
 | Platform | CMake | Bazel |
 |---|---|---|
 | Android | ✅ (via Gradle) | ❌ |
-| iOS | ❌ | ✅ |
+| iOS | ✅[^3] | ✅ |
 | Linux | ✅ | ✅ |
-| Windows | ✅ | ❌ |
+| Windows | ✅ | ✅ |
 | macOS | ✅ | ✅ |
 | Node.js | ✅ | ❌ |
 | Qt | ✅ | ❌ |
+
+
+[^3]: Some targets are supported, see [here](ios/README.md#cmake).
