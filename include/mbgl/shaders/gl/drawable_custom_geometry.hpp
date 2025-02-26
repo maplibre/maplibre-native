@@ -8,7 +8,7 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::CustomGeometryShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "CustomGeometryShader";
-    static constexpr const char* vertex = R"(layout (std140) uniform CustomDrawableDrawableUBO {
+    static constexpr const char* vertex = R"(layout (std140) uniform CustomGeometryDrawableUBO {
     mat4 u_matrix;
     vec4 u_color;
 };
@@ -22,7 +22,7 @@ void main() {
     frag_uv = a_uv;
     gl_Position = u_matrix * vec4(a_pos, 1.0);
 })";
-    static constexpr const char* fragment = R"(layout (std140) uniform CustomDrawableDrawableUBO {
+    static constexpr const char* fragment = R"(layout (std140) uniform CustomGeometryDrawableUBO {
     mat4 u_matrix;
     vec4 u_color;
 };

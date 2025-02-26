@@ -1,4 +1,4 @@
-layout (std140) uniform CustomDrawableDrawableUBO {
+layout (std140) uniform CustomGeometryDrawableUBO {
     mat4 u_matrix;
     vec4 u_color;
 };
