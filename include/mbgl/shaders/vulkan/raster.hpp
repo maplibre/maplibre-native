@@ -3,13 +3,12 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/vulkan/shader_program.hpp>
 
-#define RASTER_SHADER_PRELUDE \
-    R"(
+constexpr auto rasterShaderPrelude = R"(
 
 #define idRasterDrawableUBO         idDrawableReservedVertexOnlyUBO
 #define idRasterEvaluatedPropsUBO   layerUBOStartId
 
-)"
+)";
 
 namespace mbgl {
 namespace shaders {
@@ -22,7 +21,8 @@ struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::Vulkan> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
-    static constexpr auto vertex = RASTER_SHADER_PRELUDE R"(
+    static constexpr auto prelude = rasterShaderPrelude;
+    static constexpr auto vertex = R"(
 
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec2 in_texture_position;
@@ -73,7 +73,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = RASTER_SHADER_PRELUDE R"(
+    static constexpr auto fragment = R"(
 
 layout(location = 0) in vec2 frag_position0;
 layout(location = 1) in vec2 frag_position1;

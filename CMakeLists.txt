@@ -1035,6 +1035,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_collision_box.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_collision_circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_custom_geometry.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_custom_symbol_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_debug.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill.hpp
@@ -1217,6 +1218,7 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/clipping_mask.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/common.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/collision.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/custom_geometry.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/custom_symbol_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/debug.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill.hpp
@@ -1226,6 +1228,7 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/hillshade.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/hillshade_prepare.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/line.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/location_indicator.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/raster.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_group.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_program.hpp
@@ -1256,6 +1259,7 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/circle.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/collision.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/clipping_mask.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/custom_geometry.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/custom_symbol_icon.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/debug.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/fill.cpp
@@ -1265,6 +1269,7 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/hillshade.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/hillshade_prepare.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/line.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/location_indicator.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/raster.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/symbol.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/widevector.cpp
@@ -1313,6 +1318,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/clipping_mask.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/collision.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/common.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/custom_geometry.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/custom_symbol_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/fill.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/fill_extrusion.hpp
@@ -1353,6 +1359,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/circle.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/clipping_mask.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/collision.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/custom_geometry.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/custom_symbol_icon.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/debug.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/fill.cpp

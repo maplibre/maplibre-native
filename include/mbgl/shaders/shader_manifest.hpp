@@ -8,6 +8,7 @@
 #include <mbgl/shaders/gl/drawable_circle.hpp>
 #include <mbgl/shaders/gl/drawable_collision_box.hpp>
 #include <mbgl/shaders/gl/drawable_collision_circle.hpp>
+#include <mbgl/shaders/gl/drawable_custom_geometry.hpp>
 #include <mbgl/shaders/gl/drawable_custom_symbol_icon.hpp>
 #include <mbgl/shaders/gl/drawable_debug.hpp>
 #include <mbgl/shaders/gl/drawable_fill.hpp>

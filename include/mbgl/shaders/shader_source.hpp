@@ -14,6 +14,7 @@ enum class BuiltIn {
     CircleShader,
     CollisionBoxShader,
     CollisionCircleShader,
+    CustomGeometryShader,
     CustomSymbolIconShader,
     DebugShader,
     FillShader,

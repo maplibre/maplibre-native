@@ -6,14 +6,13 @@
 namespace mbgl {
 namespace shaders {
 
-#define HILLSHADE_SHADER_PRELUDE \
-    R"(
+constexpr auto hillshadeShaderPrelude = R"(
 
 #define idHillshadeDrawableUBO          idDrawableReservedVertexOnlyUBO
 #define idHillshadeTilePropsUBO         idDrawableReservedFragmentOnlyUBO
 #define idHillshadeEvaluatedPropsUBO    layerUBOStartId
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::Vulkan> {
@@ -23,7 +22,8 @@ struct ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::Vulkan> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto vertex = HILLSHADE_SHADER_PRELUDE R"(
+    static constexpr auto prelude = hillshadeShaderPrelude;
+    static constexpr auto vertex = R"(
 
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec2 in_texture_position;
@@ -53,7 +53,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = HILLSHADE_SHADER_PRELUDE R"(
+    static constexpr auto fragment = R"(
 
 layout(location = 0) in vec2 frag_position;
 layout(location = 0) out vec4 out_color;

@@ -366,6 +366,11 @@ gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t
         data, size, ssbo ? VK_BUFFER_USAGE_STORAGE_BUFFER_BIT : VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, persistent));
 }
 
+UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
+    return std::make_unique<UniformBufferArray>(
+        DescriptorSetType::Layer, shaders::globalUBOCount, shaders::maxSSBOCountPerLayer, shaders::maxUBOCountPerLayer);
+}
+
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
     const auto shaderGroup = shaders.getShaderGroup(name);
     auto shader = shaderGroup ? shaderGroup->getOrCreateShader(*this, {}) : gfx::ShaderProgramBasePtr{};
