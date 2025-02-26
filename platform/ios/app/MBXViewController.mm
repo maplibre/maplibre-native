@@ -2274,6 +2274,97 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
 // MARK: - MLNMapViewDelegate
 
+- (void)mapView:(MLNMapView *)mapView
+    shaderWillCompile:(NSInteger)id
+              backend:(NSInteger)backend
+              defines:(NSString *)defines
+{
+    NSLog(@"A new shader is being compiled - shaderID:%ld, backend type:%ld, program configuration:%@", id, backend, defines);
+}
+
+- (void)mapView:(MLNMapView *)mapView
+    shaderDidCompile:(NSInteger)id
+             backend:(NSInteger)backend
+             defines:(NSString *)defines
+{
+    NSLog(@"A shader has been compiled - shaderID:%ld, backend type:%ld, program configuration:%@", id, backend, defines);
+}
+
+- (void)mapView:(MLNMapView *)mapView
+    glyphsWillLoad:(NSArray<NSString *> *)fontStack
+             range:(NSRange)range
+{
+    NSLog(@"Glyphs are being requested for the font stack %@, ranging from %ld to %ld", fontStack, range.location, range.location + range.length);
+}
+
+- (void)mapView:(MLNMapView *)mapView
+    glyphsDidLoad:(NSArray<NSString *> *)fontStack
+            range:(NSRange)range
+{
+    NSLog(@"Glyphs have been loaded for the font stack %@, ranging from %ld to %ld", fontStack, range.location, range.location + range.length);
+}
+
+- (void)mapView:(MLNMapView *)mapView
+    tileDidTriggerAction:(MLNTileOperation)operation
+                       x:(NSInteger)x
+                       y:(NSInteger)y
+                       z:(NSInteger)z
+                    wrap:(NSInteger)wrap
+             overscaledZ:(NSInteger)overscaledZ
+                sourceID:(NSString *)sourceID
+{
+    NSString* tileStr = [NSString stringWithFormat:@"(x: %ld, y: %ld, z: %ld, wrap: %ld, overscaledZ: %ld, sourceID: %@)",
+                         x, y, z, wrap, overscaledZ, sourceID];
+
+    switch (operation) {
+        case MLNTileOperationRequestedFromCache:
+            NSLog(@"Requesting tile %@ from cache", tileStr);
+            break;
+
+        case MLNTileOperationRequestedFromNetwork:
+            NSLog(@"Requesting tile %@ from network", tileStr);
+            break;
+
+        case MLNTileOperationLoadFromCache:
+            NSLog(@"Loading tile %@, requested from the cache", tileStr);
+            break;
+
+        case MLNTileOperationLoadFromNetwork:
+            NSLog(@"Loading tile %@, requested from the network", tileStr);
+            break;
+
+        case MLNTileOperationStartParse:
+            NSLog(@"Parsing tile %@", tileStr);
+            break;
+
+        case MLNTileOperationEndParse:
+            NSLog(@"Completed parsing tile %@", tileStr);
+            break;
+
+        case MLNTileOperationError:
+            NSLog(@"An error occured during proccessing for tile %@", tileStr);
+            break;
+
+        case MLNTileOperationCancelled:
+            NSLog(@"Pending work on tile %@", tileStr);
+            break;
+
+        case MLNTileOperationNullOp:
+            NSLog(@"An unknown tile operation was emitted for tile %@", tileStr);
+            break;
+    }
+}
+
+- (void)mapView:(MLNMapView *)mapView spriteWillLoad:(NSString *)id url:(NSString *)url
+{
+    NSLog(@"The sprite %@ has been requested from %@", id, url);
+}
+
+- (void)mapView:(MLNMapView *)mapView spriteDidLoad:(NSString *)id url:(NSString *)url
+{
+    NSLog(@"The sprite %@ has been loaded from %@", id, url);
+}
+
 - (MLNAnnotationView *)mapView:(MLNMapView *)mapView viewForAnnotation:(id<MLNAnnotation>)annotation
 {
     if (annotation == mapView.userLocation)
