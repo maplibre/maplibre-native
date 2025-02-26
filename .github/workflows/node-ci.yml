@@ -167,7 +167,7 @@ jobs:
         if: ${{contains(runner.name, 'GitHub Actions')}}
         uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: '3.29.2'
+          cmake-version: '3.31'
 
       - name: cmake version
         run: |
