@@ -3,3 +3,10 @@ bazel-out
 bazel-testlogs
 node_modules
 .git
+.cache
+.idea
+.vscode
+build
+/build-*
+node_modules
+.cxx
