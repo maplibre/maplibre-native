@@ -15,6 +15,16 @@ public class VulkanTextureViewRenderThread extends TextureViewRenderThread {
     super(textureView, mapRenderer);
   }
 
+  void cleanup() {
+    if (surface == null) {
+      return;
+    }
+
+    mapRenderer.onSurfaceDestroyed();
+    surface.release();
+    surface = null;
+  }
+
   // Thread implementation
 
   @Override
@@ -121,6 +131,7 @@ public class VulkanTextureViewRenderThread extends TextureViewRenderThread {
 
       // Signal we're done
       synchronized (lock) {
+        cleanup();
         this.exited = true;
         lock.notifyAll();
       }
