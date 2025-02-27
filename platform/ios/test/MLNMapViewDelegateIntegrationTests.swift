@@ -103,4 +103,24 @@ extension MLNMapViewDelegateIntegrationTests: MLNMapViewDelegate {
     func mapView(_: MLNMapView, didChangeLocationManagerAuthorization _: MLNLocationManager) {}
 
     func mapView(styleForDefaultUserLocationAnnotationView _: MLNMapView) -> MLNUserLocationAnnotationViewStyle { MLNUserLocationAnnotationViewStyle() }
+
+    func mapView(_: MLNMapView, shaderWillCompile _: Int, backend _: Int, defines _: String) {}
+    func mapView(_: MLNMapView, shaderDidCompile _: Int, backend _: Int, defines _: String) {}
+    func mapView(_: MLNMapView, shaderDidFailCompile _: Int, backend _: Int, defines _: String) {}
+
+    func mapView(_: MLNMapView, glyphsWillLoad _: [String], range _: NSRange) {}
+    func mapView(_: MLNMapView, glyphsDidLoad _: [String], range _: NSRange) {}
+    func mapView(_: MLNMapView, glyphsDidError _: [String], range _: NSRange) {}
+
+    func mapView(_: MLNMapView, tileDidTriggerAction _: MLNTileOperation,
+                 x _: Int,
+                 y _: Int,
+                 z _: Int,
+                 wrap _: Int,
+                 overscaledZ _: Int,
+                 sourceID _: String) {}
+
+    func mapView(_: MLNMapView, spriteWillLoad _: String, url _: String) {}
+    func mapView(_: MLNMapView, spriteDidLoad _: String, url _: String) {}
+    func mapView(_: MLNMapView, spriteDidError _: String, url _: String) {}
 }

@@ -124,6 +124,7 @@
         "MLNOfflineRegion.h": "platform/darwin/src/MLNOfflineRegion.h",
         "MLNTilePyramidOfflineRegion.h": "platform/darwin/src/MLNTilePyramidOfflineRegion.h",
         "NSValue+MLNAdditions.h": "platform/darwin/src/NSValue+MLNAdditions.h",
+        "MLNTileOperation.h": "platform/darwin/src/MLNTileOperation.h",
         "MLNMapViewDelegate.h": "platform/macos/src/MLNMapViewDelegate.h",
         "MLNCluster.h": "platform/darwin/src/MLNCluster.h",
         "MLNFeature.h": "platform/darwin/src/MLNFeature.h",

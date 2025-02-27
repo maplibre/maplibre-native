@@ -6924,6 +6924,112 @@ static void *windowScreenContext = &windowScreenContext;
     return YES;
 }
 
+- (void)shaderWillCompile:(NSInteger)id backend:(NSInteger)backend defines:(nonnull NSString *)defines {
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:shaderWillCompile:backend:defines:)]) {
+        [self.delegate mapView:self shaderWillCompile:id backend:backend defines:defines];
+    }
+}
+
+- (void)shaderDidCompile:(NSInteger)id backend:(NSInteger)backend defines:(nonnull NSString *)defines {
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:shaderDidCompile:backend:defines:)]) {
+        [self.delegate mapView:self shaderDidCompile:id backend:backend defines:defines];
+    }
+}
+
+- (void)shaderDidFailCompile:(NSInteger)id backend:(NSInteger)backend defines:(nonnull NSString *)defines {
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:shaderDidFailCompile:backend:defines:)]) {
+        [self.delegate mapView:self shaderDidFailCompile:id backend:backend defines:defines];
+    }
+}
+
+- (void)glyphsWillLoad:(nonnull NSArray<NSString*>*)fontStack range:(NSRange)range {
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:glyphsWillLoad:range:)]) {
+        [self.delegate mapView:self glyphsWillLoad:fontStack range:range];
+    }
+}
+
+- (void)glyphsDidLoad:(nonnull NSArray<NSString*>*)fontStack range:(NSRange)range {
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:glyphsDidLoad:range:)]) {
+        [self.delegate mapView:self glyphsDidLoad:fontStack range:range];
+    }
+}
+
+- (void)glyphsDidError:(nonnull NSArray<NSString*>*)fontStack range:(NSRange)range {
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:glyphsDidError:range:)]) {
+        [self.delegate mapView:self glyphsDidError:fontStack range:range];
+    }
+}
+
+- (void)tileDidTriggerAction:(MLNTileOperation)operation
+                           x:(NSInteger)x
+                           y:(NSInteger)y
+                           z:(NSInteger)z
+                        wrap:(NSInteger)wrap
+                 overscaledZ:(NSInteger)overscaledZ
+                    sourceID:(nonnull NSString *)sourceID {
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:tileDidTriggerAction:x:y:z:wrap:overscaledZ:sourceID:)]) {
+        [self.delegate mapView:self tileDidTriggerAction:operation x:x y:y z:z wrap:wrap overscaledZ:overscaledZ sourceID:sourceID];
+    }
+}
+
+- (void)spriteWillLoad:(nullable NSString *)id url:(nullable NSString *)url {
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:spriteWillLoad:url:)]) {
+        [self.delegate mapView:self spriteWillLoad:id url:url];
+    }
+}
+
+- (void)spriteDidLoad:(nullable NSString *)id url:(nullable NSString *)url {
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:spriteDidLoad:url:)]) {
+        [self.delegate mapView:self spriteDidLoad:id url:url];
+    }
+}
+
+- (void)spriteDidError:(nullable NSString *)id url:(nullable NSString *)url {
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:spriteDidError:url:)]) {
+        [self.delegate mapView:self spriteDidError:id url:url];
+    }
+}
+
 - (void)updateUserLocationAnnotationView
 {
     [self updateUserLocationAnnotationViewAnimatedWithDuration:0];
