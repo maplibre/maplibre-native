@@ -62,3 +62,7 @@
 	path = vendor/nontype_functional
 	url = https://github.com/zhihaoy/nontype_functional.git
 	branch = compat
+[submodule "vendor/maplibre-tile-spec"]
+	path = vendor/maplibre-tile-spec
+	url = https://github.com/WetDogWeather/maplibre-tile-spec.git
+	branch = cpp
