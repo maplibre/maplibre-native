@@ -316,7 +316,6 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
     }
 
-    impl->uniformBuffers.unbind(renderPass);
     unbindTextures(renderPass);
     unbindAttributes(renderPass);
 }

@@ -12,6 +12,7 @@ namespace gfx {
 class Context;
 class UniformBuffer;
 class UniformBufferArray;
+class RenderPass;
 
 using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 using UniqueUniformBuffer = std::unique_ptr<UniformBuffer>;
@@ -74,6 +75,8 @@ public:
     {
         createOrUpdate(id, data, sizeof(T), context, persistent);
     }
+
+    virtual void bind(gfx::RenderPass& renderPass) = 0;
 
     UniformBufferArray& operator=(UniformBufferArray&&);
     UniformBufferArray& operator=(const UniformBufferArray&);

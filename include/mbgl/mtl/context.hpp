@@ -41,6 +41,7 @@ class VertexBufferResource;
 
 using UniqueShaderProgram = std::unique_ptr<ShaderProgram>;
 using UniqueVertexBufferResource = std::unique_ptr<VertexBufferResource>;
+using UniqueUniformBufferArray = std::unique_ptr<gfx::UniformBufferArray>;
 
 class Context final : public gfx::Context {
 public:
@@ -87,6 +88,8 @@ public:
                                               std::size_t size,
                                               bool persistent = false,
                                               bool ssbo = false) override;
+
+    UniqueUniformBufferArray createLayerUniformBufferArray() override;
 
     gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
 
