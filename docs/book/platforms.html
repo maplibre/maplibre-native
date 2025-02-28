@@ -260,14 +260,18 @@
 <p>In 2023 we co-opted Bazel as a build tool (generator), mostly due to it having better support for iOS compared to CMake. Some platforms can use CMake as well as Bazel.</p>
 <div class="table-wrapper"><table><thead><tr><th>Platform</th><th>CMake</th><th>Bazel</th></tr></thead><tbody>
 <tr><td>Android</td><td>✅ (via Gradle)</td><td>❌</td></tr>
-<tr><td>iOS</td><td>❌</td><td>✅</td></tr>
+<tr><td>iOS</td><td>✅<sup class="footnote-reference"><a href="#3">3</a></sup></td><td>✅</td></tr>
 <tr><td>Linux</td><td>✅</td><td>✅</td></tr>
-<tr><td>Windows</td><td>✅</td><td>❌</td></tr>
+<tr><td>Windows</td><td>✅</td><td>✅</td></tr>
 <tr><td>macOS</td><td>✅</td><td>✅</td></tr>
 <tr><td>Node.js</td><td>✅</td><td>❌</td></tr>
 <tr><td>Qt</td><td>✅</td><td>❌</td></tr>
 </tbody></table>
 </div>
+<div class="footnote-definition" id="3"><sup class="footnote-definition-label">3</sup>
+<p>Some targets are supported, see <a href="ios/README.html#cmake">here</a>.</p>
+</div>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

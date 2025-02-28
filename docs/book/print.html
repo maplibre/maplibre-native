@@ -333,14 +333,18 @@ Mapbox Style Spec. Since it is derived from Mapbox's original work it also uses 
 <p>In 2023 we co-opted Bazel as a build tool (generator), mostly due to it having better support for iOS compared to CMake. Some platforms can use CMake as well as Bazel.</p>
 <div class="table-wrapper"><table><thead><tr><th>Platform</th><th>CMake</th><th>Bazel</th></tr></thead><tbody>
 <tr><td>Android</td><td>✅ (via Gradle)</td><td>❌</td></tr>
-<tr><td>iOS</td><td>❌</td><td>✅</td></tr>
+<tr><td>iOS</td><td>✅<sup class="footnote-reference"><a href="#3">3</a></sup></td><td>✅</td></tr>
 <tr><td>Linux</td><td>✅</td><td>✅</td></tr>
-<tr><td>Windows</td><td>✅</td><td>❌</td></tr>
+<tr><td>Windows</td><td>✅</td><td>✅</td></tr>
 <tr><td>macOS</td><td>✅</td><td>✅</td></tr>
 <tr><td>Node.js</td><td>✅</td><td>❌</td></tr>
 <tr><td>Qt</td><td>✅</td><td>❌</td></tr>
 </tbody></table>
-</div><div style="break-before: page; page-break-before: always;"></div><style>
+</div>
+<div class="footnote-definition" id="3"><sup class="footnote-definition-label">3</sup>
+<p>Some targets are supported, see <a href="ios/README.html#cmake">here</a>.</p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><style>
 .mdbook-alerts {
   padding: 8px 16px;
   margin-bottom: 16px;
@@ -1104,8 +1108,16 @@ Confirm that no errors are shown.</p>
 <pre><code>bazel run //platform/ios:App --//:renderer=metal
 </code></pre>
 <p>You can also build targets from the command line. For example, if you want to build your own XCFramework, see the 'Build XCFramework' step in the <a href="ios/../../.github/workflows/ios-ci.yml">iOS CI workflow</a>.</p>
-<h2 id="swift-app"><a class="header" href="#swift-app">Swift App</a></h2>
-<p>There is also an example app built with Swift instead of Objective-C. The target is called <code>MapLibreApp</code> and the source code lives in <code>platform/ios/app-swift</code>.</p>
+<h2 id="cmake"><a class="header" href="#cmake">CMake</a></h2>
+<p>It is also possible to generate an Xcode project using CMake. As of February 2025, targets <code>mbgl-core</code>, <code>ios-sdk-static</code> and <code>app</code> (Objective-C development app) are supported.</p>
+<pre><code>cmake --preset ios -DDEVELOPMENT_TEAM_ID=YOUR_TEAM_ID
+xed build-ios/MapLibre\ Native.xcodeproj
+</code></pre>
+<h2 id="distribution"><a class="header" href="#distribution">Distribution</a></h2>
+<p>MapLibre iOS is distributed as an XCFramework via the <a href="https://github.com/maplibre/maplibre-gl-native-distribution">maplibre/maplibre-gl-native-distribution</a> repository. See <a href="ios/./release.html">Release MapLibre iOS</a> for the release process. Refer to the <a href="https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/ios-ci.yml"><code>ios-ci.yml</code></a> workflow for an up-to-date recipe for building an XCFramework. As of February 2025 we use:</p>
+<pre><code>bazel build --compilation_mode=opt --features=dead_strip,thin_lto --objc_enable_binary_stripping \
+  --apple_generate_dsym --output_groups=+dsyms --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><style>
 .mdbook-alerts {
   padding: 8px 16px;
@@ -1453,7 +1465,7 @@ The heading in the changelog must match <code>## &lt;VERSION&gt;</code> exactly,
 <p align="center">
   <img width="300" alt="Objective-C app screenshot" src="https://github.com/user-attachments/assets/aeb0cb5e-1f6c-439e-8668-22ee0a0b11f2" />
 </p>
-<h2 id="swift-app-1"><a class="header" href="#swift-app-1">Swift App</a></h2>
+<h2 id="swift-app"><a class="header" href="#swift-app">Swift App</a></h2>
 <p>The Swift App is mainly used to demo usage patterns in the <a href="ios/./ios-documentation.html#examples">example documentation</a>.</p>
 <p>This app is available as "MapLibreApp" in the <a href="ios/./README.html">generated Xcode project</a>.</p>
 <p>The source code lives in <code>platform/ios/swift-app</code>.</p>
@@ -3265,7 +3277,7 @@ bazel run //platform/glfw:glfw_app -- --style https://raw.githubusercontent.com/
 <p>The Rust bridge lives in the root <code>rustutils</code> directory.</p>
 <p>We use <a href="https://cxx.rs/">CXX</a> to allow interop between Rust and C++.</p>
 <h2 id="building-1"><a class="header" href="#building-1">Building</a></h2>
-<h3 id="cmake"><a class="header" href="#cmake">CMake</a></h3>
+<h3 id="cmake-1"><a class="header" href="#cmake-1">CMake</a></h3>
 <p>When building with CMake, need to have the correct Rust toolchain(s) installed. See <a href="https://www.rust-lang.org/tools/install">Install Rust</a> to install Rust.</p>
 <p>You can use <code>rustup</code> to manage toolchains. Which toolchain you needs depends on your host platform and for what platform you are trying to build. If your host and target platform are the same, you probably have the correct toolchain installed after installing Rust. For example when building for <strong>Android</strong> and building on a <strong>x84 Linux</strong> host you would use the following command:</p>
 <pre><code class="language-shell">rustup target add --toolchain stable-x86_64-unknown-linux-gnu aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
