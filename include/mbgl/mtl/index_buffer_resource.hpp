@@ -8,7 +8,7 @@ namespace mtl {
 
 class IndexBufferResource : public gfx::IndexBufferResource {
 public:
-    IndexBufferResource() noexcept = default;
+    IndexBufferResource() noexcept = delete;
     IndexBufferResource(BufferResource&&) noexcept;
     IndexBufferResource(IndexBufferResource&& other) noexcept
         : buffer(std::move(other.buffer)) {}
