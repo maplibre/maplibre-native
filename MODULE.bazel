@@ -64,7 +64,7 @@ bazel_dep(name = "rules_rust", version = "0.57.1")
 bazel_dep(name = "cxx.rs", version = "1.0.136")
 git_override(
     module_name = "cxx.rs",
-    commit = "94e8e46066b560fb9dc8964f047f68d066786916",
+    commit = "4b4e1c1039c5787078cb4cfb7833fba5097e8efa",
     remote = "https://github.com/dtolnay/cxx.git",
 )
 
