@@ -2,7 +2,7 @@ module(name = "maplibre")
 
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "platforms", version = "0.0.11")
-bazel_dep(name = "rules_apple", version = "3.19.0")
+bazel_dep(name = "rules_apple", version = "3.19.1")
 bazel_dep(name = "rules_swift", version = "2.5.0")
 bazel_dep(name = "rules_xcodeproj", version = "2.10.0")
 bazel_dep(name = "aspect_rules_js", version = "2.1.3")
