@@ -1,6 +1,7 @@
 #pragma once
+
+#include <mbgl/util/tile_server_options.hpp>
 #include "rust/cxx.h"
-#include "mbgl/util/tile_server_options.hpp"
 
 namespace mln {
 namespace bridge {

@@ -1,17 +1,21 @@
 #pragma once
 
+#include <mbgl/gfx/headless_frontend.hpp>
 #include <mbgl/map/map.hpp>
 #include <mbgl/map/map_options.hpp>
+#include <mbgl/style/style.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/run_loop.hpp>
-#include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/style/style.hpp>
+#include <mbgl/util/tile_server_options.hpp>
 #include <memory>
 #include <vector>
 #include <stdexcept>
+#include "rust/cxx.h"
 
 namespace mln {
 namespace bridge {
+
+using namespace mbgl;
 
 class MapRenderer {
 public:

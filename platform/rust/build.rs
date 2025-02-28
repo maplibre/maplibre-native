@@ -98,11 +98,24 @@ fn main() {
         }
     }
 
-    cxx_build::bridge("src/lib.rs")
-        .includes(include_dirs)
-        .file("src/wrapper.cpp")
+    println!("cargo:rerun-if-changed=src/map_renderer.rs");
+    println!("cargo:rerun-if-changed=src/map_renderer/map_renderer.h");
+    // println!("cargo:rerun-if-changed=src/tile_server_options/wrapper.cpp");
+    cxx_build::bridge("src/map_renderer.rs")
+        .include(project_root.join("platform/rust/include"))
+        .includes(&include_dirs)
+        // .file("src/tile_server_options/wrapper.cpp")
         .flag_if_supported("-std=c++20")
-        .compile("maplibre_rust_bindings");
+        .compile("maplibre_rust_map_renderer_bindings");
+
+    println!("cargo:rerun-if-changed=src/tile_server_options.rs");
+    println!("cargo:rerun-if-changed=src/tile_server_options/tile_server_options.h");
+    cxx_build::bridge("src/tile_server_options.rs")
+        .include(project_root.join("platform/rust/include"))
+        .includes(&include_dirs)
+        // .file("src/tile_server_options/wrapper.cpp")
+        .flag_if_supported("-std=c++20")
+        .compile("maplibre_rust_tile_server_options_bindings");
 
     // Link mbgl-core after the bridge - or else `cargo test` won't be able to find the symbols.
     println!("cargo:rustc-link-lib=static=mbgl-core");
@@ -128,9 +141,4 @@ fn main() {
     // ------------------------------------------------------------------------
     // 4. Instruct Cargo when to re-run the build script.
     // ------------------------------------------------------------------------
-
-    println!("cargo:rerun-if-changed=src/lib.rs");
-    println!("cargo:rerun-if-changed=src/wrapper.cpp");
-    println!("cargo:rerun-if-changed=include/tile_server_options.h");
-    println!("cargo:rerun-if-changed=include/map_renderer.h");
 }
