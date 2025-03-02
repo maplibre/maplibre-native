@@ -63,9 +63,6 @@ public:
     std::optional<ImagePosition> getPattern(const std::string& pattern) const;
 
 #if MLN_DRAWABLE_RENDERER
-    bool hasGlyphAtlasTexture() const;
-    const gfx::Texture2DPtr& getGlyphAtlasTexture() const;
-
     bool hasIconAtlasTexture() const;
     const gfx::Texture2DPtr& getIconAtlasTexture() const;
 
