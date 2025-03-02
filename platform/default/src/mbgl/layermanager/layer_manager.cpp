@@ -70,12 +70,9 @@ LayerManagerDefault::LayerManagerDefault() {
     addLayerType(std::make_unique<CustomLayerFactory>());
 #endif
 #endif
-#if defined(MLN_RENDER_BACKEND_OPENGL) || MLN_RENDER_BACKEND_VULKAN
 #if !defined(MBGL_LAYER_LOCATION_INDICATOR_DISABLE_ALL)
     addLayerType(std::make_unique<LocationIndicatorLayerFactory>());
 #endif
-#endif
-
 #if MLN_DRAWABLE_RENDERER
 #if !defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_ALL)
     addLayerType(std::make_unique<CustomDrawableLayerFactory>());
