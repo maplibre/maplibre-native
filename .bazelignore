@@ -3,7 +3,7 @@
 !.git/refs
 !.git/refs/heads
 !.git/packed-refs
-.git
+.git/*
 
 node_modules
 bazel-out
