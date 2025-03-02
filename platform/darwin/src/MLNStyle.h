@@ -70,6 +70,13 @@ MLN_EXPORT
  */
 @property (readonly, copy, nullable) NSString *name;
 
+/**
+ * The style JSON representation of the map.
+ *
+ * @note Reading this property returns the style JSON currently displayed in the receiver.
+ */
+@property (readonly, copy, nullable) NSString *styleJSON;
+
 // MARK: Managing Sources
 
 /**

@@ -522,6 +522,19 @@ public:
     return self;
 }
 
+- (instancetype)initWithFrame:(CGRect)frame styleJSON:(NSString *)styleJSON
+{
+    if (self = [super initWithFrame:frame])
+    {
+        MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
+        MLNLogDebug(@"Initializing frame: %@ styleJSON: %@", NSStringFromCGRect(frame), styleJSON);
+        [self commonInit];
+        self.mbglMap.getStyle().loadJSON([styleJSON UTF8String]);
+        MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
+    }
+    return self;
+}
+
 - (instancetype)initWithCoder:(nonnull NSCoder *)decoder
 {
     if (self = [super initWithCoder:decoder])
@@ -567,6 +580,23 @@ public:
     styleURL = styleURL.mgl_URLByStandardizingScheme;
     self.style = nil;
     self.mbglMap.getStyle().loadURL([[styleURL absoluteString] UTF8String]);
+}
+
+- (NSString *)styleJSON
+{
+    NSString *styleJSONString = @(self.mbglMap.getStyle().getJSON().c_str()).mgl_stringOrNilIfEmpty;
+    return styleJSONString;
+}
+
+- (void)setStyleJSON:(NSString *)styleJSON {
+    if (!styleJSON) {
+        [NSException raise:NSInvalidArgumentException format:@"Style JSON cannot be nil."];
+        return;
+    }
+
+    self.style = nil;
+    self.styleURL = nil;
+    self.mbglMap.getStyle().loadJSON([styleJSON UTF8String]);
 }
 
 - (IBAction)reloadStyle:(__unused id)sender {

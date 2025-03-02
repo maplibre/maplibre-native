@@ -207,6 +207,18 @@ MLN_EXPORT
  */
 - (instancetype)initWithFrame:(CGRect)frame styleURL:(nullable NSURL *)styleURL;
 
+/**
+ * Initializes and returns a newly allocated map view with the specified frame
+ * and style JSON.
+ *
+ * @param frame The frame for the view, measured in points.
+ * @param styleJSON JSON string of the map style to display. The JSON must conform to the
+ *        <a href="https://maplibre.org/maplibre-style-spec/">MapLibre Style Specification</a>.
+ *        Specify `nil` for the default style.
+ * @return An initialized map view.
+ */
+- (instancetype)initWithFrame:(CGRect)frame styleJSON:(NSString *)styleJSON;
+
 // MARK: Accessing the Delegate
 
 /**
@@ -252,6 +264,16 @@ MLN_EXPORT
  - TODO: change the style of a map at runtime.
  */
 @property (nonatomic, null_resettable) NSURL *styleURL;
+
+/**
+ * The style JSON representation of the map.
+ *
+ * This property can be used to get the current style as a JSON string or set a new style from a
+ * JSON string. The JSON must conform to the MapLibre Style Specification.
+ *
+ * @see https://maplibre.org/maplibre-style-spec/
+ */
+@property (nonatomic, nullable) NSString *styleJSON;
 
 /**
  Reloads the style.
