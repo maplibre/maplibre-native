@@ -104,7 +104,7 @@ fn main() {
     cxx_build::bridge("src/map_renderer.rs")
         .include(project_root.join("platform/rust/include"))
         .includes(&include_dirs)
-        // .file("src/tile_server_options/wrapper.cpp")
+        // .file("src/tile_server_options/wrapper.cpp")  // we may need this later
         .flag_if_supported("-std=c++20")
         .compile("maplibre_rust_map_renderer_bindings");
 
@@ -113,31 +113,12 @@ fn main() {
     cxx_build::bridge("src/tile_server_options.rs")
         .include(project_root.join("platform/rust/include"))
         .includes(&include_dirs)
-        // .file("src/tile_server_options/wrapper.cpp")
         .flag_if_supported("-std=c++20")
         .compile("maplibre_rust_tile_server_options_bindings");
 
     // Link mbgl-core after the bridge - or else `cargo test` won't be able to find the symbols.
     println!("cargo:rustc-link-lib=static=mbgl-core");
 
-    // Link to SQLite in order for `cargo test` to work
-    // TODO: Ensure cmake always uses statically linking to sqlite3
-    // Note that this works, but we do not want to depend on dynamic bindings in Rust
-    println!("cargo:rustc-link-lib=dylib=sqlite3");
-    // Note that linker automatically gets this passed from core, but that seems to not be enough to solve the issues bellow
-    // println!("cargo:rustc-link-lib=static=mbgl-vendor-sqlite");
-    //
-    // FIXME: This is a hack to link the SQLite library on Linux.
-    //        This does NOT work for `cargo run`, but works for `cargo test`.
-    //
-    // cargo run linking errors:
-    // platform/rust/target/debug/build/maplibre-native-d736790a198d5b5a/out/build/libmbgl-core.a(sqlite3.cpp.o): in function `mapbox::sqlite::initialize()':
-    // platform/default/src/mbgl/storage/sqlite3.cpp:117:(.text._ZN6mapbox6sqliteL10initializeEv+0x1f): undefined reference to `sqlite3_libversion_number'
-    // platform/default/src/mbgl/storage/sqlite3.cpp:119:(.text._ZN6mapbox6sqliteL10initializeEv+0x44): undefined reference to `sqlite3_libversion_number'
-    // platform/default/src/mbgl/storage/sqlite3.cpp:130:(.text._ZN6mapbox6sqliteL10initializeEv+0xd5): undefined reference to `sqlite3_config'
-    //
-    // println!("cargo:rustc-link-search=native=/usr/lib/x86_64-linux-gnu");
-    // println!("cargo:rustc-link-lib=static=sqlite3");
     // ------------------------------------------------------------------------
     // 4. Instruct Cargo when to re-run the build script.
     // ------------------------------------------------------------------------

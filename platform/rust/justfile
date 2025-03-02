@@ -20,6 +20,10 @@ check:
 build:
     cargo build --workspace
 
+# Run the demo binary
+run:
+    cargo run
+
 # Run cargo clippy to lint the code
 clippy:
     cargo clippy --all-targets --workspace -- -D warnings

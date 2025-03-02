@@ -85,8 +85,11 @@ pub struct ImageRendererOptions {
     width: u32,
     height: u32,
     pixel_ratio: f32,
+    // FIXME: can we make this an Option<PathBuf>
     cache_path: String,
+    // FIXME: can we make this an Option<PathBuf>
     asset_root: String,
+    // TODO: remove?
     api_key: String,
 }
 
