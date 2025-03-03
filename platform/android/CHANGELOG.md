@@ -4,11 +4,10 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
-### ✨ Features and improvements
-
-### 🐞 Bug fixes
+## 10.3.4
 
 ### ⛵ Dependencies
+
 - Bump SQLite from 3.24.0 to 3.45.3 ([#3238](https://github.com/maplibre/maplibre-native/pull/3238))
 
 ## 10.3.3
