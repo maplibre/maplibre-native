@@ -167,8 +167,8 @@ jobs:
         if: ${{contains(runner.name, 'GitHub Actions')}}
         uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: '3.29.2'
- 
+          cmake-version: '3.31'
+
       - name: cmake version
         run: |
           cmake --version
@@ -204,16 +204,7 @@ jobs:
       - name: Configure maplibre-native (MacOS)
         if: runner.os == 'MacOS'
         run: |
-          cmake . -B build \
-            -G Ninja \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DMLN_WITH_NODE=ON \
-            -DMLN_WITH_OPENGL=OFF \
-            -DMLN_WITH_METAL=ON \
-            -DMLN_LEGACY_RENDERER=OFF \
-            -DMLN_DRAWABLE_RENDERER=ON \
-            -DMLN_WITH_WERROR=OFF
+          cmake --preset macos-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
       - name: Configure maplibre-native (Linux)
         if: runner.os == 'Linux'

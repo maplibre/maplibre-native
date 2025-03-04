@@ -13,7 +13,7 @@ public:
     HTTPFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions);
     ~HTTPFileSource() override;
 
-    std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
+    std::unique_ptr<AsyncRequest> request(const Resource&, std::function<void(Response)>) override;
     bool canRequest(const Resource& resource) const override {
         return resource.hasLoadingMethod(Resource::LoadingMethod::Network);
     }

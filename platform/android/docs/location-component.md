@@ -82,8 +82,8 @@ Here is the final results with different color configurations. For the complete 
 </figure>
 
 
-[^1]: A variety of [camera modes] determine how the camera will track the user location.  
-      They provide the right context to your users at the correct time.  
+[^1]: A variety of [camera modes] determine how the camera will track the user location.
+      They provide the right context to your users at the correct time.
 
 [LocationComponent]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location/-location-component/index.html
 [Android Developer Documentation]: https://developer.android.com/training/location/permissions

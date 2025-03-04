@@ -47,7 +47,7 @@ jobs:
           files_yaml_from_source_file: .github/changed-files.yml
 
       - name: List changed files
-        if: steps.changed-files.outputs.windows_any_modified == 'true'  
+        if: steps.changed-files.outputs.windows_any_modified == 'true'
         run: |
           Write-Host "Changed file(s): ${{ steps.changed-files.outputs.windows_all_changed_files }}"
 
@@ -149,7 +149,7 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:cpp"
-      
+
       - name: Download Mesa3D
         if: matrix.renderer != 'egl'
         run: |
@@ -181,7 +181,7 @@ jobs:
         if: matrix.renderer == 'vulkan'
         run: |
           reg add 'HKLM\Software\Khronos\Vulkan\Drivers' /f /v '${{ github.workspace }}\build\lvp_icd.x86_64.json' /t REG_DWORD /d 0
-      
+
       - name: Download and configure Vulkan
         if: matrix.renderer == 'vulkan'
         run: |
@@ -207,7 +207,7 @@ jobs:
           name: render-test-result-${{ matrix.renderer }}
           path: |
             metrics/windows-${{ matrix.renderer == 'osmesa' && 'opengl' || matrix.renderer }}.html
-      
+
       # expression tests
 
       - name: Run expression test

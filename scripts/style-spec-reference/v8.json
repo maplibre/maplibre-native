@@ -434,7 +434,7 @@
           "js": "3.4"
         }
       }
-    },   
+    },
     "baseShift": {
       "type": "number",
       "default": 0.0,
@@ -444,7 +444,7 @@
           "js": "3.4"
         }
       }
-    },    
+    },
     "volatile": {
       "type": "boolean",
       "default": false,

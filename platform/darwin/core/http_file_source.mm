@@ -55,9 +55,9 @@ private:
 
 class HTTPRequest : public AsyncRequest {
 public:
-    HTTPRequest(FileSource::Callback callback_)
+    HTTPRequest(std::function<void(Response)> callback_)
         : shared(std::make_shared<HTTPRequestShared>(response, async)),
-          callback(callback_) {
+          callback(std::move(callback_)) {
     }
 
     ~HTTPRequest() override {
@@ -71,7 +71,7 @@ public:
     NSURLSessionDataTask* task = nil;
 
 private:
-    FileSource::Callback callback;
+    std::function<void(Response)> callback;
     Response response;
 
     util::AsyncTask async { [this] {
@@ -86,7 +86,6 @@ class HTTPFileSource::Impl {
 public:
     Impl(const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
         : resourceOptions(resourceOptions_.clone()), clientOptions(clientOptions_.clone()) {
-        @autoreleasepool {
             NSURLSessionConfiguration *sessionConfig = MLNNativeNetworkManager.sharedManager.sessionConfiguration;
             session = [NSURLSession sessionWithConfiguration:sessionConfig];
 
@@ -95,8 +94,6 @@ public:
             } else {
                 userAgent = sessionConfig.HTTPAdditionalHeaders[@"User-Agent"];
             }
-            
-        }
     }
 
     void setResourceOptions(ResourceOptions options);
@@ -225,7 +222,7 @@ BOOL isValidMapboxEndpoint(NSURL *url) {
 
 MLN_APPLE_EXPORT
 NSURL *resourceURL(const Resource& resource) {
-    
+
     NSURL *url = [NSURL URLWithString:@(resource.url.c_str())];
 
 #if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
@@ -236,20 +233,20 @@ NSURL *resourceURL(const Resource& resource) {
         if (resource.usage == Resource::Usage::Offline) {
             [queryItems addObject:[NSURLQueryItem queryItemWithName:@"offline" value:@"true"]];
         }
-        
+
         if (components.queryItems) {
             [queryItems addObjectsFromArray:components.queryItems];
         }
-        
+
         components.queryItems = queryItems;
         url = components.URL;
     }
 #endif
     return url;
 }
-    
-std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, Callback callback) {
-    auto request = std::make_unique<HTTPRequest>(callback);
+
+std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, std::function<void(Response)> callback) {
+    auto request = std::make_unique<HTTPRequest>(std::move(callback));
     auto shared = request->shared; // Explicit copy so that it also gets copied into the completion handler block below.
 
     @autoreleasepool {
@@ -264,7 +261,7 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, 
             [req addValue:@(util::rfc1123(*resource.priorModified).c_str())
                  forHTTPHeaderField:@"If-Modified-Since"];
         }
-        
+
         if (resource.dataRange) {
             NSString *rangeHeader = [NSString stringWithFormat:@"bytes=%lld-%lld",
                                      static_cast<long long>(resource.dataRange->first),
@@ -280,7 +277,7 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, 
             [MLNNativeNetworkManager.sharedManager startDownloadEvent:url.relativePath type:@"tile"];
         }
 
-        __block NSURLSession *session;
+        __block NSURLSession *session = nil;
 
         // Use the delegate's session if there is one, otherwise use the one that
         // was created when this class was constructed.
@@ -299,7 +296,7 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, 
             dataTaskWithRequest:req
               completionHandler:^(NSData* data, NSURLResponse* res, NSError* error) {
                 session = nil;
-            
+
                 if (error && [error code] == NSURLErrorCancelled) {
                     [MLNNativeNetworkManager.sharedManager cancelDownloadEventForResponse:res];
                     return;
@@ -310,7 +307,7 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, 
 
                 if (error) {
                     [MLNNativeNetworkManager.sharedManager errorLog:@"Requesting: %@ failed with error: %@", req.URL, error.debugDescription];
-                    
+
                     if (data) {
                         response.data =
                             std::make_shared<std::string>((const char*)[data bytes], [data length]);

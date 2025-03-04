@@ -42,8 +42,8 @@ public:
         return *this;
     }
 
-    void bind(RenderPass& renderPass) const noexcept;
-    void unbind(RenderPass& renderPass) const noexcept {};
+    void bindMtl(RenderPass&) const noexcept;
+    void bind(gfx::RenderPass& renderPass) override;
 
 private:
     gfx::UniqueUniformBuffer copy(const gfx::UniformBuffer& buffer) override {

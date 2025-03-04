@@ -12,7 +12,7 @@ public:
     ProxyFileSource(std::shared_ptr<FileSource>, const ResourceOptions&, const ClientOptions&);
     ~ProxyFileSource();
 
-    std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
+    std::unique_ptr<AsyncRequest> request(const Resource&, std::function<void(Response)>) override;
     bool canRequest(const Resource&) const override { return true; }
 
     /**

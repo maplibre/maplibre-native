@@ -13,7 +13,7 @@ public:
     MBTilesFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions);
     ~MBTilesFileSource() override;
 
-    std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
+    std::unique_ptr<AsyncRequest> request(const Resource&, std::function<void(Response)>) override;
     bool canRequest(const Resource&) const override;
 
     void setResourceOptions(ResourceOptions) override;

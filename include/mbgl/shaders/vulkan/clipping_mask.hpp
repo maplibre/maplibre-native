@@ -20,6 +20,7 @@ struct ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Vulkan> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
+    static constexpr auto prelude = "";
     static constexpr auto vertex = R"(
         layout(location = 0) in ivec2 position;
 

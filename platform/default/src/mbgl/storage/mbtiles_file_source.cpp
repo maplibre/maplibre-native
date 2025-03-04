@@ -29,7 +29,7 @@
 
 namespace {
 bool acceptsURL(const std::string &url) {
-    return 0 == url.rfind(mbgl::util::MBTILES_PROTOCOL, 0);
+    return url.starts_with(mbgl::util::MBTILES_PROTOCOL);
 }
 
 std::string url_to_path(const std::string &url) {
@@ -107,7 +107,7 @@ public:
         auto format_ptr = values.find("format");
         std::string format = format_ptr == values.end() ? "png" : format_ptr->second;
 
-        if (format != "pbf" && values.count("scale") == 0) {
+        if (format != "pbf" && !values.contains("scale")) {
             values["scale"] = "1";
         }
 
@@ -184,19 +184,19 @@ public:
 
     // Load data for specific tile
     void request_tile(const Resource &resource, ActorRef<FileSourceRequest> req) {
-        std::string base_path = url_to_path(resource.url);
-        std::string path = db_path(base_path);
+        const std::string base_path = url_to_path(resource.url);
+        const std::string path = db_path(base_path);
         auto &db = get_db(path);
 
-        int iy = resource.tileData->y;
-        int iz = resource.tileData->z;
+        const int iy = resource.tileData->y;
+        const int iz = static_cast<uint8_t>(resource.tileData->z);
 
-        auto x = std::to_string(resource.tileData->x);
-        auto y = std::to_string((int)(pow(2, iz) - 1) - iy);
-        auto z = std::to_string(iz);
+        const auto x = std::to_string(resource.tileData->x);
+        const auto y = std::to_string((int)(pow(2, iz) - 1) - iy);
+        const auto z = std::to_string(iz);
 
-        std::string sql = "SELECT tile_data FROM tiles where zoom_level = " + z + " AND tile_column = " + x +
-                          " AND tile_row = " + y;
+        const std::string sql = "SELECT tile_data FROM tiles where zoom_level = " + z + " AND tile_column = " + x +
+                                " AND tile_row = " + y;
         mapbox::sqlite::Statement stmt(db, sql.c_str());
 
         Response response;
@@ -255,7 +255,7 @@ private:
         auto ptr = db_cache.find(path);
         if (ptr != db_cache.end()) {
             return ptr->second;
-        };
+        }
 
         auto ptr2 = db_cache.insert(std::pair<std::string, mapbox::sqlite::Database>(
             path, mapbox::sqlite::Database::open(path, mapbox::sqlite::ReadOnly)));
@@ -275,7 +275,8 @@ MBTilesFileSource::MBTilesFileSource(const ResourceOptions &resourceOptions, con
           resourceOptions.clone(),
           clientOptions.clone())) {}
 
-std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resource, FileSource::Callback callback) {
+std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resource,
+                                                         std::function<void(Response)> callback) {
     auto req = std::make_unique<FileSourceRequest>(std::move(callback));
 
     // assume if there is a tile request, that the mbtiles file has been validated
@@ -296,7 +297,7 @@ std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resourc
 
     // file must exist
     auto path = url_to_path(resource.url);
-    struct stat buffer;
+    struct stat buffer{};
     int result = stat(path.c_str(), &buffer);
     if (result == -1 && errno == ENOENT) {
         Response response;

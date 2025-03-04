@@ -11,7 +11,7 @@ First, you need to define a ``MLNTilePyramidOfflineRegion``. Note that you shoul
 You can pass along some user data / context with ``MLNOfflineStorage/addPackForRegion:withContext:completionHandler:``. This can be read in the notififications that are emitted. You should listen for these notifications using the names defined by
 
 - ``MLNOfflinePackProgressChangedNotification``
-- ``MLNOfflinePackErrorNotification``, and 
+- ``MLNOfflinePackErrorNotification``, and
 - ``MLNOfflinePackMaximumMapboxTilesReachedNotification``
 
 as is shown in the example. Note that this last notification is a historical artifact, your tile provider may not have a maximum number of tiles you are allowed to store.

@@ -4,14 +4,19 @@
 
 - [Platforms](./platforms.md)
 
+- [Release Policy](./release-policy.md)
+
 - [Android](./android/README.md)
   - [Tests](./android/android-tests.md)
   - [Documentation](./android/android-documentation.md)
   - [Benchmark](./android/benchmark.md)
+  - [Release](android/release.md)
 
 - [iOS](./ios/README.md)
   - [Tests](ios/ios-tests.md)
   - [Documentation](ios/ios-documentation.md)
+  - [Release](ios/release.md)
+  - [Development Apps](ios/dev-apps.md)
 
 - [Design](./design/README.md)
   - [Ten Thousand Foot View](design/ten-thousand-foot-view.md)

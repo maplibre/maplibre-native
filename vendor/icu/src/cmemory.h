@@ -101,7 +101,7 @@ typedef union {
   *    Clears any user heap functions from u_setMemoryFunctions()
   *    Does NOT deallocate any remaining allocated memory.
   */
-U_CFUNC UBool 
+U_CFUNC UBool
 cmemory_cleanup(void);
 
 /**
@@ -391,7 +391,7 @@ private:
     //      Returning NULL is rejected by gcc for operator new.
     //      The expedient thing is just not to override operator new.
     //      While relatively pointless, heap allocated instances will function.
-    // static void * U_EXPORT2 operator new(size_t size); 
+    // static void * U_EXPORT2 operator new(size_t size);
     // static void * U_EXPORT2 operator new[](size_t size);
 #if U_HAVE_PLACEMENT_NEW
     // static void * U_EXPORT2 operator new(size_t, void *ptr);
@@ -566,7 +566,7 @@ private:
     // No heap allocation. Use only on the stack.
     //   (Declaring these functions private triggers a cascade of problems;
     //    see the MaybeStackArray class for details.)
-    // static void * U_EXPORT2 operator new(size_t size); 
+    // static void * U_EXPORT2 operator new(size_t size);
     // static void * U_EXPORT2 operator new[](size_t size);
 #if U_HAVE_PLACEMENT_NEW
     // static void * U_EXPORT2 operator new(size_t, void *ptr);

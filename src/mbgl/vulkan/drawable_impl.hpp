@@ -44,8 +44,8 @@ public:
 
     std::optional<gfx::RenderPassDescriptor> renderPassDescriptor;
 
-    gfx::DepthMode depthFor3D = gfx::DepthMode::disabled();
-    gfx::StencilMode stencilFor3D = gfx::StencilMode::disabled();
+    std::optional<gfx::DepthMode> depthFor3D;
+    std::optional<gfx::StencilMode> stencilFor3D;
 
     PipelineInfo pipelineInfo;
 

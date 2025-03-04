@@ -1,4 +1,15 @@
-bazel-bin
-bazel-out
-bazel-testlogs
+# ignore .git, but make sure we can get commit hash
+!.git/HEAD
+!.git/refs
+!.git/refs/heads
+!.git/packed-refs
+.git/*
+
 node_modules
+bazel-out
+bazel-bin
+bazel-testlogs
+.cache
+.idea
+.vscode
+.cxx
