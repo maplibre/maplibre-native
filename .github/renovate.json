@@ -2,7 +2,7 @@
   "enabledManagers": ["gradle-wrapper", "bazel", "bazel-module", "bazelisk"],
   "packageRules": [
     {
-      "matchManagers": ["bazel", "bazel-module", "bazelisk"],
+      "matchManagers": ["bazel", "bazel-module"],
       "groupName": "bazel"
     }
   ],
