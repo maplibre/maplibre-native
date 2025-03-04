@@ -34,6 +34,7 @@ compile_commands.json
 /platform/android/site
 node_modules
 .cxx
+.env
 
 # Node binaries.
 /lib

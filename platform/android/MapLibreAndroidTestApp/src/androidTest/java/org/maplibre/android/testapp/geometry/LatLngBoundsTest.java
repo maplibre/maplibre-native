@@ -16,7 +16,6 @@ import org.junit.Test;
 /**
  * Instrumentation test to validate integration of LatLngBounds
  */
-@Ignore("https://github.com/maplibre/maplibre-native/issues/2319")
 public class LatLngBoundsTest extends BaseTest {
 
   private static final double MAP_BEARING = 50;
