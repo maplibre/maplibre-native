@@ -50,8 +50,11 @@ void RenderRasterLayer::transition(const TransitionParameters& parameters) {
 }
 
 void RenderRasterLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    auto properties = makeMutable<RasterLayerProperties>(staticImmutableCast<RasterLayer::Impl>(baseImpl),
-                                                         unevaluated.evaluate(parameters));
+    const auto previousProperties = staticImmutableCast<RasterLayerProperties>(evaluatedProperties);
+    auto properties = makeMutable<RasterLayerProperties>(
+        staticImmutableCast<RasterLayer::Impl>(baseImpl),
+        unevaluated.evaluate(parameters, previousProperties->evaluated));
+
     passes = properties->evaluated.get<style::RasterOpacity>() > 0 ? RenderPass::Translucent : RenderPass::None;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
@@ -337,7 +340,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         [&](const gfx::UniqueDrawableBuilder& builder, gfx::Drawable* drawable, const RasterBucket& bucket) {
             // The bucket may later add, remove, or change masking.  In that case, the tile's
             // shared data and segments are not updated, and it needs to be re-created.
-            if (drawable && (bucket.sharedVertices->getDirty() || bucket.sharedTriangles->getDirty())) {
+            if (drawable &&
+                (bucket.sharedVertices->isModifiedAfter(drawable->createTime) || bucket.sharedTriangles->getDirty())) {
                 return false;
             }
 
@@ -373,7 +377,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
             assert(!!drawable ^ !!builder);
             if (drawable) {
-                drawable->setVertexAttributes(vertexAttrs);
+                drawable->updateVertexAttributes(
+                    vertexAttrs, vertices->elements(), gfx::Triangles(), indices, segments->data(), segments->size());
             } else if (builder) {
                 builder->setVertexAttributes(vertexAttrs);
                 builder->setRawVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
@@ -444,18 +449,25 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             bool cleared = false;
             auto& bucket = static_cast<RasterBucket&>(*bucket_);
 
-            // If the bucket data has changed, rebuild the drawables.
-            const bool bucketSharedData = (!bucket.vertices.empty() && !bucket.indices.empty() &&
-                                           !bucket.segments.empty());
-            const bool bucketDirty = bucketSharedData && (bucket.vertices.getDirty() || bucket.indices.getDirty());
-            if (bucketDirty) {
-                // Note, vertex/index dirty flags will be reset when those buffers are uploaded.
-                removeTile(renderPass, tileID);
-                cleared = true;
-            } else if (setRenderTileBucketID(tileID, bucket.getID())) {
+            if (setRenderTileBucketID(tileID, bucket.getID())) {
                 // Bucket ID changed, we need to rebuild the drawables
                 removeTile(renderPass, tileID);
                 cleared = true;
+            }
+            // If the bucket data has changed, rebuild the drawables.
+            else if (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty()) {
+                // Find the earliest time on existing drawables
+                std::optional<std::chrono::duration<double>> tileUpdateTime;
+                tileLayerGroup->visitDrawables(renderPass, tileID, [&](const auto& drawable) {
+                    if (!tileUpdateTime || drawable.createTime < *tileUpdateTime) {
+                        tileUpdateTime = drawable.createTime;
+                    }
+                });
+
+                if (tileUpdateTime && (bucket.vertices.isModifiedAfter(*tileUpdateTime) || bucket.indices.getDirty())) {
+                    removeTile(renderPass, tileID);
+                    cleared = true;
+                }
             }
 
             if (!cleared) {

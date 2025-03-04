@@ -39,7 +39,7 @@ private:
     void makeOptional();
 
     void loadFromCache();
-    void loadedData(const Response&);
+    void loadedData(const Response&, Resource::LoadingMethod);
     void loadFromNetwork();
 
     bool hasPendingNetworkRequest() const {
@@ -62,8 +62,8 @@ private:
         std::atomic_bool aborted{false};
     };
 
-    // Allocated as a share_ptr so either the loader or request can outlive the
-    // other and still see this.
+    // Allocated as a `shared_ptr` so either the loader or
+    // request can outlive the other and still see this.
     std::shared_ptr<Shared> shared;
 };
 

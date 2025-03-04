@@ -14,8 +14,8 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.InfoWindowAdapter
 import org.maplibre.android.maps.MapLibreMap.OnMapClickListener
 import org.maplibre.android.maps.OnMapReadyCallback
-import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.IconUtils
 import java.util.*
 
@@ -58,16 +58,16 @@ class DynamicInfoWindowAdapterActivity : AppCompatActivity(), OnMapReadyCallback
 
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
-        map.setStyle(Style.getPredefinedStyle("Streets"))
+        map.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
 
         // Add info window adapter
-        addCustomInfoWindowAdapter(maplibreMap!!)
+        addCustomInfoWindowAdapter(maplibreMap)
 
         // Keep info windows open on click
         maplibreMap.uiSettings.isDeselectMarkersOnTap = false
 
         // Add a marker
-        marker = addMarker(maplibreMap!!)
+        marker = addMarker(maplibreMap)
         maplibreMap.selectMarker(marker!!)
 
         // On map click, change the info window contents
@@ -130,7 +130,7 @@ class DynamicInfoWindowAdapterActivity : AppCompatActivity(), OnMapReadyCallback
 
     override fun onDestroy() {
         super.onDestroy()
-        if (maplibreMap != null) {
+        if (this::maplibreMap.isInitialized) {
             maplibreMap.removeOnMapClickListener(mapClickListener)
         }
         mapView.onDestroy()

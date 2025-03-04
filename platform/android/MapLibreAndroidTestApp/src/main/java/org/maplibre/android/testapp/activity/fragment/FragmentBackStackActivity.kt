@@ -1,12 +1,13 @@
 package org.maplibre.android.testapp.activity.fragment
 
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.Style
 import org.maplibre.android.maps.SupportMapFragment
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.databinding.ActivityBackstackFragmentBinding
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.NavUtils
 
 /**
@@ -25,6 +26,18 @@ class FragmentBackStackActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityBackstackFragmentBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (supportFragmentManager.backStackEntryCount == 0) {
+                    // activity uses singleInstance for testing purposes
+                    // code below provides a default navigation when using the app
+                    NavUtils.navigateHome(this@FragmentBackStackActivity)
+                } else {
+                    finish()
+                }
+            }
+        })
 
         if (savedInstanceState == null) {
             mapFragment = SupportMapFragment.newInstance()
@@ -45,8 +58,13 @@ class FragmentBackStackActivity : AppCompatActivity() {
     }
 
     private fun initMap(maplibreMap: MapLibreMap) {
-        maplibreMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid")) {
-            maplibreMap.setPadding(300, 300, 300, 300)
+        try {
+            val style = TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid")
+            maplibreMap.setStyle(style) {
+                maplibreMap.setPadding(300, 300, 300, 300)
+            }
+        } catch (e: IllegalArgumentException) {
+            // ignore style unavailable
         }
     }
 
@@ -55,15 +73,5 @@ class FragmentBackStackActivity : AppCompatActivity() {
             replace(R.id.container, NestedViewPagerActivity.ItemAdapter.EmptyFragment())
             addToBackStack("map_empty_fragment")
         }.commit()
-    }
-
-    override fun onBackPressed() {
-        if (supportFragmentManager.backStackEntryCount == 0) {
-            // activity uses singleInstance for testing purposes
-            // code below provides a default navigation when using the app
-            NavUtils.navigateHome(this)
-        } else {
-            super.onBackPressed()
-        }
     }
 }

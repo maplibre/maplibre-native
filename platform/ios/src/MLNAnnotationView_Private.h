@@ -1,5 +1,5 @@
-#import "MLNAnnotationView.h"
 #import "MLNAnnotation.h"
+#import "MLNAnnotationView.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

@@ -321,7 +321,7 @@ DEFINE_IS_IN_UNICODE_BLOCK(HalfwidthandFullwidthForms, 0xFF00, 0xFFEF)
 // DEFINE_IS_IN_UNICODE_BLOCK(SupplementaryPrivateUseAreaA, 0xF0000, 0xFFFFF)
 // DEFINE_IS_IN_UNICODE_BLOCK(SupplementaryPrivateUseAreaB, 0x100000, 0x10FFFF)
 
-MAPBOX_ETERNAL_CONSTEXPR const auto verticalPunctuation = mapbox::eternal::map<char16_t, char16_t>({
+constexpr const auto verticalPunctuation = mapbox::eternal::map<char16_t, char16_t>({
     {u'!', u'︕'},  {u'#', u'＃'},  {u'$', u'＄'},  {u'%', u'％'},  {u'&', u'＆'},  {u'(', u'︵'},  {u')', u'︶'},
     {u'*', u'＊'},  {u'+', u'＋'},  {u',', u'︐'},  {u'-', u'︲'},  {u'.', u'・'},  {u'/', u'／'},  {u':', u'︓'},
     {u';', u'︔'},  {u'<', u'︿'},  {u'=', u'＝'},  {u'>', u'﹀'},  {u'?', u'︖'},  {u'@', u'＠'},  {u'[', u'﹇'},

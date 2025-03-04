@@ -93,6 +93,7 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/MLNStyle.h",
     "src/MLNStyleLayer.h",
     "src/MLNStyleValue.h",
+    "src/MLNTileOperation.h",
     "src/MLNTilePyramidOfflineRegion.h",
     "src/MLNTileServerOptions.h",
     "src/MLNTileSource.h",
@@ -161,6 +162,7 @@ MLN_DARWIN_PRIVATE_HEADERS = [
 
 MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/MLNAttributionInfo.mm",
+    "src/MLNBackendResource.mm",
     "src/MLNComputedShapeSource.mm",
     "src/MLNCustomStyleLayer.mm",
     "src/MLNDefaultStyle.mm",

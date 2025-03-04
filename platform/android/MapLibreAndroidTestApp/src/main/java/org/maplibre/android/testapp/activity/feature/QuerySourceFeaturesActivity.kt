@@ -18,6 +18,7 @@ import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test activity showcasing using the query source features API to query feature counts
@@ -37,11 +38,12 @@ class QuerySourceFeaturesActivity : AppCompatActivity() {
                 maplibreMap = map
             }
             maplibreMap.getStyle { style: Style -> initStyle(style) }
-            maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+            maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
         }
     }
 
     private fun initStyle(style: Style) {
+        // # --8<-- [start:JsonObject]
         val properties = JsonObject()
         properties.addProperty("key1", "value1")
         val source = GeoJsonSource(
@@ -61,6 +63,7 @@ class QuerySourceFeaturesActivity : AppCompatActivity() {
         val layer = CircleLayer("test-layer", source.id)
             .withFilter(visible)
         style.addLayer(layer)
+        // # --8<-- [end:JsonObject]
 
         // Add a click listener
         maplibreMap.addOnMapClickListener { point: LatLng? ->

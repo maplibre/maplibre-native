@@ -8,40 +8,40 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** These constants indicate the current drag state of an annotation view. */
 typedef NS_ENUM(NSUInteger, MLNAnnotationViewDragState) {
-    /**
-     The view is not involved in a drag operation.
-     */
-    MLNAnnotationViewDragStateNone = 0,
-    /**
-     An action occurred that indicated the view should begin dragging.
+  /**
+   The view is not involved in a drag operation.
+   */
+  MLNAnnotationViewDragStateNone = 0,
+  /**
+   An action occurred that indicated the view should begin dragging.
 
-     The map view automatically moves draggable annotation views to this state
-     in response to the dragging the view after pressing and holding on it.
-     */
-    MLNAnnotationViewDragStateStarting,
-    /**
-     The view is in the midst of a drag operation and is actively tracking the
-     user’s gesture.
-     */
-    MLNAnnotationViewDragStateDragging,
-    /**
-     An action occurred that indicated the view should cancel the drag
-     operation.
-     */
-    MLNAnnotationViewDragStateCanceling,
-    /**
-     An action occurred that indicated the view was dropped by the user.
+   The map view automatically moves draggable annotation views to this state
+   in response to the dragging the view after pressing and holding on it.
+   */
+  MLNAnnotationViewDragStateStarting,
+  /**
+   The view is in the midst of a drag operation and is actively tracking the
+   user’s gesture.
+   */
+  MLNAnnotationViewDragStateDragging,
+  /**
+   An action occurred that indicated the view should cancel the drag
+   operation.
+   */
+  MLNAnnotationViewDragStateCanceling,
+  /**
+   An action occurred that indicated the view was dropped by the user.
 
-     The map view automatically moves annotation views to this state in response
-     to the user lifting their finger at the end of a drag gesture.
-     */
-    MLNAnnotationViewDragStateEnding,
+   The map view automatically moves annotation views to this state in response
+   to the user lifting their finger at the end of a drag gesture.
+   */
+  MLNAnnotationViewDragStateEnding,
 };
 
 /**
- The `MLNAnnotationView` class is responsible for marking a point annotation
+ The ``MLNAnnotationView`` class is responsible for marking a point annotation
  with a view. Annotation views represent an annotation object, which is an
- object that corresponds to the `MLNAnnotation` protocol. When an annotation’s
+ object that corresponds to the ``MLNAnnotation`` protocol. When an annotation’s
  geographic coordinate is visible in the map view, the map view asks its
  delegate to a corresponding annotation view. If an annotation view is created
  with a reuse identifier, the map view may recycle the view when it goes
@@ -49,7 +49,7 @@ typedef NS_ENUM(NSUInteger, MLNAnnotationViewDragState) {
 
  Annotation views are compatible with UIKit, Core Animation, and other Cocoa
  Touch frameworks. On the other hand, if you do not need animation or
- interactivity such as dragging, you can use an `MLNAnnotationImage` instead to
+ interactivity such as dragging, you can use an ``MLNAnnotationImage`` instead to
  conserve memory and optimize drawing performance.
  */
 MLN_EXPORT
@@ -65,7 +65,7 @@ MLN_EXPORT
  leaves the viewport, the map view moves its associated view to a reuse queue.
  When a new annotation becomes visible, you can request a view for that
  annotation by passing the appropriate reuse identifier string to the
- `-[MLNMapView dequeueReusableAnnotationViewWithIdentifier:]` method.
+ ``MLNMapView/dequeueReusableAnnotationViewWithIdentifier:`` method.
 
  @param reuseIdentifier A unique string identifier for this view that allows you
     to reuse this view with multiple similar annotations. You can set this
@@ -78,24 +78,24 @@ MLN_EXPORT
 
 /**
  Initializes and returns a new annotation view object.
- 
+
  Providing an annotation allows you to explicitly associate the annotation instance
- with the new view and, in custom subclasses of `MLNAnnotationView`, customize the view
+ with the new view and, in custom subclasses of ``MLNAnnotationView``, customize the view
  based on properties of the annotation instance in an overridden initializer. However,
  annotation views that are reused will not necessarily be associated with the
  same annotation they were initialized with. Also, annotation views that are in
  the reuse queue will have a nil value for the annotation property. Passing an annotation
  instance to the view is optional and the map view will automatically associate annotations
- with views when views are provided to the map via the `-[MLNMapViewDelegate mapView:viewForAnnotation:]`
- method.
- 
+ with views when views are provided to the map via the
+ ``MLNMapViewDelegate/mapView:viewForAnnotation:`` method.
+
  The reuse identifier provides a way for you to improve performance by recycling
  annotation views as they enter and leave the map’s viewport. As an annotation
  leaves the viewport, the map view moves its associated view to a reuse queue.
  When a new annotation becomes visible, you can request a view for that
  annotation by passing the appropriate reuse identifier string to the
- `-[MLNMapView dequeueReusableAnnotationViewWithIdentifier:]` method.
- 
+ ``MLNMapView/dequeueReusableAnnotationViewWithIdentifier:`` method.
+
  @param annotation The annotation object to associate with the new view.
  @param reuseIdentifier A unique string identifier for this view that allows you
  to reuse this view with multiple similar annotations. You can set this
@@ -104,7 +104,8 @@ MLN_EXPORT
  views.
  @return The initialized annotation view object.
  */
-- (instancetype)initWithAnnotation:(nullable id<MLNAnnotation>)annotation reuseIdentifier:(nullable NSString *)reuseIdentifier;
+- (instancetype)initWithAnnotation:(nullable id<MLNAnnotation>)annotation
+                   reuseIdentifier:(nullable NSString *)reuseIdentifier;
 
 /**
  Called when the view is removed from the reuse queue.
@@ -122,7 +123,7 @@ MLN_EXPORT
  contains a non-`nil` value while the annotation view is visible on the map. If
  the view is queued, waiting to be reused, the value is `nil`.
  */
-@property (nonatomic, nullable) id <MLNAnnotation> annotation;
+@property (nonatomic, nullable) id<MLNAnnotation> annotation;
 
 /**
  The string that identifies that this annotation view is reusable.
@@ -165,14 +166,14 @@ MLN_EXPORT
  When the value of this property is `YES` and the map is tilted, the annotation
  view appears smaller if it is towards the top of the view (closer to the
  horizon) and larger if it is towards the bottom of the view (closer to the
- viewpoint). This is also the behavior of `MLNAnnotationImage` objects. When the
+ viewpoint). This is also the behavior of ``MLNAnnotationImage`` objects. When the
  value of this property is `NO` or the map’s pitch is zero, the annotation view
  remains the same size regardless of its position on-screen.
 
  The default value of this property is `NO`. Keep this property set to `NO` if
  the view’s legibility is important.
 
- @note Scaling many on-screen annotation views can contribute to poor map
+ > Note: Scaling many on-screen annotation views can contribute to poor map
     performance. Consider keeping this property disabled if your use case
     involves hundreds or thousands of annotation views.
  */
@@ -183,7 +184,7 @@ MLN_EXPORT
  with the map.
 
  When the value of this property is `YES` and the map is rotated, the annotation
- view rotates. This is also the behavior of `MLNAnnotationImage` objects. When the
+ view rotates. This is also the behavior of ``MLNAnnotationImage`` objects. When the
  value of this property is `NO` the annotation has its rotation angle fixed.
 
  The default value of this property is `NO`. Set this property to `YES` if the
@@ -201,12 +202,12 @@ MLN_EXPORT
 
  By default, this property is set to `NO` and becomes `YES` when the user taps
  the view. Selecting another annotation, whether it is associated with an
- `MLNAnnotationView` or `MLNAnnotationImage` object, deselects any currently
+ ``MLNAnnotationView`` or ``MLNAnnotationImage`` object, deselects any currently
  selected view.
 
  Setting this property changes the view’s appearance to reflect the new value
  immediately. If you want the change to be animated, use the
- `-setSelected:animated:` method instead.
+ ``MLNAnnotationView/setSelected:animated:`` method instead.
  */
 @property (nonatomic, assign, getter=isSelected) BOOL selected;
 
@@ -222,9 +223,9 @@ MLN_EXPORT
     if it should display itself as unselected.
  @param animated `YES` if the change in selection state is animated; `NO` if the
     change is immediate.
- 
+
  #### Related examples
- TODO: modify an `MLNAnnotationView`'s behavior when it is selected.
+ - <doc:AnnotationViewExample>
  */
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated;
 
@@ -245,7 +246,7 @@ MLN_EXPORT
 
  If this property is set to `YES`, the user can drag the annotation after
  pressing and holding the view, and the associated annotation object must also
- implement the `-setCoordinate:` method. The default value of this property is
+ implement the `setCoordinate:` method. The default value of this property is
  `NO`.
 
  Setting this property to `YES` lets the map view know that the annotation is
@@ -253,18 +254,18 @@ MLN_EXPORT
  attempting to stop an operation that has already been initiated; doing so can
  lead to undefined behavior. Once begun, the drag operation should always
  continue to completion.
- 
+
  #### Related examples
- TODO: Enable users to drag `MLNAnnotationView` objects on your map.
+ TODO: Enable users to drag ``MLNAnnotationView`` objects on your map.
  */
 @property (nonatomic, assign, getter=isDraggable) BOOL draggable;
 
 /**
  The current drag state of the annotation view.
 
- All states are handled automatically when the `draggable` property is set to
+ All states are handled automatically when the ``MLNAnnotationView/draggable`` property is set to
  `YES`. To perform a custom animation in response to a change to this property,
- override the `-setDragState:animated:` method.
+ override the ``MLNAnnotationView/setDragState:animated:`` method.
  */
 @property (nonatomic, readonly) MLNAnnotationViewDragState dragState;
 
@@ -275,7 +276,8 @@ MLN_EXPORT
  drags it. As the system detects user actions that would indicate a drag, it
  calls this method to update the drag state.
  */
-- (void)setDragState:(MLNAnnotationViewDragState)dragState animated:(BOOL)animated NS_REQUIRES_SUPER;
+- (void)setDragState:(MLNAnnotationViewDragState)dragState
+            animated:(BOOL)animated NS_REQUIRES_SUPER;
 
 @end
 

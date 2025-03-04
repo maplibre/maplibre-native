@@ -8,9 +8,7 @@ namespace gl {
 
 class TextureResource : public gfx::TextureResource {
 public:
-    TextureResource(UniqueTexture&& texture_, int byteSize_)
-        : texture(std::move(texture_)),
-          byteSize(byteSize_) {}
+    TextureResource(UniqueTexture&& texture_);
     ~TextureResource() noexcept override;
 
     static int getStorageSize(const Size& size, gfx::TexturePixelType format, gfx::TextureChannelDataType type);
@@ -20,7 +18,6 @@ public:
     gfx::TextureMipMapType mipmap = gfx::TextureMipMapType::No;
     gfx::TextureWrapType wrapX = gfx::TextureWrapType::Clamp;
     gfx::TextureWrapType wrapY = gfx::TextureWrapType::Clamp;
-    int byteSize;
 };
 
 } // namespace gl

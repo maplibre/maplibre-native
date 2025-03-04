@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/actor/scheduler.hpp>
 #include <mbgl/storage/resource_transform.hpp>
 #include <mbgl/storage/response.hpp>
 #include <mbgl/storage/resource_options.hpp>
@@ -25,6 +26,7 @@ enum FileSourceType : uint8_t {
     FileSystem,
     Network,
     Mbtiles,
+    Pmtiles,
     ResourceLoader ///< %Resource loader acts as a proxy and has logic
     /// for request delegation to Asset, Cache, and other
     /// file sources.
@@ -37,21 +39,19 @@ public:
     FileSource& operator=(const FileSource&) = delete;
     virtual ~FileSource() = default;
 
-    using Callback = std::function<void(Response)>;
-
     /// Request a resource. The callback will be called asynchronously, in the
     /// same thread as the request was made. This thread must have an active
     /// RunLoop. The request may be cancelled before completion by releasing the
     /// returned AsyncRequest. If the request is cancelled before the callback
     /// is executed, the callback will not be executed.
-    virtual std::unique_ptr<AsyncRequest> request(const Resource&, Callback) = 0;
+    virtual std::unique_ptr<AsyncRequest> request(const Resource&, std::function<void(Response)>) = 0;
 
     /// Allows to forward response from one source to another.
     /// Optionally, callback can be provided to receive notification for forward
     /// operation.
     //
     // NOLINTNEXTLINE(performance-unnecessary-value-param)
-    virtual void forward(const Resource&, const Response&, std::function<void()>) {}
+    virtual void forward(const Resource&, const Response&, Scheduler::Task&&) {}
 
     /// When a file source supports consulting a local cache only, it must
     /// return true. Cache-only requests are requests that aren't as urgent, but

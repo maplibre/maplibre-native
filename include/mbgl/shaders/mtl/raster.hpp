@@ -2,11 +2,44 @@
 
 #include <mbgl/shaders/raster_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 
 namespace mbgl {
 namespace shaders {
+
+constexpr auto rasterShaderPrelude = R"(
+
+enum {
+    idRasterDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idRasterEvaluatedPropsUBO = drawableReservedUBOCount,
+    rasterUBOCount
+};
+
+struct alignas(16) RasterDrawableUBO {
+    /*  0 */ float4x4 matrix;
+    /* 64 */
+};
+static_assert(sizeof(RasterDrawableUBO) == 4 * 16, "wrong size");
+
+/// Evaluated properties that do not depend on the tile
+struct alignas(16) RasterEvaluatedPropsUBO {
+    /*  0 */ float4 spin_weights;
+    /* 16 */ float2 tl_parent;
+    /* 24 */ float scale_parent;
+    /* 28 */ float buffer_scale;
+    /* 32 */ float fade_t;
+    /* 36 */ float opacity;
+    /* 40 */ float brightness_low;
+    /* 44 */ float brightness_high;
+    /* 48 */ float saturation_factor;
+    /* 52 */ float contrast_factor;
+    /* 56 */ float pad1;
+    /* 60 */ float pad2;
+    /* 64 */
+};
+static_assert(sizeof(RasterEvaluatedPropsUBO) == 4 * 16, "wrong size");
+
+)";
 
 template <>
 struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::Metal> {
@@ -14,16 +47,16 @@ struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
+    static constexpr auto prelude = rasterShaderPrelude;
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(3)]];
-    short2 texture_pos [[attribute(4)]];
+    short2 pos [[attribute(rasterUBOCount + 0)]];
+    short2 texture_pos [[attribute(rasterUBOCount + 1)]];
 };
 
 struct FragmentStage {
@@ -32,27 +65,12 @@ struct FragmentStage {
     float2 pos1;
 };
 
-struct alignas(16) RasterDrawableUBO {
-    float4x4 matrix;
-};
-
-struct alignas(16) RasterEvaluatedPropsUBO {
-    float4 spin_weights;
-    float2 tl_parent;
-    float scale_parent;
-    float buffer_scale;
-    float fade_t;
-    float opacity;
-    float brightness_low;
-    float brightness_high;
-    float saturation_factor;
-    float contrast_factor;
-    float pad1, pad2;
-};
-
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const RasterDrawableUBO& drawable [[buffer(1)]],
-                                device const RasterEvaluatedPropsUBO& props [[buffer(2)]]) {
+                                device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                                device const RasterDrawableUBO* drawableVector [[buffer(idRasterDrawableUBO)]],
+                                device const RasterEvaluatedPropsUBO& props [[buffer(idRasterEvaluatedPropsUBO)]]) {
+
+    device const RasterDrawableUBO& drawable = drawableVector[uboIndex];
 
     const float4 position = drawable.matrix * float4(float2(vertx.pos), 0, 1);
 
@@ -72,7 +90,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const RasterEvaluatedPropsUBO& props [[buffer(2)]],
+                            device const RasterEvaluatedPropsUBO& props [[buffer(idRasterEvaluatedPropsUBO)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             texture2d<float, access::sample> image1 [[texture(1)]],
                             sampler image0_sampler [[sampler(0)]],

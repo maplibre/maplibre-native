@@ -61,7 +61,8 @@ class Layer;
 
 class RasterDEMTile final : public Tile {
 public:
-    RasterDEMTile(const OverscaledTileID&, const TileParameters&, const Tileset&);
+    RasterDEMTile(
+        const OverscaledTileID&, std::string, const TileParameters&, const Tileset&, TileObserver* observer = nullptr);
     ~RasterDEMTile() override;
 
     std::unique_ptr<TileRenderData> createRenderData() override;
@@ -86,9 +87,14 @@ public:
     void onParsed(std::unique_ptr<HillshadeBucket> result, uint64_t correlationID);
     void onError(std::exception_ptr, uint64_t correlationID);
 
+    void cancel() override;
+
 private:
+    void markObsolete();
+
     TileLoader<RasterDEMTile> loader;
 
+    TaggedScheduler threadPool;
     std::shared_ptr<Mailbox> mailbox;
     Actor<RasterDEMTileWorker> worker;
 
@@ -98,6 +104,8 @@ private:
     // Contains the Bucket object for the tile. Buckets are render
     // objects and they get added by tile parsing operations.
     std::shared_ptr<HillshadeBucket> bucket;
+
+    bool obsolete = false;
 };
 
 } // namespace mbgl

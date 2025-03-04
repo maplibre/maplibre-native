@@ -14,6 +14,10 @@
 #include "parser.hpp"
 #include "runner.hpp"
 
+#if MLN_RENDER_BACKEND_METAL
+#include <mbgl/gfx/backend.hpp>
+#endif // MLN_RENDER_BACKEND_METAL
+
 #ifdef SHOW_ANSI_COLORS
 #define ANSI_COLOR_RED "\x1b[31m"
 #define ANSI_COLOR_GREEN "\x1b[32m"
@@ -123,7 +127,7 @@ ArgumentsTuple parseArguments(int argc, char** argv) {
                           shuffle,
                           online,
                           seed,
-                          manifestPath.string(),
+                          manifestPath.generic_string(),
                           updateResults,
                           std::move(testFilter)};
 }
@@ -159,6 +163,11 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
 
     NetworkStatus::Set(online ? NetworkStatus::Status::Online : NetworkStatus::Status::Offline);
 
+#if MLN_RENDER_BACKEND_METAL
+    printf(ANSI_COLOR_YELLOW "Using GPU Expression Evaluation" ANSI_COLOR_RESET "\n");
+    mbgl::gfx::Backend::setEnableGPUExpressionEval(true);
+#endif // MLN_RENDER_BACKEND_METAL
+
     const auto& manifest = runner.getManifest();
     const auto& ignores = manifest.getIgnores();
     const auto& testPaths = manifest.getTestPaths();
@@ -185,7 +194,7 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
         bool shouldIgnore = false;
         std::string ignoreReason;
 
-        const std::string ignoreName = id;
+        const mbgl::filesystem::path ignoreName(id);
         const auto it = std::find_if(
             ignores.cbegin(), ignores.cend(), [&ignoreName](auto pair) { return pair.first == ignoreName; });
         if (it != ignores.end()) {
@@ -257,7 +266,7 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
         }
     }
 
-    const std::string manifestName = mbgl::filesystem::path(manifestPath).stem();
+    const std::string manifestName = mbgl::filesystem::path(manifestPath).stem().generic_string();
     const std::string resultPath = manifest.getResultPath() + "/" + manifestName + ".html";
     std::string resultsHTML = createResultPage(stats, metadatas, shuffle, seed);
     mbgl::util::write_file(resultPath, resultsHTML);
@@ -291,7 +300,7 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
                100.0 * stats.erroredTests / count);
     }
 
-    printf("Results at: %s\n", mbgl::filesystem::canonical(resultPath).c_str());
+    printf("Results at: %s\n", mbgl::filesystem::canonical(resultPath).generic_string().c_str());
 
     return returnCode;
 }

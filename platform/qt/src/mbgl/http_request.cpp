@@ -13,10 +13,12 @@
 
 namespace mbgl {
 
-HTTPRequest::HTTPRequest(HTTPFileSource::Impl* context, const Resource& resource, FileSource::Callback callback)
+HTTPRequest::HTTPRequest(HTTPFileSource::Impl* context,
+                         const Resource& resource,
+                         std::function<void(Response)> callback)
     : m_context(context),
       m_resource(resource),
-      m_callback(callback) {
+      m_callback(std::move(callback)) {
     m_context->request(this);
 }
 
@@ -48,6 +50,12 @@ QNetworkRequest HTTPRequest::networkRequest() const {
             : QString("MapLibreGL/%1 (Qt %2)").arg(version::revision).arg(QT_VERSION_STR).toLatin1();
     req.setRawHeader("User-Agent", agent);
 #endif
+
+    if (m_resource.dataRange) {
+        std::string range = std::string("bytes=") + std::to_string(m_resource.dataRange->first) + std::string("-") +
+                            std::to_string(m_resource.dataRange->second);
+        req.setRawHeader("Range", QByteArray(range.data(), static_cast<int>(range.size())));
+    }
 
     if (m_resource.priorEtag) {
         const auto etag = m_resource.priorEtag;
@@ -112,7 +120,8 @@ void HTTPRequest::handleNetworkReply(QNetworkReply* reply, const QByteArray& dat
     int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
     switch (responseCode) {
-        case 200: {
+        case 200:
+        case 206: {
             if (data.isEmpty()) {
                 response.data = std::make_shared<std::string>();
             } else {

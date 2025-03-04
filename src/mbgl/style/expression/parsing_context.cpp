@@ -103,43 +103,44 @@ ParseResult ParsingContext::parse(const Convertible& value,
 }
 
 using ParseFunction = ParseResult (*)(const conversion::Convertible&, ParsingContext&);
-MAPBOX_ETERNAL_CONSTEXPR const auto expressionRegistry =
-    mapbox::eternal::hash_map<mapbox::eternal::string, ParseFunction>({{"==", parseComparison},
-                                                                       {"!=", parseComparison},
-                                                                       {">", parseComparison},
-                                                                       {"<", parseComparison},
-                                                                       {">=", parseComparison},
-                                                                       {"<=", parseComparison},
-                                                                       {"all", All::parse},
-                                                                       {"any", Any::parse},
-                                                                       {"array", Assertion::parse},
-                                                                       {"at", At::parse},
-                                                                       {"in", In::parse},
-                                                                       {"boolean", Assertion::parse},
-                                                                       {"case", Case::parse},
-                                                                       {"coalesce", Coalesce::parse},
-                                                                       {"collator", CollatorExpression::parse},
-                                                                       {"distance", Distance::parse},
-                                                                       {"format", FormatExpression::parse},
-                                                                       {"image", ImageExpression::parse},
-                                                                       {"interpolate", parseInterpolate},
-                                                                       {"length", Length::parse},
-                                                                       {"let", Let::parse},
-                                                                       {"literal", Literal::parse},
-                                                                       {"match", parseMatch},
-                                                                       {"number", Assertion::parse},
-                                                                       {"number-format", NumberFormat::parse},
-                                                                       {"object", Assertion::parse},
-                                                                       {"step", Step::parse},
-                                                                       {"string", Assertion::parse},
-                                                                       {"to-boolean", Coercion::parse},
-                                                                       {"to-color", Coercion::parse},
-                                                                       {"to-number", Coercion::parse},
-                                                                       {"to-string", Coercion::parse},
-                                                                       {"var", Var::parse},
-                                                                       {"within", Within::parse},
-                                                                       {"index-of", IndexOf::parse},
-                                                                       {"slice", Slice::parse}});
+constexpr const auto expressionRegistry = mapbox::eternal::hash_map<mapbox::eternal::string, ParseFunction>(
+    {{"==", parseComparison},
+     {"!=", parseComparison},
+     {">", parseComparison},
+     {"<", parseComparison},
+     {">=", parseComparison},
+     {"<=", parseComparison},
+     {"all", All::parse},
+     {"any", Any::parse},
+     {"array", Assertion::parse},
+     {"at", At::parse},
+     {"in", In::parse},
+     {"boolean", Assertion::parse},
+     {"case", Case::parse},
+     {"coalesce", Coalesce::parse},
+     {"collator", CollatorExpression::parse},
+     {"distance", Distance::parse},
+     {"format", FormatExpression::parse},
+     {"image", ImageExpression::parse},
+     {"interpolate", parseInterpolate},
+     {"length", Length::parse},
+     {"let", Let::parse},
+     {"literal", Literal::parse},
+     {"match", parseMatch},
+     {"number", Assertion::parse},
+     {"number-format", NumberFormat::parse},
+     {"object", Assertion::parse},
+     {"step", Step::parse},
+     {"string", Assertion::parse},
+     {"to-boolean", Coercion::parse},
+     {"to-color", Coercion::parse},
+     {"to-padding", Coercion::parse},
+     {"to-number", Coercion::parse},
+     {"to-string", Coercion::parse},
+     {"var", Var::parse},
+     {"within", Within::parse},
+     {"index-of", IndexOf::parse},
+     {"slice", Slice::parse}});
 
 bool isExpression(const std::string& name) noexcept {
     return expressionRegistry.contains(name.c_str());
@@ -208,6 +209,14 @@ ParseResult ParsingContext::parse(const Convertible& value,
                    (actual == type::Value || actual == type::String)) {
             parsed = {annotate(
                 std::move(*parsed), std::move(*expected), typeAnnotationOption.value_or(TypeAnnotationOption::coerce))};
+        } else if (*expected == type::Padding &&
+                   (actual == type::Value || actual == type::Number || actual.is<type::Array>())) {
+            parsed = {annotate(
+                std::move(*parsed), std::move(*expected), typeAnnotationOption.value_or(TypeAnnotationOption::coerce))};
+        } else if (*expected == type::VariableAnchorOffsetCollection &&
+                   (actual == type::Value || actual.is<type::Array>())) {
+            parsed = {annotate(
+                std::move(*parsed), std::move(*expected), typeAnnotationOption.value_or(TypeAnnotationOption::coerce))};
         } else {
             checkType((*parsed)->getType());
             if (!errors->empty()) {
@@ -248,18 +257,21 @@ ParseResult ParsingContext::parseExpression(const Convertible& value,
 }
 
 ParseResult ParsingContext::parseLayerPropertyExpression(const Convertible& value) {
-    std::optional<TypeAnnotationOption> typeAnnotationOption;
-    if (expected && *expected == type::String) {
-        typeAnnotationOption = TypeAnnotationOption::coerce;
-    }
+    const auto typeAnnotationOption = (expected && *expected == type::String)
+                                          ? std::make_optional(TypeAnnotationOption::coerce)
+                                          : std::nullopt;
     ParseResult parsed = parse(value, typeAnnotationOption);
-    if (parsed && !isZoomConstant(**parsed)) {
-        std::optional<variant<const Interpolate*, const Step*, ParsingError>> zoomCurve = findZoomCurve(parsed->get());
-        if (!zoomCurve) {
+
+    // If the expression is zoom-dependent, validate that we can resolve a zoom curve or treat it as an error
+    assert(!parsed || !*parsed || !((*parsed)->dependencies & Dependency::Zoom) == isZoomConstant(**parsed));
+    if (parsed && (*parsed)->has(Dependency::Zoom)) {
+        if (const auto zoomCurve = findZoomCurve(**parsed)) {
+            if (zoomCurve->is<ParsingError>()) {
+                error(zoomCurve->get<ParsingError>().message);
+                return ParseResult();
+            }
+        } else {
             error(R"("zoom" expression may only be used as input to a top-level "step" or "interpolate" expression.)");
-            return ParseResult();
-        } else if (zoomCurve->is<ParsingError>()) {
-            error(zoomCurve->get<ParsingError>().message);
             return ParseResult();
         }
     }

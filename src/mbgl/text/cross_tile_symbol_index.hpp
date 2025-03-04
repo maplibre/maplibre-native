@@ -11,6 +11,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <thread>
 #include <unordered_set>
 
 namespace mbgl {
@@ -36,7 +37,7 @@ public:
                    uint32_t bucketInstanceId,
                    std::string bucketLeaderId);
 
-    Point<int64_t> getScaledCoordinates(SymbolInstance&, const OverscaledTileID&) const;
+    Point<int64_t> getScaledCoordinates(const SymbolInstance&, const OverscaledTileID&) const;
     void findMatches(SymbolBucket&, const OverscaledTileID&, std::set<uint32_t>&) const;
 
     OverscaledTileID coord;
@@ -75,6 +76,8 @@ public:
     void pruneUnusedLayers(const std::set<std::string>&);
 
     void reset();
+
+    const std::thread::id renderThreadID = std::this_thread::get_id();
 
 private:
     std::map<std::string, CrossTileSymbolLayerIndex> layerIndexes;

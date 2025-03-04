@@ -83,7 +83,7 @@ jobs:
         run: bloaty/build/bloaty mbgl-render -- mbgl-render-legacy -n 0 -s vm -d compileunits > tlus_diff_legacy.txt
 
       - name: Configure AWS Credentials
-        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
+        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2
@@ -167,7 +167,7 @@ jobs:
         run: python3 vendor/benchmark/tools/compare.py --no-color benchmarks ./mbgl-benchmark-runner-main ./mbgl-benchmark-runner --benchmark_filter='^[^A][^P][^I].*' > benchmark_out.txt
 
       - name: Configure AWS Credentials
-        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
+        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2

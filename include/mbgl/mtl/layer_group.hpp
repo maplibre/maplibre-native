@@ -26,9 +26,6 @@ public:
 
     gfx::UniformBufferArray& mutableUniformBuffers() override { return uniformBuffers; };
 
-    void bindUniformBuffers(RenderPass&) const noexcept;
-    void unbindUniformBuffers(RenderPass&) const noexcept {}
-
 protected:
     UniformBufferArray uniformBuffers;
 };

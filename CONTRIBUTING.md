@@ -3,14 +3,12 @@
 ## Documentation
 
 - For a high-level overview of MapLibre Native, check out the [MapLibre Native Markdown Book](https://maplibre.org/maplibre-native/docs/book/).
-- See [`DEVELOPING.md`](DEVELOPING.md) for getting started with development.
 
 ## Source code checkout
 
 ```bash
 git clone --recurse-submodules https://github.com/maplibre/maplibre-native.git
 ```
-
 
 ## Guidelines
 
@@ -22,15 +20,7 @@ If you want to contribute code:
 
 1. Pull requests are gladly accepted. If there are any changes that developers using one of the platforms should be aware of, please update the **main** section of the relevant `CHANGELOG.md`.
 
-Please note the special instructions for contributing new source code files, asset files, or user-facing strings to MapLibre Native for [iOS](platform/ios/CONTRIBUTING.md), [Android](platform/android/DEVELOPING.md) or [macOS](platform/macos/DEVELOPING.md).
-
-## Pull Requests
-
-To run the benchmarks (for Android) include the following line on a PR comment:
-
-```
-!benchmark android
-```
+Please note the special instructions for contributing new source code files, asset files, or user-facing strings to MapLibre Native for [iOS](platform/ios/CONTRIBUTING.md), [Android](platform/android/DEVELOPING.md) or [macOS](platform/macos/README.md).
 
 ## Design Proposals
 
@@ -47,25 +37,14 @@ The steps for a Design Proposal are the following:
 5. Call a vote on the Design Proposal once discussions have settled. People in favor of your Design Proposal shall approve the pull request. People against your Design Proposal shall comment on the pull request with something like "Rejected".
 6. Give the community at least 72 hours to vote. If a majority of the people who voted accept your Proposal, it can be merged.
 
-## Semantic Versioning
+[Accepted design proposals](https://github.com/maplibre/maplibre-native/tree/main/design-proposals).
 
-MapLibre uses tags for releases based on [SemVer](https://semver.org) versioning.  This is useful for checking out a particular released version for feature enhancements or debugging.
+## Pre-commit hooks
 
-You can list available tags by issuing the command `git tag`, then use the result
+Install [pre-commit](https://pre-commit.com/) and run
 
-```bash
-# 1. Obtain a list of tags, which matches to release versions
-git tag
-
-# 2.  Set a convenience variable with the desired TAG
-# TAG=android-v9.4.2
-# TAG=android-v9.5.2
-TAG=ios-v5.12.0
-# TAG=ios-v5.12.0-pre.1
-
-# 3.  Check out a particular TAG
-git checkout tags/$TAG -b $TAG
-
-# 4. build, debug or enhance features based on the tag
-# clean, if you need to troubleshoot build dependencies by using `make clean`
 ```
+pre-commit install
+```
+
+to install the pre-commit hooks configured in `.pre-commit-config.yml`.

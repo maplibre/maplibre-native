@@ -64,12 +64,19 @@ RenderLineLayer::~RenderLineLayer() = default;
 void RenderLineLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
     updateColorRamp();
+
+#if MLN_RENDER_BACKEND_METAL
+    if (auto* tweaker = static_cast<LineLayerTweaker*>(layerTweaker.get())) {
+        tweaker->updateGPUExpressions(unevaluated, parameters.now);
+    }
+#endif // MLN_RENDER_BACKEND_METAL
 }
 
 void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
+    const auto previousProperties = staticImmutableCast<LineLayerProperties>(evaluatedProperties);
     auto properties = makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(baseImpl),
                                                        parameters.getCrossfadeParameters(),
-                                                       unevaluated.evaluate(parameters));
+                                                       unevaluated.evaluate(parameters, previousProperties->evaluated));
     auto& evaluated = properties->evaluated;
 
     passes = (evaluated.get<style::LineOpacity>().constantOr(1.0) > 0 &&
@@ -81,8 +88,11 @@ void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (layerTweaker) {
-        layerTweaker->updateProperties(evaluatedProperties);
+    if (auto* tweaker = static_cast<LineLayerTweaker*>(layerTweaker.get())) {
+        tweaker->updateProperties(evaluatedProperties);
+#if MLN_RENDER_BACKEND_METAL
+        tweaker->updateGPUExpressions(unevaluated, parameters.now);
+#endif // MLN_RENDER_BACKEND_METAL
     }
 #endif
 }
@@ -147,7 +157,7 @@ void RenderLineLayer::render(PaintParameters& parameters) {
                         const std::optional<ImagePosition>& patternPositionA,
                         const std::optional<ImagePosition>& patternPositionB,
                         auto&& textureBindings) {
-            const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+            auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
 
             paintPropertyBinders.setPatternParameters(patternPositionA, patternPositionB, crossfade);
 
@@ -345,12 +355,20 @@ float RenderLineLayer::getLineWidth(const GeometryTileFeature& feature,
 }
 
 #if MLN_DRAWABLE_RENDERER
+namespace {
+
+inline void setSegments(std::unique_ptr<gfx::DrawableBuilder>& builder, const LineBucket& bucket) {
+    builder->setSegments(gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
+}
+
+} // namespace
+
 void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
-                             const TransformState& state,
-                             const std::shared_ptr<UpdateParameters>&,
-                             [[maybe_unused]] const RenderTree& renderTree,
-                             [[maybe_unused]] UniqueChangeRequestVec& changes) {
+                             const TransformState&,
+                             [[maybe_unused]] const std::shared_ptr<UpdateParameters>& parameters,
+                             const RenderTree&,
+                             UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -367,7 +385,12 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
     if (!layerTweaker) {
-        layerTweaker = std::make_shared<LineLayerTweaker>(getID(), evaluatedProperties);
+        auto tweaker = std::make_shared<LineLayerTweaker>(getID(), evaluatedProperties);
+#if MLN_RENDER_BACKEND_METAL
+        tweaker->updateGPUExpressions(unevaluated, parameters->timePoint);
+#endif // MLN_RENDER_BACKEND_METAL
+
+        layerTweaker = std::move(tweaker);
         layerGroup->addLayerTweaker(layerTweaker);
     }
 
@@ -422,10 +445,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             builder.setVertexAttributes(std::move(vertexAttrs));
         };
 
-    auto setSegments = [&](std::unique_ptr<gfx::DrawableBuilder>& builder, const LineBucket& bucket) {
-        builder->setSegments(gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
-    };
-
     tileLayerGroup->setStencilTiles(renderTiles);
 
     StringIDSetsPair propertiesAsUniforms;
@@ -444,9 +463,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+        auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
         const auto& evaluated = getEvaluated<LineLayerProperties>(renderData->layerProperties);
-        const auto& crossfade = getCrossfade<LineLayerProperties>(renderData->layerProperties);
 
         const auto prevBucketID = getRenderTileBucketID(tileID);
         if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
@@ -455,136 +473,31 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         }
         setRenderTileBucketID(tileID, bucket.getID());
 
-        // interpolation UBOs
-        const float zoom = static_cast<float>(state.getZoom());
-
-        std::optional<LineInterpolationUBO> lineInterpolationUBO = std::nullopt;
-        std::optional<LineGradientInterpolationUBO> lineGradientInterpolationUBO = std::nullopt;
-        std::optional<LinePatternInterpolationUBO> linePatternInterpolationUBO = std::nullopt;
-        std::optional<LineSDFInterpolationUBO> lineSDFInterpolationUBO = std::nullopt;
-
-        auto getLineInterpolationUBO = [&]() -> const LineInterpolationUBO& {
-            if (!lineInterpolationUBO) {
-                lineInterpolationUBO = {
-                    /*color_t =*/std::get<0>(paintPropertyBinders.get<LineColor>()->interpolationFactor(zoom)),
-                    /*blur_t =*/std::get<0>(paintPropertyBinders.get<LineBlur>()->interpolationFactor(zoom)),
-                    /*opacity_t =*/std::get<0>(paintPropertyBinders.get<LineOpacity>()->interpolationFactor(zoom)),
-                    /*gapwidth_t =*/std::get<0>(paintPropertyBinders.get<LineGapWidth>()->interpolationFactor(zoom)),
-                    /*offset_t =*/std::get<0>(paintPropertyBinders.get<LineOffset>()->interpolationFactor(zoom)),
-                    /*width_t =*/std::get<0>(paintPropertyBinders.get<LineWidth>()->interpolationFactor(zoom)),
-                    0,
-                    0};
-            }
-
-            return *lineInterpolationUBO;
-        };
-
-        auto getLineGradientInterpolationUBO = [&]() -> const LineGradientInterpolationUBO& {
-            if (!lineGradientInterpolationUBO) {
-                lineGradientInterpolationUBO = {
-                    /*blur_t =*/std::get<0>(paintPropertyBinders.get<LineBlur>()->interpolationFactor(zoom)),
-                    /*opacity_t =*/std::get<0>(paintPropertyBinders.get<LineOpacity>()->interpolationFactor(zoom)),
-                    /*gapwidth_t =*/std::get<0>(paintPropertyBinders.get<LineGapWidth>()->interpolationFactor(zoom)),
-                    /*offset_t =*/std::get<0>(paintPropertyBinders.get<LineOffset>()->interpolationFactor(zoom)),
-                    /*width_t =*/std::get<0>(paintPropertyBinders.get<LineWidth>()->interpolationFactor(zoom)),
-                    0,
-                    0,
-                    0};
-            }
-
-            return *lineGradientInterpolationUBO;
-        };
-
-        auto getLinePatternInterpolationUBO = [&]() -> const LinePatternInterpolationUBO& {
-            if (!linePatternInterpolationUBO) {
-                linePatternInterpolationUBO = {
-                    /*blur_t =*/std::get<0>(paintPropertyBinders.get<LineBlur>()->interpolationFactor(zoom)),
-                    /*opacity_t =*/std::get<0>(paintPropertyBinders.get<LineOpacity>()->interpolationFactor(zoom)),
-                    /*offset_t =*/std::get<0>(paintPropertyBinders.get<LineOffset>()->interpolationFactor(zoom)),
-                    /*gapwidth_t =*/std::get<0>(paintPropertyBinders.get<LineGapWidth>()->interpolationFactor(zoom)),
-                    /*width_t =*/std::get<0>(paintPropertyBinders.get<LineWidth>()->interpolationFactor(zoom)),
-                    /*pattern_from_t =*/std::get<0>(paintPropertyBinders.get<LinePattern>()->interpolationFactor(zoom)),
-                    /*pattern_to_t =*/std::get<1>(paintPropertyBinders.get<LinePattern>()->interpolationFactor(zoom)),
-                    0};
-            }
-
-            return *linePatternInterpolationUBO;
-        };
-
-        auto getLineSDFInterpolationUBO = [&]() -> const LineSDFInterpolationUBO& {
-            if (!lineSDFInterpolationUBO) {
-                lineSDFInterpolationUBO = {
-                    /*color_t =*/std::get<0>(paintPropertyBinders.get<LineColor>()->interpolationFactor(zoom)),
-                    /*blur_t =*/std::get<0>(paintPropertyBinders.get<LineBlur>()->interpolationFactor(zoom)),
-                    /*opacity_t =*/std::get<0>(paintPropertyBinders.get<LineOpacity>()->interpolationFactor(zoom)),
-                    /*gapwidth_t =*/std::get<0>(paintPropertyBinders.get<LineGapWidth>()->interpolationFactor(zoom)),
-                    /*offset_t =*/std::get<0>(paintPropertyBinders.get<LineOffset>()->interpolationFactor(zoom)),
-                    /*width_t =*/std::get<0>(paintPropertyBinders.get<LineWidth>()->interpolationFactor(zoom)),
-                    /*floorwidth_t =*/
-                    std::get<0>(paintPropertyBinders.get<LineFloorWidth>()->interpolationFactor(zoom)),
-                    0};
-            }
-
-            return *lineSDFInterpolationUBO;
-        };
-
-        // tile dependent properties UBOs:
-        std::optional<LinePatternTilePropertiesUBO> linePatternTilePropertiesUBO = std::nullopt;
-        const auto& linePatternValue = evaluated.get<LinePattern>().constantOr(Faded<expression::Image>{"", ""});
-        const std::optional<ImagePosition> patternPosA = tile.getPattern(linePatternValue.from.id());
-        const std::optional<ImagePosition> patternPosB = tile.getPattern(linePatternValue.to.id());
-        paintPropertyBinders.setPatternParameters(patternPosA, patternPosB, crossfade);
-
-        auto getLinePatternTilePropertiesUBO = [&]() -> const LinePatternTilePropertiesUBO& {
-            if (!linePatternTilePropertiesUBO) {
-                linePatternTilePropertiesUBO = {
-                    /*pattern_from =*/patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
-                    /*pattern_to =*/patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0}};
-            }
-
-            return *linePatternTilePropertiesUBO;
-        };
-
         auto updateExisting = [&](gfx::Drawable& drawable) {
             if (drawable.getLayerTweaker() != layerTweaker) {
                 // This drawable was produced on a previous style/bucket, and should not be updated.
                 return false;
-            }
-
-            auto& drawableUniforms = drawable.mutableUniformBuffers();
-            const LineLayerTweaker::LineType type = static_cast<LineLayerTweaker::LineType>(drawable.getType());
-            switch (type) {
-                case LineLayerTweaker::LineType::Simple: {
-                    drawableUniforms.createOrUpdate(idLineInterpolationUBO, &getLineInterpolationUBO(), context);
-                } break;
-
-                case LineLayerTweaker::LineType::Gradient: {
-                    drawableUniforms.createOrUpdate(
-                        idLineInterpolationUBO, &getLineGradientInterpolationUBO(), context);
-                } break;
-
-                case LineLayerTweaker::LineType::Pattern: {
-                    drawableUniforms.createOrUpdate(idLineInterpolationUBO, &getLinePatternInterpolationUBO(), context);
-
-                    drawableUniforms.createOrUpdate(
-                        idLineTilePropertiesUBO, &getLinePatternTilePropertiesUBO(), context);
-                } break;
-
-                case LineLayerTweaker::LineType::SDF: {
-                    drawableUniforms.createOrUpdate(idLineInterpolationUBO, &getLineSDFInterpolationUBO(), context);
-                } break;
-
-                default: {
-                    using namespace std::string_literals;
-                    Log::Error(Event::General,
-                               "RenderLineLayer: unknown line type: "s + std::to_string(mbgl::underlying_type(type)));
-                } break;
             }
             return true;
         };
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {
             continue;
         }
+
+        const auto addDrawable = [&](std::unique_ptr<gfx::Drawable>&& drawable, LineLayerTweaker::LineType type) {
+            drawable->setTileID(tileID);
+            drawable->setType(mbgl::underlying_type(type));
+            drawable->setLayerTweaker(layerTweaker);
+            drawable->setRenderTile(renderTilesOwner, &tile);
+            drawable->setBinders(renderData->bucket, &paintPropertyBinders);
+
+            const bool roundCap = bucket.layout.get<LineCap>() == LineCapType::Round;
+            const auto capType = roundCap ? LinePatternCap::Round : LinePatternCap::Square;
+            drawable->setData(std::make_unique<gfx::LineDrawableData>(capType));
+
+            tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+            ++stats.drawablesAdded;
+        };
 
         propertiesAsUniforms.first.clear();
         propertiesAsUniforms.second.clear();
@@ -620,20 +533,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             addAttributes(*builder, bucket, std::move(vertexAttrs));
             setSegments(builder, bucket);
 
-            // finish
             builder->flush(context);
-            const LinePatternCap cap = bucket.layout.get<LineCap>() == LineCapType::Round ? LinePatternCap::Round
-                                                                                          : LinePatternCap::Square;
             for (auto& drawable : builder->clearDrawables()) {
-                drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::SDF));
-                drawable->setTileID(tileID);
-                drawable->setLayerTweaker(layerTweaker);
-                drawable->setData(std::make_unique<gfx::LineDrawableData>(cap));
-                drawable->mutableUniformBuffers().createOrUpdate(
-                    idLineInterpolationUBO, &getLineSDFInterpolationUBO(), context);
-
-                tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                ++stats.drawablesAdded;
+                addDrawable(std::move(drawable), LineLayerTweaker::LineType::SDF);
             }
         } else if (!unevaluated.get<LinePattern>().isUndefined()) {
             // pattern line
@@ -656,34 +558,23 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
             // texture
             if (const auto& atlases = tile.getAtlasTextures(); atlases && atlases->icon) {
-                if (!iconTweaker) {
-                    iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
-                        atlases,
-                        std::nullopt,
-                        idLineImageTexture,
-                        /*isText*/ false,
-                        /*sdfIcons*/ true, // to force linear filter
-                        /*rotationAlignment_*/ AlignmentType::Auto,
-                        /*iconScaled*/ false,
-                        /*textSizeIsZoomConstant_*/ false);
-                }
+                auto iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
+                    atlases,
+                    std::nullopt,
+                    idLineImageTexture,
+                    /*isText*/ false,
+                    /*sdfIcons*/ true, // to force linear filter
+                    /*rotationAlignment_*/ AlignmentType::Auto,
+                    /*iconScaled*/ false,
+                    /*textSizeIsZoomConstant_*/ false);
 
-                builder->addTweaker(iconTweaker);
+                builder->addTweaker(std::move(iconTweaker));
 
                 setSegments(builder, bucket);
 
                 builder->flush(context);
                 for (auto& drawable : builder->clearDrawables()) {
-                    drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Pattern));
-                    drawable->setTileID(tileID);
-                    drawable->setLayerTweaker(layerTweaker);
-                    drawable->mutableUniformBuffers().createOrUpdate(
-                        idLineInterpolationUBO, &getLinePatternInterpolationUBO(), context);
-                    drawable->mutableUniformBuffers().createOrUpdate(
-                        idLineTilePropertiesUBO, &getLinePatternTilePropertiesUBO(), context);
-
-                    tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                    ++stats.drawablesAdded;
+                    addDrawable(std::move(drawable), LineLayerTweaker::LineType::Pattern);
                 }
             }
         } else if (!unevaluated.get<LineGradient>().getValue().isUndefined()) {
@@ -718,20 +609,11 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             if (colorRampTexture2D) {
                 builder->setTexture(colorRampTexture2D, idLineImageTexture);
 
-                // segments
                 setSegments(builder, bucket);
 
-                // finish
                 builder->flush(context);
                 for (auto& drawable : builder->clearDrawables()) {
-                    drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Gradient));
-                    drawable->setTileID(tileID);
-                    drawable->setLayerTweaker(layerTweaker);
-                    drawable->mutableUniformBuffers().createOrUpdate(
-                        idLineInterpolationUBO, &getLineGradientInterpolationUBO(), context);
-
-                    tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                    ++stats.drawablesAdded;
+                    addDrawable(std::move(drawable), LineLayerTweaker::LineType::Gradient);
                 }
             }
         } else {
@@ -754,17 +636,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             addAttributes(*builder, bucket, std::move(vertexAttrs));
             setSegments(builder, bucket);
 
-            // finish
             builder->flush(context);
             for (auto& drawable : builder->clearDrawables()) {
-                drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Simple));
-                drawable->setTileID(tileID);
-                drawable->setLayerTweaker(layerTweaker);
-                drawable->mutableUniformBuffers().createOrUpdate(
-                    idLineInterpolationUBO, &getLineInterpolationUBO(), context);
-
-                tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                ++stats.drawablesAdded;
+                addDrawable(std::move(drawable), LineLayerTweaker::LineType::Simple);
             }
         }
     }

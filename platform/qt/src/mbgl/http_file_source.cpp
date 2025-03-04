@@ -30,21 +30,10 @@ void HTTPFileSource::Impl::request(HTTPRequest* req) {
     }
 
     QNetworkRequest networkRequest = req->networkRequest();
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
-    networkRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-#elif QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
-    networkRequest.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
-#endif
-#endif
 
     data.first = m_manager->get(networkRequest);
     connect(data.first, &QNetworkReply::finished, this, &HTTPFileSource::Impl::onReplyFinished);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
     connect(data.first, &QNetworkReply::errorOccurred, this, &HTTPFileSource::Impl::onReplyFinished);
-#else
-    connect(data.first, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onReplyFinished()));
-#endif
 }
 
 void HTTPFileSource::Impl::cancel(HTTPRequest* req) {
@@ -117,8 +106,9 @@ HTTPFileSource::HTTPFileSource(const ResourceOptions& resourceOptions, const Cli
 
 HTTPFileSource::~HTTPFileSource() = default;
 
-std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, Callback callback) {
-    return std::make_unique<HTTPRequest>(impl.get(), resource, callback);
+std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource,
+                                                      std::function<void(Response)> callback) {
+    return std::make_unique<HTTPRequest>(impl.get(), resource, std::move(callback));
 }
 
 void HTTPFileSource::setResourceOptions(ResourceOptions options) {

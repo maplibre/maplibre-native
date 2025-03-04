@@ -1,7 +1,6 @@
 package org.maplibre.android.testapp.activity.annotation
 
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -12,8 +11,8 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
-import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.IconUtils
 
 /**
@@ -30,9 +29,9 @@ class DynamicMarkerChangeActivity : AppCompatActivity() {
         mapView.setTag(false)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { maplibreMap: MapLibreMap ->
-                maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
-                this@DynamicMarkerChangeActivity.maplibreMap = maplibreMap
+            OnMapReadyCallback { map: MapLibreMap ->
+                map.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
+                maplibreMap = map
                 // Create marker
                 val markerOptions = MarkerOptions()
                     .position(LAT_LNG_CHELSEA)
@@ -45,14 +44,12 @@ class DynamicMarkerChangeActivity : AppCompatActivity() {
                     )
                     .title(getString(R.string.dynamic_marker_chelsea_title))
                     .snippet(getString(R.string.dynamic_marker_chelsea_snippet))
-                marker = maplibreMap.addMarker(markerOptions)
+                marker = map.addMarker(markerOptions)
             }
         )
         val fab = findViewById<FloatingActionButton>(R.id.fab)
         fab.setColorFilter(ContextCompat.getColor(this, R.color.primary))
-        fab.setOnClickListener { view: View? ->
-            updateMarker()
-        }
+        fab.setOnClickListener { updateMarker() }
     }
 
     private fun updateMarker() {

@@ -30,31 +30,36 @@ public:
     static_assert(sizeof...(Is) == sizeof...(Ts), "IndexedTuple size mismatch");
 
     template <class I>
-    auto& get() {
-        return std::get<TypeIndex<I, Is...>::value>(*this);
+    static constexpr std::size_t getIndex() {
+        return TypeIndex<I, Is...>::value;
     }
 
     template <class I>
-    const auto& get() const {
-        return std::get<TypeIndex<I, Is...>::value>(*this);
+    constexpr auto& get() {
+        return std::get<getIndex<I>()>(*this);
+    }
+
+    template <class I>
+    constexpr const auto& get() const {
+        return std::get<getIndex<I>()>(*this);
     }
 
     template <class... Us>
-    IndexedTuple(Us&&... other)
+    constexpr IndexedTuple(Us&&... other)
         : std::tuple<Ts...>(std::forward<Us>(other)...) {}
 
     template <class... Js, class... Us>
-    IndexedTuple<TypeList<Is..., Js...>, TypeList<Ts..., Us...>> concat(
+    constexpr IndexedTuple<TypeList<Is..., Js...>, TypeList<Ts..., Us...>> concat(
         const IndexedTuple<TypeList<Js...>, TypeList<Us...>>& other) const {
         return IndexedTuple<TypeList<Is..., Js...>, TypeList<Ts..., Us...>>{get<Is>()..., other.template get<Js>()...};
     }
 
     // Help out MSVC++
-    bool operator==(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& other) const {
+    constexpr bool operator==(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& other) const {
         return static_cast<const std::tuple<Ts...>&>(*this) == static_cast<const std::tuple<Ts...>&>(other);
     }
 
-    bool operator!=(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& other) const noexcept {
+    constexpr bool operator!=(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& other) const {
         return !(*this == other);
     }
 };

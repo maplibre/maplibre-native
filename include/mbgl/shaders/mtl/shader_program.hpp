@@ -2,7 +2,6 @@
 
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
-#include <mbgl/mtl/uniform_block.hpp>
 #include <mbgl/mtl/vertex_attribute.hpp>
 
 #include <Foundation/NSSharedPtr.hpp>
@@ -62,7 +61,8 @@ public:
 
     MTLRenderPipelineStatePtr getRenderPipelineState(const gfx::Renderable&,
                                                      const MTLVertexDescriptorPtr&,
-                                                     const gfx::ColorMode& colorMode) const;
+                                                     const gfx::ColorMode& colorMode,
+                                                     const std::optional<std::size_t> reuseHash) const;
 
     std::optional<size_t> getSamplerLocation(const size_t id) const override;
 
@@ -70,12 +70,8 @@ public:
 
     const gfx::VertexAttributeArray& getInstanceAttributes() const override { return instanceAttributes; }
 
-    const gfx::UniformBlockArray& getUniformBlocks() const override { return uniformBlocks; }
-    gfx::UniformBlockArray& mutableUniformBlocks() override { return uniformBlocks; }
-
     void initAttribute(const shaders::AttributeInfo&);
     void initInstanceAttribute(const shaders::AttributeInfo&);
-    void initUniformBlock(const shaders::UniformBlockInfo&);
     void initTexture(const shaders::TextureInfo&);
 
 protected:
@@ -83,10 +79,11 @@ protected:
     RendererBackend& backend;
     MTLFunctionPtr vertexFunction;
     MTLFunctionPtr fragmentFunction;
-    UniformBlockArray uniformBlocks;
     VertexAttributeArray vertexAttributes;
     VertexAttributeArray instanceAttributes;
     std::array<std::optional<size_t>, shaders::maxTextureCountPerShader> textureBindings;
+
+    mutable mbgl::unordered_map<std::size_t, MTLRenderPipelineStatePtr> renderPipelineStateCache;
 };
 
 } // namespace mtl

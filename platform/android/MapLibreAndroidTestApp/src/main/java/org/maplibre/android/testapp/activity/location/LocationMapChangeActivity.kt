@@ -26,7 +26,7 @@ class LocationMapChangeActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView = findViewById(R.id.mapView)
         val stylesFab = findViewById<FloatingActionButton>(R.id.fabStyles)
         stylesFab.setOnClickListener { v: View? ->
-            if (maplibreMap != null) {
+            if (this::maplibreMap.isInitialized) {
                 maplibreMap.setStyle(Style.Builder().fromUri(Utils.nextStyle()))
             }
         }

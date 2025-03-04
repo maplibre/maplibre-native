@@ -1,5 +1,6 @@
 package org.maplibre.android.testapp.maps
 
+import android.view.SurfaceView
 import android.view.TextureView
 import android.view.ViewGroup
 import androidx.test.annotation.UiThreadTest
@@ -8,7 +9,6 @@ import androidx.test.rule.ActivityTestRule
 import org.maplibre.android.AppCenter
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMapOptions
-import org.maplibre.android.maps.renderer.glsurfaceview.MapLibreGLSurfaceView
 import org.maplibre.android.testapp.activity.FeatureOverviewActivity
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -30,11 +30,11 @@ class RenderViewGetterTest : AppCenter() {
 
     @Test
     @UiThreadTest
-    fun testGLSurfaceView() {
+    fun testSurfaceView() {
         rootView = rule.activity.findViewById(android.R.id.content)
         mapView = MapView(rule.activity)
         assertNotNull(mapView.renderView)
-        assertTrue(mapView.renderView is MapLibreGLSurfaceView)
+        assertTrue(mapView.renderView is SurfaceView)
     }
 
     @Test

@@ -44,7 +44,6 @@ cc_library(
         "mapbox-base/include",
     ],
     visibility = ["//visibility:public"],
-    deps = ["optional"],
 )
 
 # vendor/parsedate
@@ -54,15 +53,6 @@ cc_library(
     hdrs = glob(["parsedate/**/*.hpp"]),
     copts = CPP_FLAGS,
     includes = ["parsedate"],
-    visibility = ["//visibility:public"],
-)
-
-# vendor/optional
-cc_library(
-    name = "optional",
-    hdrs = glob(["mapbox-base/deps/optional/*.hpp"]),
-    copts = CPP_FLAGS,
-    includes = ["mapbox-base/deps/optional"],
     visibility = ["//visibility:public"],
 )
 
@@ -78,7 +68,6 @@ cc_library(
     copts = CPP_FLAGS,
     includes = ["csscolorparser"],
     visibility = ["//visibility:public"],
-    deps = ["optional"],
 )
 
 # vendor/wagyu-files.json
@@ -165,6 +154,15 @@ cc_library(
     visibility = ["//visibility:public"],
 )
 
+# vendor/pmtiles-files.json
+cc_library(
+    name = "pmtiles",
+    hdrs = ["PMTiles/cpp/pmtiles.hpp"],
+    copts = CPP_FLAGS,
+    includes = ["PMTiles/cpp"],
+    visibility = ["//visibility:public"],
+)
+
 # vendor/polylabel-files.json
 cc_library(
     name = "polylabel",
@@ -235,5 +233,14 @@ cc_library(
     hdrs = ["unordered_dense/include/ankerl/unordered_dense.h"],
     include_prefix = "ankerl",
     strip_include_prefix = "unordered_dense/include/ankerl",
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "nontype_functional",
+    srcs = [],
+    hdrs = glob(["nontype_functional/include/std23/*.h"]),
+    include_prefix = "std23",
+    strip_include_prefix = "nontype_functional/include/std23",
     visibility = ["//visibility:public"],
 )

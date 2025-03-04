@@ -4,6 +4,7 @@
 #include <mbgl/style/expression/type.hpp>
 #include <mbgl/style/expression/value.hpp>
 #include <mbgl/tile/tile_id.hpp>
+#include <mbgl/util/bitmask_operations.hpp>
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/variant.hpp>
@@ -202,17 +203,14 @@ enum class Dependency : uint32_t {
     Var = 1 << 5,      // Use variable binding
     Override = 1 << 6, // Property override
     MaskCount = 7,
+    All = (1 << MaskCount) - 1,
 };
-inline constexpr static Dependency operator|(Dependency x, Dependency y) noexcept {
-    return Dependency{mbgl::underlying_type(x) | mbgl::underlying_type(y)};
-}
-inline constexpr static Dependency operator&(Dependency x, Dependency y) noexcept {
-    return Dependency{mbgl::underlying_type(x) & mbgl::underlying_type(y)};
-}
-inline static Dependency& operator|=(Dependency& target, Dependency source) noexcept {
-    target = target | source;
-    return target;
-}
+
+class Interpolate;
+class Step;
+
+using ZoomCurveOrError = std::optional<variant<const Interpolate*, const Step*, ParsingError>>;
+using ZoomCurvePtr = variant<std::nullptr_t, const Interpolate*, const Step*>;
 
 class Expression {
 public:
@@ -226,7 +224,7 @@ public:
     virtual void eachChild(const std::function<void(const Expression&)>&) const = 0;
 
     virtual bool operator==(const Expression&) const = 0;
-    bool operator!=(const Expression& rhs) const noexcept { return !operator==(rhs); }
+    bool operator!=(const Expression&) const = default;
 
     Kind getKind() const noexcept { return kind; };
     const type::Type& getType() const noexcept { return type; };
@@ -264,6 +262,9 @@ public:
 
     const Dependency dependencies;
 
+    /// Test the expression's dependencies for any of one or more values
+    bool has(Dependency dep) const { return (dependencies & dep); }
+
 protected:
     template <typename T>
     static bool childrenEqual(const T& lhs, const T& rhs) noexcept {
@@ -281,9 +282,11 @@ protected:
         return *lhs == *rhs;
     }
 
-    template <typename T, typename = std::enable_if_t<std::is_scalar_v<T>>>
+    template <typename T>
     static bool childEqual(const std::pair<T, std::unique_ptr<Expression>>& lhs,
-                           const std::pair<T, std::unique_ptr<Expression>>& rhs) noexcept {
+                           const std::pair<T, std::unique_ptr<Expression>>& rhs) noexcept
+        requires(std::is_scalar_v<T>)
+    {
         return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
     }
 
@@ -293,9 +296,11 @@ protected:
         return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
     }
 
-    template <typename T, typename = std::enable_if_t<!std::is_scalar_v<T>>>
+    template <typename T>
     static bool childEqual(const std::pair<T, std::shared_ptr<Expression>>& lhs,
-                           const std::pair<T, std::shared_ptr<Expression>>& rhs) noexcept {
+                           const std::pair<T, std::shared_ptr<Expression>>& rhs) noexcept
+        requires(!std::is_scalar_v<T>)
+    {
 #if __clang_major__ > 16
         // On older compilers, this assignment doesn't do overload resolution
         // in the same way that `lhs==rhs` does and produces ambiguity errors.

@@ -14,11 +14,16 @@
 
 namespace mbgl {
 
-RasterDEMTile::RasterDEMTile(const OverscaledTileID& id_, const TileParameters& parameters, const Tileset& tileset)
-    : Tile(Kind::RasterDEM, id_),
+RasterDEMTile::RasterDEMTile(const OverscaledTileID& id_,
+                             std::string sourceID_,
+                             const TileParameters& parameters,
+                             const Tileset& tileset,
+                             TileObserver* observer_)
+    : Tile(Kind::RasterDEM, id_, std::move(sourceID_), observer_),
       loader(*this, id_, parameters, tileset),
+      threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
-      worker(Scheduler::GetBackground(), ActorRef<RasterDEMTile>(*this, mailbox)) {
+      worker(parameters.threadPool, ActorRef<RasterDEMTile>(*this, mailbox)) {
     encoding = tileset.encoding;
     if (id.canonical.y == 0) {
         // this tile doesn't have upper neighboring tiles so marked those as backfilled
@@ -31,7 +36,19 @@ RasterDEMTile::RasterDEMTile(const OverscaledTileID& id_, const TileParameters& 
     }
 }
 
-RasterDEMTile::~RasterDEMTile() = default;
+RasterDEMTile::~RasterDEMTile() {
+    markObsolete();
+
+    if (pending) {
+        // This tile never finished loading or was abandoned, emit a cancellation event
+        observer->onTileAction(id, sourceID, TileOperation::Cancelled);
+    }
+
+    // The bucket has resources that need to be released on the render thread.
+    if (bucket) {
+        threadPool.runOnRenderThread([bucket_{std::move(bucket)}]() {});
+    }
+}
 
 std::unique_ptr<TileRenderData> RasterDEMTile::createRenderData() {
     return std::make_unique<SharedBucketTileRenderData<HillshadeBucket>>(bucket);
@@ -48,25 +65,36 @@ void RasterDEMTile::setMetadata(std::optional<Timestamp> modified_, std::optiona
 }
 
 void RasterDEMTile::setData(const std::shared_ptr<const std::string>& data) {
-    pending = true;
-    ++correlationID;
-    worker.self().invoke(&RasterDEMTileWorker::parse, data, correlationID, encoding);
+    if (!obsolete) {
+        ++correlationID;
+
+        if (!pending) {
+            observer->onTileAction(id, sourceID, TileOperation::StartParse);
+        }
+
+        pending = true;
+        worker.self().invoke(&RasterDEMTileWorker::parse, data, correlationID, encoding);
+    }
 }
 
 void RasterDEMTile::onParsed(std::unique_ptr<HillshadeBucket> result, const uint64_t resultCorrelationID) {
-    bucket = std::move(result);
-    loaded = true;
-    if (resultCorrelationID == correlationID) {
-        pending = false;
+    if (!obsolete) {
+        bucket = std::move(result);
+        loaded = true;
+        if (resultCorrelationID == correlationID) {
+            pending = false;
+            observer->onTileAction(id, sourceID, TileOperation::EndParse);
+        }
+        renderable = static_cast<bool>(bucket);
+        observer->onTileChanged(*this);
     }
-    renderable = static_cast<bool>(bucket);
-    observer->onTileChanged(*this);
 }
 
 void RasterDEMTile::onError(std::exception_ptr err, const uint64_t resultCorrelationID) {
     loaded = true;
     if (resultCorrelationID == correlationID) {
         pending = false;
+        observer->onTileAction(id, sourceID, TileOperation::Error);
     }
     observer->onTileError(*this, std::move(err));
 }
@@ -123,6 +151,19 @@ void RasterDEMTile::setNecessity(TileNecessity necessity) {
 
 void RasterDEMTile::setUpdateParameters(const TileUpdateParameters& params) {
     loader.setUpdateParameters(params);
+}
+
+void RasterDEMTile::cancel() {
+    markObsolete();
+}
+
+void RasterDEMTile::markObsolete() {
+    obsolete = true;
+    if (pending) {
+        observer->onTileAction(id, sourceID, TileOperation::Cancelled);
+    }
+    pending = false;
+    mailbox->abandon();
 }
 
 } // namespace mbgl

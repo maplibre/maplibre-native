@@ -27,12 +27,12 @@ public:
     class FakeFileRequest : public AsyncRequest {
     public:
         Resource resource;
-        Callback callback;
+        std::function<void(Response)> callback;
 
         std::list<FakeFileRequest*>& list;
         std::list<FakeFileRequest*>::iterator link;
 
-        FakeFileRequest(Resource resource_, Callback callback_, std::list<FakeFileRequest*>& list_)
+        FakeFileRequest(Resource resource_, std::function<void(Response)> callback_, std::list<FakeFileRequest*>& list_)
             : resource(std::move(resource_)),
               callback(std::move(callback_)),
               list(list_),
@@ -47,8 +47,8 @@ public:
     FakeFileSource()
         : FakeFileSource(ResourceOptions::Default(), ClientOptions()) {}
 
-    std::unique_ptr<AsyncRequest> request(const Resource& resource, Callback callback) override {
-        return std::make_unique<FakeFileRequest>(resource, callback, requests);
+    std::unique_ptr<AsyncRequest> request(const Resource& resource, std::function<void(Response)> callback) override {
+        return std::make_unique<FakeFileRequest>(resource, std::move(callback), requests);
     }
 
     bool canRequest(const Resource&) const override { return true; }
@@ -62,7 +62,7 @@ public:
 
         if (requestFound) {
             // Copy the callback, in case calling it deallocates the AsyncRequest.
-            Callback callback_ = (*it)->callback;
+            auto callback_ = (*it)->callback;
             callback_(response);
         }
 
@@ -89,8 +89,8 @@ public:
     FakeOnlineFileSource(const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
         : FakeFileSource(resourceOptions_, clientOptions_) {}
 
-    std::unique_ptr<AsyncRequest> request(const Resource& resource, Callback callback) override {
-        return FakeFileSource::request(resource, callback);
+    std::unique_ptr<AsyncRequest> request(const Resource& resource, std::function<void(Response)> callback) override {
+        return FakeFileSource::request(resource, std::move(callback));
     }
 
     bool respond(Resource::Kind kind, const Response& response) { return FakeFileSource::respond(kind, response); }

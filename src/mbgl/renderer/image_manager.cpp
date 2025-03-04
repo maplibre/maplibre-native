@@ -4,13 +4,16 @@
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/renderer/image_manager_observer.hpp>
 #include <mbgl/util/constants.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
 
 #include <sstream>
 
 namespace mbgl {
 
-static ImageManagerObserver nullObserver;
+namespace {
+ImageManagerObserver nullObserver;
+} // namespace
 
 ImageManager::ImageManager() = default;
 
@@ -189,17 +192,19 @@ void ImageManager::reduceMemoryUse() {
 
 void ImageManager::reduceMemoryUseIfCacheSizeExceedsLimit() {
     if (requestedImagesCacheSize > util::DEFAULT_ON_DEMAND_IMAGES_CACHE_SIZE) {
+        MLN_TRACE_FUNC();
         reduceMemoryUse();
     }
 }
 
 std::set<std::string> ImageManager::getAvailableImages() const {
-    std::set<std::string> copy;
+    MLN_TRACE_FUNC();
+    std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
+
     {
-        std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
-        copy = availableImages;
+        MLN_TRACE_ZONE(copy);
+        return availableImages;
     }
-    return copy;
 }
 
 void ImageManager::clear() {
@@ -226,7 +231,7 @@ void ImageManager::checkMissingAndNotify(ImageRequestor& requestor, const ImageR
 
     if (!missingDependencies.empty()) {
         ImageRequestor* requestorPtr = &requestor;
-        assert(!missingImageRequestors.count(requestorPtr));
+        assert(!missingImageRequestors.contains(requestorPtr));
         missingImageRequestors.emplace(requestorPtr, pair);
 
         for (const auto& dependency : missingDependencies) {
@@ -255,7 +260,7 @@ void ImageManager::checkMissingAndNotify(ImageRequestor& requestor, const ImageR
                 requestor.addPendingRequest(missingImage);
             }
 
-            auto removePendingRequests = [this, missingImage] {
+            Scheduler::Task removePendingRequests = [this, missingImage] {
                 std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
                 auto existingRequest = requestedImages.find(missingImage);
                 if (existingRequest == requestedImages.end()) {
@@ -266,8 +271,8 @@ void ImageManager::checkMissingAndNotify(ImageRequestor& requestor, const ImageR
                     req->removePendingRequest(missingImage);
                 }
             };
-            observer->onStyleImageMissing(missingImage,
-                                          Scheduler::GetCurrent()->bindOnce(std::move(removePendingRequests)));
+            Scheduler::Task bindRemove = Scheduler::GetCurrent()->bindOnce(std::move(removePendingRequests));
+            observer->onStyleImageMissing(missingImage, std::move(bindRemove));
         }
     } else {
         // Associate requestor with an image that was provided by the client.
@@ -305,9 +310,7 @@ void ImageManager::notify(ImageRequestor& requestor, const ImageRequestPair& pai
 }
 
 void ImageManager::dumpDebugLogs() const {
-    std::ostringstream ss;
-    ss << "ImageManager::loaded: " << loaded;
-    Log::Info(Event::General, ss.str());
+    Log::Info(Event::General, "ImageManager::loaded: " + std::string(loaded ? "1" : "0"));
 }
 
 ImageRequestor::ImageRequestor(std::shared_ptr<ImageManager> imageManager_)

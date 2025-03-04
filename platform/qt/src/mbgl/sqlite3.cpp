@@ -14,6 +14,7 @@
 #include <chrono>
 #include <limits>
 #include <optional>
+#include <variant>
 
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/logging.hpp>
@@ -77,7 +78,7 @@ public:
     int64_t changes = 0;
 };
 
-mapbox::util::variant<Database, Exception> Database::tryOpen(const std::string& filename, int flags) {
+std::variant<Database, Exception> Database::tryOpen(const std::string& filename, int flags) {
     if (!QSqlDatabase::drivers().contains("QSQLITE")) {
         return Exception{ResultCode::CantOpen, "SQLite driver not found."};
     }
@@ -112,10 +113,10 @@ mapbox::util::variant<Database, Exception> Database::tryOpen(const std::string& 
 
 Database Database::open(const std::string& filename, int flags) {
     auto result = tryOpen(filename, flags);
-    if (result.is<Exception>()) {
-        throw result.get<Exception>();
+    if (std::holds_alternative<Exception>(result)) {
+        throw std::get<Exception>(result);
     } else {
-        return std::move(result.get<Database>());
+        return std::move(std::get<Database>(result));
     }
 }
 
@@ -168,11 +169,7 @@ void Database::exec(const std::string& sql) {
 }
 
 void DatabaseImpl::exec(const std::string& sql) {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     QStringList statements = QString::fromStdString(sql).split(';', Qt::SkipEmptyParts);
-#else
-    QStringList statements = QString::fromStdString(sql).split(';', QString::SkipEmptyParts);
-#endif
     statements.removeAll("\n");
     for (QString statement : statements) {
         if (!statement.endsWith(';')) {
@@ -232,11 +229,7 @@ template <>
 void Query::bind(int offset, std::nullptr_t) {
     assert(stmt.impl);
     // Field numbering starts at 0.
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     stmt.impl->query.bindValue(offset - 1, QVariant(), QSql::In);
-#else
-    stmt.impl->query.bindValue(offset - 1, QVariant(QVariant::Invalid), QSql::In);
-#endif
     checkQueryError(stmt.impl->query);
 }
 

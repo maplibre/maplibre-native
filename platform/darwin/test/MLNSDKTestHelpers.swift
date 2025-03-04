@@ -1,10 +1,9 @@
 import XCTest
 
 class MLNSDKTestHelpers {
-
     class func checkTestsContainAllMethods(testClass: Swift.AnyClass, in p: Protocol) {
-        let testMethods = self.classMethodDescriptions(testClass)
-        let subjectMethods = self.protocolMethodDescriptions(p)
+        let testMethods = classMethodDescriptions(testClass)
+        let subjectMethods = protocolMethodDescriptions(p)
 
         for method in subjectMethods {
             if !testMethods.contains(method) {
@@ -14,16 +13,14 @@ class MLNSDKTestHelpers {
 
         XCTAssert(true)
     }
-
 }
 
 extension MLNSDKTestHelpers {
-
     class func protocolMethodDescriptions(_ p: Protocol) -> Set<String> {
         var methods = Set<String>()
         var methodCount = UInt32()
         let methodDescriptionList = protocol_copyMethodDescriptionList(p, false, true, &methodCount)
-        for i in 0..<Int(methodCount) {
+        for i in 0 ..< Int(methodCount) {
             let description = methodDescriptionList![i]
             XCTAssertNotNil(description.name?.description)
             methods.insert(description.name!.description)
@@ -36,7 +33,7 @@ extension MLNSDKTestHelpers {
         var methods = Set<String>()
         var methodCount = UInt32()
         let methodList = class_copyMethodList(cls, &methodCount)
-        for i in 0..<Int(methodCount) {
+        for i in 0 ..< Int(methodCount) {
             let method = methodList![i]
             let selector = method_getName(method)
             methods.insert(selector.description)
@@ -44,5 +41,4 @@ extension MLNSDKTestHelpers {
         free(methodList)
         return methods
     }
-
 }

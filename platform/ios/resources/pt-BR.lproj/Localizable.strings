@@ -53,7 +53,7 @@
 "PARSE_STYLE_FAILED_DESC" = "Falha ao carregar mapa porque o estilo está corrompido.";
 
 /* Action sheet title */
-"SDK_NAME" = "MapLibre Maps SDK for iOS";
+"SDK_NAME" = "MapLibre Native iOS";
 
 /* User-friendly error description */
 "STYLE_NOT_FOUND_DESC" = "Falha ao carregar mapa porque o estilo não pode ser encontrado ou é incompatível.";
@@ -87,4 +87,3 @@
 
 /* Default user location annotation title */
 "USER_DOT_TITLE" = "Você Está Aqui";
-

@@ -5,45 +5,75 @@
 #include <mbgl/style/expression/interpolate.hpp>
 #include <mbgl/style/expression/step.hpp>
 #include <mbgl/style/expression/find_zoom_curve.hpp>
+#include <mbgl/util/bitmask_operations.hpp>
 #include <mbgl/util/range.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/gpu_expression.hpp>
+#endif // MLN_DRAWABLE_RENDERER
 
 #include <optional>
 
 namespace mbgl {
+namespace gfx {
+class GPUExpression;
+using UniqueGPUExpression = std::unique_ptr<GPUExpression>;
+} // namespace gfx
+
 namespace style {
 
 class PropertyExpressionBase {
 public:
-    explicit PropertyExpressionBase(std::unique_ptr<expression::Expression>) noexcept;
+    using Expression = expression::Expression;
+    using Dependency = expression::Dependency;
+    using ZoomCurvePtr = expression::ZoomCurvePtr;
+
+    PropertyExpressionBase(PropertyExpressionBase&&);
+    PropertyExpressionBase(const PropertyExpressionBase&);
+    explicit PropertyExpressionBase(std::unique_ptr<Expression>);
+    virtual ~PropertyExpressionBase() = default;
+
+    PropertyExpressionBase& operator=(PropertyExpressionBase&&);
+    PropertyExpressionBase& operator=(const PropertyExpressionBase&);
 
     bool isZoomConstant() const noexcept { return isZoomConstant_; }
     bool isFeatureConstant() const noexcept { return isFeatureConstant_; }
     bool isRuntimeConstant() const noexcept { return isRuntimeConstant_; }
     float interpolationFactor(const Range<float>&, float) const noexcept;
     Range<float> getCoveringStops(float, float) const noexcept;
-    const expression::Expression& getExpression() const noexcept;
+    const Expression& getExpression() const noexcept;
 
-    /// Can be used for aggregating property expressions from multiple
-    /// properties(layers) into single match / case expression. Method may
-    /// be removed if a better way of aggregation is found.
-    std::shared_ptr<const expression::Expression> getSharedExpression() const noexcept;
+    bool isGPUCapable() const { return isGPUCapable_; }
 
-    bool useIntegerZoom = false;
+    bool getUseIntegerZoom() const { return useIntegerZoom_; }
+    void setUseIntegerZoom(bool value) { useIntegerZoom_ = value; }
 
-    using Dependency = expression::Dependency;
-    Dependency getDependencies() const noexcept {
-        auto v = expression ? expression->dependencies : Dependency::None;
-        assert(isZoomConstant_ == !(underlying_type(v) & underlying_type(Dependency::Zoom)));
-        assert(isFeatureConstant_ == !(underlying_type(v) & underlying_type(Dependency::Feature)));
-        return v;
-    }
+    /// Can be used for aggregating property expressions from multiple properties(layers) into single match / case
+    /// expression. May be removed if a better way of aggregation is found.
+    std::shared_ptr<const Expression> getSharedExpression() const noexcept;
+
+#if MLN_DRAWABLE_RENDERER
+    /// Build a cached GPU representation of the expression, with the same lifetime as this object.
+    gfx::UniqueGPUExpression getGPUExpression(bool intZoom) const;
+#endif // MLN_DRAWABLE_RENDERER
+
+    Dependency getDependencies() const noexcept { return expression ? expression->dependencies : Dependency::None; }
+
+    const ZoomCurvePtr& getZoomCurve() const { return zoomCurve; }
 
 protected:
-    std::shared_ptr<const expression::Expression> expression;
+    std::shared_ptr<const Expression> expression;
+
+    ZoomCurvePtr zoomCurve;
+
+    bool useIntegerZoom_ = false;
     bool isZoomConstant_;
     bool isFeatureConstant_;
     bool isRuntimeConstant_;
-    variant<std::nullptr_t, const expression::Interpolate*, const expression::Step*> zoomCurve;
+
+    // If the expression depends on zoom and nothing else, and produces
+    // a number or color, we can potentially evaluate it on the GPU
+    bool isGPUCapable_;
 };
 
 template <class T>
@@ -52,8 +82,7 @@ class PropertyExpression final : public PropertyExpressionBase {
 
 public:
     // Second parameter to be used only for conversions from legacy functions.
-    PropertyExpression(std::unique_ptr<expression::Expression> expression_,
-                       std::optional<T> defaultValue_ = std::nullopt) noexcept
+    PropertyExpression(std::unique_ptr<Expression> expression_, std::optional<T> defaultValue_ = std::nullopt)
         : PropertyExpressionBase(std::move(expression_)),
           defaultValue(std::move(defaultValue_)) {}
 
@@ -61,7 +90,9 @@ public:
         const expression::EvaluationResult result = expression->evaluate(context);
         if (result) {
             const std::optional<T> typed = expression::fromExpressionValue<T>(*result);
-            return typed ? *typed : defaultValue ? *defaultValue : finalDefaultValue;
+            if (typed) {
+                return *typed;
+            }
         }
         return defaultValue ? *defaultValue : finalDefaultValue;
     }

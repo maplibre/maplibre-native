@@ -5,8 +5,8 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/module.cmake)
 
 add_node_module(
     mbgl-node
-    INSTALL_PATH ${PROJECT_SOURCE_DIR}/lib/{node_abi}/mbgl.node
-    NAN_VERSION 2.18.0
+    INSTALL_PATH ${PROJECT_SOURCE_DIR}/platform/node/lib/{node_abi}/mbgl.node
+    NAN_VERSION 2.22.0
     EXCLUDE_NODE_ABIS
         46
         47
@@ -37,6 +37,7 @@ target_include_directories(
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/platform/default/include
         ${PROJECT_SOURCE_DIR}/src
+        ${PROJECT_SOURCE_DIR}/vendor/nontype_functional/include
     PRIVATE ${LIBUV_INCLUDE_DIRS}
 )
 
@@ -44,6 +45,7 @@ target_link_libraries(
     mbgl-node-loop
     PUBLIC
         Mapbox::Base
+    INTERFACE mbgl-vendor-nontype_functional
 )
 
 target_sources(
@@ -68,6 +70,7 @@ target_link_libraries(
     mbgl-node
     INTERFACE mbgl-node-loop
     INTERFACE Mapbox::Map
+    INTERFACE mbgl-vendor-nontype_functional
 )
 
 # FIXME: Node bindings only run fully on Linux now because it requires libuv RunLoop (which is the default on Linux). Also, Sanitizer will
@@ -75,4 +78,10 @@ target_link_libraries(
 if(CMAKE_SYSTEM_NAME STREQUAL Linux AND NOT MLN_WITH_SANITIZER)
     add_test(NAME mbgl-node-memory COMMAND npm run test-memory WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
     add_test(NAME mbgl-node-test COMMAND npm run test WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+endif()
+
+# needed because v8config.h uses __cplusplus
+# https://learn.microsoft.com/en-us/cpp/build/reference/zc-cplusplus?view=msvc-170
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus")
 endif()

@@ -48,7 +48,7 @@ public:
         bool pitchWithMap,
         bool collisionDebug,
         const std::optional<CollisionBoundaries>& avoidEdges,
-        const std::optional<std::function<bool(const IndexedSubfeature&)>>& collisionGroupPredicate,
+        const std::optional<std::function<bool(const RefIndexedSubfeature&)>>& collisionGroupPredicate,
         std::vector<ProjectedCollisionBox>& /*out*/
     );
 
@@ -84,7 +84,7 @@ private:
         bool pitchWithMap,
         bool collisionDebug,
         const std::optional<CollisionBoundaries>& avoidEdges,
-        const std::optional<std::function<bool(const IndexedSubfeature&)>>& collisionGroupPredicate,
+        const std::optional<std::function<bool(const RefIndexedSubfeature&)>>& collisionGroupPredicate,
         std::vector<ProjectedCollisionBox>& /*out*/
     );
 

@@ -1,29 +1,29 @@
 #import <Foundation/Foundation.h>
 
 #import "MLNFoundation.h"
-#import "MLNOfflineRegion.h"
 #import "MLNGeometry.h"
+#import "MLNOfflineRegion.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 /**
  An offline region defined by a style URL, geographic coordinate bounds, and
  range of zoom levels.
- 
+
  To minimize the resources required by an irregularly shaped offline region,
  use the MLNShapeOfflineRegion class instead.
- 
+
  ### Example
  ```swift
  let northeast = CLLocationCoordinate2D(latitude: 40.989329, longitude: -102.062592)
  let southwest = CLLocationCoordinate2D(latitude: 36.986207, longitude: -109.049896)
  let bbox = MLNCoordinateBounds(sw: southwest, ne: northeast)
- 
- let region = MLNTilePyramidOfflineRegion(styleURL: MLNStyle.lightStyleURL, bounds: bbox, fromZoomLevel: 11, toZoomLevel: 14)
- let context = "Tile Pyramid Region".data(using: .utf8)
+
+ let region = MLNTilePyramidOfflineRegion(styleURL: MLNStyle.lightStyleURL, bounds: bbox,
+ fromZoomLevel: 11, toZoomLevel: 14) let context = "Tile Pyramid Region".data(using: .utf8)
  MLNOfflineStorage.shared.addPack(for: region, withContext: context!)
  ```
-  
+
  #### Related examples
  TODO: Download an offline map, learn how to define an offline region
  to be downloaded to a user's device.
@@ -40,14 +40,14 @@ MLN_EXPORT
 /**
  The minimum zoom level for which to download tiles and other resources.
 
- For more information about zoom levels, `-[MLNMapView zoomLevel]`.
+ For more information about zoom levels, ``MLNMapView/zoomLevel``.
  */
 @property (nonatomic, readonly) double minimumZoomLevel;
 
 /**
  The maximum zoom level for which to download tiles and other resources.
 
- For more information about zoom levels, `-[MLNMapView zoomLevel]`.
+ For more information about zoom levels, ``MLNMapView/zoomLevel``.
  */
 @property (nonatomic, readonly) double maximumZoomLevel;
 
@@ -57,7 +57,7 @@ MLN_EXPORT
  Initializes a newly created offline region with the given style URL, geographic
  coordinate bounds, and range of zoom levels.
 
- This is the designated initializer for `MLNTilePyramidOfflineRegion`.
+ This is the designated initializer for ``MLNTilePyramidOfflineRegion``.
 
  @param styleURL URL of the map style for which to download resources. The URL
     may be a full HTTP or HTTPS URL or a canonical style URL.
@@ -80,7 +80,10 @@ MLN_EXPORT
     level, the download covers zoom levels up to the tile source’s maximum zoom
     level.
  */
-- (instancetype)initWithStyleURL:(nullable NSURL *)styleURL bounds:(MLNCoordinateBounds)bounds fromZoomLevel:(double)minimumZoomLevel toZoomLevel:(double)maximumZoomLevel NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithStyleURL:(nullable NSURL *)styleURL
+                          bounds:(MLNCoordinateBounds)bounds
+                   fromZoomLevel:(double)minimumZoomLevel
+                     toZoomLevel:(double)maximumZoomLevel NS_DESIGNATED_INITIALIZER;
 
 @end
 

@@ -138,7 +138,7 @@ public class GeoJsonConversionTest extends EspressoTest {
       SymbolLayer layer = new SymbolLayer("layer", "source")
         .withProperties(
           PropertyFactory.iconOffset(Expression.get("property")),
-          PropertyFactory.iconImage("zoo-15")
+          PropertyFactory.iconImage("icon-zoo")
         );
       maplibreMap.getStyle().addLayer(layer);
 

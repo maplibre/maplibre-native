@@ -82,6 +82,7 @@ TEST(RunLoop, PlatformIntegration) {
     loop.setPlatformCallback([&] {
         EXPECT_NE(mainThread, std::this_thread::get_id());
         count1++;
+        std::unique_lock<std::mutex> lock(mutex);
         cv.notify_one();
     });
 
@@ -100,6 +101,7 @@ TEST(RunLoop, PlatformIntegration) {
     while (count2 < 200000) {
         std::unique_lock<std::mutex> lock(mutex);
         cv.wait(lock);
+        lock.unlock();
         loop.runOnce();
     }
 

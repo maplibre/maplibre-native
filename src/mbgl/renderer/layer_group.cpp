@@ -1,6 +1,5 @@
 #include <mbgl/renderer/layer_group.hpp>
 
-#include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
@@ -10,7 +9,6 @@
 namespace mbgl {
 
 void LayerGroupBase::addDrawable(gfx::UniqueDrawable& drawable) {
-    drawable->setLayerIndex(layerIndex);
     // init their tweakers
     for (const auto& tweaker : drawable->getTweakers()) {
         tweaker->init(*drawable);

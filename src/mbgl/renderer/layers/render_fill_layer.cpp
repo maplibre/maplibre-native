@@ -69,9 +69,10 @@ void RenderFillLayer::transition(const TransitionParameters& parameters) {
 }
 
 void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
+    const auto previousProperties = staticImmutableCast<FillLayerProperties>(evaluatedProperties);
     auto properties = makeMutable<FillLayerProperties>(staticImmutableCast<FillLayer::Impl>(baseImpl),
                                                        parameters.getCrossfadeParameters(),
-                                                       unevaluated.evaluate(parameters));
+                                                       unevaluated.evaluate(parameters, previousProperties->evaluated));
     auto& evaluated = properties->evaluated;
 
     if (unevaluated.get<style::FillOutlineColor>().isUndefined()) {
@@ -129,7 +130,7 @@ void RenderFillLayer::render(PaintParameters& parameters) {
                             const auto& indexBuffer,
                             const auto& segments,
                             auto&& textureBindings) {
-                const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+                auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
 
                 const auto allUniformValues = programInstance.computeAllUniformValues(
                     FillProgram::LayoutUniformValues{
@@ -213,7 +214,7 @@ void RenderFillLayer::render(PaintParameters& parameters) {
                             const auto& indexBuffer,
                             const auto& segments,
                             auto&& textureBindings) {
-                const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+                auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
                 paintPropertyBinders.setPatternParameters(patternPosA, patternPosB, crossfade);
 
                 const auto allUniformValues = programInstance.computeAllUniformValues(
@@ -296,10 +297,10 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
 
 void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
-                             const TransformState& state,
+                             const TransformState&,
                              const std::shared_ptr<UpdateParameters>&,
-                             [[maybe_unused]] const RenderTree& renderTree,
-                             [[maybe_unused]] UniqueChangeRequestVec& changes) {
+                             const RenderTree&,
+                             UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -350,6 +351,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
     const auto layerPrefix = getID() + "/";
     constexpr auto renderPass = RenderPass::Translucent;
+    constexpr auto lineWidth = 2.0f;
 
     const auto commonInit = [&](gfx::DrawableBuilder& builder) {
         builder.setCullFaceMode(gfx::CullFaceMode::disabled());
@@ -375,7 +377,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
-        const auto& binders = bucket.paintPropertyBinders.at(getID());
+        auto& binders = bucket.paintPropertyBinders.at(getID());
 
         const auto prevBucketID = getRenderTileBucketID(tileID);
         if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
@@ -385,95 +387,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         setRenderTileBucketID(tileID, bucket.getID());
 
         const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
-        const auto& crossfade = getCrossfade<FillLayerProperties>(renderData->layerProperties);
-
-        const auto& fillPatternValue = evaluated.get<FillPattern>().constantOr(Faded<expression::Image>{"", ""});
-        const auto patternPosA = tile.getPattern(fillPatternValue.from.id());
-        const auto patternPosB = tile.getPattern(fillPatternValue.to.id());
-        binders.setPatternParameters(patternPosA, patternPosB, crossfade);
-
-        const auto zoom = static_cast<float>(state.getZoom());
-
-        std::optional<FillInterpolateUBO> fillInterpolateUBO = std::nullopt;
-        std::optional<FillOutlineInterpolateUBO> fillOutlineInterpolateUBO = std::nullopt;
-        std::optional<FillPatternInterpolateUBO> fillPatternInterpolateUBO = std::nullopt;
-        std::optional<FillOutlinePatternInterpolateUBO> fillOutlinePatternInterpolateUBO = std::nullopt;
-
-        auto getFillInterpolateUBO = [&]() -> const FillInterpolateUBO& {
-            if (!fillInterpolateUBO) {
-                fillInterpolateUBO = {
-                    /* .color_t = */ std::get<0>(binders.get<FillColor>()->interpolationFactor(zoom)),
-                    /* .opacity_t = */ std::get<0>(binders.get<FillOpacity>()->interpolationFactor(zoom)),
-                    0,
-                    0,
-                };
-            }
-
-            return *fillInterpolateUBO;
-        };
-
-        auto getFillOutlineInterpolateUBO = [&]() -> const FillOutlineInterpolateUBO& {
-            if (!fillOutlineInterpolateUBO) {
-                fillOutlineInterpolateUBO = {
-                    /* .color_t = */ std::get<0>(binders.get<FillOutlineColor>()->interpolationFactor(zoom)),
-                    /* .opacity_t = */ std::get<0>(binders.get<FillOpacity>()->interpolationFactor(zoom)),
-                    0,
-                    0,
-                };
-            }
-
-            return *fillOutlineInterpolateUBO;
-        };
-
-        auto getFillPatternInterpolateUBO = [&]() -> const FillPatternInterpolateUBO& {
-            if (!fillPatternInterpolateUBO) {
-                fillPatternInterpolateUBO = {
-                    /* .pattern_from_t = */ std::get<0>(binders.get<FillPattern>()->interpolationFactor(zoom)),
-                    /* .pattern_to_t = */ std::get<0>(binders.get<FillPattern>()->interpolationFactor(zoom)),
-                    /* .opacity_t = */ std::get<0>(binders.get<FillOpacity>()->interpolationFactor(zoom)),
-                    0,
-                };
-            }
-
-            return *fillPatternInterpolateUBO;
-        };
-
-        auto getFillOutlinePatternInterpolateUBO = [&]() -> const FillOutlinePatternInterpolateUBO& {
-            if (!fillOutlinePatternInterpolateUBO) {
-                fillOutlinePatternInterpolateUBO = {
-                    /* .pattern_from_t = */ std::get<0>(binders.get<FillPattern>()->interpolationFactor(zoom)),
-                    /* .pattern_to_t = */ std::get<0>(binders.get<FillPattern>()->interpolationFactor(zoom)),
-                    /* .opacity_t = */ std::get<0>(binders.get<FillOpacity>()->interpolationFactor(zoom)),
-                    0,
-                };
-            }
-
-            return *fillOutlinePatternInterpolateUBO;
-        };
-
-        std::optional<FillPatternTilePropsUBO> fillPatternTilePropsUBO = std::nullopt;
-        auto getFillPatternTilePropsUBO = [&]() -> const FillPatternTilePropsUBO& {
-            if (!fillPatternTilePropsUBO) {
-                fillPatternTilePropsUBO = {
-                    /* pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
-                    /* pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
-                };
-            }
-
-            return *fillPatternTilePropsUBO;
-        };
-
-        std::optional<FillOutlinePatternTilePropsUBO> fillOutlinePatternTilePropsUBO = std::nullopt;
-        auto getFillOutlinePatternTilePropsUBO = [&]() -> const FillOutlinePatternTilePropsUBO& {
-            if (!fillOutlinePatternTilePropsUBO) {
-                fillOutlinePatternTilePropsUBO = {
-                    /* pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
-                    /* pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
-                };
-            }
-
-            return *fillOutlinePatternTilePropsUBO;
-        };
 
         gfx::DrawableTweakerPtr atlasTweaker;
         auto getAtlasTweaker = [&]() {
@@ -497,11 +410,13 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         propertiesAsUniforms.second.clear();
 
         // `Fill*Program` all use `style::FillPaintProperties`
+        // TODO: Only rebuild the vertex attributes when something has changed.
+        // TODO: Can we update them in-place instead of replacing?
         auto vertexAttrs = context.createVertexAttributeArray();
         vertexAttrs->readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
             binders, evaluated, propertiesAsUniforms, idFillColorVertexAttribute);
 
-        const auto vertexCount = bucket.vertices.elements();
+        const auto fillVertexCount = bucket.vertices.elements();
         if (const auto& attr = vertexAttrs->set(idFillPosVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillLayoutVertex, a1),
@@ -510,46 +425,92 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::AttributeDataType::Short2);
         }
 
+#if MLN_TRIANGULATE_FILL_OUTLINES
+        const auto lineVertexCount = bucket.lineVertices.elements();
+        const auto getTriangulatedAttributes = [&]() {
+            auto attrs = context.createVertexAttributeArray();
+            if (const auto& attr = attrs->set(idLinePosNormalVertexAttribute)) {
+                attr->setSharedRawData(bucket.sharedLineVertices,
+                                       offsetof(LineLayoutVertex, a1),
+                                       /*vertexOffset=*/0,
+                                       sizeof(LineLayoutVertex),
+                                       gfx::AttributeDataType::Short2);
+            }
+            if (const auto& attr = attrs->set(idLineDataVertexAttribute)) {
+                attr->setSharedRawData(bucket.sharedLineVertices,
+                                       offsetof(LineLayoutVertex, a2),
+                                       /*vertexOffset=*/0,
+                                       sizeof(LineLayoutVertex),
+                                       gfx::AttributeDataType::UByte4);
+            }
+            return attrs;
+        };
+#endif
+
         // If we already have drawables for this tile, update them.
         auto updateExisting = [&](gfx::Drawable& drawable) {
-            auto& drawableUniforms = drawable.mutableUniformBuffers();
-            switch (static_cast<FillVariant>(drawable.getType())) {
-                case FillVariant::Fill: {
-                    drawableUniforms.createOrUpdate(idFillInterpolateUBO, &getFillInterpolateUBO(), context);
-                    break;
-                }
-                case FillVariant::FillOutline: {
-                    drawableUniforms.createOrUpdate(idFillInterpolateUBO, &getFillOutlineInterpolateUBO(), context);
-                    break;
-                }
-                case FillVariant::FillPattern: {
-                    drawableUniforms.createOrUpdate(idFillInterpolateUBO, &getFillPatternInterpolateUBO(), context);
-                    drawableUniforms.createOrUpdate(idFillTilePropsUBO, &getFillPatternTilePropsUBO(), context);
-                    break;
-                }
-                case FillVariant::FillOutlinePattern: {
-                    drawableUniforms.createOrUpdate(
-                        idFillInterpolateUBO, &getFillOutlinePatternInterpolateUBO(), context);
-                    drawableUniforms.createOrUpdate(idFillTilePropsUBO, &getFillOutlinePatternTilePropsUBO(), context);
-                    break;
-                }
-                case FillVariant::FillOutlineTriangulated: {
-                    break;
-                }
-                default: {
-#ifndef NDEBUG
-                    mbgl::Log::Error(mbgl::Event::Render, "Invalid fill variant type supplied during drawable update!");
-#endif
-                    break;
-                }
+            if (drawable.getLayerTweaker() != layerTweaker) {
+                // This drawable was produced on a previous style/bucket, and should not be updated.
+                return false;
             }
 
-            drawable.setVertexAttributes(vertexAttrs);
+            switch (static_cast<FillVariant>(drawable.getType())) {
+                case FillVariant::Fill:
+                case FillVariant::FillPattern:
+                    drawable.updateVertexAttributes(vertexAttrs,
+                                                    fillVertexCount,
+                                                    gfx::Triangles(),
+                                                    bucket.sharedTriangles,
+                                                    bucket.triangleSegments.data(),
+                                                    bucket.triangleSegments.size());
+                    break;
+                case FillVariant::FillOutline:
+                case FillVariant::FillOutlinePattern:
+                    drawable.updateVertexAttributes(vertexAttrs,
+                                                    fillVertexCount,
+                                                    gfx::Lines(lineWidth),
+                                                    bucket.sharedBasicLineIndexes,
+                                                    bucket.basicLineSegments.data(),
+                                                    bucket.basicLineSegments.size());
+                    break;
+#if MLN_TRIANGULATE_FILL_OUTLINES
+                case FillVariant::FillOutlineTriangulated:
+                    if (const auto updated = drawable.getAttributeUpdateTime();
+                        !updated || bucket.lineVertices.getLastModified() > *updated) {
+                        drawable.updateVertexAttributes(getTriangulatedAttributes(),
+                                                        lineVertexCount,
+                                                        gfx::Triangles(),
+                                                        bucket.sharedLineIndexes,
+                                                        bucket.lineSegments.data(),
+                                                        bucket.lineSegments.size());
+                    }
+                    break;
+#endif
+                default:
+                    Log::Error(Event::General, "Invalid fill type " + util::toString(drawable.getType()));
+                    assert(false);
+                    return false;
+            }
+
             return true;
         };
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {
             continue;
         }
+
+        const auto finish = [&](gfx::DrawableBuilder& builder, FillVariant type) {
+            builder.flush(context);
+
+            for (auto& drawable : builder.clearDrawables()) {
+                drawable->setTileID(tileID);
+                drawable->setType(static_cast<size_t>(type));
+                drawable->setLayerTweaker(layerTweaker);
+                drawable->setBinders(renderData->bucket, &binders);
+                drawable->setRenderTile(renderTilesOwner, &tile);
+                fillTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                ++stats.drawablesAdded;
+            }
+        };
 
         // Outline always occurs in translucent pass, defaults to fill color
         // Outline does not default to fill in the pattern case
@@ -579,40 +540,15 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 : nullptr;
 
             auto createOutlineTriangulated = [&](auto& builder) {
-                if (doOutline && builder && bucket.sharedLineIndexes->elements()) {
+                if (doOutline && builder && lineVertexCount) {
                     builder->setShader(outlineTriangulatedShader);
-                    builder->setRawVertices({}, bucket.lineVertices.elements(), gfx::AttributeDataType::Short2);
-
-                    auto attrs = context.createVertexAttributeArray();
-                    if (const auto& attr = attrs->set(idLinePosNormalVertexAttribute)) {
-                        attr->setSharedRawData(bucket.sharedLineVertices,
-                                               offsetof(LineLayoutVertex, a1),
-                                               /*vertexOffset=*/0,
-                                               sizeof(LineLayoutVertex),
-                                               gfx::AttributeDataType::Short2);
-                    }
-                    if (const auto& attr = attrs->set(idLineDataVertexAttribute)) {
-                        attr->setSharedRawData(bucket.sharedLineVertices,
-                                               offsetof(LineLayoutVertex, a2),
-                                               /*vertexOffset=*/0,
-                                               sizeof(LineLayoutVertex),
-                                               gfx::AttributeDataType::UByte4);
-                    }
-                    builder->setVertexAttributes(std::move(attrs));
-
+                    builder->setRawVertices({}, lineVertexCount, gfx::AttributeDataType::Short2);
+                    builder->setVertexAttributes(getTriangulatedAttributes());
                     builder->setSegments(gfx::Triangles(),
                                          bucket.sharedLineIndexes,
                                          bucket.lineSegments.data(),
                                          bucket.lineSegments.size());
-
-                    // finish
-                    builder->flush(context);
-                    for (auto& drawable : builder->clearDrawables()) {
-                        drawable->setTileID(tileID);
-                        drawable->setType(static_cast<size_t>(FillVariant::FillOutlineTriangulated));
-                        fillTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                        ++stats.drawablesAdded;
-                    }
+                    finish(*builder, FillVariant::FillOutlineTriangulated);
                 }
             };
 #endif
@@ -639,7 +575,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-outline")) {
                     commonInit(*builder);
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
-                    builder->setLineWidth(2.0f);
+                    builder->setLineWidth(lineWidth);
                     builder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
                     builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setRenderPass(RenderPass::Translucent);
@@ -647,47 +583,25 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
 
-            const auto finish = [&](gfx::DrawableBuilder& builder,
-                                    const size_t interpolateUBOId,
-                                    const auto& interpolateUBO,
-                                    FillVariant type) {
-                builder.flush(context);
-
-                for (auto& drawable : builder.clearDrawables()) {
-                    drawable->setTileID(tileID);
-                    drawable->setLayerTweaker(layerTweaker);
-                    drawable->setType(static_cast<size_t>(type));
-
-                    auto& drawableUniforms = drawable->mutableUniformBuffers();
-                    drawableUniforms.createOrUpdate(interpolateUBOId, &interpolateUBO, context);
-                    fillTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                    ++stats.drawablesAdded;
-                }
-            };
-
             if (fillBuilder && bucket.sharedTriangles->elements()) {
                 fillBuilder->setShader(fillShader);
 #if MLN_TRIANGULATE_FILL_OUTLINES
                 if (doOutline && dataDrivenOutline && outlineBuilder) {
-                    fillBuilder->setVertexAttributes(vertexAttrs);
-                    outlineBuilder->setVertexAttributes(std::move(vertexAttrs));
-                } else {
-                    fillBuilder->setVertexAttributes(std::move(vertexAttrs));
+                    outlineBuilder->setVertexAttributes(vertexAttrs);
                 }
 #else
                 if (doOutline && outlineBuilder) {
-                    fillBuilder->setVertexAttributes(vertexAttrs);
-                    outlineBuilder->setVertexAttributes(std::move(vertexAttrs));
-                } else {
-                    fillBuilder->setVertexAttributes(std::move(vertexAttrs));
+                    outlineBuilder->setVertexAttributes(vertexAttrs);
                 }
 #endif
-                fillBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
+                fillBuilder->setVertexAttributes(std::move(vertexAttrs));
+
+                fillBuilder->setRawVertices({}, fillVertexCount, gfx::AttributeDataType::Short2);
                 fillBuilder->setSegments(gfx::Triangles(),
                                          bucket.sharedTriangles,
                                          bucket.triangleSegments.data(),
                                          bucket.triangleSegments.size());
-                finish(*fillBuilder, idFillInterpolateUBO, getFillInterpolateUBO(), FillVariant::Fill);
+                finish(*fillBuilder, FillVariant::Fill);
             }
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
@@ -698,25 +612,24 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 } else {
                     if (bucket.sharedBasicLineIndexes->elements()) {
                         outlineBuilder->setShader(outlineShader);
-                        outlineBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
-                        outlineBuilder->setSegments(gfx::Lines(2),
+                        outlineBuilder->setRawVertices({}, fillVertexCount, gfx::AttributeDataType::Short2);
+                        outlineBuilder->setSegments(gfx::Lines(lineWidth),
                                                     bucket.sharedBasicLineIndexes,
                                                     bucket.basicLineSegments.data(),
                                                     bucket.basicLineSegments.size());
-                        finish(
-                            *outlineBuilder, idFillInterpolateUBO, getFillInterpolateUBO(), FillVariant::FillOutline);
+                        finish(*outlineBuilder, FillVariant::FillOutline);
                     }
                 }
             }
 #else
             if (doOutline && outlineBuilder && bucket.sharedBasicLineIndexes->elements()) {
                 outlineBuilder->setShader(outlineShader);
-                outlineBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
-                outlineBuilder->setSegments(gfx::Lines(2),
+                outlineBuilder->setRawVertices({}, fillVertexCount, gfx::AttributeDataType::Short2);
+                outlineBuilder->setSegments(gfx::Lines(lineWidth),
                                             bucket.sharedBasicLineIndexes,
                                             bucket.basicLineSegments.data(),
                                             bucket.basicLineSegments.size());
-                finish(*outlineBuilder, idFillInterpolateUBO, getFillOutlineInterpolateUBO(), FillVariant::FillOutline);
+                finish(*outlineBuilder, FillVariant::FillOutline);
             }
 #endif
         } else {
@@ -751,7 +664,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-outline-pattern")) {
                     commonInit(*builder);
                     builder->setShader(outlineShader);
-                    builder->setLineWidth(2.0f);
+                    builder->setLineWidth(lineWidth);
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
                     builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(2);
@@ -769,65 +682,32 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 outlinePatternBuilder->addTweaker(getAtlasTweaker());
             }
 
-            const auto finish = [&](gfx::DrawableBuilder& builder,
-                                    const size_t interpolateNameId,
-                                    const auto& interpolateUBO,
-                                    const size_t tileUBOId,
-                                    const auto& tileUBO,
-                                    FillVariant type) {
-                builder.flush(context);
-
-                for (auto& drawable : builder.clearDrawables()) {
-                    drawable->setTileID(tileID);
-                    drawable->setLayerTweaker(layerTweaker);
-                    drawable->setType(static_cast<size_t>(type));
-
-                    auto& drawableUniforms = drawable->mutableUniformBuffers();
-                    drawableUniforms.createOrUpdate(interpolateNameId, &interpolateUBO, context);
-                    drawableUniforms.createOrUpdate(tileUBOId, &tileUBO, context);
-                    fillTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                    ++stats.drawablesAdded;
-                }
-            };
-
             if (patternBuilder && bucket.sharedTriangles->elements()) {
                 patternBuilder->setShader(fillShader);
                 patternBuilder->setRenderPass(renderPass);
                 if (doOutline && outlinePatternBuilder) {
-                    patternBuilder->setVertexAttributes(vertexAttrs);
-                    outlinePatternBuilder->setVertexAttributes(std::move(vertexAttrs));
-                } else {
-                    patternBuilder->setVertexAttributes(std::move(vertexAttrs));
+                    outlinePatternBuilder->setVertexAttributes(vertexAttrs);
                 }
-                patternBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
+                patternBuilder->setVertexAttributes(std::move(vertexAttrs));
+                patternBuilder->setRawVertices({}, fillVertexCount, gfx::AttributeDataType::Short2);
                 patternBuilder->setSegments(gfx::Triangles(),
                                             bucket.sharedTriangles,
                                             bucket.triangleSegments.data(),
                                             bucket.triangleSegments.size());
 
-                finish(*patternBuilder,
-                       idFillInterpolateUBO,
-                       getFillPatternInterpolateUBO(),
-                       idFillTilePropsUBO,
-                       getFillPatternTilePropsUBO(),
-                       FillVariant::FillPattern);
+                finish(*patternBuilder, FillVariant::FillPattern);
             }
 
             if (doOutline && outlinePatternBuilder && bucket.sharedBasicLineIndexes->elements()) {
                 outlinePatternBuilder->setShader(outlineShader);
                 outlinePatternBuilder->setRenderPass(renderPass);
-                outlinePatternBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
-                outlinePatternBuilder->setSegments(gfx::Lines(2),
+                outlinePatternBuilder->setRawVertices({}, fillVertexCount, gfx::AttributeDataType::Short2);
+                outlinePatternBuilder->setSegments(gfx::Lines(lineWidth),
                                                    bucket.sharedBasicLineIndexes,
                                                    bucket.basicLineSegments.data(),
                                                    bucket.basicLineSegments.size());
 
-                finish(*outlinePatternBuilder,
-                       idFillInterpolateUBO,
-                       getFillOutlinePatternInterpolateUBO(),
-                       idFillTilePropsUBO,
-                       getFillOutlinePatternTilePropsUBO(),
-                       FillVariant::FillOutlinePattern);
+                finish(*outlinePatternBuilder, FillVariant::FillOutlinePattern);
             }
         }
     }

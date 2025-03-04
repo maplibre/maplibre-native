@@ -1,4 +1,4 @@
-load("@build_bazel_rules_apple//apple:macos.bzl", "macos_application")
+load("@rules_apple//apple:macos.bzl", "macos_application")
 
 objc_library(
     name = "macos_app_lib",

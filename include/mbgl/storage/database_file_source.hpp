@@ -16,8 +16,8 @@ public:
     ~DatabaseFileSource() override;
 
     /// FileSource overrides
-    std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
-    void forward(const Resource&, const Response&, std::function<void()> callback) override;
+    std::unique_ptr<AsyncRequest> request(const Resource&, std::function<void(Response)>) override;
+    void forward(const Resource&, const Response&, Scheduler::Task&& callback) override;
     bool canRequest(const Resource&) const override;
     void setProperty(const std::string&, const mapbox::base::Value&) override;
     void pause() override;
@@ -29,7 +29,7 @@ public:
      * Sets path of a database to be used by DatabaseFileSource and invokes
      * provided callback when a database path is set.
      */
-    virtual void setDatabasePath(const std::string&, std::function<void()> callback);
+    virtual void setDatabasePath(const std::string&, std23::move_only_function<void()>&& callback);
 
     /**
      * Delete existing database and re-initialize.
@@ -38,7 +38,7 @@ public:
      * will be executed on the database thread; it is the responsibility of the
      * SDK bindings to re-execute a user-provided callback on the main thread.
      */
-    virtual void resetDatabase(std::function<void(std::exception_ptr)>);
+    virtual void resetDatabase(std23::move_only_function<void(std::exception_ptr)>&&);
 
     /**
      * Packs the existing database file into a minimal amount of disk space.
@@ -50,7 +50,7 @@ public:
      * will be executed on the database thread; it is the responsibility of the
      * SDK bindings to re-execute a user-provided callback on the main thread.
      */
-    virtual void packDatabase(std::function<void(std::exception_ptr)> callback);
+    virtual void packDatabase(std23::move_only_function<void(std::exception_ptr)>&& callback);
 
     /**
      * Sets whether packing the database file occurs automatically after an
@@ -87,7 +87,7 @@ public:
      * Resources overlapping with offline regions will not be affected
      * by this call.
      */
-    virtual void invalidateAmbientCache(std::function<void(std::exception_ptr)>);
+    virtual void invalidateAmbientCache(std23::move_only_function<void(std::exception_ptr)>&&);
 
     /**
      * Erase resources from the ambient cache, freeing storage space.
@@ -100,7 +100,7 @@ public:
      * Resources overlapping with offline regions will not be affected
      * by this call.
      */
-    virtual void clearAmbientCache(std::function<void(std::exception_ptr)>);
+    virtual void clearAmbientCache(std23::move_only_function<void(std::exception_ptr)>&&);
 
     /**
      * Sets the maximum size in bytes for the ambient cache.
@@ -122,7 +122,8 @@ public:
      * This method should always be called before using the database,
      * otherwise the default maximum size will be used.
      */
-    virtual void setMaximumAmbientCacheSize(uint64_t size, std::function<void(std::exception_ptr)> callback);
+    virtual void setMaximumAmbientCacheSize(uint64_t size,
+                                            std23::move_only_function<void(std::exception_ptr)>&& callback);
 
     // Offline
 
@@ -134,7 +135,19 @@ public:
      * responsibility of the SDK bindings to re-execute a user-provided callback
      * on the main thread.
      */
-    virtual void listOfflineRegions(std::function<void(expected<OfflineRegions, std::exception_ptr>)>);
+    virtual void listOfflineRegions(std23::move_only_function<void(expected<OfflineRegions, std::exception_ptr>)>&&);
+
+    /**
+     * Retrieve given region in the offline database.
+     *
+     * The query will be executed asynchronously and the results passed to the
+     * given callback, which will be executed on the database thread; it is the
+     * responsibility of the SDK bindings to re-execute a user-provided callback
+     * on the main thread.
+     */
+    virtual void getOfflineRegion(
+        int64_t regionID,
+        std23::move_only_function<void(expected<std::optional<OfflineRegion>, std::exception_ptr>)>&&);
 
     /**
      * Create an offline region in the database.
@@ -150,18 +163,19 @@ public:
      */
     virtual void createOfflineRegion(const OfflineRegionDefinition& definition,
                                      const OfflineRegionMetadata& metadata,
-                                     std::function<void(expected<OfflineRegion, std::exception_ptr>)>);
+                                     std23::move_only_function<void(expected<OfflineRegion, std::exception_ptr>)>&&);
     /**
      * Update an offline region metadata in the database.
      */
-    virtual void updateOfflineMetadata(int64_t regionID,
-                                       const OfflineRegionMetadata& metadata,
-                                       std::function<void(expected<OfflineRegionMetadata, std::exception_ptr>)>);
+    virtual void updateOfflineMetadata(
+        int64_t regionID,
+        const OfflineRegionMetadata& metadata,
+        std23::move_only_function<void(expected<OfflineRegionMetadata, std::exception_ptr>)>&&);
 
     /**
      * Register an observer to be notified when the state of the region changes.
      */
-    virtual void setOfflineRegionObserver(const OfflineRegion&, std::unique_ptr<OfflineRegionObserver>);
+    virtual void setOfflineRegionObserver(const OfflineRegion&, std::unique_ptr<OfflineRegionObserver>&&);
 
     /**
      * Pause or resume downloading of regional resources.
@@ -174,8 +188,9 @@ public:
      * be executed on the database thread; it is the responsibility of the SDK
      * bindings to re-execute a user-provided callback on the main thread.
      */
-    virtual void getOfflineRegionStatus(const OfflineRegion&,
-                                        std::function<void(expected<OfflineRegionStatus, std::exception_ptr>)>) const;
+    virtual void getOfflineRegionStatus(
+        const OfflineRegion&,
+        std23::move_only_function<void(expected<OfflineRegionStatus, std::exception_ptr>)>&&) const;
 
     /**
      * Merge offline regions from a secondary database into the main offline database.
@@ -198,7 +213,7 @@ public:
      * does not contain all the tiles or resources required by the region definition.
      */
     virtual void mergeOfflineRegions(const std::string& sideDatabasePath,
-                                     std::function<void(expected<OfflineRegions, std::exception_ptr>)>);
+                                     std23::move_only_function<void(expected<OfflineRegions, std::exception_ptr>)>&&);
 
     /**
      * Remove an offline region from the database and perform any resources
@@ -220,7 +235,7 @@ public:
      * will be executed on the database thread; it is the responsibility of the
      * SDK bindings to re-execute a user-provided callback on the main thread.
      */
-    virtual void deleteOfflineRegion(const OfflineRegion&, std::function<void(std::exception_ptr)>);
+    virtual void deleteOfflineRegion(const OfflineRegion&, std23::move_only_function<void(std::exception_ptr)>&&);
 
     /**
      * Invalidate all the tiles from an offline region forcing Mapbox GL to
@@ -228,7 +243,7 @@ public:
      * than deleting the offline region and downloading it again because if the
      * data on the cache matches the server, no new data gets transmitted.
      */
-    virtual void invalidateOfflineRegion(const OfflineRegion&, std::function<void(std::exception_ptr)>);
+    virtual void invalidateOfflineRegion(const OfflineRegion&, std23::move_only_function<void(std::exception_ptr)>&&);
 
     /**
      * Changing or bypassing this limit without permission from Mapbox is

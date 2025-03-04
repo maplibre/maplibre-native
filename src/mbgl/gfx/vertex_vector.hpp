@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/util/ignore.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
 
 #include <memory>
 #include <vector>
@@ -35,9 +36,17 @@ public:
     void setBuffer(std::unique_ptr<VertexBufferBase>&& value) { buffer = std::move(value); }
 #endif // MLN_DRAWABLE_RENDERER
 
-    bool getDirty() const { return dirty; }
-    void setDirty(bool value = true) { dirty = value; }
+    std::chrono::duration<double> getLastModified() const { return lastModified; }
+    bool isModifiedAfter(std::chrono::duration<double> t) const { return t < lastModified; }
 
+    void updateModified() {
+        if (dirty) {
+            lastModified = util::MonotonicTimer::now();
+            dirty = false;
+        }
+    }
+
+    // Indicates that the owner/producer will not modify this again
     bool isReleased() const { return released; }
 
 protected:
@@ -46,6 +55,8 @@ protected:
 #endif // MLN_DRAWABLE_RENDERER
     bool dirty = true;
     bool released = false;
+
+    std::chrono::duration<double> lastModified = util::MonotonicTimer::now();
 };
 using VertexVectorBasePtr = std::shared_ptr<VertexVectorBase>;
 
@@ -59,7 +70,7 @@ public:
         : VertexVectorBase(other),
           v(other.v) {}
     VertexVector(VertexVector<V>&& other)
-        : VertexVectorBase(std::move(other)),
+        : VertexVectorBase(static_cast<VertexVectorBase&&>(other)),
           v(std::move(other.v)) {}
     ~VertexVector() override = default;
 

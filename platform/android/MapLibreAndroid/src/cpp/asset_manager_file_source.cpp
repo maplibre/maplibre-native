@@ -60,7 +60,7 @@ AssetManagerFileSource::AssetManagerFileSource(jni::JNIEnv& env,
                                                const jni::Object<android::AssetManager>& assetManager_,
                                                const ResourceOptions resourceOptions,
                                                const ClientOptions clientOptions)
-    : assetManager(jni::NewGlobal(env, assetManager_)),
+    : assetManager(jni::NewGlobal<jni::EnvAttachingDeleter>(env, assetManager_)),
       impl(std::make_unique<util::Thread<Impl>>(
           util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE),
           "AssetManagerFileSource",
@@ -70,7 +70,8 @@ AssetManagerFileSource::AssetManagerFileSource(jni::JNIEnv& env,
 
 AssetManagerFileSource::~AssetManagerFileSource() = default;
 
-std::unique_ptr<AsyncRequest> AssetManagerFileSource::request(const Resource& resource, Callback callback) {
+std::unique_ptr<AsyncRequest> AssetManagerFileSource::request(const Resource& resource,
+                                                              std::function<void(Response)> callback) {
     auto req = std::make_unique<FileSourceRequest>(std::move(callback));
 
     impl->actor().invoke(&Impl::request, resource.url, req->actor());
@@ -79,7 +80,7 @@ std::unique_ptr<AsyncRequest> AssetManagerFileSource::request(const Resource& re
 }
 
 bool AssetManagerFileSource::canRequest(const Resource& resource) const {
-    return 0 == resource.url.rfind(mbgl::util::ASSET_PROTOCOL, 0);
+    return resource.url.starts_with(mbgl::util::ASSET_PROTOCOL);
 }
 
 void AssetManagerFileSource::setResourceOptions(ResourceOptions options) {

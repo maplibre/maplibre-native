@@ -36,6 +36,7 @@ public:
     std::vector<UniqueDrawSegment> segments;
 
     MTLVertexDescriptorPtr vertexDesc;
+    std::size_t vertexDescHash{0};
 
     /*
         std::vector<TextureID> textures;
@@ -44,10 +45,7 @@ public:
     std::size_t vertexCount = 0;
     gfx::AttributeDataType vertexType = gfx::AttributeDataType::Invalid;
 
-    std::vector<gfx::UniqueVertexBufferResource> attributeBuffers;
     gfx::AttributeBindingArray attributeBindings;
-
-    std::vector<gfx::UniqueVertexBufferResource> instanceBuffers;
     gfx::AttributeBindingArray instanceBindings;
 
     UniformBufferArray uniformBuffers;

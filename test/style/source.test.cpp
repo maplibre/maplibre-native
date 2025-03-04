@@ -54,17 +54,18 @@ using SourceType = mbgl::style::SourceType;
 
 class SourceTest {
 public:
+    util::SimpleIdentity uniqueID;
     util::RunLoop loop;
     std::shared_ptr<StubFileSource> fileSource = std::make_shared<StubFileSource>();
     StubStyleObserver styleObserver;
     StubRenderSourceObserver renderSourceObserver;
     Transform transform;
     TransformState transformState;
-    Style style{fileSource, 1};
     AnnotationManager annotationManager{style};
     std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
-    std::shared_ptr<Scheduler> threadPool = Scheduler::GetBackground();
+    TaggedScheduler threadPool;
+    Style style;
 
     TileParameters tileParameters(MapMode mapMode = MapMode::Continuous) {
         return {1.0,
@@ -75,10 +76,13 @@ public:
                 annotationManager.makeWeakPtr(),
                 imageManager,
                 glyphManager,
-                0};
+                0,
+                threadPool};
     };
 
-    SourceTest() {
+    SourceTest()
+        : threadPool(Scheduler::GetBackground(), uniqueID),
+          style{fileSource, 1, threadPool} {
         // Squelch logging.
         Log::setObserver(std::make_unique<Log::NullObserver>());
 
@@ -88,7 +92,7 @@ public:
         transformState = transform.getState();
     }
 
-    ~SourceTest() { threadPool->waitForEmpty(); }
+    ~SourceTest() { threadPool.waitForEmpty(); }
 
     void run() { loop.run(); }
 
@@ -761,8 +765,8 @@ class FakeTileSource;
 
 class FakeTile : public Tile {
 public:
-    FakeTile(FakeTileSource& source_, const OverscaledTileID& tileID)
-        : Tile(Tile::Kind::Geometry, tileID),
+    FakeTile(FakeTileSource& source_, const OverscaledTileID& tileID, TileObserver* observer_)
+        : Tile(Tile::Kind::Geometry, tileID, "FakeTileSource", observer_),
           source(source_) {
         renderable = true;
     }
@@ -771,6 +775,8 @@ public:
     bool layerPropertiesUpdated(const Immutable<style::LayerProperties>&) override { return true; }
 
     std::unique_ptr<TileRenderData> createRenderData() override { return nullptr; }
+
+    void cancel() override {}
 
 private:
     FakeTileSource& source;
@@ -781,8 +787,8 @@ public:
     MOCK_METHOD1(tileSetNecessity, void(TileNecessity));
     MOCK_METHOD1(tileSetMinimumUpdateInterval, void(Duration));
 
-    explicit FakeTileSource(Immutable<style::Source::Impl> impl_, std::shared_ptr<Scheduler> threadPool_)
-        : RenderTileSetSource(std::move(impl_), std::move(threadPool_)) {}
+    explicit FakeTileSource(Immutable<style::Source::Impl> impl_, const TaggedScheduler& threadPool_)
+        : RenderTileSetSource(std::move(impl_), threadPool_) {}
     void updateInternal(const Tileset& tileset,
                         const std::vector<Immutable<style::LayerProperties>>& layers,
                         const bool needsRendering,
@@ -796,7 +802,9 @@ public:
                            util::tileSize_I,
                            tileset.zoomRange,
                            tileset.bounds,
-                           [&](const OverscaledTileID& tileID) { return std::make_unique<FakeTile>(*this, tileID); });
+                           [&](const OverscaledTileID& tileID, TileObserver* observer_) {
+                               return std::make_unique<FakeTile>(*this, tileID, observer_);
+                           });
     }
 
     const std::optional<Tileset>& getTileset() const override {
@@ -885,8 +893,8 @@ TEST(Source, RenderTileSetSourceUpdate) {
 
     class FakeRenderTileSetSource : public RenderTileSetSource {
     public:
-        explicit FakeRenderTileSetSource(Immutable<style::Source::Impl> impl_, std::shared_ptr<Scheduler> threadPool_)
-            : RenderTileSetSource(std::move(impl_), std::move(threadPool_)) {}
+        explicit FakeRenderTileSetSource(Immutable<style::Source::Impl> impl_, TaggedScheduler threadPool_)
+            : RenderTileSetSource(std::move(impl_), threadPool_) {}
 
         MOCK_METHOD0(mockedUpdateInternal, void());
 

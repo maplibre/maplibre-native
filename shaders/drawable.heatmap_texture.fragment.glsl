@@ -5,7 +5,9 @@ uniform sampler2D u_color_ramp;
 layout (std140) uniform HeatmapTexturePropsUBO {
     highp mat4 u_matrix;
     highp float u_opacity;
-    lowp float props_pad1, props_pad2, props_pad3;
+    lowp float props_pad1;
+    lowp float props_pad2;
+    lowp float props_pad3;
 };
 
 void main() {

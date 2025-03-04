@@ -48,8 +48,8 @@ struct Watch {
     uv_poll_t poll;
     int fd;
 
-    std::function<void(int, RunLoop::Event)> eventCallback;
-    std::function<void()> closeCallback;
+    std23::move_only_function<void(int, RunLoop::Event)> eventCallback;
+    std23::move_only_function<void()> closeCallback;
 };
 
 RunLoop* RunLoop::Get() {
@@ -149,8 +149,13 @@ void RunLoop::stop() {
     invoke([&] { uv_unref(impl->holderHandle()); });
 }
 
-std::size_t RunLoop::waitForEmpty(Milliseconds timeout) {
-    const auto startTime = mbgl::util::MonotonicTimer::now();
+void RunLoop::updateTime() {
+    MBGL_VERIFY_THREAD(tid);
+
+    uv_update_time(impl->loop);
+}
+
+void RunLoop::waitForEmpty([[maybe_unused]] const mbgl::util::SimpleIdentity tag) {
     while (true) {
         std::size_t remaining;
         {
@@ -158,17 +163,15 @@ std::size_t RunLoop::waitForEmpty(Milliseconds timeout) {
             remaining = defaultQueue.size() + highPriorityQueue.size();
         }
 
-        const auto elapsed = mbgl::util::MonotonicTimer::now() - startTime;
-        const auto elapsedMillis = std::chrono::duration_cast<Milliseconds>(elapsed);
-        if (remaining == 0 || (Milliseconds::zero() < timeout && timeout <= elapsedMillis)) {
-            return remaining;
+        if (remaining == 0) {
+            return;
         }
 
         runOnce();
     }
 }
 
-void RunLoop::addWatch(int fd, Event event, std::function<void(int, Event)>&& callback) {
+void RunLoop::addWatch(int fd, Event event, std23::move_only_function<void(int, Event)>&& callback) {
     MBGL_VERIFY_THREAD(tid);
 
     Watch* watch = nullptr;

@@ -4,4 +4,3 @@ set -u
 
 (cd glyphs && ./download.sh)
 (cd tiles && ./download.sh)
-

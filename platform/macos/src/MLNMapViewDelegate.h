@@ -1,5 +1,6 @@
 #import <AppKit/AppKit.h>
 #import <Foundation/Foundation.h>
+#import <MLNTileOperation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -13,9 +14,9 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol MLNAnnotation;
 
 /**
- The `MLNMapViewDelegate` protocol defines a set of optional methods that you
- can use to receive messages from an `MLNMapView` instance. Because many map
- operations require the `MLNMapView` class to load data asynchronously, the map
+ The ``MLNMapViewDelegate`` protocol defines a set of optional methods that you
+ can use to receive messages from an ``MLNMapView`` instance. Because many map
+ operations require the ``MLNMapView`` class to load data asynchronously, the map
  view calls these methods to notify your application when specific operations
  complete. The map view also uses these methods to request information about
  annotations displayed on the map, such as the styles and interaction modes to
@@ -44,11 +45,11 @@ NS_ASSUME_NONNULL_BEGIN
 
  This method is called as the currently displayed map camera changes as part of
  an animation, whether due to a user gesture or due to a call to a method such
- as `-[MLNMapView setCamera:animated:]`. This method can be called before
+ as ``MLNMapView/setCamera:animated:``. This method can be called before
  `-mapViewDidFinishLoadingMap:` is called.
- 
- During the animation, this method may be called many times to report updates 
- to the viewpoint. Therefore, your implementation of this method should be as 
+
+ During the animation, this method may be called many times to report updates
+ to the viewpoint. Therefore, your implementation of this method should be as
  lightweight as possible to avoid affecting performance.
 
  @param mapView The map view whose viewpoint is changing.
@@ -61,9 +62,9 @@ NS_ASSUME_NONNULL_BEGIN
 
  This method is called whenever the currently displayed map camera has finished
  changing, after any calls to `-mapViewRegionIsChanging:` due to animation.
- This method can be called before `-mapViewDidFinishLoadingMap:` is 
+ This method can be called before `-mapViewDidFinishLoadingMap:` is
  called.
- 
+
  @param mapView The map view whose viewpoint has changed.
  @param animated Whether the change caused an animated effect on the map.
  */
@@ -72,14 +73,14 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Asks the delegate whether the map view should be allowed to change from the
  existing camera to the new camera in response to a user gesture.
- 
+
  This method is called as soon as the user gesture is recognized. It is not
  called in response to a programmatic camera change, such as by setting the
  `centerCoordinate` property or calling `-flyToCamera:completionHandler:`.
- 
- This method is called many times during gesturing, so you should avoid performing 
+
+ This method is called many times during gesturing, so you should avoid performing
  complex or performance-intensive tasks in your implementation.
- 
+
  @param mapView The map view that the user is manipulating.
  @param oldCamera The camera representing the viewpoint at the moment the
     gesture is recognized. If this method returns `NO`, the map view’s camera
@@ -89,7 +90,9 @@ NS_ASSUME_NONNULL_BEGIN
  @return A Boolean value indicating whether the map view should stay at
     `oldCamera` or change to `newCamera`.
  */
-- (BOOL)mapView:(MLNMapView *)mapView shouldChangeFromCamera:(MLNMapCamera *)oldCamera toCamera:(MLNMapCamera *)newCamera;
+- (BOOL)mapView:(MLNMapView *)mapView
+    shouldChangeFromCamera:(MLNMapCamera *)oldCamera
+                  toCamera:(MLNMapCamera *)newCamera;
 
 // MARK: Loading the Map
 
@@ -175,11 +178,11 @@ NS_ASSUME_NONNULL_BEGIN
  Tells the delegate that the map view is entering an idle state, and no more
  drawing will be necessary until new data is loaded or there is some interaction
  with the map.
- 
+
  - No camera transitions are in progress
  - All currently requested tiles have loaded
  - All fade/transition animations have completed
- 
+
  @param mapView The map view that has just entered the idle state.
  */
 - (void)mapViewDidBecomeIdle:(MLNMapView *)mapView;
@@ -202,7 +205,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)mapView:(MLNMapView *)mapView didFinishLoadingStyle:(MLNStyle *)style;
 
 /**
- Tells the delegate that the `mapView` is missing an image. The image should be added synchronously with `-[MLNStyle setImage:forName:]` to be rendered on the current zoom level. When loading icons asynchronously, you can load a placeholder image and replace it when your image has loaded.
+ Tells the delegate that the `mapView` is missing an image. The image should be added synchronously
+ with ``MLNStyle/setImage:forName:`` to be rendered on the current zoom level. When loading icons
+ asynchronously, you can load a placeholder image and replace it when your image has loaded.
 
  @param mapView The map view that is loading the image.
  @param imageName The name of the image that is missing.
@@ -211,17 +216,61 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Asks the delegate whether the map view should evict cached images.
- 
+
  This method is called in two scenarios: when the cumulative size of unused images
  exceeds the cache size or when the last tile that includes the image is removed from
  memory.
- 
+
  @param mapView The map view that is evicting the image.
  @param imageName The image name that is going to be removed.
  @return A Boolean value indicating whether the map view should evict
  the cached image.
  */
 - (BOOL)mapView:(MLNMapView *)mapView shouldRemoveStyleImage:(NSString *)imageName;
+
+// MARK: Shader Compilation
+
+- (void)mapView:(MLNMapView *)mapView
+    shaderWillCompile:(NSInteger)id
+              backend:(NSInteger)backend
+              defines:(NSString *)defines;
+- (void)mapView:(MLNMapView *)mapView
+    shaderDidCompile:(NSInteger)id
+             backend:(NSInteger)backend
+             defines:(NSString *)defines;
+- (void)mapView:(MLNMapView *)mapView
+    shaderDidFailCompile:(NSInteger)id
+                 backend:(NSInteger)backend
+                 defines:(NSString *)defines;
+
+// MARK: Glyph Requests
+
+- (void)mapView:(MLNMapView *)mapView
+    glyphsWillLoad:(NSArray<NSString *> *)fontStack
+             range:(NSRange)range;
+- (void)mapView:(MLNMapView *)mapView
+    glyphsDidLoad:(NSArray<NSString *> *)fontStack
+            range:(NSRange)range;
+- (void)mapView:(MLNMapView *)mapView
+    glyphsDidError:(NSArray<NSString *> *)fontStack
+             range:(NSRange)range;
+
+// MARK: Tile Requests
+
+- (void)mapView:(MLNMapView *)mapView
+    tileDidTriggerAction:(MLNTileOperation)operation
+                       x:(NSInteger)x
+                       y:(NSInteger)y
+                       z:(NSInteger)z
+                    wrap:(NSInteger)wrap
+             overscaledZ:(NSInteger)overscaledZ
+                sourceID:(NSString *)sourceID;
+
+// MARK: Sprite Requests
+
+- (void)mapView:(MLNMapView *)mapView spriteWillLoad:(NSString *)id url:(NSString *)url;
+- (void)mapView:(MLNMapView *)mapView spriteDidLoad:(NSString *)id url:(NSString *)url;
+- (void)mapView:(MLNMapView *)mapView spriteDidError:(NSString *)id url:(NSString *)url;
 
 // MARK: Managing the Appearance of Annotations
 
@@ -235,7 +284,8 @@ NS_ASSUME_NONNULL_BEGIN
  @return The image object to display for the given annotation or `nil` if you
     want to display the default marker image.
  */
-- (nullable MLNAnnotationImage *)mapView:(MLNMapView *)mapView imageForAnnotation:(id <MLNAnnotation>)annotation;
+- (nullable MLNAnnotationImage *)mapView:(MLNMapView *)mapView
+                      imageForAnnotation:(id<MLNAnnotation>)annotation;
 
 /**
  Returns the alpha value to use when rendering a shape annotation.
@@ -300,10 +350,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Returns a Boolean value indicating whether the shape annotation can be selected.
- 
+
  If the return value is `YES`, the user can select the annotation by clicking
  on it. If the delegate does not implement this method, the default value is `YES`.
- 
+
  @param mapView The map view that has selected the annotation.
  @param annotation The object representing the shape annotation.
  @return A Boolean value indicating whether the annotation can be selected.
@@ -318,7 +368,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param mapView The map view containing the annotation.
  @param annotation The annotation that was selected.
  */
-- (void)mapView:(MLNMapView *)mapView didSelectAnnotation:(id <MLNAnnotation>)annotation;
+- (void)mapView:(MLNMapView *)mapView didSelectAnnotation:(id<MLNAnnotation>)annotation;
 
 /**
  Tells the delegate that one of its annotations has been deselected.
@@ -328,7 +378,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param mapView The map view containing the annotation.
  @param annotation The annotation that was deselected.
  */
-- (void)mapView:(MLNMapView *)mapView didDeselectAnnotation:(id <MLNAnnotation>)annotation;
+- (void)mapView:(MLNMapView *)mapView didDeselectAnnotation:(id<MLNAnnotation>)annotation;
 
 // MARK: Managing Callout Popovers
 
@@ -353,7 +403,7 @@ NS_ASSUME_NONNULL_BEGIN
  @return A Boolean value indicating whether the annotation should show a
     callout.
  */
-- (BOOL)mapView:(MLNMapView *)mapView annotationCanShowCallout:(id <MLNAnnotation>)annotation;
+- (BOOL)mapView:(MLNMapView *)mapView annotationCanShowCallout:(id<MLNAnnotation>)annotation;
 
 /**
  Returns a view controller to manage the callout popover’s content view.
@@ -365,13 +415,14 @@ NS_ASSUME_NONNULL_BEGIN
  such as `title` and `subtitle`.
 
  If each annotation should have an identical callout, you can set the
- `MLNMapView.calloutViewController` property instead.
+ ``MLNMapView/calloutViewController`` property instead.
 
  @param mapView The map view that is requesting a callout view controller.
  @param annotation The object representing the annotation.
  @return A view controller for the given annotation.
  */
-- (nullable NSViewController *)mapView:(MLNMapView *)mapView calloutViewControllerForAnnotation:(id <MLNAnnotation>)annotation;
+- (nullable NSViewController *)mapView:(MLNMapView *)mapView
+    calloutViewControllerForAnnotation:(id<MLNAnnotation>)annotation;
 
 @end
 

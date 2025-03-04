@@ -216,8 +216,7 @@ Milliseconds RunLoop::Impl::processRunnables() {
     return timeout;
 }
 
-std::size_t RunLoop::Impl::waitForEmpty(Milliseconds timeout) {
-    const auto startTime = mbgl::util::MonotonicTimer::now();
+void RunLoop::Impl::waitForEmpty() {
     while (true) {
         std::size_t remaining;
         {
@@ -225,10 +224,8 @@ std::size_t RunLoop::Impl::waitForEmpty(Milliseconds timeout) {
             remaining = runnables.size();
         }
 
-        const auto elapsed = mbgl::util::MonotonicTimer::now() - startTime;
-        const auto elapsedMillis = std::chrono::duration_cast<Milliseconds>(elapsed);
-        if (remaining == 0 || (Milliseconds::zero() < timeout && timeout <= elapsedMillis)) {
-            return remaining;
+        if (remaining == 0) {
+            return;
         }
 
         runLoop->runOnce();
@@ -257,8 +254,8 @@ void RunLoop::wake() {
     impl->wake();
 }
 
-std::size_t RunLoop::waitForEmpty(std::chrono::milliseconds timeout) {
-    return impl->waitForEmpty(timeout);
+void RunLoop::waitForEmpty([[maybe_unused]] const SimpleIdentity tag) {
+    impl->waitForEmpty();
 }
 
 void RunLoop::run() {
@@ -272,7 +269,10 @@ void RunLoop::run() {
     while (impl->running) {
         process();
         auto timeout = impl->processRunnables().count();
-        ALooper_pollAll(timeout, &outFd, &outEvents, reinterpret_cast<void**>(&outData));
+        auto result = ALooper_pollOnce(timeout, &outFd, &outEvents, reinterpret_cast<void**>(&outData));
+        if (result == ALOOPER_POLL_ERROR) {
+            throw std::runtime_error("ALooper_pollOnce returned an error");
+        }
     }
 }
 
@@ -290,7 +290,7 @@ void RunLoop::stop() {
     });
 }
 
-void RunLoop::addWatch(int fd, Event event, std::function<void(int, Event)>&& cb) {
+void RunLoop::addWatch(int fd, Event event, std23::move_only_function<void(int, Event)>&& cb) {
     MBGL_VERIFY_THREAD(tid);
 
     if (event == Event::Read) {

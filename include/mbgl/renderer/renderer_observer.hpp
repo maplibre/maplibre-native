@@ -1,8 +1,15 @@
 #pragma once
 
+#include <mbgl/actor/scheduler.hpp>
+#include <mbgl/gfx/backend.hpp>
+#include <mbgl/shaders/shader_source.hpp>
+#include <mbgl/text/glyph_range.hpp>
+#include <mbgl/tile/tile_id.hpp>
+#include <mbgl/tile/tile_operation.hpp>
+#include <mbgl/util/font_stack.hpp>
+
 #include <cstdint>
 #include <exception>
-#include <functional>
 #include <string>
 
 namespace mbgl {
@@ -48,12 +55,22 @@ public:
     virtual void onDidFinishRenderingMap() {}
 
     /// Style is missing an image
-    using StyleImageMissingCallback = std::function<void()>;
-    virtual void onStyleImageMissing(const std::string&, const StyleImageMissingCallback& done) { done(); }
+    virtual void onStyleImageMissing(const std::string&, Scheduler::Task&& done) { done(); }
     virtual void onRemoveUnusedStyleImages(const std::vector<std::string>&) {}
 
     // Entry point for custom shader registration
     virtual void onRegisterShaders(gfx::ShaderRegistry&) {};
+    virtual void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type, const std::string&) {}
+    virtual void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type, const std::string&) {}
+    virtual void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type, const std::string&) {}
+
+    // Glyph loading
+    virtual void onGlyphsLoaded(const FontStack&, const GlyphRange&) {}
+    virtual void onGlyphsError(const FontStack&, const GlyphRange&, std::exception_ptr) {}
+    virtual void onGlyphsRequested(const FontStack&, const GlyphRange&) {}
+
+    // Tile loading
+    virtual void onTileAction(TileOperation, const OverscaledTileID&, const std::string&) {}
 };
 
 } // namespace mbgl

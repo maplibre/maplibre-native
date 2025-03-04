@@ -1,10 +1,25 @@
 #include <mbgl/tile/tile_cache.hpp>
+
 #include <mbgl/actor/scheduler.hpp>
+#include <mbgl/util/instrumentation.hpp>
+
 #include <cassert>
 
 namespace mbgl {
 
+TileCache::~TileCache() {
+    MLN_TRACE_FUNC();
+
+    clear();
+    pendingReleases.clear();
+
+    std::unique_lock counterLock{deferredSignalLock};
+    deferredSignal.wait(counterLock, [this]() { return deferredDeletionsPending == 0; });
+}
+
 void TileCache::setSize(size_t size_) {
+    MLN_TRACE_FUNC();
+
     size = size_;
 
     while (orderedKeys.size() > size) {
@@ -22,37 +37,48 @@ void TileCache::setSize(size_t size_) {
     assert(orderedKeys.size() <= size);
 }
 
-namespace {
-
-/// This exists solely to prevent a problem where temporary lambda captures
-/// are retained for the duration of the scope instead of being destroyed immediately.
-template <typename T>
-struct CaptureWrapper {
-    CaptureWrapper(std::unique_ptr<T>&& item_)
-        : item(std::move(item_)) {}
-    CaptureWrapper(const CaptureWrapper& other)
-        : item(other.item) {}
-    std::shared_ptr<T> item;
-};
-} // namespace
-
 void TileCache::deferredRelease(std::unique_ptr<Tile>&& tile) {
+    MLN_TRACE_FUNC();
+
     tile->cancel();
+    pendingReleases.push_back(std::move(tile));
+}
 
-    // The `std::function` must be created in a separate statement from the `schedule` call.
-    // Creating a `std::function` from a lambda involves a copy, which is why we must use
-    // `shared_ptr` rather than `unique_ptr` for the capture.  As a result, a temporary holds
-    // a reference until the construction is complete and the lambda is destroyed.
-    // If this temporary outlives the `schedule` call, and the function is executed immediately
-    // by a waiting thread and is already complete, that temporary reference ends up being the
-    // last one and the destruction actually occurs here on this thread.
-    std::function<void()> func{[tile_{CaptureWrapper<Tile>{std::move(tile)}}]() {
-    }};
+void TileCache::deferPendingReleases() {
+    MLN_TRACE_FUNC();
 
-    threadPool->schedule(std::move(func));
+    constexpr std::size_t scheduleThreshold = 1;
+    if (pendingReleases.size() < scheduleThreshold) {
+        return;
+    }
+
+    // Block destruction until the cleanup task is complete
+    {
+        std::lock_guard counterLock{deferredSignalLock};
+        deferredDeletionsPending++;
+    }
+
+    // Move elements to a disposable container to be captured by the lambda
+    decltype(pendingReleases) pending{pendingReleases.size()};
+    std::ranges::move(pendingReleases, pending.begin());
+    pendingReleases.clear();
+    threadPool.schedule({[items{std::move(pending)}, this]() mutable {
+        MLN_TRACE_ZONE(deferPendingReleases lambda);
+        MLN_ZONE_VALUE(items.size());
+        // Run the deletions
+        items.clear();
+
+        // Wake up a waiting destructor
+        std::lock_guard<std::mutex> counterLock(deferredSignalLock);
+        deferredDeletionsPending--;
+        deferredSignal.notify_all();
+    }});
+    pendingReleases.clear();
 }
 
 void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile>&& tile) {
+    MLN_TRACE_FUNC();
+
     if (!tile->isRenderable() || !size) {
         deferredRelease(std::move(tile));
         return;

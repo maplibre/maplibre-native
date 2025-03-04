@@ -13,7 +13,11 @@ Scheduler::~Scheduler() {
     MBGL_VERIFY_THREAD(tid);
 }
 
-void Scheduler::schedule(std::function<void()>&& function) {
+void Scheduler::schedule(Task&& function) {
+    this->Scheduler::schedule(mbgl::util::SimpleIdentity::Empty, std::move(function));
+}
+
+void Scheduler::schedule(mbgl::util::SimpleIdentity, Task&& function) {
     const std::lock_guard<std::mutex> lock(m_taskQueueMutex);
     m_taskQueue.push(std::move(function));
 
@@ -23,7 +27,7 @@ void Scheduler::schedule(std::function<void()>&& function) {
 }
 
 void Scheduler::processEvents() {
-    std::queue<std::function<void()>> taskQueue;
+    std::queue<Task> taskQueue;
     {
         const std::unique_lock<std::mutex> lock(m_taskQueueMutex);
         std::swap(taskQueue, m_taskQueue);
@@ -42,23 +46,19 @@ void Scheduler::processEvents() {
     cvEmpty.notify_all();
 }
 
-std::size_t Scheduler::waitForEmpty(std::chrono::milliseconds timeout) {
+void Scheduler::waitForEmpty([[maybe_unused]] const mbgl::util::SimpleIdentity tag) {
     MBGL_VERIFY_THREAD(tid);
 
-    const auto startTime = mbgl::util::MonotonicTimer::now();
     std::unique_lock<std::mutex> lock(m_taskQueueMutex);
     const auto isDone = [&] {
         return m_taskQueue.empty() && pendingItems == 0;
     };
+
     while (!isDone()) {
-        const auto elapsed = mbgl::util::MonotonicTimer::now() - startTime;
-        if (timeout <= elapsed || !cvEmpty.wait_for(lock, timeout - elapsed, isDone)) {
-            assert(isDone());
-            break;
-        }
+        cvEmpty.wait(lock);
     }
 
-    return m_taskQueue.size() + pendingItems;
+    assert(m_taskQueue.size() + pendingItems == 0);
 }
 
 } // namespace QMapLibre

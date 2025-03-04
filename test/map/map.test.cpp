@@ -1,3 +1,5 @@
+#include <gmock/gmock.h>
+
 #include <mbgl/test/util.hpp>
 #include <mbgl/test/stub_file_source.hpp>
 #include <mbgl/test/stub_map_observer.hpp>
@@ -28,6 +30,7 @@
 #include <mbgl/style/sources/image_source.hpp>
 #include <mbgl/style/sources/vector_source.hpp>
 #include <mbgl/style/style.hpp>
+#include <mbgl/style/style_impl.hpp>
 #include <mbgl/util/async_task.hpp>
 #include <mbgl/util/client_options.hpp>
 #include <mbgl/util/color.hpp>
@@ -382,6 +385,8 @@ TEST(Map, Offline) {
 
 #if ANDROID
     test::checkImage("test/fixtures/map/offline", test.frontend.render(test.map).image, 0.0046, 0.1);
+#elif WIN32
+    test::checkImage("test/fixtures/map/offline", test.frontend.render(test.map).image, 0.035, 0.1);
 #else
     test::checkImage("test/fixtures/map/offline", test.frontend.render(test.map).image, 0.0015, 0.1);
 #endif
@@ -1639,4 +1644,225 @@ TEST(Map, StencilOverflow) {
 #endif // !defined(NDEBUG)
 
     // TODO: confirm that the stencil masking actually worked
+}
+
+TEST(Map, InvalidUTF8InTile) {
+    FixtureLog log;
+
+    MapTest<> test{1, MapMode::Continuous};
+
+    test.fileSource->tileResponse = [&](const Resource&) {
+        Response result;
+        result.data = std::make_shared<std::string>(
+            util::read_file("test/fixtures/map/invalid_utf8/invalidutf8feature.mvt"));
+        return result;
+    };
+    test.fileSource->glyphsResponse = makeResponse("glyphs.pbf", true);
+
+    test.map.jumpTo(CameraOptions().withZoom(11.0));
+    test.map.getStyle().loadJSON(R"STYLE({
+      "version": 8,
+      "sources": {
+        "invalidutf8": {
+          "type": "vector",
+          "tiles": ["http://example.com/{z}-{x}-{y}.vector.pbf"]
+        }
+      },
+      "layers": [{
+        "id": "mountain_peak",
+        "type": "symbol",
+        "source": "invalidutf8",
+        "source-layer": "points",
+        "layout": {
+            "text-field": "{name}"
+        }
+      }]
+    })STYLE");
+
+    test.observer.didFinishLoadingMapCallback = [&]() {
+        test.observer.didFinishRenderingFrameCallback = [&](MapObserver::RenderFrameStatus status) {
+            if (!status.needsRepaint) {
+                test.runLoop.stop();
+            }
+        };
+    };
+
+    test.runLoop.run();
+}
+
+TEST(Map, ObserveTileLifecycle) {
+    util::RunLoop runLoop;
+
+    struct TileEntry {
+        OverscaledTileID id;
+        std::string sourceID;
+        TileOperation op;
+    };
+    std::mutex tileMutex;
+    std::vector<TileEntry> tileOps;
+    // We expect to see a valid lifecycle for every tile in this list.
+    const std::vector<OverscaledTileID> expectedTiles = {
+        {10, 0, 10, 163, 395}, {10, 0, 10, 163, 396}, {10, 0, 10, 164, 395}, {10, 0, 10, 164, 396},
+        // Lower zooms can also be seen, but not always, so we
+        // ignore them.
+    };
+
+    struct ShaderEntry {
+        shaders::BuiltIn id;
+        gfx::Backend::Type type;
+        std::string defines;
+        bool isPostCompile;
+    };
+    std::vector<ShaderEntry> shaderOps;
+
+    StubMapObserver observer;
+    observer.onTileActionCallback = [&](TileOperation op, const OverscaledTileID& id, const std::string& sourceID) {
+        if (sourceID != "mapbox") return;
+        std::lock_guard<std::mutex> lock(tileMutex);
+        tileOps.push_back(TileEntry{id, sourceID, op});
+    };
+    observer.onPreCompileShaderCallback =
+        [&](shaders::BuiltIn id, gfx::Backend::Type type, const std::string& additionalDefines) {
+            shaderOps.push_back(ShaderEntry{id, type, additionalDefines, false});
+        };
+    observer.onPostCompileShaderCallback =
+        [&](shaders::BuiltIn id, gfx::Backend::Type type, const std::string& additionalDefines) {
+            shaderOps.push_back(ShaderEntry{id, type, additionalDefines, true});
+        };
+
+    HeadlessFrontend frontend{{512, 512}, 1};
+    MapAdapter map(
+        frontend,
+        observer,
+        std::make_shared<MainResourceLoader>(
+            ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"), ClientOptions()),
+        MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+
+    map.getStyle().loadJSON(util::read_file("test/fixtures/api/water.json"));
+    auto layer = std::make_unique<FillLayer>("landcover", "mapbox");
+    layer->setSourceLayer("landcover");
+    layer->setFillColor(Color{0.0, 1.0, 0.0, 1.0});
+    map.getStyle().addLayer(std::move(layer));
+    map.jumpTo(CameraOptions().withCenter(LatLng{37.8, -122.5}).withZoom(10.0));
+    (void)frontend.render(map);
+
+    // We expect to see a valid shader lifecycle for every entry in this list.
+    const std::vector<std::pair<shaders::BuiltIn, size_t>> expectedShaders = {
+        {shaders::BuiltIn::FillShader, 16114602744458825542ULL},
+        {shaders::BuiltIn::FillOutlineShader, 16114602744458825542ULL},
+    };
+
+    for (const auto& [id, defineHash] : expectedShaders) {
+        bool seenPreEvent = false;
+
+        for (const auto& op : shaderOps) {
+            if (op.id != id || std::hash<std::string>()(op.defines) != defineHash) {
+                continue;
+            }
+
+            if (!seenPreEvent) {
+                EXPECT_EQ(op.isPostCompile, false);
+                seenPreEvent = true;
+            } else {
+                EXPECT_EQ(op.isPostCompile, true);
+                break;
+            }
+        }
+    }
+
+    for (const auto& tile : expectedTiles) {
+        TileOperation stage = TileOperation::NullOp;
+        bool parsing = false;
+
+        // Suppressing warning-as-error to use range-based for. Index is desired for debugging context.
+        // NOLINTNEXTLINE
+        for (size_t i = 0; i < tileOps.size(); i++) {
+            const auto& op = tileOps[i];
+            if (op.id != tile) continue;
+            switch (op.op) {
+                case TileOperation::RequestedFromCache: {
+                    EXPECT_EQ(stage, TileOperation::NullOp);
+                    stage = TileOperation::RequestedFromCache;
+                    break;
+                }
+                case TileOperation::RequestedFromNetwork: {
+                    // Parsing happens concurrently with the file source request and can start and stop between requests
+                    EXPECT_THAT(stage,
+                                testing::AnyOf(
+                                    TileOperation::StartParse, TileOperation::EndParse, TileOperation::LoadFromCache));
+                    stage = TileOperation::RequestedFromNetwork;
+                    break;
+                }
+                case TileOperation::LoadFromNetwork: {
+                    // Parsing happens concurrently with the file source request and can start and stop between requests
+                    EXPECT_THAT(
+                        stage,
+                        testing::AnyOf(
+                            TileOperation::StartParse, TileOperation::EndParse, TileOperation::RequestedFromNetwork));
+                    stage = TileOperation::LoadFromNetwork;
+                    break;
+                }
+                case TileOperation::LoadFromCache: {
+                    EXPECT_THAT(stage, testing::AnyOf(TileOperation::RequestedFromCache, TileOperation::StartParse));
+                    stage = TileOperation::LoadFromCache;
+                    break;
+                }
+                case TileOperation::StartParse: {
+                    // Parsing is expected to be started early during the request process by a call to `setLayers`
+                    EXPECT_THAT(stage,
+                                testing::AnyOf(TileOperation::RequestedFromCache,
+                                               TileOperation::RequestedFromNetwork,
+                                               TileOperation::LoadFromCache,
+                                               TileOperation::LoadFromNetwork));
+                    EXPECT_FALSE(parsing); // We must not already be parsing when seeing this marker.
+                    stage = TileOperation::StartParse;
+                    parsing = true;
+                    break;
+                }
+                case TileOperation::Cancelled: {
+                    EXPECT_THAT(stage,
+                                testing::AnyOf(TileOperation::RequestedFromCache,
+                                               TileOperation::RequestedFromNetwork,
+                                               TileOperation::LoadFromNetwork,
+                                               TileOperation::LoadFromCache,
+                                               TileOperation::StartParse));
+                    stage = TileOperation::Cancelled;
+                    parsing = false;
+                    break;
+                }
+                case TileOperation::EndParse: {
+                    // The following are both possible:
+                    // * RequestedFromCache -> LoadFromCache -> StartParse -> RequestedFromNetwork -> EndParse ->
+                    //   LoadFromNetwork -> StartParse -> EndParse
+                    // The parsing stage is initiated by the cached version. The network request doesn't arrive
+                    // until after the cached version has completed parsing. A new parsing task is spawned, resulting
+                    // in a pair of Start and EndParse events.
+                    //
+                    // * RequestedFromCache -> LoadFromCache -> StartParse ->
+                    //   RequestedFromNetwork -> LoadFromNetwork -> EndParse
+                    // The parsing stage is initiated by the cached version before being interrupted
+                    // by data from a new version downloaded over the network. This interruption doesn't cancel the
+                    // ongoing parsing task, so ::EndParse will end up being emitted only once by completion of the
+                    // newer tile's data.
+                    EXPECT_THAT(stage,
+                                testing::AnyOf(TileOperation::StartParse,
+                                               TileOperation::LoadFromNetwork,
+                                               TileOperation::RequestedFromNetwork));
+                    EXPECT_TRUE(parsing); // We must have been parsing to see the EndParse marker.
+                    parsing = false;
+                    stage = TileOperation::EndParse;
+                    break;
+                }
+                case TileOperation::NullOp:
+                    [[fallthrough]];
+                case TileOperation::Error: {
+                    ADD_FAILURE();
+                    break;
+                }
+            }
+        }
+
+        EXPECT_THAT(stage, testing::AnyOf(TileOperation::EndParse, TileOperation::Cancelled));
+        EXPECT_FALSE(parsing);
+    }
 }

@@ -12,6 +12,7 @@
 
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/storage/database_file_source.hpp>
+#include <mbgl/util/variant.hpp>
 
 const MLNExceptionName MLNInvalidOfflinePackException = @"MLNInvalidOfflinePackException";
 
@@ -19,7 +20,7 @@ const MLNExceptionName MLNInvalidOfflinePackException = @"MLNInvalidOfflinePackE
  Assert that the current offline pack is valid.
 
  This macro should be used at the beginning of any public-facing instance method
- of `MLNOfflinePack`. For private methods, an assertion is more appropriate.
+ of ``MLNOfflinePack``. For private methods, an assertion is more appropriate.
  */
 #define MLNAssertOfflinePackIsValid() \
     do { \
@@ -92,16 +93,15 @@ private:
     const mbgl::OfflineRegionDefinition &regionDefinition = _mbglOfflineRegion->getDefinition();
     MLNAssert([MLNTilePyramidOfflineRegion conformsToProtocol:@protocol(MLNOfflineRegion_Private)], @"MLNTilePyramidOfflineRegion should conform to MLNOfflineRegion_Private.");
     MLNAssert([MLNShapeOfflineRegion conformsToProtocol:@protocol(MLNOfflineRegion_Private)], @"MLNShapeOfflineRegion should conform to MLNOfflineRegion_Private.");
-    
-    
-    
-    return regionDefinition.match(
-                           [&] (const mbgl::OfflineTilePyramidRegionDefinition def){
-                               return (id <MLNOfflineRegion>)[[MLNTilePyramidOfflineRegion alloc] initWithOfflineRegionDefinition:def];
-                           },
-                           [&] (const mbgl::OfflineGeometryRegionDefinition& def){
-                               return (id <MLNOfflineRegion>)[[MLNShapeOfflineRegion alloc] initWithOfflineRegionDefinition:def];
-                           });
+
+    return  std::visit(mbgl::overloaded{
+                                   [&] (const mbgl::OfflineTilePyramidRegionDefinition def){
+                                       return (id <MLNOfflineRegion>)[[MLNTilePyramidOfflineRegion alloc] initWithOfflineRegionDefinition:def];
+                                   },
+                                   [&] (const mbgl::OfflineGeometryRegionDefinition& def){
+                                       return (id <MLNOfflineRegion>)[[MLNShapeOfflineRegion alloc] initWithOfflineRegionDefinition:def];
+                                   }
+    }, regionDefinition);
 }
 
 - (NSData *)context {
@@ -113,10 +113,10 @@ private:
 
 - (void)setContext:(NSData *)context completionHandler:(void (^_Nullable)(NSError * _Nullable error))completion {
     MLNAssertOfflinePackIsValid();
-    
+
     mbgl::OfflineRegionMetadata metadata(context.length);
     [context getBytes:&metadata[0] length:metadata.size()];
-    
+
     [self willChangeValueForKey:@"context"];
     __weak MLNOfflinePack *weakSelf = self;
     _mbglDatabaseFileSource->updateOfflineMetadata(_mbglOfflineRegion->getID(), metadata, [&, completion, weakSelf](mbgl::expected<mbgl::OfflineRegionMetadata, std::exception_ptr> mbglOfflineRegionMetadata) {
@@ -262,7 +262,7 @@ private:
 - (void)didReceiveError:(NSError *)error {
     MLNLogError(@"Error: %@", error.localizedDescription);
     MLNLogInfo(@"Notifying about pack error.");
-    
+
     NSDictionary *userInfo = @{ MLNOfflinePackUserInfoKeyError: error };
     NSNotificationCenter *noteCenter = [NSNotificationCenter defaultCenter];
     [noteCenter postNotificationName:MLNOfflinePackErrorNotification

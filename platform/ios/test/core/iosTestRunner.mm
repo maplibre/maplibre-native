@@ -32,7 +32,7 @@
         NSString *documentsDir = [paths objectAtIndex: 0];
 
         NSString *destinationPath = [documentsDir stringByAppendingPathComponent: @"test"];
-        
+
         [self copyFileAtPath:testDataDir toPath:destinationPath];
         [self copyFileAtPath:[testDataDir stringByAppendingPathComponent: @"scripts"] toPath:[documentsDir stringByAppendingPathComponent: @"scripts"]];
 
@@ -55,7 +55,7 @@
 
 /**
  Copies a file from the source path to the destination path.
- 
+
  @param sourcePath The path of the source file to be copied.
  @param destinationPath The destination path where the file should be copied.
  */
@@ -71,7 +71,7 @@
             NSAssert1(0, @"Failed to delete '%@'.", destinationPath);
         }
     }
-    
+
     success = [fileManager copyItemAtPath:sourcePath toPath:destinationPath error:&error];
     if (!success) {
         NSAssert1(0, @"Failed to copy file '%@'.", [error localizedDescription]);

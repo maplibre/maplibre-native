@@ -1,6 +1,6 @@
 #import <Mapbox.h>
 
-extern NSString * const MLNApiKeyDefaultsKey;
+extern NSString *const MLNApiKeyDefaultsKey;
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 

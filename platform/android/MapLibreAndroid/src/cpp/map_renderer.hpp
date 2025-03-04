@@ -10,6 +10,7 @@
 #include <optional>
 
 #include <jni/jni.hpp>
+#include <android/native_window.h>
 
 namespace mbgl {
 
@@ -25,6 +26,11 @@ class UpdateParameters;
 namespace android {
 
 class AndroidRendererBackend;
+
+class AndroidSurface {
+public:
+    static constexpr auto Name() { return "android/view/Surface"; };
+};
 
 /**
  * The MapRenderer is a peer class that encapsulates the actions
@@ -66,18 +72,22 @@ public:
 
     // From Scheduler. Schedules by using callbacks to the
     // JVM to process the mailbox on the right thread.
-    void schedule(std::function<void()>&& scheduled) override;
+    void schedule(Task&& scheduled) override;
+    void schedule(const util::SimpleIdentity, Task&& fn) override { schedule(std::move(fn)); };
+
     mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
     // Wait for the queue to be empty
-    // A timeout of zero results in an unbounded wait
-    std::size_t waitForEmpty(Milliseconds timeout) override;
+    void waitForEmpty(const util::SimpleIdentity tag) override;
 
     void requestRender();
 
     // Snapshot - requires a RunLoop on the calling thread
     using SnapshotCallback = std::function<void(PremultipliedImage)>;
     void requestSnapshot(SnapshotCallback);
+
+    AndroidRendererBackend& getRendererBackend() const { return *backend; }
+    const TaggedScheduler& getThreadPool() const { return threadPool; }
 
 protected:
     // Called from the GL Thread //
@@ -101,7 +111,7 @@ private:
     // Renders a frame.
     void render(JNIEnv&);
 
-    void onSurfaceCreated(JNIEnv&);
+    void onSurfaceCreated(JNIEnv&, const jni::Object<AndroidSurface>& surface);
 
     void onSurfaceChanged(JNIEnv&, jint width, jint height);
 
@@ -119,7 +129,7 @@ private:
     float pixelRatio;
     std::optional<std::string> localIdeographFontFamily;
 
-    std::shared_ptr<ThreadPool> threadPool;
+    TaggedScheduler threadPool;
     const MailboxData mailboxData;
 
     std::mutex initialisationMutex;
@@ -128,15 +138,20 @@ private:
     std::unique_ptr<AndroidRendererBackend> backend;
     std::unique_ptr<Renderer> renderer;
     std::unique_ptr<ActorRef<Renderer>> rendererRef;
+    std::unique_ptr<ANativeWindow, std::function<void(ANativeWindow*)>> window;
 
     std::shared_ptr<UpdateParameters> updateParameters;
     std::mutex updateMutex;
 
-    bool framebufferSizeChanged = false;
     std::atomic<bool> destroyed{false};
 
     std::unique_ptr<SnapshotCallback> snapshotCallback;
+
+    bool framebufferSizeChanged = false;
+    bool swapBehaviorFlush = false;
+
     mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
+    // Do not add members here, see `WeakPtrFactory`
 };
 
 } // namespace android

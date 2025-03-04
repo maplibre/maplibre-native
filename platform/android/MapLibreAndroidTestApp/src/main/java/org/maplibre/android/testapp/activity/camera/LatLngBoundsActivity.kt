@@ -18,6 +18,7 @@ import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.databinding.ActivityLatlngboundsBinding
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.GeoParseUtil
 import org.maplibre.android.utils.BitmapUtils
 import java.net.URISyntaxException
@@ -51,6 +52,7 @@ class LatLngBoundsActivity : AppCompatActivity() {
         binding.mapView.getMapAsync { map ->
             maplibreMap = map
 
+            // # --8<-- [start:featureCollection]
             val featureCollection: FeatureCollection =
                 fromJson(GeoParseUtil.loadStringFromAssets(this, "points-sf.geojson"))
             bounds = createBounds(featureCollection)
@@ -58,6 +60,7 @@ class LatLngBoundsActivity : AppCompatActivity() {
             map.getCameraForLatLngBounds(bounds, createPadding(peekHeight))?.let {
                 map.cameraPosition = it
             }
+            // # --8<-- [end:featureCollection]
 
             try {
                 loadStyle(featureCollection)
@@ -70,7 +73,7 @@ class LatLngBoundsActivity : AppCompatActivity() {
     private fun loadStyle(featureCollection: FeatureCollection) {
         maplibreMap.setStyle(
             Style.Builder()
-                .fromUri(Style.getPredefinedStyle("Streets"))
+                .fromUri(TestStyles.VERSATILES)
                 .withLayer(
                     SymbolLayer("symbol", "symbol")
                         .withProperties(
@@ -98,7 +101,7 @@ class LatLngBoundsActivity : AppCompatActivity() {
 
     private fun initBottomSheet() {
         bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
-        bottomSheetBehavior.setBottomSheetCallback(
+        bottomSheetBehavior.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
                 override fun onSlide(bottomSheet: View, slideOffset: Float) {
                     val offset = convertSlideOffset(slideOffset)
@@ -128,6 +131,7 @@ class LatLngBoundsActivity : AppCompatActivity() {
         return intArrayOf(additionalPadding, additionalPadding, additionalPadding, bottomPadding)
     }
 
+    // # --8<-- [start:createBounds]
     private fun createBounds(featureCollection: FeatureCollection): LatLngBounds {
         val boundsBuilder = LatLngBounds.Builder()
         featureCollection.features()?.let {
@@ -138,6 +142,7 @@ class LatLngBoundsActivity : AppCompatActivity() {
         }
         return boundsBuilder.build()
     }
+    // # --8<-- [end:createBounds]
 
     override fun onStart() {
         super.onStart()

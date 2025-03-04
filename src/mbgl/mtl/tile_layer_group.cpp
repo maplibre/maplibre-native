@@ -111,7 +111,6 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             }
         };
 
-        const auto depthMode = parameters.depthModeFor3D();
         if (stencil3d) {
             stencilMode3d = parameters.stencilModeFor3D();
             encoder->setStencilReferenceValue(stencilMode3d.ref);
@@ -126,6 +125,11 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             return;
         }
 
+        if (!bindUBOs) {
+            uniformBuffers.bindMtl(renderPass);
+            bindUBOs = true;
+        }
+
         for (const auto& tweaker : drawable.getTweakers()) {
             tweaker->execute(drawable, parameters);
         }
@@ -138,28 +142,8 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             renderPass.setDepthStencilState(state);
         }
 
-        if (!bindUBOs) {
-            bindUniformBuffers(renderPass);
-            bindUBOs = true;
-        }
-
         drawable.draw(parameters);
     });
-
-    if (bindUBOs) {
-        unbindUniformBuffers(renderPass);
-    }
-}
-
-void TileLayerGroup::bindUniformBuffers(RenderPass& renderPass) const noexcept {
-    for (size_t id = 0; id < uniformBuffers.allocatedSize(); id++) {
-        const auto& uniformBuffer = uniformBuffers.get(id);
-        if (!uniformBuffer) continue;
-        const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer.get());
-        const auto& resource = buffer.getBufferResource();
-        renderPass.bindVertex(resource, 0, id);
-        renderPass.bindFragment(resource, 0, id);
-    }
 }
 
 } // namespace mtl

@@ -17,7 +17,6 @@
 #include <mbgl/style/layers/fill_extrusion_layer_impl.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
 #include <mbgl/tile/tile.hpp>
-#include <mbgl/util/convert.hpp>
 #include <mbgl/util/intersection_tests.hpp>
 #include <mbgl/util/math.hpp>
 
@@ -58,13 +57,14 @@ void RenderFillExtrusionLayer::transition(const TransitionParameters& parameters
 }
 
 void RenderFillExtrusionLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    auto properties = makeMutable<FillExtrusionLayerProperties>(staticImmutableCast<FillExtrusionLayer::Impl>(baseImpl),
-                                                                parameters.getCrossfadeParameters(),
-                                                                unevaluated.evaluate(parameters));
+    const auto previousProperties = staticImmutableCast<FillExtrusionLayerProperties>(evaluatedProperties);
+    auto properties = makeMutable<FillExtrusionLayerProperties>(
+        staticImmutableCast<FillExtrusionLayer::Impl>(baseImpl),
+        parameters.getCrossfadeParameters(),
+        unevaluated.evaluate(parameters, previousProperties->evaluated));
 
-    passes = (properties->evaluated.get<style::FillExtrusionOpacity>() > 0)
-                 ? (RenderPass::Translucent | RenderPass::Pass3D)
-                 : RenderPass::None;
+    passes = (properties->evaluated.get<style::FillExtrusionOpacity>() > 0) ? RenderPass::Translucent
+                                                                            : RenderPass::None;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 
@@ -110,13 +110,13 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
                     const auto& crossfade_,
                     const gfx::StencilMode& stencilMode,
                     const gfx::ColorMode& colorMode,
-                    const auto& tileBucket,
+                    auto& tileBucket,
                     const auto& uniformValues,
                     const std::optional<ImagePosition>& patternPositionA,
                     const std::optional<ImagePosition>& patternPositionB,
                     const auto& textureBindings,
                     const std::string& uniqueName) {
-        const auto& paintPropertyBinders = tileBucket.paintPropertyBinders.at(getID());
+        auto& paintPropertyBinders = tileBucket.paintPropertyBinders.at(getID());
         paintPropertyBinders.setPatternParameters(patternPositionA, patternPositionB, crossfade_);
 
         const auto allUniformValues = programInstance.computeAllUniformValues(
@@ -150,7 +150,7 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
                     if (!renderData) {
                         continue;
                     }
-                    const auto& bucket = static_cast<FillExtrusionBucket&>(*renderData->bucket);
+                    auto& bucket = static_cast<FillExtrusionBucket&>(*renderData->bucket);
                     draw(*fillExtrusionProgram,
                          evaluated,
                          crossfade,
@@ -198,7 +198,7 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
                     if (!renderData) {
                         continue;
                     }
-                    const auto& bucket = static_cast<FillExtrusionBucket&>(*renderData->bucket);
+                    auto& bucket = static_cast<FillExtrusionBucket&>(*renderData->bucket);
                     const std::optional<ImagePosition> patternPosA = tile.getPattern(fillPatternValue.from.id());
                     const std::optional<ImagePosition> patternPosB = tile.getPattern(fillPatternValue.to.id());
                     const auto numTiles = std::pow(2, tile.id.canonical.z);
@@ -269,9 +269,9 @@ bool RenderFillExtrusionLayer::queryIntersectsFeature(const GeometryCoordinates&
 
 void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
-                                      const TransformState& state,
+                                      const TransformState&,
                                       const std::shared_ptr<UpdateParameters>&,
-                                      const RenderTree& /*renderTree*/,
+                                      const RenderTree&,
                                       UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
         removeAllDrawables();
@@ -302,23 +302,18 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
     const auto& evaluated = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties).evaluated;
-    const auto& crossfade = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties).crossfade;
 
-    // `passes` is set to (RenderPass::Translucent | RenderPass::Pass3D), but `render()`
-    // only runs on the translucent pass, so although our output is 3D, it does not render
-    // in the "3D pass".
     constexpr auto drawPass = RenderPass::Translucent;
 
     stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         const auto& tileID = drawable.getTileID();
-        if (drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID))) {
+        if (!(drawable.getRenderPass() & drawPass) || (tileID && !hasRenderTile(*tileID))) {
             return true;
         }
         return false;
     });
 
-    const auto zoom = static_cast<float>(state.getZoom());
     const auto layerPrefix = getID() + "/";
     const auto hasPattern = !unevaluated.get<FillExtrusionPattern>().isUndefined();
     const auto opaque = evaluated.get<FillExtrusionOpacity>() >= 1;
@@ -338,19 +333,19 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
-        const auto* optRenderData = getRenderDataForPass(tile, passes);
+        const auto* optRenderData = getRenderDataForPass(tile, drawPass);
         if (!optRenderData || !optRenderData->bucket || !optRenderData->bucket->hasData()) {
             removeTile(drawPass, tileID);
             continue;
         }
 
         const auto& renderData = *optRenderData;
-        const auto& bucket = static_cast<const FillExtrusionBucket&>(*renderData.bucket);
+        auto& bucket = static_cast<FillExtrusionBucket&>(*renderData.bucket);
 
         const auto prevBucketID = getRenderTileBucketID(tileID);
         if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
             // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
-            removeTile(passes, tileID);
+            removeTile(drawPass, tileID);
         }
         setRenderTileBucketID(tileID, bucket.getID());
 
@@ -363,30 +358,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         const auto vertexCount = bucket.vertices.elements();
-        const auto defPattern = mbgl::Faded<expression::Image>{"", ""};
-        const auto fillPatternValue = evaluated.get<FillExtrusionPattern>().constantOr(defPattern);
-        const auto patternPosA = tile.getPattern(fillPatternValue.from.id());
-        const auto patternPosB = tile.getPattern(fillPatternValue.to.id());
-
-        const auto& binders = bucket.paintPropertyBinders.at(getID());
-        if (hasPattern) {
-            binders.setPatternParameters(patternPosA, patternPosB, crossfade);
-        }
-
-        const FillExtrusionInterpolateUBO interpUBO = {
-            /* .base_t = */ std::get<0>(binders.get<FillExtrusionBase>()->interpolationFactor(zoom)),
-            /* .height_t = */ std::get<0>(binders.get<FillExtrusionHeight>()->interpolationFactor(zoom)),
-            /* .color_t = */ std::get<0>(binders.get<FillExtrusionColor>()->interpolationFactor(zoom)),
-            /* .pattern_from_t = */ std::get<0>(binders.get<FillExtrusionPattern>()->interpolationFactor(zoom)),
-            /* .pattern_to_t = */ std::get<0>(binders.get<FillExtrusionPattern>()->interpolationFactor(zoom)),
-            /* .pad = */ 0,
-            0,
-            0};
-
-        const FillExtrusionTilePropsUBO tilePropsUBO = {
-            /* pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
-            /* pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
-        };
+        auto& binders = bucket.paintPropertyBinders.at(getID());
 
         // If we already have drawables for this tile, update them.
         auto updateExisting = [&](gfx::Drawable& drawable) {
@@ -394,10 +366,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 // This drawable was produced on a previous style/bucket, and should not be updated.
                 return false;
             }
-
-            auto& drawableUniforms = drawable.mutableUniformBuffers();
-            drawableUniforms.createOrUpdate(idFillExtrusionTilePropsUBO, &tilePropsUBO, context);
-            drawableUniforms.createOrUpdate(idFillExtrusionInterpolateUBO, &interpUBO, context);
             return true;
         };
         if (updateTile(drawPass, tileID, std::move(updateExisting))) {
@@ -431,6 +399,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setEnableColor(false);
                 builder->setRenderPass(drawPass);
                 builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
+                builder->setDrawPriority(0);
                 if (tweaker) {
                     builder->addTweaker(tweaker);
                 }
@@ -445,6 +414,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setColorMode(gfx::ColorMode::alphaBlended());
                 builder->setRenderPass(drawPass);
                 builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
+                builder->setDrawPriority(1);
                 if (tweaker) {
                     builder->addTweaker(tweaker);
                 }
@@ -508,11 +478,10 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
             for (auto& drawable : builder.clearDrawables()) {
                 drawable->setTileID(tileID);
+                drawable->setType(static_cast<std::size_t>(hasPattern));
                 drawable->setLayerTweaker(layerTweaker);
-
-                auto& drawableUniforms = drawable->mutableUniformBuffers();
-                drawableUniforms.createOrUpdate(idFillExtrusionTilePropsUBO, &tilePropsUBO, context);
-                drawableUniforms.createOrUpdate(idFillExtrusionInterpolateUBO, &interpUBO, context);
+                drawable->setBinders(renderData.bucket, &binders);
+                drawable->setRenderTile(renderTilesOwner, &tile);
 
                 tileLayerGroup->addDrawable(drawPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;

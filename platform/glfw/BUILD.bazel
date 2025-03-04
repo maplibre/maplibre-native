@@ -36,6 +36,10 @@ cc_binary(
                ],
            }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    data = glob(["assets/*"]),
+    defines = [
+        r"MLN_ASSETS_PATH=\"assets/\"",
+    ],
     linkopts = [
         "-lglfw",
     ] + select({
@@ -51,8 +55,10 @@ cc_binary(
     deps = [
         "//:maplibre_lib",
         "@glfw",
+        "@tinyobjloader",
     ] + select({
         "@platforms//os:macos": ["metal_backend"],
+        "@platforms//os:linux": ["//platform/linux:impl"],
         "//conditions:default": [],
     }),
 )

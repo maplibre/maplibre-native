@@ -16,26 +16,29 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::OpenG
     highp float u_symbol_fade_change;
     highp float u_aspect_ratio;
     highp float u_pixel_ratio;
-    highp float global_pad1, global_pad2;
+    highp float u_map_zoom;
+    lowp float global_pad1;
 };
+
 layout (std140) uniform FillOutlinePatternDrawableUBO {
     highp mat4 u_matrix;
     highp vec2 u_pixel_coord_upper;
     highp vec2 u_pixel_coord_lower;
-    highp vec2 u_texsize;
     highp float u_tile_ratio;
-    highp float drawable_pad1;
-};
-layout (std140) uniform FillOutlinePatternTilePropsUBO {
-    highp vec4 u_pattern_from;
-    highp vec4 u_pattern_to;
-};
-layout (std140) uniform FillOutlinePatternInterpolateUBO {
+    // Interpolations
     highp float u_pattern_from_t;
     highp float u_pattern_to_t;
     highp float u_opacity_t;
-    highp float interp_pad1;
 };
+
+layout (std140) uniform FillOutlinePatternTilePropsUBO {
+    highp vec4 u_pattern_from;
+    highp vec4 u_pattern_to;
+    highp vec2 u_texsize;
+    lowp float tileprops_pad1;
+    lowp float tileprops_pad2;
+};
+
 layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_color;
     highp vec4 u_outline_color;
@@ -102,24 +105,14 @@ mediump vec4 pattern_to = u_pattern_to;
     v_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * u_world_size;
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform FillOutlinePatternDrawableUBO {
-    highp mat4 u_matrix;
-    highp vec2 u_pixel_coord_upper;
-    highp vec2 u_pixel_coord_lower;
-    highp vec2 u_texsize;
-    highp float u_tile_ratio;
-    highp float drawable_pad1;
-};
-layout (std140) uniform FillOutlinePatternTilePropsUBO {
+    static constexpr const char* fragment = R"(layout (std140) uniform FillOutlinePatternTilePropsUBO {
     highp vec4 u_pattern_from;
     highp vec4 u_pattern_to;
+    highp vec2 u_texsize;
+    lowp float tileprops_pad1;
+    lowp float tileprops_pad2;
 };
-layout (std140) uniform FillOutlinePatternInterpolateUBO {
-    highp float u_pattern_from_t;
-    highp float u_pattern_to_t;
-    highp float u_opacity_t;
-    highp float interp_pad1;
-};
+
 layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_color;
     highp vec4 u_outline_color;

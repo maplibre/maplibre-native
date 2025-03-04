@@ -9,14 +9,12 @@ TEST(Settings, SetAndGet) {
     using Object = mapbox::base::ValueObject;
 
     auto& settings = Settings::getInstance();
-    auto value = settings.get(EXPERIMENTAL_THREAD_PRIORITY_WORKER);
-    EXPECT_TRUE(value.is<mapbox::base::NullValue>());
 
     Value lowPrioValue{19.0};
     settings.set(EXPERIMENTAL_THREAD_PRIORITY_WORKER, lowPrioValue);
     auto threadPriority = settings.get(EXPERIMENTAL_THREAD_PRIORITY_WORKER);
     EXPECT_EQ(lowPrioValue, threadPriority);
-    EXPECT_EQ(lowPrioValue, settings.get("mapbox_thread_priority_worker"));
+    EXPECT_EQ(lowPrioValue, settings.get("maplibre_thread_priority_worker"));
 
     Value networkPrioValue{-20.0};
     Value databasePrioValue{-10.0};

@@ -18,6 +18,7 @@ import org.maplibre.android.maps.Style
 import org.maplibre.android.snapshotter.MapSnapshot
 import org.maplibre.android.snapshotter.MapSnapshotter
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import timber.log.Timber
 
 /**
@@ -40,7 +41,7 @@ class MapSnapshotterBitMapOverlayActivity :
         container.viewTreeObserver
             .addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
-                    container.viewTreeObserver.removeGlobalOnLayoutListener(this)
+                    container.viewTreeObserver.removeOnGlobalLayoutListener(this)
                     Timber.i("Starting snapshot")
                     mapSnapshotter = MapSnapshotter(
                         applicationContext,
@@ -49,7 +50,7 @@ class MapSnapshotterBitMapOverlayActivity :
                             Math.min(container.measuredHeight, 1024)
                         )
                             .withStyleBuilder(
-                                Style.Builder().fromUri(Style.getPredefinedStyle("Outdoor"))
+                                Style.Builder().fromUri(TestStyles.AMERICANA)
                             )
                             .withCameraPosition(
                                 CameraPosition.Builder().target(LatLng(52.090737, 5.121420))

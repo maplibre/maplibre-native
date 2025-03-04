@@ -1,5 +1,5 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary")
-load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
 load("@npm//:defs.bzl", "npm_link_all_packages")
 load(
     "//bazel:core.bzl",
@@ -124,11 +124,12 @@ cc_library(
         ":mbgl-core-generated-private-artifacts",
         ":mbgl-core-generated-public-artifacts",
         "//vendor:boost",
-        "//vendor:csscolorparser",
         "//vendor:earcut.hpp",
         "//vendor:eternal",
         "//vendor:mapbox-base",
+        "//vendor:nontype_functional",
         "//vendor:parsedate",
+        "//vendor:pmtiles",
         "//vendor:polylabel",
         "//vendor:protozero",
         "//vendor:unique_resource",
@@ -148,6 +149,13 @@ cc_library(
             "//vendor:metal-cpp",
         ],
         "//conditions:default": [],
+    }) + select({
+        ":rust": [
+            "//rustutils:rustutilslib",
+        ],
+        "//conditions:default": [
+            "//vendor:csscolorparser",
+        ],
     }),
 )
 
@@ -194,6 +202,19 @@ config_setting(
     },
 )
 
+bool_flag(
+    name = "use_rust",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "rust",
+    flag_values = {
+        "//:use_rust": "true",
+    },
+)
+
 exports_files(
     [
         "LICENSE.md",
@@ -214,7 +235,7 @@ js_binary(
         ":style-code",
         ":style-spec",
     ],
-    entry_point = "scripts/generate-style-code.js",
+    entry_point = "scripts/generate-style-code.mjs",
 )
 
 js_binary(
@@ -222,14 +243,13 @@ js_binary(
     data = [
         ":node_modules/argparse",
     ],
-    entry_point = "shaders/generate_shader_code.js",
+    entry_point = "shaders/generate_shader_code.mjs",
 )
 
 js_library(
     name = "style-spec",
-    srcs = ["scripts/style-spec.js"],
+    srcs = ["scripts/style-spec.mjs"],
     data = glob([
-        "scripts/style-spec-reference/*.js",
         "scripts/style-spec-reference/*.json",
     ]),
     visibility = ["//visibility:public"],
@@ -237,7 +257,7 @@ js_library(
 
 js_library(
     name = "style-code",
-    srcs = ["scripts/style-code.js"],
+    srcs = ["scripts/style-code.mjs"],
     visibility = ["//visibility:public"],
     deps = [
         ":node_modules/ejs",

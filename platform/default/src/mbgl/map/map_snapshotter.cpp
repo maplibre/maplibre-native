@@ -46,8 +46,8 @@ public:
         delegate.invoke(f, mode, repaintNeeded, placementChanged, frameEncodingTime, frameRenderingTime);
     }
 
-    void onStyleImageMissing(const std::string& image, const StyleImageMissingCallback& cb) override {
-        delegate.invoke(&RendererObserver::onStyleImageMissing, image, cb);
+    void onStyleImageMissing(const std::string& image, Scheduler::Task&& cb) override {
+        delegate.invoke(&RendererObserver::onStyleImageMissing, image, std::move(cb));
     }
 
 private:
@@ -95,8 +95,8 @@ public:
             mode, repaintNeeded, placementChanged, frameEncodingTime, frameRenderingTime);
     }
 
-    void onStyleImageMissing(const std::string& id, const StyleImageMissingCallback& done) override {
-        rendererObserver->onStyleImageMissing(id, done);
+    void onStyleImageMissing(const std::string& id, Scheduler::Task&& done) override {
+        rendererObserver->onStyleImageMissing(id, std::move(done));
     }
 
     void setObserver(std::shared_ptr<RendererObserver> observer) {
@@ -117,6 +117,8 @@ public:
         assert(stillImage.valid());
         return std::move(stillImage);
     }
+
+    const TaggedScheduler& getThreadPool() const { return frontend.getThreadPool(); }
 
 private:
     PremultipliedImage stillImage;
@@ -155,6 +157,10 @@ public:
     }
 
     PremultipliedImage takeImage() { return renderer->actor().ask(&SnapshotterRenderer::takeImage).get(); }
+
+    const mbgl::TaggedScheduler& getThreadPool() const override {
+        return renderer->actor().ask(&SnapshotterRenderer::getThreadPool).get();
+    }
 
 private:
     std::shared_ptr<UpdateParameters> updateParameters;

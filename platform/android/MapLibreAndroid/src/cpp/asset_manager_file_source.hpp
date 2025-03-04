@@ -23,7 +23,7 @@ public:
                            const ClientOptions);
     ~AssetManagerFileSource() override;
 
-    std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
+    std::unique_ptr<AsyncRequest> request(const Resource&, std::function<void(Response)>) override;
     bool canRequest(const Resource&) const override;
 
     void setResourceOptions(ResourceOptions options) override;
@@ -35,7 +35,7 @@ public:
 private:
     class Impl;
 
-    jni::Global<jni::Object<android::AssetManager>> assetManager;
+    jni::Global<jni::Object<android::AssetManager>, jni::EnvAttachingDeleter> assetManager;
     std::unique_ptr<util::Thread<Impl>> impl;
 };
 

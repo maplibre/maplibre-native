@@ -23,6 +23,8 @@ public:
 
     bool isConstant() const noexcept { return value.template is<T>(); }
 
+    bool isExpression() const noexcept { return value.template is<style::PropertyExpression<T>>(); }
+
     std::optional<T> constant() const {
         return value.match([&](const T& t) { return std::optional<T>(t); }, [&](const auto&) { return std::nullopt; });
     }
@@ -32,6 +34,11 @@ public:
     template <class... Ts>
     auto match(Ts&&... ts) const {
         return value.match(std::forward<Ts>(ts)...);
+    }
+
+    T evaluate(float zoom) const {
+        return this->match([&](const T& constant_) { return constant_; },
+                           [&](const style::PropertyExpression<T>& expression) { return expression.evaluate(zoom); });
     }
 
     template <class Feature>

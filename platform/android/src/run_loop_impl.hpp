@@ -16,8 +16,6 @@ struct ALooper;
 namespace mbgl {
 namespace util {
 
-using WatchCallback = std::function<void(int, RunLoop::Event)>;
-
 template <typename T>
 class Thread;
 class Alarm;
@@ -42,14 +40,14 @@ public:
 
     Milliseconds processRunnables();
 
-    std::size_t waitForEmpty(Milliseconds timeout);
+    void waitForEmpty();
 
     ALooper* loop = nullptr;
     RunLoop* runLoop = nullptr;
     std::atomic<bool> running;
     std::atomic_flag coalesce = ATOMIC_FLAG_INIT;
 
-    std::unordered_map<int, WatchCallback> readPoll;
+    std::unordered_map<int, std23::move_only_function<void(int, RunLoop::Event)>> readPoll;
 
 private:
     friend RunLoop;

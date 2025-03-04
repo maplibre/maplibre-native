@@ -3,9 +3,13 @@
 #include <mbgl/actor/mailbox.hpp>
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/util/thread_local.hpp>
+#include <mbgl/util/containers.hpp>
+#include <mbgl/util/identity.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 #include <algorithm>
 #include <condition_variable>
+#include <map>
 #include <mutex>
 #include <queue>
 #include <thread>
@@ -15,7 +19,16 @@ namespace mbgl {
 
 class ThreadedSchedulerBase : public Scheduler {
 public:
-    void schedule(std::function<void()>&&) override;
+    /// @brief Schedule a generic task not assigned to any particular owner.
+    /// The scheduler itself will own the task.
+    /// @param fn Task to run
+    void schedule(Task&& fn) override;
+
+    /// @brief Schedule a task assigned to the given owner `tag`.
+    /// @param tag Identifier object to indicate ownership of `fn`
+    /// @param fn Task to run
+    void schedule(const util::SimpleIdentity tag, Task&& fn) override;
+    const util::SimpleIdentity uniqueID;
 
 protected:
     ThreadedSchedulerBase() = default;
@@ -24,28 +37,31 @@ protected:
     void terminate();
     std::thread makeSchedulerThread(size_t index);
 
-    /// Wait until there's nothing pending or in process
+    /// @brief Wait until there's nothing pending or in process
     /// Must not be called from a task provided to this scheduler.
-    /// @param timeout Time to wait, or zero to wait forever.
-    std::size_t waitForEmpty(Milliseconds timeout) override;
+    /// @param tag Tag of the owner to identify the collection of tasks to
+    // wait for. Not providing a tag waits on tasks owned by the scheduler.
+    void waitForEmpty(const util::SimpleIdentity = util::SimpleIdentity::Empty) override;
 
     /// Returns true if called from a thread managed by the scheduler
     bool thisThreadIsOwned() const { return owningThreadPool.get() == this; }
 
-    std::queue<std::function<void()>> queue;
-    // protects `queue`
-    std::mutex mutex;
-    // Used to block addition of new items while waiting
-    std::mutex addMutex;
     // Signal when an item is added to the queue
     std::condition_variable cvAvailable;
-    // Signal when the queue becomes empty
-    std::condition_variable cvEmpty;
-    // Count of functions removed from the queue but still executing
-    std::atomic<std::size_t> pendingItems{0};
-    // Points to the owning pool in owned threads
+    std::mutex workerMutex;
+    std::mutex taggedQueueLock;
     util::ThreadLocal<ThreadedSchedulerBase> owningThreadPool;
+    std::atomic<size_t> taskCount{0};
     bool terminated{false};
+
+    // Task queues bucketed by tag address
+    struct Queue {
+        std::atomic<std::size_t> runningCount; /* running tasks */
+        std::condition_variable cv;            /* queue empty condition */
+        std::mutex lock;                       /* lock */
+        std::queue<Task> queue;                /* pending task queue */
+    };
+    mbgl::unordered_map<util::SimpleIdentity, std::shared_ptr<Queue>> taggedQueue;
 };
 
 /**
@@ -74,19 +90,56 @@ public:
         }
     }
 
-    void runOnRenderThread(std::function<void()>&& fn) override {
-        std::lock_guard<std::mutex> lock(renderMutex);
-        renderThreadQueue.push(std::move(fn));
+    void runOnRenderThread(const util::SimpleIdentity tag, Task&& fn) override {
+        std::shared_ptr<RenderQueue> queue;
+        {
+            std::lock_guard<std::mutex> lock(taggedRenderQueueLock);
+            auto it = taggedRenderQueue.find(tag);
+            if (it != taggedRenderQueue.end()) {
+                queue = it->second;
+            } else {
+                queue = std::make_shared<RenderQueue>();
+                taggedRenderQueue.insert({tag, queue});
+            }
+        }
+
+        std::lock_guard<std::mutex> lock(queue->mutex);
+        queue->queue.push(std::move(fn));
     }
 
-    void runRenderJobs() override {
-        std::lock_guard<std::mutex> lock(renderMutex);
-        while (renderThreadQueue.size()) {
-            auto fn = std::move(renderThreadQueue.front());
-            renderThreadQueue.pop();
+    void runRenderJobs(const util::SimpleIdentity tag, bool closeQueue = false) override {
+        MLN_TRACE_FUNC();
+        std::shared_ptr<RenderQueue> queue;
+        std::unique_lock<std::mutex> lock(taggedRenderQueueLock);
+
+        {
+            auto it = taggedRenderQueue.find(tag);
+            if (it != taggedRenderQueue.end()) {
+                queue = it->second;
+            }
+
+            if (!closeQueue) {
+                lock.unlock();
+            }
+        }
+
+        if (!queue) {
+            return;
+        }
+
+        std::lock_guard<std::mutex> taskLock(queue->mutex);
+        while (queue->queue.size()) {
+            auto fn = std::move(queue->queue.front());
+            queue->queue.pop();
             if (fn) {
+                MLN_TRACE_ZONE(render job);
                 fn();
             }
+        }
+
+        if (closeQueue) {
+            // We hold both locks and can safely remove the queue entry
+            taggedRenderQueue.erase(tag);
         }
     }
 
@@ -94,10 +147,16 @@ public:
 
 private:
     std::vector<std::thread> threads;
-    mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
 
-    std::queue<std::function<void()>> renderThreadQueue;
-    std::mutex renderMutex;
+    struct RenderQueue {
+        std::queue<Task> queue;
+        std::mutex mutex;
+    };
+    mbgl::unordered_map<util::SimpleIdentity, std::shared_ptr<RenderQueue>> taggedRenderQueue;
+    std::mutex taggedRenderQueueLock;
+
+    mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
+    // Do not add members here, see `WeakPtrFactory`
 };
 
 class SequencedScheduler : public ThreadedScheduler {

@@ -3,9 +3,6 @@ layout(location = 1) in vec2 a_tex;
 
 layout(std140) uniform CustomSymbolIconDrawableUBO {
     highp mat4 u_matrix;
-};
-
-layout(std140) uniform CustomSymbolIconParametersUBO {
     highp vec2 u_extrude_scale;
     highp vec2 u_anchor;
     highp float u_angle_degrees;
@@ -13,7 +10,9 @@ layout(std140) uniform CustomSymbolIconParametersUBO {
     bool u_pitch_with_map;
     highp float u_camera_to_center_distance;
     highp float u_aspect_ratio;
-    highp float params_pad1, params_pad2, params_pad3;
+    lowp float drawable_pad1;
+    lowp float drawable_pad2;
+    lowp float drawable_pad3;
 };
 
 out vec2 v_tex;
@@ -38,7 +37,7 @@ void main() {
     // make anchor relative to (0.5, 0.5) and corners in range (-1, -1) to (1, 1)
     vec2 anchor = (u_anchor - vec2(0.5, 0.5)) * 2.0;
 
-    // decode center 
+    // decode center
     vec2 center = floor(a_pos * 0.5);
 
     // rotate extrusion around anchor

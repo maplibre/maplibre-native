@@ -11,6 +11,9 @@
 #endif
 
 #include <memory>
+#include <numbers>
+
+using namespace std::numbers;
 
 namespace mbgl {
 namespace gfx {
@@ -27,7 +30,7 @@ namespace {
  *
  * The newly created vertices are placed SHARP_CORNER_OFFSET pixels from the corner.
  */
-const float COS_HALF_SHARP_CORNER = std::cos(75.0f / 2.0f * (static_cast<float>(M_PI) / 180.0f));
+const float COS_HALF_SHARP_CORNER = std::cos(75.0f / 2.0f * (pi_v<float> / 180.0f));
 constexpr float SHARP_CORNER_OFFSET = 15.0f;
 
 // Angle per triangle for approximating round line joins.
@@ -137,6 +140,16 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
 
     const std::size_t startVertex = vertices.elements();
     std::vector<TriangleElement> triangleStore;
+
+    // Pre-allocate for triangles based on measuring benchmark execution
+    constexpr auto approxTrianglesPerSegment = 6;
+    triangleStore.reserve((len - first) * approxTrianglesPerSegment);
+
+    // Vertex count depends on length rather than segment count, and two elements often generates
+    // thousands of vertices, so we allocate some extra memory to skip the next 10 allocations.
+    if (vertices.empty()) {
+        vertices.reserve(1 << 10);
+    }
 
     for (std::size_t i = first; i < len; ++i) {
         if (options.type == FeatureType::Polygon && i == len - 1) {
@@ -350,7 +363,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
 
                 // Pick the number of triangles for approximating round join by
                 // based on the angle between normals.
-                const auto n = static_cast<unsigned>(::round((approxAngle * 180 / M_PI) / DEG_PER_TRIANGLE));
+                const auto n = static_cast<unsigned>(::round((approxAngle * 180 / pi) / DEG_PER_TRIANGLE));
 
                 for (unsigned m = 1; m < n; ++m) {
                     double t = static_cast<double>(m) / n;
@@ -533,6 +546,9 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
     assert(segment.vertexLength <= std::numeric_limits<uint16_t>::max());
     const uint16_t index = static_cast<uint16_t>(segment.vertexLength);
 
+    if (indexes.empty()) {
+        indexes.reserve(triangleStore.size() * 3);
+    }
     for (const auto& triangle : triangleStore) {
         indexes.emplace_back(index + triangle.a, index + triangle.b, index + triangle.c);
     }
@@ -552,7 +568,7 @@ void PolylineGenerator<PLV, PS>::addCurrentVertex(const GeometryCoordinate& curr
                                                   std::vector<TriangleElement>& triangleStore,
                                                   std::optional<PolylineGeneratorDistances> lineDistances) {
     Point<double> extrude = normal;
-    double scaledDistance = lineDistances ? lineDistances->scaleToMaxLineDistance(distance) : distance;
+    const double scaledDistance = lineDistances ? lineDistances->scaleToMaxLineDistance(distance) : distance;
 
     if (endLeft) extrude = extrude - (util::perp(normal) * endLeft);
     vertices.emplace_back(layoutVertex(currentCoordinate,

@@ -132,10 +132,9 @@ public:
     bool supportsZoom(float zoom) const;
 
     virtual void upload(gfx::UploadPass&) {}
-    virtual void render(PaintParameters&) {};
+    virtual void render(PaintParameters&) {}
 
-    // Check wether the given geometry intersects
-    // with the feature
+    // Check whether the given geometry intersects with the feature
     virtual bool queryIntersectsFeature(const GeometryCoordinates&,
                                         const GeometryTileFeature&,
                                         const float,
@@ -276,6 +275,9 @@ protected:
 protected:
     // Stores current set of tiles to be rendered for this layer.
     RenderTiles renderTiles;
+
+    // Retains ownership of tiles
+    Immutable<std::vector<RenderTile>> renderTilesOwner;
 
     // Stores what render passes this layer is currently enabled for. This depends on the
     // evaluated StyleProperties object and is updated accordingly.

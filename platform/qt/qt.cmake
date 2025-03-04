@@ -31,7 +31,11 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     endif()
 endif()
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
+if("${QT_VERSION_MAJOR}" STREQUAL "")
+    find_package(QT NAMES Qt6 COMPONENTS Core REQUIRED)
+else()
+    find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
+endif()
 find_package(Qt${QT_VERSION_MAJOR}
              COMPONENTS Gui
                         Network
@@ -80,6 +84,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_database.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_download.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/online_file_source.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/$<IF:$<BOOL:${MLN_WITH_PMTILES}>,pmtiles_file_source.cpp,pmtiles_file_source_stub.cpp>
         ${PROJECT_SOURCE_DIR}/platform/$<IF:$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>,default/src/mbgl/storage/sqlite3.cpp,qt/src/mbgl/sqlite3.cpp>
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/compression.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/filesystem.cpp
@@ -199,7 +204,7 @@ if(NOT MLN_QT_LIBRARY_ONLY)
     else()
         target_link_libraries(
             mbgl-test-runner
-            PRIVATE -Wl,--whole-archive mbgl-test -Wl,--no-whole-archive
+            PRIVATE $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
         )
     endif()
 

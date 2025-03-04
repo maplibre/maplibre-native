@@ -79,7 +79,7 @@ private:
 
 class HTTPRequest : public AsyncRequest {
 public:
-    HTTPRequest(HTTPFileSource::Impl *, Resource, FileSource::Callback);
+    HTTPRequest(HTTPFileSource::Impl *, Resource, std::function<void(Response)>);
     ~HTTPRequest() override;
 
     void handleResult(CURLcode code);
@@ -90,7 +90,7 @@ private:
 
     HTTPFileSource::Impl *context = nullptr;
     Resource resource;
-    FileSource::Callback callback;
+    std::function<void(Response)> callback;
 
     // Will store the current response.
     std::shared_ptr<std::string> data;
@@ -204,6 +204,12 @@ int HTTPFileSource::Impl::handleSocket(
                 static_cast<int>(s), util::RunLoop::Event::Write, std::bind(&Impl::perform, context, _1, _2));
             break;
         }
+        case CURL_POLL_INOUT: {
+            using namespace std::placeholders;
+            util::RunLoop::Get()->addWatch(
+                static_cast<int>(s), util::RunLoop::Event::ReadWrite, std::bind(&Impl::perform, context, _1, _2));
+            break;
+        }
         case CURL_POLL_REMOVE:
             util::RunLoop::Get()->removeWatch(static_cast<int>(s));
             break;
@@ -258,11 +264,17 @@ ClientOptions HTTPFileSource::Impl::getClientOptions() {
     return clientOptions.clone();
 }
 
-HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, FileSource::Callback callback_)
+HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, std::function<void(Response)> callback_)
     : context(context_),
       resource(std::move(resource_)),
       callback(std::move(callback_)),
       handle(context->getHandle()) {
+    if (resource.dataRange) {
+        const std::string header = std::string("Range: bytes=") + std::to_string(resource.dataRange->first) +
+                                   std::string("-") + std::to_string(resource.dataRange->second);
+        headers = curl_slist_append(headers, header.c_str());
+    }
+
     // If there's already a response, set the correct etags/modified headers to
     // make sure we are getting a 304 response if possible. This avoids
     // redownloading unchanged data.
@@ -291,7 +303,7 @@ HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, Fil
 #else
     handleError(curl_easy_setopt(handle, CURLOPT_ENCODING, "gzip, deflate"));
 #endif
-    handleError(curl_easy_setopt(handle, CURLOPT_USERAGENT, "MapboxGL/1.0"));
+    handleError(curl_easy_setopt(handle, CURLOPT_USERAGENT, "MapLibreNative/1.0"));
     handleError(curl_easy_setopt(handle, CURLOPT_SHARE, context->share));
 
     // Start requesting the information.
@@ -411,7 +423,7 @@ void HTTPRequest::handleResult(CURLcode code) {
         long responseCode = 0;
         curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &responseCode);
 
-        if (responseCode == 200) {
+        if (responseCode == 200 || responseCode == 206) {
             if (data) {
                 response->data = std::move(data);
             } else {
@@ -446,8 +458,9 @@ HTTPFileSource::HTTPFileSource(const ResourceOptions &resourceOptions, const Cli
 
 HTTPFileSource::~HTTPFileSource() = default;
 
-std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource &resource, Callback callback) {
-    return std::make_unique<HTTPRequest>(impl.get(), resource, callback);
+std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource &resource,
+                                                      std::function<void(Response)> callback) {
+    return std::make_unique<HTTPRequest>(impl.get(), resource, std::move(callback));
 }
 
 void HTTPFileSource::setResourceOptions(ResourceOptions options) {

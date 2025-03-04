@@ -10,6 +10,7 @@ import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.*
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import timber.log.Timber
 import java.net.URI
 import java.net.URISyntaxException
@@ -33,7 +34,7 @@ class HeatmapLayerActivity : AppCompatActivity() {
                 try {
                     maplibreMap.setStyle(
                         Style.Builder()
-                            .fromUri(Style.getPredefinedStyle("Pastel"))
+                            .fromUri(TestStyles.getPredefinedStyleWithFallback("Pastel"))
                             .withSource(createEarthquakeSource())
                             .withLayerAbove(createHeatmapLayer(), "country_label")
                             .withLayerBelow(createCircleLayer(), HEATMAP_LAYER_ID)
@@ -44,10 +45,11 @@ class HeatmapLayerActivity : AppCompatActivity() {
             }
         )
     }
-
+    // # --8<-- [start:createEarthquakeSource]
     private fun createEarthquakeSource(): GeoJsonSource {
         return GeoJsonSource(EARTHQUAKE_SOURCE_ID, URI(EARTHQUAKE_SOURCE_URL))
     }
+    // # --8<-- [end:createEarthquakeSource]
 
     private fun createHeatmapLayer(): HeatmapLayer {
         val layer = HeatmapLayer(HEATMAP_LAYER_ID, EARTHQUAKE_SOURCE_ID)
@@ -187,12 +189,14 @@ class HeatmapLayerActivity : AppCompatActivity() {
         mapView.onDestroy()
     }
 
+    // # --8<-- [start:constants]
     companion object {
         private const val EARTHQUAKE_SOURCE_URL =
-            "https://maplibre.org/maplibre-gl-js-docs/assets/earthquakes.geojson"
+            "https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson"
         private const val EARTHQUAKE_SOURCE_ID = "earthquakes"
         private const val HEATMAP_LAYER_ID = "earthquakes-heat"
         private const val HEATMAP_LAYER_SOURCE = "earthquakes"
         private const val CIRCLE_LAYER_ID = "earthquakes-circle"
     }
+    // # --8<-- [end:constants]
 }

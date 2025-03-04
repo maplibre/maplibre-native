@@ -71,8 +71,10 @@ void RenderCircleLayer::transition(const TransitionParameters& parameters) {
 }
 
 void RenderCircleLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    auto properties = makeMutable<CircleLayerProperties>(staticImmutableCast<CircleLayer::Impl>(baseImpl),
-                                                         unevaluated.evaluate(parameters));
+    const auto previousProperties = staticImmutableCast<CircleLayerProperties>(evaluatedProperties);
+    auto properties = makeMutable<CircleLayerProperties>(
+        staticImmutableCast<CircleLayer::Impl>(baseImpl),
+        unevaluated.evaluate(parameters, previousProperties->evaluated));
     const auto& evaluated = properties->evaluated;
 
     passes = ((evaluated.get<style::CircleRadius>().constantOr(1) > 0 ||
@@ -116,7 +118,7 @@ void RenderCircleLayer::render(PaintParameters& parameters) {
         const auto& evaluated = getEvaluated<CircleLayerProperties>(data->layerProperties);
         const bool scaleWithMap = evaluated.template get<CirclePitchScale>() == CirclePitchScaleType::Map;
         const bool pitchWithMap = evaluated.template get<CirclePitchAlignment>() == AlignmentType::Map;
-        const auto& paintPropertyBinders = circleBucket.paintPropertyBinders.at(getID());
+        auto& paintPropertyBinders = circleBucket.paintPropertyBinders.at(getID());
 
         using LayoutUniformValues = CircleProgram::LayoutUniformValues;
         const auto& allUniformValues = CircleProgram::computeAllUniformValues(
@@ -272,9 +274,9 @@ using namespace shaders;
 
 void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
-                               const TransformState& state,
-                               [[maybe_unused]] const std::shared_ptr<UpdateParameters>&,
-                               [[maybe_unused]] const RenderTree& renderTree,
+                               const TransformState&,
+                               const std::shared_ptr<UpdateParameters>&,
+                               const RenderTree&,
                                UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
@@ -325,9 +327,9 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        const auto& bucket = static_cast<const CircleBucket&>(*renderData->bucket);
+        auto& bucket = static_cast<CircleBucket&>(*renderData->bucket);
         const auto vertexCount = bucket.vertices.elements();
-        const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+        auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
 
         const auto prevBucketID = getRenderTileBucketID(tileID);
         if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
@@ -336,36 +338,17 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         }
         setRenderTileBucketID(tileID, bucket.getID());
 
-        const float zoom = static_cast<float>(state.getZoom());
-        const CircleInterpolateUBO interpolateUBO = {
-            /* .color_t = */ std::get<0>(paintPropertyBinders.get<CircleColor>()->interpolationFactor(zoom)),
-            /* .radius_t = */ std::get<0>(paintPropertyBinders.get<CircleRadius>()->interpolationFactor(zoom)),
-            /* .blur_t = */ std::get<0>(paintPropertyBinders.get<CircleBlur>()->interpolationFactor(zoom)),
-            /* .opacity_t = */ std::get<0>(paintPropertyBinders.get<CircleOpacity>()->interpolationFactor(zoom)),
-            /* .stroke_color_t = */
-            std::get<0>(paintPropertyBinders.get<CircleStrokeColor>()->interpolationFactor(zoom)),
-            /* .stroke_width_t = */
-            std::get<0>(paintPropertyBinders.get<CircleStrokeWidth>()->interpolationFactor(zoom)),
-            /* .stroke_opacity_t = */
-            std::get<0>(paintPropertyBinders.get<CircleStrokeOpacity>()->interpolationFactor(zoom)),
-            /* .padding = */ 0};
-
         // If there are already drawables for this tile, update their UBOs and move on to the next tile.
         auto updateExisting = [&](gfx::Drawable& drawable) {
             if (drawable.getLayerTweaker() != layerTweaker) {
                 // This drawable was produced on a previous style/bucket, and should not be updated.
                 return false;
             }
-
-            auto& drawableUniforms = drawable.mutableUniformBuffers();
-            drawableUniforms.createOrUpdate(idCircleInterpolateUBO, &interpolateUBO, context);
             return true;
         };
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {
             continue;
         }
-
-        const auto interpBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
 
         propertiesAsUniforms.first.clear();
         propertiesAsUniforms.second.clear();
@@ -411,9 +394,8 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         for (auto& drawable : circleBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
             drawable->setLayerTweaker(layerTweaker);
-
-            auto& drawableUniforms = drawable->mutableUniformBuffers();
-            drawableUniforms.set(idCircleInterpolateUBO, interpBuffer);
+            drawable->setBinders(renderData->bucket, &paintPropertyBinders);
+            drawable->setRenderTile(renderTilesOwner, &tile);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;

@@ -22,11 +22,20 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/platform/glfw/settings_json.cpp
     ${PROJECT_SOURCE_DIR}/platform/glfw/test_writer.cpp
     ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/map/map_snapshotter.cpp
+    ${PROJECT_SOURCE_DIR}/platform/glfw/example_custom_drawable_style_layer.cpp
+)
+
+
+include(${PROJECT_SOURCE_DIR}/vendor/tinyobjloader.cmake)
+
+target_link_libraries(
+    mbgl-glfw
+    PRIVATE tinyobjloader
 )
 
 set_property(
     SOURCE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_view.cpp
-    PROPERTY COMPILE_DEFINITIONS MAPBOX_PUCK_ASSETS_PATH=\"${PROJECT_SOURCE_DIR}/platform/glfw/assets/\"
+    PROPERTY COMPILE_DEFINITIONS MLN_ASSETS_PATH=\"${PROJECT_SOURCE_DIR}/platform/glfw/assets/\"
 )
 
 if(MLN_WITH_OPENGL)
@@ -47,6 +56,38 @@ if(MLN_WITH_EGL)
     )
 endif()
 
+if(MLN_WITH_VULKAN)
+    target_sources(
+        mbgl-glfw
+        PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_vulkan_backend.cpp
+    )
+
+    target_compile_definitions(
+        mbgl-glfw
+        PRIVATE MLN_RENDER_BACKEND_VULKAN=1
+    )
+endif()
+
+if(MLN_WITH_METAL)
+    target_sources(
+        mbgl-glfw
+        PRIVATE
+        ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_metal_backend.mm
+        ${PROJECT_SOURCE_DIR}/platform/glfw/metal_backend.mm
+        ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_metal_backend.h
+        ${PROJECT_SOURCE_DIR}/platform/glfw/metal_backend.h
+    )
+    target_compile_definitions(
+        mbgl-glfw
+        PRIVATE MLN_RENDER_BACKEND_METAL=1
+    )
+    target_link_libraries(
+        mbgl-glfw
+        PRIVATE
+        mbgl-vendor-metal-cpp
+    )
+endif()
+
 target_include_directories(
     mbgl-glfw
     PRIVATE
@@ -55,10 +96,12 @@ target_include_directories(
     PRIVATE ${PROJECT_SOURCE_DIR}/src
 )
 
+include(${PROJECT_SOURCE_DIR}/vendor/tinyobjloader.cmake)
+
 # Use target_link_directories when we move away from CMake 3.10.
 target_link_libraries(
     mbgl-glfw
-    PRIVATE $<$<BOOL:${GLFW_LIBRARY_DIRS}>:-L${GLFW_LIBRARY_DIRS}>
+    PRIVATE $<$<BOOL:${GLFW_LIBRARY_DIRS}>:-L${GLFW_LIBRARY_DIRS}> tinyobjloader
 )
 
 if(WIN32)
@@ -101,6 +144,8 @@ if(NOT WIN32 AND MLN_WITH_OPENGL)
     )
 endif()
 
-set_property(TARGET mbgl-glfw PROPERTY FOLDER Executables)
+
+
+set_property(TARGET mbgl-glfw PROPERTY FOLDER MapLibre)
 
 install(TARGETS mbgl-glfw RUNTIME DESTINATION bin)

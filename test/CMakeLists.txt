@@ -41,6 +41,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/storage/offline_database.test.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/offline_download.test.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/online_file_source.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/storage/pmtiles_file_source.test.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/resource.test.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/sqlite.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/conversion_impl.test.cpp
@@ -48,6 +49,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/style/conversion/geojson_options.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/layer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/light.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/style/conversion/padding.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/property_value.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/stringify.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/tileset.test.cpp
@@ -62,6 +64,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/style/style_image.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/style_layer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/style_parser.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/style/variable_anchor_offset_collection.test.cpp
     $<$<AND:$<NOT:$<BOOL:MBGL_WITH_QT>>,$<NOT:$<PLATFORM_ID:Windows>>>:${PROJECT_SOURCE_DIR}/test/text/bidi.test.cpp>
     ${PROJECT_SOURCE_DIR}/test/text/calculate_tile_distances.test.cpp
     ${PROJECT_SOURCE_DIR}/test/text/cross_tile_symbol_index.test.cpp
@@ -86,7 +89,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/async_task.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/bounding_volumes.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/camera.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/dtoa.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/color.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/geo.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/grid_index.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/hash.test.cpp
@@ -96,6 +99,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/memory.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/merge_lines.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/number_conversions.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/padding.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/position.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/projection.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/rotation.test.cpp
@@ -112,6 +116,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/token.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/url.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/tile_server_options.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/lru_cache.test.cpp
 )
 
 # MapSnapshotter uses headless backend that is rendering image on a background thread. QT / macOS adaptation for headless backend creates
@@ -136,6 +141,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/test/gl/context.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/gl_functions.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/object.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/gl/resource_pool.test.cpp
             ${PROJECT_SOURCE_DIR}/test/renderer/backend_scope.test.cpp
             ${PROJECT_SOURCE_DIR}/test/util/offscreen_texture.test.cpp
     )
@@ -145,7 +151,30 @@ if(MLN_WITH_OPENGL)
     )
 endif()
 
-if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL Android AND ANDROID_NATIVE_API_LEVEL VERSION_LESS 24)
+
+if(MLN_WITH_VULKAN)
+    target_sources(
+        mbgl-test
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/test/api/custom_layer.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/api/custom_drawable_layer.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/renderer/backend_scope.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/util/offscreen_texture.test.cpp
+    )
+    target_compile_definitions(
+        mbgl-test
+        PRIVATE MLN_RENDER_BACKEND_VULKAN=1
+    )
+endif()
+
+if(MLN_WITH_METAL)
+    target_compile_definitions(
+        mbgl-test
+        PRIVATE MLN_RENDER_BACKEND_METAL=1
+    )
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL Android)
     message("Target platform does not support HTTP tests or dependencies not found.")
 
     set(MLN_TEST_HAS_TEST_SERVER 0)
@@ -159,7 +188,7 @@ else()
         ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/http_server.cpp
         PROPERTIES
         COMPILE_FLAGS
-        -Wno-shadow
+        $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-Wno-shadow>
     )
     set_source_files_properties(
         ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/http_server.cpp
@@ -230,13 +259,13 @@ if(WIN32)
     )
 endif()
 
-set_property(TARGET mbgl-test PROPERTY FOLDER Core)
+set_property(TARGET mbgl-test PROPERTY FOLDER MapLibre)
 
 if (MLN_WITH_CLANG_TIDY)
     set_target_properties(mbgl-test PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
 endif()
 
-if (CMAKE_SYSTEM_NAME STREQUAL Linux)
+if (WIN32 OR CMAKE_SYSTEM_NAME STREQUAL Linux)
     target_compile_definitions(
         mbgl-test
         PRIVATE USE_CPP_TEST_SERVER

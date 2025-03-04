@@ -589,3 +589,87 @@ TEST(Sprite, SpriteParsingNullRatio) {
                   "sprite",
               }));
 }
+
+TEST(Sprite, SpriteParsingTextFit) {
+    FixtureLog log;
+
+    const auto image_1x = util::read_file("test/fixtures/annotations/emerald.png");
+
+    const auto images = parseSprite("default", image_1x, R"JSON({
+        "image": {
+            "width": 16,
+            "height": 16,
+            "x": 0,
+            "y": 0,
+            "pixelRatio": 1,
+            "textFitWidth": "stretchOrShrink",
+            "textFitHeight": "proportional"
+        }
+    })JSON");
+    EXPECT_EQ(1u, images.size());
+    EXPECT_EQ("image", images[0]->id);
+    EXPECT_EQ(style::TextFit::stretchOrShrink, images[0]->textFitWidth);
+    EXPECT_EQ(style::TextFit::proportional, images[0]->textFitHeight);
+}
+
+TEST(Sprite, SpriteParsingNullTextFit) {
+    FixtureLog log;
+
+    const auto image_1x = util::read_file("test/fixtures/annotations/emerald.png");
+
+    const auto images = parseSprite("default", image_1x, R"JSON({
+        "image": {
+            "width": 16,
+            "height": 16,
+            "x": 0,
+            "y": 0,
+            "pixelRatio": 1,
+            "textFitHeight": "stretchOnly"
+        }
+    })JSON");
+    EXPECT_EQ(1u, images.size());
+    EXPECT_EQ("image", images[0]->id);
+    EXPECT_FALSE(images[0]->textFitWidth.has_value());
+    EXPECT_EQ(style::TextFit::stretchOnly, images[0]->textFitHeight);
+}
+
+TEST(Sprite, SpriteParsingInvalidTextFit) {
+    FixtureLog log;
+
+    const auto image_1x = util::read_file("test/fixtures/annotations/emerald.png");
+
+    parseSprite("default", image_1x, R"JSON({
+        "image": {
+            "width": 16,
+            "height": 16,
+            "x": 0,
+            "y": 0,
+            "pixelRatio": 1,
+            "textFitWidth": "invalid",
+            "textFitHeight": "stretchOnly"
+        }
+    })JSON");
+    EXPECT_EQ(1u,
+              log.count({EventSeverity::Warning,
+                         Event::Sprite,
+                         int64_t(-1),
+                         "Invalid sprite image 'image': value of 'textFitWidth' "
+                         "is an invalid value 'invalid'"}));
+
+    parseSprite("default", image_1x, R"JSON({
+        "image": {
+            "width": 16,
+            "height": 16,
+            "x": 0,
+            "y": 0,
+            "pixelRatio": 1,
+            "textFitHeight": 0
+        }
+    })JSON");
+    EXPECT_EQ(1u,
+              log.count({EventSeverity::Warning,
+                         Event::Sprite,
+                         int64_t(-1),
+                         "Invalid sprite image 'image': value of 'textFitHeight' "
+                         "must be a string"}));
+}

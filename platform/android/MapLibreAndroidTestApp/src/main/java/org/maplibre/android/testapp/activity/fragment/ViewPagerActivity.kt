@@ -3,12 +3,14 @@ package org.maplibre.android.testapp.activity.fragment
 import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentStatePagerAdapter
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMapOptions
-import org.maplibre.android.maps.Style
 import org.maplibre.android.maps.SupportMapFragment
 import org.maplibre.android.testapp.databinding.ActivityViewpagerBinding
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test activity showcasing using the Android SDK ViewPager API to show MapFragments.
@@ -38,7 +40,7 @@ class ViewPagerActivity : AppCompatActivity() {
         }
     }
 
-    internal class MapFragmentAdapter(private val context: Context, fragmentManager: androidx.fragment.app.FragmentManager) : androidx.fragment.app.FragmentStatePagerAdapter(fragmentManager) {
+    internal class MapFragmentAdapter(private val context: Context, fragmentManager: FragmentManager) : FragmentStatePagerAdapter(fragmentManager) {
 
         override fun getCount(): Int {
             return NUM_ITEMS
@@ -91,11 +93,11 @@ fun SupportMapFragment.getMapAsync(index: Int) {
     this.getMapAsync {
         it.setStyle(
             when (index) {
-                0 -> Style.getPredefinedStyle("Streets")
-                1 -> Style.getPredefinedStyle("Pastel")
-                2 -> Style.getPredefinedStyle("Satellite Hybrid")
-                3 -> Style.getPredefinedStyle("Bright")
-                else -> Style.getPredefinedStyle("Streets")
+                0 -> TestStyles.getPredefinedStyleWithFallback("Streets")
+                1 -> TestStyles.getPredefinedStyleWithFallback("Pastel")
+                2 -> TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid")
+                3 -> TestStyles.getPredefinedStyleWithFallback("Bright")
+                else -> TestStyles.getPredefinedStyleWithFallback("Streets")
             }
         )
     }
