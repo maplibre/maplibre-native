@@ -206,7 +206,7 @@ class BenchmarkActivity : AppCompatActivity() {
                     status -> println("Thermal status changed $status")
             }
         }
-        
+
         mapView = findViewById<View>(R.id.mapView) as MapView
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
             val benchmarkResult = BenchmarkResult(arrayListOf())

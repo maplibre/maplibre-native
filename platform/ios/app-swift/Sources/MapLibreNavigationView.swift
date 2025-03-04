@@ -8,6 +8,11 @@ struct MapLibreNavigationView: View {
                 NavigationLink("SimpleMap") {
                     SimpleMap().edgesIgnoringSafeArea(.all)
                 }
+                #if MLN_RENDER_BACKEND_METAL
+                    NavigationLink("CustomStyleLayer (Metal)") {
+                        CustomStyleLayerExample().edgesIgnoringSafeArea(.all)
+                    }
+                #endif
                 NavigationLink("LineTapMap") {
                     LineTapMap().edgesIgnoringSafeArea(.all)
                 }
@@ -28,6 +33,9 @@ struct MapLibreNavigationView: View {
                 }
                 NavigationLink("AddMarkerExample") {
                     AddMarkerSymbolExampleUIViewControllerRepresentable()
+                }
+                NavigationLink("ObserverExample") {
+                    ObserverExampleViewExampleUIViewControllerRepresentable()
                 }
                 Group {
                     NavigationLink("AnimatedLineExample") {

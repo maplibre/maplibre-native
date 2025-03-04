@@ -31,7 +31,7 @@ For this phase we would like to just build our support for bitmaps. The idea bei
 
 ### Phase 2
 
-Once we have a system in place that can handle bitmaps we would like to take it one step further and support native platform views. The changes described here would likely be done inside the individual platforms. 
+Once we have a system in place that can handle bitmaps we would like to take it one step further and support native platform views. The changes described here would likely be done inside the individual platforms.
 
 For inspiration we can look at Flutter and their rendering engine (see https://github.com/flutter/flutter/wiki/Texture-Layer-Hybrid-Composition and https://github.com/flutter/flutter/wiki/Hybrid-Composition-iOS).
 
@@ -59,4 +59,3 @@ No migration plan needed unless we introduce a Phase 3 to cleanup existing platf
 Historically the gap has been somewhat filled by the different platform layers. On the iOS platform there is a MapKit style “AnnotationDelegate”, which in some cases draws directly to the mglMap core and in others will add views as subviews to the MGLMapView. On Android there is a whole proposal for updating the Annotations API (design-proposals/2023-06-17-android-annotations.md). Note: This proposal is for purely additive code and we do not plan to change any of these existing systems at this time. Those who have attempted to make complex map applications using these workarounds quickly run into performance issues and other problems like incompatibility with clustering or label collisions.
 
 If one were to attempt to create such a system using SymbolLayers, they will quickly find that they need to build out a whole system to handle touch events (usually involving querying a screen rect for map features). They will find that if they want to draw many different high resolution images they now need to deal with manually adding images to the stylesheet and the performance implications of doing so. They will also find that any attempts at animating the content can cause full layout recalculations of the map and will rarely animate as expected.
-

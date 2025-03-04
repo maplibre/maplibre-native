@@ -10,72 +10,72 @@
 @implementation MLNCameraTransitionFinishTests
 
 - (void)testEaseToCompletionHandler {
-    
+
     MLNCoordinateBounds bounds = MLNCoordinateBoundsMake(CLLocationCoordinate2DMake(0.0, 0.0),
                                                          CLLocationCoordinate2DMake(1.0, 1.0));
     MLNMapCamera *camera = [self.mapView cameraThatFitsCoordinateBounds:bounds];
-    
+
     XCTestExpectation *expectation = [self expectationWithDescription:@"Completion block should be called"];
-    
+
     [self.mapView setCamera:camera
                withDuration:0.0
     animationTimingFunction:nil
           completionHandler:^{
               [expectation fulfill];
           }];
-    
+
     [self waitForExpectations:@[expectation] timeout:0.5];
 }
 
 - (void)testEaseToCompletionHandlerAnimated {
-    
+
     MLNCoordinateBounds bounds = MLNCoordinateBoundsMake(CLLocationCoordinate2DMake(0.0, 0.0),
                                                          CLLocationCoordinate2DMake(1.0, 1.0));
     MLNMapCamera *camera = [self.mapView cameraThatFitsCoordinateBounds:bounds];
-    
+
     XCTestExpectation *expectation = [self expectationWithDescription:@"Completion block should be called"];
-    
+
     [self.mapView setCamera:camera
                withDuration:0.3
     animationTimingFunction:nil
           completionHandler:^{
               [expectation fulfill];
           }];
-    
+
     [self waitForExpectations:@[expectation] timeout:0.5];
 }
 
 - (void)testFlyToCompletionHandler {
-    
+
     MLNCoordinateBounds bounds = MLNCoordinateBoundsMake(CLLocationCoordinate2DMake(0.0, 0.0),
                                                          CLLocationCoordinate2DMake(1.0, 1.0));
     MLNMapCamera *camera = [self.mapView cameraThatFitsCoordinateBounds:bounds];
-    
+
     XCTestExpectation *expectation = [self expectationWithDescription:@"Completion block should be called"];
-    
+
     [self.mapView flyToCamera:camera
                  withDuration:0.0
             completionHandler:^{
                 [expectation fulfill];
             }];
-    
+
     [self waitForExpectations:@[expectation] timeout:0.5];
 }
 
 - (void)testFlyToCompletionHandlerAnimated {
-    
+
     MLNCoordinateBounds bounds = MLNCoordinateBoundsMake(CLLocationCoordinate2DMake(0.0, 0.0),
                                                          CLLocationCoordinate2DMake(1.0, 1.0));
     MLNMapCamera *camera = [self.mapView cameraThatFitsCoordinateBounds:bounds];
-    
+
     XCTestExpectation *expectation = [self expectationWithDescription:@"Completion block should be called"];
-    
+
     [self.mapView flyToCamera:camera
                  withDuration:0.3
             completionHandler:^{
                 [expectation fulfill];
             }];
-    
+
     [self waitForExpectations:@[expectation] timeout:0.5];
 }
 @end
@@ -106,4 +106,3 @@
     return [[MLNCameraTransitionNaNZoomMapView alloc] initWithFrame:rect styleURL:styleURL];
 }
 @end
-

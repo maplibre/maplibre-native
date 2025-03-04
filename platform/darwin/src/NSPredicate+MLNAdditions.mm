@@ -13,14 +13,14 @@
     mbgl::style::conversion::Error valueError;
     NSArray *jsonObject = self.mgl_jsonExpressionObject;
     auto value = mbgl::style::conversion::convert<mbgl::style::Filter>(mbgl::style::conversion::makeConvertible(jsonObject), valueError);
-    
+
     if (!value) {
         [NSException raise:NSInvalidArgumentException
                     format:@"Invalid filter value: %@", @(valueError.message.c_str())];
         return {};
     }
     mbgl::style::Filter filter = std::move(*value);
-    
+
     return filter;
 }
 
@@ -64,15 +64,15 @@ static NSDictionary * const MLNPredicateOperatorTypesByJSONOperator = @{
     if ([object isEqual:@NO]) {
         return [NSPredicate predicateWithValue:NO];
     }
-    
+
     MLNAssert([object isKindOfClass:[NSArray class]], @"Condition for case expression should be an expression.");
     NSArray *objects = (NSArray *)object;
     NSString *op = objects.firstObject;
-    
+
     NSNumber *operatorTypeNumber = MLNPredicateOperatorTypesByJSONOperator[op];
     if (operatorTypeNumber) {
         NSPredicateOperatorType operatorType = (NSPredicateOperatorType)[operatorTypeNumber unsignedIntegerValue];
-        
+
         NSComparisonPredicateOptions options = 0;
         if (objects.count > 3) {
             NSArray *collatorExpression = objects[3];
@@ -80,7 +80,7 @@ static NSDictionary * const MLNPredicateOperatorTypesByJSONOperator = @{
             MLNCAssert(collatorExpression.count == 2, @"Malformed collator expression");
             NSDictionary *collator = collatorExpression[1];
             MLNCAssert([collator isKindOfClass:[NSDictionary class]], @"Malformed collator in collator expression");
-            
+
             // Predicate options can’t express specific locales as collators can.
             if (!collator[@"locale"]) {
                 if ([(collator[@"case-sensitive"] ?: @YES) isEqual:@NO]) {
@@ -91,7 +91,7 @@ static NSDictionary * const MLNPredicateOperatorTypesByJSONOperator = @{
                 }
             }
         }
-        
+
         NSArray *subexpressions = MLNSubexpressionsWithJSONObjects([objects subarrayWithRange:NSMakeRange(1, objects.count - 1)]);
         return [NSComparisonPredicate predicateWithLeftExpression:subexpressions[0]
                                                   rightExpression:subexpressions[1]
@@ -99,7 +99,7 @@ static NSDictionary * const MLNPredicateOperatorTypesByJSONOperator = @{
                                                              type:operatorType
                                                           options:options];
     }
-    
+
     if ([op isEqualToString:@"!"]) {
         NSArray *subpredicates = MLNSubpredicatesWithJSONObjects([objects subarrayWithRange:NSMakeRange(1, objects.count - 1)]);
         if (subpredicates.count > 1) {
@@ -119,31 +119,31 @@ static NSDictionary * const MLNPredicateOperatorTypesByJSONOperator = @{
                 [subpredicates[1] isKindOfClass:[NSComparisonPredicate class]]) {
                 NSComparisonPredicate *leftCondition = (NSComparisonPredicate *)subpredicates[0];
                 NSComparisonPredicate *rightCondition = (NSComparisonPredicate *)subpredicates[1];
-                
+
                 NSArray *limits;
                 NSExpression *leftConditionExpression;
-                
+
                 if(leftCondition.predicateOperatorType == NSGreaterThanOrEqualToPredicateOperatorType &&
                    rightCondition.predicateOperatorType == NSLessThanOrEqualToPredicateOperatorType) {
                     limits = @[leftCondition.rightExpression, rightCondition.rightExpression];
                     leftConditionExpression = leftCondition.leftExpression;
-                    
+
                 } else if (leftCondition.predicateOperatorType == NSLessThanOrEqualToPredicateOperatorType &&
                            rightCondition.predicateOperatorType == NSLessThanOrEqualToPredicateOperatorType) {
                     limits = @[leftCondition.leftExpression, rightCondition.rightExpression];
                     leftConditionExpression = leftCondition.rightExpression;
-                
+
                 } else if(leftCondition.predicateOperatorType == NSLessThanOrEqualToPredicateOperatorType &&
                           rightCondition.predicateOperatorType == NSGreaterThanOrEqualToPredicateOperatorType) {
                     limits = @[leftCondition.leftExpression, rightCondition.leftExpression];
                     leftConditionExpression = leftCondition.rightExpression;
-                
+
                 } else if(leftCondition.predicateOperatorType == NSGreaterThanOrEqualToPredicateOperatorType &&
                           rightCondition.predicateOperatorType == NSGreaterThanOrEqualToPredicateOperatorType) {
                     limits = @[leftCondition.rightExpression, rightCondition.leftExpression];
                     leftConditionExpression = leftCondition.leftExpression;
                 }
-                
+
                 if (limits && leftConditionExpression) {
                      return [NSPredicate predicateWithFormat:@"%@ BETWEEN %@", leftConditionExpression, [NSExpression expressionForAggregate:limits]];
                 }
@@ -163,7 +163,7 @@ static NSDictionary * const MLNPredicateOperatorTypesByJSONOperator = @{
                                                              type:NSInPredicateOperatorType
                                                           options:0];
     }
-    
+
     NSExpression *expression = [NSExpression expressionWithMLNJSONObject:object];
     return [NSComparisonPredicate predicateWithLeftExpression:expression
                                               rightExpression:[NSExpression expressionForConstantValue:@YES]
@@ -180,12 +180,12 @@ static NSDictionary * const MLNPredicateOperatorTypesByJSONOperator = @{
     if ([self isEqual:[NSPredicate predicateWithValue:NO]]) {
         return @NO;
     }
-    
+
     if ([self.predicateFormat hasPrefix:@"BLOCKPREDICATE("]) {
         [NSException raise:NSInvalidArgumentException
                     format:@"Block-based predicates are not supported."];
     }
-    
+
     [NSException raise:NSInvalidArgumentException
                 format:@"Unrecognized predicate type."];
     return nil;

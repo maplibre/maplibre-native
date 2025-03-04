@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 # Install build tools and dependencies
 RUN    apt-get update \
@@ -40,23 +40,24 @@ RUN echo "Download and install Bazel" \
     && chmod +x /usr/local/bin/bazel \
     && :
 
-
-ARG USERNAME=user
+# This username is hardcoded in several places, and should simply match whatever base image uses
+ARG USERNAME=ubuntu
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
 # Create docker user wuth sudo rights as passed in by the build command
 # This was modeled on https://code.visualstudio.com/remote/advancedcontainers/add-nonroot-user
 # On a Mac, USER_GID might already exist, so ignore it if it fails (--force)
-RUN groupadd --force --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+RUN groupmod --gid $USER_GID $USERNAME \
+    && usermod --uid $USER_UID --gid $USER_GID $USERNAME \
+    && chown -R $USER_UID:$USER_GID /home/$USERNAME \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
 # This allows users to `docker run` without specifying -u and -g
 USER $USERNAME
 
-RUN pip install pre-commit
+#RUN pip install pre-commit
 
 ENV RUSTUP_HOME=/home/$USERNAME/.cache/.rustup \
     CARGO_HOME=/home/$USERNAME/.cache/.cargo \

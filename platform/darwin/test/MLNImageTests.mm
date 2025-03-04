@@ -38,7 +38,7 @@
     }];
     image.resizingMode = NSImageResizingModeTile;
 #endif
-    
+
     {
         auto styleImage = [image mgl_styleImageWithIdentifier:@"box"];
         XCTAssert(styleImage);
@@ -47,7 +47,7 @@
             XCTAssertFalse(styleImage->isSdf());
             XCTAssertTrue(styleImage->getStretchX().empty());
             XCTAssertTrue(styleImage->getStretchY().empty());
-            
+
             MLNImage *imageAfter = [[MLNImage alloc] initWithMLNStyleImage:*styleImage];
             XCTAssertEqual(imageAfter.resizingMode, MLNImageResizingModeTile);
             XCTAssertEqual(imageAfter.capInsets.top, 0);
@@ -56,7 +56,7 @@
             XCTAssertEqual(imageAfter.capInsets.right, 0);
         }
     }
-    
+
 #if TARGET_OS_IPHONE
     image = [image resizableImageWithCapInsets:UIEdgeInsetsZero resizingMode:UIImageResizingModeStretch];
 #else
@@ -69,7 +69,7 @@
         if (styleImage) {
             auto scale = styleImage->getPixelRatio();
             XCTAssert(!styleImage->getContent());
-            
+
             auto stretchX = styleImage->getStretchX();
             XCTAssertEqual(stretchX.size(), 1UL);
             if (!stretchX.empty()) {
@@ -80,7 +80,7 @@
             if (!stretchY.empty()) {
                 XCTAssertEqual(stretchY.front(), mbgl::style::ImageStretch(0, 24 * scale));
             }
-            
+
             MLNImage *imageAfter = [[MLNImage alloc] initWithMLNStyleImage:*styleImage];
             XCTAssertEqual(imageAfter.resizingMode, MLNImageResizingModeStretch);
             XCTAssertEqual(imageAfter.capInsets.top, 0);
@@ -89,7 +89,7 @@
             XCTAssertEqual(imageAfter.capInsets.right, 0);
         }
     }
-    
+
 #if TARGET_OS_IPHONE
     image = [image resizableImageWithCapInsets:UIEdgeInsetsMake(1, 2, 3, 4)];
 #else
@@ -108,7 +108,7 @@
                 XCTAssertEqual(content->bottom, 21 * scale);
                 XCTAssertEqual(content->right, 20 * scale);
             }
-            
+
             auto stretchX = styleImage->getStretchX();
             XCTAssertEqual(stretchX.size(), 1UL);
             if (!stretchX.empty()) {
@@ -119,7 +119,7 @@
             if (!stretchY.empty()) {
                 XCTAssertEqual(stretchY.front(), mbgl::style::ImageStretch(1 * scale, 21 * scale));
             }
-            
+
             MLNImage *imageAfter = [[MLNImage alloc] initWithMLNStyleImage:*styleImage];
             XCTAssertEqual(imageAfter.resizingMode, MLNImageResizingModeStretch);
             XCTAssertEqual(imageAfter.capInsets.top, 1);

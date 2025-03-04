@@ -24,4 +24,3 @@ You can remove a click listener again with `MapLibreMap.removeOnMapClickListener
   </video>
   {{ openmaptiles_caption }}
 </figure>
-

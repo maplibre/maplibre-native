@@ -6,9 +6,11 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.res.Resources.NotFoundException
 import android.os.Bundle
+import android.view.Menu
 import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -35,6 +37,7 @@ import java.util.*
 class FeatureOverviewActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private var sectionAdapter: FeatureSectionAdapter? = null
+    private var featureAdapter: FeatureAdapter? = null
     private var features: List<Feature>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,7 +53,7 @@ class FeatureOverviewActivity : AppCompatActivity() {
                 override fun onItemClicked(recyclerView: RecyclerView?, position: Int, view: View?) {
                     if (sectionAdapter!!.isSectionHeaderPosition(position).not()) {
                         val itemPosition = sectionAdapter!!.getConvertedPosition(position)
-                        val feature = features!![itemPosition]
+                        val feature = featureAdapter!!.getItem(itemPosition)
                         startFeature(feature)
                     }
                 }
@@ -86,6 +89,7 @@ class FeatureOverviewActivity : AppCompatActivity() {
         if (featuresList.isNullOrEmpty()) {
             return
         }
+        featureAdapter = FeatureAdapter(features!!)
         val sections: MutableList<FeatureSectionAdapter.Section> = ArrayList()
         var currentCat = ""
         for (i in features!!.indices) {
@@ -95,12 +99,11 @@ class FeatureOverviewActivity : AppCompatActivity() {
                 currentCat = category
             }
         }
-
         sectionAdapter = FeatureSectionAdapter(
             this,
             R.layout.section_main_layout,
             R.id.section_text,
-            FeatureAdapter(features!!)
+            featureAdapter!!
         )
         sectionAdapter!!.setSections(sections.toTypedArray())
         recyclerView.adapter = sectionAdapter
@@ -161,6 +164,56 @@ class FeatureOverviewActivity : AppCompatActivity() {
         } catch (exception: NotFoundException) {
             "-"
         }
+    }
+
+    // Add SearchView to the app bar
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_feature_overview, menu)
+        val searchItem = menu.findItem(R.id.action_search)
+        val searchView = searchItem.actionView as SearchView
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false // No action on submit
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                filterFeatures(newText)
+                return true
+            }
+        })
+        return true
+    }
+
+    // Filter the features based on the search query
+    private fun filterFeatures(query: String?) {
+        val filteredFeatures = if (query.isNullOrEmpty()) {
+            features // Show full list if query is empty
+        } else {
+            features?.filter { it.getLabel().contains(query, ignoreCase = true) }
+        }
+        updateAdapter(filteredFeatures)
+    }
+
+    // Update the adapter with filtered features
+    private fun updateAdapter(filteredFeatures: List<Feature>?) {
+        if (filteredFeatures.isNullOrEmpty()) {
+            featureAdapter?.update(emptyList())
+            sectionAdapter?.setSections(emptyArray())
+            sectionAdapter?.notifyDataSetChanged()
+            return
+        }
+        val sections: MutableList<FeatureSectionAdapter.Section> = ArrayList()
+        var currentCat = ""
+        for (i in filteredFeatures.indices) {
+            val category = filteredFeatures[i].category
+            if (currentCat != category) {
+                sections.add(FeatureSectionAdapter.Section(i, category))
+                currentCat = category
+            }
+        }
+        featureAdapter?.update(filteredFeatures)
+        sectionAdapter?.setSections(sections.toTypedArray())
+        sectionAdapter?.notifyDataSetChanged()
     }
 
     companion object {

@@ -26,11 +26,11 @@ BOOL MLNEqualImages(MLNImage *leftImage, MLNImage *rightImage) {
     CGImageRef leftCGImage = [MLNNormalizedImage(leftImage) CGImageForProposedRect:nil context:nil hints:nil];
     NSBitmapImageRep *leftImageRep = [[NSBitmapImageRep alloc] initWithCGImage:leftCGImage];
     NSData *leftData = [leftImageRep representationUsingType:NSPNGFileType properties:@{}];
-    
+
     CGImageRef rightCGImage = [MLNNormalizedImage(rightImage) CGImageForProposedRect:nil context:nil hints:nil];
     NSBitmapImageRep *rightImageRep = [[NSBitmapImageRep alloc] initWithCGImage:rightCGImage];
     NSData *rightData = [rightImageRep representationUsingType:NSPNGFileType properties:@{}];
-    
+
     return [leftData isEqualToData:rightData];
 #endif
 }
@@ -60,9 +60,9 @@ MLNImage *MLNImageFromCurrentContext(void) {
 
 - (void)setUp {
     [super setUp];
-    
+
     [MLNSettings setApiKey:@"pk.feedcafedeadbeefbadebede"];
-    
+
     [MLNOfflineStorage sharedOfflineStorage].delegate = self;
 }
 
@@ -79,7 +79,7 @@ MLNImage *MLNImageFromCurrentContext(void) {
     self.styleLoadingExpectation = [self expectationWithDescription:@"Style should finish loading."];
     XCTestExpectation *overlayExpectation = [self expectationWithDescription:@"Overlay handler should get called."];
     XCTestExpectation *completionExpectation = [self expectationWithDescription:@"Completion handler should get called."];
-    
+
 #if TARGET_OS_IPHONE
     CGRect rect = CGRectMake(0, 0, 500, 500);
     UIGraphicsBeginImageContextWithOptions(rect.size, NO, UIScreen.mainScreen.scale);
@@ -90,14 +90,14 @@ MLNImage *MLNImageFromCurrentContext(void) {
         return YES;
     }];
 #endif
-    
+
     NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"one-liner" withExtension:@"json"];
     MLNMapCamera *camera = [MLNMapCamera camera];
     MLNMapSnapshotOptions *options = [[MLNMapSnapshotOptions alloc] initWithStyleURL:styleURL camera:camera size:CGSizeMake(500, 500)];
-    
+
     MLNMapSnapshotter *snapshotter = [[MLNMapSnapshotter alloc] initWithOptions:options];
     snapshotter.delegate = self;
-    
+
     [snapshotter startWithOverlayHandler:^(MLNMapSnapshotOverlay * _Nonnull snapshotOverlay) {
         XCTAssertNotNil(snapshotOverlay);
         if (snapshotOverlay) {
@@ -122,14 +122,14 @@ MLNImage *MLNImageFromCurrentContext(void) {
     XCTSkip(@"Snapshotter not implemented yet for Metal. See https://github.com/maplibre/maplibre-native/issues/1862");
     self.styleLoadingExpectation = [self expectationWithDescription:@"Style should finish loading."];
     XCTestExpectation *completionExpectation = [self expectationWithDescription:@"Completion handler should get called."];
-    
+
     NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"one-liner" withExtension:@"json"];
     MLNMapCamera *camera = [MLNMapCamera camera];
     MLNMapSnapshotOptions *options = [[MLNMapSnapshotOptions alloc] initWithStyleURL:styleURL camera:camera size:CGSizeMake(500, 500)];
-    
+
     MLNMapSnapshotter *snapshotter = [[MLNMapSnapshotter alloc] initWithOptions:options];
     snapshotter.delegate = self;
-    
+
     [snapshotter startWithCompletionHandler:^(MLNMapSnapshot * _Nullable snapshot, NSError * _Nullable error) {
         XCTAssertNil(error);
         XCTAssertNotNil(snapshot);
@@ -160,7 +160,7 @@ MLNImage *MLNImageFromCurrentContext(void) {
 
 /**
  Tests that applying the given runtime styling actions on a blank style results in a snapshot image that matches the image with the given name in the asset catalog.
- 
+
  @param actions Runtime styling actions to apply to the blank style.
  @param camera The camera to show, or `nil` to show the style’s default camera.
  @param expectedImageName Name of the test fixture image in Media.xcassets.
@@ -169,18 +169,18 @@ MLNImage *MLNImageFromCurrentContext(void) {
     self.styleLoadingExpectation = [self expectationWithDescription:@"Style should finish loading."];
     XCTestExpectation *overlayExpectation = [self expectationWithDescription:@"Overlay handler should get called."];
     XCTestExpectation *completionExpectation = [self expectationWithDescription:@"Completion handler should get called."];
-    
+
 #if TARGET_OS_IPHONE
     UIImage *expectedImage = [UIImage imageNamed:expectedImageName inBundle:[NSBundle bundleForClass:[self class]] compatibleWithTraitCollection:nil];
 #else
     NSImage *expectedImage = [[NSBundle bundleForClass:[self class]] imageForResource:expectedImageName];
 #endif
     XCTAssertNotNil(expectedImage, @"Image fixture “%@” missing from Media.xcassets.", expectedImageName);
-    
+
     if (!styleURL) {
         styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"one-liner" withExtension:@"json"];
     }
-    
+
     MLNMapCamera *defaultCamera = camera ?: [MLNMapCamera camera];
     if (!camera) {
         defaultCamera.centerCoordinate = kCLLocationCoordinate2DInvalid;
@@ -191,11 +191,11 @@ MLNImage *MLNImageFromCurrentContext(void) {
     if (!camera) {
         options.zoomLevel = -1;
     }
-    
+
     MLNMapSnapshotter *snapshotter = [[MLNMapSnapshotter alloc] initWithOptions:options];
     snapshotter.delegate = self;
     self.runtimeStylingActions = actions;
-    
+
     [snapshotter startWithOverlayHandler:^(MLNMapSnapshotOverlay * _Nonnull snapshotOverlay) {
         XCTAssertNotNil(snapshotOverlay);
 // This image comparison returns false, but they are identical when inspecting them manually
@@ -223,11 +223,11 @@ MLNImage *MLNImageFromCurrentContext(void) {
 - (void)mapSnapshotter:(MLNMapSnapshotter *)snapshotter didFinishLoadingStyle:(MLNStyle *)style {
     XCTAssertNotNil(snapshotter);
     XCTAssertNotNil(style);
-    
+
     if (self.runtimeStylingActions) {
         self.runtimeStylingActions(style);
     }
-    
+
     [self.styleLoadingExpectation fulfill];
 }
 

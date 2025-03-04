@@ -130,6 +130,8 @@ public:
                                                  bool persistent = false,
                                                  bool ssbo = false) = 0;
 
+    virtual UniqueUniformBufferArray createLayerUniformBufferArray() = 0;
+
     /// Get the generic shader with the specified name
     virtual gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) = 0;
 

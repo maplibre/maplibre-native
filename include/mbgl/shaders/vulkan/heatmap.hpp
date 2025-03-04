@@ -6,13 +6,12 @@
 namespace mbgl {
 namespace shaders {
 
-#define HEATMAP_SHADER_PRELUDE \
-    R"(
+constexpr auto heatmapShaderPrelude = R"(
 
 #define idHeatmapDrawableUBO        idDrawableReservedVertexOnlyUBO
 #define idHeatmapEvaluatedPropsUBO  layerUBOStartId
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Vulkan> {
@@ -22,7 +21,8 @@ struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Vulkan> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto vertex = HEATMAP_SHADER_PRELUDE R"(
+    static constexpr auto prelude = heatmapShaderPrelude;
+    static constexpr auto vertex = R"(
 
 // Effective "0" in the kernel density texture to adjust the kernel size to;
 // this empirically chosen number minimizes artifacts on overlapping kernels
@@ -117,7 +117,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = HEATMAP_SHADER_PRELUDE R"(
+    static constexpr auto fragment = R"(
 
 // Gaussian kernel coefficient: 1 / sqrt(2 * PI)
 #define GAUSS_COEF 0.3989422804014327

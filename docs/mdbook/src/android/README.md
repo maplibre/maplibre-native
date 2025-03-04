@@ -23,7 +23,7 @@ Open the `platform/android` directory to get started.
 
 _The test application (used for development purposes) uses MapTiler vector tiles, which require a MapTiler account and API key._
 
-With the first Gradle invocation, Gradle will take the value of the `MLN_API_KEY` environment variable and save it to `MapLibreAndroidTestApp/src/main/res/values/developer-config.xml`. If the environment variable wasn't set, you can edit `developer-config.xml` manually and add your API key to the `api_key` resource.  
+With the first Gradle invocation, Gradle will take the value of the `MLN_API_KEY` environment variable and save it to `MapLibreAndroidTestApp/src/main/res/values/developer-config.xml`. If the environment variable wasn't set, you can edit `developer-config.xml` manually and add your API key to the `api_key` resource.
 
 ## Running the TestApp
 
@@ -51,14 +51,6 @@ To format all Kotlin source files, use:
 
 ```
 $ ./gradlew formatKotlin
-```
-
-## Benchmarks in Pull Request
-
-To run the benchmarks (for Android) include the following line on a PR comment:
-
-```
-!benchmark android
 ```
 
 ## Profiling

@@ -20,6 +20,8 @@ jobs:
       - name: Install Dependencies
         shell: bash
         run: sudo apt-get install -y libwayland-dev libxkbcommon-dev # Required for winit
+      - name: Install mdbook-alerts
+        run: cargo install mdbook-alerts
       - name: Build
         working-directory: docs/mdbook
         shell: bash
@@ -41,7 +43,7 @@ jobs:
           name: book
           path: artifacts/book
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4.7.2
+        uses: JamesIves/github-pages-deploy-action@v4.7.3
         with:
           branch: gh-pages
           folder: artifacts/book

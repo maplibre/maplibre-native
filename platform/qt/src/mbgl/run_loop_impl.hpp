@@ -13,8 +13,7 @@
 namespace mbgl {
 namespace util {
 
-using WatchCallback = std::function<void(int, RunLoop::Event)>;
-using WatchPair = std::pair<std::unique_ptr<QSocketNotifier>, WatchCallback>;
+using WatchPair = std::pair<std::unique_ptr<QSocketNotifier>, std23::move_only_function<void(int, RunLoop::Event)>>;
 
 class RunLoop::Impl : public QObject {
     Q_OBJECT

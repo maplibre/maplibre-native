@@ -21,7 +21,7 @@ on:
       - ios-*.*.x
     tags:
       - 'ios-*'
-  
+
   pull_request:
     branches:
       - '*'
@@ -48,11 +48,11 @@ jobs:
           files_yaml_from_source_file: .github/changed-files.yml
 
       - name: Run step if test file(s) change
-        if: steps.changed-files-yaml.outputs.ios_any_modified == 'true'  
+        if: steps.changed-files-yaml.outputs.ios_any_modified == 'true'
         run: |
           echo "One or more iOS file(s) has changed."
           echo "List of changes: ${{ steps.changed-files-yaml.outputs.ios_all_changed_files }}"
-      
+
   ios-build:
     needs: pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
@@ -130,11 +130,11 @@ jobs:
             ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
 
       # C++ unit tests
-      
+
       - name: Build CppUnitTests .ipa and .xctest for AWS Device Farm
         run: |
           set -e
-          bazel run --//:renderer=metal //platform/ios:xcodeproj
+          bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
           build_dir="$(mktemp -d)"
           xcodebuild build-for-testing  -scheme CppUnitTests -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
           ios_cpp_test_app_dir="$(dirname "$(find "$build_dir" -name CppUnitTestsApp.app)")"
@@ -178,16 +178,16 @@ jobs:
             platform/ios/MapLibre_dynamic
 
       - name: Configure AWS Credentials
-        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
+        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
           role-session-name: ${{ github.run_id }}
-      
+
       - name: Upload MapLibre_DWARF & MapLibre_dynamic to S3
-        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
-        run: | 
+        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
+        run: |
           aws s3 cp MapLibre_DWARF s3://maplibre-native/size-test-ios/MapLibre_DWARF-main
           aws s3 cp MapLibre_dynamic s3://maplibre-native/size-test-ios/MapLibre_dynamic-main
 
@@ -198,15 +198,6 @@ jobs:
         working-directory: .
         run: |
           HOSTING_BASE_PATH="maplibre-native/ios/latest" platform/ios/scripts/docc.sh
-
-      - name: Deploy DocC documentation (main) 🚀
-        if: github.ref == 'refs/heads/main'
-        uses: JamesIves/github-pages-deploy-action@v4.7.2
-        continue-on-error: true
-        with:
-          branch: gh-pages
-          folder: build/docs
-          target-folder: ios/latest/
 
   ios-release:
     runs-on: macos-14
@@ -241,7 +232,7 @@ jobs:
           bazel build --compilation_mode=opt --features=dead_strip,thin_lto --objc_enable_binary_stripping \
             --apple_generate_dsym --output_groups=+dsyms --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
           echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal //platform/ios:MapLibre.dynamic)" >> "$GITHUB_ENV"
-          
+
       - name: Create .zip with debug symbols
         if: env.make_release
         working-directory: ./bazel-bin/platform/ios/MapLibre.dynamic_dsyms
@@ -341,13 +332,30 @@ jobs:
         run: |
           VERSION=${{ env.version }} COCOAPODS_TRUNK_TOKEN=${{ secrets.COCOAPODS_PASSWORD }} pod trunk push MapLibre.podspec
 
+  ios-build-cmake:
+    needs: pre_job
+    runs-on: macos-latest
+    if: needs.pre_job.outputs.should_skip != 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Configure build with CMake
+        run: cmake --preset ios
+
+      - name: Build mbgl-core
+        run: cmake --build build-ios --target mbgl-core ios-sdk-static app
+
   ios-ci-result:
     runs-on: ubuntu-latest
     if: needs.pre_job.outputs.should_skip != 'true' && always()
     needs:
       - pre_job
       - ios-build
+      - ios-build-cmake
     steps:
       - name: Mark result as failed
-        if: needs.ios-build.result != 'success'
+        if: needs.ios-build.result != 'success' || needs.ios-build-cmake.result != 'success'
         run: exit 1

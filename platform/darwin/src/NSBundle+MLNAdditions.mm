@@ -18,7 +18,7 @@ const MLNExceptionName MLNBundleNotFoundException = @"MLNBundleNotFoundException
             bundle = [self bundleWithPath:bundlePath];
         } else {
             [NSException raise:MLNBundleNotFoundException
-                        format:@"The MapLibre framework bundle could not be found. If using the MapLibre Native for iOS as a static framework, make sure that MapLibre bundle is copied into the root of the app bundle."];
+                        format:@"The MapLibre framework bundle could not be found. If using  MapLibre iOS as a static framework, make sure that MapLibre bundle is copied into the root of the app bundle."];
         }
     }
 #endif
@@ -37,7 +37,7 @@ const MLNExceptionName MLNBundleNotFoundException = @"MLNBundleNotFoundException
 
 + (nullable NSString *)mgl_applicationBundleIdentifier {
     NSString *bundleIdentifier = [NSBundle mainBundle].bundleIdentifier;
-    
+
 #if (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && (__IPHONE_OS_VERSION_MAX_ALLOWED < 120200)) || \
     (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && (__MAC_OS_X_VERSION_MAX_ALLOWED < 101404))
     // Before SDK 12.2 (bundled with Xcode 10.2): There’s no main bundle identifier when running in a unit test bundle.

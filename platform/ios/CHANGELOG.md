@@ -2,6 +2,26 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## main
+
+## 6.12.0
+
+- Eliminate copies in deferred cleanup ([#3035](https://github.com/maplibre/maplibre-native/pull/3035)).
+- (Drawable Custom Layers) Reset depth stencil state for render pass ([#3230](https://github.com/maplibre/maplibre-native/pull/3230)).
+- Add documentation page for iOS dev apps ([#3244](https://github.com/maplibre/maplibre-native/pull/3244)).
+- Remove unused files reachability.h, reachability.m ([#3243](https://github.com/maplibre/maplibre-native/pull/3243)).
+- Reduce texture sampler state changes in Metal ([#3236](https://github.com/maplibre/maplibre-native/pull/3236)).
+- Add iOS/macOS observer hooks ([#3245](https://github.com/maplibre/maplibre-native/pull/3245)).
+- Custom drawable layer v3 ([#3210](https://github.com/maplibre/maplibre-native/pull/3210)).
+
+## 6.11.0
+
+- Add NSString initializer MLNVectorTileSource ([#3163](https://github.com/maplibre/maplibre-native/pull/3163)).
+- Support defining a custom style layer from iOS Swift ([#3154](https://github.com/maplibre/maplibre-native/pull/3154)).
+- Add iOS trigger repaint method ([#3182](https://github.com/maplibre/maplibre-native/pull/3182)).
+- Bind global uniform buffers at the end of the custom layer tweaker ([#3186](https://github.com/maplibre/maplibre-native/pull/3186)).
+- Change runtime error to the nullptr returning ([#3184](https://github.com/maplibre/maplibre-native/pull/3184)).
+
 ## 6.10.0
 
 - Fix icon label isn't centered with the icon for CJK/local glyphy on iOS ([#3108](https://github.com/maplibre/maplibre-native/pull/3108)).
@@ -53,7 +73,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 - Toggle tile cache final API ([#2723](https://github.com/maplibre/maplibre-native/pull/2723)).
   Using this API can reduce memory usage at the cost of having to parse tile data again when the zoom level changes.
 - Fixed annotation delay in demo app for 120Hz devices ([#2775](https://github.com/maplibre/maplibre-native/pull/2775)).
-  Some users reported synchronization issues when panning the map. The issue is only present on devices with ProMotion (120Hz) displays and can be fixed by updating the Info.plist for your app (see [Apple documentation](https://developer.apple.com/documentation/quartzcore/optimizing_promotion_refresh_rates_for_iphone_13_pro_and_ipad_pro?language=objc)). 
+  Some users reported synchronization issues when panning the map. The issue is only present on devices with ProMotion (120Hz) displays and can be fixed by updating the Info.plist for your app (see [Apple documentation](https://developer.apple.com/documentation/quartzcore/optimizing_promotion_refresh_rates_for_iphone_13_pro_and_ipad_pro?language=objc)).
 - Use timestamps for attribute updates ([#2629](https://github.com/maplibre/maplibre-native/pull/2629)).
 - Reuse prefetched tiles to avoid empty screen ([#2668](https://github.com/maplibre/maplibre-native/pull/2668)).
 - Cleanup mbgl/actor/mailbox* implementation for repetition in ensuring valid weakScheduler exists before usage ([#2733](https://github.com/maplibre/maplibre-native/pull/2733)).
@@ -173,7 +193,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
   * While we had a long period of pre-releases and testing leading up to this release, and no crashes have been reported, it is possible that you come across inconsistencies or problems in production apps. Please report them on GitHub.
 * 💥 Breaking: Changed the prefix of files, classes, methods, variables and everything from `MGL` to `MLN`. ([#919](https://github.com/maplibre/maplibre-native/pull/919)).
 
-  > To migrate:  
+  > To migrate:
   > Change all your `MGL` prefixes to `MLN`. If you are using `NSKeyedArchiver` or similar mechanishm to save the state, the app may crash after this change when trying to unarchive the state using old names of the classes. You need to clean the saved state of the app and save it using new classes.
 * 💥 Breaking: The OpenGL ES renderer now uses OpenGL ES 3.0. This means that only iOS Devices with an Apple A7 GPU or later are supported. https://developer.apple.com/library/archive/documentation/3DDrawing/Conceptual/OpenGLES_ProgrammingGuide/BestPracticesforAppleA7GPUsandLater/BestPracticesforAppleA7GPUsandLater.html
 * The Swift package needs to be imported with `import MapLibre` instead of `import Mapbox`.
@@ -259,7 +279,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 ### Features
 
 * Added the mbtiles file source for rendering vector tiles from file stored locally on the device.
- 
+
 ## 5.9.0
 
 ### Styles and rendering
@@ -277,7 +297,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 * Added the `-[MLNOfflinePack setContext:completionHandler:]` method for replacing the data associated with an offline pack, such as a name. ([#288](https://github.com/mapbox/mapbox-gl-native-ios/pull/288))
 * Added the `MLNOfflineStorage.databasePath` and `MLNOfflineStorage.databaseURL` properties to obtain the path of the database that contains offline packs and the ambient cache. To customize this path, set the `MLNOfflineStorageDatabasePath` in Info.plist. ([#298](https://github.com/mapbox/mapbox-gl-native-ios/pull/298))
-* Fixed an error that occurred if your implementation of the `-[MLNOfflineStorageDelegate offlineStorage:URLForResourceOfKind:]` method returned a local file URL. ([mapbox/mapbox-gl-native#16428](https://github.com/mapbox/mapbox-gl-native/pull/16428)) 
+* Fixed an error that occurred if your implementation of the `-[MLNOfflineStorageDelegate offlineStorage:URLForResourceOfKind:]` method returned a local file URL. ([mapbox/mapbox-gl-native#16428](https://github.com/mapbox/mapbox-gl-native/pull/16428))
 
 ### Other changes
 
@@ -402,7 +422,7 @@ This release includes a known issue where the binary size has increased. ([#63](
 * Fixed an issue that caused the map to rotate too easily during a pinch gesture. [(#15562)](https://github.com/mapbox/mapbox-gl-native/pull/15562)
 
 ### Performance improvements
- 
+
 * Improved offline region download performance by batching certain database activities. ([#15521](https://github.com/mapbox/mapbox-gl-native/pull/15521))
 * Newly loaded labels appear faster on the screen. ([#15308](https://github.com/mapbox/mapbox-gl-native/pull/15308))
 
@@ -465,7 +485,7 @@ This release changes how offline tile requests are billed — they are now bill
 
 ## 5.1.2 - July 25, 2019
 
-* Fixed a crash during network access. ([#15113](https://github.com/mapbox/mapbox-gl-native/pull/15113))		
+* Fixed a crash during network access. ([#15113](https://github.com/mapbox/mapbox-gl-native/pull/15113))
 
 ## 5.2.0 - July 24, 2019
 
