@@ -467,7 +467,10 @@ void shapeLines(Shaping& shaping,
 
                 auto glyphPosition = glyphPositionMap->second.find(codePoint);
                 if (glyphPosition != glyphPositionMap->second.end()) {
-                    rect = glyphPosition->second.rect;
+                    rect = Rect<uint16_t>{static_cast<uint16_t>(glyphPosition->second.handle.getBin()->x),
+                                          static_cast<uint16_t>(glyphPosition->second.handle.getBin()->y),
+                                          static_cast<uint16_t>(glyphPosition->second.handle.getBin()->w),
+                                          static_cast<uint16_t>(glyphPosition->second.handle.getBin()->h)};
                     metrics = glyphPosition->second.metrics;
                 } else {
                     auto glyphs = glyphMap.find(section.fontStackHash);
