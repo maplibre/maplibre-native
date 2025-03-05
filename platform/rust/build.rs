@@ -46,6 +46,11 @@ fn create_cmake_config(project_root: &Path) -> cmake::Config {
     cfg.define_bool("MLN_WITH_METAL", with_metal);
     cfg.define_bool("MLN_WITH_VULKAN", with_vulkan);
     cfg.define_bool("MLN_WITH_WERROR", false);
+
+    // The default profile should be release even in a debug mode, otherwise it gets huge
+    let profile = env::var("MLN_BUILD_PROFILE");
+    cfg.profile(profile.map_or("Release", |p| p.as_str()));
+
     cfg
 }
 
