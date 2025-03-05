@@ -4,6 +4,11 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+## 6.12.1
+
+- Use double quotes for MLNTileOperation.h import ([#3277](https://github.com/maplibre/maplibre-native/issues/3277)).
+- Warn on rejected line geometry ([#3088](https://github.com/maplibre/maplibre-native/pull/3088)).
+
 ## 6.12.0
 
 - Eliminate copies in deferred cleanup ([#3035](https://github.com/maplibre/maplibre-native/pull/3035)).
