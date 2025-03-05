@@ -9,13 +9,20 @@ on:
 
 defaults:
   run:
-    shell: bash
     working-directory: rustutils/
 
 jobs:
   test:
     name: Rust tests
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: macos-latest  # M-series CPU
+          - os: macos-13  # x64 CPU
+          - os: windows-latest
+          - os: ubuntu-latest
     steps:
       - uses: taiki-e/install-action@v2
         with: { tool: just }
