@@ -1,5 +1,14 @@
 # iOS Tests
 
+## iOS Unit Tests
+
+To run the iOS unit tests via XCTest, run tests for the `ios_test` target in Xcode
+or use the following bazel command:
+
+```
+bazel test //platform/ios/test:ios_test --test_output=errors --//:renderer=metal
+```
+
 ## Render Tests
 
 To run the render tests, run the `RenderTest` target from iOS.
