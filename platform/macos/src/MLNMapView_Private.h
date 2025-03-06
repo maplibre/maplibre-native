@@ -1,4 +1,5 @@
 #import "MLNMapView.h"
+#import "MLNTileOperation.h"
 
 #include <mbgl/util/size.hpp>
 
@@ -46,6 +47,29 @@ class Renderer;
 - (void)mapViewDidFinishLoadingStyle;
 - (void)sourceDidChange:(nonnull MLNSource *)source;
 - (BOOL)shouldRemoveStyleImage:(nonnull NSString *)imageName;
+
+- (void)shaderWillCompile:(NSInteger)id
+                  backend:(NSInteger)backend
+                  defines:(nonnull NSString *)defines;
+- (void)shaderDidCompile:(NSInteger)id
+                 backend:(NSInteger)backend
+                 defines:(nonnull NSString *)defines;
+- (void)shaderDidFailCompile:(NSInteger)id
+                     backend:(NSInteger)backend
+                     defines:(nonnull NSString *)defines;
+- (void)glyphsWillLoad:(nonnull NSArray<NSString *> *)fontStack range:(NSRange)range;
+- (void)glyphsDidLoad:(nonnull NSArray<NSString *> *)fontStack range:(NSRange)range;
+- (void)glyphsDidError:(nonnull NSArray<NSString *> *)fontStack range:(NSRange)range;
+- (void)tileDidTriggerAction:(MLNTileOperation)operation
+                           x:(NSInteger)x
+                           y:(NSInteger)y
+                           z:(NSInteger)z
+                        wrap:(NSInteger)wrap
+                 overscaledZ:(NSInteger)overscaledZ
+                    sourceID:(nonnull NSString *)sourceID;
+- (void)spriteWillLoad:(nullable NSString *)id url:(nullable NSString *)url;
+- (void)spriteDidLoad:(nullable NSString *)id url:(nullable NSString *)url;
+- (void)spriteDidError:(nullable NSString *)id url:(nullable NSString *)url;
 
 /// Asynchronously render a frame of the map.
 - (void)setNeedsRerender;

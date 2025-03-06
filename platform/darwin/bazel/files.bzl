@@ -93,6 +93,7 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/MLNStyle.h",
     "src/MLNStyleLayer.h",
     "src/MLNStyleValue.h",
+    "src/MLNTileOperation.h",
     "src/MLNTilePyramidOfflineRegion.h",
     "src/MLNTileServerOptions.h",
     "src/MLNTileSource.h",

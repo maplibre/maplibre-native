@@ -86,7 +86,6 @@ class HTTPFileSource::Impl {
 public:
     Impl(const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
         : resourceOptions(resourceOptions_.clone()), clientOptions(clientOptions_.clone()) {
-        @autoreleasepool {
             NSURLSessionConfiguration *sessionConfig = MLNNativeNetworkManager.sharedManager.sessionConfiguration;
             session = [NSURLSession sessionWithConfiguration:sessionConfig];
 
@@ -95,8 +94,6 @@ public:
             } else {
                 userAgent = sessionConfig.HTTPAdditionalHeaders[@"User-Agent"];
             }
-
-        }
     }
 
     void setResourceOptions(ResourceOptions options);
@@ -280,7 +277,7 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, 
             [MLNNativeNetworkManager.sharedManager startDownloadEvent:url.relativePath type:@"tile"];
         }
 
-        __block NSURLSession *session;
+        __block NSURLSession *session = nil;
 
         // Use the delegate's session if there is one, otherwise use the one that
         // was created when this class was constructed.
