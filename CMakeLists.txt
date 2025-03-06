@@ -86,7 +86,7 @@ target_compile_options(
         $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fsanitize=float-divide-by-zero,
         -fsanitize-blacklist=${UBSAN_BLACKLIST}>
         $<$<PLATFORM_ID:iOS>:-fembed-bitcode>
-        $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<OR:$<BOOL:${MLN_WITH_RTTI}>,$<CXX_COMPILER_ID:MSVC>>>>:-fno-rtti>
+        $<$<AND:$<OR:$<COMPILE_LANGUAGE:CXX>,$<COMPILE_LANGUAGE:OBJCXX>>,$<NOT:$<OR:$<BOOL:${MLN_WITH_RTTI}>,$<CXX_COMPILER_ID:MSVC>>>>:-fno-rtti>
         $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<PLATFORM_ID:Windows>>>:-Wall>
         $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<PLATFORM_ID:Windows>>>:-Wshadow>
         $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<PLATFORM_ID:Windows>>>:-Wextra>
@@ -1035,6 +1035,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_collision_box.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_collision_circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_custom_geometry.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_custom_symbol_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_debug.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill.hpp
@@ -1217,6 +1218,7 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/clipping_mask.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/common.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/collision.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/custom_geometry.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/custom_symbol_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/debug.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill.hpp
@@ -1226,6 +1228,7 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/hillshade.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/hillshade_prepare.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/line.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/location_indicator.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/raster.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_group.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_program.hpp
@@ -1256,6 +1259,7 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/circle.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/collision.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/clipping_mask.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/custom_geometry.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/custom_symbol_icon.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/debug.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/fill.cpp
@@ -1265,9 +1269,11 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/hillshade.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/hillshade_prepare.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/line.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/location_indicator.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/raster.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/symbol.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/widevector.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/mtl/custom_layer_render_parameters.cpp
     )
 
     find_library(METAL_FRAMEWORK Metal)
@@ -1313,6 +1319,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/clipping_mask.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/collision.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/common.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/custom_geometry.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/custom_symbol_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/fill.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/fill_extrusion.hpp
@@ -1353,6 +1360,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/circle.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/clipping_mask.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/collision.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/custom_geometry.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/custom_symbol_icon.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/debug.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/fill.cpp
@@ -1372,12 +1380,12 @@ endif()
 if(MLN_DRAWABLE_RENDERER)
     list(APPEND
     SRC_FILES
-        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_drawable_layer_factory.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_drawable_layer.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_drawable_layer.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer.cpp
     )
 endif()
 
@@ -1579,7 +1587,11 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL Android)
 elseif(CMAKE_SYSTEM_NAME STREQUAL Linux)
     include(${PROJECT_SOURCE_DIR}/platform/linux/linux.cmake)
 elseif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    include(${PROJECT_SOURCE_DIR}/platform/darwin/darwin.cmake)
     include(${PROJECT_SOURCE_DIR}/platform/macos/macos.cmake)
+elseif(CMAKE_SYSTEM_NAME STREQUAL iOS)
+    include(${PROJECT_SOURCE_DIR}/platform/darwin/darwin.cmake)
+    include(${PROJECT_SOURCE_DIR}/platform/ios/ios.cmake)
 elseif(WIN32)
     include(${PROJECT_SOURCE_DIR}/platform/windows/windows.cmake)
 else()

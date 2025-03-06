@@ -35,17 +35,17 @@ class CustomDrawableLayerHost::Interface {
 public:
     enum class LineShaderType {
         Classic,
-        MetalWideVector
+        WideVector
     };
 
     struct LineOptions {
         gfx::PolylineGeneratorOptions geometry;
+
         float blur = 0.f;
         float opacity = 1.f;
         float gapWidth = 0.f;
         float offset = 0.f;
         float width = 1.f;
-        LineShaderType shaderType = LineShaderType::Classic;
         Color color;
     };
 
@@ -58,11 +58,29 @@ public:
         Size size;
         gfx::Texture2DPtr texture;
         std::array<float, 2> anchor{0.5f, 0.5f};
-        std::array<std::array<float, 2>, 2> textureCoordinates{{{0, 0}, {1, 1}}};
         float angleDegrees{.0f};
         bool scaleWithMap{false};
         bool pitchWithMap{false};
     };
+
+    struct GeometryVertex {
+        std::array<float, 3> position;
+        std::array<float, 2> texcoords;
+    };
+
+    struct GeometryOptions {
+        mat4 matrix = matrix::identity4();
+        Color color = Color::white();
+        gfx::Texture2DPtr texture;
+    };
+
+    template <typename T>
+    using TweakerCallback = std::function<void(mbgl::gfx::Drawable&, const mbgl::PaintParameters&, T&)>;
+
+    using LineTweakerCallback = TweakerCallback<LineOptions>;
+    using FillTweakerCallback = TweakerCallback<FillOptions>;
+    using SymbolTweakerCallback = TweakerCallback<SymbolOptions>;
+    using GeometryTweakerCallback = TweakerCallback<GeometryOptions>;
 
 public:
     /// @brief Construct a new Interface object (internal core use only)
@@ -110,42 +128,66 @@ public:
     void setSymbolOptions(const SymbolOptions& options);
 
     /**
+     * @brief Set the geometry options
+     *
+     * @param options
+     */
+    void setGeometryOptions(const GeometryOptions& options);
+
+    void setLineTweakerCallback(LineTweakerCallback&& callback) { lineTweakerCallback = callback; }
+    void setFillTweakerCallback(FillTweakerCallback&& callback) { fillTweakerCallback = callback; }
+    void setSymbolTweakerCallback(SymbolTweakerCallback&& callback) { symbolTweakerCallback = callback; }
+    void setGeometryTweakerCallback(GeometryTweakerCallback&& callback) { geometryTweakerCallback = callback; }
+
+    /**
      * @brief Add a polyline
      *
      * @param coordinates in tile range
-     * @return true if the polyline was added
+     * @param shaderType
+     * @return a valid util::SimpleIdentity if the polyline was added
      */
-    bool addPolyline(const GeometryCoordinates& coordinates);
+    util::SimpleIdentity addPolyline(const GeometryCoordinates& coordinates,
+                                     LineShaderType shaderType = LineShaderType::Classic);
 
     /**
      * @brief Add a polyline
      *
      * @param coordinates Geographic coordinates
-     * @return true if the polyline was added
+     * @param shaderType
+     * @return a valid util::SimpleIdentity if the poline was added
      */
-    bool addPolyline(const LineString<double>& coordinates);
+    util::SimpleIdentity addPolyline(const LineString<double>& coordinates,
+                                     LineShaderType shaderType = LineShaderType::Classic);
 
     /**
      * @brief Add a multipolygon area fill
      *
      * @param geometry a collection of rings with optional holes
-     * @return true if the fill was added
+     * @return a valid util::SimpleIdentity if the fill was added
      */
-    bool addFill(const GeometryCollection& geometry);
+    util::SimpleIdentity addFill(const GeometryCollection& geometry);
 
     /**
      * @brief Add a symbol
      *
      * @param point
-     * @return true if the symbol was added
+     * @param textureCoordinates (optional mapping)
+     * @return a valid util::SimpleIdentity if the symbol was added
      */
-    bool addSymbol(const GeometryCoordinate& point);
+    util::SimpleIdentity addSymbol(const GeometryCoordinate& point,
+                                   const std::array<std::array<float, 2>, 2>& textureCoordinates = {{{0, 0}, {1, 1}}});
+
+    util::SimpleIdentity addGeometry(std::shared_ptr<gfx::VertexVector<GeometryVertex>> vertices,
+                                     std::shared_ptr<gfx::IndexVector<gfx::Triangles>> indices,
+                                     bool is3D);
 
     /**
      * @brief Finish the current drawable building session
      *
      */
     void finish();
+
+    void removeDrawable(const util::SimpleIdentity& id);
 
 public:
     RenderLayer& layer;
@@ -162,13 +204,15 @@ private:
     gfx::ShaderPtr lineShaderWideVector() const;
     gfx::ShaderPtr fillShaderDefault() const;
     gfx::ShaderPtr symbolShaderDefault() const;
+    gfx::ShaderPtr geometryShaderDefault() const;
 
     enum class BuilderType {
         None,
         LineClassic,
         LineWideVector,
         Fill,
-        Symbol
+        Symbol,
+        Geometry
     };
 
     std::unique_ptr<gfx::DrawableBuilder> createBuilder(const std::string& name, gfx::ShaderPtr shader) const;
@@ -177,13 +221,15 @@ private:
     std::unique_ptr<gfx::DrawableBuilder> builder;
     std::optional<OverscaledTileID> tileID;
 
-    gfx::ShaderPtr lineShader;
-    gfx::ShaderPtr fillShader;
-    gfx::ShaderPtr symbolShader;
-
     LineOptions lineOptions;
     FillOptions fillOptions;
     SymbolOptions symbolOptions;
+    GeometryOptions geometryOptions;
+
+    LineTweakerCallback lineTweakerCallback;
+    FillTweakerCallback fillTweakerCallback;
+    SymbolTweakerCallback symbolTweakerCallback;
+    GeometryTweakerCallback geometryTweakerCallback;
 
     BuilderType builderType{BuilderType::None};
 };

@@ -2,6 +2,23 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## main
+
+## 6.12.1
+
+- Use double quotes for MLNTileOperation.h import ([#3277](https://github.com/maplibre/maplibre-native/issues/3277)).
+- Warn on rejected line geometry ([#3088](https://github.com/maplibre/maplibre-native/pull/3088)).
+
+## 6.12.0
+
+- Eliminate copies in deferred cleanup ([#3035](https://github.com/maplibre/maplibre-native/pull/3035)).
+- (Drawable Custom Layers) Reset depth stencil state for render pass ([#3230](https://github.com/maplibre/maplibre-native/pull/3230)).
+- Add documentation page for iOS dev apps ([#3244](https://github.com/maplibre/maplibre-native/pull/3244)).
+- Remove unused files reachability.h, reachability.m ([#3243](https://github.com/maplibre/maplibre-native/pull/3243)).
+- Reduce texture sampler state changes in Metal ([#3236](https://github.com/maplibre/maplibre-native/pull/3236)).
+- Add iOS/macOS observer hooks ([#3245](https://github.com/maplibre/maplibre-native/pull/3245)).
+- Custom drawable layer v3 ([#3210](https://github.com/maplibre/maplibre-native/pull/3210)).
+
 ## 6.11.0
 
 - Add NSString initializer MLNVectorTileSource ([#3163](https://github.com/maplibre/maplibre-native/pull/3163)).
