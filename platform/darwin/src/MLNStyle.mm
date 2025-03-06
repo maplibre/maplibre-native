@@ -141,7 +141,12 @@ const MLNExceptionName MLNRedundantSourceIdentifierException = @"MLNRedundantSou
 
 - (NSString *)styleJSON {
     std::string styleJSON = self.rawStyle->getJSON();
-    return styleJSON.empty() ? nil : @(styleJSON.c_str());
+    // Return empty string if no style is set
+    return styleJSON.empty() ? @"" : @(styleJSON.c_str());
+}
+
+- (void)setStyleJSON:(NSString *)styleJSON {
+    self.rawStyle->loadJSON([styleJSON UTF8String]);
 }
 
 // MARK: Sources

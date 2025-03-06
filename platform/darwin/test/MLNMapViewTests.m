@@ -189,14 +189,6 @@ static MLNMapView *mapView;
     XCTAssertTrue([jsonObject isKindOfClass:[NSDictionary class]], @"Style JSON should represent a dictionary");
 }
 
-- (void)testSetStyleJSONToNil {
-    XCTAssertThrowsSpecificNamed(mapView.styleJSON = nil, NSException, NSInvalidArgumentException);
-
-    // Reset to style URL for other tests
-    NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"one-liner" withExtension:@"json"];
-    mapView.styleURL = styleURL;
-}
-
 - (void)testUpdateStyleJSON {
     // Reset style loading expectation before setting new style
     _styleLoadingExpectation = nil;

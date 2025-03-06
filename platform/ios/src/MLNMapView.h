@@ -268,12 +268,16 @@ MLN_EXPORT
 /**
  * The style JSON representation of the map.
  *
- * This property can be used to get the current style as a JSON string or set a new style from a
- * JSON string. The JSON must conform to the MapLibre Style Specification.
+ * Setting this property results in an asynchronous style change. If you wish to know when the style
+ * change is complete, observe the ``MLNMapViewDelegate/mapView:didFinishLoadingStyle:`` method
+ * on ``MLNMapViewDelegate``.
  *
- * @see https://maplibre.org/maplibre-style-spec/
+ * The JSON must conform to the
+ * <a href="https://maplibre.org/maplibre-style-spec/">MapLibre Style Specification</a>.
+ *
+ * @throws NSInvalidArgumentException if styleJSON is nil or invalid JSON
  */
-@property (nonatomic, nullable) NSString *styleJSON;
+@property (nonatomic, copy) NSString *styleJSON;
 
 /**
  Reloads the style.

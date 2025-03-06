@@ -582,20 +582,30 @@ public:
     self.mbglMap.getStyle().loadURL([[styleURL absoluteString] UTF8String]);
 }
 
-- (NSString *)styleJSON
-{
-    NSString *styleJSONString = @(self.mbglMap.getStyle().getJSON().c_str()).mgl_stringOrNilIfEmpty;
-    return styleJSONString;
+- (NSString *)styleJSON {
+    return self.style.styleJSON;
 }
 
 - (void)setStyleJSON:(NSString *)styleJSON {
     if (!styleJSON) {
-        [NSException raise:NSInvalidArgumentException format:@"Style JSON cannot be nil."];
+        [NSException raise:NSInvalidArgumentException
+                    format:@"Style JSON cannot be nil."];
         return;
     }
 
+    // Verify JSON is valid
+    NSError *error = nil;
+    id jsonObject = [NSJSONSerialization JSONObjectWithData:[styleJSON dataUsingEncoding:NSUTF8StringEncoding]
+                                                   options:0
+                                                     error:&error];
+    if (error || !jsonObject || ![jsonObject isKindOfClass:[NSDictionary class]]) {
+        [NSException raise:NSInvalidArgumentException
+                    format:@"Invalid style JSON: %@", error.localizedDescription];
+        return;
+    }
+
+    // Reset style and load new JSON
     self.style = nil;
-    self.styleURL = nil;
     self.mbglMap.getStyle().loadJSON([styleJSON UTF8String]);
 }
 
