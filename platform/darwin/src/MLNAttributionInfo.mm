@@ -104,9 +104,13 @@
             [attributedString removeAttribute:NSStrokeWidthAttributeName range:range];
         }
 
-        // Omit whitespace-only strings.
+        // Clean up strings by stripping punctuation and whitespace (often present for the web).
+        NSMutableCharacterSet *charset = [NSMutableCharacterSet whitespaceAndNewlineCharacterSet];
+        [charset formUnionWithCharacterSet:[NSCharacterSet punctuationCharacterSet]];
         NSAttributedString *title = [[attributedString attributedSubstringFromRange:range]
-                                     mgl_attributedStringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+                                     mgl_attributedStringByTrimmingCharactersInSet:charset];
+
+        // Omit strings that are empty after cleaning.
         if (!title.length) {
             return;
         }
