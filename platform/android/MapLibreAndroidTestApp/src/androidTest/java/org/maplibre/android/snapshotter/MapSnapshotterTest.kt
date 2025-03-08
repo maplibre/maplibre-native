@@ -22,7 +22,6 @@ import java.util.concurrent.TimeoutException
 /**
  * Integration test that validates if a snapshotter creation
  */
-@Ignore("https://github.com/maplibre/maplibre-native/issues/2317")
 @RunWith(AndroidJUnit4ClassRunner::class)
 class MapSnapshotterTest {
 
@@ -41,7 +40,7 @@ class MapSnapshotterTest {
             val options = MapSnapshotter.Options(512, 512)
                 .withPixelRatio(1.0f)
                 .withStyleBuilder(
-                    Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"))
+                    Style.Builder().fromUri(TestStyles.OPENFREEMAP_BRIGHT)
                         .withLayerAbove(bg, "country-label")
                 )
                 .withCameraPosition(
