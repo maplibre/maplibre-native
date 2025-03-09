@@ -100,6 +100,11 @@ Thanks to everyone who helped test the pre-releases!
 ### 🐞 Bug fixes
 
 - Fix crash on unsupported attribute type conversion ([#3066](https://github.com/maplibre/maplibre-native/pull/3066)).
+## 11.6.2
+
+### Features and Improvements
+
+- Add LoD Support
 
 ## 11.6.1
 
