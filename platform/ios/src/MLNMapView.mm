@@ -522,6 +522,19 @@ public:
     return self;
 }
 
+- (instancetype)initWithFrame:(CGRect)frame styleJSON:(NSString *)styleJSON
+{
+    if (self = [super initWithFrame:frame])
+    {
+        MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
+        MLNLogDebug(@"Initializing frame: %@ styleJSON: %@", NSStringFromCGRect(frame), styleJSON);
+        [self commonInit];
+        self.mbglMap.getStyle().loadJSON([styleJSON UTF8String]);
+        MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
+    }
+    return self;
+}
+
 - (instancetype)initWithCoder:(nonnull NSCoder *)decoder
 {
     if (self = [super initWithCoder:decoder])
@@ -567,6 +580,33 @@ public:
     styleURL = styleURL.mgl_URLByStandardizingScheme;
     self.style = nil;
     self.mbglMap.getStyle().loadURL([[styleURL absoluteString] UTF8String]);
+}
+
+- (NSString *)styleJSON {
+    return self.style.styleJSON;
+}
+
+- (void)setStyleJSON:(NSString *)styleJSON {
+    if (!styleJSON) {
+        [NSException raise:NSInvalidArgumentException
+                    format:@"Style JSON cannot be nil."];
+        return;
+    }
+
+    // Verify JSON is valid
+    NSError *error = nil;
+    id jsonObject = [NSJSONSerialization JSONObjectWithData:[styleJSON dataUsingEncoding:NSUTF8StringEncoding]
+                                                   options:0
+                                                     error:&error];
+    if (error || !jsonObject || ![jsonObject isKindOfClass:[NSDictionary class]]) {
+        [NSException raise:NSInvalidArgumentException
+                    format:@"Invalid style JSON: %@", error.localizedDescription];
+        return;
+    }
+
+    // Reset style and load new JSON
+    self.style = nil;
+    self.mbglMap.getStyle().loadJSON([styleJSON UTF8String]);
 }
 
 - (IBAction)reloadStyle:(__unused id)sender {
