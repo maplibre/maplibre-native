@@ -515,7 +515,8 @@ void GeometryTileWorker::finalizeLayout() {
             }
 
             // layout adds the bucket to buckets
-            layout->createBucket(patternPositions, featureIndex, renderData, firstLoad, showCollisionBoxes, id.canonical);
+            layout->createBucket(
+                patternPositions, featureIndex, renderData, firstLoad, showCollisionBoxes, id.canonical);
         }
     }
 
@@ -530,8 +531,11 @@ void GeometryTileWorker::finalizeLayout() {
                                    << id.canonical.y << " Time");
 
     parent.invoke(&GeometryTile::onLayout,
-                  std::make_shared<GeometryTile::LayoutResult>(
-                      std::move(renderData), std::move(featureIndex), std::move(glyphPositions), std::move(iconPositions), std::move(patternPositions)),
+                  std::make_shared<GeometryTile::LayoutResult>(std::move(renderData),
+                                                               std::move(featureIndex),
+                                                               std::move(glyphPositions),
+                                                               std::move(iconPositions),
+                                                               std::move(patternPositions)),
                   correlationID);
 }
 

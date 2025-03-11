@@ -98,9 +98,10 @@ void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
     if (!imagePatches.empty()) {
         for (const auto& imagePatch : imagePatches) { // patch updated images.
 #if MLN_DRAWABLE_RENDERER
-            gfx::Context::getDynamicTextureRGBA()->getTextureAtlas()->uploadSubRegion(imagePatch.image->image,
-                                                                                      imagePatch.paddedRect.x + ImagePosition::padding,
-                                                                                      imagePatch.paddedRect.y + ImagePosition::padding);
+            gfx::Context::getDynamicTextureRGBA()->getTextureAtlas()->uploadSubRegion(
+                imagePatch.image->image,
+                imagePatch.paddedRect.x + ImagePosition::padding,
+                imagePatch.paddedRect.y + ImagePosition::padding);
 #else
             uploadPass.updateTextureSub(*atlasTextures->icon,
                                         imagePatch.image->image,

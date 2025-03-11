@@ -20,7 +20,10 @@ class ImageManager;
 
 class ImagePosition {
 public:
-    ImagePosition(const mapbox::Bin&, const style::Image::Impl&, uint32_t version = 0, std::optional<gfx::TextureHandle> handle = std::nullopt);
+    ImagePosition(const mapbox::Bin&,
+                  const style::Image::Impl&,
+                  uint32_t version = 0,
+                  std::optional<gfx::TextureHandle> handle = std::nullopt);
 
     static constexpr const uint16_t padding = 1u;
     std::optional<gfx::TextureHandle> handle;

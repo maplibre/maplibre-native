@@ -39,7 +39,7 @@ public:
         return addImage(image.data ? image.data.get() : nullptr, image.size, id);
     }
     std::optional<TextureHandle> addImage(const void* pixelData, const Size& imageSize, int32_t id = -1);
-    
+
     void removeTexture(const TextureHandle& texHandle);
 
 private:

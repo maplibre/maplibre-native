@@ -7,7 +7,10 @@
 
 namespace mbgl {
 
-ImagePosition::ImagePosition(const mapbox::Bin& bin, const style::Image::Impl& image, uint32_t version_, std::optional<gfx::TextureHandle> handle_)
+ImagePosition::ImagePosition(const mapbox::Bin& bin,
+                             const style::Image::Impl& image,
+                             uint32_t version_,
+                             std::optional<gfx::TextureHandle> handle_)
     : handle(handle_),
       pixelRatio(image.pixelRatio),
       paddedRect(bin.x, bin.y, bin.w, bin.h),
@@ -56,7 +59,7 @@ ImagePositions uploadIcons(const ImageMap& icons, const ImageVersionMap& version
             iconPositions.emplace(image.id, ImagePosition{*iconHandle->getBin(), image, version, iconHandle});
         }
     }
-    
+
     return iconPositions;
 }
 
@@ -75,7 +78,7 @@ ImagePositions uploadPatterns(const ImageMap& patterns, const ImageVersionMap& v
             patternPositions.emplace(image.id, ImagePosition{*patternHandle->getBin(), image, version, patternHandle});
         }
     }
-    
+
     return patternPositions;
 }
 
