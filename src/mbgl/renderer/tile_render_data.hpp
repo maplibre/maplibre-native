@@ -25,7 +25,7 @@ class SourcePrepareParameters;
 class TileAtlasTextures {
 public:
 #if MLN_DRAWABLE_RENDERER
-    gfx::Texture2DPtr icon;
+    gfx::Texture2DPtr unused;
 #else
     std::optional<gfx::Texture> glyph;
     std::optional<gfx::Texture> icon;
@@ -37,7 +37,7 @@ public:
     virtual ~TileRenderData();
 
 #if MLN_DRAWABLE_RENDERER
-    const gfx::Texture2DPtr& getIconAtlasTexture() const;
+
 #else
     const gfx::Texture& getGlyphAtlasTexture() const;
     const gfx::Texture& getIconAtlasTexture() const;

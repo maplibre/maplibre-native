@@ -12,20 +12,14 @@ namespace gfx {
 void DrawableAtlasesTweaker::setupTextures(gfx::Drawable& drawable, const bool linearFilterForIcons) {
     if (const auto& shader = drawable.getShader()) {
         if (glyphTextureId) {
-            if (atlases) {
-                atlases->icon->setSamplerConfiguration(
-                    {linearFilterForIcons ? TextureFilterType::Linear : TextureFilterType::Nearest,
-                     TextureWrapType::Clamp,
-                     TextureWrapType::Clamp});
-            }
             if (iconTextureId && shader->getSamplerLocation(*iconTextureId)) {
                 assert(*glyphTextureId != *iconTextureId);
-                drawable.setTexture(atlases ? gfx::Context::getDynamicTexture()->getTextureAtlas() : nullptr,
+                drawable.setTexture(atlases ? gfx::Context::getDynamicTextureAlpha()->getTextureAtlas() : nullptr,
                                     *glyphTextureId);
-                drawable.setTexture(atlases ? atlases->icon : nullptr, *iconTextureId);
+                drawable.setTexture(atlases ? gfx::Context::getDynamicTextureRGBA()->getTextureAtlas() : nullptr, *iconTextureId);
             } else {
                 drawable.setTexture(
-                    atlases ? (isText ? gfx::Context::getDynamicTexture()->getTextureAtlas() : atlases->icon) : nullptr,
+                    atlases ? (isText ? gfx::Context::getDynamicTextureAlpha()->getTextureAtlas() : gfx::Context::getDynamicTextureRGBA()->getTextureAtlas()) : nullptr,
                     *glyphTextureId);
             }
         }

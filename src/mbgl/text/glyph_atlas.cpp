@@ -17,7 +17,7 @@ GlyphPositions uploadGlyphs(const GlyphMap& glyphs) {
                 const Glyph& glyph = **entry.second;
 
                 int32_t uniqueId = static_cast<int32_t>(sqrt(fontStack) / 2 + glyph.id);
-                auto glyphHandle = gfx::Context::getDynamicTexture()->addImage(glyph.bitmap, uniqueId);
+                auto glyphHandle = gfx::Context::getDynamicTextureAlpha()->addImage(glyph.bitmap, uniqueId);
 
                 if (glyphHandle) {
                     positions.emplace(glyph.id, GlyphPosition{*glyphHandle, glyph.metrics});

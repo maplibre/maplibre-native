@@ -14,23 +14,6 @@ namespace gfx {
 class Context;
 class Texture2D;
 using Texture2DPtr = std::shared_ptr<gfx::Texture2D>;
-class TextureHandle;
-
-class DynamicTexture {
-public:
-    DynamicTexture(Context& context, Size size);
-    ~DynamicTexture() = default;
-
-    const Texture2DPtr& getTextureAtlas();
-
-    std::optional<TextureHandle> addImage(const AlphaImage& image, int32_t id = -1);
-    void removeTexture(const TextureHandle& texHandle);
-
-private:
-    Texture2DPtr textureAtlas;
-    mapbox::ShelfPack shelfPack;
-    std::mutex mutex;
-};
 
 class TextureHandle {
 public:
@@ -42,6 +25,26 @@ public:
 
 private:
     mapbox::Bin* bin;
+};
+
+class DynamicTexture {
+public:
+    DynamicTexture(Context& context, Size size, TexturePixelType pixelType);
+    ~DynamicTexture() = default;
+
+    const Texture2DPtr& getTextureAtlas();
+
+    template <typename Image>
+    std::optional<TextureHandle> addImage(const Image& image, int32_t id = -1) {
+        return addImage(image.data ? image.data.get() : nullptr, image.size, id);
+    }
+    std::optional<TextureHandle> addImage(const void* pixelData, const Size& imageSize, int32_t id = -1);
+    
+    void removeTexture(const TextureHandle& texHandle);
+
+private:
+    Texture2DPtr textureAtlas;
+    mapbox::ShelfPack shelfPack;
 };
 
 } // namespace gfx

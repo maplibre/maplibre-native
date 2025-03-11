@@ -74,18 +74,21 @@ public:
         mbgl::unordered_map<std::string, LayerRenderData> layerRenderData;
         std::shared_ptr<FeatureIndex> featureIndex;
         GlyphPositions glyphPositions;
-        ImageAtlas iconAtlas;
+        ImagePositions iconPositions;
+        ImagePositions patternPositions;
 
         LayerRenderData* getLayerRenderData(const style::Layer::Impl&);
 
         LayoutResult(mbgl::unordered_map<std::string, LayerRenderData> renderData_,
                      std::unique_ptr<FeatureIndex> featureIndex_,
                      GlyphPositions glyphPositions_,
-                     ImageAtlas iconAtlas_)
+                     ImagePositions iconPositions_,
+                     ImagePositions patternPositions_)
             : layerRenderData(std::move(renderData_)),
               featureIndex(std::move(featureIndex_)),
               glyphPositions(std::move(glyphPositions_)),
-              iconAtlas(std::move(iconAtlas_)) {}
+              iconPositions(std::move(iconPositions_)),
+              patternPositions(std::move(patternPositions_)) {}
 
         ~LayoutResult();
     };

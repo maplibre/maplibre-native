@@ -56,7 +56,8 @@ RendererObserver& nullObserver() {
 
 } // namespace
 
-std::unique_ptr<gfx::DynamicTexture> gfx::Context::dynamicTexture = nullptr;
+std::unique_ptr<gfx::DynamicTexture> gfx::Context::dynamicTextureAlpha = nullptr;
+std::unique_ptr<gfx::DynamicTexture> gfx::Context::dynamicTextureRGBA = nullptr;
 
 Renderer::Impl::Impl(gfx::RendererBackend& backend_,
                      float pixelRatio_,
@@ -98,7 +99,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     auto& context = backend.getContext();
     context.setObserver(this);
 
-    if (!gfx::Context::getDynamicTexture()) {
+    if (!gfx::Context::getDynamicTextureAlpha() || !gfx::Context::getDynamicTextureRGBA()) {
         gfx::Context::createDynamicTexture(context);
     }
 

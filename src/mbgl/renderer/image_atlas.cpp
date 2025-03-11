@@ -1,14 +1,15 @@
 #include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/renderer/image_manager.hpp>
+#include <mbgl/gfx/context.hpp>
+#include <mbgl/util/hash.hpp>
 
 #include <mapbox/shelf-pack.hpp>
 
 namespace mbgl {
 
-static constexpr uint32_t padding = 1;
-
-ImagePosition::ImagePosition(const mapbox::Bin& bin, const style::Image::Impl& image, uint32_t version_)
-    : pixelRatio(image.pixelRatio),
+ImagePosition::ImagePosition(const mapbox::Bin& bin, const style::Image::Impl& image, uint32_t version_, std::optional<gfx::TextureHandle> handle_)
+    : handle(handle_),
+      pixelRatio(image.pixelRatio),
       paddedRect(bin.x, bin.y, bin.w, bin.h),
       version(version_),
       stretchX(image.stretchX),
@@ -16,35 +17,6 @@ ImagePosition::ImagePosition(const mapbox::Bin& bin, const style::Image::Impl& i
       content(image.content),
       textFitWidth(image.textFitWidth),
       textFitHeight(image.textFitHeight) {}
-
-namespace {
-
-const mapbox::Bin& _packImage(mapbox::ShelfPack& pack,
-                              const style::Image::Impl& image,
-                              ImageAtlas& resultImage,
-                              ImageType imageType) {
-    const mapbox::Bin& bin = *pack.packOne(
-        -1, image.image.size.width + 2 * padding, image.image.size.height + 2 * padding);
-
-    resultImage.image.resize({static_cast<uint32_t>(pack.width()), static_cast<uint32_t>(pack.height())});
-
-    PremultipliedImage::copy(
-        image.image, resultImage.image, {0, 0}, {bin.x + padding, bin.y + padding}, image.image.size);
-
-    if (imageType == ImageType::Pattern) {
-        const uint32_t x = bin.x + padding;
-        const uint32_t y = bin.y + padding;
-        const uint32_t w = image.image.size.width;
-        const uint32_t h = image.image.size.height;
-
-        // Add 1 pixel wrapped padding on each side of the image.
-        PremultipliedImage::copy(image.image, resultImage.image, {0, h - 1}, {x, y - 1}, {w, 1}); // T
-        PremultipliedImage::copy(image.image, resultImage.image, {0, 0}, {x, y + h}, {w, 1});     // B
-        PremultipliedImage::copy(image.image, resultImage.image, {w - 1, 0}, {x - 1, y}, {1, h}); // L
-        PremultipliedImage::copy(image.image, resultImage.image, {0, 0}, {x + w, y}, {1, h});     // R
-    }
-    return bin;
-}
 
 void populateImagePatches(ImagePositions& imagePositions,
                           const ImageManager& imageManager,
@@ -69,46 +41,42 @@ void populateImagePatches(ImagePositions& imagePositions,
     }
 }
 
-} // namespace
-
-std::vector<ImagePatch> ImageAtlas::getImagePatchesAndUpdateVersions(const ImageManager& imageManager) {
-    std::vector<ImagePatch> imagePatches;
-    populateImagePatches(iconPositions, imageManager, imagePatches);
-    populateImagePatches(patternPositions, imageManager, imagePatches);
-    return imagePatches;
-}
-
-ImageAtlas makeImageAtlas(const ImageMap& icons, const ImageMap& patterns, const ImageVersionMap& versionMap) {
-    ImageAtlas result;
-
-    mapbox::ShelfPack::ShelfPackOptions options;
-    options.autoResize = true;
-    mapbox::ShelfPack pack(0, 0, options);
-
-    result.iconPositions.reserve(icons.size());
+ImagePositions uploadIcons(const ImageMap& icons, const ImageVersionMap& versionMap) {
+    ImagePositions iconPositions;
+    iconPositions.reserve(icons.size());
 
     for (const auto& entry : icons) {
         const style::Image::Impl& image = *entry.second;
-        const mapbox::Bin& bin = _packImage(pack, image, result, ImageType::Icon);
+        auto imageHash = util::hash(image.id);
+        int32_t uniqueId = static_cast<int32_t>(sqrt(imageHash) / 2);
+        auto iconHandle = gfx::Context::getDynamicTextureRGBA()->addImage(image.image, uniqueId);
         const auto it = versionMap.find(entry.first);
         const auto version = it != versionMap.end() ? it->second : 0;
-        result.iconPositions.emplace(image.id, ImagePosition{bin, image, version});
+        if (iconHandle) {
+            iconPositions.emplace(image.id, ImagePosition{*iconHandle->getBin(), image, version, iconHandle});
+        }
     }
+    
+    return iconPositions;
+}
 
-    result.patternPositions.reserve(patterns.size());
+ImagePositions uploadPatterns(const ImageMap& patterns, const ImageVersionMap& versionMap) {
+    ImagePositions patternPositions;
+    patternPositions.reserve(patterns.size());
 
     for (const auto& entry : patterns) {
         const style::Image::Impl& image = *entry.second;
-        const mapbox::Bin& bin = _packImage(pack, image, result, ImageType::Pattern);
+        auto imageHash = util::hash(image.id);
+        int32_t uniqueId = static_cast<int32_t>(sqrt(imageHash) / 2);
+        auto patternHandle = gfx::Context::getDynamicTextureRGBA()->addImage(image.image, uniqueId);
         const auto it = versionMap.find(entry.first);
         const auto version = it != versionMap.end() ? it->second : 0;
-        result.patternPositions.emplace(image.id, ImagePosition{bin, image, version});
+        if (patternHandle) {
+            patternPositions.emplace(image.id, ImagePosition{*patternHandle->getBin(), image, version, patternHandle});
+        }
     }
-
-    pack.shrink();
-    result.image.resize({static_cast<uint32_t>(pack.width()), static_cast<uint32_t>(pack.height())});
-
-    return result;
+    
+    return patternPositions;
 }
 
 } // namespace mbgl

@@ -97,16 +97,6 @@ std::optional<ImagePosition> RenderTile::getPattern(const std::string& pattern) 
 }
 
 #if MLN_DRAWABLE_RENDERER
-static const gfx::Texture2DPtr noTexture;
-
-bool RenderTile::hasIconAtlasTexture() const {
-    return renderData && renderData->getIconAtlasTexture();
-}
-
-const gfx::Texture2DPtr& RenderTile::getIconAtlasTexture() const {
-    return renderData ? renderData->getIconAtlasTexture() : noTexture;
-}
-
 static const std::shared_ptr<TileAtlasTextures> noAtlas;
 const std::shared_ptr<TileAtlasTextures>& RenderTile::getAtlasTextures() const {
     return renderData ? renderData->getAtlasTextures() : noAtlas;

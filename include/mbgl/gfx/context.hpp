@@ -179,10 +179,12 @@ public:
     virtual void unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept = 0;
 
     static void createDynamicTexture(Context& context) {
-        dynamicTexture = std::make_unique<gfx::DynamicTexture>(context, Size{4096, 4096});
+        dynamicTextureAlpha = std::make_unique<gfx::DynamicTexture>(context, Size{4096, 4096}, TexturePixelType::Alpha);
+        dynamicTextureRGBA = std::make_unique<gfx::DynamicTexture>(context, Size{4096, 4096}, TexturePixelType::RGBA);
     }
 
-    static std::unique_ptr<gfx::DynamicTexture>& getDynamicTexture() { return dynamicTexture; }
+    static std::unique_ptr<gfx::DynamicTexture>& getDynamicTextureAlpha() { return dynamicTextureAlpha; }
+    static std::unique_ptr<gfx::DynamicTexture>& getDynamicTextureRGBA() { return dynamicTextureRGBA; }
 #endif
 
 protected:
@@ -192,7 +194,8 @@ protected:
 
     gfx::RenderingStats stats;
     ContextObserver* observer;
-    static std::unique_ptr<gfx::DynamicTexture> dynamicTexture;
+    static std::unique_ptr<gfx::DynamicTexture> dynamicTextureAlpha;
+    static std::unique_ptr<gfx::DynamicTexture> dynamicTextureRGBA;
 };
 
 } // namespace gfx
