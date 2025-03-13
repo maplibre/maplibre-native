@@ -9,12 +9,8 @@ import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Size;
 
-import org.maplibre.android.log.Logger;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Arrays;
-import java.util.Objects;
 
 /**
  * Abstract class for all of the location component animators.
@@ -67,8 +63,10 @@ public abstract class MapLibreAnimator<K> extends ValueAnimator implements Value
 
   public MapLibreAnimator(@NonNull @Size(min = 2) K[] values, @NonNull AnimationsValueChangeListener<K> updateListener,
                    int maxAnimationFps) {
-    if (Arrays.stream(values).anyMatch(Objects::isNull)) {
-      throw new IllegalArgumentException("MapLibreAnimator values cannot be null");
+    for (Object value : values) {
+      if (value == null) {
+        throw new IllegalArgumentException("MapLibreAnimator values cannot be null");
+      }
     }
     minUpdateInterval = 1E9 / maxAnimationFps;
     setObjectValues((Object[]) values);
