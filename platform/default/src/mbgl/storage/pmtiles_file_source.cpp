@@ -208,7 +208,8 @@ private:
     std::map<AsyncRequest*, std::unique_ptr<AsyncRequest>> tasks;
 
     // Utility function to adjust response to match requested range
-    Response adjustResponseRange(const Response& response, const std::optional<std::pair<uint64_t, uint64_t>>& dataRange) {
+    Response adjustResponseRange(const Response& response,
+                                 const std::optional<std::pair<uint64_t, uint64_t>>& dataRange) {
         // If there's no data, no dataRange specified, or an error in the response, return it as is
         if (!response.data || response.error || !dataRange.has_value()) {
             return response;
@@ -230,14 +231,12 @@ private:
         if (response.data->size() > 7 && response.data->substr(0, 7) == "PMTiles") {
             // The response is likely the entire file, extract from the requested offset
             if (requestedOffset + requestedLength <= response.data->size()) {
-                result.data = std::make_shared<std::string>(
-                        response.data->substr(requestedOffset, requestedLength));
+                result.data = std::make_shared<std::string>(response.data->substr(requestedOffset, requestedLength));
             }
         } else {
             // The response is larger than requested but not the entire file
             // Assume it starts at the correct position and just trim to the requested length
-            result.data = std::make_shared<std::string>(
-                    response.data->substr(0, requestedLength));
+            result.data = std::make_shared<std::string>(response.data->substr(0, requestedLength));
         }
 
         return result;
@@ -271,7 +270,8 @@ private:
             if (adjustedResponse.error) {
                 std::string message = std::string("Error fetching PMTiles header: ") + adjustedResponse.error->message;
 
-                if (adjustedResponse.error->message.empty() && adjustedResponse.error->reason == Response::Error::Reason::NotFound) {
+                if (adjustedResponse.error->message.empty() &&
+                    adjustedResponse.error->reason == Response::Error::Reason::NotFound) {
                     if (url.starts_with(mbgl::util::FILE_PROTOCOL)) {
                         message += "path not found: " +
                                    url.substr(std::char_traits<char>::length(mbgl::util::FILE_PROTOCOL));
