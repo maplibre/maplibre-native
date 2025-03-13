@@ -357,6 +357,11 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
     return program;
 }
 
+void Context::performCleanup() {
+    stats.numDrawCalls = 0;
+    ++stats.numFrames;
+}
+
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<DrawableBuilder>(std::move(name));
 }

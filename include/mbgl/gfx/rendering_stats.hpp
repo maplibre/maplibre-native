@@ -10,6 +10,11 @@ struct RenderingStats {
     RenderingStats() = default;
     bool isZero() const;
 
+    /// Frame CPU encoding time (milliseconds)
+    double encodingTime = 0.0;
+    /// Frame CPU rendering time (milliseconds)
+    double renderingTime = 0.0;
+
     /// Number of frames rendered
     int numFrames = 0;
     /// Number of draw calls (`glDrawElements`, `drawIndexedPrimitives`, etc.) executed during the most recent frame

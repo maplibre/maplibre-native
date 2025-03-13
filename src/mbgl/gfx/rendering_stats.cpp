@@ -24,6 +24,8 @@ bool RenderingStats::isZero() const {
 }
 
 RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {
+    encodingTime += r.encodingTime;
+    renderingTime += r.renderingTime;
     numFrames += r.numFrames;
     numDrawCalls += r.numDrawCalls;
     totalDrawCalls += r.totalDrawCalls;
@@ -66,6 +68,10 @@ std::ostream& optionalStatLine(std::ostream& stream, T value, std::string_view l
 }
 std::string RenderingStats::toString(std::string_view sep) const {
     std::stringstream ss;
+    ss.precision(2);
+
+    optionalStatLine(ss, encodingTime, "encodingTime", sep);
+    optionalStatLine(ss, renderingTime, "renderingTime", sep);
     optionalStatLine(ss, numFrames, "numFrames", sep);
     optionalStatLine(ss, numDrawCalls, "numDrawCalls", sep);
     optionalStatLine(ss, totalDrawCalls, "totalDrawCalls", sep);

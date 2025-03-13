@@ -129,7 +129,12 @@ BufferResource::BufferResource(BufferResource&& other) noexcept
 BufferResource::~BufferResource() noexcept {
     if (isValid()) {
         context.renderingStats().numBuffers--;
-        context.renderingStats().memBuffers -= size;
+
+        if (bufferWindowSize > 0) {
+            context.renderingStats().memBuffers -= bufferWindowSize * context.getBackend().getMaxFrames();
+        } else {
+            context.renderingStats().memBuffers -= size;
+        }
     }
 
     if (!bufferAllocation) return;
@@ -145,7 +150,12 @@ BufferResource& BufferResource::operator=(BufferResource&& other) noexcept {
     assert(&context == &other.context);
     if (isValid()) {
         context.renderingStats().numBuffers--;
-        context.renderingStats().memBuffers -= size;
+
+        if (bufferWindowSize > 0) {
+            context.renderingStats().memBuffers -= bufferWindowSize * context.getBackend().getMaxFrames();
+        } else {
+            context.renderingStats().memBuffers -= size;
+        }
     };
 
     size = other.size;
@@ -171,6 +181,7 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
     auto& stats = context.renderingStats();
     stats.bufferUpdateBytes += updateSize;
     stats.bufferUpdates++;
+    stats.bufferObjUpdates++;
     version++;
 
     if (bufferWindowSize) {
