@@ -273,6 +273,23 @@ void SymbolLayer::setIconTextFitPadding(const PropertyValue<std::array<float, 4>
     baseImpl = std::move(impl_);
     observer->onLayerChanged(*this);
 }
+
+PropertyValue<bool> SymbolLayer::getDefaultSymbolScreenSpace() {
+    return SymbolScreenSpace::defaultValue();
+}
+
+const PropertyValue<bool>& SymbolLayer::getSymbolScreenSpace() const {
+    return impl().layout.get<SymbolScreenSpace>();
+}
+
+void SymbolLayer::setSymbolScreenSpace(const PropertyValue<bool>& value) {
+    if (value == getSymbolScreenSpace()) return;
+    auto impl_ = mutableImpl();
+    impl_->layout.get<SymbolScreenSpace>() = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
 PropertyValue<bool> SymbolLayer::getDefaultSymbolAvoidEdges() {
     return SymbolAvoidEdges::defaultValue();
 }
@@ -288,6 +305,7 @@ void SymbolLayer::setSymbolAvoidEdges(const PropertyValue<bool>& value) {
     baseImpl = std::move(impl_);
     observer->onLayerChanged(*this);
 }
+
 PropertyValue<SymbolPlacementType> SymbolLayer::getDefaultSymbolPlacement() {
     return SymbolPlacement::defaultValue();
 }
@@ -1126,6 +1144,7 @@ enum class Property : uint8_t {
     IconSize,
     IconTextFit,
     IconTextFitPadding,
+    SymbolScreenSpace,
     SymbolAvoidEdges,
     SymbolPlacement,
     SymbolSortKey,
@@ -1204,6 +1223,7 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"icon-size", toUint8(Property::IconSize)},
      {"icon-text-fit", toUint8(Property::IconTextFit)},
      {"icon-text-fit-padding", toUint8(Property::IconTextFitPadding)},
+     {"symbol-screen-space", toUint8(Property::SymbolScreenSpace)},
      {"symbol-avoid-edges", toUint8(Property::SymbolAvoidEdges)},
      {"symbol-placement", toUint8(Property::SymbolPlacement)},
      {"symbol-sort-key", toUint8(Property::SymbolSortKey)},
@@ -1319,6 +1339,8 @@ StyleProperty getLayerProperty(const SymbolLayer& layer, Property property) {
             return makeStyleProperty(layer.getIconTextFit());
         case Property::IconTextFitPadding:
             return makeStyleProperty(layer.getIconTextFitPadding());
+        case Property::SymbolScreenSpace:
+            return makeStyleProperty(layer.getSymbolScreenSpace());
         case Property::SymbolAvoidEdges:
             return makeStyleProperty(layer.getSymbolAvoidEdges());
         case Property::SymbolPlacement:
@@ -1552,9 +1574,9 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
     }
     if (property == Property::IconAllowOverlap || property == Property::IconIgnorePlacement ||
         property == Property::IconKeepUpright || property == Property::IconOptional ||
-        property == Property::SymbolAvoidEdges || property == Property::TextAllowOverlap ||
-        property == Property::TextIgnorePlacement || property == Property::TextKeepUpright ||
-        property == Property::TextOptional) {
+        property == Property::SymbolScreenSpace || property == Property::SymbolAvoidEdges ||
+        property == Property::TextAllowOverlap || property == Property::TextIgnorePlacement || 
+        property == Property::TextKeepUpright || property == Property::TextOptional) {
         Error error;
         const auto& typedValue = convert<PropertyValue<bool>>(value, error, false, false);
         if (!typedValue) {
@@ -1578,6 +1600,11 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
 
         if (property == Property::IconOptional) {
             setIconOptional(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::SymbolScreenSpace) {
+            setSymbolScreenSpace(*typedValue);
             return std::nullopt;
         }
 
