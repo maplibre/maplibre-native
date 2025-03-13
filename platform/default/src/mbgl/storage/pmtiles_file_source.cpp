@@ -142,26 +142,29 @@ public:
                     tileResource.dataRange = std::make_pair(tileAddress.first,
                                                             tileAddress.first + tileAddress.second - 1);
 
-                    tasks[req] = getFileSource()->request(tileResource, [=](const Response& tileResponse) {
+                    tasks[req] = getFileSource()->request(tileResource, [=, this](const Response& tileResponse) {
+                        // Adjust response to ensure it matches the requested range
+                        Response adjustedResponse = adjustResponseRange(tileResponse, tileResource.dataRange);
+
                         Response response;
                         response.noContent = true;
 
-                        if (tileResponse.error) {
+                        if (adjustedResponse.error) {
                             response.error = std::make_unique<Response::Error>(
-                                tileResponse.error->reason,
-                                std::string("Error fetching PMTiles tile: ") + tileResponse.error->message);
+                                adjustedResponse.error->reason,
+                                std::string("Error fetching PMTiles tile: ") + adjustedResponse.error->message);
                             ref.invoke(&FileSourceRequest::setResponse, response);
                             return;
                         }
 
-                        response.data = tileResponse.data;
+                        response.data = adjustedResponse.data;
                         response.noContent = false;
-                        response.modified = tileResponse.modified;
-                        response.expires = tileResponse.expires;
-                        response.etag = tileResponse.etag;
+                        response.modified = adjustedResponse.modified;
+                        response.expires = adjustedResponse.expires;
+                        response.etag = adjustedResponse.etag;
 
                         if (header.tile_compression == pmtiles::COMPRESSION_GZIP) {
-                            response.data = std::make_shared<std::string>(util::decompress(*tileResponse.data));
+                            response.data = std::make_shared<std::string>(util::decompress(*adjustedResponse.data));
                         }
 
                         ref.invoke(&FileSourceRequest::setResponse, response);
@@ -204,6 +207,42 @@ private:
     std::map<std::string, std::vector<std::string>> directory_cache_control;
     std::map<AsyncRequest*, std::unique_ptr<AsyncRequest>> tasks;
 
+    // Utility function to adjust response to match requested range
+    Response adjustResponseRange(const Response& response, const std::optional<std::pair<uint64_t, uint64_t>>& dataRange) {
+        // If there's no data, no dataRange specified, or an error in the response, return it as is
+        if (!response.data || response.error || !dataRange.has_value()) {
+            return response;
+        }
+
+        uint64_t requestedOffset = dataRange.value().first;
+        uint64_t requestedEndOffset = dataRange.value().second;
+        uint64_t requestedLength = requestedEndOffset - requestedOffset + 1;
+
+        // If data size matches or is smaller than requested, return as is
+        if (response.data->size() <= requestedLength) {
+            return response;
+        }
+
+        // Data is larger than requested, need to extract the correct portion
+        Response result = response;
+
+        // Check if the response appears to be the entire file (has the PMTiles header)
+        if (response.data->size() > 7 && response.data->substr(0, 7) == "PMTiles") {
+            // The response is likely the entire file, extract from the requested offset
+            if (requestedOffset + requestedLength <= response.data->size()) {
+                result.data = std::make_shared<std::string>(
+                        response.data->substr(requestedOffset, requestedLength));
+            }
+        } else {
+            // The response is larger than requested but not the entire file
+            // Assume it starts at the correct position and just trim to the requested length
+            result.data = std::make_shared<std::string>(
+                    response.data->substr(0, requestedLength));
+        }
+
+        return result;
+    }
+
     std::shared_ptr<FileSource> getFileSource() {
         if (!fileSource) {
             fileSource = FileSourceManager::get()->getFileSource(
@@ -216,6 +255,7 @@ private:
     void getHeader(const std::string& url, AsyncRequest* req, AsyncCallback callback) {
         if (header_cache.find(url) != header_cache.end()) {
             callback(std::unique_ptr<Response::Error>());
+            return;
         }
 
         Resource resource(Resource::Kind::Source, url);
@@ -225,10 +265,13 @@ private:
                                                                 pmtilesHeaderOffset + pmtilesHeaderLength - 1);
 
         tasks[req] = getFileSource()->request(resource, [=, this](const Response& response) {
-            if (response.error) {
-                std::string message = std::string("Error fetching PMTiles header: ") + response.error->message;
+            // Adjust response to ensure it matches the requested range
+            Response adjustedResponse = adjustResponseRange(response, resource.dataRange);
 
-                if (response.error->message.empty() && response.error->reason == Response::Error::Reason::NotFound) {
+            if (adjustedResponse.error) {
+                std::string message = std::string("Error fetching PMTiles header: ") + adjustedResponse.error->message;
+
+                if (adjustedResponse.error->message.empty() && adjustedResponse.error->reason == Response::Error::Reason::NotFound) {
                     if (url.starts_with(mbgl::util::FILE_PROTOCOL)) {
                         message += "path not found: " +
                                    url.substr(std::char_traits<char>::length(mbgl::util::FILE_PROTOCOL));
@@ -237,13 +280,13 @@ private:
                     }
                 }
 
-                callback(std::make_unique<Response::Error>(response.error->reason, message));
+                callback(std::make_unique<Response::Error>(adjustedResponse.error->reason, message));
 
                 return;
             }
 
             try {
-                pmtiles::headerv3 header = pmtiles::deserialize_header(response.data->substr(0, 127));
+                pmtiles::headerv3 header = pmtiles::deserialize_header(adjustedResponse.data->substr(0, 127));
 
                 if ((header.internal_compression != pmtiles::COMPRESSION_NONE &&
                      header.internal_compression != pmtiles::COMPRESSION_GZIP) ||
@@ -265,6 +308,7 @@ private:
     void getMetadata(std::string& url, AsyncRequest* req, AsyncCallback callback) {
         if (metadata_cache.find(url) != metadata_cache.end()) {
             callback(std::unique_ptr<Response::Error>());
+            return;
         }
 
         getHeader(url, req, [=, this](std::unique_ptr<Response::Error> error) {
@@ -372,16 +416,19 @@ private:
                 resource.dataRange = std::make_pair(header.json_metadata_offset,
                                                     header.json_metadata_offset + header.json_metadata_bytes - 1);
 
-                tasks[req] = getFileSource()->request(resource, [=](const Response& responseMetadata) {
-                    if (responseMetadata.error) {
+                tasks[req] = getFileSource()->request(resource, [=, this](const Response& responseMetadata) {
+                    // Adjust response to ensure it matches the requested range
+                    Response adjustedResponse = adjustResponseRange(responseMetadata, resource.dataRange);
+
+                    if (adjustedResponse.error) {
                         callback(std::make_unique<Response::Error>(
-                            responseMetadata.error->reason,
-                            std::string("Error fetching PMTiles metadata: ") + responseMetadata.error->message));
+                            adjustedResponse.error->reason,
+                            std::string("Error fetching PMTiles metadata: ") + adjustedResponse.error->message));
 
                         return;
                     }
 
-                    std::string data = *responseMetadata.data;
+                    std::string data = *adjustedResponse.data;
 
                     if (header.internal_compression == pmtiles::COMPRESSION_GZIP) {
                         data = util::decompress(data);
@@ -456,16 +503,19 @@ private:
             resource.dataRange = std::make_pair(directoryOffset, directoryOffset + directoryLength - 1);
 
             tasks[req] = getFileSource()->request(resource, [=, this](const Response& response) {
-                if (response.error) {
+                // Adjust response to ensure it matches the requested range
+                Response adjustedResponse = adjustResponseRange(response, resource.dataRange);
+
+                if (adjustedResponse.error) {
                     callback(std::make_unique<Response::Error>(
-                        response.error->reason,
-                        std::string("Error fetching PMTiles directory: ") + response.error->message));
+                        adjustedResponse.error->reason,
+                        std::string("Error fetching PMTiles directory: ") + adjustedResponse.error->message));
 
                     return;
                 }
 
                 try {
-                    std::string directoryData = *response.data;
+                    std::string directoryData = *adjustedResponse.data;
 
                     if (header.internal_compression == pmtiles::COMPRESSION_GZIP) {
                         directoryData = util::decompress(directoryData);
