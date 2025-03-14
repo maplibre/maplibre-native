@@ -11,10 +11,12 @@ namespace mbgl {
 
 VectorMLTTileFeature::VectorMLTTileFeature(std::shared_ptr<const MapLibreTile> tile_,
                                            const mlt::Feature& feature_,
+                                           std::uint32_t index_,
                                            std::uint32_t extent_,
                                            int version_)
     : tile(std::move(tile_)),
       feature(feature_),
+      index(index_),
       extent(extent_),
       version(version_) {}
 
@@ -88,6 +90,15 @@ struct PointConverter {
         return result;
     }
 };
+
+std::size_t getFeatureCount(const mlt::Feature& feature) {
+    const auto& geometry = feature.getGeometry();
+    if (geometry.type == mlt::Geometry::GeometryType::MULTIPOLYGON) {
+        const auto& multiPolygon = static_cast<const mlt::MultiPolygon&>(geometry);
+        return multiPolygon.getPolygons().size();
+    }
+    return 1;
+}
 } // namespace
 
 const GeometryCollection& VectorMLTTileFeature::getGeometries() const {
@@ -125,40 +136,59 @@ const GeometryCollection& VectorMLTTileFeature::getGeometries() const {
             }
             case GeometryType::MULTIPOLYGON: {
                 const auto& geom = static_cast<const mlt::MultiPolygon&>(geometry);
-                const auto& polys = geom.getPolygons();
+                const auto& polygons = geom.getPolygons();
                 lines.emplace();
-                lines->reserve(std::accumulate(polys.begin(), polys.end(), 0, [](const auto sum, const auto& pair) {
-                    return sum + 1 + pair.second.size();
-                }));
-                for (const auto& [shell, rings] : polys) {
-                    lines->push_back(convert(shell));
-                    std::ranges::transform(rings, std::back_inserter(*lines), convert);
-                }
+                lines->reserve(1 + polygons[index].second.size());
+                lines->push_back(convert(polygons[index].first));
+                std::ranges::transform(polygons[index].second, std::back_inserter(*lines), convert);
                 break;
             }
             default:
                 lines.emplace();
                 break;
         }
-        // unnecessary for MLT?
-        // if (version < 2 && geometry.type == GeometryType::POLYGON) {
-        //     lines = fixupPolygons(*lines);
-        // }
     }
     return *lines;
 }
 
 VectorMLTTileLayer::VectorMLTTileLayer(std::shared_ptr<const MapLibreTile> tile_, const mlt::Layer& layer_)
     : tile(std::move(tile_)),
-      layer(layer_) {}
-
-std::size_t VectorMLTTileLayer::featureCount() const {
-    return layer.getFeatures().size();
+      layer(layer_),
+      featuresCount(0) {
+    // If the layer contains multi-polygon elements, each polygon they contain will be presented
+    // as a separate feature, so the feature count may exceed the number of actual feature objects.
+    featuresCount = std::accumulate(layer.getFeatures().begin(), layer.getFeatures().end(), 0, [](auto prev, auto& f) {
+        return prev + getFeatureCount(f);
+    });
 }
 
-std::unique_ptr<GeometryTileFeature> VectorMLTTileLayer::getFeature(std::size_t i) const {
+std::unique_ptr<GeometryTileFeature> VectorMLTTileLayer::getFeature(std::size_t index) const {
+    const auto& features = layer.getFeatures();
+    const mlt::Feature* targetFeature = nullptr;
+    std::uint32_t subIndex = 0;
+    // If this layer contains multi-polygons, the index is "virtual" and will index
+    // the individual polygons within a feature as that feature is encountered.
+    // It may be worth building an index in the constructor to avoid this.
+    if (featuresCount > features.size()) {
+        for (std::size_t i = 0; i < features.size(); ++i) {
+            const auto& feature = features[i];
+            const std::size_t featureCount_ = getFeatureCount(feature);
+            if (index < featureCount_) {
+                targetFeature = &feature;
+                subIndex = static_cast<std::uint32_t>(index);
+                break;
+            }
+            index -= featureCount_;
+        }
+        if (!targetFeature) {
+            assert(false);
+            return {};
+        }
+    } else {
+        targetFeature = &features[index];
+    }
     return std::make_unique<VectorMLTTileFeature>(
-        tile, layer.getFeatures().at(i), layer.getExtent(), layer.getVersion());
+        tile, *targetFeature, subIndex, layer.getExtent(), layer.getVersion());
 }
 
 std::string VectorMLTTileLayer::getName() const {
