@@ -1,4 +1,7 @@
 #include <mbgl/gfx/rendering_stats.hpp>
+#include <mbgl/style/style.hpp>
+#include <mbgl/style/sources/custom_geometry_source.hpp>
+#include <mbgl/style/layers/symbol_layer.hpp>
 
 #include <algorithm>
 #include <initializer_list>
@@ -104,6 +107,179 @@ std::string RenderingStats::toString(std::string_view sep) const {
     return ss.str();
 }
 #endif
+
+void RenderingStatsView::create(const std::unique_ptr<style::Style>& style) {
+    if (!style) {
+        return;
+    }
+
+    if (!style->getSource(sourceID)) {
+        style::CustomGeometrySource::Options options;
+
+        options.zoomRange = {0, 0};
+
+        options.fetchTileFunction = [&](const CanonicalTileID& tileID) {
+            auto source = static_cast<style::CustomGeometrySource*>(style->getSource(sourceID));
+
+            if (!source) {
+                return;
+            }
+
+            mbgl::FeatureCollection features;
+
+            mapbox::geojson::feature feature;
+            feature.geometry = mapbox::geometry::geometry<double>(Point<double>{0, 0});
+
+            features.emplace_back(feature);
+            source->setTileData(tileID, features);
+        };
+
+        style->addSource(std::make_unique<style::CustomGeometrySource>(sourceID, options));
+    }
+
+    if (!style->getLayer(layerID)) {
+        auto infoLayer = std::make_unique<style::SymbolLayer>(layerID, sourceID);
+
+        // required
+        infoLayer->setSymbolScreenSpace(true);
+        infoLayer->setTextAllowOverlap(true);
+        infoLayer->setIconAllowOverlap(true);
+        infoLayer->setTextIgnorePlacement(true);
+
+        // customizable
+        infoLayer->setTextColor(mbgl::Color::red());
+        infoLayer->setTextSize(4.0f);
+        infoLayer->setTextMaxWidth(300.0f);
+        infoLayer->setTextJustify(mbgl::style::TextJustifyType::Left);
+        infoLayer->setTextAnchor(mbgl::style::SymbolAnchorType::TopRight);
+
+        const float translation = mbgl::util::EXTENT / 2.0f - 100.0f;
+        infoLayer->setTextTranslateAnchor(mbgl::style::TranslateAnchorType::Viewport);
+        infoLayer->setTextTranslate(std::array<float, 2>{translation, translation});
+
+        style->addLayer(std::move(infoLayer));
+    }
+}
+
+void RenderingStatsView::destroy(const std::unique_ptr<style::Style>& style) {
+    if (!style) {
+        return;
+    }
+
+    style->removeLayer(layerID);
+    style->removeSource(sourceID);
+}
+
+mbgl::style::SymbolLayer* RenderingStatsView::getLayer(const std::unique_ptr<style::Style>& style) {
+    return static_cast<mbgl::style::SymbolLayer*>(style->getLayer(layerID));
+}
+
+template <typename T>
+static void printNumber(std::stringstream& ss, const std::string_view label, const T& value, bool print) {
+    if (!print) {
+        return;
+    }
+
+    ss << label << ": ";
+
+    if (value >= 1e9) {
+        ss << value / 1e9 << "B";
+    } else if (value >= 1e6) {
+        ss << value / 1e6 << "M";
+    } else if (value >= 1e3) {
+        ss << value / 1e3 << "K";
+    } else {
+        ss << value;
+    }
+
+    ss << "\n";
+};
+
+template <typename T>
+static void printMemory(std::stringstream& ss, const std::string_view label, const T& value, bool print) {
+    if (!print) {
+        return;
+    }
+
+    constexpr auto base = 1024;
+    constexpr auto kb = base;
+    constexpr auto mb = kb * base;
+    constexpr auto gb = mb * base;
+
+    ss << label << ": ";
+
+    if (value >= gb) {
+        ss << value / gb << "GB";
+    } else if (value >= mb) {
+        ss << value / mb << "MB";
+    } else if (value >= kb) {
+        ss << value / kb << "KB";
+    } else {
+        ss << value << "B";
+    }
+
+    ss << "\n";
+};
+
+void RenderingStatsView::update(const std::unique_ptr<style::Style>& style, const gfx::RenderingStats& stats) {
+    if (!style) {
+        return;
+    }
+
+    auto layer = getLayer(style);
+
+    // style reloaded? layer got removed?
+    if (!layer) {
+        create(style);
+        layer = getLayer(style);
+    }
+
+    if (!layer) {
+        return;
+    }
+
+    std::stringstream ss;
+    ss << std::setprecision(3) << std::fixed;
+
+    printNumber(ss, "CPU encoding time (ms)", stats.encodingTime * 1000, true);
+    printNumber(ss, "CPU rendering time (ms)", stats.renderingTime * 1000, true);
+    printNumber(ss, "Frame count", stats.numFrames, true);
+    printNumber(ss, "Draw calls", stats.numDrawCalls, true);
+    printNumber(ss, "Total draw calls", stats.totalDrawCalls, verbose);
+
+    printNumber(ss, "Textures", stats.numActiveTextures, true);
+    printNumber(ss, "Total textures", stats.numCreatedTextures, verbose);
+    printNumber(ss, "Texture updates", stats.numTextureUpdates, verbose);
+    printMemory(ss, "Texture updates", stats.textureUpdateBytes, verbose);
+
+    printNumber(ss, "Buffers", stats.numBuffers, true);
+    printNumber(ss, "Total buffers", stats.totalBuffers, verbose);
+    printNumber(ss, "Total buffer updates", stats.bufferUpdates, verbose);
+    printMemory(ss, "Total buffer updates", stats.bufferUpdateBytes, verbose);
+
+    printNumber(ss, "FrameBuffers", stats.numFrameBuffers, verbose);
+
+    printNumber(ss, "Index buffers", stats.numIndexBuffers, true);
+    printMemory(ss, "Index buffers updates", stats.indexUpdateBytes, verbose);
+
+    printNumber(ss, "Vertex buffers", stats.numVertexBuffers, true);
+    printMemory(ss, "Vertex buffers updates", stats.vertexUpdateBytes, verbose);
+
+    printNumber(ss, "Uniform buffers", stats.numUniformBuffers, true);
+    printNumber(ss, "Uniform buffer updates", stats.numUniformUpdates, verbose);
+    printMemory(ss, "Uniform buffer updates", stats.uniformUpdateBytes, verbose);
+
+    printMemory(ss, "Texture memory", stats.memTextures, true);
+    printMemory(ss, "Buffer memory", stats.memBuffers, true);
+    printMemory(ss, "Index buffer memory", stats.memIndexBuffers, true);
+    printMemory(ss, "Vertex buffer memory", stats.memVertexBuffers, true);
+    printMemory(ss, "Uniform buffer memory", stats.memUniformBuffers, true);
+
+    printNumber(ss, "Stencil buffer clears", stats.stencilClears, true);
+    printNumber(ss, "Stencil buffer updates", stats.stencilUpdates, verbose);
+
+    layer->setTextField(mbgl::style::expression::Formatted(ss.str().c_str()));
+}
 
 } // namespace gfx
 } // namespace mbgl

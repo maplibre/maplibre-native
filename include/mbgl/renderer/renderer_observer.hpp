@@ -7,6 +7,7 @@
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/tile/tile_operation.hpp>
 #include <mbgl/util/font_stack.hpp>
+#include <mbgl/gfx/rendering_stats.hpp>
 
 #include <cstdint>
 #include <exception>
@@ -49,6 +50,13 @@ public:
                                            double /*frameEncodingTime*/,
                                            double /*frameRenderingTime*/) {
         onDidFinishRenderingFrame(mode, repaint, placementChanged);
+    }
+
+    virtual void onDidFinishRenderingFrame(RenderMode mode,
+                                           bool repaint,
+                                           bool placementChanged,
+                                           const gfx::RenderingStats& stats) {
+        onDidFinishRenderingFrame(mode, repaint, placementChanged, stats.encodingTime, stats.renderingTime);
     }
 
     /// Final frame

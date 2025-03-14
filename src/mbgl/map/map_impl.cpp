@@ -6,6 +6,7 @@
 #include <mbgl/util/exception.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/traits.hpp>
+#include <mbgl/gfx/rendering_stats.hpp>
 
 namespace mbgl {
 
@@ -181,16 +182,15 @@ void Map::Impl::onWillStartRenderingFrame() {
 void Map::Impl::onDidFinishRenderingFrame(RenderMode renderMode,
                                           bool needsRepaint,
                                           bool placemenChanged,
-                                          double frameEncodingTime,
-                                          double frameRenderingTime) {
+                                          const gfx::RenderingStats& stats) {
     rendererFullyLoaded = renderMode == RenderMode::Full;
 
+    if (renderingStatsView) {
+        renderingStatsView->update(style, stats);
+    }
+
     if (mode == MapMode::Continuous) {
-        observer.onDidFinishRenderingFrame({MapObserver::RenderMode(renderMode),
-                                            needsRepaint,
-                                            placemenChanged,
-                                            frameEncodingTime,
-                                            frameRenderingTime});
+        observer.onDidFinishRenderingFrame({MapObserver::RenderMode(renderMode), needsRepaint, placemenChanged, stats});
 
         if (needsRepaint || transform.inTransition()) {
             onUpdate();
@@ -221,6 +221,24 @@ void Map::Impl::jumpTo(const CameraOptions& camera) {
     cameraMutated = true;
     transform.jumpTo(camera);
     onUpdate();
+}
+
+bool Map::Impl::isRenderingStatsViewEnabled() const {
+    return !!renderingStatsView;
+}
+
+void Map::Impl::enableRenderingStatsView(bool value) {
+    if (value) {
+        if (!renderingStatsView) {
+            renderingStatsView = std::make_unique<gfx::RenderingStatsView>();
+            renderingStatsView->create(style);
+        }
+    } else {
+        if (renderingStatsView) {
+            renderingStatsView->destroy(style);
+            renderingStatsView = nullptr;
+        }
+    }
 }
 
 void Map::Impl::onStyleImageMissing(const std::string& id, Scheduler::Task&& done) {

@@ -2,8 +2,15 @@
 
 #include <cstddef>
 #include <string>
+#include <memory>
 
 namespace mbgl {
+
+namespace style {
+class Style;
+class SymbolLayer;
+}
+
 namespace gfx {
 
 struct RenderingStats {
@@ -72,6 +79,28 @@ struct RenderingStats {
 #if !defined(NDEBUG)
     std::string toString(std::string_view separator) const;
 #endif
+};
+
+class RenderingStatsView final {
+public:
+
+    RenderingStatsView(bool verbose_ = false)
+        : verbose(verbose_) {}
+    ~RenderingStatsView() = default;
+
+    void create(const std::unique_ptr<style::Style>& style);
+    void destroy(const std::unique_ptr<style::Style>& style);
+
+    mbgl::style::SymbolLayer* getLayer(const std::unique_ptr<style::Style>& style);
+
+    void update(const std::unique_ptr<style::Style>& style, const gfx::RenderingStats& stats);
+
+protected:
+
+    const std::string layerID = "rendering-stats";
+    const std::string sourceID = layerID + "-source";
+
+    bool verbose = false;
 };
 
 } // namespace gfx

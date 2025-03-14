@@ -7,6 +7,7 @@
 #include <mbgl/style/sprite.hpp>
 #include <mbgl/text/glyph.hpp>
 #include <mbgl/shaders/shader_source.hpp>
+#include <mbgl/gfx/rendering_stats.hpp>
 
 #include <cstdint>
 #include <string>
@@ -47,8 +48,7 @@ public:
         RenderMode mode;
         bool needsRepaint; // In continous mode, shows that there are ongoig transitions.
         bool placementChanged;
-        double frameEncodingTime;
-        double frameRenderingTime;
+        gfx::RenderingStats renderingStats;
     };
 
     virtual void onCameraWillChange(CameraChangeMode) {}
