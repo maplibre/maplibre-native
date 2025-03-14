@@ -18,7 +18,11 @@ using MapLibreTile = mlt::MapLibreTile;
 
 class VectorMLTTileFeature : public GeometryTileFeature {
 public:
-    VectorMLTTileFeature(std::shared_ptr<const MapLibreTile>, const mlt::Feature&, std::uint32_t extent, int version);
+    VectorMLTTileFeature(std::shared_ptr<const MapLibreTile>,
+                         const mlt::Feature&,
+                         std::uint32_t index,
+                         std::uint32_t extent,
+                         int version);
 
     FeatureType getType() const override;
     std::optional<Value> getValue(const std::string& key) const override;
@@ -29,6 +33,7 @@ public:
 private:
     const std::shared_ptr<const MapLibreTile> tile;
     const mlt::Feature& feature;
+    const std::uint32_t index;
     const std::uint32_t extent;
     const int version;
     mutable std::optional<GeometryCollection> lines;
@@ -39,13 +44,14 @@ class VectorMLTTileLayer : public GeometryTileLayer {
 public:
     VectorMLTTileLayer(std::shared_ptr<const MapLibreTile>, const mlt::Layer&);
 
-    std::size_t featureCount() const override;
+    std::size_t featureCount() const override { return featuresCount; }
     std::unique_ptr<GeometryTileFeature> getFeature(std::size_t i) const override;
     std::string getName() const override;
 
 private:
     const std::shared_ptr<const MapLibreTile> tile;
     const mlt::Layer& layer;
+    std::size_t featuresCount;
 };
 
 class VectorMLTTileData : public GeometryTileData {
