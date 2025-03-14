@@ -198,6 +198,9 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
                                      Enum<gfx::TexturePixelType>::to(pixelFormat),
                                      Enum<gfx::TextureChannelDataType>::to(channelType),
                                      pixelData));
+
+    context.renderingStats().numTextureUpdates++;
+    context.renderingStats().textureUpdateBytes += size_.width * size_.height * getPixelStride();
 }
 
 void Texture2D::upload() noexcept {

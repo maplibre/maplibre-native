@@ -237,12 +237,13 @@ void RenderingStatsView::update(const std::unique_ptr<style::Style>& style, cons
     if (!layer) {
         return;
     }
-
+    verbose = true;
     std::stringstream ss;
     ss << std::setprecision(3) << std::fixed;
 
-    printNumber(ss, "CPU encoding time (ms)", stats.encodingTime * 1000, true);
-    printNumber(ss, "CPU rendering time (ms)", stats.renderingTime * 1000, true);
+    ss << "Encoding time (ms): " << std::setw(7) << stats.encodingTime * 1000 << "\n";
+    ss << "Rendering time (ms): " << std::setw(7) << stats.renderingTime * 1000 << "\n";
+
     printNumber(ss, "Frame count", stats.numFrames, true);
     printNumber(ss, "Draw calls", stats.numDrawCalls, true);
     printNumber(ss, "Total draw calls", stats.totalDrawCalls, verbose);
@@ -256,8 +257,6 @@ void RenderingStatsView::update(const std::unique_ptr<style::Style>& style, cons
     printNumber(ss, "Total buffers", stats.totalBuffers, verbose);
     printNumber(ss, "Total buffer updates", stats.bufferUpdates, verbose);
     printMemory(ss, "Total buffer updates", stats.bufferUpdateBytes, verbose);
-
-    printNumber(ss, "FrameBuffers", stats.numFrameBuffers, verbose);
 
     printNumber(ss, "Index buffers", stats.numIndexBuffers, true);
     printMemory(ss, "Index buffers updates", stats.indexUpdateBytes, verbose);

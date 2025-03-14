@@ -209,6 +209,7 @@ void Texture2D::uploadSubRegion(const void* pixelData,
     context.enqueueDeletion([buffAlloc = std::move(bufferAllocation)](auto&) mutable { buffAlloc.reset(); });
 
     context.renderingStats().numTextureUpdates++;
+    context.renderingStats().textureUpdateBytes += bufferInfo.size;
 }
 
 vk::Format Texture2D::vulkanFormat(const gfx::TexturePixelType pixel, gfx::TextureChannelDataType channel) {
