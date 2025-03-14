@@ -983,6 +983,13 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
 
     for (const auto& item : items) {
         auto& renderLayer = item.layer.get();
+#if MLN_RENDER_BACKEND_OPENGL
+        // Android Emulator: Goldfish is *very* broken. This will prevent a crash
+        // inside the GL translation layer at the cost of emulator performance.
+        if (androidGoldfishMitigationEnabled) {
+            renderLayer.removeAllDrawables();
+        }
+#endif
         renderLayer.update(shaders, context, state, updateParameters, renderTree, changes);
     }
     addChanges(changes);

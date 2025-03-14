@@ -191,6 +191,9 @@ public:
 
     /// Returns the current renderability mode of the layer
     bool isLayerRenderable() const noexcept { return isRenderable; }
+
+    /// Remove all the drawables for tiles
+    virtual std::size_t removeAllDrawables();
 #endif
 
     using Dependency = style::expression::Dependency;
@@ -246,9 +249,6 @@ protected:
     /// Remove all drawables for the tile from the layer group
     /// @return The number of drawables actually removed.
     virtual std::size_t removeTile(RenderPass, const OverscaledTileID&);
-
-    /// Remove all the drawables for tiles
-    virtual std::size_t removeAllDrawables();
 
     /// Update `renderTileIDs` from `renderTiles`
     void updateRenderTileIDs();
