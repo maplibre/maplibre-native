@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <string>
 #include <memory>
+#include <mbgl/util/color.hpp>
 
 namespace mbgl {
 
@@ -84,8 +85,14 @@ struct RenderingStats {
 class RenderingStatsView final {
 public:
 
-    RenderingStatsView(bool verbose_ = false)
-        : verbose(verbose_) {}
+    struct Options {
+        float updateInterval = 0.25f;
+        bool verbose = false;
+        Color textColor = Color::red();
+        float textSize = 4.0f;
+    };
+
+    RenderingStatsView(const Options& options = {});
     ~RenderingStatsView() = default;
 
     void create(const std::unique_ptr<style::Style>& style);
@@ -100,7 +107,12 @@ protected:
     const std::string layerID = "rendering-stats";
     const std::string sourceID = layerID + "-source";
 
-    bool verbose = false;
+    Options options;
+
+    double lastUpdate = 0.0;
+    uint32_t frameCount = 0;
+    double encodingTime = 0.0;
+    double renderingTime = 0.0;
 };
 
 } // namespace gfx

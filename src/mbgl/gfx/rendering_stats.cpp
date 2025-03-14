@@ -2,6 +2,7 @@
 #include <mbgl/style/style.hpp>
 #include <mbgl/style/sources/custom_geometry_source.hpp>
 #include <mbgl/style/layers/symbol_layer.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
 
 #include <algorithm>
 #include <initializer_list>
@@ -108,6 +109,9 @@ std::string RenderingStats::toString(std::string_view sep) const {
 }
 #endif
 
+RenderingStatsView::RenderingStatsView(const Options& options_)
+    : options(options_) {}
+
 void RenderingStatsView::create(const std::unique_ptr<style::Style>& style) {
     if (!style) {
         return;
@@ -147,8 +151,8 @@ void RenderingStatsView::create(const std::unique_ptr<style::Style>& style) {
         infoLayer->setTextIgnorePlacement(true);
 
         // customizable
-        infoLayer->setTextColor(mbgl::Color::red());
-        infoLayer->setTextSize(4.0f);
+        infoLayer->setTextColor(options.textColor);
+        infoLayer->setTextSize(options.textSize);
         infoLayer->setTextMaxWidth(300.0f);
         infoLayer->setTextJustify(mbgl::style::TextJustifyType::Left);
         infoLayer->setTextAnchor(mbgl::style::SymbolAnchorType::TopRight);
@@ -237,36 +241,45 @@ void RenderingStatsView::update(const std::unique_ptr<style::Style>& style, cons
     if (!layer) {
         return;
     }
-    verbose = true;
+
+    ++frameCount;
+    encodingTime += stats.encodingTime;
+    renderingTime += stats.renderingTime;
+
+    const auto currentTime = util::MonotonicTimer::now().count();
+    if (currentTime - lastUpdate < options.updateInterval) {
+        return;
+    }
+
     std::stringstream ss;
     ss << std::setprecision(3) << std::fixed;
 
-    ss << "Encoding time (ms): " << std::setw(7) << stats.encodingTime * 1000 << "\n";
-    ss << "Rendering time (ms): " << std::setw(7) << stats.renderingTime * 1000 << "\n";
+    ss << "Encoding time (ms): " << std::setw(7) << encodingTime / frameCount * 1000 << "\n";
+    ss << "Rendering time (ms): " << std::setw(7) << renderingTime / frameCount * 1000 << "\n";
 
     printNumber(ss, "Frame count", stats.numFrames, true);
     printNumber(ss, "Draw calls", stats.numDrawCalls, true);
-    printNumber(ss, "Total draw calls", stats.totalDrawCalls, verbose);
+    printNumber(ss, "Total draw calls", stats.totalDrawCalls, options.verbose);
 
     printNumber(ss, "Textures", stats.numActiveTextures, true);
-    printNumber(ss, "Total textures", stats.numCreatedTextures, verbose);
-    printNumber(ss, "Texture updates", stats.numTextureUpdates, verbose);
-    printMemory(ss, "Texture updates", stats.textureUpdateBytes, verbose);
+    printNumber(ss, "Total textures", stats.numCreatedTextures, options.verbose);
+    printNumber(ss, "Texture updates", stats.numTextureUpdates, options.verbose);
+    printMemory(ss, "Texture updates", stats.textureUpdateBytes, options.verbose);
 
     printNumber(ss, "Buffers", stats.numBuffers, true);
-    printNumber(ss, "Total buffers", stats.totalBuffers, verbose);
-    printNumber(ss, "Total buffer updates", stats.bufferUpdates, verbose);
-    printMemory(ss, "Total buffer updates", stats.bufferUpdateBytes, verbose);
+    printNumber(ss, "Total buffers", stats.totalBuffers, options.verbose);
+    printNumber(ss, "Total buffer updates", stats.bufferUpdates, options.verbose);
+    printMemory(ss, "Total buffer updates", stats.bufferUpdateBytes, options.verbose);
 
     printNumber(ss, "Index buffers", stats.numIndexBuffers, true);
-    printMemory(ss, "Index buffers updates", stats.indexUpdateBytes, verbose);
+    printMemory(ss, "Index buffers updates", stats.indexUpdateBytes, options.verbose);
 
     printNumber(ss, "Vertex buffers", stats.numVertexBuffers, true);
-    printMemory(ss, "Vertex buffers updates", stats.vertexUpdateBytes, verbose);
+    printMemory(ss, "Vertex buffers updates", stats.vertexUpdateBytes, options.verbose);
 
     printNumber(ss, "Uniform buffers", stats.numUniformBuffers, true);
-    printNumber(ss, "Uniform buffer updates", stats.numUniformUpdates, verbose);
-    printMemory(ss, "Uniform buffer updates", stats.uniformUpdateBytes, verbose);
+    printNumber(ss, "Uniform buffer updates", stats.numUniformUpdates, options.verbose);
+    printMemory(ss, "Uniform buffer updates", stats.uniformUpdateBytes, options.verbose);
 
     printMemory(ss, "Texture memory", stats.memTextures, true);
     printMemory(ss, "Buffer memory", stats.memBuffers, true);
@@ -275,9 +288,14 @@ void RenderingStatsView::update(const std::unique_ptr<style::Style>& style, cons
     printMemory(ss, "Uniform buffer memory", stats.memUniformBuffers, true);
 
     printNumber(ss, "Stencil buffer clears", stats.stencilClears, true);
-    printNumber(ss, "Stencil buffer updates", stats.stencilUpdates, verbose);
+    printNumber(ss, "Stencil buffer updates", stats.stencilUpdates, options.verbose);
 
     layer->setTextField(mbgl::style::expression::Formatted(ss.str().c_str()));
+
+    frameCount = 0;
+    encodingTime = 0.0;
+    renderingTime = 0.0;
+    lastUpdate = currentTime;
 }
 
 } // namespace gfx
