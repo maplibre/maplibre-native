@@ -213,11 +213,11 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: VERSION file changed
-        id: version-file-ios-changed
-        uses: tj-actions/changed-files@v45
-        with:
-          files: platform/ios/VERSION
+      # - name: VERSION file changed
+      #   id: version-file-ios-changed
+      #   uses: tj-actions/changed-files@v45
+      #   with:
+      #     files: platform/ios/VERSION
 
       # Make Metal XCFramework release
       - name: Should make release?
