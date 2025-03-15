@@ -40,12 +40,12 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Get all iOS files that have changed
-        if: github.event_name != 'workflow_dispatch'
-        id: changed-files-yaml
-        uses: tj-actions/changed-files@v45
-        with:
-          files_yaml_from_source_file: .github/changed-files.yml
+      # - name: Get all iOS files that have changed
+      #   if: github.event_name != 'workflow_dispatch'
+      #   id: changed-files-yaml
+      #   uses: tj-actions/changed-files@v45
+      #   with:
+      #     files_yaml_from_source_file: .github/changed-files.yml
 
       - name: Run step if test file(s) change
         if: steps.changed-files-yaml.outputs.ios_any_modified == 'true'
