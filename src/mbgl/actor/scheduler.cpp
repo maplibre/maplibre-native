@@ -5,7 +5,7 @@
 
 namespace mbgl {
 
-Scheduler::Task Scheduler::bindOnce(Scheduler::Task&& fn) {
+std::function<void()> Scheduler::bindOnce(std::function<void()> fn) {
     assert(fn);
     return [scheduler = makeWeakPtr(), scheduled = std::move(fn)]() mutable {
         if (!scheduled) return; // Repeated call.
@@ -59,11 +59,11 @@ std::shared_ptr<Scheduler> Scheduler::GetSequenced() {
 
     if (auto scheduler = weaks[lastUsedIndex].lock()) {
         return scheduler;
+    } else {
+        auto result = std::make_shared<SequencedScheduler>();
+        weaks[lastUsedIndex] = result;
+        return result;
     }
-
-    auto result = std::make_shared<SequencedScheduler>();
-    weaks[lastUsedIndex] = result;
-    return result;
 }
 
 } // namespace mbgl

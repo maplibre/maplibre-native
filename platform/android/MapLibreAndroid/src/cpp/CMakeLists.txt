@@ -241,7 +241,6 @@ target_link_libraries(maplibre
                               $<$<CONFIG:Release>:-fuse-ld=gold>
                               Mapbox::Base::jni.hpp
                               mbgl-core
-                              mbgl-vendor-nontype_functional
                               mbgl-vendor-unique_resource)
 
 install(TARGETS maplibre LIBRARY DESTINATION lib)

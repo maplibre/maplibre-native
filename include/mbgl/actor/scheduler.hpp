@@ -4,8 +4,6 @@
 
 #include <mapbox/std/weak.hpp>
 
-#include <std23/move_only_function.h>
-
 #include <functional>
 #include <memory>
 #include <type_traits>
@@ -38,18 +36,16 @@ class Mailbox;
 */
 class Scheduler {
 public:
-    using Task = std23::move_only_function<void()>;
-
     virtual ~Scheduler() = default;
 
     /// Enqueues a function for execution.
-    virtual void schedule(Task&&) = 0;
-    virtual void schedule(const util::SimpleIdentity, Task&&) = 0;
+    virtual void schedule(std::function<void()>&&) = 0;
+    virtual void schedule(const util::SimpleIdentity, std::function<void()>&&) = 0;
 
     /// Makes a weak pointer to this Scheduler.
     virtual mapbox::base::WeakPtr<Scheduler> makeWeakPtr() = 0;
     /// Enqueues a function for execution on the render thread owned by the given tag.
-    virtual void runOnRenderThread(const util::SimpleIdentity, Task&&) {}
+    virtual void runOnRenderThread(const util::SimpleIdentity, std::function<void()>&&) {}
     /// Run render thread jobs for the given tag
     /// @param tag Tag of owner
     /// @param closeQueue Runs all render jobs and then removes the internal queue.
@@ -61,9 +57,9 @@ public:
     /// the given closure to this scheduler, the consequent calls of the
     /// returned closure are ignored.
     ///
-    /// If this scheduler is already deleted by the time the returned closure
+    /// If this scheduler is already deleted by the time the returnded closure
     /// is first invoked, the call is ignored.
-    Scheduler::Task bindOnce(Task&&);
+    std::function<void()> bindOnce(std::function<void()>);
 
     /// Enqueues the given |task| for execution into this scheduler's task queue
     /// and then enqueues the |reply| with the captured task result to the
@@ -107,12 +103,10 @@ public:
     [[nodiscard]] static std::shared_ptr<Scheduler> GetSequenced();
 
     /// Set a function to be called when an exception occurs on a thread controlled by the scheduler
-    void setExceptionHandler(std23::move_only_function<void(const std::exception_ptr)> handler_) {
-        handler = std::move(handler_);
-    }
+    void setExceptionHandler(std::function<void(const std::exception_ptr)> handler_) { handler = std::move(handler_); }
 
 protected:
-    std23::move_only_function<void(const std::exception_ptr)> handler;
+    std::function<void(const std::exception_ptr)> handler;
 
 private:
     template <typename TaskFn, typename ReplyFn>
@@ -142,8 +136,8 @@ public:
     /// @brief Get the wrapped scheduler
     const std::shared_ptr<Scheduler>& get() const noexcept { return scheduler; }
 
-    void schedule(Scheduler::Task&& fn) { scheduler->schedule(tag, std::move(fn)); }
-    void runOnRenderThread(Scheduler::Task&& fn) { scheduler->runOnRenderThread(tag, std::move(fn)); }
+    void schedule(std::function<void()>&& fn) { scheduler->schedule(tag, std::move(fn)); }
+    void runOnRenderThread(std::function<void()>&& fn) { scheduler->runOnRenderThread(tag, std::move(fn)); }
     void runRenderJobs(bool closeQueue = false) { scheduler->runRenderJobs(tag, closeQueue); }
     void waitForEmpty() const noexcept { scheduler->waitForEmpty(tag); }
 

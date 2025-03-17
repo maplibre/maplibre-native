@@ -93,7 +93,7 @@ private:
     mbgl::ResourceOptions resourceOptions;
     mbgl::ClientOptions clientOptions;
     std::unique_ptr<Actor<ResourceTransform::TransformCallback>> resourceTransform;
-    std23::move_only_function<void()> pathChangeCallback;
+    std::function<void()> pathChangeCallback;
     std::shared_ptr<mbgl::DatabaseFileSource> databaseSource;
     std::shared_ptr<mbgl::FileSource> onlineSource;
     std::shared_ptr<mbgl::FileSource> resourceLoader;

@@ -14,13 +14,12 @@
 #include <mbgl/renderer/layers/render_line_layer.hpp>
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/containers.hpp>
-#include <mbgl/util/exception.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/util/stopwatch.hpp>
+#include <mbgl/util/constants.hpp>
 #include <mbgl/util/string.hpp>
+#include <mbgl/util/exception.hpp>
+#include <mbgl/util/stopwatch.hpp>
 #include <mbgl/util/thread_pool.hpp>
 
 #include <unordered_set>
@@ -373,9 +372,9 @@ void GeometryTileWorker::parse() {
         return;
     }
 
-    MBGL_TIMING_START(watch);
+    MBGL_TIMING_START(watch)
 
-    mbgl::unordered_map<std::string, std::unique_ptr<SymbolLayout>> symbolLayoutMap;
+    std::unordered_map<std::string, std::unique_ptr<SymbolLayout>> symbolLayoutMap;
 
     renderData.clear();
     layouts.clear();
@@ -496,7 +495,7 @@ void GeometryTileWorker::finalizeLayout() {
         return;
     }
 
-    MBGL_TIMING_START(watch);
+    MBGL_TIMING_START(watch)
     std::optional<AlphaImage> glyphAtlasImage;
     ImageAtlas iconAtlas = makeImageAtlas(imageMap, patternMap, versionMap);
     if (!layouts.empty()) {

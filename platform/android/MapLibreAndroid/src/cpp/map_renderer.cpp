@@ -63,7 +63,7 @@ ActorRef<Renderer> MapRenderer::actor() const {
     return *rendererRef;
 }
 
-void MapRenderer::schedule(Task&& scheduled) {
+void MapRenderer::schedule(std::function<void()>&& scheduled) {
     MLN_TRACE_FUNC();
     try {
         // Create a runnable

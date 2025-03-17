@@ -59,7 +59,7 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
 
             // 2. Visit a task from each
             for (auto& q : pending) {
-                Task tasklet;
+                std::function<void()> tasklet;
                 {
                     std::lock_guard<std::mutex> lock(q->lock);
                     if (q->queue.size()) {
@@ -105,11 +105,11 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
     });
 }
 
-void ThreadedSchedulerBase::schedule(Task&& fn) {
+void ThreadedSchedulerBase::schedule(std::function<void()>&& fn) {
     schedule(uniqueID, std::move(fn));
 }
 
-void ThreadedSchedulerBase::schedule(const util::SimpleIdentity tag, Task&& fn) {
+void ThreadedSchedulerBase::schedule(const util::SimpleIdentity tag, std::function<void()>&& fn) {
     MLN_TRACE_FUNC();
     assert(fn);
     if (!fn) return;

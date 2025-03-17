@@ -1,10 +1,10 @@
 # Changelog MapLibre Native for Android
 
-## main
-
-### ✨ Features and improvements
+## 11.8.3
 
 ### 🐞 Bug fixes
+
+- Revert "Eliminate copies in deferred cleanup" ([#3035](https://github.com/maplibre/maplibre-native/pull/3035)) which was causing a memory growth issue.
 
 ## 11.8.2
 

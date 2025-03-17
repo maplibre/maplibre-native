@@ -1,15 +1,16 @@
 #include "android_renderer_frontend.hpp"
-#include "android_renderer_backend.hpp"
 
+#include <mbgl/tile/tile_operation.hpp>
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/renderer/renderer_observer.hpp>
-#include <mbgl/tile/tile_operation.hpp>
 #include <mbgl/util/async_task.hpp>
 #include <mbgl/util/geojson.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/thread.hpp>
+
+#include "android_renderer_backend.hpp"
 
 namespace mbgl {
 namespace android {
@@ -44,8 +45,8 @@ public:
 
     void onDidFinishRenderingMap() override { delegate.invoke(&RendererObserver::onDidFinishRenderingMap); }
 
-    void onStyleImageMissing(const std::string& id, Scheduler::Task&& done) override {
-        delegate.invoke(&RendererObserver::onStyleImageMissing, id, std::move(done));
+    void onStyleImageMissing(const std::string& id, const StyleImageMissingCallback& done) override {
+        delegate.invoke(&RendererObserver::onStyleImageMissing, id, done);
     }
 
     void onRemoveUnusedStyleImages(const std::vector<std::string>& ids) override {
