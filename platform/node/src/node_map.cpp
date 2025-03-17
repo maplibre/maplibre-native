@@ -1537,7 +1537,7 @@ NodeMap::~NodeMap() {
 }
 
 std::unique_ptr<mbgl::AsyncRequest> NodeFileSource::request(const mbgl::Resource& resource,
-                                                            std::function<void(mbgl::Response)> callback_) {
+                                                            mbgl::FileSource::Callback callback_) {
     assert(nodeMap);
 
     Nan::HandleScope scope;

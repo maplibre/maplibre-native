@@ -48,8 +48,8 @@ struct Watch {
     uv_poll_t poll;
     int fd;
 
-    std23::move_only_function<void(int, RunLoop::Event)> eventCallback;
-    std23::move_only_function<void()> closeCallback;
+    std::function<void(int, RunLoop::Event)> eventCallback;
+    std::function<void()> closeCallback;
 };
 
 RunLoop* RunLoop::Get() {
@@ -171,7 +171,7 @@ void RunLoop::waitForEmpty([[maybe_unused]] const mbgl::util::SimpleIdentity tag
     }
 }
 
-void RunLoop::addWatch(int fd, Event event, std23::move_only_function<void(int, Event)>&& callback) {
+void RunLoop::addWatch(int fd, Event event, std::function<void(int, Event)>&& callback) {
     MBGL_VERIFY_THREAD(tid);
 
     Watch* watch = nullptr;

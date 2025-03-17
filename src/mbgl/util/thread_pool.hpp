@@ -22,12 +22,12 @@ public:
     /// @brief Schedule a generic task not assigned to any particular owner.
     /// The scheduler itself will own the task.
     /// @param fn Task to run
-    void schedule(Task&& fn) override;
+    void schedule(std::function<void()>&& fn) override;
 
     /// @brief Schedule a task assigned to the given owner `tag`.
     /// @param tag Identifier object to indicate ownership of `fn`
     /// @param fn Task to run
-    void schedule(const util::SimpleIdentity tag, Task&& fn) override;
+    void schedule(const util::SimpleIdentity tag, std::function<void()>&& fn) override;
     const util::SimpleIdentity uniqueID;
 
 protected:
@@ -56,10 +56,10 @@ protected:
 
     // Task queues bucketed by tag address
     struct Queue {
-        std::atomic<std::size_t> runningCount; /* running tasks */
-        std::condition_variable cv;            /* queue empty condition */
-        std::mutex lock;                       /* lock */
-        std::queue<Task> queue;                /* pending task queue */
+        std::atomic<std::size_t> runningCount;   /* running tasks */
+        std::condition_variable cv;              /* queue empty condition */
+        std::mutex lock;                         /* lock */
+        std::queue<std::function<void()>> queue; /* pending task queue */
     };
     mbgl::unordered_map<util::SimpleIdentity, std::shared_ptr<Queue>> taggedQueue;
 };
@@ -90,7 +90,7 @@ public:
         }
     }
 
-    void runOnRenderThread(const util::SimpleIdentity tag, Task&& fn) override {
+    void runOnRenderThread(const util::SimpleIdentity tag, std::function<void()>&& fn) override {
         std::shared_ptr<RenderQueue> queue;
         {
             std::lock_guard<std::mutex> lock(taggedRenderQueueLock);
@@ -149,7 +149,7 @@ private:
     std::vector<std::thread> threads;
 
     struct RenderQueue {
-        std::queue<Task> queue;
+        std::queue<std::function<void()>> queue;
         std::mutex mutex;
     };
     mbgl::unordered_map<util::SimpleIdentity, std::shared_ptr<RenderQueue>> taggedRenderQueue;

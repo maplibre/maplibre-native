@@ -55,9 +55,9 @@ private:
 
 class HTTPRequest : public AsyncRequest {
 public:
-    HTTPRequest(std::function<void(Response)> callback_)
+    HTTPRequest(FileSource::Callback callback_)
         : shared(std::make_shared<HTTPRequestShared>(response, async)),
-          callback(std::move(callback_)) {
+          callback(callback_) {
     }
 
     ~HTTPRequest() override {
@@ -71,7 +71,7 @@ public:
     NSURLSessionDataTask* task = nil;
 
 private:
-    std::function<void(Response)> callback;
+    FileSource::Callback callback;
     Response response;
 
     util::AsyncTask async { [this] {

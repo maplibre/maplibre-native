@@ -58,7 +58,3 @@
 [submodule "vendor/PMTiles"]
 	path = vendor/PMTiles
 	url = https://github.com/protomaps/PMTiles.git
-[submodule "vendor/nontype_functional"]
-	path = vendor/nontype_functional
-	url = https://github.com/zhihaoy/nontype_functional.git
-	branch = compat
