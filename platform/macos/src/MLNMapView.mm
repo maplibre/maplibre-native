@@ -59,6 +59,7 @@
 #import "MLNNetworkConfiguration_Private.h"
 #import "MLNLoggingConfiguration_Private.h"
 #import "MLNReachability.h"
+#import "MLNRenderingStats_Private.h"
 #import "MLNSettings_Private.h"
 
 #import <CoreImage/CIFilter.h>
@@ -205,6 +206,8 @@ public:
 
     /// reachability instance
     MLNReachability *_reachability;
+    
+    MLNRenderingStats* _renderingStats;
 }
 
 // MARK: Lifecycle
@@ -924,7 +927,8 @@ public:
     }
 }
 
-- (void)mapViewDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered {
+- (void)mapViewDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered
+                                     renderingStats:(const mbgl::gfx::RenderingStats &)stats {
     if (!_mbglMap) {
         return;
     }
@@ -933,7 +937,25 @@ public:
         _isChangingAnnotationLayers = NO;
         [self.style didChangeValueForKey:@"layers"];
     }
-    if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:)]) {
+    
+    if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:renderingStats:)])
+    {
+        if (!_renderingStats) {
+            _renderingStats = [[MLNRenderingStats alloc] init];
+        }
+
+        [_renderingStats setCoreData:stats];
+        [self.delegate mapViewDidFinishRenderingFrame:self fullyRendered:fullyRendered renderingStats:_renderingStats];
+    }
+    else if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:frameEncodingTime:frameRenderingTime:)])
+    {
+        [self.delegate mapViewDidFinishRenderingFrame:self
+                                        fullyRendered:fullyRendered
+                                    frameEncodingTime:stats.encodingTime
+                                   frameRenderingTime:stats.renderingTime];
+    }
+    else if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:)])
+    {
         [self.delegate mapViewDidFinishRenderingFrame:self fullyRendered:fullyRendered];
     }
 }

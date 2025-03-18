@@ -92,7 +92,8 @@ public:
         float textSize = 4.0f;
     };
 
-    RenderingStatsView(const Options& options = {});
+    RenderingStatsView() = default;
+    RenderingStatsView(const Options& options_) : options(options_) {}
     ~RenderingStatsView() = default;
 
     void create(const std::unique_ptr<style::Style>& style);
