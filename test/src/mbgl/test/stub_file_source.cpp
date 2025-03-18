@@ -60,8 +60,7 @@ StubFileSource::StubFileSource(const ResourceOptions& resourceOptions_,
 
 StubFileSource::~StubFileSource() = default;
 
-std::unique_ptr<AsyncRequest> StubFileSource::request(const Resource& resource,
-                                                      std::function<void(Response)> callback) {
+std::unique_ptr<AsyncRequest> StubFileSource::request(const Resource& resource, Callback callback) {
     auto req = std::make_unique<StubFileRequest>(*this);
     if (type == ResponseType::Synchronous) {
         std::optional<Response> res = response(resource);
@@ -69,7 +68,7 @@ std::unique_ptr<AsyncRequest> StubFileSource::request(const Resource& resource,
             callback(*res);
         }
     } else {
-        pending.emplace(req.get(), std::make_tuple(resource, response, std::move(callback)));
+        pending.emplace(req.get(), std::make_tuple(resource, response, callback));
     }
     return req;
 }

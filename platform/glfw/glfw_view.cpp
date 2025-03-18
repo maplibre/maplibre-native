@@ -482,9 +482,7 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
 
                 auto &style = view->map->getStyle();
                 if (!style.getSource("states")) {
-                    std::string url =
-                        "https://maplibre.org/maplibre-gl-js-docs/assets/"
-                        "us_states.geojson";
+                    std::string url = "https://maplibre.org/maplibre-gl-js/docs/assets/us_states.geojson";
                     auto source = std::make_unique<GeoJSONSource>("states");
                     source->setURL(url);
                     style.addSource(std::move(source));

@@ -13,11 +13,7 @@ Scheduler::~Scheduler() {
     MBGL_VERIFY_THREAD(tid);
 }
 
-void Scheduler::schedule(Task&& function) {
-    this->Scheduler::schedule(mbgl::util::SimpleIdentity::Empty, std::move(function));
-}
-
-void Scheduler::schedule(mbgl::util::SimpleIdentity, Task&& function) {
+void Scheduler::schedule(std::function<void()>&& function) {
     const std::lock_guard<std::mutex> lock(m_taskQueueMutex);
     m_taskQueue.push(std::move(function));
 
@@ -27,7 +23,7 @@ void Scheduler::schedule(mbgl::util::SimpleIdentity, Task&& function) {
 }
 
 void Scheduler::processEvents() {
-    std::queue<Task> taskQueue;
+    std::queue<std::function<void()>> taskQueue;
     {
         const std::unique_lock<std::mutex> lock(m_taskQueueMutex);
         std::swap(taskQueue, m_taskQueue);
