@@ -8,6 +8,7 @@ bazel_dep(name = "rules_xcodeproj", version = "2.10.0")
 bazel_dep(name = "aspect_rules_js", version = "2.2.0")
 bazel_dep(name = "rules_nodejs", version = "6.3.4")
 bazel_dep(name = "libuv", version = "1.48.0")
+bazel_dep(name = "rules_foreign_cc", version = "0.9.0")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node", dev_dependency = True)
 node.toolchain(node_version = "20.14.0")

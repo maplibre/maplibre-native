@@ -224,10 +224,12 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
     }
 
     if (!parser.glyphURL.empty()) {
+        uint32_t ttfCount = 0;
+        if (parser.fontFaces) ttfCount = static_cast<uint32_t>(parser.fontFaces->size()); // custom faces
         result->requiredResourceCount += parser.fontStacks().size() *
                                          (std::visit([](auto& reg) { return reg.includeIdeographs; }, definition)
-                                              ? GLYPH_RANGES_PER_FONT_STACK
-                                              : NON_IDEOGRAPH_GLYPH_RANGES_PER_FONT_STACK);
+                                              ? GLYPH_RANGES_PER_FONT_STACK + ttfCount
+                                              : NON_IDEOGRAPH_GLYPH_RANGES_PER_FONT_STACK + ttfCount);
     }
 
     if (!parser.sprites.empty()) {
@@ -342,8 +344,15 @@ void OfflineDownload::activateDownload() {
                     // Assumes that if a glyph range starts with fixed width/ideographic
                     // characters, the entire range will be fixed width.
                     if (includeIdeographs || !util::i18n::allowsFixedWidthGlyphGeneration(i * GLYPHS_PER_GLYPH_RANGE)) {
-                        queueResource(
-                            Resource::glyphs(parser.glyphURL, fontStack, getGlyphRange(i * GLYPHS_PER_GLYPH_RANGE)));
+                        auto range = getGlyphRange(i * GLYPHS_PER_GLYPH_RANGE);
+                        queueResource(Resource::glyphs(
+                            parser.glyphURL, fontStack, std::pair<uint16_t, uint16_t>{range.first, range.second}));
+                    }
+                    if (parser.fontFaces) {
+                        FontFaces& faces = *parser.fontFaces;
+                        for (const auto& face : faces) {
+                            queueResource(Resource::fontFace(face.url));
+                        }
                     }
                 }
             }

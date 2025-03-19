@@ -135,7 +135,7 @@ public:
 
 class StubGlyphRequestor : public GlyphRequestor {
 public:
-    void onGlyphsAvailable(GlyphMap glyphs) override {
+    void onGlyphsAvailable(GlyphMap glyphs, HBShapeRequests) override {
         if (glyphsAvailable) glyphsAvailable(std::move(glyphs));
     }
 
@@ -181,7 +181,7 @@ TEST(GlyphManager, LoadingSuccess) {
 
     test.observer.glyphsLoaded = [&](const FontStack& fontStack, const GlyphRange& range) {
         ASSERT_EQ(fontStack, FontStack{{"Test Stack"}});
-        ASSERT_EQ(range, GlyphRange(0, 255));
+        ASSERT_EQ(range, GlyphRange(0, 255, GlyphIDType::FontPBF));
     };
 
     test.requestor.glyphsAvailable = [&](GlyphMap glyphs) {
@@ -196,7 +196,7 @@ TEST(GlyphManager, LoadingSuccess) {
         test.end();
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{"Test Stack"}}, {u'a', u'å', u' '}}});
+    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{{"Test Stack"}}, {u'a', u'å', u' '}}}, {}});
 }
 
 TEST(GlyphManager, LoadingFail) {
@@ -211,7 +211,7 @@ TEST(GlyphManager, LoadingFail) {
     test.observer.glyphsError =
         [&](const FontStack& fontStack, const GlyphRange& glyphRange, std::exception_ptr error) {
             EXPECT_EQ(fontStack, FontStack({"Test Stack"}));
-            EXPECT_EQ(glyphRange, GlyphRange(0, 255));
+            EXPECT_EQ(glyphRange, GlyphRange(0, 255, GlyphIDType::FontPBF));
 
             EXPECT_TRUE(error != nullptr);
             EXPECT_EQ(util::toString(error), "Failed by the test case");
@@ -224,7 +224,7 @@ TEST(GlyphManager, LoadingFail) {
         test.end();
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{"Test Stack"}}, {u'a', u'å'}}});
+    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{{"Test Stack"}}, {u'a', u'å'}}}, {}});
 }
 
 TEST(GlyphManager, LoadingCorrupted) {
@@ -239,7 +239,7 @@ TEST(GlyphManager, LoadingCorrupted) {
     test.observer.glyphsError =
         [&](const FontStack& fontStack, const GlyphRange& glyphRange, std::exception_ptr error) {
             EXPECT_EQ(fontStack, FontStack({"Test Stack"}));
-            EXPECT_EQ(glyphRange, GlyphRange(0, 255));
+            EXPECT_EQ(glyphRange, GlyphRange(0, 255, GlyphIDType::FontPBF));
 
             EXPECT_TRUE(error != nullptr);
             EXPECT_EQ(util::toString(error), "unknown pbf field type exception");
@@ -252,7 +252,7 @@ TEST(GlyphManager, LoadingCorrupted) {
         test.end();
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{"Test Stack"}}, {u'a', u'å'}}});
+    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{{"Test Stack"}}, {u'a', u'å'}}}, {}});
 }
 
 TEST(GlyphManager, LoadingCancel) {
@@ -267,7 +267,7 @@ TEST(GlyphManager, LoadingCancel) {
         FAIL() << "Should never be called";
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{"Test Stack"}}, {u'a', u'å'}}});
+    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{{"Test Stack"}}, {u'a', u'å'}}}, {}});
 }
 
 TEST(GlyphManager, LoadLocalCJKGlyph) {
@@ -293,7 +293,7 @@ TEST(GlyphManager, LoadLocalCJKGlyph) {
         ASSERT_EQ(testPositions.count(u'中'), 1u);
 
         Immutable<Glyph> glyph = *testPositions.at(u'中');
-        EXPECT_EQ(glyph->id, u'中');
+        EXPECT_EQ(glyph->id.complex.code, u'中');
         EXPECT_EQ(glyph->metrics.width, 24ul);
         EXPECT_EQ(glyph->metrics.height, 24ul);
         EXPECT_EQ(glyph->metrics.left, 0);
@@ -309,7 +309,7 @@ TEST(GlyphManager, LoadLocalCJKGlyph) {
         test.end();
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{"Test Stack"}}, {u'中'}}});
+    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{{"Test Stack"}}, {u'中'}}}, {}});
 }
 
 TEST(GlyphManager, LoadLocalCJKGlyphAfterLoadingRangeFromURL) {
@@ -336,16 +336,15 @@ TEST(GlyphManager, LoadLocalCJKGlyphAfterLoadingRangeFromURL) {
             //  instead of using the glyph recieved from the range
             //  for the ideagraphic mark
             test.glyphManager.getGlyphs(test.requestor,
-                                        GlyphDependencies{
-                                            {{{"Test Stack"}}, {u'テ'}} // 0x30c6
-                                        },
+                                        GlyphDependencies{{{{{"Test Stack"}}, {u'テ'}}}, // 0x30c6
+                                                          {}},
                                         test.fileSource);
         } else {
             ASSERT_EQ(testPositions.size(), 1u);
             ASSERT_EQ(testPositions.count(u'テ'), 1u);
 
             Immutable<Glyph> glyph = *testPositions.at(u'テ');
-            EXPECT_EQ(glyph->id, u'テ');
+            EXPECT_EQ(glyph->id.complex.code, u'テ');
             EXPECT_EQ(glyph->metrics.width, 24ul);
             EXPECT_EQ(glyph->metrics.height, 24ul);
             EXPECT_EQ(glyph->metrics.left, 0);
@@ -358,9 +357,8 @@ TEST(GlyphManager, LoadLocalCJKGlyphAfterLoadingRangeFromURL) {
     };
 
     test.run("test/fixtures/resources/glyphs-12244-12543.pbf",
-             GlyphDependencies{
-                 {{{"Test Stack"}}, {u'々'}} // 0x3005
-             });
+             GlyphDependencies{{{{{"Test Stack"}}, {u'々'}}}, // 0x3005
+                               {}});
 }
 
 TEST(GlyphManager, LoadingInvalid) {
@@ -380,7 +378,7 @@ TEST(GlyphManager, LoadingInvalid) {
 
     test.observer.glyphsLoaded = [&](const FontStack& fontStack, const GlyphRange& range) {
         ASSERT_EQ(fontStack, FontStack{{"Test Stack"}});
-        ASSERT_EQ(range, GlyphRange(0, 255));
+        ASSERT_EQ(range, GlyphRange(0, 255, GlyphIDType::FontPBF));
     };
 
     test.requestor.glyphsAvailable = [&](GlyphMap glyphs) {
@@ -393,7 +391,7 @@ TEST(GlyphManager, LoadingInvalid) {
         test.end();
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{"Test Stack"}}, {u'A', u'E'}}});
+    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{{"Test Stack"}}, {u'A', u'E'}}}, {}});
 }
 
 TEST(GlyphManager, ImmediateFileSource) {
@@ -436,5 +434,5 @@ TEST(GlyphManager, ImmediateFileSource) {
         test.end();
     };
 
-    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{"Test Stack"}}, {u'a', u'å', u' '}}});
+    test.run("test/fixtures/resources/glyphs.pbf", GlyphDependencies{{{{{"Test Stack"}}, {u'a', u'å', u' '}}}, {}});
 }

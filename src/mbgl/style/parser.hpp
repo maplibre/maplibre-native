@@ -4,6 +4,9 @@
 #include <mbgl/style/sprite.hpp>
 #include <mbgl/style/source.hpp>
 #include <mbgl/style/light.hpp>
+
+#include <mbgl/text/glyph.hpp>
+
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/rapidjson.hpp>
 #include <mbgl/util/font_stack.hpp>
@@ -29,6 +32,7 @@ public:
 
     std::vector<Sprite> sprites;
     std::string glyphURL;
+    std::shared_ptr<FontFaces> fontFaces;
 
     std::vector<std::unique_ptr<Source>> sources;
     std::vector<std::unique_ptr<Layer>> layers;

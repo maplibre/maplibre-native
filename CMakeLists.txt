@@ -18,6 +18,7 @@ option(MLN_DRAWABLE_RENDERER "Include the drawable rendering pathway" OFF)
 option(MLN_USE_UNORDERED_DENSE "Use ankerl dense containers for performance" ON)
 option(MLN_USE_TRACY "Enable Tracy instrumentation" OFF)
 option(MLN_USE_RUST "Use components in Rust" OFF)
+option(MLN_TEXT_SHAPING_HARFBUZZ "Use haffbuzz to shape complex text" ON)
 
 if (MLN_WITH_CLANG_TIDY)
     find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
@@ -1389,6 +1390,8 @@ if(MLN_DRAWABLE_RENDERER)
     )
 endif()
 
+include(${PROJECT_SOURCE_DIR}/cmake/harfbuzz.cmake)
+
 target_sources(
     mbgl-core PRIVATE
     ${INCLUDE_FILES}
@@ -1492,6 +1495,7 @@ target_link_libraries(
         mbgl-vendor-wagyu
         $<$<BOOL:${MLN_WITH_METAL}>:mbgl-vendor-metal-cpp>
         $<IF:$<BOOL:${MLN_USE_RUST}>,mbgl-rustutils,mbgl-vendor-csscolorparser>
+        ${SHAPE_TARGETS} # from harfbuzz.cmake
     PUBLIC
         Mapbox::Base
         Mapbox::Base::Extras::expected-lite
@@ -1531,6 +1535,7 @@ set(EXPORT_TARGETS
     mbgl-vendor-wagyu
     mbgl-vendor-metal-cpp
     unordered_dense
+    ${SHAPE_TARGETS} # from harfbuzz.cmake
 )
 
 if(MLN_USE_RUST)
