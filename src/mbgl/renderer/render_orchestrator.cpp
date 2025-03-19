@@ -54,7 +54,7 @@ const std::string& LayerRenderItem::getName() const {
 }
 
 #if MLN_DRAWABLE_RENDERER
-void LayerRenderItem::updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const {}
+void LayerRenderItem::updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const {};
 #endif
 
 namespace {
@@ -1065,10 +1065,10 @@ void RenderOrchestrator::onTileAction(RenderSource&,
     observer->onTileAction(op, id, sourceID);
 }
 
-void RenderOrchestrator::onStyleImageMissing(const std::string& id, Scheduler::Task&& done) {
+void RenderOrchestrator::onStyleImageMissing(const std::string& id, const std::function<void()>& done) {
     MLN_TRACE_FUNC();
 
-    observer->onStyleImageMissing(id, std::move(done));
+    observer->onStyleImageMissing(id, done);
 }
 
 void RenderOrchestrator::onRemoveUnusedStyleImages(const std::vector<std::string>& unusedImageIDs) {

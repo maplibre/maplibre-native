@@ -127,7 +127,6 @@ cc_library(
         "//vendor:earcut.hpp",
         "//vendor:eternal",
         "//vendor:mapbox-base",
-        "//vendor:nontype_functional",
         "//vendor:parsedate",
         "//vendor:pmtiles",
         "//vendor:polylabel",

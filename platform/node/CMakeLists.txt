@@ -37,7 +37,6 @@ target_include_directories(
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/platform/default/include
         ${PROJECT_SOURCE_DIR}/src
-        ${PROJECT_SOURCE_DIR}/vendor/nontype_functional/include
     PRIVATE ${LIBUV_INCLUDE_DIRS}
 )
 
@@ -45,7 +44,6 @@ target_link_libraries(
     mbgl-node-loop
     PUBLIC
         Mapbox::Base
-    INTERFACE mbgl-vendor-nontype_functional
 )
 
 target_sources(
@@ -70,7 +68,6 @@ target_link_libraries(
     mbgl-node
     INTERFACE mbgl-node-loop
     INTERFACE Mapbox::Map
-    INTERFACE mbgl-vendor-nontype_functional
 )
 
 # FIXME: Node bindings only run fully on Linux now because it requires libuv RunLoop (which is the default on Linux). Also, Sanitizer will

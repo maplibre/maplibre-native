@@ -2,11 +2,11 @@ module(name = "maplibre")
 
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "platforms", version = "0.0.11")
-bazel_dep(name = "rules_apple", version = "3.19.1")
-bazel_dep(name = "rules_swift", version = "2.5.0")
+bazel_dep(name = "rules_apple", version = "3.20.1")
+bazel_dep(name = "rules_swift", version = "2.7.0")
 bazel_dep(name = "rules_xcodeproj", version = "2.10.0")
 bazel_dep(name = "aspect_rules_js", version = "2.2.0")
-bazel_dep(name = "rules_nodejs", version = "6.3.3")
+bazel_dep(name = "rules_nodejs", version = "6.3.4")
 bazel_dep(name = "libuv", version = "1.48.0")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node", dev_dependency = True)
@@ -68,11 +68,11 @@ darwin_config(
     name = "darwin_config",
 )
 
-bazel_dep(name = "rules_rust", version = "0.58.0")
+bazel_dep(name = "rules_rust", version = "0.59.1")
 bazel_dep(name = "cxx.rs", version = "1.0.136")
 git_override(
     module_name = "cxx.rs",
-    commit = "0bb4ad82075cb304020df928efb784cee9375467",
+    commit = "ba6590df60e521dc40b67814dd58116ff37f742f",
     remote = "https://github.com/dtolnay/cxx.git",
 )
 
