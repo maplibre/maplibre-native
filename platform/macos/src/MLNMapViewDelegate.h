@@ -1,7 +1,7 @@
 #import <AppKit/AppKit.h>
 #import <Foundation/Foundation.h>
-#import "MLNTileOperation.h"
 #import "MLNRenderingStats.h"
+#import "MLNTileOperation.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -193,7 +193,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView
                          fullyRendered:(BOOL)fullyRendered
-                        renderingStats:(MLNRenderingStats*)renderingStats;
+                        renderingStats:(MLNRenderingStats *)renderingStats;
 
 /**
  Tells the delegate that the map view is entering an idle state, and no more

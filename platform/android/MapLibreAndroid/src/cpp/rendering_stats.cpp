@@ -8,16 +8,18 @@ void RenderingStats::registerNative(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<RenderingStats>> RenderingStats::Create(jni::JNIEnv& env) {
-    auto &javaClass = jni::Class<RenderingStats>::Singleton(env);
+    auto& javaClass = jni::Class<RenderingStats>::Singleton(env);
     auto constructor = javaClass.GetConstructor(env);
     return javaClass.New(env, constructor);
 }
 
-void RenderingStats::Update(jni::JNIEnv& env, jni::Object<RenderingStats>& javaObject, const gfx::RenderingStats& stats) {
-    static auto &javaClass = jni::Class<RenderingStats>::Singleton(env);
+void RenderingStats::Update(jni::JNIEnv& env,
+                            jni::Object<RenderingStats>& javaObject,
+                            const gfx::RenderingStats& stats) {
+    static auto& javaClass = jni::Class<RenderingStats>::Singleton(env);
 
-#define SetField(name, type) \
-    static auto name##Field = javaClass.GetField<type>(env, #name);     \
+#define SetField(name, type)                                        \
+    static auto name##Field = javaClass.GetField<type>(env, #name); \
     javaObject.Set(env, name##Field, static_cast<type>(stats.name));
 
     SetField(encodingTime, jni::jdouble);

@@ -206,7 +206,7 @@ public:
 
     /// reachability instance
     MLNReachability *_reachability;
-    
+
     MLNRenderingStats* _renderingStats;
 }
 
@@ -937,7 +937,7 @@ public:
         _isChangingAnnotationLayers = NO;
         [self.style didChangeValueForKey:@"layers"];
     }
-    
+
     if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:renderingStats:)])
     {
         if (!_renderingStats) {

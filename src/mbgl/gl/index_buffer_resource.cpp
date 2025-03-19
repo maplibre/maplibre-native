@@ -29,7 +29,7 @@ IndexBufferResource::~IndexBufferResource() noexcept {
         stats.numIndexBuffers--;
         stats.memIndexBuffers -= byteSize;
         stats.memBuffers -= byteSize;
-    
+
         assert(stats.memIndexBuffers >= 0);
     }
 }

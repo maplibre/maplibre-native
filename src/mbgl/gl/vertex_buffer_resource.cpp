@@ -23,13 +23,13 @@ VertexBufferResource::VertexBufferResource(UniqueBuffer&& buffer_, int byteSize_
 
 VertexBufferResource::~VertexBufferResource() noexcept {
     MLN_TRACE_FREE_VERTEX_BUFFER(buffer.get());
-   
+
     if (buffer) {
         auto& stats = buffer.get_deleter().context.renderingStats();
         stats.numVertexBuffers--;
         stats.memVertexBuffers -= byteSize;
         stats.memBuffers -= byteSize;
-    
+
         assert(stats.memVertexBuffers >= 0);
     }
 }

@@ -10,7 +10,7 @@ namespace mbgl {
 namespace style {
 class Style;
 class SymbolLayer;
-}
+} // namespace style
 
 namespace gfx {
 
@@ -84,7 +84,6 @@ struct RenderingStats {
 
 class RenderingStatsView final {
 public:
-
     struct Options {
         float updateInterval = 0.25f;
         bool verbose = false;
@@ -93,7 +92,8 @@ public:
     };
 
     RenderingStatsView() = default;
-    RenderingStatsView(const Options& options_) : options(options_) {}
+    RenderingStatsView(const Options& options_)
+        : options(options_) {}
     ~RenderingStatsView() = default;
 
     void create(const std::unique_ptr<style::Style>& style);
@@ -104,7 +104,6 @@ public:
     void update(const std::unique_ptr<style::Style>& style, const gfx::RenderingStats& stats);
 
 protected:
-
     const std::string layerID = "rendering-stats";
     const std::string sourceID = layerID + "-source";
 

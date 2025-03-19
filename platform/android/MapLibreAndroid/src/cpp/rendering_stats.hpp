@@ -11,7 +11,6 @@ namespace android {
 
 class RenderingStats {
 public:
-
     static constexpr auto Name() { return "org/maplibre/android/maps/RenderingStats"; };
     static void registerNative(jni::JNIEnv& env);
 

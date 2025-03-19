@@ -123,14 +123,14 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
         // from RenderTile::translatedMatrix
         const auto translate = isText ? evaluated.get<style::TextTranslate>() : evaluated.get<style::IconTranslate>();
-        
+
         mat4 matrix;
 
         if (isScreenSpace) {
             matrix::ortho(matrix, 0, util::EXTENT, -util::EXTENT, 0, 0, 1);
             matrix::translate(matrix, matrix, 0, -util::EXTENT, 0);
             matrix::translate(matrix, matrix, translate[0], translate[1], 0);
-        } else { 
+        } else {
             constexpr bool nearClipped = false;
             constexpr bool inViewportPixelUnits = false;
             const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()

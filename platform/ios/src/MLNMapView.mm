@@ -493,7 +493,7 @@ public:
     CFTimeInterval _frameCounterStartTime;
     NSInteger _frameCount;
     CFTimeInterval _frameDurations;
-    
+
     MLNRenderingStats* _renderingStats;
 }
 
@@ -6842,7 +6842,7 @@ static void *windowScreenContext = &windowScreenContext;
         _isChangingAnnotationLayers = NO;
         [self.style didChangeValueForKey:@"layers"];
     }
-    
+
     if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:renderingStats:)])
     {
         if (!_renderingStats) {
