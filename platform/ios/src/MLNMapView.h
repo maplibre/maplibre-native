@@ -2120,6 +2120,9 @@ vertically on the map.
  */
 @property (nonatomic) MLNMapDebugMaskOptions debugMask;
 
+- (BOOL)isRenderingStatsViewEnabled;
+- (void)enableRenderingStatsView:(BOOL)value;
+
 - (MLNBackendResource *)backendResource;
 
 /**

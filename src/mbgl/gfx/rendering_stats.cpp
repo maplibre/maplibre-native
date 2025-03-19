@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <initializer_list>
 #include <sstream>
+#include <iomanip>
 
 namespace mbgl {
 namespace gfx {
@@ -110,20 +111,17 @@ std::string RenderingStats::toString(std::string_view sep) const {
 }
 #endif
 
-RenderingStatsView::RenderingStatsView(const Options& options_)
-    : options(options_) {}
-
 void RenderingStatsView::create(const std::unique_ptr<style::Style>& style) {
     if (!style) {
         return;
     }
 
     if (!style->getSource(sourceID)) {
-        style::CustomGeometrySource::Options options;
+        style::CustomGeometrySource::Options sourceOptions;
 
-        options.zoomRange = {0, 0};
+        sourceOptions.zoomRange = {0, 0};
 
-        options.fetchTileFunction = [&](const CanonicalTileID& tileID) {
+        sourceOptions.fetchTileFunction = [&](const CanonicalTileID& tileID) {
             auto source = static_cast<style::CustomGeometrySource*>(style->getSource(sourceID));
 
             if (!source) {
@@ -139,7 +137,7 @@ void RenderingStatsView::create(const std::unique_ptr<style::Style>& style) {
             source->setTileData(tileID, features);
         };
 
-        style->addSource(std::make_unique<style::CustomGeometrySource>(sourceID, options));
+        style->addSource(std::make_unique<style::CustomGeometrySource>(sourceID, sourceOptions));
     }
 
     if (!style->getLayer(layerID)) {
