@@ -32,7 +32,7 @@ public:
         }
     }
 
-    void onDidFinishRenderingFrame(RenderFrameStatus status) final {
+    void onDidFinishRenderingFrame(const RenderFrameStatus& status) final {
         if (didFinishRenderingFrameCallback) {
             didFinishRenderingFrameCallback(status);
         }

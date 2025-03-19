@@ -18,6 +18,7 @@ import kotlin.time.TimeSource
 import kotlin.time.TimeSource.Monotonic
 import org.maplibre.android.log.Logger
 import org.maplibre.android.log.Logger.INFO
+import org.maplibre.android.maps.RenderingStats
 
 /**
  * Test activity showcasing logging observer actions from the core
@@ -29,7 +30,8 @@ class ObserverActivity : AppCompatActivity(),
     MapView.OnGlyphsLoadedListener,
     MapView.OnGlyphsRequestedListener,
     MapView.OnSpriteLoadedListener,
-    MapView.OnSpriteRequestedListener {
+    MapView.OnSpriteRequestedListener,
+    MapView.OnDidFinishRenderingFrameListener {
     private lateinit var mapView: MapView
 
     companion object {
@@ -48,10 +50,13 @@ class ObserverActivity : AppCompatActivity(),
         mapView.addOnGlyphsRequestedListener(this)
         mapView.addOnSpriteLoadedListener(this)
         mapView.addOnSpriteRequestedListener(this)
+        mapView.addOnDidFinishRenderingFrameListener(this)
         mapView.getMapAsync {
             it.setStyle(
-                Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
+                //Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
+                Style.Builder().fromUri("https://demotiles.maplibre.org/style.json")
             )
+            it.enableRenderingStatsView(true)
         }
     }
 
@@ -98,6 +103,10 @@ class ObserverActivity : AppCompatActivity(),
             TileOperation.Cancelled -> Logger.i(TAG, "Pending work on tile ${tile} was cancelled")
             TileOperation.NullOp -> Logger.e(TAG, "An unknown tile operation was emitted for tile ${tile}")
         }
+    }
+
+    override fun onDidFinishRenderingFrame(fully: Boolean, stats: RenderingStats) {
+
     }
 
     override fun onStart() {
