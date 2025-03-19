@@ -81,10 +81,6 @@ public:
     const PropertyValue<std::array<float, 4>>& getIconTextFitPadding() const;
     void setIconTextFitPadding(const PropertyValue<std::array<float, 4>>&);
 
-    static PropertyValue<bool> getDefaultSymbolScreenSpace();
-    const PropertyValue<bool>& getSymbolScreenSpace() const;
-    void setSymbolScreenSpace(const PropertyValue<bool>&);
-
     static PropertyValue<bool> getDefaultSymbolAvoidEdges();
     const PropertyValue<bool>& getSymbolAvoidEdges() const;
     void setSymbolAvoidEdges(const PropertyValue<bool>&);

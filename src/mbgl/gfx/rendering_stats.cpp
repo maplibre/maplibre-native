@@ -2,6 +2,7 @@
 #include <mbgl/style/style.hpp>
 #include <mbgl/style/sources/custom_geometry_source.hpp>
 #include <mbgl/style/layers/symbol_layer.hpp>
+#include <mbgl/style/layers/symbol_layer_impl.hpp>
 #include <mbgl/util/monotonic_timer.hpp>
 
 #include <algorithm>
@@ -142,10 +143,11 @@ void RenderingStatsView::create(const std::unique_ptr<style::Style>& style) {
     }
 
     if (!style->getLayer(layerID)) {
-        auto infoLayer = std::make_unique<style::SymbolLayer>(layerID, sourceID);
+        auto impl = makeMutable<style::SymbolLayer::Impl>(layerID, sourceID);
+        impl->layout.get<mbgl::style::SymbolScreenSpace>() = true;
+        auto infoLayer = std::make_unique<style::SymbolLayer>(std::move(impl));
 
         // required
-        infoLayer->setSymbolScreenSpace(true);
         infoLayer->setTextAllowOverlap(true);
         infoLayer->setIconAllowOverlap(true);
         infoLayer->setTextIgnorePlacement(true);
