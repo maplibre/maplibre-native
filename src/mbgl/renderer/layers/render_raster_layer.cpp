@@ -47,6 +47,7 @@ RenderRasterLayer::~RenderRasterLayer() = default;
 
 void RenderRasterLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
+    styleDependencies = unevaluated.getDependencies();
 }
 
 void RenderRasterLayer::evaluate(const PropertyEvaluationParameters& parameters) {
