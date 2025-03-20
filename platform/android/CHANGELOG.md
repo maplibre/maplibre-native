@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## 11.8.4
+
+### 🐞 Bug fixes
+
+-  Add workaround for android emulator as crash on Android emulation is still presented ([#3310](https://github.com/maplibre/maplibre-native/pull/3310))
+
 ## 11.8.3
 
 ### 🐞 Bug fixes
