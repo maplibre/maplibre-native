@@ -1887,6 +1887,8 @@ TEST(BackgroundLayer, StyleUpdateZoomDependency) {
     layer->setBackgroundColor(PropertyExpression<Color>(
         interpolate(linear(), zoom(), 0.0, literal(Color::red()), 14.0, literal(Color::green()))));
 
+    test.frontend.render(test.map);
+
     // Change zoom to 14 and re-render
     test.map.jumpTo(CameraOptions().withZoom(14.0));
     test::checkImage("test/fixtures/map/style_update_zoom_dependency/after_update_green",
