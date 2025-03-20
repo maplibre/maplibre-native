@@ -44,6 +44,18 @@ public final class Utils {
   }
 
   /**
+   * Check if NaN is present in a Location
+   *
+   * @param location location
+   * @return true if NaN is present, false otherwise
+   */
+  public static boolean locationHasNaN(Location location) {
+    return Double.isNaN(location.getLatitude())
+           || Double.isNaN(location.getLongitude())
+           || Double.isNaN(location.getBearing());
+  }
+
+  /**
    * Normalizes an angle to be in the [0, 360] range.
    *
    * @param angle the provided angle

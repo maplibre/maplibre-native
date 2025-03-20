@@ -260,6 +260,14 @@ public final class LocationComponent {
     customPuckAnimationOptions.animationIntervalMS = activationOptions.customPuckAnimationIntervalMS();
     customPuckAnimationOptions.lagMS = activationOptions.customPuckLagMS();
     customPuckAnimationOptions.iconScale = activationOptions.customPuckIconScale();
+    if (customPuckAnimationOptions.customPuckAnimationEnabled) {
+      if (customPuckAnimationOptions.lagMS <= 0) {
+        throw new RuntimeException("Custom puck lag must be greater than 0");
+      }
+      if (customPuckAnimationOptions.iconScale <= 0) {
+        throw new RuntimeException("Custom puck icon scale must be greater than 0");
+      }
+    }
 
     // Initialize the LocationComponent with Context, the map's `Style`, and either custom LocationComponentOptions
     // or backup options created from default/custom attributes
@@ -1282,6 +1290,9 @@ public final class LocationComponent {
   private void updateLocation(@Nullable final Location location, @Nullable List<Location> intermediatePoints,
                               boolean fromLastLocation, boolean lookAheadUpdate) {
     if (location == null) {
+      return;
+    } else if (Utils.locationHasNaN(location)) {
+      Logger.e(TAG, "Skipping invalid location: " + location.toString());
       return;
     } else if (!isLayerReady) {
       lastLocation = location;

@@ -34,6 +34,9 @@ final class LocationAnimatorCustomPuck {
       this.lon = lon;
       this.bearing = bearing;
       this.time = time;
+      if (Double.isNaN(lat) || Double.isNaN(lon) || Double.isNaN(bearing)) {
+        throw new RuntimeException("Unexpected puck location: lat=" + lat + ", lon=" + lon + ", bearing=" + bearing);
+      }
     }
 
     public StampedLatLon(StampedLatLon other) {
