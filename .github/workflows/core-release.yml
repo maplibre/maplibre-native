@@ -36,7 +36,7 @@ jobs:
 
       - name: Build mbgl-core for macOS
         run: |
-          cmake --preset macos-core
+          cmake --preset macos-core -DCMAKE_CXX_COMPILER_LAUNCHER=""
           cmake --build --preset macos-core
 
       - name: Rename artifact
