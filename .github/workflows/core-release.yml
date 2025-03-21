@@ -47,23 +47,23 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
-    build-linux:
-      needs: [create-release]
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
-          with:
-            submodules: recursive
+  build-linux:
+    needs: [create-release]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-        - name: Build mbgl-core for Linux
-          run: |
-            cmake --preset linux-opengl-core -DCMAKE_CXX_COMPILER_LAUNCHER=""
-            cmake --build --preset linux-opengl-core
+      - name: Build mbgl-core for Linux
+        run: |
+          cmake --preset linux-opengl-core -DCMAKE_CXX_COMPILER_LAUNCHER=""
+          cmake --build --preset linux-opengl-core
 
-        - name: Rename artifact
-          run: cp build-linux-opengl/libmbgl-core.a libmaplibre-native-core-linux-x64-opengl.a
+      - name: Rename artifact
+        run: cp build-linux-opengl/libmbgl-core.a libmaplibre-native-core-linux-x64-opengl.a
 
-        - name: Upload Linux artifact
-          run: gh release upload core-${{ github.sha }} libmaplibre-native-core-linux-x64-opengl.a
-          env:
-            GH_TOKEN: ${{ github.token }}
+      - name: Upload Linux artifact
+        run: gh release upload core-${{ github.sha }} libmaplibre-native-core-linux-x64-opengl.a
+        env:
+          GH_TOKEN: ${{ github.token }}
