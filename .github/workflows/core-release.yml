@@ -20,7 +20,9 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            "include/*"
+            "include/**/*"
+          fail_on_unmatched_files: true
+          make_latest: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
