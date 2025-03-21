@@ -2,7 +2,7 @@ if(TARGET mbgl-vendor-icu)
     return()
 endif()
 
-if(MLN_WITH_QT)
+if(MLN_WITH_QT OR MLN_WITH_CORE_ONLY)
     add_library(mbgl-vendor-icu OBJECT)
 else()
     add_library(mbgl-vendor-icu STATIC)

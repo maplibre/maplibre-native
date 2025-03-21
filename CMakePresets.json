@@ -55,5 +55,12 @@
         "MLN_WITH_WERROR": "OFF"
       }
     }
+  ],
+  "buildPresets": [
+    {
+      "name": "macos-core",
+      "configurePreset": "macos",
+      "targets": ["mbgl-core"]
+    }
   ]
 }
