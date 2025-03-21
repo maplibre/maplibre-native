@@ -65,6 +65,7 @@ std::array<float, 2> RenderHillshadeLayer::getLight(const PaintParameters& param
 
 void RenderHillshadeLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
+    styleDependencies = unevaluated.getDependencies();
 }
 
 #if MLN_DRAWABLE_RENDERER

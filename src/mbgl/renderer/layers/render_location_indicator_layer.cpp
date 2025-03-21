@@ -944,6 +944,7 @@ RenderLocationIndicatorLayer::~RenderLocationIndicatorLayer() {
 
 void RenderLocationIndicatorLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
+    styleDependencies = unevaluated.getDependencies();
 }
 
 void RenderLocationIndicatorLayer::evaluate(const PropertyEvaluationParameters& parameters) {
