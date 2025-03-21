@@ -54,12 +54,20 @@
         "MLN_WITH_NODE": "ON",
         "MLN_WITH_WERROR": "OFF"
       }
+    },
+    {
+      "name": "macos-core",
+      "inherits": "macos",
+      "cacheVariables": {
+        "MLN_CORE_INCLUDE_DEPS": "ON",
+        "MLN_WITH_GLFW": "OFF"
+      }
     }
   ],
   "buildPresets": [
     {
       "name": "macos-core",
-      "configurePreset": "macos",
+      "configurePreset": "macos-core",
       "targets": ["mbgl-core"]
     }
   ]
