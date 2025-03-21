@@ -16,7 +16,7 @@ CommandEncoder::CommandEncoder(Context& context_)
     : context(context_) {}
 
 CommandEncoder::~CommandEncoder() {
-    context.performCleanup();
+
 }
 
 std::unique_ptr<gfx::UploadPass> CommandEncoder::createUploadPass(const char* name, gfx::Renderable& renderable) {
