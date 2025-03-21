@@ -13,16 +13,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: core-${{ github.sha }}
-          generate_release_notes: true
-          draft: false
-          prerelease: false
-          files: |
+        run: |
+          gh release create core-${{ github.sha }} \
+            --draft=false \
+            --prerelease=false \
+             --latest=false \
+            --title "core-${{ github.sha }}" \
             "include/**/*"
-          fail_on_unmatched_files: true
-          make_latest: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
