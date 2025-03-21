@@ -27,16 +27,15 @@ void LocationIndicatorLayerTweaker::execute(LayerGroupBase& layerGroup, const Pa
 
         switch (static_cast<RenderLocationIndicatorLayer::LocationIndicatorComponentType>(drawable.getType())) {
             case RenderLocationIndicatorLayer::LocationIndicatorComponentType::Circle: {
-                LocationIndicatorDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(projectionCircle),
-                                                            /* .color = */ props.evaluated.get<AccuracyRadiusColor>()};
+                LocationIndicatorDrawableUBO drawableUBO = {.matrix = util::cast<float>(projectionCircle),
+                                                            .color = props.evaluated.get<AccuracyRadiusColor>()};
                 drawableUniforms.createOrUpdate(idLocationIndicatorDrawableUBO, &drawableUBO, params.context);
                 break;
             }
 
             case RenderLocationIndicatorLayer::LocationIndicatorComponentType::CircleOutline: {
-                LocationIndicatorDrawableUBO drawableUBO = {
-                    /* .matrix = */ util::cast<float>(projectionCircle),
-                    /* .color = */ props.evaluated.get<AccuracyRadiusBorderColor>()};
+                LocationIndicatorDrawableUBO drawableUBO = {.matrix = util::cast<float>(projectionCircle),
+                                                            .color = props.evaluated.get<AccuracyRadiusBorderColor>()};
                 drawableUniforms.createOrUpdate(idLocationIndicatorDrawableUBO, &drawableUBO, params.context);
                 break;
             }
@@ -46,8 +45,8 @@ void LocationIndicatorLayerTweaker::execute(LayerGroupBase& layerGroup, const Pa
             case RenderLocationIndicatorLayer::LocationIndicatorComponentType::Puck:
                 [[fallthrough]];
             case RenderLocationIndicatorLayer::LocationIndicatorComponentType::PuckHat: {
-                const LocationIndicatorDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(projectionPuck),
-                                                                  /* .color = */ Color::black()};
+                const LocationIndicatorDrawableUBO drawableUBO = {.matrix = util::cast<float>(projectionPuck),
+                                                                  .color = Color::black()};
                 drawableUniforms.createOrUpdate(idLocationIndicatorDrawableUBO, &drawableUBO, params.context);
                 break;
             }
