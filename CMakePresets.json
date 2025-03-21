@@ -35,7 +35,7 @@
     },
     {
       "name": "macos-vulkan",
-      "displayName": "macOS",
+      "displayName": "macOS-vulkan",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-macos-vulkan",
       "cacheVariables": {

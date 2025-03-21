@@ -2,13 +2,26 @@
 
 #include <cstddef>
 #include <string>
+#include <memory>
+#include <mbgl/util/color.hpp>
 
 namespace mbgl {
+
+namespace style {
+class Style;
+class SymbolLayer;
+} // namespace style
+
 namespace gfx {
 
 struct RenderingStats {
     RenderingStats() = default;
     bool isZero() const;
+
+    /// Frame CPU encoding time (milliseconds)
+    double encodingTime = 0.0;
+    /// Frame CPU rendering time (milliseconds)
+    double renderingTime = 0.0;
 
     /// Number of frames rendered
     int numFrames = 0;
@@ -67,6 +80,39 @@ struct RenderingStats {
 #if !defined(NDEBUG)
     std::string toString(std::string_view separator) const;
 #endif
+};
+
+class RenderingStatsView final {
+public:
+    struct Options {
+        float updateInterval = 0.25f;
+        bool verbose = false;
+        Color textColor = Color::red();
+        float textSize = 4.0f;
+    };
+
+    RenderingStatsView() = default;
+    RenderingStatsView(const Options& options_)
+        : options(options_) {}
+    ~RenderingStatsView() = default;
+
+    void create(const std::unique_ptr<style::Style>& style);
+    void destroy(const std::unique_ptr<style::Style>& style);
+
+    mbgl::style::SymbolLayer* getLayer(const std::unique_ptr<style::Style>& style);
+
+    void update(const std::unique_ptr<style::Style>& style, const gfx::RenderingStats& stats);
+
+protected:
+    const std::string layerID = "rendering-stats";
+    const std::string sourceID = layerID + "-source";
+
+    Options options;
+
+    double lastUpdate = 0.0;
+    uint32_t frameCount = 0;
+    double encodingTime = 0.0;
+    double renderingTime = 0.0;
 };
 
 } // namespace gfx
