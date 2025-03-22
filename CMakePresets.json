@@ -1,5 +1,5 @@
 {
-  "version": 10,
+  "version": 3,
   "cmakeMinimumRequired": {
     "major": 3,
     "minor": 21,
@@ -54,6 +54,69 @@
         "MLN_WITH_NODE": "ON",
         "MLN_WITH_WERROR": "OFF"
       }
+    },
+    {
+      "name": "macos-core",
+      "inherits": "macos",
+      "cacheVariables": {
+        "MLN_CORE_INCLUDE_DEPS": "ON",
+        "MLN_WITH_GLFW": "OFF"
+      }
+    },
+    {
+      "name": "linux-opengl",
+      "binaryDir": "${sourceDir}/build-linux-opengl",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "Linux",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "MLN_WITH_METAL": "OFF",
+        "MLN_WITH_OPENGL": "ON",
+        "MLN_DRAWABLE_RENDERER": "ON",
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++"
+      }
+    },
+    {
+      "name": "linux-opengl-core",
+      "inherits": "linux-opengl",
+      "cacheVariables": {
+        "MLN_CORE_INCLUDE_DEPS": "ON"
+      }
+    },
+    {
+      "name": "linux-vulkan",
+      "binaryDir": "${sourceDir}/build-linux-vulkan",
+      "generator": "Ninja",
+      "inherits": "linux-opengl",
+      "cacheVariables": {
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_WITH_VULKAN": "ON"
+      }
+    },
+    {
+      "name": "linux-vulkan-core",
+      "inherits": "linux-vulkan",
+      "cacheVariables": {
+        "MLN_CORE_INCLUDE_DEPS": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "macos-core",
+      "configurePreset": "macos-core",
+      "targets": ["mbgl-core"]
+    },
+    {
+      "name": "linux-opengl-core",
+      "configurePreset": "linux-opengl",
+      "targets": ["mbgl-core"]
+    },
+    {
+      "name": "linux-vulkan-core",
+      "configurePreset": "linux-vulkan",
+      "targets": ["mbgl-core"]
     }
   ]
 }
