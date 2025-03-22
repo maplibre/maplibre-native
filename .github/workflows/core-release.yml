@@ -1,5 +1,5 @@
 
-name: Release MapLibre Native Core
+name: core-release
 
 permissions:
   contents: write
@@ -50,6 +50,9 @@ jobs:
   build-linux:
     needs: [create-release]
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        renderer: [opengl, vulkan]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -57,13 +60,13 @@ jobs:
 
       - name: Build mbgl-core for Linux
         run: |
-          cmake --preset linux-opengl-core -DCMAKE_CXX_COMPILER_LAUNCHER=""
-          cmake --build --preset linux-opengl-core
+          cmake --preset linux-${{ matrix.renderer }}-core -DCMAKE_CXX_COMPILER_LAUNCHER=""
+          cmake --build --preset linux-${{ matrix.renderer }}-core
 
       - name: Rename artifact
-        run: cp build-linux-opengl/libmbgl-core.a libmaplibre-native-core-linux-x64-opengl.a
+        run: cp build-linux-${{ matrix.renderer }}/libmbgl-core.a libmaplibre-native-core-linux-x64-${{ matrix.renderer }}.a
 
       - name: Upload Linux artifact
-        run: gh release upload core-${{ github.sha }} libmaplibre-native-core-linux-x64-opengl.a
+        run: gh release upload core-${{ github.sha }} libmaplibre-native-core-linux-x64-${{ matrix.renderer }}.a
         env:
           GH_TOKEN: ${{ github.token }}

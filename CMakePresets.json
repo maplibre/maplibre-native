@@ -83,6 +83,23 @@
       "cacheVariables": {
         "MLN_CORE_INCLUDE_DEPS": "ON"
       }
+    },
+    {
+      "name": "linux-vulkan",
+      "binaryDir": "${sourceDir}/build-linux-vulkan",
+      "generator": "Ninja",
+      "inherits": "linux-opengl",
+      "cacheVariables": {
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_WITH_VULKAN": "ON"
+      }
+    },
+    {
+      "name": "linux-vulkan-core",
+      "inherits": "linux-vulkan",
+      "cacheVariables": {
+        "MLN_CORE_INCLUDE_DEPS": "ON"
+      }
     }
   ],
   "buildPresets": [
@@ -94,6 +111,11 @@
     {
       "name": "linux-opengl-core",
       "configurePreset": "linux-opengl",
+      "targets": ["mbgl-core"]
+    },
+    {
+      "name": "linux-vulkan-core",
+      "configurePreset": "linux-vulkan",
       "targets": ["mbgl-core"]
     }
   ]
