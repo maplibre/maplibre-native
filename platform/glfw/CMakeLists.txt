@@ -1,5 +1,3 @@
-find_package(OpenGL REQUIRED)
-
 if(WIN32)
     if(MLN_WITH_OSMESA)
         message(WARNING "mbgl-glfw does not work with -DMLN_WITH_OSMESA=ON. If you want to build this target, don't use this option.")
@@ -39,6 +37,7 @@ set_property(
 )
 
 if(MLN_WITH_OPENGL)
+    find_package(OpenGL REQUIRED)
     target_sources(
         mbgl-glfw
         PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_gl_backend.cpp
