@@ -49,10 +49,18 @@ jobs:
 
   build-linux:
     needs: [create-release]
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner.os }}
     strategy:
       matrix:
-        renderer: [opengl, vulkan]
+        include:
+          - renderer: opengl
+            runner: { os: ubuntu-latest, arch: x64 }
+          - renderer: vulkan
+            runner: { os: ubuntu-latest, arch: x64 }
+          - renderer: opengl
+            runner: { os: ubuntu-24.04-arm, arch: arm64 }
+          - renderer: vulkan
+            runner: { os: ubuntu-24.04-arm, arch: arm64 }
     steps:
       - uses: actions/checkout@v4
         with:
@@ -67,9 +75,9 @@ jobs:
           cmake --build --preset linux-${{ matrix.renderer }}-core
 
       - name: Rename artifact
-        run: cp build-linux-${{ matrix.renderer }}/libmbgl-core.a libmaplibre-native-core-linux-x64-${{ matrix.renderer }}.a
+        run: cp build-linux-${{ matrix.renderer }}/libmbgl-core.a libmaplibre-native-core-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
 
       - name: Upload Linux artifact
-        run: gh release upload core-${{ github.sha }} libmaplibre-native-core-linux-x64-${{ matrix.renderer }}.a
+        run: gh release upload core-${{ github.sha }} libmaplibre-native-core-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
         env:
           GH_TOKEN: ${{ github.token }}
