@@ -51,7 +51,7 @@ public:
 Context::Context(RendererBackend& backend_)
     : gfx::Context(vulkan::maximumVertexBindingCount),
       backend(backend_),
-      globalUniformBuffers(DescriptorSetType::Global, 0, shaders::globalUBOCount) {
+      globalUniformBuffers(DescriptorSetType::Global, 0, 0, shaders::globalUBOCount) {
     if (glslangRefCount++ == 0) {
         glslang::InitializeProcess();
     }
@@ -74,18 +74,20 @@ void Context::initFrameResources() {
     const auto frameCount = backend.getMaxFrames();
 
     descriptorPoolMap.emplace(DescriptorSetType::Global,
-                              DescriptorPoolGrowable(globalDescriptorPoolSize, shaders::globalUBOCount));
+                              DescriptorPoolGrowable(globalDescriptorPoolSize, 0, shaders::globalUBOCount, 0));
 
-    descriptorPoolMap.emplace(DescriptorSetType::Layer,
-                              DescriptorPoolGrowable(layerDescriptorPoolSize, shaders::maxUBOCountPerLayer));
+    descriptorPoolMap.emplace(
+        DescriptorSetType::Layer,
+        DescriptorPoolGrowable(
+            layerDescriptorPoolSize, shaders::maxSSBOCountPerLayer, shaders::maxUBOCountPerLayer, 0));
 
     descriptorPoolMap.emplace(
         DescriptorSetType::DrawableUniform,
-        DescriptorPoolGrowable(drawableUniformDescriptorPoolSize, shaders::maxUBOCountPerDrawable));
+        DescriptorPoolGrowable(drawableUniformDescriptorPoolSize, 0, shaders::maxUBOCountPerDrawable, 0));
 
     descriptorPoolMap.emplace(
         DescriptorSetType::DrawableImage,
-        DescriptorPoolGrowable(drawableImageDescriptorPoolSize, shaders::maxTextureCountPerShader));
+        DescriptorPoolGrowable(drawableImageDescriptorPoolSize, 0, 0, shaders::maxTextureCountPerShader));
 
     // command buffers
     const vk::CommandBufferAllocateInfo allocateInfo(
@@ -113,11 +115,17 @@ void Context::initFrameResources() {
     (void)getDummyTexture();
 
     buildUniformDescriptorSetLayout(
-        globalUniformDescriptorSetLayout, shaders::globalUBOCount, "GlobalUniformDescriptorSetLayout");
-    buildUniformDescriptorSetLayout(
-        layerUniformDescriptorSetLayout, shaders::maxUBOCountPerLayer, "LayerUniformDescriptorSetLayout");
-    buildUniformDescriptorSetLayout(
-        drawableUniformDescriptorSetLayout, shaders::maxUBOCountPerDrawable, "DrawableUniformDescriptorSetLayout");
+        globalUniformDescriptorSetLayout, 0, 0, shaders::globalUBOCount, "GlobalUniformDescriptorSetLayout");
+    buildUniformDescriptorSetLayout(layerUniformDescriptorSetLayout,
+                                    shaders::globalUBOCount,
+                                    shaders::maxSSBOCountPerLayer,
+                                    shaders::maxUBOCountPerLayer,
+                                    "LayerUniformDescriptorSetLayout");
+    buildUniformDescriptorSetLayout(drawableUniformDescriptorSetLayout,
+                                    shaders::globalUBOCount,
+                                    0,
+                                    shaders::maxUBOCountPerDrawable,
+                                    "DrawableUniformDescriptorSetLayout");
     buildImageDescriptorSetLayout();
 }
 
@@ -171,6 +179,19 @@ void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueComm
     }
 }
 
+void Context::requestSurfaceUpdate(bool useDelay) {
+    if (surfaceUpdateRequested) {
+        if (!useDelay) {
+            surfaceUpdateLatency = 0;
+        }
+
+        return;
+    }
+
+    surfaceUpdateRequested = true;
+    surfaceUpdateLatency = useDelay ? backend.getMaxFrames() * 3 : 0;
+}
+
 void Context::waitFrame() const {
     MLN_TRACE_FUNC();
     const auto& device = backend.getDevice();
@@ -189,7 +210,21 @@ void Context::beginFrame() {
     auto& renderableResource = backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
     const auto& platformSurface = renderableResource.getPlatformSurface();
 
-    if (platformSurface && surfaceUpdateRequested) {
+    // poll for surface transform updates if enabled
+    const int32_t surfaceTransformPollingInterval = renderableResource.getSurfaceTransformPollingInterval();
+    if (surfaceTransformPollingInterval >= 0 && !surfaceUpdateRequested) {
+        if (currentFrameCount > surfaceTransformPollingInterval) {
+            if (renderableResource.didSurfaceTransformUpdate()) {
+                requestSurfaceUpdate();
+            }
+
+            currentFrameCount = 0;
+        } else {
+            ++currentFrameCount;
+        }
+    }
+
+    if (platformSurface && surfaceUpdateRequested && --surfaceUpdateLatency <= 0) {
         renderableResource.recreateSwapchain();
 
         // we wait for an idle device to recreate the swapchain
@@ -201,6 +236,14 @@ void Context::beginFrame() {
         // sync resources with swapchain
         frameResourceIndex = 0;
         surfaceUpdateRequested = false;
+
+        // update renderable size
+        if (renderableResource.hasSurfaceTransformSupport()) {
+            const auto& extent = renderableResource.getExtent();
+
+            auto& renderable = static_cast<Renderable&>(backend.getDefaultRenderable());
+            renderable.setSize({extent.width, extent.height});
+        }
     }
 
     backend.startFrameCapture();
@@ -222,17 +265,12 @@ void Context::beginFrame() {
                 renderableResource.setAcquiredImageIndex(acquireImageResult.value);
             } else if (acquireImageResult.result == vk::Result::eSuboptimalKHR) {
                 renderableResource.setAcquiredImageIndex(acquireImageResult.value);
-                // TODO implement pre-rotation transform for surface orientation
-#if defined(__APPLE__)
                 requestSurfaceUpdate();
-                beginFrame();
-                return;
-#endif
             }
 
         } catch (const vk::OutOfDateKHRError& e) {
             // request an update and restart frame
-            requestSurfaceUpdate();
+            requestSurfaceUpdate(false);
             beginFrame();
             return;
         }
@@ -289,13 +327,10 @@ void Context::submitFrame() {
             const auto& presentQueue = backend.getPresentQueue();
             const vk::Result presentResult = presentQueue.presentKHR(presentInfo);
             if (presentResult == vk::Result::eSuboptimalKHR) {
-                // TODO implement pre-rotation transform for surface orientation
-#if defined(__APPLE__)
                 requestSurfaceUpdate();
-#endif
             }
         } catch (const vk::OutOfDateKHRError& e) {
-            requestSurfaceUpdate();
+            requestSurfaceUpdate(false);
         }
     }
 
@@ -326,8 +361,14 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<DrawableBuilder>(std::move(name));
 }
 
-gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool persistent) {
-    return std::make_shared<UniformBuffer>(createBuffer(data, size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, persistent));
+gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool persistent, bool ssbo) {
+    return std::make_shared<UniformBuffer>(createBuffer(
+        data, size, ssbo ? VK_BUFFER_USAGE_STORAGE_BUFFER_BIT : VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, persistent));
+}
+
+UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
+    return std::make_unique<UniformBufferArray>(
+        DescriptorSetType::Layer, shaders::globalUBOCount, shaders::maxSSBOCountPerLayer, shaders::maxUBOCountPerLayer);
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
@@ -409,7 +450,20 @@ void Context::clearStencilBuffer(int32_t) {
 
 void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexcept {
     auto& renderPassImpl = static_cast<RenderPass&>(renderPass);
-    const_cast<Context*>(this)->globalUniformBuffers.bindDescriptorSets(renderPassImpl.getEncoder());
+    auto& context = const_cast<Context&>(*this);
+
+    auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();
+    if (renderableResource.hasSurfaceTransformSupport()) {
+        float surfaceRotation = renderableResource.getRotation();
+
+        const shaders::GlobalPlatformParamsUBO platformUBO = {
+            /* .rotation0 = */ {cosf(surfaceRotation), -sinf(surfaceRotation)},
+            /* .rotation1 = */ {sinf(surfaceRotation), cosf(surfaceRotation)}};
+        context.globalUniformBuffers.createOrUpdate(
+            shaders::idGlobalPlatformParamsUBO, &platformUBO, sizeof(platformUBO), context);
+    }
+
+    context.globalUniformBuffers.bindDescriptorSets(renderPassImpl.getEncoder());
 }
 
 bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
@@ -489,15 +543,23 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     commandBuffer->bindVertexBuffers(0, vertexBuffers, offset);
     commandBuffer->bindIndexBuffer(clipping.indexBuffer->getVulkanBuffer(), 0, vk::IndexType::eUint16);
 
+    auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();
+    const float rad = renderableResource.getRotation();
+    const mat4 rotationMat = {cos(rad), -sin(rad), 0, 0, sin(rad), cos(rad), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+
     for (const auto& tileInfo : tileUBOs) {
         commandBuffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, tileInfo.stencil_ref);
+
+        mat4 matrix;
+        matrix::multiply(matrix, rotationMat, tileInfo.matrix);
+        const auto& matrixf = util::cast<float>(matrix);
 
         commandBuffer->pushConstants(
             getPushConstantPipelineLayout().get(),
             vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
             0,
-            sizeof(tileInfo.matrix),
-            &tileInfo.matrix);
+            sizeof(matrixf),
+            &matrixf);
         commandBuffer->drawIndexed(clipping.indexCount, 1, 0, 0, 0);
     }
 
@@ -506,18 +568,14 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     return true;
 }
 
-const std::unique_ptr<BufferResource>& Context::getDummyVertexBuffer() {
-    if (!dummyVertexBuffer)
-        dummyVertexBuffer = std::make_unique<BufferResource>(
-            *this, nullptr, 16, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, false);
-    return dummyVertexBuffer;
-}
+const std::unique_ptr<BufferResource>& Context::getDummyBuffer() {
+    if (!dummyBuffer) {
+        const uint32_t usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT |
+                               VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+        dummyBuffer = std::make_unique<BufferResource>(*this, nullptr, 16, usage, false);
+    }
 
-const std::unique_ptr<BufferResource>& Context::getDummyUniformBuffer() {
-    if (!dummyUniformBuffer)
-        dummyUniformBuffer = std::make_unique<BufferResource>(
-            *this, nullptr, 16, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, false);
-    return dummyUniformBuffer;
+    return dummyBuffer;
 }
 
 const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
@@ -538,17 +596,27 @@ const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
 }
 
 void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& layout,
+                                              size_t startId,
+                                              size_t storageCount,
                                               size_t uniformCount,
                                               const std::string& name) {
     std::vector<vk::DescriptorSetLayoutBinding> bindings;
-    const auto stageFlags = vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex |
-                            vk::ShaderStageFlagBits::eFragment;
+    for (size_t i = 0; i < storageCount + uniformCount; ++i) {
+        auto stageFlags = vk::ShaderStageFlags();
+        if (startId + i != shaders::idDrawableReservedFragmentOnlyUBO) {
+            stageFlags |= vk::ShaderStageFlagBits::eVertex;
+        }
+        if (startId + i != shaders::idDrawableReservedVertexOnlyUBO) {
+            stageFlags |= vk::ShaderStageFlagBits::eFragment;
+        }
 
-    for (size_t i = 0; i < uniformCount; ++i) {
+        const auto descriptorType = i < storageCount ? vk::DescriptorType::eStorageBuffer
+                                                     : vk::DescriptorType::eUniformBuffer;
+
         bindings.push_back(vk::DescriptorSetLayoutBinding()
-                               .setBinding(i)
+                               .setBinding(static_cast<uint32_t>(i))
                                .setStageFlags(stageFlags)
-                               .setDescriptorType(vk::DescriptorType::eUniformBuffer)
+                               .setDescriptorType(descriptorType)
                                .setDescriptorCount(1));
     }
 
@@ -603,6 +671,9 @@ DescriptorPoolGrowable& Context::getDescriptorPool(DescriptorSetType type) {
 const vk::UniquePipelineLayout& Context::getGeneralPipelineLayout() {
     if (generalPipelineLayout) return generalPipelineLayout;
 
+    const auto stages = vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment;
+    const auto pushConstant = vk::PushConstantRange().setSize(sizeof(uint32_t)).setStageFlags(stages);
+
     const std::vector<vk::DescriptorSetLayout> layouts = {
         globalUniformDescriptorSetLayout.get(),
         layerUniformDescriptorSetLayout.get(),
@@ -611,7 +682,7 @@ const vk::UniquePipelineLayout& Context::getGeneralPipelineLayout() {
     };
 
     generalPipelineLayout = backend.getDevice()->createPipelineLayoutUnique(
-        vk::PipelineLayoutCreateInfo().setSetLayouts(layouts));
+        vk::PipelineLayoutCreateInfo().setPushConstantRanges(pushConstant).setSetLayouts(layouts));
 
     backend.setDebugName(generalPipelineLayout.get(), "PipelineLayout_general");
 

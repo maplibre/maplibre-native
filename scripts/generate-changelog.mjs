@@ -18,7 +18,7 @@ function getTagLastVersion() {
     const lastVersion = fs
       .readFileSync(`platform/${platform}/CHANGELOG.md`, "utf-8")
       .split("\n")
-      .filter((line) => line.startsWith("## "))[1]
+      .filter((line) => line.startsWith("## "))[0]
       .slice(3);
     return `${platform}-v${lastVersion}`;
   }

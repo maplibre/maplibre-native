@@ -189,13 +189,13 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
     NSOpenPanel *panel = [NSOpenPanel openPanel];
     panel.allowedFileTypes = @[@"public.json", @"json", @"geojson"];
     panel.allowsMultipleSelection = YES;
-    
+
     __weak __typeof__(self) weakSelf = self;
     [panel beginSheetModalForWindow:self.window completionHandler:^(NSModalResponse result) {
       if (result != NSModalResponseOK) {
             return;
         }
-        
+
         for (NSURL *url in panel.URLs) {
             [weakSelf importFromURL:url];
         }
@@ -204,7 +204,7 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
 
 /**
  Adds the contents of the GeoJSON file at the given URL to the map.
- 
+
  GeoJSON features are styled according to
  [simplestyle-spec](https://github.com/mapbox/simplestyle-spec/tree/master/1.1.0/).
  */
@@ -213,10 +213,10 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
     if (!style) {
         return;
     }
-    
+
     MLNShapeSource *source = [[MLNShapeSource alloc] initWithIdentifier:[NSUUID UUID].UUIDString URL:url options:nil];
     [self.mapView.style addSource:source];
-    
+
     NSString *pointIdentifier = [NSString stringWithFormat:@"%@ marker", source.identifier];
     MLNSymbolStyleLayer *pointLayer = [[MLNSymbolStyleLayer alloc] initWithIdentifier:pointIdentifier source:source];
     pointLayer.iconImageName =
@@ -227,14 +227,14 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
                             @"marker-color"];
     pointLayer.iconAllowsOverlap = [NSExpression expressionForConstantValue:@YES];
     [style addLayer:pointLayer];
-    
+
     NSString *fillIdentifier = [NSString stringWithFormat:@"%@ fill", source.identifier];
     MLNFillStyleLayer *fillLayer = [[MLNFillStyleLayer alloc] initWithIdentifier:fillIdentifier source:source];
     fillLayer.predicate = [NSPredicate predicateWithFormat:@"fill != nil OR %K != nil", @"fill-opacity"];
     fillLayer.fillColor = [NSExpression expressionWithFormat:@"CAST(mgl_coalesce({fill, '#555555'}), 'NSColor')"];
     fillLayer.fillOpacity = [NSExpression expressionWithFormat:@"mgl_coalesce({%K, 0.5})", @"fill-opacity"];
     [style addLayer:fillLayer];
-    
+
     NSString *lineIdentifier = [NSString stringWithFormat:@"%@ stroke", source.identifier];
     MLNLineStyleLayer *lineLayer = [[MLNLineStyleLayer alloc] initWithIdentifier:lineIdentifier source:source];
     lineLayer.lineColor = [NSExpression expressionWithFormat:@"CAST(mgl_coalesce({stroke, '#555555'}), 'NSColor')"];
@@ -247,10 +247,10 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
 
 - (IBAction)takeSnapshot:(id)sender {
     MLNMapCamera *camera = self.mapView.camera;
-    
+
     MLNMapSnapshotOptions *options = [[MLNMapSnapshotOptions alloc] initWithStyleURL:self.mapView.styleURL camera:camera size:self.mapView.bounds.size];
     options.zoomLevel = self.mapView.zoomLevel;
-    
+
     // Create and start the snapshotter
     __weak __typeof__(self) weakSelf = self;
     _snapshotter = [[MLNMapSnapshotter alloc] initWithOptions:options];
@@ -268,12 +268,12 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
             NSSavePanel *panel = [NSSavePanel savePanel];
             panel.nameFieldStringValue = [strongSelf.mapView.styleURL.lastPathComponent.stringByDeletingPathExtension stringByAppendingPathExtension:@"png"];
             panel.allowedFileTypes = [@[(NSString *)kUTTypePNG] arrayByAddingObjectsFromArray:[NSBitmapImageRep imageUnfilteredTypes]];
-            
+
             [panel beginSheetModalForWindow:strongSelf.window completionHandler:^(NSInteger result) {
               if (result == NSModalResponseOK) {
                     // Write the contents in the new format.
                     NSURL *fileURL = panel.URL;
-                    
+
                     NSBitmapImageRep *bitmapRep;
                     for (NSImageRep *imageRep in snapshot.image.representations) {
                         if ([imageRep isKindOfClass:[NSBitmapImageRep class]]) {
@@ -281,11 +281,11 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
                             break; // stop on first bitmap rep we find
                         }
                     }
-                    
+
                     if (!bitmapRep) {
                         bitmapRep = [NSBitmapImageRep imageRepWithData:snapshot.image.TIFFRepresentation];
                     }
-                    
+
                     CFStringRef uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)fileURL.pathExtension, NULL /* inConformingToUTI */);
                     NSBitmapImageFileType fileType = NSTIFFFileType;
                     if (UTTypeConformsTo(uti, kUTTypePNG)) {
@@ -299,7 +299,7 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
                     } else if (UTTypeConformsTo(uti, kUTTypeBMP)) {
                         fileType = NSBitmapImageFileTypeBMP;
                     }
-                    
+
                     NSData *imageData = [bitmapRep representationUsingType:fileType properties:@{}];
                     [imageData writeToURL:fileURL atomically:NO];
                 }
@@ -757,7 +757,7 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
 
     MLNRasterStyleLayer * imageLayer = [[MLNRasterStyleLayer alloc] initWithIdentifier:@"animated-radar-layer" source:imageSource];
     [self.mapView.style addLayer:imageLayer];
-    
+
     [NSTimer scheduledTimerWithTimeInterval:1.0
                                      target:self
                                    selector:@selector(updateAnimatedImageSource:)
@@ -769,7 +769,7 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
 - (void)updateAnimatedImageSource:(NSTimer *)timer {
     static int radarSuffix = 0;
     MLNImageSource *imageSource = (MLNImageSource *)timer.userInfo;
-    
+
     MLNImage *image = [[NSBundle bundleForClass:[self class]] imageForResource:[NSString stringWithFormat:@"southeast_%d", radarSuffix++]];
     [imageSource setValue:image forKey:@"image"];
 
@@ -860,19 +860,19 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
     // Works only with Mapbox tileserver
     if (![[MLNSettings tileServerOptions].uriSchemeAlias isEqualToString:@"mapbox"])
         return;
-    
+
     // Find all the identifiers of Mapbox Terrain sources used in the style.
     NSMutableSet *terrainSourceIdentifiers = [NSMutableSet set];
     for (MLNVectorTileSource *source in self.mapView.style.sources) {
         if (![source isKindOfClass:[MLNVectorTileSource class]]) {
             continue;
         }
-        
+
         if (source.mapboxTerrain) {
             [terrainSourceIdentifiers addObject:source.identifier];
         }
     }
-    
+
     // Find and remove all the style layers using those sources.
     NSUInteger hillshadeIndex = NSNotFound;
     NSEnumerator *layerEnumerator = self.mapView.style.layers.objectEnumerator;
@@ -881,23 +881,23 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
         if (![layer isKindOfClass:[MLNVectorStyleLayer class]]) {
             continue;
         }
-        
+
         if ([terrainSourceIdentifiers containsObject:layer.sourceIdentifier]
             && [layer.sourceLayerIdentifier isEqualToString:@"hillshade"]) {
             hillshadeIndex = i;
             [self.mapView.style removeLayer:layer];
         }
     }
-    
+
     if (hillshadeIndex == NSNotFound) {
         return;
     }
-    
+
     // Add terrain-RGB source.
     NSURL *terrainRGBURL = [NSURL URLWithString:@"maptiler://sources/terrain-rgb"];
     MLNRasterDEMSource *terrainRGBSource = [[MLNRasterDEMSource alloc] initWithIdentifier:@"terrain" configurationURL:terrainRGBURL];
     [self.mapView.style addSource:terrainRGBSource];
-    
+
     // Insert a hillshade layer where the Mapbox Terrain–based layers were.
     MLNHillshadeStyleLayer *hillshadeLayer = [[MLNHillshadeStyleLayer alloc] initWithIdentifier:@"hillshade" source:terrainRGBSource];
     [self.mapView.style insertLayer:hillshadeLayer atIndex:hillshadeIndex];
@@ -914,18 +914,18 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
     self.maximumOfflinePackZoomLevelFormatter.minimum = @(floor(self.mapView.minimumZoomLevel));
     self.minimumOfflinePackZoomLevelFormatter.maximum = @(ceil(self.mapView.maximumZoomLevel));
     self.maximumOfflinePackZoomLevelFormatter.maximum = @(ceil(self.mapView.maximumZoomLevel));
-    
+
     id ideographicFontFamilyName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"MLNIdeographicFontFamilyName"];
     self.includesIdeographicGlyphsBox.state = ([ideographicFontFamilyName isKindOfClass:[NSNumber class]] && ![ideographicFontFamilyName boolValue]) ? NSOffState : NSOnState;
     [self.addOfflinePackWindow makeFirstResponder:self.offlinePackNameField];
-    
+
     __weak __typeof__(self) weakSelf = self;
     [self.window beginSheet:self.addOfflinePackWindow completionHandler:^(NSModalResponse returnCode) {
         __typeof__(self) strongSelf = weakSelf;
         if (!strongSelf || returnCode != NSModalResponseOK) {
             return;
         }
-        
+
         id <MLNOfflineRegion> region =
             [[MLNTilePyramidOfflineRegion alloc] initWithStyleURL:strongSelf.mapView.styleURL
                                                            bounds:strongSelf.mapView.visibleCoordinateBounds
@@ -979,7 +979,7 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
         @10.0: [NSColor yellowColor],
         @20.0: [NSColor blackColor],
     }];
-    
+
     if ([waterLayer respondsToSelector:@selector(fillColor)]) {
         [waterLayer setValue:colorExpression forKey:@"fillColor"];
     } else if ([waterLayer respondsToSelector:@selector(lineColor)]) {
@@ -1001,7 +1001,7 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
     if (streetsSource) {
         NSImage *image = [NSImage imageNamed:NSImageNameIChatTheaterTemplate];
         [self.mapView.style setImage:image forName:NSImageNameIChatTheaterTemplate];
-        
+
         MLNSymbolStyleLayer *theaterLayer = [[MLNSymbolStyleLayer alloc] initWithIdentifier:@"theaters" source:streetsSource];
         theaterLayer.sourceLayerIdentifier = @"poi_label";
         theaterLayer.predicate = [NSPredicate predicateWithFormat:@"maki == 'theatre'"];
@@ -1013,10 +1013,10 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
             @20.0: [NSColor blackColor],
         }];
         [self.mapView.style addLayer:theaterLayer];
-        
+
         NSImage *ohio = [NSImage imageNamed:@"ohio"];
         [self.mapView.style setImage:ohio forName:@"ohio"];
-        
+
         MLNSymbolStyleLayer *ohioLayer = [[MLNSymbolStyleLayer alloc] initWithIdentifier:@"ohio" source:streetsSource];
         ohioLayer.sourceLayerIdentifier = @"road";
         ohioLayer.predicate = [NSPredicate predicateWithFormat:@"shield = 'circle-white' and iso_3166_2 = 'US-OH'"];
@@ -1042,7 +1042,7 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
 
     MLNRasterStyleLayer * imageLayer = [[MLNRasterStyleLayer alloc] initWithIdentifier:@"radar-layer" source:imageSource];
     [self.mapView.style addLayer:imageLayer];
-    
+
     MLNCircleStyleLayer *ucLayer = [[MLNCircleStyleLayer alloc] initWithIdentifier:@"uc" source:streetsSource];
     ucLayer.sourceLayerIdentifier = @"poi_label";
     ucLayer.predicate = [NSPredicate predicateWithFormat:@"$geometryType = 'Point'"];
@@ -1077,7 +1077,7 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
     for (id <MLNFeature> feature in features) {
         if (!title) {
             title = [feature attributeForKey:@"title"] ?: [feature attributeForKey:@"name_en"] ?: [feature attributeForKey:@"name"];
-            
+
             // simplestyle-spec defines a “description” attribute in HTML format.
             NSString *featureDescription = [feature attributeForKey:@"description"];
             if (featureDescription) {
@@ -1086,7 +1086,7 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
                 NSData *data = [featureDescription dataUsingEncoding:NSUTF8StringEncoding];
                 description = [[NSAttributedString alloc] initWithHTML:data options:@{} documentAttributes:nil].string;
             }
-            
+
             if (title) {
                 break;
             }
@@ -1443,7 +1443,7 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
 
 - (void)mapSnapshotter:(MLNMapSnapshotter *)snapshotter didFinishLoadingStyle:(MLNStyle *)style {
     [style localizeLabelsIntoLocale:_isLocalizingLabels ? nil : [NSLocale localeWithLocaleIdentifier:@"mul"]];
-    
+
     // Layers hidden in the sidebar should be hidden in the snapshot too.
     NSMutableArray<NSString *> *hiddenLayerIdentifiers = [NSMutableArray array];
     for (MLNStyleLayer *layer in self.mapView.style.layers) {
@@ -1451,7 +1451,7 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
             [hiddenLayerIdentifiers addObject:layer.identifier];
         }
     }
-    
+
     NSSet <NSString *> *hiddenLayerIdentifierSet = [NSSet setWithArray:hiddenLayerIdentifiers];
     for (MLNStyleLayer *layer in style.layers) {
         if ([hiddenLayerIdentifierSet containsObject:layer.identifier]) {

@@ -82,6 +82,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
 
         tiles.clear();
         renderedTiles.clear();
+        cache.deferPendingReleases();
 
         return;
     }
@@ -288,6 +289,8 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
             tile.usedByRenderedLayers |= tile.layerPropertiesUpdated(layerProperties);
         }
     }
+
+    cache.deferPendingReleases();
 }
 
 void TilePyramid::handleWrapJump(float lng) {

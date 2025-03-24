@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/gfx/shader.hpp>
-#include <mbgl/gfx/uniform_block.hpp>
 #include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/util/identity.hpp>
 
@@ -34,17 +33,11 @@ public:
     /// @param name uniform name
     virtual std::optional<size_t> getSamplerLocation(const size_t) const = 0;
 
-    /// Get the available uniform blocks attached to this shader
-    virtual const gfx::UniformBlockArray& getUniformBlocks() const = 0;
-
     /// Get the available vertex attributes and their default values
     virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
 
     /// Get the available instance attributes and their default values
     virtual const gfx::VertexAttributeArray& getInstanceAttributes() const = 0;
-
-protected:
-    virtual gfx::UniformBlockArray& mutableUniformBlocks() = 0;
 
 protected:
     util::SimpleIdentity shaderProgramID;

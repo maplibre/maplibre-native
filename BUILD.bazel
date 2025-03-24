@@ -1,5 +1,5 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary")
-load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
 load("@npm//:defs.bzl", "npm_link_all_packages")
 load(
     "//bazel:core.bzl",
@@ -124,11 +124,11 @@ cc_library(
         ":mbgl-core-generated-private-artifacts",
         ":mbgl-core-generated-public-artifacts",
         "//vendor:boost",
-        "//vendor:csscolorparser",
         "//vendor:earcut.hpp",
         "//vendor:eternal",
         "//vendor:mapbox-base",
         "//vendor:parsedate",
+        "//vendor:pmtiles",
         "//vendor:polylabel",
         "//vendor:protozero",
         "//vendor:unique_resource",
@@ -148,6 +148,13 @@ cc_library(
             "//vendor:metal-cpp",
         ],
         "//conditions:default": [],
+    }) + select({
+        ":rust": [
+            "//rustutils:rustutilslib",
+        ],
+        "//conditions:default": [
+            "//vendor:csscolorparser",
+        ],
     }),
 )
 
@@ -191,6 +198,19 @@ config_setting(
     name = "metal_renderer",
     flag_values = {
         ":renderer": "metal",
+    },
+)
+
+bool_flag(
+    name = "use_rust",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "rust",
+    flag_values = {
+        "//:use_rust": "true",
     },
 )
 

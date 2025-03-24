@@ -17,7 +17,10 @@ namespace vulkan {
 
 TileLayerGroup::TileLayerGroup(int32_t layerIndex_, std::size_t initialCapacity, std::string name_)
     : mbgl::TileLayerGroup(layerIndex_, initialCapacity, std::move(name_)),
-      uniformBuffers(DescriptorSetType::Layer, shaders::layerUBOStartId, shaders::maxUBOCountPerLayer) {}
+      uniformBuffers(DescriptorSetType::Layer,
+                     shaders::globalUBOCount,
+                     shaders::maxSSBOCountPerLayer,
+                     shaders::maxUBOCountPerLayer) {}
 
 void TileLayerGroup::upload(gfx::UploadPass& uploadPass) {
     if (!enabled || !getDrawableCount()) {
@@ -89,13 +92,13 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             return;
         }
 
-        for (const auto& tweaker : drawable.getTweakers()) {
-            tweaker->execute(drawable, parameters);
-        }
-
         if (!bindUBOs) {
             uniformBuffers.bindDescriptorSets(encoder);
             bindUBOs = true;
+        }
+
+        for (const auto& tweaker : drawable.getTweakers()) {
+            tweaker->execute(drawable, parameters);
         }
 
         if (features3d) {

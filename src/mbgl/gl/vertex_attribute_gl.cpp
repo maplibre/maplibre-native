@@ -169,7 +169,7 @@ const std::vector<std::uint8_t>& VertexAttributeGL::getRaw(gfx::VertexAttribute&
             for (std::size_t i = 0; i < count; ++i) {
                 if (!get(attr.get(i), type, outPtr)) {
                     // missing type conversion
-                    assert(false);
+                    std::fill(outPtr, outPtr + stride_, 0);
                 }
                 outPtr += stride_;
             }

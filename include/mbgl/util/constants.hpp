@@ -60,6 +60,7 @@ constexpr int DEFAULT_RATE_LIMIT_TIMEOUT = 5;
 constexpr const char* ASSET_PROTOCOL = "asset://";
 constexpr const char* FILE_PROTOCOL = "file://";
 constexpr const char* MBTILES_PROTOCOL = "mbtiles://";
+constexpr const char* PMTILES_PROTOCOL = "pmtiles://";
 constexpr uint32_t DEFAULT_MAXIMUM_CONCURRENT_REQUESTS = 20;
 
 constexpr uint8_t TERRAIN_RGB_MAXZOOM = 15;

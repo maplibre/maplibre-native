@@ -24,8 +24,8 @@ using namespace platform;
 class Drawable::Impl final {
 public:
     Impl()
-        : uniformBuffers(DescriptorSetType::DrawableUniform, shaders::globalUBOCount, shaders::maxUBOCountPerDrawable) {
-    }
+        : uniformBuffers(
+              DescriptorSetType::DrawableUniform, shaders::globalUBOCount, 0, shaders::maxUBOCountPerDrawable) {}
 
     ~Impl() = default;
 
@@ -44,8 +44,8 @@ public:
 
     std::optional<gfx::RenderPassDescriptor> renderPassDescriptor;
 
-    gfx::DepthMode depthFor3D = gfx::DepthMode::disabled();
-    gfx::StencilMode stencilFor3D = gfx::StencilMode::disabled();
+    std::optional<gfx::DepthMode> depthFor3D;
+    std::optional<gfx::StencilMode> stencilFor3D;
 
     PipelineInfo pipelineInfo;
 

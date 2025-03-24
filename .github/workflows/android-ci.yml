@@ -123,6 +123,8 @@ jobs:
       - uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ${{ github.job }}
+          append-timestamp: false
+          max-size: 5G
 
       - name: restore-gradle-cache
         uses: actions/cache@v4
@@ -144,8 +146,8 @@ jobs:
         run: make android-lib-arm-v8
 
       - name: Build API documentation
-        run: ./gradlew dokkaHtml
-      
+        run: ./gradlew dokkaGenerate
+
       - name: Build Examples documentation
         run: make mkdocs-build
 
@@ -210,6 +212,18 @@ jobs:
         working-directory: test/android
 
     steps:
+      - name: Free Disk Space (Ubuntu)
+        if: startsWith(runner.name, 'GitHub Actions')
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: false
+
       - uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -229,6 +243,8 @@ jobs:
       - uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ${{ github.job }}
+          append-timestamp: false
+          max-size: 5G
 
       - name: Create data.zip in assets directory
         run: zip -r test/android/app/src/main/assets/data.zip -@ < test/android/app/src/main/assets/to_zip.txt
@@ -283,6 +299,8 @@ jobs:
       - uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ${{ github.job }}
+          append-timestamp: false
+          max-size: 5G
 
       - name: Get CMake and Ninja
         uses: lukka/get-cmake@latest

@@ -68,7 +68,8 @@ MLN_EXPORT
 
  @param styleURL URL of the map style to snapshot. The URL may be a full HTTP,
     HTTPS URL, canonical URL or a path to a local file relative to
-    the application’s resource path. Specify `nil` for the default style.
+    the application's resource path. Specify `nil` for the default style.
+ @param camera The camera representing the viewport visible in the snapshot.
  @param size The image size.
  */
 - (instancetype)initWithStyleURL:(nullable NSURL *)styleURL

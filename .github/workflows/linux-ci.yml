@@ -37,12 +37,13 @@ jobs:
       - name: Get all Linux files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files
+
         uses: tj-actions/changed-files@v45
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
       - name: List changed files
-        if: steps.changed-files.outputs.linux_any_modified == 'true'  
+        if: steps.changed-files.outputs.linux_any_modified == 'true'
         run: |
           echo "Changed file(s): ${{ steps.changed-files.outputs.linux_all_changed_files }}"
 
@@ -52,7 +53,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        renderer: [legacy, drawable, vulkan]
+        renderer: [legacy, drawable, vulkan, drawable-rust]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -76,20 +77,15 @@ jobs:
           ninjaVersion: latest
 
       - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libcurl4-openssl-dev \
-            libuv1-dev \
-            libjpeg-dev \
-            libpng-dev \
-            libglfw3-dev \
-            libwebp-dev \
-            libopengl0 \
-            mesa-vulkan-drivers
+        run: .github/scripts/install-linux-deps
 
       - if: matrix.renderer == 'drawable'
         run: echo renderer_flag_cmake=-DMLN_DRAWABLE_RENDERER=ON >> "$GITHUB_ENV"
+
+      - if: matrix.renderer == 'drawable-rust'
+        run: |
+          echo "renderer_flag_cmake=-DMLN_DRAWABLE_RENDERER=ON -DMLN_USE_RUST=ON" >> "$GITHUB_ENV"
+          cargo install cxxbridge-cmd
 
       - if: matrix.renderer == 'legacy'
         run: echo renderer_flag_cmake=-DMLN_LEGACY_RENDERER=ON >> "$GITHUB_ENV"
@@ -108,15 +104,15 @@ jobs:
       # mbgl-render (used for size test) & mbgl-benchmark-runner
 
       - name: Upload mbgl-render as artifact
-        if: matrix.renderer == 'drawable' && github.event_name == 'pull_request' 
+        if: matrix.renderer == 'drawable' && github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: mbgl-render
           path: |
             build/bin/mbgl-render
-  
+
       - name: Upload mbgl-benchmark-runner as artifact
-        if: matrix.renderer == 'drawable' && github.event_name == 'pull_request' 
+        if: matrix.renderer == 'drawable' && github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: mbgl-benchmark-runner
@@ -124,7 +120,7 @@ jobs:
             build/mbgl-benchmark-runner
 
       - name: Configure AWS Credentials
-        if: matrix.renderer == 'drawable' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
+        if: matrix.renderer == 'drawable' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2
@@ -132,8 +128,8 @@ jobs:
           role-session-name: ${{ github.run_id }}
 
       - name: Upload mbgl-render & mbgl-benchmark-runner to S3
-        if: matrix.renderer == 'drawable' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
-        run: | 
+        if: matrix.renderer == 'drawable' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
+        run: |
           aws s3 cp build/bin/mbgl-render s3://maplibre-native/mbgl-render-main
           aws s3 cp build/mbgl-benchmark-runner s3://maplibre-native/mbgl-benchmark-runner-main
 
@@ -158,7 +154,12 @@ jobs:
 
       - name: Run render test
         id: render_test
-        run: xvfb-run -a build/mbgl-render-test-runner --manifestPath=metrics/linux-${{ matrix.renderer }}.json
+        run: |
+          renderer="${{ matrix.renderer }}"
+          if [[ "$renderer" == *-rust ]]; then
+            renderer=${renderer%-rust}
+          fi
+          xvfb-run -a build/mbgl-render-test-runner --manifestPath=metrics/linux-"$renderer".json
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure'
@@ -167,7 +168,7 @@ jobs:
           name: render-test-result-${{ matrix.renderer }}
           path: |
             metrics/linux-${{ matrix.renderer }}.html
-      
+
       # expression tests
 
       - run: chmod +x build/expression-test/mbgl-expression-test
@@ -187,18 +188,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install dependencies
-        run: |
-          sudo apt-get update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
-            libcurl4-openssl-dev \
-            libuv1-dev \
-            libjpeg-dev \
-            libpng-dev \
-            libwebp-dev \
-            libglfw3-dev \
-            libsqlite3-dev \
-            xvfb \
-            x11-xserver-utils
+        run: .github/scripts/install-linux-deps
 
       - name: Cache Bazel
         uses: actions/cache@v4

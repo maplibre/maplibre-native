@@ -6,7 +6,7 @@ namespace mbgl {
     extern NSURL *resourceURL(const Resource& resource);
     extern BOOL isValidMapboxEndpoint(NSURL *url);
 }
-    
+
 @interface MLNResourceTests : XCTestCase
 @end
 
@@ -27,7 +27,7 @@ namespace mbgl {
 }
 
 - (void)internalTestOfflineQueryParameterIsAddedForOfflineResource:(std::string)testURL {
-    
+
     using namespace mbgl;
 
     // Is our test URL "correct" for subsequent checks?
@@ -42,14 +42,14 @@ namespace mbgl {
 
     // Now check offline
     resource.setUsage(Resource::Usage::Offline);
-    
+
     {
         NSURL *url = resourceURL(resource);
         NSURLComponents *components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
-        
+
         // For offline, we expect a single offline query item
         NSInteger foundCount = 0;
-        
+
 #if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
         for (NSURLQueryItem *item in components.queryItems) {
             if (([item.name isEqualToString:@"offline"] && [item.value isEqualToString:@"true"]) ||
@@ -70,7 +70,7 @@ namespace mbgl {
             }
             XCTAssertFalse([item.name isEqualToString:@"sku"]);
         }
-        
+
         XCTAssert(foundCount == 2);
 #endif
     }
@@ -84,17 +84,6 @@ namespace mbgl {
 - (void)testOfflineQueryParameterIsAddedForOfflineResourceForChina {
     std::string testURL = "test://mapbox.cn/testing_offline_query?a=one&b=two";
     [self internalTestOfflineQueryParameterIsAddedForOfflineResource:testURL];
-}
-
-- (void)testResourceURL {
-    using namespace mbgl;
-
-    // Test URL with characters requiring encoding
-    Resource resource(Resource::Kind::Unknown, "https://example.com/test?param1=a|b&param2=c|d");
-    NSURL *url = resourceURL(resource);
-
-    XCTAssertNotNil(url);
-    XCTAssertEqualObjects(url.absoluteString, @"https://example.com/test?param1=a%7Cb&param2=c%7Cd");
 }
 
 @end

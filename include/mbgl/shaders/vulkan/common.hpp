@@ -72,6 +72,11 @@ vec2 get_pattern_pos(const vec2 pixel_coord_upper, const vec2 pixel_coord_lower,
 #define DRAWABLE_UBO_SET_INDEX      2
 #define DRAWABLE_IMAGE_SET_INDEX    3
 
+#define idDrawableReservedVertexOnlyUBO         0
+#define idDrawableReservedFragmentOnlyUBO       1
+#define drawableReservedUBOCount                2
+#define layerUBOStartId                         3
+
 layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     vec2 pattern_atlas_texsize;
     vec2 units_to_pixels;
@@ -80,9 +85,23 @@ layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     float symbol_fade_change;
     float aspect_ratio;
     float pixel_ratio;
-    float zoom;
+    float map_zoom;
     float pad1;
-} global;
+} paintParams;
+
+#ifdef USE_SURFACE_TRANSFORM
+layout(set = GLOBAL_SET_INDEX, binding = 1) uniform GlobalPlatformParamsUBO {
+    mat2 rotation;
+} platformParams;
+#endif
+
+void applySurfaceTransform() {
+#ifdef USE_SURFACE_TRANSFORM
+    gl_Position.xy = platformParams.rotation * gl_Position.xy;
+#endif
+
+    gl_Position.y *= -1.0;
+}
 
 )";
 
@@ -96,6 +115,11 @@ layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
 #define DRAWABLE_UBO_SET_INDEX      2
 #define DRAWABLE_IMAGE_SET_INDEX    3
 
+#define idDrawableReservedVertexOnlyUBO         0
+#define idDrawableReservedFragmentOnlyUBO       1
+#define drawableReservedUBOCount                2
+#define layerUBOStartId                         3
+
 layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     vec2 pattern_atlas_texsize;
     vec2 units_to_pixels;
@@ -104,87 +128,10 @@ layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     float symbol_fade_change;
     float aspect_ratio;
     float pixel_ratio;
-    float zoom;
+    float map_zoom;
     float pad1;
-} global;
+} paintParams;
 
-)";
-};
-
-template <>
-struct ShaderSource<BuiltIn::CommonShader, gfx::Backend::Type::Vulkan> {
-    static constexpr const char* name = "CommonShader";
-
-    static const std::array<UniformBlockInfo, 1> uniforms;
-    static const std::array<AttributeInfo, 1> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static constexpr std::array<TextureInfo, 0> textures{};
-
-    static constexpr auto vertex = R"(
-layout(location = 0) in vec2 in_position;
-
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform CommonUBO {
-    mat4 matrix;
-    vec4 color;
-} ubo;
-
-void main() {
-    gl_Position = ubo.matrix * vec4(in_position, 0, 1);
-    gl_Position.y *= -1.0;
-}
-)";
-
-    static constexpr auto fragment = R"(
-layout(location = 0) out vec4 out_color;
-
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform CommonUBO {
-    mat4 matrix;
-    vec4 color;
-} ubo;
-
-void main() {
-    out_color = ubo.color;
-}
-)";
-};
-
-template <>
-struct ShaderSource<BuiltIn::CommonTexturedShader, gfx::Backend::Type::Vulkan> {
-    static constexpr const char* name = "CommonTexturedShader";
-
-    static const std::array<UniformBlockInfo, 1> uniforms;
-    static const std::array<AttributeInfo, 2> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
-
-    static constexpr auto vertex = R"(
-layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec2 in_texcoord;
-
-layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform CommonUBO {
-    mat4 matrix;
-    vec4 color;
-} ubo;
-
-layout(location = 0) out vec2 frag_uv;
-
-void main() {
-    gl_Position = ubo.matrix * vec4(in_position, 0, 1);
-    gl_Position.y *= -1.0;
-
-    frag_uv = in_texcoord;
-}
-)";
-
-    static constexpr auto fragment = R"(
-layout(location = 0) in vec2 frag_uv;
-layout(location = 0) out vec4 out_color;
-
-layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image_sampler;
-
-void main() {
-    out_color = texture(image_sampler, frag_uv);
-}
 )";
 };
 

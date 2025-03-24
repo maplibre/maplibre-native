@@ -555,28 +555,13 @@ bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
 void Context::bindGlobalUniformBuffers(gfx::RenderPass&) const noexcept {
     MLN_TRACE_FUNC();
 
-    for (size_t id = 0; id < globalUniformBuffers.allocatedSize(); id++) {
-        const auto& globalUniformBuffer = globalUniformBuffers.get(id);
-        if (!globalUniformBuffer) continue;
-        GLint binding = static_cast<GLint>(id);
-        const auto& uniformBufferGL = static_cast<const UniformBufferGL&>(*globalUniformBuffer);
-        MBGL_CHECK_ERROR(glBindBufferRange(GL_UNIFORM_BUFFER,
-                                           binding,
-                                           uniformBufferGL.getID(),
-                                           uniformBufferGL.getManagedBuffer().getBindingOffset(),
-                                           uniformBufferGL.getSize()));
-    }
+    globalUniformBuffers.bind();
 }
 
 void Context::unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept {
     MLN_TRACE_FUNC();
 
-    for (size_t id = 0; id < globalUniformBuffers.allocatedSize(); id++) {
-        const auto& globalUniformBuffer = globalUniformBuffers.get(id);
-        if (!globalUniformBuffer) continue;
-        GLint binding = static_cast<GLint>(id);
-        MBGL_CHECK_ERROR(glBindBufferBase(GL_UNIFORM_BUFFER, binding, 0));
-    }
+    globalUniformBuffers.unbind();
 }
 #endif
 
@@ -626,10 +611,17 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<gl::DrawableGLBuilder>(std::move(name));
 }
 
-gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool /*persistent*/) {
+gfx::UniformBufferPtr Context::createUniformBuffer(const void* data,
+                                                   std::size_t size,
+                                                   bool /*persistent*/,
+                                                   bool /*ssbo*/) {
     MLN_TRACE_FUNC();
 
     return std::make_shared<gl::UniformBufferGL>(data, size, *uboAllocator);
+}
+
+gfx::UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
+    return std::make_unique<UniformBufferArrayGL>();
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {

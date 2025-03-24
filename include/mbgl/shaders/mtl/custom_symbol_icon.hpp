@@ -1,12 +1,36 @@
 #pragma once
 
-#include <mbgl/shaders/mtl/common.hpp>
-#include <mbgl/shaders/mtl/shader_program.hpp>
-#include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/custom_drawable_layer_ubo.hpp>
+#include <mbgl/shaders/shader_source.hpp>
+#include <mbgl/shaders/mtl/shader_program.hpp>
 
 namespace mbgl {
 namespace shaders {
+
+constexpr auto customSymbolIconShaderPrelude = R"(
+
+enum {
+    idCustomSymbolDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    customSymbolUBOCount = drawableReservedUBOCount
+};
+
+struct alignas(16) CustomSymbolIconDrawableUBO {
+    /*   0 */ float4x4 matrix;
+    /*  64 */ float2 extrude_scale;
+    /*  72 */ float2 anchor;
+    /*  80 */ float angle_degrees;
+    /*  84 */ uint32_t scale_with_map;
+    /*  88 */ uint32_t pitch_with_map;
+    /*  92 */ float camera_to_center_distance;
+    /*  96 */ float aspect_ratio;
+    /* 100 */ float pad1;
+    /* 104 */ float pad2;
+    /* 108 */ float pad3;
+    /* 112 */
+};
+static_assert(sizeof(CustomSymbolIconDrawableUBO) == 7 * 16, "wrong size");
+
+)";
 
 template <>
 struct ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::Metal> {
@@ -14,30 +38,16 @@ struct ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::Metal> 
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
+    static constexpr auto prelude = customSymbolIconShaderPrelude;
     static constexpr auto source = R"(
-struct alignas(16) CustomSymbolIconDrawableUBO {
-    float4x4 matrix;
-};
-
-struct alignas(16) CustomSymbolIconParametersUBO {
-    float2 extrude_scale;
-    float2 anchor;
-    float angle_degrees;
-    int scale_with_map;
-    int pitch_with_map;
-    float camera_to_center_distance;
-    float aspect_ratio;
-    float pad0, pad1, pad3;
-};
 
 struct VertexStage {
-    float2 a_pos [[attribute(3)]];
-    float2 a_tex [[attribute(4)]];
+    float2 a_pos [[attribute(customSymbolUBOCount + 0)]];
+    float2 a_tex [[attribute(customSymbolUBOCount + 1)]];
 };
 
 struct FragmentStage {
@@ -59,29 +69,28 @@ float2 ellipseRotateVec2(float2 v, float angle, float radiusRatio /* A/B */) {
 }
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const CustomSymbolIconDrawableUBO& drawable [[buffer(1)]],
-                                device const CustomSymbolIconParametersUBO& parameters [[buffer(2)]]) {
+                                device const CustomSymbolIconDrawableUBO& drawable [[buffer(idCustomSymbolDrawableUBO)]]) {
 
     const float2 extrude = glMod(float2(vertx.a_pos), 2.0) * 2.0 - 1.0;
-    const float2 anchor = (parameters.anchor - float2(0.5, 0.5)) * 2.0;
+    const float2 anchor = (drawable.anchor - float2(0.5, 0.5)) * 2.0;
     const float2 center = floor(float2(vertx.a_pos) * 0.5);
-    const float angle = radians(-parameters.angle_degrees);
+    const float angle = radians(-drawable.angle_degrees);
     float2 corner = extrude - anchor;
 
     float4 position;
-    if (parameters.pitch_with_map) {
-        if (parameters.scale_with_map) {
-            corner *= parameters.extrude_scale;
+    if (drawable.pitch_with_map) {
+        if (drawable.scale_with_map) {
+            corner *= drawable.extrude_scale;
         } else {
             float4 projected_center = drawable.matrix * float4(center, 0, 1);
-            corner *= parameters.extrude_scale * (projected_center.w / parameters.camera_to_center_distance);
+            corner *= drawable.extrude_scale * (projected_center.w / drawable.camera_to_center_distance);
         }
         corner = center + rotateVec2(corner, angle);
         position = drawable.matrix * float4(corner, 0, 1);
     } else {
         position = drawable.matrix * float4(center, 0, 1);
-        const float factor = parameters.scale_with_map ? parameters.camera_to_center_distance : position.w;
-        position.xy += ellipseRotateVec2(corner * parameters.extrude_scale * factor, angle, parameters.aspect_ratio);
+        const float factor = drawable.scale_with_map ? drawable.camera_to_center_distance : position.w;
+        position.xy += ellipseRotateVec2(corner * drawable.extrude_scale * factor, angle, drawable.aspect_ratio);
     }
 
     return {

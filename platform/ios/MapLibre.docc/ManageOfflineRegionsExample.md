@@ -174,7 +174,7 @@ private extension MLNOfflinePackProgress {
             return 0
         }
 
-        let percentage = Float((countOfResourcesCompleted / countOfResourcesExpected) * 100)
+        let percentage = Float(countOfResourcesCompleted) / Float(countOfResourcesExpected) * 100
         return percentage
     }
 

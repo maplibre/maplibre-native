@@ -104,21 +104,21 @@ MLN_DEFINE_FEATURE_ATTRIBUTES_GETTER();
 - (NSUInteger)clusterIdentifier {
     NSNumber *clusterNumber = MLN_OBJC_DYNAMIC_CAST([self attributeForKey:MLNClusterIdentifierKey], NSNumber);
     MLNAssert(clusterNumber, @"Clusters should have a cluster_id");
-    
+
     if (!clusterNumber) {
         return MLNClusterIdentifierInvalid;
     }
-    
+
     NSUInteger clusterIdentifier = [clusterNumber unsignedIntegerValue];
     MLNAssert(clusterIdentifier <= UINT32_MAX, @"Cluster identifiers are 32bit");
-    
+
     return clusterIdentifier;
 }
 
 - (NSUInteger)clusterPointCount {
     NSNumber *count = MLN_OBJC_DYNAMIC_CAST([self attributeForKey:MLNClusterCountKey], NSNumber);
     MLNAssert(count, @"Clusters should have a point_count");
-    
+
     return [count unsignedIntegerValue];
 }
 @end
@@ -353,20 +353,20 @@ class GeometryEvaluator {
 private:
     const mbgl::PropertyMap *shared_properties;
     const bool is_in_feature;
-    
+
 public:
     GeometryEvaluator(const mbgl::PropertyMap *properties = nullptr, const bool isInFeature = false):
         shared_properties(properties),
         is_in_feature(isInFeature)
     {}
-    
+
     MLNShape * operator()(const mbgl::EmptyGeometry &) const {
         return is_in_feature ? [[MLNEmptyFeature alloc] init] : [[MLNShape alloc] init];
     }
 
     MLNShape * operator()(const mbgl::Point<T> &geometry) const {
         Class shapeClass = is_in_feature ? [MLNPointFeature class] : [MLNPointAnnotation class];
-        
+
         // If we're dealing with a cluster, we should change the class type.
         // This could be generic and build the subclass at runtime if it turns
         // out we need to support more than point clusters.
@@ -381,7 +381,7 @@ public:
                 }
             }
         }
-        
+
         MLNPointAnnotation *shape = [[shapeClass alloc] init];
         shape.coordinate = toLocationCoordinate2D(geometry);
         return shape;

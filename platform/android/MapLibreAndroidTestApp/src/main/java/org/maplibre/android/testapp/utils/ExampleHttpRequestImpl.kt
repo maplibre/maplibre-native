@@ -11,11 +11,11 @@ import org.maplibre.android.module.http.HttpRequestImpl
  */
 class ExampleHttpRequestImpl : HttpRequest {
     override fun executeRequest(httpRequest: HttpResponder, nativePtr: Long, resourceUrl: String,
-                                etag: String, modified: String, offlineUsage: Boolean)
+                                dataRange: String, etag: String, modified: String, offlineUsage: Boolean)
     {
         // Load all json documents and any pbf ending with a 0.
         if (resourceUrl.endsWith(".json") || resourceUrl.endsWith("0.pbf")) {
-            impl.executeRequest(httpRequest, nativePtr, resourceUrl, etag, modified, offlineUsage)
+            impl.executeRequest(httpRequest, nativePtr, resourceUrl, dataRange, etag, modified, offlineUsage)
         } else {
             // All other requests get an instant 404!
             httpRequest.onResponse(

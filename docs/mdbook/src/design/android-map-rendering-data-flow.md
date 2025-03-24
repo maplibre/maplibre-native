@@ -1,6 +1,6 @@
 # Android Map Rendering Data Flow
 
-![](media/android-data-flow.jpg)    
+![](media/android-data-flow.jpg)
 *Figure 5: Simplified data flow diagram of initializing a map in Android*
 
 Figure 5 shows a simplified data flow diagram of initializing a map. The
@@ -27,7 +27,7 @@ document talked about before is seen in the form of *MapRenderer*. This
 is an Actor that passes the rendering events from the device runtime to
 *MapLibre Native* renderer.
 
-![](media/workflow-of-rendering-tiles.jpg)    
+![](media/workflow-of-rendering-tiles.jpg)
 *Figure 6: Workflow of rendering tiles*
 
 Before the frame-by-frame map rendering
@@ -103,7 +103,7 @@ contains said glyphs. Sources and Layers are translated to
 
 *For the sake of restating, a layer is composed of a set of sources.*
 
-![](media/android-rendering-map-tiles.jpg)    
+![](media/android-rendering-map-tiles.jpg)
 *Figure 7: Simplified data flow diagram of rendering map tiles*
 
 A *RenderSource* is produced from a single

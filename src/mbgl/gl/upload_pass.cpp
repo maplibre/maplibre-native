@@ -271,7 +271,9 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             return;
         }
 
-        overrideAttr->setDirty(false);
+        if (overrideAttr) {
+            overrideAttr->setDirty(false);
+        }
 
         bindings[index] = {
             /*.attribute = */ {defaultAttr.getDataType(), offset},

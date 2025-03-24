@@ -1,0 +1,46 @@
+name: rust-ci
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: rustutils/
+
+jobs:
+  test:
+    name: Rust tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: macos-latest  # M-series CPU
+          - os: macos-13  # x64 CPU
+          - os: windows-latest
+          - os: ubuntu-latest
+    steps:
+      - uses: taiki-e/install-action@v2
+        with: { tool: just }
+      - uses: actions/checkout@v4
+      - run: just -v ci-test
+
+  msrv:
+    name: Rust tests MSRV (Minimal Supported Rust Version)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: taiki-e/install-action@v2
+        with: { tool: just }
+      - uses: actions/checkout@v4
+      - name: Read crate metadata
+        id: metadata
+        run: echo "rust-version=$(sed -ne 's/rust-version *= *\"\(.*\)\"/\1/p' Cargo.toml)" >> "$GITHUB_OUTPUT"
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ steps.metadata.outputs.rust-version }}
+      - run: just ci-test-msrv

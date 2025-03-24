@@ -30,6 +30,7 @@ Powerful, free and open-source mapping toolkit with full control over data sourc
 - <doc:DDSCircleLayerExample>
 - <doc:POIAlongRouteExample>
 - <doc:GeoJSON>
+- <doc:PMTiles>
 
 ### Map Interaction
 
@@ -48,11 +49,15 @@ Powerful, free and open-source mapping toolkit with full control over data sourc
 - <doc:OfflinePackExample>
 - <doc:ManageOfflineRegionsExample>
 
+### Advanced
+
+- <doc:ObserverExample>
+- <doc:CustomStyleLayerExample>
+
 ### Other Articles
 
 - <doc:Customizing_Fonts>
 - <doc:Info.plist_Keys>
-- <doc:GeoJSON>
 - <doc:GestureRecognizers>
 - <doc:MultipleImagesExample>
 - <doc:Predicates_and_Expressions>

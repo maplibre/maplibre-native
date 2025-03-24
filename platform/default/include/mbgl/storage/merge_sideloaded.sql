@@ -1,6 +1,6 @@
 INSERT INTO regions
    SELECT DISTINCT NULL, sr.definition, sr.description -- Merge duplicate regions
-    FROM side.regions sr 
+    FROM side.regions sr
     LEFT JOIN regions r ON sr.definition = r.definition AND sr.description IS r.description
       WHERE r.definition IS NULL;
 
@@ -32,7 +32,7 @@ INSERT OR IGNORE INTO region_tiles
 
 -- copy over resources
 REPLACE INTO resources
-    SELECT r.id, 
+    SELECT r.id,
         sr.url, sr.kind, sr.expires, sr.modified, sr.etag,
         sr.data, sr.compressed, sr.accessed, sr.must_revalidate
     FROM side.region_resources srr JOIN side.resources sr ON srr.resource_id = sr.id   --only consider region resources, and not ambient resources.
@@ -47,5 +47,5 @@ INSERT OR IGNORE INTO region_resources
   JOIN region_mapping rm ON srr.region_id = rm.side_region_id
   JOIN (SELECT r.id, sr.id AS side_resource_id FROM side.resources sr
           JOIN resources r ON sr.url = r.url) AS sri  ON srr.resource_id = sri.side_resource_id;
- 
+
 DROP TABLE region_mapping;

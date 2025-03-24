@@ -5,6 +5,7 @@
 #include <mbgl/vulkan/texture2d.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/instrumentation.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
 
 #include <cassert>
 #include <math.h>
@@ -36,10 +37,6 @@ void DescriptorSet::createDescriptorPool(DescriptorPoolGrowable& growablePool) {
 
     const uint32_t maxSets = static_cast<uint32_t>(growablePool.maxSets *
                                                    std::pow(growablePool.growFactor, growablePool.pools.size()));
-    const vk::DescriptorPoolSize size = {type != DescriptorSetType::DrawableImage
-                                             ? vk::DescriptorType::eUniformBuffer
-                                             : vk::DescriptorType::eCombinedImageSampler,
-                                         maxSets * growablePool.descriptorsPerSet};
 
 #ifdef USE_DESCRIPTOR_POOL_RESET
     const auto poolFlags = vk::DescriptorPoolCreateFlags();
@@ -47,10 +44,24 @@ void DescriptorSet::createDescriptorPool(DescriptorPoolGrowable& growablePool) {
     const auto poolFlags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet;
 #endif
 
-    const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo(poolFlags).setPoolSizes(size).setMaxSets(maxSets);
+    std::vector<vk::DescriptorPoolSize> sizes;
+    if (growablePool.descriptorStoragePerSet > 0) {
+        sizes.emplace_back(
+            vk::DescriptorPoolSize(vk::DescriptorType::eStorageBuffer, maxSets * growablePool.descriptorStoragePerSet));
+    }
+    if (growablePool.descriptorUniformsPerSet > 0) {
+        sizes.emplace_back(vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer,
+                                                  maxSets * growablePool.descriptorUniformsPerSet));
+    }
+    if (growablePool.descriptorTexturesPerSet > 0) {
+        sizes.emplace_back(vk::DescriptorPoolSize(vk::DescriptorType::eCombinedImageSampler,
+                                                  maxSets * growablePool.descriptorTexturesPerSet));
+    }
+
+    const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo(poolFlags).setPoolSizes(sizes).setMaxSets(maxSets);
 
     growablePool.pools.emplace_back(device->createDescriptorPoolUnique(descriptorPoolInfo), maxSets);
-    growablePool.currentPoolIndex = growablePool.pools.size() - 1;
+    growablePool.currentPoolIndex = static_cast<int32_t>(growablePool.pools.size() - 1);
 };
 
 void DescriptorSet::allocate() {
@@ -73,7 +84,8 @@ void DescriptorSet::allocate() {
             growablePool.pools.begin(), growablePool.pools.end(), [&](const auto& p) { return !p.unusedSets.empty(); });
 
         if (unusedPoolIt != growablePool.pools.end()) {
-            growablePool.currentPoolIndex = std::distance(growablePool.pools.begin(), unusedPoolIt);
+            growablePool.currentPoolIndex = static_cast<int32_t>(
+                std::distance(growablePool.pools.begin(), unusedPoolIt));
         } else
 #endif
         {
@@ -83,7 +95,8 @@ void DescriptorSet::allocate() {
                                                   [&](const auto& p) { return p.remainingSets >= layouts.size(); });
 
             if (freePoolIt != growablePool.pools.end()) {
-                growablePool.currentPoolIndex = std::distance(growablePool.pools.begin(), freePoolIt);
+                growablePool.currentPoolIndex = static_cast<int32_t>(
+                    std::distance(growablePool.pools.begin(), freePoolIt));
             } else {
                 createDescriptorPool(growablePool);
             }
@@ -108,8 +121,8 @@ void DescriptorSet::allocate() {
     dirty = std::vector(descriptorSets.size(), true);
 }
 
-void DescriptorSet::markDirty(bool value) {
-    std::fill(dirty.begin(), dirty.end(), value);
+void DescriptorSet::markDirty() {
+    std::fill(dirty.begin(), dirty.end(), true);
 }
 
 void DescriptorSet::bind(CommandEncoder& encoder) {
@@ -129,8 +142,9 @@ UniformDescriptorSet::UniformDescriptorSet(Context& context_, DescriptorSetType 
     : DescriptorSet(context_, type_) {}
 
 void UniformDescriptorSet::update(const gfx::UniformBufferArray& uniforms,
-                                  uint32_t uniformStartIndex,
-                                  uint32_t descriptorBindingCount) {
+                                  uint32_t descriptorStartIndex,
+                                  uint32_t descriptorStorageCount,
+                                  uint32_t descriptorUniformCount) {
     MLN_TRACE_FUNC();
 
     allocate();
@@ -142,26 +156,28 @@ void UniformDescriptorSet::update(const gfx::UniformBufferArray& uniforms,
 
     const auto& device = context.getBackend().getDevice();
 
-    for (size_t index = 0; index < descriptorBindingCount; ++index) {
+    for (size_t index = 0; index < descriptorStorageCount + descriptorUniformCount; ++index) {
         vk::DescriptorBufferInfo descriptorBufferInfo;
 
-        if (const auto& uniformBuffer = uniforms.get(uniformStartIndex + index)) {
+        if (const auto& uniformBuffer = uniforms.get(descriptorStartIndex + index)) {
             const auto& uniformBufferImpl = static_cast<const UniformBuffer&>(*uniformBuffer);
             const auto& bufferResource = uniformBufferImpl.getBufferResource();
             descriptorBufferInfo.setBuffer(bufferResource.getVulkanBuffer())
                 .setOffset(bufferResource.getVulkanBufferOffset())
                 .setRange(bufferResource.getSizeInBytes());
         } else {
-            descriptorBufferInfo.setBuffer(context.getDummyUniformBuffer()->getVulkanBuffer())
-                .setOffset(0)
-                .setRange(VK_WHOLE_SIZE);
+            const auto& dummyBuffer = context.getDummyBuffer();
+            descriptorBufferInfo.setBuffer(dummyBuffer->getVulkanBuffer()).setOffset(0).setRange(VK_WHOLE_SIZE);
         }
+
+        const auto descriptorType = index < descriptorStorageCount ? vk::DescriptorType::eStorageBuffer
+                                                                   : vk::DescriptorType::eUniformBuffer;
 
         const auto writeDescriptorSet = vk::WriteDescriptorSet()
                                             .setBufferInfo(descriptorBufferInfo)
                                             .setDescriptorCount(1)
-                                            .setDescriptorType(vk::DescriptorType::eUniformBuffer)
-                                            .setDstBinding(index)
+                                            .setDescriptorType(descriptorType)
+                                            .setDstBinding(static_cast<uint32_t>(index))
                                             .setDstSet(descriptorSets[frameIndex]);
 
         device->updateDescriptorSets(writeDescriptorSet, nullptr);
@@ -171,7 +187,14 @@ void UniformDescriptorSet::update(const gfx::UniformBufferArray& uniforms,
 }
 
 ImageDescriptorSet::ImageDescriptorSet(Context& context_)
-    : DescriptorSet(context_, DescriptorSetType::DrawableImage) {}
+    : DescriptorSet(context_, DescriptorSetType::DrawableImage),
+      lastModified(0.0) {}
+
+void ImageDescriptorSet::markDirty() {
+    DescriptorSet::markDirty();
+
+    lastModified = util::MonotonicTimer::now();
+}
 
 void ImageDescriptorSet::update(const std::array<gfx::Texture2DPtr, shaders::maxTextureCountPerShader>& textures) {
     MLN_TRACE_FUNC();
@@ -197,7 +220,7 @@ void ImageDescriptorSet::update(const std::array<gfx::Texture2DPtr, shaders::max
                                             .setImageInfo(descriptorImageInfo)
                                             .setDescriptorCount(1)
                                             .setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
-                                            .setDstBinding(id)
+                                            .setDstBinding(static_cast<uint32_t>(id))
                                             .setDstSet(descriptorSets[frameIndex]);
 
         device->updateDescriptorSets(writeDescriptorSet, nullptr);

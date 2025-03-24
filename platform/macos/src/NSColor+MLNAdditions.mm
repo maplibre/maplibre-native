@@ -47,7 +47,7 @@
             return [NSColor colorWithRed:color.r green:color.g blue:color.b alpha:color.a];
         }
     }
-    
+
     // mbgl::Color provides premultiplied color components, so we have to convert color
     // components to non-premultiplied values to return a valid NSColor object.
     float red = static_cast<float>((color.r / color.a));
@@ -75,7 +75,7 @@
     if (NSColor *color = [self mgl_colorWithRGBComponents:components]) {
         return [NSExpression expressionForConstantValue:color];
     }
-    
+
     NSExpression *color = [NSExpression expressionForConstantValue:[NSColor class]];
     NSExpression *alpha = [NSExpression expressionForConstantValue:@1.0];
     return [NSExpression expressionForFunction:color
@@ -87,7 +87,7 @@
     if (NSColor *color = [self mgl_colorWithRGBComponents:components]) {
         return [NSExpression expressionForConstantValue:color];
     }
-    
+
     NSExpression *color = [NSExpression expressionForConstantValue:[NSColor class]];
     return [NSExpression expressionForFunction:color
                                   selectorName:@"colorWithRed:green:blue:alpha:"
@@ -106,23 +106,23 @@
         if (componentExpression.expressionType != NSConstantValueExpressionType) {
             return nil;
         }
-        
+
         NSNumber *component = (NSNumber *)componentExpression.constantValue;
         if (![component isKindOfClass:[NSNumber class]]) {
             return nil;
         }
-        
+
         components.push_back(component.doubleValue / 255.0);
     }
-    
+
     if (components.size() < 4) {
         components.push_back(1.0);
     } else {
         // Alpha
         components.back() *= 255.0;
     }
-    
-    
+
+
     // macOS 10.12 Sierra and below uses calibrated RGB by default.
     if ([NSColor redColor].colorSpaceName == NSCalibratedRGBColorSpace) {
         return [NSColor colorWithCalibratedRed:components[0]

@@ -2,19 +2,10 @@ name: android-release
 
 on:
   workflow_dispatch:
-    inputs:
-      renderer:
-        description: "Select renderering backend"
-        required: true
-        default: "OpenGL"
-        type: choice
-        options:
-          - OpenGL
-          - Vulkan
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: MapLibre_Native_Ubuntu_24_04_x84_16_core
     defaults:
       run:
         working-directory: platform/android
@@ -27,17 +18,6 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-
-      - name: Map renderer input
-        id: backend_lowercase
-        run: |
-          if [ "${{ github.event.inputs.renderer }}" = "OpenGL" ]; then
-            echo "backend_lowercase=drawable" >> "$GITHUB_ENV"
-          elif [ "${{ github.event.inputs.renderer }}" = "Vulkan" ]; then
-            echo "backend_lowercase=vulkan" >> "$GITHUB_ENV"
-          fi
-
-      - run: echo "cmake.dir=$(dirname "$(dirname "$(command -v cmake)")")" >> local.properties
 
       - uses: actions/setup-java@v4
         with:
@@ -55,55 +35,9 @@ jobs:
         working-directory: platform/android
         shell: bash
 
-      - name: Cache node modules
-        uses: actions/cache@v4
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-
       - name: npm install
         run: npm install --ignore-scripts
         working-directory: platform/android
-
-      - name: Install ccache
-        run: sudo apt-get install -y ccache
-
-      - name: Prepare ccache
-        run: ccache --clear
-
-      - name: Cache ccache
-        uses: actions/cache@v4
-        env:
-          cache-name: ccache-v1
-        with:
-          path: ~/.ccache'
-          key: ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
-          restore-keys: |
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}
-
-      - name: Clear ccache statistics
-        run: |
-          ccache --zero-stats
-          ccache --max-size=2G
-          ccache --show-stats
-
-      - name: restore-gradle-cache
-        uses: actions/cache@v4
-        env:
-          cache-name: gradle-v1
-        with:
-          path: ~/.gradle'
-          key: ${{ env.cache-name }}-${{ hashFiles('platform/android/gradle/dependencies.gradle') }}-${{ hashFiles('platform/android/build.gradle') }}-${{ hashFiles('platform/android/local.properties') }}-${{ hashFiles('platform/android/gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: |
-            - ${{ env.cache-name }}
 
       - name: Android nitpick
         run: make run-android-nitpick
@@ -111,6 +45,7 @@ jobs:
       - name: Update version name
         run: |
           RELEASE_VERSION="$( git describe --tags --match=android-v*.*.* --abbrev=0 | sed 's/^android-v//' )"
+          echo version="$RELEASE_VERSION" >> "$GITHUB_ENV"
           echo "Latest version from tag: $RELEASE_VERSION"
           if [ -n "$RELEASE_VERSION" ]; then
             sed -i -e "s/^VERSION_NAME=.*/VERSION_NAME=${RELEASE_VERSION}/" MapLibreAndroid/gradle.properties
@@ -120,20 +55,9 @@ jobs:
         shell: bash
 
       - name: Build package
-        run: make apackage
-        env:
-          RENDERER: ${{ env.backend_lowercase }}
-
-      - name: Build release Test App
         run: |
-          MAPLIBRE_DEVELOPER_CONFIG_XML='${{ secrets.MAPLIBRE_DEVELOPER_CONFIG_XML }}'
-          if [ -n "${MAPLIBRE_DEVELOPER_CONFIG_XML}" ]; then
-            echo "${MAPLIBRE_DEVELOPER_CONFIG_XML}" > MapLibreAndroidTestApp/src/main/res/values/developer-config.xml
-            make android
-          else
-            echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, skipping apk build..."
-          fi
-        shell: bash
+          RENDERER=vulkan make apackage
+          RENDERER=drawable make apackage
 
       # create github release
       - name: Prepare release
@@ -145,15 +69,15 @@ jobs:
           echo version_tag="$( git describe --tags --match=android-v*.*.* --abbrev=0 )" >> "$GITHUB_OUTPUT"
         shell: bash
 
-      - name: Check if version is valid semver
+      - name: Check if version is pre-release
         id: check_version
         run: |
-          version_tag="${{ steps.prepare_release.outputs.version_tag }}"
-          if [[ $version_tag =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Valid semver: $version_tag"
+          version="${{ env.version }}"
+          if [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Valid semver: $version"
             echo "prerelease=false" >> "$GITHUB_ENV"
           else
-            echo "Invalid semver: $version_tag"
+            echo "Invalid semver: $version"
             echo "prerelease=true" >> "$GITHUB_ENV"
           fi
 
@@ -169,25 +93,44 @@ jobs:
           draft: false
           prerelease: ${{ env.prerelease }}
 
-      - name: Upload aar
-        id: upload-release-asset
+      - name: Upload aar (OpenGL)
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-${{ env.backend_lowercase }}-release.aar
+          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-drawable-release.aar
           asset_name: MapLibreAndroid-release.aar
           asset_content_type: application/zip
 
-      - name: Upload debug symbols
+      - name: Upload aar (Vulkan)
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/build/debug-symbols.tar.gz
-          asset_name: debug-symbols.tar.gz
+          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-vulkan-release.aar
+          asset_name: MapLibreAndroid-release-vulkan.aar
+          asset_content_type: application/zip
+
+      - name: Upload debug symbols (OpenGL)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: platform/android/build/debug-symbols-opengl.tar.gz
+          asset_name: debug-symbols-maplibre-android-opengl-${{ steps.prepare_release.outputs.version_tag }}.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload debug symbols (Vulkan)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: platform/android/build/debug-symbols-vulkan.tar.gz
+          asset_name: debug-symbols-maplibre-android-vulkan-${{ steps.prepare_release.outputs.version_tag }}.tar.gz
           asset_content_type: application/gzip
 
       - name: Clean release
@@ -210,4 +153,3 @@ jobs:
           SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
           SONATYPE_STAGING_PROFILE_ID: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}
-          RENDERER: ${{ env.backend_lowercase }}

@@ -13,6 +13,15 @@
   display: none;
 }
 
-.md-grid {
-  max-width: 1800px; 
+.md-nav--primary .md-nav__link[for=__toc] > .md-nav__icon,
+.md-nav--primary .md-nav__link[for=__toc] ~ .md-nav {
+  display: none;
+}
+
+.md-copyright__highlight {
+  color: inherit;
+}
+
+.inline-attribution {
+  font-size: smaller;
 }

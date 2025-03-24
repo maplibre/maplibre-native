@@ -1,48 +1,39 @@
 # MapLibre Android Examples
 
-Welcome to the examples documentation of MapLibre Android.
+To build the Examples Documentation you need to have Docker installed.
 
-<div class="grid cards" markdown>
+From `platform/android`, run:
 
--   :material-clock-fast:{ .lg .middle } __Quickstart__
+```
+make mkdocs
+```
 
-    ---
+Next, visit http://localhost:8000/maplibre-native/android/examples/
 
-    Learn how to include MapLibre Android in your project
+## Snippets
 
-    [:octicons-arrow-right-24: Getting started](getting-started.md)
+We use [a Markdown extension for snippets](https://facelessuser.github.io/pymdown-extensions/extensions/snippets/#snippet-sections). This way code can be referenced instead of copy pasted into the documentation. This avoids code examples from becoming out of date or failing to compile. The syntax is as follows:
 
--   :fontawesome-brands-slack:{ .lg .middle } __Find us on Slack__
+````kotlin
+// --8<-- [start:fun]
+fun double(x: Int): Int {
+    return 2 * x
+}
+// --8<-- [end:fun]
+````
 
-    ---
+Next, you'll be able to reference that piece of code in Markdown like so:
 
-    Discuss the project and ask questions in the `#maplibre-android` channel
+```
+--8<-- "example.kt:fun"
+```
 
-    [:octicons-arrow-right-24: Slack](https://osmus.slack.com/archives/C01G3D28DAB)
+Where `example.kt` is the path to the file.
 
--   :fontawesome-solid-code:{ .lg .middle } __Contribute to these Docs__
+## Static Assets
 
-    ---
+Static assets are ideally uploaded to the [MapLibre Native S3 Bucket](https://maplibre-native.s3.eu-central-1.amazonaws.com/index.html#android-documentation-resources/).
 
-    Share your own examples with the community!
+Please open an issue with the ARN of your AWS account to get upload privileges.
 
-    [:octicons-arrow-right-24: Documentation on GitHub](https://github.com/maplibre/maplibre-native/tree/main/platform/android/docs)
-
-</div>
-
-
-## Open-Source Apps Using MapLibre Android
-
-You can learn how to use the API from MapLibre Android by stuying the source code of existing apps that intergrate MapLibre Android. Here are some open-source apps that use MapLibre Android:
-
-- [Streetcomplete](https://github.com/streetcomplete/StreetComplete) ([source code](https://github.com/search?q=repo%3Astreetcomplete%2FStreetComplete%20maplibre&type=code))
-- [The official Wikipedia app for Android](https://github.com/wikimedia/apps-android-wikipedia) ([source code](https://github.com/search?q=repo%3Awikimedia%2Fapps-android-wikipedia%20maplibre&type=code)).
-- [MapLibreAndroidTestApp](https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapLibreAndroidTestApp). This app is part of the MapLibre Native repository and is used for (automated) testing. Many of the examples in this documentation site come directly from this app.
-
-## See Also
-
-- [MapLibre Android API Documentation](https://maplibre.org/maplibre-native/android/api/)
-- [Source code on GitHub](https://github.com/maplibre/maplibre-native/tree/main/platform/android)
-- [Latest releases](https://github.com/maplibre/maplibre-native/releases?q=android-v11&expanded=true)
-- [GitHub Discussions](https://github.com/maplibre/maplibre-native/discussions/categories/q-a?discussions_q=is%3Aopen+category%3AQ%26A+label%3Aandroid)
-- [MapLibre on Slack](https://slack.openstreetmap.us). Join the `#maplibre-native` and `#maplibre-android` channels.
+Use the CDN URL `https://dwxvn1oqw6mkc.cloudfront.net/` instead of linking to the S3 bucket directly.

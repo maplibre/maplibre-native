@@ -306,7 +306,7 @@ public:
     auto apiKey = [[MLNSettings sharedSettings] apiKey];
     if (apiKey) {
         resourceOptions.withApiKey([apiKey UTF8String]);
-    }                     
+    }
 
     _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions, clientOptions);
 
@@ -962,7 +962,7 @@ public:
     if (!_mbglMap) {
         return;
     }
-    
+
     if ([self.delegate respondsToSelector:@selector(mapViewDidBecomeIdle:)]) {
         [self.delegate mapViewDidBecomeIdle:self];
     }
@@ -996,9 +996,116 @@ public:
     if ([self.delegate respondsToSelector:@selector(mapView:shouldRemoveStyleImage:)]) {
         return [self.delegate mapView:self shouldRemoveStyleImage:imageName];
     }
-    
+
     return YES;
 }
+
+- (void)shaderWillCompile:(NSInteger)id backend:(NSInteger)backend defines:(nonnull NSString *)defines {
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:shaderWillCompile:backend:defines:)]) {
+        [self.delegate mapView:self shaderWillCompile:id backend:backend defines:defines];
+    }
+}
+
+- (void)shaderDidCompile:(NSInteger)id backend:(NSInteger)backend defines:(nonnull NSString *)defines {
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:shaderDidCompile:backend:defines:)]) {
+        [self.delegate mapView:self shaderDidCompile:id backend:backend defines:defines];
+    }
+}
+
+- (void)shaderDidFailCompile:(NSInteger)id backend:(NSInteger)backend defines:(nonnull NSString *)defines {
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:shaderDidFailCompile:backend:defines:)]) {
+        [self.delegate mapView:self shaderDidFailCompile:id backend:backend defines:defines];
+    }
+}
+
+- (void)glyphsWillLoad:(nonnull NSArray<NSString*>*)fontStack range:(NSRange)range {
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:glyphsWillLoad:range:)]) {
+        [self.delegate mapView:self glyphsWillLoad:fontStack range:range];
+    }
+}
+
+- (void)glyphsDidLoad:(nonnull NSArray<NSString*>*)fontStack range:(NSRange)range {
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:glyphsDidLoad:range:)]) {
+        [self.delegate mapView:self glyphsDidLoad:fontStack range:range];
+    }
+}
+
+- (void)glyphsDidError:(nonnull NSArray<NSString*>*)fontStack range:(NSRange)range {
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:glyphsDidError:range:)]) {
+        [self.delegate mapView:self glyphsDidError:fontStack range:range];
+    }
+}
+
+- (void)tileDidTriggerAction:(MLNTileOperation)operation
+                           x:(NSInteger)x
+                           y:(NSInteger)y
+                           z:(NSInteger)z
+                        wrap:(NSInteger)wrap
+                 overscaledZ:(NSInteger)overscaledZ
+                    sourceID:(nonnull NSString *)sourceID {
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:tileDidTriggerAction:x:y:z:wrap:overscaledZ:sourceID:)]) {
+        [self.delegate mapView:self tileDidTriggerAction:operation x:x y:y z:z wrap:wrap overscaledZ:overscaledZ sourceID:sourceID];
+    }
+}
+
+- (void)spriteWillLoad:(nullable NSString *)id url:(nullable NSString *)url {
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:spriteWillLoad:url:)]) {
+        [self.delegate mapView:self spriteWillLoad:id url:url];
+    }
+}
+
+- (void)spriteDidLoad:(nullable NSString *)id url:(nullable NSString *)url {
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:spriteDidLoad:url:)]) {
+        [self.delegate mapView:self spriteDidLoad:id url:url];
+    }
+}
+
+- (void)spriteDidError:(nullable NSString *)id url:(nullable NSString *)url {
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:spriteDidError:url:)]) {
+        [self.delegate mapView:self spriteDidError:id url:url];
+    }
+}
+
 
 // MARK: Printing
 
@@ -1046,7 +1153,7 @@ public:
             });
         }
     };
-    
+
     [self willChangeValueForKey:@"centerCoordinate"];
     _mbglMap->easeTo(mbgl::CameraOptions()
                          .withCenter(MLNLatLngFromLocationCoordinate2D(centerCoordinate))
@@ -1246,7 +1353,7 @@ public:
             });
         };
     }
-    
+
     if ([self.camera isEqualToMapCamera:camera]) {
         if (completion) {
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(duration * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -1295,7 +1402,7 @@ public:
             });
         };
     }
-    
+
     if ([self.camera isEqualToMapCamera:camera]) {
         if (completion) {
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(duration * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -1362,7 +1469,7 @@ public:
     if (animated) {
         animationOptions.duration = MLNDurationFromTimeInterval(MLNAnimationDuration);
     }
-    
+
     MLNMapCamera *camera = [self cameraForCameraOptions:cameraOptions];
     if ([self.camera isEqualToMapCamera:camera]) {
         completion();
@@ -1396,11 +1503,11 @@ public:
 {
     mbgl::EdgeInsets padding = MLNEdgeInsetsFromNSEdgeInsets(insets);
     padding += MLNEdgeInsetsFromNSEdgeInsets(self.contentInsets);
-    
+
     MLNMapCamera *currentCamera = self.camera;
     CGFloat pitch = camera.pitch < 0 ? currentCamera.pitch : camera.pitch;
     CLLocationDirection direction = camera.heading < 0 ? currentCamera.heading : camera.heading;
-    
+
     mbgl::CameraOptions cameraOptions = _mbglMap->cameraForLatLngBounds(MLNLatLngBoundsFromCoordinateBounds(bounds), padding, direction, pitch);
     return [self cameraForCameraOptions:cameraOptions];
 }
@@ -1408,13 +1515,13 @@ public:
 - (MLNMapCamera *)camera:(MLNMapCamera *)camera fittingShape:(MLNShape *)shape edgePadding:(NSEdgeInsets)insets {
     mbgl::EdgeInsets padding = MLNEdgeInsetsFromNSEdgeInsets(insets);
     padding += MLNEdgeInsetsFromNSEdgeInsets(self.contentInsets);
-    
+
     MLNMapCamera *currentCamera = self.camera;
     CGFloat pitch = camera.pitch < 0 ? currentCamera.pitch : camera.pitch;
     CLLocationDirection direction = camera.heading < 0 ? currentCamera.heading : camera.heading;
-    
+
     mbgl::CameraOptions cameraOptions = _mbglMap->cameraForGeometry([shape geometryObject], padding, direction, pitch);
-    
+
     return [self cameraForCameraOptions: cameraOptions];
 }
 
@@ -1569,7 +1676,7 @@ public:
                 _mbglMap->jumpTo(mbgl::CameraOptions().withPitch(_pitchAtBeginningOfGesture + delta.y / 5).withAnchor(center));
                 didChangeCamera = YES;
             }
-            
+
             if (didChangeCamera
                 && [self.delegate respondsToSelector:@selector(mapView:shouldChangeFromCamera:toCamera:)]
                 && ![self.delegate mapView:self shouldChangeFromCamera:oldCamera toCamera:self.camera]) {
@@ -1696,13 +1803,13 @@ public:
         _directionAtBeginningOfGesture = self.direction;
     } else if (gestureRecognizer.state == NSGestureRecognizerStateChanged) {
         MLNMapCamera *oldCamera = self.camera;
-        
+
         NSPoint rotationPoint = [gestureRecognizer locationInView:self];
         mbgl::ScreenCoordinate anchor(rotationPoint.x, self.bounds.size.height - rotationPoint.y);
         _mbglMap->jumpTo(mbgl::CameraOptions()
                              .withBearing(_directionAtBeginningOfGesture + gestureRecognizer.rotationInDegrees)
                              .withAnchor(anchor));
-        
+
         if ([self.delegate respondsToSelector:@selector(mapView:shouldChangeFromCamera:toCamera:)]
             && ![self.delegate mapView:self shouldChangeFromCamera:oldCamera toCamera:self.camera]) {
             self.camera = oldCamera;
@@ -1813,12 +1920,12 @@ public:
         case '-':
             [self moveToEndOfParagraph:nil];
             break;
-            
+
         case '+':
         case '=':
             [self moveToBeginningOfParagraph:nil];
             break;
-            
+
         default:
             [super insertText:insertString];
             break;
@@ -1928,11 +2035,11 @@ public:
 
     std::vector<MLNAnnotationTag> annotationTags = [self annotationTagsInRect:rect];
     std::vector<MLNAnnotationTag> shapeAnnotationTags = [self shapeAnnotationTagsInRect:rect];
-    
+
     if (shapeAnnotationTags.size()) {
         annotationTags.insert(annotationTags.end(), shapeAnnotationTags.begin(), shapeAnnotationTags.end());
     }
-    
+
     if (annotationTags.size())
     {
         NSMutableArray *annotations = [NSMutableArray arrayWithCapacity:annotationTags.size()];
@@ -2193,7 +2300,7 @@ public:
                             -MLNAnnotationImagePaddingForHitTest);
     std::vector<MLNAnnotationTag> nearbyAnnotations = [self annotationTagsInRect:queryRect];
     std::vector<MLNAnnotationTag> nearbyShapeAnnotations = [self shapeAnnotationTagsInRect:queryRect];
-    
+
     if (nearbyShapeAnnotations.size()) {
         nearbyAnnotations.insert(nearbyAnnotations.end(), nearbyShapeAnnotations.begin(), nearbyShapeAnnotations.end());
     }
@@ -2203,7 +2310,7 @@ public:
         NSRect hitRect = NSInsetRect({ point, NSZeroSize },
                                      -MLNAnnotationImagePaddingForHitTest,
                                      -MLNAnnotationImagePaddingForHitTest);
-        
+
         // Filter out any annotation whose image is unselectable or for which
         // hit testing fails.
         auto end = std::remove_if(nearbyAnnotations.begin(), nearbyAnnotations.end(), [&](const MLNAnnotationTag annotationTag) {
@@ -2212,7 +2319,7 @@ public:
             if (!annotation) {
                 return true;
             }
-            
+
             if ([annotation isKindOfClass:[MLNMultiPoint class]])
             {
                 if ([self.delegate respondsToSelector:@selector(mapView:shapeAnnotationIsEnabled:)]) {
@@ -2221,12 +2328,12 @@ public:
                     return false;
                 }
             }
-            
+
             MLNAnnotationImage *annotationImage = [self imageOfAnnotationWithTag:annotationTag];
             if (!annotationImage.selectable) {
                 return true;
             }
-            
+
             // Filter out the annotation if the fattened finger didn’t land on a
             // translucent or opaque pixel in the image.
             NSRect annotationRect = [self frameOfImage:annotationImage.image
@@ -2252,7 +2359,7 @@ public:
                                              coordinateB.longitude - currentCoordinate.longitude);
             return deltaA < deltaB;
         });
-        
+
         if (nearbyAnnotations == _annotationsNearbyLastClick) {
             // The last time we persisted a set of annotations, we had the same
             // set of annotations as we do now. Cycle through them.
@@ -2315,7 +2422,7 @@ public:
         _selectedAnnotationTag == MLNAnnotationTagNotFound) {
         return nil;
     }
-    
+
     MLNAnnotationContext &annotationContext = _annotationContextsByAnnotationTag.at(_selectedAnnotationTag);
     return annotationContext.annotation;
 }
@@ -2402,7 +2509,7 @@ public:
                               && !self.calloutForSelectedAnnotation.shown
                               && [self.delegate respondsToSelector:@selector(mapView:annotationCanShowCallout:)]
                               && [self.delegate mapView:self annotationCanShowCallout:annotation]);
-    
+
     if (NSIsEmptyRect(NSIntersectionRect(positioningRect, self.bounds))) {
         if (!moveIntoView && !NSEqualPoints(gesturePoint, NSZeroPoint)) {
             positioningRect = CGRectMake(gesturePoint.x, gesturePoint.y, positioningRect.size.width, positioningRect.size.height);
@@ -2449,7 +2556,7 @@ public:
 
         // Add padding around the positioning rect (in essence an inset from the edge of the viewport
         NSRect expandedPositioningRect = positioningRect;
-        
+
         if (shouldShowCallout) {
             // If we have a callout, expand this rect to include a buffer
             expandedPositioningRect = edgeInsetsInsetRect(positioningRect, MLNMapViewOffscreenAnnotationPadding);
@@ -2461,29 +2568,29 @@ public:
 
         // Any one of these cases should trigger a move onscreen
         CGFloat minX = CGRectGetMinX(expandedPositioningRect);
-        
+
         if (minX < CGRectGetMinX(bounds)) {
             constrainedRect.origin.x = minX;
             moveIntoView = YES;
         }
         else {
             CGFloat maxX = CGRectGetMaxX(expandedPositioningRect);
-            
+
             if (maxX > CGRectGetMaxX(bounds)) {
                 constrainedRect.origin.x = maxX - CGRectGetWidth(constrainedRect);
                 moveIntoView = YES;
             }
         }
-        
+
         CGFloat minY = CGRectGetMinY(expandedPositioningRect);
-        
+
         if (minY < CGRectGetMinY(bounds)) {
             constrainedRect.origin.y = minY;
             moveIntoView = YES;
         }
         else {
             CGFloat maxY = CGRectGetMaxY(expandedPositioningRect);
-            
+
             if (maxY > CGRectGetMaxY(bounds)) {
                 constrainedRect.origin.y = maxY - CGRectGetHeight(constrainedRect);
                 moveIntoView = YES;
@@ -2584,9 +2691,9 @@ public:
         CLLocationCoordinate2D origin = annotation.coordinate;
         CGPoint originPoint = [self convertCoordinate:origin toPointToView:self];
         return CGRectMake(originPoint.x, originPoint.y, MLNAnnotationImagePaddingForHitTest, MLNAnnotationImagePaddingForHitTest);
-        
+
     }
-    
+
     NSImage *image = [self imageOfAnnotationWithTag:annotationTag].image;
     if (!image) {
         image = [self dequeueReusableAnnotationImageWithIdentifier:MLNDefaultStyleMarkerSymbolName].image;
@@ -2858,12 +2965,12 @@ public:
         }];
         optionalLayerIDs = layerIDs;
     }
-    
+
     std::optional<mbgl::style::Filter> optionalFilter;
     if (predicate) {
         optionalFilter = predicate.mgl_filter;
     }
-    
+
     std::vector<mbgl::Feature> features = _rendererFrontend->getRenderer()->queryRenderedFeatures(screenCoordinate, { optionalLayerIDs, optionalFilter });
     return MLNFeaturesFromMBGLFeatures(features);
 }
@@ -2895,12 +3002,12 @@ public:
         }];
         optionalLayerIDs = layerIDs;
     }
-    
+
     std::optional<mbgl::style::Filter> optionalFilter;
     if (predicate) {
         optionalFilter = predicate.mgl_filter;
     }
-    
+
     std::vector<mbgl::Feature> features = _rendererFrontend->getRenderer()->queryRenderedFeatures(screenBox, { optionalLayerIDs, optionalFilter });
     return MLNFeaturesFromMBGLFeatures(features);
 }
@@ -2977,19 +3084,19 @@ public:
     auto southeast = bounds.southeast();
 
     auto center = [self convertPoint:{ NSMidX(view.bounds), NSMidY(view.bounds) } toLatLngFromView:view];
-    
+
     // Extend bounds to account for the antimeridian
     northwest.unwrapForShortestPath(center);
     northeast.unwrapForShortestPath(center);
     southwest.unwrapForShortestPath(center);
     southeast.unwrapForShortestPath(center);
-    
+
     auto correctedLatLngBounds = mbgl::LatLngBounds::empty();
     correctedLatLngBounds.extend(northwest);
     correctedLatLngBounds.extend(northeast);
     correctedLatLngBounds.extend(southwest);
     correctedLatLngBounds.extend(southeast);
-    
+
     NSRect rect = { [self convertLatLng:correctedLatLngBounds.southwest() toPointToView:view], CGSizeZero };
     rect = MLNExtendRect(rect, [self convertLatLng:correctedLatLngBounds.northeast() toPointToView:view]);
     return rect;
@@ -3007,7 +3114,7 @@ public:
     auto bottomRight = [self convertPoint:{ NSMaxX(rect), NSMinY(rect) } toLatLngFromView:view];
     auto topRight = [self convertPoint:{ NSMaxX(rect), NSMaxY(rect) } toLatLngFromView:view];
     auto topLeft = [self convertPoint:{ NSMinX(rect), NSMaxY(rect) } toLatLngFromView:view];
-    
+
     // If the bounds straddles the antimeridian, unwrap it so that one side
     // extends beyond ±180° longitude.
     auto center = [self convertPoint:{ NSMidX(rect), NSMidY(rect) } toLatLngFromView:view];
@@ -3015,7 +3122,7 @@ public:
     bottomRight.unwrapForShortestPath(center);
     topRight.unwrapForShortestPath(center);
     topLeft.unwrapForShortestPath(center);
-    
+
     bounds.extend(bottomLeft);
     bounds.extend(bottomRight);
     bounds.extend(topRight);

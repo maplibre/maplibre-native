@@ -3,8 +3,12 @@
 namespace mbgl {
 namespace shaders {
 
-const std::array<AttributeInfo, 1> ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Vulkan>::attributes =
-    {AttributeInfo{0, gfx::AttributeDataType::Short2, idClippingMaskPosVertexAttribute}};
+using ClippingMaskShaderSource = ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Vulkan>;
+
+const std::array<AttributeInfo, 1> ClippingMaskShaderSource::attributes = {
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idClippingMaskPosVertexAttribute},
+};
+const std::array<TextureInfo, 0> ClippingMaskShaderSource::textures = {};
 
 } // namespace shaders
 } // namespace mbgl

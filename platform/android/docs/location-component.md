@@ -76,11 +76,14 @@ val locationComponentOptions =
 
 Here is the final results with different color configurations. For the complete content of this demo, please refer to the source code of the [Test App].
 
-![result](https://github.com/maplibre/maplibre-native/assets/19887090/03dfc87b-111b-4dd0-b4a3-d89e30ed6b63)
+<figure markdown="span">
+  ![result](https://github.com/maplibre/maplibre-native/assets/19887090/03dfc87b-111b-4dd0-b4a3-d89e30ed6b63)
+  {{ openmaptiles_caption() }}
+</figure>
 
 
-[^1]: A variety of [camera modes] determine how the camera will track the user location.  
-      They provide the right context to your users at the correct time.  
+[^1]: A variety of [camera modes] determine how the camera will track the user location.
+      They provide the right context to your users at the correct time.
 
 [LocationComponent]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location/-location-component/index.html
 [Android Developer Documentation]: https://developer.android.com/training/location/permissions

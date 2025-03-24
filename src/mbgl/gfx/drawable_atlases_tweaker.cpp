@@ -12,12 +12,13 @@ void DrawableAtlasesTweaker::setupTextures(gfx::Drawable& drawable, const bool l
     if (const auto& shader = drawable.getShader()) {
         if (glyphTextureId) {
             if (atlases) {
-                atlases->glyph->setSamplerConfiguration(
-                    {TextureFilterType::Linear, TextureWrapType::Clamp, TextureWrapType::Clamp});
+                atlases->glyph->setSamplerConfiguration({.filter = TextureFilterType::Linear,
+                                                         .wrapU = TextureWrapType::Clamp,
+                                                         .wrapV = TextureWrapType::Clamp});
                 atlases->icon->setSamplerConfiguration(
-                    {linearFilterForIcons ? TextureFilterType::Linear : TextureFilterType::Nearest,
-                     TextureWrapType::Clamp,
-                     TextureWrapType::Clamp});
+                    {.filter = linearFilterForIcons ? TextureFilterType::Linear : TextureFilterType::Nearest,
+                     .wrapU = TextureWrapType::Clamp,
+                     .wrapV = TextureWrapType::Clamp});
             }
             if (iconTextureId && shader->getSamplerLocation(*iconTextureId)) {
                 assert(*glyphTextureId != *iconTextureId);
@@ -34,7 +35,7 @@ void DrawableAtlasesTweaker::init(gfx::Drawable& drawable) {
     setupTextures(drawable, true);
 }
 
-void DrawableAtlasesTweaker::execute(gfx::Drawable& drawable, const PaintParameters& parameters) {
+void DrawableAtlasesTweaker::execute(gfx::Drawable& drawable, PaintParameters& parameters) {
     const bool transformed = rotationAlignment == style::AlignmentType::Map || parameters.state.getPitch() != 0;
     const bool linearFilterForIcons = isText ? (parameters.state.isChanging() || transformed || !textSizeIsZoomConstant)
                                              : (sdfIcons || parameters.state.isChanging() || iconScaled || transformed);

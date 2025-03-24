@@ -63,9 +63,8 @@ void RenderFillExtrusionLayer::evaluate(const PropertyEvaluationParameters& para
         parameters.getCrossfadeParameters(),
         unevaluated.evaluate(parameters, previousProperties->evaluated));
 
-    passes = (properties->evaluated.get<style::FillExtrusionOpacity>() > 0)
-                 ? (RenderPass::Translucent | RenderPass::Pass3D)
-                 : RenderPass::None;
+    passes = (properties->evaluated.get<style::FillExtrusionOpacity>() > 0) ? RenderPass::Translucent
+                                                                            : RenderPass::None;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 
@@ -304,15 +303,12 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
     const auto& evaluated = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties).evaluated;
 
-    // `passes` is set to (RenderPass::Translucent | RenderPass::Pass3D), but `render()`
-    // only runs on the translucent pass, so although our output is 3D, it does not render
-    // in the "3D pass".
     constexpr auto drawPass = RenderPass::Translucent;
 
     stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         const auto& tileID = drawable.getTileID();
-        if (!(drawable.getRenderPass() & passes) || (tileID && !hasRenderTile(*tileID))) {
+        if (!(drawable.getRenderPass() & drawPass) || (tileID && !hasRenderTile(*tileID))) {
             return true;
         }
         return false;
@@ -337,7 +333,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
-        const auto* optRenderData = getRenderDataForPass(tile, passes);
+        const auto* optRenderData = getRenderDataForPass(tile, drawPass);
         if (!optRenderData || !optRenderData->bucket || !optRenderData->bucket->hasData()) {
             removeTile(drawPass, tileID);
             continue;
@@ -349,7 +345,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         const auto prevBucketID = getRenderTileBucketID(tileID);
         if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
             // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
-            removeTile(passes, tileID);
+            removeTile(drawPass, tileID);
         }
         setRenderTileBucketID(tileID, bucket.getID());
 

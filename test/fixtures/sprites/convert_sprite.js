@@ -7,7 +7,7 @@ var zlib = require('zlib');
 var PNG = require('png-js');
 var png = PNG.load('styles/sprites/bright.png');
 png.decodePixels(function(data) {
-    var result = new Buffer(8 + data.length);
+    var result = Buffer.alloc(8 + data.length);
     result.writeUInt32BE(png.width, 0);
     result.writeUInt32BE(png.height, 4);
     data.copy(result, 8);

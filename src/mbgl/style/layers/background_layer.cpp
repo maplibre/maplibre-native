@@ -21,16 +21,15 @@ namespace style {
 
 // static
 const LayerTypeInfo* BackgroundLayer::Impl::staticTypeInfo() noexcept {
-    const static LayerTypeInfo typeInfo{"background",
-                                        LayerTypeInfo::Source::NotRequired,
-                                        LayerTypeInfo::Pass3D::NotRequired,
-                                        LayerTypeInfo::Layout::NotRequired,
-                                        LayerTypeInfo::FadingTiles::NotRequired,
-                                        LayerTypeInfo::CrossTileIndex::NotRequired,
-                                        LayerTypeInfo::TileKind::NotRequired};
+    const static LayerTypeInfo typeInfo{.type="background",
+                                        .source=LayerTypeInfo::Source::NotRequired,
+                                        .pass3d=LayerTypeInfo::Pass3D::NotRequired,
+                                        .layout=LayerTypeInfo::Layout::NotRequired,
+                                        .fadingTiles=LayerTypeInfo::FadingTiles::NotRequired,
+                                        .crossTileIndex=LayerTypeInfo::CrossTileIndex::NotRequired,
+                                        .tileKind=LayerTypeInfo::TileKind::NotRequired};
     return &typeInfo;
 }
-
 
 BackgroundLayer::BackgroundLayer(const std::string& layerID)
     : Layer(makeMutable<Impl>(layerID, std::string())) {

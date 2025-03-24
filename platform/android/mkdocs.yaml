@@ -1,8 +1,10 @@
 site_name: MapLibre Android Examples
 site_url: https://www.maplibre.org/maplibre-native/android/examples
-repo_url: https://github.com/louwers/maplibre-native
+repo_url: https://github.com/maplibre/maplibre-native
 site_description: MapLibre Android Examples
 edit_uri: edit/main/platform/android/docs
+copyright: Map data from <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>
+exclude_docs: README.md
 extra_css:
   - assets/extra.css
 theme:
@@ -15,6 +17,7 @@ theme:
     - navigation.instant
     - navigation.sections
     - content.action.edit
+    - toc.integrate
   palette:
     - media: "(prefers-color-scheme)"
       toggle:
@@ -26,7 +29,7 @@ theme:
         icon: material/brightness-4
         name: Switch to system preference
     - media: "(prefers-color-scheme: light)"
-      scheme: default 
+      scheme: default
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
@@ -38,6 +41,7 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets:
       dedent_subsections: true
+      check_paths: true
   - pymdownx.superfences
   - pymdownx.escapeall:
       hardbreak: True
@@ -64,6 +68,9 @@ extra:
       link: https://github.com/maplibre
 plugins:
   - search
+  - macros:
+      module_name: docs/main
+      on_undefined: strict
   - social:
       cards_layout_options:
         background_color: '#295DAA'

@@ -2,10 +2,10 @@
 
 These steps will allow you to compile code as described [platform/linux/README.md](../platform/linux/README.md) using a Docker container. All the steps should be executed from the root of the repository.
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > Not all platform builds are currently supported. Docker builds are a work in progress.
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > You cannot build MapLibre native using both Docker and host methods at the same time. If you want to switch, you need to clean the repository first, e.g. by using this command:
 >
 > ```bash
@@ -19,7 +19,7 @@ You must build your own Docker image, specific with your user and group IDs to e
 ```bash
 # Build docker image from the repo __root__
 # Specifying USER_UID and USER_GID allows container to create files with the same owner as the host user,
-# and avoids having to pass -u $(id -u):$(id -g) to docker run.  
+# and avoids having to pass -u $(id -u):$(id -g) to docker run.
 docker build \
   -t maplibre-native-image \
   --build-arg USER_UID=$(id -u) \
@@ -33,11 +33,11 @@ docker build \
 ```bash
 # Run all build commands using the docker container.
 # You can also execute build commands from inside the docker container by starting it without the build command.
-docker run --rm -it -v "$PWD:/app/" -v "$PWD/docker/.cache:/home/user/.cache" maplibre-native-image
+docker run --rm -it -v "$PWD:/app/" -v "$PWD/docker/.cache:/home/ubuntu/.cache" maplibre-native-image
 ```
 
 You can also use the container to run just one specific commands, e.g. `cmake` or `bazel`. Any downloaded dependencies will be cached in the `docker/.cache` directory.
 
 ```bash
-docker run --rm -it -v "$PWD:/app/" -v "$PWD/docker/.cache:/home/user/.cache" maplibre-native-image cmake ...
-``` 
+docker run --rm -it -v "$PWD:/app/" -v "$PWD/docker/.cache:/home/ubuntu/.cache" maplibre-native-image cmake ...
+```

@@ -72,6 +72,17 @@ void RenderPass::endEncoding() {
     }
 }
 
+void RenderPass::resetState() {
+    currentDepthStencilState.reset();
+    currentStencilReferenceValue = 0;
+    for (int i = 0; i < maxBinds; ++i) {
+        vertexBinds[i].reset();
+        fragmentBinds[i].reset();
+        fragmentTextureBindings[i].reset();
+        fragmentSamplerStates[i].reset();
+    }
+}
+
 namespace {
 constexpr auto missing = "<none>";
 NS::String* toNSString(const char* str) {
@@ -122,6 +133,10 @@ void RenderPass::bindVertex(const BufferResource& buf, std::size_t offset, std::
     buf.bindVertex(encoder, offset, index, actualSize);
 }
 
+void RenderPass::unbindVertex(std::size_t index) {
+    vertexBinds[index] = std::nullopt;
+}
+
 void RenderPass::bindFragment(const BufferResource& buf, std::size_t offset, std::size_t index, std::size_t size) {
     const auto actualSize = size ? size : buf.getSizeInBytes() - offset;
     assert(actualSize <= buf.getSizeInBytes());
@@ -142,6 +157,10 @@ void RenderPass::bindFragment(const BufferResource& buf, std::size_t offset, std
         fragmentBinds[index] = BindInfo{&buf, actualSize, offset};
     }
     buf.bindFragment(encoder, offset, index, actualSize);
+}
+
+void RenderPass::unbindFragment(std::size_t index) {
+    fragmentBinds[index] = std::nullopt;
 }
 
 void RenderPass::setDepthStencilState(const MTLDepthStencilStatePtr& state) {
