@@ -40,6 +40,7 @@ import org.maplibre.android.style.layers.SymbolLayer;
 import java.lang.ref.WeakReference;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -1259,7 +1260,17 @@ public final class LocationComponent {
    * @param location the latest user location
    */
   private void updateLocation(@Nullable final Location location, boolean fromLastLocation) {
-    updateLocation(location, null, fromLastLocation, false);
+    try {
+      updateLocation(location, null, fromLastLocation, false);
+    } catch (IllegalArgumentException ex) {
+      // ignore location update
+      // to prevent rare crash https://github.com/maplibre/maplibre-native/issues/3294
+      if (Objects.equals(ex.getMessage(), "MapLibreAnimator values cannot be null")) {
+        Logger.e(TAG, ex.getMessage());
+        return;
+      }
+      throw ex;
+    }
   }
 
   private void updateLocation(@Nullable final Location location, @Nullable List<Location> intermediatePoints,

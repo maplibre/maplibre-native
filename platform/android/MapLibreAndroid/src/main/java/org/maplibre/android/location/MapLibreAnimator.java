@@ -63,6 +63,11 @@ public abstract class MapLibreAnimator<K> extends ValueAnimator implements Value
 
   public MapLibreAnimator(@NonNull @Size(min = 2) K[] values, @NonNull AnimationsValueChangeListener<K> updateListener,
                    int maxAnimationFps) {
+    for (Object value : values) {
+      if (value == null) {
+        throw new IllegalArgumentException("MapLibreAnimator values cannot be null");
+      }
+    }
     minUpdateInterval = 1E9 / maxAnimationFps;
     setObjectValues((Object[]) values);
     setEvaluator(provideEvaluator());
