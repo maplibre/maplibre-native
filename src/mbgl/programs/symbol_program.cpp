@@ -104,8 +104,16 @@ SymbolIconProgram::LayoutUniformValues SymbolIconProgram::layoutUniformValues(
     const TransformState& state,
     const float symbolFadeChange,
     const bool isOffset) {
-    return makeValues<SymbolIconProgram::LayoutUniformValues>(
-        isText, hasVariablePacement, values, texsize, pixelsToGLUnits, alongLine, tile, state, symbolFadeChange, isOffset);
+    return makeValues<SymbolIconProgram::LayoutUniformValues>(isText,
+                                                              hasVariablePacement,
+                                                              values,
+                                                              texsize,
+                                                              pixelsToGLUnits,
+                                                              alongLine,
+                                                              tile,
+                                                              state,
+                                                              symbolFadeChange,
+                                                              isOffset);
 }
 
 template <class Name, shaders::BuiltIn ShaderSource, class PaintProperties>

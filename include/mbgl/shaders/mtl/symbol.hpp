@@ -153,7 +153,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     if (!drawable.is_offset) {
         size *= perspective_ratio;
     }
-    
+
     const float fontScale = drawable.is_text_prop ? size / 24.0 : size;
 
     float symbol_rotation = 0.0;
