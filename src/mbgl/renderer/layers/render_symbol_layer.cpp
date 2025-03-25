@@ -373,6 +373,7 @@ void RenderSymbolLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
     hasFormatSectionOverrides = SymbolLayerPaintPropertyOverrides::hasOverrides(
         impl_cast(baseImpl).layout.get<TextField>());
+    styleDependencies = unevaluated.getDependencies();
 }
 
 void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters) {
