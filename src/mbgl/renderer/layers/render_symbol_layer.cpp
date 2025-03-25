@@ -147,6 +147,7 @@ void drawIcon(const RenderSymbolLayer::Programs& programs,
               SegmentsWrapper iconSegments,
               const SymbolBucket::PaintProperties& bucketPaintProperties,
               const PaintParameters& parameters,
+              const bool isOffset,
               const bool sdfIcons) {
     auto& bucket = static_cast<SymbolBucket&>(*renderData.bucket);
     const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
@@ -180,6 +181,7 @@ void drawIcon(const RenderSymbolLayer::Programs& programs,
                                                            tile,
                                                            parameters.state,
                                                            parameters.symbolFadeChange,
+                                                           isOffset,
                                                            SymbolSDFPart::Halo),
                  bucket.sdfIcon,
                  iconSegments,
@@ -202,6 +204,7 @@ void drawIcon(const RenderSymbolLayer::Programs& programs,
                                                            tile,
                                                            parameters.state,
                                                            parameters.symbolFadeChange,
+                                                           isOffset,
                                                            SymbolSDFPart::Fill),
                  bucket.sdfIcon,
                  iconSegments,
@@ -221,7 +224,8 @@ void drawIcon(const RenderSymbolLayer::Programs& programs,
                                                     alongLine,
                                                     tile,
                                                     parameters.state,
-                                                    parameters.symbolFadeChange),
+                                                    parameters.symbolFadeChange,
+                                                    isOffset),
              bucket.icon,
              iconSegments,
              bucket.iconSizeBinder,
@@ -239,7 +243,8 @@ void drawText(const RenderSymbolLayer::Programs& programs,
               const LayerRenderData& renderData,
               SegmentsWrapper textSegments,
               const SymbolBucket::PaintProperties& bucketPaintProperties,
-              const PaintParameters& parameters) {
+              const PaintParameters& parameters,
+              const bool isOffset) {
     const auto& bucket = static_cast<SymbolBucket&>(*renderData.bucket);
     const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
     const auto& layout = *bucket.layout;
@@ -285,6 +290,7 @@ void drawText(const RenderSymbolLayer::Programs& programs,
                                                                      tile,
                                                                      parameters.state,
                                                                      parameters.symbolFadeChange,
+                                                                     isOffset,
                                                                      SymbolSDFPart::Halo),
                        SymbolTextAndIconProgram::TextureBindings{glyphTextureBinding, iconTextureBinding},
                        SymbolSDFPart::Halo);
@@ -302,6 +308,7 @@ void drawText(const RenderSymbolLayer::Programs& programs,
                                                                      tile,
                                                                      parameters.state,
                                                                      parameters.symbolFadeChange,
+                                                                     isOffset,
                                                                      SymbolSDFPart::Fill),
                        SymbolTextAndIconProgram::TextureBindings{glyphTextureBinding, iconTextureBinding},
                        SymbolSDFPart::Fill);
@@ -319,6 +326,7 @@ void drawText(const RenderSymbolLayer::Programs& programs,
                                                                  tile,
                                                                  parameters.state,
                                                                  parameters.symbolFadeChange,
+                                                                 isOffset,
                                                                  SymbolSDFPart::Halo),
                        SymbolSDFTextProgram::TextureBindings{glyphTextureBinding},
                        SymbolSDFPart::Halo);
@@ -336,6 +344,7 @@ void drawText(const RenderSymbolLayer::Programs& programs,
                                                                  tile,
                                                                  parameters.state,
                                                                  parameters.symbolFadeChange,
+                                                                 isOffset,
                                                                  SymbolSDFPart::Fill),
                        SymbolSDFTextProgram::TextureBindings{glyphTextureBinding},
                        SymbolSDFPart::Fill);
@@ -425,6 +434,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
 
     const bool sortFeaturesByKey = !impl_cast(baseImpl).layout.get<SymbolSortKey>().isUndefined();
     std::multiset<RenderableSegment> renderableSegments;
+    const bool isOffset = !impl_cast(baseImpl).layout.get<IconOffset>().isUndefined();
 
     const auto draw = [&parameters, this](auto& programInstance,
                                           const auto& uniformValues,
@@ -521,6 +531,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
                          std::cref(bucket.icon.segments),
                          bucketPaintProperties,
                          parameters,
+                         isOffset,
                          false /*sdfIcon*/
                 );
             }
@@ -537,6 +548,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
                          std::cref(bucket.sdfIcon.segments),
                          bucketPaintProperties,
                          parameters,
+                         isOffset,
                          true /*sdfIcon*/
                 );
             }
@@ -552,7 +564,8 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
                          *renderData,
                          std::cref(bucket.text.segments),
                          bucketPaintProperties,
-                         parameters);
+                         parameters,
+                         isOffset);
             }
         }
 
@@ -643,7 +656,8 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
                          renderable.renderData,
                          renderable.segment,
                          renderable.bucketPaintProperties,
-                         parameters);
+                         parameters,
+                         isOffset);
             } else {
                 drawIcon(programs,
                          draw,
@@ -652,6 +666,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
                          renderable.segment,
                          renderable.bucketPaintProperties,
                          parameters,
+                         isOffset,
                          renderable.type == SymbolType::IconSDF);
             }
         }
@@ -980,6 +995,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     const bool sortFeaturesByKey = !impl_cast(baseImpl).layout.get<SymbolSortKey>().isUndefined();
     std::multiset<SegmentGroup> renderableSegments;
     std::unique_ptr<gfx::DrawableBuilder> builder;
+    const bool isOffset = !impl_cast(baseImpl).layout.get<IconOffset>().isUndefined();
 
     const auto currentZoom = static_cast<float>(state.getZoom());
     const auto layerPrefix = getID() + "/";
@@ -1283,7 +1299,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     /*.pitchAlignment=*/values.pitchAlignment,
                     /*.rotationAlignment=*/values.rotationAlignment,
                     /*.placement=*/layout.get<SymbolPlacement>(),
-                    /*.textFit=*/layout.get<IconTextFit>()));
+                    /*.textFit=*/layout.get<IconTextFit>(),
+                    /*.isOffset=*/isOffset));
 
                 tileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
                 ++stats.drawablesAdded;

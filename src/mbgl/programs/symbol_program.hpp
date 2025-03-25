@@ -48,6 +48,7 @@ MBGL_DEFINE_UNIFORM_SCALAR(float, size_t);
 MBGL_DEFINE_UNIFORM_SCALAR(float, size);
 MBGL_DEFINE_UNIFORM_SCALAR(bool, rotate_symbol);
 MBGL_DEFINE_UNIFORM_SCALAR(float, aspect_ratio);
+MBGL_DEFINE_UNIFORM_SCALAR(bool, is_offset);
 } // namespace uniforms
 
 using SymbolLayoutAttributes = TypeList<attributes::pos_offset, attributes::data<uint16_t, 4>, attributes::pixeloffset>;
@@ -409,7 +410,8 @@ class SymbolIconProgram final : public SymbolProgram<SymbolIconProgram,
                                                               uniforms::pitch,
                                                               uniforms::pitch_with_map,
                                                               uniforms::rotate_symbol,
-                                                              uniforms::aspect_ratio>,
+                                                              uniforms::aspect_ratio,
+                                                              uniforms::is_offset>,
                                                      TypeList<textures::texture>,
                                                      style::IconPaintProperties> {
 public:
@@ -426,7 +428,8 @@ public:
                                                    bool alongLine,
                                                    const RenderTile&,
                                                    const TransformState&,
-                                                   float symbolFadeChange);
+                                                   float symbolFadeChange,
+                                                   bool isOffset);
 };
 
 enum class SymbolSDFPart {
@@ -446,6 +449,7 @@ using SymbolSDFProgramUniforms = TypeList<uniforms::matrix,
                                           uniforms::pitch_with_map,
                                           uniforms::rotate_symbol,
                                           uniforms::aspect_ratio,
+                                          uniforms::is_offset,
                                           uniforms::gamma_scale,
                                           uniforms::device_pixel_ratio,
                                           uniforms::is_halo>;
@@ -482,6 +486,7 @@ public:
                                                    const RenderTile&,
                                                    const TransformState&,
                                                    float SymbolFadeChange,
+                                                   bool isOffset,
                                                    SymbolSDFPart);
 };
 
@@ -521,6 +526,7 @@ public:
                                                    const RenderTile&,
                                                    const TransformState&,
                                                    float SymbolFadeChange,
+                                                   bool isOffset,
                                                    SymbolSDFPart);
 };
 
