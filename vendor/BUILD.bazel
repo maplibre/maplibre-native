@@ -235,12 +235,3 @@ cc_library(
     strip_include_prefix = "unordered_dense/include/ankerl",
     visibility = ["//visibility:public"],
 )
-
-cc_library(
-    name = "nontype_functional",
-    srcs = [],
-    hdrs = glob(["nontype_functional/include/std23/*.h"]),
-    include_prefix = "std23",
-    strip_include_prefix = "nontype_functional/include/std23",
-    visibility = ["//visibility:public"],
-)

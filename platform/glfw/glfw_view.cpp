@@ -28,6 +28,10 @@
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/string.hpp>
 
+#if !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL) && MLN_DRAWABLE_RENDERER
+#include "example_custom_drawable_style_layer.hpp"
+#endif
+
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4244)
@@ -66,7 +70,7 @@ using namespace std::numbers;
 #ifdef ENABLE_LOCATION_INDICATOR
 
 namespace {
-const std::string mbglPuckAssetsPath{MAPBOX_PUCK_ASSETS_PATH};
+const std::string mbglPuckAssetsPath{MLN_ASSETS_PATH};
 
 mbgl::Color premultiply(mbgl::Color c) {
     c.r *= c.a;
@@ -366,6 +370,9 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
             case GLFW_KEY_C:
                 view->clearAnnotations();
                 break;
+            case GLFW_KEY_V:
+                view->toggleCustomDrawableStyle();
+                break;
             case GLFW_KEY_I:
                 view->resetDatabaseCallback();
                 break;
@@ -475,9 +482,7 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
 
                 auto &style = view->map->getStyle();
                 if (!style.getSource("states")) {
-                    std::string url =
-                        "https://maplibre.org/maplibre-gl-js-docs/assets/"
-                        "us_states.geojson";
+                    std::string url = "https://maplibre.org/maplibre-gl-js/docs/assets/us_states.geojson";
                     auto source = std::make_unique<GeoJSONSource>("states");
                     source->setURL(url);
                     style.addSource(std::move(source));
@@ -821,6 +826,23 @@ void GLFWView::popAnnotation() {
 
     map->removeAnnotation(annotationIDs.back());
     annotationIDs.pop_back();
+}
+
+void GLFWView::toggleCustomDrawableStyle() {
+#if !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL) && MLN_DRAWABLE_RENDERER
+    auto &style = map->getStyle();
+
+    const std::string identifier = "ExampleCustomDrawableStyleLayer";
+    const auto &existingLayer = style.getLayer(identifier);
+
+    if (!existingLayer) {
+        style.addLayer(std::make_unique<mbgl::style::CustomDrawableLayer>(
+            identifier, std::make_unique<ExampleCustomDrawableStyleLayerHost>(MLN_ASSETS_PATH)));
+    } else {
+        style.removeLayer(identifier);
+    }
+
+#endif
 }
 
 void GLFWView::makeSnapshot(bool withOverlay) {

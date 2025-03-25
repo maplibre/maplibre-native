@@ -69,6 +69,7 @@ struct PatternFeatureInserter {
         const auto& sortKeyProperty = properties.template get<SortKeyPropertyType>();
         float sortKey = sortKeyProperty.evaluate(*feature, zoom, canonical, SortKeyPropertyType::defaultValue());
         PatternFeature patternFeature{index, std::move(feature), std::move(patternDependencyMap), sortKey};
+        // NOLINTNEXTLINE(modernize-use-ranges) C++26
         const auto lowerBound = std::lower_bound(features.cbegin(), features.cend(), patternFeature);
         features.insert(lowerBound, std::move(patternFeature));
     }
@@ -99,7 +100,8 @@ public:
             const std::string& layerId = layerProperties->baseImpl->id;
             const auto& evaluated = style::getEvaluated<LayerPropertiesType>(layerProperties);
             const auto& patternProperty = evaluated.template get<PatternPropertyType>();
-            const auto constantPattern = patternProperty.constantOr(Faded<style::expression::Image>{"", ""});
+            const auto constantPattern = patternProperty.constantOr(
+                Faded<style::expression::Image>{.from = "", .to = ""});
             // determine if layer group has any layers that use *-pattern
             // property and add constant pattern dependencies.
             if (!patternProperty.isConstant()) {

@@ -79,7 +79,7 @@ private:
 
 class HTTPRequest : public AsyncRequest {
 public:
-    HTTPRequest(HTTPFileSource::Impl *, Resource, std::function<void(Response)>);
+    HTTPRequest(HTTPFileSource::Impl *, Resource, FileSource::Callback);
     ~HTTPRequest() override;
 
     void handleResult(CURLcode code);
@@ -90,7 +90,7 @@ private:
 
     HTTPFileSource::Impl *context = nullptr;
     Resource resource;
-    std::function<void(Response)> callback;
+    FileSource::Callback callback;
 
     // Will store the current response.
     std::shared_ptr<std::string> data;
@@ -264,7 +264,7 @@ ClientOptions HTTPFileSource::Impl::getClientOptions() {
     return clientOptions.clone();
 }
 
-HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, std::function<void(Response)> callback_)
+HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, FileSource::Callback callback_)
     : context(context_),
       resource(std::move(resource_)),
       callback(std::move(callback_)),
@@ -458,9 +458,8 @@ HTTPFileSource::HTTPFileSource(const ResourceOptions &resourceOptions, const Cli
 
 HTTPFileSource::~HTTPFileSource() = default;
 
-std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource &resource,
-                                                      std::function<void(Response)> callback) {
-    return std::make_unique<HTTPRequest>(impl.get(), resource, std::move(callback));
+std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource &resource, Callback callback) {
+    return std::make_unique<HTTPRequest>(impl.get(), resource, callback);
 }
 
 void HTTPFileSource::setResourceOptions(ResourceOptions options) {

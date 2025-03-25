@@ -67,6 +67,7 @@ private:
     /// Remove all the drawables for tiles
     /// @return The number of drawables actually removed.
     std::size_t removeAllDrawables() override;
+
 #endif
 
     // Paint properties

@@ -5,6 +5,7 @@ option(MLN_WITH_CLANG_TIDY "Build with clang-tidy checks enabled" OFF)
 option(MLN_WITH_COVERAGE "Enable code coverage collection" OFF)
 option(MLN_WITH_QT "Build MapLibre Native Qt bindings" OFF)
 option(MLN_WITH_NODE "Build MapLibre Native Node.js bindings" OFF)
+option(MLN_WITH_GLFW "Set up targets for GLFW platform" ON)
 option(MLN_WITH_SANITIZER "Use [address|thread|undefined] here" OFF)
 option(MLN_WITH_RTTI "Compile with runtime type information" OFF)
 option(MLN_WITH_OPENGL "Build with OpenGL renderer" ON)
@@ -18,6 +19,7 @@ option(MLN_DRAWABLE_RENDERER "Include the drawable rendering pathway" OFF)
 option(MLN_USE_UNORDERED_DENSE "Use ankerl dense containers for performance" ON)
 option(MLN_USE_TRACY "Enable Tracy instrumentation" OFF)
 option(MLN_USE_RUST "Use components in Rust" OFF)
+option(MLN_CORE_INCLUDE_DEPS "Include depdendencies in static build of core" OFF)
 
 if (MLN_WITH_CLANG_TIDY)
     find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
@@ -86,7 +88,7 @@ target_compile_options(
         $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fsanitize=float-divide-by-zero,
         -fsanitize-blacklist=${UBSAN_BLACKLIST}>
         $<$<PLATFORM_ID:iOS>:-fembed-bitcode>
-        $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<OR:$<BOOL:${MLN_WITH_RTTI}>,$<CXX_COMPILER_ID:MSVC>>>>:-fno-rtti>
+        $<$<AND:$<OR:$<COMPILE_LANGUAGE:CXX>,$<COMPILE_LANGUAGE:OBJCXX>>,$<NOT:$<OR:$<BOOL:${MLN_WITH_RTTI}>,$<CXX_COMPILER_ID:MSVC>>>>:-fno-rtti>
         $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<PLATFORM_ID:Windows>>>:-Wall>
         $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<PLATFORM_ID:Windows>>>:-Wshadow>
         $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<PLATFORM_ID:Windows>>>:-Wextra>
@@ -1037,6 +1039,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_collision_box.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_collision_circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_custom_geometry.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_custom_symbol_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_debug.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill.hpp
@@ -1219,6 +1222,7 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/clipping_mask.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/common.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/collision.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/custom_geometry.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/custom_symbol_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/debug.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill.hpp
@@ -1228,6 +1232,7 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/hillshade.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/hillshade_prepare.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/line.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/location_indicator.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/raster.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_group.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_program.hpp
@@ -1258,6 +1263,7 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/circle.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/collision.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/clipping_mask.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/custom_geometry.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/custom_symbol_icon.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/debug.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/fill.cpp
@@ -1267,9 +1273,11 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/hillshade.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/hillshade_prepare.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/line.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/location_indicator.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/raster.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/symbol.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/widevector.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/mtl/custom_layer_render_parameters.cpp
     )
 
     find_library(METAL_FRAMEWORK Metal)
@@ -1315,6 +1323,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/clipping_mask.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/collision.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/common.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/custom_geometry.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/custom_symbol_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/fill.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/fill_extrusion.hpp
@@ -1355,6 +1364,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/circle.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/clipping_mask.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/collision.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/custom_geometry.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/custom_symbol_icon.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/debug.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/fill.cpp
@@ -1374,12 +1384,12 @@ endif()
 if(MLN_DRAWABLE_RENDERER)
     list(APPEND
     SRC_FILES
-        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_drawable_layer_factory.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_drawable_layer.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_drawable_layer.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer.cpp
     )
 endif()
 
@@ -1450,8 +1460,6 @@ include(${PROJECT_SOURCE_DIR}/vendor/csscolorparser.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/earcut.hpp.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/eternal.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/mapbox-base.cmake)
-include(${PROJECT_SOURCE_DIR}/vendor/metal-cpp.cmake)
-include(${PROJECT_SOURCE_DIR}/vendor/nontype_functional.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/parsedate.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/pmtiles.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/polylabel.cmake)
@@ -1461,6 +1469,7 @@ include(${PROJECT_SOURCE_DIR}/vendor/unique_resource.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/unordered_dense.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/metal-cpp.cmake)
 
 if(MLN_USE_RUST)
 include(${PROJECT_SOURCE_DIR}/rustutils/rustutils.cmake)
@@ -1478,7 +1487,6 @@ target_link_libraries(
         mbgl-vendor-boost
         mbgl-vendor-earcut.hpp
         mbgl-vendor-eternal
-        $<$<BOOL:${MLN_WITH_METAL}>:mbgl-vendor-metal-cpp>
         mbgl-vendor-parsedate
         mbgl-vendor-pmtiles
         mbgl-vendor-polylabel
@@ -1495,7 +1503,6 @@ target_link_libraries(
         Mapbox::Base::geojson.hpp
         Mapbox::Base::geometry.hpp
         Mapbox::Base::variant
-        mbgl-vendor-nontype_functional
         $<$<BOOL:${MLN_USE_TRACY}>:TracyClient>
         unordered_dense
 )
@@ -1519,8 +1526,6 @@ set(EXPORT_TARGETS
     mbgl-vendor-boost
     mbgl-vendor-earcut.hpp
     mbgl-vendor-eternal
-    mbgl-vendor-metal-cpp
-    mbgl-vendor-nontype_functional
     mbgl-vendor-parsedate
     mbgl-vendor-pmtiles
     mbgl-vendor-polylabel
@@ -1528,6 +1533,7 @@ set(EXPORT_TARGETS
     mbgl-vendor-unique_resource
     mbgl-vendor-vector-tile
     mbgl-vendor-wagyu
+    mbgl-vendor-metal-cpp
     unordered_dense
 )
 
@@ -1581,7 +1587,11 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL Android)
 elseif(CMAKE_SYSTEM_NAME STREQUAL Linux)
     include(${PROJECT_SOURCE_DIR}/platform/linux/linux.cmake)
 elseif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    include(${PROJECT_SOURCE_DIR}/platform/darwin/darwin.cmake)
     include(${PROJECT_SOURCE_DIR}/platform/macos/macos.cmake)
+elseif(CMAKE_SYSTEM_NAME STREQUAL iOS)
+    include(${PROJECT_SOURCE_DIR}/platform/darwin/darwin.cmake)
+    include(${PROJECT_SOURCE_DIR}/platform/ios/ios.cmake)
 elseif(WIN32)
     include(${PROJECT_SOURCE_DIR}/platform/windows/windows.cmake)
 else()
@@ -1591,3 +1601,5 @@ endif()
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)
 add_subdirectory(${PROJECT_SOURCE_DIR}/benchmark)
 add_subdirectory(${PROJECT_SOURCE_DIR}/render-test)
+
+include(cmake/mbgl-core-deps.cmake)

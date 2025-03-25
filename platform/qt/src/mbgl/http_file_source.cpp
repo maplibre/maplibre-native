@@ -106,9 +106,8 @@ HTTPFileSource::HTTPFileSource(const ResourceOptions& resourceOptions, const Cli
 
 HTTPFileSource::~HTTPFileSource() = default;
 
-std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource,
-                                                      std::function<void(Response)> callback) {
-    return std::make_unique<HTTPRequest>(impl.get(), resource, std::move(callback));
+std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, Callback callback) {
+    return std::make_unique<HTTPRequest>(impl.get(), resource, callback);
 }
 
 void HTTPFileSource::setResourceOptions(ResourceOptions options) {

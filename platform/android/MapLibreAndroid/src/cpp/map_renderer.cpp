@@ -13,6 +13,27 @@
 #include "android_renderer_backend.hpp"
 #include "map_renderer_runnable.hpp"
 
+#if MLN_RENDER_BACKEND_OPENGL
+#include <sys/system_properties.h>
+
+namespace {
+std::string androidSysProp(const char* key) {
+    assert(strlen(key) < PROP_NAME_MAX);
+    if (__system_property_find(key) == nullptr) {
+        return "";
+    }
+    char prop[PROP_VALUE_MAX + 1];
+    __system_property_get(key, prop);
+    return prop;
+}
+
+bool inEmulator() {
+    return androidSysProp("ro.kernel.qemu") == "1" || androidSysProp("ro.boot.qemu") == "1" ||
+           androidSysProp("ro.hardware.egl") == "emulation";
+}
+} // namespace
+#endif
+
 namespace mbgl {
 namespace android {
 
@@ -63,7 +84,7 @@ ActorRef<Renderer> MapRenderer::actor() const {
     return *rendererRef;
 }
 
-void MapRenderer::schedule(Task&& scheduled) {
+void MapRenderer::schedule(std::function<void()>&& scheduled) {
     MLN_TRACE_FUNC();
     try {
         // Create a runnable
@@ -231,6 +252,14 @@ void MapRenderer::onSurfaceCreated(JNIEnv& env, const jni::Object<AndroidSurface
     backend = AndroidRendererBackend::Create(window.get());
     renderer = std::make_unique<Renderer>(backend->getImpl(), pixelRatio, localIdeographFontFamily);
     rendererRef = std::make_unique<ActorRef<Renderer>>(*renderer, mailboxData.getMailbox());
+
+#if MLN_RENDER_BACKEND_OPENGL
+    // If we're running the emulator with the OpenGL backend, we're going to crash eventually,
+    // unless we enable this mitigation.
+    if (inEmulator()) {
+        renderer->enableAndroidEmulatorGoldfishMitigation(true);
+    }
+#endif
 
     backend->setSwapBehavior(swapBehaviorFlush ? gfx::Renderable::SwapBehaviour::Flush
                                                : gfx::Renderable::SwapBehaviour::NoFlush);

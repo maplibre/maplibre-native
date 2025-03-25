@@ -61,6 +61,10 @@ public:
                        const std::optional<std::string>& localFontFamily_);
     ~RenderOrchestrator() override;
 
+#if MLN_RENDER_BACKEND_OPENGL
+    void enableAndroidEmulatorGoldfishMitigation(bool enable) { androidGoldfishMitigationEnabled = enable; }
+#endif
+
     void markContextLost() { contextLost = true; };
     // TODO: Introduce RenderOrchestratorObserver.
     void setObserver(RendererObserver*);
@@ -186,7 +190,7 @@ private:
     void onTileAction(RenderSource&, TileOperation, const OverscaledTileID&, const std::string&) override;
 
     // ImageManagerObserver implementation
-    void onStyleImageMissing(const std::string&, Scheduler::Task&&) override;
+    void onStyleImageMissing(const std::string&, const std::function<void()>&) override;
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) override;
 
 #if MLN_DRAWABLE_RENDERER
@@ -219,6 +223,10 @@ private:
     bool contextLost = false;
     bool placedSymbolDataCollected = false;
     bool tileCacheEnabled = true;
+
+#if MLN_RENDER_BACKEND_OPENGL
+    bool androidGoldfishMitigationEnabled{false};
+#endif
 
     // Vectors with reserved capacity of layerImpls->size() to avoid
     // reallocation on each frame.

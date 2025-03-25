@@ -265,7 +265,7 @@ public:
     TileServerOptions& withDefaultStyles(std::vector<mbgl::util::DefaultStyle> styles);
 
     /**
-     * @brief Sets the default style by name. The style name must exists in
+     * @brief Sets the default style by name. The style name must exist in
      * defaultStyles collection
      *
      * @param defaultStyle The style name

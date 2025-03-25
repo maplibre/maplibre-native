@@ -37,7 +37,9 @@ constexpr const char* ONLINE_STATUS_KEY = "online-status";
 class OnlineFileSourceThread;
 
 struct OnlineFileRequest {
-    OnlineFileRequest(Resource resource_, std::function<void(Response)>&& callback_, OnlineFileSourceThread& impl_);
+    using Callback = std::function<void(Response)>;
+
+    OnlineFileRequest(Resource resource_, Callback callback_, OnlineFileSourceThread& impl_);
     ~OnlineFileRequest();
 
     void networkIsReachableAgain();
@@ -54,7 +56,7 @@ struct OnlineFileRequest {
     Resource resource;
     std::unique_ptr<AsyncRequest> request;
     util::Timer timer;
-    std::function<void(Response)> callback;
+    Callback callback;
 
     std::function<void()> cancelCallback = nullptr;
     std::shared_ptr<Mailbox> mailbox;
@@ -301,7 +303,7 @@ private:
     std::set<OnlineFileRequest*> activeRequests;
 
     bool online = true;
-    uint32_t maximumConcurrentRequests = util::DEFAULT_MAXIMUM_CONCURRENT_REQUESTS;
+    uint32_t maximumConcurrentRequests;
     HTTPFileSource httpFileSource;
     util::AsyncTask reachability{std::bind(&OnlineFileSourceThread::networkIsReachableAgain, this)};
     std::map<AsyncRequest*, std::unique_ptr<OnlineFileRequest>> tasks;
@@ -318,7 +320,7 @@ public:
               resourceOptions.clone(),
               clientOptions.clone())) {}
 
-    std::unique_ptr<AsyncRequest> request(std::function<void(Response)> callback, Resource res) {
+    std::unique_ptr<AsyncRequest> request(Callback callback, Resource res) {
         auto req = std::make_unique<FileSourceRequest>(std::move(callback));
         req->onCancel(
             [actorRef = thread->actor(), req = req.get()]() { actorRef.invoke(&OnlineFileSourceThread::cancel, req); });
@@ -427,9 +429,7 @@ private:
     const std::unique_ptr<util::Thread<OnlineFileSourceThread>> thread;
 };
 
-OnlineFileRequest::OnlineFileRequest(Resource resource_,
-                                     std::function<void(Response)>&& callback_,
-                                     OnlineFileSourceThread& impl_)
+OnlineFileRequest::OnlineFileRequest(Resource resource_, Callback callback_, OnlineFileSourceThread& impl_)
     : impl(impl_),
       resource(std::move(resource_)),
       callback(std::move(callback_)) {
@@ -616,8 +616,7 @@ OnlineFileSource::OnlineFileSource(const ResourceOptions& resourceOptions, const
 
 OnlineFileSource::~OnlineFileSource() = default;
 
-std::unique_ptr<AsyncRequest> OnlineFileSource::request(const Resource& resource,
-                                                        std::function<void(Response)> callback) {
+std::unique_ptr<AsyncRequest> OnlineFileSource::request(const Resource& resource, Callback callback) {
     Resource res = resource;
     const TileServerOptions options = impl->getResourceOptions().tileServerOptions();
 

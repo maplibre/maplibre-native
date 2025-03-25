@@ -114,7 +114,9 @@ Checks: [
     -misc-include-cleaner,
     -readability-redundant-inline-specifier,
     -readability-avoid-nested-conditional-operator,
-    -cppcoreguidelines-pro-type-static-cast-downcast  # no RTTI
+    -readability-math-missing-parentheses,
+    -readability-enum-initial-value,
+    -boost-use-ranges
 ]
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'

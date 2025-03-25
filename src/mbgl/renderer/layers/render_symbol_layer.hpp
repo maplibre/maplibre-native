@@ -98,6 +98,10 @@ public:
                 const std::shared_ptr<UpdateParameters>&,
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
+
+    /// Remove all the drawables for tiles
+    std::size_t removeAllDrawables() override;
+
 #endif // MLN_DRAWABLE_RENDERER
 
 protected:
@@ -120,8 +124,6 @@ protected:
     /// Remove all drawables for the tile from the layer group
     std::size_t removeTile(RenderPass, const OverscaledTileID&) override;
 
-    /// Remove all the drawables for tiles
-    std::size_t removeAllDrawables() override;
 #endif // MLN_DRAWABLE_RENDERER
 
 private:

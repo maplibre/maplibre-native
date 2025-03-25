@@ -27,6 +27,7 @@ public:
     CommandEncoder& operator=(const CommandEncoder&) = delete;
 
     DebugGroup<CommandEncoder> createDebugGroup(const char* name) { return {*this, name}; }
+    // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
     DebugGroup<CommandEncoder> createDebugGroup(std::string_view name) { return createDebugGroup(name.data()); }
 
     virtual std::unique_ptr<UploadPass> createUploadPass(const char* name, Renderable&) = 0;

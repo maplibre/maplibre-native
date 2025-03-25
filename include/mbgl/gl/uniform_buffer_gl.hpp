@@ -62,6 +62,8 @@ public:
     void bind() const;
     void unbind() const;
 
+    void bind(gfx::RenderPass&) override { bind(); }
+
 private:
     std::unique_ptr<gfx::UniformBuffer> copy(const gfx::UniformBuffer& uniformBuffers) override {
         return std::make_unique<UniformBufferGL>(static_cast<const UniformBufferGL&>(uniformBuffers).clone());

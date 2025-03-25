@@ -1,10 +1,27 @@
 # Changelog MapLibre Native for Android
 
-## main
+## 11.8.4
+
+### 🐞 Bug fixes
+
+-  Add workaround for android emulator as crash on Android emulation is still presented ([#3310](https://github.com/maplibre/maplibre-native/pull/3310))
+
+## 11.8.3
+
+### 🐞 Bug fixes
+
+- Revert "Eliminate copies in deferred cleanup" ([#3035](https://github.com/maplibre/maplibre-native/pull/3035)) which was causing a memory growth issue.
+
+## 11.8.2
 
 ### ✨ Features and improvements
 
+- Eliminate copies in deferred cleanup ([#3035](https://github.com/maplibre/maplibre-native/pull/3035)).
+- (Custom Layer Support) Reset depth stencil state for render pass ([#3230](https://github.com/maplibre/maplibre-native/pull/3230)).
+
 ### 🐞 Bug fixes
+
+- Fix texture view cleanup ([#3254](https://github.com/maplibre/maplibre-native/pull/3254)). Possible fix for [issue](https://github.com/maplibre/maplibre-native/issues/3241) reported by Lyft.
 
 ## 11.8.1
 

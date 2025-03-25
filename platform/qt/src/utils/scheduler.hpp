@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/actor/scheduler.hpp>
-#include <mbgl/util/identity.hpp>
 #include <mbgl/util/util.hpp>
 
 #include <QObject>
@@ -21,8 +20,7 @@ public:
     ~Scheduler() override;
 
     // mbgl::Scheduler implementation.
-    void schedule(Task&&) final;
-    void schedule(mbgl::util::SimpleIdentity, Task&&) final;
+    void schedule(std::function<void()>&& function) final;
 
     void waitForEmpty(const mbgl::util::SimpleIdentity tag = mbgl::util::SimpleIdentity::Empty) override;
 
@@ -39,7 +37,7 @@ private:
     std::mutex m_taskQueueMutex;
     std::condition_variable cvEmpty;
     std::atomic<std::size_t> pendingItems;
-    std::queue<Task> m_taskQueue;
+    std::queue<std::function<void()>> m_taskQueue;
     mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
     // Do not add members here, see `WeakPtrFactory`
 };
