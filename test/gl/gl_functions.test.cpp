@@ -253,8 +253,10 @@ TEST(GLFunctions, OpenGLES) {
     EXPECT_NE(glGetProgramBinary, nullptr);
     EXPECT_NE(glProgramBinary, nullptr);
     EXPECT_NE(glProgramParameteri, nullptr);
+#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
     EXPECT_NE(glInvalidateFramebuffer, nullptr);
     EXPECT_NE(glInvalidateSubFramebuffer, nullptr);
+#endif
     EXPECT_NE(glTexStorage2D, nullptr);
     EXPECT_NE(glTexStorage3D, nullptr);
     EXPECT_NE(glGetInternalformativ, nullptr);
