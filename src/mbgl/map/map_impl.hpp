@@ -2,6 +2,7 @@
 
 #include <mbgl/annotation/annotation_manager.hpp>
 #include <mbgl/map/map.hpp>
+#include <mbgl/map/map_lod_shift.hpp>
 #include <mbgl/map/map_observer.hpp>
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/map/mode.hpp>
@@ -96,7 +97,7 @@ public:
     double tileLodMinRadius = 3;
     double tileLodScale = 1;
     double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;
-    double tileLodZoomShift = 0;
+    MapLodShift tileLodZoomShift;
 };
 
 // Forward declaration of this method is required for the MapProjection class

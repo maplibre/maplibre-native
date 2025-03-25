@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/map/map_lod_shift.hpp>
 #include <mbgl/map/mode.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/style/light.hpp>
@@ -49,7 +50,7 @@ public:
     double tileLodMinRadius = 3;
     double tileLodScale = 1;
     double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;
-    double tileLodZoomShift = 0;
+    MapLodShift tileLodZoomShift;
 };
 
 } // namespace mbgl

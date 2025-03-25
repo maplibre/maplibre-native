@@ -90,8 +90,8 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     handleWrapJump(static_cast<float>(parameters.transformState.getLatLng().longitude()));
 
     // Optionally shift the zoom level
-    double zoom = util::clamp<double>(
-        parameters.transformState.getZoom() + parameters.tileLodZoomShift, zoomRange.min, zoomRange.max);
+    double shift = parameters.tileLodZoomShift.get(parameters.transformState.getZoom());
+    double zoom = util::clamp<double>(parameters.transformState.getZoom() + shift, zoomRange.min, zoomRange.max);
 
     const auto type = sourceImpl.type;
     // Determine the overzooming/underzooming amounts and required tiles.

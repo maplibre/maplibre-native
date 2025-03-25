@@ -163,10 +163,10 @@ void cycleTileLodMode(mbgl::Map &map) {
 void tileLodZoomShift(mbgl::Map &map, bool positive) {
     constexpr auto tileLodZoomShiftStep = 0.25;
     auto shift = positive ? tileLodZoomShiftStep : -tileLodZoomShiftStep;
-    shift = map.getTileLodZoomShift() + shift;
+    shift = map.getTileLodZoomShift(0) + shift;
     shift = mbgl::util::clamp(shift, -2.5, 2.5);
     mbgl::Log::Info(mbgl::Event::OpenGL, "Zoom shift: " + std::to_string(shift));
-    map.setTileLodZoomShift(shift);
+    map.setTileLodZoomShift({0, shift});
     map.triggerRepaint();
 }
 

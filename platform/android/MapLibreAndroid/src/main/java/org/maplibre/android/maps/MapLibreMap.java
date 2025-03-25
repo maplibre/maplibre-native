@@ -424,19 +424,22 @@ public final class MapLibreMap {
    * displayed tiles by a factor of 4 on average
    * It is recommended to first configure the pixelRatio before adjusting
    * TileLodZoomShift. {@link MapLibreMapOptions#pixelRatio(float)}
+   * shift is an array of pairs. The pair first element is the zoom level and
+   * the second element is the shift value.
    */
-  public void setTileLodZoomShift(double shift) {
+  public void setTileLodZoomShift(double[] shift) {
     nativeMapView.setTileLodZoomShift(shift);
   }
 
   /**
    * Camera based tile level of detail controls
    *
+   * @param zoom Zoom level for which the shift is returned
    * @return shift applied to the Zoom level during LOD calculation
-   * @see MapLibreMap#setTileLodZoomShift(double)
+   * @see MapLibreMap#setTileLodZoomShift(double[])
    */
-  public double getTileLodZoomShift() {
-    return nativeMapView.getTileLodZoomShift();
+  public double getTileLodZoomShift(double zoom) {
+    return nativeMapView.getTileLodZoomShift(zoom);
   }
 
   //

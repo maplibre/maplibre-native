@@ -3,6 +3,7 @@
 #include <mbgl/map/camera.hpp>
 #include <mbgl/map/map.hpp>
 #include <mbgl/map/map_impl.hpp>
+#include <mbgl/map/map_lod_shift.hpp>
 #include <mbgl/map/transform.hpp>
 #include <mbgl/math/angles.hpp>
 #include <mbgl/math/log2.hpp>
@@ -551,12 +552,12 @@ double Map::getTileLodPitchThreshold() const {
     return impl->tileLodPitchThreshold;
 }
 
-void Map::setTileLodZoomShift(double shift) {
-    impl->tileLodZoomShift = shift;
+void Map::setTileLodZoomShift(const std::vector<double>& shift) {
+    impl->tileLodZoomShift = MapLodShift(shift);
 }
 
-double Map::getTileLodZoomShift() const {
-    return impl->tileLodZoomShift;
+double Map::getTileLodZoomShift(double zoom) const {
+    return impl->tileLodZoomShift.get(zoom);
 }
 
 } // namespace mbgl

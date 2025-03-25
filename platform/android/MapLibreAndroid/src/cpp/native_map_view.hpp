@@ -352,9 +352,9 @@ public:
 
     jni::jdouble getTileLodPitchThreshold(JNIEnv&);
 
-    void setTileLodZoomShift(JNIEnv&, jni::jdouble);
+    void setTileLodZoomShift(JNIEnv&, const jni::Array<jni::jdouble>&);
 
-    jni::jdouble getTileLodZoomShift(JNIEnv&);
+    jni::jdouble getTileLodZoomShift(JNIEnv&, jni::jdouble);
 
     jni::jint getLastRenderedTileCount(JNIEnv&);
 

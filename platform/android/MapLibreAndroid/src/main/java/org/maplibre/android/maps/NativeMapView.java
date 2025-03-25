@@ -879,7 +879,7 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
-  public void setTileLodZoomShift(double shift) {
+  public void setTileLodZoomShift(double[] shift) {
     if (checkState("setTileLodZoomShift")) {
       return;
     }
@@ -887,11 +887,11 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
-  public double getTileLodZoomShift() {
+  public double getTileLodZoomShift(double zoom) {
     if (checkState("getTileLodZoomShift")) {
       return 0;
     }
-    return nativeGetTileLodZoomShift();
+    return nativeGetTileLodZoomShift(zoom);
   }
 
   @Override
@@ -1848,10 +1848,10 @@ final class NativeMapView implements NativeMap {
   private native double nativeGetTileLodPitchThreshold();
 
   @Keep
-  private native void nativeSetTileLodZoomShift(double shift);
+  private native void nativeSetTileLodZoomShift(double[] shift);
 
   @Keep
-  private native double nativeGetTileLodZoomShift();
+  private native double nativeGetTileLodZoomShift(double zoom);
 
   @Keep
   private native int nativeGetLastRenderedTileCount();

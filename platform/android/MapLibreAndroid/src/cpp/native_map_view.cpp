@@ -1306,12 +1306,17 @@ jni::jdouble NativeMapView::getTileLodPitchThreshold(JNIEnv&) {
     return jni::jdouble(map->getTileLodPitchThreshold());
 }
 
-void NativeMapView::setTileLodZoomShift(JNIEnv&, jni::jdouble shift) {
-    map->setTileLodZoomShift(shift);
+void NativeMapView::setTileLodZoomShift(JNIEnv& env, const jni::Array<jni::jdouble>& shift) {
+    assert(shift.Length(env) % 2 == 0);
+    std::vector<double> shiftVec(shift.Length(env));
+    for (std::size_t i = 0; i < shift.Length(env); i++) {
+        shiftVec[i] = shift.Get(env, i);
+    }
+    map->setTileLodZoomShift(shiftVec);
 }
 
-jni::jdouble NativeMapView::getTileLodZoomShift(JNIEnv&) {
-    return jni::jdouble(map->getTileLodZoomShift());
+jni::jdouble NativeMapView::getTileLodZoomShift(JNIEnv&, jni::jdouble zoom) {
+    return jni::jdouble(map->getTileLodZoomShift(zoom));
 }
 
 jni::jint NativeMapView::getLastRenderedTileCount(JNIEnv&) {

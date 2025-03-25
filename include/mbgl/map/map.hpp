@@ -175,14 +175,16 @@ public:
     /// A negative values typically improves performance but reduces quality.
     /// For instance, a value of -1 reduces the zoom level by 1 and this
     /// reduces the number of tiles by a factor of 4 for the same camera view.
+    /// shift is an array of pairs. The pair first element is the zoom level and
+    /// the second element is the shift value.
     void setTileLodMinRadius(double radius);
     double getTileLodMinRadius() const;
     void setTileLodScale(double scale);
     double getTileLodScale() const;
     void setTileLodPitchThreshold(double threshold);
     double getTileLodPitchThreshold() const;
-    void setTileLodZoomShift(double shift);
-    double getTileLodZoomShift() const;
+    void setTileLodZoomShift(const std::vector<double>& shift);
+    double getTileLodZoomShift(double zoom) const;
 
 protected:
     class Impl;
