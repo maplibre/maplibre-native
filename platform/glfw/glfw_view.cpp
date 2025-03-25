@@ -352,7 +352,7 @@ GLFWView::GLFWView(bool fullscreen_,
     printf("- Press `F1` to generate a render test for the current view\n");
     printf("\n");
     printf("- Press `Tab` to cycle through the map debug options\n");
-    printf("- Press `V` to cycle through Tile LOD modes\n");
+    printf("- Press `F6` to cycle through Tile LOD modes\n");
     printf("- Press `F7` to lower the zoom level without changing the camera\n");
     printf("- Press `F8` to higher the zoom level without changing the camera\n");
     printf("- Press `Esc` to quit\n");
@@ -631,7 +631,7 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                 view->freeCameraDemoStartTime = mbgl::Clock::now();
                 view->invalidate();
             } break;
-            case GLFW_KEY_V: {
+            case GLFW_KEY_F6: {
                 cycleTileLodMode(*view->map);
             } break;
             case GLFW_KEY_F7: {
