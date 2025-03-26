@@ -22,7 +22,7 @@ namespace mbgl {
 namespace gfx {
 
 #if MLN_DRAWABLE_RENDERER
-class Conext;
+class Context;
 class Texture2D;
 class VertexAttributeArray;
 
