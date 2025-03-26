@@ -33,6 +33,9 @@ public:
 
     ~LineLayerTweaker() override = default;
 
+    void setGradientLineClip(double clip);
+    void setGradientLineClipColor(const mbgl::Color& color);
+
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
 #if MLN_RENDER_BACKEND_METAL
@@ -49,6 +52,8 @@ public:
 private:
     template <typename Property>
     auto evaluate(const PaintParameters& parameters) const;
+    double line_clip_ = 0.0;
+    mbgl::Color line_clip_color = mbgl::Color(0.0, 0.0, 0.0, 0.0);
 
 #if MLN_RENDER_BACKEND_METAL
     template <typename Result>

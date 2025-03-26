@@ -3,6 +3,11 @@
 #include <algorithm>
 #include <initializer_list>
 #include <sstream>
+#include <string>
+#include <locale>
+#include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
 
 namespace mbgl {
 namespace gfx {
@@ -54,6 +59,47 @@ RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {
     stencilClears += r.stencilClears;
     stencilUpdates += r.stencilUpdates;
     return *this;
+}
+
+std::string RenderingStats::toJSONString() const {
+    const auto& formatWithCommas = [](long long number) -> std::string { // Using long long for broader applicability
+        std::ostringstream oss;
+        bool localeSet = false;
+        try {
+            oss.imbue(std::locale(""));
+            localeSet = true;
+        } catch (const std::runtime_error& err) {
+            localeSet = false;
+        }
+        if (!localeSet) {
+            const char* fallbackLocale = "en_US.UTF-8"; // Common on Linux/macOS
+            oss.imbue(std::locale(fallbackLocale));
+        }
+        oss << number;
+        return oss.str();
+    };
+
+    rapidjson::Document document;
+    document.SetObject();
+
+    rapidjson::Document::AllocatorType& allocator = document.GetAllocator();
+    rapidjson::Value rendering_stats(rapidjson::kObjectType);
+    rendering_stats.AddMember("numDrawCalls", formatWithCommas(numDrawCalls), allocator);
+    rendering_stats.AddMember("numCreatedTextures", formatWithCommas(numCreatedTextures), allocator);
+    rendering_stats.AddMember("numActiveTextures", formatWithCommas(numActiveTextures), allocator);
+    rendering_stats.AddMember("numBuffers", formatWithCommas(numBuffers), allocator);
+    rendering_stats.AddMember("memTextures", formatWithCommas(memTextures), allocator);
+    rendering_stats.AddMember("memIndexBuffers", formatWithCommas(memIndexBuffers), allocator);
+    rendering_stats.AddMember("memVertexBuffers", formatWithCommas(memVertexBuffers), allocator);
+    rendering_stats.AddMember("stencilUpdates", formatWithCommas(stencilUpdates), allocator);
+
+    document.AddMember("rendering_stats", rendering_stats, allocator);
+
+    rapidjson::StringBuffer buffer;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+    document.Accept(writer);
+
+    return buffer.GetString();
 }
 
 #if !defined(NDEBUG)

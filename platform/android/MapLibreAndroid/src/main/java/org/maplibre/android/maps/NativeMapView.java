@@ -38,10 +38,13 @@ import org.maplibre.android.style.sources.CannotAddSourceException;
 import org.maplibre.android.style.sources.Source;
 import org.maplibre.android.utils.BitmapUtils;
 import org.maplibre.android.tile.TileOperation;
+import org.maplibre.geojson.LineString;
+import org.maplibre.geojson.Point;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TreeMap;
 
 // Class that wraps the native methods for convenience
 final class NativeMapView implements NativeMap {
@@ -113,6 +116,7 @@ final class NativeMapView implements NativeMap {
   //
   // Methods
   //
+
 
   private boolean checkState(String callingMethod) {
     // validate if invocation has occurred on the main thread
@@ -1050,6 +1054,113 @@ final class NativeMapView implements NativeMap {
     mapRenderer.setSwapBehaviorFlush(flush);
   }
 
+  private static double[] getDoubleArrayKeys(TreeMap<Double, Double> map) {
+    List<Double> keyList = new ArrayList<>(map.keySet());
+    double[] keys = new double[keyList.size()];
+    for (int i = 0; i < keyList.size(); i++) {
+      keys[i] = keyList.get(i);
+    }
+    return keys;
+  }
+
+  private static double[] getDoubleArrayValues(TreeMap<Double, Double> map) {
+    List<Double> valueList = new ArrayList<>(map.values());
+    double[] values = new double[valueList.size()];
+    for (int i = 0; i < valueList.size(); i++) {
+      values[i] = valueList.get(i);
+    }
+    return values;
+  }
+
+  @Override
+  public RouteID createRoute(LineString routeGeom, RouteOptions routeOptions) {
+    double[] outerDynamicWidthZooms = getDoubleArrayKeys(routeOptions.outerDynamicWidthZoomStops);
+    double[] outerDynamicWidths = getDoubleArrayValues(routeOptions.outerDynamicWidthZoomStops);
+    double[] innerDynamicWidthZooms = getDoubleArrayKeys(routeOptions.innerDynamicWidthZoomStops);
+    double[] innerDynamicWidths = getDoubleArrayValues(routeOptions.innerDynamicWidthZoomStops);
+
+    RouteID routeID = new RouteID(nativeRouteCreate(routeGeom, routeOptions.outerColor, routeOptions.innerColor,
+            routeOptions.outerWidth, routeOptions.innerWidth, routeOptions.layerBefore, routeOptions.useDynamicWidths,
+            outerDynamicWidthZooms, outerDynamicWidths, innerDynamicWidthZooms, innerDynamicWidths));
+    return routeID;
+  }
+
+  @Override
+  public String getRouteActiveLayerName(RouteID routeID) {
+    return nativeRouteGetActiveLayerName(routeID.getId());
+  }
+
+  @Override
+  public String getRouteBaseLayerName(RouteID routeID) {
+    return nativeRouteGetBaseLayerName(routeID.getId());
+  }
+
+  @Override
+  public boolean disposeRoute(RouteID routeID) {
+    boolean success = false;
+    if(routeID.isValid()) {
+      success = nativeRouteDispose(routeID.getId());
+    }
+
+    return success;
+  }
+
+  @Override
+  public RouteID queryRoute(double x, double y, int radius) {
+    RouteID routeID = new RouteID(nativeRouteQuery(x, y, radius));
+    return routeID;
+  }
+
+  @Override
+  public boolean createRouteSegment(RouteID routeID, RouteSegmentOptions rsopts) {
+    if(routeID.isValid()) {
+      return nativeRouteSegmentCreate(routeID.getId(), rsopts.geometry, rsopts.color, rsopts.priority);
+    }
+
+    return false;
+  }
+
+  @Override
+  public boolean setRouteProgress(RouteID routeID, double progress) {
+    if(routeID.isValid()) {
+      return nativeRouteSetProgress(routeID.getId(), progress);
+    }
+
+    return false;
+  }
+
+  @Override
+  public boolean setRouteProgressPoint(RouteID routeID, Point point) {
+    if(routeID.isValid()) {
+      return nativeRouteSetProgressPoint(routeID.getId(), point.latitude(), point.longitude());
+    }
+
+    return false;
+  }
+
+  @Override
+  public void clearRouteSegments(RouteID routeID) {
+    if(routeID.isValid()) {
+      nativeRouteClearSegments(routeID.getId());
+    }
+  }
+
+  @Override
+  public boolean finalizeRoutes() {
+    return nativeRoutesFinalize();
+  }
+
+  @Override
+  public String getRenderingStats() {
+    return nativeGetRenderingStats();
+  }
+
+  @Override
+  public String getSnapshotCapture() {
+    return nativeRoutesCaptureSnapshot();
+  }
+
+
   @NonNull
   @Override
   public RectF getDensityDependantRectangle(final RectF rectangle) {
@@ -1419,6 +1530,52 @@ final class NativeMapView implements NativeMap {
   @Keep
   private native void nativeSetVisibleCoordinateBounds(LatLng[] coordinates, RectF padding,
                                                        double direction, long duration);
+
+  //---------------------Native route APIs---------------------
+  @Keep
+  private native int nativeRouteCreate(LineString routeGeometry, int outerColor, int innerColor,
+                                       double outerWidth, double innerWidth, String layerBefore,
+                                       boolean useDynamicWidths, double[] outerDynamicWidthZooms,
+                                       double[] outerDynamicWidths, double[] innerDynamicWidthZooms,
+                                       double[] innerDynamicWidths);
+
+  @Keep
+  private native int nativeRouteQuery(double x, double y, int radius);
+
+  @Keep
+  private native String nativeRouteGetActiveLayerName(int routeID);
+
+  @Keep
+  private native String nativeRouteGetBaseLayerName(int routeID);
+
+  @Keep
+  private native boolean nativeRouteDispose(int routeID);
+
+  @Keep
+  private native boolean nativeRouteSegmentCreate(int routeID, LineString segmentGeometry, int color, int priority);
+
+  @Keep
+  private native boolean nativeRouteSetProgress(int routeID, double progress);
+
+  @Keep
+  private native boolean nativeRouteSetProgressPoint(int routeID, double x, double y);
+
+  @Keep
+  private native void nativeRouteClearSegments(int routeID);
+
+  @Keep
+  private native boolean nativeRoutesFinalize();
+
+  @Keep
+  private native String nativeRoutesCaptureSnapshot();
+
+  @Keep
+  native void nativeRoutesClearStats();
+
+  //---------------------------------------------------------
+
+  @Keep
+  private native String nativeGetRenderingStats();
 
   @Keep
   private native void nativeOnLowMemory();
