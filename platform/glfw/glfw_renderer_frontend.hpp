@@ -2,7 +2,7 @@
 
 #include "glfw_view.hpp"
 #include <mbgl/renderer/renderer_frontend.hpp>
-
+#include <mbgl/util/feature.hpp>
 #include <memory>
 
 namespace mbgl {
@@ -20,6 +20,8 @@ public:
     void update(std::shared_ptr<mbgl::UpdateParameters>) override;
     const mbgl::TaggedScheduler& getThreadPool() const override;
     void render();
+
+    std::vector<mbgl::Feature> queryFeatures(double screenspaceX, double screenspaceY);
 
     mbgl::Renderer* getRenderer();
 

@@ -15,6 +15,7 @@
 #include "graphics/rectf.hpp"
 #include "geojson/feature.hpp"
 #include "geojson/geometry.hpp"
+#include "geojson/line_string.hpp"
 #include "geometry/lat_lng.hpp"
 #include "geometry/projected_meters.hpp"
 #include "style/layers/layer_manager.hpp"
@@ -24,6 +25,7 @@
 #include "map/image.hpp"
 #include "style/light.hpp"
 #include "bitmap.hpp"
+#include "mbgl/route/route_manager.hpp"
 
 #include <exception>
 #include <string>
@@ -229,6 +231,49 @@ public:
 
     void removeAnnotationIcon(JNIEnv&, const jni::String&);
 
+    //--------------- route APIs ---------------
+    jint routeCreate(JNIEnv& env,
+                     const jni::Object<mbgl::android::geojson::LineString>& routeGeom,
+                     jint outerColor,
+                     jint innerColor,
+                     jdouble outerWidth,
+                     jdouble innerWidth,
+                     const jni::String& layerbefore,
+                     jboolean useDyanmicWidths,
+                     const jni::Array<jdouble>& outerDynamicWidthZooms,
+                     const jni::Array<jdouble>& outerDynamicWidths,
+                     const jni::Array<jdouble>& innerDynamicWidthZooms,
+                     const jni::Array<jdouble>& innerDynamicWidths);
+
+    jboolean routeDispose(JNIEnv& env, jint routeID);
+
+    jni::Local<jni::String> routeGetActiveLayerName(JNIEnv& env, const jint routeID);
+
+    jni::Local<jni::String> routeGetBaseLayerName(JNIEnv& env, const jint& routeID);
+
+    jboolean routeSegmentCreate(JNIEnv& env,
+                                jint routeID,
+                                const jni::Object<mbgl::android::geojson::LineString>& segmentGeom,
+                                jint color,
+                                jint priority);
+
+    jboolean routeProgressSet(JNIEnv& env, jint routeID, jdouble progress);
+
+    jboolean routeProgressSetPoint(JNIEnv& env, jint routeID, jdouble x, jdouble y);
+
+    void routeSegmentsClear(JNIEnv& env, jint routeID);
+
+    jni::Local<jni::String> routesGetStats(JNIEnv& env);
+
+    jni::Local<jni::String> routesGetCaptureSnapshot(JNIEnv& env);
+
+    void routesClearStats(JNIEnv& env);
+
+    jint routeQueryRendered(JNIEnv& env, jni::jdouble screenSpaceX, jni::jdouble screenSpaceY);
+
+    jboolean routesFinalize(JNIEnv& env);
+    //------------------------------------------------
+
     jni::jdouble getTopOffsetPixelsForAnnotationSymbol(JNIEnv&, const jni::String&);
 
     jni::Local<jni::Object<TransitionOptions>> getTransitionOptions(JNIEnv&);
@@ -338,6 +383,7 @@ public:
 
 private:
     std::unique_ptr<AndroidRendererFrontend> rendererFrontend;
+    std::unique_ptr<mbgl::route::RouteManager> routeMgr;
 
     JavaVM* vm = nullptr;
     jni::WeakReference<jni::Object<NativeMapView>> javaPeer;
@@ -354,6 +400,8 @@ private:
 
     // Ensure these are initialised last
     std::unique_ptr<mbgl::Map> map;
+
+    std::map<double, double> convert(JNIEnv& env, const jni::Array<jdouble>& keys, const jni::Array<jdouble>& values);
 };
 
 } // namespace android

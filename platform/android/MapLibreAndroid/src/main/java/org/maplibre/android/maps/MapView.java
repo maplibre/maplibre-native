@@ -34,6 +34,8 @@ import org.maplibre.android.net.ConnectivityReceiver;
 import org.maplibre.android.storage.FileSource;
 import org.maplibre.android.utils.BitmapUtils;
 import org.maplibre.android.tile.TileOperation;
+import org.maplibre.geojson.LineString;
+import org.maplibre.geojson.Point;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -441,6 +443,148 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     if (mapRenderer != null) {
       mapRenderer.onDestroy();
     }
+  }
+
+  /***
+   * Create a new route on the map view. Once all routes are created and updated , one must call finalizeRoutes().
+   * One should not create a RouteID manually and should only be used what is returned by this method.
+   *
+   * @param routeGeom specified linestring of points in physical coordinates or lat longs
+   * @param routeOptions specified visual appearance of the route geometry
+   * @return a unique id for the route
+   */
+  public RouteID createRoute(LineString routeGeom, RouteOptions routeOptions) {
+    return nativeMapView.createRoute(routeGeom, routeOptions);
+  }
+
+  /***
+   * Gets the active layer name for a route. An active layer is a layer in the style that contains the
+   * route's blue line (not casing)
+   *
+   * @param routeID the specified routeID that was returned by createRoute()
+   * @return the active layer name for the specified routeID
+   */
+  String getRouteActiveLayerName(RouteID routeID) {
+    return nativeMapView.getRouteActiveLayerName(routeID);
+  }
+
+  /***
+   * Gets the base layer name for a route. A base layer is a layer in the style that contains the
+   * route's casing.
+   *
+   * @param routeID the specified routeID that was returned by createRoute()
+   * @return the base/casing layer name for the specified routeID
+   */
+  String getRouteBaseLayerName(RouteID routeID) {
+    return nativeMapView.getRouteBaseLayerName(routeID);
+  }
+
+
+  /***
+   * Disposes a route given a route ID. The route ID must have been previous created via createRoute().
+   * Once a route is disposed, the routeID can be recycled and reused. Remember to call finalizeRoutes().
+   *
+   * @param routeID the specified routeID for the corresponding route to be disposed
+   * @return true if disposal was successful, false otherwise
+   */
+  public boolean disposeRoute(RouteID routeID) {
+    return nativeMapView.disposeRoute(routeID);
+  }
+
+  /***
+   * Sets the progress of a route on the map view. Remember to call finalizeRoutes().
+   *
+   * @param routeID the specified routeID for the corresponding route. If the route does not exist,
+   *                this method will return false.
+   * @param progress the specified progress which is a value between 0 and 1.
+   * @return true if setting the progress was a success
+   */
+  public boolean setRouteProgress(RouteID routeID, double progress) {
+    return nativeMapView.setRouteProgress(routeID, progress);
+  }
+
+  /***
+   * Sets the progress point which lies close enough on a route in the map view. Remember to call finalizeRoutes().
+   *
+   * @param routeID the specified routeID for the corresponding route.
+   * @param point the specified point which lies close enough on the route
+   * @return true if successful, false otherwise. If the route does not exist, false is returned.
+   */
+  public boolean setRouteProgressPoint(RouteID routeID, Point point) {
+    return nativeMapView.setRouteProgressPoint(routeID, point);
+  }
+
+  /***
+   * Removes all the route segments for the corresponding route. Remember to call finalizeRoutes().
+   *
+   * @param routeID the specified route ID for the corresponding route. If the route does not exist,
+   *                this operation is a no-op.
+   */
+  public void clearRouteSegments(RouteID routeID) {
+    nativeMapView.clearRouteSegments(routeID);
+  }
+
+  /***
+   * Creates a new route segment on the map view. A route segment is a set of points that exists on
+   * the route. These points may be a subset of points that makee the route geometry or it may
+   * be composed on points that are interpolated between points in the route geometry.
+   * A route segment is typically used to visualize traffic zones and is customizable by the client
+   * code. Remember to call finalizeRoutes().
+   *
+   * @param routeID the specified routeID for the corresponding route.
+   * @param rsopts the specified visual appearance of the route segment
+   * @return true if the route segment was created successfully, false otherwise. If the route
+   * does not exist, false is returned.
+   */
+  public boolean createRouteSegment(RouteID routeID, RouteSegmentOptions rsopts) {
+    return nativeMapView.createRouteSegment(routeID, rsopts);
+  }
+
+  /***
+   * Finalizes the routes on the map view. This method must be called if any route or route segments
+   * calls were made. This method can get fairly expensive and hence we do not want to call this for
+   * every mutation of route or route segment. The client code is free to create/mutate the routes/routesegments
+   * as many times as needed but call the finalizeRoutes() method once (or as few times as possible).
+   *
+   * It is during this time , that map libre layers, expressions and images are constructed.
+   *
+   * @return true if the routes were finalized successfully, false otherwise
+   */
+  public boolean finalizeRoutes() {
+    return nativeMapView.finalizeRoutes();
+  }
+
+  /***
+   * Gets statistics of the underlying health of routes management and includes stats on various
+   * constructs built in native code, such as memory and time take for such constructs.
+   *
+   * @return a formatted string containing the statistics
+   */
+  public String getRoutesStats() {
+    return nativeMapView.getRoutesStats();
+  }
+
+  /***
+   * Clears the stream containing the statistics of the underlying constructs related to routes.
+   */
+  public void clearRoutesStats() {
+    nativeMapView.clearRoutesStats();
+  }
+
+  public String getSnapshotCapture() {
+    return nativeMapView.getSnapshotCapture();
+  }
+
+  /***
+   * Queries map libre native is a screen space point is over a route.
+   *
+   * @param x the screen space x coordinate
+   * @param y the screen space y coordinate
+   * @return a route ID. The routeID will always be non null but client needs to check if its
+   *         valid by calling isValid() on it.
+   */
+  public RouteID queryRoute(double x, double y) {
+    return nativeMapView.queryRoute(x, y);
   }
 
   /**

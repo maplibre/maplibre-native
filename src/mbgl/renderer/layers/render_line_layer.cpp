@@ -1,3 +1,5 @@
+#include <iostream>
+#include <mapbox/vector_tile.hpp>
 #include <mbgl/renderer/layers/render_line_layer.hpp>
 
 #include <mbgl/geometry/feature_index.hpp>
@@ -510,7 +512,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                    LineOffset,
                                                    LineWidth,
                                                    LineFloorWidth,
-                                                   LinePattern>(
+                                                   LinePattern,
+                                                   LineClip,
+                                                   LineClipColor>(
             paintPropertyBinders, evaluated, propertiesAsUniforms, idLineColorVertexAttribute);
 
         if (!evaluated.get<LineDasharray>().from.empty()) {
@@ -586,6 +590,22 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
 
+            const auto& currLineClipProp = impl_cast(baseImpl).paint.get<LineClip>().value;
+            if (currLineClipProp.isConstant()) {
+                double currLineClipPropValue = currLineClipProp.asConstant();
+                if (layerTweaker) {
+                    LineLayerTweakerPtr lineLayerTweaker = std::static_pointer_cast<LineLayerTweaker>(layerTweaker);
+                    lineLayerTweaker->setGradientLineClip(currLineClipPropValue);
+                }
+            }
+            const auto& currLineClipColor = impl_cast(baseImpl).paint.get<LineClipColor>().value;
+            if (currLineClipColor.isConstant()) {
+                Color currLineClipColorValue = currLineClipColor.asConstant();
+                if (layerTweaker) {
+                    LineLayerTweakerPtr lineLayerTweaker = std::static_pointer_cast<LineLayerTweaker>(layerTweaker);
+                    lineLayerTweaker->setGradientLineClipColor(currLineClipColorValue);
+                }
+            }
             auto shader = lineGradientShaderGroup->getOrCreateShader(
                 context, propertiesAsUniforms, posNormalAttribName);
             if (!shader) {
@@ -602,8 +622,12 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 // create texture. to be reused for all the tiles of the layer
                 colorRampTexture2D = context.createTexture2D();
                 colorRampTexture2D->setImage(colorRamp);
+                gfx::TextureFilterType filterType = impl_cast(baseImpl).gradientFilterType ==
+                                                            LineGradientFilterType::Linear
+                                                        ? gfx::TextureFilterType::Linear
+                                                        : gfx::TextureFilterType::Nearest;
                 colorRampTexture2D->setSamplerConfiguration(
-                    {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+                    {filterType, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
             }
 
             if (colorRampTexture2D) {

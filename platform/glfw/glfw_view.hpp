@@ -8,6 +8,9 @@
 
 #include <utility>
 #include <optional>
+#include <stack>
+#include <mbgl/route/id_types.hpp>
+#include <mbgl/route/route_manager.hpp>
 
 #if (defined(MLN_RENDER_BACKEND_OPENGL) || defined(MLN_RENDER_BACKEND_VULKAN)) && \
     !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
@@ -67,6 +70,9 @@ public:
 
     mbgl::Size getSize() const;
 
+    bool getRoutePickMode() const;
+    GLFWRendererFrontend *getRenderFrontend() const;
+
     // mbgl::MapObserver implementation
     void onDidFinishLoadingStyle() override;
     void onWillStartRenderingFrame() override;
@@ -108,6 +114,20 @@ private:
     void updateAnimatedAnnotations();
     void toggleCustomSource();
     void toggleLocationIndicatorLayer();
+    std::vector<RouteID> routeIDlist;
+    std::unique_ptr<mbgl::route::RouteManager> rmptr_;
+    void addRoute();
+    void modifyRoute();
+    void disposeRoute();
+    void addTrafficSegments();
+    void modifyTrafficViz();
+    void removeTrafficViz();
+    void incrementRouteProgress();
+    void decrementRouteProgress();
+    void printRouteStats();
+    void captureSnapshot();
+    void setRouteProgressUsage();
+    void setRoutePickMode();
 
     void cycleDebugOptions();
     void clearAnnotations();
@@ -138,6 +158,44 @@ private:
     bool rotating = false;
     bool pitching = false;
     bool show3DExtrusions = false;
+
+    struct RouteCircle {
+        double resolution = 30;
+        double xlate = 0;
+        double radius = 50;
+        int numTrafficZones = 5;
+        bool trafficZonesGridAligned = true;
+        mbgl::LineString<double> points;
+
+        mbgl::Point<double> getPoint(double percent) const;
+    };
+
+    struct TrafficBlock {
+        mbgl::LineString<double> block;
+        uint32_t priority = 0;
+        mbgl::Color color;
+    };
+
+    enum RouteSegmentTestCases {
+        Blk1LowPriorityIntersecting,
+        Blk1HighPriorityIntersecting,
+        Blk12SameColorIntersecting,
+        Blk12NonIntersecting,
+        Invalid
+    };
+
+    std::vector<TrafficBlock> testCases(const RouteSegmentTestCases &testcase,
+                                        const GLFWView::RouteCircle &route) const;
+    void writeCapture(const std::string &capture, const std::string &capture_file_name) const;
+    void readAndLoadCapture(const std::string &capture_file_name);
+    int getCaptureIdx() const;
+
+    std::unordered_map<RouteID, RouteCircle, IDHasher<RouteID>> routeMap_;
+    int lastCaptureIdx_ = 0;
+    RouteID lastRouteID_;
+    double routeProgress_ = 0.0;
+    bool useRouteProgressPercent_ = false;
+    bool routePickMode_ = false;
 
     // Frame timer
     int frames = 0;

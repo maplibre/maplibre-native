@@ -18,6 +18,12 @@ void GLFWRendererFrontend::reset() {
     renderer.reset();
 }
 
+std::vector<mbgl::Feature> GLFWRendererFrontend::queryFeatures(double screenspaceX, double screenspaceY) {
+    mbgl::ScreenCoordinate screen_point(screenspaceX, screenspaceY);
+    std::vector<mbgl::Feature> features = renderer->queryRenderedFeatures(screen_point);
+    return features;
+}
+
 void GLFWRendererFrontend::setObserver(mbgl::RendererObserver& observer) {
     assert(renderer);
     renderer->setObserver(&observer);

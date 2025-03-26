@@ -39,6 +39,7 @@
 // C++ -> Java conversion
 #include "conversion/conversion.hpp"
 #include "conversion/collection.hpp"
+#include "conversion/color.hpp"
 #include "style/conversion/filter.hpp"
 #include "geojson/feature.hpp"
 
@@ -56,6 +57,8 @@
 #include "run_loop_impl.hpp"
 #include "style/light.hpp"
 #include "tile/tile_operation.hpp"
+#include "mbgl/route/route_manager.hpp"
+#include "mbgl/route/route.hpp"
 
 #include "android_renderer_backend.hpp"
 
@@ -83,7 +86,7 @@ NativeMapView::NativeMapView(jni::JNIEnv& _env,
 
     // Create a renderer frontend
     rendererFrontend = std::make_unique<AndroidRendererFrontend>(mapRenderer);
-
+    routeMgr = std::make_unique<mbgl::route::RouteManager>();
     // Create Map options
     MapOptions options;
     options.withMapMode(MapMode::Continuous)
@@ -312,6 +315,9 @@ jni::Local<jni::String> NativeMapView::getStyleUrl(jni::JNIEnv& env) {
 
 void NativeMapView::setStyleUrl(jni::JNIEnv& env, const jni::String& url) {
     map->getStyle().loadURL(jni::Make<std::string>(env, url));
+    if (routeMgr) {
+        routeMgr->setStyle(map->getStyle());
+    }
 }
 
 jni::Local<jni::String> NativeMapView::getStyleJson(jni::JNIEnv& env) {
@@ -320,6 +326,9 @@ jni::Local<jni::String> NativeMapView::getStyleJson(jni::JNIEnv& env) {
 
 void NativeMapView::setStyleJson(jni::JNIEnv& env, const jni::String& json) {
     map->getStyle().loadJSON(jni::Make<std::string>(env, json));
+    if (routeMgr) {
+        routeMgr->setStyle(map->getStyle());
+    }
 }
 
 void NativeMapView::setLatLngBounds(jni::JNIEnv& env, const jni::Object<mbgl::android::LatLngBounds>& jBounds) {
@@ -935,6 +944,43 @@ jni::Local<jni::Array<jlong>> NativeMapView::queryShapeAnnotations(JNIEnv& env, 
     return result;
 }
 
+jint NativeMapView::routeQueryRendered(JNIEnv& env, jni::jdouble screenSpaceX, jni::jdouble screenSpaceY) {
+    std::vector<RouteID> routeIDs = routeMgr->getAllRoutes();
+    std::vector<std::string> layers;
+    std::unordered_map<std::string, RouteID> baseLayerMapCache;
+    std::unordered_map<std::string, RouteID> baseSourceMapCache;
+    for (const auto& routeID : routeIDs) {
+        if (routeID.isValid()) {
+            std::string baseLayer = routeMgr->getBaseRouteLayerName(routeID);
+            assert(!baseLayer.empty() && "base layer cannot be empty!");
+            if (!baseLayer.empty()) {
+                layers.push_back(baseLayer);
+                baseLayerMapCache[baseLayer] = routeID;
+            }
+            std::string baseSource = routeMgr->getBaseGeoJSONsourceName(routeID);
+            assert(!baseSource.empty() && "base source cannot be empty");
+            if (!baseSource.empty()) {
+                baseSourceMapCache[baseSource] = routeID;
+            }
+        }
+    }
+
+    mapbox::geometry::point<double> point = {screenSpaceX, screenSpaceY};
+
+    const std::vector<Feature>& features = rendererFrontend->queryRenderedFeatures(point, {layers});
+    for (const auto& feature : features) {
+        if (baseLayerMapCache.find(feature.sourceLayer) != baseLayerMapCache.end()) {
+            return baseLayerMapCache[feature.sourceLayer].id;
+        }
+        // also check cache of geojson source names if the source layer is not set.
+        if (baseSourceMapCache.find(feature.source) != baseSourceMapCache.end()) {
+            return baseSourceMapCache[feature.source].id;
+        }
+    }
+
+    return -1;
+}
+
 jni::Local<jni::Array<jni::Object<geojson::Feature>>> NativeMapView::queryRenderedFeaturesForPoint(
     JNIEnv& env,
     jni::jfloat x,
@@ -1400,7 +1446,194 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::setTileLodZoomShift, "nativeSetTileLodZoomShift"),
         METHOD(&NativeMapView::getTileLodZoomShift, "nativeGetTileLodZoomShift"),
         METHOD(&NativeMapView::getLastRenderedTileCount, "nativeGetLastRenderedTileCount"),
-        METHOD(&NativeMapView::triggerRepaint, "nativeTriggerRepaint"));
+        METHOD(&NativeMapView::triggerRepaint, "nativeTriggerRepaint"),
+        METHOD(&NativeMapView::routeCreate, "nativeRouteCreate"),
+        METHOD(&NativeMapView::routeGetActiveLayerName, "nativeRouteGetActiveLayerName"),
+        METHOD(&NativeMapView::routeGetBaseLayerName, "nativeRouteGetBaseLayerName"),
+        METHOD(&NativeMapView::routeDispose, "nativeRouteDispose"),
+        METHOD(&NativeMapView::routeProgressSet, "nativeRouteSetProgress"),
+        METHOD(&NativeMapView::routeProgressSetPoint, "nativeRouteSetProgressPoint"),
+        METHOD(&NativeMapView::routeSegmentsClear, "nativeRouteClearSegments"),
+        METHOD(&NativeMapView::routeSegmentCreate, "nativeRouteSegmentCreate"),
+        METHOD(&NativeMapView::routesGetStats, "nativeRoutesGetStats"),
+        METHOD(&NativeMapView::routesClearStats, "nativeRoutesClearStats"),
+        METHOD(&NativeMapView::routeQueryRendered, "nativeRouteQuery"),
+        METHOD(&NativeMapView::routesGetCaptureSnapshot, "nativeRoutesCaptureSnapshot"),
+        METHOD(&NativeMapView::routesFinalize, "nativeRoutesFinalize"));
+}
+
+std::map<double, double> NativeMapView::convert(JNIEnv& env,
+                                                const jni::Array<jdouble>& keys,
+                                                const jni::Array<jdouble>& values) {
+    std::map<double, double> ret;
+    size_t keyslen = keys.Length(env);
+    size_t valueslen = values.Length(env);
+    assert(keyslen == valueslen && "invalid map data");
+    if (keyslen == valueslen) {
+        for (size_t i = 0; i < keyslen; i++) {
+            double key = keys.Get(env, i);
+            double value = values.Get(env, i);
+            ret[key] = value;
+        }
+    }
+
+    return ret;
+}
+
+jint NativeMapView::routeCreate(JNIEnv& env,
+                                const jni::Object<mbgl::android::geojson::LineString>& routeGeom,
+                                jint outerColor,
+                                jint innerColor,
+                                jdouble outerWidth,
+                                jdouble innerWidth,
+                                const jni::String& layerbefore,
+                                jboolean useDynamicWidths,
+                                const jni::Array<jdouble>& outerDynamicWidthZooms,
+                                const jni::Array<jdouble>& outerDynamicWidths,
+                                const jni::Array<jdouble>& innerDynamicWidthZooms,
+                                const jni::Array<jdouble>& innerDynamicWidths) {
+    if (!routeMgr->hasStyle()) {
+        routeMgr->setStyle(map->getStyle());
+    }
+
+    assert(routeMgr->hasStyle() && "style object has not been set");
+    RouteID routeID;
+    if (routeMgr) {
+        if (routeMgr->hasStyle()) {
+            using namespace mbgl::android::conversion;
+            const auto& linestring = mbgl::android::geojson::LineString::convert(env, routeGeom);
+            mbgl::route::RouteOptions routeOptions;
+            Converter<mbgl::Color, int> colorConverter;
+            Result<Color> outerColorRes = colorConverter(env, outerColor);
+            Result<Color> innerColorRes = colorConverter(env, innerColor);
+            if (outerColorRes) {
+                routeOptions.outerColor = *outerColorRes;
+            }
+            if (innerColorRes) {
+                routeOptions.innerColor = *innerColorRes;
+            }
+            routeOptions.outerWidth = outerWidth;
+            routeOptions.innerWidth = innerWidth;
+            routeOptions.useDynamicWidths = useDynamicWidths;
+            if (layerbefore) {
+                routeOptions.layerBefore = jni::Make<std::string>(env, layerbefore);
+            }
+
+            if (outerDynamicWidthZooms && outerDynamicWidths && innerDynamicWidthZooms && innerDynamicWidths) {
+                routeOptions.outerWidthZoomStops = convert(env, outerDynamicWidthZooms, outerDynamicWidths);
+                routeOptions.innerWidthZoomStops = convert(env, innerDynamicWidthZooms, innerDynamicWidths);
+            }
+
+            routeID = routeMgr->routeCreate(linestring, routeOptions);
+        }
+    }
+
+    return routeID.id;
+}
+
+jni::Local<jni::String> NativeMapView::routeGetActiveLayerName(JNIEnv& env, const jint routeID) {
+    std::string layerName;
+    if (routeMgr) {
+        layerName = routeMgr->getActiveRouteLayerName(RouteID(routeID));
+    }
+
+    return jni::Make<jni::String>(env, layerName);
+}
+
+jni::Local<jni::String> NativeMapView::routeGetBaseLayerName(JNIEnv& env, const jint& routeID) {
+    std::string layerName;
+    if (routeMgr) {
+        layerName = routeMgr->getBaseRouteLayerName(RouteID(routeID));
+    }
+
+    return jni::Make<jni::String>(env, layerName);
+}
+
+jni::Local<jni::String> NativeMapView::routesGetStats(JNIEnv& env) {
+    std::string stats;
+    if (routeMgr) {
+        stats = routeMgr->getStats();
+    }
+
+    return jni::Make<jni::String>(env, stats);
+}
+
+void NativeMapView::routesClearStats(JNIEnv& env) {
+    if (routeMgr) {
+        routeMgr->clearStats();
+    }
+}
+
+jni::Local<jni::String> NativeMapView::routesGetCaptureSnapshot(JNIEnv& env) {
+    std::string captureStr;
+    if (routeMgr) {
+        captureStr = routeMgr->captureSnapshot();
+    }
+
+    return jni::Make<jni::String>(env, captureStr);
+}
+
+jboolean NativeMapView::routeDispose(JNIEnv& env, jint routeID) {
+    if (routeMgr) {
+        return routeMgr->routeDispose(RouteID(routeID));
+    }
+
+    return false;
+}
+
+jboolean NativeMapView::routeSegmentCreate(JNIEnv& env,
+                                           jint routeID,
+                                           const jni::Object<mbgl::android::geojson::LineString>& segmentGeom,
+                                           jint color,
+                                           jint priority) {
+    if (routeMgr) {
+        using namespace mbgl::android::conversion;
+        const auto& linestring = mbgl::android::geojson::LineString::convert(env, segmentGeom);
+        mbgl::route::RouteSegmentOptions rsegopts;
+        rsegopts.geometry = linestring;
+        rsegopts.priority = static_cast<uint32_t>(priority);
+        Converter<mbgl::Color, int> colorConverter;
+        Result<Color> segmentColorRes = colorConverter(env, color);
+        if (segmentColorRes) {
+            rsegopts.color = *segmentColorRes;
+        }
+
+        return routeMgr->routeSegmentCreate(RouteID(routeID), rsegopts);
+    }
+
+    return false;
+}
+
+jboolean NativeMapView::routeProgressSet(JNIEnv& env, jint routeID, jdouble progress) {
+    if (routeMgr) {
+        return routeMgr->routeSetProgress(RouteID(routeID), progress);
+    }
+
+    return false;
+}
+
+jboolean NativeMapView::routeProgressSetPoint(JNIEnv& env, jint routeID, jdouble x, jdouble y) {
+    if (routeMgr) {
+        return routeMgr->routeSetProgress(RouteID(routeID), mbgl::Point<double>(x, y));
+    }
+
+    return false;
+}
+
+void NativeMapView::routeSegmentsClear(JNIEnv& env, jint routeID) {
+    if (routeMgr) {
+        routeMgr->routeClearSegments(RouteID(routeID));
+    }
+}
+
+jboolean NativeMapView::routesFinalize(JNIEnv& env) {
+    if (routeMgr) {
+        routeMgr->finalize();
+
+        return true;
+    }
+
+    return false;
 }
 
 void NativeMapView::onRegisterShaders(gfx::ShaderRegistry&) {};

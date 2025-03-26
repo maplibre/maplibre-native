@@ -43,11 +43,11 @@ struct alignas(16) LineGradientDrawableUBO {
     /* 76 */ float gapwidth_t;
     /* 80 */ float offset_t;
     /* 84 */ float width_t;
-    /* 88 */ float pad1;
+    /* 88 */ float lineclip_t;
     /* 92 */ float pad2;
-    /* 96 */
+    /* 96 */ std::array<float, 4> clip_color_t;
 };
-static_assert(sizeof(LineGradientDrawableUBO) == 6 * 16);
+static_assert(sizeof(LineGradientDrawableUBO) == 7 * 16);
 
 //
 // Line pattern

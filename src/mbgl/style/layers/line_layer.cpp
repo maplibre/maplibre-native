@@ -139,6 +139,19 @@ void LineLayer::setLineSortKey(const PropertyValue<float>& value) {
     observer->onLayerChanged(*this);
 }
 
+void LineLayer::setGradientLineFilter(const LineGradientFilterType& value) {
+    if (value == getGradientLineFilter()) return;
+    auto impl_ = mutableImpl();
+    impl_->gradientFilterType = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+LineGradientFilterType LineLayer::getGradientLineFilter() const {
+    return impl().gradientFilterType;
+}
+
+
 // Paint properties
 
 PropertyValue<float> LineLayer::getDefaultLineBlur() {
@@ -437,6 +450,37 @@ void LineLayer::setLineWidthTransition(const TransitionOptions& options) {
 
 TransitionOptions LineLayer::getLineWidthTransition() const {
     return impl().paint.template get<LineWidth>().options;
+}
+
+void LineLayer::setGradientLineClip(const PropertyValue<float>& value) {
+    if(value == getGradientLineClip()) {
+        return;
+    }
+
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<LineClip>().value = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+const PropertyValue<float>& LineLayer::getGradientLineClip() const {
+    return impl().paint.template get<LineClip>().value;
+}
+
+void LineLayer::setGradientLineClipColor(const PropertyValue<Color>& value) {
+    if(value == getGradientLineClipColor()) {
+        return;
+    }
+
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<LineClipColor>().value = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+
+}
+
+const PropertyValue<Color>& LineLayer::getGradientLineClipColor() const {
+    return impl().paint.template get<LineClipColor>().value;
 }
 
 using namespace conversion;
