@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## 11.8.5
+
+### 🐞 Bug fixes
+
+- Fix `ErrorSurfaceLostKHR` exception ([#3337](https://github.com/maplibre/maplibre-native/pull/3337)).
+
 ## 11.8.4
 
 ### 🐞 Bug fixes
