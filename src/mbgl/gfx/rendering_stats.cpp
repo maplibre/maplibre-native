@@ -142,7 +142,7 @@ void RenderingStatsView::create(const std::unique_ptr<style::Style>& style) {
 
     if (!style->getLayer(layerID)) {
         auto infoLayer = std::make_unique<style::SymbolLayer>(layerID, sourceID);
-        
+
         // required
         infoLayer->setSymbolScreenSpace(true);
         infoLayer->setTextAllowOverlap(true);
