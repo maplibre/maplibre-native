@@ -249,6 +249,11 @@ jni::Local<jni::Object<>> SymbolLayer::getTextOptional(jni::JNIEnv& env) {
     return std::move(*convert<jni::Local<jni::Object<>>>(env, toSymbolLayer(layer).getTextOptional()));
 }
 
+jni::Local<jni::Object<>> SymbolLayer::getSymbolScreenSpace(jni::JNIEnv& env) {
+    using namespace mbgl::android::conversion;
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toSymbolLayer(layer).getSymbolScreenSpace()));
+}
+
 jni::Local<jni::Object<>> SymbolLayer::getIconOpacity(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
     return std::move(*convert<jni::Local<jni::Object<>>>(env, toSymbolLayer(layer).getIconOpacity()));
@@ -557,6 +562,7 @@ void SymbolJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&SymbolLayer::getTextAllowOverlap, "nativeGetTextAllowOverlap"),
         METHOD(&SymbolLayer::getTextIgnorePlacement, "nativeGetTextIgnorePlacement"),
         METHOD(&SymbolLayer::getTextOptional, "nativeGetTextOptional"),
+        METHOD(&SymbolLayer::getSymbolScreenSpace, "nativeGetSymbolScreenSpace"),
         METHOD(&SymbolLayer::getIconOpacityTransition, "nativeGetIconOpacityTransition"),
         METHOD(&SymbolLayer::setIconOpacityTransition, "nativeSetIconOpacityTransition"),
         METHOD(&SymbolLayer::getIconOpacity, "nativeGetIconOpacity"),

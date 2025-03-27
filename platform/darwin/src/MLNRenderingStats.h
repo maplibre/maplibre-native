@@ -2,6 +2,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+MLN_EXPORT
 @interface MLNRenderingStats : NSObject
 
 /// Frame CPU encoding time (milliseconds)
