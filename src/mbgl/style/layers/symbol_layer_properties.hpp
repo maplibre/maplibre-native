@@ -86,11 +86,6 @@ struct IconTextFitPadding : LayoutProperty<std::array<float, 4>> {
     static std::array<float, 4> defaultValue() { return {{0.f, 0.f, 0.f, 0.f}}; }
 };
 
-struct SymbolScreenSpace : LayoutProperty<bool> {
-    static constexpr const char *name() { return "symbol-screen-space"; }
-    static bool defaultValue() { return false; }
-};
-
 struct SymbolAvoidEdges : LayoutProperty<bool> {
     static constexpr const char *name() { return "symbol-avoid-edges"; }
     static bool defaultValue() { return false; }
@@ -99,6 +94,11 @@ struct SymbolAvoidEdges : LayoutProperty<bool> {
 struct SymbolPlacement : LayoutProperty<SymbolPlacementType> {
     static constexpr const char *name() { return "symbol-placement"; }
     static SymbolPlacementType defaultValue() { return SymbolPlacementType::Point; }
+};
+
+struct SymbolScreenSpace : LayoutProperty<bool> {
+    static constexpr const char *name() { return "symbol-screen-space"; }
+    static bool defaultValue() { return false; }
 };
 
 struct SymbolSortKey : DataDrivenLayoutProperty<float> {
@@ -305,9 +305,9 @@ class SymbolLayoutProperties : public Properties<
     IconSize,
     IconTextFit,
     IconTextFitPadding,
-    SymbolScreenSpace,
     SymbolAvoidEdges,
     SymbolPlacement,
+    SymbolScreenSpace,
     SymbolSortKey,
     SymbolSpacing,
     SymbolZOrder,

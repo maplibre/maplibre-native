@@ -141,11 +141,10 @@ void RenderingStatsView::create(const std::unique_ptr<style::Style>& style) {
     }
 
     if (!style->getLayer(layerID)) {
-        auto impl = makeMutable<style::SymbolLayer::Impl>(layerID, sourceID);
-        impl->layout.get<mbgl::style::SymbolScreenSpace>() = true;
-        auto infoLayer = std::make_unique<style::SymbolLayer>(std::move(impl));
-
+        auto infoLayer = std::make_unique<style::SymbolLayer>(layerID, sourceID);
+        
         // required
+        infoLayer->setSymbolScreenSpace(true);
         infoLayer->setTextAllowOverlap(true);
         infoLayer->setIconAllowOverlap(true);
         infoLayer->setTextIgnorePlacement(true);

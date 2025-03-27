@@ -89,6 +89,10 @@ public:
     const PropertyValue<SymbolPlacementType>& getSymbolPlacement() const;
     void setSymbolPlacement(const PropertyValue<SymbolPlacementType>&);
 
+    static PropertyValue<bool> getDefaultSymbolScreenSpace();
+    const PropertyValue<bool>& getSymbolScreenSpace() const;
+    void setSymbolScreenSpace(const PropertyValue<bool>&);
+
     static PropertyValue<float> getDefaultSymbolSortKey();
     const PropertyValue<float>& getSymbolSortKey() const;
     void setSymbolSortKey(const PropertyValue<float>&);

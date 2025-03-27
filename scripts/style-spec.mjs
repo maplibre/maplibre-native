@@ -190,4 +190,11 @@ modifiedReferenceSpec["paint_location-indicator"] = {
   }
 };
 
+// internal use
+modifiedReferenceSpec["layout_symbol"]["symbol-screen-space"] = {
+    "type": "boolean",
+    "default": false,
+    "property-type": "data-constant"
+};
+
 export default modifiedReferenceSpec;
