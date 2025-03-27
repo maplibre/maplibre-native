@@ -111,13 +111,17 @@ public class VulkanTextureViewRenderThread extends TextureViewRenderThread {
         if (destroySurface) {
           mapRenderer.onSurfaceDestroyed();
           destroySurface = false;
-          break;
+          continue;
         }
 
         // If the surface size has changed inform the map renderer.
         if (sizeChanged) {
           mapRenderer.onSurfaceChanged(w, h);
           sizeChanged = false;
+          continue;
+        }
+
+        if (surface == null) {
           continue;
         }
 
