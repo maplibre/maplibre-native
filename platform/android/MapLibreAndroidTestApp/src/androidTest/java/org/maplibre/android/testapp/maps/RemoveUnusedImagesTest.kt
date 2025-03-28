@@ -60,7 +60,7 @@ class RemoveUnusedImagesTest : AppCenter() {
             mapView.addOnCanRemoveUnusedStyleImageListener {
                 callbackLatch.countDown()
                 maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 120.0), 8.0))
-                mapView.addOnDidFinishRenderingFrameListener{ _, _, _ ->
+                mapView.addOnDidFinishRenderingFrameListener{ _, _ ->
                     assertNotNull(maplibreMap.style!!.getImage("small"))
                     assertNotNull(maplibreMap.style!!.getImage("large"))
                     latch.countDown()
@@ -89,7 +89,7 @@ class RemoveUnusedImagesTest : AppCenter() {
                 maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 120.0), 8.0))
 
                 // Wait for the next frame and check that images were removed from the style.
-                mapView.addOnDidFinishRenderingFrameListener { _, _, _ ->
+                mapView.addOnDidFinishRenderingFrameListener { _, _ ->
                     if (maplibreMap.style!!.getImage("small") == null && maplibreMap.style!!.getImage("large") == null) {
                         latch.countDown()
                     }
