@@ -1188,8 +1188,9 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
      * Called when the map has finished rendering a frame
      *
      * @param fully true if all frames have been rendered, false if partially rendered
+     * @param stats rendering statistics
      */
-    void onDidFinishRenderingFrame(boolean fully, double frameEncodingTime, double frameRenderingTime);
+    void onDidFinishRenderingFrame(boolean fully, RenderingStats stats);
   }
 
   /**
@@ -1539,7 +1540,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     }
 
     @Override
-    public void onDidFinishRenderingFrame(boolean fully, double frameEncodingTime, double frameRenderingTime) {
+    public void onDidFinishRenderingFrame(boolean fully, RenderingStats stats) {
       if (maplibreMap != null && maplibreMap.getStyle() != null && maplibreMap.getStyle().isFullyLoaded()) {
         renderCount++;
         if (renderCount == 3) {
@@ -1711,7 +1712,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     }
 
     @Override
-    public void onDidFinishRenderingFrame(boolean fully, double frameEncodingTime, double frameRenderingTime) {
+    public void onDidFinishRenderingFrame(boolean fully, RenderingStats stats) {
       if (maplibreMap != null) {
         maplibreMap.onUpdateFullyRendered();
       }

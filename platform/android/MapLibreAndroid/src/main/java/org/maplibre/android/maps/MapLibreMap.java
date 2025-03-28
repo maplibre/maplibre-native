@@ -103,6 +103,14 @@ public final class MapLibreMap {
     nativeMapView.triggerRepaint();
   }
 
+  public boolean isRenderingStatsViewEnabled() {
+    return nativeMapView.isRenderingStatsViewEnabled();
+  }
+
+  public void enableRenderingStatsView(boolean value) {
+    nativeMapView.enableRenderingStatsView(value);
+  }
+
   public void setSwapBehaviorFlush(boolean flush) {
     nativeMapView.setSwapBehaviorFlush(flush);
   }
