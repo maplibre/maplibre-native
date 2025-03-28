@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/drawable_data.hpp>
 #include <mbgl/gfx/texture2d.hpp>
+#include <mbgl/gfx/dynamic_texture.hpp>
 #include <mbgl/gfx/uniform_buffer.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/color.hpp>
@@ -53,6 +54,7 @@ class Drawable {
 public:
     /// @brief Array of textures to bind
     using Textures = std::array<gfx::Texture2DPtr, shaders::maxTextureCountPerShader>;
+    using TextureHandles = std::array<std::optional<gfx::TextureHandle>, shaders::maxTextureCountPerShader>;
 
 protected:
     Drawable(std::string name);
@@ -108,6 +110,7 @@ public:
 
     /// @brief Get the texture at the given internal ID.
     const gfx::Texture2DPtr& getTexture(size_t id) const;
+    std::optional<gfx::TextureHandle> getTextureHandle(size_t id);
 
     /// @brief Set the collection of textures bound to this drawable
     /// @param textures_ A Textures collection to set
@@ -118,6 +121,7 @@ public:
     /// @param texture Texture2D instance
     /// @param id Internal ID of the texture.
     void setTexture(gfx::Texture2DPtr texture, size_t id);
+    void setTextureHandle(std::optional<gfx::TextureHandle> textureHandle, size_t id);
 
     /// Whether the drawble should be drawn
     bool getEnabled() const { return enabled; }
@@ -303,6 +307,7 @@ protected:
     std::unique_ptr<Impl> impl;
 
     Textures textures;
+    TextureHandles textureHandles;
     std::vector<DrawableTweakerPtr> tweakers;
     LayerTweakerPtr layerTweaker;
 
