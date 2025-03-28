@@ -167,7 +167,8 @@ void drawIcon(const RenderSymbolLayer::Programs& programs,
     const gfx::TextureBinding textureBinding = tile.getIconAtlasTextureBinding(filterType);
 
     const Size& iconSize = tile.getIconAtlasTexture()->getSize();
-    const bool variablePlacedIcon = bucket.hasVariablePlacement && bucketLayout.get<IconTextFit>() != IconTextFitType::None;
+    const bool variablePlacedIcon = bucket.hasVariablePlacement &&
+                                    bucketLayout.get<IconTextFit>() != IconTextFitType::None;
 
     if (sdfIcons) {
         if (values.hasHalo) {
@@ -572,80 +573,80 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
             }
         }
 
-        const auto drawCollisonData = [&](const bool isText,
-                                          const bool hasCollisionBox,
-                                          const bool hasCollisionCircle) {
-            if (!hasCollisionBox && !hasCollisionCircle) return;
+        const auto drawCollisonData =
+            [&](const bool isText, const bool hasCollisionBox, const bool hasCollisionCircle) {
+                if (!hasCollisionBox && !hasCollisionCircle) return;
 
-            static const style::Properties<>::PossiblyEvaluated properties{};
-            static const CollisionBoxProgram::Binders paintAttributeData(properties, 0);
-            const auto pixelRatio = tile.id.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));
-            const auto scale = static_cast<float>(
-                std::pow(2, parameters.state.getZoom() - tile.getOverscaledTileID().overscaledZ));
-            std::array<float, 2> extrudeScale = {{parameters.pixelsToGLUnits[0] / (pixelRatio * scale),
-                                                  parameters.pixelsToGLUnits[1] / (pixelRatio * scale)}};
-            const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData->layerProperties);
-            const auto& bucketLayout = *bucket.layout;
-            const auto values = isText ? textPropertyValues(evaluated, bucketLayout) : iconPropertyValues(evaluated, bucketLayout);
-            const bool needTranslate = values.translate[0] != 0 || values.translate[1] != 0;
+                static const style::Properties<>::PossiblyEvaluated properties{};
+                static const CollisionBoxProgram::Binders paintAttributeData(properties, 0);
+                const auto pixelRatio = tile.id.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));
+                const auto scale = static_cast<float>(
+                    std::pow(2, parameters.state.getZoom() - tile.getOverscaledTileID().overscaledZ));
+                std::array<float, 2> extrudeScale = {{parameters.pixelsToGLUnits[0] / (pixelRatio * scale),
+                                                      parameters.pixelsToGLUnits[1] / (pixelRatio * scale)}};
+                const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData->layerProperties);
+                const auto& bucketLayout = *bucket.layout;
+                const auto values = isText ? textPropertyValues(evaluated, bucketLayout)
+                                           : iconPropertyValues(evaluated, bucketLayout);
+                const bool needTranslate = values.translate[0] != 0 || values.translate[1] != 0;
 
-            if (hasCollisionBox) {
-                const auto& collisionBox = isText ? bucket.textCollisionBox : bucket.iconCollisionBox;
-                programs.collisionBoxProgram->draw(
-                    parameters.context,
-                    *parameters.renderPass,
-                    gfx::Lines{1.0f},
-                    gfx::DepthMode::disabled(),
-                    gfx::StencilMode::disabled(),
-                    parameters.colorModeForRenderPass(),
-                    gfx::CullFaceMode::disabled(),
-                    CollisionBoxProgram::LayoutUniformValues{
-                        uniforms::matrix::Value(
-                            (needTranslate
-                                 ? tile.translatedMatrix(values.translate, values.translateAnchor, parameters.state)
-                                 : tile.matrix)),
-                        uniforms::extrude_scale::Value(extrudeScale),
-                        uniforms::camera_to_center_distance::Value(parameters.state.getCameraToCenterDistance())},
-                    *collisionBox->vertexBuffer,
-                    *collisionBox->dynamicVertexBuffer,
-                    *collisionBox->indexBuffer,
-                    collisionBox->segments,
-                    paintAttributeData,
-                    properties,
-                    CollisionBoxProgram::TextureBindings{},
-                    static_cast<float>(parameters.state.getZoom()),
-                    getID());
-            }
-            if (hasCollisionCircle) {
-                const auto& collisionCircle = isText ? bucket.textCollisionCircle : bucket.iconCollisionCircle;
-                programs.collisionCircleProgram->draw(
-                    parameters.context,
-                    *parameters.renderPass,
-                    gfx::Triangles(),
-                    gfx::DepthMode::disabled(),
-                    gfx::StencilMode::disabled(),
-                    parameters.colorModeForRenderPass(),
-                    gfx::CullFaceMode::disabled(),
-                    CollisionCircleProgram::LayoutUniformValues{
-                        uniforms::matrix::Value(
-                            (needTranslate
-                                 ? tile.translatedMatrix(values.translate, values.translateAnchor, parameters.state)
-                                 : tile.matrix)),
-                        uniforms::extrude_scale::Value(extrudeScale),
-                        uniforms::overscale_factor::Value(
-                            static_cast<float>(tile.getOverscaledTileID().overscaleFactor())),
-                        uniforms::camera_to_center_distance::Value(parameters.state.getCameraToCenterDistance())},
-                    *collisionCircle->vertexBuffer,
-                    *collisionCircle->dynamicVertexBuffer,
-                    *collisionCircle->indexBuffer,
-                    collisionCircle->segments,
-                    paintAttributeData,
-                    properties,
-                    CollisionCircleProgram::TextureBindings{},
-                    static_cast<float>(parameters.state.getZoom()),
-                    getID());
-            }
-        };
+                if (hasCollisionBox) {
+                    const auto& collisionBox = isText ? bucket.textCollisionBox : bucket.iconCollisionBox;
+                    programs.collisionBoxProgram->draw(
+                        parameters.context,
+                        *parameters.renderPass,
+                        gfx::Lines{1.0f},
+                        gfx::DepthMode::disabled(),
+                        gfx::StencilMode::disabled(),
+                        parameters.colorModeForRenderPass(),
+                        gfx::CullFaceMode::disabled(),
+                        CollisionBoxProgram::LayoutUniformValues{
+                            uniforms::matrix::Value(
+                                (needTranslate
+                                     ? tile.translatedMatrix(values.translate, values.translateAnchor, parameters.state)
+                                     : tile.matrix)),
+                            uniforms::extrude_scale::Value(extrudeScale),
+                            uniforms::camera_to_center_distance::Value(parameters.state.getCameraToCenterDistance())},
+                        *collisionBox->vertexBuffer,
+                        *collisionBox->dynamicVertexBuffer,
+                        *collisionBox->indexBuffer,
+                        collisionBox->segments,
+                        paintAttributeData,
+                        properties,
+                        CollisionBoxProgram::TextureBindings{},
+                        static_cast<float>(parameters.state.getZoom()),
+                        getID());
+                }
+                if (hasCollisionCircle) {
+                    const auto& collisionCircle = isText ? bucket.textCollisionCircle : bucket.iconCollisionCircle;
+                    programs.collisionCircleProgram->draw(
+                        parameters.context,
+                        *parameters.renderPass,
+                        gfx::Triangles(),
+                        gfx::DepthMode::disabled(),
+                        gfx::StencilMode::disabled(),
+                        parameters.colorModeForRenderPass(),
+                        gfx::CullFaceMode::disabled(),
+                        CollisionCircleProgram::LayoutUniformValues{
+                            uniforms::matrix::Value(
+                                (needTranslate
+                                     ? tile.translatedMatrix(values.translate, values.translateAnchor, parameters.state)
+                                     : tile.matrix)),
+                            uniforms::extrude_scale::Value(extrudeScale),
+                            uniforms::overscale_factor::Value(
+                                static_cast<float>(tile.getOverscaledTileID().overscaleFactor())),
+                            uniforms::camera_to_center_distance::Value(parameters.state.getCameraToCenterDistance())},
+                        *collisionCircle->vertexBuffer,
+                        *collisionCircle->dynamicVertexBuffer,
+                        *collisionCircle->indexBuffer,
+                        collisionCircle->segments,
+                        paintAttributeData,
+                        properties,
+                        CollisionCircleProgram::TextureBindings{},
+                        static_cast<float>(parameters.state.getZoom()),
+                        getID());
+                }
+            };
         drawCollisonData(false /*isText*/, bucket.hasIconCollisionBoxData(), bucket.hasIconCollisionCircleData());
         drawCollisonData(true /*isText*/, bucket.hasTextCollisionBoxData(), bucket.hasTextCollisionCircleData());
     }
