@@ -1047,7 +1047,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             const auto& bucketLayout = *bucket.layout;
-            const auto values = isText ? textPropertyValues(evaluated, bucketLayout) : iconPropertyValues(evaluated, bucketLayout);
+            const auto values = isText ? textPropertyValues(evaluated, bucketLayout)
+                                       : iconPropertyValues(evaluated, bucketLayout);
             const std::string suffix = isText ? "text/" : "icon/";
 
             const auto addVertices = [&collisionBuilder](const auto& vertices) {
@@ -1193,7 +1194,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         auto& bucketPaintProperties = bucket.paintProperties.at(getID());
 
         const auto& bucketLayout = *bucket.layout;
-        const auto values = isText ? textPropertyValues(evaluated, bucketLayout) : iconPropertyValues(evaluated, bucketLayout);
+        const auto values = isText ? textPropertyValues(evaluated, bucketLayout)
+                                   : iconPropertyValues(evaluated, bucketLayout);
 
         const auto& atlases = tile.getAtlasTextures();
         if (!atlases) {
