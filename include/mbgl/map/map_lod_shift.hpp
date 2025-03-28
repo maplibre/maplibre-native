@@ -11,10 +11,10 @@ public:
 
     MapLodShift(const std::vector<double>& data) {
         assert(data.size() % 2 == 0);
-        size_t size = data.size() / 2;
+        std::size_t size = data.size() / 2;
         zoom.resize(size);
         shift.resize(size);
-        for (size_t i = 0; i < size; i++) {
+        for (std::size_t i = 0; i < size; i++) {
             zoom[i] = data[i * 2];
             shift[i] = data[i * 2 + 1];
         }
@@ -30,7 +30,7 @@ public:
         if (z >= zoom.back()) {
             return shift.back();
         }
-        for (size_t i = 1; i < zoom.size(); i++) {
+        for (std::size_t i = 1; i < zoom.size(); i++) {
             if (z < zoom[i]) {
                 double t = (z - zoom[i - 1]) / (zoom[i] - zoom[i - 1]);
                 return shift[i - 1] + t * (shift[i] - shift[i - 1]);

@@ -3,6 +3,7 @@
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/gfx/custom_puck.hpp>
 #include <mbgl/util/util.hpp>
+#include <mbgl/gfx/rendering_stats.hpp>
 
 #include <memory>
 #include <mutex>
@@ -52,6 +53,8 @@ public:
     virtual Renderable& getDefaultRenderable() = 0;
 
     virtual CustomPuckState getCurrentCustomPuckState() const { return {}; }
+
+    virtual mbgl::gfx::RenderingStats getRenderingStats();
 
 #if MLN_DRAWABLE_RENDERER
     /// One-time shader initialization
