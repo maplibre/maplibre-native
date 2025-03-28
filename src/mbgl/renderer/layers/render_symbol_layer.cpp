@@ -152,14 +152,14 @@ void drawIcon(const RenderSymbolLayer::Programs& programs,
               const bool sdfIcons) {
     auto& bucket = static_cast<SymbolBucket&>(*renderData.bucket);
     const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
-    const auto& layout = *bucket.layout;
-    auto values = iconPropertyValues(evaluated, layout);
+    const auto& bucketLayout = *bucket.layout;
+    auto values = iconPropertyValues(evaluated, bucketLayout);
     const auto& paintPropertyValues = RenderSymbolLayer::iconPaintProperties(evaluated);
 
-    const bool alongLine = layout.get<SymbolPlacement>() != SymbolPlacementType::Point &&
-                           layout.get<IconRotationAlignment>() == AlignmentType::Map;
+    const bool alongLine = bucketLayout.get<SymbolPlacement>() != SymbolPlacementType::Point &&
+                           bucketLayout.get<IconRotationAlignment>() == AlignmentType::Map;
 
-    const bool iconScaled = layout.get<IconSize>().constantOr(1.0) != 1.0 || bucket.iconsNeedLinear;
+    const bool iconScaled = bucketLayout.get<IconSize>().constantOr(1.0) != 1.0 || bucket.iconsNeedLinear;
     const bool iconTransformed = values.rotationAlignment == AlignmentType::Map || parameters.state.getPitch() != 0;
 
     const bool linear = sdfIcons || parameters.state.isChanging() || iconScaled || iconTransformed;
@@ -167,7 +167,7 @@ void drawIcon(const RenderSymbolLayer::Programs& programs,
     const gfx::TextureBinding textureBinding = tile.getIconAtlasTextureBinding(filterType);
 
     const Size& iconSize = tile.getIconAtlasTexture()->getSize();
-    const bool variablePlacedIcon = bucket.hasVariablePlacement && layout.get<IconTextFit>() != IconTextFitType::None;
+    const bool variablePlacedIcon = bucket.hasVariablePlacement && bucketLayout.get<IconTextFit>() != IconTextFitType::None;
 
     if (sdfIcons) {
         if (values.hasHalo) {
@@ -248,12 +248,12 @@ void drawText(const RenderSymbolLayer::Programs& programs,
               const bool isOffset) {
     const auto& bucket = static_cast<SymbolBucket&>(*renderData.bucket);
     const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
-    const auto& layout = *bucket.layout;
+    const auto& bucketLayout = *bucket.layout;
 
-    const auto values = textPropertyValues(evaluated, layout);
+    const auto values = textPropertyValues(evaluated, bucketLayout);
     const auto& paintPropertyValues = RenderSymbolLayer::textPaintProperties(evaluated);
 
-    const bool alongLine = layout.get<SymbolPlacement>() != SymbolPlacementType::Point &&
+    const bool alongLine = bucketLayout.get<SymbolPlacement>() != SymbolPlacementType::Point &&
                            values.rotationAlignment == AlignmentType::Map;
 
     const Size& glyphTexSize = tile.getGlyphAtlasTexture()->getSize();
@@ -585,8 +585,8 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
             std::array<float, 2> extrudeScale = {{parameters.pixelsToGLUnits[0] / (pixelRatio * scale),
                                                   parameters.pixelsToGLUnits[1] / (pixelRatio * scale)}};
             const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData->layerProperties);
-            const auto& layout = *bucket.layout;
-            const auto values = isText ? textPropertyValues(evaluated, layout) : iconPropertyValues(evaluated, layout);
+            const auto& bucketLayout = *bucket.layout;
+            const auto values = isText ? textPropertyValues(evaluated, bucketLayout) : iconPropertyValues(evaluated, bucketLayout);
             const bool needTranslate = values.translate[0] != 0 || values.translate[1] != 0;
 
             if (hasCollisionBox) {
