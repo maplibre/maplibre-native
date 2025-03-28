@@ -256,7 +256,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
     NSDictionary* _pointFeatures;
     NSLock* _loadLock;
-    
+
     MBXTileLodMode _tileLodMode;
 }
 
@@ -2014,7 +2014,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     static const double defaultRadius = self.mapView.tileLodMinRadius;
     static const double defaultScale = self.mapView.tileLodScale;
     static const double defaultPitchThreshold = self.mapView.tileLodPitchThreshold;
-    
+
     _tileLodMode = static_cast<MBXTileLodMode>((static_cast<int>(_tileLodMode) + 1) % static_cast<int>(MBXTileLodModeCount));
 
     switch (_tileLodMode) {
@@ -2040,14 +2040,14 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         default:
             break;
     }
-    
+
     // update UI
     static UISlider* zoomSlider = nil;
     if (zoomSlider && _tileLodMode == MBXTileLodModeNoLod) {
         [zoomSlider removeFromSuperview];
         zoomSlider = nil;
     }
-    
+
     if (!zoomSlider && _tileLodMode != MBXTileLodModeNoLod) {
         const float zoomShiftRange = 5.0f;
         zoomSlider = [[UISlider alloc] init];
@@ -2055,10 +2055,10 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         zoomSlider.maximumValue = zoomShiftRange / 2.0f;
         zoomSlider.value = self.mapView.tileLodZoomShift;
         zoomSlider.continuous = NO;
-        
+
         [zoomSlider addTarget:self action:@selector(updateTileLodZoom:) forControlEvents:UIControlEventValueChanged];
         [self.view addSubview:zoomSlider];
-        
+
         zoomSlider.translatesAutoresizingMaskIntoConstraints = NO;
         zoomSlider.frame = CGRectMake(0, 0, 100, 100);
 
@@ -2085,10 +2085,10 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                                             multiplier:1
                                               constant:0],
                 [zoomSlider.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor]];
-        
+
         [self.view addConstraints:layout];
     }
-    
+
     [self.mapView triggerRepaint];
 }
 
@@ -2097,7 +2097,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
     self.mapView.tileLodZoomShift = slider.value;
     [self.mapView triggerRepaint];
-    
+
     NSLog(@"Tile LOD zoom shift: %f", self.mapView.tileLodZoomShift);
 }
 
