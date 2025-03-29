@@ -21,7 +21,6 @@
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/math.hpp>
-#include <iostream>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_atlases_tweaker.hpp>
@@ -1001,7 +1000,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     std::multiset<SegmentGroup> renderableSegments;
     std::unique_ptr<gfx::DrawableBuilder> builder;
     const bool isOffset = !layout.get<IconOffset>().isUndefined();
-    std::clog << " isOffset " << isOffset << std::endl;
 
     const auto currentZoom = static_cast<float>(state.getZoom());
     const auto layerPrefix = getID() + "/";
