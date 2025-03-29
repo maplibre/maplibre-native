@@ -147,17 +147,18 @@ void drawIcon(const RenderSymbolLayer::Programs& programs,
               SegmentsWrapper iconSegments,
               const SymbolBucket::PaintProperties& bucketPaintProperties,
               const PaintParameters& parameters,
+              const bool isOffset,
               const bool sdfIcons) {
     auto& bucket = static_cast<SymbolBucket&>(*renderData.bucket);
     const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
-    const auto& layout = *bucket.layout;
-    auto values = iconPropertyValues(evaluated, layout);
+    const auto& bucketLayout = *bucket.layout;
+    auto values = iconPropertyValues(evaluated, bucketLayout);
     const auto& paintPropertyValues = RenderSymbolLayer::iconPaintProperties(evaluated);
 
-    const bool alongLine = layout.get<SymbolPlacement>() != SymbolPlacementType::Point &&
-                           layout.get<IconRotationAlignment>() == AlignmentType::Map;
+    const bool alongLine = bucketLayout.get<SymbolPlacement>() != SymbolPlacementType::Point &&
+                           bucketLayout.get<IconRotationAlignment>() == AlignmentType::Map;
 
-    const bool iconScaled = layout.get<IconSize>().constantOr(1.0) != 1.0 || bucket.iconsNeedLinear;
+    const bool iconScaled = bucketLayout.get<IconSize>().constantOr(1.0) != 1.0 || bucket.iconsNeedLinear;
     const bool iconTransformed = values.rotationAlignment == AlignmentType::Map || parameters.state.getPitch() != 0;
 
     const bool linear = sdfIcons || parameters.state.isChanging() || iconScaled || iconTransformed;
@@ -165,7 +166,8 @@ void drawIcon(const RenderSymbolLayer::Programs& programs,
     const gfx::TextureBinding textureBinding = tile.getIconAtlasTextureBinding(filterType);
 
     const Size& iconSize = tile.getIconAtlasTexture()->getSize();
-    const bool variablePlacedIcon = bucket.hasVariablePlacement && layout.get<IconTextFit>() != IconTextFitType::None;
+    const bool variablePlacedIcon = bucket.hasVariablePlacement &&
+                                    bucketLayout.get<IconTextFit>() != IconTextFitType::None;
 
     if (sdfIcons) {
         if (values.hasHalo) {
@@ -180,6 +182,7 @@ void drawIcon(const RenderSymbolLayer::Programs& programs,
                                                            tile,
                                                            parameters.state,
                                                            parameters.symbolFadeChange,
+                                                           isOffset,
                                                            SymbolSDFPart::Halo),
                  bucket.sdfIcon,
                  iconSegments,
@@ -202,6 +205,7 @@ void drawIcon(const RenderSymbolLayer::Programs& programs,
                                                            tile,
                                                            parameters.state,
                                                            parameters.symbolFadeChange,
+                                                           isOffset,
                                                            SymbolSDFPart::Fill),
                  bucket.sdfIcon,
                  iconSegments,
@@ -221,7 +225,8 @@ void drawIcon(const RenderSymbolLayer::Programs& programs,
                                                     alongLine,
                                                     tile,
                                                     parameters.state,
-                                                    parameters.symbolFadeChange),
+                                                    parameters.symbolFadeChange,
+                                                    isOffset),
              bucket.icon,
              iconSegments,
              bucket.iconSizeBinder,
@@ -239,15 +244,16 @@ void drawText(const RenderSymbolLayer::Programs& programs,
               const LayerRenderData& renderData,
               SegmentsWrapper textSegments,
               const SymbolBucket::PaintProperties& bucketPaintProperties,
-              const PaintParameters& parameters) {
+              const PaintParameters& parameters,
+              const bool isOffset) {
     const auto& bucket = static_cast<SymbolBucket&>(*renderData.bucket);
     const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
-    const auto& layout = *bucket.layout;
+    const auto& bucketLayout = *bucket.layout;
 
-    const auto values = textPropertyValues(evaluated, layout);
+    const auto values = textPropertyValues(evaluated, bucketLayout);
     const auto& paintPropertyValues = RenderSymbolLayer::textPaintProperties(evaluated);
 
-    const bool alongLine = layout.get<SymbolPlacement>() != SymbolPlacementType::Point &&
+    const bool alongLine = bucketLayout.get<SymbolPlacement>() != SymbolPlacementType::Point &&
                            values.rotationAlignment == AlignmentType::Map;
 
     const Size& glyphTexSize = tile.getGlyphAtlasTexture()->getSize();
@@ -285,6 +291,7 @@ void drawText(const RenderSymbolLayer::Programs& programs,
                                                                      tile,
                                                                      parameters.state,
                                                                      parameters.symbolFadeChange,
+                                                                     isOffset,
                                                                      SymbolSDFPart::Halo),
                        SymbolTextAndIconProgram::TextureBindings{glyphTextureBinding, iconTextureBinding},
                        SymbolSDFPart::Halo);
@@ -302,6 +309,7 @@ void drawText(const RenderSymbolLayer::Programs& programs,
                                                                      tile,
                                                                      parameters.state,
                                                                      parameters.symbolFadeChange,
+                                                                     isOffset,
                                                                      SymbolSDFPart::Fill),
                        SymbolTextAndIconProgram::TextureBindings{glyphTextureBinding, iconTextureBinding},
                        SymbolSDFPart::Fill);
@@ -319,6 +327,7 @@ void drawText(const RenderSymbolLayer::Programs& programs,
                                                                  tile,
                                                                  parameters.state,
                                                                  parameters.symbolFadeChange,
+                                                                 isOffset,
                                                                  SymbolSDFPart::Halo),
                        SymbolSDFTextProgram::TextureBindings{glyphTextureBinding},
                        SymbolSDFPart::Halo);
@@ -336,6 +345,7 @@ void drawText(const RenderSymbolLayer::Programs& programs,
                                                                  tile,
                                                                  parameters.state,
                                                                  parameters.symbolFadeChange,
+                                                                 isOffset,
                                                                  SymbolSDFPart::Fill),
                        SymbolSDFTextProgram::TextureBindings{glyphTextureBinding},
                        SymbolSDFPart::Fill);
@@ -424,8 +434,10 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
     if (!parameters.shaders.getLegacyGroup().populate(programs.collisionBoxProgram)) return;
     if (!parameters.shaders.getLegacyGroup().populate(programs.collisionCircleProgram)) return;
 
-    const bool sortFeaturesByKey = !impl_cast(baseImpl).layout.get<SymbolSortKey>().isUndefined();
+    const auto& layout = impl_cast(baseImpl).layout;
+    const bool sortFeaturesByKey = !layout.get<SymbolSortKey>().isUndefined();
     std::multiset<RenderableSegment> renderableSegments;
+    const bool isOffset = !layout.get<IconOffset>().isUndefined();
 
     const auto draw = [&parameters, this](auto& programInstance,
                                           const auto& uniformValues,
@@ -522,6 +534,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
                          std::cref(bucket.icon.segments),
                          bucketPaintProperties,
                          parameters,
+                         isOffset,
                          false /*sdfIcon*/
                 );
             }
@@ -538,6 +551,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
                          std::cref(bucket.sdfIcon.segments),
                          bucketPaintProperties,
                          parameters,
+                         isOffset,
                          true /*sdfIcon*/
                 );
             }
@@ -553,84 +567,85 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
                          *renderData,
                          std::cref(bucket.text.segments),
                          bucketPaintProperties,
-                         parameters);
+                         parameters,
+                         isOffset);
             }
         }
 
-        const auto drawCollisonData = [&](const bool isText,
-                                          const bool hasCollisionBox,
-                                          const bool hasCollisionCircle) {
-            if (!hasCollisionBox && !hasCollisionCircle) return;
+        const auto drawCollisonData =
+            [&](const bool isText, const bool hasCollisionBox, const bool hasCollisionCircle) {
+                if (!hasCollisionBox && !hasCollisionCircle) return;
 
-            static const style::Properties<>::PossiblyEvaluated properties{};
-            static const CollisionBoxProgram::Binders paintAttributeData(properties, 0);
-            const auto pixelRatio = tile.id.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));
-            const auto scale = static_cast<float>(
-                std::pow(2, parameters.state.getZoom() - tile.getOverscaledTileID().overscaledZ));
-            std::array<float, 2> extrudeScale = {{parameters.pixelsToGLUnits[0] / (pixelRatio * scale),
-                                                  parameters.pixelsToGLUnits[1] / (pixelRatio * scale)}};
-            const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData->layerProperties);
-            const auto& layout = *bucket.layout;
-            const auto values = isText ? textPropertyValues(evaluated, layout) : iconPropertyValues(evaluated, layout);
-            const bool needTranslate = values.translate[0] != 0 || values.translate[1] != 0;
+                static const style::Properties<>::PossiblyEvaluated properties{};
+                static const CollisionBoxProgram::Binders paintAttributeData(properties, 0);
+                const auto pixelRatio = tile.id.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));
+                const auto scale = static_cast<float>(
+                    std::pow(2, parameters.state.getZoom() - tile.getOverscaledTileID().overscaledZ));
+                std::array<float, 2> extrudeScale = {{parameters.pixelsToGLUnits[0] / (pixelRatio * scale),
+                                                      parameters.pixelsToGLUnits[1] / (pixelRatio * scale)}};
+                const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData->layerProperties);
+                const auto& bucketLayout = *bucket.layout;
+                const auto values = isText ? textPropertyValues(evaluated, bucketLayout)
+                                           : iconPropertyValues(evaluated, bucketLayout);
+                const bool needTranslate = values.translate[0] != 0 || values.translate[1] != 0;
 
-            if (hasCollisionBox) {
-                const auto& collisionBox = isText ? bucket.textCollisionBox : bucket.iconCollisionBox;
-                programs.collisionBoxProgram->draw(
-                    parameters.context,
-                    *parameters.renderPass,
-                    gfx::Lines{1.0f},
-                    gfx::DepthMode::disabled(),
-                    gfx::StencilMode::disabled(),
-                    parameters.colorModeForRenderPass(),
-                    gfx::CullFaceMode::disabled(),
-                    CollisionBoxProgram::LayoutUniformValues{
-                        uniforms::matrix::Value(
-                            (needTranslate
-                                 ? tile.translatedMatrix(values.translate, values.translateAnchor, parameters.state)
-                                 : tile.matrix)),
-                        uniforms::extrude_scale::Value(extrudeScale),
-                        uniforms::camera_to_center_distance::Value(parameters.state.getCameraToCenterDistance())},
-                    *collisionBox->vertexBuffer,
-                    *collisionBox->dynamicVertexBuffer,
-                    *collisionBox->indexBuffer,
-                    collisionBox->segments,
-                    paintAttributeData,
-                    properties,
-                    CollisionBoxProgram::TextureBindings{},
-                    static_cast<float>(parameters.state.getZoom()),
-                    getID());
-            }
-            if (hasCollisionCircle) {
-                const auto& collisionCircle = isText ? bucket.textCollisionCircle : bucket.iconCollisionCircle;
-                programs.collisionCircleProgram->draw(
-                    parameters.context,
-                    *parameters.renderPass,
-                    gfx::Triangles(),
-                    gfx::DepthMode::disabled(),
-                    gfx::StencilMode::disabled(),
-                    parameters.colorModeForRenderPass(),
-                    gfx::CullFaceMode::disabled(),
-                    CollisionCircleProgram::LayoutUniformValues{
-                        uniforms::matrix::Value(
-                            (needTranslate
-                                 ? tile.translatedMatrix(values.translate, values.translateAnchor, parameters.state)
-                                 : tile.matrix)),
-                        uniforms::extrude_scale::Value(extrudeScale),
-                        uniforms::overscale_factor::Value(
-                            static_cast<float>(tile.getOverscaledTileID().overscaleFactor())),
-                        uniforms::camera_to_center_distance::Value(parameters.state.getCameraToCenterDistance())},
-                    *collisionCircle->vertexBuffer,
-                    *collisionCircle->dynamicVertexBuffer,
-                    *collisionCircle->indexBuffer,
-                    collisionCircle->segments,
-                    paintAttributeData,
-                    properties,
-                    CollisionCircleProgram::TextureBindings{},
-                    static_cast<float>(parameters.state.getZoom()),
-                    getID());
-            }
-        };
+                if (hasCollisionBox) {
+                    const auto& collisionBox = isText ? bucket.textCollisionBox : bucket.iconCollisionBox;
+                    programs.collisionBoxProgram->draw(
+                        parameters.context,
+                        *parameters.renderPass,
+                        gfx::Lines{1.0f},
+                        gfx::DepthMode::disabled(),
+                        gfx::StencilMode::disabled(),
+                        parameters.colorModeForRenderPass(),
+                        gfx::CullFaceMode::disabled(),
+                        CollisionBoxProgram::LayoutUniformValues{
+                            uniforms::matrix::Value(
+                                (needTranslate
+                                     ? tile.translatedMatrix(values.translate, values.translateAnchor, parameters.state)
+                                     : tile.matrix)),
+                            uniforms::extrude_scale::Value(extrudeScale),
+                            uniforms::camera_to_center_distance::Value(parameters.state.getCameraToCenterDistance())},
+                        *collisionBox->vertexBuffer,
+                        *collisionBox->dynamicVertexBuffer,
+                        *collisionBox->indexBuffer,
+                        collisionBox->segments,
+                        paintAttributeData,
+                        properties,
+                        CollisionBoxProgram::TextureBindings{},
+                        static_cast<float>(parameters.state.getZoom()),
+                        getID());
+                }
+                if (hasCollisionCircle) {
+                    const auto& collisionCircle = isText ? bucket.textCollisionCircle : bucket.iconCollisionCircle;
+                    programs.collisionCircleProgram->draw(
+                        parameters.context,
+                        *parameters.renderPass,
+                        gfx::Triangles(),
+                        gfx::DepthMode::disabled(),
+                        gfx::StencilMode::disabled(),
+                        parameters.colorModeForRenderPass(),
+                        gfx::CullFaceMode::disabled(),
+                        CollisionCircleProgram::LayoutUniformValues{
+                            uniforms::matrix::Value(
+                                (needTranslate
+                                     ? tile.translatedMatrix(values.translate, values.translateAnchor, parameters.state)
+                                     : tile.matrix)),
+                            uniforms::extrude_scale::Value(extrudeScale),
+                            uniforms::overscale_factor::Value(
+                                static_cast<float>(tile.getOverscaledTileID().overscaleFactor())),
+                            uniforms::camera_to_center_distance::Value(parameters.state.getCameraToCenterDistance())},
+                        *collisionCircle->vertexBuffer,
+                        *collisionCircle->dynamicVertexBuffer,
+                        *collisionCircle->indexBuffer,
+                        collisionCircle->segments,
+                        paintAttributeData,
+                        properties,
+                        CollisionCircleProgram::TextureBindings{},
+                        static_cast<float>(parameters.state.getZoom()),
+                        getID());
+                }
+            };
         drawCollisonData(false /*isText*/, bucket.hasIconCollisionBoxData(), bucket.hasIconCollisionCircleData());
         drawCollisonData(true /*isText*/, bucket.hasTextCollisionBoxData(), bucket.hasTextCollisionCircleData());
     }
@@ -644,7 +659,8 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
                          renderable.renderData,
                          renderable.segment,
                          renderable.bucketPaintProperties,
-                         parameters);
+                         parameters,
+                         isOffset);
             } else {
                 drawIcon(programs,
                          draw,
@@ -653,6 +669,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
                          renderable.segment,
                          renderable.bucketPaintProperties,
                          parameters,
+                         isOffset,
                          renderable.type == SymbolType::IconSDF);
             }
         }
@@ -978,9 +995,11 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         });
     }
 
-    const bool sortFeaturesByKey = !impl_cast(baseImpl).layout.get<SymbolSortKey>().isUndefined();
+    const auto& layout = impl_cast(baseImpl).layout;
+    const bool sortFeaturesByKey = !layout.get<SymbolSortKey>().isUndefined();
     std::multiset<SegmentGroup> renderableSegments;
     std::unique_ptr<gfx::DrawableBuilder> builder;
+    const bool isOffset = !layout.get<IconOffset>().isUndefined();
 
     const auto currentZoom = static_cast<float>(state.getZoom());
     const auto layerPrefix = getID() + "/";
@@ -1026,8 +1045,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 return;
             }
 
-            const auto& layout = *bucket.layout;
-            const auto values = isText ? textPropertyValues(evaluated, layout) : iconPropertyValues(evaluated, layout);
+            const auto& bucketLayout = *bucket.layout;
+            const auto values = isText ? textPropertyValues(evaluated, bucketLayout)
+                                       : iconPropertyValues(evaluated, bucketLayout);
             const std::string suffix = isText ? "text/" : "icon/";
 
             const auto addVertices = [&collisionBuilder](const auto& vertices) {
@@ -1172,8 +1192,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderable.renderData.layerProperties);
         auto& bucketPaintProperties = bucket.paintProperties.at(getID());
 
-        const auto& layout = *bucket.layout;
-        const auto values = isText ? textPropertyValues(evaluated, layout) : iconPropertyValues(evaluated, layout);
+        const auto& bucketLayout = *bucket.layout;
+        const auto values = isText ? textPropertyValues(evaluated, bucketLayout)
+                                   : iconPropertyValues(evaluated, bucketLayout);
 
         const auto& atlases = tile.getAtlasTextures();
         if (!atlases) {
@@ -1223,7 +1244,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                                                                      textSizeIsZoomConstant);
             }
             if (!isText && !tileInfo.iconTweaker) {
-                const bool iconScaled = layout.get<IconSize>().constantOr(1.0) != 1.0 || bucket.iconsNeedLinear;
+                const bool iconScaled = bucketLayout.get<IconSize>().constantOr(1.0) != 1.0 || bucket.iconsNeedLinear;
                 tileInfo.iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
                                                                                      idSymbolImageIconTexture,
                                                                                      idSymbolImageTexture,
@@ -1283,8 +1304,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     /*.symbolType=*/renderable.type,
                     /*.pitchAlignment=*/values.pitchAlignment,
                     /*.rotationAlignment=*/values.rotationAlignment,
-                    /*.placement=*/layout.get<SymbolPlacement>(),
-                    /*.textFit=*/layout.get<IconTextFit>()));
+                    /*.placement=*/bucketLayout.get<SymbolPlacement>(),
+                    /*.textFit=*/bucketLayout.get<IconTextFit>(),
+                    /*.isOffset=*/isOffset));
 
                 tileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
                 ++stats.drawablesAdded;

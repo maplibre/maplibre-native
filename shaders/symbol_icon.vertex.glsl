@@ -22,6 +22,7 @@ uniform bool u_is_text;
 uniform bool u_pitch_with_map;
 
 uniform vec2 u_texsize;
+uniform bool u_is_offset;
 
 out vec2 v_tex;
 out float v_fade_opacity;
@@ -63,7 +64,9 @@ void main() {
             0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
             4.0);
 
-    size *= perspective_ratio;
+    if (!u_is_offset) {
+        size *= perspective_ratio;
+    }
 
     float fontScale = u_is_text ? size / 24.0 : size;
 

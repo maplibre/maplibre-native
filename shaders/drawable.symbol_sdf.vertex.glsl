@@ -47,6 +47,7 @@ layout (std140) uniform SymbolDrawableUBO {
     highp float u_opacity_t;
     highp float u_halo_width_t;
     highp float u_halo_blur_t;
+    bool u_is_offset;
 };
 
 layout (std140) uniform SymbolEvaluatedPropsUBO {
@@ -122,7 +123,9 @@ void main() {
         0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
         4.0);
 
-    size *= perspective_ratio;
+    if (!u_is_offset) {
+        size *= perspective_ratio;
+    }
 
     float fontScale = u_is_text_prop ? size / 24.0 : size;
 

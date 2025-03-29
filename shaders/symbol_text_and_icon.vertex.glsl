@@ -26,6 +26,7 @@ uniform highp float u_camera_to_center_distance;
 uniform float u_fade_change;
 uniform vec2 u_texsize;
 uniform vec2 u_texsize_icon;
+uniform bool u_is_offset;
 
 out vec4 v_data0;
 out vec4 v_data1;
@@ -79,7 +80,9 @@ void main() {
         0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
         4.0);
 
-    size *= perspective_ratio;
+    if (!u_is_offset) {
+        size *= perspective_ratio;
+    }
 
     float fontScale = size / 24.0;
 
