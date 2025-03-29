@@ -56,6 +56,32 @@ RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {
     return *this;
 }
 
+std::string RenderingStats::toJSONString(uint32_t tabcount) const {
+    std::stringstream ss;
+    const auto& tabgen = [](uint32_t tabcount) {
+        std::string tabstr;
+        for (size_t i = 0; i < tabcount; i++) {
+            tabstr += "\t";
+        }
+
+        return tabstr;
+    };
+    // TODO: missed out fields are not populated correctly and can be added when used correctly
+    ss << tabgen(tabcount) << "{\n"
+       << tabgen(tabcount + 1) << "\"numDrawCalls\":" << std::to_string(numDrawCalls) << ",\n"
+       << tabgen(tabcount + 1) << "\"numCreatedTextures\":" << std::to_string(numCreatedTextures) << ",\n"
+       << tabgen(tabcount + 1) << "\"numActiveTextures\":" << std::to_string(numActiveTextures) << ",\n"
+       << tabgen(tabcount + 1) << "\"numBuffers\":" << std::to_string(numBuffers) << ",\n"
+       << tabgen(tabcount + 1) << "\"memTextures\":" << std::to_string(memTextures) << ",\n"
+       << tabgen(tabcount + 1) << "\"memIndexBuffers\":" << std::to_string(memIndexBuffers) << ",\n"
+       << tabgen(tabcount + 1) << "\"memVertexBuffers\":" << std::to_string(memVertexBuffers) << ",\n"
+       << tabgen(tabcount + 1) << "\"stencilUpdates\":" << std::to_string(stencilUpdates) << "\n"
+       << "}";
+
+    return ss.str();
+    ;
+}
+
 #if !defined(NDEBUG)
 template <typename T>
 std::ostream& optionalStatLine(std::ostream& stream, T value, std::string_view label, std::string_view sep) {

@@ -209,6 +209,10 @@ void MapRenderer::render(JNIEnv&) {
     }
 }
 
+gfx::RenderingStats MapRenderer::getRenderingStats() {
+    return backend->getImpl().getRenderingStats();
+}
+
 void MapRenderer::onSurfaceCreated(JNIEnv& env, const jni::Object<AndroidSurface>& surface) {
     // Lock as the initialization can come from the main thread or the GL thread first
     std::lock_guard<std::mutex> lock(initialisationMutex);

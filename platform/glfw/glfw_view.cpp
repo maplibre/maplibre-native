@@ -55,6 +55,8 @@
 #endif
 
 #define GL_GLEXT_PROTOTYPES
+#include "mbgl/gfx/renderer_backend.hpp"
+
 #include <GLFW/glfw3.h>
 
 #include <cassert>
@@ -738,14 +740,13 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                 case GLFW_KEY_9: {
                     int lastCapturedIdx = view->getCaptureIdx() - 1;
                     if (lastCapturedIdx == -1) lastCapturedIdx = 0;
-                    // std::string capture_file_name =
-                    // "/home/spalaniappan/mln-proton/cmake-build-debug/platform/glfw/snapshot_0.json";
                     std::string capture_file_name = "snapshot" + std::to_string(lastCapturedIdx) + ".json";
                     view->readAndLoadCapture(capture_file_name);
                 } break;
 
                 case GLFW_KEY_0:
-                    view->setRouteProgressUsage();
+                    // view->setRouteProgressUsage();
+                    view->writeStats();
                     break;
             }
         } else {
@@ -962,6 +963,18 @@ mbgl::Point<double> GLFWView::RouteCircle::getPoint(double percent) const {
     }
 
     return points.back();
+}
+
+void GLFWView::writeStats() {
+    mbgl::gfx::BackendScope scope{backend->getRendererBackend()};
+    std::stringstream ss;
+    std::string renderingStats = backend->getRendererBackend().getRenderingStats().toJSONString(1);
+    ss << "{" << std::endl;
+    ss << "\"rendering_stats\": " << renderingStats << ",\n";
+    ss << "\"route_stats\": " << rmptr_->getStats(1) << "\n";
+    ss << "}" << std::endl;
+
+    std::cout << ss.str() << std::endl;
 }
 
 void GLFWView::addRoute() {
@@ -1258,14 +1271,6 @@ void GLFWView::disposeRoute() {
             routeMap_.erase(routeID);
         }
         rmptr_->finalize();
-    }
-}
-
-void GLFWView::printRouteStats() {
-    if (rmptr_) {
-        std::cout << "Route stats:" << std::endl;
-        std::cout << rmptr_->getStats() << std::endl;
-        rmptr_->clearStats();
     }
 }
 

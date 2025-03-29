@@ -34,8 +34,7 @@ class RouteManager final {
 public:
     RouteManager();
     void setStyle(style::Style&);
-    const std::string getStats();
-    void clearStats();
+    const std::string getStats(uint32_t tabcount);
     bool hasStyle() const;
     RouteID routeCreate(const LineString<double>& geometry, const RouteOptions& ropts);
     bool routeSegmentCreate(const RouteID&, const RouteSegmentOptions&);
@@ -60,7 +59,6 @@ private:
     static const std::string ACTIVE_ROUTE_LAYER;
     static const std::string GEOJSON_BASE_ROUTE_SOURCE_ID;
     static const std::string GEOJSON_ACTIVE_ROUTE_SOURCE_ID;
-    std::stringstream statsStream_;
 
     enum class DirtyType {
         dtRouteSegments,

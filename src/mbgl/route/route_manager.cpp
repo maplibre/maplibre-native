@@ -443,18 +443,28 @@ std::string RouteManager::getBaseGeoJSONsourceName(const RouteID& routeID) const
     return GEOJSON_BASE_ROUTE_SOURCE_ID + std::to_string(routeID.id);
 }
 
-const std::string RouteManager::getStats() {
-    statsStream_ << "Num Routes: " << stats_.numRoutes << std::endl;
-    statsStream_ << "Num finalized invocations: " << stats_.numFinalizedInvoked << std::endl;
-    statsStream_ << "Num traffic zones: " << stats_.numRouteSegments << std::endl;
-    statsStream_ << "InconsistentAPIusage: " << std::boolalpha << stats_.inconsistentAPIusage << std::endl;
-    statsStream_ << "Routes finilize elapsed: " << stats_.finalizeMillis << std::endl;
+const std::string RouteManager::getStats(uint32_t tabcount) {
+    const auto& tabgen = [](uint32_t tabcount) {
+        std::string tabstr;
+        for (size_t i = 0; i < tabcount; i++) {
+            tabstr += "\t";
+        }
 
-    return statsStream_.str();
-}
+        return tabstr;
+    };
+    std::stringstream ss;
+    ss << tabgen(tabcount) << "{\n";
+    ss << tabgen(tabcount + 1) << "\"num_routes\" : " << std::to_string(stats_.numRoutes) << ",\n";
+    ss << tabgen(tabcount + 1) << "\"num_traffic_zones\" : " << std::to_string(stats_.numRouteSegments) << ",\n";
+    ss << tabgen(tabcount + 1) << "\"num_finalize_invocations\" : " << std::to_string(stats_.numFinalizedInvoked)
+       << ",\n";
+    ss << tabgen(tabcount + 1) << "\"inconsistant_route_API_usages\" : " << std::to_string(stats_.inconsistentAPIusage)
+       << ",\n";
+    ss << tabgen(tabcount + 1) << "\"avg_route_finalize_elapse_millis\" : " << stats_.finalizeMillis << "\n";
 
-void RouteManager::clearStats() {
-    statsStream_.clear();
+    ss << tabgen(tabcount) << "}";
+
+    return ss.str();
 }
 
 void RouteManager::finalizeRoute(const RouteID& routeID, const DirtyType& dt) {

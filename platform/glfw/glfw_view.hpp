@@ -124,7 +124,6 @@ private:
     void removeTrafficViz();
     void incrementRouteProgress();
     void decrementRouteProgress();
-    void printRouteStats();
     void captureSnapshot();
     void setRouteProgressUsage();
     void setRoutePickMode();
@@ -189,6 +188,7 @@ private:
     void writeCapture(const std::string &capture, const std::string &capture_file_name) const;
     void readAndLoadCapture(const std::string &capture_file_name);
     int getCaptureIdx() const;
+    void writeStats();
 
     std::unordered_map<RouteID, RouteCircle, IDHasher<RouteID>> routeMap_;
     int lastCaptureIdx_ = 0;

@@ -274,6 +274,8 @@ public:
     jboolean routesFinalize(JNIEnv& env);
     //------------------------------------------------
 
+    jni::Local<jni::String> getRenderingStats(JNIEnv& env);
+
     jni::jdouble getTopOffsetPixelsForAnnotationSymbol(JNIEnv&, const jni::String&);
 
     jni::Local<jni::Object<TransitionOptions>> getTransitionOptions(JNIEnv&);

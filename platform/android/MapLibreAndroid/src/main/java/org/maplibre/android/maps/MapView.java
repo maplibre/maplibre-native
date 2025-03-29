@@ -560,15 +560,8 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
    *
    * @return a formatted string containing the statistics
    */
-  public String getRoutesStats() {
-    return nativeMapView.getRoutesStats();
-  }
-
-  /***
-   * Clears the stream containing the statistics of the underlying constructs related to routes.
-   */
-  public void clearRoutesStats() {
-    nativeMapView.clearRoutesStats();
+  public String getRenderingStats() {
+    return nativeMapView.getRenderingStats();
   }
 
   public String getSnapshotCapture() {

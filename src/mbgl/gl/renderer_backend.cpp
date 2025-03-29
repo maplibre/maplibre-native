@@ -41,8 +41,9 @@ PremultipliedImage RendererBackend::readFramebuffer(const Size& size) {
 
 mbgl::gfx::RenderingStats RendererBackend::getRenderingStats() {
     MLN_TRACE_FUNC();
-    const auto& context = getContext<gl::Context>();
-    return context.renderingStats();
+
+    auto renderingStats = getContext<gl::Context>().renderingStats();
+    return renderingStats;
 }
 
 void RendererBackend::assumeFramebufferBinding(const gl::FramebufferID fbo) {

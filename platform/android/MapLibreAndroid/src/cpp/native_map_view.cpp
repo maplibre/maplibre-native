@@ -1460,8 +1460,7 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::routeProgressSetPoint, "nativeRouteSetProgressPoint"),
         METHOD(&NativeMapView::routeSegmentsClear, "nativeRouteClearSegments"),
         METHOD(&NativeMapView::routeSegmentCreate, "nativeRouteSegmentCreate"),
-        METHOD(&NativeMapView::routesGetStats, "nativeRoutesGetStats"),
-        METHOD(&NativeMapView::routesClearStats, "nativeRoutesClearStats"),
+        METHOD(&NativeMapView::getRenderingStats, "nativeGetRenderingStats"),
         METHOD(&NativeMapView::routeQueryRendered, "nativeRouteQuery"),
         METHOD(&NativeMapView::routesGetCaptureSnapshot, "nativeRoutesCaptureSnapshot"),
         METHOD(&NativeMapView::routesFinalize, "nativeRoutesFinalize"));
@@ -1565,12 +1564,6 @@ jni::Local<jni::String> NativeMapView::routesGetStats(JNIEnv& env) {
     return jni::Make<jni::String>(env, stats);
 }
 
-void NativeMapView::routesClearStats(JNIEnv& env) {
-    if (routeMgr) {
-        routeMgr->clearStats();
-    }
-}
-
 jni::Local<jni::String> NativeMapView::routesGetCaptureSnapshot(JNIEnv& env) {
     std::string captureStr;
     if (routeMgr) {
@@ -1641,6 +1634,16 @@ jboolean NativeMapView::routesFinalize(JNIEnv& env) {
     }
 
     return false;
+}
+
+jni::Local<jni::String> NativeMapView::getRenderingStats(JNIEnv& env) {
+    std::stringstream ss;
+    gfx::RenderingStats stats = mapRenderer.getRenderingStats();
+    ss << stats.toString(",");
+    if (routeMgr) {
+        ss << routeMgr->getStats();
+    }
+    return jni::Make<jni::String>(env, ss.str());
 }
 
 void NativeMapView::onRegisterShaders(gfx::ShaderRegistry&) {};
