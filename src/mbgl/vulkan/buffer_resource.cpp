@@ -148,6 +148,10 @@ BufferResource BufferResource::clone() const {
 
 BufferResource& BufferResource::operator=(BufferResource&& other) noexcept {
     assert(&context == &other.context);
+    if (isValid()) {
+        context.renderingStats().numBuffers--;
+        context.renderingStats().memBuffers -= size;
+    }
 
     size = other.size;
     usage = other.usage;
