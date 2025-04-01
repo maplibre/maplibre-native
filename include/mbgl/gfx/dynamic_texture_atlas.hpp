@@ -22,11 +22,11 @@ public:
 
     const std::vector<mapbox::Bin*>& getBins() const { return bins; }
     const DynamicTexturePtr& getDynamicTexture() const { return dynamicTexture; }
-        
+
 private:
     std::vector<mapbox::Bin*> bins;
     DynamicTexturePtr dynamicTexture;
-    
+
     friend class DynamicTextureAtlas;
 };
 
@@ -48,11 +48,13 @@ public:
     DynamicTextureAtlas(Context& context_)
         : context(context_) {}
     ~DynamicTextureAtlas() = default;
-    
+
     GlyphTexturePack uploadGlyphs(const GlyphMap& glyphs);
-    ImageTexturePack uploadIconsAndPatterns(const ImageMap& icons, const ImageMap& patterns, const ImageVersionMap& versionMap);
+    ImageTexturePack uploadIconsAndPatterns(const ImageMap& icons,
+                                            const ImageMap& patterns,
+                                            const ImageVersionMap& versionMap);
     void uploadDeferredImages();
-    
+
 private:
     Context& context;
     std::vector<DynamicTexturePtr> dynamicTextures;

@@ -199,7 +199,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                         updateParameters->prefetchZoomDelta,
                                         threadPool,
                                         dynamicTextureAtlas};
-    
+
     glyphManager->setURL(updateParameters->glyphURL);
 
     // Update light.

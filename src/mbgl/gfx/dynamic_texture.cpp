@@ -15,7 +15,8 @@ DynamicTexture::DynamicTexture(Context& context, Size size, TexturePixelType pix
     texture = context.createTexture2D();
     texture->setSize(size);
     texture->setFormat(pixelType, TextureChannelDataType::UnsignedByte);
-    texture->setSamplerConfiguration({gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+    texture->setSamplerConfiguration(
+        {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
     texture->create();
 }
 

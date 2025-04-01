@@ -18,7 +18,7 @@ class GlyphManager;
 namespace gfx {
 class DynamicTextureAtlas;
 using DynamicTextureAtlasPtr = std::unique_ptr<gfx::DynamicTextureAtlas>;
-}
+} // namespace gfx
 
 class TileParameters {
 public:

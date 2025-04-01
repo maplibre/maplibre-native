@@ -125,7 +125,7 @@ void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
     }
 
     assert(atlasTextures);
-    
+
     if (const auto& glyphDynamicTexture = layoutResult->glyphTexturePack.handle.getDynamicTexture()) {
         atlasTextures->glyph = glyphDynamicTexture->getTexture();
     }

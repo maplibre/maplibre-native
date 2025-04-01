@@ -498,7 +498,8 @@ void GeometryTileWorker::finalizeLayout() {
     }
 
     MBGL_TIMING_START(watch);
-    gfx::ImageTexturePack imageTexturePack = dynamicTextureAtlas->uploadIconsAndPatterns(iconMap, patternMap, versionMap);
+    gfx::ImageTexturePack imageTexturePack = dynamicTextureAtlas->uploadIconsAndPatterns(
+        iconMap, patternMap, versionMap);
     gfx::GlyphTexturePack glyphTexturePack;
     if (!layouts.empty()) {
         glyphTexturePack = dynamicTextureAtlas->uploadGlyphs(glyphMap);
@@ -515,8 +516,12 @@ void GeometryTileWorker::finalizeLayout() {
             }
 
             // layout adds the bucket to buckets
-            layout->createBucket(
-                imageTexturePack.patternPositions, featureIndex, renderData, firstLoad, showCollisionBoxes, id.canonical);
+            layout->createBucket(imageTexturePack.patternPositions,
+                                 featureIndex,
+                                 renderData,
+                                 firstLoad,
+                                 showCollisionBoxes,
+                                 id.canonical);
         }
     }
 
@@ -530,12 +535,11 @@ void GeometryTileWorker::finalizeLayout() {
                                    << " Canonical: " << static_cast<int>(id.canonical.z) << "/" << id.canonical.x << "/"
                                    << id.canonical.y << " Time");
 
-    parent.invoke(&GeometryTile::onLayout,
-                  std::make_shared<GeometryTile::LayoutResult>(std::move(renderData),
-                                                               std::move(featureIndex),
-                                                               std::move(glyphTexturePack),
-                                                               std::move(imageTexturePack)),
-                  correlationID);
+    parent.invoke(
+        &GeometryTile::onLayout,
+        std::make_shared<GeometryTile::LayoutResult>(
+            std::move(renderData), std::move(featureIndex), std::move(glyphTexturePack), std::move(imageTexturePack)),
+        correlationID);
 }
 
 } // namespace mbgl

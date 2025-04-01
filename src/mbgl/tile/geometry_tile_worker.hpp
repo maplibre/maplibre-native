@@ -29,7 +29,7 @@ class Layer;
 namespace gfx {
 class DynamicTextureAtlas;
 using DynamicTextureAtlasPtr = std::unique_ptr<gfx::DynamicTextureAtlas>;
-}
+} // namespace gfx
 
 class GeometryTileWorker {
 public:
@@ -116,7 +116,7 @@ private:
 
     bool showCollisionBoxes;
     bool firstLoad = true;
-    
+
     gfx::DynamicTextureAtlasPtr& dynamicTextureAtlas;
 };
 
