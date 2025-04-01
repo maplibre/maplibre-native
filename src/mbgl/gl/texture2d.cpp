@@ -200,7 +200,7 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
                                      pixelData));
 
     context.renderingStats().numTextureUpdates++;
-    context.renderingStats().textureUpdateBytes += static_cast<size_t>(size_.width * size_.height * getPixelStride());
+    context.renderingStats().textureUpdateBytes += static_cast<size_t>(getPixelStride() * size_.width * size_.height);
 }
 
 void Texture2D::upload() noexcept {

@@ -37,24 +37,39 @@ public class RenderingStats {
 
   /// Number of active buffers
   public int numBuffers = 0;
+  /// Number of active offscreen frame buffers
   public int numFrameBuffers = 0;
 
+  /// Number of active index buffers
   public int numIndexBuffers = 0;
+  /// Sum of index buffers update sizes
   public long indexUpdateBytes = 0;
 
+  /// Number of active vertex buffers
   public int numVertexBuffers = 0;
+  /// Sum of vertex buffers update sizes
   public long vertexUpdateBytes = 0;
 
+  /// Number of active uniform buffers
   public int numUniformBuffers = 0;
+  /// Number of times a uniform buffer is updated
   public int numUniformUpdates = 0;
+  /// Sum of uniform buffers update sizes
   public long uniformUpdateBytes = 0;
 
+  /// Total texture memory
   public int memTextures = 0;
+  /// Total buffer memory
   public int memBuffers = 0;
+  /// Total index buffer memory
   public int memIndexBuffers = 0;
+  /// Total vertex buffer memory
   public int memVertexBuffers = 0;
+  /// Total uniform buffer memory
   public int memUniformBuffers = 0;
 
+  /// Number of stencil buffer clears
   public int stencilClears = 0;
+  /// Number of stencil buffer updates
   public int stencilUpdates = 0;
 }

@@ -54,25 +54,40 @@ struct RenderingStats {
 
     /// Number of active buffers
     int numBuffers = 0;
+    /// Number of active offscreen frame buffers
     int numFrameBuffers = 0;
 
+    /// Number of active index buffers
     int numIndexBuffers = 0;
+    /// Sum of index buffers update sizes
     std::size_t indexUpdateBytes = 0;
 
+    /// Number of active vertex buffers
     int numVertexBuffers = 0;
+    /// Sum of vertex buffers update sizes
     std::size_t vertexUpdateBytes = 0;
 
+    /// Number of active uniform buffers
     int numUniformBuffers = 0;
+    /// Number of times a uniform buffer is updated
     int numUniformUpdates = 0;
+    /// Sum of uniform buffers update sizes
     std::size_t uniformUpdateBytes = 0;
 
+    /// Total texture memory
     int memTextures = 0;
+    /// Total buffer memory
     int memBuffers = 0;
+    /// Total index buffer memory
     int memIndexBuffers = 0;
+    /// Total vertex buffer memory
     int memVertexBuffers = 0;
+    /// Total uniform buffer memory
     int memUniformBuffers = 0;
 
+    /// Number of stencil buffer clears
     int stencilClears = 0;
+    /// Number of stencil buffer updates
     int stencilUpdates = 0;
 
     RenderingStats& operator+=(const RenderingStats&);

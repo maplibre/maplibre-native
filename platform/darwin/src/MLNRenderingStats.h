@@ -43,25 +43,40 @@ MLN_EXPORT
 
 /// Number of active buffers
 @property (readonly) int numBuffers;
+/// Number of active offscreen frame buffers
 @property (readonly) int numFrameBuffers;
 
+/// Number of active index buffers
 @property (readonly) int numIndexBuffers;
+/// Sum of index buffers update sizes
 @property (readonly) unsigned long indexUpdateBytes;
 
+/// Number of active vertex buffers
 @property (readonly) int numVertexBuffers;
+/// Sum of vertex buffers update sizes
 @property (readonly) unsigned long vertexUpdateBytes;
 
+/// Number of active uniform buffers
 @property (readonly) int numUniformBuffers;
+/// Number of times a uniform buffer is updated
 @property (readonly) int numUniformUpdates;
+/// Sum of uniform buffers update sizes
 @property (readonly) unsigned long uniformUpdateBytes;
 
+/// Total texture memory
 @property (readonly) int memTextures;
+/// Total buffer memory
 @property (readonly) int memBuffers;
+/// Total index buffer memory
 @property (readonly) int memIndexBuffers;
+/// Total vertex buffer memory
 @property (readonly) int memVertexBuffers;
+/// Total uniform buffer memory
 @property (readonly) int memUniformBuffers;
 
+/// Number of stencil buffer clears
 @property (readonly) int stencilClears;
+/// Number of stencil buffer updates
 @property (readonly) int stencilUpdates;
 @end
 

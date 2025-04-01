@@ -2120,7 +2120,14 @@ vertically on the map.
  */
 @property (nonatomic) MLNMapDebugMaskOptions debugMask;
 
+/**
+ Returns the status of the rendering statistics overlay.
+ */
 - (BOOL)isRenderingStatsViewEnabled;
+
+/**
+ Enable a rendering statistics overlay with ``MLNRenderingStats`` values.
+ */
 - (void)enableRenderingStatsView:(BOOL)value;
 
 - (MLNBackendResource *)backendResource;
