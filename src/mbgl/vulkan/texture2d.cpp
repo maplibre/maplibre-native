@@ -44,9 +44,6 @@ Texture2D::Texture2D(Context& context_)
 Texture2D::~Texture2D() {
     destroyTexture();
     destroySampler();
-
-    context.renderingStats().numActiveTextures--;
-    context.renderingStats().memTextures -= Texture2D::getDataSize();
 }
 
 gfx::Texture2D& Texture2D::setSamplerConfiguration(const SamplerState& samplerState_) noexcept {
@@ -403,6 +400,9 @@ void Texture2D::destroyTexture() {
         context.enqueueDeletion([allocation = std::move(imageAllocation)](auto&) mutable { allocation.reset(); });
 
         imageLayout = vk::ImageLayout::eUndefined;
+
+        context.renderingStats().numActiveTextures--;
+        context.renderingStats().memTextures -= Texture2D::getDataSize();
     }
 }
 

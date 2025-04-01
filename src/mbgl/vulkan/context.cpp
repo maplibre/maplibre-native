@@ -67,6 +67,12 @@ Context::~Context() noexcept {
     if (--glslangRefCount == 0) {
         glslang::FinalizeProcess();
     }
+
+#if !defined(NDEBUG)
+    Log::Debug(Event::General, "Rendering Stats:\n" + stats.toString("\n"));
+#endif
+
+    assert(stats.isZero());
 }
 
 void Context::initFrameResources() {
@@ -136,10 +142,20 @@ void Context::destroyResources() {
         frame.runDeletionQueue(*this);
     }
 
-    globalUniformBuffers.freeDescriptorSets();
-
     // all resources have unique handles
     frameResources.clear();
+
+    globalUniformBuffers.freeDescriptorSets();
+
+    for (size_t i = 0; i < globalUniformBuffers.allocatedSize(); i++) {
+        globalUniformBuffers.set(i, nullptr);
+    }
+
+    dummyBuffer.reset();
+    dummyTexture2D.reset();
+
+    clipping.indexBuffer.reset();
+    clipping.vertexBuffer.reset();
 }
 
 void Context::enqueueDeletion(std::function<void(Context&)>&& function) {
