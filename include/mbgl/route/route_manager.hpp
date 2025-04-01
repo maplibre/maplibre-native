@@ -22,6 +22,8 @@ struct RouteMgrStats {
     uint32_t numRouteSegments = 0;
     std::string finalizeMillis;
     bool inconsistentAPIusage = false;
+    double avgRouteCreationInterval = 0.0;
+    double avgRouteSegmentCreationInterval = 0.0;
 };
 
 /***
@@ -66,7 +68,6 @@ private:
         dtRouteGeometry,
         // TODO: may be route puck position
     };
-
     std::string dirtyTypeToString(const DirtyType& dt) const;
 
     std::unordered_map<DirtyType, std::unordered_set<RouteID, IDHasher<RouteID>>> dirtyRouteMap_;

@@ -732,20 +732,24 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                 case GLFW_KEY_7:
                     view->decrementRouteProgress();
                     break;
-                case GLFW_KEY_8: {
+
+                case GLFW_KEY_P:
+                    view->setRouteProgressUsage();
+                    break;
+
+                case GLFW_KEY_S: {
                     view->captureSnapshot();
                     std::cout << "captured snapshot" << std::endl;
                 } break;
 
-                case GLFW_KEY_9: {
+                case GLFW_KEY_L: {
                     int lastCapturedIdx = view->getCaptureIdx() - 1;
                     if (lastCapturedIdx == -1) lastCapturedIdx = 0;
                     std::string capture_file_name = "snapshot" + std::to_string(lastCapturedIdx) + ".json";
                     view->readAndLoadCapture(capture_file_name);
                 } break;
 
-                case GLFW_KEY_0:
-                    // view->setRouteProgressUsage();
+                case GLFW_KEY_R:
                     view->writeStats();
                     break;
             }

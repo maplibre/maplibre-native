@@ -212,6 +212,16 @@ std::map<double, double> getDefaultRouteLineWeights() {
             {ROUTE_LINE_ZOOM_LEVEL_20, ROUTE_LINE_WEIGHT_22 * ROUTE_LINE_MULTIPLIER}};
 }
 
+struct AvgIntervalStat {
+    std::chrono::steady_clock::time_point lastStartTime;
+    std::chrono::duration<double> totalIntervalDuration{0.0};
+    long long intervalCount = 0;
+    bool firstCall = true;
+};
+
+AvgIntervalStat routeCreateStat;
+AvgIntervalStat routeSegmentCreateStat;
+
 } // namespace
 
 RouteManager::RouteManager()
@@ -307,6 +317,22 @@ RouteID RouteManager::routeCreate(const LineString<double>& geometry, const Rout
         routeMap_[rid] = route;
         stats_.numRoutes++;
         dirtyRouteMap_[DirtyType::dtRouteGeometry].insert(rid);
+
+        auto now = std::chrono::steady_clock::now();
+        if (!routeCreateStat.firstCall) {
+            auto interval = now - routeCreateStat.lastStartTime;
+            routeCreateStat.totalIntervalDuration += interval;
+            routeCreateStat.intervalCount++;
+            if (routeCreateStat.intervalCount > 0) {
+                stats_.avgRouteCreationInterval =
+                    std::chrono::duration<double>(routeCreateStat.totalIntervalDuration).count() /
+                    routeCreateStat.intervalCount;
+            }
+
+        } else {
+            routeCreateStat.firstCall = false;
+        }
+        routeCreateStat.lastStartTime = now;
     }
 
     return rid;
@@ -355,6 +381,22 @@ void RouteManager::routeClearSegments(const RouteID& routeID) {
             routeMap_[routeID].routeSegmentsClear();
             validateAddToDirtyBin(routeID, DirtyType::dtRouteSegments);
         }
+
+        auto now = std::chrono::steady_clock::now();
+        if (!routeSegmentCreateStat.firstCall) {
+            auto interval = now - routeSegmentCreateStat.lastStartTime;
+            routeSegmentCreateStat.totalIntervalDuration += interval;
+            routeSegmentCreateStat.intervalCount++;
+            if (routeSegmentCreateStat.intervalCount > 0) {
+                stats_.avgRouteSegmentCreationInterval =
+                    std::chrono::duration<double>(routeSegmentCreateStat.totalIntervalDuration).count() /
+                    routeSegmentCreateStat.intervalCount;
+            }
+
+        } else {
+            routeSegmentCreateStat.firstCall = false;
+        }
+        routeSegmentCreateStat.lastStartTime = now;
     }
 }
 
@@ -461,6 +503,9 @@ const std::string RouteManager::getStats(uint32_t tabcount) {
     ss << tabgen(tabcount + 1) << "\"inconsistant_route_API_usages\" : " << std::to_string(stats_.inconsistentAPIusage)
        << ",\n";
     ss << tabgen(tabcount + 1) << "\"avg_route_finalize_elapse_millis\" : " << stats_.finalizeMillis << "\n";
+    ss << tabgen(tabcount + 1) << "\"avg_route_create_interval_seconds\" : " << stats_.avgRouteCreationInterval << "\n";
+    ss << tabgen(tabcount + 1)
+       << "\"avg_route_segment_create_interval_seconds\" : " << stats_.avgRouteSegmentCreationInterval << "\n";
 
     ss << tabgen(tabcount) << "}";
 

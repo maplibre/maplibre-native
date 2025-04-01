@@ -30,6 +30,7 @@
 #include <mbgl/style/image.hpp>
 #include <mbgl/style/filter.hpp>
 #include <mbgl/renderer/query.hpp>
+#include <mbgl/util/thread_local.hpp>
 
 // Java -> C++ conversion
 #include "style/android_conversion.hpp"
@@ -1553,17 +1554,6 @@ jni::Local<jni::String> NativeMapView::routeGetBaseLayerName(JNIEnv& env, const 
     return jni::Make<jni::String>(env, layerName);
 }
 
-jni::Local<jni::String> NativeMapView::routesGetStats(JNIEnv& env) {
-    std::string stats;
-    if (routeMgr) {
-        stats = routeMgr->getStats();
-    }
-
-    const auto& backend = mapRenderer.getRendererBackend();
-
-    return jni::Make<jni::String>(env, stats);
-}
-
 jni::Local<jni::String> NativeMapView::routesGetCaptureSnapshot(JNIEnv& env) {
     std::string captureStr;
     if (routeMgr) {
@@ -1638,10 +1628,11 @@ jboolean NativeMapView::routesFinalize(JNIEnv& env) {
 
 jni::Local<jni::String> NativeMapView::getRenderingStats(JNIEnv& env) {
     std::stringstream ss;
+    static mbgl::util::ThreadLocal<mbgl::gfx::BackendScope> backendScope;
     gfx::RenderingStats stats = mapRenderer.getRenderingStats();
     ss << stats.toString(",");
     if (routeMgr) {
-        ss << routeMgr->getStats();
+        ss << routeMgr->getStats(0);
     }
     return jni::Make<jni::String>(env, ss.str());
 }
