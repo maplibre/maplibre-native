@@ -2,6 +2,7 @@
 
 #include <mbgl/actor/actor.hpp>
 #include <mbgl/geometry/feature_index.hpp>
+#include <mbgl/gfx/dynamic_texture_atlas.hpp>
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/text/glyph_manager.hpp>
@@ -73,22 +74,19 @@ public:
     public:
         mbgl::unordered_map<std::string, LayerRenderData> layerRenderData;
         std::shared_ptr<FeatureIndex> featureIndex;
-        GlyphPositions glyphPositions;
-        ImagePositions iconPositions;
-        ImagePositions patternPositions;
+        gfx::GlyphTexturePack glyphTexturePack;
+        gfx::ImageTexturePack imageTexturePack;
 
         LayerRenderData* getLayerRenderData(const style::Layer::Impl&);
 
         LayoutResult(mbgl::unordered_map<std::string, LayerRenderData> renderData_,
                      std::unique_ptr<FeatureIndex> featureIndex_,
-                     GlyphPositions glyphPositions_,
-                     ImagePositions iconPositions_,
-                     ImagePositions patternPositions_)
+                     gfx::GlyphTexturePack glyphTexturePack_,
+                     gfx::ImageTexturePack imageTexturePack_)
             : layerRenderData(std::move(renderData_)),
               featureIndex(std::move(featureIndex_)),
-              glyphPositions(std::move(glyphPositions_)),
-              iconPositions(std::move(iconPositions_)),
-              patternPositions(std::move(patternPositions_)) {}
+              glyphTexturePack(std::move(glyphTexturePack_)),
+              imageTexturePack(std::move(imageTexturePack_)) {}
 
         ~LayoutResult();
     };

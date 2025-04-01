@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/layout/symbol_instance.hpp>
-#include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/style/image_impl.hpp>
 #include <mbgl/style/layer_impl.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>

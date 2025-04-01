@@ -4,6 +4,7 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
+#include <mbgl/gfx/dynamic_texture_atlas.hpp>
 #include <mbgl/gfx/render_pass.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gfx/renderable.hpp>
@@ -56,9 +57,6 @@ RendererObserver& nullObserver() {
 
 } // namespace
 
-std::unique_ptr<gfx::DynamicTexture> gfx::Context::dynamicTextureAlpha = nullptr;
-std::unique_ptr<gfx::DynamicTexture> gfx::Context::dynamicTextureRGBA = nullptr;
-
 Renderer::Impl::Impl(gfx::RendererBackend& backend_,
                      float pixelRatio_,
                      const std::optional<std::string>& localFontFamily_)
@@ -98,10 +96,6 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     MLN_TRACE_FUNC();
     auto& context = backend.getContext();
     context.setObserver(this);
-
-    if (!gfx::Context::getDynamicTextureAlpha() || !gfx::Context::getDynamicTextureRGBA()) {
-        gfx::Context::createDynamicTexture(context);
-    }
 
 #if MLN_RENDER_BACKEND_METAL
     if constexpr (EnableMetalCapture) {
@@ -238,6 +232,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         staticData->upload(*uploadPass);
         renderTree.getLineAtlas().upload(*uploadPass);
         renderTree.getPatternAtlas().upload(*uploadPass);
+        dynamicTextureAtlas->uploadDeferredImages();
     }
 
 #if MLN_DRAWABLE_RENDERER

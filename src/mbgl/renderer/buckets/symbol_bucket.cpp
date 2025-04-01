@@ -4,7 +4,6 @@
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/style/layers/symbol_layer_impl.hpp>
 #include <mbgl/text/cross_tile_symbol_index.hpp>
-#include <mbgl/text/glyph_atlas.hpp>
 #include <mbgl/text/placement.hpp>
 
 #include <utility>

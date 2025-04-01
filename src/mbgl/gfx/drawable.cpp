@@ -56,24 +56,12 @@ const gfx::Texture2DPtr& Drawable::getTexture(size_t id) const {
     return (id < textures.size()) ? textures[id] : noTexture;
 }
 
-std::optional<gfx::TextureHandle> Drawable::getTextureHandle(size_t id) {
-    return (id < textureHandles.size()) ? textureHandles[id] : std::nullopt;
-}
-
 void Drawable::setTexture(std::shared_ptr<gfx::Texture2D> texture, size_t id) {
     assert(id < textures.size());
     if (id >= textures.size()) {
         return;
     }
     textures[id] = std::move(texture);
-}
-
-void Drawable::setTextureHandle(std::optional<gfx::TextureHandle> textureHandle, size_t id) {
-    assert(id < textureHandles.size());
-    if (id >= textureHandles.size()) {
-        return;
-    }
-    textureHandles[id] = textureHandle;
 }
 
 PaintPropertyBindersBase* Drawable::getBinders() {

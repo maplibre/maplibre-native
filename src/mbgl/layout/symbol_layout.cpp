@@ -5,7 +5,6 @@
 #include <mbgl/math/angles.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
-#include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/text/get_anchors.hpp>
 #include <mbgl/text/shaping.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>

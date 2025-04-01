@@ -37,7 +37,8 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
                                        const std::atomic<bool>& obsolete_,
                                        const MapMode mode_,
                                        const float pixelRatio_,
-                                       const bool showCollisionBoxes_)
+                                       const bool showCollisionBoxes_,
+                                       gfx::DynamicTextureAtlasPtr& dynamicTextureAtlas_)
     : self(std::move(self_)),
       parent(std::move(parent_)),
       scheduler(scheduler_),
@@ -46,7 +47,8 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
       obsolete(obsolete_),
       mode(mode_),
       pixelRatio(pixelRatio_),
-      showCollisionBoxes(showCollisionBoxes_) {}
+      showCollisionBoxes(showCollisionBoxes_),
+      dynamicTextureAtlas(dynamicTextureAtlas_) {}
 
 GeometryTileWorker::~GeometryTileWorker() {
     MLN_TRACE_FUNC();
@@ -332,7 +334,7 @@ void GeometryTileWorker::onImagesAvailable(ImageMap newIconMap,
     if (imageCorrelationID != imageCorrelationID_) {
         return; // Ignore outdated image request replies.
     }
-    imageMap = std::move(newIconMap);
+    iconMap = std::move(newIconMap);
     patternMap = std::move(newPatternMap);
     versionMap = std::move(newVersionMap);
     pendingImageDependencies.clear();
@@ -496,18 +498,17 @@ void GeometryTileWorker::finalizeLayout() {
     }
 
     MBGL_TIMING_START(watch);
-    ImagePositions iconPositions = uploadIcons(imageMap, versionMap);
-    ImagePositions patternPositions = uploadPatterns(patternMap, versionMap);
-    GlyphPositions glyphPositions;
+    gfx::ImageTexturePack imageTexturePack = dynamicTextureAtlas->uploadIconsAndPatterns(iconMap, patternMap, versionMap);
+    gfx::GlyphTexturePack glyphTexturePack;
     if (!layouts.empty()) {
-        glyphPositions = uploadGlyphs(glyphMap);
+        glyphTexturePack = dynamicTextureAtlas->uploadGlyphs(glyphMap);
 
         for (auto& layout : layouts) {
             if (obsolete) {
                 return;
             }
 
-            layout->prepareSymbols(glyphMap, glyphPositions, imageMap, iconPositions);
+            layout->prepareSymbols(glyphMap, glyphTexturePack.positions, iconMap, imageTexturePack.iconPositions);
 
             if (!layout->hasSymbolInstances()) {
                 continue;
@@ -515,7 +516,7 @@ void GeometryTileWorker::finalizeLayout() {
 
             // layout adds the bucket to buckets
             layout->createBucket(
-                patternPositions, featureIndex, renderData, firstLoad, showCollisionBoxes, id.canonical);
+                imageTexturePack.patternPositions, featureIndex, renderData, firstLoad, showCollisionBoxes, id.canonical);
         }
     }
 
@@ -532,9 +533,8 @@ void GeometryTileWorker::finalizeLayout() {
     parent.invoke(&GeometryTile::onLayout,
                   std::make_shared<GeometryTile::LayoutResult>(std::move(renderData),
                                                                std::move(featureIndex),
-                                                               std::move(glyphPositions),
-                                                               std::move(iconPositions),
-                                                               std::move(patternPositions)),
+                                                               std::move(glyphTexturePack),
+                                                               std::move(imageTexturePack)),
                   correlationID);
 }
 

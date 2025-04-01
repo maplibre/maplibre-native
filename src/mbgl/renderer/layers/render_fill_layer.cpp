@@ -392,7 +392,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         gfx::DrawableTweakerPtr atlasTweaker;
         auto getAtlasTweaker = [&]() {
             if (!atlasTweaker) {
-                if (const auto& atlases = tile.getAtlasTextures(); atlases) {
+                if (const auto& atlases = tile.getAtlasTextures(); atlases->icon) {
                     atlasTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
                         atlases,
                         std::nullopt,
@@ -676,11 +676,15 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
             if (patternBuilder) {
                 patternBuilder->clearTweakers();
-                patternBuilder->addTweaker(getAtlasTweaker());
+                if (const auto& tweaker = getAtlasTweaker()) {
+                    patternBuilder->addTweaker(tweaker);
+                }
             }
             if (doOutline && outlinePatternBuilder) {
                 outlinePatternBuilder->clearTweakers();
-                outlinePatternBuilder->addTweaker(getAtlasTweaker());
+                if (const auto& tweaker = getAtlasTweaker()) {
+                    outlinePatternBuilder->addTweaker(tweaker);
+                }
             }
 
             if (patternBuilder && bucket.sharedTriangles->elements()) {

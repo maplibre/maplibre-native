@@ -424,7 +424,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         if (hasPattern && !tweaker) {
-            if (const auto& atlases = tile.getAtlasTextures(); atlases) {
+            if (const auto& atlases = tile.getAtlasTextures(); atlases->icon) {
                 tweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
                                                                         std::nullopt,
                                                                         idFillExtrusionImageTexture,

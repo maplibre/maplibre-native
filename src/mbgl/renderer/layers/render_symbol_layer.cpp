@@ -14,7 +14,6 @@
 #include <mbgl/renderer/tile_render_data.hpp>
 #include <mbgl/renderer/upload_parameters.hpp>
 #include <mbgl/style/layers/symbol_layer_impl.hpp>
-#include <mbgl/text/glyph_atlas.hpp>
 #include <mbgl/text/shaping.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
@@ -1128,13 +1127,13 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        if (bucket.hasIconData()) {
+        if (bucket.hasIconData() && atlases->icon) {
             addRenderables(bucket.icon, SymbolType::IconRGBA);
         }
-        if (bucket.hasSdfIconData()) {
+        if (bucket.hasSdfIconData() && atlases->icon) {
             addRenderables(bucket.sdfIcon, SymbolType::IconSDF);
         }
-        if (bucket.hasTextData()) {
+        if (bucket.hasTextData() && atlases->glyph) {
             addRenderables(bucket.text, SymbolType::Text);
         }
 
