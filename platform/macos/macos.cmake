@@ -73,7 +73,9 @@ target_include_directories(
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
+if(MLN_WITH_GLFW)
 add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
+endif()
 if(MLN_WITH_NODE)
     add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
 endif()

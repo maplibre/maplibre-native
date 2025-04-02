@@ -205,7 +205,7 @@ namespace  mbgl {
        8,
        4 * image.size.width,
        colorSpace,
-       kCGImageAlphaPremultipliedLast | kCGBitmapByteOrderDefault
+       kCGImageAlphaPremultipliedLast
     );
     CFRelease(colorSpace);
     CGImageRef cgImage = CGBitmapContextCreateImage(bitmapContext);

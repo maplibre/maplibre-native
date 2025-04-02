@@ -14,7 +14,7 @@ TileCache::~TileCache() {
     pendingReleases.clear();
 
     std::unique_lock counterLock{deferredSignalLock};
-    deferredSignal.wait(counterLock, [this]() { return deferredDeletionsPending == 0; });
+    deferredSignal.wait(counterLock, [&]() { return deferredDeletionsPending == 0; });
 }
 
 void TileCache::setSize(size_t size_) {
@@ -37,6 +37,24 @@ void TileCache::setSize(size_t size_) {
     assert(orderedKeys.size() <= size);
 }
 
+namespace {
+/// This exists solely to prevent a problem where temporary lambda captures
+/// are retained for the duration of the scope instead of being destroyed immediately.
+struct CaptureWrapper {
+    CaptureWrapper(std::vector<std::unique_ptr<Tile>>&& items_)
+        : items(items_.size()) {
+        std::ranges::move(items_, items.begin());
+    }
+    CaptureWrapper(CaptureWrapper&&) = default;
+
+    /// This copy constructor is required to build, but doesn't seem to be called.
+    CaptureWrapper(const CaptureWrapper& other)
+        : items(other.items) {}
+
+    std::vector<std::shared_ptr<Tile>> items;
+};
+} // namespace
+
 void TileCache::deferredRelease(std::unique_ptr<Tile>&& tile) {
     MLN_TRACE_FUNC();
 
@@ -58,22 +76,27 @@ void TileCache::deferPendingReleases() {
         deferredDeletionsPending++;
     }
 
-    // Move elements to a disposable container to be captured by the lambda
-    decltype(pendingReleases) pending{pendingReleases.size()};
-    std::ranges::move(pendingReleases, pending.begin());
+    CaptureWrapper wrap{std::move(pendingReleases)};
     pendingReleases.clear();
-    threadPool.schedule({[items{std::move(pending)}, this]() mutable {
-        MLN_TRACE_ZONE(deferPendingReleases lambda);
-        MLN_ZONE_VALUE(items.size());
-        // Run the deletions
-        items.clear();
 
-        // Wake up a waiting destructor
+    // The `std::function` must be created in a separate statement from the `schedule` call.
+    // Creating a `std::function` from a lambda involves a copy, which is why we must use
+    // `shared_ptr` rather than `unique_ptr` for the capture.  As a result, a temporary holds
+    // a reference until the construction is complete and the lambda is destroyed.
+    // If this temporary outlives the `schedule` call, and the function is executed immediately
+    // by a waiting thread and is already complete, that temporary reference ends up being the
+    // last one and the destruction actually occurs here on this thread.
+    std::function<void()> func{[tile_{CaptureWrapper{std::move(wrap)}}, this]() mutable {
+        MLN_TRACE_ZONE(deferPendingReleases lambda);
+        MLN_ZONE_VALUE(wrap_.releases.size());
+        tile_.items.clear();
+
         std::lock_guard<std::mutex> counterLock(deferredSignalLock);
         deferredDeletionsPending--;
         deferredSignal.notify_all();
-    }});
-    pendingReleases.clear();
+    }};
+
+    threadPool.schedule(std::move(func));
 }
 
 void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile>&& tile) {

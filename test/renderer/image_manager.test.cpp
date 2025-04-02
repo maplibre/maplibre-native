@@ -149,7 +149,7 @@ public:
     int count = 0;
     std::function<void(const std::string&)> imageMissing = [](const std::string&) {
     };
-    void onStyleImageMissing(const std::string& id, Scheduler::Task&& done) override {
+    void onStyleImageMissing(const std::string& id, const std::function<void()>& done) override {
         count++;
         imageMissing(id);
         done();
