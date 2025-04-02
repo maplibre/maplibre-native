@@ -498,25 +498,24 @@ void GeometryTileWorker::finalizeLayout() {
     }
 
     MBGL_TIMING_START(watch);
-    gfx::ImageTexturePack imageTexturePack = dynamicTextureAtlas->uploadIconsAndPatterns(
-        iconMap, patternMap, versionMap);
-    gfx::GlyphTexturePack glyphTexturePack;
+    gfx::ImageAtlas imageAtlas = dynamicTextureAtlas->uploadIconsAndPatterns(iconMap, patternMap, versionMap);
+    gfx::GlyphAtlas glyphAtlas;
     if (!layouts.empty()) {
-        glyphTexturePack = dynamicTextureAtlas->uploadGlyphs(glyphMap);
+        glyphAtlas = dynamicTextureAtlas->uploadGlyphs(glyphMap);
 
         for (auto& layout : layouts) {
             if (obsolete) {
                 return;
             }
 
-            layout->prepareSymbols(glyphMap, glyphTexturePack.positions, iconMap, imageTexturePack.iconPositions);
+            layout->prepareSymbols(glyphMap, glyphAtlas.glyphPositions, iconMap, imageAtlas.iconPositions);
 
             if (!layout->hasSymbolInstances()) {
                 continue;
             }
 
             // layout adds the bucket to buckets
-            layout->createBucket(imageTexturePack.patternPositions,
+            layout->createBucket(imageAtlas.patternPositions,
                                  featureIndex,
                                  renderData,
                                  firstLoad,
@@ -538,7 +537,7 @@ void GeometryTileWorker::finalizeLayout() {
     parent.invoke(
         &GeometryTile::onLayout,
         std::make_shared<GeometryTile::LayoutResult>(
-            std::move(renderData), std::move(featureIndex), std::move(glyphTexturePack), std::move(imageTexturePack)),
+            std::move(renderData), std::move(featureIndex), std::move(glyphAtlas), std::move(imageAtlas)),
         correlationID);
 }
 

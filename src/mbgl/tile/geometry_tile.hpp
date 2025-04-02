@@ -23,8 +23,6 @@ class GeometryTileData;
 class RenderLayer;
 class SourceQueryOptions;
 class TileParameters;
-class GlyphAtlas;
-class ImageAtlas;
 class TileAtlasTextures;
 
 class GeometryTile : public Tile, public GlyphRequestor, public ImageRequestor {
@@ -74,19 +72,19 @@ public:
     public:
         mbgl::unordered_map<std::string, LayerRenderData> layerRenderData;
         std::shared_ptr<FeatureIndex> featureIndex;
-        gfx::GlyphTexturePack glyphTexturePack;
-        gfx::ImageTexturePack imageTexturePack;
+        gfx::GlyphAtlas glyphAtlas;
+        gfx::ImageAtlas imageAtlas;
 
         LayerRenderData* getLayerRenderData(const style::Layer::Impl&);
 
         LayoutResult(mbgl::unordered_map<std::string, LayerRenderData> renderData_,
                      std::unique_ptr<FeatureIndex> featureIndex_,
-                     gfx::GlyphTexturePack glyphTexturePack_,
-                     gfx::ImageTexturePack imageTexturePack_)
+                     gfx::GlyphAtlas glyphAtlas_,
+                     gfx::ImageAtlas imageAtlas_)
             : layerRenderData(std::move(renderData_)),
               featureIndex(std::move(featureIndex_)),
-              glyphTexturePack(std::move(glyphTexturePack_)),
-              imageTexturePack(std::move(imageTexturePack_)) {}
+              glyphAtlas(std::move(glyphAtlas_)),
+              imageAtlas(std::move(imageAtlas_)) {}
 
         ~LayoutResult();
     };

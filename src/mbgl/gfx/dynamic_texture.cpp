@@ -38,25 +38,26 @@ std::optional<TextureHandle> DynamicTexture::addImage(const uint8_t* pixelData, 
         return std::nullopt;
     }
 
+    const auto texHandle = TextureHandle(*bin);
     if (bin->refcount() == 1) {
 #if MLN_DEFER_UPLOAD_ON_RENDER_THREAD
         auto size = imageSize.area() * texture->getPixelStride();
         auto imageData = std::make_unique<uint8_t[]>(size);
         std::copy(pixelData, pixelData + size, imageData.get());
-        imagesToUpload.emplace(bin, std::move(imageData));
+        imagesToUpload.emplace(texHandle, std::move(imageData));
 #else
         texture->uploadSubRegion(pixelData, imageSize, bin->x + 1, bin->y + 1);
 #endif
     }
     mutex.unlock();
-    return TextureHandle(bin);
+    return texHandle;
 }
 
 void DynamicTexture::uploadDeferredImages() {
     mutex.lock();
     for (auto& pair : imagesToUpload) {
-        const auto& bin = pair.first;
-        texture->uploadSubRegion(pair.second.get(), Size(bin->w - 2, bin->h - 2), bin->x + 1, bin->y + 1);
+        const auto& rect = pair.first.getRectangle();
+        texture->uploadSubRegion(pair.second.get(), Size(rect.w - 2, rect.h - 2), rect.x + 1, rect.y + 1);
     }
     imagesToUpload.clear();
     mutex.unlock();
@@ -64,10 +65,14 @@ void DynamicTexture::uploadDeferredImages() {
 
 void DynamicTexture::removeTexture(const TextureHandle& texHandle) {
     mutex.lock();
-    const auto& bin = texHandle.getBin();
+    auto* bin = shelfPack.getBin(texHandle.getId());
+    if (!bin) {
+        mutex.unlock();
+        return;
+    }
     auto refcount = shelfPack.unref(*bin);
     if (refcount == 0) {
-        imagesToUpload.erase(bin);
+        imagesToUpload.erase(texHandle);
 #if !defined(NDEBUG)
         Size size = Size(bin->w, bin->h);
         std::unique_ptr<uint8_t[]> data = std::make_unique<uint8_t[]>(size.area() * texture->numChannels());

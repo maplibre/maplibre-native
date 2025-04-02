@@ -1,46 +1,28 @@
 #pragma once
 
+#include <mbgl/gfx/dynamic_texture.hpp>
 #include <mbgl/text/glyph.hpp>
 #include <mbgl/style/image_impl.hpp>
-
-#include <mapbox/shelf-pack.hpp>
 
 namespace mbgl {
 
 namespace gfx {
 
-class Context;
-class DynamicTexture;
 using DynamicTexturePtr = std::shared_ptr<gfx::DynamicTexture>;
-class DynamicTextureAtlas;
-using DynamicTextureAtlasPtr = std::unique_ptr<gfx::DynamicTextureAtlas>;
 
-class TexturePackHandle {
+class GlyphAtlas {
 public:
-    TexturePackHandle() = default;
-    ~TexturePackHandle() = default;
-
-    const std::vector<mapbox::Bin*>& getBins() const { return bins; }
-    const DynamicTexturePtr& getDynamicTexture() const { return dynamicTexture; }
-
-private:
-    std::vector<mapbox::Bin*> bins;
+    GlyphPositions glyphPositions;
+    std::vector<TextureHandle> textureHandles;
     DynamicTexturePtr dynamicTexture;
-
-    friend class DynamicTextureAtlas;
 };
 
-class GlyphTexturePack {
-public:
-    GlyphPositions positions;
-    TexturePackHandle handle;
-};
-
-class ImageTexturePack {
+class ImageAtlas {
 public:
     ImagePositions iconPositions;
     ImagePositions patternPositions;
-    TexturePackHandle handle;
+    std::vector<TextureHandle> textureHandles;
+    DynamicTexturePtr dynamicTexture;
 };
 
 class DynamicTextureAtlas {
@@ -49,10 +31,10 @@ public:
         : context(context_) {}
     ~DynamicTextureAtlas() = default;
 
-    GlyphTexturePack uploadGlyphs(const GlyphMap& glyphs);
-    ImageTexturePack uploadIconsAndPatterns(const ImageMap& icons,
-                                            const ImageMap& patterns,
-                                            const ImageVersionMap& versionMap);
+    GlyphAtlas uploadGlyphs(const GlyphMap& glyphs);
+    ImageAtlas uploadIconsAndPatterns(const ImageMap& icons,
+                                      const ImageMap& patterns,
+                                      const ImageVersionMap& versionMap);
     void uploadDeferredImages();
 
 private:

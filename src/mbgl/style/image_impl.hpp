@@ -65,25 +65,26 @@ inline bool operator<(const Immutable<mbgl::style::Image::Impl>& a, const Immuta
 
 class ImagePosition {
 public:
-    ImagePosition(const mapbox::Bin& bin, const style::Image::Impl& image, uint32_t version_ = 0)
-        : pixelRatio(image.pixelRatio),
-          paddedRect(bin.x, bin.y, bin.w, bin.h),
-          version(version_),
+    ImagePosition(const Rect<uint16_t>& rect, const style::Image::Impl& image, uint32_t version_ = 0)
+        : paddedRect(rect),
+          pixelRatio(image.pixelRatio),
           stretchX(image.stretchX),
           stretchY(image.stretchY),
           content(image.content),
           textFitWidth(image.textFitWidth),
-          textFitHeight(image.textFitHeight) {}
+          textFitHeight(image.textFitHeight),
+          version(version_) {}
 
     static constexpr const uint16_t padding = 1u;
-    float pixelRatio;
+    
     Rect<uint16_t> paddedRect;
-    uint32_t version;
+    float pixelRatio;
     style::ImageStretches stretchX;
     style::ImageStretches stretchY;
     std::optional<style::ImageContent> content;
     std::optional<style::TextFit> textFitWidth;
     std::optional<style::TextFit> textFitHeight;
+    uint32_t version;
 
     std::array<uint16_t, 2> tl() const {
         return {{static_cast<uint16_t>(paddedRect.x + padding), static_cast<uint16_t>(paddedRect.y + padding)}};

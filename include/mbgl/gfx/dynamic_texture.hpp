@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/types.hpp>
 #include <mbgl/util/image.hpp>
+#include <mbgl/util/rect.hpp>
 
 #include <mapbox/shelf-pack.hpp>
 
@@ -12,18 +13,30 @@ namespace gfx {
 class Context;
 class Texture2D;
 using Texture2DPtr = std::shared_ptr<gfx::Texture2D>;
-using ImagesToUpload = std::unordered_map<mapbox::Bin*, std::unique_ptr<uint8_t[]>>;
 
 class TextureHandle {
 public:
-    TextureHandle(mapbox::Bin* bin_)
-        : bin(bin_) {};
+    TextureHandle(const mapbox::Bin& bin)
+        : id(bin.id),
+          rectangle(bin.x, bin.y, bin.w, bin.h) {};
     ~TextureHandle() = default;
 
-    mapbox::Bin* getBin() const { return bin; }
+    int32_t getId() const { return id; }
+    const Rect<uint16_t>& getRectangle() const { return rectangle; }
 
+    bool operator==(const TextureHandle &other) const {
+        return (id == other.id);
+    }
+    
+    struct Hasher {
+        size_t operator()(const TextureHandle& texHandle) const {
+            return texHandle.id;
+        }
+    };
+    
 private:
-    mapbox::Bin* bin;
+    int32_t id = 0;
+    Rect<uint16_t> rectangle;
 };
 
 class DynamicTexture {
@@ -42,6 +55,8 @@ public:
     void uploadDeferredImages();
     void removeTexture(const TextureHandle& texHandle);
 
+    using ImagesToUpload = std::unordered_map<TextureHandle, std::unique_ptr<uint8_t[]>, TextureHandle::Hasher>;
+    
 private:
     Texture2DPtr texture;
     mapbox::ShelfPack shelfPack;
