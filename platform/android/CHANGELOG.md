@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## 11.8.6
+
+### 🐞 Bug fixes
+
+- Fix issue related to symbol icon scaling with offset
+
 ## 11.8.5
 
 ### 🐞 Bug fixes

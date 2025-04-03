@@ -1271,7 +1271,7 @@ around the returned camera object if it were set as the receiver’s camera.
  */
 @property (nonatomic) MLNMapDebugMaskOptions debugMask;
 
-- (MLNBackendResource)backendResource;
+- (MLNBackendResource *)backendResource;
 @end
 
 NS_ASSUME_NONNULL_END
