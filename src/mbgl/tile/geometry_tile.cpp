@@ -6,7 +6,6 @@
 #include <mbgl/renderer/layers/render_custom_layer.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
-#include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/renderer/layers/render_background_layer.hpp>
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
 #include <mbgl/renderer/query.hpp>
@@ -15,15 +14,15 @@
 #include <mbgl/renderer/tile_render_data.hpp>
 #include <mbgl/style/layer_impl.hpp>
 #include <mbgl/style/layers/background_layer.hpp>
-#include <mbgl/text/glyph_atlas.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/tile/geometry_tile_worker.hpp>
 #include <mbgl/tile/tile_observer.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/thread_pool.hpp>
-
+#include <mbgl/gfx/dynamic_texture.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
+
 #include <utility>
 
 namespace mbgl {
@@ -42,6 +41,38 @@ LayerRenderData* GeometryTile::LayoutResult::getLayerRenderData(const style::Lay
         return nullptr;
     }
     return &result;
+}
+
+class ImagePatch {
+public:
+    ImagePatch(Immutable<style::Image::Impl> image_, const Rect<uint16_t>& paddedRect_)
+        : image(std::move(image_)),
+          paddedRect(paddedRect_) {}
+    Immutable<style::Image::Impl> image;
+    Rect<uint16_t> paddedRect;
+};
+
+void populateImagePatches(ImagePositions& imagePositions,
+                          const ImageManager& imageManager,
+                          std::vector<ImagePatch>& /*out*/ patches) {
+    if (imagePositions.empty()) {
+        imagePositions.reserve(imageManager.updatedImageVersions.size());
+    }
+    for (auto& updatedImageVersion : imageManager.updatedImageVersions) {
+        const std::string& name = updatedImageVersion.first;
+        const uint32_t version = updatedImageVersion.second;
+        const auto it = imagePositions.find(updatedImageVersion.first);
+        if (it != imagePositions.end()) {
+            auto& position = it->second;
+            if (position.version == version) continue;
+
+            const auto updatedImage = imageManager.getSharedImage(name);
+            if (updatedImage == nullptr) continue;
+
+            patches.emplace_back(*updatedImage, position.paddedRect);
+            position.version = version;
+        }
+    }
 }
 
 class GeometryTileRenderData final : public TileRenderData {
@@ -69,9 +100,9 @@ std::optional<ImagePosition> GeometryTileRenderData::getPattern(const std::strin
     MLN_TRACE_FUNC();
 
     if (layoutResult) {
-        const auto& iconAtlas = layoutResult->iconAtlas;
-        auto it = iconAtlas.patternPositions.find(pattern);
-        if (it != iconAtlas.patternPositions.end()) {
+        const auto& patternPositions = layoutResult->imageTexturePack.patternPositions;
+        auto it = patternPositions.find(pattern);
+        if (it != patternPositions.end()) {
             return it->second;
         }
     }
@@ -95,40 +126,18 @@ void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
 
     assert(atlasTextures);
 
-    if (layoutResult->glyphAtlasImage && layoutResult->glyphAtlasImage->valid()) {
-#if MLN_DRAWABLE_RENDERER
-        atlasTextures->glyph = uploadPass.getContext().createTexture2D();
-        atlasTextures->glyph->setSamplerConfiguration(
-            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-        atlasTextures->glyph->upload(*layoutResult->glyphAtlasImage);
-#else
-        atlasTextures->glyph = uploadPass.createTexture(*layoutResult->glyphAtlasImage);
-#endif
-        layoutResult->glyphAtlasImage = {};
+    if (const auto& glyphDynamicTexture = layoutResult->glyphTexturePack.handle.getDynamicTexture()) {
+        atlasTextures->glyph = glyphDynamicTexture->getTexture();
+    }
+    if (const auto& imageDynamicTexture = layoutResult->imageTexturePack.handle.getDynamicTexture()) {
+        atlasTextures->icon = imageDynamicTexture->getTexture();
     }
 
-    if (layoutResult->iconAtlas.image.valid()) {
-#if MLN_DRAWABLE_RENDERER
-        atlasTextures->icon = uploadPass.getContext().createTexture2D();
-        atlasTextures->icon->upload(layoutResult->iconAtlas.image);
-#else
-        atlasTextures->icon = uploadPass.createTexture(layoutResult->iconAtlas.image);
-#endif
-        layoutResult->iconAtlas.image = {};
-    }
-
-    if (atlasTextures->icon && !imagePatches.empty()) {
+    if (!imagePatches.empty()) {
         for (const auto& imagePatch : imagePatches) { // patch updated images.
-#if MLN_DRAWABLE_RENDERER
             atlasTextures->icon->uploadSubRegion(imagePatch.image->image,
                                                  imagePatch.paddedRect.x + ImagePosition::padding,
                                                  imagePatch.paddedRect.y + ImagePosition::padding);
-#else
-            uploadPass.updateTextureSub(*atlasTextures->icon,
-                                        imagePatch.image->image,
-                                        imagePatch.paddedRect.x + ImagePosition::padding,
-                                        imagePatch.paddedRect.y + ImagePosition::padding);
-#endif
         }
         imagePatches.clear();
     }
@@ -138,7 +147,9 @@ void GeometryTileRenderData::prepare(const SourcePrepareParameters& parameters) 
     MLN_TRACE_FUNC();
 
     if (!layoutResult) return;
-    imagePatches = layoutResult->iconAtlas.getImagePatchesAndUpdateVersions(parameters.imageManager);
+    imagePatches.clear();
+    populateImagePatches(layoutResult->imageTexturePack.iconPositions, parameters.imageManager, imagePatches);
+    populateImagePatches(layoutResult->imageTexturePack.patternPositions, parameters.imageManager, imagePatches);
 }
 
 Bucket* GeometryTileRenderData::getBucket(const Layer::Impl& layer) const {
@@ -182,7 +193,8 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_,
              obsolete,
              parameters.mode,
              parameters.pixelRatio,
-             parameters.debugOptions & MapDebugOptions::Collision),
+             parameters.debugOptions & MapDebugOptions::Collision,
+             parameters.dynamicTextureAtlas),
       fileSource(parameters.fileSource),
       glyphManager(parameters.glyphManager),
       imageManager(parameters.imageManager),
@@ -205,6 +217,19 @@ GeometryTile::~GeometryTile() {
     if (layoutResult) {
         threadPool.runOnRenderThread(
             [layoutResult_{std::move(layoutResult)}, atlasTextures_{std::move(atlasTextures)}]() {});
+    }
+}
+
+GeometryTile::LayoutResult::~LayoutResult() {
+    if (auto& imageDynamicTexture = imageTexturePack.handle.getDynamicTexture()) {
+        for (const auto& bin : imageTexturePack.handle.getBins()) {
+            imageDynamicTexture->removeTexture(gfx::TextureHandle(bin));
+        }
+    }
+    if (auto& glyphDynamicTexture = glyphTexturePack.handle.getDynamicTexture()) {
+        for (const auto& bin : glyphTexturePack.handle.getBins()) {
+            glyphDynamicTexture->removeTexture(gfx::TextureHandle(bin));
+        }
     }
 }
 
@@ -544,7 +569,7 @@ void GeometryTile::setFeatureState(const LayerFeatureStates& states) {
 
             auto bucket = layer.second.bucket;
             if (bucket && bucket->hasData()) {
-                bucket->update(featureStates, *sourceLayer, layerID, layoutResult->iconAtlas.patternPositions);
+                bucket->update(featureStates, *sourceLayer, layerID, layoutResult->imageTexturePack.patternPositions);
             }
         }
     }

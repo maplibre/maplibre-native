@@ -20,6 +20,8 @@ class RenderTree;
 namespace gfx {
 class RendererBackend;
 class ShadeRegistry;
+class DynamicTextureAtlas;
+using DynamicTextureAtlasPtr = std::unique_ptr<gfx::DynamicTextureAtlas>;
 } // namespace gfx
 
 class Renderer::Impl : public gfx::ContextObserver {
@@ -50,6 +52,7 @@ private:
 
     const float pixelRatio;
     std::unique_ptr<RenderStaticData> staticData;
+    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
 
     enum class RenderState {
         Never,
