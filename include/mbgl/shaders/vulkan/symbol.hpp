@@ -62,6 +62,7 @@ struct SymbolDrawableUBO {
     float opacity_t;
     float halo_width_t;
     float halo_blur_t;
+    bool is_offset;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly buffer SymbolDrawableUBOVector {
@@ -106,7 +107,9 @@ void main() {
             0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
             4.0);
 
-    size *= perspective_ratio;
+    if (!drawable.is_offset) {
+        size *= perspective_ratio;
+    }
 
     const float fontScale = drawable.is_text_prop ? size / 24.0 : size;
 
@@ -266,6 +269,7 @@ struct SymbolDrawableUBO {
     float opacity_t;
     float halo_width_t;
     float halo_blur_t;
+    bool is_offset;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly buffer SymbolDrawableUBOVector {
@@ -335,7 +339,9 @@ void main() {
             0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
             4.0);
 
-    size *= perspective_ratio;
+    if (!drawable.is_offset) {
+        size *= perspective_ratio;
+    }
 
     const float fontScale = drawable.is_text_prop ? size / 24.0 : size;
 
@@ -563,6 +569,7 @@ struct SymbolDrawableUBO {
     float opacity_t;
     float halo_width_t;
     float halo_blur_t;
+    bool is_offset;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly buffer SymbolDrawableUBOVector {
@@ -634,7 +641,9 @@ void main() {
             0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
             4.0);
 
-    size *= perspective_ratio;
+    if (!drawable.is_offset) {
+        size *= perspective_ratio;
+    }
 
     const float fontScale = size / 24.0;
 

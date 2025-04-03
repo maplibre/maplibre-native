@@ -44,6 +44,7 @@ Values makeValues(const bool isText,
                   const RenderTile& tile,
                   const TransformState& state,
                   const float symbolFadeChange,
+                  const bool isOffset,
                   Args&&... args) {
     std::array<float, 2> extrudeScale;
 
@@ -88,6 +89,7 @@ Values makeValues(const bool isText,
                   uniforms::pitch_with_map::Value(pitchWithMap),
                   uniforms::rotate_symbol::Value(rotateInShader),
                   uniforms::aspect_ratio::Value(state.getSize().aspectRatio()),
+                  uniforms::is_offset::Value(isOffset),
                   std::forward<Args>(args)...};
 }
 
@@ -100,9 +102,18 @@ SymbolIconProgram::LayoutUniformValues SymbolIconProgram::layoutUniformValues(
     const bool alongLine,
     const RenderTile& tile,
     const TransformState& state,
-    const float symbolFadeChange) {
-    return makeValues<SymbolIconProgram::LayoutUniformValues>(
-        isText, hasVariablePacement, values, texsize, pixelsToGLUnits, alongLine, tile, state, symbolFadeChange);
+    const float symbolFadeChange,
+    const bool isOffset) {
+    return makeValues<SymbolIconProgram::LayoutUniformValues>(isText,
+                                                              hasVariablePacement,
+                                                              values,
+                                                              texsize,
+                                                              pixelsToGLUnits,
+                                                              alongLine,
+                                                              tile,
+                                                              state,
+                                                              symbolFadeChange,
+                                                              isOffset);
 }
 
 template <class Name, shaders::BuiltIn ShaderSource, class PaintProperties>
@@ -117,6 +128,7 @@ SymbolSDFProgram<Name, ShaderSource, PaintProperties>::layoutUniformValues(const
                                                                            const RenderTile& tile,
                                                                            const TransformState& state,
                                                                            const float symbolFadeChange,
+                                                                           const bool isOffset,
                                                                            const SymbolSDFPart part) {
     const float gammaScale = (values.pitchAlignment == AlignmentType::Map
                                   ? static_cast<float>(std::cos(state.getPitch())) * state.getCameraToCenterDistance()
@@ -132,6 +144,7 @@ SymbolSDFProgram<Name, ShaderSource, PaintProperties>::layoutUniformValues(const
         tile,
         state,
         symbolFadeChange,
+        isOffset,
         uniforms::gamma_scale::Value(gammaScale),
         uniforms::device_pixel_ratio::Value(pixelRatio),
         uniforms::is_halo::Value(part == SymbolSDFPart::Halo));
@@ -148,6 +161,7 @@ SymbolTextAndIconProgram::LayoutUniformValues SymbolTextAndIconProgram::layoutUn
     const RenderTile& tile,
     const TransformState& state,
     const float symbolFadeChange,
+    const bool isOffset,
     const SymbolSDFPart part) {
     return {SymbolSDFProgram<SymbolSDFTextProgram,
                              shaders::BuiltIn::SymbolSDFTextProgram,
@@ -161,6 +175,7 @@ SymbolTextAndIconProgram::LayoutUniformValues SymbolTextAndIconProgram::layoutUn
                                                                               tile,
                                                                               state,
                                                                               symbolFadeChange,
+                                                                              isOffset,
                                                                               part)
                 .concat(gfx::UniformValues<SymbolTextAndIconProgramUniforms>(uniforms::texsize::Value(texsize_icon)))};
 }
