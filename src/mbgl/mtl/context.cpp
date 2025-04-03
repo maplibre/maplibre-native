@@ -605,12 +605,12 @@ MTLDepthStencilStatePtr Context::makeDepthStencilState(const gfx::DepthMode& dep
         // `Draw Errors Validation MTLDepthStencilDescriptor sets depth test but MTLRenderPassDescriptor has a nil
         // depthAttachment texture`
         if (auto* depthTarget = rpd->depthAttachment()) {
-            if (auto* tex = depthTarget->texture()) {
+            if (depthTarget->texture()) {
                 applyDepthMode(depthMode, depthStencilDescriptor.get());
             }
         }
         if (auto* stencilTarget = rpd->stencilAttachment()) {
-            if (auto* tex = stencilTarget->texture()) {
+            if (stencilTarget->texture()) {
                 auto stencilDescriptor = NS::TransferPtr(MTL::StencilDescriptor::alloc()->init());
                 if (!stencilDescriptor) {
                     return {};
