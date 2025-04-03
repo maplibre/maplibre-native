@@ -58,7 +58,10 @@ public:
                     RenderStaticData&,
                     LineAtlas&,
                     PatternAtlas&,
-                    uint64_t frameCount);
+                    uint64_t frameCount,
+                    double tileLodMinRadius,
+                    double tileLodScale,
+                    double tileLodPitchThreshold);
     ~PaintParameters();
 
     gfx::Context& context;
@@ -134,6 +137,10 @@ public:
     static constexpr float depthEpsilon = 1.0f / (1 << 12);
 #endif
     static constexpr int maxStencilValue = 255;
+
+    double tileLodMinRadius;
+    double tileLodScale;
+    double tileLodPitchThreshold;
 };
 
 } // namespace mbgl
