@@ -30,7 +30,7 @@ void MetalRenderer::setMetalDevice(id<MTLDevice> device) {
     if (_metalDevice == device) {
         return;
     }
-    
+
     _metalDevice = device;
     setupMetal();
 }
@@ -58,15 +58,15 @@ void MetalRenderer::setDrawableSize(int width, int height) {
 
 // Update any animations
 void MetalRenderer::update(float timeSinceLastDraw) {
-    
+
     // Update the global time
     _globalTime += timeSinceLastDraw;
-    
+
     // If we don't have an asset, then bail
     if (_models.size() == 0) {
         return;
     }
-    
+
     double maxAnimDuration = 0;
     for (auto m: _models) {
         for (GLTFAnimation *animation in m->_asset.animations) {
@@ -77,19 +77,19 @@ void MetalRenderer::update(float timeSinceLastDraw) {
             }
         }
     }
-    
+
     double animTime = fmod(_globalTime, maxAnimDuration);
     for (auto m: _models) {
         for (GLTFAnimation *animation in m->_asset.animations) {
             [animation runAtTime:animTime];
         }
     }
-    
+
     _camera->updateWithTimestep(timeSinceLastDraw);
     for (auto m: _models) {
         computeTransforms(m);
     }
-    
+
 }
 
 // Render
@@ -102,13 +102,13 @@ void MetalRenderer::render() {
     double worldSize = (tileSize / scaleFactor) * pow(2.0, zoom);
     simd_double4x4 scaleMatrix = GLTFMatrixFromScaleD(simd_make_double3(worldSize, -worldSize, 1.0));
     simd_double4x4 xlateMatrix = GLTFMatrixFromTranslationD(simd_make_double3(20037508.34,-20037508.34,0.0));
-    
+
     auto m1 = matrix_multiply(scaleMatrix, xlateMatrix);
     auto m2 = matrix_multiply(environmentMVP, m1);
     _projectionMatrix = m2;
 
     // id <MTLCommandBuffer> internalCommandBuffer = [_internalMetalCommandQueue commandBuffer];
-//    
+//
 //    if (_existingCommandBuffer) {
 //        commandBuffer = _metalRenderingEnvironment->_currentCommandBuffer;
 //    } else {
@@ -116,12 +116,12 @@ void MetalRenderer::render() {
 //        commandBuffer = [_internalMetalCommandQueue commandBuffer];
 //        currentDrawable = _metalRenderingEnvironment->_currentDrawable;
 //    }
-//    
+//
     encodeMainPass(_metalRenderingEnvironment->_currentCommandBuffer);
     // if (_useBloomPass) {
     //     encodeBloomPasses(internalCommandBuffer);
     // }
-    
+
 //    [internalCommandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
 //        dispatch_async(dispatch_get_main_queue(), ^{
 //            signalFrameCompletion();
@@ -136,7 +136,7 @@ void MetalRenderer::render() {
 
 // Load a model
 void MetalRenderer::loadGLTFModel(std::shared_ptr<GLTFModel> model) {
-    
+
     GLTFModelLoader *modelLoader = [[GLTFModelLoader alloc] init];
     NSURL *u = [NSURL URLWithString:[NSString stringWithCString:model->_modelURL.c_str()]];
     [modelLoader loadURL:u
@@ -144,34 +144,34 @@ void MetalRenderer::loadGLTFModel(std::shared_ptr<GLTFModel> model) {
         addGLTFAsset(asset, model);
     }
          bufferAllocator:_bufferAllocator];
-    
+
 }
 
 // Set the rendering environemnt variables
 void MetalRenderer::setRenderingEnvironemnt(std::shared_ptr<GLTFManagerRenderingEnvironment> renderingEnvironment) {
     GLTFRenderer::setRenderingEnvironemnt(renderingEnvironment);
-    
+
     _metalRenderingEnvironment = std::static_pointer_cast<GLTFManagerRenderingEnvironmentMetal>(renderingEnvironment);
-    
+
 }
 
 
 // RENDERING
 void MetalRenderer::encodeMainPass(id<MTLCommandBuffer> commandBuffer) {
-    
+
     id <MTLRenderCommandEncoder> renderEncoder = _metalRenderingEnvironment->_currentCommandEncoder;
-    
+
     for (auto m: _models) {
         [renderEncoder pushDebugGroup:@"Draw glTF Scene"];
         renderScene(m, m->_asset.defaultScene, commandBuffer, renderEncoder);
         [renderEncoder popDebugGroup];
     }
-    
+
 
 }
 
 void MetalRenderer::encodeBloomPasses(id<MTLCommandBuffer> commandBuffer) {
-    
+
     MTLRenderPassDescriptor *pass = [MTLRenderPassDescriptor renderPassDescriptor];
     pass.colorAttachments[0].texture = _bloomTextureA;
     pass.colorAttachments[0].loadAction = MTLLoadActionDontCare;
@@ -207,7 +207,7 @@ void MetalRenderer::encodeBloomPasses(id<MTLCommandBuffer> commandBuffer) {
     pass.colorAttachments[0].texture = _colorTexture;
     pass.colorAttachments[0].loadAction = MTLLoadActionLoad;
     pass.colorAttachments[0].storeAction = MTLStoreActionStore;
-    
+
     renderEncoder = [commandBuffer renderCommandEncoderWithDescriptor:pass];
     [renderEncoder pushDebugGroup:@"Post-process (Bloom combine)"];
     drawFullscreenPassWithPipeline(_additiveBlendPipelineState,renderEncoder,_bloomTextureA);
@@ -216,7 +216,7 @@ void MetalRenderer::encodeBloomPasses(id<MTLCommandBuffer> commandBuffer) {
 }
 
 void MetalRenderer::encodeTonemappingPass(id<MTLCommandBuffer> commandBuffer) {
-    
+
     if (_metalRenderingEnvironment->_currentRenderPassDescriptor == nil) {
         return;
     }
@@ -226,7 +226,7 @@ void MetalRenderer::encodeTonemappingPass(id<MTLCommandBuffer> commandBuffer) {
     drawFullscreenPassWithPipeline(_tonemapPipelineState,renderEncoder,_colorTexture);
     [renderEncoder popDebugGroup];
     [renderEncoder endEncoding];
-    
+
 
 
 }
@@ -270,7 +270,7 @@ MTLRenderPassDescriptor* MetalRenderer::newRenderPassDescriptor() {
     pass.depthAttachment.texture = _metalRenderingEnvironment->_depthStencilTexture;
     pass.depthAttachment.loadAction = MTLLoadActionLoad;
     pass.depthAttachment.storeAction = MTLStoreActionStore;
-    
+
     return pass;
 }
 
@@ -282,22 +282,22 @@ MTLRenderPassDescriptor* MetalRenderer::newRenderPassDescriptor() {
 
 
 void MetalRenderer::setupMetal() {
-    
+
     _internalMetalCommandQueue = [_metalDevice newCommandQueue];
     _metalLibrary = [_metalDevice newDefaultLibrary];
-    
+
     _projectionMatrix = matrix_identity_double4x4;
     _colorPixelFormat = MTLPixelFormatBGRA8Unorm;
    _depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
     _sampleCount = 1;
     _drawableSize = {1, 1};
-    
+
     _frameBoundarySemaphore = dispatch_semaphore_create(_maxInflightFrames);
-    
+
     loadBloomPipelines();
     loadTonemapPipeline();
     loadDepthClearPipeline();
-    
+
     _opaqueRenderItems = [NSMutableArray array];
     _transparentRenderItems = [NSMutableArray array];
     _currentLightNodes = [NSMutableArray array];
@@ -312,17 +312,17 @@ void MetalRenderer::setupMetal() {
     _textureLoader = [[GLTFMTLTextureLoader alloc] initWithDevice:_metalDevice];
     _bufferAllocator = [[GLTFMTLBufferAllocator alloc] initWithDevice:_metalDevice];
     //_assets = [NSMutableArray array];
-    
-    
-    
-    
+
+
+
+
     MTLDepthStencilDescriptor *fullscreenTransfterDepthStencilDescriptor = [[MTLDepthStencilDescriptor alloc] init];
     fullscreenTransfterDepthStencilDescriptor.depthCompareFunction = MTLCompareFunctionAlways; // Or another value as needed
     fullscreenTransfterDepthStencilDescriptor.depthWriteEnabled = NO;
     _fullscreenTransfterDepthStencilState = [_metalDevice newDepthStencilStateWithDescriptor:fullscreenTransfterDepthStencilDescriptor];
 
-    
-    
+
+
 }
 
 void MetalRenderer::updateFramebufferSize() {
@@ -338,7 +338,7 @@ void MetalRenderer::updateFramebufferSize() {
     textureDescriptor.storageMode = MTLStorageModePrivate;
     textureDescriptor.usage = MTLTextureUsageRenderTarget;
     _multisampleColorTexture = [_metalDevice newTextureWithDescriptor:textureDescriptor];
-    
+
     textureDescriptor.textureType = MTLTextureType2D;
     textureDescriptor.pixelFormat = _colorPixelFormat;
     textureDescriptor.sampleCount = 1;
@@ -352,7 +352,7 @@ void MetalRenderer::updateFramebufferSize() {
    textureDescriptor.storageMode = MTLStorageModePrivate;
    textureDescriptor.usage = MTLTextureUsageRenderTarget;
    _depthStencilTexture = [_metalDevice newTextureWithDescriptor:textureDescriptor];
-    
+
     textureDescriptor.width = _drawableSize.x / 2;
     textureDescriptor.height = _drawableSize.y / 2;
     textureDescriptor.textureType = MTLTextureType2D;
@@ -370,7 +370,7 @@ void MetalRenderer::updateFramebufferSize() {
     textureDescriptor.storageMode = MTLStorageModePrivate;
     textureDescriptor.usage = MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead;
     _bloomTextureB = [_metalDevice newTextureWithDescriptor:textureDescriptor];
-    
+
     //self.renderer.sampleCount = self.sampleCount;
 
 
@@ -382,7 +382,7 @@ void MetalRenderer::updateFramebufferSize() {
 
 
 void MetalRenderer::loadBloomPipelines() {
-    
+
     NSError *error = nil;
     MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
     descriptor.vertexFunction = [_metalLibrary newFunctionWithName:@"quad_vertex_main"];
@@ -406,7 +406,7 @@ void MetalRenderer::loadBloomPipelines() {
     }
 
     descriptor.fragmentFunction = [_metalLibrary newFunctionWithName:@"additive_blend_fragment_main"];
-    
+
     // Original Values
     descriptor.colorAttachments[0].blendingEnabled = YES;
     descriptor.colorAttachments[0].rgbBlendOperation = MTLBlendOperationAdd;
@@ -424,7 +424,7 @@ void MetalRenderer::loadBloomPipelines() {
     descriptor.colorAttachments[0].destinationRGBBlendFactor = MTLBlendFactorOne;
     descriptor.colorAttachments[0].destinationAlphaBlendFactor = MTLBlendFactorDestinationAlpha;
 
-    
+
     _additiveBlendPipelineState = [_metalDevice newRenderPipelineStateWithDescriptor:descriptor error:&error];
     if (_additiveBlendPipelineState == nil) {
         NSLog(@"Error occurred when creating render pipeline state: %@", error);
@@ -432,11 +432,11 @@ void MetalRenderer::loadBloomPipelines() {
 }
 
 void MetalRenderer::loadTonemapPipeline() {
-    
+
     NSError *error = nil;
     MTLRenderPipelineDescriptor *descriptor = [MTLRenderPipelineDescriptor new];
-    
-    
+
+
     // MT: Added blending
     descriptor.colorAttachments[0].blendingEnabled = YES;
     descriptor.colorAttachments[0].rgbBlendOperation = MTLBlendOperationAdd;
@@ -446,20 +446,20 @@ void MetalRenderer::loadTonemapPipeline() {
     descriptor.colorAttachments[0].destinationRGBBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
     descriptor.colorAttachments[0].destinationAlphaBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
 
-    
+
     id <MTLFunction> vertexFunction = [_metalLibrary newFunctionWithName:@"quad_vertex_main"];
-    
+
     descriptor.vertexFunction = vertexFunction;
     descriptor.fragmentFunction = [_metalLibrary newFunctionWithName:@"tonemap_fragment_main"];
     descriptor.sampleCount = _sampleCount;
     descriptor.colorAttachments[0].pixelFormat = _colorPixelFormat;
-    
+
     // TODO: This was hard coded to fix an issue whe moving to ML.  Need to sort out
     // how these params are set in ML and pass them into here
     descriptor.stencilAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
     descriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
-    
-    
+
+
     _tonemapPipelineState = [_metalDevice newRenderPipelineStateWithDescriptor:descriptor error:&error];
     if (_tonemapPipelineState == nil) {
         NSLog(@"Error occurred when creating render pipeline state: %@", error);
@@ -523,9 +523,9 @@ void MetalRenderer::enqueueReusableBuffer(id<MTLBuffer> buffer) {
 }
 
 id<MTLRenderPipelineState> MetalRenderer::renderPipelineStateForSubmesh(GLTFSubmesh *submesh) {
-    
+
     id<MTLRenderPipelineState> pipeline = _pipelineStatesForSubmeshes[submesh.identifier];
-    
+
     if (pipeline == nil) {
         GLTFMTLShaderBuilder *shaderBuilder = [[GLTFMTLShaderBuilder alloc] init];
         pipeline = [shaderBuilder renderPipelineStateForSubmesh: submesh

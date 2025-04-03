@@ -631,7 +631,7 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                 view->freeCameraDemoStartTime = mbgl::Clock::now();
                 view->invalidate();
             } break;
-            case GLFW_KEY_V: {
+            case GLFW_KEY_COMMA: {
                 cycleTileLodMode(*view->map);
             } break;
             case GLFW_KEY_F7: {
