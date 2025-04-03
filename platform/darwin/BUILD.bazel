@@ -6,6 +6,8 @@ load(
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
 load(
     "bazel/files.bzl",
+    "MLN_GLTF_HEADERS",
+    "MLN_GLTF_SOURCE",
     "MLN_DARWIN_OBJCPP_HEADERS",
     "MLN_DARWIN_OBJC_HEADERS",
     "MLN_DARWIN_PRIVATE_HEADERS",
@@ -39,6 +41,18 @@ filegroup(
 filegroup(
     name = "darwin_objcpp_srcs",
     srcs = MLN_DARWIN_PUBLIC_OBJCPP_SOURCE,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "darwin_gltf_hdrs",
+    srcs = MLN_GLTF_HEADERS,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "darwin_gltf_srcs",
+    srcs = MLN_GLTF_SOURCE,
     visibility = ["//visibility:public"],
 )
 
@@ -305,6 +319,8 @@ exports_files(
         "include/mbgl/util/image+MLNAdditions.hpp",
     ] + MLN_DARWIN_PUBLIC_OBJC_SOURCE +
     MLN_DARWIN_PUBLIC_OBJCPP_SOURCE +
+    MLN_GLTF_HEADERS +
+    MLN_GLTF_SOURCE + 
     MLN_DARWIN_PUBLIC_OBJCPP_CUSTOM_DRAWABLE_SOURCE +
     MLN_DARWIN_PRIVATE_HEADERS +
     MLN_DARWIN_OBJC_HEADERS +
@@ -330,6 +346,8 @@ js_library(
     srcs = [
         ":darwin_objc_hdrs",
         ":darwin_objc_srcs",
+        ":darwin_gltf_hdrs",
+        ":darwin_gltf_srcs",
         ":darwin_objcpp_hdrs",
         ":darwin_objcpp_srcs",
         ":darwin_private_hdrs",

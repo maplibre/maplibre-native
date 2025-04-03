@@ -158,3 +158,14 @@ mbgl::PremultipliedImage MLNMapViewMetalImpl::readStillImage() {
     // return readFramebuffer(mapView.framebufferSize); // TODO: RendererBackend::readFramebuffer
     return {};
 }
+
+MLNBackendResource MLNMapViewMetalImpl::getObject() {
+    auto& resource = getResource<MLNMapViewMetalRenderableResource>();
+    auto renderPassDescriptor = resource.getRenderPassDescriptor().get();
+    return {
+        resource.mtlView,
+        resource.mtlView.device,
+        [MTLRenderPassDescriptor renderPassDescriptor],
+        resource.commandBuffer
+    };
+}
