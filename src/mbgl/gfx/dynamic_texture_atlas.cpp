@@ -5,69 +5,64 @@ namespace mbgl {
 namespace gfx {
 
 GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
-    GlyphAtlas glyphAtlas;
-
+    using GlyphsToUpload = std::vector<std::tuple<TextureHandle, Immutable<Glyph>, FontStackHash>>;
     mutex.lock();
-    for (const auto& dynamicTexture : dynamicTextures) {
-        if (dynamicTexture->getPixelFormat() != TexturePixelType::Alpha) {
+
+    size_t dynTexIndex = 0;
+    Size dynTexSize = {512, 512};
+    GlyphsToUpload glyphsToUpload;
+    GlyphAtlas glyphAtlas;
+    
+    while (!glyphAtlas.dynamicTexture) {
+        if (dynTexIndex < dynamicTextures.size()) {
+            glyphAtlas.dynamicTexture = dynamicTextures[dynTexIndex++];
+        } else {
+            glyphAtlas.dynamicTexture = std::make_shared<gfx::DynamicTexture>(context, dynTexSize, TexturePixelType::Alpha);
+            dynTexSize = Size(dynTexSize.width * 2, dynTexSize.height * 2);
+        }
+        
+        if (glyphAtlas.dynamicTexture->getPixelFormat() != TexturePixelType::Alpha) {
+            glyphAtlas.dynamicTexture = nullptr;
             continue;
         }
+        
         bool hasSpace = true;
         for (const auto& glyphMapEntry : glyphs) {
             FontStackHash fontStack = glyphMapEntry.first;
 
             for (const auto& glyphEntry : glyphMapEntry.second) {
-                if (glyphEntry.second && (*glyphEntry.second)->bitmap.valid()) {
-                    const Glyph& glyph = **glyphEntry.second;
-
-                    int32_t uniqueId = static_cast<int32_t>(sqrt(fontStack) / 2 + glyph.id);
-                    const auto& glyphHandle = dynamicTexture->addImage(glyph.bitmap, uniqueId);
-                    if (!glyphHandle) {
+                const auto& glyph = glyphEntry.second;
+                
+                if (glyph.has_value() && glyph.value()->bitmap.valid()) {
+                    int32_t uniqueId = static_cast<int32_t>(sqrt(fontStack) / 2 + glyph.value()->id);
+                    const auto& texHandle = glyphAtlas.dynamicTexture->reserveSize(glyph.value()->bitmap.size, uniqueId);
+                    if (!texHandle) {
                         hasSpace = false;
                         break;
                     }
-                    glyphAtlas.textureHandles.emplace_back(*glyphHandle);
+                    glyphsToUpload.emplace_back(std::make_tuple(*texHandle, glyph.value(), fontStack));
                 }
             }
             if (!hasSpace) {
-                for (const auto& texHandle : glyphAtlas.textureHandles) {
-                    dynamicTexture->removeTexture(texHandle);
-                }
-                glyphAtlas.textureHandles.clear();
+                glyphsToUpload.clear();
+                glyphAtlas.dynamicTexture = nullptr;
                 break;
             }
         }
-        if (hasSpace) {
-            glyphAtlas.dynamicTexture = dynamicTexture;
-            break;
-        }
     }
-
-    if (!glyphAtlas.dynamicTexture) {
-        glyphAtlas.dynamicTexture = std::make_shared<gfx::DynamicTexture>(
-            context, Size{2048, 2048}, TexturePixelType::Alpha);
+    if (dynTexIndex == dynamicTextures.size()) {
         dynamicTextures.emplace_back(glyphAtlas.dynamicTexture);
     }
 
-    for (const auto& glyphMapEntry : glyphs) {
-        FontStackHash fontStack = glyphMapEntry.first;
-        GlyphPositionMap& positions = glyphAtlas.glyphPositions[fontStack];
-
-        for (const auto& entry : glyphMapEntry.second) {
-            if (entry.second && (*entry.second)->bitmap.valid()) {
-                const Glyph& glyph = **entry.second;
-
-                int32_t uniqueId = static_cast<int32_t>(sqrt(fontStack) / 2 + glyph.id);
-                const auto& glyphHandle = glyphAtlas.dynamicTexture->addImage(glyph.bitmap, uniqueId);
-                assert(glyphHandle.has_value());
-
-                if (glyphHandle.has_value()) {
-                    glyphAtlas.textureHandles.emplace_back(*glyphHandle);
-                    positions.emplace(glyph.id,
-                                      GlyphPosition{glyphHandle->getRectangle(), glyph.metrics});
-                }
-            }
-        }
+    for (const auto& tuple : glyphsToUpload) {
+        const auto& texHandle = std::get<0>(tuple);
+        const auto& glyph = std::get<1>(tuple);
+        auto fontStack = std::get<2>(tuple);
+        
+        glyphAtlas.dynamicTexture->uploadImage(glyph->bitmap.data.get(), texHandle);
+        glyphAtlas.textureHandles.emplace_back(texHandle);
+        glyphAtlas.glyphPositions[fontStack].emplace(glyph->id,
+                                                     GlyphPosition{texHandle.getRectangle(), glyph->metrics});
     }
     mutex.unlock();
     return glyphAtlas;
@@ -173,9 +168,29 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
 }
 
 void DynamicTextureAtlas::uploadDeferredImages() {
+    mutex.lock();
     for (const auto& dynamicTexture : dynamicTextures) {
         dynamicTexture->uploadDeferredImages();
     }
+    mutex.unlock();
+}
+
+void DynamicTextureAtlas::removeTextures(const std::vector<TextureHandle>& textureHandles,
+                                         const DynamicTexturePtr& dynamicTexture) {
+    if (!dynamicTexture) {
+        return;
+    }
+    mutex.lock();
+    for (const auto& texHandle : textureHandles) {
+        dynamicTexture->removeTexture(texHandle);
+    }
+    if (dynamicTexture->isEmpty()) {
+        auto iterator = std::find(dynamicTextures.begin(), dynamicTextures.end(), dynamicTexture);
+        if(iterator != dynamicTextures.end()) {
+            dynamicTextures.erase(iterator);
+        }
+    }
+    mutex.unlock();
 }
 
 } // namespace gfx

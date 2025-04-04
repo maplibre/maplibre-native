@@ -85,8 +85,6 @@ public:
               featureIndex(std::move(featureIndex_)),
               glyphAtlas(std::move(glyphAtlas_)),
               imageAtlas(std::move(imageAtlas_)) {}
-
-        ~LayoutResult();
     };
     void onLayout(std::shared_ptr<LayoutResult>, uint64_t correlationID);
 
@@ -118,6 +116,7 @@ private:
     const std::shared_ptr<FileSource> fileSource;
     const std::shared_ptr<GlyphManager> glyphManager;
     const std::shared_ptr<ImageManager> imageManager;
+    gfx::DynamicTextureAtlasPtr& dynamicTextureAtlas;
 
     uint64_t correlationID = 0;
 

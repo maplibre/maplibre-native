@@ -197,6 +197,7 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_,
       fileSource(parameters.fileSource),
       glyphManager(parameters.glyphManager),
       imageManager(parameters.imageManager),
+      dynamicTextureAtlas(parameters.dynamicTextureAtlas),
       mode(parameters.mode),
       showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {}
 
@@ -213,22 +214,11 @@ GeometryTile::~GeometryTile() {
         observer->onTileAction(id, sourceID, TileOperation::Cancelled);
     }
 
-    if (layoutResult) {
-        threadPool.runOnRenderThread(
-            [layoutResult_{std::move(layoutResult)}, atlasTextures_{std::move(atlasTextures)}]() {});
-    }
-}
-
-GeometryTile::LayoutResult::~LayoutResult() {
-    if (auto& imageDynamicTexture = imageAtlas.dynamicTexture) {
-        for (const auto& texHandle : imageAtlas.textureHandles) {
-            imageDynamicTexture->removeTexture(texHandle);
-        }
-    }
-    if (auto& glyphDynamicTexture = glyphAtlas.dynamicTexture) {
-        for (const auto& texHandle : glyphAtlas.textureHandles) {
-            glyphDynamicTexture->removeTexture(texHandle);
-        }
+    if (layoutResult && dynamicTextureAtlas) {
+        dynamicTextureAtlas->removeTextures(layoutResult->glyphAtlas.textureHandles,
+                                            layoutResult->glyphAtlas.dynamicTexture);
+        dynamicTextureAtlas->removeTextures(layoutResult->imageAtlas.textureHandles,
+                                            layoutResult->imageAtlas.dynamicTexture);
     }
 }
 

@@ -46,12 +46,17 @@ public:
 
     const Texture2DPtr& getTexture() const;
     TexturePixelType getPixelFormat() const;
-
+    bool isEmpty() const;
+    
+    std::optional<TextureHandle> reserveSize(const Size& size, int32_t uniqueId);
+    void uploadImage(const uint8_t* pixelData, const TextureHandle& texHandle);
+    
     template <typename Image>
-    std::optional<TextureHandle> addImage(const Image& image, int32_t id = -1) {
-        return addImage(image.data ? image.data.get() : nullptr, image.size, id);
+    std::optional<TextureHandle> addImage(const Image& image, int32_t uniqueId = -1) {
+        return addImage(image.data ? image.data.get() : nullptr, image.size, uniqueId);
     }
-    std::optional<TextureHandle> addImage(const uint8_t* pixelData, const Size& imageSize, int32_t id = -1);
+    std::optional<TextureHandle> addImage(const uint8_t* pixelData, const Size& imageSize, int32_t uniqueId = -1);
+    
     void uploadDeferredImages();
     void removeTexture(const TextureHandle& texHandle);
 
@@ -61,6 +66,7 @@ private:
     Texture2DPtr texture;
     mapbox::ShelfPack shelfPack;
     ImagesToUpload imagesToUpload;
+    int numTextures;
 };
 
 #define MLN_DEFER_UPLOAD_ON_RENDER_THREAD (MLN_RENDER_BACKEND_OPENGL || MLN_RENDER_BACKEND_VULKAN)

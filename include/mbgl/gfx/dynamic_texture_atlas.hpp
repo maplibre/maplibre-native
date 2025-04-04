@@ -36,6 +36,8 @@ public:
                                       const ImageMap& patterns,
                                       const ImageVersionMap& versionMap);
     void uploadDeferredImages();
+    void removeTextures(const std::vector<TextureHandle>& textureHandles,
+                        const DynamicTexturePtr& dynamicTexture);
 
 private:
     Context& context;
