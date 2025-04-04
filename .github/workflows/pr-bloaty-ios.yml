@@ -35,7 +35,7 @@ jobs:
       - name: Get latest CMake and Ninja
         uses: lukka/get-cmake@latest
         with:
-          cmakeVersion: latest
+          cmakeVersion: 3.24.1
           ninjaVersion: latest
 
       - name: Cache Bloaty
