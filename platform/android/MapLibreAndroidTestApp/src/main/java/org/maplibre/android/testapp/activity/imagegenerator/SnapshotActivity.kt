@@ -6,6 +6,7 @@ import org.maplibre.android.log.Logger
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
+import org.maplibre.android.maps.RenderingStats
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.databinding.ActivitySnapshotBinding
 import org.maplibre.android.testapp.styles.TestStyles
@@ -21,7 +22,7 @@ class SnapshotActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var maplibreMap: MapLibreMap
 
     private val idleListener = object : MapView.OnDidFinishRenderingFrameListener {
-        override fun onDidFinishRenderingFrame(fully: Boolean, frameEncodingTime: Double, frameRenderingTime: Double) {
+        override fun onDidFinishRenderingFrame(fully: Boolean, renderingStats: RenderingStats) {
             if (fully) {
                 binding.mapView.removeOnDidFinishRenderingFrameListener(this)
                 Logger.v(TAG, LOG_MESSAGE)

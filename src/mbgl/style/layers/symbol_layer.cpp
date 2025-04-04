@@ -302,6 +302,21 @@ void SymbolLayer::setSymbolPlacement(const PropertyValue<SymbolPlacementType>& v
     baseImpl = std::move(impl_);
     observer->onLayerChanged(*this);
 }
+PropertyValue<bool> SymbolLayer::getDefaultSymbolScreenSpace() {
+    return SymbolScreenSpace::defaultValue();
+}
+
+const PropertyValue<bool>& SymbolLayer::getSymbolScreenSpace() const {
+    return impl().layout.get<SymbolScreenSpace>();
+}
+
+void SymbolLayer::setSymbolScreenSpace(const PropertyValue<bool>& value) {
+    if (value == getSymbolScreenSpace()) return;
+    auto impl_ = mutableImpl();
+    impl_->layout.get<SymbolScreenSpace>() = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
 PropertyValue<float> SymbolLayer::getDefaultSymbolSortKey() {
     return SymbolSortKey::defaultValue();
 }
@@ -1124,6 +1139,7 @@ enum class Property : uint8_t {
     IconTextFitPadding,
     SymbolAvoidEdges,
     SymbolPlacement,
+    SymbolScreenSpace,
     SymbolSortKey,
     SymbolSpacing,
     SymbolZOrder,
@@ -1202,6 +1218,7 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"icon-text-fit-padding", toUint8(Property::IconTextFitPadding)},
      {"symbol-avoid-edges", toUint8(Property::SymbolAvoidEdges)},
      {"symbol-placement", toUint8(Property::SymbolPlacement)},
+     {"symbol-screen-space", toUint8(Property::SymbolScreenSpace)},
      {"symbol-sort-key", toUint8(Property::SymbolSortKey)},
      {"symbol-spacing", toUint8(Property::SymbolSpacing)},
      {"symbol-z-order", toUint8(Property::SymbolZOrder)},
@@ -1319,6 +1336,8 @@ StyleProperty getLayerProperty(const SymbolLayer& layer, Property property) {
             return makeStyleProperty(layer.getSymbolAvoidEdges());
         case Property::SymbolPlacement:
             return makeStyleProperty(layer.getSymbolPlacement());
+        case Property::SymbolScreenSpace:
+            return makeStyleProperty(layer.getSymbolScreenSpace());
         case Property::SymbolSortKey:
             return makeStyleProperty(layer.getSymbolSortKey());
         case Property::SymbolSpacing:
@@ -1548,9 +1567,9 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
     }
     if (property == Property::IconAllowOverlap || property == Property::IconIgnorePlacement ||
         property == Property::IconKeepUpright || property == Property::IconOptional ||
-        property == Property::SymbolAvoidEdges || property == Property::TextAllowOverlap ||
-        property == Property::TextIgnorePlacement || property == Property::TextKeepUpright ||
-        property == Property::TextOptional) {
+        property == Property::SymbolAvoidEdges || property == Property::SymbolScreenSpace ||
+        property == Property::TextAllowOverlap || property == Property::TextIgnorePlacement ||
+        property == Property::TextKeepUpright || property == Property::TextOptional) {
         Error error;
         const auto& typedValue = convert<PropertyValue<bool>>(value, error, false, false);
         if (!typedValue) {
@@ -1579,6 +1598,11 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
 
         if (property == Property::SymbolAvoidEdges) {
             setSymbolAvoidEdges(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::SymbolScreenSpace) {
+            setSymbolScreenSpace(*typedValue);
             return std::nullopt;
         }
 

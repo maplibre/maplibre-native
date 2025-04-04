@@ -6,6 +6,11 @@
 namespace mbgl {
 class Map;
 class Renderer;
+
+namespace gfx {
+struct RenderingStats;
+}
+
 }  // namespace mbgl
 
 @class MLNSource;
@@ -40,7 +45,8 @@ class Renderer;
 - (void)mapViewDidFinishLoadingMap;
 - (void)mapViewDidFailLoadingMapWithError:(nonnull NSError *)error;
 - (void)mapViewWillStartRenderingFrame;
-- (void)mapViewDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered;
+- (void)mapViewDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered
+                                     renderingStats:(const mbgl::gfx::RenderingStats &)stats;
 - (void)mapViewWillStartRenderingMap;
 - (void)mapViewDidFinishRenderingMapFullyRendered:(BOOL)fullyRendered;
 - (void)mapViewDidBecomeIdle;

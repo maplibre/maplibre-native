@@ -81,6 +81,7 @@ BufferResource& BufferResource::operator=(BufferResource&& other) noexcept {
         context.renderingStats().numBuffers--;
         context.renderingStats().memBuffers -= size;
     }
+
     buffer = std::move(other.buffer);
     raw = std::move(other.raw);
     size = other.size;
