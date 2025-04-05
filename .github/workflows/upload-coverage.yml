@@ -14,7 +14,7 @@ jobs:
     steps:
       - id: check_skip
         run: |
-          conclusion=$(curl ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "linux-coverage").conclusion')
+          conclusion=$(curl --retry 5 ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "linux-coverage").conclusion')
           should_run=$([[ "$conclusion" = "success" ]] && echo "true" || echo "false")
           echo "should_run=$should_run" >> "$GITHUB_OUTPUT"
 
