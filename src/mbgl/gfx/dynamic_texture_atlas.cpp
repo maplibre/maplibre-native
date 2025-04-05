@@ -44,6 +44,10 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
                 }
             }
             if (!hasSpace) {
+                for (const auto& tuple : glyphsToUpload) {
+                    const auto& texHandle = std::get<0>(tuple);
+                    glyphAtlas.dynamicTexture->removeTexture(texHandle);
+                }
                 glyphsToUpload.clear();
                 glyphAtlas.dynamicTexture = nullptr;
                 break;
@@ -71,96 +75,91 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
 ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
                                                        const ImageMap& patterns,
                                                        const ImageVersionMap& versionMap) {
-    ImageAtlas imageAtlas;
-
+    using ImagesToUpload = std::vector<std::pair<TextureHandle, Immutable<style::Image::Impl>>>;
     mutex.lock();
-    for (const auto& dynamicTexture : dynamicTextures) {
-        if (dynamicTexture->getPixelFormat() != TexturePixelType::RGBA) {
+
+    size_t dynTexIndex = 0;
+    Size dynTexSize = {512, 512};
+    ImagesToUpload iconsToUpload;
+    ImagesToUpload patternsToUpload;
+    ImageAtlas imageAtlas;
+    
+    while (!imageAtlas.dynamicTexture) {
+        if (dynTexIndex < dynamicTextures.size()) {
+            imageAtlas.dynamicTexture = dynamicTextures[dynTexIndex++];
+        } else {
+            imageAtlas.dynamicTexture = std::make_shared<gfx::DynamicTexture>(context, dynTexSize, TexturePixelType::RGBA);
+            dynTexSize = Size(dynTexSize.width * 2, dynTexSize.height * 2);
+        }
+        
+        if (imageAtlas.dynamicTexture->getPixelFormat() != TexturePixelType::RGBA) {
+            imageAtlas.dynamicTexture = nullptr;
             continue;
         }
+
         bool hasSpace = true;
         for (const auto& iconEntry : icons) {
-            const style::Image::Impl& icon = *iconEntry.second;
+            const auto& icon = iconEntry.second;
 
-            auto imageHash = util::hash(icon.id);
+            auto imageHash = util::hash(icon->id);
             int32_t uniqueId = static_cast<int32_t>(sqrt(imageHash) / 2);
-            const auto& iconHandle = dynamicTexture->addImage(icon.image, uniqueId);
-            if (!iconHandle) {
+            const auto& texHandle = imageAtlas.dynamicTexture->reserveSize(icon->image.size, uniqueId);
+            if (!texHandle) {
                 hasSpace = false;
                 break;
             }
-            imageAtlas.textureHandles.emplace_back(*iconHandle);
-        }
-        if (!hasSpace) {
-            for (const auto& texHandle : imageAtlas.textureHandles) {
-                dynamicTexture->removeTexture(texHandle);
-            }
-            imageAtlas.textureHandles.clear();
-            continue;
-        }
-        for (const auto& patternEntry : patterns) {
-            const style::Image::Impl& pattern = *patternEntry.second;
-
-            auto patternHash = util::hash(pattern.id);
-            int32_t uniqueId = static_cast<int32_t>(sqrt(patternHash) / 2);
-            const auto& patternHandle = dynamicTexture->addImage(pattern.image, uniqueId);
-            if (!patternHandle) {
-                hasSpace = false;
-                break;
-            }
-            imageAtlas.textureHandles.emplace_back(*patternHandle);
-        }
-        if (!hasSpace) {
-            for (const auto& texHandle : imageAtlas.textureHandles) {
-                dynamicTexture->removeTexture(texHandle);
-            }
-            imageAtlas.textureHandles.clear();
-            continue;
+            iconsToUpload.emplace_back(std::make_tuple(*texHandle, icon));
         }
         if (hasSpace) {
-            imageAtlas.dynamicTexture = dynamicTexture;
-            break;
+            for (const auto& patternEntry : patterns) {
+                const auto& pattern = patternEntry.second;
+                
+                auto patternHash = util::hash(pattern->id);
+                int32_t uniqueId = static_cast<int32_t>(sqrt(patternHash) / 2);
+                const auto& texHandle = imageAtlas.dynamicTexture->reserveSize(pattern->image.size, uniqueId);
+                if (!texHandle) {
+                    hasSpace = false;
+                    break;
+                }
+                patternsToUpload.emplace_back(std::make_tuple(*texHandle, pattern));
+            }
+        }
+        if (!hasSpace) {
+            for (const auto& pair : iconsToUpload) {
+                const auto& texHandle = pair.first;
+                imageAtlas.dynamicTexture->removeTexture(texHandle);
+            }
+            iconsToUpload.clear();
+            imageAtlas.dynamicTexture = nullptr;
+            continue;
         }
     }
-
-    if (!imageAtlas.dynamicTexture) {
-        imageAtlas.dynamicTexture = std::make_shared<gfx::DynamicTexture>(
-            context, Size{1024, 1024}, TexturePixelType::RGBA);
+    if (dynTexIndex == dynamicTextures.size()) {
         dynamicTextures.emplace_back(imageAtlas.dynamicTexture);
     }
-
+    
     imageAtlas.iconPositions.reserve(icons.size());
-    for (const auto& iconEntry : icons) {
-        const style::Image::Impl& icon = *iconEntry.second;
-
-        auto imageHash = util::hash(icon.id);
-        int32_t uniqueId = static_cast<int32_t>(sqrt(imageHash) / 2);
-        const auto& iconHandle = imageAtlas.dynamicTexture->addImage(icon.image, uniqueId);
-        assert(iconHandle.has_value());
-
-        if (iconHandle.has_value()) {
-            const auto it = versionMap.find(iconEntry.first);
-            const auto version = it != versionMap.end() ? it->second : 0;
-            imageAtlas.iconPositions.emplace(icon.id, ImagePosition{iconHandle->getRectangle(), icon, version});
-            imageAtlas.textureHandles.emplace_back(*iconHandle);
-        }
+    for (const auto& pair : iconsToUpload) {
+        const auto& texHandle = pair.first;
+        const auto& icon = pair.second;
+        
+        imageAtlas.dynamicTexture->uploadImage(icon->image.data.get(), texHandle);
+        imageAtlas.textureHandles.emplace_back(texHandle);
+        const auto it = versionMap.find(icon->id);
+        const auto version = it != versionMap.end() ? it->second : 0;
+        imageAtlas.iconPositions.emplace(icon->id, ImagePosition{texHandle.getRectangle(), *icon, version});
     }
-
-    for (const auto& patternEntry : patterns) {
-        const style::Image::Impl& pattern = *patternEntry.second;
-
-        auto patternHash = util::hash(pattern.id);
-        int32_t uniqueId = static_cast<int32_t>(sqrt(patternHash) / 2);
-        const auto& patternHandle = imageAtlas.dynamicTexture->addImage(pattern.image, uniqueId);
-        assert(patternHandle.has_value());
-
-        if (patternHandle.has_value()) {
-            const auto it = versionMap.find(patternEntry.first);
-            const auto version = it != versionMap.end() ? it->second : 0;
-            imageAtlas.patternPositions.emplace(pattern.id,
-                                                  ImagePosition{patternHandle->getRectangle(), pattern, version});
-            imageAtlas.textureHandles.emplace_back(*patternHandle);
-        }
+    
+    imageAtlas.patternPositions.reserve(patterns.size());
+    for (const auto& pair : patternsToUpload) {
+        const auto& texHandle = pair.first;
+        const auto& pattern = pair.second;
+        
+        imageAtlas.dynamicTexture->uploadImage(pattern->image.data.get(), texHandle);
+        imageAtlas.textureHandles.emplace_back(texHandle);
+        const auto it = versionMap.find(pattern->id);
+        const auto version = it != versionMap.end() ? it->second : 0;
+        imageAtlas.patternPositions.emplace(pattern->id, ImagePosition{texHandle.getRectangle(), *pattern, version});
     }
 
     mutex.unlock();

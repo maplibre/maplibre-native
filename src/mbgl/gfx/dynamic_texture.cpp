@@ -40,7 +40,6 @@ std::optional<TextureHandle> DynamicTexture::reserveSize(const Size& size, int32
     if (bin->refcount() == 1) {
         numTextures ++;
     }
-    numTextures++;
     return TextureHandle(*bin);
 }
 
