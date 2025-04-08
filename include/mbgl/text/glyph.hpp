@@ -9,6 +9,7 @@
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/util.hpp>
 
+#include <algorithm>
 #include <cstdint>
 #include <vector>
 #include <string>
@@ -113,9 +114,7 @@ public:
     float right = 0;
     WritingModeType writingMode;
     explicit operator bool() const {
-        return std::any_of(positionedLines.begin(), positionedLines.end(), [](const auto& line) {
-            return !line.positionedGlyphs.empty();
-        });
+        return std::ranges::any_of(positionedLines, [](const auto& line) { return !line.positionedGlyphs.empty(); });
     }
     // The y offset *should* be part of the font metadata.
     static constexpr int32_t yOffset = -17;

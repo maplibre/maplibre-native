@@ -26,7 +26,7 @@ import static org.maplibre.android.maps.MapLibreMap.OnCameraMoveStartedListener;
  * Responsible for synchronising {@link CameraPosition} state and notifying camera change listeners.
  * </p>
  */
-public final class Transform implements MapView.OnCameraDidChangeListener {
+public class Transform implements MapView.OnCameraDidChangeListener {
 
   private static final String TAG = "Mbgl-Transform";
 
@@ -73,7 +73,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
 
   @Nullable
   @UiThread
-  public final CameraPosition getCameraPosition() {
+  public CameraPosition getCameraPosition() {
     if (cameraPosition == null) {
       cameraPosition = invalidateCameraPosition();
     }
@@ -106,7 +106,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
    * Internal use.
    */
   @UiThread
-  public final void moveCamera(@NonNull MapLibreMap maplibreMap, CameraUpdate update,
+  public void moveCamera(@NonNull MapLibreMap maplibreMap, CameraUpdate update,
                                @Nullable final MapLibreMap.CancelableCallback callback) {
     CameraPosition cameraPosition = update.getCameraPosition(maplibreMap);
     if (isValidCameraPosition(cameraPosition)) {
@@ -130,7 +130,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
   }
 
   @UiThread
-  final void easeCamera(@NonNull MapLibreMap maplibreMap, CameraUpdate update, int durationMs,
+  void easeCamera(@NonNull MapLibreMap maplibreMap, CameraUpdate update, int durationMs,
                         boolean easingInterpolator,
                         @Nullable final MapLibreMap.CancelableCallback callback) {
     CameraPosition cameraPosition = update.getCameraPosition(maplibreMap);
@@ -153,7 +153,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
    * Internal use.
    */
   @UiThread
-  public final void animateCamera(@NonNull MapLibreMap maplibreMap, CameraUpdate update, int durationMs,
+  public void animateCamera(@NonNull MapLibreMap maplibreMap, CameraUpdate update, int durationMs,
                                   @Nullable final MapLibreMap.CancelableCallback callback) {
     CameraPosition cameraPosition = update.getCameraPosition(maplibreMap);
     if (isValidCameraPosition(cameraPosition)) {

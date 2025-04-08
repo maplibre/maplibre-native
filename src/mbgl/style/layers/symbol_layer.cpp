@@ -21,16 +21,15 @@ namespace style {
 
 // static
 const LayerTypeInfo* SymbolLayer::Impl::staticTypeInfo() noexcept {
-    const static LayerTypeInfo typeInfo{"symbol",
-                                        LayerTypeInfo::Source::Required,
-                                        LayerTypeInfo::Pass3D::NotRequired,
-                                        LayerTypeInfo::Layout::Required,
-                                        LayerTypeInfo::FadingTiles::Required,
-                                        LayerTypeInfo::CrossTileIndex::Required,
-                                        LayerTypeInfo::TileKind::Geometry};
+    const static LayerTypeInfo typeInfo{.type="symbol",
+                                        .source=LayerTypeInfo::Source::Required,
+                                        .pass3d=LayerTypeInfo::Pass3D::NotRequired,
+                                        .layout=LayerTypeInfo::Layout::Required,
+                                        .fadingTiles=LayerTypeInfo::FadingTiles::Required,
+                                        .crossTileIndex=LayerTypeInfo::CrossTileIndex::Required,
+                                        .tileKind=LayerTypeInfo::TileKind::Geometry};
     return &typeInfo;
 }
-
 
 SymbolLayer::SymbolLayer(const std::string& layerID, const std::string& sourceID)
     : Layer(makeMutable<Impl>(layerID, sourceID)) {

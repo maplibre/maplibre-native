@@ -12,12 +12,13 @@ void DrawableAtlasesTweaker::setupTextures(gfx::Drawable& drawable, const bool l
     if (const auto& shader = drawable.getShader()) {
         if (glyphTextureId) {
             if (atlases) {
-                atlases->glyph->setSamplerConfiguration(
-                    {TextureFilterType::Linear, TextureWrapType::Clamp, TextureWrapType::Clamp});
+                atlases->glyph->setSamplerConfiguration({.filter = TextureFilterType::Linear,
+                                                         .wrapU = TextureWrapType::Clamp,
+                                                         .wrapV = TextureWrapType::Clamp});
                 atlases->icon->setSamplerConfiguration(
-                    {linearFilterForIcons ? TextureFilterType::Linear : TextureFilterType::Nearest,
-                     TextureWrapType::Clamp,
-                     TextureWrapType::Clamp});
+                    {.filter = linearFilterForIcons ? TextureFilterType::Linear : TextureFilterType::Nearest,
+                     .wrapU = TextureWrapType::Clamp,
+                     .wrapV = TextureWrapType::Clamp});
             }
             if (iconTextureId && shader->getSamplerLocation(*iconTextureId)) {
                 assert(*glyphTextureId != *iconTextureId);
