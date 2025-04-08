@@ -24,7 +24,7 @@ jobs:
     steps:
       - id: check_skip
         run: |
-          conclusion=$(curl ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "linux-build-and-test").conclusion')
+          conclusion=$(curl --retry 5 ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "linux-build-and-test").conclusion')
           should_skip=$([[ "$conclusion" = "skipped" || "$conclusion" = "cancelled" ]] && echo "true" || echo "false")
           echo "should_skip=$should_skip" >> "$GITHUB_OUTPUT"
 
@@ -54,7 +54,7 @@ jobs:
       - name: Get latest CMake and Ninja
         uses: lukka/get-cmake@latest
         with:
-          cmakeVersion: latest
+          cmakeVersion: 3.24.1
           ninjaVersion: latest
 
       - name: Cache Bloaty

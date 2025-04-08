@@ -4,6 +4,16 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+## 6.12.3
+
+- add MLNDefines.h to make sure Metal backend is available in headers ([#3335](https://github.com/maplibre/maplibre-native/issues/3335)).
+
+## 6.12.2
+
+- Strip punctuation from attribution ([#3287](https://github.com/maplibre/maplibre-native/pull/3287)).
+- Revert [#3035](https://github.com/maplibre/maplibre-native/pull/3035) which was causing memory growth issue (#3315).
+- Apply clang-tidy fixes (mostly use designated initializers) ([#3328](https://github.com/maplibre/maplibre-native/pull/3328)).
+
 ## 6.12.1
 
 - Use double quotes for MLNTileOperation.h import ([#3277](https://github.com/maplibre/maplibre-native/issues/3277)).
