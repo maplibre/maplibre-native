@@ -52,7 +52,7 @@ fun PublishingExtension.configureMavenPublication(
 ) {
     publications {
         create<MavenPublication>(publicationName) {
-            groupId = project.group.toString()
+            groupId = project.group.toString().replace("org.maplibre.gl", "org.hudhud.maplibre.gl")
             artifactId = "${project.extra["mapLibreArtifactId"]}$artifactIdPostfix"
             version = project.version.toString()
 
