@@ -515,12 +515,8 @@ void GeometryTileWorker::finalizeLayout() {
             }
 
             // layout adds the bucket to buckets
-            layout->createBucket(imageAtlas.patternPositions,
-                                 featureIndex,
-                                 renderData,
-                                 firstLoad,
-                                 showCollisionBoxes,
-                                 id.canonical);
+            layout->createBucket(
+                imageAtlas.patternPositions, featureIndex, renderData, firstLoad, showCollisionBoxes, id.canonical);
         }
     }
 
@@ -534,11 +530,10 @@ void GeometryTileWorker::finalizeLayout() {
                                    << " Canonical: " << static_cast<int>(id.canonical.z) << "/" << id.canonical.x << "/"
                                    << id.canonical.y << " Time");
 
-    parent.invoke(
-        &GeometryTile::onLayout,
-        std::make_shared<GeometryTile::LayoutResult>(
-            std::move(renderData), std::move(featureIndex), std::move(glyphAtlas), std::move(imageAtlas)),
-        correlationID);
+    parent.invoke(&GeometryTile::onLayout,
+                  std::make_shared<GeometryTile::LayoutResult>(
+                      std::move(renderData), std::move(featureIndex), std::move(glyphAtlas), std::move(imageAtlas)),
+                  correlationID);
 }
 
 } // namespace mbgl

@@ -38,7 +38,7 @@ std::optional<TextureHandle> DynamicTexture::reserveSize(const Size& size, int32
         return std::nullopt;
     }
     if (bin->refcount() == 1) {
-        numTextures ++;
+        numTextures++;
     }
     return TextureHandle(*bin);
 }
@@ -61,7 +61,9 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, const TextureHandle& 
 #endif
 }
 
-std::optional<TextureHandle> DynamicTexture::addImage(const uint8_t* pixelData, const Size& imageSize, int32_t uniqueId) {
+std::optional<TextureHandle> DynamicTexture::addImage(const uint8_t* pixelData,
+                                                      const Size& imageSize,
+                                                      int32_t uniqueId) {
     const auto& texHandle = reserveSize(imageSize, uniqueId);
     if (texHandle) {
         uploadImage(pixelData, *texHandle);
@@ -86,12 +88,12 @@ void DynamicTexture::removeTexture(const TextureHandle& texHandle) {
     if (refcount == 0) {
         numTextures--;
         imagesToUpload.erase(texHandle);
-/*#if !defined(NDEBUG)
-        Size size = Size(bin->w, bin->h);
-        std::unique_ptr<uint8_t[]> data = std::make_unique<uint8_t[]>(size.area() * texture->numChannels());
-        memset(data.get(), 0, size.area() * texture->numChannels());
-        texture->uploadSubRegion(data.get(), size, bin->x, bin->y);
-#endif*/
+        /*#if !defined(NDEBUG)
+                Size size = Size(bin->w, bin->h);
+                std::unique_ptr<uint8_t[]> data = std::make_unique<uint8_t[]>(size.area() * texture->numChannels());
+                memset(data.get(), 0, size.area() * texture->numChannels());
+                texture->uploadSubRegion(data.get(), size, bin->x, bin->y);
+        #endif*/
     }
 }
 
