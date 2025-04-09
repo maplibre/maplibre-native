@@ -33,9 +33,21 @@ bool DynamicTexture::isEmpty() const {
 }
 
 std::optional<TextureHandle> DynamicTexture::reserveSize(const Size& size, int32_t uniqueId) {
-    mapbox::Bin* bin = shelfPack.packOne(uniqueId, size.width + 2, size.height + 2);
+    mapbox::Bin* bin = shelfPack.packOne(uniqueId, size.width, size.height);
     if (!bin) {
         return std::nullopt;
+    }
+    if (bin->w != static_cast<int>(size.width) || bin->h != static_cast<int>(size.height)) {
+        const auto texHandle = TextureHandle(*bin);
+        while (bin->refcount() > 1) {
+            shelfPack.unref(*bin);
+        }
+        removeTexture(texHandle);
+        
+        bin = shelfPack.packOne(uniqueId, size.width, size.height);
+        if (!bin) {
+            return std::nullopt;
+        }
     }
     if (bin->refcount() == 1) {
         numTextures ++;
@@ -49,7 +61,7 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, const TextureHandle& 
         return;
     }
     const auto& rect = texHandle.getRectangle();
-    const auto imageSize = Size(rect.w - 2, rect.h - 2);
+    const auto imageSize = Size(rect.w, rect.h);
 
 #if MLN_DEFER_UPLOAD_ON_RENDER_THREAD
     auto size = imageSize.area() * texture->getPixelStride();
@@ -57,7 +69,7 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, const TextureHandle& 
     std::copy(pixelData, pixelData + size, imageData.get());
     imagesToUpload.emplace(texHandle, std::move(imageData));
 #else
-    texture->uploadSubRegion(pixelData, imageSize, rect.x + 1, rect.y + 1);
+    texture->uploadSubRegion(pixelData, imageSize, rect.x, rect.y);
 #endif
 }
 
@@ -72,7 +84,7 @@ std::optional<TextureHandle> DynamicTexture::addImage(const uint8_t* pixelData, 
 void DynamicTexture::uploadDeferredImages() {
     for (const auto& pair : imagesToUpload) {
         const auto& rect = pair.first.getRectangle();
-        texture->uploadSubRegion(pair.second.get(), Size(rect.w - 2, rect.h - 2), rect.x + 1, rect.y + 1);
+        texture->uploadSubRegion(pair.second.get(), Size(rect.w, rect.h), rect.x, rect.y);
     }
     imagesToUpload.clear();
 }
@@ -86,12 +98,6 @@ void DynamicTexture::removeTexture(const TextureHandle& texHandle) {
     if (refcount == 0) {
         numTextures--;
         imagesToUpload.erase(texHandle);
-/*#if !defined(NDEBUG)
-        Size size = Size(bin->w, bin->h);
-        std::unique_ptr<uint8_t[]> data = std::make_unique<uint8_t[]>(size.area() * texture->numChannels());
-        memset(data.get(), 0, size.area() * texture->numChannels());
-        texture->uploadSubRegion(data.get(), size, bin->x, bin->y);
-#endif*/
     }
 }
 
