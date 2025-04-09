@@ -966,6 +966,7 @@ class LocationLayerControllerTest {
         val locationSource = Mockito.mock(GeoJsonSource::class.java)
         Mockito.`when`<Any?>(style.getSourceAs(LocationComponentConstants.LOCATION_SOURCE))
             .thenReturn(locationSource)
+        Mockito.`when`(style.isFullyLoaded).thenReturn(true)
         val sourceProvider = buildLayerProvider()
         Mockito.`when`(
             sourceProvider.generateSource(
