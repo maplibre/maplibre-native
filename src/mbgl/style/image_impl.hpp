@@ -76,7 +76,7 @@ public:
           version(version_) {}
 
     static constexpr const uint16_t padding = 1u;
-    
+
     Rect<uint16_t> paddedRect;
     float pixelRatio;
     style::ImageStretches stretchX;

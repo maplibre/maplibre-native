@@ -24,16 +24,12 @@ public:
     int32_t getId() const { return id; }
     const Rect<uint16_t>& getRectangle() const { return rectangle; }
 
-    bool operator==(const TextureHandle &other) const {
-        return (id == other.id);
-    }
-    
+    bool operator==(const TextureHandle& other) const { return (id == other.id); }
+
     struct Hasher {
-        size_t operator()(const TextureHandle& texHandle) const {
-            return texHandle.id;
-        }
+        size_t operator()(const TextureHandle& texHandle) const { return texHandle.id; }
     };
-    
+
 private:
     int32_t id = 0;
     Rect<uint16_t> rectangle;
@@ -47,21 +43,21 @@ public:
     const Texture2DPtr& getTexture() const;
     TexturePixelType getPixelFormat() const;
     bool isEmpty() const;
-    
+
     std::optional<TextureHandle> reserveSize(const Size& size, int32_t uniqueId);
     void uploadImage(const uint8_t* pixelData, const TextureHandle& texHandle);
-    
+
     template <typename Image>
     std::optional<TextureHandle> addImage(const Image& image, int32_t uniqueId = -1) {
         return addImage(image.data ? image.data.get() : nullptr, image.size, uniqueId);
     }
     std::optional<TextureHandle> addImage(const uint8_t* pixelData, const Size& imageSize, int32_t uniqueId = -1);
-    
+
     void uploadDeferredImages();
     void removeTexture(const TextureHandle& texHandle);
 
     using ImagesToUpload = std::unordered_map<TextureHandle, std::unique_ptr<uint8_t[]>, TextureHandle::Hasher>;
-    
+
 private:
     Texture2DPtr texture;
     mapbox::ShelfPack shelfPack;
