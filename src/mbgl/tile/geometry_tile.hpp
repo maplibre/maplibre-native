@@ -88,7 +88,7 @@ public:
               glyphAtlas(std::move(glyphAtlas_)),
               imageAtlas(std::move(imageAtlas_)),
               dynamicTextureAtlas(dynamicTextureAtlas_) {}
-        
+
         ~LayoutResult();
     };
     void onLayout(std::shared_ptr<LayoutResult>, uint64_t correlationID);

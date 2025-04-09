@@ -43,14 +43,14 @@ std::optional<TextureHandle> DynamicTexture::reserveSize(const Size& size, int32
             shelfPack.unref(*bin);
         }
         removeTexture(texHandle);
-        
+
         bin = shelfPack.packOne(uniqueId, size.width, size.height);
         if (!bin) {
             return std::nullopt;
         }
     }
     if (bin->refcount() == 1) {
-        numTextures ++;
+        numTextures++;
     }
     return TextureHandle(*bin);
 }
@@ -73,7 +73,9 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, const TextureHandle& 
 #endif
 }
 
-std::optional<TextureHandle> DynamicTexture::addImage(const uint8_t* pixelData, const Size& imageSize, int32_t uniqueId) {
+std::optional<TextureHandle> DynamicTexture::addImage(const uint8_t* pixelData,
+                                                      const Size& imageSize,
+                                                      int32_t uniqueId) {
     const auto& texHandle = reserveSize(imageSize, uniqueId);
     if (texHandle) {
         uploadImage(pixelData, *texHandle);
