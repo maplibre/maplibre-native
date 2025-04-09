@@ -74,17 +74,22 @@ public:
         std::shared_ptr<FeatureIndex> featureIndex;
         gfx::GlyphAtlas glyphAtlas;
         gfx::ImageAtlas imageAtlas;
+        gfx::DynamicTextureAtlasPtr& dynamicTextureAtlas;
 
         LayerRenderData* getLayerRenderData(const style::Layer::Impl&);
 
         LayoutResult(mbgl::unordered_map<std::string, LayerRenderData> renderData_,
                      std::unique_ptr<FeatureIndex> featureIndex_,
                      gfx::GlyphAtlas glyphAtlas_,
-                     gfx::ImageAtlas imageAtlas_)
+                     gfx::ImageAtlas imageAtlas_,
+                     gfx::DynamicTextureAtlasPtr& dynamicTextureAtlas_)
             : layerRenderData(std::move(renderData_)),
               featureIndex(std::move(featureIndex_)),
               glyphAtlas(std::move(glyphAtlas_)),
-              imageAtlas(std::move(imageAtlas_)) {}
+              imageAtlas(std::move(imageAtlas_)),
+              dynamicTextureAtlas(dynamicTextureAtlas_) {}
+        
+        ~LayoutResult();
     };
     void onLayout(std::shared_ptr<LayoutResult>, uint64_t correlationID);
 
@@ -116,7 +121,6 @@ private:
     const std::shared_ptr<FileSource> fileSource;
     const std::shared_ptr<GlyphManager> glyphManager;
     const std::shared_ptr<ImageManager> imageManager;
-    gfx::DynamicTextureAtlasPtr& dynamicTextureAtlas;
 
     uint64_t correlationID = 0;
 

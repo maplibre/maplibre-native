@@ -6,12 +6,17 @@ namespace gfx {
 
 GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
     using GlyphsToUpload = std::vector<std::tuple<TextureHandle, Immutable<Glyph>, FontStackHash>>;
+   
+    GlyphAtlas glyphAtlas;
+    if (!glyphs.size()) {
+        return glyphAtlas;
+    }
+    
     mutex.lock();
 
     size_t dynTexIndex = 0;
     Size dynTexSize = {512, 512};
     GlyphsToUpload glyphsToUpload;
-    GlyphAtlas glyphAtlas;
     
     while (!glyphAtlas.dynamicTexture) {
         if (dynTexIndex < dynamicTextures.size()) {
@@ -19,6 +24,7 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
         } else {
             glyphAtlas.dynamicTexture = std::make_shared<gfx::DynamicTexture>(context, dynTexSize, TexturePixelType::Alpha);
             dynTexSize = Size(dynTexSize.width * 2, dynTexSize.height * 2);
+            dynTexIndex++;
         }
         
         if (glyphAtlas.dynamicTexture->getPixelFormat() != TexturePixelType::Alpha) {
@@ -54,7 +60,7 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
             }
         }
     }
-    if (dynTexIndex == dynamicTextures.size()) {
+    if (dynTexIndex > dynamicTextures.size()) {
         dynamicTextures.emplace_back(glyphAtlas.dynamicTexture);
     }
 
@@ -76,13 +82,18 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
                                                        const ImageMap& patterns,
                                                        const ImageVersionMap& versionMap) {
     using ImagesToUpload = std::vector<std::pair<TextureHandle, Immutable<style::Image::Impl>>>;
+    
+    ImageAtlas imageAtlas;
+    if (!icons.size() && !patterns.size()) {
+        return imageAtlas;
+    }
+    
     mutex.lock();
 
     size_t dynTexIndex = 0;
     Size dynTexSize = {512, 512};
     ImagesToUpload iconsToUpload;
     ImagesToUpload patternsToUpload;
-    ImageAtlas imageAtlas;
     
     while (!imageAtlas.dynamicTexture) {
         if (dynTexIndex < dynamicTextures.size()) {
@@ -90,6 +101,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
         } else {
             imageAtlas.dynamicTexture = std::make_shared<gfx::DynamicTexture>(context, dynTexSize, TexturePixelType::RGBA);
             dynTexSize = Size(dynTexSize.width * 2, dynTexSize.height * 2);
+            dynTexIndex++;
         }
         
         if (imageAtlas.dynamicTexture->getPixelFormat() != TexturePixelType::RGBA) {
@@ -130,11 +142,16 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
                 imageAtlas.dynamicTexture->removeTexture(texHandle);
             }
             iconsToUpload.clear();
+            for (const auto& pair : patternsToUpload) {
+                const auto& texHandle = pair.first;
+                imageAtlas.dynamicTexture->removeTexture(texHandle);
+            }
+            patternsToUpload.clear();
             imageAtlas.dynamicTexture = nullptr;
             continue;
         }
     }
-    if (dynTexIndex == dynamicTextures.size()) {
+    if (dynTexIndex > dynamicTextures.size()) {
         dynamicTextures.emplace_back(imageAtlas.dynamicTexture);
     }
     

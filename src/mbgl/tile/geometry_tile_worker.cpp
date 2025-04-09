@@ -505,6 +505,8 @@ void GeometryTileWorker::finalizeLayout() {
 
         for (auto& layout : layouts) {
             if (obsolete) {
+                dynamicTextureAtlas->removeTextures(glyphAtlas.textureHandles, glyphAtlas.dynamicTexture);
+                dynamicTextureAtlas->removeTextures(imageAtlas.textureHandles, imageAtlas.dynamicTexture);
                 return;
             }
 
@@ -537,7 +539,7 @@ void GeometryTileWorker::finalizeLayout() {
     parent.invoke(
         &GeometryTile::onLayout,
         std::make_shared<GeometryTile::LayoutResult>(
-            std::move(renderData), std::move(featureIndex), std::move(glyphAtlas), std::move(imageAtlas)),
+            std::move(renderData), std::move(featureIndex), std::move(glyphAtlas), std::move(imageAtlas), dynamicTextureAtlas),
         correlationID);
 }
 
