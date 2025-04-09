@@ -505,6 +505,8 @@ void GeometryTileWorker::finalizeLayout() {
 
         for (auto& layout : layouts) {
             if (obsolete) {
+                dynamicTextureAtlas->removeTextures(glyphAtlas.textureHandles, glyphAtlas.dynamicTexture);
+                dynamicTextureAtlas->removeTextures(imageAtlas.textureHandles, imageAtlas.dynamicTexture);
                 return;
             }
 
@@ -515,8 +517,12 @@ void GeometryTileWorker::finalizeLayout() {
             }
 
             // layout adds the bucket to buckets
-            layout->createBucket(
-                imageAtlas.patternPositions, featureIndex, renderData, firstLoad, showCollisionBoxes, id.canonical);
+            layout->createBucket(imageAtlas.patternPositions,
+                                 featureIndex,
+                                 renderData,
+                                 firstLoad,
+                                 showCollisionBoxes,
+                                 id.canonical);
         }
     }
 
@@ -530,10 +536,11 @@ void GeometryTileWorker::finalizeLayout() {
                                    << " Canonical: " << static_cast<int>(id.canonical.z) << "/" << id.canonical.x << "/"
                                    << id.canonical.y << " Time");
 
-    parent.invoke(&GeometryTile::onLayout,
-                  std::make_shared<GeometryTile::LayoutResult>(
-                      std::move(renderData), std::move(featureIndex), std::move(glyphAtlas), std::move(imageAtlas)),
-                  correlationID);
+    parent.invoke(
+        &GeometryTile::onLayout,
+        std::make_shared<GeometryTile::LayoutResult>(
+            std::move(renderData), std::move(featureIndex), std::move(glyphAtlas), std::move(imageAtlas), dynamicTextureAtlas),
+        correlationID);
 }
 
 } // namespace mbgl

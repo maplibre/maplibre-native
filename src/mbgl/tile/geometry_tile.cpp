@@ -160,6 +160,13 @@ const LayerRenderData* GeometryTileRenderData::getLayerRenderData(const style::L
     return layoutResult ? layoutResult->getLayerRenderData(layerImpl) : nullptr;
 }
 
+GeometryTile::LayoutResult::~LayoutResult() {
+    if (dynamicTextureAtlas) {
+        dynamicTextureAtlas->removeTextures(glyphAtlas.textureHandles, glyphAtlas.dynamicTexture);
+        dynamicTextureAtlas->removeTextures(imageAtlas.textureHandles, imageAtlas.dynamicTexture);
+    }
+}
+
 /*
    Correlation between GeometryTile and GeometryTileWorker is safeguarded by two
    correlation schemes:
@@ -197,7 +204,6 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_,
       fileSource(parameters.fileSource),
       glyphManager(parameters.glyphManager),
       imageManager(parameters.imageManager),
-      dynamicTextureAtlas(parameters.dynamicTextureAtlas),
       mode(parameters.mode),
       showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {}
 
@@ -212,13 +218,6 @@ GeometryTile::~GeometryTile() {
     if (pending) {
         // This tile never finished loading or was abandoned, emit a cancellation event
         observer->onTileAction(id, sourceID, TileOperation::Cancelled);
-    }
-
-    if (layoutResult && dynamicTextureAtlas) {
-        dynamicTextureAtlas->removeTextures(layoutResult->glyphAtlas.textureHandles,
-                                            layoutResult->glyphAtlas.dynamicTexture);
-        dynamicTextureAtlas->removeTextures(layoutResult->imageAtlas.textureHandles,
-                                            layoutResult->imageAtlas.dynamicTexture);
     }
 }
 

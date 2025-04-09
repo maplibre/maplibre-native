@@ -33,7 +33,9 @@ void Renderer::setObserver(RendererObserver* observer) {
 void Renderer::render(const std::shared_ptr<UpdateParameters>& updateParameters) {
     MLN_TRACE_FUNC();
     assert(updateParameters);
-    if (!impl->dynamicTextureAtlas) {
+    const bool styleChanged = impl->styleLoaded && !updateParameters->styleLoaded;
+    impl->styleLoaded = updateParameters->styleLoaded;
+    if (!impl->dynamicTextureAtlas || styleChanged) {
         auto& context = impl->backend.getContext();
         impl->dynamicTextureAtlas = std::make_unique<gfx::DynamicTextureAtlas>(context);
     }

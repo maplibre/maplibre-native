@@ -53,6 +53,7 @@ private:
     const float pixelRatio;
     std::unique_ptr<RenderStaticData> staticData;
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
+    bool styleLoaded = false;
 
     enum class RenderState {
         Never,
