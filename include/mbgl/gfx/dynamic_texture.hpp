@@ -36,7 +36,7 @@ private:
     int32_t id = 0;
     Rect<uint16_t> rectangle;
     bool needsUpload = false;
-    
+
     friend class DynamicTexture;
 };
 
