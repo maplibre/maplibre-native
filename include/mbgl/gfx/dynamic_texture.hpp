@@ -61,8 +61,9 @@ public:
 private:
     Texture2DPtr texture;
     mapbox::ShelfPack shelfPack;
+    int numTextures = 0;
+    bool deferredCreation = false;
     ImagesToUpload imagesToUpload;
-    int numTextures;
 };
 
 #define MLN_DEFER_UPLOAD_ON_RENDER_THREAD (MLN_RENDER_BACKEND_OPENGL || MLN_RENDER_BACKEND_VULKAN)
