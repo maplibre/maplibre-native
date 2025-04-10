@@ -37,7 +37,7 @@ class TileRenderData {
 public:
     virtual ~TileRenderData();
 
-#ifndef MLN_DRAWABLE_RENDERER
+#if MLN_LEGACY_RENDERER
     const gfx::Texture& getGlyphAtlasTexture() const;
     const gfx::Texture& getIconAtlasTexture() const;
 #endif

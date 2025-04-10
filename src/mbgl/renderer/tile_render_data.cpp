@@ -9,9 +9,7 @@ TileRenderData::TileRenderData(std::shared_ptr<TileAtlasTextures> atlasTextures_
 
 TileRenderData::~TileRenderData() = default;
 
-#if MLN_DRAWABLE_RENDERER
-
-#else
+#if MLN_LEGACY_RENDERER
 const gfx::Texture& TileRenderData::getGlyphAtlasTexture() const {
     assert(atlasTextures);
     assert(atlasTextures->glyph);
