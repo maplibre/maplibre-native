@@ -71,16 +71,18 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
     }
 
     for (const auto& tuple : glyphsToUpload) {
-        const auto& texHandle = std::get<0>(tuple);
+        auto texHandle = std::get<0>(tuple);
         const auto& glyph = std::get<1>(tuple);
         const auto fontStack = std::get<2>(tuple);
-
         const auto& rect = texHandle.getRectangle();
-        AlphaImage paddedImage(Size{rect.w, rect.h});
-        paddedImage.fill(0);
-        AlphaImage::copy(glyph->bitmap, paddedImage, {0, 0}, {padding, padding}, glyph->bitmap.size);
-
-        glyphAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
+        
+        if (texHandle.isUploadNeeded()) {
+            AlphaImage paddedImage(Size{rect.w, rect.h});
+            paddedImage.fill(0);
+            AlphaImage::copy(glyph->bitmap, paddedImage, {0, 0}, {padding, padding}, glyph->bitmap.size);
+            
+            glyphAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
+        }
         glyphAtlas.textureHandles.emplace_back(texHandle);
         glyphAtlas.glyphPositions[fontStack].emplace(glyph->id, GlyphPosition{rect, glyph->metrics});
     }
@@ -124,7 +126,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
         for (const auto& iconEntry : icons) {
             const auto& icon = iconEntry.second;
 
-            auto imageHash = util::hash(icon->id);
+            auto imageHash = util::hash(icon->id);            
             int32_t uniqueId = static_cast<int32_t>(sqrt(imageHash) / 2);
             const auto size = Size(icon->image.size.width + 2 * padding, icon->image.size.height + 2 * padding);
             const auto& texHandle = imageAtlas.dynamicTexture->reserveSize(size, uniqueId);
@@ -171,15 +173,17 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
 
     imageAtlas.iconPositions.reserve(icons.size());
     for (const auto& pair : iconsToUpload) {
-        const auto& texHandle = pair.first;
+        auto texHandle = pair.first;
         const auto& icon = pair.second;
-
         const auto& rect = texHandle.getRectangle();
-        PremultipliedImage paddedImage(Size{rect.w, rect.h});
-        paddedImage.fill(0);
-        PremultipliedImage::copy(icon->image, paddedImage, {0, 0}, {padding, padding}, icon->image.size);
 
-        imageAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
+        if (texHandle.isUploadNeeded()) {
+            PremultipliedImage paddedImage(Size{rect.w, rect.h});
+            paddedImage.fill(0);
+            PremultipliedImage::copy(icon->image, paddedImage, {0, 0}, {padding, padding}, icon->image.size);
+            
+            imageAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
+        }
         imageAtlas.textureHandles.emplace_back(texHandle);
         const auto it = versionMap.find(icon->id);
         const auto version = it != versionMap.end() ? it->second : 0;
@@ -188,26 +192,28 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
 
     imageAtlas.patternPositions.reserve(patterns.size());
     for (const auto& pair : patternsToUpload) {
-        const auto& texHandle = pair.first;
+        auto texHandle = pair.first;
         const auto& pattern = pair.second;
-
         const auto& rect = texHandle.getRectangle();
-        PremultipliedImage paddedImage(Size{rect.w, rect.h});
-        paddedImage.fill(0);
-        PremultipliedImage::copy(pattern->image, paddedImage, {0, 0}, {padding, padding}, pattern->image.size);
-
-        const uint32_t x = padding;
-        const uint32_t y = padding;
-        const uint32_t w = pattern->image.size.width;
-        const uint32_t h = pattern->image.size.height;
-
-        // Add 1 pixel wrapped padding on each side of the image.
-        PremultipliedImage::copy(pattern->image, paddedImage, {0, h - 1}, {x, y - 1}, {w, 1}); // T
-        PremultipliedImage::copy(pattern->image, paddedImage, {0, 0}, {x, y + h}, {w, 1});     // B
-        PremultipliedImage::copy(pattern->image, paddedImage, {w - 1, 0}, {x - 1, y}, {1, h}); // L
-        PremultipliedImage::copy(pattern->image, paddedImage, {0, 0}, {x + w, y}, {1, h});     // R
-
-        imageAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
+        
+        if (texHandle.isUploadNeeded()) {
+            PremultipliedImage paddedImage(Size{rect.w, rect.h});
+            paddedImage.fill(0);
+            PremultipliedImage::copy(pattern->image, paddedImage, {0, 0}, {padding, padding}, pattern->image.size);
+            
+            const uint32_t x = padding;
+            const uint32_t y = padding;
+            const uint32_t w = pattern->image.size.width;
+            const uint32_t h = pattern->image.size.height;
+            
+            // Add 1 pixel wrapped padding on each side of the image.
+            PremultipliedImage::copy(pattern->image, paddedImage, {0, h - 1}, {x, y - 1}, {w, 1}); // T
+            PremultipliedImage::copy(pattern->image, paddedImage, {0, 0}, {x, y + h}, {w, 1});     // B
+            PremultipliedImage::copy(pattern->image, paddedImage, {w - 1, 0}, {x - 1, y}, {1, h}); // L
+            PremultipliedImage::copy(pattern->image, paddedImage, {0, 0}, {x + w, y}, {1, h});     // R
+            
+            imageAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
+        }
         imageAtlas.textureHandles.emplace_back(texHandle);
         const auto it = versionMap.find(pattern->id);
         const auto version = it != versionMap.end() ? it->second : 0;
