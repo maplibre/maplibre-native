@@ -44,6 +44,7 @@
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/renderer/tile_render_data.hpp>
 #include <mbgl/text/glyph_manager.hpp>
+#include <mbgl/gfx/dynamic_texture_atlas.hpp>
 
 #include <cstdint>
 #include <optional>
@@ -66,6 +67,7 @@ public:
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
     TaggedScheduler threadPool;
     Style style;
+    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
 
     TileParameters tileParameters(MapMode mapMode = MapMode::Continuous) {
         return {1.0,
@@ -77,7 +79,8 @@ public:
                 imageManager,
                 glyphManager,
                 0,
-                threadPool};
+                threadPool,
+                dynamicTextureAtlas};
     };
 
     SourceTest()

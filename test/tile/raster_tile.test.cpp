@@ -11,6 +11,7 @@
 #include <mbgl/renderer/buckets/raster_bucket.hpp>
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/text/glyph_manager.hpp>
+#include <mbgl/gfx/dynamic_texture_atlas.hpp>
 
 using namespace mbgl;
 
@@ -26,6 +27,7 @@ public:
     Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
     TileParameters tileParameters;
     style::Style style;
+    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
 
     RasterTileTest()
         : tileParameters{1.0,
@@ -37,7 +39,8 @@ public:
                          imageManager,
                          glyphManager,
                          0,
-                         {Scheduler::GetBackground(), uniqueID}},
+                         {Scheduler::GetBackground(), uniqueID},
+                         dynamicTextureAtlas},
           style{fileSource, 1, tileParameters.threadPool} {}
 };
 
