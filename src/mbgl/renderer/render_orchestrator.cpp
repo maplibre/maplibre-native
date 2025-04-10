@@ -1,7 +1,6 @@
 #include <mbgl/renderer/render_orchestrator.hpp>
 
 #include <mbgl/annotation/annotation_manager.hpp>
-#include <mbgl/gfx/dynamic_texture_atlas.hpp>
 #include <mbgl/layermanager/layer_manager.hpp>
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/renderer/change_request.hpp>
