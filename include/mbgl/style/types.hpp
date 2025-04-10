@@ -125,5 +125,10 @@ enum class LightAnchorType : bool {
     Viewport
 };
 
+enum class LineGradientFilterType : uint8_t {
+    Linear,
+    Nearest
+};
+
 } // namespace style
 } // namespace mbgl

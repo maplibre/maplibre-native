@@ -21,6 +21,7 @@ import java.io.IOException
  */
 class GradientLineActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_gradient_line)

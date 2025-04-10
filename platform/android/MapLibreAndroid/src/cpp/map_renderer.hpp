@@ -3,6 +3,7 @@
 #include <mbgl/actor/actor_ref.hpp>
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/util/image.hpp>
+#include <mbgl/gfx/rendering_stats.hpp>
 
 #include <memory>
 #include <mutex>
@@ -69,6 +70,8 @@ public:
     // Gives a handle to the Renderer to enable actions on
     // any thread.
     ActorRef<Renderer> actor() const;
+
+    gfx::RenderingStats getRenderingStats();
 
     // From Scheduler. Schedules by using callbacks to the
     // JVM to process the mailbox on the right thread.

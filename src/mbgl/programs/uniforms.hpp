@@ -13,6 +13,8 @@ MBGL_DEFINE_UNIFORM_MATRIX(double, 4, matrix);
 MBGL_DEFINE_UNIFORM_SCALAR(float, opacity);
 MBGL_DEFINE_UNIFORM_SCALAR(Color, color);
 MBGL_DEFINE_UNIFORM_SCALAR(float, blur);
+MBGL_DEFINE_UNIFORM_SCALAR(float, line_clip);
+MBGL_DEFINE_UNIFORM_SCALAR(Color, line_clip_color);
 
 MBGL_DEFINE_UNIFORM_SCALAR(float, zoom);
 MBGL_DEFINE_UNIFORM_SCALAR(float, collision_y_stretch);
