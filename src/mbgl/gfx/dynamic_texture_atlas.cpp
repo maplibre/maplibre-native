@@ -127,7 +127,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
             const auto& icon = iconEntry.second;
 
             auto imageHash = util::hash(icon->id);
-            int32_t uniqueId = static_cast<int32_t>(sqrt(imageHash) / 2);
+            int32_t uniqueId = static_cast<int32_t>(sqrt(imageHash) / 2 + icon->image.size.area());
             const auto size = Size(icon->image.size.width + 2 * padding, icon->image.size.height + 2 * padding);
             const auto& texHandle = imageAtlas.dynamicTexture->reserveSize(size, uniqueId);
             if (!texHandle) {
@@ -141,7 +141,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
                 const auto& pattern = patternEntry.second;
 
                 auto patternHash = util::hash(pattern->id);
-                int32_t uniqueId = static_cast<int32_t>(sqrt(patternHash) / 2);
+                int32_t uniqueId = static_cast<int32_t>(sqrt(patternHash) / 2 + pattern->image.size.area());
                 const auto size = Size(pattern->image.size.width + 2 * padding,
                                        pattern->image.size.height + 2 * padding);
                 const auto& texHandle = imageAtlas.dynamicTexture->reserveSize(size, uniqueId);
