@@ -1,7 +1,7 @@
 #include <mbgl/gfx/dynamic_texture_atlas.hpp>
 #include <mbgl/gfx/context.hpp>
 
-#include <numbers>
+#include <cmath>
 
 namespace mbgl {
 namespace gfx {
