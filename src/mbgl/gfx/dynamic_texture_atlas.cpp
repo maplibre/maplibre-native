@@ -136,7 +136,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
                 hasSpace = false;
                 break;
             }
-            iconsToUpload.emplace_back(std::make_tuple(*texHandle, icon));
+            iconsToUpload.emplace_back(std::make_pair(*texHandle, icon));
         }
         if (hasSpace) {
             for (const auto& patternEntry : patterns) {
@@ -151,7 +151,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
                     hasSpace = false;
                     break;
                 }
-                patternsToUpload.emplace_back(std::make_tuple(*texHandle, pattern));
+                patternsToUpload.emplace_back(std::make_pair(*texHandle, pattern));
             }
         }
         if (!hasSpace) {
