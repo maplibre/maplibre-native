@@ -18,11 +18,13 @@ class TextureHandle {
 public:
     TextureHandle(const mapbox::Bin& bin)
         : id(bin.id),
-          rectangle(bin.x, bin.y, bin.w, bin.h) {};
+          rectangle(bin.x, bin.y, bin.w, bin.h),
+          needsUpload(bin.refcount() == 1) {};
     ~TextureHandle() = default;
 
     int32_t getId() const { return id; }
     const Rect<uint16_t>& getRectangle() const { return rectangle; }
+    bool isUploadNeeded() const { return needsUpload; }
 
     bool operator==(const TextureHandle& other) const { return (id == other.id); }
 
@@ -33,6 +35,9 @@ public:
 private:
     int32_t id = 0;
     Rect<uint16_t> rectangle;
+    bool needsUpload = false;
+    
+    friend class DynamicTexture;
 };
 
 class DynamicTexture {
@@ -45,7 +50,7 @@ public:
     bool isEmpty() const;
 
     std::optional<TextureHandle> reserveSize(const Size& size, int32_t uniqueId);
-    void uploadImage(const uint8_t* pixelData, const TextureHandle& texHandle);
+    void uploadImage(const uint8_t* pixelData, TextureHandle& texHandle);
 
     template <typename Image>
     std::optional<TextureHandle> addImage(const Image& image, int32_t uniqueId = -1) {

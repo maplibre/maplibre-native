@@ -41,29 +41,13 @@ std::optional<TextureHandle> DynamicTexture::reserveSize(const Size& size, int32
     if (!bin) {
         return std::nullopt;
     }
-    if (bin->w != static_cast<int>(size.width) || bin->h != static_cast<int>(size.height)) {
-        const auto texHandle = TextureHandle(*bin);
-        while (bin->refcount() > 1) {
-            shelfPack.unref(*bin);
-        }
-        removeTexture(texHandle);
-
-        bin = shelfPack.packOne(uniqueId, size.width, size.height);
-        if (!bin) {
-            return std::nullopt;
-        }
-    }
     if (bin->refcount() == 1) {
         numTextures++;
     }
     return TextureHandle(*bin);
 }
 
-void DynamicTexture::uploadImage(const uint8_t* pixelData, const TextureHandle& texHandle) {
-    auto* bin = shelfPack.getBin(texHandle.getId());
-    if (!bin || bin->refcount() > 1) {
-        return;
-    }
+void DynamicTexture::uploadImage(const uint8_t* pixelData, TextureHandle& texHandle) {
     const auto& rect = texHandle.getRectangle();
     const auto imageSize = Size(rect.w, rect.h);
 
@@ -75,13 +59,14 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, const TextureHandle& 
 #else
     texture->uploadSubRegion(pixelData, imageSize, rect.x, rect.y);
 #endif
+    texHandle.needsUpload = false;
 }
 
 std::optional<TextureHandle> DynamicTexture::addImage(const uint8_t* pixelData,
                                                       const Size& imageSize,
                                                       int32_t uniqueId) {
-    const auto& texHandle = reserveSize(imageSize, uniqueId);
-    if (texHandle) {
+    auto texHandle = reserveSize(imageSize, uniqueId);
+    if (texHandle && texHandle->isUploadNeeded()) {
         uploadImage(pixelData, *texHandle);
     }
     return texHandle;
