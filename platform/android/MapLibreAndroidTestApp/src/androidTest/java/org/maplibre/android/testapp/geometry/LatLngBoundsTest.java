@@ -2,7 +2,6 @@ package org.maplibre.android.testapp.geometry;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Ignore;
 import org.maplibre.android.camera.CameraUpdateFactory;
 import org.maplibre.android.geometry.LatLng;
 import org.maplibre.android.geometry.LatLngBounds;
