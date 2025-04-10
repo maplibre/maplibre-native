@@ -15,7 +15,11 @@ DynamicTexture::DynamicTexture(Context& context, Size size, TexturePixelType pix
     texture->setFormat(pixelType, TextureChannelDataType::UnsignedByte);
     texture->setSamplerConfiguration(
         {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+#if MLN_DEFER_UPLOAD_ON_RENDER_THREAD
+    deferredCreation = true;
+#else
     texture->create();
+#endif
 }
 
 const Texture2DPtr& DynamicTexture::getTexture() const {
@@ -84,6 +88,10 @@ std::optional<TextureHandle> DynamicTexture::addImage(const uint8_t* pixelData,
 }
 
 void DynamicTexture::uploadDeferredImages() {
+    if (deferredCreation) {
+        texture->create();
+        deferredCreation = false;
+    }
     for (const auto& pair : imagesToUpload) {
         const auto& rect = pair.first.getRectangle();
         texture->uploadSubRegion(pair.second.get(), Size(rect.w, rect.h), rect.x, rect.y);
