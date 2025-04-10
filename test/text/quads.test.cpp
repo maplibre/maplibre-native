@@ -13,8 +13,7 @@ using namespace mbgl::style;
 TEST(getIconQuads, normal) {
     SymbolLayoutProperties::Evaluated layout;
     Anchor anchor(2.0, 3.0, 0.0, 0);
-    ImagePosition image = {Rect<uint16_t>(0, 0, 15, 11),
-                           style::Image::Impl("test", PremultipliedImage({1, 1}), 1.0f)};
+    ImagePosition image = {Rect<uint16_t>(0, 0, 15, 11), style::Image::Impl("test", PremultipliedImage({1, 1}), 1.0f)};
 
     auto shapedIcon = PositionedIcon::shapeIcon(image, {{-6.5f, -4.5f}}, SymbolAnchorType::Center);
 
