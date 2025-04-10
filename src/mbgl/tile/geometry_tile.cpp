@@ -219,7 +219,7 @@ GeometryTile::~GeometryTile() {
         // This tile never finished loading or was abandoned, emit a cancellation event
         observer->onTileAction(id, sourceID, TileOperation::Cancelled);
     }
-    
+
     if (layoutResult) {
         threadPool.runOnRenderThread(
             [layoutResult_{std::move(layoutResult)}, atlasTextures_{std::move(atlasTextures)}]() {});
