@@ -11,19 +11,16 @@
 
 namespace mbgl {
 
-#if MLN_DRAWABLE_RENDERER
 class HeatmapLayerTweaker;
 class HeatmapTextureLayerTweaker;
 using HeatmapLayerTweakerPtr = std::shared_ptr<HeatmapLayerTweaker>;
 using HeatmapTextureLayerTweakerPtr = std::shared_ptr<HeatmapTextureLayerTweaker>;
-#endif // MLN_DRAWABLE_RENDERER
 
 class RenderHeatmapLayer final : public RenderLayer {
 public:
     explicit RenderHeatmapLayer(Immutable<style::HeatmapLayer::Impl>);
     ~RenderHeatmapLayer() override;
 
-#if MLN_DRAWABLE_RENDERER
     void markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) override;
 
     /// Generate any changes needed by the layer
@@ -33,19 +30,12 @@ public:
                 const std::shared_ptr<UpdateParameters>&,
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
-#endif
 
 private:
     void transition(const TransitionParameters&) override;
     void evaluate(const PropertyEvaluationParameters&) override;
     bool hasTransition() const override;
     bool hasCrossfade() const override;
-
-#if MLN_LEGACY_RENDERER
-    void upload(gfx::UploadPass&) override;
-    void render(PaintParameters&) override;
-#endif
-
     bool queryIntersectsFeature(const GeometryCoordinates&,
                                 const GeometryTileFeature&,
                                 float,
@@ -55,7 +45,6 @@ private:
                                 const FeatureState&) const override;
     void updateColorRamp();
 
-#if MLN_DRAWABLE_RENDERER
     void layerChanged(const TransitionParameters& parameters,
                       const Immutable<style::Layer::Impl>& impl,
                       UniqueChangeRequestVec& changes) override;
@@ -68,8 +57,6 @@ private:
     /// @return The number of drawables actually removed.
     std::size_t removeAllDrawables() override;
 
-#endif
-
     // Paint properties
     style::HeatmapPaintProperties::Unevaluated unevaluated;
     std::shared_ptr<PremultipliedImage> colorRamp;
@@ -77,13 +64,6 @@ private:
     std::optional<gfx::Texture> colorRampTexture;
     SegmentVector<HeatmapTextureAttributes> segments;
 
-#if MLN_LEGACY_RENDERER
-    // Programs
-    std::shared_ptr<HeatmapProgram> heatmapProgram;
-    std::shared_ptr<HeatmapTextureProgram> heatmapTextureProgram;
-#endif
-
-#if MLN_DRAWABLE_RENDERER
     gfx::ShaderGroupPtr heatmapShaderGroup;
     gfx::ShaderProgramBasePtr heatmapTextureShader;
     RenderTargetPtr renderTarget;
@@ -94,7 +74,6 @@ private:
     // This is the layer tweaker for applying the off-screen texture to the framebuffer.
     // The inherited layer tweaker is for applying tiles to the off-screen texture.
     LayerTweakerPtr textureTweaker;
-#endif
 };
 
 } // namespace mbgl

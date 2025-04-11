@@ -16,8 +16,7 @@
         "CMAKE_SYSTEM_NAME": "iOS",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
         "MLN_WITH_METAL": "ON",
-        "MLN_WITH_OPENGL": "OFF",
-        "MLN_DRAWABLE_RENDERER": "ON"
+        "MLN_WITH_OPENGL": "OFF"
       }
     },
     {
@@ -29,8 +28,7 @@
         "CMAKE_SYSTEM_NAME": "Darwin",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
         "MLN_WITH_METAL": "ON",
-        "MLN_WITH_OPENGL": "OFF",
-        "MLN_DRAWABLE_RENDERER": "ON"
+        "MLN_WITH_OPENGL": "OFF"
       }
     },
     {
@@ -42,8 +40,7 @@
         "CMAKE_SYSTEM_NAME": "Darwin",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
         "MLN_WITH_VULKAN": "ON",
-        "MLN_WITH_OPENGL": "OFF",
-        "MLN_DRAWABLE_RENDERER": "ON"
+        "MLN_WITH_OPENGL": "OFF"
       }
     },
     {
@@ -72,7 +69,6 @@
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
         "MLN_WITH_METAL": "OFF",
         "MLN_WITH_OPENGL": "ON",
-        "MLN_DRAWABLE_RENDERER": "ON",
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++"
       }

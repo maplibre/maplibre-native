@@ -187,9 +187,9 @@ jobs:
 
       - name: Build Instrumentation Tests, copy to platform/android
         run: |
-          ./gradlew assembleLegacyDebug assembleLegacyDebugAndroidTest -PtestBuildType=debug
-          cp MapLibreAndroidTestApp/build/outputs/apk/legacy/debug/MapLibreAndroidTestApp-legacy-debug.apk InstrumentationTestApp.apk
-          cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/legacy/debug/MapLibreAndroidTestApp-legacy-debug-androidTest.apk InstrumentationTests.apk
+          ./gradlew assembleDrawableDebug assembleDrawableDebugAndroidTest -PtestBuildType=debug
+          cp MapLibreAndroidTestApp/build/outputs/apk/drawable/debug/MapLibreAndroidTestApp-drawable-debug.apk InstrumentationTestApp.apk
+          cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/drawable/debug/MapLibreAndroidTestApp-drawable-debug-androidTest.apk InstrumentationTests.apk
 
       - name: Upload android-ui-test
         uses: actions/upload-artifact@v4

@@ -5,7 +5,6 @@
 
 #include <cmath>
 #include <string>
-#include <vector>
 
 namespace mbgl {
 
@@ -70,18 +69,6 @@ DebugBucket::DebugBucket(const OverscaledTileID& id,
     segments.emplace_back(0, 0, vertices.elements(), indices.elements());
 }
 
-void DebugBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
-#if MLN_LEGACY_RENDERER
-    if (!vertices.empty()) {
-        vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
-        indexBuffer = uploadPass.createIndexBuffer(std::move(indices));
-    }
-    if (!texture) {
-        std::array<uint8_t, 4> data{{0, 0, 0, 0}};
-        static const PremultipliedImage emptyImage{Size(1, 1), data.data(), data.size()};
-        texture = uploadPass.createTexture(emptyImage);
-    }
-#endif // MLN_LEGACY_RENDERER
-}
+void DebugBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {}
 
 } // namespace mbgl

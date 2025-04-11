@@ -7,10 +7,7 @@
 #include <mbgl/style/expression/find_zoom_curve.hpp>
 #include <mbgl/util/bitmask_operations.hpp>
 #include <mbgl/util/range.hpp>
-
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/gpu_expression.hpp>
-#endif // MLN_DRAWABLE_RENDERER
 
 #include <optional>
 
@@ -52,10 +49,8 @@ public:
     /// expression. May be removed if a better way of aggregation is found.
     std::shared_ptr<const Expression> getSharedExpression() const noexcept;
 
-#if MLN_DRAWABLE_RENDERER
     /// Build a cached GPU representation of the expression, with the same lifetime as this object.
     gfx::UniqueGPUExpression getGPUExpression(bool intZoom) const;
-#endif // MLN_DRAWABLE_RENDERER
 
     Dependency getDependencies() const noexcept { return expression ? expression->dependencies : Dependency::None; }
 

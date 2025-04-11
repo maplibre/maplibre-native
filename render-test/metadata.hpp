@@ -152,11 +152,7 @@ struct TestMetadata {
     // error message: "Failed to find expectations for..., to prevent
     // unit test error by missing metric.json, can turn on 'ignoreProbing'
     // to prevent the unit test fail, and just verify the render result.
-#if MLN_LEGACY_RENDERER
-    bool ignoreProbing = false;
-#else
     bool ignoreProbing = true;
-#endif
 
     mbgl::Size size{512u, 512u};
     float pixelRatio = 1.0f;

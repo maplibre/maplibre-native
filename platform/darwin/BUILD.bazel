@@ -1,4 +1,5 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary")
+load("@rules_cc//cc:defs.bzl", "cc_library", "objc_library")
 load(
     "@rules_swift//swift:swift.bzl",
     "swift_library",
@@ -337,7 +338,6 @@ js_library(
         ":generated_style_hdrs",
         ":generated_style_srcs",
     ] + select({
-        "//:legacy_renderer": [],
         "//conditions:default": [
             ":darwin_objcpp_custom_drawable_srcs",
         ],

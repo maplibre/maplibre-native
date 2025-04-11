@@ -16,12 +16,10 @@
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/util/noncopyable.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gl/fence.hpp>
 #include <mbgl/gl/buffer_allocator.hpp>
 #include <mbgl/gfx/texture2d.hpp>
 #include <mbgl/gl/uniform_buffer_gl.hpp>
-#endif
 
 #include <array>
 #include <functional>
@@ -89,9 +87,7 @@ public:
 
     void finish();
 
-#if MLN_DRAWABLE_RENDERER
     std::shared_ptr<gl::Fence> getCurrentFrameFence() const;
-#endif
 
     // Actually remove the objects we marked as abandoned with the above methods.
     // Only call this while the OpenGL context is exclusive to this thread.
@@ -118,7 +114,6 @@ public:
 
     void setCleanupOnDestruction(bool cleanup) { cleanupOnDestruction = cleanup; }
 
-#if MLN_DRAWABLE_RENDERER
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
     gfx::UniformBufferPtr createUniformBuffer(const void* data,
                                               std::size_t size,
@@ -159,7 +154,6 @@ public:
 
     /// Unbind the global uniform buffers
     void unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept override;
-#endif
 
     void setDirtyState() override;
 
@@ -170,12 +164,10 @@ private:
     bool cleanupOnDestruction = true;
 
     std::unique_ptr<extension::Debugging> debugging;
-#if MLN_DRAWABLE_RENDERER
     std::shared_ptr<gl::Fence> frameInFlightFence;
     std::unique_ptr<gl::UniformBufferAllocator> uboAllocator;
     size_t frameNum = 0;
     UniformBufferArrayGL globalUniformBuffers;
-#endif
 
 public:
     State<value::ActiveTextureUnit> activeTextureUnit;

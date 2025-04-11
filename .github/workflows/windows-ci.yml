@@ -88,12 +88,6 @@ jobs:
     strategy:
       matrix:
         renderer: [opengl, egl, vulkan, osmesa]
-        rendering_mode: [legacy, drawable]
-        exclude:
-          - renderer: egl
-            rendering_mode: drawable
-          - renderer: vulkan
-            rendering_mode: legacy
     runs-on: windows-2022
     steps:
       - run: |
@@ -133,7 +127,6 @@ jobs:
           CMAKE_C_COMPILER_LAUNCHER: "${{ env.SCCACHE_PATH }}"
           CMAKE_CXX_COMPILER_LAUNCHER: "${{ env.SCCACHE_PATH }}"
           RENDERER: "${{ matrix.renderer }}"
-          RENDERING_MODE: "${{ matrix.rendering_mode }}"
         timeout-minutes: 60
         run: |
           cmake --version

@@ -2,8 +2,6 @@
 
 #include <mbgl/style/layers/custom_drawable_layer.hpp>
 
-#if MLN_DRAWABLE_RENDERER
-
 class ExampleCustomDrawableStyleLayerHost : public mbgl::style::CustomDrawableLayerHost {
 public:
     using VertexVector = mbgl::gfx::VertexVector<Interface::GeometryVertex>;
@@ -39,5 +37,3 @@ protected:
 protected:
     const std::string assetsPath;
 };
-
-#endif

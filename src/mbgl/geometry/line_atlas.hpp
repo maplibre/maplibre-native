@@ -3,15 +3,9 @@
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/util/image.hpp>
-
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/texture2d.hpp>
-#include <variant>
-#else
-#include <mbgl/util/variant.hpp>
-#include <optional>
-#endif
 
+#include <variant>
 #include <map>
 #include <memory>
 #include <vector>
@@ -51,11 +45,7 @@ public:
     void upload(gfx::UploadPass&);
 
     // Binds the atlas texture to the GPU, and uploads data if it is out of date.
-#if MLN_DRAWABLE_RENDERER
     const std::shared_ptr<gfx::Texture2D>& getTexture() const;
-#else
-    gfx::TextureBinding textureBinding() const;
-#endif
 
     // Returns the size of the texture image.
     Size getSize() const;
@@ -66,11 +56,7 @@ public:
 private:
     LinePatternPos from, to;
 
-#if MLN_DRAWABLE_RENDERER
     std::variant<AlphaImage, gfx::Texture2DPtr> texture;
-#else
-    variant<AlphaImage, gfx::Texture> texture;
-#endif
 };
 
 class LineAtlas {

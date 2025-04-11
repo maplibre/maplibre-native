@@ -28,7 +28,7 @@
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/string.hpp>
 
-#if !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL) && MLN_DRAWABLE_RENDERER
+#if !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
 #include "example_custom_drawable_style_layer.hpp"
 #endif
 
@@ -829,7 +829,7 @@ void GLFWView::popAnnotation() {
 }
 
 void GLFWView::toggleCustomDrawableStyle() {
-#if !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL) && MLN_DRAWABLE_RENDERER
+#if !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
     auto &style = map->getStyle();
 
     const std::string identifier = "ExampleCustomDrawableStyleLayer";

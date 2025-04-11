@@ -11,9 +11,7 @@
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/types.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/uniform_buffer.hpp>
-#endif
 
 #include <memory>
 #include <string>
@@ -23,21 +21,18 @@ namespace mbgl {
 class PaintParameters;
 class ProgramParameters;
 
-#if MLN_DRAWABLE_RENDERER
 class TileLayerGroup;
 class LayerGroup;
 class RenderTarget;
 using TileLayerGroupPtr = std::shared_ptr<TileLayerGroup>;
 using LayerGroupPtr = std::shared_ptr<LayerGroup>;
 using RenderTargetPtr = std::shared_ptr<RenderTarget>;
-#endif
 
 namespace gfx {
 
 class OffscreenTexture;
 class ShaderRegistry;
 
-#if MLN_DRAWABLE_RENDERER
 class Drawable;
 class DrawableBuilder;
 class ShaderProgramBase;
@@ -50,7 +45,6 @@ using Texture2DPtr = std::shared_ptr<Texture2D>;
 using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 using UniqueDrawableBuilder = std::unique_ptr<DrawableBuilder>;
 using VertexAttributeArrayPtr = std::shared_ptr<VertexAttributeArray>;
-#endif
 
 namespace {
 ContextObserver nullObserver;
@@ -114,7 +108,6 @@ public:
     /// Sets dirty state
     virtual void setDirtyState() = 0;
 
-#if MLN_DRAWABLE_RENDERER
     /// Create a new vertex attribute array
     virtual gfx::VertexAttributeArrayPtr createVertexAttributeArray() const = 0;
 
@@ -178,7 +171,6 @@ public:
 
     /// Unbind the global uniform buffers
     virtual void unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept = 0;
-#endif
 
 protected:
     virtual std::unique_ptr<TextureResource> createTextureResource(Size, TexturePixelType, TextureChannelDataType) = 0;

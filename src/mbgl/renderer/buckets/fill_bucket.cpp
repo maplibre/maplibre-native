@@ -76,19 +76,6 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
 #endif // MLN_TRIANGULATE_FILL_OUTLINES
 
 void FillBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
-#if MLN_LEGACY_RENDERER
-    if (!uploaded) {
-        vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
-        lineIndexBuffer = uploadPass.createIndexBuffer(std::move(basicLines));
-        triangleIndexBuffer = triangles.empty() ? std::optional<gfx::IndexBuffer>{}
-                                                : uploadPass.createIndexBuffer(std::move(triangles));
-    }
-
-    for (auto& pair : paintPropertyBinders) {
-        pair.second.upload(uploadPass);
-    }
-#endif // MLN_LEGACY_RENDERER
-
     uploaded = true;
 }
 

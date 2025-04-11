@@ -10,7 +10,6 @@ public:
     explicit RenderCustomDrawableLayer(Immutable<style::CustomDrawableLayer::Impl>);
     ~RenderCustomDrawableLayer() override;
 
-#if MLN_DRAWABLE_RENDERER
     /// Generate any changes needed by the layer
     void update(gfx::ShaderRegistry&,
                 gfx::Context&,
@@ -18,7 +17,6 @@ public:
                 const std::shared_ptr<UpdateParameters>&,
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
-#endif
 
 private:
     void transition(const TransitionParameters&) override {}
@@ -26,10 +24,6 @@ private:
     bool hasTransition() const override;
     bool hasCrossfade() const override;
     void prepare(const LayerPrepareParameters&) override;
-
-#if MLN_LEGACY_RENDERER
-    void render(PaintParameters&) override;
-#endif
 
     std::shared_ptr<style::CustomDrawableLayerHost> host;
 };

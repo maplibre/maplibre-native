@@ -19,7 +19,6 @@
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/thread_pool.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/gl/drawable_gl_builder.hpp>
 #include <mbgl/gl/layer_group_gl.hpp>
@@ -27,7 +26,6 @@
 #include <mbgl/gl/texture2d.hpp>
 #include <mbgl/renderer/render_target.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
-#endif
 
 #include <cstring>
 #include <iterator>
@@ -95,9 +93,7 @@ constexpr size_t renderBufferByteSize(const gfx::RenderbufferPixelType type, con
 Context::Context(RendererBackend& backend_)
     : gfx::Context(/*maximumVertexBindingCount=*/getMaxVertexAttribs()),
       backend(backend_) {
-#if MLN_DRAWABLE_RENDERER
     uboAllocator = std::make_unique<gl::UniformBufferAllocator>();
-#endif
 
     texturePool = std::make_unique<Texture2DPool>(this);
 }
@@ -123,7 +119,6 @@ void Context::beginFrame() {
 
     backend.getThreadPool().runRenderJobs();
 
-#if MLN_DRAWABLE_RENDERER
     frameInFlightFence = std::make_shared<gl::Fence>();
 
     // Run allocator defragmentation on this frame interval.
@@ -135,19 +130,16 @@ void Context::beginFrame() {
     } else {
         frameNum++;
     }
-#endif
 }
 
 void Context::endFrame() {
     MLN_TRACE_FUNC();
 
-#if MLN_DRAWABLE_RENDERER
     if (!frameInFlightFence) {
         return;
     }
 
     frameInFlightFence->insert();
-#endif
 }
 
 void Context::initializeExtensions(const std::function<gl::ProcAddress(const char*)>& getProcAddress) {
@@ -524,7 +516,6 @@ void Context::reset() {
     texturePool->shrink();
 }
 
-#if MLN_DRAWABLE_RENDERER
 void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
     MLN_TRACE_FUNC();
     MLN_TRACE_FUNC_GL();
@@ -563,7 +554,6 @@ void Context::unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept {
 
     globalUniformBuffers.unbind();
 }
-#endif
 
 void Context::setDirtyState() {
     MLN_TRACE_FUNC();
@@ -604,7 +594,6 @@ void Context::setDirtyState() {
     globalVertexArrayState.setDirty();
 }
 
-#if MLN_DRAWABLE_RENDERER
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     MLN_TRACE_FUNC();
 
@@ -675,8 +664,6 @@ Framebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
 gfx::VertexAttributeArrayPtr Context::createVertexAttributeArray() const {
     return std::make_shared<VertexAttributeArrayGL>();
 }
-
-#endif
 
 void Context::clear(std::optional<mbgl::Color> color, std::optional<float> depth, std::optional<int32_t> stencil) {
     MLN_TRACE_FUNC();
@@ -785,11 +772,9 @@ void Context::finish() {
     MBGL_CHECK_ERROR(glFinish());
 }
 
-#if MLN_DRAWABLE_RENDERER
 std::shared_ptr<gl::Fence> Context::getCurrentFrameFence() const {
     return frameInFlightFence;
 }
-#endif
 
 void Context::draw(const gfx::DrawMode& drawMode, std::size_t indexOffset, std::size_t indexLength) {
     MLN_TRACE_FUNC();

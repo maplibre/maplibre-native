@@ -5,8 +5,6 @@
 
 #include <optional>
 
-#if MLN_DRAWABLE_RENDERER
-
 namespace mbgl {
 namespace style {
 namespace expression {
@@ -104,5 +102,3 @@ inline auto GPUExpression::evaluate<float>(const float zoom) const {
 
 } // namespace gfx
 } // namespace mbgl
-
-#endif

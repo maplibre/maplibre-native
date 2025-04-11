@@ -1,7 +1,5 @@
 #pragma once
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable.hpp>
-#endif
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/monotonic_timer.hpp>
 
@@ -38,9 +36,7 @@ public:
     virtual void render(PaintParameters&) const = 0;
     virtual bool hasRenderPass(RenderPass) const = 0;
     virtual const std::string& getName() const = 0;
-#if MLN_DRAWABLE_RENDERER
     virtual void updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const = 0;
-#endif
 };
 
 class RenderSource;
@@ -58,9 +54,7 @@ private:
     void upload(gfx::UploadPass& pass) const override;
     void render(PaintParameters& parameters) const override;
     const std::string& getName() const override;
-#if MLN_DRAWABLE_RENDERER
     void updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const override;
-#endif
 };
 
 using RenderItems = std::vector<std::reference_wrapper<const RenderItem>>;

@@ -6,21 +6,14 @@
 
 namespace mbgl {
 
-#if MLN_LEGACY_RENDERER
-class CircleProgram;
-#endif // MLN_LEGACY_RENDERER
-
-#if MLN_DRAWABLE_RENDERER
 class CircleLayerTweaker;
 using CircleLayerTweakerPtr = std::shared_ptr<CircleLayerTweaker>;
-#endif // MLN_DRAWABLE_RENDERER
 
 class RenderCircleLayer final : public RenderLayer {
 public:
     explicit RenderCircleLayer(Immutable<style::CircleLayer::Impl>);
     ~RenderCircleLayer() final = default;
 
-#if MLN_DRAWABLE_RENDERER
     /// Generate any changes needed by the layer
     void update(gfx::ShaderRegistry&,
                 gfx::Context&,
@@ -28,7 +21,6 @@ public:
                 const std::shared_ptr<UpdateParameters>&,
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
-#endif
 
 private:
     void transition(const TransitionParameters&) override;
@@ -44,22 +36,11 @@ private:
                                 const mat4&,
                                 const FeatureState&) const override;
 
-#if MLN_LEGACY_RENDERER
-    void render(PaintParameters&) override;
-#endif // MLN_LEGACY_RENDERER
-
 private:
     // Paint properties
     style::CirclePaintProperties::Unevaluated unevaluated;
 
-#if MLN_LEGACY_RENDERER
-    // Programs
-    std::shared_ptr<CircleProgram> circleProgram;
-#endif
-
-#if MLN_DRAWABLE_RENDERER
     gfx::ShaderGroupPtr circleShaderGroup;
-#endif
 };
 
 } // namespace mbgl
