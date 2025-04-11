@@ -46,8 +46,8 @@ public:
         delegate.invoke(f, mode, repaintNeeded, placementChanged, frameEncodingTime, frameRenderingTime);
     }
 
-    void onStyleImageMissing(const std::string& image, Scheduler::Task&& cb) override {
-        delegate.invoke(&RendererObserver::onStyleImageMissing, image, std::move(cb));
+    void onStyleImageMissing(const std::string& image, const StyleImageMissingCallback& cb) override {
+        delegate.invoke(&RendererObserver::onStyleImageMissing, image, cb);
     }
 
 private:
@@ -95,8 +95,8 @@ public:
             mode, repaintNeeded, placementChanged, frameEncodingTime, frameRenderingTime);
     }
 
-    void onStyleImageMissing(const std::string& id, Scheduler::Task&& done) override {
-        rendererObserver->onStyleImageMissing(id, std::move(done));
+    void onStyleImageMissing(const std::string& id, const StyleImageMissingCallback& done) override {
+        rendererObserver->onStyleImageMissing(id, done);
     }
 
     void setObserver(std::shared_ptr<RendererObserver> observer) {

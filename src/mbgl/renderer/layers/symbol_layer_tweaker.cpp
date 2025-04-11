@@ -69,19 +69,19 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     const auto zoom = static_cast<float>(state.getZoom());
 
     if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
-        const SymbolEvaluatedPropsUBO propsUBO = {/* .text_fill_color = */ constOrDefault<TextColor>(evaluated),
-                                                  /* .text_halo_color = */ constOrDefault<TextHaloColor>(evaluated),
-                                                  /* .text_opacity = */ constOrDefault<TextOpacity>(evaluated),
-                                                  /* .text_halo_width = */ constOrDefault<TextHaloWidth>(evaluated),
-                                                  /* .text_halo_blur = */ constOrDefault<TextHaloBlur>(evaluated),
-                                                  /* .pad1 */ 0,
+        const SymbolEvaluatedPropsUBO propsUBO = {.text_fill_color = constOrDefault<TextColor>(evaluated),
+                                                  .text_halo_color = constOrDefault<TextHaloColor>(evaluated),
+                                                  .text_opacity = constOrDefault<TextOpacity>(evaluated),
+                                                  .text_halo_width = constOrDefault<TextHaloWidth>(evaluated),
+                                                  .text_halo_blur = constOrDefault<TextHaloBlur>(evaluated),
+                                                  .pad1 = 0,
 
-                                                  /* .icon_fill_color = */ constOrDefault<IconColor>(evaluated),
-                                                  /* .icon_halo_color = */ constOrDefault<IconHaloColor>(evaluated),
-                                                  /* .icon_opacity = */ constOrDefault<IconOpacity>(evaluated),
-                                                  /* .icon_halo_width = */ constOrDefault<IconHaloWidth>(evaluated),
-                                                  /* .icon_halo_blur = */ constOrDefault<IconHaloBlur>(evaluated),
-                                                  /* .pad2 */ 0};
+                                                  .icon_fill_color = constOrDefault<IconColor>(evaluated),
+                                                  .icon_halo_color = constOrDefault<IconHaloColor>(evaluated),
+                                                  .icon_opacity = constOrDefault<IconOpacity>(evaluated),
+                                                  .icon_halo_width = constOrDefault<IconHaloWidth>(evaluated),
+                                                  .icon_halo_blur = constOrDefault<IconHaloBlur>(evaluated),
+                                                  .pad2 = 0};
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);
         propertiesUpdated = false;
     }
@@ -157,27 +157,27 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 #else
         const SymbolDrawableUBO drawableUBO = {
 #endif
-            /* .matrix = */ util::cast<float>(matrix),
-            /* .label_plane_matrix = */ util::cast<float>(labelPlaneMatrix),
-            /* .coord_matrix = */ util::cast<float>(glCoordMatrix),
+            .matrix = util::cast<float>(matrix),
+            .label_plane_matrix = util::cast<float>(labelPlaneMatrix),
+            .coord_matrix = util::cast<float>(glCoordMatrix),
 
-            /* .texsize = */ toArray(getTexSize(drawable, idSymbolImageTexture)),
-            /* .texsize_icon = */ toArray(getTexSize(drawable, idSymbolImageIconTexture)),
+            .texsize = toArray(getTexSize(drawable, idSymbolImageTexture)),
+            .texsize_icon = toArray(getTexSize(drawable, idSymbolImageIconTexture)),
 
-            /* .is_text_prop = */ isText,
-            /* .rotate_symbol = */ rotateInShader,
-            /* .pitch_with_map = */ (symbolData.pitchAlignment == style::AlignmentType::Map),
-            /* .is_size_zoom_constant = */ size.isZoomConstant,
-            /* .is_size_feature_constant = */ size.isFeatureConstant,
+            .is_text_prop = isText,
+            .rotate_symbol = rotateInShader,
+            .pitch_with_map = (symbolData.pitchAlignment == style::AlignmentType::Map),
+            .is_size_zoom_constant = size.isZoomConstant,
+            .is_size_feature_constant = size.isFeatureConstant,
 
-            /* .size_t = */ size.sizeT,
-            /* .size = */ size.size,
+            .size_t = size.sizeT,
+            .size = size.size,
 
-            /* .fill_color_t = */ getInterpFactor<TextColor, IconColor, 0>(paintProperties, isText, zoom),
-            /* .halo_color_t = */ getInterpFactor<TextHaloColor, IconHaloColor, 0>(paintProperties, isText, zoom),
-            /* .opacity_t = */ getInterpFactor<TextOpacity, IconOpacity, 0>(paintProperties, isText, zoom),
-            /* .halo_width_t = */ getInterpFactor<TextHaloWidth, IconHaloWidth, 0>(paintProperties, isText, zoom),
-            /* .halo_blur_t = */ getInterpFactor<TextHaloBlur, IconHaloBlur, 0>(paintProperties, isText, zoom),
+            .fill_color_t = getInterpFactor<TextColor, IconColor, 0>(paintProperties, isText, zoom),
+            .halo_color_t = getInterpFactor<TextHaloColor, IconHaloColor, 0>(paintProperties, isText, zoom),
+            .opacity_t = getInterpFactor<TextOpacity, IconOpacity, 0>(paintProperties, isText, zoom),
+            .halo_width_t = getInterpFactor<TextHaloWidth, IconHaloWidth, 0>(paintProperties, isText, zoom),
+            .halo_blur_t = getInterpFactor<TextHaloBlur, IconHaloBlur, 0>(paintProperties, isText, zoom),
         };
 
 #if MLN_UBO_CONSOLIDATION
@@ -185,10 +185,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 #else
         const SymbolTilePropsUBO tilePropsUBO = {
 #endif
-            /* .is_text = */ isText,
-            /* .is_halo = */ symbolData.isHalo,
-            /* .gamma_scale= */ gammaScale,
-            /* .pad1 = */ 0,
+            .is_text = isText,
+            .is_halo = symbolData.isHalo,
+            .gamma_scale = gammaScale,
+            .pad1 = 0,
         };
 
 #if MLN_UBO_CONSOLIDATION

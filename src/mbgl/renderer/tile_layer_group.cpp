@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/upload_pass.hpp>
 
+#include <algorithm>
 #include <unordered_map>
 #include <set>
 
@@ -40,7 +41,7 @@ std::vector<gfx::UniqueDrawable> TileLayerGroup::removeDrawables(mbgl::RenderPas
             return std::move(pair.second);
         });
     drawablesByTile.erase(range.first, range.second);
-    std::for_each(result.begin(), result.end(), [&](const auto& item) {
+    std::ranges::for_each(result, [&](const auto& item) {
         const auto hit = sortedDrawables.find(item.get());
         assert(hit != sortedDrawables.end());
         if (hit != sortedDrawables.end()) {
@@ -56,7 +57,8 @@ void TileLayerGroup::addDrawable(mbgl::RenderPass pass, const OverscaledTileID& 
         LayerGroupBase::addDrawable(drawable);
         [[maybe_unused]] const auto result = sortedDrawables.insert(drawable.get());
         assert(result.second);
-        drawablesByTile.insert(std::make_pair(TileLayerGroupTileKey{pass, id}, std::move(drawable)));
+        drawablesByTile.insert(
+            std::make_pair(TileLayerGroupTileKey{.renderPass = pass, .tileID = id}, std::move(drawable)));
     }
 }
 

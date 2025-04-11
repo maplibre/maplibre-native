@@ -52,7 +52,7 @@ public:
     void onDidFinishRenderingFrame(RenderMode, bool, bool, double, double) final;
     void onWillStartRenderingMap() final;
     void onDidFinishRenderingMap() final;
-    void onStyleImageMissing(const std::string&, Scheduler::Task&&) final;
+    void onStyleImageMissing(const std::string&, const std::function<void()>&) final;
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) final;
     void onRegisterShaders(gfx::ShaderRegistry&) final;
 
@@ -88,7 +88,7 @@ public:
     uint8_t prefetchZoomDelta = util::DEFAULT_PREFETCH_ZOOM_DELTA;
 
     bool loading = false;
-    bool rendererFullyLoaded{false};
+    bool rendererFullyLoaded;
     std::unique_ptr<StillImageRequest> stillImageRequest;
 };
 

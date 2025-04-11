@@ -131,7 +131,11 @@ public:
         }
 
         const float unused = 0.0f;
-        return {isZoomConstant, true, unused, size, layoutSize};
+        return {.isZoomConstant = isZoomConstant,
+                .isFeatureConstant = true,
+                .sizeT = unused,
+                .size = size,
+                .layoutSize = layoutSize};
     }
 
     float layoutSize;
@@ -154,7 +158,8 @@ public:
 
     ZoomEvaluatedSize evaluateForZoom(float) const noexcept override {
         const float unused = 0.0f;
-        return {true, false, unused, unused, unused};
+        return {
+            .isZoomConstant = true, .isFeatureConstant = false, .sizeT = unused, .size = unused, .layoutSize = unused};
     }
 
     style::PropertyExpression<float> expression;
@@ -181,7 +186,11 @@ public:
             expression.interpolationFactor(coveringZoomStops, currentZoom), 0.0f, 1.0f);
 
         const float unused = 0.0f;
-        return {false, false, sizeInterpolationT, unused, unused};
+        return {.isZoomConstant = false,
+                .isFeatureConstant = false,
+                .sizeT = sizeInterpolationT,
+                .size = unused,
+                .layoutSize = unused};
     }
 
     style::PropertyExpression<float> expression;
@@ -261,6 +270,7 @@ public:
 
     std::unique_ptr<gfx::Program<Name>> program;
 
+    // NOLINTNEXTLINE(bugprone-crtp-constructor-accessibility)
     SymbolProgram([[maybe_unused]] const ProgramParameters& programParameters) {
         switch (gfx::Backend::GetType()) {
 #if MLN_RENDER_BACKEND_OPENGL
@@ -441,6 +451,7 @@ using SymbolSDFProgramUniforms = TypeList<uniforms::matrix,
                                           uniforms::is_halo>;
 
 template <class Name, shaders::BuiltIn ShaderSource, class PaintProperties>
+// NOLINTNEXTLINE(bugprone-crtp-constructor-accessibility)
 class SymbolSDFProgram : public SymbolProgram<Name,
                                               ShaderSource,
                                               gfx::PrimitiveType::Triangle,

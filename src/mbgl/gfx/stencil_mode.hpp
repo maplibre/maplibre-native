@@ -40,7 +40,12 @@ public:
     StencilOpType pass;
 
     static StencilMode disabled() {
-        return StencilMode{Always(), 0, 0, StencilOpType::Keep, StencilOpType::Keep, StencilOpType::Keep};
+        return StencilMode{.test = Always(),
+                           .ref = 0,
+                           .mask = 0,
+                           .fail = StencilOpType::Keep,
+                           .depthFail = StencilOpType::Keep,
+                           .pass = StencilOpType::Keep};
     }
 };
 
