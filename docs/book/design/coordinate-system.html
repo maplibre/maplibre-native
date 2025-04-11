@@ -24,18 +24,19 @@
         <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="../highlight.css">
-        <link rel="stylesheet" href="../tomorrow-night.css">
-        <link rel="stylesheet" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
         <link rel="stylesheet" href="../diff.css">
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
@@ -45,8 +46,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -60,7 +61,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -73,8 +75,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -110,6 +112,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -270,7 +273,7 @@ the world space.</p>
 see the <em>world</em> from a viewpoint of a camera, view matrix
 transformation is applied. Cameras can see the world up to a
 distance like human eyes can. To emulate that we apply <em>Projection
-Matrix</em> to <em>View Space</em> and end up in <em>Clip Space</em><sup class="footnote-reference"><a href="#8">1</a></sup>.</p>
+Matrix</em> to <em>View Space</em> and end up in <em>Clip Space</em><sup class="footnote-reference" id="fr-8-1"><a href="#footnote-8">1</a></sup>.</p>
 </li>
 <li>
 <p>Finally, the <em>World Space</em> is transformed to device screen by
@@ -288,7 +291,7 @@ will talk mostly about two categories of coordinate systems:</p>
 </li>
 </ol>
 <p>World Coordinates are defined in <em>World Space</em>. This speaks of how <em>this
-world defines itself in a three-dimensional space</em>.<sup class="footnote-reference"><a href="#9">2</a></sup> On the other
+world defines itself in a three-dimensional space</em>.<sup class="footnote-reference" id="fr-9-1"><a href="#footnote-9">2</a></sup> On the other
 hand, device coordinates are used through View, Clip, and Screen Space.
 The purpose of this set of coordinates is to define how the world will
 be projected on a screen. Device Coordinates define <em>how a world will be
@@ -308,12 +311,12 @@ earth (ellipsoid) to define specific locations on the surface to create
 a grid. Traditional longitude, and latitude coordinate pair to define a
 location is an example of using geographic coordinates. EPSG: 4326
 (WGS84) is the reference <em>Geographic Coordinate System</em> that most of the
-world's geospatial data is defined and stored<sup class="footnote-reference"><a href="#10">3</a></sup> in. There is no way
+world's geospatial data is defined and stored<sup class="footnote-reference" id="fr-10-1"><a href="#footnote-10">3</a></sup> in. There is no way
 to visualize the WGS84 coordinate system on a two-dimensional plane, in
 this case, the map.</p>
 <p>Projections are used to translate WGS84 coordinates to a plane. To be
 specific, projections are used to translate a location on the ellipsoid
-to a two-dimensional square. EPSG:3857<sup class="footnote-reference"><a href="#11">4</a></sup> or projected
+to a two-dimensional square. EPSG:3857<sup class="footnote-reference" id="fr-11-1"><a href="#footnote-11">4</a></sup> or projected
 <em>Pseudo-Mercator Coordinate System</em> is such a coordinate system.
 EPSG:3857 is used by MapLibre Native as a default coordinate system
 to display maps. This system takes WGS84 coordinates and projects them
@@ -347,7 +350,7 @@ shifting our coordinate by 180. For example, a location with longitude
 </code></pre>
 <p>Finding the X coordinate is easy to compute. But the Y requires a more
 than normalizing the range. This is due to the aforementioned space
-stretching in the hemispheres<sup class="footnote-reference"><a href="#12">5</a></sup>. Latitude value (Y) defined in WGS84
+stretching in the hemispheres<sup class="footnote-reference" id="fr-12-1"><a href="#footnote-12">5</a></sup>. Latitude value (Y) defined in WGS84
 will not be the same position after stretching. The computation looks
 like the following if the latitude was 38.889814:</p>
 <pre><code>y = ln(tan(45 + latitude / 2))
@@ -399,7 +402,7 @@ and latitude 38.889814.</p>
 translate these coordinates to native device coordinates. To reiterate
 our progress in the perspective of rendering, we just defined our local
 space with tile coordinates. Local coordinates are the coordinates of
-the object to be rendered relative to its local origin<sup class="footnote-reference"><a href="#13">6</a></sup>. In this
+the object to be rendered relative to its local origin<sup class="footnote-reference" id="fr-13-1"><a href="#footnote-13">6</a></sup>. In this
 case, the objects are the map tiles. The next step in traditional
 rendering workflow is to translate object coordinates to world
 coordinates. This is important to understand if we are to render
@@ -418,7 +421,7 @@ level at a time.</p>
 <p>The journey towards rendering the tiles in the device screen from the
 world space starts with <em>View Matrix</em>, as defined in the world space.
 The key part here is the <em>camera</em>. A <em>view matrix</em> is a matrix that
-scales, rotates, and translates<sup class="footnote-reference"><a href="#14">7</a></sup> the world space from the view of
+scales, rotates, and translates<sup class="footnote-reference" id="fr-14-1"><a href="#footnote-14">7</a></sup> the world space from the view of
 the camera. To add the perspective of the camera, we apply the
 <em>Projection Matrix</em>. In MapLibre Native, a camera initialization
 requires map center, bearing, and pitch.</p>
@@ -432,7 +435,7 @@ the 3D plane we render tiles on, rather the position of the camera.</em></p>
 we use here, to be specific the view matrix, can directly take the tile
 coordinates to move the camera to a particular tile in a zoom level.
 Once a tile is built, the GPU can quickly draw the same tile with different
-bearing, pan, pitch, and zoom parameters<sup class="footnote-reference"><a href="#15">8</a></sup>.</p>
+bearing, pan, pitch, and zoom parameters<sup class="footnote-reference" id="fr-15-1"><a href="#footnote-15">8</a></sup>.</p>
 <p>If we keep following Figure 2, we see we need to also add a projection
 matrix. And MapLibre Native uses a <em>perspective projection</em>.
 Perspective projection matrix introduces the sense of depth perspective
@@ -460,7 +463,7 @@ is derived from the following formula:</p>
 </code></pre>
 <p>Factoring only the transformations of zoom, map center, bearing, pitch,
 and tile in, with a viewport of 862 by 742 pixels, the projection matrix
-will look like<sup class="footnote-reference"><a href="#16">9</a></sup>:</p>
+will look like<sup class="footnote-reference" id="fr-16-1"><a href="#footnote-16">9</a></sup>:</p>
 <div class="table-wrapper"><table><thead><tr><th></th><th><strong>x</strong></th><th><strong>y</strong></th><th><strong>z</strong></th><th><strong>w</strong></th></tr></thead><tbody>
 <tr><td><strong>x</strong></td><td>0.224</td><td>-0.079</td><td>-0.026</td><td>-0.026</td></tr>
 <tr><td><strong>y</strong></td><td>-0.096</td><td>-0.184</td><td>-0.062</td><td>-0.061</td></tr>
@@ -504,52 +507,53 @@ NormalizedY * height)
 <p>These are our viewport screen coordinates where our desired WGS84
 location longitude -77.035915 and latitude 38.889814 will be rendered.</p>
 <hr />
-<div class="footnote-definition" id="8"><sup class="footnote-definition-label">1</sup>
+<hr>
+<ol class="footnote-definition"><li id="footnote-8">
 <p>Clip coordinates are normalized to -1.0 to 1.0. For brevity, this
-document does not dive deep into 3D rendering basics.</p>
-</div>
-<div class="footnote-definition" id="9"><sup class="footnote-definition-label">2</sup>
+document does not dive deep into 3D rendering basics. <a href="#fr-8-1">↩</a></p>
+</li>
+<li id="footnote-9">
 <p>For brevity, this document is assuming the world we live in is
-three dimensional.</p>
-</div>
-<div class="footnote-definition" id="10"><sup class="footnote-definition-label">3</sup>
+three dimensional. <a href="#fr-9-1">↩</a></p>
+</li>
+<li id="footnote-10">
 <p>For brevity, this document does not dive deep into reference
 ellipsoids to approximates earth, also known as Datums. EPSG:4326 or
-WGS84 is such a Datum or reference ellipsoid.</p>
-</div>
-<div class="footnote-definition" id="11"><sup class="footnote-definition-label">4</sup>
+WGS84 is such a Datum or reference ellipsoid. <a href="#fr-10-1">↩</a></p>
+</li>
+<li id="footnote-11">
 <p>There are other coordinate systems such as EPSG:54001 that uses
 equirectangles over squares to project the WGS84 coordinates. This
 document focuses on EPSG:3857 because MapLibre Native uses it by
-default.</p>
-</div>
-<div class="footnote-definition" id="12"><sup class="footnote-definition-label">5</sup>
+default. <a href="#fr-11-1">↩</a></p>
+</li>
+<li id="footnote-12">
 <p>This document scopes out the trigonometric proof of this
 translation for brevity. To know more:
-<a href="https://en.wikipedia.org/wiki/Web_Mercator_projection">https://en.wikipedia.org/wiki/Web_Mercator_projection</a></p>
-</div>
-<div class="footnote-definition" id="13"><sup class="footnote-definition-label">6</sup>
+<a href="https://en.wikipedia.org/wiki/Web_Mercator_projection">https://en.wikipedia.org/wiki/Web_Mercator_projection</a> <a href="#fr-12-1">↩</a></p>
+</li>
+<li id="footnote-13">
 <p>For brevity, this document does not speak in depth of rendering
 basics in regards to coordinate systems. For more, please check:
-<a href="https://learnopengl.com/Getting-started/Coordinate-Systems">https://learnopengl.com/Getting-started/Coordinate-Systems</a></p>
-</div>
-<div class="footnote-definition" id="14"><sup class="footnote-definition-label">7</sup>
+<a href="https://learnopengl.com/Getting-started/Coordinate-Systems">https://learnopengl.com/Getting-started/Coordinate-Systems</a> <a href="#fr-13-1">↩</a></p>
+</li>
+<li id="footnote-14">
 <p>Scale, rotate, and translate are common rendering transformation
 used to produce model, view, and projection matrices. These
 operations are applied right to left. As in translate first, rotate
 second, and scale last. Matrix multiplications are not commutative,
-so order of operation matters.</p>
-</div>
-<div class="footnote-definition" id="15"><sup class="footnote-definition-label">8</sup>
+so order of operation matters. <a href="#fr-14-1">↩</a></p>
+</li>
+<li id="footnote-15">
 <p>The piece of code we run on GPU is called a shader. We will see
 more how shaders influence MapLibre Native rendering later in the
-document.</p>
-</div>
-<div class="footnote-definition" id="16"><sup class="footnote-definition-label">9</sup>
+document. <a href="#fr-15-1">↩</a></p>
+</li>
+<li id="footnote-16">
 <p>Matrix and examples produced from Chris Loers work hosted in:
-<a href="https://chrisloer.github.io/mapbox-gl-coordinates/#11.8/38.895/-77.0757/40/60">https://chrisloer.github.io/mapbox-gl-coordinates/#11.8/38.895/-77.0757/40/60</a></p>
-</div>
-
+<a href="https://chrisloer.github.io/mapbox-gl-coordinates/#11.8/38.895/-77.0757/40/60">https://chrisloer.github.io/mapbox-gl-coordinates/#11.8/38.895/-77.0757/40/60</a> <a href="#fr-16-1">↩</a></p>
+</li>
+</ol>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

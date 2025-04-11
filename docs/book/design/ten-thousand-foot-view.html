@@ -24,18 +24,19 @@
         <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="../highlight.css">
-        <link rel="stylesheet" href="../tomorrow-night.css">
-        <link rel="stylesheet" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
         <link rel="stylesheet" href="../diff.css">
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
@@ -45,8 +46,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -60,7 +61,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -73,8 +75,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -110,6 +112,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -260,15 +263,15 @@ come from data sources. And a <em><strong>Layer</strong></em> is composed of til
 from said features.</p>
 </li>
 </ol>
-<p>We will look a bit more into these components going forward<sup class="footnote-reference"><a href="#1">1</a></sup>.</p>
+<p>We will look a bit more into these components going forward<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup>.</p>
 <h3 id="map-view"><a class="header" href="#map-view">Map View</a></h3>
 <p>A <em>Map View</em> is a reusable map viewer that renders a raster or vector
 map in different platform specific viewports. It bears the standard of
 common map configuration across the platforms. These ranges from map
 viewport size, pixel ratio, tileset URL, style, collision configuration
-for text, and annotations<sup class="footnote-reference"><a href="#2">2</a></sup>. A <em>Map View</em> does not contain any
+for text, and annotations<sup class="footnote-reference" id="fr-2-1"><a href="#footnote-2">2</a></sup>. A <em>Map View</em> does not contain any
 rendering capability of its own. It publishes and listens to events
-through observers<sup class="footnote-reference"><a href="#3">3</a></sup>.</p>
+through observers<sup class="footnote-reference" id="fr-3-1"><a href="#footnote-3">3</a></sup>.</p>
 <p>Figure 1 does not display the explicit use of observers for brevity.</p>
 <h4 id="observers"><a class="header" href="#observers">Observers</a></h4>
 <p>Observers are a group of components that listen and publish events from
@@ -305,7 +308,7 @@ context. <em>Layer</em> can mean any of the following:</p>
 <li>
 <p>From the point of view of data that needs to be rendered on map,
 each map tile is composed of <em>layers</em> of data. Each layer, in this
-context, contains <em>features</em><sup class="footnote-reference"><a href="#4">4</a></sup> to be rendered in a map. These
+context, contains <em>features</em><sup class="footnote-reference" id="fr-4-1"><a href="#footnote-4">4</a></sup> to be rendered in a map. These
 features are defined by a <em>source.</em> Each <em>layer</em> is tied to a
 <em>source</em>.</p>
 </li>
@@ -320,7 +323,7 @@ data to be rendered and the style to be applied on said layer.</p>
 refers to the definition mentioned in 2.</p>
 <h3 id="glyphs"><a class="header" href="#glyphs">Glyphs</a></h3>
 <p>A <em>glyph</em> is a single representation of a character. A font is a map of
-characters<sup class="footnote-reference"><a href="#5">5</a></sup>. Map tiles use labels of text to show name of cities,
+characters<sup class="footnote-reference" id="fr-5-1"><a href="#footnote-5">5</a></sup>. Map tiles use labels of text to show name of cities,
 administrative boundaries, or street names. Map tiles also need to show
 icons for amenities like bus stops and parks. A map style uses character
 map from fonts to display labels and icons. Collectively these are
@@ -343,7 +346,7 @@ When it does, we will dive more into <em>glyph</em> rendering.</p>
 underpowered environments, MapLibre Native tries to leverage message
 passing across threads to render frames asynchronously. The threading
 architecture in implementation realizes this using the Actor
-interface<sup class="footnote-reference"><a href="#6">6</a></sup>. In reality the messages are raw pointers. This ranges
+interface<sup class="footnote-reference" id="fr-6-1"><a href="#footnote-6">6</a></sup>. In reality the messages are raw pointers. This ranges
 from raw message to actionable message. By actionable message this
 document means <em>anonymous functions</em> that are passed as messages between
 actors. These arbitrary messages are <em>immutable</em> by design. The current
@@ -377,7 +380,7 @@ Android uses a <em>GLSurfaceView</em> with a <em>GLThread</em> where the iOS SDK
 passing to communicate with the renderer. These messages are <em>immutable</em>
 by design and the render loops checks for these in each iteration. To
 simplify, there is only one thread allocated for rendering loop,
-background or foreground<sup class="footnote-reference"><a href="#7">7</a></sup>. A <em>Tile Worker</em> is a thread that prepares
+background or foreground<sup class="footnote-reference" id="fr-7-1"><a href="#footnote-7">7</a></sup>. A <em>Tile Worker</em> is a thread that prepares
 a tile of a specific type. Geometry Tile Worker by the name of it,
 prepares a tile for rendering tiles that contains vector geometry.
 Following that same trend, MapLibre Native offers tile worker for
@@ -394,44 +397,45 @@ is a Geometry Tile.</p>
 <p>*To read in depth about the workflow of a Geometry Tile Worker, please
 check <a href="./geometry-tile-worker.html">Geometry Tile Worker</a> chapter.</p>
 <hr />
-<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<hr>
+<ol class="footnote-definition"><li id="footnote-1">
 <p>To read in depth about the data flow for map initialization and
 rendering in Android, please check
-<a href="./android-map-rendering-data-flow.html">Android Map Rendering Data Flow</a></p>
-</div>
-<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<a href="./android-map-rendering-data-flow.html">Android Map Rendering Data Flow</a> <a href="#fr-1-1">↩</a></p>
+</li>
+<li id="footnote-2">
 <p>This document speaks of a simplified configuration for brevity.
 These also includes viewport mode, constrain mode, and north
-orientation.</p>
-</div>
-<div class="footnote-definition" id="3"><sup class="footnote-definition-label">3</sup>
+orientation. <a href="#fr-2-1">↩</a></p>
+</li>
+<li id="footnote-3">
 <p>Platform SDKs might use a wrapper map view class atop the map
 component. This is to help establish contract between the device
 runtime running a different language. Android is a good example of
-this behaviour.</p>
-</div>
-<div class="footnote-definition" id="4"><sup class="footnote-definition-label">4</sup>
+this behaviour. <a href="#fr-3-1">↩</a></p>
+</li>
+<li id="footnote-4">
 <p>A feature is the spatial description of a real-world entity such
 as a road or a utility pole. Any geometry that is displayed on a map
-tile is either an individual feature or a part of a feature.</p>
-</div>
-<div class="footnote-definition" id="5"><sup class="footnote-definition-label">5</sup>
+tile is either an individual feature or a part of a feature. <a href="#fr-4-1">↩</a></p>
+</li>
+<li id="footnote-5">
 <p>This document used the term glyph and character interchangeably.
 In reality, a single character can have multiple glyphs. These are
 called alternates. On the other hand, a single glyph can represent
-multiple characters. These are called ligatures.</p>
-</div>
-<div class="footnote-definition" id="6"><sup class="footnote-definition-label">6</sup>
+multiple characters. These are called ligatures. <a href="#fr-5-1">↩</a></p>
+</li>
+<li id="footnote-6">
 <p>In the Javascript counterpart, MapLibre GL JS, this is achieved
-through usage of webworkers.</p>
-</div>
-<div class="footnote-definition" id="7"><sup class="footnote-definition-label">7</sup>
+through usage of webworkers. <a href="#fr-6-1">↩</a></p>
+</li>
+<li id="footnote-7">
 <p>In iOS, the render thread runs on UI thread, as in it's a
 foreground thread. Android offers wider range of devices in terms of
 battery capacity. Hence, Android prefers to use a background thread
-for rendering loop.</p>
-</div>
-
+for rendering loop. <a href="#fr-7-1">↩</a></p>
+</li>
+</ol>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

@@ -25,18 +25,19 @@
         <link rel="stylesheet" href="fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="highlight.css">
-        <link rel="stylesheet" href="tomorrow-night.css">
-        <link rel="stylesheet" href="ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
         <link rel="stylesheet" href="diff.css">
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -46,8 +47,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -61,7 +62,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -74,8 +76,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -111,6 +113,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -318,33 +321,33 @@ Mapbox Style Spec. Since it is derived from Mapbox's original work it also uses 
 <tr><td>iOS</td><td>❌</td><td>❌</td><td>✅</td></tr>
 <tr><td>Linux</td><td>✅</td><td>✅</td><td>❌</td></tr>
 <tr><td>Windows</td><td>✅</td><td>❌</td><td>❌</td></tr>
-<tr><td>macOS</td><td>❌</td><td>✅</td><td>✅<sup class="footnote-reference"><a href="#1">1</a></sup></td></tr>
-<tr><td>Node.js</td><td>✅</td><td>❌</td><td>✅ <sup class="footnote-reference"><a href="#2">2</a></sup></td></tr>
+<tr><td>macOS</td><td>❌</td><td>✅</td><td>✅<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>Node.js</td><td>✅</td><td>❌</td><td>✅ <sup class="footnote-reference" id="fr-2-1"><a href="#footnote-2">2</a></sup></td></tr>
 <tr><td>Qt</td><td>✅</td><td>❌</td><td>❌</td></tr>
 </tbody></table>
-</div>
-<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
-<p>Requires MoltenVK. Only available when built via CMake.</p>
-</div>
-<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
-<p>Issue reported, see <a href="https://github.com/maplibre/maplibre-native/issues/2928">#2928</a>.</p>
 </div>
 <h2 id="build-tooling"><a class="header" href="#build-tooling">Build Tooling</a></h2>
 <p>In 2023 we co-opted Bazel as a build tool (generator), mostly due to it having better support for iOS compared to CMake. Some platforms can use CMake as well as Bazel.</p>
 <div class="table-wrapper"><table><thead><tr><th>Platform</th><th>CMake</th><th>Bazel</th></tr></thead><tbody>
 <tr><td>Android</td><td>✅ (via Gradle)</td><td>❌</td></tr>
-<tr><td>iOS</td><td>✅<sup class="footnote-reference"><a href="#3">3</a></sup></td><td>✅</td></tr>
+<tr><td>iOS</td><td>✅<sup class="footnote-reference" id="fr-3-1"><a href="#footnote-3">3</a></sup></td><td>✅</td></tr>
 <tr><td>Linux</td><td>✅</td><td>✅</td></tr>
 <tr><td>Windows</td><td>✅</td><td>✅</td></tr>
 <tr><td>macOS</td><td>✅</td><td>✅</td></tr>
 <tr><td>Node.js</td><td>✅</td><td>❌</td></tr>
 <tr><td>Qt</td><td>✅</td><td>❌</td></tr>
 </tbody></table>
-</div>
-<div class="footnote-definition" id="3"><sup class="footnote-definition-label">3</sup>
-<p>Some targets are supported, see <a href="ios/README.html#cmake">here</a>.</p>
-</div>
-<div style="break-before: page; page-break-before: always;"></div><style>
+</div><hr>
+<ol class="footnote-definition"><li id="footnote-1">
+<p>Requires MoltenVK. Only available when built via CMake. <a href="#fr-1-1">↩</a></p>
+</li>
+<li id="footnote-2">
+<p>Issue reported, see <a href="https://github.com/maplibre/maplibre-native/issues/2928">#2928</a>. <a href="#fr-2-1">↩</a></p>
+</li>
+<li id="footnote-3">
+<p>Some targets are supported, see <a href="ios/README.html#cmake">here</a>. <a href="#fr-3-1">↩</a></p>
+</li>
+</ol><div style="break-before: page; page-break-before: always;"></div><style>
 .mdbook-alerts {
   padding: 8px 16px;
   margin-bottom: 16px;
@@ -436,6 +439,178 @@ Mapbox Style Spec. Since it is derived from Mapbox's original work it also uses 
 <li>When the PR is approved and merged, a release is attempted. If the release workflow significantly changed and the release fails, you may need to help to backport changes to the release workflow as well.</li>
 </ol>
 <p>The branch names for older versions follow a pattern as follows: <code>platform-x.x.x</code> (e.g. <a href="https://github.com/maplibre/maplibre-native/tree/android-10.x.x"><code>android-10.x.x</code></a> for the MapLibre Native Android 10.x.x release series). These branches have some minimal branch protection (a pull request is required to push changes to them).</p>
+<div style="break-before: page; page-break-before: always;"></div><style>
+.mdbook-alerts {
+  padding: 8px 16px;
+  margin-bottom: 16px;
+  border-left: 0.25em solid var(--mdbook-alerts-color);
+}
+
+.mdbook-alerts > *:first-child {
+  margin-top: 0;
+}
+
+.mdbook-alerts > *:last-child {
+  margin-bottom: 0;
+}
+
+.mdbook-alerts-title {
+  display: flex;
+  font-weight: 600;
+  align-items: center;
+  line-height: 1;
+  color: var(--mdbook-alerts-color);
+  text-transform: capitalize;
+}
+
+.mdbook-alerts-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-right: 0.2em;
+  background-color: currentColor;
+  -webkit-mask: no-repeat center / 100%;
+  mask: no-repeat center / 100%;
+  -webkit-mask-image: var(--mdbook-alerts-icon);
+  mask-image: var(--mdbook-alerts-icon);
+}
+
+.mdbook-alerts-note {
+  --mdbook-alerts-color: rgb(9, 105, 218);
+  /* https://icon-sets.iconify.design/material-symbols/info-outline-rounded/ */
+  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 17q.425 0 .713-.288T13 16v-4q0-.425-.288-.712T12 11q-.425 0-.712.288T11 12v4q0 .425.288.713T12 17m0-8q.425 0 .713-.288T13 8q0-.425-.288-.712T12 7q-.425 0-.712.288T11 8q0 .425.288.713T12 9m0 13q-2.075 0-3.9-.788t-3.175-2.137q-1.35-1.35-2.137-3.175T2 12q0-2.075.788-3.9t2.137-3.175q1.35-1.35 3.175-2.137T12 2q2.075 0 3.9.788t3.175 2.137q1.35 1.35 2.138 3.175T22 12q0 2.075-.788 3.9t-2.137 3.175q-1.35 1.35-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12q0-3.35-2.325-5.675T12 4Q8.65 4 6.325 6.325T4 12q0 3.35 2.325 5.675T12 20m0-8"%2F%3E%3C%2Fsvg%3E');
+}
+
+.mdbook-alerts-tip {
+  --mdbook-alerts-color: rgb(26, 127, 55);
+  /* https://icon-sets.iconify.design/material-symbols/lightbulb-outline-rounded/ */
+  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 22q-.825 0-1.412-.587T10 20h4q0 .825-.587 1.413T12 22m-3-3q-.425 0-.712-.288T8 18q0-.425.288-.712T9 17h6q.425 0 .713.288T16 18q0 .425-.288.713T15 19zm-.75-3q-1.725-1.025-2.738-2.75T4.5 9.5q0-3.125 2.188-5.312T12 2q3.125 0 5.313 2.188T19.5 9.5q0 2.025-1.012 3.75T15.75 16zm.6-2h6.3q1.125-.8 1.738-1.975T17.5 9.5q0-2.3-1.6-3.9T12 4Q9.7 4 8.1 5.6T6.5 9.5q0 1.35.613 2.525T8.85 14M12 14"%2F%3E%3C%2Fsvg%3E');
+}
+
+.mdbook-alerts-important {
+  --mdbook-alerts-color: rgb(130, 80, 223);
+  /* https://icon-sets.iconify.design/material-symbols/chat-info-outline-rounded/ */
+  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 7q.425 0 .713-.288T13 6q0-.425-.288-.712T12 5q-.425 0-.712.288T11 6q0 .425.288.713T12 7m0 8q.425 0 .713-.288T13 14v-4q0-.425-.288-.712T12 9q-.425 0-.712.288T11 10v4q0 .425.288.713T12 15m-6 3l-2.3 2.3q-.475.475-1.088.213T2 19.575V4q0-.825.588-1.412T4 2h16q.825 0 1.413.588T22 4v12q0 .825-.587 1.413T20 18zm-.85-2H20V4H4v13.125zM4 16V4z"%2F%3E%3C%2Fsvg%3E');
+}
+
+.mdbook-alerts-warning {
+  --mdbook-alerts-color: rgb(154, 103, 0);
+  /* https://icon-sets.iconify.design/material-symbols/warning-outline-rounded/ */
+  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M2.725 21q-.275 0-.5-.137t-.35-.363q-.125-.225-.137-.488t.137-.512l9.25-16q.15-.25.388-.375T12 3q.25 0 .488.125t.387.375l9.25 16q.15.25.138.513t-.138.487q-.125.225-.35.363t-.5.137zm1.725-2h15.1L12 6zM12 18q.425 0 .713-.288T13 17q0-.425-.288-.712T12 16q-.425 0-.712.288T11 17q0 .425.288.713T12 18m0-3q.425 0 .713-.288T13 14v-3q0-.425-.288-.712T12 10q-.425 0-.712.288T11 11v3q0 .425.288.713T12 15m0-2.5"%2F%3E%3C%2Fsvg%3E');
+}
+
+.mdbook-alerts-caution {
+  --mdbook-alerts-color: rgb(207, 34, 46);
+  /* https://icon-sets.iconify.design/material-symbols/brightness-alert-outline-rounded/ */
+  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 17q.425 0 .713-.288T13 16q0-.425-.288-.712T12 15q-.425 0-.712.288T11 16q0 .425.288.713T12 17m0-4q.425 0 .713-.288T13 12V8q0-.425-.288-.712T12 7q-.425 0-.712.288T11 8v4q0 .425.288.713T12 13m-3.35 7H6q-.825 0-1.412-.587T4 18v-2.65L2.075 13.4q-.275-.3-.425-.662T1.5 12q0-.375.15-.737t.425-.663L4 8.65V6q0-.825.588-1.412T6 4h2.65l1.95-1.925q.3-.275.663-.425T12 1.5q.375 0 .738.15t.662.425L15.35 4H18q.825 0 1.413.588T20 6v2.65l1.925 1.95q.275.3.425.663t.15.737q0 .375-.15.738t-.425.662L20 15.35V18q0 .825-.587 1.413T18 20h-2.65l-1.95 1.925q-.3.275-.662.425T12 22.5q-.375 0-.737-.15t-.663-.425zm.85-2l2.5 2.5l2.5-2.5H18v-3.5l2.5-2.5L18 9.5V6h-3.5L12 3.5L9.5 6H6v3.5L3.5 12L6 14.5V18zm2.5-6"%2F%3E%3C%2Fsvg%3E');
+}
+
+</style>
+<h1 id="render-tests"><a class="header" href="#render-tests">Render Tests</a></h1>
+<div class="mdbook-alerts mdbook-alerts-note">
+<p class="mdbook-alerts-title">
+  <span class="mdbook-alerts-icon"></span>
+  note
+</p>
+<p>See also <a href="./android/android-tests.html#render-tests">Android Tests</a> and <a href="./ios/ios-tests.html#render-tests">iOS Tests</a> for some platform-specific information on the render tests.</p>
+</div>
+<p>Render tests verify the correctness and consistency of MapLibre Native's rendering. Note that 'render test' is a bit of a misnomer, because there are various types of tests that do not really test rendering behavior that we sometimes call render tests. Examples are <a href="render-tests.html#metricsintergration">expression tests and query tests</a>. In addition, these 'render tests' allow a wide variety of operations and probes (which write out metrics) for things like GPU memory allocations, memory usage, network requests, FPS, so these tests are really quite a bit more versatile than just verifying rendering behavior.</p>
+<h2 id="render-test-runner-cli-options"><a class="header" href="#render-test-runner-cli-options">Render Test Runner CLI Options</a></h2>
+<p>When using CMake, the render test runner is an executable available as <code>mbgl-render-test-runner</code> in the build directory.</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Option / Argument</th><th style="text-align: left">Description</th><th style="text-align: left">Required?</th></tr></thead><tbody>
+<tr><td style="text-align: left"><code>-h</code>, <code>--help</code></td><td style="text-align: left">Display the help menu and exit.</td><td style="text-align: left">No</td></tr>
+<tr><td style="text-align: left"><code>-r</code>, <code>--recycle-map</code></td><td style="text-align: left">Toggle reusing the map object between tests. If set, the map object is reused; otherwise, it's reset for each test.</td><td style="text-align: left">No</td></tr>
+<tr><td style="text-align: left"><code>-s</code>, <code>--shuffle</code></td><td style="text-align: left">Toggle shuffling the order of tests based on the manifest file.</td><td style="text-align: left">No</td></tr>
+<tr><td style="text-align: left"><code>-o</code>, <code>--online</code></td><td style="text-align: left">Toggle online mode. If set, tests can make network requests. By default (<code>--online</code> not specified), tests run in offline mode, forcing resource loading from the cache only.</td><td style="text-align: left">No</td></tr>
+<tr><td style="text-align: left"><code>--seed &lt;uint32_t&gt;</code></td><td style="text-align: left">Set the seed for shuffling tests. Only relevant if <code>--shuffle</code> is also used. Defaults to <code>1</code> if <code>--shuffle</code> is used without <code>--seed</code>.</td><td style="text-align: left">No</td></tr>
+<tr><td style="text-align: left"><code>-p</code>, <code>--manifestPath &lt;string&gt;</code></td><td style="text-align: left">Specifies the path to the test manifest JSON file, which defines test configurations, paths, and potentially filters/ignores.</td><td style="text-align: left">Yes</td></tr>
+<tr><td style="text-align: left"><code>-f</code>, <code>--filter &lt;string&gt;</code></td><td style="text-align: left">Provides a regular expression used to filter which tests (based on their path/ID) should be run. Only tests matching the regex will be executed.</td><td style="text-align: left">No</td></tr>
+<tr><td style="text-align: left"><code>-u</code>, <code>--update default | platform | metrics | rebaseline</code></td><td style="text-align: left">Sets the mode for updating test expectation results: <br> - <code>default</code>: Updates generic render test expectation images/JSON. <br> - <code>platform</code>: Updates platform-specific render test expectation images/JSON. <br> - <code>metrics</code>: Updates expected metrics for the configuration defined by the manifest. <br> - <code>rebaseline</code>: Updates or creates expected metrics for the configuration defined by the manifest.</td><td style="text-align: left">No</td></tr>
+</tbody></table>
+</div>
+<h2 id="source-code-organization"><a class="header" href="#source-code-organization">Source Code Organization</a></h2>
+<h3 id="render-test"><a class="header" href="#render-test"><code>render-test</code></a></h3>
+<p>This directory contains the C++ source code for common render test runner, manifest parser and CLI tool.</p>
+<ul>
+<li><code>render-test/android</code>: standalone Gradle project with a app that runs the render test runner.</li>
+<li><code>render-tests/ios</code>: source code for Objective-C app that encapsulates the render test runner.
+property: <code>background-color</code>, <code>line-width</code>, etc., with a second level of directories below that for individual tests.</li>
+</ul>
+<h3 id="metrics"><a class="header" href="#metrics"><code>metrics</code></a></h3>
+<p>The JSON files in this directory are the manifests (to be passed to render test CLI tool). This directory also contains many directories that store metrics used by the tests. Other files/directories include:</p>
+<ul>
+<li><code>cache-style.db</code>, <code>cache-metrics.db</code>: pre-populated cache (SQLite database file) so the tests can run offline. You may need to update this database when you need a new resource available during test executation.</li>
+<li><code>binary-size</code>: binary-size checks. Not used right now, see <a href="https://github.com/maplibre/maplibre-native/issues/3379">#3379</a>.</li>
+<li><code>expectations</code>: expectations for various platforms. E.g. <code>expectations/platform-android</code> is referenced by the <code>android-render-test-runner-metrics.json</code> manifest under its <code>expectation_paths</code> key.</li>
+<li><code>ignores</code>: contains JSON files with as key a test path and as value a reason why a test is ignored. For example:
+<pre><code>{
+   "expression-tests/collator/accent-equals-de": "Locale-specific behavior changes based on platform."
+}
+</code></pre>
+Manifests can have a key <code>ignore_paths</code> with an array of ignore files. For example:
+<pre><code>{
+   ...
+   "ignore_paths": [
+      "ignores/platform-all.json",
+      "ignores/platform-linux.json",
+      "ignores/platform-android.json"
+   ],
+   ...
+}
+</code></pre>
+</li>
+</ul>
+<h4 id="metricsintergration"><a class="header" href="#metricsintergration"><code>metrics/intergration</code></a></h4>
+<ul>
+<li><code>data</code>, <code>geojson</code>, <code>glyphs</code>, <code>image</code>, <code>sprites</code>, <code>styles</code>, <code>tiles</code>, <code>tilesets</code>, <code>video</code>: various data used by the render tests.</li>
+<li><code>expression-tests</code>: tests that verify the behavior of <a href="https://maplibre.org/maplibre-style-spec/expressions/">expressions</a> of the MapLibre Style Spec.</li>
+<li><code>query-tests</code>: these tests test the behavior of the <code>queryRenderedFeatures</code> API which, as the name suggests, allow you to query the rendered features.</li>
+<li><code>render-tests</code>: location of render tests. Each render test contains a <code>style.json</code> and an <code>expected.png</code> image. This directory tree is generally organized by <a href="https://maplibre.org/maplibre-style-spec/">style specification</a> properties.</li>
+</ul>
+<h2 id="running-tests"><a class="header" href="#running-tests">Running tests</a></h2>
+<p>To run the entire integration test suite (both render or query tests), from within the maplibre-native directory on Linux run the command:</p>
+<pre><code>./build/mbgl-render-test-runner --manifestPath metrics/linux-clang8-release-style.json
+</code></pre>
+<h3 id="running-specific-tests"><a class="header" href="#running-specific-tests">Running specific tests</a></h3>
+<p>To run a subset of tests or an individual test, you can pass a specific subdirectory to the <code>mbgl-render-test-runner</code> executable. For example, to run all the tests for a given property, e.g. <code>circle-radius</code>:</p>
+<pre><code>$ build-macos-vulkan/mbgl-render-test-runner --manifestPath=metrics/macos-xcode11-release-style.json -f 'circle-radius/.*'
+* passed query-tests/circle-radius/feature-state
+* passed query-tests/circle-radius/zoom-and-property-function
+* passed query-tests/circle-radius/property-function
+* passed query-tests/circle-radius/outside
+* passed query-tests/circle-radius/tile-boundary
+* passed query-tests/circle-radius/inside
+* passed query-tests/circle-radius/multiple-layers
+* passed render-tests/circle-radius/zoom-and-property-function
+* passed render-tests/circle-radius/literal
+* passed render-tests/circle-radius/property-function
+* passed render-tests/circle-radius/default
+* passed render-tests/circle-radius/function
+* passed render-tests/circle-radius/antimeridian
+13 passed (100.0%)
+Results at: /Users/bart/src/maplibre-native/metrics/macos-xcode11-release-style.html
+</code></pre>
+<h2 id="writing-new-tests"><a class="header" href="#writing-new-tests">Writing new tests</a></h2>
+<p>To add a new render test:</p>
+<ol>
+<li>
+<p>Create a new directory <code>test/integration/render-tests/&lt;property-name&gt;/&lt;new-test-name&gt;</code></p>
+</li>
+<li>
+<p>Create a new <code>style.json</code> file within that directory, specifying the map to load. Feel free to copy &amp; modify one of the existing <code>style.json</code> files from the <code>render-tests</code> subdirectories.</p>
+</li>
+<li>
+<p>Generate an <code>expected.png</code> image from the given style with</p>
+<pre><code>$ ./build/mbgl-render-test-runner --update default --manifestPath=... -f '&lt;property-name&gt;/&lt;new-test-name&gt;'
+</code></pre>
+</li>
+<li>
+<p>Manually inspect <code>expected.png</code> to verify it looks as expected.</p>
+</li>
+<li>
+<p>Commit the new <code>style.json</code> and <code>expected.png</code>.</p>
+</li>
+</ol>
 <div style="break-before: page; page-break-before: always;"></div><style>
 .mdbook-alerts {
   padding: 8px 16px;
@@ -603,7 +778,7 @@ cd platform/android
 
 </style>
 <h1 id="maplibre-android-tests"><a class="header" href="#maplibre-android-tests">MapLibre Android Tests</a></h1>
-<h2 id="render-tests"><a class="header" href="#render-tests">Render Tests</a></h2>
+<h2 id="render-tests-1"><a class="header" href="#render-tests-1">Render Tests</a></h2>
 <p>To run the render tests for Android, run the configuration for the <code>androidRenderTest.app</code> module.</p>
 <h3 id="filtering-render-tests"><a class="header" href="#filtering-render-tests">Filtering Render Tests</a></h3>
 <p>You can filter the tests to run by passing a flag to the file <code>platform/android/src/test/render_test_runner.cpp</code>:</p>
@@ -615,8 +790,12 @@ cd platform/android
 <p>Double click <code>android-render-test-runner-style.html</code>. Right click on the opened tab and select <em>Open In &gt; Browser</em>. You should see that a single render test passed.</p>
 <img width="801" alt="image" src="https://github.com/maplibre/maplibre-native/assets/649392/33e88999-7787-492f-afd9-f5a3e3fd61f7">
 <p>Alternatively to download (and open) the results from the command line, use:</p>
-<pre><code>adb shell "run-as org.maplibre.render_test_runner cat files/metrics/android-render-test-runner-style.html" &gt; android-render-test-runner-style.html
-open android-render-test-runner-style.html
+<pre><code>filename=android-render-test-runner-style.html
+adb shell "run-as org.maplibre.render_test_runner cat files/metrics/$filename" &gt; $filename
+open $filename
+</code></pre>
+<p>For Vulkan use</p>
+<pre><code>filename=android-vulkan-render-test-runner-style.html
 </code></pre>
 <h3 id="updating-the-render-tests"><a class="header" href="#updating-the-render-tests">Updating the Render Tests</a></h3>
 <p>Now let's edit <code>metrics/integration/render-tests/background-color/literal/style.json</code>, change this line:</p>
@@ -1186,7 +1365,12 @@ xed build-ios/MapLibre\ Native.xcodeproj
 
 </style>
 <h1 id="ios-tests"><a class="header" href="#ios-tests">iOS Tests</a></h1>
-<h2 id="render-tests-1"><a class="header" href="#render-tests-1">Render Tests</a></h2>
+<h2 id="ios-unit-tests"><a class="header" href="#ios-unit-tests">iOS Unit Tests</a></h2>
+<p>To run the iOS unit tests via XCTest, run tests for the <code>ios_test</code> target in Xcode
+or use the following bazel command:</p>
+<pre><code>bazel test //platform/ios/test:ios_test --test_output=errors --//:renderer=metal
+</code></pre>
+<h2 id="render-tests-2"><a class="header" href="#render-tests-2">Render Tests</a></h2>
 <p>To run the render tests, run the <code>RenderTest</code> target from iOS.</p>
 <p>When running in a simulator, use</p>
 <pre><code># check for 'DataContainer' of the app with `*.maplibre.RenderTestApp` id
@@ -1658,15 +1842,15 @@ come from data sources. And a <em><strong>Layer</strong></em> is composed of til
 from said features.</p>
 </li>
 </ol>
-<p>We will look a bit more into these components going forward<sup class="footnote-reference"><a href="#1">1</a></sup>.</p>
+<p>We will look a bit more into these components going forward<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup>.</p>
 <h3 id="map-view"><a class="header" href="#map-view">Map View</a></h3>
 <p>A <em>Map View</em> is a reusable map viewer that renders a raster or vector
 map in different platform specific viewports. It bears the standard of
 common map configuration across the platforms. These ranges from map
 viewport size, pixel ratio, tileset URL, style, collision configuration
-for text, and annotations<sup class="footnote-reference"><a href="#2">2</a></sup>. A <em>Map View</em> does not contain any
+for text, and annotations<sup class="footnote-reference" id="fr-2-1"><a href="#footnote-2">2</a></sup>. A <em>Map View</em> does not contain any
 rendering capability of its own. It publishes and listens to events
-through observers<sup class="footnote-reference"><a href="#3">3</a></sup>.</p>
+through observers<sup class="footnote-reference" id="fr-3-1"><a href="#footnote-3">3</a></sup>.</p>
 <p>Figure 1 does not display the explicit use of observers for brevity.</p>
 <h4 id="observers"><a class="header" href="#observers">Observers</a></h4>
 <p>Observers are a group of components that listen and publish events from
@@ -1703,7 +1887,7 @@ context. <em>Layer</em> can mean any of the following:</p>
 <li>
 <p>From the point of view of data that needs to be rendered on map,
 each map tile is composed of <em>layers</em> of data. Each layer, in this
-context, contains <em>features</em><sup class="footnote-reference"><a href="#4">4</a></sup> to be rendered in a map. These
+context, contains <em>features</em><sup class="footnote-reference" id="fr-4-1"><a href="#footnote-4">4</a></sup> to be rendered in a map. These
 features are defined by a <em>source.</em> Each <em>layer</em> is tied to a
 <em>source</em>.</p>
 </li>
@@ -1718,7 +1902,7 @@ data to be rendered and the style to be applied on said layer.</p>
 refers to the definition mentioned in 2.</p>
 <h3 id="glyphs"><a class="header" href="#glyphs">Glyphs</a></h3>
 <p>A <em>glyph</em> is a single representation of a character. A font is a map of
-characters<sup class="footnote-reference"><a href="#5">5</a></sup>. Map tiles use labels of text to show name of cities,
+characters<sup class="footnote-reference" id="fr-5-1"><a href="#footnote-5">5</a></sup>. Map tiles use labels of text to show name of cities,
 administrative boundaries, or street names. Map tiles also need to show
 icons for amenities like bus stops and parks. A map style uses character
 map from fonts to display labels and icons. Collectively these are
@@ -1741,7 +1925,7 @@ When it does, we will dive more into <em>glyph</em> rendering.</p>
 underpowered environments, MapLibre Native tries to leverage message
 passing across threads to render frames asynchronously. The threading
 architecture in implementation realizes this using the Actor
-interface<sup class="footnote-reference"><a href="#6">6</a></sup>. In reality the messages are raw pointers. This ranges
+interface<sup class="footnote-reference" id="fr-6-1"><a href="#footnote-6">6</a></sup>. In reality the messages are raw pointers. This ranges
 from raw message to actionable message. By actionable message this
 document means <em>anonymous functions</em> that are passed as messages between
 actors. These arbitrary messages are <em>immutable</em> by design. The current
@@ -1775,7 +1959,7 @@ Android uses a <em>GLSurfaceView</em> with a <em>GLThread</em> where the iOS SDK
 passing to communicate with the renderer. These messages are <em>immutable</em>
 by design and the render loops checks for these in each iteration. To
 simplify, there is only one thread allocated for rendering loop,
-background or foreground<sup class="footnote-reference"><a href="#7">7</a></sup>. A <em>Tile Worker</em> is a thread that prepares
+background or foreground<sup class="footnote-reference" id="fr-7-1"><a href="#footnote-7">7</a></sup>. A <em>Tile Worker</em> is a thread that prepares
 a tile of a specific type. Geometry Tile Worker by the name of it,
 prepares a tile for rendering tiles that contains vector geometry.
 Following that same trend, MapLibre Native offers tile worker for
@@ -1792,44 +1976,45 @@ is a Geometry Tile.</p>
 <p>*To read in depth about the workflow of a Geometry Tile Worker, please
 check <a href="design/./geometry-tile-worker.html">Geometry Tile Worker</a> chapter.</p>
 <hr />
-<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<hr>
+<ol class="footnote-definition"><li id="footnote-1">
 <p>To read in depth about the data flow for map initialization and
 rendering in Android, please check
-<a href="design/./android-map-rendering-data-flow.html">Android Map Rendering Data Flow</a></p>
-</div>
-<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<a href="design/./android-map-rendering-data-flow.html">Android Map Rendering Data Flow</a> <a href="#fr-1-1">↩</a></p>
+</li>
+<li id="footnote-2">
 <p>This document speaks of a simplified configuration for brevity.
 These also includes viewport mode, constrain mode, and north
-orientation.</p>
-</div>
-<div class="footnote-definition" id="3"><sup class="footnote-definition-label">3</sup>
+orientation. <a href="#fr-2-1">↩</a></p>
+</li>
+<li id="footnote-3">
 <p>Platform SDKs might use a wrapper map view class atop the map
 component. This is to help establish contract between the device
 runtime running a different language. Android is a good example of
-this behaviour.</p>
-</div>
-<div class="footnote-definition" id="4"><sup class="footnote-definition-label">4</sup>
+this behaviour. <a href="#fr-3-1">↩</a></p>
+</li>
+<li id="footnote-4">
 <p>A feature is the spatial description of a real-world entity such
 as a road or a utility pole. Any geometry that is displayed on a map
-tile is either an individual feature or a part of a feature.</p>
-</div>
-<div class="footnote-definition" id="5"><sup class="footnote-definition-label">5</sup>
+tile is either an individual feature or a part of a feature. <a href="#fr-4-1">↩</a></p>
+</li>
+<li id="footnote-5">
 <p>This document used the term glyph and character interchangeably.
 In reality, a single character can have multiple glyphs. These are
 called alternates. On the other hand, a single glyph can represent
-multiple characters. These are called ligatures.</p>
-</div>
-<div class="footnote-definition" id="6"><sup class="footnote-definition-label">6</sup>
+multiple characters. These are called ligatures. <a href="#fr-5-1">↩</a></p>
+</li>
+<li id="footnote-6">
 <p>In the Javascript counterpart, MapLibre GL JS, this is achieved
-through usage of webworkers.</p>
-</div>
-<div class="footnote-definition" id="7"><sup class="footnote-definition-label">7</sup>
+through usage of webworkers. <a href="#fr-6-1">↩</a></p>
+</li>
+<li id="footnote-7">
 <p>In iOS, the render thread runs on UI thread, as in it's a
 foreground thread. Android offers wider range of devices in terms of
 battery capacity. Hence, Android prefers to use a background thread
-for rendering loop.</p>
-</div>
-<div style="break-before: page; page-break-before: always;"></div><style>
+for rendering loop. <a href="#fr-7-1">↩</a></p>
+</li>
+</ol><div style="break-before: page; page-break-before: always;"></div><style>
 .mdbook-alerts {
   padding: 8px 16px;
   margin-bottom: 16px;
@@ -1946,7 +2131,7 @@ the world space.</p>
 see the <em>world</em> from a viewpoint of a camera, view matrix
 transformation is applied. Cameras can see the world up to a
 distance like human eyes can. To emulate that we apply <em>Projection
-Matrix</em> to <em>View Space</em> and end up in <em>Clip Space</em><sup class="footnote-reference"><a href="#8">1</a></sup>.</p>
+Matrix</em> to <em>View Space</em> and end up in <em>Clip Space</em><sup class="footnote-reference" id="fr-8-1"><a href="#footnote-8">1</a></sup>.</p>
 </li>
 <li>
 <p>Finally, the <em>World Space</em> is transformed to device screen by
@@ -1964,7 +2149,7 @@ will talk mostly about two categories of coordinate systems:</p>
 </li>
 </ol>
 <p>World Coordinates are defined in <em>World Space</em>. This speaks of how <em>this
-world defines itself in a three-dimensional space</em>.<sup class="footnote-reference"><a href="#9">2</a></sup> On the other
+world defines itself in a three-dimensional space</em>.<sup class="footnote-reference" id="fr-9-1"><a href="#footnote-9">2</a></sup> On the other
 hand, device coordinates are used through View, Clip, and Screen Space.
 The purpose of this set of coordinates is to define how the world will
 be projected on a screen. Device Coordinates define <em>how a world will be
@@ -1984,12 +2169,12 @@ earth (ellipsoid) to define specific locations on the surface to create
 a grid. Traditional longitude, and latitude coordinate pair to define a
 location is an example of using geographic coordinates. EPSG: 4326
 (WGS84) is the reference <em>Geographic Coordinate System</em> that most of the
-world's geospatial data is defined and stored<sup class="footnote-reference"><a href="#10">3</a></sup> in. There is no way
+world's geospatial data is defined and stored<sup class="footnote-reference" id="fr-10-1"><a href="#footnote-10">3</a></sup> in. There is no way
 to visualize the WGS84 coordinate system on a two-dimensional plane, in
 this case, the map.</p>
 <p>Projections are used to translate WGS84 coordinates to a plane. To be
 specific, projections are used to translate a location on the ellipsoid
-to a two-dimensional square. EPSG:3857<sup class="footnote-reference"><a href="#11">4</a></sup> or projected
+to a two-dimensional square. EPSG:3857<sup class="footnote-reference" id="fr-11-1"><a href="#footnote-11">4</a></sup> or projected
 <em>Pseudo-Mercator Coordinate System</em> is such a coordinate system.
 EPSG:3857 is used by MapLibre Native as a default coordinate system
 to display maps. This system takes WGS84 coordinates and projects them
@@ -2023,7 +2208,7 @@ shifting our coordinate by 180. For example, a location with longitude
 </code></pre>
 <p>Finding the X coordinate is easy to compute. But the Y requires a more
 than normalizing the range. This is due to the aforementioned space
-stretching in the hemispheres<sup class="footnote-reference"><a href="#12">5</a></sup>. Latitude value (Y) defined in WGS84
+stretching in the hemispheres<sup class="footnote-reference" id="fr-12-1"><a href="#footnote-12">5</a></sup>. Latitude value (Y) defined in WGS84
 will not be the same position after stretching. The computation looks
 like the following if the latitude was 38.889814:</p>
 <pre><code>y = ln(tan(45 + latitude / 2))
@@ -2075,7 +2260,7 @@ and latitude 38.889814.</p>
 translate these coordinates to native device coordinates. To reiterate
 our progress in the perspective of rendering, we just defined our local
 space with tile coordinates. Local coordinates are the coordinates of
-the object to be rendered relative to its local origin<sup class="footnote-reference"><a href="#13">6</a></sup>. In this
+the object to be rendered relative to its local origin<sup class="footnote-reference" id="fr-13-1"><a href="#footnote-13">6</a></sup>. In this
 case, the objects are the map tiles. The next step in traditional
 rendering workflow is to translate object coordinates to world
 coordinates. This is important to understand if we are to render
@@ -2094,7 +2279,7 @@ level at a time.</p>
 <p>The journey towards rendering the tiles in the device screen from the
 world space starts with <em>View Matrix</em>, as defined in the world space.
 The key part here is the <em>camera</em>. A <em>view matrix</em> is a matrix that
-scales, rotates, and translates<sup class="footnote-reference"><a href="#14">7</a></sup> the world space from the view of
+scales, rotates, and translates<sup class="footnote-reference" id="fr-14-1"><a href="#footnote-14">7</a></sup> the world space from the view of
 the camera. To add the perspective of the camera, we apply the
 <em>Projection Matrix</em>. In MapLibre Native, a camera initialization
 requires map center, bearing, and pitch.</p>
@@ -2108,7 +2293,7 @@ the 3D plane we render tiles on, rather the position of the camera.</em></p>
 we use here, to be specific the view matrix, can directly take the tile
 coordinates to move the camera to a particular tile in a zoom level.
 Once a tile is built, the GPU can quickly draw the same tile with different
-bearing, pan, pitch, and zoom parameters<sup class="footnote-reference"><a href="#15">8</a></sup>.</p>
+bearing, pan, pitch, and zoom parameters<sup class="footnote-reference" id="fr-15-1"><a href="#footnote-15">8</a></sup>.</p>
 <p>If we keep following Figure 2, we see we need to also add a projection
 matrix. And MapLibre Native uses a <em>perspective projection</em>.
 Perspective projection matrix introduces the sense of depth perspective
@@ -2136,7 +2321,7 @@ is derived from the following formula:</p>
 </code></pre>
 <p>Factoring only the transformations of zoom, map center, bearing, pitch,
 and tile in, with a viewport of 862 by 742 pixels, the projection matrix
-will look like<sup class="footnote-reference"><a href="#16">9</a></sup>:</p>
+will look like<sup class="footnote-reference" id="fr-16-1"><a href="#footnote-16">9</a></sup>:</p>
 <div class="table-wrapper"><table><thead><tr><th></th><th><strong>x</strong></th><th><strong>y</strong></th><th><strong>z</strong></th><th><strong>w</strong></th></tr></thead><tbody>
 <tr><td><strong>x</strong></td><td>0.224</td><td>-0.079</td><td>-0.026</td><td>-0.026</td></tr>
 <tr><td><strong>y</strong></td><td>-0.096</td><td>-0.184</td><td>-0.062</td><td>-0.061</td></tr>
@@ -2180,52 +2365,53 @@ NormalizedY * height)
 <p>These are our viewport screen coordinates where our desired WGS84
 location longitude -77.035915 and latitude 38.889814 will be rendered.</p>
 <hr />
-<div class="footnote-definition" id="8"><sup class="footnote-definition-label">1</sup>
+<hr>
+<ol class="footnote-definition"><li id="footnote-8">
 <p>Clip coordinates are normalized to -1.0 to 1.0. For brevity, this
-document does not dive deep into 3D rendering basics.</p>
-</div>
-<div class="footnote-definition" id="9"><sup class="footnote-definition-label">2</sup>
+document does not dive deep into 3D rendering basics. <a href="#fr-8-1">↩</a></p>
+</li>
+<li id="footnote-9">
 <p>For brevity, this document is assuming the world we live in is
-three dimensional.</p>
-</div>
-<div class="footnote-definition" id="10"><sup class="footnote-definition-label">3</sup>
+three dimensional. <a href="#fr-9-1">↩</a></p>
+</li>
+<li id="footnote-10">
 <p>For brevity, this document does not dive deep into reference
 ellipsoids to approximates earth, also known as Datums. EPSG:4326 or
-WGS84 is such a Datum or reference ellipsoid.</p>
-</div>
-<div class="footnote-definition" id="11"><sup class="footnote-definition-label">4</sup>
+WGS84 is such a Datum or reference ellipsoid. <a href="#fr-10-1">↩</a></p>
+</li>
+<li id="footnote-11">
 <p>There are other coordinate systems such as EPSG:54001 that uses
 equirectangles over squares to project the WGS84 coordinates. This
 document focuses on EPSG:3857 because MapLibre Native uses it by
-default.</p>
-</div>
-<div class="footnote-definition" id="12"><sup class="footnote-definition-label">5</sup>
+default. <a href="#fr-11-1">↩</a></p>
+</li>
+<li id="footnote-12">
 <p>This document scopes out the trigonometric proof of this
 translation for brevity. To know more:
-<a href="https://en.wikipedia.org/wiki/Web_Mercator_projection">https://en.wikipedia.org/wiki/Web_Mercator_projection</a></p>
-</div>
-<div class="footnote-definition" id="13"><sup class="footnote-definition-label">6</sup>
+<a href="https://en.wikipedia.org/wiki/Web_Mercator_projection">https://en.wikipedia.org/wiki/Web_Mercator_projection</a> <a href="#fr-12-1">↩</a></p>
+</li>
+<li id="footnote-13">
 <p>For brevity, this document does not speak in depth of rendering
 basics in regards to coordinate systems. For more, please check:
-<a href="https://learnopengl.com/Getting-started/Coordinate-Systems">https://learnopengl.com/Getting-started/Coordinate-Systems</a></p>
-</div>
-<div class="footnote-definition" id="14"><sup class="footnote-definition-label">7</sup>
+<a href="https://learnopengl.com/Getting-started/Coordinate-Systems">https://learnopengl.com/Getting-started/Coordinate-Systems</a> <a href="#fr-13-1">↩</a></p>
+</li>
+<li id="footnote-14">
 <p>Scale, rotate, and translate are common rendering transformation
 used to produce model, view, and projection matrices. These
 operations are applied right to left. As in translate first, rotate
 second, and scale last. Matrix multiplications are not commutative,
-so order of operation matters.</p>
-</div>
-<div class="footnote-definition" id="15"><sup class="footnote-definition-label">8</sup>
+so order of operation matters. <a href="#fr-14-1">↩</a></p>
+</li>
+<li id="footnote-15">
 <p>The piece of code we run on GPU is called a shader. We will see
 more how shaders influence MapLibre Native rendering later in the
-document.</p>
-</div>
-<div class="footnote-definition" id="16"><sup class="footnote-definition-label">9</sup>
+document. <a href="#fr-15-1">↩</a></p>
+</li>
+<li id="footnote-16">
 <p>Matrix and examples produced from Chris Loers work hosted in:
-<a href="https://chrisloer.github.io/mapbox-gl-coordinates/#11.8/38.895/-77.0757/40/60">https://chrisloer.github.io/mapbox-gl-coordinates/#11.8/38.895/-77.0757/40/60</a></p>
-</div>
-<div style="break-before: page; page-break-before: always;"></div><style>
+<a href="https://chrisloer.github.io/mapbox-gl-coordinates/#11.8/38.895/-77.0757/40/60">https://chrisloer.github.io/mapbox-gl-coordinates/#11.8/38.895/-77.0757/40/60</a> <a href="#fr-16-1">↩</a></p>
+</li>
+</ol><div style="break-before: page; page-break-before: always;"></div><style>
 .mdbook-alerts {
   padding: 8px 16px;
   margin-bottom: 16px;
@@ -2308,7 +2494,7 @@ features in different zoom levels with different colors. Expressions
 facilitate that. The rendering depends on the style of the layer along with
 pitch, bearing, and zoom of the map. This was called <em>Data Driven Styling (DDS)</em>.
 Another option that was used was to completely change the style in run time to
-achieve the same outcome<sup class="footnote-reference"><a href="#17">1</a></sup>.</p>
+achieve the same outcome<sup class="footnote-reference" id="fr-17-1"><a href="#footnote-17">1</a></sup>.</p>
 <p>The desire of being able to render a layer in different zoom levels
 differently based on data drove the birth of <em>expressions</em>. To
 summarize, expressions do the following:</p>
@@ -2419,11 +2605,12 @@ expression can be computed only when its necessary to be computed in
 runtime. A change induced by data or interaction in an expression
 evaluation result will result in a new style load in the rendering loop.</p>
 <hr />
-<div class="footnote-definition" id="17"><sup class="footnote-definition-label">1</sup>
+<hr>
+<ol class="footnote-definition"><li id="footnote-17">
 <p>Sourced from Mapbox GL Native wiki:
-<a href="https://github.com/mapbox/mapbox-gl-native/wiki/Expression-Architecture">https://github.com/mapbox/mapbox-gl-native/wiki/Expression-Architecture</a></p>
-</div>
-<div style="break-before: page; page-break-before: always;"></div><style>
+<a href="https://github.com/mapbox/mapbox-gl-native/wiki/Expression-Architecture">https://github.com/mapbox/mapbox-gl-native/wiki/Expression-Architecture</a> <a href="#fr-17-1">↩</a></p>
+</li>
+</ol><div style="break-before: page; page-break-before: always;"></div><style>
 .mdbook-alerts {
   padding: 8px 16px;
   margin-bottom: 16px;
@@ -2495,7 +2682,7 @@ evaluation result will result in a new style load in the rendering loop.</p>
 Native at the time of writing. This section speaks of possible future
 improvements for MapLibre Native from an architectural point of view.
 Before that, let's look into the architectural challenges MapLibre
-Native is facing<sup class="footnote-reference"><a href="#18">1</a></sup>:</p>
+Native is facing<sup class="footnote-reference" id="fr-18-1"><a href="#footnote-18">1</a></sup>:</p>
 <h2 id="renderer-coupled-with-opengl"><a class="header" href="#renderer-coupled-with-opengl">Renderer coupled with OpenGL</a></h2>
 <p>The renderer component is tightly coupled to OpenGL ES. It uses OpenGL
 ES as its only preferred rendering backend. Furthermore, MapLibre
@@ -2610,7 +2797,7 @@ renderer and tile workers. Private functions also follow the <em>C++ move
 semantics</em>. This means, each private function takes ownership of the
 arguments passed to the function by copying it to a new memory.</p>
 <p>Rust as a programming language enforces such intentions through compile
-time safety checks. Provided Rust Foreign Function<sup class="footnote-reference"><a href="#19">2</a></sup> Interface allows
+time safety checks. Provided Rust Foreign Function<sup class="footnote-reference" id="fr-19-1"><a href="#footnote-19">2</a></sup> Interface allows
 interoperability with Rust, this document proposes the following to be
 done in sequence:</p>
 <ol>
@@ -2639,17 +2826,18 @@ ecosystem.</p>
 <p>Following the above steps will merge towards a single MapLibre
 implementation for web and native.</p>
 <hr />
-<div class="footnote-definition" id="18"><sup class="footnote-definition-label">1</sup>
+<hr>
+<ol class="footnote-definition"><li id="footnote-18">
 <p>This document deliberately does not speak of problems regarding
 build and infrastructure of MapLibre Native. They will be handled
-in individual design PR requests / documents.</p>
-</div>
-<div class="footnote-definition" id="19"><sup class="footnote-definition-label">2</sup>
+in individual design PR requests / documents. <a href="#fr-18-1">↩</a></p>
+</li>
+<li id="footnote-19">
 <p>Rust Foreign Function Interface allows interop bindings and code
 that needs to exchange C-Like strings with other programming
-languages.</p>
-</div>
-<div style="break-before: page; page-break-before: always;"></div><style>
+languages. <a href="#fr-19-1">↩</a></p>
+</li>
+</ol><div style="break-before: page; page-break-before: always;"></div><style>
 .mdbook-alerts {
   padding: 8px 16px;
   margin-bottom: 16px;
@@ -2782,7 +2970,7 @@ tileset to be rendered first. In a rendering request, if the tileset is
 already loaded, MapLibre Native will use a cached tile set.</p>
 <p>The next decision to make here is which tiles are to be rendered on the
 viewport. To deduce this, MapLibre Native translates the device
-viewport coordinates<sup class="footnote-reference"><a href="#20">1</a></sup> to a tile cover. A tile cover loads all the
+viewport coordinates<sup class="footnote-reference" id="fr-20-1"><a href="#footnote-20">1</a></sup> to a tile cover. A tile cover loads all the
 tiles that will rendered to current viewport. If the viewport already
 has all the tiles that is needed to be rendered by the deduced tile
 cover, there are no <em>dirty</em> tiles. If the tile cover somehow has a
@@ -2815,14 +3003,15 @@ source that has an internal <em>update</em> method. This method produces the
 There are other types such as GeoJSON sources. They work in a similar
 manner as the tile source.</p>
 <hr />
-<div class="footnote-definition" id="20"><sup class="footnote-definition-label">1</sup>
+<hr>
+<ol class="footnote-definition"><li id="footnote-20">
 <p>Viewport coordinates are derived from the coordinate system of
 the device screen. Anything rendered inside a unit cube of local
 space is translated to screen space of actual pixels. The tiles are
 rendered in a local space before rendered back to screen. We will
-see more about that in Coordinate System section.</p>
-</div>
-<div style="break-before: page; page-break-before: always;"></div><style>
+see more about that in Coordinate System section. <a href="#fr-20-1">↩</a></p>
+</li>
+</ol><div style="break-before: page; page-break-before: always;"></div><style>
 .mdbook-alerts {
   padding: 8px 16px;
   margin-bottom: 16px;
@@ -2895,7 +3084,7 @@ see more about that in Coordinate System section.</p>
 <p>Going back to Geometry Tile Worker, it is
 a state machine. The main principle is that Geometry Tile Worker should
 carry out each task till completion once it has begun even if it
-requires asynchronous waiting<sup class="footnote-reference"><a href="#21">1</a></sup>. When a Geometry Tile Worker is
+requires asynchronous waiting<sup class="footnote-reference" id="fr-21-1"><a href="#footnote-21">1</a></sup>. When a Geometry Tile Worker is
 working on a task, any new message to said worker is queued. Messages
 per <em>unique tile</em> are grouped. Upon finishing work, Geometry Tile Worker
 picks the latest message from the queue. All changes introduced in the
@@ -2929,7 +3118,7 @@ in the same thread as the worker or in a different thread. Looking back
 to Figure 8, we also see another transition path from <em>Idle</em> state to
 <em>coalescing</em> state through <em>symbolDependenciesChanged</em> event. When a
 tile object is done with downloading pending glyphs and images it issues
-a <em>onImagesAvailable</em> or <em>onGlyphsAvailable</em> event to the worker<sup class="footnote-reference"><a href="#22">2</a></sup>.
+a <em>onImagesAvailable</em> or <em>onGlyphsAvailable</em> event to the worker<sup class="footnote-reference" id="fr-22-1"><a href="#footnote-22">2</a></sup>.
 Both of these events will translate to <em>symbolDependenciesChanged</em> event
 in the end. When <em>symbolDependenciesChanged</em> is fired, if the worker is
 on <em>Idle</em> state, it will move to <em>Coalescing</em> state. If the worker was
@@ -2979,17 +3168,18 @@ state by self-sending <em>coalesced</em> transition. Reiterating again, to
 consider the worker has coalesced, it has to <em>parse</em> all the <em>coalesced</em>
 data from available messages in the queue for a particular tile.</p>
 <hr />
-<div class="footnote-definition" id="21"><sup class="footnote-definition-label">1</sup>
+<hr>
+<ol class="footnote-definition"><li id="footnote-21">
 <p>This is not entirely true. Going forward this section will shed
 some light on <em>why.</em> For the time being, the assumption accelerates
-understanding.</p>
-</div>
-<div class="footnote-definition" id="22"><sup class="footnote-definition-label">2</sup>
+understanding. <a href="#fr-21-1">↩</a></p>
+</li>
+<li id="footnote-22">
 <p>In reality, <em>onGlyphsAvailable</em> and <em>onImagesAvailable</em> events
 will be fired from GlyphManager and ImageManger instances. For
-brevity, this document does not speak of these classes.</p>
-</div>
-<div style="break-before: page; page-break-before: always;"></div><style>
+brevity, this document does not speak of these classes. <a href="#fr-22-1">↩</a></p>
+</li>
+</ol><div style="break-before: page; page-break-before: always;"></div><style>
 .mdbook-alerts {
   padding: 8px 16px;
   margin-bottom: 16px;

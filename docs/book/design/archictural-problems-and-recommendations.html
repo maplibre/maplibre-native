@@ -24,18 +24,19 @@
         <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="../highlight.css">
-        <link rel="stylesheet" href="../tomorrow-night.css">
-        <link rel="stylesheet" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
         <link rel="stylesheet" href="../diff.css">
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
@@ -45,8 +46,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -60,7 +61,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -73,8 +75,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -110,6 +112,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -225,7 +228,7 @@
 Native at the time of writing. This section speaks of possible future
 improvements for MapLibre Native from an architectural point of view.
 Before that, let's look into the architectural challenges MapLibre
-Native is facing<sup class="footnote-reference"><a href="#18">1</a></sup>:</p>
+Native is facing<sup class="footnote-reference" id="fr-18-1"><a href="#footnote-18">1</a></sup>:</p>
 <h2 id="renderer-coupled-with-opengl"><a class="header" href="#renderer-coupled-with-opengl">Renderer coupled with OpenGL</a></h2>
 <p>The renderer component is tightly coupled to OpenGL ES. It uses OpenGL
 ES as its only preferred rendering backend. Furthermore, MapLibre
@@ -340,7 +343,7 @@ renderer and tile workers. Private functions also follow the <em>C++ move
 semantics</em>. This means, each private function takes ownership of the
 arguments passed to the function by copying it to a new memory.</p>
 <p>Rust as a programming language enforces such intentions through compile
-time safety checks. Provided Rust Foreign Function<sup class="footnote-reference"><a href="#19">2</a></sup> Interface allows
+time safety checks. Provided Rust Foreign Function<sup class="footnote-reference" id="fr-19-1"><a href="#footnote-19">2</a></sup> Interface allows
 interoperability with Rust, this document proposes the following to be
 done in sequence:</p>
 <ol>
@@ -369,17 +372,18 @@ ecosystem.</p>
 <p>Following the above steps will merge towards a single MapLibre
 implementation for web and native.</p>
 <hr />
-<div class="footnote-definition" id="18"><sup class="footnote-definition-label">1</sup>
+<hr>
+<ol class="footnote-definition"><li id="footnote-18">
 <p>This document deliberately does not speak of problems regarding
 build and infrastructure of MapLibre Native. They will be handled
-in individual design PR requests / documents.</p>
-</div>
-<div class="footnote-definition" id="19"><sup class="footnote-definition-label">2</sup>
+in individual design PR requests / documents. <a href="#fr-18-1">↩</a></p>
+</li>
+<li id="footnote-19">
 <p>Rust Foreign Function Interface allows interop bindings and code
 that needs to exchange C-Like strings with other programming
-languages.</p>
-</div>
-
+languages. <a href="#fr-19-1">↩</a></p>
+</li>
+</ol>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
