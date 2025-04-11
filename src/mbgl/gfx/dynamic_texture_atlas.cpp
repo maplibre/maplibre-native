@@ -12,12 +12,13 @@ constexpr const Size startSize = {512, 512};
 GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
     using GlyphsToUpload = std::vector<std::tuple<TextureHandle, Immutable<Glyph>, FontStackHash>>;
     mutex.lock();
-    
+
     GlyphAtlas glyphAtlas;
     if (!glyphs.size()) {
         glyphAtlas.dynamicTexture = dummyDynamicTexture[TexturePixelType::Alpha];
         if (!glyphAtlas.dynamicTexture) {
-            glyphAtlas.dynamicTexture = std::make_shared<gfx::DynamicTexture>(context, Size(1, 1), TexturePixelType::Alpha);
+            glyphAtlas.dynamicTexture = std::make_shared<gfx::DynamicTexture>(
+                context, Size(1, 1), TexturePixelType::Alpha);
             dummyDynamicTexture[TexturePixelType::Alpha] = glyphAtlas.dynamicTexture;
         }
         mutex.unlock();
@@ -102,12 +103,13 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
                                                        const ImageVersionMap& versionMap) {
     using ImagesToUpload = std::vector<std::pair<TextureHandle, Immutable<style::Image::Impl>>>;
     mutex.lock();
-    
+
     ImageAtlas imageAtlas;
     if (!icons.size() && !patterns.size()) {
         imageAtlas.dynamicTexture = dummyDynamicTexture[TexturePixelType::RGBA];
         if (!imageAtlas.dynamicTexture) {
-            imageAtlas.dynamicTexture = std::make_shared<gfx::DynamicTexture>(context, Size(1, 1), TexturePixelType::RGBA);
+            imageAtlas.dynamicTexture = std::make_shared<gfx::DynamicTexture>(
+                context, Size(1, 1), TexturePixelType::RGBA);
             dummyDynamicTexture[TexturePixelType::RGBA] = imageAtlas.dynamicTexture;
         }
         mutex.unlock();
