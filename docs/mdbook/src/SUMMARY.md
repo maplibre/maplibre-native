@@ -6,6 +6,8 @@
 
 - [Release Policy](./release-policy.md)
 
+- [Render Tests](./render-tests.md)
+
 - [Android](./android/README.md)
   - [Tests](./android/android-tests.md)
   - [Documentation](./android/android-documentation.md)
