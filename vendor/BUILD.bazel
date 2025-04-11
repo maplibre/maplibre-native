@@ -145,6 +145,16 @@ cc_library(
     visibility = ["//visibility:public"],
 )
 
+# vendor/maplibre-tile-spec
+
+cc_library(
+    name = "maplibre-tile-spec",
+    hdrs = glob(["maplibre-tile-spec/cpp/include/**/*.hpp"]),
+    copts = CPP_FLAGS,
+    includes = ["maplibre-tile-spec/cpp/include"],
+    visibility = ["//visibility:public"],
+)
+
 # vendor/metal-cpp.json
 cc_library(
     name = "metal-cpp",

@@ -6,8 +6,11 @@
 
 #include <mlt/decoder.hpp>
 #include <mlt/metadata/tileset_protozero.hpp>
+#include <mlt/metadata/tileset.hpp>
 
 namespace mbgl {
+
+using GeometryType = mlt::metadata::tileset::GeometryType;
 
 VectorMLTTileFeature::VectorMLTTileFeature(std::shared_ptr<const MapLibreTile> tile_,
                                            const mlt::Feature& feature_,
@@ -21,7 +24,6 @@ VectorMLTTileFeature::VectorMLTTileFeature(std::shared_ptr<const MapLibreTile> t
       version(version_) {}
 
 FeatureType VectorMLTTileFeature::getType() const {
-    using mlt::metadata::tileset::GeometryType;
     switch (feature.getGeometry().type) {
         case GeometryType::POINT:
             return FeatureType::Point;
@@ -93,8 +95,8 @@ struct PointConverter {
 
 std::size_t getFeatureCount(const mlt::Feature& feature) {
     const auto& geometry = feature.getGeometry();
-    if (geometry.type == mlt::Geometry::GeometryType::MULTIPOLYGON) {
-        const auto& multiPolygon = static_cast<const mlt::MultiPolygon&>(geometry);
+    if (geometry.type == GeometryType::MULTIPOLYGON) {
+        const auto& multiPolygon = static_cast<const mlt::geometry::MultiPolygon&>(geometry);
         return multiPolygon.getPolygons().size();
     }
     return 1;
@@ -105,37 +107,36 @@ const GeometryCollection& VectorMLTTileFeature::getGeometries() const {
     MLN_TRACE_FUNC();
 
     if (!lines) {
-        using mlt::metadata::tileset::GeometryType;
         const auto scale = static_cast<double>(util::EXTENT) / extent;
         const auto& geometry = feature.getGeometry();
         const PointConverter convert{scale};
         switch (geometry.type) {
             case GeometryType::POINT: {
-                const auto& geom = static_cast<const mlt::Point&>(geometry);
+                const auto& geom = static_cast<const mlt::geometry::Point&>(geometry);
                 lines = GeometryCollection{{convert(geom.getCoordinate())}};
                 break;
             }
             case GeometryType::MULTIPOINT:
             case GeometryType::LINESTRING: {
-                const auto& geom = static_cast<const mlt::MultiPoint&>(geometry);
+                const auto& geom = static_cast<const mlt::geometry::MultiPoint&>(geometry);
                 lines = GeometryCollection{convert(geom.getCoordinates())};
                 break;
             }
             case GeometryType::POLYGON: {
-                const auto& geom = static_cast<const mlt::Polygon&>(geometry);
+                const auto& geom = static_cast<const mlt::geometry::Polygon&>(geometry);
                 lines.emplace(geom.getRings().size() + 1);
                 lines->front() = convert(geom.getShell());
                 std::ranges::transform(geom.getRings(), std::next(lines->begin()), convert);
                 break;
             }
             case GeometryType::MULTILINESTRING: {
-                const auto& geom = static_cast<const mlt::MultiLineString&>(geometry);
+                const auto& geom = static_cast<const mlt::geometry::MultiLineString&>(geometry);
                 lines.emplace(geom.getLineStrings().size());
                 std::ranges::transform(geom.getLineStrings(), lines->begin(), convert);
                 break;
             }
             case GeometryType::MULTIPOLYGON: {
-                const auto& geom = static_cast<const mlt::MultiPolygon&>(geometry);
+                const auto& geom = static_cast<const mlt::geometry::MultiPolygon&>(geometry);
                 const auto& polygons = geom.getPolygons();
                 lines.emplace();
                 lines->reserve(1 + polygons[index].second.size());
