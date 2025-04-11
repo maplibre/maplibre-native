@@ -53,7 +53,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        renderer: [legacy, drawable, vulkan, drawable-rust]
+        renderer: [vulkan, drawable-rust]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -79,19 +79,14 @@ jobs:
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
-      - if: matrix.renderer == 'drawable'
-        run: echo renderer_flag_cmake=-DMLN_DRAWABLE_RENDERER=ON >> "$GITHUB_ENV"
 
       - if: matrix.renderer == 'drawable-rust'
         run: |
-          echo "renderer_flag_cmake=-DMLN_DRAWABLE_RENDERER=ON -DMLN_USE_RUST=ON" >> "$GITHUB_ENV"
+          echo "renderer_flag_cmake=-DMLN_USE_RUST=ON" >> "$GITHUB_ENV"
           cargo install cxxbridge-cmd
 
-      - if: matrix.renderer == 'legacy'
-        run: echo renderer_flag_cmake=-DMLN_LEGACY_RENDERER=ON >> "$GITHUB_ENV"
-
       - if: matrix.renderer == 'vulkan'
-        run: echo renderer_flag_cmake="-DMLN_DRAWABLE_RENDERER=ON -DMLN_LEGACY_RENDERER=OFF -DMLN_WITH_VULKAN=ON -DMLN_WITH_OPENGL=OFF" >> "$GITHUB_ENV"
+        run: echo renderer_flag_cmake="-DMLN_WITH_VULKAN=ON -DMLN_WITH_OPENGL=OFF" >> "$GITHUB_ENV"
 
       - name: Build MapLibre Native Core
         env:

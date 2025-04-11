@@ -14,10 +14,8 @@
 namespace mbgl {
 
 namespace gfx {
-#if MLN_DRAWABLE_RENDERER
 class Texture2D;
 using Texture2DPtr = std::shared_ptr<Texture2D>;
-#endif
 
 class UploadPass;
 } // namespace gfx
@@ -62,7 +60,6 @@ public:
     const LayerRenderData* getLayerRenderData(const style::Layer::Impl&) const;
     std::optional<ImagePosition> getPattern(const std::string& pattern) const;
 
-#if MLN_DRAWABLE_RENDERER
     bool hasGlyphAtlasTexture() const;
     const gfx::Texture2DPtr& getGlyphAtlasTexture() const;
 
@@ -72,13 +69,6 @@ public:
     const std::shared_ptr<TileAtlasTextures>& getAtlasTextures() const;
 
     bool getNeedsRendering() const { return needsRendering; };
-#else
-    gfx::TextureBinding getGlyphAtlasTextureBinding(gfx::TextureFilterType) const;
-    gfx::TextureBinding getIconAtlasTextureBinding(gfx::TextureFilterType) const;
-
-    const gfx::Texture* getGlyphAtlasTexture() const;
-    const gfx::Texture* getIconAtlasTexture() const;
-#endif
 
     void upload(gfx::UploadPass&) const;
     void prepare(const SourcePrepareParameters&);

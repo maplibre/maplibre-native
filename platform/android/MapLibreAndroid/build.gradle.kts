@@ -70,29 +70,15 @@ android {
             "\"MapLibre Native/${project.property("VERSION_NAME")}\""
         )
         consumerProguardFiles("proguard-rules.pro")
-
-        externalNativeBuild {
-            cmake {
-                arguments("-DMLN_LEGACY_RENDERER=ON", "-DMLN_DRAWABLE_RENDERER=OFF")
-            }
-        }
     }
 
     flavorDimensions += "renderer"
     productFlavors {
-        create("legacy") {
-            dimension = "renderer"
-            externalNativeBuild {
-                cmake {
-                    arguments("-DMLN_LEGACY_RENDERER=ON", "-DMLN_DRAWABLE_RENDERER=OFF")
-                }
-            }
-        }
         create("drawable") {
             dimension = "renderer"
             externalNativeBuild {
                 cmake {
-                    arguments("-DMLN_LEGACY_RENDERER=OFF", "-DMLN_DRAWABLE_RENDERER=ON")
+                    arguments("-DMLN_LEGACY_RENDERER=OFF")
                 }
             }
         }
@@ -100,7 +86,7 @@ android {
             dimension = "renderer"
             externalNativeBuild {
                 cmake {
-                    arguments("-DMLN_LEGACY_RENDERER=OFF", "-DMLN_DRAWABLE_RENDERER=ON")
+                    arguments("-DMLN_LEGACY_RENDERER=OFF")
                     arguments("-DMLN_WITH_OPENGL=OFF", "-DMLN_WITH_VULKAN=ON")
                 }
             }
@@ -108,9 +94,6 @@ android {
     }
 
     sourceSets {
-        getByName("legacy") {
-            java.srcDirs("src/opengl/java/")
-        }
         getByName("drawable") {
             java.srcDirs("src/opengl/java/")
         }
