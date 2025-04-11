@@ -120,7 +120,7 @@ void setupShapedText(Shaping& shapedText, float textSize) {
     shapedText.positionedLines.back().positionedGlyphs.emplace_back(glyph);
 }
 
-void testApplyTextFit(const mapbox::Bin& rectangle,
+void testApplyTextFit(const Rect<uint16_t>& rectangle,
                       const style::ImageContent& content,
                       const std::optional<style::TextFit> textFitWidth,
                       const std::optional<style::TextFit> textFitHeight,
@@ -159,7 +159,7 @@ TEST(Shaping, applyTextFit) {
         // applyTextFitHorizontal
         // This set of tests against applyTextFit starts with a 100x20 image with a 5,5,95,15 content box
         // that has been fitted to a 4*4 text with scale 4, resulting in a 16*16 image.
-        const auto horizontalRectangle = mapbox::Bin(-1, 100, 20, -1, -1, 0, 0);
+        const auto horizontalRectangle = Rect<uint16_t>(0, 0, 100, 20);
         const style::ImageContent horizontalContent = {5, 5, 95, 15};
 
         {
@@ -207,7 +207,7 @@ TEST(Shaping, applyTextFit) {
         // applyTextFitVertical
         // This set of tests against applyTextFit starts with a 20x100 image with a 5,5,15,95 content box
         // that has been fitted to a 4*4 text with scale 4, resulting in a 16*16 image.
-        const auto verticalRectangle = mapbox::Bin(-1, 20, 100, -1, -1, 0, 0);
+        const auto verticalRectangle = Rect<uint16_t>(0, 0, 20, 100);
         const style::ImageContent verticalContent = {5, 5, 15, 95};
 
         {

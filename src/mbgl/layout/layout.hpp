@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/renderer/image_atlas.hpp>
-#include <mbgl/text/glyph_atlas.hpp>
+#include <mbgl/style/image_impl.hpp>
+#include <mbgl/text/glyph.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/util/containers.hpp>
 #include <memory>

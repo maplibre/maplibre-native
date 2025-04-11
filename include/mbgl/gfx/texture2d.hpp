@@ -53,6 +53,10 @@ public:
     /// @param image_ Image data to transfer
     virtual Texture2D& setImage(std::shared_ptr<PremultipliedImage> image_) noexcept = 0;
 
+    /// @brief Get the pixel format of the texture
+    /// @return Pixel format of the texture
+    virtual TexturePixelType getFormat() const noexcept = 0;
+
     /// @brief Get the size of the texture
     /// @return Size of the texture
     virtual Size getSize() const noexcept = 0;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/texture.hpp>
-#include <mbgl/renderer/image_atlas.hpp>
+#include <mbgl/style/image_impl.hpp>
 #include <mbgl/style/layer_impl.hpp>
 
 #include <memory>
@@ -37,10 +37,7 @@ class TileRenderData {
 public:
     virtual ~TileRenderData();
 
-#if MLN_DRAWABLE_RENDERER
-    const gfx::Texture2DPtr& getGlyphAtlasTexture() const;
-    const gfx::Texture2DPtr& getIconAtlasTexture() const;
-#else
+#if MLN_LEGACY_RENDERER
     const gfx::Texture& getGlyphAtlasTexture() const;
     const gfx::Texture& getIconAtlasTexture() const;
 #endif
