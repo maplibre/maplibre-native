@@ -162,9 +162,8 @@ genrule(
 
 string_flag(
     name = "renderer",
-    build_setting_default = "legacy",
+    build_setting_default = "drawable",
     values = [
-        "legacy",
         "drawable",
         "metal",
     ],
