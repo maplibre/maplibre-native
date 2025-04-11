@@ -43,6 +43,7 @@ public:
 private:
     Context& context;
     std::vector<DynamicTexturePtr> dynamicTextures;
+    std::unordered_map<TexturePixelType, DynamicTexturePtr> dummyDynamicTexture;
     std::mutex mutex;
 };
 

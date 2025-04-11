@@ -11,13 +11,18 @@ constexpr const Size startSize = {512, 512};
 
 GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
     using GlyphsToUpload = std::vector<std::tuple<TextureHandle, Immutable<Glyph>, FontStackHash>>;
-
+    mutex.lock();
+    
     GlyphAtlas glyphAtlas;
     if (!glyphs.size()) {
+        glyphAtlas.dynamicTexture = dummyDynamicTexture[TexturePixelType::Alpha];
+        if (!glyphAtlas.dynamicTexture) {
+            glyphAtlas.dynamicTexture = std::make_shared<gfx::DynamicTexture>(context, Size(1, 1), TexturePixelType::Alpha);
+            dummyDynamicTexture[TexturePixelType::Alpha] = glyphAtlas.dynamicTexture;
+        }
+        mutex.unlock();
         return glyphAtlas;
     }
-
-    mutex.lock();
 
     size_t dynTexIndex = 0;
     Size dynTexSize = startSize;
@@ -96,13 +101,18 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
                                                        const ImageMap& patterns,
                                                        const ImageVersionMap& versionMap) {
     using ImagesToUpload = std::vector<std::pair<TextureHandle, Immutable<style::Image::Impl>>>;
-
+    mutex.lock();
+    
     ImageAtlas imageAtlas;
     if (!icons.size() && !patterns.size()) {
+        imageAtlas.dynamicTexture = dummyDynamicTexture[TexturePixelType::RGBA];
+        if (!imageAtlas.dynamicTexture) {
+            imageAtlas.dynamicTexture = std::make_shared<gfx::DynamicTexture>(context, Size(1, 1), TexturePixelType::RGBA);
+            dummyDynamicTexture[TexturePixelType::RGBA] = imageAtlas.dynamicTexture;
+        }
+        mutex.unlock();
         return imageAtlas;
     }
-
-    mutex.lock();
 
     size_t dynTexIndex = 0;
     Size dynTexSize = startSize;
@@ -230,6 +240,9 @@ void DynamicTextureAtlas::uploadDeferredImages() {
     mutex.lock();
     for (const auto& dynamicTexture : dynamicTextures) {
         dynamicTexture->uploadDeferredImages();
+    }
+    for (const auto& pair : dummyDynamicTexture) {
+        pair.second->uploadDeferredImages();
     }
     mutex.unlock();
 }
