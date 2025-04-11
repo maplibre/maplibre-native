@@ -31,6 +31,10 @@ class Image;
 class Style;
 } // namespace style
 
+namespace util {
+class ActionJournal;
+} // namespace util
+
 class Map : private util::noncopyable {
 public:
     explicit Map(RendererFrontend&,
@@ -151,6 +155,11 @@ public:
     /// has zero length.
     void setFreeCameraOptions(const FreeCameraOptions& camera);
     FreeCameraOptions getFreeCameraOptions() const;
+
+    ClientOptions getClientOptions() const;
+
+    void enableActionJournal(bool value);
+    const std::unique_ptr<util::ActionJournal>& getActionJournal();
 
 protected:
     class Impl;

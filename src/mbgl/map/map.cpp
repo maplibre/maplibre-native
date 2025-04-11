@@ -20,6 +20,7 @@
 #include <mbgl/util/mapbox.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/tile_coordinate.hpp>
+#include <mbgl/util/action_journal.hpp>
 
 #include <utility>
 
@@ -525,6 +526,26 @@ void Map::setFreeCameraOptions(const FreeCameraOptions& camera) {
 
 FreeCameraOptions Map::getFreeCameraOptions() const {
     return impl->transform.getFreeCameraOptions();
+}
+
+ClientOptions Map::getClientOptions() const {
+    return impl->fileSource ? impl->fileSource->getClientOptions() : ClientOptions();
+}
+
+void Map::enableActionJournal(bool value) {
+    if (value) {
+        if (!impl->actionJournal) {
+            impl->actionJournal = std::make_unique<util::ActionJournal>(*this);
+        }
+    } else {
+        if (impl->actionJournal) {
+            impl->actionJournal.reset();
+        }
+    }
+}
+
+const std::unique_ptr<util::ActionJournal>& Map::getActionJournal() {
+    return impl->actionJournal;
 }
 
 } // namespace mbgl
