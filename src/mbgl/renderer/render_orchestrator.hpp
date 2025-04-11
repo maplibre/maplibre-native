@@ -16,7 +16,6 @@
 #include <mbgl/renderer/image_manager_observer.hpp>
 #include <mbgl/text/placement.hpp>
 #include <mbgl/renderer/render_tree.hpp>
-#include <mbgl/gfx/dynamic_texture_atlas.hpp>
 
 #include <map>
 #include <memory>
@@ -46,6 +45,8 @@ class ShaderRegistry;
 #if MLN_DRAWABLE_RENDERER
 class Drawable;
 using DrawablePtr = std::shared_ptr<Drawable>;
+class DynamicTextureAtlas;
+using DynamicTextureAtlasPtr = std::unique_ptr<gfx::DynamicTextureAtlas>;
 #endif
 } // namespace gfx
 

@@ -9,8 +9,6 @@ namespace mbgl {
 namespace gfx {
 
 using DynamicTexturePtr = std::shared_ptr<gfx::DynamicTexture>;
-class DynamicTextureAtlas;
-using DynamicTextureAtlasPtr = std::unique_ptr<gfx::DynamicTextureAtlas>;
 
 class GlyphAtlas {
 public:
