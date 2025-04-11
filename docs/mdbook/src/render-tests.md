@@ -3,11 +3,11 @@
 > [!NOTE]
 > See also [Android Tests](./android/android-tests.md#render-tests) and [iOS Tests](./ios/ios-tests.md#render-tests) for some platform-specific information on the render tests.
 
-Render tests verify the correctness and consistency of MapLibre Native's rendering.
-
-When using CMake, the render test runner is an executable available as `mbgl-render-test-runner` in the build directory.
+Render tests verify the correctness and consistency of MapLibre Native's rendering. Note that 'render test' is a bit of a misnomer, because there are various types of tests that do not really test rendering behavior that we sometimes call render tests. Examples are [expression tests and query tests](#metricsintergration). In addition, these 'render tests' allow a wide variety of operations and probes (which write out metrics) for things like GPU memory allocations, memory usage, network requests, FPS, so these tests are really quite a bit more versatile than just verifying rendering behavior.
 
 ## Render Test Runner CLI Options
+
+When using CMake, the render test runner is an executable available as `mbgl-render-test-runner` in the build directory.
 
 | Option / Argument                                  | Description                                                                                                                                                                                                                                                                                          | Required? |
 | :------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------- |
@@ -23,15 +23,46 @@ When using CMake, the render test runner is an executable available as `mbgl-ren
 
 ## Source Code Organization
 
-- `render-test`: C++ source code for common render test runner, manifest parser and CLI tool.
+### `render-test`
+
+This directory contains the C++ source code for common render test runner, manifest parser and CLI tool.
+
 - `render-test/android`: standalone Gradle project with a app that runs the render test runner.
 - `render-tests/ios`: source code for Objective-C app that encapsulates the render test runner.
-- `metrics/intergration/render-tests`: location of render tests. Each render test contains a `style.json` and an `expected.png` image.
-- `metrics/*.json`: location of manifests (to be passed to render test CLI tool).
-- `metrics/cache-style.db`: pre-populated cache (SQLite database file) so the tests can run offline.
-
-Tests in `metrics/intergration/render-tests` are contained in a directory tree, generally organized by [style specification](https://maplibre.org/maplibre-style-spec/)
 property: `background-color`, `line-width`, etc., with a second level of directories below that for individual tests.
+
+### `metrics`
+
+The JSON files in this directory are the manifests (to be passed to render test CLI tool). This directory also contains many directories that store metrics used by the tests. Other files/directories include:
+
+- `cache-style.db`, `cache-metrics.db`: pre-populated cache (SQLite database file) so the tests can run offline. You may need to update this database when you need a new resource available during test executation.
+- `binary-size`: binary-size checks. Not used right now, see [#3379](https://github.com/maplibre/maplibre-native/issues/3379).
+- `expectations`: expectations for various platforms. E.g. `expectations/platform-android` is referenced by the `android-render-test-runner-metrics.json` manifest under its `expectation_paths` key.
+- `ignores`: contains JSON files with as key a test path and as value a reason why a test is ignored. For example:
+   ```
+   {
+      "expression-tests/collator/accent-equals-de": "Locale-specific behavior changes based on platform."
+   }
+   ```
+   Manifests can have a key `ignore_paths` with an array of ignore files. For example:
+   ```
+   {
+      ...
+      "ignore_paths": [
+         "ignores/platform-all.json",
+         "ignores/platform-linux.json",
+         "ignores/platform-android.json"
+      ],
+      ...
+   }
+   ```
+
+#### `metrics/intergration`
+
+- `data`, `geojson`, `glyphs`, `image`, `sprites`, `styles`, `tiles`, `tilesets`, `video`: various data used by the render tests.
+- `expression-tests`: tests that verify the behavior of [expressions](https://maplibre.org/maplibre-style-spec/expressions/) of the MapLibre Style Spec.
+- `query-tests`: these tests test the behavior of the `queryRenderedFeatures` API which, as the name suggests, allow you to query the rendered features.
+- `render-tests`: location of render tests. Each render test contains a `style.json` and an `expected.png` image. This directory tree is generally organized by [style specification](https://maplibre.org/maplibre-style-spec/) properties.
 
 ## Running tests
 
@@ -74,7 +105,7 @@ To add a new render test:
 
 3. Generate an `expected.png` image from the given style with
    ```
-   $ ./build/mbgl-test-runner --update default --manifestPath=... -f '<property-name>/<new-test-name>'
+   $ ./build/mbgl-render-test-runner --update default --manifestPath=... -f '<property-name>/<new-test-name>'
    ```
 
 4. Manually inspect `expected.png` to verify it looks as expected.
