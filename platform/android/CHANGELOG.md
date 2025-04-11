@@ -1,5 +1,26 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+## 11.8.6
+
+### ✨ Features and improvements
+
+- Change Java Transfrom class from final to normal ([#3332](https://github.com/maplibre/maplibre-native/pull/3332)).
+
+### 🐞 Bug fixes
+
+- Fix rare crash LatLngAnimator ([#3352](https://github.com/maplibre/maplibre-native/pull/3352)).
+- Sync surface destruction with main thread ([#3368](https://github.com/maplibre/maplibre-native/pull/3368)).
+- Prevent exception SymbolLocationLayerRenderer with new style ([#3369](https://github.com/maplibre/maplibre-native/pull/3369)).
+
+## 11.8.5
+
+### 🐞 Bug fixes
+
+- Add regression test for [#3323](https://github.com/maplibre/maplibre-native/pull/3323), bug in layer dependency tracking ([#3326](https://github.com/maplibre/maplibre-native/pull/3326))
+- Fix `ErrorSurfaceLostKHR` exception ([#3337](https://github.com/maplibre/maplibre-native/pull/3337)).
+
 ## 11.8.4
 
 ### 🐞 Bug fixes
