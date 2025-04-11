@@ -1,4 +1,5 @@
 load("@rules_apple//apple:ios.bzl", "ios_unit_test")
+load("@rules_cc//cc:defs.bzl", "objc_library")
 load(
     "@rules_swift//swift:swift.bzl",
     "swift_library",
