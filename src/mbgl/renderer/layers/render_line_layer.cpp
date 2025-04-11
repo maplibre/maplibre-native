@@ -558,7 +558,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             addAttributes(*builder, bucket, std::move(vertexAttrs));
 
             // texture
-            if (const auto& atlases = tile.getAtlasTextures(); atlases->icon) {
+            if (const auto& atlases = tile.getAtlasTextures(); atlases && atlases->icon) {
                 auto iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
                     atlases,
                     std::nullopt,

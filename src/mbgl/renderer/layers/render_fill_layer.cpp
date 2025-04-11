@@ -392,7 +392,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         gfx::DrawableTweakerPtr atlasTweaker;
         auto getAtlasTweaker = [&]() {
             if (!atlasTweaker) {
-                if (const auto& atlases = tile.getAtlasTextures(); atlases->icon) {
+                if (const auto& atlases = tile.getAtlasTextures(); atlases && atlases->icon) {
                     atlasTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
                         atlases,
                         std::nullopt,
