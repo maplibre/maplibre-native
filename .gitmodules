@@ -58,3 +58,7 @@
 [submodule "vendor/PMTiles"]
 	path = vendor/PMTiles
 	url = https://github.com/protomaps/PMTiles.git
+[submodule "vendor/maplibre-tile-spec"]
+	path = vendor/maplibre-tile-spec
+	url = https://github.com/WetDogWeather/maplibre-tile-spec.git
+	branch = cpp

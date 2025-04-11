@@ -119,7 +119,7 @@ public:
                 req,
                 tileID,
                 header.root_dir_offset,
-                static_cast<uint32_t>(header.root_dir_bytes),
+                static_cast<std::uint32_t>(header.root_dir_bytes),
                 0,
                 [=, this](std::pair<uint64_t, uint32_t> tileAddress, std::unique_ptr<Response::Error> tileError) {
                     if (tileError) {
