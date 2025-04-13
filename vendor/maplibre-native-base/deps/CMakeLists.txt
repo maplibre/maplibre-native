@@ -18,11 +18,6 @@ function(maplibre_native_base_add_library name include_path)
     target_link_libraries(maplibre-native-base INTERFACE maplibre-native-base-${name})
 endfunction()
 
-execute_process(
-    COMMAND git submodule update --init .
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/deps
-)
-
 maplibre_native_base_add_library(geojson-vt-cpp ${PROJECT_SOURCE_DIR}/deps/geojson-vt-cpp/include)
 maplibre_native_base_add_library(geojson.hpp ${PROJECT_SOURCE_DIR}/deps/geojson.hpp/include)
 maplibre_native_base_add_library(geometry.hpp ${PROJECT_SOURCE_DIR}/deps/geometry.hpp/include)
