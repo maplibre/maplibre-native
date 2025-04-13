@@ -58,7 +58,6 @@ target_link_libraries(
     mbgl-render-test
     PRIVATE
         MapLibreNative::Base::Extras::args
-        MapLibreNative::Base::Extras::filesystem
         MapLibreNative::Base::pixelmatch-cpp
         mbgl-compiler-options
         mbgl-vendor-boost

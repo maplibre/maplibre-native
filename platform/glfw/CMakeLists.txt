@@ -129,7 +129,6 @@ target_link_libraries(
     mbgl-glfw
     PRIVATE
         MapLibreNative::Base::Extras::args
-        MapLibreNative::Base::Extras::filesystem
         MapLibreNative::Base::Extras::rapidjson
         Mapbox::Map
         mbgl-compiler-options
