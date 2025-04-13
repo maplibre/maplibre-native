@@ -20,9 +20,8 @@ endfunction()
 add_library(maplibre-native-base-extras INTERFACE)
 add_library(MapLibreNative::Base::Extras ALIAS maplibre-native-base-extras)
 
-maplibre_native_base_extras_add_library(args ${PROJECT_SOURCE_DIR}/extras/args)
-maplibre_native_base_extras_add_library(expected-lite ${PROJECT_SOURCE_DIR}/extras/expected-lite/include)
-maplibre_native_base_extras_add_library(filesystem ${PROJECT_SOURCE_DIR}/extras/filesystem/include)
-maplibre_native_base_extras_add_library(kdbush.hpp ${PROJECT_SOURCE_DIR}/extras/kdbush.hpp/include)
+maplibre_native_base_extras_add_library(args ${CMAKE_CURRENT_LIST_DIR}/args)
+maplibre_native_base_extras_add_library(expected-lite ${CMAKE_CURRENT_LIST_DIR}/expected-lite/include)
+maplibre_native_base_extras_add_library(kdbush.hpp ${CMAKE_CURRENT_LIST_DIR}/kdbush.hpp/include)
 
 include(${PROJECT_SOURCE_DIR}/extras/rapidjson.cmake)
