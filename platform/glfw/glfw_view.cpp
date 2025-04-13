@@ -3,6 +3,8 @@
 #include "glfw_renderer_frontend.hpp"
 #include "ny_route.hpp"
 #include "test_writer.hpp"
+#include "rapidjson/document.h"
+#include "rapidjson/error/en.h"
 
 #include <mbgl/annotation/annotation.hpp>
 #include <mbgl/gfx/backend.hpp>
@@ -27,6 +29,9 @@
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/string.hpp>
+#include <mbgl/route/route_manager.hpp>
+#include <mbgl/route/route_segment.hpp>
+#include <random>
 
 #if !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL) && MLN_DRAWABLE_RENDERER
 #include "example_custom_drawable_style_layer.hpp"
@@ -55,6 +60,8 @@
 #endif
 
 #define GL_GLEXT_PROTOTYPES
+#include "mbgl/gfx/renderer_backend.hpp"
+
 #include <GLFW/glfw3.h>
 
 #include <cassert>
@@ -64,6 +71,11 @@
 #include <utility>
 #include <sstream>
 #include <numbers>
+#include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/error/en.h>
+#include <rapidjson/rapidjson.h>
+#include <rapidjson/stringbuffer.h>
 
 using namespace std::numbers;
 
@@ -85,6 +97,9 @@ std::array<double, 3> toArray(const mbgl::LatLng &crd) {
 } // namespace
 #endif
 
+namespace {
+const double ROUTE_PROGRESS_STEP = 0.001;
+}
 class SnapshotObserver final : public mbgl::MapSnapshotterObserver {
 public:
     ~SnapshotObserver() override = default;
@@ -132,6 +147,59 @@ void addFillExtrusionLayer(mbgl::style::Style &style, bool visible) {
     extrusionLayer->setFillExtrusionBase(PropertyExpression<float>(get("min_height")));
     style.addLayer(std::move(extrusionLayer));
 }
+
+mbgl::Color convert(std::string hexcolor) {
+    std::stringstream ss;
+    ss << std::hex << hexcolor;
+    int color;
+    ss >> color;
+    float r = (color >> 16) & 0xFF;
+    float g = (color >> 8) & 0xFF;
+    float b = (color) & 0xFF;
+    float a = 1.0f;
+    return {mbgl::Color(r / 255.0f, g / 255.0f, b / 255.0f, a)};
+}
+
+enum RouteColorType {
+    RouteMapAlternative,
+    RouteMapAlternativeCasing,
+    RouteMapAlternativeLowTrafficColor,
+    RouteMapAlternativeModerateTrafficColor,
+    RouteMapAlternativeHeavyTrafficColor,
+    RouteMapAlternativeSevereTrafficColor,
+    RouteMapColor,
+    RouteMapCasingColor,
+    RouteMapLowTrafficColor,
+    RouteMapModerateTrafficColor,
+    RouteMapHeavyTrafficColor,
+    RouteMapSevereTrafficColor,
+    InactiveLegRouteColor,
+    InactiveRouteLowTrafficColor,
+    InactiveRouteModerateTrafficColor,
+    InactiveRouteHeavyTrafficColor,
+    InactiveRouteSevereTrafficColor
+};
+
+const std::unordered_map<RouteColorType, mbgl::Color> routeColorTable = {
+    {RouteMapAlternative, convert("7A7A7A")},
+    {RouteMapAlternativeCasing, convert("FFFFFF")},
+    {RouteMapAlternativeLowTrafficColor, convert("FFCC5B")},
+    {RouteMapAlternativeModerateTrafficColor, convert("F0691D")},
+    {RouteMapAlternativeHeavyTrafficColor, convert("DB0000")},
+    {RouteMapAlternativeSevereTrafficColor, convert("9B0000")},
+    {RouteMapColor, convert("2F70A9")},
+    {RouteMapCasingColor, convert("FFFFFF")},
+    {RouteMapLowTrafficColor, convert("FFBC2D")},
+    {RouteMapModerateTrafficColor, convert("ED6D4A")},
+    {RouteMapHeavyTrafficColor, convert("DB0000")},
+    {RouteMapSevereTrafficColor, convert("9B0000")},
+    {InactiveLegRouteColor, convert("76A7D1")},
+    {InactiveRouteLowTrafficColor, convert("FFE5AD")},
+    {InactiveRouteModerateTrafficColor, convert("F39F7E")},
+    {InactiveRouteHeavyTrafficColor, convert("EE7676")},
+    {InactiveRouteSevereTrafficColor, convert("E64747")}
+
+};
 } // namespace
 
 void glfwError(int error, const char *description) {
@@ -150,7 +218,7 @@ GLFWView::GLFWView(bool fullscreen_,
     MLN_TRACE_FUNC();
 
     glfwSetErrorCallback(glfwError);
-
+    rmptr_ = std::make_unique<mbgl::route::RouteManager>();
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
     if (!glfwInit()) {
@@ -324,6 +392,7 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
     MLN_TRACE_FUNC();
 
     auto *view = reinterpret_cast<GLFWView *>(glfwGetWindowUserPointer(window));
+    bool isLeftShift = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
 
     if (action == GLFW_RELEASE) {
         if (key != GLFW_KEY_R || key != GLFW_KEY_S) view->animateRouteCallback = nullptr;
@@ -566,43 +635,98 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
     }
 
     if (action == GLFW_RELEASE || action == GLFW_REPEAT) {
-        switch (key) {
-            case GLFW_KEY_W:
-                view->popAnnotation();
-                break;
-            case GLFW_KEY_1:
-                view->addRandomPointAnnotations(1);
-                break;
-            case GLFW_KEY_2:
-                view->addRandomPointAnnotations(10);
-                break;
-            case GLFW_KEY_3:
-                view->addRandomPointAnnotations(100);
-                break;
-            case GLFW_KEY_4:
-                view->addRandomPointAnnotations(1000);
-                break;
-            case GLFW_KEY_5:
-                view->addRandomPointAnnotations(10000);
-                break;
-            case GLFW_KEY_6:
-                view->addRandomPointAnnotations(100000);
-                break;
-            case GLFW_KEY_7:
-                view->addRandomShapeAnnotations(1);
-                break;
-            case GLFW_KEY_8:
-                view->addRandomShapeAnnotations(10);
-                break;
-            case GLFW_KEY_9:
-                view->addRandomShapeAnnotations(100);
-                break;
-            case GLFW_KEY_0:
-                view->addRandomShapeAnnotations(1000);
-                break;
-            case GLFW_KEY_M:
-                view->addAnimatedAnnotation();
-                break;
+        if (isLeftShift) {
+            switch (key) {
+                case GLFW_KEY_1:
+                    std::cout << "Adding Route" << std::endl;
+                    view->addRoute();
+                    break;
+                case GLFW_KEY_2:
+                    std::cout << "Disposing Route" << std::endl;
+                    view->disposeRoute();
+                    break;
+                case GLFW_KEY_3:
+                    std::cout << "Adding Route Traffic Viz" << std::endl;
+                    view->addTrafficSegments();
+                    break;
+                case GLFW_KEY_4:
+                    std::cout << "Removing Route Traffic Viz" << std::endl;
+                    view->removeTrafficViz();
+                    break;
+                case GLFW_KEY_5:
+                    std::cout << "Set Route Pick Mode" << std::endl;
+                    view->setRoutePickMode();
+                    break;
+                case GLFW_KEY_6:
+                    view->incrementRouteProgress();
+                    break;
+                case GLFW_KEY_7:
+                    view->decrementRouteProgress();
+                    break;
+
+                case GLFW_KEY_P:
+                    view->setRouteProgressUsage();
+                    break;
+
+                case GLFW_KEY_S: {
+                    view->captureSnapshot();
+                    std::cout << "captured snapshot" << std::endl;
+                } break;
+
+                case GLFW_KEY_L: {
+                    int lastCapturedIdx = view->getCaptureIdx() - 1;
+                    if (lastCapturedIdx == -1) lastCapturedIdx = 0;
+                    std::string capture_file_name = "snapshot" + std::to_string(lastCapturedIdx) + ".json";
+                    view->readAndLoadCapture(capture_file_name);
+                } break;
+
+                case GLFW_KEY_Q:
+                    view->writeStats();
+                    break;
+
+                case GLFW_KEY_0:
+                    view->setRouteProgressUsage();
+                    break;
+            }
+        } else {
+            switch (key) {
+                case GLFW_KEY_W:
+                    view->popAnnotation();
+                    break;
+                case GLFW_KEY_1:
+                    view->addRandomPointAnnotations(1);
+                    break;
+                case GLFW_KEY_2:
+                    view->addRandomPointAnnotations(10);
+                    break;
+                case GLFW_KEY_3:
+                    view->addRandomPointAnnotations(100);
+                    break;
+                case GLFW_KEY_4:
+                    view->addRandomPointAnnotations(1000);
+                    break;
+                case GLFW_KEY_5:
+                    view->addRandomPointAnnotations(10000);
+                    break;
+                case GLFW_KEY_6:
+                    view->addRandomPointAnnotations(100000);
+                    break;
+                case GLFW_KEY_7:
+                    view->addRandomShapeAnnotations(1);
+                    break;
+                case GLFW_KEY_8:
+                    view->addRandomShapeAnnotations(10);
+                    break;
+                case GLFW_KEY_9:
+                    view->addRandomShapeAnnotations(100);
+                    break;
+                case GLFW_KEY_0:
+                    view->addRandomShapeAnnotations(1000);
+                    break;
+                case GLFW_KEY_M:
+                    view->addAnimatedAnnotation();
+                    break;
+            }
         }
     }
 }
@@ -736,6 +860,585 @@ void GLFWView::addRandomPointAnnotations(int count) {
 
     for (int i = 0; i < count; ++i) {
         annotationIDs.push_back(map->addAnnotation(mbgl::SymbolAnnotation{makeRandomPoint(), "default_marker"}));
+    }
+}
+
+mbgl::Point<double> GLFWView::RouteCircle::getPoint(double percent) const {
+    if (points.empty()) {
+        return {0.0, 0.0};
+    }
+
+    if (percent <= 0.0) {
+        return points.front();
+    }
+
+    if (percent >= 1.0) {
+        return points.back();
+    }
+
+    double totalLength = 0.0;
+    std::vector<double> segmentLengths(points.size() - 1);
+
+    // Calculate the length of each segment and the total length of the polyline
+    for (size_t i = 0; i < points.size() - 1; ++i) {
+        double dx = points[i + 1].x - points[i].x;
+        double dy = points[i + 1].y - points[i].y;
+        segmentLengths[i] = std::sqrt(dx * dx + dy * dy);
+        totalLength += segmentLengths[i];
+    }
+
+    double targetLength = percent * totalLength;
+    double accumulatedLength = 0.0;
+
+    // Find the segment where the target length falls
+    for (size_t i = 0; i < segmentLengths.size(); ++i) {
+        if (accumulatedLength + segmentLengths[i] >= targetLength) {
+            double segmentPercent = (targetLength - accumulatedLength) / segmentLengths[i];
+            double x = points[i].x + segmentPercent * (points[i + 1].x - points[i].x);
+            double y = points[i].y + segmentPercent * (points[i + 1].y - points[i].y);
+            return {x, y};
+        }
+        accumulatedLength += segmentLengths[i];
+    }
+
+    return points.back();
+}
+
+void GLFWView::writeStats() {
+    std::stringstream ss;
+    std::string renderingStats = backend->getRendererBackend().getRenderingStats().toJSONString();
+    std::string routeStats = rmptr_->getStats();
+    rapidjson::Document renderStatsDoc;
+    renderStatsDoc.Parse(renderingStats.c_str());
+    rapidjson::Document routeStatsDoc;
+    routeStatsDoc.Parse(routeStats.c_str());
+
+    rapidjson::Document combined;
+    combined.SetObject();
+
+    rapidjson::Document::AllocatorType &combinedAllocator = combined.GetAllocator();
+
+    rapidjson::Value copiedRenderingStats(renderStatsDoc, combinedAllocator);
+    rapidjson::Value copiedRouteStats(routeStatsDoc, combinedAllocator);
+
+    combined.AddMember("rendering_stats", copiedRenderingStats, combinedAllocator);
+    combined.AddMember("route_stats", copiedRouteStats, combinedAllocator);
+
+    rapidjson::StringBuffer buffer;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+    combined.Accept(writer);
+
+    std::cout << buffer.GetString() << std::endl;
+}
+
+std::vector<RouteID> GLFWView::getAllRoutes() const {
+    return rmptr_->getAllRoutes();
+}
+
+std::string GLFWView::getBaseRouteLayerName(const RouteID &routeID) const {
+    return rmptr_->getBaseRouteLayerName(routeID);
+}
+
+std::string GLFWView::getBaseGeoJSONsourceName(const RouteID &routeID) const {
+    return rmptr_->getBaseGeoJSONsourceName(routeID);
+}
+
+int GLFWView::getTopMost(const std::vector<RouteID> &routeList) const {
+    return rmptr_->getTopMost(routeList);
+}
+
+void GLFWView::addRoute() {
+    using namespace mbgl::route;
+
+    mbgl::Color color0 = routeColorTable.at(RouteColorType::RouteMapColor);
+    mbgl::Color color1 = routeColorTable.at(RouteColorType::RouteMapAlternative);
+    std::vector<mbgl::Color> colors = {color0, color1};
+
+    auto getRouteGeom = [](const RouteCircle &route) -> mbgl::LineString<double> {
+        mbgl::LineString<double> linestring;
+        float radius = route.radius;
+        for (int i = 0; i < route.resolution; i++) {
+            float anglerad = (float(i) / float(route.resolution - 1)) * 2 * 3.14f;
+            mbgl::Point<double> pt{route.xlate + radius * sin(anglerad), radius * cos(anglerad)};
+            linestring.push_back(pt);
+        }
+
+        return linestring;
+    };
+
+    rmptr_->setStyle(map->getStyle());
+    RouteCircle route;
+    route.resolution = 30.0;
+    route.xlate = routeMap_.size() * route.radius * 2.0;
+    mbgl::LineString<double> geom = getRouteGeom(route);
+    route.points = geom;
+    assert(route.points.size() == route.resolution && "invalid number of points generated");
+    RouteOptions routeOpts;
+    int colorIdx = routeMap_.size() == 0 ? 0 : 1;
+    routeOpts.innerColor = colors[colorIdx];
+    routeOpts.outerColor = mbgl::Color(0.2, 0.2, 0.2, 1);
+    routeOpts.useDynamicWidths = false;
+    routeOpts.outerClipColor = mbgl::Color(0.5, 0.5, 0.5, 1.0);
+    routeOpts.innerClipColor = mbgl::Color(0.5, 0.5, 0.5, 1.0);
+    // Testing the layerBefore option
+    //  if(lastRouteID_.isValid()) {
+    //      routeOpts.layerBefore = getBaseRouteLayerName(lastRouteID_);
+    //  }
+
+    auto routeID = rmptr_->routeCreate(geom, routeOpts);
+    routeMap_[routeID] = route;
+    rmptr_->finalize();
+    lastRouteID_ = routeID;
+}
+
+std::vector<GLFWView::TrafficBlock> GLFWView::testCases(const RouteSegmentTestCases &testcase,
+                                                        const GLFWView::RouteCircle &route) const {
+    TrafficBlock block1;
+    TrafficBlock block2;
+
+    std::vector<GLFWView::TrafficBlock> fixture;
+    switch (testcase) {
+        case RouteSegmentTestCases::Blk1LowPriorityIntersecting: {
+            block1.block = {route.getPoint(0.0), route.getPoint(0.25), route.getPoint(0.5)};
+            block1.priority = 0;
+            block1.color = routeColorTable.at(RouteMapLowTrafficColor);
+
+            block2.block = {route.getPoint(0.2), route.getPoint(0.7), route.getPoint(0.8)};
+            block2.priority = 1;
+            block2.color = routeColorTable.at(RouteMapModerateTrafficColor);
+        } break;
+
+        case RouteSegmentTestCases::Blk1HighPriorityIntersecting: {
+            block1.block = {route.getPoint(0.0), route.getPoint(0.25), route.getPoint(0.5)};
+            block1.priority = 1;
+            block1.color = routeColorTable.at(RouteMapLowTrafficColor);
+
+            block2.block = {route.getPoint(0.2), route.getPoint(0.7), route.getPoint(0.8)};
+            block2.priority = 0;
+            block2.color = routeColorTable.at(RouteMapModerateTrafficColor);
+        } break;
+
+        case RouteSegmentTestCases::Blk12SameColorIntersecting: {
+            block1.block = {route.getPoint(0.0), route.getPoint(0.25), route.getPoint(0.5)};
+            block1.priority = 0;
+            block1.color = routeColorTable.at(RouteMapLowTrafficColor);
+
+            block2.block = {route.getPoint(0.2), route.getPoint(0.7), route.getPoint(0.8)};
+            block2.priority = 1;
+            block2.color = routeColorTable.at(RouteMapLowTrafficColor);
+
+        } break;
+
+        case RouteSegmentTestCases::Blk12NonIntersecting: {
+            block1.block = {route.getPoint(0.0), route.getPoint(0.25), route.getPoint(0.5)};
+            block1.priority = 0;
+            block1.color = routeColorTable.at(RouteMapLowTrafficColor);
+
+            block2.block = {route.getPoint(0.6), route.getPoint(0.7), route.getPoint(0.8)};
+            block2.priority = 0;
+            block2.color = routeColorTable.at(RouteMapModerateTrafficColor);
+
+        } break;
+
+        default:
+            break;
+    }
+
+    fixture.push_back(block1);
+    fixture.push_back(block2);
+
+    return fixture;
+}
+
+void GLFWView::addTrafficSegments() {
+    const auto &getActiveColors = []() -> std::vector<mbgl::Color> {
+        return {routeColorTable.at(RouteColorType::RouteMapLowTrafficColor),
+                routeColorTable.at(RouteColorType::RouteMapModerateTrafficColor),
+                routeColorTable.at(RouteColorType::RouteMapHeavyTrafficColor),
+                routeColorTable.at(RouteColorType::RouteMapSevereTrafficColor)};
+    };
+
+    const auto &getAlternativeColors = []() -> std::vector<mbgl::Color> {
+        return {routeColorTable.at(RouteColorType::InactiveRouteLowTrafficColor),
+                routeColorTable.at(RouteColorType::InactiveRouteModerateTrafficColor),
+                routeColorTable.at(RouteColorType::InactiveRouteHeavyTrafficColor),
+                routeColorTable.at(RouteColorType::InactiveRouteHeavyTrafficColor)};
+    };
+
+    for (const auto &iter : routeMap_) {
+        const auto &routeID = iter.first;
+        const auto &route = iter.second;
+        std::vector<mbgl::Color> colors = routeID == routeMap_.begin()->first ? getActiveColors()
+                                                                              : getAlternativeColors();
+        std::vector<TrafficBlock> trafficBlks;
+
+        // TODO: we have run out of hot keys :( . one of these days, need to create graphics tests for nav.
+        bool useTestCode = false;
+        if (useTestCode) {
+            trafficBlks = testCases(RouteSegmentTestCases::Blk12SameColorIntersecting, route);
+        } else {
+            size_t blockSize = floor(float(route.resolution) / float(route.numTrafficZones));
+            size_t innerBlockSize = ceil((float(blockSize) / 2.0f));
+
+            auto &routePts = route.points;
+            TrafficBlock currTrafficBlk;
+            for (size_t i = 0; i < routePts.size(); i++) {
+                if (i % blockSize == 0 && !currTrafficBlk.block.empty()) {
+                    trafficBlks.push_back(currTrafficBlk);
+                    currTrafficBlk.block.clear();
+                }
+
+                if (i % blockSize < innerBlockSize) {
+                    currTrafficBlk.block.push_back(mbgl::Point<double>(routePts.at(i).x, routePts.at(i).y));
+                }
+            }
+            if (!currTrafficBlk.block.empty()) {
+                trafficBlks.push_back(currTrafficBlk);
+            }
+        }
+
+        // clear the route segments and create new ones from the traffic blocks
+        rmptr_->routeClearSegments(routeID);
+        for (size_t i = 0; i < trafficBlks.size(); i++) {
+            mbgl::route::RouteSegmentOptions rsegopts;
+            rsegopts.color = trafficBlks[i].color;
+            rsegopts.geometry = trafficBlks[i].block;
+            rsegopts.priority = trafficBlks[i].priority;
+
+            rmptr_->routeSegmentCreate(routeID, rsegopts);
+        }
+    }
+    rmptr_->finalize();
+}
+
+void GLFWView::modifyTrafficViz() {
+    const auto &getColorTable = [](uint32_t numColors) -> std::vector<mbgl::Color> {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<> distrib(0.0, 1.0);
+        std::vector<mbgl::Color> colors;
+        for (uint32_t i = 0; i < numColors; i++) {
+            double rand_r = distrib(gen);
+            double rand_g = distrib(gen);
+            double rand_b = distrib(gen);
+            mbgl::Color color(rand_r, rand_g, rand_b, 1.0);
+            // mbgl::Color color(1.0, 0.0, 0.0, 1.0);
+            colors.push_back(color);
+        }
+        return colors;
+    };
+
+    for (const auto &iter : routeMap_) {
+        const auto &routeID = iter.first;
+        const auto &route = iter.second;
+        rmptr_->routeClearSegments(routeID);
+
+        std::vector<mbgl::Color> colors = getColorTable(route.numTrafficZones);
+
+        size_t blockSize = floor(float(route.resolution) / float(route.numTrafficZones));
+        size_t innerBlockSize = ceil((float(blockSize) / 2.0f));
+
+        auto &routePts = route.points;
+        std::vector<mbgl::LineString<double>> trafficBlks;
+        mbgl::LineString<double> currTrafficBlk;
+        if (route.resolution > route.numTrafficZones) {
+            for (size_t i = 1; i < routePts.size() - 1; i++) {
+                if (i % blockSize == 0 && !currTrafficBlk.empty()) {
+                    trafficBlks.push_back(currTrafficBlk);
+                    currTrafficBlk.clear();
+                }
+
+                if (i % blockSize < innerBlockSize) {
+                    mbgl::Point<double> non_aligned_pt;
+                    if (i == 0 || i == routePts.size() - 1) {
+                        non_aligned_pt = routePts.at(i);
+                    } else {
+                        mbgl::Point<double> prevpt = routePts.at(i - 1);
+                        mbgl::Point<double> currpt = routePts.at(i);
+                        non_aligned_pt = (currpt - prevpt) * 0.5;
+                    }
+                    currTrafficBlk.push_back(non_aligned_pt);
+                }
+            }
+        } else {
+            std::cout << "need to have more number of sample points in the route!" << std::endl;
+            exit(1);
+        }
+        if (!currTrafficBlk.empty()) {
+            trafficBlks.push_back(currTrafficBlk);
+        }
+
+        for (size_t i = 0; i < trafficBlks.size(); i++) {
+            mbgl::route::RouteSegmentOptions rsegopts;
+            rsegopts.color = colors[i];
+            rsegopts.geometry = trafficBlks[i];
+            rsegopts.priority = i;
+
+            rmptr_->routeSegmentCreate(routeID, rsegopts);
+        }
+    }
+}
+
+void GLFWView::setRouteProgressUsage() {
+    useRouteProgressPercent_ = !useRouteProgressPercent_;
+    if (useRouteProgressPercent_) {
+        std::cout << "Using route progress percent" << std::endl;
+    } else {
+        std::cout << "Using route progress point" << std::endl;
+    }
+}
+
+void GLFWView::setRoutePickMode() {
+    routePickMode_ = !routePickMode_;
+    std::string routePickModeStr = routePickMode_ ? "routePickMode ON" : "routePickMode OFF";
+    std::cout << routePickModeStr << std::endl;
+}
+
+bool GLFWView::getRoutePickMode() const {
+    return routePickMode_;
+}
+
+GLFWRendererFrontend *GLFWView::getRenderFrontend() const {
+    return rendererFrontend;
+}
+
+void GLFWView::incrementRouteProgress() {
+    routeProgress_ += ROUTE_PROGRESS_STEP;
+    std::clamp<double>(routeProgress_, 0.0, 1.0f);
+    // std::cout<<"Route progress: "<<routeProgress_<<std::endl;
+    for (const auto &iter : routeMap_) {
+        const auto &routeID = iter.first;
+        if (useRouteProgressPercent_) {
+            rmptr_->routeSetProgress(routeID, routeProgress_);
+        } else {
+            mbgl::Point<double> progressPoint = routeMap_[routeID].getPoint(routeProgress_);
+            rmptr_->routeSetProgress(routeID, progressPoint);
+        }
+    }
+    rmptr_->finalize();
+}
+
+void GLFWView::decrementRouteProgress() {
+    routeProgress_ -= ROUTE_PROGRESS_STEP;
+    std::clamp<double>(routeProgress_, 0.0, 1.0f);
+    std::cout << "Route progress: " << routeProgress_ << std::endl;
+    for (const auto &iter : routeMap_) {
+        const auto &routeID = iter.first;
+        rmptr_->routeSetProgress(routeID, routeProgress_);
+    }
+    rmptr_->finalize();
+}
+
+void GLFWView::removeTrafficViz() {
+    for (const auto &iter : routeMap_) {
+        rmptr_->routeClearSegments(iter.first);
+    }
+    rmptr_->finalize();
+}
+
+void GLFWView::disposeRoute() {
+    if (!routeMap_.empty()) {
+        auto &routeID = routeMap_.begin()->first;
+        bool success = rmptr_->routeDispose(routeID);
+        if (success) {
+            routeMap_.erase(routeID);
+        }
+        rmptr_->finalize();
+    }
+}
+
+void GLFWView::captureSnapshot() {
+    if (rmptr_) {
+        std::string snapshot = rmptr_->captureSnapshot();
+        std::string snapshot_file_name = "snapshot" + std::to_string(lastCaptureIdx_++) + ".json";
+        writeCapture(snapshot, snapshot_file_name);
+
+        std::cout << "Snapshot created: " << snapshot_file_name << std::endl;
+    }
+}
+
+int GLFWView::getCaptureIdx() const {
+    return lastCaptureIdx_;
+}
+
+void GLFWView::writeCapture(const std::string &capture, const std::string &capture_file_name) const {
+    std::ofstream outfile(capture_file_name);
+
+    if (outfile.is_open()) {
+        outfile << capture;
+        outfile.close();
+        std::cout << "Successfully wrote capture to file: " << capture_file_name << std::endl;
+    } else {
+        std::cout << "Failed to write capture to file: " << capture_file_name << std::endl;
+    }
+}
+
+void GLFWView::readAndLoadCapture(const std::string &capture_file_name) {
+    for (size_t i = 0; i < routeMap_.size(); i++) {
+        disposeRoute();
+    }
+    lastRouteID_ = RouteID();
+    rmptr_->setStyle(map->getStyle());
+
+    std::ifstream jsonfile(capture_file_name);
+    if (!jsonfile.is_open()) {
+        std::cerr << "Failed to open the file." << std::endl;
+        return;
+    }
+
+    std::stringstream buffer;
+    buffer << jsonfile.rdbuf();
+
+    rapidjson::Document document;
+    rapidjson::ParseResult result = document.Parse(buffer.str());
+
+    if (document.HasParseError()) {
+        const auto errorCode = document.GetParseError();
+        std::cerr << "JSON parse error: " << rapidjson::GetParseError_En(result.Code()) << " (" << result.Offset()
+                  << ")" << std::endl;
+
+        std::cerr << "Error parsing JSON: " << errorCode << std::endl;
+
+        return;
+    }
+
+    uint32_t numRoutes = 0;
+    if (document.HasMember("num_routes") && document["num_routes"].IsInt()) {
+        numRoutes = document["num_routes"].GetInt();
+        std::cout << "De-serializing " << numRoutes << " routes" << std::endl;
+    }
+
+    if (document.HasMember("routes") && document["routes"].IsArray()) {
+        const rapidjson::Value &routes = document["routes"];
+        for (rapidjson::SizeType i = 0; i < routes.Size(); i++) {
+            const rapidjson::Value &route = routes[i];
+
+            if (route.HasMember("route") && route["route"].IsObject()) {
+                const rapidjson::Value &route_obj = route["route"];
+
+                mbgl::route::RouteOptions routeOpts;
+                const auto &mbglColor = [](const rapidjson::Value &jsonColor) -> mbgl::Color {
+                    std::array<float, 4> innerColorArr;
+                    for (rapidjson::SizeType j = 0; j < jsonColor.Size(); j++) {
+                        innerColorArr[j] = jsonColor[j].GetFloat();
+                    }
+                    mbgl::Color color(innerColorArr[0], innerColorArr[1], innerColorArr[2], innerColorArr[3]);
+
+                    return color;
+                };
+
+                if (route_obj.HasMember("route_options") && route_obj["route_options"].IsObject()) {
+                    const rapidjson::Value &route_options = route_obj["route_options"];
+
+                    // innerColor
+                    if (route_options.HasMember("innerColor") && route_options["innerColor"].IsArray()) {
+                        const rapidjson::Value &innerColor = route_options["innerColor"];
+                        routeOpts.innerColor = mbglColor(innerColor);
+                    }
+
+                    // outerColor
+                    if (route_options.HasMember("outerColor") && route_options["outerColor"].IsArray()) {
+                        const rapidjson::Value &outerColor = route_options["outerColor"];
+                        routeOpts.outerColor = mbglColor(outerColor);
+                    }
+
+                    // innerClipColor
+                    if (route_options.HasMember("innerClipColor") && route_options["innerClipColor"].IsArray()) {
+                        const rapidjson::Value &innerClipColor = route_options["innerClipColor"];
+                        routeOpts.innerClipColor = mbglColor(innerClipColor);
+                    }
+
+                    // outerClipColor
+                    if (route_options.HasMember("outerClipColor") && route_options["outerClipColor"].IsArray()) {
+                        const rapidjson::Value &outerClipColor = route_options["outerClipColor"];
+                        routeOpts.outerClipColor = mbglColor(outerClipColor);
+                    }
+
+                    // innerWidth
+                    if (route_options.HasMember("innerWidth") && route_options["innerWidth"].IsArray()) {
+                        const rapidjson::Value &innerWidth = route_options["innerWidth"];
+                        routeOpts.innerWidth = innerWidth.GetFloat();
+                    }
+
+                    // outerWidth
+                    if (route_options.HasMember("outerWidth") && route_options["outerWidth"].IsArray()) {
+                        const rapidjson::Value &outerWidth = route_options["outerWidth"];
+                        routeOpts.outerWidth = outerWidth.GetFloat();
+                    }
+
+                    // layerBefore
+                    if (route_options.HasMember("layerBefore") && route_options["layerBefore"].IsArray()) {
+                        const rapidjson::Value &layerBefore = route_options["layerBefore"];
+                        routeOpts.layerBefore = layerBefore.GetString();
+                    }
+
+                    // useDynamicWidths
+                    if (route_options.HasMember("useDynamicWidths") && route_options["useDynamicWidths"].IsArray()) {
+                        const rapidjson::Value &useDynamicWidths = route_options["useDynamicWidths"];
+                        routeOpts.useDynamicWidths = useDynamicWidths.GetBool();
+                    }
+                }
+
+                mbgl::LineString<double> route_geom;
+                if (route_obj.HasMember("geometry") && route_obj["geometry"].IsArray()) {
+                    const rapidjson::Value &geometry = route_obj["geometry"];
+                    for (rapidjson::SizeType j = 0; j < geometry.Size(); j++) {
+                        const rapidjson::Value &point = geometry[j];
+                        if (point.IsArray() && point.Size() == 2) {
+                            double x = point[0].GetDouble();
+                            double y = point[1].GetDouble();
+                            route_geom.push_back({x, y});
+                        }
+                    }
+                }
+
+                auto routeID = rmptr_->routeCreate(route_geom, routeOpts);
+                RouteCircle routeCircle;
+                routeCircle.points = route_geom;
+                routeCircle.resolution = route_geom.size();
+                routeCircle.radius = 50;
+                routeCircle.xlate = 0; // TODO fixme later
+                routeMap_[routeID] = routeCircle;
+
+                rmptr_->finalize();
+                lastRouteID_ = routeID;
+
+                // create route segments
+                if (route_obj.HasMember("route_segments") && route_obj["route_segments"].IsArray()) {
+                    const rapidjson::Value &route_segments = route_obj["route_segments"];
+                    for (rapidjson::SizeType j = 0; j < route_segments.Size(); j++) {
+                        mbgl::route::RouteSegmentOptions rsopts;
+                        const rapidjson::Value &segment = route_segments[j];
+                        if (segment.HasMember("route_segment_options") && segment["route_segment_options"].IsObject()) {
+                            const rapidjson::Value &segment_options = segment["route_segment_options"];
+                            if (segment_options.HasMember("color") && segment_options["color"].IsArray()) {
+                                const rapidjson::Value &color = segment_options["color"];
+                                rsopts.color = mbglColor(color);
+                            }
+
+                            if (segment_options.HasMember("geometry") && segment_options["geometry"].IsArray()) {
+                                const rapidjson::Value &geometry = segment_options["geometry"];
+                                for (rapidjson::SizeType k = 0; k < geometry.Size(); k++) {
+                                    const rapidjson::Value &point = geometry[k];
+                                    if (point.IsArray() && point.Size() == 2) {
+                                        double x = point[0].GetDouble();
+                                        double y = point[1].GetDouble();
+                                        rsopts.geometry.push_back({x, y});
+                                    }
+                                }
+                            }
+
+                            if (segment_options.HasMember("priority")) {
+                                rsopts.priority = segment_options["priority"].GetInt();
+                            }
+                        }
+
+                        rmptr_->routeSegmentCreate(routeID, rsopts);
+                    }
+                }
+                rmptr_->finalize();
+            }
+        }
     }
 }
 
@@ -959,31 +1662,113 @@ void GLFWView::onMouseClick(GLFWwindow *window, int button, int action, int modi
     MLN_TRACE_FUNC();
 
     auto *view = reinterpret_cast<GLFWView *>(glfwGetWindowUserPointer(window));
-
-    if (button == GLFW_MOUSE_BUTTON_RIGHT || (button == GLFW_MOUSE_BUTTON_LEFT && modifiers & GLFW_MOD_CONTROL)) {
-        view->rotating = action == GLFW_PRESS;
-        view->map->setGestureInProgress(view->rotating);
-    } else if (button == GLFW_MOUSE_BUTTON_LEFT && (modifiers & GLFW_MOD_SHIFT)) {
-        view->pitching = action == GLFW_PRESS;
-        view->map->setGestureInProgress(view->pitching);
-    } else if (button == GLFW_MOUSE_BUTTON_LEFT) {
-        view->tracking = action == GLFW_PRESS;
-        view->map->setGestureInProgress(view->tracking);
-
-        if (action == GLFW_RELEASE) {
-            double now = glfwGetTime();
-            if (now - view->lastClick < 0.4 /* ms */) {
-                if (modifiers & GLFW_MOD_SHIFT) {
-                    view->map->scaleBy(0.5,
-                                       mbgl::ScreenCoordinate{view->lastX, view->lastY},
-                                       mbgl::AnimationOptions{{mbgl::Milliseconds(500)}});
-                } else {
-                    view->map->scaleBy(2.0,
-                                       mbgl::ScreenCoordinate{view->lastX, view->lastY},
-                                       mbgl::AnimationOptions{{mbgl::Milliseconds(500)}});
+    if (view->getRoutePickMode()) {
+        std::cout << "onClick(): last: " << std::to_string(view->lastX) << ", " << std::to_string(view->lastY)
+                  << std::endl;
+        std::vector<RouteID> routeIDs = view->getAllRoutes();
+        std::vector<std::string> layers;
+        // we specifically create caches for base layer since base route is wider than the active layer.
+        // we also check against source name as well as source layer name, since I've seen cases where the source layer
+        // name is not set.
+        std::unordered_map<std::string, RouteID> baseLayerMapCache;
+        std::unordered_map<std::string, RouteID> baseSourceMapCache;
+        for (const auto &routeID : routeIDs) {
+            if (routeID.isValid()) {
+                std::string baseLayer = view->getBaseRouteLayerName(routeID);
+                assert(!baseLayer.empty() && "base layer cannot be empty!");
+                if (!baseLayer.empty()) {
+                    layers.push_back(baseLayer);
+                    baseLayerMapCache[baseLayer] = routeID;
+                }
+                std::string baseSource = view->getBaseGeoJSONsourceName(routeID);
+                assert(!baseSource.empty() && "base source cannot be empty");
+                if (!baseSource.empty()) {
+                    baseSourceMapCache[baseSource] = routeID;
                 }
             }
-            view->lastClick = now;
+        }
+
+        double screenSpaceX = view->lastX, screenSpaceY = view->lastY;
+        int radius = 5;
+        std::unordered_map<RouteID, int, IDHasher<RouteID>> routeCoverage;
+        // sample multiple ray picks over an radius
+        for (int i = -radius; i < radius; i++) {
+            for (int j = -radius; j < radius; j++) {
+                mapbox::geometry::point<double> screenpoint = {screenSpaceX + i, screenSpaceY + j};
+                std::vector<mbgl::Feature> features = view->getRenderFrontend()->queryFeatures(screenpoint.x,
+                                                                                               screenpoint.y);
+                for (const auto &feature : features) {
+                    if (baseLayerMapCache.find(feature.sourceLayer) != baseLayerMapCache.end()) {
+                        RouteID baseRouteID = baseLayerMapCache[feature.sourceLayer];
+                        routeCoverage[baseRouteID]++;
+                    }
+
+                    // also check cache of geojson source names if the source layer is not set.
+                    if (baseSourceMapCache.find(feature.source) != baseSourceMapCache.end()) {
+                        RouteID baseRouteID = baseSourceMapCache[feature.source];
+                        routeCoverage[baseRouteID]++;
+                    }
+                }
+            }
+        }
+
+        // when you do a touch at a location, the radius can cover multiple routes.
+        // find the RouteID that has the maximum touch weight value
+        int maxTouchWeight = 0;
+        std::vector<RouteID> maxRouteIDs;
+        for (const auto &[routeID, weight] : routeCoverage) {
+            if (weight > maxTouchWeight) {
+                maxTouchWeight = weight;
+            }
+        }
+        for (const auto &[routeID, weight] : routeCoverage) {
+            if (weight == maxTouchWeight) {
+                maxRouteIDs.push_back(routeID);
+            }
+        }
+
+        if (maxRouteIDs.size() == 1) {
+            std::cout << "Clicked routeID: " << std::to_string(maxRouteIDs[0].id) << std::endl;
+        }
+
+        if (!maxRouteIDs.empty()) {
+            int top = view->getTopMost(maxRouteIDs);
+            RouteID topRouteID;
+            if (top >= 0 && top < static_cast<int>(maxRouteIDs.size())) {
+                topRouteID = maxRouteIDs[top];
+            }
+
+            std::cout << "Clicked routeID: " << std::to_string(topRouteID.id) << std::endl;
+        } else {
+            std::cout << "Clicked on no routes" << std::endl;
+        }
+
+    } else {
+        if (button == GLFW_MOUSE_BUTTON_RIGHT || (button == GLFW_MOUSE_BUTTON_LEFT && modifiers & GLFW_MOD_CONTROL)) {
+            view->rotating = action == GLFW_PRESS;
+            view->map->setGestureInProgress(view->rotating);
+        } else if (button == GLFW_MOUSE_BUTTON_LEFT && (modifiers & GLFW_MOD_SHIFT)) {
+            view->pitching = action == GLFW_PRESS;
+            view->map->setGestureInProgress(view->pitching);
+        } else if (button == GLFW_MOUSE_BUTTON_LEFT) {
+            view->tracking = action == GLFW_PRESS;
+            view->map->setGestureInProgress(view->tracking);
+
+            if (action == GLFW_RELEASE) {
+                double now = glfwGetTime();
+                if (now - view->lastClick < 0.4 /* ms */) {
+                    if (modifiers & GLFW_MOD_SHIFT) {
+                        view->map->scaleBy(0.5,
+                                           mbgl::ScreenCoordinate{view->lastX, view->lastY},
+                                           mbgl::AnimationOptions{{mbgl::Milliseconds(500)}});
+                    } else {
+                        view->map->scaleBy(2.0,
+                                           mbgl::ScreenCoordinate{view->lastX, view->lastY},
+                                           mbgl::AnimationOptions{{mbgl::Milliseconds(500)}});
+                    }
+                }
+                view->lastClick = now;
+            }
         }
     }
 }

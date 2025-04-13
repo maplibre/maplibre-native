@@ -65,6 +65,14 @@ auto LineLayerTweaker::evaluate([[maybe_unused]] const PaintParameters& paramete
     return evaluated.get<Property>().constantOr(Property::defaultValue());
 }
 
+void LineLayerTweaker::setGradientLineClip(double clip) {
+    line_clip_ = clip;
+}
+
+void LineLayerTweaker::setGradientLineClipColor(const mbgl::Color& color) {
+    line_clip_color = color;
+}
+
 void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     if (layerGroup.empty()) {
         return;
@@ -223,6 +231,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             } break;
 
             case LineType::Gradient: {
+                std::array<float, 4> linecolor = {
+                    line_clip_color.r, line_clip_color.g, line_clip_color.b, line_clip_color.a};
 #if MLN_UBO_CONSOLIDATION
                 drawableUBOVector[i].lineGradientDrawableUBO = {
 #else
@@ -236,8 +246,9 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     .gapwidth_t = std::get<0>(binders->get<LineGapWidth>()->interpolationFactor(zoom)),
                     .offset_t = std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
                     .width_t = std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
-                    .pad1 = 0,
-                    .pad2 = 0
+                    .lineclip_t = static_cast<float>(line_clip_),
+                    .pad2 = 0,
+                    .clip_color_t = util::cast<float>(linecolor)
                 };
 
 #if !MLN_UBO_CONSOLIDATION

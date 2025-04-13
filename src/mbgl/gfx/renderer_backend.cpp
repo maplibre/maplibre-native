@@ -22,5 +22,11 @@ gfx::Context& RendererBackend::getContext() {
     return *context;
 }
 
+Context& RendererBackend::getContextOutsideRenderingScope() {
+    std::call_once(initialized, [this] { context = createContext(); });
+    assert(context);
+    return *context;
+}
+
 } // namespace gfx
 } // namespace mbgl

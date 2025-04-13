@@ -63,6 +63,7 @@ struct RenderingStats {
     int stencilUpdates = 0;
 
     RenderingStats& operator+=(const RenderingStats&);
+    std::string toJSONString() const;
 
 #if !defined(NDEBUG)
     std::string toString(std::string_view separator) const;
