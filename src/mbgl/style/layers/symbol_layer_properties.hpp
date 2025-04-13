@@ -51,9 +51,9 @@ struct IconOptional : LayoutProperty<bool> {
     static bool defaultValue() { return false; }
 };
 
-struct IconPadding : LayoutProperty<float> {
+struct IconPadding : DataDrivenLayoutProperty<Padding> {
     static constexpr const char *name() { return "icon-padding"; }
-    static float defaultValue() { return 2.f; }
+    static Padding defaultValue() { return {2}; }
 };
 
 struct IconPitchAlignment : LayoutProperty<AlignmentType> {
@@ -216,6 +216,11 @@ struct TextVariableAnchor : LayoutProperty<std::vector<TextVariableAnchorType>> 
     static std::vector<TextVariableAnchorType> defaultValue() { return {}; }
 };
 
+struct TextVariableAnchorOffset : DataDrivenLayoutProperty<VariableAnchorOffsetCollection> {
+    static constexpr const char *name() { return "text-variable-anchor-offset"; }
+    static VariableAnchorOffsetCollection defaultValue() { return {}; }
+};
+
 struct TextWritingMode : LayoutProperty<std::vector<TextWritingModeType>> {
     static constexpr const char *name() { return "text-writing-mode"; }
     static std::vector<TextWritingModeType> defaultValue() { return {}; }
@@ -321,6 +326,7 @@ class SymbolLayoutProperties : public Properties<
     TextSize,
     TextTransform,
     TextVariableAnchor,
+    TextVariableAnchorOffset,
     TextWritingMode
 > {};
 

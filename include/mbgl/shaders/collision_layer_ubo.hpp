@@ -5,19 +5,19 @@
 namespace mbgl {
 namespace shaders {
 
-struct alignas(16) CollisionUBO {
-    std::array<float, 4 * 4> matrix;
-    std::array<float, 2> extrude_scale;
-    float overscale_factor;
-    float pad;
+struct alignas(16) CollisionDrawableUBO {
+    /*  0 */ std::array<float, 4 * 4> matrix;
+    /* 64 */
 };
-static_assert(sizeof(CollisionUBO) % 16 == 0);
-static_assert(sizeof(CollisionUBO) == 80);
+static_assert(sizeof(CollisionDrawableUBO) == 4 * 16);
 
-enum {
-    idCollisionUBO = globalUBOCount,
-    collisionUBOCount
+struct alignas(16) CollisionTilePropsUBO {
+    /*  0 */ std::array<float, 2> extrude_scale;
+    /*  8 */ float overscale_factor;
+    /* 12 */ float pad1;
+    /* 16 */
 };
+static_assert(sizeof(CollisionTilePropsUBO) == 16);
 
 } // namespace shaders
 } // namespace mbgl

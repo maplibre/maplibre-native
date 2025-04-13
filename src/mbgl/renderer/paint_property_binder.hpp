@@ -320,12 +320,15 @@ public:
                             const FeatureState& state) override {
         using style::expression::EvaluationContext;
 
-        auto evaluated = expression.evaluate(EvaluationContext(&feature).withFeatureState(&state), defaultValue);
+        const auto evaluated = expression.evaluate(EvaluationContext(&feature).withFeatureState(&state), defaultValue);
         this->statistics.add(evaluated);
-        auto value = attributeValue(evaluated);
+
+        const auto value = BaseVertex{attributeValue(evaluated)};
         for (std::size_t i = start; i < end; ++i) {
-            vertexVector.at(i) = BaseVertex{value};
+            vertexVector.at(i) = value;
         }
+
+        vertexVector.updateModified();
     }
 
 #if MLN_LEGACY_RENDERER
@@ -449,17 +452,21 @@ public:
                             const GeometryTileFeature& feature,
                             const FeatureState& state) override {
         using style::expression::EvaluationContext;
-        Range<T> range = {
+        const Range<T> range = {
             expression.evaluate(EvaluationContext(zoomRange.min, &feature, &state), defaultValue),
             expression.evaluate(EvaluationContext(zoomRange.max, &feature, &state), defaultValue),
         };
         this->statistics.add(range.min);
         this->statistics.add(range.max);
-        AttributeValue value = zoomInterpolatedAttributeValue(attributeValue(range.min), attributeValue(range.max));
+
+        const Vertex value = Vertex{
+            zoomInterpolatedAttributeValue(attributeValue(range.min), attributeValue(range.max))};
 
         for (std::size_t i = start; i < end; ++i) {
-            vertexVector.at(i) = Vertex{value};
+            vertexVector.at(i) = value;
         }
+
+        vertexVector.updateModified();
     }
 
 #if MLN_LEGACY_RENDERER
@@ -710,11 +717,13 @@ struct InterpolationUniform {
     static constexpr auto name() { return concat_literals<&Attr::name, &string_literal<'_', 't'>::value>::value(); }
 };
 
+class PaintPropertyBindersBase {};
+
 template <class Ps>
 class PaintPropertyBinders;
 
 template <class... Ps>
-class PaintPropertyBinders<TypeList<Ps...>> {
+class PaintPropertyBinders<TypeList<Ps...>> : public PaintPropertyBindersBase {
 private:
     template <class T, class PossiblyEvaluatedType, class... As>
     struct Detail;
@@ -767,7 +776,7 @@ public:
 
     void setPatternParameters(const std::optional<ImagePosition>& posA,
                               const std::optional<ImagePosition>& posB,
-                              const CrossfadeParameters& crossfade) const {
+                              const CrossfadeParameters& crossfade) {
         util::ignore({(binders.template get<Ps>()->setPatternParameters(posA, posB, crossfade), 0)...});
     }
 

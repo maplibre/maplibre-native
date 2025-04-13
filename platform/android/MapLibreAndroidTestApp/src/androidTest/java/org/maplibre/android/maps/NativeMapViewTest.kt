@@ -2,6 +2,7 @@ package org.maplibre.android.maps
 
 import android.content.Context
 import android.graphics.PointF
+import android.view.View
 import androidx.test.annotation.UiThreadTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
@@ -436,6 +437,8 @@ class NativeMapViewTest : AppCenter() {
 
     class DummyRenderer(context: Context) : MapRenderer(context, null) {
 
+        private var renderingRefreshMode: RenderingRefreshMode = RenderingRefreshMode.WHEN_DIRTY
+
         override fun requestRender() {
             // no-op
         }
@@ -443,10 +446,21 @@ class NativeMapViewTest : AppCenter() {
         override fun queueEvent(runnable: Runnable?) {
             // no-op
         }
-        
-        override fun waitForEmpty(timeoutMillis: Long): Long {
+
+        override fun waitForEmpty() {
             // no-op
-            return 0
+        }
+
+        override fun getView(): View? {
+            return null;
+        }
+
+        override fun setRenderingRefreshMode(mode : RenderingRefreshMode) {
+            renderingRefreshMode = mode
+        }
+
+        override fun getRenderingRefreshMode() : RenderingRefreshMode{
+            return renderingRefreshMode
         }
     }
 }

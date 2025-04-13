@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param object A Foundation object deserialized from JSON data, for example
  using `NSJSONSerialization`.
  @return An initialized predicate equivalent to `object`, suitable for use
- with the `MLNVectorStyleLayer.predicate` property.
+ with the ``MLNVectorStyleLayer/predicate`` property.
  */
 + (instancetype)predicateWithMLNJSONObject:(id)object NS_SWIFT_NAME(init(mglJSONObject:));
 

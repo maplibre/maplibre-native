@@ -3,8 +3,8 @@ package org.maplibre.android.location
 import android.graphics.PointF
 import android.graphics.RectF
 import android.location.Location
-import com.mapbox.android.gestures.AndroidGesturesManager
-import com.mapbox.android.gestures.MoveGestureDetector
+import org.maplibre.android.gestures.AndroidGesturesManager
+import org.maplibre.android.gestures.MoveGestureDetector
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdate
 import org.maplibre.android.camera.CameraUpdateFactory.newCameraPosition

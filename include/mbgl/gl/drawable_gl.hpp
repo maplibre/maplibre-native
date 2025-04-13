@@ -48,6 +48,13 @@ public:
 
     void upload(gfx::UploadPass&);
 
+    void updateVertexAttributes(gfx::VertexAttributeArrayPtr,
+                                std::size_t vertexCount,
+                                gfx::DrawMode,
+                                gfx::IndexVectorBasePtr,
+                                const SegmentBase* segments,
+                                std::size_t segmentCount) override;
+
 protected:
     class Impl;
     const std::unique_ptr<Impl> impl;
@@ -60,9 +67,6 @@ private:
     gfx::StencilMode makeStencilMode(PaintParameters&) const;
 
     void uploadTextures() const;
-
-    void bindUniformBuffers() const;
-    void unbindUniformBuffers() const;
 
     void bindTextures() const;
     void unbindTextures() const;

@@ -336,7 +336,7 @@ void benchmark(const std::string_view label,
             for (std::size_t j = 0; j < lookups; ++j) {
                 for (const auto& k : testKeys) {
                     if (map.count(k)) {
-                        do_not_optimize_away++;
+                        do_not_optimize_away = do_not_optimize_away + 1;
                     }
                 }
             }

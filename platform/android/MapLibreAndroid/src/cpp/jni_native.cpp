@@ -56,6 +56,7 @@
 #include "i18n/number_format_jni.hpp"
 #include "logger.hpp"
 #include "text/local_glyph_rasterizer_jni.hpp"
+#include "tile/tile_operation.hpp"
 
 namespace mbgl {
 namespace android {
@@ -67,8 +68,6 @@ void registerNatives(JavaVM* vm) {
 
     jni::JNIEnv& env = jni::GetEnv(*vm, jni::jni_version_1_6);
 
-    // For the FileSource
-    static mbgl::util::RunLoop mainRunLoop;
     FileSource::registerNative(env);
 
     // Basic types
@@ -157,6 +156,9 @@ void registerNatives(JavaVM* vm) {
     Collator::registerNative(env);
     StringUtils::registerNative(env);
     NumberFormat::registerNative(env);
+
+    // Tile
+    TileOperation::registerNative(env);
 
     // Logger
     Logger::registerNative(env);

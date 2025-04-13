@@ -18,14 +18,20 @@ using namespace shaders;
 
 void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
                                  [[maybe_unused]] const PaintParameters& parameters) {
+    if (layerGroup.empty()) {
+        return;
+    }
+
     const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
 
     const auto spinWeights = [](float spin) -> std::array<float, 4> {
         spin = util::deg2radf(spin);
         const float s = std::sin(spin);
         const float c = std::cos(spin);
-        std::array<float, 4> spin_weights = {
-            {(2 * c + 1) / 3, (-std::sqrt(3.0f) * s - c + 1) / 3, (std::sqrt(3.0f) * s - c + 1) / 3, 0}};
+        std::array<float, 4> spin_weights = {{(2 * c + 1) / 3,
+                                              (-std::numbers::sqrt3_v<float> * s - c + 1) / 3,
+                                              (std::numbers::sqrt3_v<float> * s - c + 1) / 3,
+                                              0}};
         return spin_weights;
     };
     const auto saturationFactor = [](float saturation) -> float {
@@ -45,23 +51,28 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
 
     if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
         const RasterEvaluatedPropsUBO propsUBO = {
-            /*.spin_weigths = */ spinWeights(evaluated.get<RasterHueRotate>()),
-            /*.tl_parent = */ {{0.0f, 0.0f}},
-            /*.scale_parent = */ 1.0f,
-            /*.buffer_scale = */ 1.0f,
-            /*.fade_t = */ 1.0f,
-            /*.opacity = */ evaluated.get<RasterOpacity>(),
-            /*.brightness_low = */ evaluated.get<RasterBrightnessMin>(),
-            /*.brightness_high = */ evaluated.get<RasterBrightnessMax>(),
-            /*.saturation_factor = */ saturationFactor(evaluated.get<RasterSaturation>()),
-            /*.contrast_factor = */ contrastFactor(evaluated.get<RasterContrast>()),
-            0,
-            0};
+            .spin_weights = spinWeights(evaluated.get<RasterHueRotate>()),
+            .tl_parent = {{0.0f, 0.0f}},
+            .scale_parent = 1.0f,
+            .buffer_scale = 1.0f,
+            .fade_t = 1.0f,
+            .opacity = evaluated.get<RasterOpacity>(),
+            .brightness_low = evaluated.get<RasterBrightnessMin>(),
+            .brightness_high = evaluated.get<RasterBrightnessMax>(),
+            .saturation_factor = saturationFactor(evaluated.get<RasterSaturation>()),
+            .contrast_factor = contrastFactor(evaluated.get<RasterContrast>()),
+            .pad1 = 0,
+            .pad2 = 0};
         parameters.context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);
         propertiesUpdated = false;
     }
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.set(idRasterEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
+
+#if MLN_UBO_CONSOLIDATION
+    int i = 0;
+    std::vector<RasterDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
+#endif
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!checkTweakDrawable(drawable)) {
@@ -93,10 +104,33 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
                                    !parameters.state.isChanging());
         }
 
-        const RasterDrawableUBO drawableUBO{/*.matrix = */ util::cast<float>(matrix)};
+#if MLN_UBO_CONSOLIDATION
+        drawableUBOVector[i] = {
+#else
+        const RasterDrawableUBO drawableUBO = {
+#endif
+            /* .matrix = */ util::cast<float>(matrix)
+        };
+#if MLN_UBO_CONSOLIDATION
+        drawable.setUBOIndex(i++);
+#else
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idRasterDrawableUBO, &drawableUBO, parameters.context);
+#endif
     });
+
+#if MLN_UBO_CONSOLIDATION
+    auto& context = parameters.context;
+    const size_t drawableUBOVectorSize = sizeof(RasterDrawableUBO) * drawableUBOVector.size();
+    if (!drawableUniformBuffer || drawableUniformBuffer->getSize() < drawableUBOVectorSize) {
+        drawableUniformBuffer = context.createUniformBuffer(
+            drawableUBOVector.data(), drawableUBOVectorSize, false, true);
+    } else {
+        drawableUniformBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
+    }
+
+    layerUniforms.set(idRasterDrawableUBO, drawableUniformBuffer);
+#endif
 }
 
 } // namespace mbgl

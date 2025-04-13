@@ -5,20 +5,10 @@
 #include <mbgl/test/util.hpp>
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/rapidjson.hpp>
-
 #include <rapidjson/document.h>
-
 #include <iostream>
+#include <filesystem>
 #include <fstream>
-
-#if defined(_MSC_VER) && !defined(__clang__)
-#include <Windows.h>
-#ifdef GetObject
-#undef GetObject
-#endif
-#else
-#include <dirent.h>
-#endif
 
 using namespace mbgl;
 using namespace mbgl::style;
@@ -88,51 +78,27 @@ TEST_P(ExpressionEqualityTest, ExpressionEquality) {
     EXPECT_FALSE(*expression_b == *((expression_b->getKind() == Kind::Literal) ? dsl::id() : dsl::literal(0.0)));
 }
 
-static void populateNames(std::vector<std::string>& names) {
-    const std::string ending = ".a.json";
+static std::vector<std::string> populateNames() {
+    std::vector<std::string> test_inputs;
 
-    std::string style_directory = "test/fixtures/expression_equality";
+    const std::string ending{".a.json"};
 
-    auto testName = [&](const std::string& name) {
-        if (name.length() >= ending.length() &&
-            name.compare(name.length() - ending.length(), ending.length(), ending) == 0) {
-            names.push_back(name.substr(0, name.length() - ending.length()));
-        }
-    };
+    const std::filesystem::path style_directory{"test/fixtures/expression_equality"};
 
-#if defined(_MSC_VER) && !defined(__clang__)
-    style_directory += "/*";
-    WIN32_FIND_DATAA ffd;
-    HANDLE hFind = FindFirstFileA(style_directory.c_str(), &ffd);
-    if (hFind != INVALID_HANDLE_VALUE) {
-        do {
-            const std::string name = ffd.cFileName;
-            testName(name);
-        } while (FindNextFileA(hFind, &ffd) != 0);
-        FindClose(hFind);
-    }
-#else
-    DIR* dir = opendir(style_directory.c_str());
-    if (dir != nullptr) {
-        for (dirent* dp = nullptr; (dp = readdir(dir)) != nullptr;) {
-            const std::string name = dp->d_name;
+    for (const auto& file_entry : std::filesystem::directory_iterator(style_directory)) {
+        auto file_entry_path = file_entry.path().string();
+        if (!file_entry.path().empty() && file_entry_path.length() >= ending.length() &&
+            file_entry_path.compare(file_entry_path.length() - ending.length(), ending.length(), ending) == 0) {
 #if ANDROID
-            // Android unit test uses number-format stub implementation so skip the tests
-            if (name.find("number-format") != std::string::npos) {
+            if (file_entry_path.find("number-format") != std::string::npos) {
                 continue;
             }
 #endif
-            testName(name);
+            auto file_name = file_entry.path().filename().string();
+            test_inputs.push_back(file_name.substr(0, file_name.length() - ending.length()));
         }
-        closedir(dir);
     }
-#endif
+    return test_inputs;
 }
 
-INSTANTIATE_TEST_SUITE_P(Expression, ExpressionEqualityTest, ::testing::ValuesIn([] {
-                             std::vector<std::string> names;
-                             populateNames(names);
-                             std::sort(names.begin(), names.end());
-                             EXPECT_GT(names.size(), 0u);
-                             return names;
-                         }()));
+INSTANTIATE_TEST_SUITE_P(Expression, ExpressionEqualityTest, ::testing::ValuesIn(populateNames()));

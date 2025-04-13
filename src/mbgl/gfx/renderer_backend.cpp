@@ -6,7 +6,13 @@ namespace mbgl {
 namespace gfx {
 
 RendererBackend::RendererBackend(const ContextMode contextMode_)
-    : contextMode(contextMode_) {}
+    : contextMode(contextMode_),
+      threadPool(Scheduler::GetBackground(), uniqueID) {}
+
+RendererBackend::RendererBackend(const ContextMode contextMode_, const TaggedScheduler& threadPool_)
+    : contextMode(contextMode_),
+      threadPool(threadPool_) {}
+
 RendererBackend::~RendererBackend() = default;
 
 gfx::Context& RendererBackend::getContext() {

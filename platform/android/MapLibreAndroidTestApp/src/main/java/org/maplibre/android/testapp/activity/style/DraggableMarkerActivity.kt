@@ -7,8 +7,8 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
-import com.mapbox.android.gestures.AndroidGesturesManager
-import com.mapbox.android.gestures.MoveGestureDetector
+import org.maplibre.android.gestures.AndroidGesturesManager
+import org.maplibre.android.gestures.MoveGestureDetector
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.Point
@@ -72,7 +72,7 @@ class DraggableMarkerActivity : AppCompatActivity() {
 
             maplibreMap.setStyle(
                 Style.Builder()
-                    .fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
+                    .fromUri(TestStyles.PROTOMAPS_LIGHT)
                     .withImage(markerImageId, IconFactory.getInstance(this).defaultMarker().bitmap)
                     .withSource(source)
                     .withLayer(layer)
@@ -91,6 +91,7 @@ class DraggableMarkerActivity : AppCompatActivity() {
                 )
             )
 
+            // --8<-- [start:addOnMapClickListener]
             maplibreMap.addOnMapClickListener {
                 // Adding a marker on map click
                 val features = maplibreMap.queryRenderedSymbols(it, layerId)
@@ -108,7 +109,9 @@ class DraggableMarkerActivity : AppCompatActivity() {
 
                 false
             }
+            // --8<-- [end:addOnMapClickListener]
 
+            // --8<-- [start:draggableSymbolsManager]
             draggableSymbolsManager = DraggableSymbolsManager(
                 mapView,
                 maplibreMap,
@@ -148,22 +151,25 @@ class DraggableMarkerActivity : AppCompatActivity() {
                         .show()
                 }
             })
+            // --8<-- [end:draggableSymbolsManager]
         }
     }
 
+    // --8<-- [start:addMarker]
     private fun addMarker(latLng: LatLng) {
         featureCollection.features()?.add(
             Feature.fromGeometry(Point.fromLngLat(latLng.longitude, latLng.latitude), null, generateMarkerId())
         )
         source.setGeoJson(featureCollection)
     }
+    // --8<-- [end:addMarker]
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
         // Dispatching parent's touch events to the manager
         draggableSymbolsManager?.onParentTouchEvent(ev)
         return super.dispatchTouchEvent(ev)
     }
-
+    // --8<-- [start:DraggableSymbolsManager]
     /**
      * A manager, that allows dragging symbols after they are long clicked.
      * Since this manager lives outside of the Maps SDK, we need to intercept parent's motion events
@@ -201,7 +207,7 @@ class DraggableMarkerActivity : AppCompatActivity() {
 
         private val androidGesturesManager: AndroidGesturesManager = AndroidGesturesManager(mapView.context, false)
         private var draggedSymbolId: String? = null
-        private val onSymbolDragListeners: MutableList<OnSymbolDragListener> = mutableListOf<OnSymbolDragListener>()
+        private val onSymbolDragListeners: MutableList<OnSymbolDragListener> = mutableListOf()
 
         init {
             maplibreMap.addOnMapLongClickListener {
@@ -303,6 +309,7 @@ class DraggableMarkerActivity : AppCompatActivity() {
             fun onSymbolDragFinished(id: String)
         }
     }
+    // --8<-- [end:DraggableSymbolsManager]
 
     override fun onStart() {
         super.onStart()
@@ -336,9 +343,7 @@ class DraggableMarkerActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
         super.onSaveInstanceState(outState, outPersistentState)
-        outState?.let {
-            mapView.onSaveInstanceState(it)
-        }
+        mapView.onSaveInstanceState(outState)
     }
 }
 

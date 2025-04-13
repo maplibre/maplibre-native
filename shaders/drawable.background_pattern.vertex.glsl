@@ -3,9 +3,12 @@ layout (std140) uniform BackgroundPatternDrawableUBO {
     highp vec2 u_pixel_coord_upper;
     highp vec2 u_pixel_coord_lower;
     highp float u_tile_units_to_pixels;
-    highp float drawable_pad1, drawable_pad2, drawable_pad3;
+    lowp float drawable_pad1;
+    lowp float drawable_pad2;
+    lowp float drawable_pad3;
 };
-layout (std140) uniform BackgroundPatternLayerUBO {
+
+layout (std140) uniform BackgroundPatternPropsUBO {
     highp vec2 u_pattern_tl_a;
     highp vec2 u_pattern_br_a;
     highp vec2 u_pattern_tl_b;

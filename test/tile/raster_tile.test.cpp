@@ -16,29 +16,34 @@ using namespace mbgl;
 
 class RasterTileTest {
 public:
+    util::SimpleIdentity uniqueID;
     std::shared_ptr<FileSource> fileSource = std::make_shared<FakeFileSource>();
     TransformState transformState;
     util::RunLoop loop;
-    style::Style style{fileSource, 1};
     AnnotationManager annotationManager{style};
     std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
     Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
+    TileParameters tileParameters;
+    style::Style style;
 
-    TileParameters tileParameters{1.0,
-                                  MapDebugOptions(),
-                                  transformState,
-                                  fileSource,
-                                  MapMode::Continuous,
-                                  annotationManager.makeWeakPtr(),
-                                  imageManager,
-                                  glyphManager,
-                                  0};
+    RasterTileTest()
+        : tileParameters{1.0,
+                         MapDebugOptions(),
+                         transformState,
+                         fileSource,
+                         MapMode::Continuous,
+                         annotationManager.makeWeakPtr(),
+                         imageManager,
+                         glyphManager,
+                         0,
+                         {Scheduler::GetBackground(), uniqueID}},
+          style{fileSource, 1, tileParameters.threadPool} {}
 };
 
 TEST(RasterTile, setError) {
     RasterTileTest test;
-    RasterTile tile(OverscaledTileID(0, 0, 0), test.tileParameters, test.tileset);
+    RasterTile tile(OverscaledTileID(0, 0, 0), "testSource", test.tileParameters, test.tileset);
     tile.setError(std::make_exception_ptr(std::runtime_error("test")));
     EXPECT_FALSE(tile.isRenderable());
     EXPECT_TRUE(tile.isLoaded());
@@ -47,7 +52,7 @@ TEST(RasterTile, setError) {
 
 TEST(RasterTile, onError) {
     RasterTileTest test;
-    RasterTile tile(OverscaledTileID(0, 0, 0), test.tileParameters, test.tileset);
+    RasterTile tile(OverscaledTileID(0, 0, 0), "testSource", test.tileParameters, test.tileset);
     tile.onError(std::make_exception_ptr(std::runtime_error("test")), 0);
     EXPECT_FALSE(tile.isRenderable());
     EXPECT_TRUE(tile.isLoaded());
@@ -56,7 +61,7 @@ TEST(RasterTile, onError) {
 
 TEST(RasterTile, onParsed) {
     RasterTileTest test;
-    RasterTile tile(OverscaledTileID(0, 0, 0), test.tileParameters, test.tileset);
+    RasterTile tile(OverscaledTileID(0, 0, 0), "testSource", test.tileParameters, test.tileset);
     tile.onParsed(std::make_unique<RasterBucket>(PremultipliedImage{}), 0);
     EXPECT_TRUE(tile.isRenderable());
     EXPECT_TRUE(tile.isLoaded());
@@ -80,7 +85,7 @@ TEST(RasterTile, onParsed) {
 
 TEST(RasterTile, onParsedEmpty) {
     RasterTileTest test;
-    RasterTile tile(OverscaledTileID(0, 0, 0), test.tileParameters, test.tileset);
+    RasterTile tile(OverscaledTileID(0, 0, 0), "testSource", test.tileParameters, test.tileset);
     tile.onParsed(nullptr, 0);
     EXPECT_FALSE(tile.isRenderable());
     EXPECT_TRUE(tile.isLoaded());

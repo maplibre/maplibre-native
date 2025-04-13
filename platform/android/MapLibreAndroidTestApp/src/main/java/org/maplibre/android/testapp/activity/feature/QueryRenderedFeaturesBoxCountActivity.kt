@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.geojson.Feature
 import org.maplibre.android.maps.MapView
@@ -26,6 +27,13 @@ class QueryRenderedFeaturesBoxCountActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // activity uses singleInstance for testing purposes
+                // code below provides a default navigation when using the app
+                NavUtils.navigateHome(this@QueryRenderedFeaturesBoxCountActivity)
+            }
+        })
         setContentView(R.layout.activity_query_features_box)
         val selectionBox = findViewById<View>(R.id.selection_box)
 
@@ -35,7 +43,7 @@ class QueryRenderedFeaturesBoxCountActivity : AppCompatActivity() {
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
             this@QueryRenderedFeaturesBoxCountActivity.maplibreMap = maplibreMap
             maplibreMap.setStyle(Style.Builder().fromUri(TestStyles.AMERICANA))
-            selectionBox.setOnClickListener { view: View? ->
+            selectionBox.setOnClickListener { _: View? ->
                 // Query
                 val top = selectionBox.top - mapView.top
                 val left = selectionBox.left - mapView.left
@@ -132,16 +140,10 @@ class QueryRenderedFeaturesBoxCountActivity : AppCompatActivity() {
             android.R.id.home -> {
                 // activity uses singleInstance for testing purposes
                 // code below provides a default navigation when using the app
-                onBackPressed()
+                NavUtils.navigateHome(this)
                 return true
             }
         }
         return super.onOptionsItemSelected(item)
-    }
-
-    override fun onBackPressed() {
-        // activity uses singleInstance for testing purposes
-        // code below provides a default navigation when using the app
-        NavUtils.navigateHome(this)
     }
 }

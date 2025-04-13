@@ -2,13 +2,13 @@
 
 Before we dive in, a bit about our process.  Stamen Design, with a sub-contract to Wet Dog Weather, has been contracted by Amazon (AWS) to develop two proposals to upgrade MapLibre Native.  The first was the Rendering Modularization Proposal.  This one is the Metal Port.
 
-The mechanism for this will be a Pull Request, which we have obviously opened.  This will result in as much discussion as the community would like here, on the OSM Slack and by email or video call (we're available, so reach out).  As we wrap up our specific proposal, that discussion will hopefully reach a consensus and we'll be ready for a Yes or No on the PR by the end of the year.  
+The mechanism for this will be a Pull Request, which we have obviously opened.  This will result in as much discussion as the community would like here, on the OSM Slack and by email or video call (we're available, so reach out).  As we wrap up our specific proposal, that discussion will hopefully reach a consensus and we'll be ready for a Yes or No on the PR by the end of the year.
 
 This proposal is to implement a rendering module as defined in the earlier Rendering Modularization proposal.  Some of those stages are reflected here directly, such as "Snapshotting".  Others are spread across multiple passes in this documents.  For example, the Shader Registry from the Modularization proposal is directly referenced but will be used in each of the Shader related passes.
 
 ## Motivation
 
-MapLibre Native is currently depending on a deprecated rendering SDK (OpenGL) for iOS. It needs to move to Metal for iOS in some form.  Thus the graphics implementations must diverge, either by doing so within MapLibre Native or depending on another toolkit to do the rendering entirely. 
+MapLibre Native is currently depending on a deprecated rendering SDK (OpenGL) for iOS. It needs to move to Metal for iOS in some form.  Thus the graphics implementations must diverge, either by doing so within MapLibre Native or depending on another toolkit to do the rendering entirely.
 
 We are proposing the former approach, with support for multiple rendering SDKs in the MapLibre Native toolkit itself. That is discussed in more detail in the MapLibre Rendering Modularization Design Plan.  This proposal assumes that one is adopted.
 
@@ -42,7 +42,7 @@ It is useful to split our goals into three sections to articulate what this prop
 5. Screen snapshots will not block the rendering pipeline
 6. Atlases will be implemented for Metal and be accessible from any thread
 7. The Metal renderer will be optimized to the best of our abilities
-8. The toolkit will allow mixing of real time assets from other Metal based toolkits 
+8. The toolkit will allow mixing of real time assets from other Metal based toolkits
 
 ###  <a name="eval">Evaluation Metrics</a>
 1. The new version of MapLibre with Metal should support all iOS devices that support Metal
@@ -55,7 +55,7 @@ It is useful to split our goals into three sections to articulate what this prop
 
 Before we dive into the specific changes we wish to make, let's discuss how software development works with one of these low level rendering SDKs.
 
-Anyone who has worked with OpenGL knows that first you get nothing.  Traditionally, it's a black screen and a lot of tweaking before the developer sees anything.  And then a lot more tweaking before the developer sees anything useful.  
+Anyone who has worked with OpenGL knows that first you get nothing.  Traditionally, it's a black screen and a lot of tweaking before the developer sees anything.  And then a lot more tweaking before the developer sees anything useful.
 
 With Metal, you get crashes with error messages usually related to what you actually did.  This is a huge improvement!  And the debugging tools... well they do exist and they mostly work.  They work better in direct mode and with smaller test cases, so we plan accordingly.  When they do work, you can actually debug a shader!  That's very helpful.
 
@@ -96,7 +96,7 @@ The MapLibre Native toolkit already knows what a texture is, so this is the Meta
 
 Metal supports a whole host of texture formats that Maplibre Native doesn't (or does through extensions).  There is the traditional RGBA, but there are also 32 bit float, or dual 16 bit float, or.... the list goes on and on.  We want to allow support for these without losing our minds representing them.
 
-As it stands, supporting RGBA is probably sufficient, but the utility of a good single component 16 bit texture is not to be denied and neither is the flexibility of a 32 bit floating point texture.  
+As it stands, supporting RGBA is probably sufficient, but the utility of a good single component 16 bit texture is not to be denied and neither is the flexibility of a 32 bit floating point texture.
 
 We should at least fill out a handful of those image types.  Which ones aren't all that important, but the workflow for adding new ones is.  It should be simple to add the logic for a new type, but we don't need to go so far as seamlessly converting from one to another.
 
@@ -124,7 +124,7 @@ When the developers have a basic render loop going with drawables that do nothin
 
 After the Modularization PR is finished we'll have a representation for individual rendering passes.  This is similar to what the Heatmap makes use of internally, but it'll be more explicit.
 
-The rendering loop itself is affected by these passes.  We want the output of one to feed into the input of another and we want to make sure they're rendered in the right order.  
+The rendering loop itself is affected by these passes.  We want the output of one to feed into the input of another and we want to make sure they're rendered in the right order.
 
 As for the renderer observer, we'd like to expose each level of that as appropriate.  As to why, exposing things like the command buffers at the right time allow integration of Metal compatible functionality from other toolkits.
 
@@ -150,7 +150,7 @@ Implementing the Metal version of the basic shaders should be intermingled with 
 
 For each shader, we suggest doing a straight conversion from the OpenGL.  Take the GLSL source and convert it manually, ideally with comments describing the choices you made.  There will be a chance to revisit the shaders in a later phase, so don't worry about efficiency quite yet.
 
-At the end of that process, all the Builders should be fleshed out and all the Shaders should be working.  
+At the end of that process, all the Builders should be fleshed out and all the Shaders should be working.
 
 ### Atlases
 
@@ -194,7 +194,7 @@ _Addresses Core Functionality [#7](#core)._
 
 If you thought real time rendering was mostly about triangles, I have some bad news.  It's more about memory management.  There are two ways for handling memory in Metal (that we'll deal with), the boring way and the good way.
 
-The boring way is to allocate Buffers and stick your geometry, indices, textures, uniforms, car keys, manifesto, and texture coordinates in them.  They're just memory.  You ask for how much you want, you get a handle, you copy what you need into place.  You fix whatever buffer overruns you created.  
+The boring way is to allocate Buffers and stick your geometry, indices, textures, uniforms, car keys, manifesto, and texture coordinates in them.  They're just memory.  You ask for how much you want, you get a handle, you copy what you need into place.  You fix whatever buffer overruns you created.
 
 Metal isn't fussy about a buffer containing vertices vs. indices vs. uniforms.  Mostly.  So you build a little buffer management infrastructure and alway use it.
 

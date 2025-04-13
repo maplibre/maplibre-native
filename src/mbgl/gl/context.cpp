@@ -98,13 +98,19 @@ Context::Context(RendererBackend& backend_)
 #if MLN_DRAWABLE_RENDERER
     uboAllocator = std::make_unique<gl::UniformBufferAllocator>();
 #endif
+
+    texturePool = std::make_unique<Texture2DPool>(this);
 }
 
 Context::~Context() noexcept {
     if (cleanupOnDestruction) {
-        Scheduler::GetBackground()->runRenderJobs();
+        backend.getThreadPool().runRenderJobs(true /* closeQueue */);
 
         reset();
+
+        // Delete all pooled resources while the context is still valid
+        texturePool.reset();
+
 #if !defined(NDEBUG)
         Log::Debug(Event::General, "Rendering Stats:\n" + stats.toString("\n"));
 #endif
@@ -115,7 +121,7 @@ Context::~Context() noexcept {
 void Context::beginFrame() {
     MLN_TRACE_FUNC();
 
-    Scheduler::GetBackground()->runRenderJobs();
+    backend.getThreadPool().runRenderJobs();
 
 #if MLN_DRAWABLE_RENDERER
     frameInFlightFence = std::make_shared<gl::Fence>();
@@ -265,18 +271,14 @@ void Context::verifyProgramLinkage(ProgramID program_) {
     throw std::runtime_error("program failed to link");
 }
 
-UniqueTexture Context::createUniqueTexture() {
+UniqueTexture Context::createUniqueTexture(const Size& size,
+                                           gfx::TexturePixelType format,
+                                           gfx::TextureChannelDataType type) {
     MLN_TRACE_FUNC();
 
-    if (pooledTextures.empty()) {
-        pooledTextures.resize(TextureMax);
-        MBGL_CHECK_ERROR(glGenTextures(TextureMax, pooledTextures.data()));
-        stats.numCreatedTextures += TextureMax;
-    }
+    assert(texturePool);
+    TextureID id = texturePool->alloc(size, format, type);
 
-    TextureID id = pooledTextures.back();
-    pooledTextures.pop_back();
-    stats.numActiveTextures++;
     // NOLINTNEXTLINE(performance-move-const-arg)
     return UniqueTexture{std::move(id), {this}};
 }
@@ -306,26 +308,12 @@ std::unique_ptr<gfx::TextureResource> Context::createTextureResource(const Size 
                                                                      const gfx::TextureChannelDataType type) {
     MLN_TRACE_FUNC();
 
-    auto obj = createUniqueTexture();
-    int textureByteSize = gl::TextureResource::getStorageSize(size, format, type);
-    stats.memTextures += textureByteSize;
-    std::unique_ptr<gfx::TextureResource> resource = std::make_unique<gl::TextureResource>(std::move(obj),
-                                                                                           textureByteSize);
+    auto obj = createUniqueTexture(size, format, type);
+    std::unique_ptr<gfx::TextureResource> resource = std::make_unique<gl::TextureResource>(std::move(obj));
 
     // Always use texture unit 0 for manipulating it.
     activeTextureUnit = 0;
     texture[0] = static_cast<gl::TextureResource&>(*resource).texture;
-
-    // Creates an empty texture with the specified size and format.
-    MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D,
-                                  0,
-                                  Enum<gfx::TexturePixelType>::sizedFor(format, type),
-                                  size.width,
-                                  size.height,
-                                  0,
-                                  Enum<gfx::TexturePixelType>::to(format),
-                                  Enum<gfx::TextureChannelDataType>::to(type),
-                                  nullptr));
 
     // We are using clamp to edge here since OpenGL ES doesn't allow GL_REPEAT
     // on NPOT textures. We use those when the pixelRatio isn't a power of two,
@@ -530,9 +518,10 @@ std::unique_ptr<gfx::DrawScopeResource> Context::createDrawScopeResource() {
 void Context::reset() {
     MLN_TRACE_FUNC();
 
-    std::copy(pooledTextures.begin(), pooledTextures.end(), std::back_inserter(abandonedTextures));
-    pooledTextures.resize(0);
     performCleanup();
+
+    // Delete all unused pooled resources
+    texturePool->shrink();
 }
 
 #if MLN_DRAWABLE_RENDERER
@@ -566,28 +555,13 @@ bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
 void Context::bindGlobalUniformBuffers(gfx::RenderPass&) const noexcept {
     MLN_TRACE_FUNC();
 
-    for (size_t id = 0; id < globalUniformBuffers.allocatedSize(); id++) {
-        const auto& globalUniformBuffer = globalUniformBuffers.get(id);
-        if (!globalUniformBuffer) continue;
-        GLint binding = static_cast<GLint>(id);
-        const auto& uniformBufferGL = static_cast<const UniformBufferGL&>(*globalUniformBuffer);
-        MBGL_CHECK_ERROR(glBindBufferRange(GL_UNIFORM_BUFFER,
-                                           binding,
-                                           uniformBufferGL.getID(),
-                                           uniformBufferGL.getManagedBuffer().getBindingOffset(),
-                                           uniformBufferGL.getSize()));
-    }
+    globalUniformBuffers.bind();
 }
 
 void Context::unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept {
     MLN_TRACE_FUNC();
 
-    for (size_t id = 0; id < globalUniformBuffers.allocatedSize(); id++) {
-        const auto& globalUniformBuffer = globalUniformBuffers.get(id);
-        if (!globalUniformBuffer) continue;
-        GLint binding = static_cast<GLint>(id);
-        MBGL_CHECK_ERROR(glBindBufferBase(GL_UNIFORM_BUFFER, binding, 0));
-    }
+    globalUniformBuffers.unbind();
 }
 #endif
 
@@ -637,10 +611,17 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<gl::DrawableGLBuilder>(std::move(name));
 }
 
-gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool /*persistent*/) {
+gfx::UniformBufferPtr Context::createUniformBuffer(const void* data,
+                                                   std::size_t size,
+                                                   bool /*persistent*/,
+                                                   bool /*ssbo*/) {
     MLN_TRACE_FUNC();
 
     return std::make_shared<gl::UniformBufferGL>(data, size, *uboAllocator);
+}
+
+gfx::UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
+    return std::make_unique<UniformBufferArrayGL>();
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
@@ -836,9 +817,10 @@ void Context::draw(const gfx::DrawMode& drawMode, std::size_t indexOffset, std::
 
 void Context::performCleanup() {
     MLN_TRACE_FUNC();
-
-    // TODO: Find a better way to unbind VAOs after we're done with them without
-    // introducing unnecessary bind(0)/bind(N) sequences.
+#ifndef NDEBUG
+    // In debug builds, un-bind all texture units so that any incorrect use results in an
+    // error rather than using whatever texture happened to have been bound previously.
+    // This takes some time, however, so don't do it in release builds.
     {
         for (auto i = 0; i < gfx::MaxActiveTextureUnits; i++) {
             activeTextureUnit = i;
@@ -847,6 +829,7 @@ void Context::performCleanup() {
 
         bindVertexArray = 0;
     }
+#endif
 
     for (auto id : abandonedPrograms) {
         if (program == id) {
@@ -881,10 +864,8 @@ void Context::performCleanup() {
                     binding.setDirty();
                 }
             }
+            texturePool->release(id);
         }
-        MBGL_CHECK_ERROR(glDeleteTextures(int(abandonedTextures.size()), abandonedTextures.data()));
-        stats.numCreatedTextures -= int(abandonedTextures.size());
-        assert(stats.numCreatedTextures >= 0);
         abandonedTextures.clear();
     }
 
@@ -921,6 +902,8 @@ void Context::reduceMemoryUsage() {
     MLN_TRACE_FUNC_GL();
 
     performCleanup();
+    assert(texturePool);
+    texturePool->shrink();
 
     // Ensure that all pending actions are executed to ensure that they happen
     // before the app goes to the background.
@@ -945,6 +928,11 @@ void Context::clearStencilBuffer(const int32_t bits) {
     MBGL_CHECK_ERROR(glClear(GL_STENCIL_BUFFER_BIT));
 
     stats.stencilClears++;
+}
+
+Texture2DPool& Context::getTexturePool() {
+    assert(texturePool);
+    return *texturePool;
 }
 
 } // namespace gl

@@ -2,11 +2,55 @@
 
 #include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 
 namespace mbgl {
 namespace shaders {
+
+constexpr auto circleShaderPrelude = R"(
+
+enum {
+    idCircleDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idCircleEvaluatedPropsUBO = drawableReservedUBOCount,
+    circleUBOCount
+};
+
+struct alignas(16) CircleDrawableUBO {
+    /*   0 */ float4x4 matrix;
+    /*  64 */ float2 extrude_scale;
+
+    // Interpolations
+    /*  72 */ float color_t;
+    /*  76 */ float radius_t;
+    /*  80 */ float blur_t;
+    /*  84 */ float opacity_t;
+    /*  88 */ float stroke_color_t;
+    /*  92 */ float stroke_width_t;
+    /*  96 */ float stroke_opacity_t;
+    /* 100 */ float pad1;
+    /* 104 */ float pad2;
+    /* 108 */ float pad3;
+    /* 112 */
+};
+static_assert(sizeof(CircleDrawableUBO) == 7 * 16, "wrong size");
+
+/// Evaluated properties that do not depend on the tile
+struct alignas(16) CircleEvaluatedPropsUBO {
+    /*  0 */ float4 color;
+    /* 16 */ float4 stroke_color;
+    /* 32 */ float radius;
+    /* 36 */ float blur;
+    /* 40 */ float opacity;
+    /* 44 */ float stroke_width;
+    /* 48 */ float stroke_opacity;
+    /* 52 */ int scale_with_map;
+    /* 56 */ int pitch_with_map;
+    /* 60 */ float pad1;
+    /* 64 */
+};
+static_assert(sizeof(CircleEvaluatedPropsUBO) == 4 * 16, "wrong size");
+
+)";
 
 template <>
 struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal> {
@@ -14,35 +58,36 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 4> uniforms;
     static const std::array<AttributeInfo, 8> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
+    static constexpr auto prelude = circleShaderPrelude;
     static constexpr auto source = R"(
+
 struct VertexStage {
-    short2 position [[attribute(4)]];
+    short2 position [[attribute(circleUBOCount + 0)]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(5)]];
+    float4 color [[attribute(circleUBOCount + 1)]];
 #endif
 #if !defined(HAS_UNIFORM_u_radius)
-    float2 radius [[attribute(6)]];
+    float2 radius [[attribute(circleUBOCount + 2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_blur)
-    float2 blur [[attribute(7)]];
+    float2 blur [[attribute(circleUBOCount + 3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(8)]];
+    float2 opacity [[attribute(circleUBOCount + 4)]];
 #endif
 #if !defined(HAS_UNIFORM_u_stroke_color)
-    float4 stroke_color [[attribute(9)]];
+    float4 stroke_color [[attribute(circleUBOCount + 5)]];
 #endif
 #if !defined(HAS_UNIFORM_u_stroke_width)
-    float2 stroke_width [[attribute(10)]];
+    float2 stroke_width [[attribute(circleUBOCount + 6)]];
 #endif
 #if !defined(HAS_UNIFORM_u_stroke_opacity)
-    float2 stroke_opacity [[attribute(11)]];
+    float2 stroke_opacity [[attribute(circleUBOCount + 7)]];
 #endif
 };
 
@@ -74,55 +119,24 @@ struct FragmentStage {
 #endif
 };
 
-struct alignas(16) CircleDrawableUBO {
-    float4x4 matrix;
-    float2 extrude_scale;
-    float2 padding;
-};
-struct alignas(16) CirclePaintParamsUBO {
-    float camera_to_center_distance;
-    float pad1,pad2,pad3;
-};
-struct alignas(16) CircleEvaluatedPropsUBO {
-    float4 color;
-    float4 stroke_color;
-    float radius;
-    float blur;
-    float opacity;
-    float stroke_width;
-    float stroke_opacity;
-    int scale_with_map;
-    int pitch_with_map;
-    float padding;
-};
-
-struct alignas(16) CircleInterpolateUBO {
-    float color_t;
-    float radius_t;
-    float blur_t;
-    float opacity_t;
-    float stroke_color_t;
-    float stroke_width_t;
-    float stroke_opacity_t;
-    float pad1_;
-};
-
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
-                                device const CircleDrawableUBO& drawable [[buffer(1)]],
-                                device const CircleEvaluatedPropsUBO& props [[buffer(2)]],
-                                device const CircleInterpolateUBO& interp [[buffer(3)]]) {
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
+                                device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                                device const CircleDrawableUBO* drawableVector [[buffer(idCircleDrawableUBO)]],
+                                device const CircleEvaluatedPropsUBO& props [[buffer(idCircleEvaluatedPropsUBO)]]) {
+
+    device const CircleDrawableUBO& drawable = drawableVector[uboIndex];
 
 #if defined(HAS_UNIFORM_u_radius)
     const auto radius       = props.radius;
 #else
-    const auto radius       = unpack_mix_float(vertx.radius, interp.radius_t);
+    const auto radius       = unpack_mix_float(vertx.radius, drawable.radius_t);
 #endif
 
 #if defined(HAS_UNIFORM_u_stroke_width)
     const auto stroke_width = props.stroke_width;
 #else
-    const auto stroke_width = unpack_mix_float(vertx.stroke_width, interp.stroke_width_t);
+    const auto stroke_width = unpack_mix_float(vertx.stroke_width, drawable.stroke_width_t);
 #endif
 
     // unencode the extrusion vector that we snuck into the a_pos vector
@@ -165,31 +179,31 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .antialiasblur  = antialiasblur,
 
 #if !defined(HAS_UNIFORM_u_color)
-        .color          = half4(unpack_mix_color(vertx.color, interp.color_t)),
+        .color          = half4(unpack_mix_color(vertx.color, drawable.color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_radius)
         .radius         = radius,
 #endif
 #if !defined(HAS_UNIFORM_u_blur)
-        .blur           = half(unpack_mix_float(vertx.blur, interp.blur_t)),
+        .blur           = half(unpack_mix_float(vertx.blur, drawable.blur_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity        = half(unpack_mix_float(vertx.opacity, interp.opacity_t)),
+        .opacity        = half(unpack_mix_float(vertx.opacity, drawable.opacity_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_stroke_color)
-        .stroke_color   = half4(unpack_mix_color(vertx.stroke_color, interp.stroke_color_t)),
+        .stroke_color   = half4(unpack_mix_color(vertx.stroke_color, drawable.stroke_color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_stroke_width)
         .stroke_width   = half(stroke_width),
 #endif
 #if !defined(HAS_UNIFORM_u_stroke_opacity)
-        .stroke_opacity = half(unpack_mix_float(vertx.stroke_opacity, interp.stroke_opacity_t)),
+        .stroke_opacity = half(unpack_mix_float(vertx.stroke_opacity, drawable.stroke_opacity_t)),
 #endif
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const CircleEvaluatedPropsUBO& props [[buffer(2)]]) {
+                            device const CircleEvaluatedPropsUBO& props [[buffer(idCircleEvaluatedPropsUBO)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif

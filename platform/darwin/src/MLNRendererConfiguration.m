@@ -38,7 +38,7 @@ static NSString * const MLNIdeographicFontFamilyNameKey = @"MLNIdeographicFontFa
         // mbgl::LocalGlyphRasterizer::Impl accepts only a single string, but form a cascade list with one font on each line.
         return [infoDictionaryObject componentsJoinedByString:@"\n"];
     }
-    
+
 #if TARGET_OS_IPHONE
     return [UIFont systemFontOfSize:0 weight:UIFontWeightRegular].familyName;
 #else

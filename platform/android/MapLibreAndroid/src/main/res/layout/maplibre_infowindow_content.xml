@@ -50,4 +50,3 @@
         android:visibility="gone"/>
 
 </org.maplibre.android.annotations.BubbleLayout>
-

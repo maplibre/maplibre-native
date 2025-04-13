@@ -108,7 +108,7 @@ MLNMapViewMetalImpl::MLNMapViewMetalImpl(MLNMapView* nativeView_)
     : MLNMapViewImpl(nativeView_),
       mbgl::mtl::RendererBackend(mbgl::gfx::ContextMode::Unique),
       mbgl::gfx::Renderable({ 0, 0 }, std::make_unique<MLNMapViewMetalRenderableResource>(*this)) {
-          
+
       auto& resource = getResource<MLNMapViewMetalRenderableResource>();
       if (resource.mtlView) {
           return;

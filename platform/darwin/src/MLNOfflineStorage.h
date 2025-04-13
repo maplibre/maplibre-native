@@ -10,17 +10,17 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol MLNOfflineStorageDelegate;
 
 /**
- Posted by the shared `MLNOfflineStorage` object when an `MLNOfflinePack`
+ Posted by the shared ``MLNOfflineStorage`` object when an ``MLNOfflinePack``
  object’s progress changes. The progress may change due to a resource being
  downloaded or because the pack discovers during the download that more
  resources are required for offline viewing. This notification is posted
  whenever any field in the `progress` property changes.
 
- The `object` is the `MLNOfflinePack` object whose progress changed. The
+ The `object` is the ``MLNOfflinePack`` object whose progress changed. The
  `userInfo` dictionary contains the pack’s current state in the
- `MLNOfflinePackUserInfoKeyState` key and details about the pack’s current
- progress in the `MLNOfflinePackUserInfoKeyProgress` key. You may also consult
- the `MLNOfflinePack.state` and `MLNOfflinePack.progress` properties, which
+ ``MLNOfflinePackUserInfoKeyState`` key and details about the pack’s current
+ progress in the ``MLNOfflinePackUserInfoKeyProgress`` key. You may also consult
+ the ``MLNOfflinePack/state`` and ``MLNOfflinePack/progress`` properties, which
  provide the same values.
 
  If you only need to observe changes in a particular pack’s progress, you can
@@ -28,74 +28,74 @@ NS_ASSUME_NONNULL_BEGIN
  path.
 
  #### Related examples
- TODO: Download an offline map, learn how to calculate the progress
- of an offline download.
+ - <doc:OfflinePackExample>
+ - <doc:ManageOfflineRegionsExample>
  */
 FOUNDATION_EXTERN MLN_EXPORT const NSNotificationName MLNOfflinePackProgressChangedNotification;
 
 /**
- Posted by the shared `MLNOfflineStorage` object whenever an `MLNOfflinePack`
+ Posted by the shared ``MLNOfflineStorage`` object whenever an ``MLNOfflineStorage``
  object encounters an error while downloading. The error may be recoverable and
  may not warrant the user’s attention. For example, the pack’s implementation
  may attempt to re-request failed resources based on an exponential backoff
  strategy or upon the restoration of network access.
 
- The `object` is the `MLNOfflinePack` object that encountered the error. The
+ The `object` is the ``MLNOfflinePack`` object that encountered the error. The
  `userInfo` dictionary contains the error object in the
- `MLNOfflinePackUserInfoKeyError` key.
+ ``MLNOfflinePackUserInfoKeyError`` key.
  */
 FOUNDATION_EXTERN MLN_EXPORT const NSNotificationName MLNOfflinePackErrorNotification;
 
 /**
- Posted by the shared `MLNOfflineStorage` object when the maximum number of
- Mapbox-hosted tiles has been downloaded and stored on the current device.
+ Posted by the shared ``MLNOfflineStorage`` object when the maximum number of
+ tiles has been downloaded and stored on the current device.
 
- The `object` is the `MLNOfflinePack` object that reached the tile limit in the
+ The `object` is the ``MLNOfflinePack`` object that reached the tile limit in the
  course of downloading. The `userInfo` dictionary contains the tile limit in the
- `MLNOfflinePackUserInfoKeyMaximumCount` key.
+ ``MLNOfflinePackUserInfoKeyMaximumCount`` key.
 
- Once this limit is reached, no instance of `MLNOfflinePack` can download
- additional tiles from Mapbox APIs until already downloaded tiles are removed by
- calling the `-[MLNOfflineStorage removePack:withCompletionHandler:]` method.
+ Once this limit is reached, no instance of ``MLNOfflinePack`` can download
+ additional tiles until already downloaded tiles are removed by
+ calling the ``MLNOfflineStorage/removePack:withCompletionHandler:`` method.
  */
 FOUNDATION_EXTERN MLN_EXPORT const NSNotificationName
     MLNOfflinePackMaximumMapboxTilesReachedNotification;
 
 /**
- A key in the `userInfo` property of a notification posted by `MLNOfflinePack`.
+ A key in the `userInfo` property of a notification posted by ``MLNOfflinePack``.
  */
 typedef NSString *MLNOfflinePackUserInfoKey NS_EXTENSIBLE_STRING_ENUM;
 
 /**
  The key for an `NSNumber` object that indicates an offline pack’s current
  state. This key is used in the `userInfo` dictionary of an
- `MLNOfflinePackProgressChangedNotification` notification. Call `-integerValue`
- on the object to receive the `MLNOfflinePackState`-typed state.
+ ``MLNOfflinePackProgressChangedNotification`` notification. Call `-integerValue`
+ on the object to receive the ``MLNOfflinePackState``-typed state.
  */
 FOUNDATION_EXTERN MLN_EXPORT const MLNOfflinePackUserInfoKey MLNOfflinePackUserInfoKeyState;
 
 /**
  The key for an `NSValue` object that indicates an offline pack’s current
  progress. This key is used in the `userInfo` dictionary of an
- `MLNOfflinePackProgressChangedNotification` notification. Call
+ ``MLNOfflinePackProgressChangedNotification`` notification. Call
  `-MLNOfflinePackProgressValue` on the object to receive the
- `MLNOfflinePackProgress`-typed progress.
+ ``MLNOfflinePackProgress``-typed progress.
  */
 FOUNDATION_EXTERN MLN_EXPORT const MLNOfflinePackUserInfoKey MLNOfflinePackUserInfoKeyProgress;
 
 /**
  The key for an `NSError` object that is encountered in the course of
  downloading an offline pack. This key is used in the `userInfo` dictionary of
- an `MLNOfflinePackErrorNotification` notification. The error’s domain is
- `MLNErrorDomain`. See `MLNErrorCode` for possible error codes.
+ an ``MLNOfflinePackErrorNotification`` notification. The error’s domain is
+ ``MLNErrorDomain``. See ``MLNErrorDomain`` for possible error codes.
  */
 FOUNDATION_EXTERN MLN_EXPORT const MLNOfflinePackUserInfoKey MLNOfflinePackUserInfoKeyError;
 
 /**
  The key for an `NSNumber` object that indicates the maximum number of
- Mapbox-hosted tiles that may be downloaded and stored on the current device.
+  tiles that may be downloaded and stored on the current device.
  This key is used in the `userInfo` dictionary of an
- `MLNOfflinePackMaximumMapboxTilesReachedNotification` notification. Call
+ ``MLNOfflinePackMaximumMapboxTilesReachedNotification`` notification. Call
  `-unsignedLongLongValue` on the object to receive the `uint64_t`-typed tile
  limit.
  */
@@ -191,8 +191,8 @@ typedef NS_ENUM(NSUInteger, MLNResourceKind) {
  information.
 
  #### Related examples
- TODO: Download an offline map, learn how to create and register an
- offline pack for a defined region.
+ - <doc:OfflinePackExample>
+ - <doc:ManageOfflineRegionsExample>
  */
 MLN_EXPORT
 @interface MLNOfflineStorage : NSObject
@@ -220,8 +220,8 @@ MLN_EXPORT
  The file path at which offline packs and the ambient cache are stored.
 
  To customize this path, specify the
- [`MLNOfflineStorageDatabasePath`](../infoplist-keys.html#mglofflinestoragedatabasepath)
- key in Info.plist.
+ `MLNOfflineStorageDatabasePath`
+ key in Info.plist, see <doc:Info.plist_Keys>.
  */
 @property (nonatomic, readonly, copy) NSString *databasePath;
 
@@ -229,8 +229,7 @@ MLN_EXPORT
  The file URL at which offline packs and the ambient cache are stored.
 
  To customize this path, specify the
- [`MLNOfflineStorageDatabasePath`](../infoplist-keys.html#mglofflinestoragedatabasepath)
- key in Info.plist.
+ `MLNOfflineStorageDatabasePath` key in Info.plist, see <doc:Info.plist_Keys>.
  */
 @property (nonatomic, readonly, copy) NSURL *databaseURL;
 
@@ -294,10 +293,10 @@ MLN_EXPORT
  The resulting pack is added to the shared offline storage object’s `packs`
  property, then the `completion` block is executed with that pack passed in.
 
- The pack has an initial state of `MLNOfflinePackStateInactive`. To begin
- downloading resources, call `-[MLNOfflinePack resume]` on the pack from within
+ The pack has an initial state of ``MLNOfflinePackState/MLNOfflinePackStateInactive``. To begin
+ downloading resources, call ``MLNOfflinePack/resume`` on the pack from within
  the completion handler. To monitor download progress, add an observer for
- `MLNOfflinePackProgressChangedNotification`s about that pack.
+ ``MLNOfflinePackProgressChangedNotification``s about that pack.
 
  To detect when any call to this method results in a new pack, observe KVO
  change notifications on the shared offline storage object’s `packs` key path.
@@ -320,7 +319,7 @@ MLN_EXPORT
  attempt to send it a message will result in an exception being thrown. If an
  error occurs and the pack cannot be removed, do not attempt to reuse the pack
  object. Instead, if you need continued access to the pack, suspend all packs
- and use the `-reloadPacks` method to obtain valid pointers to all the packs.
+ and use the ``MLNOfflineStorage/reloadPacks`` method to obtain valid pointers to all the packs.
 
  To detect when any call to this method results in a pack being removed, observe
  KVO change notifications on the shared offline storage object’s `packs` key
@@ -358,7 +357,7 @@ MLN_EXPORT
     withCompletionHandler:(void (^)(NSError *_Nullable))completion;
 /**
  Forcibly, asynchronously reloads the `packs` property. At some point after this
- method is called, the pointer values of the `MLNOfflinePack` objects in the
+ method is called, the pointer values of the ``MLNOfflinePack`` objects in the
  `packs` property change, even if the underlying data for these packs has not
  changed. If this method is called while a pack is actively downloading, the
  behavior is undefined.
@@ -372,13 +371,13 @@ MLN_EXPORT
 - (void)reloadPacks;
 
 /**
- Sets the maximum number of Mapbox-hosted tiles that may be downloaded and
+ Sets the maximum number of tiles that may be downloaded and
  stored on the current device.
 
  Once this limit is reached, an
- `MLNOfflinePackMaximumMapboxTilesReachedNotification` is posted for every
+ ``MLNOfflinePackMaximumMapboxTilesReachedNotification`` is posted for every
  attempt to download additional tiles until already downloaded tiles are removed
- by calling the `-removePack:withCompletionHandler:` method.
+ by calling the ``MLNOfflineStorage/removePack:withCompletionHandler:`` method.
 
  @param maximumCount The maximum number of tiles allowed to be downloaded.
  */
@@ -388,7 +387,7 @@ MLN_EXPORT
  The cumulative size, measured in bytes, of all downloaded resources on disk.
 
  The returned value includes all resources, including tiles, whether downloaded
- as part of an offline pack or due to caching during normal use of `MLNMapView`.
+ as part of an offline pack or due to caching during normal use of ``MLNMapView``.
  */
 @property (nonatomic, readonly) unsigned long long countOfBytesCompleted;
 
@@ -466,7 +465,7 @@ MLN_EXPORT
  cached data.
 
  To find out when the resource is ready to retrieve from the cache, use the
- `-preloadData:forURL:modificationDate:expirationDate:eTag:mustRevalidate:completionHandler:`
+ ``MLNOfflineStorage/preloadData:forURL:modificationDate:expirationDate:eTag:mustRevalidate:completionHandler:``
  method.
 
  @param data Response data to store for this resource. The data is expected to
@@ -528,8 +527,8 @@ MLN_EXPORT
 @end
 
 /**
- The `MLNOfflineStorageDelegate` protocol defines methods that a delegate of an
- `MLNOfflineStorage` object can optionally implement to transform various types
+ The ``MLNOfflineStorageDelegate`` protocol defines methods that a delegate of an
+ ``MLNOfflineStorage`` object can optionally implement to transform various types
  of URLs before downloading them via the internet.
  */
 @protocol MLNOfflineStorageDelegate <NSObject>

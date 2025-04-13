@@ -1,3 +1,11 @@
 {
-  "enabledManagers": ["gradle-wrapper", "bazel"]
+  "enabledManagers": ["gradle-wrapper", "bazel", "bazel-module", "bazelisk"],
+  "packageRules": [
+    {
+      "matchManagers": ["bazel", "bazel-module"],
+      "groupName": "bazel"
+    }
+  ],
+  "schedule": "* * 1,15 * *",
+  "dependencyDashboard": true
 }

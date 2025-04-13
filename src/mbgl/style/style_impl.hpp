@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/actor/scheduler.hpp>
 #include <mbgl/style/style.hpp>
 #include <mbgl/style/transition_options.hpp>
 #include <mbgl/style/observer.hpp>
@@ -36,7 +37,7 @@ class Style::Impl : public SpriteLoaderObserver,
                     public LightObserver,
                     public util::noncopyable {
 public:
-    Impl(std::shared_ptr<FileSource>, float pixelRatio);
+    Impl(std::shared_ptr<FileSource>, float pixelRatio, const TaggedScheduler& threadPool_);
     ~Impl() override;
 
     void loadJSON(const std::string&);
@@ -117,6 +118,7 @@ private:
     // SpriteLoaderObserver implementation.
     void onSpriteLoaded(std::optional<style::Sprite> sprite, std::vector<Immutable<style::Image::Impl>>) override;
     void onSpriteError(std::optional<style::Sprite> sprite, std::exception_ptr) override;
+    void onSpriteRequested(const std::optional<style::Sprite>&) override;
 
     // SourceObserver implementation.
     void onSourceLoaded(Source&) override;

@@ -117,7 +117,7 @@ public:
     void setIndex(int value) { index = value; }
 
     /// @brief Get the stride of the vertex attribute
-    std::size_t getStride() const { return stride; }
+    virtual std::size_t getStride() const { return stride; }
     void setStride(std::size_t value) { stride = value; }
 
     /// @brief Get the count of vertex attribute items
@@ -180,19 +180,26 @@ public:
         items.clear();
     }
 
-    /// @brief Get dirty state
-    bool isDirty() const { return dirty; }
-
     /// @brief Set dirty state
     void setDirty(bool value = true) { dirty = value; }
 
+    bool isModifiedAfter(std::chrono::duration<double> time) const {
+        if (sharedRawData) {
+            return sharedRawData->isModifiedAfter(time);
+        }
+        return dirty;
+    }
+
     template <std::size_t I = 0, typename... Tp>
-    inline typename std::enable_if<I == sizeof...(Tp), void>::type set(std::size_t, std::tuple<Tp...>, std::size_t) {}
+    inline void set(std::size_t, std::tuple<Tp...>, std::size_t)
+        requires(I == sizeof...(Tp))
+    {}
 
     /// Set item value
     template <std::size_t I = 0, typename... Tp>
-        inline typename std::enable_if <
-        I<sizeof...(Tp), void>::type set(std::size_t i, std::tuple<Tp...> tuple, std::size_t tupleIndex) {
+    inline void set(std::size_t i, std::tuple<Tp...> tuple, std::size_t tupleIndex)
+        requires(I < sizeof...(Tp))
+    {
         if (tupleIndex == 0) {
             set(i, std::get<I>(tuple).a1);
         } else {
@@ -255,6 +262,9 @@ protected:
     }
 
 protected:
+    friend class VertexAttributeArray;
+    bool isDirty() const { return dirty; }
+
     int index;
     std::size_t stride;
 
@@ -310,8 +320,8 @@ public:
                                                 std::size_t count = 0);
 
     /// Indicates whether any values have changed
-    virtual bool isDirty() const {
-        return std::any_of(attrs.begin(), attrs.end(), [](const auto& attr) { return attr && attr->isDirty(); });
+    bool isModifiedAfter(std::chrono::duration<double> time) const {
+        return std::ranges::any_of(attrs, [&](const auto& attr) { return attr && attr->isModifiedAfter(time); });
     }
 
     /// Clear the collection
@@ -328,11 +338,17 @@ public:
     }
 
     /// Call the provided delegate with each value, providing the override if one exists.
-    template <typename Func /* void(const size_t, VertexAttribute&, const std::unique_ptr<VertexAttribute>&) */>
-    void resolve(const VertexAttributeArray& overrides, Func delegate) const {
+    /// @param foundDelegate Called for each attribute in `default`, with the corresponding override, if present
+    /// @param missingDelegate Called for any overrides with no corresponding default
+    template <typename ResolveFunc /* void(const size_t, VertexAttribute&, const std::unique_ptr<VertexAttribute>&) */,
+              typename MissingFunc /* void(const size_t, const std::unique_ptr<VertexAttribute>&) */>
+    void resolve(const VertexAttributeArray& overrides, ResolveFunc foundDelegate, MissingFunc missingDelegate) const {
         for (size_t id = 0; id < attrs.size(); id++) {
+            const auto& override = overrides.get(id);
             if (const auto& attr = attrs[id]) {
-                delegate(id, *attr, overrides.get(id));
+                foundDelegate(id, *attr, override);
+            } else if (override) {
+                missingDelegate(id, override);
             }
         }
     }

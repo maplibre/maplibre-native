@@ -17,7 +17,8 @@ class Layer;
 
 class RasterTile final : public Tile {
 public:
-    RasterTile(const OverscaledTileID&, const TileParameters&, const Tileset&);
+    RasterTile(
+        const OverscaledTileID&, std::string, const TileParameters&, const Tileset&, TileObserver* observer = nullptr);
     ~RasterTile() override;
 
     std::unique_ptr<TileRenderData> createRenderData() override;
@@ -42,7 +43,7 @@ private:
 
     TileLoader<RasterTile> loader;
 
-    const std::shared_ptr<Scheduler> threadPool;
+    TaggedScheduler threadPool;
     std::shared_ptr<Mailbox> mailbox;
     Actor<RasterTileWorker> worker;
 

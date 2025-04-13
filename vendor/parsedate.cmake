@@ -2,7 +2,7 @@ if(TARGET mbgl-vendor-parsedate)
     return()
 endif()
 
-if(MLN_WITH_QT)
+if(MLN_WITH_QT OR MLN_CORE_INCLUDE_DEPS)
     add_library(mbgl-vendor-parsedate OBJECT)
 else()
     add_library(mbgl-vendor-parsedate STATIC)
@@ -26,8 +26,8 @@ target_include_directories(
 set_target_properties(
     mbgl-vendor-parsedate
     PROPERTIES
-        INTERFACE_MAPBOX_NAME "parsedate"
-        INTERFACE_MAPBOX_URL "https://curl.haxx.se"
-        INTERFACE_MAPBOX_AUTHOR "Daniel Stenberg and others"
-        INTERFACE_MAPBOX_LICENSE ${CMAKE_CURRENT_LIST_DIR}/parsedate/COPYING
+        INTERFACE_MAPLIBRE_NAME "parsedate"
+        INTERFACE_MAPLIBRE_URL "https://curl.haxx.se"
+        INTERFACE_MAPLIBRE_AUTHOR "Daniel Stenberg and others"
+        INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/parsedate/COPYING
 )

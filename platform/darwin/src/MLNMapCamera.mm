@@ -31,7 +31,7 @@ BOOL MLNEqualFloatWithAccuracy(CGFloat left, CGFloat right, CGFloat accuracy)
     CGFloat pitch = -1;
     if (CLLocationCoordinate2DIsValid(centerCoordinate) && CLLocationCoordinate2DIsValid(eyeCoordinate)) {
         heading = MLNDirectionBetweenCoordinates(eyeCoordinate, centerCoordinate);
-        
+
         CLLocation *centerLocation = [[CLLocation alloc] initWithLatitude:centerCoordinate.latitude
                                                                 longitude:centerCoordinate.longitude];
         CLLocation *eyeLocation = [[CLLocation alloc] initWithLatitude:eyeCoordinate.latitude
@@ -56,7 +56,7 @@ BOOL MLNEqualFloatWithAccuracy(CGFloat left, CGFloat right, CGFloat accuracy)
     // to the ground and toward the center coordinate.
     CLLocationDirection eyeAngle = 90 - pitch;
     CLLocationDistance altitude = distance * sin(MLNRadiansFromDegrees(eyeAngle));
-    
+
     return [[self alloc] initWithCenterCoordinate:centerCoordinate
                                          altitude:altitude
                                             pitch:pitch
@@ -179,7 +179,7 @@ BOOL MLNEqualFloatWithAccuracy(CGFloat left, CGFloat right, CGFloat accuracy)
     {
         return YES;
     }
-    
+
     return (MLNEqualFloatWithAccuracy(_centerCoordinate.latitude, otherCamera.centerCoordinate.latitude, 1e-8)
             && MLNEqualFloatWithAccuracy(_centerCoordinate.longitude, otherCamera.centerCoordinate.longitude, 1e-8)
             && MLNEqualFloatWithAccuracy(_altitude, otherCamera.altitude, 1e-6)

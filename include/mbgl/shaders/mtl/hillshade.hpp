@@ -2,11 +2,43 @@
 
 #include <mbgl/shaders/hillshade_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 
 namespace mbgl {
 namespace shaders {
+
+constexpr auto hillshadeShaderPrelude = R"(
+
+enum {
+    idHillshadeDrawableUBO = idDrawableReservedVertexOnlyUBO,
+    idHillshadeTilePropsUBO = idDrawableReservedFragmentOnlyUBO,
+    idHillshadeEvaluatedPropsUBO = drawableReservedUBOCount,
+    hillshadeUBOCount
+};
+
+struct alignas(16) HillshadeDrawableUBO {
+    /*  0 */ float4x4 matrix;
+    /* 64 */
+};
+static_assert(sizeof(HillshadeDrawableUBO) == 4 * 16, "wrong size");
+
+struct alignas(16) HillshadeTilePropsUBO {
+    /*  0 */ float2 latrange;
+    /*  8 */ float2 light;
+    /* 16 */
+};
+static_assert(sizeof(HillshadeTilePropsUBO) == 16, "wrong size");
+
+/// Evaluated properties that do not depend on the tile
+struct alignas(16) HillshadeEvaluatedPropsUBO {
+    /*  0 */ float4 highlight;
+    /* 16 */ float4 shadow;
+    /* 32 */ float4 accent;
+    /* 48 */
+};
+static_assert(sizeof(HillshadeEvaluatedPropsUBO) == 3 * 16, "wrong size");
+
+)";
 
 template <>
 struct ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::Metal> {
@@ -14,16 +46,16 @@ struct ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
+    static constexpr auto prelude = hillshadeShaderPrelude;
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(3)]];
-    short2 texture_pos [[attribute(4)]];
+    short2 pos [[attribute(hillshadeUBOCount + 0)]];
+    short2 texture_pos [[attribute(hillshadeUBOCount + 1)]];
 };
 
 struct FragmentStage {
@@ -31,25 +63,16 @@ struct FragmentStage {
     float2 pos;
 };
 
-struct alignas(16) HillshadeDrawableUBO {
-    float4x4 matrix;
-    float2 latrange;
-    float2 light;
-};
-
-struct alignas(16) HillshadeEvaluatedPropsUBO {
-    float4 highlight;
-    float4 shadow;
-    float4 accent;
-};
-
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const HillshadeDrawableUBO& drawable [[buffer(1)]]) {
-    
+                                device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                                device const HillshadeDrawableUBO* drawableVector [[buffer(idHillshadeDrawableUBO)]]) {
+
+    device const HillshadeDrawableUBO& drawable = drawableVector[uboIndex];
+
     const float4 position = drawable.matrix * float4(float2(vertx.pos), 0, 1);
     float2 pos = float2(vertx.texture_pos) / 8192.0;
     pos.y = 1.0 - pos.y;
-    
+
     return {
         .position    = position,
         .pos         = pos,
@@ -57,13 +80,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const HillshadeDrawableUBO& drawable [[buffer(1)]],
-                            device const HillshadeEvaluatedPropsUBO& props [[buffer(2)]],
+                            device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                            device const HillshadeTilePropsUBO* tilePropsVector [[buffer(idHillshadeTilePropsUBO)]],
+                            device const HillshadeEvaluatedPropsUBO& props [[buffer(idHillshadeEvaluatedPropsUBO)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
+
+    device const HillshadeTilePropsUBO& tileProps = tilePropsVector[uboIndex];
 
     float4 pixel = image.sample(image_sampler, in.pos);
 
@@ -71,16 +97,16 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     // We divide the slope by a scale factor based on the cosin of the pixel's approximate latitude
     // to account for mercator projection distortion. see #4807 for details
-    float scaleFactor = cos(radians((drawable.latrange[0] - drawable.latrange[1]) * in.pos.y + drawable.latrange[1]));
+    float scaleFactor = cos(radians((tileProps.latrange[0] - tileProps.latrange[1]) * in.pos.y + tileProps.latrange[1]));
     // We also multiply the slope by an arbitrary z-factor of 1.25
     float slope = atan(1.25 * length(deriv) / scaleFactor);
     float aspect = deriv.x != 0.0 ? atan2(deriv.y, -deriv.x) : M_PI_F / 2.0 * (deriv.y > 0.0 ? 1.0 : -1.0);
 
-    float intensity = drawable.light.x;
+    float intensity = tileProps.light.x;
     // We add PI to make this property match the global light object, which adds PI/2 to the light's azimuthal
     // position property to account for 0deg corresponding to north/the top of the viewport in the style spec
     // and the original shader was written to accept (-illuminationDirection - 90) as the azimuthal.
-    float azimuth = drawable.light.y + M_PI_F;
+    float azimuth = tileProps.light.y + M_PI_F;
 
     // We scale the slope exponentially based on intensity, using a calculation similar to
     // the exponential interpolation function in the style spec:

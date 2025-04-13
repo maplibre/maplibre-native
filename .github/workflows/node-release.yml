@@ -20,10 +20,11 @@ jobs:
       - name: Use Node.js from nvmrc
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: 'platform/node/.nvmrc'
 
       - name: Check if version is published
         id: check
+        working-directory: platform/node
         run: |
           currentVersion="$( node -e "console.log(require('./package.json').version)" )"
           isPublished="$( npm view @maplibre/maplibre-gl-native versions --json | jq -c --arg cv "$currentVersion" 'any(. == $cv)' )"
@@ -45,14 +46,12 @@ jobs:
         include:
           - runs-on: ubuntu-22.04
             arch: x86_64
-          - runs-on: [self-hosted, linux, ARM64]
+          - runs-on: MapLibre_Native_Ubuntu_22_04_ARM_8_core
             arch: arm64
-          # Disabled until Metal backend is complete
-          # A release for macOS can be made from the opengl-2 branch
-          # - runs-on: macos-12
-          #   arch: x86_64
-          # - runs-on: macos-13-xlarge
-          #   arch: arm64
+          - runs-on: macos-14
+            arch: arm64
+          - runs-on: macos-14-large
+            arch: x86_64
           - runs-on: windows-2022
             arch: x86_64
     continue-on-error: true
@@ -116,9 +115,10 @@ jobs:
       - name: Use Node.js from nvmrc
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: 'platform/node/.nvmrc'
 
       - name: npm ci
+        working-directory: platform/node
         run: npm ci --ignore-scripts
 
       - name: Set up msvc dev cmd (Windows)
@@ -138,7 +138,7 @@ jobs:
         uses: jwlawson/actions-setup-cmake@v2
         with:
           cmake-version: '3.29.2'
- 
+
       - name: cmake version
         run: |
           cmake --version
@@ -178,11 +178,15 @@ jobs:
             -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DMLN_WITH_NODE=ON
+            -DMLN_WITH_NODE=ON \
+            -DMLN_WITH_OPENGL=OFF \
+            -DMLN_WITH_METAL=ON \
+            -DMLN_LEGACY_RENDERER=OFF \
+            -DMLN_DRAWABLE_RENDERER=ON \
+            -DMLN_WITH_WERROR=OFF
 
       - name: Configure maplibre-native (Linux)
         if: runner.os == 'Linux'
-        shell: bash -leo pipefail {0}
         run: |
           cmake . -B build \
             -G Ninja \
@@ -231,21 +235,23 @@ jobs:
 
       - name: Publish X64 Release to Github
         if: matrix.arch == 'x86_64'
+        working-directory: platform/node
         env:
           PUBLISH: true
           BUILDTYPE: RelWithDebInfo
           NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./platform/node/scripts/publish.sh
+          ./scripts/publish.sh
 
       - name: Publish ARM Release to Github
         if: matrix.arch == 'arm64'
+        working-directory: platform/node
         env:
           PUBLISH: true
           BUILDTYPE: RelWithDebInfo
           NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./platform/node/scripts/publish.sh --target_arch=arm64
+          ./scripts/publish.sh --target_arch=arm64
 
   publish_npm:
     runs-on: ubuntu-latest
@@ -264,17 +270,21 @@ jobs:
       - name: Use Node.js from nvmrc
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: 'platform/node/.nvmrc'
 
       - name: Get version
         id: package-version
         uses: martinbeentjes/npm-get-version-action@v1.3.1
+        with:
+          path: platform/node
 
       - name: npm ci
+        working-directory: platform/node
         run: npm ci --ignore-scripts
 
       - name: Prepare release
         id: prepare_release
+        working-directory: platform/node
         run: |
           RELEASE_TYPE="$(node -e "console.log(require('semver').prerelease('${{ steps.package-version.outputs.current-version }}') ? 'prerelease' : 'regular')")"
           if [[ $RELEASE_TYPE == 'regular' ]]; then
@@ -284,8 +294,9 @@ jobs:
           fi
 
       - name: Extract changelog for version
+        working-directory: platform/node
         run: |
-          awk '/^##/ { p = 0 }; p == 1 { print }; $0 == "## ${{ steps.package-version.outputs.current-version }}" { p = 1 };' platform/node/CHANGELOG.md > changelog_for_version.md
+          awk '/^##/ { p = 0 }; p == 1 { print }; $0 == "## ${{ steps.package-version.outputs.current-version }}" { p = 1 };' CHANGELOG.md > changelog_for_version.md
           cat changelog_for_version.md
 
       - name: Update Release Notes
@@ -296,13 +307,14 @@ jobs:
         with:
           tag: node-v${{ steps.package-version.outputs.current-version }}
           name: node-v${{ steps.package-version.outputs.current-version }}
-          bodyFile: changelog_for_version.md
+          bodyFile: platform/node/changelog_for_version.md
           allowUpdates: true
           draft: false
           prerelease: ${{ steps.prepare_release.outputs.prerelease }}
 
       - name: Publish to NPM (release)
         if: ${{ steps.prepare_release.outputs.prerelease == 'false' }}
+        working-directory: platform/node
         run: |
           npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
           npm publish --access public
@@ -311,6 +323,7 @@ jobs:
 
       - name: Publish to NPM (prerelease)
         if: ${{ steps.prepare_release.outputs.prerelease == 'true' }}
+        working-directory: platform/node
         run: |
           npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
           npm publish --tag next --access public

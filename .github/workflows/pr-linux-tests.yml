@@ -24,7 +24,7 @@ jobs:
     steps:
       - id: check_skip
         run: |
-          conclusion=$(curl ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "linux-build-and-test").conclusion')
+          conclusion=$(curl --retry 5 ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "linux-build-and-test").conclusion')
           should_skip=$([[ "$conclusion" = "skipped" || "$conclusion" = "cancelled" ]] && echo "true" || echo "false")
           echo "should_skip=$should_skip" >> "$GITHUB_OUTPUT"
 
@@ -54,7 +54,7 @@ jobs:
       - name: Get latest CMake and Ninja
         uses: lukka/get-cmake@latest
         with:
-          cmakeVersion: latest
+          cmakeVersion: 3.24.1
           ninjaVersion: latest
 
       - name: Cache Bloaty
@@ -83,7 +83,7 @@ jobs:
         run: bloaty/build/bloaty mbgl-render -- mbgl-render-legacy -n 0 -s vm -d compileunits > tlus_diff_legacy.txt
 
       - name: Configure AWS Credentials
-        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
+        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2
@@ -149,25 +149,15 @@ jobs:
       - name: Install scipy
         run: pip3 install scipy
 
-      # not sure which one of these are runtime dependencies
       - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libcurl4-openssl-dev \
-            libuv1-dev \
-            libjpeg-dev \
-            libpng-dev \
-            libglfw3-dev \
-            libwebp-dev \
-            libopengl0
+        run: .github/scripts/install-linux-deps
 
       - name: Run Benchmarks
         # excluding the API tests because they hang https://github.com/maplibre/maplibre-native/issues/1808
         run: python3 vendor/benchmark/tools/compare.py --no-color benchmarks ./mbgl-benchmark-runner-main ./mbgl-benchmark-runner --benchmark_filter='^[^A][^P][^I].*' > benchmark_out.txt
 
       - name: Configure AWS Credentials
-        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
+        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2

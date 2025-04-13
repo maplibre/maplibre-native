@@ -10,8 +10,6 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import org.maplibre.android.MapLibre
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.module.http.HttpRequestUtil
 import org.maplibre.android.testapp.R
@@ -37,49 +35,47 @@ class PerformanceMeasurementActivity : AppCompatActivity() {
             .eventListener(eventListener)
             .build()
         HttpRequestUtil.setOkHttpClient(okHttpClient)
-        mapView.getMapAsync(
-            OnMapReadyCallback { maplibreMap: MapLibreMap ->
-                maplibreMap.setStyle(
-                    Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
-                )
-            }
-        )
+        mapView.getMapAsync {
+            it.setStyle(
+                Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
+            )
+        }
     }
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        mapView.onStop()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        mapView.onLowMemory()
     }
 
     override fun onDestroy() {
         HttpRequestUtil.setOkHttpClient(null)
         super.onDestroy()
-        mapView!!.onDestroy()
+        mapView.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     private class EventListener : okhttp3.EventListener() {
@@ -105,7 +101,7 @@ class PerformanceMeasurementActivity : AppCompatActivity() {
         }
     }
 
-    private class Attribute<T> internal constructor(private val name: String, private val value: T)
+    private class Attribute<T>(private val name: String, private val value: T)
     companion object {
         private fun triggerPerformanceEvent(style: String, elapsed: Long) {
             val attributes: MutableList<Attribute<String>> = ArrayList()
@@ -123,7 +119,7 @@ class PerformanceMeasurementActivity : AppCompatActivity() {
             metaData.addProperty("brand", Build.BRAND)
             metaData.addProperty("device", Build.MODEL)
             metaData.addProperty("version", Build.VERSION.RELEASE)
-            metaData.addProperty("abi", Build.CPU_ABI)
+            metaData.addProperty("abi", Build.SUPPORTED_ABIS[0])
             metaData.addProperty("country", Locale.getDefault().isO3Country)
             metaData.addProperty("ram", ram)
             metaData.addProperty("screenSize", windowSize)
@@ -135,7 +131,7 @@ class PerformanceMeasurementActivity : AppCompatActivity() {
         }
 
         private val ram: String
-            private get() {
+            get() {
                 val actManager = MapLibre.getApplicationContext()
                     .getSystemService(ACTIVITY_SERVICE) as ActivityManager
                 val memInfo = ActivityManager.MemoryInfo()
@@ -143,7 +139,7 @@ class PerformanceMeasurementActivity : AppCompatActivity() {
                 return memInfo.totalMem.toString()
             }
         private val windowSize: String
-            private get() {
+            get() {
                 val windowManager =
                     MapLibre.getApplicationContext().getSystemService(WINDOW_SERVICE) as WindowManager
                 val display = windowManager.defaultDisplay

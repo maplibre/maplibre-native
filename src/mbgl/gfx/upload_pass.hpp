@@ -44,6 +44,7 @@ public:
     UploadPass& operator=(const UploadPass&) = delete;
 
     DebugGroup<UploadPass> createDebugGroup(const char* name) { return {*this, name}; }
+    // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
     DebugGroup<UploadPass> createDebugGroup(std::string_view name) { return createDebugGroup(name.data()); }
 
 #if MLN_DRAWABLE_RENDERER
@@ -87,6 +88,7 @@ public:
         const gfx::VertexAttributeArray& defaults,
         const gfx::VertexAttributeArray& overrides,
         gfx::BufferUsageType,
+        const std::optional<std::chrono::duration<double>> lastUpdate,
         /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) = 0;
 #endif
 

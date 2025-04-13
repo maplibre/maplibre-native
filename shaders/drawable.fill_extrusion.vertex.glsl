@@ -4,16 +4,31 @@ out vec4 v_color;
 
 layout (std140) uniform FillExtrusionDrawableUBO {
     highp mat4 u_matrix;
-    highp vec2 u_texsize;
     highp vec2 u_pixel_coord_upper;
     highp vec2 u_pixel_coord_lower;
     highp float u_height_factor;
     highp float u_tile_ratio;
+    // Interpolations
+    highp float u_base_t;
+    highp float u_height_t;
+    highp float u_color_t;
+    highp float u_pattern_from_t;
+    highp float u_pattern_to_t;
+    lowp float drawable_pad1;
 };
+
+layout (std140) uniform FillExtrusionTilePropsUBO {
+    highp vec4 u_pattern_from;
+    highp vec4 u_pattern_to;
+    highp vec2 u_texsize;
+    lowp float tileprops_pad1;
+    lowp float tileprops_pad2;
+};
+
 layout (std140) uniform FillExtrusionPropsUBO {
     highp vec4 u_color;
     highp vec3 u_lightcolor;
-    highp float props_pad1;
+    lowp float props_pad1;
     highp vec3 u_lightpos;
     highp float u_base;
     highp float u_height;
@@ -23,20 +38,9 @@ layout (std140) uniform FillExtrusionPropsUBO {
     highp float u_fade;
     highp float u_from_scale;
     highp float u_to_scale;
-    highp float props_pad2;
+    lowp float props_pad2;
 };
-layout (std140) uniform FillExtrusionTilePropsUBO {
-    highp vec4 u_pattern_from;
-    highp vec4 u_pattern_to;
-};
-layout (std140) uniform FillExtrusionInterpolateUBO {
-    highp float u_base_t;
-    highp float u_height_t;
-    highp float u_color_t;
-    highp float u_pattern_from_t;
-    highp float u_pattern_to_t;
-    highp float interp_pad1, interp_pad2, interp_pad3;
-};
+
 #pragma mapbox: define highp float base
 #pragma mapbox: define highp float height
 #pragma mapbox: define highp vec4 color

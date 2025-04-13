@@ -33,7 +33,7 @@ FILES=(
 # Find dependencies for all of these files
 echo ">> Finding dependencies..."
 ALL=()
-for FILE in "${FILES[@]}"; do 
+for FILE in "${FILES[@]}"; do
     ALL+=($(cd "common" && $CXX -std=c++17 -I. -c "$FILE" -M | sed -e 's/^[a-z0-9._-]*: *//;s/ *\\$//'))
 done
 

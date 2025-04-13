@@ -65,8 +65,8 @@ constexpr const auto extensionGetters = mapbox::eternal::hash_map<mapbox::eterna
 } // namespace
 
 RenderGeoJSONSource::RenderGeoJSONSource(Immutable<style::GeoJSONSource::Impl> impl_,
-                                         std::shared_ptr<Scheduler> threadPool_)
-    : RenderTileSource(std::move(impl_), std::move(threadPool_)) {}
+                                         const TaggedScheduler& threadPool_)
+    : RenderTileSource(std::move(impl_), threadPool_) {}
 
 RenderGeoJSONSource::~RenderGeoJSONSource() = default;
 
@@ -110,8 +110,8 @@ void RenderGeoJSONSource::update(Immutable<style::Source::Impl> baseImpl_,
                        util::tileSize_I,
                        impl().getZoomRange(),
                        std::optional<LatLngBounds>{},
-                       [&, data_](const OverscaledTileID& tileID) {
-                           return std::make_unique<GeoJSONTile>(tileID, impl().id, parameters, data_);
+                       [&, data_](const OverscaledTileID& tileID, TileObserver* observer_) {
+                           return std::make_unique<GeoJSONTile>(tileID, impl().id, parameters, data_, observer_);
                        });
 }
 

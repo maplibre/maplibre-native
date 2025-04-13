@@ -80,8 +80,10 @@ public:
     /// @tparam T Derived type, inheriting `gfx::Shader`
     /// @param shaderName The group name to look up
     /// @return T or nullptr if not found in the group
-    template <typename T, typename std::enable_if_t<is_shader_v<T>, bool>* = nullptr>
-    std::shared_ptr<T> get(const std::string& shaderName) noexcept {
+    template <typename T>
+    std::shared_ptr<T> get(const std::string& shaderName) noexcept
+        requires(is_shader_v<T>)
+    {
         auto shader = getShader(shaderName);
         if (!shader || shader->typeName() != T::Name) {
             return nullptr;
@@ -93,8 +95,10 @@ public:
     /// This variant looks up shaders only by type name.
     /// @tparam T Derived type, inheriting `gfx::Shader`
     /// @return T or nullptr if not found in the group
-    template <typename T, typename std::enable_if_t<is_shader_v<T>, bool>* = nullptr>
-    std::shared_ptr<T> get() noexcept {
+    template <typename T>
+    std::shared_ptr<T> get() noexcept
+        requires(is_shader_v<T>)
+    {
         auto shader = getShader(std::string(T::Name));
         if (!shader || shader->typeName() != T::Name) {
             return nullptr;
@@ -108,8 +112,10 @@ public:
     /// @param to Location to store the shader
     /// @param shaderName The group name to look up
     /// @return True if 'to' has a valid program object, false otherwise.
-    template <typename T, typename std::enable_if_t<is_shader_v<T>, bool>* = nullptr>
-    bool populate(std::shared_ptr<T>& to, const std::string& shaderName) noexcept {
+    template <typename T>
+    bool populate(std::shared_ptr<T>& to, const std::string& shaderName) noexcept
+        requires(is_shader_v<T>)
+    {
         if (to) {
             return true;
         }
@@ -128,8 +134,10 @@ public:
     /// @tparam T Derived type, inheriting `gfx::Shader`
     /// @param to Location to store the shader
     /// @return True if 'to' has a valid program object, false otherwise.
-    template <typename T, typename std::enable_if_t<is_shader_v<T>, bool>* = nullptr>
-    bool populate(std::shared_ptr<T>& to) noexcept {
+    template <typename T>
+    bool populate(std::shared_ptr<T>& to) noexcept
+        requires(is_shader_v<T>)
+    {
         if (to) {
             return true;
         }

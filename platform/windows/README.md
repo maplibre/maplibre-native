@@ -15,9 +15,12 @@ To install the required Visual Studio components, open Visual Studio Installer a
 Open `x64 Native Tools Command Prompt for VS 2022` and then clone the repository:
 
 ```cmd
-git clone --recurse-submodules -j8 https://github.com/maplibre/maplibre-native.git
+git clone --config core.longpaths=true --recurse-submodules -j8 https://github.com/maplibre/maplibre-native.git
 cd maplibre-native
 ```
+
+> [!NOTE]
+> The `core.longpaths=true` config is necessary, because without it a lot of `Filename too long` messages will come. If you have this configuration set globally (`git config --system core.longpaths=true`), you can omit the `--config core.longpaths=true` portion of the clone command.
 
 ## Configuring
 
@@ -85,7 +88,7 @@ This should produce an `out.png` map tile image with the default MapLibre stylin
 
 ![Sample image of world from mbgl-render command](/misc/sample-maplibre-style-mbgl-render-out.png)
 
-### Using your own style/tiles 
+### Using your own style/tiles
 
 You can also use the `mbgl-render` command to render images from your own style or tile set. To do so, you will need a data source and a style JSON file.
 

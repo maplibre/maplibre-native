@@ -68,6 +68,7 @@
     <string name="activity_map_snapshotter_local_style">Map Snapshot with local style</string>
     <string name="activity_camera_animator">Animator animation</string>
     <string name="activity_symbol_generator">SymbolGenerator</string>
+    <string name="activity_observer_activity">Log map observer events</string>
     <string name="activity_textureview_debug">TextureView debug</string>
     <string name="activity_textureview_resize">TextureView resize</string>
     <string name="activity_textureview_animate">TextureView animation</string>
@@ -75,6 +76,7 @@
     <string name="activity_overlay">Map overlay</string>
     <string name="activity_grid_source">Grid Source</string>
     <string name="activity_no_style">No Style URI/JSON</string>
+    <string name="activity_vector_tile">Vector Tile source</string>
     <string name="activity_local_glyph">Local CJK glyph generation</string>
     <string name="activity_hillshade">Hillshade</string>
     <string name="activity_heatmaplayer">Heatmap layer</string>
@@ -97,4 +99,6 @@
     <string name="activity_within">Within expression</string>
     <string name="activity_stretchable_image">Stretchable Image</string>
     <string name="activity_image_in_label">Image In Label</string>
+    <string name="activity_map_options_runtime">MapOptions Runtime</string>
+    <string name="activity_map_options_xml">MapOptions XML</string>
 </resources>

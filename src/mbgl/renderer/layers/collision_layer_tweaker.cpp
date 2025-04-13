@@ -58,14 +58,16 @@ void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
         const std::array<float, 2> extrudeScale = {{parameters.pixelsToGLUnits[0] / (pixelRatio * scale),
                                                     parameters.pixelsToGLUnits[1] / (pixelRatio * scale)}};
 
-        const CollisionUBO drawableUBO = {
-            /*.matrix=*/util::cast<float>(matrix),
-            /*.extrude_scale*/ extrudeScale,
-            /*.overscale_factor*/ static_cast<float>(drawable.getTileID()->overscaleFactor()),
-            /*.pad*/ 0};
+        const CollisionDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix)};
+
+        const CollisionTilePropsUBO tilePropsUBO = {
+            .extrude_scale = extrudeScale,
+            .overscale_factor = static_cast<float>(drawable.getTileID()->overscaleFactor()),
+            .pad1 = 0};
 
         auto& drawableUniforms = drawable.mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(idCollisionUBO, &drawableUBO, context);
+        drawableUniforms.createOrUpdate(idCollisionDrawableUBO, &drawableUBO, context);
+        drawableUniforms.createOrUpdate(idCollisionTilePropsUBO, &tilePropsUBO, context);
     });
 }
 

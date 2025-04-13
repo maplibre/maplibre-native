@@ -63,7 +63,7 @@
     UIImage *scaleImage = [UIImage mgl_resourceImageNamed:@"Compass"];
     UIGraphicsBeginImageContextWithOptions(scaleImage.size, NO, UIScreen.mainScreen.scale);
     [scaleImage drawInRect:{CGPointZero, scaleImage.size}];
-    
+
     UIFont *northFont;
     if (@available(iOS 13.0, *)) {
         northFont = [UIFont systemFontOfSize:11 weight:UIFontWeightLight];
@@ -124,6 +124,8 @@
 
 - (void)hideCompass:(BOOL)animated {
     animated ? [self animateToAlpha:0] : [self setAlpha:0];
+    self.isAccessibilityElement = NO;
+    self.accessibilityElementsHidden = YES;
 }
 
 - (void)animateToAlpha:(CGFloat)alpha {

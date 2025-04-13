@@ -27,12 +27,10 @@ class PolygonContainer implements Polygons {
   @Override
   public Polygon addBy(@NonNull PolygonOptions polygonOptions, @NonNull MapLibreMap maplibreMap) {
     Polygon polygon = polygonOptions.getPolygon();
-    if (!polygon.getPoints().isEmpty()) {
-      long id = nativeMap != null ? nativeMap.addPolygon(polygon) : 0;
-      polygon.setId(id);
-      polygon.setMapLibreMap(maplibreMap);
-      annotations.put(id, polygon);
-    }
+    long id = nativeMap != null ? nativeMap.addPolygon(polygon) : 0;
+    polygon.setId(id);
+    polygon.setMapLibreMap(maplibreMap);
+    annotations.put(id, polygon);
     return polygon;
   }
 

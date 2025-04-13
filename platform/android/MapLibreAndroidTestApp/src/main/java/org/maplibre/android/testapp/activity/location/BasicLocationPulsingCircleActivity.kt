@@ -21,7 +21,7 @@ import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
 
-/* ANCHOR: top */
+// # --8<-- [start:top]
 /**
  * This activity shows a basic usage of the LocationComponent's pulsing circle. There's no
  * customization of the pulsing circle's color, radius, speed, etc.
@@ -32,19 +32,20 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
     private var permissionsManager: PermissionsManager? = null
     private var locationComponent: LocationComponent? = null
     private lateinit var maplibreMap: MapLibreMap
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location_layer_basic_pulsing_circle)
         mapView = findViewById(R.id.mapView)
         if (savedInstanceState != null) {
-            lastLocation = savedInstanceState.getParcelable(SAVED_STATE_LOCATION)
+            lastLocation = savedInstanceState.getParcelable(SAVED_STATE_LOCATION, Location::class.java)
         }
         mapView.onCreate(savedInstanceState)
         checkPermissions()
     }
-    /* ANCHOR_END: top */
+    // # --8<-- [end:top]
 
-    /* ANCHOR: onMapReady */
+    // # --8<-- [start:onMapReady]
     @SuppressLint("MissingPermission")
     override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
@@ -62,9 +63,9 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
             locationComponent!!.forceLocationUpdate(lastLocation)
         }
     }
-    /* ANCHOR_END: onMapReady */
+    // # --8<-- [end:onMapReady]
 
-    /* ANCHOR: LocationComponentActivationOptions */
+    // # --8<-- [start:LocationComponentActivationOptions]
     private fun buildLocationComponentActivationOptions(
         style: Style,
         locationComponentOptions: LocationComponentOptions
@@ -81,7 +82,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
             )
             .build()
     }
-    /* ANCHOR_END: LocationComponentActivationOptions */
+    // # --8<-- [end:LocationComponentActivationOptions]
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_pulsing_location_mode, menu)
@@ -94,42 +95,48 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
             return super.onOptionsItemSelected(item)
         }
         val id = item.itemId
-        if (id == R.id.action_map_style_change) {
-            loadNewStyle()
-            return true
-        } else if (id == R.id.action_component_disable) {
-            locationComponent!!.isLocationComponentEnabled = false
-            return true
-        } else if (id == R.id.action_component_enabled) {
-            locationComponent!!.isLocationComponentEnabled = true
-            return true
-        } else if (id == R.id.action_stop_pulsing) {
-            locationComponent!!.applyStyle(
-                LocationComponentOptions.builder(
-                    this@BasicLocationPulsingCircleActivity
+        when (id) {
+            R.id.action_map_style_change -> {
+                loadNewStyle()
+                return true
+            }
+            R.id.action_component_disable -> {
+                locationComponent!!.isLocationComponentEnabled = false
+                return true
+            }
+            R.id.action_component_enabled -> {
+                locationComponent!!.isLocationComponentEnabled = true
+                return true
+            }
+            R.id.action_stop_pulsing -> {
+                locationComponent!!.applyStyle(
+                    LocationComponentOptions.builder(
+                        this@BasicLocationPulsingCircleActivity
+                    )
+                        .pulseEnabled(false)
+                        .build()
                 )
-                    .pulseEnabled(false)
-                    .build()
-            )
-            return true
-        } else if (id == R.id.action_start_pulsing) {
-            locationComponent!!.applyStyle(
-                LocationComponentOptions.builder(
-                    this@BasicLocationPulsingCircleActivity
+                return true
+            }
+            R.id.action_start_pulsing -> {
+                locationComponent!!.applyStyle(
+                    LocationComponentOptions.builder(
+                        this@BasicLocationPulsingCircleActivity
+                    )
+                        .pulseEnabled(true)
+                        .build()
                 )
-                    .pulseEnabled(true)
-                    .build()
-            )
-            return true
+                return true
+            }
+            else -> return super.onOptionsItemSelected(item)
         }
-        return super.onOptionsItemSelected(item)
     }
 
     private fun loadNewStyle() {
         maplibreMap.setStyle(Style.Builder().fromUri(Utils.nextStyle()))
     }
 
-    /* ANCHOR: permission */
+    // # --8<-- [start:permission]
     private fun checkPermissions() {
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
             mapView.getMapAsync(this)
@@ -163,7 +170,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         permissionsManager!!.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
-    /* ANCHOR_END: permission */
+    // # --8<-- [end:permission]
 
     override fun onStart() {
         super.onStart()
@@ -206,6 +213,5 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
 
     companion object {
         private const val SAVED_STATE_LOCATION = "saved_state_location"
-        private const val TAG = "Mbgl-BasicLocationPulsingCircleActivity"
     }
 }

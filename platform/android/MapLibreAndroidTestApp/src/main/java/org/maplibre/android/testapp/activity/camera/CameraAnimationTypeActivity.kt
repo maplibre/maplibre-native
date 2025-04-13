@@ -24,12 +24,13 @@ import timber.log.Timber
  * Shows how to use animate, ease and move camera update factory methods.
  */
 class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
+    // # --8<-- [start:callback]
     private val callback: CancelableCallback =
         object : CancelableCallback {
             override fun onCancel() {
                 Timber.i("Duration onCancel Callback called.")
                 Toast.makeText(
-                    this@CameraAnimationTypeActivity.applicationContext,
+                    applicationContext,
                     "Ease onCancel Callback called.",
                     Toast.LENGTH_LONG
                 )
@@ -39,18 +40,20 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
             override fun onFinish() {
                 Timber.i("Duration onFinish Callback called.")
                 Toast.makeText(
-                    this@CameraAnimationTypeActivity.applicationContext,
+                    applicationContext,
                     "Ease onFinish Callback called.",
                     Toast.LENGTH_LONG
                 )
                     .show()
             }
         }
+    // # --8<-- [end:callback]
+
     private lateinit var maplibreMap: MapLibreMap
     private lateinit var mapView: MapView
     private var cameraState = false
     private val cameraIdleListener = OnCameraIdleListener {
-        if (maplibreMap != null) {
+        if (this::maplibreMap.isInitialized) {
             Timber.w(maplibreMap.cameraPosition.toString())
         }
     }
@@ -73,6 +76,7 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
         // handle move button clicks
         val moveButton = findViewById<View>(R.id.cameraMoveButton)
         moveButton?.setOnClickListener { view: View? ->
+            // # --8<-- [start:moveCamera]
             val cameraPosition =
                 CameraPosition.Builder()
                     .target(nextLatLng)
@@ -81,11 +85,13 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
                     .tilt(0.0)
                     .build()
             maplibreMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+            // # --8<-- [end:moveCamera]
         }
 
         // handle ease button clicks
         val easeButton = findViewById<View>(R.id.cameraEaseButton)
         easeButton?.setOnClickListener { view: View? ->
+            // # --8<-- [start:easeCamera]
             val cameraPosition =
                 CameraPosition.Builder()
                     .target(nextLatLng)
@@ -98,11 +104,13 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
                 7500,
                 callback
             )
+            // # --8<-- [end:easeCamera]
         }
 
         // handle animate button clicks
         val animateButton = findViewById<View>(R.id.cameraAnimateButton)
         animateButton?.setOnClickListener { view: View? ->
+            // # --8<-- [start:animateCamera]
             val cameraPosition =
                 CameraPosition.Builder().target(nextLatLng).bearing(270.0).tilt(20.0).build()
             maplibreMap.animateCamera(
@@ -110,11 +118,12 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
                 7500,
                 callback
             )
+            // # --8<-- [end:animateCamera]
         }
     }
 
     private val nextLatLng: LatLng
-        private get() {
+        get() {
             cameraState = !cameraState
             return if (cameraState) LAT_LNG_TOWER_BRIDGE else LAT_LNG_LONDON_EYE
         }
@@ -146,7 +155,7 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (maplibreMap != null) {
+        if (this::maplibreMap.isInitialized) {
             maplibreMap.removeOnCameraIdleListener(cameraIdleListener)
         }
         mapView.onDestroy()

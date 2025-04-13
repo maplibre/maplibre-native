@@ -4,7 +4,7 @@
     <string name="maplibre_attributionsIconContentDescription">Biểu tượng ghi công. Kích hoạt để xem hộp thoại ghi công.</string>
     <string name="maplibre_myLocationViewContentDescription">Cái chỉ vị trí. Cái này chỉ vị trí của bạn trên bản đồ.</string>
     <string name="maplibre_mapActionDescription">Đang xem bản đồ được xây dựng dùng MapLibre. Kéo hai ngón tay để cuộn. Chụm các ngón tay lại để phóng to. Tách các ngón tay ra để thu nhỏ.</string>
-    <string name="maplibre_attributionsDialogTitle">MapLibre Maps SDK cho Android</string>
+    <string name="maplibre_attributionsDialogTitle">MapLibre Android</string>
     <string name="maplibre_attributionErrorNoBrowser">Không thể mở trang Web vì thiết bị thiếu trình duyệt.</string>
     <string name="maplibre_offline_error_region_definition_invalid">OfflineRegionDefinition được cung cấp không vừa thế giới: %s</string>
     </resources>

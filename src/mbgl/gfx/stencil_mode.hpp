@@ -40,18 +40,14 @@ public:
     StencilOpType pass;
 
     static StencilMode disabled() {
-        return StencilMode{Always(), 0, 0, StencilOpType::Keep, StencilOpType::Keep, StencilOpType::Keep};
+        return StencilMode{.test = Always(),
+                           .ref = 0,
+                           .mask = 0,
+                           .fail = StencilOpType::Keep,
+                           .depthFail = StencilOpType::Keep,
+                           .pass = StencilOpType::Keep};
     }
 };
-
-template <StencilFunctionType F>
-constexpr StencilFunctionType StencilMode::SimpleTest<F>::func;
-
-template <StencilFunctionType F>
-constexpr uint32_t StencilMode::SimpleTest<F>::mask;
-
-template <StencilFunctionType F>
-constexpr StencilFunctionType StencilMode::MaskedTest<F>::func;
 
 } // namespace gfx
 } // namespace mbgl

@@ -6,10 +6,10 @@
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gl/drawable_gl.hpp>
-#include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/convert.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 namespace mbgl {
 namespace gl {
@@ -20,6 +20,9 @@ TileLayerGroupGL::TileLayerGroupGL(int32_t layerIndex_, std::size_t initialCapac
     : TileLayerGroup(layerIndex_, initialCapacity, std::move(name_)) {}
 
 void TileLayerGroupGL::upload(gfx::UploadPass& uploadPass) {
+    MLN_TRACE_FUNC();
+    MLN_ZONE_STR(name);
+
     if (!enabled) {
         return;
     }
@@ -49,6 +52,8 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         return;
     }
 
+    MLN_TRACE_FUNC();
+
     auto& context = static_cast<gl::Context&>(parameters.context);
 
     // `stencilModeFor3D` uses a different stencil mask value each time its called, so if the
@@ -60,6 +65,7 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
     gfx::StencilMode stencilMode3d;
 
     if (getDrawableCount()) {
+        MLN_TRACE_ZONE(clip masks);
 #if !defined(NDEBUG)
         const auto label_clip = getName() + (getName().empty() ? "" : "-") + "tile-clip-masks";
         const auto debugGroupClip = parameters.encoder->createDebugGroup(label_clip.c_str());
@@ -109,6 +115,11 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         const auto debugGroupTile = parameters.encoder->createDebugGroup(labelPtr);
 #endif
 
+        if (!bindUBOs) {
+            uniformBuffers.bind();
+            bindUBOs = true;
+        }
+
         for (const auto& tweaker : drawable.getTweakers()) {
             tweaker->execute(drawable, parameters);
         }
@@ -120,39 +131,11 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
             context.setStencilMode(drawable.getEnableStencil() ? stencilMode3d : gfx::StencilMode::disabled());
         }
 
-        if (!bindUBOs) {
-            bindUniformBuffers();
-            bindUBOs = true;
-        }
-
         drawable.draw(parameters);
     });
 
     if (bindUBOs) {
-        unbindUniformBuffers();
-    }
-}
-
-void TileLayerGroupGL::bindUniformBuffers() const {
-    for (size_t id = 0; id < uniformBuffers.allocatedSize(); id++) {
-        const auto& uniformBuffer = uniformBuffers.get(id);
-        if (!uniformBuffer) continue;
-        GLint binding = static_cast<GLint>(id);
-        const auto& uniformBufferGL = static_cast<const UniformBufferGL&>(*uniformBuffer);
-        MBGL_CHECK_ERROR(glBindBufferRange(GL_UNIFORM_BUFFER,
-                                           binding,
-                                           uniformBufferGL.getID(),
-                                           uniformBufferGL.getManagedBuffer().getBindingOffset(),
-                                           uniformBufferGL.getSize()));
-    }
-}
-
-void TileLayerGroupGL::unbindUniformBuffers() const {
-    for (size_t id = 0; id < uniformBuffers.allocatedSize(); id++) {
-        const auto& uniformBuffer = uniformBuffers.get(id);
-        if (!uniformBuffer) continue;
-        GLint binding = static_cast<GLint>(id);
-        MBGL_CHECK_ERROR(glBindBufferBase(GL_UNIFORM_BUFFER, binding, 0));
+        uniformBuffers.unbind();
     }
 }
 
@@ -193,44 +176,20 @@ void LayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) {
 #if !defined(NDEBUG)
         const auto debugGroup = parameters.encoder->createDebugGroup(drawable.getName().c_str());
 #endif
+        if (!bindUBOs) {
+            uniformBuffers.bind();
+            bindUBOs = true;
+        }
 
         for (const auto& tweaker : drawable.getTweakers()) {
             tweaker->execute(drawable, parameters);
-        }
-
-        if (!bindUBOs) {
-            bindUniformBuffers();
-            bindUBOs = true;
         }
 
         drawable.draw(parameters);
     });
 
     if (bindUBOs) {
-        unbindUniformBuffers();
-    }
-}
-
-void LayerGroupGL::bindUniformBuffers() const {
-    for (size_t id = 0; id < uniformBuffers.allocatedSize(); id++) {
-        const auto& uniformBuffer = uniformBuffers.get(id);
-        if (!uniformBuffer) continue;
-        GLint binding = static_cast<GLint>(id);
-        const auto& uniformBufferGL = static_cast<const UniformBufferGL&>(*uniformBuffer);
-        MBGL_CHECK_ERROR(glBindBufferRange(GL_UNIFORM_BUFFER,
-                                           binding,
-                                           uniformBufferGL.getID(),
-                                           uniformBufferGL.getManagedBuffer().getBindingOffset(),
-                                           uniformBufferGL.getSize()));
-    }
-}
-
-void LayerGroupGL::unbindUniformBuffers() const {
-    for (size_t id = 0; id < uniformBuffers.allocatedSize(); id++) {
-        const auto& uniformBuffer = uniformBuffers.get(id);
-        if (!uniformBuffer) continue;
-        GLint binding = static_cast<GLint>(id);
-        MBGL_CHECK_ERROR(glBindBufferBase(GL_UNIFORM_BUFFER, binding, 0));
+        uniformBuffers.unbind();
     }
 }
 

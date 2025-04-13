@@ -6,17 +6,17 @@ Mapbox Vector Tiles is a vector tile specification initiated by Mapbox
 which was later widely adopted by the geospatial community.
 
 To recap, Mapbox Vector Styles have 2 significant parts - *Sources* and *Layers*.
-Sources define where the geospatial features to display the map are loaded from. 
+Sources define where the geospatial features to display the map are loaded from.
 They can be GeoJSON, Mapbox Vector Tiles (MVT) etc. We draw said features
-on map using *Layers*. 
+on map using *Layers*.
 
-A *Layer* references a single source. This is where expressions kick in. 
-Expressions define how the data from a source will be painted in a layer 
-following a style. For example, a heatmap, requires the ability to paint 
-features in different zoom levels with different colors. Expressions 
-facilitate that. The rendering depends on the style of the layer along with 
-pitch, bearing, and zoom of the map. This was called *Data Driven Styling (DDS)*. 
-Another option that was used was to completely change the style in run time to 
+A *Layer* references a single source. This is where expressions kick in.
+Expressions define how the data from a source will be painted in a layer
+following a style. For example, a heatmap, requires the ability to paint
+features in different zoom levels with different colors. Expressions
+facilitate that. The rendering depends on the style of the layer along with
+pitch, bearing, and zoom of the map. This was called *Data Driven Styling (DDS)*.
+Another option that was used was to completely change the style in run time to
 achieve the same outcome[^17].
 
 The desire of being able to render a layer in different zoom levels
@@ -43,7 +43,7 @@ a text field fixed text `hello world` for all features in a vector source:
 }
 ```
 
-If we wanted it instead to display the name property of each feature, 
+If we wanted it instead to display the name property of each feature,
 we can use an expression like this:
 
 ```json
@@ -58,8 +58,8 @@ expression:
 { "text-field": ["concat", "Hello, ", ["get", "name"]] }
 ```
 
-By now, you probably have figured it out that expressions use a JSON-like 
-syntax to define. For brevity, let's look at the construction of an example 
+By now, you probably have figured it out that expressions use a JSON-like
+syntax to define. For brevity, let's look at the construction of an example
 expression below:
 
 ```
@@ -91,13 +91,13 @@ extending expressions library with custom expressions if desired.
 In the example expression, we saw how one expression is defined. The
 example also shows that expressions have types. Expression language can
 accept input and output types of null, number, string, boolean, color,
-object, value, array, error, collator, and formatted. The canonical 
-definition of Expressions is rooted in JSON. Like JSON, `object` type 
+object, value, array, error, collator, and formatted. The canonical
+definition of Expressions is rooted in JSON. Like JSON, `object` type
 is the mapping key type that maps a set of *keys* to *values*.
 
 Beside the aforementioned data types, Expressions offer built-in functions
-or operators such as assertion, coalesce, interpolate, distance etc. 
-The code uses the word *kind* to differentiate between these. 
+or operators such as assertion, coalesce, interpolate, distance etc.
+The code uses the word *kind* to differentiate between these.
 Each *kind* of expression performs a single responsibility.
 
 *Assertion expressions* assert the returning type from one expression is
@@ -106,10 +106,10 @@ of `["get", "feature_property"]`, returns a generic *value* type. To
 use it on another expression that accepts a string type, an assertion
 such as `["string", ["get", "feature_property"]]` is necessary.
 Assertion throws an evaluation-time error if the types don't match
-during evaluation. 
+during evaluation.
 
-You might think this is a *coercion* instead of an *assertion*. If you are 
-seeking for coercions, read the upcoming paragraph. Expression names 
+You might think this is a *coercion* instead of an *assertion*. If you are
+seeking for coercions, read the upcoming paragraph. Expression names
 that looks like `to-something` are coercions by convention.
 
 *Coercion expressions* convert a return type to another type. It also

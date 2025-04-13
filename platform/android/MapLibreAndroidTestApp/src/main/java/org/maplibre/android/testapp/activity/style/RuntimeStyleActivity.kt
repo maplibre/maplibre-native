@@ -16,7 +16,6 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.CancelableCallback
-import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
@@ -38,8 +37,6 @@ import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.ResourceUtils
 import timber.log.Timber
 import java.io.IOException
-import java.util.Arrays
-import java.util.Collections
 
 /**
  * Test activity showcasing the runtime style API.
@@ -48,8 +45,8 @@ class RuntimeStyleActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
     private var styleLoaded = false
-    var lngLats = listOf(
-        Arrays.asList(
+    private var lngLats = listOf(
+        listOf(
             Point.fromLngLat(
                 -15.468749999999998,
                 41.77131167976407
@@ -80,39 +77,34 @@ class RuntimeStyleActivity : AppCompatActivity() {
         // Initialize map as normal
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(
-            OnMapReadyCallback { map: MapLibreMap? ->
-                // Store for later
-                if (map != null) {
-                    maplibreMap = map
-                }
+        mapView.getMapAsync {
+            // Store for later
+            maplibreMap = it
 
-                // Center and Zoom (Amsterdam, zoomed to streets)
-                maplibreMap.animateCamera(
-                    CameraUpdateFactory.newLatLngZoom(
-                        LatLng(52.379189, 4.899431),
-                        1.0
-                    )
+            // Center and Zoom (Amsterdam, zoomed to streets)
+            maplibreMap.animateCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(52.379189, 4.899431),
+                    1.0
                 )
-                maplibreMap.setStyle(
-                    Style.Builder()
-                        .fromUri(TestStyles.getPredefinedStyleWithFallback("Streets")) // set custom transition
-                        .withTransition(TransitionOptions(250, 50))
-                ) { style: Style ->
-                    styleLoaded = true
-                    val laber = style.getLayer("country_1") as SymbolLayer?
-                    laber!!.setProperties(
-                        PropertyFactory.textOpacity(
-                            Expression.switchCase(
-                                Expression.within(polygon),
-                                Expression.literal(1.0f),
-                                Expression.literal(0.5f)
-                            )
+            )
+            maplibreMap.setStyle(
+                Style.Builder()
+                    .fromUri(TestStyles.getPredefinedStyleWithFallback("Streets")) // set custom transition
+                    .withTransition(TransitionOptions(250, 50))
+            ) { style: Style ->
+                styleLoaded = true
+                style.getLayer("country_1")?.setProperties(
+                    PropertyFactory.textOpacity(
+                        Expression.switchCase(
+                            Expression.within(polygon),
+                            Expression.literal(1.0f),
+                            Expression.literal(0.5f)
                         )
                     )
-                }
+                )
             }
-        )
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -210,8 +202,8 @@ class RuntimeStyleActivity : AppCompatActivity() {
                     true
                 }
 
-                R.id.action_add_satellite_layer -> {
-                    addSatelliteLayer()
+                R.id.action_add_raster_source_layer -> {
+                    addRasterSourceLayer()
                     true
                 }
 
@@ -337,8 +329,8 @@ class RuntimeStyleActivity : AppCompatActivity() {
 
     private fun addParksLayer() {
         // Add a source
-        val source: Source
-        source = try {
+        // # --8<-- [start:source]
+        val source: Source = try {
             GeoJsonSource("amsterdam-spots", ResourceUtils.readRawResource(this, R.raw.amsterdam))
         } catch (ioException: IOException) {
             Toast.makeText(
@@ -356,6 +348,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
             PropertyFactory.fillOpacity(0.3f),
             PropertyFactory.fillAntialias(true)
         )
+        // # --8<-- [end:source]
 
         // Only show me parks (except westerpark with stroke-width == 3)
         layer.setFilter(
@@ -391,8 +384,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
 
     private fun addDynamicParksLayer() {
         // Load some data
-        val parks: FeatureCollection
-        parks = try {
+        val parks: FeatureCollection = try {
             val json = ResourceUtils.readRawResource(this, R.raw.amsterdam)
             FeatureCollection.fromJson(json)
         } catch (ioException: IOException) {
@@ -436,7 +428,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
         val handler = Handler(mainLooper)
         handler.postDelayed(
             {
-                if (maplibreMap == null) {
+                if (!this::maplibreMap.isInitialized) {
                     return@postDelayed
                 }
                 Timber.d("Updating parks source")
@@ -477,7 +469,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
         val layers = maplibreMap.style!!
             .layers
         var latestLayer: Layer? = null
-        Collections.reverse(layers)
+        layers.reverse()
         for (currentLayer in layers) {
             if (currentLayer is FillLayer && currentLayer.sourceLayer == "road") {
                 latestLayer = currentLayer
@@ -511,13 +503,14 @@ class RuntimeStyleActivity : AppCompatActivity() {
         ).show()
     }
 
-    private fun addSatelliteLayer() {
-        // Add a source
-        val source: Source = RasterSource("my-raster-source", "maptiler://sources/satellite", 512)
-        maplibreMap.style!!.addSource(source)
+    private fun addRasterSourceLayer() {
+        // Take note of Tile Usage Policy https://operations.osmfoundation.org/policies/tiles/
+        val osmTileSet = TileSet("osm", "https://tile.openstreetmap.org/{z}/{x}/{y}.png")
+        osmTileSet.attribution = "OSM Contributors"
+        val source = RasterSource("osm", osmTileSet, 128)
+        val layer = RasterLayer("osm-layer", "osm")
 
-        // Add a layer
-        maplibreMap.style!!.addLayer(RasterLayer("satellite-layer", "my-raster-source"))
+        maplibreMap.setStyle(Style.Builder().withSource(source).withLayer(layer))
     }
 
     private fun updateWaterColorOnZoom() {
@@ -584,7 +577,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
         val handler = Handler(mainLooper)
         handler.postDelayed(
             {
-                if (maplibreMap == null) {
+                if (!this::maplibreMap.isInitialized) {
                     return@postDelayed
                 }
                 Timber.d("Styling filtered fill layer")
@@ -620,7 +613,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
         val handler = Handler(mainLooper)
         handler.postDelayed(
             {
-                if (maplibreMap == null) {
+                if (!this::maplibreMap.isInitialized) {
                     return@postDelayed
                 }
                 Timber.d("Styling text size fill layer")
@@ -658,7 +651,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
         val handler = Handler(mainLooper)
         handler.postDelayed(
             {
-                if (maplibreMap == null) {
+                if (!this::maplibreMap.isInitialized) {
                     return@postDelayed
                 }
                 Timber.d("Styling filtered line layer")
@@ -688,7 +681,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
         val handler = Handler(mainLooper)
         handler.postDelayed(
             {
-                if (maplibreMap == null) {
+                if (!this::maplibreMap.isInitialized) {
                     return@postDelayed
                 }
                 Timber.d("Styling numeric fill layer")

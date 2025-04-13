@@ -9,6 +9,9 @@
 
 #include <functional>
 #include <list>
+#include <numbers>
+
+using namespace std::numbers;
 
 namespace mbgl {
 
@@ -172,7 +175,7 @@ std::vector<OverscaledTileID> tileCover(const TransformState& state,
 
     const double numTiles = std::pow(2.0, z);
     const double worldSize = Projection::worldSize(state.getScale());
-    const uint8_t minZoom = state.getPitch() <= (60.0 / 180.0) * M_PI ? z : 0;
+    const uint8_t minZoom = state.getPitch() <= (60.0 / 180.0) * pi ? z : 0;
     const uint8_t maxZoom = z;
     const uint8_t overscaledZoom = overscaledZ.value_or(z);
     const bool flippedY = state.getViewportMode() == ViewportMode::FlippedY;

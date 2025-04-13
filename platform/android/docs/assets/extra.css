@@ -1,0 +1,27 @@
+
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #295DAA;
+  --md-accent-fg-color: #568ad6;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #295DAA;
+  --md-accent-fg-color: #568ad6;
+}
+
+.md-nav__title {
+  display: none;
+}
+
+.md-nav--primary .md-nav__link[for=__toc] > .md-nav__icon,
+.md-nav--primary .md-nav__link[for=__toc] ~ .md-nav {
+  display: none;
+}
+
+.md-copyright__highlight {
+  color: inherit;
+}
+
+.inline-attribution {
+  font-size: smaller;
+}

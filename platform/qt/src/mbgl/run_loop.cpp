@@ -91,8 +91,7 @@ void RunLoop::runOnce() {
     }
 }
 
-std::size_t RunLoop::waitForEmpty(std::chrono::milliseconds timeout) {
-    const auto startTime = mbgl::util::MonotonicTimer::now();
+void RunLoop::waitForEmpty([[maybe_unused]] const mbgl::util::SimpleIdentity tag) {
     while (true) {
         std::size_t remaining;
         {
@@ -100,10 +99,8 @@ std::size_t RunLoop::waitForEmpty(std::chrono::milliseconds timeout) {
             remaining = defaultQueue.size() + highPriorityQueue.size();
         }
 
-        const auto elapsed = mbgl::util::MonotonicTimer::now() - startTime;
-        const auto elapsedMillis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
-        if (remaining == 0 || timeout <= elapsedMillis) {
-            return remaining;
+        if (remaining == 0) {
+            return;
         }
 
         runOnce();
@@ -116,7 +113,7 @@ void RunLoop::addWatch(int fd, Event event, std::function<void(int, Event)>&& cb
     if (event == Event::Read || event == Event::ReadWrite) {
         auto notifier = std::make_unique<QSocketNotifier>(fd, QSocketNotifier::Read);
         QObject::connect(notifier.get(), &QSocketNotifier::activated, impl.get(), &RunLoop::Impl::onReadEvent);
-        impl->readPoll[fd] = WatchPair(std::move(notifier), std::move(cb));
+        impl->readPoll[fd] = WatchPair(std::move(notifier), cb);
     }
 
     if (event == Event::Write || event == Event::ReadWrite) {

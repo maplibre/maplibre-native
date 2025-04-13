@@ -24,7 +24,7 @@ public:
     UniformBufferGL clone() const { return {*this}; }
 
     // gfx::UniformBuffer
-    void update(const void* data, std::size_t size_) override;
+    void update(const void* data, std::size_t dataSize) override;
 
 private:
     // unique id used for debugging and profiling purposes
@@ -58,6 +58,11 @@ public:
         UniformBufferArray::operator=(other);
         return *this;
     }
+
+    void bind() const;
+    void unbind() const;
+
+    void bind(gfx::RenderPass&) override { bind(); }
 
 private:
     std::unique_ptr<gfx::UniformBuffer> copy(const gfx::UniformBuffer& uniformBuffers) override {

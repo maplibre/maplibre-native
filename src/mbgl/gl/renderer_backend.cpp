@@ -19,10 +19,14 @@ namespace gl {
 RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
     : gfx::RendererBackend(contextMode_) {}
 
+RendererBackend::RendererBackend(const gfx::ContextMode contextMode_, const TaggedScheduler& threadPool_)
+    : gfx::RendererBackend(contextMode_, threadPool_) {}
+
 std::unique_ptr<gfx::Context> RendererBackend::createContext() {
     MLN_TRACE_FUNC();
 
-    auto result = std::make_unique<gl::Context>(*this);
+    auto result = std::make_unique<gl::Context>(
+        *this); // Tagged background thread pool will be owned by the RendererBackend
     result->enableDebugging();
     result->initializeExtensions(std::bind(&RendererBackend::getExtensionFunctionPointer, this, std::placeholders::_1));
     return result;
@@ -121,6 +125,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::CircleShader,
                   shaders::BuiltIn::CollisionBoxShader,
                   shaders::BuiltIn::CollisionCircleShader,
+                  shaders::BuiltIn::CustomGeometryShader,
                   shaders::BuiltIn::CustomSymbolIconShader,
                   shaders::BuiltIn::DebugShader,
                   shaders::BuiltIn::FillShader,
@@ -138,6 +143,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::LineGradientShader,
                   shaders::BuiltIn::LinePatternShader,
                   shaders::BuiltIn::LineSDFShader,
+                  shaders::BuiltIn::LocationIndicatorShader,
+                  shaders::BuiltIn::LocationIndicatorTexturedShader,
                   shaders::BuiltIn::RasterShader,
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFIconShader,

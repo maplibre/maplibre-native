@@ -75,7 +75,7 @@ mbgl::Tileset MLNTileSetFromTileURLTemplates(NSArray<NSString *> *tileURLTemplat
         [NSException raise:NSInvalidArgumentException
                     format:@"MLNTileSourceOptionMinimumZoomLevel must be less than MLNTileSourceOptionMaximumZoomLevel."];
     }
-    
+
     if (NSValue *coordinateBounds = options[MLNTileSourceOptionCoordinateBounds]) {
         if (![coordinateBounds isKindOfClass:[NSValue class]]
             && strcmp(coordinateBounds.objCType, @encode(MLNCoordinateBounds)) == 0) {

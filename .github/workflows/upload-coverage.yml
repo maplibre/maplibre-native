@@ -14,7 +14,7 @@ jobs:
     steps:
       - id: check_skip
         run: |
-          conclusion=$(curl ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "linux-coverage").conclusion')
+          conclusion=$(curl --retry 5 ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "linux-coverage").conclusion')
           should_run=$([[ "$conclusion" = "success" ]] && echo "true" || echo "false")
           echo "should_run=$should_run" >> "$GITHUB_OUTPUT"
 
@@ -32,7 +32,7 @@ jobs:
 
       - name: Upload coverage report
         if: '!cancelled()'
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           override_commit: ${{ github.event.workflow_run.head_sha }}
           override_pr: ${{ github.event.workflow_run.pull_requests[0].number }}
