@@ -109,7 +109,7 @@ jobs:
         with:
           path: source
           fetch-depth: 0
-          submodules: recursive
+          submodules: true
 
       - name: Install test dependencies
         if: runner.os == 'Linux' && matrix.compiler != ''
