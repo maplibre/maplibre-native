@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/util/action_journal.hpp>
 #include <mbgl/map/map_observer.hpp>
 
 #include <fstream>
@@ -8,17 +9,16 @@
 namespace mbgl {
 
 class Map;
+class Scheduler;
 
 namespace util {
 
 class ActionJournalEvent;
 
-class ActionJournal : public MapObserver {
+class ActionJournal::Impl : public MapObserver {
 public:
-    ActionJournal(const Map& map,
-                  const uint32_t logFileSize = 1024,
-                  const uint32_t logFileCount = 5);
-    ~ActionJournal();
+    Impl(const Map& map, const uint32_t logFileSize = 600, const uint32_t logFileCount = 5);
+    ~Impl() = default;
 
     const Map& getMap() const { return map; }
 
@@ -55,25 +55,31 @@ public:
     void onMapCreate();
     void onMapDestroy();
 
-private:
+protected:
 
     void log(ActionJournalEvent& value);
+    void log(ActionJournalEvent&& value);
 
     // file operations
     std::filesystem::path getFilepath(uint32_t fileIndex);
     uint32_t detectFiles();
     uint32_t rollFiles();
 
-    void openFile(uint32_t fileIndex, bool truncate = false);
-    void prepareFile(size_t size);
+    bool openFile(uint32_t fileIndex, bool truncate = false);
+    bool prepareFile(size_t size);
     void logToFile(const std::string& value);
 
-private:
+protected:
+
+    friend class ActionJournalEvent;
+    friend class Map;
 
     const Map& map;
 
     const uint32_t logFileSize;
     const uint32_t logFileCount;
+
+    const std::shared_ptr<Scheduler> scheduler;
 
     std::mutex fileMutex;
     std::fstream currentFile;
