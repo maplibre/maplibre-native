@@ -941,6 +941,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_tile_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/action_journal.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/action_journal.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/action_journal_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/action_journal_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/camera.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/bounding_volumes.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/bounding_volumes.cpp

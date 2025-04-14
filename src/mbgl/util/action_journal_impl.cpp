@@ -94,14 +94,11 @@ public:
     rapidjson::Value eventJson;
 };
 
-ActionJournal::Impl::Impl(const Map& map_,
-                             const uint32_t logFileSize_,
-                             const uint32_t logFileCount_)
+ActionJournal::Impl::Impl(const Map& map_, const uint32_t logFileSize_, const uint32_t logFileCount_)
     : map(map_),
       logFileSize(logFileSize_),
       logFileCount(logFileCount_),
       scheduler(Scheduler::GetSequenced()) {
-
     assert(logFileSize > 0);
     assert(logFileCount > 1);
 
