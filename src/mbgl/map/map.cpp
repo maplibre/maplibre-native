@@ -21,6 +21,7 @@
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/tile_coordinate.hpp>
 #include <mbgl/util/action_journal.hpp>
+#include <mbgl/util/action_journal_impl.hpp>
 
 #include <utility>
 
