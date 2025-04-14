@@ -12,6 +12,7 @@
       "generator": "Xcode",
       "description": "Create Xcode project for iOS",
       "binaryDir": "${sourceDir}/build-ios",
+      "toolchainFile": "${sourceDir}/platform/ios/ios.toolchain.cmake",
       "cacheVariables": {
         "CMAKE_SYSTEM_NAME": "iOS",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
@@ -34,10 +35,36 @@
       }
     },
     {
+      "name": "macos-xcode",
+      "displayName": "macOS-Xcode",
+      "generator": "Xcode",
+      "binaryDir": "${sourceDir}/build-macos-xcode",
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "Darwin",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "MLN_WITH_METAL": "ON",
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_DRAWABLE_RENDERER": "ON"
+      }
+    },
+    {
       "name": "macos-vulkan",
       "displayName": "macOS",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-macos-vulkan",
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "Darwin",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "MLN_WITH_VULKAN": "ON",
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_DRAWABLE_RENDERER": "ON"
+      }
+    },
+    {
+      "name": "macos-vulkan-xcode",
+      "displayName": "macOS-Xcode",
+      "generator": "Xcode",
+      "binaryDir": "${sourceDir}/build-macos-vulkan-xcode",
       "cacheVariables": {
         "CMAKE_SYSTEM_NAME": "Darwin",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",

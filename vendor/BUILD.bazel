@@ -1,4 +1,4 @@
-load("//bazel:flags.bzl", "CPP_FLAGS")
+load("//bazel:flags.bzl", "C_FLAGS", "CPP_FLAGS")
 
 # vendor/mapbox-base-files.json
 cc_library(
@@ -148,10 +148,42 @@ cc_library(
 # vendor/maplibre-tile-spec
 
 cc_library(
+    name = "simde",
+    hdrs = glob(["maplibre-tile-spec/vendor/simde/simde/**/*.h"]),
+    includes = ["maplibre-tile-spec/vendor/simde"],
+    visibility = ["//visibility:public"],
+)
+cc_library(
+    name = "FastPFOR",
+    deps = [":simde"],
+    srcs = glob([
+        "maplibre-tile-spec/vendor/fastpfor/src/*.c",
+        "maplibre-tile-spec/vendor/fastpfor/src/*.cpp",
+    ]),
+    hdrs = glob(["maplibre-tile-spec/vendor/fastpfor/headers/*.h"]),
+    includes = ["maplibre-tile-spec/vendor/fastpfor/headers"],
+    cxxopts = CPP_FLAGS,
+    copts = C_FLAGS + ["-D__ARM_NEON=1"],
+    visibility = ["//visibility:public"],
+)
+cc_library(
     name = "maplibre-tile-spec",
-    hdrs = glob(["maplibre-tile-spec/cpp/include/**/*.hpp"]),
+    deps = [":FastPFOR"],
+    srcs = glob([
+        "maplibre-tile-spec/cpp/src/**/*.cpp",
+        "maplibre-tile-spec/cpp/src/**/*.hpp",
+    ]),
+    hdrs = glob([
+        "maplibre-tile-spec/cpp/include/**/*.hpp",
+    ]),
+    defines = [
+        "MLT_WITH_JSON=0",
+    ],
     copts = CPP_FLAGS,
-    includes = ["maplibre-tile-spec/cpp/include"],
+    includes = [
+        "maplibre-tile-spec/cpp/include",
+        "maplibre-tile-spec/cpp/src",
+    ],
     visibility = ["//visibility:public"],
 )
 

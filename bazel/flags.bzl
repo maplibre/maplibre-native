@@ -97,6 +97,13 @@ MSVC_CPP_FLAGS = [
     "/utf-8",
 ]
 
+C_FLAGS = select({
+    "//conditions:default": [],
+    "@platforms//os:ios": WARNING_FLAGS["ios"] + ["-fvisibility=hidden"],
+    "@platforms//os:macos": WARNING_FLAGS["macos"] + ["-fvisibility=hidden"],
+    "@platforms//os:linux": WARNING_FLAGS["linux"],
+    "@platforms//os:windows": WARNING_FLAGS["windows"],
+})
 CPP_FLAGS = select({
     "//conditions:default": GCC_CLANG_CPP_FLAGS,
     "@platforms//os:ios": GCC_CLANG_CPP_FLAGS + WARNING_FLAGS["ios"] + ["-fvisibility=hidden"],
