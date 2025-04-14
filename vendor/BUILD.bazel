@@ -1,4 +1,4 @@
-load("//bazel:flags.bzl", "C_FLAGS", "CPP_FLAGS")
+load("//bazel:flags.bzl", "CPP_FLAGS")
 
 # vendor/mapbox-base-files.json
 cc_library(
@@ -163,7 +163,7 @@ cc_library(
     hdrs = glob(["maplibre-tile-spec/vendor/fastpfor/headers/*.h"]),
     includes = ["maplibre-tile-spec/vendor/fastpfor/headers"],
     cxxopts = CPP_FLAGS,
-    copts = C_FLAGS + ["-D__ARM_NEON=1"],
+    copts = ["-DSIMDE_ENABLE_NATIVE_ALIASES"],
     visibility = ["//visibility:public"],
 )
 cc_library(
