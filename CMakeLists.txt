@@ -387,6 +387,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/tile/tile_id.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/tile/tile_operation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/tile/tile_necessity.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/action_journal.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/async_request.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/async_task.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/char_array_buffer.hpp
@@ -939,7 +940,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_tile.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_tile_data.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_tile_data.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/util/action_journal.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/action_journal.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/action_journal_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/action_journal_impl.cpp
