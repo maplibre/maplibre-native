@@ -178,7 +178,7 @@ TEST(Transform, UnwrappedLatLng) {
 }
 
 TEST(Transform, ConstrainHeightOnly) {
-    Transform transform(MapObserver::nullObserver(), ConstrainMode::HeightOnly);
+    Transform transform(TransformObserver::nullObserver(), ConstrainMode::HeightOnly);
     transform.resize({2, 2});
 
     transform.jumpTo(CameraOptions().withCenter(LatLngBounds::world().southwest()).withZoom(util::MAX_ZOOM));
@@ -191,7 +191,7 @@ TEST(Transform, ConstrainHeightOnly) {
 }
 
 TEST(Transform, ConstrainWidthAndHeight) {
-    Transform transform(MapObserver::nullObserver(), ConstrainMode::WidthAndHeight);
+    Transform transform(TransformObserver::nullObserver(), ConstrainMode::WidthAndHeight);
     transform.resize({2, 2});
 
     transform.jumpTo(CameraOptions().withCenter(LatLngBounds::world().southwest()).withZoom(util::MAX_ZOOM));
@@ -541,7 +541,7 @@ TEST(Transform, IsPanning) {
 }
 
 TEST(Transform, DefaultTransform) {
-    struct TransformObserver : public mbgl::MapObserver {
+    struct TransformObserver : public mbgl::TransformObserver {
         void onCameraWillChange(MapObserver::CameraChangeMode) final { cameraWillChangeCallback(); };
 
         void onCameraDidChange(MapObserver::CameraChangeMode) final { cameraDidChangeCallback(); };

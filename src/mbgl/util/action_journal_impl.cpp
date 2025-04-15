@@ -12,8 +12,8 @@
 namespace mbgl {
 namespace util {
 
-constexpr auto ACTION_JOURNAL_PATH = "/tmp/action_journal/";
-constexpr auto ACTION_JOURNAL_FILENAME = "action_journal";
+constexpr auto ACTION_JOURNAL_FOLDER_NAME = "action_journal";
+constexpr auto ACTION_JOURNAL_FILE_NAME = "action_journal";
 constexpr auto ACTION_JOURNAL_FILE_EXTENSION = "log";
 
 class ActionJournalEvent {
@@ -29,7 +29,7 @@ public:
         const auto& clientVersion = clientOptions.version();
 
         if (!clientName.empty()) {
-            json.AddMember("clientName", clientName, json.GetAllocator()); 
+            json.AddMember("clientName", clientName, json.GetAllocator());
         }
 
         if (!clientVersion.empty()) {
@@ -39,7 +39,7 @@ public:
         const auto& style = journal.getMap().getStyle();
         const auto& styleName = style.getName();
         const auto& styleURL = style.getURL();
-            
+
         if (!styleName.empty()) {
             json.AddMember("styleName", styleName, json.GetAllocator());
         }
@@ -94,13 +94,15 @@ public:
     rapidjson::Value eventJson;
 };
 
-ActionJournal::Impl::Impl(const Map& map_, const uint32_t logFileSize_, const uint32_t logFileCount_)
+ActionJournal::Impl::Impl(const Map& map_, const ActionJournalOptions& options_)
     : map(map_),
-      logFileSize(logFileSize_),
-      logFileCount(logFileCount_),
+      options(options_),
       scheduler(Scheduler::GetSequenced()) {
-    assert(logFileSize > 0);
-    assert(logFileCount > 1);
+    assert(!options.path().empty());
+    assert(options.logFileSize() > 0);
+    assert(options.logFileCount() > 1);
+
+    options.withPath(options.path() / ACTION_JOURNAL_FOLDER_NAME);
 
     openFile(detectFiles(), false);
 }
@@ -108,7 +110,7 @@ ActionJournal::Impl::Impl(const Map& map_, const uint32_t logFileSize_, const ui
 std::vector<std::string> ActionJournal::Impl::getLog() {
     std::lock_guard lock(fileMutex);
     std::vector<std::string> logEvents;
-    
+
     const auto readFile = [&](std::fstream& file) {
         if (!file) {
             return;
@@ -152,7 +154,7 @@ void ActionJournal::Impl::clearLog() {
     currentFileIndex = 0;
     currentFileSize = 0;
 
-    if (!std::filesystem::remove_all(ACTION_JOURNAL_PATH)) {
+    if (!std::filesystem::remove_all(options.path())) {
         Log::Error(Event::General, "Failed to clear ActionJournal");
     }
 
@@ -160,89 +162,80 @@ void ActionJournal::Impl::clearLog() {
 }
 
 void ActionJournal::Impl::onCameraWillChange(CameraChangeMode mode) {
-    scheduler->schedule(
-        [=]() { log(ActionJournalEvent("onCameraWillChange", *this).addEvent("cameraMode", static_cast<int>(mode))); });
+    scheduler->schedule([=, this]() {
+        log(ActionJournalEvent("onCameraWillChange", *this).addEvent("cameraMode", static_cast<int>(mode)));
+    });
 }
 
-void ActionJournal::Impl::onCameraIsChanging() {
-
-}
+void ActionJournal::Impl::onCameraIsChanging() {}
 
 void ActionJournal::Impl::onCameraDidChange(CameraChangeMode mode) {
-    scheduler->schedule(
-        [=]() { log(ActionJournalEvent("onCameraDidChange", *this).addEvent("cameraMode", static_cast<int>(mode))); });
+    scheduler->schedule([=, this]() {
+        log(ActionJournalEvent("onCameraDidChange", *this).addEvent("cameraMode", static_cast<int>(mode)));
+    });
 }
 
 void ActionJournal::Impl::onWillStartLoadingMap() {
-    scheduler->schedule([=]() { log(ActionJournalEvent("onWillStartLoadingMap", *this)); });
+    scheduler->schedule([=, this]() { log(ActionJournalEvent("onWillStartLoadingMap", *this)); });
 }
 
 void ActionJournal::Impl::onDidFinishLoadingMap() {
-    scheduler->schedule([=]() { log(ActionJournalEvent("onDidFinishLoadingMap", *this)); });
+    scheduler->schedule([=, this]() { log(ActionJournalEvent("onDidFinishLoadingMap", *this)); });
 }
 
 void ActionJournal::Impl::onDidFailLoadingMap(MapLoadError error, const std::string& errorStr) {
-    scheduler->schedule([=, errorStr = errorStr]() {
+    scheduler->schedule([=, this, errorStr = errorStr]() {
         log(ActionJournalEvent("onDidFailLoadingMap", *this)
                 .addEvent("error", errorStr)
                 .addEvent("code", static_cast<int>(error)));
     });
 }
 
-void ActionJournal::Impl::onWillStartRenderingFrame() {
+void ActionJournal::Impl::onWillStartRenderingFrame() {}
 
-}
-
-void ActionJournal::Impl::onDidFinishRenderingFrame(RenderFrameStatus frame) {
-
-}
+void ActionJournal::Impl::onDidFinishRenderingFrame(RenderFrameStatus) {}
 
 void ActionJournal::Impl::onWillStartRenderingMap() {
-    scheduler->schedule([=]() { log(ActionJournalEvent("onWillStartRenderingMap", *this)); });
+    scheduler->schedule([=, this]() { log(ActionJournalEvent("onWillStartRenderingMap", *this)); });
 }
 
 void ActionJournal::Impl::onDidFinishRenderingMap(RenderMode) {
-    scheduler->schedule([=]() { log(ActionJournalEvent("onDidFinishRenderingMap", *this)); });
+    scheduler->schedule([=, this]() { log(ActionJournalEvent("onDidFinishRenderingMap", *this)); });
 }
 
 void ActionJournal::Impl::onDidFinishLoadingStyle() {
-    scheduler->schedule([=]() { log(ActionJournalEvent("onDidFinishLoadingStyle", *this)); });
+    scheduler->schedule([=, this]() { log(ActionJournalEvent("onDidFinishLoadingStyle", *this)); });
 }
 
 void ActionJournal::Impl::onSourceChanged(style::Source& source) {
-    scheduler->schedule([=, type = source.getType()]() {
+    scheduler->schedule([=, this, type = source.getType()]() {
         log(ActionJournalEvent("onSourceChanged", *this).addEventEnum("type", type));
     });
 }
 
 void ActionJournal::Impl::onDidBecomeIdle() {
-    scheduler->schedule([=]() { log(ActionJournalEvent("onDidBecomeIdle", *this)); });
+    scheduler->schedule([=, this]() { log(ActionJournalEvent("onDidBecomeIdle", *this)); });
 }
 
 void ActionJournal::Impl::onStyleImageMissing(const std::string& id) {
-    scheduler->schedule([=, id = id]() { log(ActionJournalEvent("onDidBecomeIdle", *this).addEvent("id", id)); });
+    scheduler->schedule([=, this, id = id]() { log(ActionJournalEvent("onDidBecomeIdle", *this).addEvent("id", id)); });
 }
 
-void ActionJournal::Impl::onRegisterShaders(gfx::ShaderRegistry& shaders) {
-    scheduler->schedule([=]() { log(ActionJournalEvent("onRegisterShaders", *this)); });
+void ActionJournal::Impl::onRegisterShaders(gfx::ShaderRegistry&) {
+    scheduler->schedule([=, this]() { log(ActionJournalEvent("onRegisterShaders", *this)); });
 }
 
-void ActionJournal::Impl::onPreCompileShader(shaders::BuiltIn id,
-                                             gfx::Backend::Type backend,
-                                             const std::string& defines) {
-    scheduler->schedule([=]() {
+void ActionJournal::Impl::onPreCompileShader(shaders::BuiltIn id, gfx::Backend::Type backend, const std::string&) {
+    scheduler->schedule([=, this]() {
         log(ActionJournalEvent("onPreCompileShader", *this)
                 .addEvent("shader", static_cast<int>(id))
                 .addEvent("backend", static_cast<int>(backend)));
     });
 }
 
-void ActionJournal::Impl::onPostCompileShader(shaders::BuiltIn id,
-                                              gfx::Backend::Type backend,
-                                              const std::string& defines) {
-
+void ActionJournal::Impl::onPostCompileShader(shaders::BuiltIn id, gfx::Backend::Type backend, const std::string&) {
     // TODO add `shader_source.cpp` with `BuiltIn` enum string to `generate_shader_code.mjs`?
-    scheduler->schedule([=]() {
+    scheduler->schedule([=, this]() {
         log(ActionJournalEvent("onPostCompileShader", *this)
                 .addEvent("shader", static_cast<int>(id))
                 .addEvent("backend", static_cast<int>(backend)));
@@ -252,15 +245,16 @@ void ActionJournal::Impl::onPostCompileShader(shaders::BuiltIn id,
 void ActionJournal::Impl::onShaderCompileFailed(shaders::BuiltIn id,
                                                 gfx::Backend::Type backend,
                                                 const std::string& defines) {
-    scheduler->schedule([=]() {
+    scheduler->schedule([=, this]() {
         log(ActionJournalEvent("onShaderCompileFailed", *this)
                 .addEvent("shader", static_cast<int>(id))
-                .addEvent("backend", static_cast<int>(backend)));
+                .addEvent("backend", static_cast<int>(backend))
+                .addEvent("defines", defines));
     });
 }
 
 void ActionJournal::Impl::onGlyphsLoaded(const FontStack& fonts, const GlyphRange& range) {
-    scheduler->schedule([=, fonts = fonts, range = range]() {
+    scheduler->schedule([=, this, fonts = fonts, range = range]() {
         log(ActionJournalEvent("onGlyphsLoaded", *this)
                 .addEventStringArray("fonts", fonts)
                 .addEvent("rangeStart", range.first)
@@ -269,7 +263,7 @@ void ActionJournal::Impl::onGlyphsLoaded(const FontStack& fonts, const GlyphRang
 }
 
 void ActionJournal::Impl::onGlyphsError(const FontStack& fonts, const GlyphRange& range, std::exception_ptr error) {
-    scheduler->schedule([=, fonts = fonts, range = range, error = error]() {
+    scheduler->schedule([=, this, fonts = fonts, range = range, error = error]() {
         ActionJournalEvent event("onGlyphsError", *this);
 
         event.addEventStringArray("fonts", fonts);
@@ -289,7 +283,7 @@ void ActionJournal::Impl::onGlyphsError(const FontStack& fonts, const GlyphRange
 }
 
 void ActionJournal::Impl::onGlyphsRequested(const FontStack& fonts, const GlyphRange& range) {
-    scheduler->schedule([=, fonts = fonts, range = range]() {
+    scheduler->schedule([=, this, fonts = fonts, range = range]() {
         log(ActionJournalEvent("onGlyphsRequested", *this)
                 .addEventStringArray("fonts", fonts)
                 .addEvent("rangeStart", range.first)
@@ -298,7 +292,7 @@ void ActionJournal::Impl::onGlyphsRequested(const FontStack& fonts, const GlyphR
 }
 
 void ActionJournal::Impl::onTileAction(TileOperation op, const OverscaledTileID& id, const std::string& sourceID) {
-    scheduler->schedule([=]() {
+    scheduler->schedule([=, this]() {
         log(ActionJournalEvent("onTileAction", *this)
                 .addEventEnum("action", op)
                 .addEvent("tileX", id.canonical.x)
@@ -310,7 +304,7 @@ void ActionJournal::Impl::onTileAction(TileOperation op, const OverscaledTileID&
 }
 
 void ActionJournal::Impl::onSpriteLoaded(const std::optional<style::Sprite>& sprite) {
-    scheduler->schedule([=]() {
+    scheduler->schedule([=, this]() {
         ActionJournalEvent event("onSpriteLoaded", *this);
 
         if (sprite) {
@@ -323,7 +317,7 @@ void ActionJournal::Impl::onSpriteLoaded(const std::optional<style::Sprite>& spr
 }
 
 void ActionJournal::Impl::onSpriteError(const std::optional<style::Sprite>& sprite, std::exception_ptr error) {
-    scheduler->schedule([=]() {
+    scheduler->schedule([=, this]() {
         ActionJournalEvent event("onSpriteError", *this);
 
         if (sprite) {
@@ -344,7 +338,7 @@ void ActionJournal::Impl::onSpriteError(const std::optional<style::Sprite>& spri
 }
 
 void ActionJournal::Impl::onSpriteRequested(const std::optional<style::Sprite>& sprite) {
-    scheduler->schedule([=]() {
+    scheduler->schedule([=, this]() {
         ActionJournalEvent event("onSpriteRequested", *this);
 
         if (sprite) {
@@ -357,11 +351,11 @@ void ActionJournal::Impl::onSpriteRequested(const std::optional<style::Sprite>& 
 }
 
 void ActionJournal::Impl::onMapCreate() {
-    scheduler->schedule([=]() { log(ActionJournalEvent("onMapCreate", *this)); });
+    scheduler->schedule([=, this]() { log(ActionJournalEvent("onMapCreate", *this)); });
 }
 
 void ActionJournal::Impl::onMapDestroy() {
-    scheduler->schedule([=]() { log(ActionJournalEvent("onMapDestroy", *this)); });
+    scheduler->schedule([=, this]() { log(ActionJournalEvent("onMapDestroy", *this)); });
 }
 
 void ActionJournal::Impl::log(ActionJournalEvent& value) {
@@ -373,12 +367,12 @@ void ActionJournal::Impl::log(ActionJournalEvent&& value) {
 }
 
 std::filesystem::path ActionJournal::Impl::getFilepath(uint32_t fileIndex) {
-    return std::filesystem::path(ACTION_JOURNAL_PATH) /
-           std::format("{}.{}.{}", ACTION_JOURNAL_FILENAME, fileIndex, ACTION_JOURNAL_FILE_EXTENSION);
+    return std::filesystem::path(options.path()) /
+           std::format("{}.{}.{}", ACTION_JOURNAL_FILE_NAME, fileIndex, ACTION_JOURNAL_FILE_EXTENSION);
 }
 
 uint32_t ActionJournal::Impl::detectFiles() {
-    if (!std::filesystem::exists(ACTION_JOURNAL_PATH)) {
+    if (!std::filesystem::exists(options.path())) {
         return 0;
     }
 
@@ -387,7 +381,7 @@ uint32_t ActionJournal::Impl::detectFiles() {
     const std::regex fileRegex(std::string(R"(.*\.([0-9]+)\.)") + ACTION_JOURNAL_FILE_EXTENSION);
     std::smatch fileMatch;
 
-    for (const auto& entry : std::filesystem::directory_iterator(ACTION_JOURNAL_PATH)) {
+    for (const auto& entry : std::filesystem::directory_iterator(options.path())) {
         if (!entry.is_regular_file()) {
             continue;
         }
@@ -405,7 +399,7 @@ uint32_t ActionJournal::Impl::detectFiles() {
     }
 
     // removing extra files (old files or due to the file count changing)
-    for (auto it = existingFiles.begin(); existingFiles.size() > logFileCount;) {
+    for (auto it = existingFiles.begin(); existingFiles.size() > options.logFileCount();) {
         std::filesystem::remove(it->second);
         it = existingFiles.erase(it);
     }
@@ -433,7 +427,7 @@ uint32_t ActionJournal::Impl::rollFiles() {
 
     // rename the rest
     uint32_t expectedIndex = 0;
-    for (uint32_t index = 1; index < logFileCount; ++index) {
+    for (uint32_t index = 1; index < options.logFileCount(); ++index) {
         const auto& filepath = getFilepath(index);
         if (std::filesystem::exists(filepath)) {
             std::filesystem::rename(filepath, getFilepath(expectedIndex++));
@@ -444,10 +438,10 @@ uint32_t ActionJournal::Impl::rollFiles() {
 }
 
 bool ActionJournal::Impl::openFile(uint32_t fileIndex, bool truncate) {
-    assert(fileIndex < logFileCount);
+    assert(fileIndex < options.logFileCount());
 
-    if (!std::filesystem::exists(ACTION_JOURNAL_PATH)) {
-        std::filesystem::create_directories(ACTION_JOURNAL_PATH);
+    if (!std::filesystem::exists(options.path())) {
+        std::filesystem::create_directories(options.path());
     }
 
     const auto& filepath = getFilepath(fileIndex);
@@ -461,12 +455,12 @@ bool ActionJournal::Impl::openFile(uint32_t fileIndex, bool truncate) {
         currentFileSize = std::filesystem::file_size(filepath);
         return true;
     }
-    
+
     return false;
 }
 
 bool ActionJournal::Impl::prepareFile(size_t size) {
-    if (currentFileSize + size <= logFileSize && currentFile) {
+    if (currentFileSize + size <= options.logFileSize() && currentFile) {
         currentFileSize += size;
         return true;
     }
@@ -474,7 +468,7 @@ bool ActionJournal::Impl::prepareFile(size_t size) {
     // else roll file
     currentFile.close();
 
-    if (currentFileIndex + 1 >= logFileCount) {
+    if (currentFileIndex + 1 >= options.logFileCount()) {
         currentFileIndex = rollFiles();
     } else {
         ++currentFileIndex;

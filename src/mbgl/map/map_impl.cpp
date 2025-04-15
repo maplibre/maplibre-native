@@ -56,11 +56,6 @@ Map::Impl::Impl(RendererFrontend& frontend_,
       fileSource(std::move(fileSource_)),
       style(std::make_unique<style::Style>(fileSource, pixelRatio, frontend_.getThreadPool())),
       annotationManager(*style) {
-
-    if (actionJournal) {
-        actionJournal->impl->onMapCreate();
-    }
-
     transform.setNorthOrientation(mapOptions.northOrientation());
     style->impl->setObserver(this);
     rendererFrontend.setObserver(*this);
@@ -77,11 +72,11 @@ Map::Impl::~Impl() {
     rendererFrontend.reset();
 };
 
-void Map::Impl::onCameraWillChange(MapObserver::CameraChangeMode mode) {
-    observer.onCameraWillChange(mode);
+void Map::Impl::onCameraWillChange(MapObserver::CameraChangeMode cameraMode) {
+    observer.onCameraWillChange(cameraMode);
 
     if (actionJournal) {
-        actionJournal->impl->onCameraWillChange(mode);
+        actionJournal->impl->onCameraWillChange(cameraMode);
     }
 }
 
@@ -93,11 +88,11 @@ void Map::Impl::onCameraIsChanging() {
     }
 }
 
-void Map::Impl::onCameraDidChange(MapObserver::CameraChangeMode mode) {
-    observer.onCameraDidChange(mode);
+void Map::Impl::onCameraDidChange(MapObserver::CameraChangeMode cameraMode) {
+    observer.onCameraDidChange(cameraMode);
 
     if (actionJournal) {
-        actionJournal->impl->onCameraDidChange(mode);
+        actionJournal->impl->onCameraDidChange(cameraMode);
     }
 }
 
@@ -321,7 +316,7 @@ void Map::Impl::onStyleImageMissing(const std::string& id, const std::function<v
             actionJournal->impl->onStyleImageMissing(id);
         }
     }
-    
+
     done();
     onUpdate();
 }

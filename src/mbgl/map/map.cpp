@@ -33,14 +33,20 @@ Map::Map(RendererFrontend& frontend,
          MapObserver& observer,
          const MapOptions& mapOptions,
          const ResourceOptions& resourceOptions,
-         const ClientOptions& clientOptions)
+         const ClientOptions& clientOptions,
+         const util::ActionJournalOptions& actionJournalOptions)
     : impl(std::make_unique<Impl>(frontend,
                                   observer,
                                   FileSourceManager::get()
                                       ? std::shared_ptr<FileSource>(FileSourceManager::get()->getFileSource(
                                             ResourceLoader, resourceOptions, clientOptions))
                                       : nullptr,
-                                  mapOptions)) {}
+                                  mapOptions)) {
+    if (actionJournalOptions.enabled()) {
+        impl->actionJournal = std::make_unique<util::ActionJournal>(*this, actionJournalOptions);
+        impl->actionJournal->impl->onMapCreate();
+    }
+}
 
 Map::Map(std::unique_ptr<Impl> impl_)
     : impl(std::move(impl_)) {}
@@ -531,18 +537,6 @@ FreeCameraOptions Map::getFreeCameraOptions() const {
 
 ClientOptions Map::getClientOptions() const {
     return impl->fileSource ? impl->fileSource->getClientOptions() : ClientOptions();
-}
-
-void Map::enableActionJournal(bool value) {
-    if (value) {
-        if (!impl->actionJournal) {
-            impl->actionJournal = std::make_unique<util::ActionJournal>(*this);
-        }
-    } else {
-        if (impl->actionJournal) {
-            impl->actionJournal.reset();
-        }
-    }
 }
 
 const std::unique_ptr<util::ActionJournal>& Map::getActionJournal() {
