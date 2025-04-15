@@ -21,8 +21,10 @@ public:
     ActionJournalEvent(const rapidjson::GenericStringRef<char>& name, const ActionJournal::Impl& journal)
         : json(rapidjson::kObjectType),
           eventJson(rapidjson::kObjectType) {
+        auto timepoint = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now());
+
         json.AddMember("name", name, json.GetAllocator());
-        json.AddMember("time", std::format("{:%FT%TZ}", std::chrono::system_clock::now()), json.GetAllocator());
+        json.AddMember("time", iso8601(timepoint), json.GetAllocator());
 
         const auto& clientOptions = journal.getMap().getClientOptions();
         const auto& clientName = clientOptions.name();
@@ -102,7 +104,7 @@ ActionJournal::Impl::Impl(const Map& map_, const ActionJournalOptions& options_)
     assert(options.logFileSize() > 0);
     assert(options.logFileCount() > 1);
 
-    options.withPath(options.path() / ACTION_JOURNAL_FOLDER_NAME);
+    options.withPath(options.path() + "/" + ACTION_JOURNAL_FOLDER_NAME);
 
     openFile(detectFiles(), false);
 }
@@ -366,9 +368,9 @@ void ActionJournal::Impl::log(ActionJournalEvent&& value) {
     logToFile(value.toString());
 }
 
-std::filesystem::path ActionJournal::Impl::getFilepath(uint32_t fileIndex) {
-    return std::filesystem::path(options.path()) /
-           std::format("{}.{}.{}", ACTION_JOURNAL_FILE_NAME, fileIndex, ACTION_JOURNAL_FILE_EXTENSION);
+std::string ActionJournal::Impl::getFilepath(uint32_t fileIndex) {
+    return options.path() + "/" + ACTION_JOURNAL_FILE_NAME + "." + std::to_string(fileIndex) + "." +
+           ACTION_JOURNAL_FILE_EXTENSION;
 }
 
 uint32_t ActionJournal::Impl::detectFiles() {

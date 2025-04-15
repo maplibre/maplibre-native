@@ -5,7 +5,6 @@
 #include <mbgl/map/map_observer.hpp>
 
 #include <fstream>
-#include <filesystem>
 
 namespace mbgl {
 
@@ -61,7 +60,7 @@ protected:
     void log(ActionJournalEvent&& value);
 
     // file operations
-    std::filesystem::path getFilepath(uint32_t fileIndex);
+    std::string getFilepath(uint32_t fileIndex);
     uint32_t detectFiles();
     uint32_t rollFiles();
 
