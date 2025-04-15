@@ -1,5 +1,6 @@
 load("@darwin_config//:config.bzl", "BUNDLE_ID_PREFIX")
 load("@rules_apple//apple:ios.bzl", "ios_application")
+load("@rules_cc//cc:defs.bzl", "cc_library", "objc_library")
 
 cc_library(
     name = "ios_test_runner_lib",

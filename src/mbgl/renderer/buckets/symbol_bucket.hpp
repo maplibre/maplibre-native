@@ -182,13 +182,6 @@ public:
 
         SegmentVector<SymbolTextAttributes> segments;
         std::vector<PlacedSymbol> placedSymbols;
-
-#if MLN_LEGACY_RENDERER
-        std::optional<VertexBuffer> vertexBuffer;
-        std::optional<DynamicVertexBuffer> dynamicVertexBuffer;
-        std::optional<OpacityVertexBuffer> opacityVertexBuffer;
-        std::optional<gfx::IndexBuffer> indexBuffer;
-#endif // MLN_LEGACY_RENDERER
     } text;
 
     std::unique_ptr<SymbolSizeBinder> iconSizeBinder;
@@ -210,20 +203,12 @@ public:
         const CollisionDynamicVertexVector& dynamicVertices() const { return *sharedDynamicVertices; }
 
         SegmentVector<CollisionBoxProgram::AttributeList> segments;
-
-#if MLN_LEGACY_RENDERER
-        std::optional<gfx::VertexBuffer<gfx::Vertex<CollisionBoxLayoutAttributes>>> vertexBuffer;
-        std::optional<gfx::VertexBuffer<gfx::Vertex<CollisionBoxDynamicAttributes>>> dynamicVertexBuffer;
-#endif // MLN_LEGACY_RENDERER
     };
 
     struct CollisionBoxBuffer : public CollisionBuffer {
         using LineIndexVector = gfx::IndexVector<gfx::Lines>;
         const std::shared_ptr<LineIndexVector> sharedLines = std::make_shared<LineIndexVector>();
         LineIndexVector& lines = *sharedLines;
-#if MLN_LEGACY_RENDERER
-        std::optional<gfx::IndexBuffer> indexBuffer;
-#endif // MLN_LEGACY_RENDERER
     };
     std::unique_ptr<CollisionBoxBuffer> iconCollisionBox;
     std::unique_ptr<CollisionBoxBuffer> textCollisionBox;
@@ -242,9 +227,6 @@ public:
         using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
         const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
         TriangleIndexVector& triangles = *sharedTriangles;
-#if MLN_LEGACY_RENDERER
-        std::optional<gfx::IndexBuffer> indexBuffer;
-#endif // MLN_LEGACY_RENDERER
     };
     std::unique_ptr<CollisionCircleBuffer> iconCollisionCircle;
     std::unique_ptr<CollisionCircleBuffer> textCollisionCircle;

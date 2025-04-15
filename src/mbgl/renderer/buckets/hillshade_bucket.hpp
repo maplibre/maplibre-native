@@ -30,10 +30,8 @@ public:
     std::optional<gfx::Texture> dem;
     std::optional<gfx::Texture> texture;
 
-#if MLN_DRAWABLE_RENDERER
     RenderTargetPtr renderTarget;
     bool renderTargetPrepared = false;
-#endif
 
     TileMask mask{{0, 0, 0}};
 
@@ -54,11 +52,6 @@ public:
     IndexVector& indices = *sharedIndices;
 
     SegmentVector<HillshadeAttributes> segments;
-
-#if MLN_LEGACY_RENDERER
-    std::optional<gfx::VertexBuffer<HillshadeLayoutVertex>> vertexBuffer;
-    std::optional<gfx::IndexBuffer> indexBuffer;
-#endif // MLN_LEGACY_RENDERER
 
 private:
     DEMData demdata;
