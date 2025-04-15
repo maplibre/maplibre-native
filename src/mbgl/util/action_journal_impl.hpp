@@ -17,7 +17,7 @@ class ActionJournalEvent;
 
 class ActionJournal::Impl : public MapObserver {
 public:
-    Impl(const Map& map, const uint32_t logFileSize = 600, const uint32_t logFileCount = 5);
+    Impl(const Map& map, const uint32_t logFileSize = 1024 * 1024, const uint32_t logFileCount = 5);
     ~Impl() = default;
 
     const Map& getMap() const { return map; }
