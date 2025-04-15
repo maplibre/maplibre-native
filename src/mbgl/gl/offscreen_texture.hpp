@@ -17,12 +17,7 @@ public:
     bool isRenderable() override;
 
     PremultipliedImage readStillImage() override;
-
-#if MLN_LEGACY_RENDERER
-    gfx::Texture& getTexture() override;
-#else
     const gfx::Texture2DPtr& getTexture() override;
-#endif
 };
 
 } // namespace gl

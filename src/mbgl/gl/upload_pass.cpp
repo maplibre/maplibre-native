@@ -12,10 +12,8 @@
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gl/vertex_attribute_gl.hpp>
 #include <mbgl/gl/texture2d.hpp>
-#endif
 
 #include <algorithm>
 
@@ -140,7 +138,6 @@ struct VertexBufferGL : public gfx::VertexBufferBase {
     std::unique_ptr<gfx::VertexBufferResource> resource;
 };
 
-#if MLN_DRAWABLE_RENDERER
 namespace {
 const std::unique_ptr<gfx::VertexBufferResource> noBuffer;
 }
@@ -315,7 +312,6 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
 
     return bindings;
 }
-#endif
 
 void UploadPass::pushDebugGroup(const char* name) {
     commandEncoder.pushDebugGroup(name);
@@ -325,7 +321,6 @@ void UploadPass::popDebugGroup() {
     commandEncoder.popDebugGroup();
 }
 
-#if MLN_DRAWABLE_RENDERER
 gfx::Context& UploadPass::getContext() {
     return commandEncoder.context;
 }
@@ -333,7 +328,6 @@ gfx::Context& UploadPass::getContext() {
 const gfx::Context& UploadPass::getContext() const {
     return commandEncoder.context;
 }
-#endif
 
 } // namespace gl
 } // namespace mbgl

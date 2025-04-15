@@ -3,10 +3,7 @@
 #include <mbgl/shaders/layer_ubo.hpp>
 #include <mbgl/style/property_expression.hpp>
 #include <mbgl/util/bitmask_operations.hpp>
-
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/gpu_expression.hpp>
-#endif // MLN_DRAWABLE_RENDERER
 
 namespace mbgl {
 namespace shaders {
