@@ -194,7 +194,11 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                         .imageManager = imageManager,
                                         .glyphManager = glyphManager,
                                         .prefetchZoomDelta = updateParameters->prefetchZoomDelta,
-                                        .threadPool = threadPool};
+                                        .threadPool = threadPool,
+                                        .tileLodMinRadius = updateParameters->tileLodMinRadius,
+                                        .tileLodScale = updateParameters->tileLodScale,
+                                        .tileLodPitchThreshold = updateParameters->tileLodPitchThreshold,
+                                        .tileLodZoomShift = updateParameters->tileLodZoomShift};
 
     glyphManager->setURL(updateParameters->glyphURL);
 
