@@ -16,38 +16,52 @@ constexpr auto ACTION_JOURNAL_FOLDER_NAME = "action_journal";
 constexpr auto ACTION_JOURNAL_FILE_NAME = "action_journal";
 constexpr auto ACTION_JOURNAL_FILE_EXTENSION = "log";
 
+class MapEnvironmentSnapshot {
+public:
+    MapEnvironmentSnapshot(const ActionJournal::Impl& journal) {
+        const auto& map = journal.getMap();
+        const auto& clientOptions = map.getClientOptions();
+        const auto& style = map.getStyle();
+
+        time = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now());
+
+        clientName = clientOptions.name();
+        clientVersion = clientOptions.version();
+
+        styleName = style.getName();
+        styleURL = style.getURL();
+    }
+
+public:
+    std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> time;
+    std::string clientName;
+    std::string clientVersion;
+    std::string styleName;
+    std::string styleURL;
+};
+
 class ActionJournalEvent {
 public:
-    ActionJournalEvent(const rapidjson::GenericStringRef<char>& name, const ActionJournal::Impl& journal)
+    ActionJournalEvent(const rapidjson::GenericStringRef<char>& name, const MapEnvironmentSnapshot& env)
         : json(rapidjson::kObjectType),
           eventJson(rapidjson::kObjectType) {
-        auto timepoint = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now());
-
         json.AddMember("name", name, json.GetAllocator());
-        json.AddMember("time", iso8601(timepoint), json.GetAllocator());
+        json.AddMember("time", iso8601(env.time), json.GetAllocator());
 
-        const auto& clientOptions = journal.getMap().getClientOptions();
-        const auto& clientName = clientOptions.name();
-        const auto& clientVersion = clientOptions.version();
-
-        if (!clientName.empty()) {
-            json.AddMember("clientName", clientName, json.GetAllocator());
+        if (!env.clientName.empty()) {
+            json.AddMember("clientName", env.clientName, json.GetAllocator());
         }
 
-        if (!clientVersion.empty()) {
-            json.AddMember("clientVersion", clientVersion, json.GetAllocator());
+        if (!env.clientVersion.empty()) {
+            json.AddMember("clientVersion", env.clientVersion, json.GetAllocator());
         }
 
-        const auto& style = journal.getMap().getStyle();
-        const auto& styleName = style.getName();
-        const auto& styleURL = style.getURL();
-
-        if (!styleName.empty()) {
-            json.AddMember("styleName", styleName, json.GetAllocator());
+        if (!env.styleName.empty()) {
+            json.AddMember("styleName", env.styleName, json.GetAllocator());
         }
 
-        if (!styleURL.empty()) {
-            json.AddMember("styleURL", styleURL, json.GetAllocator());
+        if (!env.styleURL.empty()) {
+            json.AddMember("styleURL", env.styleURL, json.GetAllocator());
         }
     }
 
@@ -164,30 +178,32 @@ void ActionJournal::Impl::clearLog() {
 }
 
 void ActionJournal::Impl::onCameraWillChange(CameraChangeMode mode) {
-    scheduler->schedule([=, this]() {
-        log(ActionJournalEvent("onCameraWillChange", *this).addEvent("cameraMode", static_cast<int>(mode)));
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+        log(ActionJournalEvent("onCameraWillChange", env).addEvent("cameraMode", static_cast<int>(mode)));
     });
 }
 
 void ActionJournal::Impl::onCameraIsChanging() {}
 
 void ActionJournal::Impl::onCameraDidChange(CameraChangeMode mode) {
-    scheduler->schedule([=, this]() {
-        log(ActionJournalEvent("onCameraDidChange", *this).addEvent("cameraMode", static_cast<int>(mode)));
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+        log(ActionJournalEvent("onCameraDidChange", env).addEvent("cameraMode", static_cast<int>(mode)));
     });
 }
 
 void ActionJournal::Impl::onWillStartLoadingMap() {
-    scheduler->schedule([=, this]() { log(ActionJournalEvent("onWillStartLoadingMap", *this)); });
+    scheduler->schedule(
+        [=, this, env = MapEnvironmentSnapshot(*this)]() { log(ActionJournalEvent("onWillStartLoadingMap", env)); });
 }
 
 void ActionJournal::Impl::onDidFinishLoadingMap() {
-    scheduler->schedule([=, this]() { log(ActionJournalEvent("onDidFinishLoadingMap", *this)); });
+    scheduler->schedule(
+        [=, this, env = MapEnvironmentSnapshot(*this)]() { log(ActionJournalEvent("onDidFinishLoadingMap", env)); });
 }
 
 void ActionJournal::Impl::onDidFailLoadingMap(MapLoadError error, const std::string& errorStr) {
-    scheduler->schedule([=, this, errorStr = errorStr]() {
-        log(ActionJournalEvent("onDidFailLoadingMap", *this)
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this), errorStr = errorStr]() {
+        log(ActionJournalEvent("onDidFailLoadingMap", env)
                 .addEvent("error", errorStr)
                 .addEvent("code", static_cast<int>(error)));
     });
@@ -198,48 +214,54 @@ void ActionJournal::Impl::onWillStartRenderingFrame() {}
 void ActionJournal::Impl::onDidFinishRenderingFrame(RenderFrameStatus) {}
 
 void ActionJournal::Impl::onWillStartRenderingMap() {
-    scheduler->schedule([=, this]() { log(ActionJournalEvent("onWillStartRenderingMap", *this)); });
+    scheduler->schedule(
+        [=, this, env = MapEnvironmentSnapshot(*this)]() { log(ActionJournalEvent("onWillStartRenderingMap", env)); });
 }
 
 void ActionJournal::Impl::onDidFinishRenderingMap(RenderMode) {
-    scheduler->schedule([=, this]() { log(ActionJournalEvent("onDidFinishRenderingMap", *this)); });
+    scheduler->schedule(
+        [=, this, env = MapEnvironmentSnapshot(*this)]() { log(ActionJournalEvent("onDidFinishRenderingMap", env)); });
 }
 
 void ActionJournal::Impl::onDidFinishLoadingStyle() {
-    scheduler->schedule([=, this]() { log(ActionJournalEvent("onDidFinishLoadingStyle", *this)); });
+    scheduler->schedule(
+        [=, this, env = MapEnvironmentSnapshot(*this)]() { log(ActionJournalEvent("onDidFinishLoadingStyle", env)); });
 }
 
 void ActionJournal::Impl::onSourceChanged(style::Source& source) {
-    scheduler->schedule([=, this, type = source.getType()]() {
-        log(ActionJournalEvent("onSourceChanged", *this).addEventEnum("type", type));
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this), type = source.getType()]() {
+        log(ActionJournalEvent("onSourceChanged", env).addEventEnum("type", type));
     });
 }
 
 void ActionJournal::Impl::onDidBecomeIdle() {
-    scheduler->schedule([=, this]() { log(ActionJournalEvent("onDidBecomeIdle", *this)); });
+    scheduler->schedule(
+        [=, this, env = MapEnvironmentSnapshot(*this)]() { log(ActionJournalEvent("onDidBecomeIdle", env)); });
 }
 
 void ActionJournal::Impl::onStyleImageMissing(const std::string& id) {
-    scheduler->schedule([=, this, id = id]() { log(ActionJournalEvent("onDidBecomeIdle", *this).addEvent("id", id)); });
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this), id = id]() {
+        log(ActionJournalEvent("onDidBecomeIdle", env).addEvent("id", id));
+    });
 }
 
 void ActionJournal::Impl::onRegisterShaders(gfx::ShaderRegistry&) {
-    scheduler->schedule([=, this]() { log(ActionJournalEvent("onRegisterShaders", *this)); });
+    scheduler->schedule(
+        [=, this, env = MapEnvironmentSnapshot(*this)]() { log(ActionJournalEvent("onRegisterShaders", env)); });
 }
 
 void ActionJournal::Impl::onPreCompileShader(shaders::BuiltIn id, gfx::Backend::Type backend, const std::string&) {
-    scheduler->schedule([=, this]() {
-        log(ActionJournalEvent("onPreCompileShader", *this)
-                .addEvent("shader", static_cast<int>(id))
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+        log(ActionJournalEvent("onPreCompileShader", env)
+                .addEventEnum("shader", id)
                 .addEvent("backend", static_cast<int>(backend)));
     });
 }
 
 void ActionJournal::Impl::onPostCompileShader(shaders::BuiltIn id, gfx::Backend::Type backend, const std::string&) {
-    // TODO add `shader_source.cpp` with `BuiltIn` enum string to `generate_shader_code.mjs`?
-    scheduler->schedule([=, this]() {
-        log(ActionJournalEvent("onPostCompileShader", *this)
-                .addEvent("shader", static_cast<int>(id))
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+        log(ActionJournalEvent("onPostCompileShader", env)
+                .addEventEnum("shader", id)
                 .addEvent("backend", static_cast<int>(backend)));
     });
 }
@@ -247,17 +269,17 @@ void ActionJournal::Impl::onPostCompileShader(shaders::BuiltIn id, gfx::Backend:
 void ActionJournal::Impl::onShaderCompileFailed(shaders::BuiltIn id,
                                                 gfx::Backend::Type backend,
                                                 const std::string& defines) {
-    scheduler->schedule([=, this]() {
-        log(ActionJournalEvent("onShaderCompileFailed", *this)
-                .addEvent("shader", static_cast<int>(id))
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+        log(ActionJournalEvent("onShaderCompileFailed", env)
+                .addEventEnum("shader", id)
                 .addEvent("backend", static_cast<int>(backend))
                 .addEvent("defines", defines));
     });
 }
 
 void ActionJournal::Impl::onGlyphsLoaded(const FontStack& fonts, const GlyphRange& range) {
-    scheduler->schedule([=, this, fonts = fonts, range = range]() {
-        log(ActionJournalEvent("onGlyphsLoaded", *this)
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this), fonts = fonts, range = range]() {
+        log(ActionJournalEvent("onGlyphsLoaded", env)
                 .addEventStringArray("fonts", fonts)
                 .addEvent("rangeStart", range.first)
                 .addEvent("rangeEnd", range.second));
@@ -265,8 +287,8 @@ void ActionJournal::Impl::onGlyphsLoaded(const FontStack& fonts, const GlyphRang
 }
 
 void ActionJournal::Impl::onGlyphsError(const FontStack& fonts, const GlyphRange& range, std::exception_ptr error) {
-    scheduler->schedule([=, this, fonts = fonts, range = range, error = error]() {
-        ActionJournalEvent event("onGlyphsError", *this);
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this), fonts = fonts, range = range, error = error]() {
+        ActionJournalEvent event("onGlyphsError", env);
 
         event.addEventStringArray("fonts", fonts);
         event.addEvent("rangeStart", range.first);
@@ -285,8 +307,8 @@ void ActionJournal::Impl::onGlyphsError(const FontStack& fonts, const GlyphRange
 }
 
 void ActionJournal::Impl::onGlyphsRequested(const FontStack& fonts, const GlyphRange& range) {
-    scheduler->schedule([=, this, fonts = fonts, range = range]() {
-        log(ActionJournalEvent("onGlyphsRequested", *this)
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this), fonts = fonts, range = range]() {
+        log(ActionJournalEvent("onGlyphsRequested", env)
                 .addEventStringArray("fonts", fonts)
                 .addEvent("rangeStart", range.first)
                 .addEvent("rangeEnd", range.second));
@@ -294,8 +316,8 @@ void ActionJournal::Impl::onGlyphsRequested(const FontStack& fonts, const GlyphR
 }
 
 void ActionJournal::Impl::onTileAction(TileOperation op, const OverscaledTileID& id, const std::string& sourceID) {
-    scheduler->schedule([=, this]() {
-        log(ActionJournalEvent("onTileAction", *this)
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+        log(ActionJournalEvent("onTileAction", env)
                 .addEventEnum("action", op)
                 .addEvent("tileX", id.canonical.x)
                 .addEvent("tileY", id.canonical.y)
@@ -306,7 +328,7 @@ void ActionJournal::Impl::onTileAction(TileOperation op, const OverscaledTileID&
 }
 
 void ActionJournal::Impl::onSpriteLoaded(const std::optional<style::Sprite>& sprite) {
-    scheduler->schedule([=, this]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
         ActionJournalEvent event("onSpriteLoaded", *this);
 
         if (sprite) {
@@ -319,8 +341,8 @@ void ActionJournal::Impl::onSpriteLoaded(const std::optional<style::Sprite>& spr
 }
 
 void ActionJournal::Impl::onSpriteError(const std::optional<style::Sprite>& sprite, std::exception_ptr error) {
-    scheduler->schedule([=, this]() {
-        ActionJournalEvent event("onSpriteError", *this);
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+        ActionJournalEvent event("onSpriteError", env);
 
         if (sprite) {
             event.addEvent("id", sprite.value().id);
@@ -340,8 +362,8 @@ void ActionJournal::Impl::onSpriteError(const std::optional<style::Sprite>& spri
 }
 
 void ActionJournal::Impl::onSpriteRequested(const std::optional<style::Sprite>& sprite) {
-    scheduler->schedule([=, this]() {
-        ActionJournalEvent event("onSpriteRequested", *this);
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+        ActionJournalEvent event("onSpriteRequested", env);
 
         if (sprite) {
             event.addEvent("id", sprite.value().id);
@@ -353,11 +375,13 @@ void ActionJournal::Impl::onSpriteRequested(const std::optional<style::Sprite>& 
 }
 
 void ActionJournal::Impl::onMapCreate() {
-    scheduler->schedule([=, this]() { log(ActionJournalEvent("onMapCreate", *this)); });
+    scheduler->schedule(
+        [=, this, env = MapEnvironmentSnapshot(*this)]() { log(ActionJournalEvent("onMapCreate", env)); });
 }
 
 void ActionJournal::Impl::onMapDestroy() {
-    scheduler->schedule([=, this]() { log(ActionJournalEvent("onMapDestroy", *this)); });
+    scheduler->schedule(
+        [=, this, env = MapEnvironmentSnapshot(*this)]() { log(ActionJournalEvent("onMapDestroy", env)); });
 }
 
 void ActionJournal::Impl::log(ActionJournalEvent& value) {
