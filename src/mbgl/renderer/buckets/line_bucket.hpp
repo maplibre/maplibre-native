@@ -8,8 +8,6 @@
 #include <mbgl/style/layers/line_layer_properties.hpp>
 #include <mbgl/style/image_impl.hpp>
 
-#include <vector>
-
 namespace mbgl {
 
 class BucketParameters;
@@ -51,11 +49,6 @@ public:
     TriangleIndexVector& triangles = *sharedTriangles;
 
     SegmentVector<LineAttributes> segments;
-
-#if MLN_LEGACY_RENDERER
-    std::optional<gfx::VertexBuffer<LineLayoutVertex>> vertexBuffer;
-    std::optional<gfx::IndexBuffer> indexBuffer;
-#endif // MLN_LEGACY_RENDERER
 
     std::map<std::string, LineProgram::Binders> paintPropertyBinders;
 

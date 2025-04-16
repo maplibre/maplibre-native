@@ -43,7 +43,7 @@ target_include_directories(
 target_link_libraries(
     mbgl-node-loop
     PUBLIC
-        Mapbox::Base
+        MapLibreNative::Base
 )
 
 target_sources(

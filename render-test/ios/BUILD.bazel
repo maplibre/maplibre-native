@@ -1,5 +1,6 @@
 load("@rules_apple//apple:ios.bzl", "ios_unit_test")
 load("@rules_apple//apple:resources.bzl", "apple_resource_bundle")
+load("@rules_cc//cc:defs.bzl", "objc_library")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
 apple_resource_bundle(

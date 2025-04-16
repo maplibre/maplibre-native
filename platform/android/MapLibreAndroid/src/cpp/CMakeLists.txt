@@ -239,7 +239,7 @@ target_link_libraries(maplibre
                               $<$<CONFIG:Release>:-Wl,--gc-sections>
                               $<$<CONFIG:Release>:-flto>
                               $<$<CONFIG:Release>:-fuse-ld=gold>
-                              Mapbox::Base::jni.hpp
+                              MapLibreNative::Base::jni.hpp
                               mbgl-core
                               mbgl-vendor-unique_resource)
 

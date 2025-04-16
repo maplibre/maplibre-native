@@ -25,8 +25,15 @@ Double click `android-render-test-runner-style.html`. Right click on the opened 
 Alternatively to download (and open) the results from the command line, use:
 
 ```
-adb shell "run-as org.maplibre.render_test_runner cat files/metrics/android-render-test-runner-style.html" > android-render-test-runner-style.html
-open android-render-test-runner-style.html
+filename=android-render-test-runner-style.html
+adb shell "run-as org.maplibre.render_test_runner cat files/metrics/$filename" > $filename
+open $filename
+```
+
+For Vulkan use
+
+```
+filename=android-vulkan-render-test-runner-style.html
 ```
 
 ### Updating the Render Tests
