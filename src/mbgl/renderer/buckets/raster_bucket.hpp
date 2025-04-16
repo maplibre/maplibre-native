@@ -48,11 +48,6 @@ public:
     TriangleIndexVector& indices = *sharedTriangles;
 
     SegmentVector<RasterAttributes> segments;
-
-#if MLN_LEGACY_RENDERER
-    std::optional<gfx::VertexBuffer<RasterLayoutVertex>> vertexBuffer;
-    std::optional<gfx::IndexBuffer> indexBuffer;
-#endif // MLN_LEGACY_RENDERER
 };
 
 } // namespace mbgl

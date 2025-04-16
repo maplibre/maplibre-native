@@ -40,11 +40,6 @@ public:
 
     SegmentVector<CircleAttributes> segments;
 
-#if MLN_LEGACY_RENDERER
-    std::optional<gfx::VertexBuffer<CircleLayoutVertex>> vertexBuffer;
-    std::optional<gfx::IndexBuffer> indexBuffer;
-#endif // MLN_LEGACY_RENDERER
-
     std::map<std::string, CircleProgram::Binders> paintPropertyBinders;
 
     const MapMode mode;
