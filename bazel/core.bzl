@@ -54,6 +54,10 @@ MLN_GENERATED_SHADER_HEADERS = [
     "include/mbgl/shaders/shader_manifest.hpp",
 ]
 
+MLN_GENERATED_SHADER_SOURCE = [
+    "src/mbgl/shaders/shader_source.cpp",
+]
+
 MLN_GENERATED_OPENGL_SHADER_HEADERS = [
     "include/mbgl/shaders/gl/background.hpp",
     "include/mbgl/shaders/gl/background_pattern.hpp",
