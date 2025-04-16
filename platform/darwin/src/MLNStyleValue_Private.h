@@ -19,6 +19,7 @@
 
 #import <mbgl/util/enum.hpp>
 #include <mbgl/util/interpolate.hpp>
+#include <mbgl/util/unitbezier.hpp>
 
 #include <memory>
 
@@ -48,8 +49,13 @@ NS_INLINE MLNTransition MLNTransitionFromOptions(const mbgl::style::TransitionOp
 }
 
 NS_INLINE mbgl::style::TransitionOptions MLNOptionsFromTransition(MLNTransition transition) {
+  CAMediaTimingFunction *function = [CAMediaTimingFunction functionWithName:transition.ease];
+  float p0[2], p3[2];
+  [function getControlPointAtIndex:0 values:p0];
+  [function getControlPointAtIndex:3 values:p3];
   mbgl::style::TransitionOptions options{{MLNDurationFromTimeInterval(transition.duration)},
-                                         {MLNDurationFromTimeInterval(transition.delay)}};
+                                         {MLNDurationFromTimeInterval(transition.delay)},
+                                         mbgl::util::UnitBezier({p0[0], p0[1], p3[0], p3[1]})};
   return options;
 }
 

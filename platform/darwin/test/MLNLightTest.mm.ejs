@@ -23,8 +23,8 @@
 
 - (void)testProperties {
 
-    MLNTransition defaultTransition = MLNTransitionMake(0, 0);
-    MLNTransition transition = MLNTransitionMake(6, 3);
+    MLNTransition defaultTransition = MLNTransitionMake(0, 0, kCAMediaTimingFunctionDefault);
+    MLNTransition transition = MLNTransitionMake(6, 3, kCAMediaTimingFunctionDefault);
     mbgl::style::TransitionOptions transitionOptions { { MLNDurationFromTimeInterval(6) }, { MLNDurationFromTimeInterval(3) } };
 
 <% for (const property of properties) { -%>
