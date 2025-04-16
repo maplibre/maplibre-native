@@ -40,38 +40,8 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
 }
 
 void Programs::registerWith(gfx::ShaderRegistry& registry) {
-#if MLN_LEGACY_RENDERER
-    /// The following types will be registered
-    registerTypes<BackgroundProgram,
-                  BackgroundPatternProgram,
-                  RasterProgram,
-                  HeatmapProgram,
-                  HeatmapTextureProgram,
-                  HillshadeProgram,
-                  HillshadePrepareProgram,
-                  FillProgram,
-                  FillPatternProgram,
-                  FillOutlineProgram,
-                  FillOutlinePatternProgram,
-                  FillExtrusionProgram,
-                  FillExtrusionPatternProgram,
-                  CircleProgram,
-                  LineProgram,
-                  LineGradientProgram,
-                  LineSDFProgram,
-                  LinePatternProgram,
-                  SymbolIconProgram,
-                  SymbolSDFIconProgram,
-                  SymbolSDFTextProgram,
-                  SymbolTextAndIconProgram,
-                  CollisionBoxProgram,
-                  CollisionCircleProgram,
-                  DebugProgram,
-                  ClippingMaskProgram>(registry, programParameters);
-#else
     /// The following types will be registered
     registerTypes<DebugProgram, ClippingMaskProgram>(registry, programParameters);
-#endif
 }
 
 } // namespace mbgl

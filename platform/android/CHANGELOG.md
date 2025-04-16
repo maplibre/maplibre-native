@@ -1,9 +1,18 @@
 # Changelog MapLibre Native for Android
 
+## main
+
 ## 11.8.6
+
+### ✨ Features and improvements
+
+- Change Java Transfrom class from final to normal ([#3332](https://github.com/maplibre/maplibre-native/pull/3332)).
 
 ### 🐞 Bug fixes
 
+- Fix rare crash LatLngAnimator ([#3352](https://github.com/maplibre/maplibre-native/pull/3352)).
+- Sync surface destruction with main thread ([#3368](https://github.com/maplibre/maplibre-native/pull/3368)).
+- Prevent exception SymbolLocationLayerRenderer with new style ([#3369](https://github.com/maplibre/maplibre-native/pull/3369)).
 - Fix issue related to symbol icon scaling with offset
 
 ## 11.8.5

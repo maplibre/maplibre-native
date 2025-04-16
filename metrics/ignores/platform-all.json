@@ -114,7 +114,6 @@
     "render-tests/tilejson-bounds/overwrite-bounds": "started failing after https://github.com/mapbox/mapbox-gl-native/pull/16091",
     "render-tests/video/default": "skip - https://github.com/mapbox/mapbox-gl-native/issues/601",
     "render-tests/zoomed-fill/negative-zoom": "https://github.com/mapbox/mapbox-gl-native/issues/16019",
-    "render-tests/zoomed-fill/negative-zoom": "https://github.com/mapbox/mapbox-gl-native/issues/16019",
     "render-tests/fill-extrusion-translate/default": "https://github.com/mapbox/mapbox-gl-js/pull/9202",
     "render-tests/fill-extrusion-opacity/literal": "https://github.com/mapbox/mapbox-gl-js/pull/9202",
     "render-tests/fill-extrusion-opacity/default": "https://github.com/mapbox/mapbox-gl-js/pull/9202",

@@ -338,7 +338,6 @@ public:
             return result;
         }
 
-#if MLN_DRAWABLE_RENDERER
         using GPUExpressions = std::array<gfx::UniqueGPUExpression, UnevaluatedTypes::TypeCount>;
 
         /// Update the GPU expressions, if applicable, for each item in the tuple.
@@ -347,7 +346,6 @@ public:
             const auto results = util::to_array(std::make_tuple(updateGPUExpression<Ps>(exprs, now)...));
             return std::any_of(results.begin(), results.end(), [](bool x) { return x; });
         }
-#endif // MLN_DRAWABLE_RENDERER
 
     protected:
         // gather dependencies for each type that can appear in this tuple
@@ -362,7 +360,6 @@ public:
             return v.getValue().getDependencies();
         }
 
-#if MLN_DRAWABLE_RENDERER
         template <typename P>
         bool updateGPUExpression(Unevaluated::GPUExpressions& exprs, TimePoint now) const {
             constexpr auto index = TypeIndex<P, Ps...>::value;
@@ -407,7 +404,6 @@ public:
                                         bool) {
             return false;
         }
-#endif // MLN_DRAWABLE_RENDERER
     };
 
     class Transitionable : public Tuple<TransitionableTypes> {
