@@ -512,6 +512,12 @@ MLN_EXPORT
 @property (nonatomic, assign) BOOL showsUserLocation;
 
 /**
+ A boolean value indicating whether the location indicator is drawn using the location
+ indicator layer or the location indication annotation.
+ */
+@property (nonatomic, assign) BOOL useLocationIndicatorLayer;
+
+/**
  A Boolean value indicating whether the map may request authorization to use location services.
 
  Setting this property to `YES` causes the map view to use the Core Location
