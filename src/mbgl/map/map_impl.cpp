@@ -63,10 +63,6 @@ Map::Impl::Impl(RendererFrontend& frontend_,
 }
 
 Map::Impl::~Impl() {
-    if (actionJournal) {
-        actionJournal->impl->onMapDestroy();
-    }
-
     // Explicitly reset the RendererFrontend first to ensure it releases
     // All shared resources (AnnotationManager)
     rendererFrontend.reset();

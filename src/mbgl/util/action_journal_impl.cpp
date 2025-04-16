@@ -202,7 +202,7 @@ void ActionJournal::Impl::onDidFinishLoadingMap() {
 }
 
 void ActionJournal::Impl::onDidFailLoadingMap(MapLoadError error, const std::string& errorStr) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this), errorStr = errorStr]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
         log(ActionJournalEvent("onDidFailLoadingMap", env)
                 .addEvent("error", errorStr)
                 .addEvent("code", static_cast<int>(error)));
@@ -240,7 +240,7 @@ void ActionJournal::Impl::onDidBecomeIdle() {
 }
 
 void ActionJournal::Impl::onStyleImageMissing(const std::string& id) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this), id = id]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
         log(ActionJournalEvent("onDidBecomeIdle", env).addEvent("id", id));
     });
 }
@@ -278,7 +278,7 @@ void ActionJournal::Impl::onShaderCompileFailed(shaders::BuiltIn id,
 }
 
 void ActionJournal::Impl::onGlyphsLoaded(const FontStack& fonts, const GlyphRange& range) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this), fonts = fonts, range = range]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
         log(ActionJournalEvent("onGlyphsLoaded", env)
                 .addEventStringArray("fonts", fonts)
                 .addEvent("rangeStart", range.first)
@@ -287,7 +287,7 @@ void ActionJournal::Impl::onGlyphsLoaded(const FontStack& fonts, const GlyphRang
 }
 
 void ActionJournal::Impl::onGlyphsError(const FontStack& fonts, const GlyphRange& range, std::exception_ptr error) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this), fonts = fonts, range = range, error = error]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
         ActionJournalEvent event("onGlyphsError", env);
 
         event.addEventStringArray("fonts", fonts);
@@ -307,7 +307,7 @@ void ActionJournal::Impl::onGlyphsError(const FontStack& fonts, const GlyphRange
 }
 
 void ActionJournal::Impl::onGlyphsRequested(const FontStack& fonts, const GlyphRange& range) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this), fonts = fonts, range = range]() {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
         log(ActionJournalEvent("onGlyphsRequested", env)
                 .addEventStringArray("fonts", fonts)
                 .addEvent("rangeStart", range.first)

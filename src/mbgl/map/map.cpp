@@ -51,7 +51,11 @@ Map::Map(RendererFrontend& frontend,
 Map::Map(std::unique_ptr<Impl> impl_)
     : impl(std::move(impl_)) {}
 
-Map::~Map() = default;
+Map::~Map() {
+    if (impl->actionJournal) {
+        impl->actionJournal->impl->onMapDestroy();
+    }
+}
 
 void Map::renderStill(StillImageCallback callback) {
     if (!callback) {
