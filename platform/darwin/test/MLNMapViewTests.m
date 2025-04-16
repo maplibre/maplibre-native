@@ -178,6 +178,10 @@ static MLNMapView *mapView;
     // Test getting style JSON
     NSString *styleJSON = mapView.styleJSON;
     XCTAssertNotNil(styleJSON, @"Style JSON should not be nil");
+    NSString * expectedJSON = @"{\"version\":8,\"sources\":{},\"layers\":[]}";
+    XCTAssertEqualObjects([self normalizeJSON:expectedJSON],
+                          [self normalizeJSON:styleJSON],
+                         @"Style JSON should be expected");
 
     // Verify the JSON is valid
     NSError *error = nil;
@@ -187,6 +191,21 @@ static MLNMapView *mapView;
     XCTAssertNil(error, @"Style JSON should be valid JSON");
     XCTAssertNotNil(jsonObject, @"Style JSON should parse to a valid object");
     XCTAssertTrue([jsonObject isKindOfClass:[NSDictionary class]], @"Style JSON should represent a dictionary");
+}
+
+- (void)testMapViewInitWithStyleJSON {
+    // Test setting style JSON
+    NSString *styleJSON = @"{\"version\": 8, \"sources\": { \"mapbox\": {\"type\": \"vector\", \"tiles\": [ \"local://tiles/{z}-{x}-{y}.mvt\" ] }}, \"layers\": [], \"metadata\": { \"test\": 1, \"type\": \"template\"}}";
+    MLNMapView* mapViewWithJSON = [[MLNMapView alloc] initWithFrame:CGRectMake(0, 0, 64, 64) styleJSON:styleJSON];
+
+    // Verify the style was updated
+    NSString *loadedStyleJSON = mapViewWithJSON.styleJSON;
+    XCTAssertEqualObjects([self normalizeJSON:loadedStyleJSON],
+                          [self normalizeJSON:styleJSON],
+                         @"Style JSON should match what was set");
+
+    XCTAssertNotNil(mapViewWithJSON.style);
+    XCTAssertNotNil(mapViewWithJSON.style.sources);
 }
 
 - (void)testUpdateStyleJSON {
@@ -207,9 +226,13 @@ static MLNMapView *mapView;
     XCTAssertNotNil(mapView.style.sources);
     // source "org.maplibre.annotations" is added by default
     XCTAssertEqual(mapView.style.sources.count, 2UL);
-    // Reset to style URL for other tests
-    NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"one-liner" withExtension:@"json"];
-    mapView.styleURL = styleURL;
+
+    // Test invalid JSON syntax
+    NSString *invalidJSON = @"{invalid json";
+    XCTAssertThrowsSpecificNamed(mapView.styleJSON = invalidJSON,
+                                NSException,
+                                NSInvalidArgumentException,
+                                @"Setting invalid JSON should throw an exception");
 }
 
 - (void)testStyleJSONAfterAddLayer {

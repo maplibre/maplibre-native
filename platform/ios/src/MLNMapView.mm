@@ -424,6 +424,7 @@ public:
 @property (nonatomic, copy) MLNMapCamera *residualCamera;
 @property (nonatomic) MLNMapDebugMaskOptions residualDebugMask;
 @property (nonatomic, copy) NSURL *residualStyleURL;
+@property (nonatomic, copy, nullable) NSString *initialStyleJSON;
 
 /// Tilt gesture recognizer helper
 @property (nonatomic, assign) CGPoint dragGestureMiddlePoint;
@@ -529,7 +530,9 @@ public:
         MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
         MLNLogDebug(@"Initializing frame: %@ styleJSON: %@", NSStringFromCGRect(frame), styleJSON);
         [self commonInit];
-        self.mbglMap.getStyle().loadJSON([styleJSON UTF8String]);
+        // Please don't call self.styleURL = nil, which load the default style
+        self.styleJSON = styleJSON;
+        _initialStyleJSON = [styleJSON copy];
         MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
     }
     return self;
@@ -565,6 +568,12 @@ public:
         return self.residualStyleURL;
     }
 
+    // If style was initialized with JSON, return nil
+    if (self.mbglMap.getStyle().getJSON().length() > 0 &&
+        self.mbglMap.getStyle().getURL().empty()) {
+        return nil;
+    }
+
     NSString *styleURLString = @(self.mbglMap.getStyle().getURL().c_str()).mgl_stringOrNilIfEmpty;
     MLNAssert(styleURLString, @"Invalid style URL string %@", styleURLString);
     return styleURLString ? [NSURL URLWithString:styleURLString] : nil;
@@ -587,12 +596,6 @@ public:
 }
 
 - (void)setStyleJSON:(NSString *)styleJSON {
-    if (!styleJSON) {
-        [NSException raise:NSInvalidArgumentException
-                    format:@"Style JSON cannot be nil."];
-        return;
-    }
-
     // Verify JSON is valid
     NSError *error = nil;
     id jsonObject = [NSJSONSerialization JSONObjectWithData:[styleJSON dataUsingEncoding:NSUTF8StringEncoding]
@@ -600,7 +603,7 @@ public:
                                                      error:&error];
     if (error || !jsonObject || ![jsonObject isKindOfClass:[NSDictionary class]]) {
         [NSException raise:NSInvalidArgumentException
-                    format:@"Invalid style JSON: %@", error.localizedDescription];
+                    format:@"Invalid style JSON object: %@", error.localizedDescription];
         return;
     }
 
@@ -930,7 +933,9 @@ public:
     self.terminated = YES;
     self.residualCamera = self.camera;
     self.residualDebugMask = self.debugMask;
-    self.residualStyleURL = self.styleURL;
+    if (!_initialStyleJSON) {
+        self.residualStyleURL = self.styleURL;
+    }
 
     // Tear down C++ objects, insuring worker threads correctly terminate.
     // Because of how _mbglMap is constructed, we need to destroy it first.
