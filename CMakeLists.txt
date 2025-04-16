@@ -1446,7 +1446,7 @@ include(${PROJECT_SOURCE_DIR}/vendor/boost.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/csscolorparser.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/earcut.hpp.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/eternal.cmake)
-include(${PROJECT_SOURCE_DIR}/vendor/mapbox-base.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/maplibre-native-base.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/parsedate.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/pmtiles.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/polylabel.cmake)
@@ -1465,11 +1465,11 @@ endif()
 target_link_libraries(
     mbgl-core
     PRIVATE
-        Mapbox::Base::Extras::kdbush.hpp
-        Mapbox::Base::supercluster.hpp
-        Mapbox::Base::shelf-pack-cpp
-        Mapbox::Base::geojson-vt-cpp
-        Mapbox::Base::cheap-ruler-cpp
+        MapLibreNative::Base::Extras::kdbush.hpp
+        MapLibreNative::Base::supercluster.hpp
+        MapLibreNative::Base::shelf-pack-cpp
+        MapLibreNative::Base::geojson-vt-cpp
+        MapLibreNative::Base::cheap-ruler-cpp
         mbgl-compiler-options
         mbgl-vendor-boost
         mbgl-vendor-earcut.hpp
@@ -1484,31 +1484,31 @@ target_link_libraries(
         $<$<BOOL:${MLN_WITH_METAL}>:mbgl-vendor-metal-cpp>
         $<IF:$<BOOL:${MLN_USE_RUST}>,mbgl-rustutils,mbgl-vendor-csscolorparser>
     PUBLIC
-        Mapbox::Base
-        Mapbox::Base::Extras::expected-lite
-        Mapbox::Base::Extras::rapidjson
-        Mapbox::Base::geojson.hpp
-        Mapbox::Base::geometry.hpp
-        Mapbox::Base::variant
+        MapLibreNative::Base
+        MapLibreNative::Base::Extras::expected-lite
+        MapLibreNative::Base::Extras::rapidjson
+        MapLibreNative::Base::geojson.hpp
+        MapLibreNative::Base::geometry.hpp
+        MapLibreNative::Base::variant
         $<$<BOOL:${MLN_USE_TRACY}>:TracyClient>
         unordered_dense
 )
 
 set(EXPORT_TARGETS
     mbgl-core
-    mapbox-base
-    mapbox-base-cheap-ruler-cpp
-    mapbox-base-extras-expected-lite
-    mapbox-base-extras-kdbush.hpp
-    mapbox-base-extras-rapidjson
-    mapbox-base-geojson-vt-cpp
-    mapbox-base-geojson.hpp
-    mapbox-base-geometry.hpp
-    mapbox-base-jni.hpp
-    mapbox-base-pixelmatch-cpp
-    mapbox-base-shelf-pack-cpp
-    mapbox-base-supercluster.hpp
-    mapbox-base-variant
+    maplibre-native-base
+    maplibre-native-base-cheap-ruler-cpp
+    maplibre-native-base-extras-expected-lite
+    maplibre-native-base-extras-kdbush.hpp
+    maplibre-native-base-extras-rapidjson
+    maplibre-native-base-geojson-vt-cpp
+    maplibre-native-base-geojson.hpp
+    maplibre-native-base-geometry.hpp
+    maplibre-native-base-jni.hpp
+    maplibre-native-base-pixelmatch-cpp
+    maplibre-native-base-shelf-pack-cpp
+    maplibre-native-base-supercluster.hpp
+    maplibre-native-base-variant
     mbgl-compiler-options
     mbgl-vendor-boost
     mbgl-vendor-earcut.hpp
