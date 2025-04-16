@@ -58,7 +58,7 @@ namespace mbgl {
 
 @implementation MLN<%- camelize(type) %>StyleLayer
 
-<% if (type == 'background') { -%>
+<% if (type == 'background' || type == "location-indicator") { -%>
 - (instancetype)initWithIdentifier:(NSString *)identifier
 {
     MLNLogDebug(@"Initializing %@ with identifier: %@", NSStringFromClass([self class]), identifier);
