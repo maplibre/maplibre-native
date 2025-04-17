@@ -54,6 +54,6 @@ cc_test(
     deps = [
         "render-test-srcs",
         "//platform/default:render-test-bin",
-        "//vendor:mapbox-base",
+        "//vendor:maplibre-native-base",
     ],
 )
