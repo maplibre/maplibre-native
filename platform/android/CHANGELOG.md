@@ -2,6 +2,12 @@
 
 ## main
 
+## 11.8.7
+
+### ✨ Features and improvements
+
+- Change Java Transfrom class from final to normal ([#3332](https://github.com/maplibre/maplibre-native/pull/3332)).
+
 ## 11.8.6
 
 ### ✨ Features and improvements
