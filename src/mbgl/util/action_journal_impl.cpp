@@ -241,7 +241,7 @@ void ActionJournal::Impl::onDidBecomeIdle() {
 
 void ActionJournal::Impl::onStyleImageMissing(const std::string& id) {
     scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
-        log(ActionJournalEvent("onDidBecomeIdle", env).addEvent("id", id));
+        log(ActionJournalEvent("onStyleImageMissing", env).addEvent("id", id));
     });
 }
 

@@ -8,9 +8,13 @@ namespace util {
 
 class ActionJournalOptions {
 public:
-    ActionJournalOptions(bool enable = false)
-        : enable_(enable) {}
+    ActionJournalOptions() = default;
     ~ActionJournalOptions() = default;
+
+    ActionJournalOptions& enable(bool value) {
+        enable_ = value;
+        return *this;
+    }
 
     bool enabled() const { return enable_; }
 

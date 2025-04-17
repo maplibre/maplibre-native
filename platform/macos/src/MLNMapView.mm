@@ -34,6 +34,7 @@
 #import <mbgl/storage/network_status.hpp>
 #import <mbgl/storage/resource_options.hpp>
 #import <mbgl/math/wrap.hpp>
+#include <mbgl/util/action_journal.hpp>
 #import <mbgl/util/client_options.hpp>
 #import <mbgl/util/constants.hpp>
 #import <mbgl/util/chrono.hpp>
@@ -59,6 +60,7 @@
 #import "MLNNetworkConfiguration_Private.h"
 #import "MLNLoggingConfiguration_Private.h"
 #import "MLNReachability.h"
+#import "MLNActionJournalOptions_Private.h"
 #import "MLNSettings_Private.h"
 
 #import <CoreImage/CIFilter.h>
@@ -308,7 +310,8 @@ public:
         resourceOptions.withApiKey([apiKey UTF8String]);
     }
 
-    _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions, clientOptions);
+    const mbgl::util::ActionJournalOptions& actionJournalOptions = [MLNSettings.actionJournalOptions getCoreOptions];
+    _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions, clientOptions, actionJournalOptions);
 
     // Notify map object when network reachability status changes.
     _reachability = [MLNReachability reachabilityForInternetConnection];
@@ -3188,6 +3191,33 @@ public:
         options |= mbgl::MapDebugOptions::DepthBuffer;
     }
     _mbglMap->setDebug(options);
+}
+
+- (NSArray<NSString*>*)getActionJournalLog
+{
+    const auto& actionJournal = _mbglMap->getActionJournal();
+    if (!actionJournal) {
+        return nil;
+    }
+
+    const auto& log = actionJournal->getLog();
+    NSMutableArray<NSString*>* objcLog = [NSMutableArray new];
+
+    for (const auto& event : log) {
+        [objcLog addObject:[NSString stringWithUTF8String:event.c_str()]];
+    }
+
+    return objcLog;
+}
+
+- (void)clearActionJournalLog
+{
+    const auto& actionJournal = _mbglMap->getActionJournal();
+    if (!actionJournal) {
+        return;
+    }
+
+    actionJournal->clearLog();
 }
 
 @end

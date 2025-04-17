@@ -2120,6 +2120,33 @@ vertically on the map.
  */
 @property (nonatomic) MLNMapDebugMaskOptions debugMask;
 
+/**
+ Get the action journal events from oldest to newest.
+
+ Each element contains a serialized json object with the event data.
+ Example
+ `{
+    "name" : "onTileAction",
+    "time" : "2025-04-17T13:13:13.974Z",
+    "styleName" : "Streets",
+    "styleURL" : "maptiler://maps/streets",
+    "event" : {
+        "action" : "RequestedFromNetwork",
+        "tileX" : 0,
+        "tileY" : 0,
+        "tileZ" : 0,
+        "overscaledZ" : 0,
+        "sourceID" : "openmaptiles"
+    }
+ }`
+ */
+- (NSArray<NSString *> *)getActionJournalLog;
+
+/**
+ Clear stored action journal events.
+ */
+- (void)clearActionJournalLog;
+
 - (MLNBackendResource *)backendResource;
 
 /**
