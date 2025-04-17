@@ -4092,8 +4092,9 @@ static void *windowScreenContext = &windowScreenContext;
     {
         CGPoint anchor = self.userLocationAnnotationViewCenter;
         self.mbglMap.easeTo(mbgl::CameraOptions()
-                                .withBearing(direction)
-                                .withAnchor(mbgl::ScreenCoordinate { anchor.x, anchor.y }),
+                            .withBearing(direction)
+                            .withCenter(MLNLatLngFromLocationCoordinate2D(self.userLocation.coordinate))
+                            .withAnchor(mbgl::ScreenCoordinate { anchor.x, anchor.y }),
                             MLNDurationFromTimeInterval(duration));
     }
 }
