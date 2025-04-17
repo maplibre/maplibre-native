@@ -880,6 +880,7 @@ void NativeMapView::setTransitionOptions(JNIEnv& env, const jni::Object<Transiti
     const mbgl::style::TransitionOptions transitionOptions(
         Duration(mbgl::Milliseconds(TransitionOptions::getDuration(env, options))),
         Duration(mbgl::Milliseconds(TransitionOptions::getDelay(env, options))),
+        util::DEFAULT_TRANSITION_EASE,
         TransitionOptions::isEnablePlacementTransitions(env, options));
     map->getStyle().setTransitionOptions(transitionOptions);
 }

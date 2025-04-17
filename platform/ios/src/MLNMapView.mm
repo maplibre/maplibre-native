@@ -24,7 +24,6 @@
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/string.hpp>
-#include <mbgl/util/projection.hpp>
 
 #import "Mapbox.h"
 #import "MLNShape_Private.h"
@@ -69,6 +68,7 @@
 #import "MLNReachability.h"
 #import "MLNSettings_Private.h"
 #import "MLNMapProjection.h"
+#import "MLNLocationIndicatorUserLocationAnnotationView.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -5955,7 +5955,7 @@ static void *windowScreenContext = &windowScreenContext;
             }
         }
 
-        self.userLocationAnnotationView = userLocationAnnotationView ?: [[MLNFaux3DUserLocationAnnotationView alloc] init];
+        self.userLocationAnnotationView = userLocationAnnotationView ?: self.useLocationIndicatorLayer ? [[MLNLocationIndicatorUserLocationAnnotationView alloc] init] : [[MLNFaux3DUserLocationAnnotationView alloc] init];
         self.userLocationAnnotationView.mapView = self;
         self.userLocationAnnotationView.userLocation = self.userLocation;
 
