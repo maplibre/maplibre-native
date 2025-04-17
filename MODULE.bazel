@@ -71,10 +71,10 @@ darwin_config(
 )
 
 bazel_dep(name = "rules_rust", version = "0.59.2")
-bazel_dep(name = "cxx.rs", version = "1.0.136")
+bazel_dep(name = "cxx.rs", version = "1.0.154")
 git_override(
     module_name = "cxx.rs",
-    commit = "dfb54b4a6b2c60de54431ae97c2014aee96c162c",
+    commit = "204d76f53ab2380dd9d532795781beb51c953520",  # 1.0.154
     remote = "https://github.com/dtolnay/cxx.git",
 )
 
