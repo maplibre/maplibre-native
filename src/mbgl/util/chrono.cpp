@@ -54,7 +54,7 @@ std::string iso8601(std::chrono::time_point<std::chrono::system_clock, Milliseco
     std::tm info;
     _gmtime(&time, &info);
 
-    auto ms =
+    long long ms =
         std::chrono::duration_cast<Milliseconds>(timestamp - std::chrono::system_clock::from_time_t(time)).count() %
         1000;
 

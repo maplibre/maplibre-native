@@ -79,7 +79,7 @@ public:
 
         for (const auto& elem : value) {
             rapidjson::Value elemJson(rapidjson::kStringType);
-            elemJson.SetString(elem.c_str(), elem.size());
+            elemJson.SetString(elem.c_str(), static_cast<rapidjson::SizeType>(elem.size()));
             arrayJson.PushBack(elemJson, json.GetAllocator());
         }
 

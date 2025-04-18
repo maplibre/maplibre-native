@@ -4,6 +4,7 @@ load("@rules_apple//apple:apple.bzl", "apple_static_xcframework", "apple_xcframe
 load("@rules_apple//apple:ios.bzl", "ios_application", "ios_framework")
 load("@rules_apple//apple:resources.bzl", "apple_resource_bundle")
 load("@rules_apple//apple:versioning.bzl", "apple_bundle_version")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load(
     "@rules_xcodeproj//xcodeproj:defs.bzl",
     "top_level_target",
@@ -109,7 +110,7 @@ apple_static_xcframework(
         ],
         "device": ["arm64"],
     },
-    minimum_os_versions = {"ios": "12.0"},
+    minimum_os_versions = {"ios": "13.0"},
     public_hdrs = public_hdrs,
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk"],
@@ -145,7 +146,7 @@ apple_xcframework(
         ],
         "device": ["arm64"],
     },
-    minimum_os_versions = {"ios": "12.0"},
+    minimum_os_versions = {"ios": "13.0"},
     public_hdrs = public_hdrs,
     version = ":maplibre_ios_version",
     visibility = ["//visibility:public"],
