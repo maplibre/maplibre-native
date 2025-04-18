@@ -548,8 +548,8 @@ MLN_EXPORT
  `-setUserLocationVerticalAlignment:animated:` method instead.
  */
 @property (nonatomic, assign) MLNAnnotationVerticalAlignment userLocationVerticalAlignment
-    __attribute__((deprecated("Use ``MLNMapViewDelegate/mapViewUserLocationAnchorPoint:`` instead.")
-                       ));
+    __attribute__((
+        deprecated("Use ``MLNMapViewDelegate/mapViewUserLocationAnchorPoint:`` instead.")));
 
 /**
  Sets the vertical alignment of the user location annotation within the

@@ -44,7 +44,8 @@ fi
 
 if ! command -v cxxbridge > /dev/null; then
     echo "Installing cxxbridge..."
-    cargo install cxxbridge-cmd
+    # Attention: v1.0.154 was the last one was not causing &str passing issues
+    cargo install cxxbridge-cmd@1.0.154 --locked
 fi
 
 

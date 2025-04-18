@@ -1,4 +1,5 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary")
+load("@rules_cc//cc:defs.bzl", "objc_library")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
 
 objc_library(
@@ -88,7 +89,6 @@ objc_library(
         "//platform/ios:ios_public_hdrs",
         "//platform/ios:ios_sdk_hdrs",
     ] + select({
-        "//:legacy_renderer": [],
         "//conditions:default": [
             "//platform/darwin:darwin_objcpp_custom_drawable_srcs",
         ],
@@ -288,7 +288,6 @@ objc_library(
     deps = [
         ":ios-sdk",
     ] + select({
-        "//:legacy_renderer": [],
         "//conditions:default": [
             ":app_custom_drawable_layer_objcpp_srcs",
         ],

@@ -17,7 +17,6 @@ import java.util.concurrent.TimeoutException
 /**
  * Integration test that validates downloading an offline region from a point geometry at zoomlevel 17
  */
-@Ignore("https://github.com/maplibre/maplibre-native/issues/2318")
 @RunWith(AndroidJUnit4ClassRunner::class)
 class OfflineDownloadTest : OfflineRegion.OfflineRegionObserver {
 
