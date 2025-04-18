@@ -513,7 +513,8 @@ void GeometryTile::setFeatureState(const LayerFeatureStates& states) {
         return;
     }
 
-    for (auto& layerIdToLayerRenderData = layoutResult->layerRenderData; auto&[layerID, renderData] : layerIdToLayerRenderData) {
+    for (auto& layerIdToLayerRenderData = layoutResult->layerRenderData;
+         auto& [layerID, renderData] : layerIdToLayerRenderData) {
         std::string sourceLayerId = renderData.layerProperties->baseImpl->sourceLayer;
         if (const auto sourceLayer = layers->getLayer(sourceLayerId)) {
             auto entry = states.find(sourceLayerId);
