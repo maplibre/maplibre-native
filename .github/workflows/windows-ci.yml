@@ -38,6 +38,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
 
       - name: Get all Windows files that have changed
         if: github.event_name != 'workflow_dispatch'
@@ -62,7 +63,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-          fetch-depth: 0
 
       - uses: ilammy/msvc-dev-cmd@v1
 
@@ -75,7 +75,7 @@ jobs:
 
       - name: Acquire/Build Maplibre Native Core Dependencies
         env:
-          CI: 1
+          CI: 1,
           VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
         timeout-minutes: 120
         run: |
@@ -122,6 +122,7 @@ jobs:
       - name: Configure MapLibre Native Core
         env:
           CI: 1
+          VCPKG_INSTALL_OPTIONS: "--debug"
           VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
 #          VCPKG_KEEP_ENV_VARS: "CMAKE_CXX_COMPILER_LAUNCHER;CMAKE_C_COMPILER_LAUNCHER"
           CMAKE_C_COMPILER_LAUNCHER: "${{ env.SCCACHE_PATH }}"
