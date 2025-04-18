@@ -8,6 +8,8 @@ bazel_dep(name = "rules_xcodeproj", version = "2.11.1")
 bazel_dep(name = "aspect_rules_js", version = "2.3.3")
 bazel_dep(name = "rules_nodejs", version = "6.3.4")
 bazel_dep(name = "libuv", version = "1.48.0")
+bazel_dep(name = "apple_support", version = "1.21.1", repo_name = "build_bazel_apple_support")
+bazel_dep(name = "rules_cc", version = "0.1.1")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node", dev_dependency = True)
 node.toolchain(node_version = "20.14.0")
@@ -58,8 +60,8 @@ new_git_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:git.bzl"
 
 new_git_repository(
     name = "tinyobjloader",
-    remote = "https://github.com/tinyobjloader/tinyobjloader.git",
     branch = "release",
+    remote = "https://github.com/tinyobjloader/tinyobjloader.git",
 )
 
 darwin_config = use_repo_rule("//platform/darwin:bazel/darwin_config_repository_rule.bzl", "darwin_config")
@@ -69,10 +71,10 @@ darwin_config(
 )
 
 bazel_dep(name = "rules_rust", version = "0.59.2")
-bazel_dep(name = "cxx.rs", version = "1.0.136")
+bazel_dep(name = "cxx.rs", version = "1.0.154")
 git_override(
     module_name = "cxx.rs",
-    commit = "dfb54b4a6b2c60de54431ae97c2014aee96c162c",
+    commit = "204d76f53ab2380dd9d532795781beb51c953520",  # 1.0.154
     remote = "https://github.com/dtolnay/cxx.git",
 )
 

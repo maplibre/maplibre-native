@@ -17,9 +17,7 @@
 
 #import "CustomStyleLayerExample.h"
 
-#if MLN_DRAWABLE_RENDERER
 #import "ExampleCustomDrawableStyleLayer.h"
-#endif
 
 #import "MBXFrameTimeGraphView.h"
 #import "MLNMapView_Experimental.h"
@@ -106,9 +104,7 @@ typedef NS_ENUM(NSInteger, MBXSettingsRuntimeStylingRows) {
     MBXSettingsRuntimeStylingDDSPolygon,
     MBXSettingsRuntimeStylingCustomLatLonGrid,
     MBXSettingsRuntimeStylingLineGradient,
-#if MLN_DRAWABLE_RENDERER
     MBXSettingsRuntimeStylingCustomDrawableLayer,
-#endif
     MBXSettingsRuntimeStylingAddFoursquarePOIsPMTiles
 };
 
@@ -461,9 +457,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 @"Dynamically Style Polygon",
                 @"Add Custom Lat/Lon Grid",
                 @"Style Route line with gradient",
-#if MLN_DRAWABLE_RENDERER
                 @"Add Custom Drawable Layer",
-#endif
                 @"Add FourSquare POIs PMTiles Layer"
             ]];
             break;
@@ -693,11 +687,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 case MBXSettingsRuntimeStylingLineGradient:
                     [self styleLineGradient];
                     break;
-#if MLN_DRAWABLE_RENDERER
                 case MBXSettingsRuntimeStylingCustomDrawableLayer:
                     [self addCustomDrawableLayer];
                     break;
-#endif
                 case MBXSettingsRuntimeStylingAddFoursquarePOIsPMTiles:
                     [self addFoursquarePOIsPMTilesLayer];
                     break;
@@ -1687,7 +1679,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.mapView.style addLayer:routeLayer];
 }
 
-#if MLN_DRAWABLE_RENDERER
 - (void)addCustomDrawableLayer
 {
     // Create a CustomLayer that uses the Drawable/Builder toolkit to generate and render geometry
@@ -1697,7 +1688,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         [self.mapView.style addLayer:layer];
     }
 }
-#endif
 
 - (void)removeSource:(NSString*)ident
 {
