@@ -109,14 +109,7 @@ jobs:
         with:
           path: source
           fetch-depth: 0
-
-      - name: Setup submodules
-        shell: bash
-        run: |
-          cd source
-          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
-          git submodule sync --recursive
-          git -c core.longpaths=true -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1 || true
+          submodules: true
 
       - name: Install test dependencies
         if: runner.os == 'Linux' && matrix.compiler != ''

@@ -266,8 +266,8 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
     CFArrayRef glyphRuns = CTLineGetGlyphRuns(*line);
     CTRunRef glyphRun = (CTRunRef)CFArrayGetValueAtIndex(glyphRuns, 0);
     CFRange wholeRunRange = CFRangeMake(0, CTRunGetGlyphCount(glyphRun));
-    CGSize advances[wholeRunRange.length];
-    CTRunGetAdvances(glyphRun, wholeRunRange, advances);
+    std::vector<CGSize> advances(wholeRunRange.length);
+    CTRunGetAdvances(glyphRun, wholeRunRange, advances.data());
     metrics.advance = std::round(advances[0].width);
 
     // Mimic glyph PBF metrics.

@@ -21,6 +21,7 @@ local.properties
 .cache
 compile_commands.json
 /build
+/build-*
 **/.idea
 **/.clwb
 /new_offline.db
@@ -34,6 +35,7 @@ compile_commands.json
 /platform/android/site
 node_modules
 .cxx
+.env
 
 # Node binaries.
 /lib
