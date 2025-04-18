@@ -34,7 +34,7 @@
 #import <mbgl/storage/network_status.hpp>
 #import <mbgl/storage/resource_options.hpp>
 #import <mbgl/math/wrap.hpp>
-#include <mbgl/util/action_journal.hpp>
+#import <mbgl/util/action_journal.hpp>
 #import <mbgl/util/client_options.hpp>
 #import <mbgl/util/constants.hpp>
 #import <mbgl/util/chrono.hpp>
