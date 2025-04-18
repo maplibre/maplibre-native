@@ -193,7 +193,7 @@ public class MapLibreMapOptions implements Parcelable {
                                                  @NonNull Context context,
                                                  @Nullable TypedArray typedArray) {
     float pxlRatio = context.getResources().getDisplayMetrics().density;
-    maplibreMapOptions.actionJournalPath(FileSource.getResourcesCachePath(context));
+    maplibreMapOptions.actionJournalPath(context.getFilesDir().getAbsolutePath());
 
     try {
       maplibreMapOptions.camera(new CameraPosition.Builder(typedArray).build());
