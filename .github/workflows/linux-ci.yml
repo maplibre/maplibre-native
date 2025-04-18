@@ -82,7 +82,7 @@ jobs:
       - if: matrix.renderer == 'drawable-rust'
         run: |
           echo "renderer_flag_cmake=DMLN_WITH_OPENGL=ON -DMLN_USE_RUST=ON" >> "$GITHUB_ENV"
-          cargo install cxxbridge-cmd --version 1.0.154 --locked
+          cargo install cxxbridge-cmd --version 1.0.157 --locked
 
       - if: matrix.renderer == 'drawable'
         run: |
