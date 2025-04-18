@@ -3,6 +3,7 @@ package org.maplibre.android.testapp.activity.events
 import android.app.ActivityManager
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.MapLibre
@@ -38,7 +39,7 @@ class ObserverActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_map_simple)
+        setContentView(R.layout.activity_map_events)
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.addOnPreCompileShaderListener(this)
@@ -50,8 +51,17 @@ class ObserverActivity : AppCompatActivity(),
         mapView.addOnSpriteRequestedListener(this)
         mapView.getMapAsync {
             it.setStyle(
-                Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
+                Style.Builder().fromUri("https://demotiles.maplibre.org/style.json")
             )
+        }
+
+        // print and clear action journal
+        val fab = findViewById<View>(R.id.fab)
+        fab?.setOnClickListener { _: View? ->
+            mapView.getMapAsync {
+                Logger.i(TAG,"ActionJournal : \n${it.actionJournalLog.joinToString("\n")}")
+                it.clearActionJournalLog()
+            }
         }
     }
 

@@ -17,6 +17,11 @@
     <public name="maplibre_cross_source_collisions" type="attr" />
     <public name="maplibre_pixelRatio"  type="float" />
 
+    <!--Action Journal-->
+    <public name="maplibre_actionJournalEnabled" type="attr"/>
+    <public name="maplibre_actionJournalLogFileSize" type="attr"/>
+    <public name="maplibre_actionJournalLogFileCount" type="attr"/>
+
     <!--Camera-->
     <public name="maplibre_cameraTargetLng" type="attr" />
     <public name="maplibre_cameraTargetLat" type="attr" />

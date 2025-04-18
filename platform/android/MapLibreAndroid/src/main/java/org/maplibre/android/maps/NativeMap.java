@@ -221,6 +221,10 @@ interface NativeMap {
 
   boolean getDebug();
 
+  String[] getActionJournalLog();
+
+  void clearActionJournalLog();
+
   void setReachability(boolean status);
 
   void setApiBaseUrl(String baseUrl);

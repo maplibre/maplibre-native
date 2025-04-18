@@ -34,6 +34,7 @@
 #include "map_renderer_runnable.hpp"
 #include "maplibre.hpp"
 #include "native_map_view.hpp"
+#include "native_map_options.hpp"
 #include "util/tile_server_options.hpp"
 #ifndef MBGL_MODULE_OFFLINE_DISABLE
 #include "offline/offline_manager.hpp"
@@ -109,6 +110,7 @@ void registerNatives(JavaVM* vm) {
     MapRenderer::registerNative(env);
     MapRendererRunnable::registerNative(env);
     NativeMapView::registerNative(env);
+    NativeMapOptions::registerNative(env);
 
     // Http
     RegisterNativeHTTPRequest(env);
