@@ -21,7 +21,6 @@ import androidx.core.content.res.ResourcesCompat;
 import org.maplibre.android.R;
 import org.maplibre.android.camera.CameraPosition;
 import org.maplibre.android.constants.MapLibreConstants;
-import org.maplibre.android.storage.FileSource;
 import org.maplibre.android.utils.BitmapUtils;
 import org.maplibre.android.utils.FontUtils;
 
