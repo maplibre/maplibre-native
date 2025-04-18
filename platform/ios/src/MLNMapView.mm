@@ -4066,10 +4066,10 @@ static void *windowScreenContext = &windowScreenContext;
         self.userTrackingMode = MLNUserTrackingModeFollow;
     }
 
-    [self _setDirection:direction animated:animated];
+    [self _setDirection:direction shouldCenter:NO animated:animated];
 }
 
-- (void)_setDirection:(CLLocationDirection)direction animated:(BOOL)animated
+- (void)_setDirection:(CLLocationDirection)direction shouldCenter:(BOOL)shouldCenter animated:(BOOL)animated
 {
     if (!_mbglMap)
     {
@@ -4091,11 +4091,27 @@ static void *windowScreenContext = &windowScreenContext;
     else
     {
         CGPoint anchor = self.userLocationAnnotationViewCenter;
-        self.mbglMap.easeTo(mbgl::CameraOptions()
-                            .withBearing(direction)
-                            .withCenter(MLNLatLngFromLocationCoordinate2D(self.userLocation.coordinate))
-                            .withAnchor(mbgl::ScreenCoordinate { anchor.x, anchor.y }),
-                            MLNDurationFromTimeInterval(duration));
+        CLLocationCoordinate2D center = self.userLocation.coordinate;
+        
+        mbgl::CameraOptions cameraOptions = mbgl::CameraOptions()
+            .withBearing(direction)
+            .withAnchor(mbgl::ScreenCoordinate { anchor.x, anchor.y });
+        
+        mbgl::AnimationOptions animationOptions;
+        animationOptions.duration.emplace(MLNDurationFromTimeInterval(duration));
+        
+        if (shouldCenter && CLLocationCoordinate2DIsValid(center))
+        {
+            cameraOptions.center = MLNLatLngFromLocationCoordinate2D(center);
+            
+            if (duration)
+            {
+                CAMediaTimingFunction *function = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
+                animationOptions.easing.emplace(MLNUnitBezierForMediaTimingFunction(function));
+            }
+        }
+        
+        self.mbglMap.easeTo(cameraOptions, animationOptions);
     }
 }
 
@@ -6429,7 +6445,7 @@ static void *windowScreenContext = &windowScreenContext;
         if (headingDirection >= 0 && self.userTrackingMode == MLNUserTrackingModeFollowWithHeading
             && self.userTrackingState != MLNUserTrackingStateBegan)
         {
-            [self _setDirection:headingDirection animated:YES];
+            [self _setDirection:headingDirection shouldCenter:YES animated:YES];
             [self updateUserLocationAnnotationView];
         }
     });
