@@ -4092,25 +4092,25 @@ static void *windowScreenContext = &windowScreenContext;
     {
         CGPoint anchor = self.userLocationAnnotationViewCenter;
         CLLocationCoordinate2D center = self.userLocation.coordinate;
-        
+
         mbgl::CameraOptions cameraOptions = mbgl::CameraOptions()
             .withBearing(direction)
             .withAnchor(mbgl::ScreenCoordinate { anchor.x, anchor.y });
-        
+
         mbgl::AnimationOptions animationOptions;
         animationOptions.duration.emplace(MLNDurationFromTimeInterval(duration));
-        
+
         if (shouldCenter && CLLocationCoordinate2DIsValid(center))
         {
             cameraOptions.center = MLNLatLngFromLocationCoordinate2D(center);
-            
+
             if (duration)
             {
                 CAMediaTimingFunction *function = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
                 animationOptions.easing.emplace(MLNUnitBezierForMediaTimingFunction(function));
             }
         }
-        
+
         self.mbglMap.easeTo(cameraOptions, animationOptions);
     }
 }
