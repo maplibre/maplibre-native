@@ -127,6 +127,7 @@ const GeometryCollection& VectorMLTTileFeature::getGeometries() const {
                 lines.emplace(geom.getRings().size() + 1);
                 lines->front() = convert(geom.getShell());
                 std::ranges::transform(geom.getRings(), std::next(lines->begin()), convert);
+                lines->setTriangles(geometry.triangles);
                 break;
             }
             case GeometryType::MULTILINESTRING: {
@@ -142,6 +143,7 @@ const GeometryCollection& VectorMLTTileFeature::getGeometries() const {
                 lines->reserve(1 + polygons[index].second.size());
                 lines->push_back(convert(polygons[index].first));
                 std::ranges::transform(polygons[index].second, std::back_inserter(*lines), convert);
+                lines->setTriangles(geometry.triangles);
                 break;
             }
             default:

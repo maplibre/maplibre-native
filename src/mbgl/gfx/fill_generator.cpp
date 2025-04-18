@@ -220,7 +220,10 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
             lineGenerator.generate(ring, lineOptions);
         }
 
-        std::vector<uint32_t> indices = mapbox::earcut(polygon);
+        // tessellate, if no triangles are provided
+        std::vector<uint32_t> indices;
+        indices = geometry.triangles.empty() ? mapbox::earcut(polygon) : geometry.triangles;
+
         addFillIndices(fillSegments, fillIndexes, indices, startVertices, totalVertices);
     }
 }

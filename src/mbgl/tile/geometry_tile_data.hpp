@@ -44,6 +44,11 @@ public:
 
     GeometryCollection clone() const { return GeometryCollection(*this); }
 
+    std::vector<std::uint32_t> triangles;
+    void setTriangles(std::vector<std::uint32_t> triangles_) {
+        triangles = std::move(triangles_);
+    }
+
 private:
     GeometryCollection(const GeometryCollection&) = default;
 };
