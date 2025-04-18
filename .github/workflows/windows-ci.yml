@@ -77,7 +77,7 @@ jobs:
         env:
           CI: 1
           VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
-        timeout-minutes: 60
+        timeout-minutes: 120
         run: |
           & ${{ github.workspace }}\platform\windows\Get-VendorPackages.ps1 -Triplet ${{ env.VSCMD_ARG_TGT_ARCH }}-windows -Renderer All
 
@@ -127,7 +127,7 @@ jobs:
           CMAKE_C_COMPILER_LAUNCHER: "${{ env.SCCACHE_PATH }}"
           CMAKE_CXX_COMPILER_LAUNCHER: "${{ env.SCCACHE_PATH }}"
           RENDERER: "${{ matrix.renderer }}"
-        timeout-minutes: 60
+        timeout-minutes: 120
         run: |
           cmake --version
           & ${{ github.workspace }}\.github\scripts\windows-ci_configure_wrapper.ps1
