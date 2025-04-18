@@ -14,6 +14,7 @@ static MLNMapView *mapView;
 
 @implementation MLNMapViewTests {
     XCTestExpectation *_styleLoadingExpectation;
+    XCTestExpectation *_styleLoadErrorExpectation;
 }
 
 - (void)setUp {
@@ -41,6 +42,14 @@ static MLNMapView *mapView;
     XCTAssertEqual(mapView.style, style);
 
     [_styleLoadingExpectation fulfill];
+}
+
+- (void)mapViewDidFailLoadingMap:(MLNMapView *)mapView withError:(NSError *)error {
+    XCTAssertNotNil(error);
+    XCTAssertEqual(error.domain, MLNErrorDomain);
+    if (error.code == MLNErrorCodeLoadStyleFailed || error.code == MLNErrorCodeParseStyleFailed) {
+        [_styleLoadErrorExpectation fulfill];
+    }
 }
 
 - (void)testCoordinateBoundsConversion {
@@ -209,8 +218,8 @@ static MLNMapView *mapView;
 }
 
 - (void)testUpdateStyleJSON {
-    // Reset style loading expectation before setting new style
     _styleLoadingExpectation = nil;
+    _styleLoadErrorExpectation = [self expectationWithDescription:@"Style should load error"];
 
     // Test setting style JSON
     NSString *newStyleJSON = @"{\"version\": 8, \"sources\": { \"mapbox\": {\"type\": \"vector\", \"tiles\": [ \"local://tiles/{z}-{x}-{y}.mvt\" ] }}, \"layers\": [], \"metadata\": { \"test\": 1, \"type\": \"template\"}}";
@@ -229,10 +238,8 @@ static MLNMapView *mapView;
 
     // Test invalid JSON syntax
     NSString *invalidJSON = @"{invalid json";
-    XCTAssertThrowsSpecificNamed(mapView.styleJSON = invalidJSON,
-                                NSException,
-                                NSInvalidArgumentException,
-                                @"Setting invalid JSON should throw an exception");
+    mapView.styleJSON = invalidJSON;
+    [self waitForExpectations:@[_styleLoadErrorExpectation] timeout:10];
 }
 
 - (void)testStyleJSONAfterAddLayer {

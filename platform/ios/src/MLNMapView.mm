@@ -596,17 +596,6 @@ public:
 }
 
 - (void)setStyleJSON:(NSString *)styleJSON {
-    // Verify JSON is valid
-    NSError *error = nil;
-    id jsonObject = [NSJSONSerialization JSONObjectWithData:[styleJSON dataUsingEncoding:NSUTF8StringEncoding]
-                                                   options:0
-                                                     error:&error];
-    if (error || !jsonObject || ![jsonObject isKindOfClass:[NSDictionary class]]) {
-        [NSException raise:NSInvalidArgumentException
-                    format:@"Invalid style JSON object: %@", error.localizedDescription];
-        return;
-    }
-
     // Reset style and load new JSON
     self.style = nil;
     self.mbglMap.getStyle().loadJSON([styleJSON UTF8String]);
