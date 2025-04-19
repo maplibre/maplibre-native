@@ -518,6 +518,11 @@ MLN_EXPORT
 @property (nonatomic, assign) BOOL useLocationIndicatorLayer;
 
 /**
+ A boolean value indicating whether the camera follows the puck during gesture handling
+ */
+@property (nonatomic, assign) BOOL followLocationIndicatorDuringGesture;
+
+/**
  A Boolean value indicating whether the map may request authorization to use location services.
 
  Setting this property to `YES` causes the map view to use the Core Location
