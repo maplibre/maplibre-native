@@ -35,6 +35,7 @@ if(-not (Test-Path ('{0}\vcpkg.exe' -f $vcpkg_temp_dir)))
 
 & ('{0}\vcpkg.exe' -f $vcpkg_temp_dir) $(
     @(
+        '--debug',
         '--disable-metrics',
         ('--overlay-triplets={0}' -f [System.IO.Path]::Combine($PWD.Path, 'vendor', 'vcpkg-custom-triplets')),
         ('--triplet={0}' -f $Triplet),
