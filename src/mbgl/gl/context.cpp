@@ -102,6 +102,10 @@ Context::~Context() noexcept {
     if (cleanupOnDestruction) {
         backend.getThreadPool().runRenderJobs(true /* closeQueue */);
 
+#if MLN_DRAWABLE_RENDERER
+        globalUniformBuffers = {};
+#endif
+
         reset();
 
         // Delete all pooled resources while the context is still valid
@@ -606,7 +610,7 @@ gfx::UniformBufferPtr Context::createUniformBuffer(const void* data,
                                                    bool /*ssbo*/) {
     MLN_TRACE_FUNC();
 
-    return std::make_shared<gl::UniformBufferGL>(data, size, *uboAllocator);
+    return std::make_shared<gl::UniformBufferGL>(*this, data, size, *uboAllocator);
 }
 
 gfx::UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
@@ -692,6 +696,7 @@ void Context::clear(std::optional<mbgl::Color> color, std::optional<float> depth
     MBGL_CHECK_ERROR(glClear(mask));
 
     stats.numDrawCalls = 0;
+    stats.numFrames++;
 }
 
 void Context::setCullFaceMode(const gfx::CullFaceMode& mode) {
@@ -798,6 +803,7 @@ void Context::draw(const gfx::DrawMode& drawMode, std::size_t indexOffset, std::
                                     reinterpret_cast<GLvoid*>(sizeof(uint16_t) * indexOffset)));
 
     stats.numDrawCalls++;
+    stats.totalDrawCalls++;
 }
 
 void Context::performCleanup() {

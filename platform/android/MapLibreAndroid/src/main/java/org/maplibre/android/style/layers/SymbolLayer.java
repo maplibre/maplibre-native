@@ -650,6 +650,18 @@ public class SymbolLayer extends Layer {
   }
 
   /**
+   * Get the SymbolScreenSpace property
+   *
+   * @return property wrapper value around Boolean
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Boolean> getSymbolScreenSpace() {
+    checkThread();
+    return (PropertyValue<Boolean>) new PropertyValue("symbol-screen-space", nativeGetSymbolScreenSpace());
+  }
+
+  /**
    * Get the IconOpacity property
    *
    * @return property wrapper value around Float
@@ -1304,6 +1316,10 @@ public class SymbolLayer extends Layer {
   @NonNull
   @Keep
   private native Object nativeGetTextOptional();
+
+  @NonNull
+  @Keep
+  private native Object nativeGetSymbolScreenSpace();
 
   @NonNull
   @Keep
