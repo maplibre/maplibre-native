@@ -7,6 +7,43 @@
 
 
         <!-- Custom HTML head -->
+        <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.6.0/+esm';
+        
+        const darkThemes = ['ayu', 'navy', 'coal'];
+        const lightThemes = ['light', 'rust'];
+        
+        const classList = document.getElementsByTagName('html')[0].classList;
+        
+        let lastThemeWasLight = true;
+        for (const cssClass of classList) {
+            if (darkThemes.includes(cssClass)) {
+                lastThemeWasLight = false;
+                break;
+            }
+        }
+        
+        const theme = lastThemeWasLight ? 'default' : 'dark';
+        mermaid.initialize({ startOnLoad: true, theme });
+        
+        // Simplest way to make mermaid re-render the diagrams in the new theme is via refreshing the page
+        
+        for (const darkTheme of darkThemes) {
+            document.getElementById(darkTheme).addEventListener('click', () => {
+                if (lastThemeWasLight) {
+                    window.location.reload();
+                }
+            });
+        }
+        
+        for (const lightTheme of lightThemes) {
+            document.getElementById(lightTheme).addEventListener('click', () => {
+                if (!lastThemeWasLight) {
+                    window.location.reload();
+                }
+            });
+        }
+        </script>
 
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -224,8 +261,36 @@
 
 </style>
 <h1 id="ten-thousand-foot-view"><a class="header" href="#ten-thousand-foot-view">Ten Thousand Foot View</a></h1>
-<p><img src="media/ten-thousand-foot-view-diagram.png" alt="" />
-<em>Figure 1: MapLibre Native Components – Ten Thousand Foot view</em></p>
+<pre class="mermaid">graph TD
+    subgraph Platform
+        MV[Map View]
+        MR[Map Renderer]
+    end
+
+    subgraph &quot;MapLibre Native Core&quot;
+        M[Map]
+        S[Style]
+        L[Layers]
+        I[Images]
+        Glyphs
+        R[Renderer]
+        TW[TileWorker]
+    end
+
+    %% Platform Interactions
+    MV -- initializes --&gt; MR
+    MV -- Initializes --&gt; M
+
+    %% Core Interactions
+    MR -- runs the rendering loop --&gt; R
+    R -- Renders Map --&gt; M
+    L -- Fetches --&gt; S
+    L -- Fetches --&gt; I
+    R -- Sends messages to generate tiles --&gt; TW
+    TW -- Prepares layers to be rendered --&gt; L
+    L -- Fetches --&gt; Glyphs
+</pre>
+<p><em>Figure 1: MapLibre Native Components – Ten Thousand Foot view</em></p>
 <p>From ten thousand foot, MapLibre Native is composed of <em>Map View</em> and a
 <em>Renderer</em>. MapLibre Native supports iOS, Android, Linux, QT, MacOS,
 and nodeJS at the time of writing. Each of these <em>platforms</em> have their
