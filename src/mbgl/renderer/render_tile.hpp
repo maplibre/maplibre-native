@@ -4,7 +4,7 @@
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/mat4.hpp>
-#include <mbgl/renderer/image_atlas.hpp>
+#include <mbgl/style/image_impl.hpp>
 #include <mbgl/style/layer_impl.hpp>
 #include <mbgl/style/types.hpp>
 
@@ -59,12 +59,6 @@ public:
     Bucket* getBucket(const style::Layer::Impl&) const;
     const LayerRenderData* getLayerRenderData(const style::Layer::Impl&) const;
     std::optional<ImagePosition> getPattern(const std::string& pattern) const;
-
-    bool hasGlyphAtlasTexture() const;
-    const gfx::Texture2DPtr& getGlyphAtlasTexture() const;
-
-    bool hasIconAtlasTexture() const;
-    const gfx::Texture2DPtr& getIconAtlasTexture() const;
 
     const std::shared_ptr<TileAtlasTextures>& getAtlasTextures() const;
 

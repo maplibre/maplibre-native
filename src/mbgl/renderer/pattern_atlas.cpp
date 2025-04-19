@@ -65,7 +65,9 @@ std::optional<ImagePosition> PatternAtlas::addPattern(const style::Image::Impl& 
 
     dirty = true;
 
-    return patterns.emplace(image.id, Pattern{.bin = bin, .position = {*bin, image}}).first->second.position;
+    return patterns
+        .emplace(image.id, Pattern{.bin = bin, .position = {Rect<uint16_t>(bin->x, bin->y, bin->w, bin->h), image}})
+        .first->second.position;
 }
 
 void PatternAtlas::removePattern(const std::string& id) {

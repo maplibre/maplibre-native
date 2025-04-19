@@ -14,6 +14,7 @@
 #include <mbgl/annotation/annotation_manager.hpp>
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/text/glyph_manager.hpp>
+#include <mbgl/gfx/dynamic_texture_atlas.hpp>
 
 #include <memory>
 
@@ -31,6 +32,7 @@ public:
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
     TileParameters tileParameters;
     style::Style style;
+    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
 
     CustomTileTest()
         : tileParameters{1.0,
@@ -42,7 +44,8 @@ public:
                          imageManager,
                          glyphManager,
                          0,
-                         {Scheduler::GetBackground(), uniqueID}},
+                         {Scheduler::GetBackground(), uniqueID},
+                         dynamicTextureAtlas},
           style{fileSource, 1, tileParameters.threadPool} {}
 };
 
