@@ -1270,6 +1270,17 @@ around the returned camera object if it were set as the receiver’s camera.
  */
 @property (nonatomic) MLNMapDebugMaskOptions debugMask;
 
+/**
+ Get the action journal events from oldest to newest.
+ Each element contains a serialized json object with the event data.
+ */
+- (NSArray<NSString *> *)getActionJournalLog;
+
+/**
+ Clear stored action journal events.
+ */
+- (void)clearActionJournalLog;
+
 @end
 
 NS_ASSUME_NONNULL_END

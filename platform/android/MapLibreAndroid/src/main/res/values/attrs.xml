@@ -12,6 +12,11 @@
         <attr name="maplibre_localIdeographFontFamilies" format="reference"/>
         <attr name="maplibre_cross_source_collisions" format="boolean"/>
 
+        <!--Action Journal-->
+        <attr name="maplibre_actionJournalEnabled" format="boolean"/>
+        <attr name="maplibre_actionJournalLogFileSize" format="integer"/>
+        <attr name="maplibre_actionJournalLogFileCount" format="integer"/>
+
         <!--Camera-->
         <attr name="maplibre_cameraTargetLat" format="float"/>
         <attr name="maplibre_cameraTargetLng" format="float"/>

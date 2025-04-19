@@ -15,6 +15,7 @@
 #include <mbgl/style/layers/custom_layer.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/math/wrap.hpp>
+#include <mbgl/util/action_journal.hpp>
 #include <mbgl/util/client_options.hpp>
 #include <mbgl/util/exception.hpp>
 #include <mbgl/util/geo.hpp>
@@ -68,6 +69,7 @@
 #import "MLNNetworkConfiguration_Private.h"
 #import "MLNReachability.h"
 #import "MLNSettings_Private.h"
+#import "MLNActionJournalOptions_Private.h"
 #import "MLNMapProjection.h"
 
 #include <algorithm>
@@ -653,8 +655,11 @@ public:
         resourceOptions.withApiKey([apiKey UTF8String]);
     }
 
+    const mbgl::util::ActionJournalOptions& actionJournalOptions = [MLNSettings.actionJournalOptions getCoreOptions];
+
     NSAssert(!_mbglMap, @"_mbglMap should be NULL");
-    _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions, clientOptions);
+    _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions,
+                                           resourceOptions, clientOptions, actionJournalOptions);
 
     // start paused if launch into the background
     if (background) {
@@ -7470,6 +7475,33 @@ static void *windowScreenContext = &windowScreenContext;
 - (void)triggerRepaint
 {
     _mbglMap->triggerRepaint();
+}
+
+- (NSArray<NSString*>*)getActionJournalLog
+{
+    const auto& actionJournal = _mbglMap->getActionJournal();
+    if (!actionJournal) {
+        return nil;
+    }
+
+    const auto& log = actionJournal->getLog();
+    NSMutableArray<NSString*>* objcLog = [NSMutableArray new];
+
+    for (const auto& event : log) {
+        [objcLog addObject:[NSString stringWithUTF8String:event.c_str()]];
+    }
+
+    return objcLog;
+}
+
+- (void)clearActionJournalLog
+{
+    const auto& actionJournal = _mbglMap->getActionJournal();
+    if (!actionJournal) {
+        return;
+    }
+
+    actionJournal->clearLog();
 }
 
 - (MLNBackendResource *)backendResource {
