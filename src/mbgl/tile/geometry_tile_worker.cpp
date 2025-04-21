@@ -501,7 +501,7 @@ void GeometryTileWorker::finalizeLayout() {
     gfx::ImageAtlas imageAtlas;
     gfx::GlyphAtlas glyphAtlas;
     if (dynamicTextureAtlas) {
-        dynamicTextureAtlas->uploadIconsAndPatterns(iconMap, patternMap, versionMap);
+        imageAtlas = dynamicTextureAtlas->uploadIconsAndPatterns(iconMap, patternMap, versionMap);
     }
     if (!layouts.empty()) {
         if (dynamicTextureAtlas) {
