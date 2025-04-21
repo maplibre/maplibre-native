@@ -14,7 +14,7 @@ crate-type = ["staticlib"]
 
 [dependencies]
 csscolorparser = "0.7.0"
-cxx = "1"
+cxx = "1.0.157"
 
 [profile.release]
 lto = true

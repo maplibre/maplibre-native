@@ -71,10 +71,12 @@ darwin_config(
 )
 
 bazel_dep(name = "rules_rust", version = "0.59.2")
-bazel_dep(name = "cxx.rs", version = "1.0.136")
+bazel_dep(name = "cxx.rs", version = "1.0.157")
+# The registry is not always up to date
+# See https://registry.bazel.build/modules/cxx.rs
 git_override(
     module_name = "cxx.rs",
-    commit = "dfb54b4a6b2c60de54431ae97c2014aee96c162c",
+    tag = "1.0.157",
     remote = "https://github.com/dtolnay/cxx.git",
 )
 
