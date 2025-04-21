@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Tests - MapLibre Native Developer Documentation</title>
+        <title>Release - MapLibre Native Developer Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -49,34 +49,34 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="../favicon.svg">
-        <link rel="shortcut icon" href="../favicon.png">
-        <link rel="stylesheet" href="../css/variables.css">
-        <link rel="stylesheet" href="../css/general.css">
-        <link rel="stylesheet" href="../css/chrome.css">
-        <link rel="stylesheet" href="../css/print.css" media="print">
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
-        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
-        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
-        <link rel="stylesheet" href="../diff.css">
+        <link rel="stylesheet" href="../../diff.css">
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "../";
+            const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc.js"></script>
+        <script src="../../toc.js"></script>
     </head>
     <body>
     <div id="body-container">
@@ -129,7 +129,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
             </noscript>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -164,7 +164,7 @@
                     <h1 class="menu-title">MapLibre Native Developer Documentation</h1>
 
                     <div class="right-buttons">
-                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
 
@@ -260,31 +260,44 @@
 }
 
 </style>
-<h1 id="ios-tests"><a class="header" href="#ios-tests">iOS Tests</a></h1>
-<h2 id="ios-unit-tests"><a class="header" href="#ios-unit-tests">iOS Unit Tests</a></h2>
-<p>To run the iOS unit tests via XCTest, run tests for the <code>ios_test</code> target in Xcode
-or use the following bazel command:</p>
-<pre><code>bazel test //platform/ios/test:ios_test --test_output=errors --//:renderer=metal
+<h1 id="release-maplibre-ios"><a class="header" href="#release-maplibre-ios">Release MapLibre iOS</a></h1>
+<p>We make iOS releases to GitHub (a downloadable XCFramework), the <a href="https://swiftpackageindex.com/maplibre/maplibre-gl-native-distribution">Swift Package Index</a> and <a href="https://cocoapods.org/">CocoaPods</a>. Everyone with write access to the repository is able to make releases using the instructions below.</p>
+<p>Also see the current <a href="../release-policy.html">release policy</a>.</p>
+<h2 id="making-a-release"><a class="header" href="#making-a-release">Making a release</a></h2>
+<ol>
+<li>
+<p>Prepare a PR, see <a href="https://github.com/maplibre/maplibre-native/pull/3193">this PR</a> as an example.</p>
+<ul>
+<li>Update the <a href="https://github.com/maplibre/maplibre-native/blob/main/platform/ios/CHANGELOG.md">changelog</a>. The changelog should contain links to all relevant PRs for iOS since the last release. You can use the script below with a <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens">GitHub access token</a> with the <code>public_repo</code> scope. You will need to filter out PRs that do not relate to iOS.
+<pre><code>GITHUB_ACCESS_TOKEN=... node scripts/generate-changelog.mjs ios
 </code></pre>
-<h2 id="render-tests"><a class="header" href="#render-tests">Render Tests</a></h2>
-<p>To run the render tests, run the <code>RenderTest</code> target from iOS.</p>
-<p>When running in a simulator, use</p>
-<pre><code># check for 'DataContainer' of the app with `*.maplibre.RenderTestApp` id
-xcrun simctl listapps booted
+The heading in the changelog must match <code>## &lt;VERSION&gt;</code> exactly, or it will not be picked up. For example, for version 6.0.0:
+<pre><code class="language-md">## 6.0.0
 </code></pre>
-<p>to get the data directory of the render test app. This allows you to inspect test results. When adding new tests, the generated expectations and <code>actual.png</code> file can be copied into the source directory from here.</p>
-<h2 id="c-unit-tests"><a class="header" href="#c-unit-tests">C++ Unit Tests</a></h2>
-<p>Run the tests from the <code>CppUnitTests</code> target in Xcode to run the C++ Unit Tests on iOS.</p>
+</li>
+<li>Update the <code>VERSION</code> file in <code>platform/ios/VERSION</code> with the version to be released. We use <a href="https://semver.org/">semantic versioning</a>, so any breaking changes require a major version bump. Use a minor version bump when functionality has been added in a backward compatible manner, and a patch version bump when the release contains only backward compatible bug fixes.</li>
+</ul>
+</li>
+<li>
+<p>Once the PR is merged the <code>ios-ci.yml</code> workflow will detect that the <code>VERSION</code> file is changed, and a release will be made automatically.</p>
+</li>
+</ol>
+<h2 id="pre-release"><a class="header" href="#pre-release">Pre-release</a></h2>
+<p>Run the <code>ios-ci</code> workflow. You can use the <a href="https://cli.github.com/manual/gh_workflow_run">GitHub CLI</a>:</p>
+<pre><code>gh workflow run ios-ci.yml -f release=pre --ref main
+</code></pre>
+<p>Or run the workflow from the Actions tab on GitHub.</p>
+<p>The items under the <code>## main</code> heading in <code>platform/ios/CHANGELOG.md</code> will be used as changelog for the pre-release.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../ios/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../platforms/ios/ios-documentation.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../ios/ios-documentation.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../platforms/ios/dev-apps.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -294,11 +307,11 @@ xcrun simctl listapps booted
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../ios/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../platforms/ios/ios-documentation.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../ios/ios-documentation.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../platforms/ios/dev-apps.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
@@ -313,13 +326,13 @@ xcrun simctl listapps booted
         </script>
 
 
-        <script src="../elasticlunr.min.js"></script>
-        <script src="../mark.min.js"></script>
-        <script src="../searcher.js"></script>
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
 
-        <script src="../clipboard.min.js"></script>
-        <script src="../highlight.js"></script>
-        <script src="../book.js"></script>
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
 
         <!-- Custom JS scripts -->
 

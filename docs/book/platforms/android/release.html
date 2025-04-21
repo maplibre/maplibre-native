@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Development Apps - MapLibre Native Developer Documentation</title>
+        <title>Release - MapLibre Native Developer Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -49,34 +49,34 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="../favicon.svg">
-        <link rel="shortcut icon" href="../favicon.png">
-        <link rel="stylesheet" href="../css/variables.css">
-        <link rel="stylesheet" href="../css/general.css">
-        <link rel="stylesheet" href="../css/chrome.css">
-        <link rel="stylesheet" href="../css/print.css" media="print">
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
-        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
-        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
-        <link rel="stylesheet" href="../diff.css">
+        <link rel="stylesheet" href="../../diff.css">
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "../";
+            const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc.js"></script>
+        <script src="../../toc.js"></script>
     </head>
     <body>
     <div id="body-container">
@@ -129,7 +129,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
             </noscript>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -164,7 +164,7 @@
                     <h1 class="menu-title">MapLibre Native Developer Documentation</h1>
 
                     <div class="right-buttons">
-                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
 
@@ -260,37 +260,59 @@
 }
 
 </style>
-<h1 id="development-apps"><a class="header" href="#development-apps">Development Apps</a></h1>
-<p>There are two iOS apps available in the repo that you can use for MapLibre Native development. One Objective-C based app and a Swift based app.</p>
-<h2 id="objective-c-app"><a class="header" href="#objective-c-app">Objective-C App</a></h2>
-<p>This app is available as "App" in the <a href="./README.html">generated Xcode project</a>.</p>
-<p>The source code lives in <code>platform/ios/app</code>.</p>
-<p>You can also build and run it from the command line with:</p>
-<pre><code>bazel run --//:renderer=metal //platform/ios:App
+<h1 id="release-maplibre-android"><a class="header" href="#release-maplibre-android">Release MapLibre Android</a></h1>
+<p>We make MapLibre Android releases as a downloadable asset on <a href="https://github.com/maplibre/maplibre-native/releases?q=android&amp;expanded=true">GitHub</a> as well as to <a href="https://central.sonatype.com/artifact/org.maplibre.gl/android-sdk/versions">Maven Central</a>. Specifically we make use of a Sonatype OSSHR repository provided by Maven Central.</p>
+<p>Also see the current <a href="../release-policy.html">release policy</a>.</p>
+<h2 id="making-a-release"><a class="header" href="#making-a-release">Making a release</a></h2>
+<p>To make an Android release, do the following:</p>
+<ol>
+<li>
+<p>Prepare a PR.</p>
+<ul>
+<li>
+<p>Update <a href="https://github.com/maplibre/maplibre-native/blob/main/platform/android/CHANGELOG.md"><code>CHANGELOG.md</code></a> in a PR, see for example <a href="https://github.com/maplibre/maplibre-native/pull/3194">this PR</a>. The changelog should contain links to all relevant PRs for Android since the last release. You can use the script below with a <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens">GitHub access token</a> with the <code>public_repo</code> scope. You will need to filter out PRs that do not relate to Android and categorize PRs as features or bugfixes.</p>
+<pre><code>GITHUB_ACCESS_TOKEN=... node scripts/generate-changelog.mjs android
 </code></pre>
-<p align="center">
-  <img width="300" alt="Objective-C app screenshot" src="https://github.com/user-attachments/assets/aeb0cb5e-1f6c-439e-8668-22ee0a0b11f2" />
-</p>
-<h2 id="swift-app"><a class="header" href="#swift-app">Swift App</a></h2>
-<p>The Swift App is mainly used to demo usage patterns in the <a href="./ios-documentation.html#examples">example documentation</a>.</p>
-<p>This app is available as "MapLibreApp" in the <a href="./README.html">generated Xcode project</a>.</p>
-<p>The source code lives in <code>platform/ios/swift-app</code>.</p>
-<p align="center">
-  <img width="300" alt="Swift app screenshot" src="https://github.com/user-attachments/assets/87f4cea4-40dd-4744-a935-c7cebd6887f1" />
-</p>
-<p>You can also build and run it from the command line with:</p>
-<pre><code>bazel run --//:renderer=metal //platform/ios/app-swift:MapLibreApp
+<p>The heading in the changelog must match <code>## &lt;VERSION&gt;</code> exactly, or it will not be picked up. For example, for version 9.6.0:</p>
+<pre><code class="language-md">## 9.6.0
 </code></pre>
+</li>
+<li>
+<p>Update <code>android/MapLibreAndroid/gradle.properties</code> with the new version.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Once the pull request updating the changelog is merged, tag the commit:</p>
+<ul>
+<li>Create a tag locally, with for example:
+<pre><code>git tag -a android-v9.6.0 -m "Release android-v9.6.0"
+</code></pre>
+</li>
+<li>You need write access to push the tag, use for example:
+<pre><code>git push --atomic origin main android-v9.6.0
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>Once the tag is pushed, you can run the <a href="https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/android-release.yml"><code>android-release.yml</code></a> workflow.</p>
+<ul>
+<li>Open the <a href="https://github.com/maplibre/maplibre-native/actions/workflows/android-release.yml">android-release</a> workflow page.</li>
+<li>Press <em>Run workflow</em> and select the tag you pushed.</li>
+</ul>
+</li>
+</ol>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../ios/release.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../platforms/android/benchmark.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../design/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../platforms/ios/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -300,11 +322,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../ios/release.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../platforms/android/benchmark.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../design/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../platforms/ios/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
@@ -319,13 +341,13 @@
         </script>
 
 
-        <script src="../elasticlunr.min.js"></script>
-        <script src="../mark.min.js"></script>
-        <script src="../searcher.js"></script>
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
 
-        <script src="../clipboard.min.js"></script>
-        <script src="../highlight.js"></script>
-        <script src="../book.js"></script>
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
 
         <!-- Custom JS scripts -->
 

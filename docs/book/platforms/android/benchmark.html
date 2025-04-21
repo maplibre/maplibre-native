@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Documentation - MapLibre Native Developer Documentation</title>
+        <title>Benchmark - MapLibre Native Developer Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -49,34 +49,34 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="../favicon.svg">
-        <link rel="shortcut icon" href="../favicon.png">
-        <link rel="stylesheet" href="../css/variables.css">
-        <link rel="stylesheet" href="../css/general.css">
-        <link rel="stylesheet" href="../css/chrome.css">
-        <link rel="stylesheet" href="../css/print.css" media="print">
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
-        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
-        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
-        <link rel="stylesheet" href="../diff.css">
+        <link rel="stylesheet" href="../../diff.css">
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "../";
+            const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc.js"></script>
+        <script src="../../toc.js"></script>
     </head>
     <body>
     <div id="body-container">
@@ -129,7 +129,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
             </noscript>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -164,7 +164,7 @@
                     <h1 class="menu-title">MapLibre Native Developer Documentation</h1>
 
                     <div class="right-buttons">
-                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
 
@@ -260,46 +260,90 @@
 }
 
 </style>
-<h1 id="ios-documentation"><a class="header" href="#ios-documentation">iOS Documentation</a></h1>
-<p>We use <a href="https://www.swift.org/documentation/docc">DocC</a> for the MapLibre iOS documentation. The live documentation site can be found <a href="https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre/">here</a>.</p>
-<h2 id="resources"><a class="header" href="#resources">Resources</a></h2>
-<p>You need to have <a href="https://github.com/aws/aws-cli">aws-cli</a> installed to download the resources from S3 (see below). Run the following command:</p>
-<pre><code>aws s3 sync --no-sign-request "s3://maplibre-native/ios-documentation-resources" "platform/ios/MapLibre.docc/Resources"
+<h1 id="benchmark"><a class="header" href="#benchmark">Benchmark</a></h1>
+<p>We have created a rendering performance benchmark for Android. The logic for this benchmark is encapsulated in <code>BenchMarkActivity.kt</code>.</p>
+<h2 id="styles"><a class="header" href="#styles">Styles</a></h2>
+<p>We have hardcoded various styles, which you can override with a <code>developer-config.xml</code> by adding some XML with the following structure:</p>
+<pre><code>&lt;array name="benchmark_style_names"&gt;
+  &lt;item&gt;Americana&lt;/item&gt;
+&lt;/array&gt;
+&lt;array name="benchmark_style_urls"&gt;
+  &lt;item&gt;https://americanamap.org/style.json&lt;/item&gt;
+&lt;/array&gt;
 </code></pre>
-<p>Then, to build the documentation locally, run the following command:</p>
-<pre><code>platform/ios/scripts/docc.sh preview
+<h2 id="retrieving-results"><a class="header" href="#retrieving-results">Retrieving Results</a></h2>
+<p>Results are logged to the console as they come in. After the benchmark is done running a <code>benchmark_results.json</code> file is generated. You can pull it off the device with for example adb:</p>
+<pre><code>adb shell "run-as org.maplibre.android.testapp cat files/benchmark_results.json" \
+  &gt; benchmark_results.json
 </code></pre>
-<p>Resources like images should not be checked in but should be uploaded to the <a href="https://s3.eu-central-1.amazonaws.com/maplibre-native/index.html#ios-documentation-resources/">S3 Bucket</a>. You can share a <code>.zip</code> with all files that should be added in the PR.</p>
-<p>If you want to get direct access you need an AWS account to get permissions to upload files. Create an account and authenticate with aws-cli. Share the account ARN that you can get with</p>
-<pre><code>aws sts get-caller-identity
+<h2 id="results"><a class="header" href="#results">Results</a></h2>
+<p>The <code>benchmark_results.json</code> containing the benchmark results will have the following structure.</p>
+<pre><code class="language-json">{
+  "results": [
+    {
+      "styleName": "AWS Open Data Standard Light",
+      "syncRendering": true,
+      "thermalState": 0,
+      "fps": 34.70237085812839,
+      "avgEncodingTime": 19.818289053808947,
+      "avgRenderingTime": 7.7432454899654255,
+      "low1pEncodingTime": 91.72538138784371,
+      "low1pRenderingTime": 26.573758581509203
+    },
+  ],
+  "deviceManufacturer": "samsung",
+  "model": "SM-G973F",
+  "renderer": "drawable",
+  "debugBuild": true,
+  "gitRevision": "fc95b79880223e34c2ce80339f698d095e3d63cd",
+  "timestamp": 1736454325393
+}
 </code></pre>
-<h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
-<p>The code samples in the documentation should ideally be compiled on CI so they do not go out of date.</p>
-<p>Fence your example code with</p>
-<pre><code class="language-swift">// #-example-code(LineTapMap)
-...
-// #-end-example-code
+<p>The meaning of the keys is as follows.</p>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Description</th></tr></thead><tbody>
+<tr><td>styleName</td><td>Name of the style being benchmarked</td></tr>
+<tr><td>syncRendering</td><td>Whether synchronous rendering was used</td></tr>
+<tr><td>thermalState</td><td>Thermal state of the device during benchmark</td></tr>
+<tr><td>fps</td><td>Average frames per second achieved during the benchmark</td></tr>
+<tr><td>avgEncodingTime</td><td>Average time taken for encoding in milliseconds</td></tr>
+<tr><td>avgRenderingTime</td><td>Average time taken for rendering in milliseconds</td></tr>
+<tr><td>low1pEncodingTime</td><td>1st percentile (worst case) encoding time in milliseconds</td></tr>
+<tr><td>low1pRenderingTime</td><td>1st percentile (worst case) rendering time in milliseconds</td></tr>
+<tr><td>deviceManufacturer</td><td>Manufacturer of the test device</td></tr>
+<tr><td>model</td><td>Model number/name of the test device</td></tr>
+<tr><td>renderer</td><td>Type of renderer used (<code>drawable</code> for Open GL ES, <code>vulkan</code> for Vulkan, <code>legacy</code> for the legacy Open GL ES rendering backend)</td></tr>
+<tr><td>debugBuild</td><td>Whether the build was a debug build</td></tr>
+<tr><td>gitRevision</td><td>Git commit hash of the code version</td></tr>
+<tr><td>timestamp</td><td>Unix timestamp of when the benchmark was run</td></tr>
+</tbody></table>
+</div>
+<h2 id="large-scale-benchmarks-on-aws-device-farm"><a class="header" href="#large-scale-benchmarks-on-aws-device-farm">Large Scale Benchmarks on AWS Device Farm</a></h2>
+<p>Sometimes we do a large scale benchmark across a variety of devices on AWS Device Farm. We ran one such test in <a href="https://github.com/maplibre/maplibre-native/issues/2787#issuecomment-2466948888">November 2024</a> to compare the performance of the then new Vulkan rendering backend against the OpenGL ES backend. There are some scripts in the repo to kick off the tests and to collect and plot the results:</p>
+<pre><code>scripts/aws-device-farm/aws-device-farm-run.sh
+scripts/aws-device-farm/collect-benchmark-outputs.mjs
+scripts/aws-device-farm/update-benchmark-db.mjs
+scripts/aws-device-farm/plot-android-benchmark-results.py
 </code></pre>
-<p>Prefix your documentation code block with</p>
-<pre><code class="language-md">&lt;!-- include-example(LineTapMap) --&gt;
-
-```swift
-...
-```
+<h2 id="continuous-benchmarking"><a class="header" href="#continuous-benchmarking">Continuous Benchmarking</a></h2>
+<p>We are running the Android benchmark on every merge with <code>main</code>.</p>
+<p>You can find the results per commit <a href="https://maplibre-native.s3.eu-central-1.amazonaws.com/index.html#android-benchmark-render/">here</a> or pull them from our public S3 bucket:</p>
+<pre><code>aws s3 sync s3://maplibre-native/android-benchmark-render/ .
 </code></pre>
-<p>Then the code block will be updated when you run:</p>
-<pre><code class="language-sh">node scripts/update-ios-examples.mjs
+<h2 id="benchmarks-in-pull-request"><a class="header" href="#benchmarks-in-pull-request">Benchmarks in Pull Request</a></h2>
+<p>To run the benchmarks (for Android) include the following line on a PR comment:</p>
+<pre><code>!benchmark android
 </code></pre>
+<p>A file with the benchmark results will be added to the workflow summary, which you can compare with the previous results in the bucket.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../ios/ios-tests.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../platforms/android/android-documentation.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../ios/release.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../platforms/android/release.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -309,11 +353,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../ios/ios-tests.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../platforms/android/android-documentation.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../ios/release.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../platforms/android/release.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
@@ -328,13 +372,13 @@
         </script>
 
 
-        <script src="../elasticlunr.min.js"></script>
-        <script src="../mark.min.js"></script>
-        <script src="../searcher.js"></script>
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
 
-        <script src="../clipboard.min.js"></script>
-        <script src="../highlight.js"></script>
-        <script src="../book.js"></script>
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
 
         <!-- Custom JS scripts -->
 

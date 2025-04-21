@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Render Tests - MapLibre Native Developer Documentation</title>
+        <title>Tests - MapLibre Native Developer Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -49,34 +49,34 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="favicon.svg">
-        <link rel="shortcut icon" href="favicon.png">
-        <link rel="stylesheet" href="css/variables.css">
-        <link rel="stylesheet" href="css/general.css">
-        <link rel="stylesheet" href="css/chrome.css">
-        <link rel="stylesheet" href="css/print.css" media="print">
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="fonts/fonts.css">
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="highlight-css" href="highlight.css">
-        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
-        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
-        <link rel="stylesheet" href="diff.css">
+        <link rel="stylesheet" href="../../diff.css">
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "";
+            const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc.js"></script>
+        <script src="../../toc.js"></script>
     </head>
     <body>
     <div id="body-container">
@@ -129,7 +129,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
             </noscript>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -164,7 +164,7 @@
                     <h1 class="menu-title">MapLibre Native Developer Documentation</h1>
 
                     <div class="right-buttons">
-                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
 
@@ -260,121 +260,70 @@
 }
 
 </style>
-<h1 id="render-tests"><a class="header" href="#render-tests">Render Tests</a></h1>
-<div class="mdbook-alerts mdbook-alerts-note">
-<p class="mdbook-alerts-title">
-  <span class="mdbook-alerts-icon"></span>
-  note
-</p>
-<p>See also <a href="./android/android-tests.html#render-tests">Android Tests</a> and <a href="./ios/ios-tests.html#render-tests">iOS Tests</a> for some platform-specific information on the render tests.</p>
-</div>
-<p>Render tests verify the correctness and consistency of MapLibre Native's rendering. Note that 'render test' is a bit of a misnomer, because there are various types of tests that do not really test rendering behavior that we sometimes call render tests. Examples are <a href="#metricsintergration">expression tests and query tests</a>. In addition, these 'render tests' allow a wide variety of operations and probes (which write out metrics) for things like GPU memory allocations, memory usage, network requests, FPS, so these tests are really quite a bit more versatile than just verifying rendering behavior.</p>
-<h2 id="render-test-runner-cli-options"><a class="header" href="#render-test-runner-cli-options">Render Test Runner CLI Options</a></h2>
-<p>When using CMake, the render test runner is an executable available as <code>mbgl-render-test-runner</code> in the build directory.</p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Option / Argument</th><th style="text-align: left">Description</th><th style="text-align: left">Required?</th></tr></thead><tbody>
-<tr><td style="text-align: left"><code>-h</code>, <code>--help</code></td><td style="text-align: left">Display the help menu and exit.</td><td style="text-align: left">No</td></tr>
-<tr><td style="text-align: left"><code>-r</code>, <code>--recycle-map</code></td><td style="text-align: left">Toggle reusing the map object between tests. If set, the map object is reused; otherwise, it's reset for each test.</td><td style="text-align: left">No</td></tr>
-<tr><td style="text-align: left"><code>-s</code>, <code>--shuffle</code></td><td style="text-align: left">Toggle shuffling the order of tests based on the manifest file.</td><td style="text-align: left">No</td></tr>
-<tr><td style="text-align: left"><code>-o</code>, <code>--online</code></td><td style="text-align: left">Toggle online mode. If set, tests can make network requests. By default (<code>--online</code> not specified), tests run in offline mode, forcing resource loading from the cache only.</td><td style="text-align: left">No</td></tr>
-<tr><td style="text-align: left"><code>--seed &lt;uint32_t&gt;</code></td><td style="text-align: left">Set the seed for shuffling tests. Only relevant if <code>--shuffle</code> is also used. Defaults to <code>1</code> if <code>--shuffle</code> is used without <code>--seed</code>.</td><td style="text-align: left">No</td></tr>
-<tr><td style="text-align: left"><code>-p</code>, <code>--manifestPath &lt;string&gt;</code></td><td style="text-align: left">Specifies the path to the test manifest JSON file, which defines test configurations, paths, and potentially filters/ignores.</td><td style="text-align: left">Yes</td></tr>
-<tr><td style="text-align: left"><code>-f</code>, <code>--filter &lt;string&gt;</code></td><td style="text-align: left">Provides a regular expression used to filter which tests (based on their path/ID) should be run. Only tests matching the regex will be executed.</td><td style="text-align: left">No</td></tr>
-<tr><td style="text-align: left"><code>-u</code>, <code>--update default | platform | metrics | rebaseline</code></td><td style="text-align: left">Sets the mode for updating test expectation results: <br> - <code>default</code>: Updates generic render test expectation images/JSON. <br> - <code>platform</code>: Updates platform-specific render test expectation images/JSON. <br> - <code>metrics</code>: Updates expected metrics for the configuration defined by the manifest. <br> - <code>rebaseline</code>: Updates or creates expected metrics for the configuration defined by the manifest.</td><td style="text-align: left">No</td></tr>
+<h1 id="maplibre-android-tests"><a class="header" href="#maplibre-android-tests">MapLibre Android Tests</a></h1>
+<h2 id="render-tests"><a class="header" href="#render-tests">Render Tests</a></h2>
+<p>To run the render tests for Android, run the configuration for the <code>androidRenderTest.app</code> module.</p>
+<h3 id="filtering-render-tests"><a class="header" href="#filtering-render-tests">Filtering Render Tests</a></h3>
+<p>You can filter the tests to run by passing a flag to the file <code>platform/android/src/test/render_test_runner.cpp</code>:</p>
+<pre><code class="language-cpp">std::vector&lt;std::string&gt; arguments = {..., "-f", "background-color/literal"};
+</code></pre>
+<h3 id="viewing-the-results"><a class="header" href="#viewing-the-results">Viewing the Results</a></h3>
+<p>Once the application quits, use the Device Explorer to navigate to <code>/data/data/org.maplibre.render_test_runner/files</code>.</p>
+<img width="980" alt="image" src="https://github.com/maplibre/maplibre-native/assets/649392/0dc42d4a-6221-46b6-8352-1eb24d466e91">
+<p>Double click <code>android-render-test-runner-style.html</code>. Right click on the opened tab and select <em>Open In &gt; Browser</em>. You should see that a single render test passed.</p>
+<img width="801" alt="image" src="https://github.com/maplibre/maplibre-native/assets/649392/33e88999-7787-492f-afd9-f5a3e3fd61f7">
+<p>Alternatively to download (and open) the results from the command line, use:</p>
+<pre><code>filename=android-render-test-runner-style.html
+adb shell "run-as org.maplibre.render_test_runner cat files/metrics/$filename" &gt; $filename
+open $filename
+</code></pre>
+<p>For Vulkan use</p>
+<pre><code>filename=android-vulkan-render-test-runner-style.html
+</code></pre>
+<h3 id="updating-the-render-tests"><a class="header" href="#updating-the-render-tests">Updating the Render Tests</a></h3>
+<p>Now let's edit <code>metrics/integration/render-tests/background-color/literal/style.json</code>, change this line:</p>
+<pre><code>        "background-color": "red"
+</code></pre>
+<p>to</p>
+<pre><code>        "background-color": "yellow"
+</code></pre>
+<p>We need to make sure that the new <code>data.zip</code> with the data for the render tests is installed on the device. You can use the following commands:</p>
+<pre><code>tar chf render-test/android/app/src/main/assets/data.zip --format=zip --files-from=render-test/android/app/src/main/assets/to_zip.txt
+adb push render-test/android/app/src/main/assets/data.zip /data/local/tmp/data.zip
+adb shell chmod 777 /data/local/tmp/data.zip
+adb shell "run-as org.maplibre.render_test_runner unzip -o /data/local/tmp/data.zip -d files"
+</code></pre>
+<p>Rerun the render test app and reload the Device Explorer. When you re-open the HTML file with the results you should now see a failing test:</p>
+<img width="685" alt="image" src="https://github.com/maplibre/maplibre-native/assets/649392/303ad75a-cf74-4b8c-927c-c9bd59a79de4">
+<p>Now download the <code>actual.png</code> in <code>metrics/integration/render-tests/background-color/literal</code> with the Device Explorer. Replace the corresponding <code>expected.png</code> on your local file system. Upload the new render test data again and run the test app once more.</p>
+<img width="800" alt="image" src="https://github.com/maplibre/maplibre-native/assets/649392/04734c6a-9cf1-489a-b9bb-8d857581261c">
+<p>Of we don't want to commit this change. But know you can add and debug (Android) render tests.</p>
+<h2 id="instrumentation-tests"><a class="header" href="#instrumentation-tests">Instrumentation Tests</a></h2>
+<p>To run the instrumentation tests, choose the "Instrumentation Tests" run configuration.</p>
+<p>Your device needs remain unlocked for the duration of the tests.</p>
+<h2 id="c-unit-tests"><a class="header" href="#c-unit-tests">C++ Unit Tests</a></h2>
+<p>There is a separate Gradle project that contains a test app which runs the C++ Unit Tests. It does not depend on the Android platform implementations.</p>
+<p>You can find the project in <code>test/android.</code> You can open this project in Android Studio and run the C++ Tests on an Android device or Simulator.</p>
+<p>To run a particular set of tests you can modify the <code>--gtest_filter</code> flag in <code>platform/android/src/test/test_runner.cpp</code>. See the <a href="https://google.github.io/googletest/advanced.html#running-a-subset-of-the-tests">GoogleTest documentation</a> for details how to use this flag.</p>
+<h3 id="aws-device-farm"><a class="header" href="#aws-device-farm">AWS Device Farm</a></h3>
+<p>The instrumentation tests and C++ unit tests are running on AWS Device Farm. To see the results and the logs, go to:</p>
+<p><a href="https://us-west-2.console.aws.amazon.com/devicefarm/home?region=us-east-1#/mobile/projects/20687d72-0e46-403e-8f03-0941850665bc/runs">https://us-west-2.console.aws.amazon.com/devicefarm/home?region=us-east-1#/mobile/projects/20687d72-0e46-403e-8f03-0941850665bc/runs</a>.</p>
+<p>Use the following login details (this is a read-only account):</p>
+<div class="table-wrapper"><table><thead><tr><th></th><th></th></tr></thead><tbody>
+<tr><td>Alias</td><td><code>maplibre</code></td></tr>
+<tr><td>Username</td><td><code>maplibre</code></td></tr>
+<tr><td>Password</td><td><code>maplibre</code></td></tr>
 </tbody></table>
 </div>
-<h2 id="source-code-organization"><a class="header" href="#source-code-organization">Source Code Organization</a></h2>
-<h3 id="render-test"><a class="header" href="#render-test"><code>render-test</code></a></h3>
-<p>This directory contains the C++ source code for common render test runner, manifest parser and CLI tool.</p>
-<ul>
-<li><code>render-test/android</code>: standalone Gradle project with a app that runs the render test runner.</li>
-<li><code>render-tests/ios</code>: source code for Objective-C app that encapsulates the render test runner.
-property: <code>background-color</code>, <code>line-width</code>, etc., with a second level of directories below that for individual tests.</li>
-</ul>
-<h3 id="metrics"><a class="header" href="#metrics"><code>metrics</code></a></h3>
-<p>The JSON files in this directory are the manifests (to be passed to render test CLI tool). This directory also contains many directories that store metrics used by the tests. Other files/directories include:</p>
-<ul>
-<li><code>cache-style.db</code>, <code>cache-metrics.db</code>: pre-populated cache (SQLite database file) so the tests can run offline. You may need to update this database when you need a new resource available during test executation.</li>
-<li><code>binary-size</code>: binary-size checks. Not used right now, see <a href="https://github.com/maplibre/maplibre-native/issues/3379">#3379</a>.</li>
-<li><code>expectations</code>: expectations for various platforms. E.g. <code>expectations/platform-android</code> is referenced by the <code>android-render-test-runner-metrics.json</code> manifest under its <code>expectation_paths</code> key.</li>
-<li><code>ignores</code>: contains JSON files with as key a test path and as value a reason why a test is ignored. For example:
-<pre><code>{
-   "expression-tests/collator/accent-equals-de": "Locale-specific behavior changes based on platform."
-}
-</code></pre>
-Manifests can have a key <code>ignore_paths</code> with an array of ignore files. For example:
-<pre><code>{
-   ...
-   "ignore_paths": [
-      "ignores/platform-all.json",
-      "ignores/platform-linux.json",
-      "ignores/platform-android.json"
-   ],
-   ...
-}
-</code></pre>
-</li>
-</ul>
-<h4 id="metricsintergration"><a class="header" href="#metricsintergration"><code>metrics/intergration</code></a></h4>
-<ul>
-<li><code>data</code>, <code>geojson</code>, <code>glyphs</code>, <code>image</code>, <code>sprites</code>, <code>styles</code>, <code>tiles</code>, <code>tilesets</code>, <code>video</code>: various data used by the render tests.</li>
-<li><code>expression-tests</code>: tests that verify the behavior of <a href="https://maplibre.org/maplibre-style-spec/expressions/">expressions</a> of the MapLibre Style Spec.</li>
-<li><code>query-tests</code>: these tests test the behavior of the <code>queryRenderedFeatures</code> API which, as the name suggests, allow you to query the rendered features.</li>
-<li><code>render-tests</code>: location of render tests. Each render test contains a <code>style.json</code> and an <code>expected.png</code> image. This directory tree is generally organized by <a href="https://maplibre.org/maplibre-style-spec/">style specification</a> properties.</li>
-</ul>
-<h2 id="running-tests"><a class="header" href="#running-tests">Running tests</a></h2>
-<p>To run the entire integration test suite (both render or query tests), from within the maplibre-native directory on Linux run the command:</p>
-<pre><code>./build/mbgl-render-test-runner --manifestPath metrics/linux-clang8-release-style.json
-</code></pre>
-<h3 id="running-specific-tests"><a class="header" href="#running-specific-tests">Running specific tests</a></h3>
-<p>To run a subset of tests or an individual test, you can pass a specific subdirectory to the <code>mbgl-render-test-runner</code> executable. For example, to run all the tests for a given property, e.g. <code>circle-radius</code>:</p>
-<pre><code>$ build-macos-vulkan/mbgl-render-test-runner --manifestPath=metrics/macos-xcode11-release-style.json -f 'circle-radius/.*'
-* passed query-tests/circle-radius/feature-state
-* passed query-tests/circle-radius/zoom-and-property-function
-* passed query-tests/circle-radius/property-function
-* passed query-tests/circle-radius/outside
-* passed query-tests/circle-radius/tile-boundary
-* passed query-tests/circle-radius/inside
-* passed query-tests/circle-radius/multiple-layers
-* passed render-tests/circle-radius/zoom-and-property-function
-* passed render-tests/circle-radius/literal
-* passed render-tests/circle-radius/property-function
-* passed render-tests/circle-radius/default
-* passed render-tests/circle-radius/function
-* passed render-tests/circle-radius/antimeridian
-13 passed (100.0%)
-Results at: /Users/bart/src/maplibre-native/metrics/macos-xcode11-release-style.html
-</code></pre>
-<h2 id="writing-new-tests"><a class="header" href="#writing-new-tests">Writing new tests</a></h2>
-<p>To add a new render test:</p>
-<ol>
-<li>
-<p>Create a new directory <code>test/integration/render-tests/&lt;property-name&gt;/&lt;new-test-name&gt;</code></p>
-</li>
-<li>
-<p>Create a new <code>style.json</code> file within that directory, specifying the map to load. Feel free to copy &amp; modify one of the existing <code>style.json</code> files from the <code>render-tests</code> subdirectories.</p>
-</li>
-<li>
-<p>Generate an <code>expected.png</code> image from the given style with</p>
-<pre><code>$ ./build/mbgl-render-test-runner --update default --manifestPath=... -f '&lt;property-name&gt;/&lt;new-test-name&gt;'
-</code></pre>
-</li>
-<li>
-<p>Manually inspect <code>expected.png</code> to verify it looks as expected.</p>
-</li>
-<li>
-<p>Commit the new <code>style.json</code> and <code>expected.png</code>.</p>
-</li>
-</ol>
-
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="release-policy.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../platforms/android/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="design/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../platforms/android/android-documentation.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -384,11 +333,11 @@ Results at: /Users/bart/src/maplibre-native/metrics/macos-xcode11-release-style.
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="release-policy.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../platforms/android/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="design/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../platforms/android/android-documentation.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
@@ -403,13 +352,13 @@ Results at: /Users/bart/src/maplibre-native/metrics/macos-xcode11-release-style.
         </script>
 
 
-        <script src="elasticlunr.min.js"></script>
-        <script src="mark.min.js"></script>
-        <script src="searcher.js"></script>
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
 
-        <script src="clipboard.min.js"></script>
-        <script src="highlight.js"></script>
-        <script src="book.js"></script>
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
 
         <!-- Custom JS scripts -->
 

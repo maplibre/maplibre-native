@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Android - MapLibre Native Developer Documentation</title>
+        <title>Documentation - MapLibre Native Developer Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -49,34 +49,34 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="../favicon.svg">
-        <link rel="shortcut icon" href="../favicon.png">
-        <link rel="stylesheet" href="../css/variables.css">
-        <link rel="stylesheet" href="../css/general.css">
-        <link rel="stylesheet" href="../css/chrome.css">
-        <link rel="stylesheet" href="../css/print.css" media="print">
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
-        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
-        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
-        <link rel="stylesheet" href="../diff.css">
+        <link rel="stylesheet" href="../../diff.css">
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "../";
+            const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc.js"></script>
+        <script src="../../toc.js"></script>
     </head>
     <body>
     <div id="body-container">
@@ -129,7 +129,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
             </noscript>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -164,7 +164,7 @@
                     <h1 class="menu-title">MapLibre Native Developer Documentation</h1>
 
                     <div class="right-buttons">
-                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
 
@@ -260,48 +260,46 @@
 }
 
 </style>
-<h1 id="maplibre-android-developer-guide"><a class="header" href="#maplibre-android-developer-guide">MapLibre Android Developer Guide</a></h1>
-<p>These instructions are for developers interested in making code-level contributions to MapLibre Native for Android.</p>
-<h2 id="getting-the-source"><a class="header" href="#getting-the-source">Getting the source</a></h2>
-<p>Clone the git repository and pull in submodules:</p>
-<pre><code class="language-bash">git clone git@github.com:maplibre/maplibre-native.git
-cd maplibre-native
-git submodule update --init --recursive
-cd platform/android
+<h1 id="ios-documentation"><a class="header" href="#ios-documentation">iOS Documentation</a></h1>
+<p>We use <a href="https://www.swift.org/documentation/docc">DocC</a> for the MapLibre iOS documentation. The live documentation site can be found <a href="https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre/">here</a>.</p>
+<h2 id="resources"><a class="header" href="#resources">Resources</a></h2>
+<p>You need to have <a href="https://github.com/aws/aws-cli">aws-cli</a> installed to download the resources from S3 (see below). Run the following command:</p>
+<pre><code>aws s3 sync --no-sign-request "s3://maplibre-native/ios-documentation-resources" "platform/ios/MapLibre.docc/Resources"
 </code></pre>
-<h2 id="requirements"><a class="header" href="#requirements">Requirements</a></h2>
-<p><a href="https://developer.android.com/studio">Android Studio</a> needs to be installed.</p>
-<p>Open the <code>platform/android</code> directory to get started.</p>
-<h2 id="setting-an-api-key"><a class="header" href="#setting-an-api-key">Setting an API Key</a></h2>
-<p><em>The test application (used for development purposes) uses MapTiler vector tiles, which require a MapTiler account and API key.</em></p>
-<p>With the first Gradle invocation, Gradle will take the value of the <code>MLN_API_KEY</code> environment variable and save it to <code>MapLibreAndroidTestApp/src/main/res/values/developer-config.xml</code>. If the environment variable wasn't set, you can edit <code>developer-config.xml</code> manually and add your API key to the <code>api_key</code> resource.</p>
-<h2 id="running-the-testapp"><a class="header" href="#running-the-testapp">Running the TestApp</a></h2>
-<p>Run the configuration for the <code>MapLibreAndroidTestApp</code> module and select a device or emulator to deploy on.</p>
-<p align="left">
-  <img src="https://github.com/maplibre/maplibre-native/assets/649392/5494925e-8cbb-4d5d-8033-8a2f141ede3c" alt="Android TestApp menu" width="15%">   <img src="https://github.com/maplibre/maplibre-native/assets/649392/f169db51-615d-4fca-b297-ac6197bec674" alt="Android TestApp showing Demotiles" width="15%">
-</p>
-<h2 id="kotlin"><a class="header" href="#kotlin">Kotlin</a></h2>
-<p>All new code should be written in <a href="https://kotlinlang.org/">Kotlin</a>.</p>
-<h2 id="style-checking"><a class="header" href="#style-checking">Style Checking</a></h2>
-<p>To check Kotlin style, we use <a href="https://pinterest.github.io/ktlint/">ktlint</a>. This linter is based on the <a href="https://kotlinlang.org/docs/coding-conventions.html">official Kotlin coding conventions</a>. We intergrate with it using the <a href="https://github.com/jeremymailen/kotlinter-gradle">kotlinder</a> Gradle plugin.</p>
-<p>To check the style of all Kotlin source files, use:</p>
-<pre><code>$ ./gradlew checkStyle
+<p>Then, to build the documentation locally, run the following command:</p>
+<pre><code>platform/ios/scripts/docc.sh preview
 </code></pre>
-<p>To format all Kotlin source files, use:</p>
-<pre><code>$ ./gradlew formatKotlin
+<p>Resources like images should not be checked in but should be uploaded to the <a href="https://s3.eu-central-1.amazonaws.com/maplibre-native/index.html#ios-documentation-resources/">S3 Bucket</a>. You can share a <code>.zip</code> with all files that should be added in the PR.</p>
+<p>If you want to get direct access you need an AWS account to get permissions to upload files. Create an account and authenticate with aws-cli. Share the account ARN that you can get with</p>
+<pre><code>aws sts get-caller-identity
 </code></pre>
-<h2 id="profiling"><a class="header" href="#profiling">Profiling</a></h2>
-<p>See <a href="/profiling/tracy-profiling.html">Tracy Profiling</a> to understand how Tracy can be used for profiling.</p>
+<h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
+<p>The code samples in the documentation should ideally be compiled on CI so they do not go out of date.</p>
+<p>Fence your example code with</p>
+<pre><code class="language-swift">// #-example-code(LineTapMap)
+...
+// #-end-example-code
+</code></pre>
+<p>Prefix your documentation code block with</p>
+<pre><code class="language-md">&lt;!-- include-example(LineTapMap) --&gt;
+
+```swift
+...
+```
+</code></pre>
+<p>Then the code block will be updated when you run:</p>
+<pre><code class="language-sh">node scripts/update-ios-examples.mjs
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../render-tests.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../platforms/ios/ios-tests.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../android/android-tests.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../platforms/ios/release.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -311,11 +309,11 @@ cd platform/android
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../render-tests.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../platforms/ios/ios-tests.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../android/android-tests.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../platforms/ios/release.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
@@ -330,13 +328,13 @@ cd platform/android
         </script>
 
 
-        <script src="../elasticlunr.min.js"></script>
-        <script src="../mark.min.js"></script>
-        <script src="../searcher.js"></script>
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
 
-        <script src="../clipboard.min.js"></script>
-        <script src="../highlight.js"></script>
-        <script src="../book.js"></script>
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
 
         <!-- Custom JS scripts -->
 

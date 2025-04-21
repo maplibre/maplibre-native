@@ -382,273 +382,9 @@ Mapbox Style Spec. Since it is derived from Mapbox's original work it also uses 
 <p>Issue reported, see <a href="https://github.com/maplibre/maplibre-native/issues/2928">#2928</a>. <a href="#fr-2-1">↩</a></p>
 </li>
 <li id="footnote-3">
-<p>Some targets are supported, see <a href="ios/README.html#cmake">here</a>. <a href="#fr-3-1">↩</a></p>
+<p>Some targets are supported, see <a href="platforms/ios/README.html#cmake">here</a>. <a href="#fr-3-1">↩</a></p>
 </li>
 </ol><div style="break-before: page; page-break-before: always;"></div><style>
-.mdbook-alerts {
-  padding: 8px 16px;
-  margin-bottom: 16px;
-  border-left: 0.25em solid var(--mdbook-alerts-color);
-}
-
-.mdbook-alerts > *:first-child {
-  margin-top: 0;
-}
-
-.mdbook-alerts > *:last-child {
-  margin-bottom: 0;
-}
-
-.mdbook-alerts-title {
-  display: flex;
-  font-weight: 600;
-  align-items: center;
-  line-height: 1;
-  color: var(--mdbook-alerts-color);
-  text-transform: capitalize;
-}
-
-.mdbook-alerts-icon {
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  margin-right: 0.2em;
-  background-color: currentColor;
-  -webkit-mask: no-repeat center / 100%;
-  mask: no-repeat center / 100%;
-  -webkit-mask-image: var(--mdbook-alerts-icon);
-  mask-image: var(--mdbook-alerts-icon);
-}
-
-.mdbook-alerts-note {
-  --mdbook-alerts-color: rgb(9, 105, 218);
-  /* https://icon-sets.iconify.design/material-symbols/info-outline-rounded/ */
-  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 17q.425 0 .713-.288T13 16v-4q0-.425-.288-.712T12 11q-.425 0-.712.288T11 12v4q0 .425.288.713T12 17m0-8q.425 0 .713-.288T13 8q0-.425-.288-.712T12 7q-.425 0-.712.288T11 8q0 .425.288.713T12 9m0 13q-2.075 0-3.9-.788t-3.175-2.137q-1.35-1.35-2.137-3.175T2 12q0-2.075.788-3.9t2.137-3.175q1.35-1.35 3.175-2.137T12 2q2.075 0 3.9.788t3.175 2.137q1.35 1.35 2.138 3.175T22 12q0 2.075-.788 3.9t-2.137 3.175q-1.35 1.35-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12q0-3.35-2.325-5.675T12 4Q8.65 4 6.325 6.325T4 12q0 3.35 2.325 5.675T12 20m0-8"%2F%3E%3C%2Fsvg%3E');
-}
-
-.mdbook-alerts-tip {
-  --mdbook-alerts-color: rgb(26, 127, 55);
-  /* https://icon-sets.iconify.design/material-symbols/lightbulb-outline-rounded/ */
-  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 22q-.825 0-1.412-.587T10 20h4q0 .825-.587 1.413T12 22m-3-3q-.425 0-.712-.288T8 18q0-.425.288-.712T9 17h6q.425 0 .713.288T16 18q0 .425-.288.713T15 19zm-.75-3q-1.725-1.025-2.738-2.75T4.5 9.5q0-3.125 2.188-5.312T12 2q3.125 0 5.313 2.188T19.5 9.5q0 2.025-1.012 3.75T15.75 16zm.6-2h6.3q1.125-.8 1.738-1.975T17.5 9.5q0-2.3-1.6-3.9T12 4Q9.7 4 8.1 5.6T6.5 9.5q0 1.35.613 2.525T8.85 14M12 14"%2F%3E%3C%2Fsvg%3E');
-}
-
-.mdbook-alerts-important {
-  --mdbook-alerts-color: rgb(130, 80, 223);
-  /* https://icon-sets.iconify.design/material-symbols/chat-info-outline-rounded/ */
-  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 7q.425 0 .713-.288T13 6q0-.425-.288-.712T12 5q-.425 0-.712.288T11 6q0 .425.288.713T12 7m0 8q.425 0 .713-.288T13 14v-4q0-.425-.288-.712T12 9q-.425 0-.712.288T11 10v4q0 .425.288.713T12 15m-6 3l-2.3 2.3q-.475.475-1.088.213T2 19.575V4q0-.825.588-1.412T4 2h16q.825 0 1.413.588T22 4v12q0 .825-.587 1.413T20 18zm-.85-2H20V4H4v13.125zM4 16V4z"%2F%3E%3C%2Fsvg%3E');
-}
-
-.mdbook-alerts-warning {
-  --mdbook-alerts-color: rgb(154, 103, 0);
-  /* https://icon-sets.iconify.design/material-symbols/warning-outline-rounded/ */
-  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M2.725 21q-.275 0-.5-.137t-.35-.363q-.125-.225-.137-.488t.137-.512l9.25-16q.15-.25.388-.375T12 3q.25 0 .488.125t.387.375l9.25 16q.15.25.138.513t-.138.487q-.125.225-.35.363t-.5.137zm1.725-2h15.1L12 6zM12 18q.425 0 .713-.288T13 17q0-.425-.288-.712T12 16q-.425 0-.712.288T11 17q0 .425.288.713T12 18m0-3q.425 0 .713-.288T13 14v-3q0-.425-.288-.712T12 10q-.425 0-.712.288T11 11v3q0 .425.288.713T12 15m0-2.5"%2F%3E%3C%2Fsvg%3E');
-}
-
-.mdbook-alerts-caution {
-  --mdbook-alerts-color: rgb(207, 34, 46);
-  /* https://icon-sets.iconify.design/material-symbols/brightness-alert-outline-rounded/ */
-  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 17q.425 0 .713-.288T13 16q0-.425-.288-.712T12 15q-.425 0-.712.288T11 16q0 .425.288.713T12 17m0-4q.425 0 .713-.288T13 12V8q0-.425-.288-.712T12 7q-.425 0-.712.288T11 8v4q0 .425.288.713T12 13m-3.35 7H6q-.825 0-1.412-.587T4 18v-2.65L2.075 13.4q-.275-.3-.425-.662T1.5 12q0-.375.15-.737t.425-.663L4 8.65V6q0-.825.588-1.412T6 4h2.65l1.95-1.925q.3-.275.663-.425T12 1.5q.375 0 .738.15t.662.425L15.35 4H18q.825 0 1.413.588T20 6v2.65l1.925 1.95q.275.3.425.663t.15.737q0 .375-.15.738t-.425.662L20 15.35V18q0 .825-.587 1.413T18 20h-2.65l-1.95 1.925q-.3.275-.662.425T12 22.5q-.375 0-.737-.15t-.663-.425zm.85-2l2.5 2.5l2.5-2.5H18v-3.5l2.5-2.5L18 9.5V6h-3.5L12 3.5L9.5 6H6v3.5L3.5 12L6 14.5V18zm2.5-6"%2F%3E%3C%2Fsvg%3E');
-}
-
-</style>
-<h1 id="release-policy"><a class="header" href="#release-policy">Release Policy</a></h1>
-<div class="mdbook-alerts mdbook-alerts-note">
-<p class="mdbook-alerts-title">
-  <span class="mdbook-alerts-icon"></span>
-  note
-</p>
-<p>The following release policiy applies specifically to MapLibre <strong>Android</strong> and MapLibre <strong>iOS</strong>.</p>
-</div>
-<ul>
-<li>We use <a href="https://semver.org/">semantic versioning</a>. Breaking changes will always result in a major release.</li>
-<li>Despite having extensive tests in place, as a FOSS project we have limited QA testing capabilities. When major changes took place we may opt to put out a pre-release to let the community help with testing.</li>
-<li>In principle the <code>main</code> branch should always be in a releasable state.</li>
-<li>The release process is automated and documented (see <a href="./ios/release.html">Release MapLibre iOS</a> and <a href="./android/release.html">Release MapLibre Android</a>). Anyone with write access should be able to push out a release.</li>
-<li>There is no fixed release cadence, but you are welcome to request a release on any of the communication channels.</li>
-<li>We do not have long-term support (LTS) releases.</li>
-<li>If you need a feature or a bugfix ported to and old version of MapLibre, you need to do the backporting yourself (see steps below).</li>
-</ul>
-<h2 id="backporting"><a class="header" href="#backporting">Backporting</a></h2>
-<p>We understand that MapLibre is used in large mission critical applications where updating to the latest version is not always immediately possible. We do not have the capacity to offer LTS releases, but we do want to facilitate backporting.</p>
-<ol>
-<li>Create an issue and request that a branch is created from the release you want to target. Also mention the feature or bugfix you want to backport.</li>
-<li>Once the branch is created, make a PR that includes the feature or bugfix and that targets this branch. Also update the relevant changelog.</li>
-<li>When the PR is approved and merged, a release is attempted. If the release workflow significantly changed and the release fails, you may need to help to backport changes to the release workflow as well.</li>
-</ol>
-<p>The branch names for older versions follow a pattern as follows: <code>platform-x.x.x</code> (e.g. <a href="https://github.com/maplibre/maplibre-native/tree/android-10.x.x"><code>android-10.x.x</code></a> for the MapLibre Native Android 10.x.x release series). These branches have some minimal branch protection (a pull request is required to push changes to them).</p>
-<div style="break-before: page; page-break-before: always;"></div><style>
-.mdbook-alerts {
-  padding: 8px 16px;
-  margin-bottom: 16px;
-  border-left: 0.25em solid var(--mdbook-alerts-color);
-}
-
-.mdbook-alerts > *:first-child {
-  margin-top: 0;
-}
-
-.mdbook-alerts > *:last-child {
-  margin-bottom: 0;
-}
-
-.mdbook-alerts-title {
-  display: flex;
-  font-weight: 600;
-  align-items: center;
-  line-height: 1;
-  color: var(--mdbook-alerts-color);
-  text-transform: capitalize;
-}
-
-.mdbook-alerts-icon {
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  margin-right: 0.2em;
-  background-color: currentColor;
-  -webkit-mask: no-repeat center / 100%;
-  mask: no-repeat center / 100%;
-  -webkit-mask-image: var(--mdbook-alerts-icon);
-  mask-image: var(--mdbook-alerts-icon);
-}
-
-.mdbook-alerts-note {
-  --mdbook-alerts-color: rgb(9, 105, 218);
-  /* https://icon-sets.iconify.design/material-symbols/info-outline-rounded/ */
-  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 17q.425 0 .713-.288T13 16v-4q0-.425-.288-.712T12 11q-.425 0-.712.288T11 12v4q0 .425.288.713T12 17m0-8q.425 0 .713-.288T13 8q0-.425-.288-.712T12 7q-.425 0-.712.288T11 8q0 .425.288.713T12 9m0 13q-2.075 0-3.9-.788t-3.175-2.137q-1.35-1.35-2.137-3.175T2 12q0-2.075.788-3.9t2.137-3.175q1.35-1.35 3.175-2.137T12 2q2.075 0 3.9.788t3.175 2.137q1.35 1.35 2.138 3.175T22 12q0 2.075-.788 3.9t-2.137 3.175q-1.35 1.35-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12q0-3.35-2.325-5.675T12 4Q8.65 4 6.325 6.325T4 12q0 3.35 2.325 5.675T12 20m0-8"%2F%3E%3C%2Fsvg%3E');
-}
-
-.mdbook-alerts-tip {
-  --mdbook-alerts-color: rgb(26, 127, 55);
-  /* https://icon-sets.iconify.design/material-symbols/lightbulb-outline-rounded/ */
-  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 22q-.825 0-1.412-.587T10 20h4q0 .825-.587 1.413T12 22m-3-3q-.425 0-.712-.288T8 18q0-.425.288-.712T9 17h6q.425 0 .713.288T16 18q0 .425-.288.713T15 19zm-.75-3q-1.725-1.025-2.738-2.75T4.5 9.5q0-3.125 2.188-5.312T12 2q3.125 0 5.313 2.188T19.5 9.5q0 2.025-1.012 3.75T15.75 16zm.6-2h6.3q1.125-.8 1.738-1.975T17.5 9.5q0-2.3-1.6-3.9T12 4Q9.7 4 8.1 5.6T6.5 9.5q0 1.35.613 2.525T8.85 14M12 14"%2F%3E%3C%2Fsvg%3E');
-}
-
-.mdbook-alerts-important {
-  --mdbook-alerts-color: rgb(130, 80, 223);
-  /* https://icon-sets.iconify.design/material-symbols/chat-info-outline-rounded/ */
-  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 7q.425 0 .713-.288T13 6q0-.425-.288-.712T12 5q-.425 0-.712.288T11 6q0 .425.288.713T12 7m0 8q.425 0 .713-.288T13 14v-4q0-.425-.288-.712T12 9q-.425 0-.712.288T11 10v4q0 .425.288.713T12 15m-6 3l-2.3 2.3q-.475.475-1.088.213T2 19.575V4q0-.825.588-1.412T4 2h16q.825 0 1.413.588T22 4v12q0 .825-.587 1.413T20 18zm-.85-2H20V4H4v13.125zM4 16V4z"%2F%3E%3C%2Fsvg%3E');
-}
-
-.mdbook-alerts-warning {
-  --mdbook-alerts-color: rgb(154, 103, 0);
-  /* https://icon-sets.iconify.design/material-symbols/warning-outline-rounded/ */
-  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M2.725 21q-.275 0-.5-.137t-.35-.363q-.125-.225-.137-.488t.137-.512l9.25-16q.15-.25.388-.375T12 3q.25 0 .488.125t.387.375l9.25 16q.15.25.138.513t-.138.487q-.125.225-.35.363t-.5.137zm1.725-2h15.1L12 6zM12 18q.425 0 .713-.288T13 17q0-.425-.288-.712T12 16q-.425 0-.712.288T11 17q0 .425.288.713T12 18m0-3q.425 0 .713-.288T13 14v-3q0-.425-.288-.712T12 10q-.425 0-.712.288T11 11v3q0 .425.288.713T12 15m0-2.5"%2F%3E%3C%2Fsvg%3E');
-}
-
-.mdbook-alerts-caution {
-  --mdbook-alerts-color: rgb(207, 34, 46);
-  /* https://icon-sets.iconify.design/material-symbols/brightness-alert-outline-rounded/ */
-  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 17q.425 0 .713-.288T13 16q0-.425-.288-.712T12 15q-.425 0-.712.288T11 16q0 .425.288.713T12 17m0-4q.425 0 .713-.288T13 12V8q0-.425-.288-.712T12 7q-.425 0-.712.288T11 8v4q0 .425.288.713T12 13m-3.35 7H6q-.825 0-1.412-.587T4 18v-2.65L2.075 13.4q-.275-.3-.425-.662T1.5 12q0-.375.15-.737t.425-.663L4 8.65V6q0-.825.588-1.412T6 4h2.65l1.95-1.925q.3-.275.663-.425T12 1.5q.375 0 .738.15t.662.425L15.35 4H18q.825 0 1.413.588T20 6v2.65l1.925 1.95q.275.3.425.663t.15.737q0 .375-.15.738t-.425.662L20 15.35V18q0 .825-.587 1.413T18 20h-2.65l-1.95 1.925q-.3.275-.662.425T12 22.5q-.375 0-.737-.15t-.663-.425zm.85-2l2.5 2.5l2.5-2.5H18v-3.5l2.5-2.5L18 9.5V6h-3.5L12 3.5L9.5 6H6v3.5L3.5 12L6 14.5V18zm2.5-6"%2F%3E%3C%2Fsvg%3E');
-}
-
-</style>
-<h1 id="render-tests"><a class="header" href="#render-tests">Render Tests</a></h1>
-<div class="mdbook-alerts mdbook-alerts-note">
-<p class="mdbook-alerts-title">
-  <span class="mdbook-alerts-icon"></span>
-  note
-</p>
-<p>See also <a href="./android/android-tests.html#render-tests">Android Tests</a> and <a href="./ios/ios-tests.html#render-tests">iOS Tests</a> for some platform-specific information on the render tests.</p>
-</div>
-<p>Render tests verify the correctness and consistency of MapLibre Native's rendering. Note that 'render test' is a bit of a misnomer, because there are various types of tests that do not really test rendering behavior that we sometimes call render tests. Examples are <a href="render-tests.html#metricsintergration">expression tests and query tests</a>. In addition, these 'render tests' allow a wide variety of operations and probes (which write out metrics) for things like GPU memory allocations, memory usage, network requests, FPS, so these tests are really quite a bit more versatile than just verifying rendering behavior.</p>
-<h2 id="render-test-runner-cli-options"><a class="header" href="#render-test-runner-cli-options">Render Test Runner CLI Options</a></h2>
-<p>When using CMake, the render test runner is an executable available as <code>mbgl-render-test-runner</code> in the build directory.</p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Option / Argument</th><th style="text-align: left">Description</th><th style="text-align: left">Required?</th></tr></thead><tbody>
-<tr><td style="text-align: left"><code>-h</code>, <code>--help</code></td><td style="text-align: left">Display the help menu and exit.</td><td style="text-align: left">No</td></tr>
-<tr><td style="text-align: left"><code>-r</code>, <code>--recycle-map</code></td><td style="text-align: left">Toggle reusing the map object between tests. If set, the map object is reused; otherwise, it's reset for each test.</td><td style="text-align: left">No</td></tr>
-<tr><td style="text-align: left"><code>-s</code>, <code>--shuffle</code></td><td style="text-align: left">Toggle shuffling the order of tests based on the manifest file.</td><td style="text-align: left">No</td></tr>
-<tr><td style="text-align: left"><code>-o</code>, <code>--online</code></td><td style="text-align: left">Toggle online mode. If set, tests can make network requests. By default (<code>--online</code> not specified), tests run in offline mode, forcing resource loading from the cache only.</td><td style="text-align: left">No</td></tr>
-<tr><td style="text-align: left"><code>--seed &lt;uint32_t&gt;</code></td><td style="text-align: left">Set the seed for shuffling tests. Only relevant if <code>--shuffle</code> is also used. Defaults to <code>1</code> if <code>--shuffle</code> is used without <code>--seed</code>.</td><td style="text-align: left">No</td></tr>
-<tr><td style="text-align: left"><code>-p</code>, <code>--manifestPath &lt;string&gt;</code></td><td style="text-align: left">Specifies the path to the test manifest JSON file, which defines test configurations, paths, and potentially filters/ignores.</td><td style="text-align: left">Yes</td></tr>
-<tr><td style="text-align: left"><code>-f</code>, <code>--filter &lt;string&gt;</code></td><td style="text-align: left">Provides a regular expression used to filter which tests (based on their path/ID) should be run. Only tests matching the regex will be executed.</td><td style="text-align: left">No</td></tr>
-<tr><td style="text-align: left"><code>-u</code>, <code>--update default | platform | metrics | rebaseline</code></td><td style="text-align: left">Sets the mode for updating test expectation results: <br> - <code>default</code>: Updates generic render test expectation images/JSON. <br> - <code>platform</code>: Updates platform-specific render test expectation images/JSON. <br> - <code>metrics</code>: Updates expected metrics for the configuration defined by the manifest. <br> - <code>rebaseline</code>: Updates or creates expected metrics for the configuration defined by the manifest.</td><td style="text-align: left">No</td></tr>
-</tbody></table>
-</div>
-<h2 id="source-code-organization"><a class="header" href="#source-code-organization">Source Code Organization</a></h2>
-<h3 id="render-test"><a class="header" href="#render-test"><code>render-test</code></a></h3>
-<p>This directory contains the C++ source code for common render test runner, manifest parser and CLI tool.</p>
-<ul>
-<li><code>render-test/android</code>: standalone Gradle project with a app that runs the render test runner.</li>
-<li><code>render-tests/ios</code>: source code for Objective-C app that encapsulates the render test runner.
-property: <code>background-color</code>, <code>line-width</code>, etc., with a second level of directories below that for individual tests.</li>
-</ul>
-<h3 id="metrics"><a class="header" href="#metrics"><code>metrics</code></a></h3>
-<p>The JSON files in this directory are the manifests (to be passed to render test CLI tool). This directory also contains many directories that store metrics used by the tests. Other files/directories include:</p>
-<ul>
-<li><code>cache-style.db</code>, <code>cache-metrics.db</code>: pre-populated cache (SQLite database file) so the tests can run offline. You may need to update this database when you need a new resource available during test executation.</li>
-<li><code>binary-size</code>: binary-size checks. Not used right now, see <a href="https://github.com/maplibre/maplibre-native/issues/3379">#3379</a>.</li>
-<li><code>expectations</code>: expectations for various platforms. E.g. <code>expectations/platform-android</code> is referenced by the <code>android-render-test-runner-metrics.json</code> manifest under its <code>expectation_paths</code> key.</li>
-<li><code>ignores</code>: contains JSON files with as key a test path and as value a reason why a test is ignored. For example:
-<pre><code>{
-   "expression-tests/collator/accent-equals-de": "Locale-specific behavior changes based on platform."
-}
-</code></pre>
-Manifests can have a key <code>ignore_paths</code> with an array of ignore files. For example:
-<pre><code>{
-   ...
-   "ignore_paths": [
-      "ignores/platform-all.json",
-      "ignores/platform-linux.json",
-      "ignores/platform-android.json"
-   ],
-   ...
-}
-</code></pre>
-</li>
-</ul>
-<h4 id="metricsintergration"><a class="header" href="#metricsintergration"><code>metrics/intergration</code></a></h4>
-<ul>
-<li><code>data</code>, <code>geojson</code>, <code>glyphs</code>, <code>image</code>, <code>sprites</code>, <code>styles</code>, <code>tiles</code>, <code>tilesets</code>, <code>video</code>: various data used by the render tests.</li>
-<li><code>expression-tests</code>: tests that verify the behavior of <a href="https://maplibre.org/maplibre-style-spec/expressions/">expressions</a> of the MapLibre Style Spec.</li>
-<li><code>query-tests</code>: these tests test the behavior of the <code>queryRenderedFeatures</code> API which, as the name suggests, allow you to query the rendered features.</li>
-<li><code>render-tests</code>: location of render tests. Each render test contains a <code>style.json</code> and an <code>expected.png</code> image. This directory tree is generally organized by <a href="https://maplibre.org/maplibre-style-spec/">style specification</a> properties.</li>
-</ul>
-<h2 id="running-tests"><a class="header" href="#running-tests">Running tests</a></h2>
-<p>To run the entire integration test suite (both render or query tests), from within the maplibre-native directory on Linux run the command:</p>
-<pre><code>./build/mbgl-render-test-runner --manifestPath metrics/linux-clang8-release-style.json
-</code></pre>
-<h3 id="running-specific-tests"><a class="header" href="#running-specific-tests">Running specific tests</a></h3>
-<p>To run a subset of tests or an individual test, you can pass a specific subdirectory to the <code>mbgl-render-test-runner</code> executable. For example, to run all the tests for a given property, e.g. <code>circle-radius</code>:</p>
-<pre><code>$ build-macos-vulkan/mbgl-render-test-runner --manifestPath=metrics/macos-xcode11-release-style.json -f 'circle-radius/.*'
-* passed query-tests/circle-radius/feature-state
-* passed query-tests/circle-radius/zoom-and-property-function
-* passed query-tests/circle-radius/property-function
-* passed query-tests/circle-radius/outside
-* passed query-tests/circle-radius/tile-boundary
-* passed query-tests/circle-radius/inside
-* passed query-tests/circle-radius/multiple-layers
-* passed render-tests/circle-radius/zoom-and-property-function
-* passed render-tests/circle-radius/literal
-* passed render-tests/circle-radius/property-function
-* passed render-tests/circle-radius/default
-* passed render-tests/circle-radius/function
-* passed render-tests/circle-radius/antimeridian
-13 passed (100.0%)
-Results at: /Users/bart/src/maplibre-native/metrics/macos-xcode11-release-style.html
-</code></pre>
-<h2 id="writing-new-tests"><a class="header" href="#writing-new-tests">Writing new tests</a></h2>
-<p>To add a new render test:</p>
-<ol>
-<li>
-<p>Create a new directory <code>test/integration/render-tests/&lt;property-name&gt;/&lt;new-test-name&gt;</code></p>
-</li>
-<li>
-<p>Create a new <code>style.json</code> file within that directory, specifying the map to load. Feel free to copy &amp; modify one of the existing <code>style.json</code> files from the <code>render-tests</code> subdirectories.</p>
-</li>
-<li>
-<p>Generate an <code>expected.png</code> image from the given style with</p>
-<pre><code>$ ./build/mbgl-render-test-runner --update default --manifestPath=... -f '&lt;property-name&gt;/&lt;new-test-name&gt;'
-</code></pre>
-</li>
-<li>
-<p>Manually inspect <code>expected.png</code> to verify it looks as expected.</p>
-</li>
-<li>
-<p>Commit the new <code>style.json</code> and <code>expected.png</code>.</p>
-</li>
-</ol>
-<div style="break-before: page; page-break-before: always;"></div><style>
 .mdbook-alerts {
   padding: 8px 16px;
   margin-bottom: 16px;
@@ -746,7 +482,7 @@ cd platform/android
 <pre><code>$ ./gradlew formatKotlin
 </code></pre>
 <h2 id="profiling"><a class="header" href="#profiling">Profiling</a></h2>
-<p>See <a href="android//profiling/tracy-profiling.html">Tracy Profiling</a> to understand how Tracy can be used for profiling.</p>
+<p>See <a href="platforms/android//profiling/tracy-profiling.html">Tracy Profiling</a> to understand how Tracy can be used for profiling.</p>
 <div style="break-before: page; page-break-before: always;"></div><style>
 .mdbook-alerts {
   padding: 8px 16px;
@@ -815,7 +551,7 @@ cd platform/android
 
 </style>
 <h1 id="maplibre-android-tests"><a class="header" href="#maplibre-android-tests">MapLibre Android Tests</a></h1>
-<h2 id="render-tests-1"><a class="header" href="#render-tests-1">Render Tests</a></h2>
+<h2 id="render-tests"><a class="header" href="#render-tests">Render Tests</a></h2>
 <p>To run the render tests for Android, run the configuration for the <code>androidRenderTest.app</code> module.</p>
 <h3 id="filtering-render-tests"><a class="header" href="#filtering-render-tests">Filtering Render Tests</a></h3>
 <p>You can filter the tests to run by passing a flag to the file <code>platform/android/src/test/render_test_runner.cpp</code>:</p>
@@ -1172,7 +908,7 @@ scripts/aws-device-farm/plot-android-benchmark-results.py
 </style>
 <h1 id="release-maplibre-android"><a class="header" href="#release-maplibre-android">Release MapLibre Android</a></h1>
 <p>We make MapLibre Android releases as a downloadable asset on <a href="https://github.com/maplibre/maplibre-native/releases?q=android&amp;expanded=true">GitHub</a> as well as to <a href="https://central.sonatype.com/artifact/org.maplibre.gl/android-sdk/versions">Maven Central</a>. Specifically we make use of a Sonatype OSSHR repository provided by Maven Central.</p>
-<p>Also see the current <a href="android/../release-policy.html">release policy</a>.</p>
+<p>Also see the current <a href="platforms/android/../release-policy.html">release policy</a>.</p>
 <h2 id="making-a-release"><a class="header" href="#making-a-release">Making a release</a></h2>
 <p>To make an Android release, do the following:</p>
 <ol>
@@ -1323,14 +1059,14 @@ Confirm that no errors are shown.</p>
 <p>It is also possible to build and run the test application in a simulator from the command line without opening Xcode.</p>
 <pre><code>bazel run //platform/ios:App --//:renderer=metal
 </code></pre>
-<p>You can also build targets from the command line. For example, if you want to build your own XCFramework, see the 'Build XCFramework' step in the <a href="ios/../../.github/workflows/ios-ci.yml">iOS CI workflow</a>.</p>
+<p>You can also build targets from the command line. For example, if you want to build your own XCFramework, see the 'Build XCFramework' step in the <a href="platforms/ios/../../.github/workflows/ios-ci.yml">iOS CI workflow</a>.</p>
 <h2 id="cmake"><a class="header" href="#cmake">CMake</a></h2>
 <p>It is also possible to generate an Xcode project using CMake. As of February 2025, targets <code>mbgl-core</code>, <code>ios-sdk-static</code> and <code>app</code> (Objective-C development app) are supported.</p>
 <pre><code>cmake --preset ios -DDEVELOPMENT_TEAM_ID=YOUR_TEAM_ID
 xed build-ios/MapLibre\ Native.xcodeproj
 </code></pre>
 <h2 id="distribution"><a class="header" href="#distribution">Distribution</a></h2>
-<p>MapLibre iOS is distributed as an XCFramework via the <a href="https://github.com/maplibre/maplibre-gl-native-distribution">maplibre/maplibre-gl-native-distribution</a> repository. See <a href="ios/./release.html">Release MapLibre iOS</a> for the release process. Refer to the <a href="https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/ios-ci.yml"><code>ios-ci.yml</code></a> workflow for an up-to-date recipe for building an XCFramework. As of February 2025 we use:</p>
+<p>MapLibre iOS is distributed as an XCFramework via the <a href="https://github.com/maplibre/maplibre-gl-native-distribution">maplibre/maplibre-gl-native-distribution</a> repository. See <a href="platforms/ios/./release.html">Release MapLibre iOS</a> for the release process. Refer to the <a href="https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/ios-ci.yml"><code>ios-ci.yml</code></a> workflow for an up-to-date recipe for building an XCFramework. As of February 2025 we use:</p>
 <pre><code>bazel build --compilation_mode=opt --features=dead_strip,thin_lto --objc_enable_binary_stripping \
   --apple_generate_dsym --output_groups=+dsyms --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
 </code></pre>
@@ -1407,7 +1143,7 @@ xed build-ios/MapLibre\ Native.xcodeproj
 or use the following bazel command:</p>
 <pre><code>bazel test //platform/ios/test:ios_test --test_output=errors --//:renderer=metal
 </code></pre>
-<h2 id="render-tests-2"><a class="header" href="#render-tests-2">Render Tests</a></h2>
+<h2 id="render-tests-1"><a class="header" href="#render-tests-1">Render Tests</a></h2>
 <p>To run the render tests, run the <code>RenderTest</code> target from iOS.</p>
 <p>When running in a simulator, use</p>
 <pre><code># check for 'DataContainer' of the app with `*.maplibre.RenderTestApp` id
@@ -1582,7 +1318,7 @@ xcrun simctl listapps booted
 </style>
 <h1 id="release-maplibre-ios"><a class="header" href="#release-maplibre-ios">Release MapLibre iOS</a></h1>
 <p>We make iOS releases to GitHub (a downloadable XCFramework), the <a href="https://swiftpackageindex.com/maplibre/maplibre-gl-native-distribution">Swift Package Index</a> and <a href="https://cocoapods.org/">CocoaPods</a>. Everyone with write access to the repository is able to make releases using the instructions below.</p>
-<p>Also see the current <a href="ios/../release-policy.html">release policy</a>.</p>
+<p>Also see the current <a href="platforms/ios/../release-policy.html">release policy</a>.</p>
 <h2 id="making-a-release-1"><a class="header" href="#making-a-release-1">Making a release</a></h2>
 <ol>
 <li>
@@ -1678,7 +1414,7 @@ The heading in the changelog must match <code>## &lt;VERSION&gt;</code> exactly,
 <h1 id="development-apps"><a class="header" href="#development-apps">Development Apps</a></h1>
 <p>There are two iOS apps available in the repo that you can use for MapLibre Native development. One Objective-C based app and a Swift based app.</p>
 <h2 id="objective-c-app"><a class="header" href="#objective-c-app">Objective-C App</a></h2>
-<p>This app is available as "App" in the <a href="ios/./README.html">generated Xcode project</a>.</p>
+<p>This app is available as "App" in the <a href="platforms/ios/./README.html">generated Xcode project</a>.</p>
 <p>The source code lives in <code>platform/ios/app</code>.</p>
 <p>You can also build and run it from the command line with:</p>
 <pre><code>bazel run --//:renderer=metal //platform/ios:App
@@ -1687,8 +1423,8 @@ The heading in the changelog must match <code>## &lt;VERSION&gt;</code> exactly,
   <img width="300" alt="Objective-C app screenshot" src="https://github.com/user-attachments/assets/aeb0cb5e-1f6c-439e-8668-22ee0a0b11f2" />
 </p>
 <h2 id="swift-app"><a class="header" href="#swift-app">Swift App</a></h2>
-<p>The Swift App is mainly used to demo usage patterns in the <a href="ios/./ios-documentation.html#examples">example documentation</a>.</p>
-<p>This app is available as "MapLibreApp" in the <a href="ios/./README.html">generated Xcode project</a>.</p>
+<p>The Swift App is mainly used to demo usage patterns in the <a href="platforms/ios/./ios-documentation.html#examples">example documentation</a>.</p>
+<p>This app is available as "MapLibreApp" in the <a href="platforms/ios/./README.html">generated Xcode project</a>.</p>
 <p>The source code lives in <code>platform/ios/swift-app</code>.</p>
 <p align="center">
   <img width="300" alt="Swift app screenshot" src="https://github.com/user-attachments/assets/87f4cea4-40dd-4744-a935-c7cebd6887f1" />
@@ -1696,6 +1432,400 @@ The heading in the changelog must match <code>## &lt;VERSION&gt;</code> exactly,
 <p>You can also build and run it from the command line with:</p>
 <pre><code>bazel run --//:renderer=metal //platform/ios/app-swift:MapLibreApp
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><style>
+.mdbook-alerts {
+  padding: 8px 16px;
+  margin-bottom: 16px;
+  border-left: 0.25em solid var(--mdbook-alerts-color);
+}
+
+.mdbook-alerts > *:first-child {
+  margin-top: 0;
+}
+
+.mdbook-alerts > *:last-child {
+  margin-bottom: 0;
+}
+
+.mdbook-alerts-title {
+  display: flex;
+  font-weight: 600;
+  align-items: center;
+  line-height: 1;
+  color: var(--mdbook-alerts-color);
+  text-transform: capitalize;
+}
+
+.mdbook-alerts-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-right: 0.2em;
+  background-color: currentColor;
+  -webkit-mask: no-repeat center / 100%;
+  mask: no-repeat center / 100%;
+  -webkit-mask-image: var(--mdbook-alerts-icon);
+  mask-image: var(--mdbook-alerts-icon);
+}
+
+.mdbook-alerts-note {
+  --mdbook-alerts-color: rgb(9, 105, 218);
+  /* https://icon-sets.iconify.design/material-symbols/info-outline-rounded/ */
+  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 17q.425 0 .713-.288T13 16v-4q0-.425-.288-.712T12 11q-.425 0-.712.288T11 12v4q0 .425.288.713T12 17m0-8q.425 0 .713-.288T13 8q0-.425-.288-.712T12 7q-.425 0-.712.288T11 8q0 .425.288.713T12 9m0 13q-2.075 0-3.9-.788t-3.175-2.137q-1.35-1.35-2.137-3.175T2 12q0-2.075.788-3.9t2.137-3.175q1.35-1.35 3.175-2.137T12 2q2.075 0 3.9.788t3.175 2.137q1.35 1.35 2.138 3.175T22 12q0 2.075-.788 3.9t-2.137 3.175q-1.35 1.35-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12q0-3.35-2.325-5.675T12 4Q8.65 4 6.325 6.325T4 12q0 3.35 2.325 5.675T12 20m0-8"%2F%3E%3C%2Fsvg%3E');
+}
+
+.mdbook-alerts-tip {
+  --mdbook-alerts-color: rgb(26, 127, 55);
+  /* https://icon-sets.iconify.design/material-symbols/lightbulb-outline-rounded/ */
+  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 22q-.825 0-1.412-.587T10 20h4q0 .825-.587 1.413T12 22m-3-3q-.425 0-.712-.288T8 18q0-.425.288-.712T9 17h6q.425 0 .713.288T16 18q0 .425-.288.713T15 19zm-.75-3q-1.725-1.025-2.738-2.75T4.5 9.5q0-3.125 2.188-5.312T12 2q3.125 0 5.313 2.188T19.5 9.5q0 2.025-1.012 3.75T15.75 16zm.6-2h6.3q1.125-.8 1.738-1.975T17.5 9.5q0-2.3-1.6-3.9T12 4Q9.7 4 8.1 5.6T6.5 9.5q0 1.35.613 2.525T8.85 14M12 14"%2F%3E%3C%2Fsvg%3E');
+}
+
+.mdbook-alerts-important {
+  --mdbook-alerts-color: rgb(130, 80, 223);
+  /* https://icon-sets.iconify.design/material-symbols/chat-info-outline-rounded/ */
+  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 7q.425 0 .713-.288T13 6q0-.425-.288-.712T12 5q-.425 0-.712.288T11 6q0 .425.288.713T12 7m0 8q.425 0 .713-.288T13 14v-4q0-.425-.288-.712T12 9q-.425 0-.712.288T11 10v4q0 .425.288.713T12 15m-6 3l-2.3 2.3q-.475.475-1.088.213T2 19.575V4q0-.825.588-1.412T4 2h16q.825 0 1.413.588T22 4v12q0 .825-.587 1.413T20 18zm-.85-2H20V4H4v13.125zM4 16V4z"%2F%3E%3C%2Fsvg%3E');
+}
+
+.mdbook-alerts-warning {
+  --mdbook-alerts-color: rgb(154, 103, 0);
+  /* https://icon-sets.iconify.design/material-symbols/warning-outline-rounded/ */
+  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M2.725 21q-.275 0-.5-.137t-.35-.363q-.125-.225-.137-.488t.137-.512l9.25-16q.15-.25.388-.375T12 3q.25 0 .488.125t.387.375l9.25 16q.15.25.138.513t-.138.487q-.125.225-.35.363t-.5.137zm1.725-2h15.1L12 6zM12 18q.425 0 .713-.288T13 17q0-.425-.288-.712T12 16q-.425 0-.712.288T11 17q0 .425.288.713T12 18m0-3q.425 0 .713-.288T13 14v-3q0-.425-.288-.712T12 10q-.425 0-.712.288T11 11v3q0 .425.288.713T12 15m0-2.5"%2F%3E%3C%2Fsvg%3E');
+}
+
+.mdbook-alerts-caution {
+  --mdbook-alerts-color: rgb(207, 34, 46);
+  /* https://icon-sets.iconify.design/material-symbols/brightness-alert-outline-rounded/ */
+  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 17q.425 0 .713-.288T13 16q0-.425-.288-.712T12 15q-.425 0-.712.288T11 16q0 .425.288.713T12 17m0-4q.425 0 .713-.288T13 12V8q0-.425-.288-.712T12 7q-.425 0-.712.288T11 8v4q0 .425.288.713T12 13m-3.35 7H6q-.825 0-1.412-.587T4 18v-2.65L2.075 13.4q-.275-.3-.425-.662T1.5 12q0-.375.15-.737t.425-.663L4 8.65V6q0-.825.588-1.412T6 4h2.65l1.95-1.925q.3-.275.663-.425T12 1.5q.375 0 .738.15t.662.425L15.35 4H18q.825 0 1.413.588T20 6v2.65l1.925 1.95q.275.3.425.663t.15.737q0 .375-.15.738t-.425.662L20 15.35V18q0 .825-.587 1.413T18 20h-2.65l-1.95 1.925q-.3.275-.662.425T12 22.5q-.375 0-.737-.15t-.663-.425zm.85-2l2.5 2.5l2.5-2.5H18v-3.5l2.5-2.5L18 9.5V6h-3.5L12 3.5L9.5 6H6v3.5L3.5 12L6 14.5V18zm2.5-6"%2F%3E%3C%2Fsvg%3E');
+}
+
+</style>
+<h1 id="macos"><a class="header" href="#macos">macOS</a></h1>
+<p>MapLibre Native can be built for macOS. This is mostly used for development.</p>
+<div class="mdbook-alerts mdbook-alerts-note">
+<p class="mdbook-alerts-title">
+  <span class="mdbook-alerts-icon"></span>
+  note
+</p>
+<p>There are some <a href="https://developer.apple.com/documentation/appkit">AppKit</a> APIs for macOS the source tree. However those are not actively maintained. There is an <a href="https://github.com/maplibre/maplibre-native/discussions/3414">discussion</a> on whether we should remove this code.</p>
+</div>
+<h2 id="file-structure"><a class="header" href="#file-structure">File Structure</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Path</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>platform/darwin</code></td><td>Shared code between macOS and iOS</td></tr>
+<tr><td><code>platform/darwin/core</code></td><td>iOS/macOS specific implementations for interfaces part of the MapLibre Native C++ Core</td></tr>
+<tr><td><code>platform/macos</code></td><td>macOS specific code</td></tr>
+<tr><td><code>platform/macos/app</code></td><td>AppKit based example app</td></tr>
+</tbody></table>
+</div>
+<h2 id="getting-started"><a class="header" href="#getting-started">Getting Started</a></h2>
+<p>Clone the repo:</p>
+<pre><code class="language-sh">git clone --recurse-submodules git@github.com:maplibre/maplibre-native.git
+</code></pre>
+<p>Make sure the following Homebrew packages are installed:</p>
+<pre><code class="language-sh">brew install bazelisk webp libuv webp icu4c jpeg-turbo glfw
+brew link icu4c --force
+</code></pre>
+<p>You can get started building the project for macOS using either Bazel or CMake.</p>
+<h2 id="bazel-1"><a class="header" href="#bazel-1">Bazel</a></h2>
+<p>Configure Bazel (optional):</p>
+<pre><code class="language-sh">cp platform/darwin/bazel/example_config.bzl platform/darwin/bazel/config.bzl
+</code></pre>
+<p>Run the GLFW app with a style of your choice:</p>
+<pre><code class="language-sh">bazel run --//:renderer=metal //platform/glfw:glfw_app -- --style https://sgx.geodatenzentrum.de/gdz_basemapworld_vektor/styles/bm_web_wld_col.json
+</code></pre>
+<p>Create and open Xcode project:</p>
+<pre><code class="language-sh">bazel run //platform/macos:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
+xed platform/macos/MapLibre.xcodeproj
+</code></pre>
+<h2 id="cmake-1"><a class="header" href="#cmake-1">CMake</a></h2>
+<p>Configure CMake:</p>
+<pre><code class="language-sh">cmake --preset macos
+</code></pre>
+<p>Build and run the render tests:</p>
+<pre><code class="language-sh">cmake --build build-macos --target mbgl-render-test-runner
+build-macos/mbgl-render-test-runner --manifestPath=metrics/macos-xcode11-release-style.json
+</code></pre>
+<p>Build and run the C++ Tests:</p>
+<pre><code class="language-sh">cmake --build build-macos --target mbgl-test-runner
+npm install &amp;&amp; node test/storage/server.js  # required test server
+# in another terminal
+build-macos/mbgl-test-runner
+</code></pre>
+<p>Create and open an Xcode project with CMake:</p>
+<pre><code class="language-sh">cmake --preset macos-xcode
+xed build-macos-xcode/MapLibre\ Native.xcodeproj
+</code></pre>
+<p>Configure project for Vulkan (make sure <a href="https://github.com/KhronosGroup/MoltenVK">MoltenVK</a> is installed):</p>
+<pre><code class="language-sh">cmake --preset macos-vulkan
+</code></pre>
+<p>Build and run <code>mbgl-render</code> (simple command line utility for rendering maps):</p>
+<pre><code class="language-sh">cmake --build build-macos-vulkan --target mbgl-render
+build-macos-vulkan/bin/mbgl-render -z 7 -x -74 -y 41 --style https://americanamap.org/style.json
+open out.png
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><style>
+.mdbook-alerts {
+  padding: 8px 16px;
+  margin-bottom: 16px;
+  border-left: 0.25em solid var(--mdbook-alerts-color);
+}
+
+.mdbook-alerts > *:first-child {
+  margin-top: 0;
+}
+
+.mdbook-alerts > *:last-child {
+  margin-bottom: 0;
+}
+
+.mdbook-alerts-title {
+  display: flex;
+  font-weight: 600;
+  align-items: center;
+  line-height: 1;
+  color: var(--mdbook-alerts-color);
+  text-transform: capitalize;
+}
+
+.mdbook-alerts-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-right: 0.2em;
+  background-color: currentColor;
+  -webkit-mask: no-repeat center / 100%;
+  mask: no-repeat center / 100%;
+  -webkit-mask-image: var(--mdbook-alerts-icon);
+  mask-image: var(--mdbook-alerts-icon);
+}
+
+.mdbook-alerts-note {
+  --mdbook-alerts-color: rgb(9, 105, 218);
+  /* https://icon-sets.iconify.design/material-symbols/info-outline-rounded/ */
+  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 17q.425 0 .713-.288T13 16v-4q0-.425-.288-.712T12 11q-.425 0-.712.288T11 12v4q0 .425.288.713T12 17m0-8q.425 0 .713-.288T13 8q0-.425-.288-.712T12 7q-.425 0-.712.288T11 8q0 .425.288.713T12 9m0 13q-2.075 0-3.9-.788t-3.175-2.137q-1.35-1.35-2.137-3.175T2 12q0-2.075.788-3.9t2.137-3.175q1.35-1.35 3.175-2.137T12 2q2.075 0 3.9.788t3.175 2.137q1.35 1.35 2.138 3.175T22 12q0 2.075-.788 3.9t-2.137 3.175q-1.35 1.35-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12q0-3.35-2.325-5.675T12 4Q8.65 4 6.325 6.325T4 12q0 3.35 2.325 5.675T12 20m0-8"%2F%3E%3C%2Fsvg%3E');
+}
+
+.mdbook-alerts-tip {
+  --mdbook-alerts-color: rgb(26, 127, 55);
+  /* https://icon-sets.iconify.design/material-symbols/lightbulb-outline-rounded/ */
+  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 22q-.825 0-1.412-.587T10 20h4q0 .825-.587 1.413T12 22m-3-3q-.425 0-.712-.288T8 18q0-.425.288-.712T9 17h6q.425 0 .713.288T16 18q0 .425-.288.713T15 19zm-.75-3q-1.725-1.025-2.738-2.75T4.5 9.5q0-3.125 2.188-5.312T12 2q3.125 0 5.313 2.188T19.5 9.5q0 2.025-1.012 3.75T15.75 16zm.6-2h6.3q1.125-.8 1.738-1.975T17.5 9.5q0-2.3-1.6-3.9T12 4Q9.7 4 8.1 5.6T6.5 9.5q0 1.35.613 2.525T8.85 14M12 14"%2F%3E%3C%2Fsvg%3E');
+}
+
+.mdbook-alerts-important {
+  --mdbook-alerts-color: rgb(130, 80, 223);
+  /* https://icon-sets.iconify.design/material-symbols/chat-info-outline-rounded/ */
+  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 7q.425 0 .713-.288T13 6q0-.425-.288-.712T12 5q-.425 0-.712.288T11 6q0 .425.288.713T12 7m0 8q.425 0 .713-.288T13 14v-4q0-.425-.288-.712T12 9q-.425 0-.712.288T11 10v4q0 .425.288.713T12 15m-6 3l-2.3 2.3q-.475.475-1.088.213T2 19.575V4q0-.825.588-1.412T4 2h16q.825 0 1.413.588T22 4v12q0 .825-.587 1.413T20 18zm-.85-2H20V4H4v13.125zM4 16V4z"%2F%3E%3C%2Fsvg%3E');
+}
+
+.mdbook-alerts-warning {
+  --mdbook-alerts-color: rgb(154, 103, 0);
+  /* https://icon-sets.iconify.design/material-symbols/warning-outline-rounded/ */
+  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M2.725 21q-.275 0-.5-.137t-.35-.363q-.125-.225-.137-.488t.137-.512l9.25-16q.15-.25.388-.375T12 3q.25 0 .488.125t.387.375l9.25 16q.15.25.138.513t-.138.487q-.125.225-.35.363t-.5.137zm1.725-2h15.1L12 6zM12 18q.425 0 .713-.288T13 17q0-.425-.288-.712T12 16q-.425 0-.712.288T11 17q0 .425.288.713T12 18m0-3q.425 0 .713-.288T13 14v-3q0-.425-.288-.712T12 10q-.425 0-.712.288T11 11v3q0 .425.288.713T12 15m0-2.5"%2F%3E%3C%2Fsvg%3E');
+}
+
+.mdbook-alerts-caution {
+  --mdbook-alerts-color: rgb(207, 34, 46);
+  /* https://icon-sets.iconify.design/material-symbols/brightness-alert-outline-rounded/ */
+  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 17q.425 0 .713-.288T13 16q0-.425-.288-.712T12 15q-.425 0-.712.288T11 16q0 .425.288.713T12 17m0-4q.425 0 .713-.288T13 12V8q0-.425-.288-.712T12 7q-.425 0-.712.288T11 8v4q0 .425.288.713T12 13m-3.35 7H6q-.825 0-1.412-.587T4 18v-2.65L2.075 13.4q-.275-.3-.425-.662T1.5 12q0-.375.15-.737t.425-.663L4 8.65V6q0-.825.588-1.412T6 4h2.65l1.95-1.925q.3-.275.663-.425T12 1.5q.375 0 .738.15t.662.425L15.35 4H18q.825 0 1.413.588T20 6v2.65l1.925 1.95q.275.3.425.663t.15.737q0 .375-.15.738t-.425.662L20 15.35V18q0 .825-.587 1.413T18 20h-2.65l-1.95 1.925q-.3.275-.662.425T12 22.5q-.375 0-.737-.15t-.663-.425zm.85-2l2.5 2.5l2.5-2.5H18v-3.5l2.5-2.5L18 9.5V6h-3.5L12 3.5L9.5 6H6v3.5L3.5 12L6 14.5V18zm2.5-6"%2F%3E%3C%2Fsvg%3E');
+}
+
+</style>
+<h1 id="release-policy"><a class="header" href="#release-policy">Release Policy</a></h1>
+<div class="mdbook-alerts mdbook-alerts-note">
+<p class="mdbook-alerts-title">
+  <span class="mdbook-alerts-icon"></span>
+  note
+</p>
+<p>The following release policiy applies specifically to MapLibre <strong>Android</strong> and MapLibre <strong>iOS</strong>.</p>
+</div>
+<ul>
+<li>We use <a href="https://semver.org/">semantic versioning</a>. Breaking changes will always result in a major release.</li>
+<li>Despite having extensive tests in place, as a FOSS project we have limited QA testing capabilities. When major changes took place we may opt to put out a pre-release to let the community help with testing.</li>
+<li>In principle the <code>main</code> branch should always be in a releasable state.</li>
+<li>The release process is automated and documented (see <a href="./ios/release.html">Release MapLibre iOS</a> and <a href="./android/release.html">Release MapLibre Android</a>). Anyone with write access should be able to push out a release.</li>
+<li>There is no fixed release cadence, but you are welcome to request a release on any of the communication channels.</li>
+<li>We do not have long-term support (LTS) releases.</li>
+<li>If you need a feature or a bugfix ported to and old version of MapLibre, you need to do the backporting yourself (see steps below).</li>
+</ul>
+<h2 id="backporting"><a class="header" href="#backporting">Backporting</a></h2>
+<p>We understand that MapLibre is used in large mission critical applications where updating to the latest version is not always immediately possible. We do not have the capacity to offer LTS releases, but we do want to facilitate backporting.</p>
+<ol>
+<li>Create an issue and request that a branch is created from the release you want to target. Also mention the feature or bugfix you want to backport.</li>
+<li>Once the branch is created, make a PR that includes the feature or bugfix and that targets this branch. Also update the relevant changelog.</li>
+<li>When the PR is approved and merged, a release is attempted. If the release workflow significantly changed and the release fails, you may need to help to backport changes to the release workflow as well.</li>
+</ol>
+<p>The branch names for older versions follow a pattern as follows: <code>platform-x.x.x</code> (e.g. <a href="https://github.com/maplibre/maplibre-native/tree/android-10.x.x"><code>android-10.x.x</code></a> for the MapLibre Native Android 10.x.x release series). These branches have some minimal branch protection (a pull request is required to push changes to them).</p>
+<div style="break-before: page; page-break-before: always;"></div><style>
+.mdbook-alerts {
+  padding: 8px 16px;
+  margin-bottom: 16px;
+  border-left: 0.25em solid var(--mdbook-alerts-color);
+}
+
+.mdbook-alerts > *:first-child {
+  margin-top: 0;
+}
+
+.mdbook-alerts > *:last-child {
+  margin-bottom: 0;
+}
+
+.mdbook-alerts-title {
+  display: flex;
+  font-weight: 600;
+  align-items: center;
+  line-height: 1;
+  color: var(--mdbook-alerts-color);
+  text-transform: capitalize;
+}
+
+.mdbook-alerts-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-right: 0.2em;
+  background-color: currentColor;
+  -webkit-mask: no-repeat center / 100%;
+  mask: no-repeat center / 100%;
+  -webkit-mask-image: var(--mdbook-alerts-icon);
+  mask-image: var(--mdbook-alerts-icon);
+}
+
+.mdbook-alerts-note {
+  --mdbook-alerts-color: rgb(9, 105, 218);
+  /* https://icon-sets.iconify.design/material-symbols/info-outline-rounded/ */
+  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 17q.425 0 .713-.288T13 16v-4q0-.425-.288-.712T12 11q-.425 0-.712.288T11 12v4q0 .425.288.713T12 17m0-8q.425 0 .713-.288T13 8q0-.425-.288-.712T12 7q-.425 0-.712.288T11 8q0 .425.288.713T12 9m0 13q-2.075 0-3.9-.788t-3.175-2.137q-1.35-1.35-2.137-3.175T2 12q0-2.075.788-3.9t2.137-3.175q1.35-1.35 3.175-2.137T12 2q2.075 0 3.9.788t3.175 2.137q1.35 1.35 2.138 3.175T22 12q0 2.075-.788 3.9t-2.137 3.175q-1.35 1.35-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12q0-3.35-2.325-5.675T12 4Q8.65 4 6.325 6.325T4 12q0 3.35 2.325 5.675T12 20m0-8"%2F%3E%3C%2Fsvg%3E');
+}
+
+.mdbook-alerts-tip {
+  --mdbook-alerts-color: rgb(26, 127, 55);
+  /* https://icon-sets.iconify.design/material-symbols/lightbulb-outline-rounded/ */
+  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 22q-.825 0-1.412-.587T10 20h4q0 .825-.587 1.413T12 22m-3-3q-.425 0-.712-.288T8 18q0-.425.288-.712T9 17h6q.425 0 .713.288T16 18q0 .425-.288.713T15 19zm-.75-3q-1.725-1.025-2.738-2.75T4.5 9.5q0-3.125 2.188-5.312T12 2q3.125 0 5.313 2.188T19.5 9.5q0 2.025-1.012 3.75T15.75 16zm.6-2h6.3q1.125-.8 1.738-1.975T17.5 9.5q0-2.3-1.6-3.9T12 4Q9.7 4 8.1 5.6T6.5 9.5q0 1.35.613 2.525T8.85 14M12 14"%2F%3E%3C%2Fsvg%3E');
+}
+
+.mdbook-alerts-important {
+  --mdbook-alerts-color: rgb(130, 80, 223);
+  /* https://icon-sets.iconify.design/material-symbols/chat-info-outline-rounded/ */
+  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 7q.425 0 .713-.288T13 6q0-.425-.288-.712T12 5q-.425 0-.712.288T11 6q0 .425.288.713T12 7m0 8q.425 0 .713-.288T13 14v-4q0-.425-.288-.712T12 9q-.425 0-.712.288T11 10v4q0 .425.288.713T12 15m-6 3l-2.3 2.3q-.475.475-1.088.213T2 19.575V4q0-.825.588-1.412T4 2h16q.825 0 1.413.588T22 4v12q0 .825-.587 1.413T20 18zm-.85-2H20V4H4v13.125zM4 16V4z"%2F%3E%3C%2Fsvg%3E');
+}
+
+.mdbook-alerts-warning {
+  --mdbook-alerts-color: rgb(154, 103, 0);
+  /* https://icon-sets.iconify.design/material-symbols/warning-outline-rounded/ */
+  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M2.725 21q-.275 0-.5-.137t-.35-.363q-.125-.225-.137-.488t.137-.512l9.25-16q.15-.25.388-.375T12 3q.25 0 .488.125t.387.375l9.25 16q.15.25.138.513t-.138.487q-.125.225-.35.363t-.5.137zm1.725-2h15.1L12 6zM12 18q.425 0 .713-.288T13 17q0-.425-.288-.712T12 16q-.425 0-.712.288T11 17q0 .425.288.713T12 18m0-3q.425 0 .713-.288T13 14v-3q0-.425-.288-.712T12 10q-.425 0-.712.288T11 11v3q0 .425.288.713T12 15m0-2.5"%2F%3E%3C%2Fsvg%3E');
+}
+
+.mdbook-alerts-caution {
+  --mdbook-alerts-color: rgb(207, 34, 46);
+  /* https://icon-sets.iconify.design/material-symbols/brightness-alert-outline-rounded/ */
+  --mdbook-alerts-icon: url('data:image/svg+xml,%3Csvg xmlns="http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width="24" height="24" viewBox="0 0 24 24"%3E%3Cpath fill="currentColor" d="M12 17q.425 0 .713-.288T13 16q0-.425-.288-.712T12 15q-.425 0-.712.288T11 16q0 .425.288.713T12 17m0-4q.425 0 .713-.288T13 12V8q0-.425-.288-.712T12 7q-.425 0-.712.288T11 8v4q0 .425.288.713T12 13m-3.35 7H6q-.825 0-1.412-.587T4 18v-2.65L2.075 13.4q-.275-.3-.425-.662T1.5 12q0-.375.15-.737t.425-.663L4 8.65V6q0-.825.588-1.412T6 4h2.65l1.95-1.925q.3-.275.663-.425T12 1.5q.375 0 .738.15t.662.425L15.35 4H18q.825 0 1.413.588T20 6v2.65l1.925 1.95q.275.3.425.663t.15.737q0 .375-.15.738t-.425.662L20 15.35V18q0 .825-.587 1.413T18 20h-2.65l-1.95 1.925q-.3.275-.662.425T12 22.5q-.375 0-.737-.15t-.663-.425zm.85-2l2.5 2.5l2.5-2.5H18v-3.5l2.5-2.5L18 9.5V6h-3.5L12 3.5L9.5 6H6v3.5L3.5 12L6 14.5V18zm2.5-6"%2F%3E%3C%2Fsvg%3E');
+}
+
+</style>
+<h1 id="render-tests-2"><a class="header" href="#render-tests-2">Render Tests</a></h1>
+<div class="mdbook-alerts mdbook-alerts-note">
+<p class="mdbook-alerts-title">
+  <span class="mdbook-alerts-icon"></span>
+  note
+</p>
+<p>See also <a href="./android/android-tests.html#render-tests">Android Tests</a> and <a href="./ios/ios-tests.html#render-tests">iOS Tests</a> for some platform-specific information on the render tests.</p>
+</div>
+<p>Render tests verify the correctness and consistency of MapLibre Native's rendering. Note that 'render test' is a bit of a misnomer, because there are various types of tests that do not really test rendering behavior that we sometimes call render tests. Examples are <a href="render-tests.html#metricsintergration">expression tests and query tests</a>. In addition, these 'render tests' allow a wide variety of operations and probes (which write out metrics) for things like GPU memory allocations, memory usage, network requests, FPS, so these tests are really quite a bit more versatile than just verifying rendering behavior.</p>
+<h2 id="render-test-runner-cli-options"><a class="header" href="#render-test-runner-cli-options">Render Test Runner CLI Options</a></h2>
+<p>When using CMake, the render test runner is an executable available as <code>mbgl-render-test-runner</code> in the build directory.</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Option / Argument</th><th style="text-align: left">Description</th><th style="text-align: left">Required?</th></tr></thead><tbody>
+<tr><td style="text-align: left"><code>-h</code>, <code>--help</code></td><td style="text-align: left">Display the help menu and exit.</td><td style="text-align: left">No</td></tr>
+<tr><td style="text-align: left"><code>-r</code>, <code>--recycle-map</code></td><td style="text-align: left">Toggle reusing the map object between tests. If set, the map object is reused; otherwise, it's reset for each test.</td><td style="text-align: left">No</td></tr>
+<tr><td style="text-align: left"><code>-s</code>, <code>--shuffle</code></td><td style="text-align: left">Toggle shuffling the order of tests based on the manifest file.</td><td style="text-align: left">No</td></tr>
+<tr><td style="text-align: left"><code>-o</code>, <code>--online</code></td><td style="text-align: left">Toggle online mode. If set, tests can make network requests. By default (<code>--online</code> not specified), tests run in offline mode, forcing resource loading from the cache only.</td><td style="text-align: left">No</td></tr>
+<tr><td style="text-align: left"><code>--seed &lt;uint32_t&gt;</code></td><td style="text-align: left">Set the seed for shuffling tests. Only relevant if <code>--shuffle</code> is also used. Defaults to <code>1</code> if <code>--shuffle</code> is used without <code>--seed</code>.</td><td style="text-align: left">No</td></tr>
+<tr><td style="text-align: left"><code>-p</code>, <code>--manifestPath &lt;string&gt;</code></td><td style="text-align: left">Specifies the path to the test manifest JSON file, which defines test configurations, paths, and potentially filters/ignores.</td><td style="text-align: left">Yes</td></tr>
+<tr><td style="text-align: left"><code>-f</code>, <code>--filter &lt;string&gt;</code></td><td style="text-align: left">Provides a regular expression used to filter which tests (based on their path/ID) should be run. Only tests matching the regex will be executed.</td><td style="text-align: left">No</td></tr>
+<tr><td style="text-align: left"><code>-u</code>, <code>--update default | platform | metrics | rebaseline</code></td><td style="text-align: left">Sets the mode for updating test expectation results: <br> - <code>default</code>: Updates generic render test expectation images/JSON. <br> - <code>platform</code>: Updates platform-specific render test expectation images/JSON. <br> - <code>metrics</code>: Updates expected metrics for the configuration defined by the manifest. <br> - <code>rebaseline</code>: Updates or creates expected metrics for the configuration defined by the manifest.</td><td style="text-align: left">No</td></tr>
+</tbody></table>
+</div>
+<h2 id="source-code-organization"><a class="header" href="#source-code-organization">Source Code Organization</a></h2>
+<h3 id="render-test"><a class="header" href="#render-test"><code>render-test</code></a></h3>
+<p>This directory contains the C++ source code for common render test runner, manifest parser and CLI tool.</p>
+<ul>
+<li><code>render-test/android</code>: standalone Gradle project with a app that runs the render test runner.</li>
+<li><code>render-tests/ios</code>: source code for Objective-C app that encapsulates the render test runner.
+property: <code>background-color</code>, <code>line-width</code>, etc., with a second level of directories below that for individual tests.</li>
+</ul>
+<h3 id="metrics"><a class="header" href="#metrics"><code>metrics</code></a></h3>
+<p>The JSON files in this directory are the manifests (to be passed to render test CLI tool). This directory also contains many directories that store metrics used by the tests. Other files/directories include:</p>
+<ul>
+<li><code>cache-style.db</code>, <code>cache-metrics.db</code>: pre-populated cache (SQLite database file) so the tests can run offline. You may need to update this database when you need a new resource available during test executation.</li>
+<li><code>binary-size</code>: binary-size checks. Not used right now, see <a href="https://github.com/maplibre/maplibre-native/issues/3379">#3379</a>.</li>
+<li><code>expectations</code>: expectations for various platforms. E.g. <code>expectations/platform-android</code> is referenced by the <code>android-render-test-runner-metrics.json</code> manifest under its <code>expectation_paths</code> key.</li>
+<li><code>ignores</code>: contains JSON files with as key a test path and as value a reason why a test is ignored. For example:
+<pre><code>{
+   "expression-tests/collator/accent-equals-de": "Locale-specific behavior changes based on platform."
+}
+</code></pre>
+Manifests can have a key <code>ignore_paths</code> with an array of ignore files. For example:
+<pre><code>{
+   ...
+   "ignore_paths": [
+      "ignores/platform-all.json",
+      "ignores/platform-linux.json",
+      "ignores/platform-android.json"
+   ],
+   ...
+}
+</code></pre>
+</li>
+</ul>
+<h4 id="metricsintergration"><a class="header" href="#metricsintergration"><code>metrics/intergration</code></a></h4>
+<ul>
+<li><code>data</code>, <code>geojson</code>, <code>glyphs</code>, <code>image</code>, <code>sprites</code>, <code>styles</code>, <code>tiles</code>, <code>tilesets</code>, <code>video</code>: various data used by the render tests.</li>
+<li><code>expression-tests</code>: tests that verify the behavior of <a href="https://maplibre.org/maplibre-style-spec/expressions/">expressions</a> of the MapLibre Style Spec.</li>
+<li><code>query-tests</code>: these tests test the behavior of the <code>queryRenderedFeatures</code> API which, as the name suggests, allow you to query the rendered features.</li>
+<li><code>render-tests</code>: location of render tests. Each render test contains a <code>style.json</code> and an <code>expected.png</code> image. This directory tree is generally organized by <a href="https://maplibre.org/maplibre-style-spec/">style specification</a> properties.</li>
+</ul>
+<h2 id="running-tests"><a class="header" href="#running-tests">Running tests</a></h2>
+<p>To run the entire integration test suite (both render or query tests), from within the maplibre-native directory on Linux run the command:</p>
+<pre><code>./build/mbgl-render-test-runner --manifestPath metrics/linux-clang8-release-style.json
+</code></pre>
+<h3 id="running-specific-tests"><a class="header" href="#running-specific-tests">Running specific tests</a></h3>
+<p>To run a subset of tests or an individual test, you can pass a specific subdirectory to the <code>mbgl-render-test-runner</code> executable. For example, to run all the tests for a given property, e.g. <code>circle-radius</code>:</p>
+<pre><code>$ build-macos-vulkan/mbgl-render-test-runner --manifestPath=metrics/macos-xcode11-release-style.json -f 'circle-radius/.*'
+* passed query-tests/circle-radius/feature-state
+* passed query-tests/circle-radius/zoom-and-property-function
+* passed query-tests/circle-radius/property-function
+* passed query-tests/circle-radius/outside
+* passed query-tests/circle-radius/tile-boundary
+* passed query-tests/circle-radius/inside
+* passed query-tests/circle-radius/multiple-layers
+* passed render-tests/circle-radius/zoom-and-property-function
+* passed render-tests/circle-radius/literal
+* passed render-tests/circle-radius/property-function
+* passed render-tests/circle-radius/default
+* passed render-tests/circle-radius/function
+* passed render-tests/circle-radius/antimeridian
+13 passed (100.0%)
+Results at: /Users/bart/src/maplibre-native/metrics/macos-xcode11-release-style.html
+</code></pre>
+<h2 id="writing-new-tests"><a class="header" href="#writing-new-tests">Writing new tests</a></h2>
+<p>To add a new render test:</p>
+<ol>
+<li>
+<p>Create a new directory <code>test/integration/render-tests/&lt;property-name&gt;/&lt;new-test-name&gt;</code></p>
+</li>
+<li>
+<p>Create a new <code>style.json</code> file within that directory, specifying the map to load. Feel free to copy &amp; modify one of the existing <code>style.json</code> files from the <code>render-tests</code> subdirectories.</p>
+</li>
+<li>
+<p>Generate an <code>expected.png</code> image from the given style with</p>
+<pre><code>$ ./build/mbgl-render-test-runner --update default --manifestPath=... -f '&lt;property-name&gt;/&lt;new-test-name&gt;'
+</code></pre>
+</li>
+<li>
+<p>Manually inspect <code>expected.png</code> to verify it looks as expected.</p>
+</li>
+<li>
+<p>Commit the new <code>style.json</code> and <code>expected.png</code>.</p>
+</li>
+</ol>
 <div style="break-before: page; page-break-before: always;"></div><style>
 .mdbook-alerts {
   padding: 8px 16px;
@@ -3532,7 +3662,7 @@ bazel run //platform/glfw:glfw_app -- --style https://raw.githubusercontent.com/
 <p>The Rust bridge lives in the root <code>rustutils</code> directory.</p>
 <p>We use <a href="https://cxx.rs/">CXX</a> to allow interop between Rust and C++.</p>
 <h2 id="building-1"><a class="header" href="#building-1">Building</a></h2>
-<h3 id="cmake-1"><a class="header" href="#cmake-1">CMake</a></h3>
+<h3 id="cmake-2"><a class="header" href="#cmake-2">CMake</a></h3>
 <p>When building with CMake, need to have the correct Rust toolchain(s) installed. See <a href="https://www.rust-lang.org/tools/install">Install Rust</a> to install Rust.</p>
 <p>You can use <code>rustup</code> to manage toolchains. Which toolchain you needs depends on your host platform and for what platform you are trying to build. If your host and target platform are the same, you probably have the correct toolchain installed after installing Rust. For example when building for <strong>Android</strong> and building on a <strong>x84 Linux</strong> host you would use the following command:</p>
 <pre><code class="language-shell">rustup target add --toolchain stable-x86_64-unknown-linux-gnu aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
@@ -3542,7 +3672,7 @@ bazel run //platform/glfw:glfw_app -- --style https://raw.githubusercontent.com/
 <pre><code class="language-shell">cargo install cxxbridge-cmd@1.0.157 --locked
 </code></pre>
 <p>Set <code>-DMLN_USE_RUST=ON</code> when generating a configuration with CMake.</p>
-<h3 id="bazel-1"><a class="header" href="#bazel-1">Bazel</a></h3>
+<h3 id="bazel-2"><a class="header" href="#bazel-2">Bazel</a></h3>
 <p>Pass the <code>--//:use_rust</code> flag to Bazel commands.</p>
 <p>Note that when <a href="./ios/README.html">generating an Xcode project</a> you should not pass this option to Bazel directly, but as follows:</p>
 <pre><code class="language-shell">bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal --//:use_rust"
