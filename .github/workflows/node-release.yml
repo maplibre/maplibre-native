@@ -67,14 +67,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          submodules: true
           fetch-depth: 0
-
-      - name: Setup submodules
-        shell: bash
-        run: |
-          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
-          git submodule sync --recursive
-          git -c core.longpaths=true -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive || true
 
       - name: Get OS Architecture
         if: runner.os == 'MacOS' || runner.os == 'Linux'
@@ -106,7 +100,6 @@ jobs:
             libcurl4-openssl-dev \
             libglfw3-dev \
             libuv1-dev \
-            g++-12 \
             libjpeg-dev \
             libpng-dev \
             libwebp-dev
@@ -137,7 +130,7 @@ jobs:
         if: ${{contains(runner.name, 'GitHub Actions')}}
         uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: '3.29.2'
+          cmake-version: '3.31'
 
       - name: cmake version
         run: |
@@ -174,14 +167,7 @@ jobs:
       - name: Configure maplibre-native (MacOS)
         if: runner.os == 'MacOS'
         run: |
-          cmake . -B build \
-            -G Ninja \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DMLN_WITH_NODE=ON \
-            -DMLN_WITH_OPENGL=OFF \
-            -DMLN_WITH_METAL=ON \
-            -DMLN_WITH_WERROR=OFF
+          cmake --preset macos-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
       - name: Configure maplibre-native (Linux)
         if: runner.os == 'Linux'
@@ -191,7 +177,6 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DCMAKE_C_COMPILER=gcc-12 \
-            -DCMAKE_CXX_COMPILER=g++-12 \
             -DMLN_WITH_NODE=ON
 
       - name: "Create directory '${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache' (Windows)"
@@ -214,11 +199,12 @@ jobs:
 
       - name: Configure maplibre-native (Windows)
         if: runner.os == 'Windows'
+        shell: pwsh
         run: |
-          cmake . -B build \
-            -G Ninja \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
+          cmake . -B build `
+            -G Ninja `
+            -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} `
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
             -DMLN_WITH_NODE=ON
 
       - name: Build maplibre-native (MacOS/Linux)
