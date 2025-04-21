@@ -530,7 +530,6 @@ public:
         MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
         MLNLogDebug(@"Initializing frame: %@ styleJSON: %@", NSStringFromCGRect(frame), styleJSON);
         [self commonInit];
-        // Please don't call self.styleURL = nil, which load the default style
         self.styleJSON = styleJSON;
         _initialStyleJSON = [styleJSON copy];
         MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
@@ -568,10 +567,9 @@ public:
         return self.residualStyleURL;
     }
 
-    // If style was initialized with JSON, return nil
     if (self.mbglMap.getStyle().getJSON().length() > 0 &&
         self.mbglMap.getStyle().getURL().empty()) {
-        return nil;
+        return [NSURL URLWithString:@"local://style.json"];
     }
 
     NSString *styleURLString = @(self.mbglMap.getStyle().getURL().c_str()).mgl_stringOrNilIfEmpty;
