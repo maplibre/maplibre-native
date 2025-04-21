@@ -27,7 +27,7 @@ public:
     const std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
     TaggedScheduler threadPool;
-    
+
     Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
     TileParameters tileParameters;
     style::Style style;
