@@ -102,9 +102,9 @@ Context::~Context() noexcept {
     if (cleanupOnDestruction) {
         backend.getThreadPool().runRenderJobs(true /* closeQueue */);
 
-#if MLN_DRAWABLE_RENDERER
-        globalUniformBuffers = {};
-#endif
+        for (size_t i = 0; i < globalUniformBuffers.allocatedSize(); i++) {
+            globalUniformBuffers.set(i, nullptr);
+        }
 
         reset();
 
