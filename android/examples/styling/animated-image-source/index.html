@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="https://maplibre.org/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.11">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.12">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.4af4bdda.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2afb09e1.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -1149,15 +1149,15 @@
 </div>
 <p>In this example we will see how we can animate an image source. This is the MapLibre Native equivalent of <a href="https://maplibre.org/maplibre-gl-js/docs/examples/animate-images/">this MapLibre GL JS example</a>.</p>
 <figure>
+<br />
 <video controls="controls" poster="https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/animated_image_source_thumbnail.jpg" width="400">
     <source src="https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/animated_image_source.mp4" />
   </video>
 
+
 <caption>
     <p class="inline-attribution">Map data <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>. © <a href="https://openmaptiles.org/">OpenMapTiles</a>.</p>
-</caption>
-
-</figure>
+</caption></figure>
 <p>We set up an <a href="https://maplibre.org/maplibre-style-spec/sources/#image">image source</a> in a particular quad. Then we kick of a runnable that periodically updates the image source.</p>
 <div class="language-kotlin highlight"><span class="filename">Creating the image source</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">val</span><span class="w"> </span><span class="nv">quad</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LatLngQuad</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="n">LatLng</span><span class="p">(</span><span class="m">46.437</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="m">80.425</span><span class="p">),</span>

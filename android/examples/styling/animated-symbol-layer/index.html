@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="https://maplibre.org/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.11">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.12">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.4af4bdda.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2afb09e1.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -1148,15 +1148,15 @@
 <p>You can find the full source code of this example in <a href="https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/style/AnimatedSymbolLayerActivity.kt"><code>AnimatedSymbolLayerActivity.kt</code></a> of the MapLibreAndroidTestApp.</p>
 </div>
 <figure>
+<br />
 <video controls="controls" poster="https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/animated_symbol_layer_thumbnail.jpg" width="250">
     <source src="https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/animated_symbol_layer.mp4" />
   </video>
 
+
 <caption>
     <p class="inline-attribution">Map data <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>. © <a href="https://openmaptiles.org/">OpenMapTiles</a>.</p>
-</caption>
-
-</figure>
+</caption></figure>
 <p>Notice that there are (red) cars randomly moving around, and a (yellow) taxi that is always heading to the passenger (indicated by the M symbol), which upon arrival hops to a different location again. We will focus on the passanger and the taxi, because the cars randomly moving around follow a similar pattern.</p>
 <p>In a real application you would of course retrieve the locations from some sort of external API, but for the purposes of this example a random latitude longtitude pair within bounds of the currently visible screen will do.</p>
 <div class="language-kotlin highlight"><span class="filename">Getter method to get a random location on the screen</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">private</span><span class="w"> </span><span class="kd">val</span><span class="w"> </span><span class="nv">latLngInBounds</span><span class="p">:</span><span class="w"> </span><span class="n">LatLng</span>

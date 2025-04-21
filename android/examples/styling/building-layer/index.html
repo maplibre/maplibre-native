@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="https://maplibre.org/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.11">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.12">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.4af4bdda.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2afb09e1.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -1149,15 +1149,15 @@
 </div>
 <p>In this example will show how to add a <a href="https://maplibre.org/maplibre-style-spec/layers/#fill-extrusion">Fill Extrusion</a> layer to a style.</p>
 <figure>
+<br />
 <video controls="controls" poster="https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/building_layer_thumbnail.jpg" width="400">
     <source src="https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/building_layer.mp4" />
   </video>
 
+
 <caption>
     <p class="inline-attribution">Map data <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>. © <a href="https://openmaptiles.org/">OpenMapTiles</a>.</p>
-</caption>
-
-</figure>
+</caption></figure>
 <p>We use the <a href="https://openfreemap.org/quick_start/">OpenFreeMap Bright</a> style which, unlike OpenFreeMap Libery, does not have a fill extrusion layer by default. However, if you inspect this style with <a href="https://maplibre.org/maputnik">Maputnik</a> you will find that the multipolygons in the  <code>building</code> layer (of the <code>openfreemap</code> source) each have <code>render_min_height</code> and <code>render_height</code> properties.</p>
 <div class="language-kotlin highlight"><span class="filename">Setting up the fill extrusion layer</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">val</span><span class="w"> </span><span class="nv">fillExtrusionLayer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FillExtrusionLayer</span><span class="p">(</span><span class="s">&quot;building-3d&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;openmaptiles&quot;</span><span class="p">)</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">fillExtrusionLayer</span><span class="p">.</span><span class="na">sourceLayer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;building&quot;</span>
