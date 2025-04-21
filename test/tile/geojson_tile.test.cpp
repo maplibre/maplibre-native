@@ -30,10 +30,11 @@ public:
     AnnotationManager annotationManager{style};
     std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
+    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
+    
     Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
     TileParameters tileParameters;
     style::Style style;
-    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
 
     GeoJSONTileTest()
         : tileParameters{1.0,

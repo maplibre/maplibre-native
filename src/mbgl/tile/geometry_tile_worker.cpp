@@ -498,10 +498,15 @@ void GeometryTileWorker::finalizeLayout() {
     }
 
     MBGL_TIMING_START(watch);
-    gfx::ImageAtlas imageAtlas = dynamicTextureAtlas->uploadIconsAndPatterns(iconMap, patternMap, versionMap);
+    gfx::ImageAtlas imageAtlas;
     gfx::GlyphAtlas glyphAtlas;
+    if (dynamicTextureAtlas) {
+        dynamicTextureAtlas->uploadIconsAndPatterns(iconMap, patternMap, versionMap);
+    }
     if (!layouts.empty()) {
-        glyphAtlas = dynamicTextureAtlas->uploadGlyphs(glyphMap);
+        if (dynamicTextureAtlas) {
+            glyphAtlas = dynamicTextureAtlas->uploadGlyphs(glyphMap);
+        }
 
         for (auto& layout : layouts) {
             if (obsolete) {

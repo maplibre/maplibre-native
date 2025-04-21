@@ -65,9 +65,9 @@ public:
     AnnotationManager annotationManager{style};
     std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
+    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
     TaggedScheduler threadPool;
     Style style;
-    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
 
     TileParameters tileParameters(MapMode mapMode = MapMode::Continuous) {
         return {1.0,

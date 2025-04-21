@@ -25,14 +25,12 @@ public:
 
     const std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
     const std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
-
-    Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
-
+    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
     TaggedScheduler threadPool;
-
+    
+    Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
     TileParameters tileParameters;
     style::Style style;
-    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
 
     VectorTileTest()
         : threadPool(Scheduler::GetBackground(), uniqueID),
