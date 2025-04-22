@@ -53,10 +53,10 @@ NS_INLINE mbgl::style::TransitionOptions MLNOptionsFromTransition(MLNTransition 
   mbgl::util::UnitBezier ease = mbgl::util::DEFAULT_TRANSITION_EASE;
   if (transition.ease) {
     CAMediaTimingFunction *function = [CAMediaTimingFunction functionWithName:transition.ease];
-    float p0[2], p3[2];
-    [function getControlPointAtIndex:0 values:p0];
-    [function getControlPointAtIndex:3 values:p3];
-    ease = {p0[0], p0[1], p3[0], p3[1]};
+    float p1[2], p2[2];
+    [function getControlPointAtIndex:1 values:p1];
+    [function getControlPointAtIndex:2 values:p2];
+    ease = {p1[0], p1[1], p2[0], p2[1]};
   }
 
   mbgl::style::TransitionOptions options{{MLNDurationFromTimeInterval(transition.duration)},
