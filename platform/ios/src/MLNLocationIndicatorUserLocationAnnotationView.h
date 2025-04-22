@@ -10,4 +10,6 @@ typedef NS_ENUM(NSUInteger, MLNRenderMode) {
 
 @interface MLNLocationIndicatorUserLocationAnnotationView : MLNUserLocationAnnotationView
 
+- (void)removeLayer;
+
 @end
