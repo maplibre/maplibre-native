@@ -565,6 +565,7 @@ public:
     }
     MLNLogDebug(@"Setting styleURL: %@", styleURL);
     styleURL = styleURL.mgl_URLByStandardizingScheme;
+    [self removeLocationIndicatorLayer];
     self.style = nil;
     self.mbglMap.getStyle().loadURL([[styleURL absoluteString] UTF8String]);
 }
@@ -572,8 +573,15 @@ public:
 - (IBAction)reloadStyle:(__unused id)sender {
     MLNLogInfo(@"Reloading style.");
     NSURL *styleURL = self.styleURL;
+    [self removeLocationIndicatorLayer];
     self.mbglMap.getStyle().loadURL("");
     self.styleURL = styleURL;
+}
+
+- (void)removeLocationIndicatorLayer {
+    if (self.userLocationAnnotationView && [self.userLocationAnnotationView isKindOfClass:[MLNLocationIndicatorUserLocationAnnotationView class]]) {
+        [(MLNLocationIndicatorUserLocationAnnotationView*)self.userLocationAnnotationView removeLayer];
+    }
 }
 
 - (mbgl::Map &)mbglMap
