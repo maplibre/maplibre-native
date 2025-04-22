@@ -150,7 +150,14 @@ jobs:
           export testSpecArn="${{ matrix.test.testSpecArn }}"
           export wait_for_completion=true
 
-          echo run_arn="$(./scripts/aws-device-farm/aws-device-farm-run.sh)" > "$GITHUB_ENV"
+          run_arn="$(./scripts/aws-device-farm/aws-device-farm-run.sh)"
+          exit_status=$?
+          echo "run_arn=$run_arn" >> "$GITHUB_ENV"
+
+          # make sure workflow fails
+          if [ $exit_status -ne 0 ]; then
+            exit $exit_status
+          fi
 
       - name: Store Test Artifacts
         if: (matrix.test.name == 'Android Benchmark' || failure()) && env.run_device_test == 'true'
