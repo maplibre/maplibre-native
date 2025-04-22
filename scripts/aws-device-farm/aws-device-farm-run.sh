@@ -87,6 +87,14 @@ arn="$(aws devicefarm schedule-run \
   --execution-configuration videoCapture=false \
   --output text --query run.arn)"
 
+echo ARN: $arn  >&2
+
+if [ -z "$arn" ]; then
+  echo "Error: Failed to schedule Device Farm run or got empty ARN" >&2
+  exit 1
+fi
+
+
 echo "$arn"
 
 if [[ "$wait_for_completion" != "true" ]]; then
