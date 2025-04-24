@@ -6,7 +6,7 @@
 
 #include <string>
 #include <optional>
-#include <mapbox/shelf-pack.hpp>
+#include <array>
 
 namespace mbgl {
 namespace style {
