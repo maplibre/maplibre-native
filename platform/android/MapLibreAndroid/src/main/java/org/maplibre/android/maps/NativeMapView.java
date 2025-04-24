@@ -646,6 +646,14 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public String[] getActionJournalLogFiles() {
+    if (checkState("getActionJournalLogFiles")) {
+      return null;
+    }
+    return nativeGetActionJournalLogFiles();
+  }
+
+  @Override
   public String[] getActionJournalLog() {
     if (checkState("getActionJournalLog")) {
       return null;
@@ -1442,6 +1450,9 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native boolean nativeGetDebug();
+
+  @Keep
+  private native String[] nativeGetActionJournalLogFiles();
 
   @Keep
   private native String[] nativeGetActionJournalLog();

@@ -35,6 +35,7 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
     @objc func printActionJournal() {
         // configure using `MLNSettings.actionJournalOptions`
 
+        print("ActionJournalLog files: \(mapView.getActionJournalLogFiles())")
         print("ActionJournalLog : \(mapView.getActionJournalLog())")
         mapView.clearActionJournalLog()
     }

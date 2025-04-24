@@ -695,6 +695,23 @@ jni::jboolean NativeMapView::getDebug(JNIEnv&) {
     return map->getDebug() != DebugOptions::NoDebug;
 }
 
+jni::Local<jni::Array<jni::String>> NativeMapView::getActionJournalLogFiles(JNIEnv& env) {
+    const auto& actionJournal = map->getActionJournal();
+    if (!actionJournal) {
+        return jni::Local<jni::Array<jni::String>>();
+    }
+
+    const auto& files = actionJournal->getLogFiles();
+    auto jFiles = jni::Array<jni::String>::New(env, files.size());
+
+    uint32_t index = 0;
+    for (const auto& file : files) {
+        jFiles.Set(env, index++, jni::Make<jni::String>(env, file));
+    }
+
+    return jFiles;
+}
+
 jni::Local<jni::Array<jni::String>> NativeMapView::getActionJournalLog(JNIEnv& env) {
     const auto& actionJournal = map->getActionJournal();
     if (!actionJournal) {
@@ -1317,6 +1334,7 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::addMarkers, "nativeAddMarkers"),
         METHOD(&NativeMapView::setDebug, "nativeSetDebug"),
         METHOD(&NativeMapView::getDebug, "nativeGetDebug"),
+        METHOD(&NativeMapView::getActionJournalLogFiles, "nativeGetActionJournalLogFiles"),
         METHOD(&NativeMapView::getActionJournalLog, "nativeGetActionJournalLog"),
         METHOD(&NativeMapView::clearActionJournalLog, "nativeClearActionJournalLog"),
         METHOD(&NativeMapView::isFullyLoaded, "nativeIsFullyLoaded"),

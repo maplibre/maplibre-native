@@ -7477,6 +7477,23 @@ static void *windowScreenContext = &windowScreenContext;
     _mbglMap->triggerRepaint();
 }
 
+- (NSArray<NSString*>*)getActionJournalLogFiles
+{
+    const auto& actionJournal = _mbglMap->getActionJournal();
+    if (!actionJournal) {
+        return nil;
+    }
+
+    const auto& files = actionJournal->getLogFiles();
+    NSMutableArray<NSString*>* objcFiles = [NSMutableArray new];
+
+    for (const auto& file : files) {
+        [objcFiles addObject:[NSString stringWithUTF8String:file.c_str()]];
+    }
+
+    return objcFiles;
+}
+
 - (NSArray<NSString*>*)getActionJournalLog
 {
     const auto& actionJournal = _mbglMap->getActionJournal();

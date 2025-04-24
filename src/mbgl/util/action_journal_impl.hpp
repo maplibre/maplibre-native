@@ -22,8 +22,12 @@ public:
 
     const Map& getMap() const { return map; }
 
+    std::string getLogDirectory() const;
+    std::vector<std::string> getLogFiles() const;
     std::vector<std::string> getLog();
     void clearLog();
+
+    // Logged events
 
     // MapObserver
     void onCameraWillChange(CameraChangeMode) override;
@@ -60,12 +64,29 @@ protected:
     void log(ActionJournalEvent&& value);
 
     // file operations
-    std::string getFilepath(uint32_t fileIndex);
-    uint32_t detectFiles();
+
+    // generate the file path for the given index -> action_journal.{fileIndex}.log
+    std::string getFilepath(uint32_t fileIndex) const;
+
+    // detect and validate files at `ActionJournalOptions.path()/ACTION_JOURNAL_DIRECTORY_NAME`
+    uint32_t detectFiles() const;
+
+    // create a new log file with the highest unused index
+    // delete the oldest one if `logFileCount` number of files was reached
+    // rename the remaining files to match the index chain if a file was deleted
+    //
+    // action_journal.0.log -> deleted
+    // action_journal.1.log -> action_journal.0.log
+    // ...
+    // action_journal.{logFileCount - 1}.log -> action_journal.{logFileCount - 2}.log
+    // action_journal.{logFileCount - 1}.log -> new file
     uint32_t rollFiles();
 
+    // open the given index file
     bool openFile(uint32_t fileIndex, bool truncate = false);
+    // check if the current file can log `size` bytes of info and roll files if needed
     bool prepareFile(size_t size);
+    // log string to file and flush
     void logToFile(const std::string& value);
 
 protected:

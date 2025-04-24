@@ -221,6 +221,8 @@ interface NativeMap {
 
   boolean getDebug();
 
+  String[] getActionJournalLogFiles();
+
   String[] getActionJournalLog();
 
   void clearActionJournalLog();

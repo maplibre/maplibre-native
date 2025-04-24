@@ -2121,6 +2121,13 @@ vertically on the map.
 @property (nonatomic) MLNMapDebugMaskOptions debugMask;
 
 /**
+ Get the list of action journal log files from oldest to newest.
+
+ @return An array of log file paths.
+*/
+- (NSArray<NSString *> *)getActionJournalLogFiles;
+
+/**
  Get the action journal events from oldest to newest.
 
  Each element contains a serialized json object with the event data.

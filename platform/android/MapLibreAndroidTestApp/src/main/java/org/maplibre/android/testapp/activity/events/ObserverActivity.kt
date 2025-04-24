@@ -51,7 +51,7 @@ class ObserverActivity : AppCompatActivity(),
         mapView.addOnSpriteRequestedListener(this)
         mapView.getMapAsync {
             it.setStyle(
-                Style.Builder().fromUri("https://demotiles.maplibre.org/style.json")
+                Style.Builder().fromUri(TestStyles.DEMOTILES)
             )
         }
 
@@ -59,6 +59,7 @@ class ObserverActivity : AppCompatActivity(),
         val fab = findViewById<View>(R.id.fab)
         fab?.setOnClickListener { _: View? ->
             mapView.getMapAsync {
+                Logger.i(TAG,"ActionJournal files: \n${it.actionJournalLogFiles.joinToString("\n")}")
                 Logger.i(TAG,"ActionJournal : \n${it.actionJournalLog.joinToString("\n")}")
                 it.clearActionJournalLog()
             }

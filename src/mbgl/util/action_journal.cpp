@@ -7,6 +7,14 @@ namespace util {
 ActionJournal::ActionJournal(const Map& map, const ActionJournalOptions& options)
     : impl(std::make_unique<Impl>(map, options)) {}
 
+std::string ActionJournal::getLogDirectory() const {
+    return impl->getLogDirectory();
+}
+
+std::vector<std::string> ActionJournal::getLogFiles() const {
+    return impl->getLogFiles();
+}
+
 std::vector<std::string> ActionJournal::getLog() {
     return impl->getLog();
 }

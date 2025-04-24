@@ -199,6 +199,8 @@ public:
 
     jni::jboolean getDebug(JNIEnv&);
 
+    jni::Local<jni::Array<jni::String>> getActionJournalLogFiles(JNIEnv&);
+
     jni::Local<jni::Array<jni::String>> getActionJournalLog(JNIEnv&);
 
     void clearActionJournalLog(JNIEnv&);

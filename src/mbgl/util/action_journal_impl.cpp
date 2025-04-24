@@ -12,32 +12,31 @@
 namespace mbgl {
 namespace util {
 
-constexpr auto ACTION_JOURNAL_FOLDER_NAME = "action_journal";
+constexpr auto ACTION_JOURNAL_DIRECTORY_NAME = "action_journal";
 constexpr auto ACTION_JOURNAL_FILE_NAME = "action_journal";
 constexpr auto ACTION_JOURNAL_FILE_EXTENSION = "log";
 
 class MapEnvironmentSnapshot {
 public:
-    MapEnvironmentSnapshot(const ActionJournal::Impl& journal) {
-        const auto& map = journal.getMap();
-        const auto& clientOptions = map.getClientOptions();
-        const auto& style = map.getStyle();
+    MapEnvironmentSnapshot(const ActionJournal::Impl& journal)
+        : time(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now())),
+          clientName(journal.getMap().getClientOptions().name()),
+          clientVersion(journal.getMap().getClientOptions().version()),
+          styleName(journal.getMap().getStyle().getName()),
+          styleURL(journal.getMap().getStyle().getURL()) {}
 
-        time = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now());
+    const auto& getTime() const { return time; }
+    const auto& getClientName() const { return clientName; }
+    const auto& getClientVersion() const { return clientVersion; }
+    const auto& getStyleName() const { return styleName; }
+    const auto& getStyleURL() const { return styleURL; }
 
-        clientName = clientOptions.name();
-        clientVersion = clientOptions.version();
-
-        styleName = style.getName();
-        styleURL = style.getURL();
-    }
-
-public:
-    std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> time;
-    std::string clientName;
-    std::string clientVersion;
-    std::string styleName;
-    std::string styleURL;
+protected:
+    const std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> time;
+    const std::string clientName;
+    const std::string clientVersion;
+    const std::string styleName;
+    const std::string styleURL;
 };
 
 class ActionJournalEvent {
@@ -46,22 +45,22 @@ public:
         : json(rapidjson::kObjectType),
           eventJson(rapidjson::kObjectType) {
         json.AddMember("name", name, json.GetAllocator());
-        json.AddMember("time", iso8601(env.time), json.GetAllocator());
+        json.AddMember("time", iso8601(env.getTime()), json.GetAllocator());
 
-        if (!env.clientName.empty()) {
-            json.AddMember("clientName", env.clientName, json.GetAllocator());
+        if (!env.getClientName().empty()) {
+            json.AddMember("clientName", env.getClientName(), json.GetAllocator());
         }
 
-        if (!env.clientVersion.empty()) {
-            json.AddMember("clientVersion", env.clientVersion, json.GetAllocator());
+        if (!env.getClientVersion().empty()) {
+            json.AddMember("clientVersion", env.getClientVersion(), json.GetAllocator());
         }
 
-        if (!env.styleName.empty()) {
-            json.AddMember("styleName", env.styleName, json.GetAllocator());
+        if (!env.getStyleName().empty()) {
+            json.AddMember("styleName", env.getStyleName(), json.GetAllocator());
         }
 
-        if (!env.styleURL.empty()) {
-            json.AddMember("styleURL", env.styleURL, json.GetAllocator());
+        if (!env.getStyleURL().empty()) {
+            json.AddMember("styleURL", env.getStyleURL(), json.GetAllocator());
         }
     }
 
@@ -118,9 +117,28 @@ ActionJournal::Impl::Impl(const Map& map_, const ActionJournalOptions& options_)
     assert(options.logFileSize() > 0);
     assert(options.logFileCount() > 1);
 
-    options.withPath(options.path() + "/" + ACTION_JOURNAL_FOLDER_NAME);
+    options.withPath(options.path() + "/" + ACTION_JOURNAL_DIRECTORY_NAME);
 
-    openFile(detectFiles(), false);
+    if (!openFile(detectFiles(), false)) {
+        Log::Error(Event::General, "Failed to open Action Journal file");
+    }
+}
+
+std::string ActionJournal::Impl::getLogDirectory() const {
+    return options.path();
+}
+
+std::vector<std::string> ActionJournal::Impl::getLogFiles() const {
+    std::set<std::string> files;
+    for (const auto& entry : std::filesystem::directory_iterator(options.path())) {
+        if (!entry.is_regular_file()) {
+            continue;
+        }
+
+        files.emplace(entry.path().string());
+    }
+
+    return std::vector<std::string>(files.begin(), files.end());
 }
 
 std::vector<std::string> ActionJournal::Impl::getLog() {
@@ -174,7 +192,9 @@ void ActionJournal::Impl::clearLog() {
         Log::Error(Event::General, "Failed to clear ActionJournal");
     }
 
-    openFile(0, false);
+    if (!openFile(0, false)) {
+        Log::Error(Event::General, "Failed to open Action Journal file");
+    }
 }
 
 void ActionJournal::Impl::onCameraWillChange(CameraChangeMode mode) {
@@ -392,12 +412,12 @@ void ActionJournal::Impl::log(ActionJournalEvent&& value) {
     logToFile(value.toString());
 }
 
-std::string ActionJournal::Impl::getFilepath(uint32_t fileIndex) {
+std::string ActionJournal::Impl::getFilepath(uint32_t fileIndex) const {
     return options.path() + "/" + ACTION_JOURNAL_FILE_NAME + "." + std::to_string(fileIndex) + "." +
            ACTION_JOURNAL_FILE_EXTENSION;
 }
 
-uint32_t ActionJournal::Impl::detectFiles() {
+uint32_t ActionJournal::Impl::detectFiles() const {
     if (!std::filesystem::exists(options.path())) {
         return 0;
     }
