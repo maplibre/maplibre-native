@@ -82,7 +82,8 @@ public class RuntimeStyleTests extends EspressoTest {
       public void perform(UiController uiController, View view) {
         List<Layer> layers = Objects.requireNonNull(maplibreMap.getStyle()).getLayers();
 
-        Source source = maplibreMap.getStyle().getSources().stream().filter(s -> s.getId().equals("openmaptiles")).findAny().get();
+        Source source = maplibreMap.getStyle().getSources().stream()
+          .filter(s -> s.getId().equals("openmaptiles")).findAny().get();
 
         // Test inserting with invalid above-id
         try {
@@ -137,7 +138,8 @@ public class RuntimeStyleTests extends EspressoTest {
       @Override
       public void perform(UiController uiController, View view) {
         List<Layer> layers = Objects.requireNonNull(maplibreMap.getStyle()).getLayers();
-        Source source = maplibreMap.getStyle().getSources().stream().filter(s -> s.getId().equals("openmaptiles")).findAny().get();
+        Source source = maplibreMap.getStyle().getSources().stream()
+          .filter(s -> s.getId().equals("openmaptiles")).findAny().get();
 
         // Test inserting out of range
         try {
