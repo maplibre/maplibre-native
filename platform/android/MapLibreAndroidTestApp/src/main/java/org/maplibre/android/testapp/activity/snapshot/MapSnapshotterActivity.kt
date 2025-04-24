@@ -70,7 +70,7 @@ class MapSnapshotterActivity : AppCompatActivity() {
         val styles = arrayOf(
             TestStyles.DEMOTILES,
             TestStyles.AMERICANA,
-            TestStyles.OPENFREEMAP_LIBERY,
+            TestStyles.OPENFREEMAP_LIBERTY,
             TestStyles.AWS_OPEN_DATA_STANDARD_LIGHT,
             TestStyles.PROTOMAPS_LIGHT,
             TestStyles.PROTOMAPS_DARK,

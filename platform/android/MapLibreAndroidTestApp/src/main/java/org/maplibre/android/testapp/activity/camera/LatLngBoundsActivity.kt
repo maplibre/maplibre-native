@@ -73,7 +73,7 @@ class LatLngBoundsActivity : AppCompatActivity() {
     private fun loadStyle(featureCollection: FeatureCollection) {
         maplibreMap.setStyle(
             Style.Builder()
-                .fromUri(TestStyles.OPENFREEMAP_LIBERY)
+                .fromUri(TestStyles.OPENFREEMAP_LIBERTY)
                 .withLayer(
                     SymbolLayer("symbol", "symbol")
                         .withProperties(
