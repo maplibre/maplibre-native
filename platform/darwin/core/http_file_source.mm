@@ -319,7 +319,7 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, 
                     case NSURLErrorBadServerResponse: // 5xx errors
                         response.error = std::make_unique<Error>(
                                                                  Error::Reason::Server, std::string{ [[error localizedDescription] UTF8String]} + stringResourceURL);
-                        
+
                         break;
 
                     case NSURLErrorNetworkConnectionLost:

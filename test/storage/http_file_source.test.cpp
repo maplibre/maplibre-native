@@ -137,7 +137,7 @@ TEST(HTTPFileSource, TEST_REQUIRES_SERVER(HTTP204)) {
 TEST(HTTPFileSource, TEST_REQUIRES_SERVER(HTTP500)) {
     util::RunLoop loop;
     HTTPFileSource fs(ResourceOptions::Default(), ClientOptions());
-    
+
     std::string stringResourceURL = "http://127.0.0.1:3000/permanent-error";
     std::string resourceURLInterpolation = " - Resource URL: " + stringResourceURL;
 
