@@ -10,7 +10,7 @@ namespace mbgl::style {
 
 class PluginLayer final : public Layer {
 public:
-    PluginLayer(const std::string& layerID, const std::string& sourceID);
+    PluginLayer(const std::string& layerID, const std::string& sourceID, const style::LayerTypeInfo layerTypeInfo);
     ~PluginLayer() override;
 
     // Private implementation

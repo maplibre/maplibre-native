@@ -69,7 +69,7 @@ PluginLayerFactory::PluginLayerFactory(std::string & layerType,
     _layerTypeInfo(getDefaultInfo()),
     _layerType(layerType) {
     
-    _layerTypeInfo.type = layerType.c_str();
+    _layerTypeInfo.type = _layerType.c_str();
     plugins::NonConstLayerTypeInfo *lti = (plugins::NonConstLayerTypeInfo *)&_layerTypeInfo;
     lti->source = (plugins::NonConstLayerTypeInfo::Source)((int)source);
     lti->pass3d = (plugins::NonConstLayerTypeInfo::Pass3D)((int)pass3D);
@@ -88,7 +88,17 @@ const style::LayerTypeInfo* PluginLayerFactory::getTypeInfo() const noexcept {
 
 std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string& id,
                                                               const style::conversion::Convertible& value) noexcept {
-    return nullptr;
+    
+    
+    // TODO: What is this and how does it fit in
+//    const auto source = getSource(value);
+//    if (!source) {
+//        return nullptr;
+//    }
+    
+    std::string source = "source";
+    return std::unique_ptr<style::Layer>(new (std::nothrow) style::PluginLayer(id, source, _layerTypeInfo));
+
     /*
         const auto source = getSource(value);
         if (!source) {

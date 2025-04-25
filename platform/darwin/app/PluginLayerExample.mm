@@ -16,6 +16,7 @@
     MLNPluginLayerCapabilities *tempResult = [[MLNPluginLayerCapabilities alloc] init];
     tempResult.layerID = @"plugin-layer-test";
     tempResult.tileKind = MLNPluginLayerTileKindNotRequired;
+    tempResult.requiresPass3D = YES;
     return tempResult;
     
 }
