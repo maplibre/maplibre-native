@@ -23,7 +23,7 @@
 // This is called from the core to create the layer with the properties
 // in the style
 -(void)createLayerFromProperties:(NSDictionary *)properties {
-    
+
 }
 
 @end

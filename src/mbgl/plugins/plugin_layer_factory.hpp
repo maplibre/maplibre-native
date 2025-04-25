@@ -23,12 +23,11 @@ protected:
     std::unique_ptr<Bucket> createBucket(const BucketParameters&,
                                          const std::vector<Immutable<style::LayerProperties>>&) noexcept final;
     std::unique_ptr<RenderLayer> createRenderLayer(Immutable<style::Layer::Impl>) noexcept final;
-    
-    
+
 private:
     // These is the layer type info that is setup during factory creation and returned in the getTypeInfo method
     style::LayerTypeInfo _layerTypeInfo;
     std::string _layerType;
 };
 
-}
+} // namespace mbgl

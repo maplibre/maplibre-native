@@ -5,7 +5,6 @@
 //  Created by Malcolm Toon on 4/24/25.
 //
 
-
 #include <mbgl/plugins/plugin_layer.hpp>
 #include <mbgl/plugins/plugin_layer_impl.hpp>
 /*
@@ -49,7 +48,7 @@ uint8_t>(
 
 
 StyleProperty getLayerProperty(const PluginLayer& layer, Property property) {
-    
+
      switch (property) {
      case Property::HeatmapColor:
      return makeStyleProperty(layer.getHeatmapColor());
@@ -72,7 +71,7 @@ StyleProperty getLayerProperty(const PluginLayer& layer, Property property) {
      case Property::HeatmapWeightTransition:
      return makeStyleProperty(layer.getHeatmapWeightTransition());
      }
-     
+
     return {};
 }
 
@@ -92,16 +91,15 @@ StyleProperty getLayerProperty(const PluginLayer& layer, const std::string& name
 namespace mbgl {
 namespace style {
 
-
 // static
 const LayerTypeInfo* PluginLayer::Impl::staticTypeInfo() noexcept {
-    const static LayerTypeInfo typeInfo{.type="heatmap",
-                                        .source=LayerTypeInfo::Source::Required,
-                                        .pass3d=LayerTypeInfo::Pass3D::Required,
-                                        .layout=LayerTypeInfo::Layout::NotRequired,
-                                        .fadingTiles=LayerTypeInfo::FadingTiles::NotRequired,
-                                        .crossTileIndex=LayerTypeInfo::CrossTileIndex::NotRequired,
-                                        .tileKind=LayerTypeInfo::TileKind::Geometry};
+    const static LayerTypeInfo typeInfo{.type = "heatmap",
+                                        .source = LayerTypeInfo::Source::Required,
+                                        .pass3d = LayerTypeInfo::Pass3D::Required,
+                                        .layout = LayerTypeInfo::Layout::NotRequired,
+                                        .fadingTiles = LayerTypeInfo::FadingTiles::NotRequired,
+                                        .crossTileIndex = LayerTypeInfo::CrossTileIndex::NotRequired,
+                                        .tileKind = LayerTypeInfo::TileKind::Geometry};
     return &typeInfo;
 }
 /*
@@ -146,8 +144,8 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"heatmap-radius-transition", toUint8(Property::HeatmapRadiusTransition)},
      {"heatmap-weight-transition", toUint8(Property::HeatmapWeightTransition)}});
 
- 
- 
+
+
 
 
 
@@ -155,13 +153,13 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
 Value PluginLayer::serialize() const {
     auto result = Layer::serialize();
     assert(result.getObject());
-    
+
     for (const auto& property : layerProperties) {
         auto styleProperty = getLayerProperty(*this, static_cast<Property>(property.second));
         if (styleProperty.getKind() == StyleProperty::Kind::Undefined) continue;
         serializeProperty(result, styleProperty, property.first.c_str(), property.second < kPaintPropertyCount);
     }
-     
+
     return result;
 }
 

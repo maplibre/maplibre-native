@@ -35,14 +35,13 @@ typedef enum {
 
 @interface MLNPluginLayer : NSObject
 
-
 /// Returns the layer capabilities of the plugin layer.
 /// This must be overridden by the plug-in layer and return a set of capabilities
 -(MLNPluginLayerCapabilities *)layerCapabilities;
 
 
 // Creates the layer
--(void)createLayerFromProperties:(NSDictionary *)properties;
+- (void)createLayerFromProperties:(NSDictionary *)properties;
 
 @end
 

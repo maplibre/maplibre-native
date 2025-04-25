@@ -8,9 +8,6 @@
 #include "plugin_layer.hpp"
 #include "plugin_layer_impl.hpp"
 
-
-
-
 namespace mbgl {
 namespace style {
 
