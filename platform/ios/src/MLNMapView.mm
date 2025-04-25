@@ -4066,10 +4066,10 @@ static void *windowScreenContext = &windowScreenContext;
         self.userTrackingMode = MLNUserTrackingModeFollow;
     }
 
-    [self _setDirection:direction shouldCenter:NO animated:animated];
+    [self _setDirection:direction center:kCLLocationCoordinate2DInvalid animated:animated];
 }
 
-- (void)_setDirection:(CLLocationDirection)direction shouldCenter:(BOOL)shouldCenter animated:(BOOL)animated
+- (void)_setDirection:(CLLocationDirection)direction center:(CLLocationCoordinate2D)center animated:(BOOL)animated
 {
     if (!_mbglMap)
     {
@@ -4091,7 +4091,6 @@ static void *windowScreenContext = &windowScreenContext;
     else
     {
         CGPoint anchor = self.userLocationAnnotationViewCenter;
-        CLLocationCoordinate2D center = self.userLocation.coordinate;
 
         mbgl::CameraOptions cameraOptions = mbgl::CameraOptions()
             .withBearing(direction)
@@ -4100,7 +4099,7 @@ static void *windowScreenContext = &windowScreenContext;
         mbgl::AnimationOptions animationOptions;
         animationOptions.duration.emplace(MLNDurationFromTimeInterval(duration));
 
-        if (shouldCenter && CLLocationCoordinate2DIsValid(center))
+        if (CLLocationCoordinate2DIsValid(center))
         {
             cameraOptions.center = MLNLatLngFromLocationCoordinate2D(center);
 
@@ -6445,7 +6444,7 @@ static void *windowScreenContext = &windowScreenContext;
         if (headingDirection >= 0 && self.userTrackingMode == MLNUserTrackingModeFollowWithHeading
             && self.userTrackingState != MLNUserTrackingStateBegan)
         {
-            [self _setDirection:headingDirection shouldCenter:YES animated:YES];
+            [self _setDirection:headingDirection center:self.userLocation.coordinate animated:YES];
             [self updateUserLocationAnnotationView];
         }
     });
