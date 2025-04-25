@@ -1,3 +1,4 @@
+## main
 
 ## 6.1.0-pre.0
 * Add `textFitWidth` and `textFitHeight` properties to sprites ([#2780](https://github.com/maplibre/maplibre-native/pull/2780)).
