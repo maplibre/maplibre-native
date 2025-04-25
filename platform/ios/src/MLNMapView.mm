@@ -7521,8 +7521,63 @@ static void *windowScreenContext = &windowScreenContext;
 
     auto layerManager = mbgl::LayerManager::get();
     auto darwinLayerManager = (mbgl::LayerManagerDarwin *)layerManager;
-    std::string layerType = [[pluginLayer layerTypeID] UTF8String];
-    darwinLayerManager->addLayerTypeCoreOnly(std::make_unique<mbgl::PluginLayerFactory>(layerType));
+    
+    MLNPluginLayerCapabilities *capabilities = [pluginLayer layerCapabilities];
+    //mbgl::style::LayerTypeInfo::
+    
+    std::string layerType = [capabilities.layerID UTF8String];
+
+    mbgl::style::LayerTypeInfo::Source source = mbgl::style::LayerTypeInfo::Source::NotRequired;
+    if (capabilities.requiresSource) {
+        source = mbgl::style::LayerTypeInfo::Source::Required;
+    }
+    
+    mbgl::style::LayerTypeInfo::Pass3D pass3D = mbgl::style::LayerTypeInfo::Pass3D::NotRequired;
+    if (capabilities.requiresPass3D) {
+        pass3D = mbgl::style::LayerTypeInfo::Pass3D::Required;
+    }
+    
+    mbgl::style::LayerTypeInfo::Layout layout = mbgl::style::LayerTypeInfo::Layout::NotRequired;
+    if (capabilities.requiresLayout) {
+        layout = mbgl::style::LayerTypeInfo::Layout::Required;
+    }
+    
+    mbgl::style::LayerTypeInfo::FadingTiles fadingTiles = mbgl::style::LayerTypeInfo::FadingTiles::NotRequired;
+    if (capabilities.requiresRenderingFadingTiles) {
+        fadingTiles = mbgl::style::LayerTypeInfo::FadingTiles::Required;
+    }
+    
+    mbgl::style::LayerTypeInfo::CrossTileIndex crossTileIndex = mbgl::style::LayerTypeInfo::CrossTileIndex::NotRequired;
+    if (capabilities.requiresCrossTileIndex) {
+        crossTileIndex = mbgl::style::LayerTypeInfo::CrossTileIndex::Required;
+    }
+    
+    mbgl::style::LayerTypeInfo::TileKind tileKind = mbgl::style::LayerTypeInfo::TileKind::Geometry;
+    switch (capabilities.tileKind) {
+        case MLNPluginLayerTileKindRaster:
+            tileKind = mbgl::style::LayerTypeInfo::TileKind::Raster;
+            break;
+        case MLNPluginLayerTileKindRasterDEM:
+            tileKind = mbgl::style::LayerTypeInfo::TileKind::RasterDEM;
+            break;
+        case MLNPluginLayerTileKindNotRequired:
+            tileKind = mbgl::style::LayerTypeInfo::TileKind::NotRequired;
+            break;
+        case MLNPluginLayerTileKindGeometry:
+            tileKind = mbgl::style::LayerTypeInfo::TileKind::Geometry;
+            break;
+    }
+
+    
+    darwinLayerManager->addLayerTypeCoreOnly(
+        std::make_unique<mbgl::PluginLayerFactory>(layerType,
+                                                   source,
+                                                   pass3D,
+                                                   layout,
+                                                   fadingTiles,
+                                                   crossTileIndex,
+                                                   tileKind));
+    
    //darwinLayerManager->addLayerType(<#std::unique_ptr<LayerPeerFactory>#>)
 
 }
