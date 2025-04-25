@@ -10,10 +10,10 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef enum {
-    MLNPluginLayerTileKindGeometry,
-    MLNPluginLayerTileKindRaster,
-    MLNPluginLayerTileKindRasterDEM,
-    MLNPluginLayerTileKindNotRequired
+  MLNPluginLayerTileKindGeometry,
+  MLNPluginLayerTileKindRaster,
+  MLNPluginLayerTileKindRasterDEM,
+  MLNPluginLayerTileKindNotRequired
 } MLNPluginLayerTileKind;
 
 @interface MLNPluginLayerCapabilities : NSObject
@@ -28,17 +28,11 @@ typedef enum {
 
 @end
 
-
-
-
-
-
 @interface MLNPluginLayer : NSObject
 
 /// Returns the layer capabilities of the plugin layer.
 /// This must be overridden by the plug-in layer and return a set of capabilities
--(MLNPluginLayerCapabilities *)layerCapabilities;
-
+- (MLNPluginLayerCapabilities *)layerCapabilities;
 
 // Creates the layer
 - (void)createLayerFromProperties:(NSDictionary *)properties;

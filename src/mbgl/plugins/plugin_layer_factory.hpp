@@ -7,15 +7,14 @@ namespace mbgl {
 
 class PluginLayerFactory : public LayerFactory {
 public:
-    PluginLayerFactory(std::string & layerType,
+    PluginLayerFactory(std::string& layerType,
                        mbgl::style::LayerTypeInfo::Source source,
                        mbgl::style::LayerTypeInfo::Pass3D pass3D,
                        mbgl::style::LayerTypeInfo::Layout layout,
                        mbgl::style::LayerTypeInfo::FadingTiles fadingTiles,
                        mbgl::style::LayerTypeInfo::CrossTileIndex crossTileIndex,
-                       mbgl::style::LayerTypeInfo::TileKind tileKind
-                       );
-    
+                       mbgl::style::LayerTypeInfo::TileKind tileKind);
+
 protected:
     const style::LayerTypeInfo* getTypeInfo() const noexcept final;
     std::unique_ptr<style::Layer> createLayer(const std::string& id,

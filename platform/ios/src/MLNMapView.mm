@@ -7521,37 +7521,37 @@ static void *windowScreenContext = &windowScreenContext;
 
     auto layerManager = mbgl::LayerManager::get();
     auto darwinLayerManager = (mbgl::LayerManagerDarwin *)layerManager;
-    
+
     MLNPluginLayerCapabilities *capabilities = [pluginLayer layerCapabilities];
     //mbgl::style::LayerTypeInfo::
-    
+
     std::string layerType = [capabilities.layerID UTF8String];
 
     mbgl::style::LayerTypeInfo::Source source = mbgl::style::LayerTypeInfo::Source::NotRequired;
     if (capabilities.requiresSource) {
         source = mbgl::style::LayerTypeInfo::Source::Required;
     }
-    
+
     mbgl::style::LayerTypeInfo::Pass3D pass3D = mbgl::style::LayerTypeInfo::Pass3D::NotRequired;
     if (capabilities.requiresPass3D) {
         pass3D = mbgl::style::LayerTypeInfo::Pass3D::Required;
     }
-    
+
     mbgl::style::LayerTypeInfo::Layout layout = mbgl::style::LayerTypeInfo::Layout::NotRequired;
     if (capabilities.requiresLayout) {
         layout = mbgl::style::LayerTypeInfo::Layout::Required;
     }
-    
+
     mbgl::style::LayerTypeInfo::FadingTiles fadingTiles = mbgl::style::LayerTypeInfo::FadingTiles::NotRequired;
     if (capabilities.requiresRenderingFadingTiles) {
         fadingTiles = mbgl::style::LayerTypeInfo::FadingTiles::Required;
     }
-    
+
     mbgl::style::LayerTypeInfo::CrossTileIndex crossTileIndex = mbgl::style::LayerTypeInfo::CrossTileIndex::NotRequired;
     if (capabilities.requiresCrossTileIndex) {
         crossTileIndex = mbgl::style::LayerTypeInfo::CrossTileIndex::Required;
     }
-    
+
     mbgl::style::LayerTypeInfo::TileKind tileKind = mbgl::style::LayerTypeInfo::TileKind::Geometry;
     switch (capabilities.tileKind) {
         case MLNPluginLayerTileKindRaster:
@@ -7568,7 +7568,7 @@ static void *windowScreenContext = &windowScreenContext;
             break;
     }
 
-    
+
     darwinLayerManager->addLayerTypeCoreOnly(
         std::make_unique<mbgl::PluginLayerFactory>(layerType,
                                                    source,
@@ -7577,7 +7577,7 @@ static void *windowScreenContext = &windowScreenContext;
                                                    fadingTiles,
                                                    crossTileIndex,
                                                    tileKind));
-    
+
    //darwinLayerManager->addLayerType(<#std::unique_ptr<LayerPeerFactory>#>)
 
 }
