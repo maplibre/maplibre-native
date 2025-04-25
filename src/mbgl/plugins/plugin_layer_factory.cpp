@@ -51,7 +51,7 @@ struct NonConstLayerTypeInfo {
 }
 
 style::LayerTypeInfo getDefaultInfo() {
-    style::LayerTypeInfo tempResult = {.type="plugin",
+    style::LayerTypeInfo tempResult = {.type="unknown",
             .source=style::LayerTypeInfo::Source::Required,
             .pass3d=style::LayerTypeInfo::Pass3D::Required,
             .layout=style::LayerTypeInfo::Layout::NotRequired,
