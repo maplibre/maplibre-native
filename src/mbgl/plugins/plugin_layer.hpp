@@ -1,10 +1,10 @@
 #pragma once
 
-//#include <mbgl/style/color_ramp_property_value.hpp>
+// #include <mbgl/style/color_ramp_property_value.hpp>
 #include <mbgl/style/layer.hpp>
-//#include <mbgl/style/filter.hpp>
-//#include <mbgl/style/property_value.hpp>
-//#include <mbgl/util/color.hpp>
+// #include <mbgl/style/filter.hpp>
+// #include <mbgl/style/property_value.hpp>
+// #include <mbgl/util/color.hpp>
 
 namespace mbgl::style {
 
@@ -23,7 +23,8 @@ public:
 
 protected:
     // Dynamic properties
-    std::optional<conversion::Error> setPropertyInternal(const std::string& name, const conversion::Convertible& value) final;
+    std::optional<conversion::Error> setPropertyInternal(const std::string& name,
+                                                         const conversion::Convertible& value) final;
 
     StyleProperty getProperty(const std::string& name) const final;
     Value serialize() const final;
@@ -31,6 +32,5 @@ protected:
     Mutable<Layer::Impl> mutableBaseImpl() const final;
 };
 
-} // namespace style
+} // namespace mbgl::style
 // } // namespace mbgl
-

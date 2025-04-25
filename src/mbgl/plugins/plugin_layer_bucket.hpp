@@ -38,9 +38,9 @@ public:
     const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
     TriangleIndexVector& triangles = *sharedTriangles;
 
-   // SegmentVector<HeatmapAttributes> segments;
+    // SegmentVector<HeatmapAttributes> segments;
 
-   // std::map<std::string, HeatmapProgram::Binders> paintPropertyBinders;
+    // std::map<std::string, HeatmapProgram::Binders> paintPropertyBinders;
 
     const MapMode mode;
 };

@@ -28,7 +28,7 @@ PluginLayerBucket::PluginLayerBucket(const BucketParameters& parameters,
 //            std::forward_as_tuple(layer->baseImpl->id),
 //            std::forward_as_tuple(getEvaluated<HeatmapLayerProperties>(layer), parameters.tileID.overscaledZ));
 //    }
-         
+
 }
 
 PluginLayerBucket::~PluginLayerBucket() {
@@ -51,7 +51,7 @@ void PluginLayerBucket::addFeature(const GeometryTileFeature& feature,
                                const PatternLayerMap&,
                                std::size_t featureIndex,
                                const CanonicalTileID& canonical) {
-    
+
 //     MT: Leaving in as reference for now
 //    constexpr const uint16_t vertexLength = 4;
 //

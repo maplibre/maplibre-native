@@ -12,10 +12,10 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MLNPluginLayer : NSObject
 
 // Returns the layer type of the plugin layer
--(NSString *)layerTypeID;
+- (NSString *)layerTypeID;
 
 // Creates the layer
--(void)createLayerFromProperties:(NSDictionary *)properties;
+- (void)createLayerFromProperties:(NSDictionary *)properties;
 
 @end
 

@@ -2,7 +2,7 @@
 
 #include <mbgl/style/layer_impl.hpp>
 #include <mbgl/plugins/plugin_layer.hpp>
-//#include <mbgl/style/layers/plugin_layer_properties.hpp>
+// #include <mbgl/style/layers/plugin_layer_properties.hpp>
 
 namespace mbgl {
 namespace style {
@@ -14,7 +14,7 @@ public:
     bool hasLayoutDifference(const Layer::Impl&) const override;
     void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const override;
 
-    //HeatmapPaintProperties::Transitionable paint;
+    // HeatmapPaintProperties::Transitionable paint;
 
     DECLARE_LAYER_TYPE_INFO;
 };
