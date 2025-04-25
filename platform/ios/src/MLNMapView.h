@@ -18,6 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class MLNPolygon;
 @class MLNScaleBar;
 @class MLNShape;
+@class MLNPluginLayer;
 
 @protocol MLNMapViewDelegate;
 @protocol MLNAnnotation;
@@ -2152,6 +2153,11 @@ vertically on the map.
  Triggers a repaint of the map.
 */
 - (void)triggerRepaint;
+
+/**
+ Adds a plug-in layer that is external to this library
+ */
+-(void)addPluginLayerType:(MLNPluginLayer *)pluginLayer;
 
 @end
 

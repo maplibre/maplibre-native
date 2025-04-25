@@ -22,6 +22,7 @@
 #import "MBXFrameTimeGraphView.h"
 #import "MLNMapView_Experimental.h"
 #import <objc/runtime.h>
+#import "PluginLayerExample.h"
 
 static const CLLocationCoordinate2D WorldTourDestinations[] = {
     { .latitude = 38.8999418, .longitude = -77.033996 },
@@ -257,9 +258,19 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     return self;
 }
 
+// This will add the plug-in layers.  This is a demo of how
+// extensible layers for the style can be added to the map view
+-(void)addPluginLayers {
+    
+  [self.mapView addPluginLayerType:[[PluginLayerExample alloc] init]];
+    
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    [self addPluginLayers];
 
     // Keep track of current map state and debug preferences,
     // saving and restoring when the application's state changes.
@@ -2182,6 +2193,14 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     self.styleNames = [NSMutableArray array];
     self.styleURLs = [NSMutableArray array];
 
+    /// Testing Plugins
+    
+    /// Style that does not require an `apiKey` nor any further configuration
+    [self.styleNames addObject:@"MapLibre Basic - Local With Plugin"];
+    NSURL *url = [[NSBundle mainBundle] URLForResource:@"PluginLayerTestStyle.json" withExtension:nil];
+    [self.styleURLs addObject:url];
+
+    
     /// Style that does not require an `apiKey` nor any further configuration
     [self.styleNames addObject:@"MapLibre Basic"];
     [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];

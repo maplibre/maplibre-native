@@ -25,6 +25,7 @@
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/projection.hpp>
+#include <mbgl/layermanager/layer_manager.hpp>
 
 #import "Mapbox.h"
 #import "MLNShape_Private.h"
@@ -69,6 +70,10 @@
 #import "MLNReachability.h"
 #import "MLNSettings_Private.h"
 #import "MLNMapProjection.h"
+
+#import "MLNPluginLayer.h"
+#import "MLNStyleLayerManager.h"
+#include <mbgl/plugins/plugin_layer_factory.hpp>
 
 #include <algorithm>
 #include <cstdlib>
@@ -7508,6 +7513,20 @@ static void *windowScreenContext = &windowScreenContext;
 {
     _mbglMap->triggerRepaint();
 }
+
+/**
+ Adds a plug-in layer that is external to this library
+ */
+-(void)addPluginLayerType:(MLNPluginLayer *)pluginLayer {
+
+    auto layerManager = mbgl::LayerManager::get();
+    auto darwinLayerManager = (mbgl::LayerManagerDarwin *)layerManager;
+    std::string layerType = [[pluginLayer layerTypeID] UTF8String];
+    darwinLayerManager->addLayerTypeCoreOnly(std::make_unique<mbgl::PluginLayerFactory>(layerType));
+   //darwinLayerManager->addLayerType(<#std::unique_ptr<LayerPeerFactory>#>)
+
+}
+
 
 - (MLNBackendResource *)backendResource {
     return _mbglView->getObject();
