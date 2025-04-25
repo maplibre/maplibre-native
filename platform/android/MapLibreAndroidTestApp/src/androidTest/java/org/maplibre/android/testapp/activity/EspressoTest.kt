@@ -20,7 +20,7 @@ open class EspressoTest : BaseTest() {
 
     @UiThread
     override fun initMap(maplibreMap: MapLibreMap) {
-        maplibreMap.setStyle(Style.Builder().fromUri(TestStyles.OPENFREEMAP_LIBERY))
+        maplibreMap.setStyle(Style.Builder().fromUri(TestStyles.OPENFREEMAP_LIBERTY))
         super.initMap(maplibreMap)
     }
 }
