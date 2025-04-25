@@ -9,7 +9,6 @@ namespace style {
 
 class PluginLayer::Impl : public Layer::Impl {
 public:
-    
     Impl(std::string layerID, std::string sourceID, LayerTypeInfo layerTypeInfo);
 
     using Layer::Impl::Impl;
@@ -20,22 +19,21 @@ public:
     const LayerTypeInfo* getTypeInfo() const noexcept final {
         return &_layerTypeInfo;
         // TODO: Return the right thing here
-       // return nullptr;
+        // return nullptr;
     }
-    
+
 private:
     LayerTypeInfo _layerTypeInfo;
 
     // HeatmapPaintProperties::Transitionable paint;
-    
-    // Not needed for this
-    //DECLARE_LAYER_TYPE_INFO;
-    
-//    const LayerTypeInfo* getTypeInfo() const noexcept final {
-//        return staticTypeInfo();
-//    }
-//    static const LayerTypeInfo* staticTypeInfo() noexcept;
 
+    // Not needed for this
+    // DECLARE_LAYER_TYPE_INFO;
+
+    //    const LayerTypeInfo* getTypeInfo() const noexcept final {
+    //        return staticTypeInfo();
+    //    }
+    //    static const LayerTypeInfo* staticTypeInfo() noexcept;
 };
 
 } // namespace style

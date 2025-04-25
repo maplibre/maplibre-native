@@ -92,7 +92,7 @@ namespace mbgl {
 namespace style {
 
 // static
-//const LayerTypeInfo* PluginLayer::Impl::staticTypeInfo() noexcept {
+// const LayerTypeInfo* PluginLayer::Impl::staticTypeInfo() noexcept {
 //    const static LayerTypeInfo typeInfo{.type = "heatmap",
 //                                        .source = LayerTypeInfo::Source::Required,
 //                                        .pass3d = LayerTypeInfo::Pass3D::Required,
@@ -103,14 +103,13 @@ namespace style {
 //    return &typeInfo;
 //}
 
-PluginLayer::PluginLayer(const std::string& layerID, const std::string& sourceID, const style::LayerTypeInfo layerTypeInfo)
-    : Layer(makeMutable<Impl>(layerID, sourceID, layerTypeInfo)) {
-}
-
+PluginLayer::PluginLayer(const std::string& layerID,
+                         const std::string& sourceID,
+                         const style::LayerTypeInfo layerTypeInfo)
+    : Layer(makeMutable<Impl>(layerID, sourceID, layerTypeInfo)) {}
 
 PluginLayer::PluginLayer(Immutable<Impl> impl_)
-    : Layer(std::move(impl_)) {
-}
+    : Layer(std::move(impl_)) {}
 
 PluginLayer::~PluginLayer() = default;
 
@@ -128,8 +127,7 @@ std::unique_ptr<Layer> PluginLayer::cloneRef(const std::string& id_) const {
     return std::make_unique<PluginLayer>(std::move(impl_));
 }
 
-void PluginLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const {
-}
+void PluginLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const {}
 /*
 // Layout properties
 
@@ -147,9 +145,6 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
 
 
 */
-
-
-
 
 Value PluginLayer::serialize() const {
     auto result = Layer::serialize();
@@ -169,30 +164,28 @@ Value PluginLayer::serialize() const {
 using namespace conversion;
 
 std::optional<Error> PluginLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
-/*
- TODO: Implement this
-    const auto it = layerProperties.find(name.c_str());
-    if (it == layerProperties.end()) return Error{"layer doesn't support this property"};
+    /*
+     TODO: Implement this
+        const auto it = layerProperties.find(name.c_str());
+        if (it == layerProperties.end()) return Error{"layer doesn't support this property"};
 
-    auto property = static_cast<Property>(it->second);
+        auto property = static_cast<Property>(it->second);
 
-    return Error{"layer doesn't support this property"};
- */
-    
+        return Error{"layer doesn't support this property"};
+     */
+
     return Error{"Not implemented yet"};
 }
 
-
 StyleProperty PluginLayer::getProperty(const std::string& name) const {
     // TODO: Implement this via callback
-    //return getLayerProperty(*this, name);
+    // return getLayerProperty(*this, name);
     return {};
 }
 
 Mutable<Layer::Impl> PluginLayer::mutableBaseImpl() const {
     return staticMutableCast<Layer::Impl>(mutableImpl());
 }
-
 
 } // namespace style
 } // namespace mbgl

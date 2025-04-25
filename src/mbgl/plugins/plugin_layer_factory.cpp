@@ -86,14 +86,12 @@ const style::LayerTypeInfo* PluginLayerFactory::getTypeInfo() const noexcept {
 
 std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string& id,
                                                               const style::conversion::Convertible& value) noexcept {
-    
-    
     // TODO: What is this and how does it fit in
-//    const auto source = getSource(value);
-//    if (!source) {
-//        return nullptr;
-//    }
-    
+    //    const auto source = getSource(value);
+    //    if (!source) {
+    //        return nullptr;
+    //    }
+
     std::string source = "source";
     return std::unique_ptr<style::Layer>(new (std::nothrow) style::PluginLayer(id, source, _layerTypeInfo));
 
