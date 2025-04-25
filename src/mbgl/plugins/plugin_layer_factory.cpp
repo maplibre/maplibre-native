@@ -59,25 +59,23 @@ style::LayerTypeInfo getDefaultInfo() {
     return tempResult;
 }
 
-PluginLayerFactory::PluginLayerFactory(std::string & layerType,
+PluginLayerFactory::PluginLayerFactory(std::string& layerType,
                                        mbgl::style::LayerTypeInfo::Source source,
                                        mbgl::style::LayerTypeInfo::Pass3D pass3D,
                                        mbgl::style::LayerTypeInfo::Layout layout,
                                        mbgl::style::LayerTypeInfo::FadingTiles fadingTiles,
                                        mbgl::style::LayerTypeInfo::CrossTileIndex crossTileIndex,
-                                       mbgl::style::LayerTypeInfo::TileKind tileKind):
-    _layerTypeInfo(getDefaultInfo()),
-    _layerType(layerType) {
-    
-    _layerTypeInfo.type = _layerType.c_str();
-    plugins::NonConstLayerTypeInfo *lti = (plugins::NonConstLayerTypeInfo *)&_layerTypeInfo;
+                                       mbgl::style::LayerTypeInfo::TileKind tileKind)
+    : _layerTypeInfo(getDefaultInfo()),
+      _layerType(layerType) {
+    _layerTypeInfo.type = layerType.c_str();
+    plugins::NonConstLayerTypeInfo* lti = (plugins::NonConstLayerTypeInfo*)&_layerTypeInfo;
     lti->source = (plugins::NonConstLayerTypeInfo::Source)((int)source);
     lti->pass3d = (plugins::NonConstLayerTypeInfo::Pass3D)((int)pass3D);
     lti->layout = (plugins::NonConstLayerTypeInfo::Layout)((int)layout);
     lti->fadingTiles = (plugins::NonConstLayerTypeInfo::FadingTiles)((int)fadingTiles);
     lti->crossTileIndex = (plugins::NonConstLayerTypeInfo::CrossTileIndex)((int)crossTileIndex);
     lti->tileKind = (plugins::NonConstLayerTypeInfo::TileKind)((int)tileKind);
-
 }
 
 const style::LayerTypeInfo* PluginLayerFactory::getTypeInfo() const noexcept {
