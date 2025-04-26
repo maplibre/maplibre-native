@@ -112,15 +112,13 @@ std::unique_ptr<Bucket> PluginLayerFactory::createBucket(
 }
 
 std::unique_ptr<RenderLayer> PluginLayerFactory::createRenderLayer(Immutable<style::Layer::Impl> impl) noexcept {
-
     //    assert(impl->getTypeInfo() == getTypeInfo());
     //    return std::make_unique<RenderHeatmapLayer>(staticImmutableCast<style::HeatmapLayer::Impl>(impl));
-    
+
     return std::make_unique<RenderPluginLayer>(staticImmutableCast<style::PluginLayer::Impl>(impl));
 
-  //  return std::make_unique<RenderPluginLayer>(impl);
-  //  return nullptr;
-    
+    //  return std::make_unique<RenderPluginLayer>(impl);
+    //  return nullptr;
 }
 
 } // namespace mbgl

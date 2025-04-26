@@ -11,9 +11,8 @@
 namespace mbgl {
 namespace style {
 
-PluginLayerProperties::PluginLayerProperties(
-                                             Immutable<PluginLayer::Impl> impl_)
-: LayerProperties(std::move(impl_)) {}
+PluginLayerProperties::PluginLayerProperties(Immutable<PluginLayer::Impl> impl_)
+    : LayerProperties(std::move(impl_)) {}
 /*
  PluginLayerProperties::PluginLayerProperties(
  Immutable<PluginLayer::Impl> impl_,
@@ -23,7 +22,6 @@ PluginLayerProperties::PluginLayerProperties(
  */
 
 PluginLayerProperties::~PluginLayerProperties() = default;
-
 
 unsigned long PluginLayerProperties::constantsMask() const {
     // TODO: What are these and how should they be implemented for plugins?
@@ -38,9 +36,8 @@ unsigned long PluginLayerProperties::constantsMask() const {
 expression::Dependency PluginLayerProperties::getDependencies() const noexcept {
     // TODO: What are dependencies and how should they be implemented in the plugin paradigm
     return expression::Dependency::None;
-    //return layerImpl().paint.getDependencies();
+    // return layerImpl().paint.getDependencies();
 }
 
-
-}
-}
+} // namespace style
+} // namespace mbgl

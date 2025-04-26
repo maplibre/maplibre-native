@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/offscreen_texture.hpp>
 #include <mbgl/gfx/texture.hpp>
-//#include <mbgl/programs/heatmap_program.hpp>
+// #include <mbgl/programs/heatmap_program.hpp>
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/plugins/plugin_layer_impl.hpp>
 #include <mbgl/plugins/plugin_layer_properties.hpp>
@@ -11,10 +11,10 @@
 
 namespace mbgl {
 
-//class HeatmapLayerTweaker;
-//class HeatmapTextureLayerTweaker;
-//using HeatmapLayerTweakerPtr = std::shared_ptr<HeatmapLayerTweaker>;
-//using HeatmapTextureLayerTweakerPtr = std::shared_ptr<HeatmapTextureLayerTweaker>;
+// class HeatmapLayerTweaker;
+// class HeatmapTextureLayerTweaker;
+// using HeatmapLayerTweakerPtr = std::shared_ptr<HeatmapLayerTweaker>;
+// using HeatmapTextureLayerTweakerPtr = std::shared_ptr<HeatmapTextureLayerTweaker>;
 
 class RenderPluginLayer final : public RenderLayer {
 public:
@@ -60,22 +60,22 @@ private:
     std::size_t removeAllDrawables() override;
 
     // Paint properties
-//    style::HeatmapPaintProperties::Unevaluated unevaluated;
-//    std::shared_ptr<PremultipliedImage> colorRamp;
-//    std::unique_ptr<gfx::OffscreenTexture> renderTexture;
-//    std::optional<gfx::Texture> colorRampTexture;
-//    SegmentVector<HeatmapTextureAttributes> segments;
-//
-//    gfx::ShaderGroupPtr heatmapShaderGroup;
-//    gfx::ShaderProgramBasePtr heatmapTextureShader;
-//    RenderTargetPtr renderTarget;
-//
-//    using TextureVertexVector = gfx::VertexVector<HeatmapTextureLayoutVertex>;
-//    std::shared_ptr<TextureVertexVector> sharedTextureVertices;
+    //    style::HeatmapPaintProperties::Unevaluated unevaluated;
+    //    std::shared_ptr<PremultipliedImage> colorRamp;
+    //    std::unique_ptr<gfx::OffscreenTexture> renderTexture;
+    //    std::optional<gfx::Texture> colorRampTexture;
+    //    SegmentVector<HeatmapTextureAttributes> segments;
+    //
+    //    gfx::ShaderGroupPtr heatmapShaderGroup;
+    //    gfx::ShaderProgramBasePtr heatmapTextureShader;
+    //    RenderTargetPtr renderTarget;
+    //
+    //    using TextureVertexVector = gfx::VertexVector<HeatmapTextureLayoutVertex>;
+    //    std::shared_ptr<TextureVertexVector> sharedTextureVertices;
 
     // This is the layer tweaker for applying the off-screen texture to the framebuffer.
     // The inherited layer tweaker is for applying tiles to the off-screen texture.
-//    LayerTweakerPtr textureTweaker;
+    //    LayerTweakerPtr textureTweaker;
 };
 
 } // namespace mbgl
