@@ -1,5 +1,4 @@
 #pragma once
-#include <list>
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/layout/layout.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>
@@ -8,6 +7,8 @@
 #include <mbgl/style/properties.hpp>
 #include <mbgl/style/layer_properties.hpp>
 #include <mbgl/util/containers.hpp>
+
+#include <list>
 
 namespace mbgl {
 

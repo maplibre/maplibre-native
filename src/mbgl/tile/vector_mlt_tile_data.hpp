@@ -20,9 +20,20 @@ class VectorMLTTileFeature : public GeometryTileFeature {
 public:
     VectorMLTTileFeature(std::shared_ptr<const MapLibreTile>,
                          const mlt::Feature&,
-                         std::uint32_t index,
                          std::uint32_t extent,
                          int version);
+    VectorMLTTileFeature(const VectorMLTTileFeature&) = delete;
+    VectorMLTTileFeature(VectorMLTTileFeature&& other) :
+    tile(std::move(other.tile)),
+    feature(other.feature),
+    extent(other.extent),
+    version(other.version),
+    lines(std::move(other.lines)),
+    properties(std::move(other.properties))
+    {}
+    
+    VectorMLTTileFeature& operator=(VectorMLTTileFeature&&) = delete;
+    VectorMLTTileFeature& operator=(const VectorMLTTileFeature&) = delete;
 
     FeatureType getType() const override;
     std::optional<Value> getValue(const std::string& key) const override;
@@ -31,11 +42,12 @@ public:
     const GeometryCollection& getGeometries() const override;
 
 private:
-    const std::shared_ptr<const MapLibreTile> tile;
-    const mlt::Feature& feature;
-    const std::uint32_t index;
-    const std::uint32_t extent;
-    const int version;
+    std::shared_ptr<const MapLibreTile> tile;
+    mlt::Feature const& feature;
+    std::uint32_t extent;
+    int version;
+
+    // lazy init
     mutable std::optional<GeometryCollection> lines;
     mutable std::optional<PropertyMap> properties;
 };
@@ -44,14 +56,13 @@ class VectorMLTTileLayer : public GeometryTileLayer {
 public:
     VectorMLTTileLayer(std::shared_ptr<const MapLibreTile>, const mlt::Layer&);
 
-    std::size_t featureCount() const override { return featuresCount; }
+    std::size_t featureCount() const override;
     std::unique_ptr<GeometryTileFeature> getFeature(std::size_t i) const override;
     std::string getName() const override;
 
 private:
     const std::shared_ptr<const MapLibreTile> tile;
     const mlt::Layer& layer;
-    std::size_t featuresCount;
 };
 
 class VectorMLTTileData : public GeometryTileData {
