@@ -103,7 +103,7 @@ jobs:
     needs: windows-get-or-build-dependencies
     strategy:
       matrix:
-        renderer: [opengl, egl, vulkan, osmesa]
+        renderer: [opengl, egl, vulkan]
     runs-on: windows-2022
     steps:
       - run: |
@@ -165,12 +165,12 @@ jobs:
 
       - name: Download Mesa3D
         run: |
-          Invoke-WebRequest https://github.com/pal1000/mesa-dist-win/releases/download/25.0.4/mesa3d-25.0.4-release-msvc.7z -OutFile mesa3d.7z
+          (Invoke-WebRequest https://api.github.com/repos/pal1000/mesa-dist-win/releases -Headers @{ Authorization = ('Bearer {0}' -f '${{ secrets.GITHUB_TOKEN }}') } | ConvertFrom-Json)[0].assets | Where-Object name -match 'mesa3d-.+-(release|devel)-msvc\.7z' | foreach { Invoke-WebRequest $_.browser_download_url -OutFile mesa3d.7z }
 
       - name: Extract Mesa3D files for OpenGL
         if: matrix.renderer != 'vulkan'
         run: |
-          & 'C:\Program Files\7-Zip\7z.exe' e -bb3 -obuild .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll x64\libglapi.dll
+          & 'C:\Program Files\7-Zip\7z.exe' e -bb3 -obuild .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll
 
       - name: Extract Mesa3D files for EGL
         if: matrix.renderer == 'egl'
@@ -181,11 +181,6 @@ jobs:
         if: matrix.renderer == 'vulkan'
         run: |
           & 'C:\Program Files\7-Zip\7z.exe' e -bb3 -obuild .\mesa3d.7z x64\lvp_icd.x86_64.json x64\vulkan_lvp.dll
-
-      - name: Extract Mesa3D files for OSMesa
-        if: matrix.renderer == 'osmesa'
-        run: |
-          & 'C:\Program Files\7-Zip\7z.exe' e -bb3 -obuild .\mesa3d.7z x64\osmesa.dll
 
       # unit tests
 
@@ -210,7 +205,8 @@ jobs:
         continue-on-error: ${{ matrix.renderer == 'vulkan' }}
         env:
           ANGLE_DEFAULT_PLATFORM: 'gl'
-          VK_LOADER_DEBUG: all
+          GALLIUM_DRIVER: llvmpipe
+          LIBGL_ALWAYS_SOFTWARE: true
         run: build/mbgl-test-runner.exe
 
       # render tests
@@ -218,9 +214,10 @@ jobs:
       - name: Run render test
         id: render_test
         env:
-          manifest_file: ${{ matrix.renderer == 'osmesa' && 'opengl' || matrix.renderer }}
+          manifest_file: ${{ matrix.renderer }}
           ANGLE_DEFAULT_PLATFORM: 'gl'
-          VK_LOADER_DEBUG: all
+          GALLIUM_DRIVER: llvmpipe
+          LIBGL_ALWAYS_SOFTWARE: true
         run: build/mbgl-render-test-runner.exe "--manifestPath=metrics/windows-${env:manifest_file}.json"
 
       - name: Upload render test result
@@ -229,7 +226,7 @@ jobs:
         with:
           name: render-test-result-${{ matrix.renderer }}
           path: |
-            metrics/windows-${{ matrix.renderer == 'osmesa' && 'opengl' || matrix.renderer }}.html
+            metrics/windows-${{ matrix.renderer }}.html
 
       # expression tests
 

@@ -9,7 +9,6 @@ switch ($env:RENDERER)
 	'opengl' { $compile_flags += '-DMLN_WITH_OPENGL=ON'; break; }
 	'egl'    { $compile_flags += '-DMLN_WITH_EGL=ON'   ; break; }
 	'vulkan' { $compile_flags += @('-DMLN_WITH_VULKAN=ON', '-DMLN_WITH_OPENGL=OFF'); break; }
-	'osmesa' { $compile_flags += '-DMLN_WITH_OSMESA=ON'; break; }
 }
 
 Write-Host 'Compile flags: ' $compile_flags
