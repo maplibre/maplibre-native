@@ -30,6 +30,8 @@ extension MLNMapViewDelegateIntegrationTests: MLNMapViewDelegate {
 
     func mapView(_: MLNMapView, didFinishLoading _: MLNStyle) {}
 
+    func mapView(_: MLNMapView, sourceDidChange _: MLNSource) {}
+
     func mapView(_: MLNMapView, didSelect _: MLNAnnotation) {}
 
     func mapView(_: MLNMapView, didDeselect _: MLNAnnotation) {}

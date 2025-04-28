@@ -27,7 +27,7 @@ class MaxMinZoomActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
-        maplibreMap.setStyle(TestStyles.OPENFREEMAP_LIBERY)
+        maplibreMap.setStyle(TestStyles.OPENFREEMAP_LIBERTY)
         // # --8<-- [start:zoomPreference]
         maplibreMap.setMinZoomPreference(3.0)
         maplibreMap.setMaxZoomPreference(5.0)
