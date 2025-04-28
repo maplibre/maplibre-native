@@ -5,6 +5,8 @@ param(
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path -Parent)
 
+Copy-Item ('{0}\*' -f [System.IO.Path]::Combine($PWD.Path, 'vendor', 'vcpkg-custom-ports')) -Force -Recurse -Destination ('{0}\ports\' -f [System.IO.Path]::Combine($PWD.Path, 'vendor', 'vcpkg'))
+
 $vcpkg_temp_dir = '***'
 
 foreach($letter in [byte][char]'Z'..[byte][char]'A')

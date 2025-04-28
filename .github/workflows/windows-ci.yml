@@ -164,29 +164,33 @@ jobs:
           category: "/language:cpp"
 
       - name: Download Mesa3D
-        if: matrix.renderer != 'egl'
         run: |
-          Invoke-WebRequest https://github.com/pal1000/mesa-dist-win/releases/download/24.2.5/mesa3d-24.2.5-release-msvc.7z -OutFile mesa3d.7z
+          Invoke-WebRequest https://github.com/pal1000/mesa-dist-win/releases/download/25.0.4/mesa3d-25.0.4-release-msvc.7z -OutFile mesa3d.7z
 
       - name: Extract Mesa3D files for OpenGL
-        if: matrix.renderer != 'egl' && matrix.renderer != 'vulkan'
+        if: matrix.renderer != 'vulkan'
         run: |
-          & 'C:\Program Files\7-Zip\7z.exe' e -obuild .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll x64\libglapi.dll
+          & 'C:\Program Files\7-Zip\7z.exe' e -bb3 -obuild .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll x64\libglapi.dll
+
+      - name: Extract Mesa3D files for EGL
+        if: matrix.renderer == 'egl'
+        run: |
+          & 'C:\Program Files\7-Zip\7z.exe' e -bb3 -obuild .\mesa3d.7z x64\d3d10warp.dll
 
       - name: Extract Mesa3D files for Vulkan
-        if: matrix.renderer != 'egl' && matrix.renderer == 'vulkan'
+        if: matrix.renderer == 'vulkan'
         run: |
-          & 'C:\Program Files\7-Zip\7z.exe' e -obuild .\mesa3d.7z x64\lvp_icd.x86_64.json x64\vulkan_lvp.dll
+          & 'C:\Program Files\7-Zip\7z.exe' e -bb3 -obuild .\mesa3d.7z x64\lvp_icd.x86_64.json x64\vulkan_lvp.dll
 
       - name: Extract Mesa3D files for OSMesa
         if: matrix.renderer == 'osmesa'
         run: |
-          & 'C:\Program Files\7-Zip\7z.exe' e -obuild .\mesa3d.7z x64\osmesa.dll
+          & 'C:\Program Files\7-Zip\7z.exe' e -bb3 -obuild .\mesa3d.7z x64\osmesa.dll
 
       # unit tests
 
       - name: Configure Mesa3D drivers (OpenGL)
-        if: matrix.renderer != 'egl' && matrix.renderer != 'vulkan'
+        if: matrix.renderer != 'vulkan'
         run: |
           Add-Content -Path $env:GITHUB_ENV -Value 'GALLIUM_DRIVER=llvmpipe'
 
@@ -198,11 +202,15 @@ jobs:
       - name: Download and configure Vulkan
         if: matrix.renderer == 'vulkan'
         run: |
-          Invoke-WebRequest https://sdk.lunarg.com/sdk/download/1.3.296.0/windows/VulkanRT-1.3.296.0-Components.zip -OutFile VulkanRT.zip
-          & 'C:\Program Files\7-Zip\7z.exe' e -obuild -r .\VulkanRT.zip *x64\vulkan-1.dll
+          $version = (Invoke-WebRequest -Uri "https://vulkan.lunarg.com/sdk/latest.json" | ConvertFrom-Json).windows
+          Invoke-WebRequest https://sdk.lunarg.com/sdk/download/$version/windows/VulkanRT-$version-Components.zip -OutFile VulkanRT.zip
+          & 'C:\Program Files\7-Zip\7z.exe' e -bb3 -obuild -r .\VulkanRT.zip *x64\vulkan-1.*
 
       - name: Run C++ tests
         continue-on-error: ${{ matrix.renderer == 'vulkan' }}
+        env:
+          ANGLE_DEFAULT_PLATFORM: 'gl'
+          VK_LOADER_DEBUG: all
         run: build/mbgl-test-runner.exe
 
       # render tests
@@ -211,6 +219,8 @@ jobs:
         id: render_test
         env:
           manifest_file: ${{ matrix.renderer == 'osmesa' && 'opengl' || matrix.renderer }}
+          ANGLE_DEFAULT_PLATFORM: 'gl'
+          VK_LOADER_DEBUG: all
         run: build/mbgl-render-test-runner.exe "--manifestPath=metrics/windows-${env:manifest_file}.json"
 
       - name: Upload render test result
