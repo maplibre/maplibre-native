@@ -38,6 +38,8 @@ public:
         renderable = true;
     }
 
+    void setData(const std::shared_ptr<const std::string>&) override {}
+
     util::SimpleIdentity uniqueId;
 };
 

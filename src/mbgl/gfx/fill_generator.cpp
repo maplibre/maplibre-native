@@ -54,10 +54,10 @@ std::size_t totalVerticesCheck(const GeometryCollection& polygon) {
 
 void addFillIndices(SegmentVector<FillAttributes>& fillSegments,
                     gfx::IndexVector<gfx::Triangles>& fillIndexes,
-                    const std::vector<uint32_t>& indices,
+                    const std::span<const uint32_t>& indices,
                     const std::size_t startVertices,
                     const std::size_t totalVertices) {
-    std::size_t nIndices = indices.size();
+    const std::size_t nIndices = indices.size();
     assert(nIndices % 3 == 0);
 
     if (fillSegments.empty() ||
@@ -211,14 +211,14 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
 
     // If we have pre-tessellated geometry, multi-polygons are tessellated
     // together, so we need to add them to the fill segment all at once.
-    if (!geometry.triangles.empty()) {
+    if (!geometry.getTriangles().empty()) {
         const std::size_t startVertices = fillVertices.elements();
         std::size_t totalVertices = 0;
         for (const auto& polygon : geometry) {
             totalVertices += polygon.size();
             addRingVertices(fillVertices, polygon);
         }
-        addFillIndices(fillSegments, fillIndexes, geometry.triangles, startVertices, totalVertices);
+        addFillIndices(fillSegments, fillIndexes, geometry.getTriangles(), startVertices, totalVertices);
         return;
     }
 
