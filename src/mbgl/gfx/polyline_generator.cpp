@@ -96,7 +96,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
     const std::size_t first = [&coordinates, &len] {
         std::size_t i = 0;
         // If the line has duplicate vertices at the start, adjust index to remove them.
-        while (i < len - 1 && coordinates[i] == coordinates[i + 1]) {
+        while (i + 1 < len && coordinates[i] == coordinates[i + 1]) {
             i++;
         }
         return i;

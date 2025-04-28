@@ -2346,7 +2346,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
             break;
 
         case MLNTileOperationCancelled:
-            NSLog(@"Pending work on tile %@", tileStr);
+            NSLog(@"Pending work cancelled on tile %@", tileStr);
             break;
 
         case MLNTileOperationNullOp:
