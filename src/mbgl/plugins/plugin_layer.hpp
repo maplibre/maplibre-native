@@ -10,11 +10,9 @@ namespace mbgl::style {
 
 class PluginLayer final : public Layer {
 public:
-    PluginLayer(const std::string& layerID,
-                const std::string& sourceID,
-                const style::LayerTypeInfo layerTypeInfo
+    PluginLayer(const std::string& layerID, const std::string& sourceID, const style::LayerTypeInfo layerTypeInfo
                 //,const style::conversion::Convertible& layerProperties
-                );
+    );
     ~PluginLayer() override;
 
     // Private implementation
@@ -27,15 +25,15 @@ public:
 
 protected:
     // Dynamic properties
-//    std::optional<conversion::Error> setPropertyInternal(const std::string& name,
-//                                                         const conversion::Convertible& value) final;
-    std::optional<conversion::Error> setPropertyInternal(const std::string& name, const conversion::Convertible& value) final;
+    //    std::optional<conversion::Error> setPropertyInternal(const std::string& name,
+    //                                                         const conversion::Convertible& value) final;
+    std::optional<conversion::Error> setPropertyInternal(const std::string& name,
+                                                         const conversion::Convertible& value) final;
 
     StyleProperty getProperty(const std::string& name) const final;
     Value serialize() const final;
 
     Mutable<Layer::Impl> mutableBaseImpl() const final;
-    
 };
 
 } // namespace mbgl::style

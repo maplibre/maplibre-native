@@ -108,9 +108,9 @@ PluginLayer::PluginLayer(const std::string& layerID,
                          const style::LayerTypeInfo layerTypeInfo
                          //,const style::conversion::Convertible& layerProperties
                          )
-: Layer(makeMutable<Impl>(layerID, sourceID, layerTypeInfo
-                          //, layerProperties
-                          )) {}
+    : Layer(makeMutable<Impl>(layerID, sourceID, layerTypeInfo
+                              //, layerProperties
+                              )) {}
 
 PluginLayer::PluginLayer(Immutable<Impl> impl_)
     : Layer(std::move(impl_)) {}
@@ -167,9 +167,9 @@ Value PluginLayer::serialize() const {
 
 using namespace conversion;
 
-std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::string& name, const conversion::Convertible& value) {
-
-//std::optional<Error> PluginLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
+std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::string& name,
+                                                                  const conversion::Convertible& value) {
+    // std::optional<Error> PluginLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
     /*
      TODO: Implement this
         const auto it = layerProperties.find(name.c_str());

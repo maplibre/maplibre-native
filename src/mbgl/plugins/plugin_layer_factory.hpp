@@ -18,10 +18,10 @@ public:
 
     typedef std::function<void()> RenderFunction;
     void setRenderFunction(RenderFunction renderFunction) { _renderFunction = renderFunction; }
-    
+
     typedef std::function<void()> UpdateFunction;
     void setUpdateFunction(UpdateFunction updateFunction) { _updateFunction = updateFunction; }
-    
+
 protected:
     const style::LayerTypeInfo* getTypeInfo() const noexcept final;
     std::unique_ptr<style::Layer> createLayer(const std::string& id,
@@ -34,10 +34,9 @@ private:
     // These is the layer type info that is setup during factory creation and returned in the getTypeInfo method
     style::LayerTypeInfo _layerTypeInfo;
     std::string _layerType;
-    
+
     RenderFunction _renderFunction;
     UpdateFunction _updateFunction;
-
 };
 
 } // namespace mbgl

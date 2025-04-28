@@ -7578,8 +7578,8 @@ static void *windowScreenContext = &windowScreenContext;
                                                tileKind);
 //    factory->setRenderFunction();
 //    factory->setUpdateFunction();
-    
-    
+
+
     darwinLayerManager->addLayerTypeCoreOnly(std::move(factory));
 
    //darwinLayerManager->addLayerType(<#std::unique_ptr<LayerPeerFactory>#>)
