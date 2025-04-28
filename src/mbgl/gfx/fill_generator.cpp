@@ -70,7 +70,9 @@ void addFillIndices(SegmentVector<FillAttributes>& fillSegments,
     const auto triangleIndex = static_cast<uint16_t>(triangleSegment.vertexLength);
 
     for (std::size_t i = 0; i < nIndices; i += 3) {
-        assert(std::max({triangleIndex + indices[i+0],triangleIndex + indices[i+1],triangleIndex + indices[i+2]}) < triangleIndex + totalVertices);
+        assert(
+            std::max({triangleIndex + indices[i + 0], triangleIndex + indices[i + 1], triangleIndex + indices[i + 2]}) <
+            triangleIndex + totalVertices);
         fillIndexes.emplace_back(
             triangleIndex + indices[i], triangleIndex + indices[i + 1], triangleIndex + indices[i + 2]);
     }

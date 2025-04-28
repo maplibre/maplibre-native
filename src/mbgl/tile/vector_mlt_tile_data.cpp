@@ -127,7 +127,10 @@ const GeometryCollection& VectorMLTTileFeature::getGeometries() const {
             case GeometryType::MULTIPOLYGON: {
                 const auto& geom = static_cast<const mlt::geometry::MultiPolygon&>(geometry);
                 const auto& polygons = geom.getPolygons();
-                lines.emplace(std::reduce(/*std::execution::par_unseq,*/ polygons.begin(), polygons.end(),static_cast<std::size_t>(0), [](const auto a, const auto& b){ return a+b.size(); }));
+                lines.emplace(std::reduce(/*std::execution::par_unseq,*/ polygons.begin(),
+                                          polygons.end(),
+                                          static_cast<std::size_t>(0),
+                                          [](const auto a, const auto& b) { return a + b.size(); }));
                 for (const auto& poly : polygons) {
                     std::ranges::transform(poly, std::back_inserter(*lines), convert);
                 }
@@ -144,8 +147,7 @@ const GeometryCollection& VectorMLTTileFeature::getGeometries() const {
 
 VectorMLTTileLayer::VectorMLTTileLayer(std::shared_ptr<const MapLibreTile> tile_, const mlt::Layer& layer_)
     : tile(std::move(tile_)),
-      layer(layer_) {
-}
+      layer(layer_) {}
 
 std::size_t VectorMLTTileLayer::featureCount() const {
     return layer.getFeatures().size();
@@ -153,8 +155,7 @@ std::size_t VectorMLTTileLayer::featureCount() const {
 
 std::unique_ptr<GeometryTileFeature> VectorMLTTileLayer::getFeature(std::size_t index) const {
     const auto& features = layer.getFeatures();
-    return std::make_unique<VectorMLTTileFeature>(
-        tile, features[index], layer.getExtent(), layer.getVersion());
+    return std::make_unique<VectorMLTTileFeature>(tile, features[index], layer.getExtent(), layer.getVersion());
 }
 
 std::string VectorMLTTileLayer::getName() const {

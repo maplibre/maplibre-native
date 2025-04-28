@@ -18,20 +18,16 @@ using MapLibreTile = mlt::MapLibreTile;
 
 class VectorMLTTileFeature : public GeometryTileFeature {
 public:
-    VectorMLTTileFeature(std::shared_ptr<const MapLibreTile>,
-                         const mlt::Feature&,
-                         std::uint32_t extent,
-                         int version);
+    VectorMLTTileFeature(std::shared_ptr<const MapLibreTile>, const mlt::Feature&, std::uint32_t extent, int version);
     VectorMLTTileFeature(const VectorMLTTileFeature&) = delete;
-    VectorMLTTileFeature(VectorMLTTileFeature&& other) :
-    tile(std::move(other.tile)),
-    feature(other.feature),
-    extent(other.extent),
-    version(other.version),
-    lines(std::move(other.lines)),
-    properties(std::move(other.properties))
-    {}
-    
+    VectorMLTTileFeature(VectorMLTTileFeature&& other)
+        : tile(std::move(other.tile)),
+          feature(other.feature),
+          extent(other.extent),
+          version(other.version),
+          lines(std::move(other.lines)),
+          properties(std::move(other.properties)) {}
+
     VectorMLTTileFeature& operator=(VectorMLTTileFeature&&) = delete;
     VectorMLTTileFeature& operator=(const VectorMLTTileFeature&) = delete;
 
