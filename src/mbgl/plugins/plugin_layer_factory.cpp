@@ -10,6 +10,9 @@
 #include "plugin_layer_impl.hpp"
 #include "plugin_layer_render.hpp"
 // #include "plugin_layer_bucket.hpp"
+#include <mbgl/style/conversion_impl.hpp>
+#include <iostream>
+#include <string>
 
 namespace mbgl {
 
@@ -85,6 +88,113 @@ const style::LayerTypeInfo* PluginLayerFactory::getTypeInfo() const noexcept {
     // return style::PluginLayer::Impl::staticTypeInfo();
 }
 
+void jsonStringFromConvertible(const style::conversion::Convertible& value,
+                               std::string & output) {
+    
+    if (isObject(value)) {
+        output.append("{");
+        bool firstItem = true;
+        eachMember(value, [&output, &firstItem](const std::string& name,
+                                                const style::conversion::Convertible& value) -> std::optional<style::conversion::Error> {
+            
+            std::cout << "Working on: " << name << "\n";
+            
+            if (!firstItem) {
+                output.append(",");
+            }
+            firstItem = false;
+            output.append("\"");
+            output.append(name);
+            output.append("\":");
+            
+            jsonStringFromConvertible(value, output);
+            
+            return std::nullopt;
+        });
+        output.append("}");
+    } else if (isArray(value)) {
+        output.append("[");
+        bool firstItem = true;
+        
+        for (size_t i=0; i < arrayLength(value); i++) {
+            
+            if (!firstItem) {
+                output.append(",");
+            }
+            firstItem = false;
+
+            auto itemValue = arrayMember(value, i);
+            jsonStringFromConvertible(itemValue, output);
+
+            
+            
+        }
+        
+        output.append("]");
+/*
+        eachMember(value, [&output, &firstItem](const std::string& name,
+                                                const style::conversion::Convertible& value) -> std::optional<style::conversion::Error> {
+            
+            std::cout << "Working on: " << name << "\n";
+            
+            if (!firstItem) {
+                output.append(",");
+            }
+            firstItem = false;
+            
+            jsonStringFromConvertible(value, output);
+            
+            return std::nullopt;
+        });
+        output.append("]");
+        */
+    } else {
+        
+        /*
+         DECLARE_VALUE_TYPE_ACCESOR(Int, int64_t)
+         DECLARE_VALUE_TYPE_ACCESOR(Uint, uint64_t)
+         DECLARE_VALUE_TYPE_ACCESOR(Bool, bool)
+         DECLARE_VALUE_TYPE_ACCESOR(Double, double)
+         DECLARE_VALUE_TYPE_ACCESOR(Array, array_type)
+         DECLARE_VALUE_TYPE_ACCESOR(Object, object_type)
+         DECLARE_VALUE_TYPE_ACCESOR(String, std::string)
+
+         */
+        auto v = toValue(value);
+        if (auto i = v.value().getInt()) {
+            std::cout << "Int: " << i << "\n";
+            std::string tempResult = std::to_string(*i);
+            output.append(tempResult);
+        } else if (auto i = v.value().getUint()) {
+            std::cout << "Int: " << i << "\n";
+            std::string tempResult = std::to_string(*i);
+            output.append(tempResult);
+
+        } else if (auto s = v.value().getString()) {
+            output.append("\"");
+            output.append(v.value().getString()->c_str());
+            output.append("\"");
+
+          //  std::cout << "String: " << v.value().getString()->c_str() << "\n";
+        } else if (auto d = v.value().getDouble()) {
+            std::cout << "Double: " << d << "\n";
+            
+            output.append(std::to_string(*d));
+
+        }
+//        std::cout << v.value().getInt() << "\n";
+//        if (v == std::nullopt) {
+//            // This means there's no value.. skip
+//        } else if (v.has_value()) {
+//            
+//        }
+        
+    }
+
+    
+}
+
+
 std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string& id,
                                                               const style::conversion::Convertible& value) noexcept {
     // TODO: What is this and how does it fit in
@@ -93,8 +203,47 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
     //        return nullptr;
     //    }
 
+    std::string properties;
+    
+    if (auto memberValue = objectMember(value, "properties")) {
+        
+        jsonStringFromConvertible(*memberValue, properties);
+        std::cout << "Properties: " << properties << "\n";
+        
+        if (isObject(*memberValue)) {
+            
+            eachMember(*memberValue, [](const std::string& name,
+                                        const style::conversion::Convertible& value) -> std::optional<style::conversion::Error> {
+                
+                
+                
+                return std::nullopt;
+            });
+            
+        }
+        
+       // if (isArray(memberValue)) {
+//            for (size_t i=0; i < arrayLength(memberValue); i++) {
+//                auto itemValue = arrayMember(memberValue, i);
+//            }
+        //}
+//        if (auto error_ = layer->setProperty(member, *memberValue)) {
+//            error = *error_;
+//            return false;
+//        }
+    }
+    //return true;
+
+    
+   // std::string json =
+    
+    auto customProperties = objectMember(value, "properties");
     std::string source = "source";
-    return std::unique_ptr<style::Layer>(new (std::nothrow) style::PluginLayer(id, source, _layerTypeInfo));
+    return std::unique_ptr<style::Layer>(new (std::nothrow) style::PluginLayer(id,
+                                                                               source,
+                                                                               _layerTypeInfo
+                                                                               //,*customProperties
+                                                                               ));
 
     /*
         const auto source = getSource(value);

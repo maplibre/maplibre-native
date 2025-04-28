@@ -7569,14 +7569,18 @@ static void *windowScreenContext = &windowScreenContext;
     }
 
 
-    darwinLayerManager->addLayerTypeCoreOnly(
-        std::make_unique<mbgl::PluginLayerFactory>(layerType,
-                                                   source,
-                                                   pass3D,
-                                                   layout,
-                                                   fadingTiles,
-                                                   crossTileIndex,
-                                                   tileKind));
+    auto factory = std::make_unique<mbgl::PluginLayerFactory>(layerType,
+                                               source,
+                                               pass3D,
+                                               layout,
+                                               fadingTiles,
+                                               crossTileIndex,
+                                               tileKind);
+//    factory->setRenderFunction();
+//    factory->setUpdateFunction();
+    
+    
+    darwinLayerManager->addLayerTypeCoreOnly(std::move(factory));
 
    //darwinLayerManager->addLayerType(<#std::unique_ptr<LayerPeerFactory>#>)
 

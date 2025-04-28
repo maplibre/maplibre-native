@@ -3,13 +3,18 @@
 #include <mbgl/style/layer_impl.hpp>
 #include <mbgl/plugins/plugin_layer.hpp>
 // #include <mbgl/style/layers/plugin_layer_properties.hpp>
+#include <mbgl/style/conversion_impl.hpp>
 
 namespace mbgl {
 namespace style {
 
 class PluginLayer::Impl : public Layer::Impl {
 public:
-    Impl(std::string layerID, std::string sourceID, LayerTypeInfo layerTypeInfo);
+    Impl(std::string layerID,
+         std::string sourceID,
+         LayerTypeInfo layerTypeInfo
+         //,const style::conversion::Convertible& layerProperties
+         );
 
     using Layer::Impl::Impl;
 
@@ -24,6 +29,7 @@ public:
 
 private:
     LayerTypeInfo _layerTypeInfo;
+    //style::conversion::Convertible _layerProperties;
 
     // HeatmapPaintProperties::Transitionable paint;
 
