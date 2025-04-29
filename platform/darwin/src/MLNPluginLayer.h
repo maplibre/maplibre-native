@@ -46,7 +46,7 @@ typedef enum {
 
 /// Called when the layer properties are updated.  Can be on initial load from the JSON or when
 /// dynamic properties are updated
--(void)onUpdateLayerProperties:(NSDictionary *)layerProperties;
+- (void)onUpdateLayerProperties:(NSDictionary *)layerProperties;
 
 @end
 

@@ -10,7 +10,7 @@ namespace style {
 // Forward
 class PluginLayer;
 
-}
+} // namespace style
 
 class PluginLayerFactory : public LayerFactory {
 public:
@@ -22,11 +22,9 @@ public:
                        mbgl::style::LayerTypeInfo::CrossTileIndex crossTileIndex,
                        mbgl::style::LayerTypeInfo::TileKind tileKind);
 
-    typedef std::function<void(mbgl::style::PluginLayer *pluginLayer)> OnLayerCreatedEvent;
+    typedef std::function<void(mbgl::style::PluginLayer* pluginLayer)> OnLayerCreatedEvent;
     void setOnLayerCreatedEvent(OnLayerCreatedEvent onLayerCreated) { _onLayerCreated = onLayerCreated; }
-    
 
-    
 protected:
     const style::LayerTypeInfo* getTypeInfo() const noexcept final;
     std::unique_ptr<style::Layer> createLayer(const std::string& id,
@@ -41,7 +39,6 @@ private:
     std::string _layerType;
 
     OnLayerCreatedEvent _onLayerCreated;
-    
 };
 
 } // namespace mbgl

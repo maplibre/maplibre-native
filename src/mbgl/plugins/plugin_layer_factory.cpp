@@ -218,27 +218,24 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
 
     // std::string json =
 
-    //auto customProperties = objectMember(value, "properties");
+    // auto customProperties = objectMember(value, "properties");
     std::string source = "source";
-    
-    auto tempResult = std::unique_ptr<style::Layer>(new (std::nothrow) style::PluginLayer(id
-                                                                               , source
-                                                                               , _layerTypeInfo
-                                                                               , layerProperties
-                                                                               //,*customProperties
-                                                                               ));
+
+    auto tempResult = std::unique_ptr<style::Layer>(new (std::nothrow)
+                                                        style::PluginLayer(id, source, _layerTypeInfo, layerProperties
+                                                                           //,*customProperties
+                                                                           ));
     if (_onLayerCreated != nullptr) {
         auto layerRaw = tempResult.get();
-        auto pluginLayer = static_cast<mbgl::style::PluginLayer *>(layerRaw);
+        auto pluginLayer = static_cast<mbgl::style::PluginLayer*>(layerRaw);
         _onLayerCreated(pluginLayer);
         if (pluginLayer->_updateLayerPropertiesFunction != nullptr) {
             pluginLayer->_updateLayerPropertiesFunction(layerProperties);
         }
 
-//        _onLayerCreated();
-        
+        //        _onLayerCreated();
     }
-    
+
     return tempResult;
     /*
     return std::unique_ptr<style::Layer>(new (std::nothrow) style::PluginLayer(id

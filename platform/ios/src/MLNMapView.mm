@@ -7577,23 +7577,23 @@ static void *windowScreenContext = &windowScreenContext;
                                                fadingTiles,
                                                crossTileIndex,
                                                tileKind);
-    
+
     Class layerClass = [pluginLayer class];
     factory->setOnLayerCreatedEvent([layerClass](mbgl::style::PluginLayer *pluginLayer) {
-        
+
         NSLog(@"Creating Plugin Layer");
         MLNPluginLayer *layer = [[layerClass alloc] init];
-        
+
         // Use weak here so there isn't a retain cycle
         __weak MLNPluginLayer *weakPlugInLayer = layer;
         pluginLayer->setRenderFunction([weakPlugInLayer](){
             [weakPlugInLayer onRenderLayer];
         });
-        
+
         pluginLayer->setUpdateFunction([weakPlugInLayer](){
             [weakPlugInLayer onUpdateLayer];
         });
-        
+
         pluginLayer->setOnUpdateLayerPropertiesFunction([weakPlugInLayer](const std::string & jsonProperties) {
             // Use autorelease pools in lambdas
             @autoreleasepool {
@@ -7609,9 +7609,9 @@ static void *windowScreenContext = &windowScreenContext;
                 [weakPlugInLayer onUpdateLayerProperties:properties];
             }
         });
-        
+
     });
-    
+
 
     darwinLayerManager->addLayerTypeCoreOnly(std::move(factory));
 

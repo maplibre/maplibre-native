@@ -29,11 +29,11 @@
 
 // The overrides
 -(void)onRenderLayer {
-    
+
 }
 
 -(void)onUpdateLayer {
-    
+
 }
 
 -(void)onUpdateLayerProperties:(NSDictionary *)layerProperties {
