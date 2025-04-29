@@ -1,6 +1,6 @@
 ## main
 
-## 6.1.0-pre.0
+## 6.1.0
 * Add `textFitWidth` and `textFitHeight` properties to sprites ([#2780](https://github.com/maplibre/maplibre-native/pull/2780)).
   More information can be found in the [MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/sprite/#text-fit-properties).
 * Update NAN to 2.22.0 ([#2948](https://github.com/maplibre/maplibre-native/pull/2948))
