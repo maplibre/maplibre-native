@@ -27,4 +27,17 @@
 
 }
 
+// The overrides
+-(void)onRenderLayer {
+    
+}
+
+-(void)onUpdateLayer {
+    
+}
+
+-(void)onUpdateLayerProperties:(NSDictionary *)layerProperties {
+    NSLog(@"Layer Properties: %@", layerProperties);
+}
+
 @end

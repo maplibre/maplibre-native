@@ -37,6 +37,17 @@ typedef enum {
 // Creates the layer
 - (void)createLayerFromProperties:(NSDictionary *)properties;
 
+// These are public methods that can be overridden by the plugin layer
+/// Called when the layer is rendered
+- (void)onRenderLayer;
+
+/// Called when the layer is updated in the render loop.  This would update animations/etc
+- (void)onUpdateLayer;
+
+/// Called when the layer properties are updated.  Can be on initial load from the JSON or when
+/// dynamic properties are updated
+-(void)onUpdateLayerProperties:(NSDictionary *)layerProperties;
+
 @end
 
 NS_ASSUME_NONNULL_END

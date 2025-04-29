@@ -6,6 +6,12 @@
 
 namespace mbgl {
 
+namespace style {
+// Forward
+class PluginLayer;
+
+}
+
 class PluginLayerFactory : public LayerFactory {
 public:
     PluginLayerFactory(std::string& layerType,
@@ -16,12 +22,11 @@ public:
                        mbgl::style::LayerTypeInfo::CrossTileIndex crossTileIndex,
                        mbgl::style::LayerTypeInfo::TileKind tileKind);
 
-    typedef std::function<void()> RenderFunction;
-    void setRenderFunction(RenderFunction renderFunction) { _renderFunction = renderFunction; }
+    typedef std::function<void(mbgl::style::PluginLayer *pluginLayer)> OnLayerCreatedEvent;
+    void setOnLayerCreatedEvent(OnLayerCreatedEvent onLayerCreated) { _onLayerCreated = onLayerCreated; }
+    
 
-    typedef std::function<void()> UpdateFunction;
-    void setUpdateFunction(UpdateFunction updateFunction) { _updateFunction = updateFunction; }
-
+    
 protected:
     const style::LayerTypeInfo* getTypeInfo() const noexcept final;
     std::unique_ptr<style::Layer> createLayer(const std::string& id,
@@ -35,8 +40,8 @@ private:
     style::LayerTypeInfo _layerTypeInfo;
     std::string _layerType;
 
-    RenderFunction _renderFunction;
-    UpdateFunction _updateFunction;
+    OnLayerCreatedEvent _onLayerCreated;
+    
 };
 
 } // namespace mbgl

@@ -24,6 +24,18 @@
     // Base class does nothing
 }
 
+- (void)onRenderLayer {
+    // Base class does nothing
+}
+
+- (void)onUpdateLayer {
+    // Base class does nothing
+}
+
+-(void)onUpdateLayerProperties:(NSDictionary *)layerProperties {
+    // Base class does nothing
+}
+
 
 @end
 

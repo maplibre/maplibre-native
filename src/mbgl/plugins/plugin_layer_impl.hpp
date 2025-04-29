@@ -10,7 +10,10 @@ namespace style {
 
 class PluginLayer::Impl : public Layer::Impl {
 public:
-    Impl(std::string layerID, std::string sourceID, LayerTypeInfo layerTypeInfo
+    Impl(std::string layerID
+         , std::string sourceID
+         , LayerTypeInfo layerTypeInfo
+         , const std::string & layerProperties
          //,const style::conversion::Convertible& layerProperties
     );
 
@@ -27,6 +30,7 @@ public:
 
 private:
     LayerTypeInfo _layerTypeInfo;
+    std::string _layerProperties;
     // style::conversion::Convertible _layerProperties;
 
     // HeatmapPaintProperties::Transitionable paint;

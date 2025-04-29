@@ -103,13 +103,17 @@ namespace style {
 //    return &typeInfo;
 //}
 
-PluginLayer::PluginLayer(const std::string& layerID,
-                         const std::string& sourceID,
-                         const style::LayerTypeInfo layerTypeInfo
+PluginLayer::PluginLayer(const std::string& layerID
+                         , const std::string& sourceID
+                         , const style::LayerTypeInfo layerTypeInfo
+                         , const std::string & layerProperties
+
                          //,const style::conversion::Convertible& layerProperties
                          )
-    : Layer(makeMutable<Impl>(layerID, sourceID, layerTypeInfo
-                              //, layerProperties
+    : Layer(makeMutable<Impl>(layerID
+                              , sourceID
+                              , layerTypeInfo
+                              , layerProperties
                               )) {}
 
 PluginLayer::PluginLayer(Immutable<Impl> impl_)

@@ -11,11 +11,15 @@
 namespace mbgl {
 namespace style {
 
-PluginLayer::Impl::Impl(std::string layerID, std::string sourceID, LayerTypeInfo layerTypeInfo
+PluginLayer::Impl::Impl(std::string layerID
+                        , std::string sourceID
+                        , LayerTypeInfo layerTypeInfo
+                        , const std::string & layerProperties
                         // ,const style::conversion::Convertible& layerProperties
                         )
-    : Layer::Impl(layerID, sourceID),
-      _layerTypeInfo(layerTypeInfo)
+    : Layer::Impl(layerID, sourceID)
+     , _layerTypeInfo(layerTypeInfo)
+     , _layerProperties(layerProperties)
 //, _layerProperties(layerProperties)
 {
     std::cout << "Init\n";

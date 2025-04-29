@@ -192,11 +192,11 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
     //        return nullptr;
     //    }
 
-    std::string properties;
+    std::string layerProperties;
 
     if (auto memberValue = objectMember(value, "properties")) {
-        jsonStringFromConvertible(*memberValue, properties);
-        std::cout << "Properties: " << properties << "\n";
+        jsonStringFromConvertible(*memberValue, layerProperties);
+        std::cout << "Properties: " << layerProperties << "\n";
 
         if (isObject(*memberValue)) {
             eachMember(*memberValue,
@@ -218,12 +218,36 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
 
     // std::string json =
 
-    auto customProperties = objectMember(value, "properties");
+    //auto customProperties = objectMember(value, "properties");
     std::string source = "source";
-    return std::unique_ptr<style::Layer>(new (std::nothrow) style::PluginLayer(id, source, _layerTypeInfo
+    
+    auto tempResult = std::unique_ptr<style::Layer>(new (std::nothrow) style::PluginLayer(id
+                                                                               , source
+                                                                               , _layerTypeInfo
+                                                                               , layerProperties
                                                                                //,*customProperties
                                                                                ));
+    if (_onLayerCreated != nullptr) {
+        auto layerRaw = tempResult.get();
+        auto pluginLayer = static_cast<mbgl::style::PluginLayer *>(layerRaw);
+        _onLayerCreated(pluginLayer);
+        if (pluginLayer->_updateLayerPropertiesFunction != nullptr) {
+            pluginLayer->_updateLayerPropertiesFunction(layerProperties);
+        }
 
+//        _onLayerCreated();
+        
+    }
+    
+    return tempResult;
+    /*
+    return std::unique_ptr<style::Layer>(new (std::nothrow) style::PluginLayer(id
+                                                                               , source
+                                                                               , _layerTypeInfo
+                                                                               , layerProperties
+                                                                               //,*customProperties
+                                                                               ));
+*/
     /*
         const auto source = getSource(value);
         if (!source) {

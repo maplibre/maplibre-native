@@ -74,6 +74,7 @@
 #import "MLNPluginLayer.h"
 #import "MLNStyleLayerManager.h"
 #include <mbgl/plugins/plugin_layer_factory.hpp>
+#include <mbgl/plugins/plugin_layer.hpp>
 
 #include <algorithm>
 #include <cstdlib>
@@ -7576,9 +7577,41 @@ static void *windowScreenContext = &windowScreenContext;
                                                fadingTiles,
                                                crossTileIndex,
                                                tileKind);
-//    factory->setRenderFunction();
-//    factory->setUpdateFunction();
-
+    
+    Class layerClass = [pluginLayer class];
+    factory->setOnLayerCreatedEvent([layerClass](mbgl::style::PluginLayer *pluginLayer) {
+        
+        NSLog(@"Creating Plugin Layer");
+        MLNPluginLayer *layer = [[layerClass alloc] init];
+        
+        // Use weak here so there isn't a retain cycle
+        __weak MLNPluginLayer *weakPlugInLayer = layer;
+        pluginLayer->setRenderFunction([weakPlugInLayer](){
+            [weakPlugInLayer onRenderLayer];
+        });
+        
+        pluginLayer->setUpdateFunction([weakPlugInLayer](){
+            [weakPlugInLayer onUpdateLayer];
+        });
+        
+        pluginLayer->setOnUpdateLayerPropertiesFunction([weakPlugInLayer](const std::string & jsonProperties) {
+            // Use autorelease pools in lambdas
+            @autoreleasepool {
+                // Just wrap the string with NSData so it can be run through properties
+                NSData *d = [NSData dataWithBytesNoCopy:(void *)jsonProperties.data() length:jsonProperties.length() freeWhenDone:NO];
+                NSError *error = nil;
+                NSDictionary *properties = [NSJSONSerialization JSONObjectWithData:d
+                                                                           options:0
+                                                                             error:&error];
+                if (error) {
+                    // TODO: What should we do here?
+                }
+                [weakPlugInLayer onUpdateLayerProperties:properties];
+            }
+        });
+        
+    });
+    
 
     darwinLayerManager->addLayerTypeCoreOnly(std::move(factory));
 
