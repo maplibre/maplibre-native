@@ -29,10 +29,20 @@ int main(int argc, char* argv[]) {
 
     args::ValueFlag<double> pixelRatioValue(argumentParser, "number", "Image scale factor", {'r', "ratio"});
 
-    args::ValueFlag<double> zoomValue(argumentParser, "number", "Zoom level", {'z', "zoom"});
+    // grouping ensures either bounds or center based position is used
+    args::Group boundsOrCenterZoom(argumentParser, "Position (either one):", args::Group::Validators::AtMostOne);
 
-    args::ValueFlag<double> lonValue(argumentParser, "degrees", "Longitude", {'x', "lon"});
-    args::ValueFlag<double> latValue(argumentParser, "degrees", "Latitude", {'y', "lat"});
+    args::Group latLngBoundsGroup(boundsOrCenterZoom, "LatLng bounds:", args::Group::Validators::All);
+    args::ValueFlag<double> northValue(latLngBoundsGroup, "degrees", "North latitude", {"north"});
+    args::ValueFlag<double> westValue(latLngBoundsGroup, "degrees", "West longitude", {"west"});
+    args::ValueFlag<double> southValue(latLngBoundsGroup, "degrees", "South latitude", {"south"});
+    args::ValueFlag<double> eastValue(latLngBoundsGroup, "degrees", "East longitude", {"east"});
+
+    args::Group centerGroup(boundsOrCenterZoom, "Center:", args::Group::Validators::AtLeastOne);
+    args::ValueFlag<double> zoomValue(centerGroup, "number", "Zoom level", {'z', "zoom"});
+    args::ValueFlag<double> lonValue(centerGroup, "degrees", "Longitude", {'x', "lon"});
+    args::ValueFlag<double> latValue(centerGroup, "degrees", "Latitude", {'y', "lat"});
+
     args::ValueFlag<double> bearingValue(argumentParser, "degrees", "Bearing", {'b', "bearing"});
     args::ValueFlag<double> pitchValue(argumentParser, "degrees", "Pitch", {'p', "pitch"});
     args::ValueFlag<uint32_t> widthValue(argumentParser, "pixels", "Image width", {'w', "width"});
@@ -108,7 +118,13 @@ int main(int argc, char* argv[]) {
     }
 
     map.getStyle().loadURL(style);
-    map.jumpTo(CameraOptions().withCenter(LatLng{lat, lon}).withZoom(zoom).withBearing(bearing).withPitch(pitch));
+    if (latLngBoundsGroup.Get()) {
+        LatLngBounds boundingBox = LatLngBounds::hull(LatLng(args::get(northValue), args::get(westValue)), LatLng(args::get(southValue), args::get(eastValue)));
+        map.jumpTo(map.cameraForLatLngBounds(boundingBox, EdgeInsets(), bearing, pitch));
+    }
+    else {
+        map.jumpTo(CameraOptions().withCenter(LatLng{lat, lon}).withZoom(zoom).withBearing(bearing).withPitch(pitch));
+    }
 
     if (debug) {
         map.setDebug(debug ? mbgl::MapDebugOptions::TileBorders | mbgl::MapDebugOptions::ParseStatus
