@@ -63,11 +63,20 @@ void HTTPFileSource::Impl::cancel(HTTPRequest* req) {
 
 void HTTPFileSource::Impl::onReplyFinished() {
     QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
+
+#if defined(Q_OS_WASM)
+    const QUrl& url = reply->url();
+#else
     const QUrl& url = reply->request().url();
+#endif
 
     auto it = m_pending.find(url);
     if (it == m_pending.end()) {
+#if defined(Q_OS_WASM)
+        reply->abort();
+#else
         reply->deleteLater();
+#endif
         return;
     }
 
@@ -82,7 +91,11 @@ void HTTPFileSource::Impl::onReplyFinished() {
     }
 
     m_pending.erase(it);
+#if defined(Q_OS_WASM)
+    reply->abort();
+#else
     reply->deleteLater();
+#endif
 }
 
 void HTTPFileSource::Impl::setResourceOptions(ResourceOptions options) {
