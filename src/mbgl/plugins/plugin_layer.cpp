@@ -104,13 +104,10 @@ namespace style {
 //}
 
 void PluginLayer::setRenderFunction(OnRenderLayer renderFunction) {
-    
     auto i = impl();
     i.setRenderFunction(renderFunction);
     _renderFunction = renderFunction;
-    
 }
-
 
 PluginLayer::PluginLayer(const std::string& layerID,
                          const std::string& sourceID,

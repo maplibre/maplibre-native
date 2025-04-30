@@ -21,11 +21,11 @@ namespace mbgl {
 namespace gfx {
 class Drawable;
 }
-}
+} // namespace mbgl
 
 class RenderPluginLayerTweaker : public mbgl::gfx::DrawableTweaker {
 public:
-    RenderPluginLayerTweaker(RenderPluginLayer *plugInRenderer)
+    RenderPluginLayerTweaker(RenderPluginLayer* plugInRenderer)
         : _plugInRenderer(plugInRenderer) {}
     ~RenderPluginLayerTweaker() override = default;
 
@@ -34,17 +34,16 @@ public:
     void execute(mbgl::gfx::Drawable&, mbgl::PaintParameters&) override;
 
 protected:
-    RenderPluginLayer *_plugInRenderer = nullptr;
+    RenderPluginLayer* _plugInRenderer = nullptr;
 };
 
-void RenderPluginLayerTweaker::init(mbgl::gfx::Drawable& drawablee)  {
+void RenderPluginLayerTweaker::init(mbgl::gfx::Drawable& drawablee) {
     std::cout << "RenderPluginLayerTweaker::init\n";
-
 };
 
 void RenderPluginLayerTweaker::execute(mbgl::gfx::Drawable& drawable, mbgl::PaintParameters& paintParameters) {
     std::cout << "RenderPluginLayerTweaker::execute\n";
-    
+
     // custom drawing
     auto& context = paintParameters.context;
     context.resetState(paintParameters.depthModeForSublayer(0, mbgl::gfx::DepthMaskType::ReadOnly),
@@ -60,7 +59,7 @@ void RenderPluginLayerTweaker::execute(mbgl::gfx::Drawable& drawable, mbgl::Pain
 #endif
 
     _plugInRenderer->render(paintParameters);
-    //host->render(parameters);
+    // host->render(parameters);
 
     // Reset the view back to our original one, just in case the CustomLayer
     // changed the viewport or Framebuffer.
@@ -68,13 +67,7 @@ void RenderPluginLayerTweaker::execute(mbgl::gfx::Drawable& drawable, mbgl::Pain
 
     context.setDirtyState();
     context.bindGlobalUniformBuffers(*paintParameters.renderPass);
-
-    
-    
 }
-
-
-
 
 // RenderHeatmapLayer::RenderHeatmapLayer(Immutable<HeatmapLayer::Impl> _impl)
 //     : RenderLayer(makeMutable<HeatmapLayerProperties>(std::move(_impl))),
@@ -91,7 +84,6 @@ RenderPluginLayer::~RenderPluginLayer() = default;
 void RenderPluginLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
     std::cout << "markLayerRenderable\n";
     isRenderable = true;
-
 }
 
 /// Generate any changes needed by the layer
@@ -103,19 +95,19 @@ void RenderPluginLayer::update(gfx::ShaderRegistry& shaderRegistery,
                                UniqueChangeRequestVec& changes) {
     // TODO: What should be implemented here?
     std::cout << "Update\n";
-    
+
     // create layer group
     if (!layerGroup) {
         if (auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID())) {
             setLayerGroup(std::move(layerGroup_), changes);
         }
     }
-    
+
     auto* localLayerGroup = static_cast<LayerGroup*>(layerGroup.get());
 
     // TODO: Implement this
     bool hostChanged = false;
-    
+
     // create drawable
     if (localLayerGroup->getDrawableCount() == 0 || hostChanged) {
         localLayerGroup->clearDrawables();
@@ -136,30 +128,23 @@ void RenderPluginLayer::update(gfx::ShaderRegistry& shaderRegistery,
         localLayerGroup->addDrawable(std::move(drawable));
         ++stats.drawablesAdded;
     }
-
-
-    
 }
 
 void RenderPluginLayer::upload(gfx::UploadPass& uploadPass) {
     std::cout << "Upload\n";
-
 }
 
 void RenderPluginLayer::render(PaintParameters& paintParameters) {
     std::cout << "Render\n";
-    
+
     if (_renderFunction) {
         _renderFunction();
     }
-
 }
-
 
 void RenderPluginLayer::prepare(const LayerPrepareParameters& layerParameters) {
     // TODO: What should be implemented here?
     std::cout << "prepare\n";
-
 }
 
 // --- Private methods
@@ -169,9 +154,7 @@ void RenderPluginLayer::transition(const TransitionParameters&) {
 
 void RenderPluginLayer::evaluate(const PropertyEvaluationParameters&) {
     std::cout << "evaluate\n";
-
 }
-
 
 bool RenderPluginLayer::hasTransition() const {
     return false;
@@ -194,8 +177,6 @@ void RenderPluginLayer::layerChanged(const TransitionParameters& parameters,
                                      const Immutable<style::Layer::Impl>& impl,
                                      UniqueChangeRequestVec& changes) {
     std::cout << "layerChanged\n";
-
-    
 }
 
 /// Remove all drawables for the tile from the layer group

@@ -24,13 +24,10 @@ public:
         // TODO: Return the right thing here
         // return nullptr;
     }
-    
-    void setRenderFunction(OnRenderLayer renderFunction) {
-        _renderFunction = renderFunction;
-    }
-    
-    OnRenderLayer _renderFunction;
 
+    void setRenderFunction(OnRenderLayer renderFunction) { _renderFunction = renderFunction; }
+
+    OnRenderLayer _renderFunction;
 
 private:
     LayerTypeInfo _layerTypeInfo;

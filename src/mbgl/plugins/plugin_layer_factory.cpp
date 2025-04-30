@@ -263,12 +263,12 @@ std::unique_ptr<Bucket> PluginLayerFactory::createBucket(
 std::unique_ptr<RenderLayer> PluginLayerFactory::createRenderLayer(Immutable<style::Layer::Impl> impl) noexcept {
     //    assert(impl->getTypeInfo() == getTypeInfo());
     //    return std::make_unique<RenderHeatmapLayer>(staticImmutableCast<style::HeatmapLayer::Impl>(impl));
-    
+
     auto localImpl = staticImmutableCast<style::PluginLayer::Impl>(impl);
-    
+
     auto tempResult = std::make_unique<RenderPluginLayer>(staticImmutableCast<style::PluginLayer::Impl>(impl));
     tempResult->setRenderFunction(localImpl->_renderFunction);
-   // tempResult
+    // tempResult
     return tempResult;
 
     //  return std::make_unique<RenderPluginLayer>(impl);
