@@ -60,5 +60,5 @@ protected:
     Mutable<Layer::Impl> mutableBaseImpl() const final;
 };
 
-} // namespace mbgl::style
+} // namespace style
 } // namespace mbgl

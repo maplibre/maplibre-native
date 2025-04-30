@@ -1,9 +1,9 @@
 /*
  PluginLayerExampleMetalRendering
- 
+
  This is a port lf the CustomStyleLayerExample into the plug-in architecture.   It assumes
  that the rendering is being done in metal since it's added to the core via a darwin method
- 
+
  */
 
 #import "PluginLayerExampleMetalRendering.h"
@@ -111,11 +111,11 @@
        renderEncoder:(id<MTLRenderCommandEncoder>)renderEncoder {
 
     MLNBackendResource* resource = [mapView backendResource];
-    
+
     if (_pipelineState == nil) {
         [self createShaders:mapView];
     }
-    
+
 
     if (renderEncoder == nil) {
         return;

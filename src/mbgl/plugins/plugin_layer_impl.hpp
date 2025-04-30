@@ -5,7 +5,8 @@
 // #include <mbgl/style/layers/plugin_layer_properties.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 
-namespace mbgl { namespace style {
+namespace mbgl {
+namespace style {
 
 class PluginLayer::Impl : public Layer::Impl {
 public:

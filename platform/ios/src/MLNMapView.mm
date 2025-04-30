@@ -7583,7 +7583,7 @@ static void *windowScreenContext = &windowScreenContext;
                                                tileKind);
 
     __weak MLNMapView *weakMapView = self;
-    
+
     Class layerClass = [pluginLayer class];
     factory->setOnLayerCreatedEvent([layerClass, weakMapView](mbgl::style::PluginLayer *pluginLayer) {
 
@@ -7595,7 +7595,7 @@ static void *windowScreenContext = &windowScreenContext;
 
         // Set the render function
         auto renderFunction = [weakPlugInLayer, weakMapView](mbgl::PaintParameters& paintParameters){
-            
+
             const mbgl::mtl::RenderPass& renderPass = static_cast<mbgl::mtl::RenderPass&>(*paintParameters.renderPass);
             id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)renderPass.getMetalEncoder().get();
 
@@ -7629,7 +7629,7 @@ static void *windowScreenContext = &windowScreenContext;
                 }
             }
 */
-            
+
             NSLog(@"IMPL pluginLayer->setRenderFunction");
             MLNMapView *strongMapView = weakMapView;
             [weakPlugInLayer onRenderLayer:strongMapView

@@ -105,10 +105,10 @@ namespace style {
 //}
 
 void PluginLayer::setRenderFunction(OnRenderLayer renderFunction) {
-//    auto i = impl();
-//    auto i2 = mutableImpl();
-//    i.setRenderFunction(renderFunction);
-//    i2->setRenderFunction(renderFunction);
+    //    auto i = impl();
+    //    auto i2 = mutableImpl();
+    //    i.setRenderFunction(renderFunction);
+    //    i2->setRenderFunction(renderFunction);
     _renderFunction = renderFunction;
 }
 

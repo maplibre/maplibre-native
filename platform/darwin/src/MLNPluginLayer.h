@@ -43,7 +43,7 @@ typedef enum {
 // These are public methods that can be overridden by the plugin layer
 /// Called when the layer is rendered
 - (void)onRenderLayer:(MLNMapView *)mapView
-renderEncoder:(id<MTLRenderCommandEncoder>)renderEncoder;
+        renderEncoder:(id<MTLRenderCommandEncoder>)renderEncoder;
 
 /// Called when the layer is updated in the render loop.  This would update animations/etc
 - (void)onUpdateLayer;
@@ -54,7 +54,6 @@ renderEncoder:(id<MTLRenderCommandEncoder>)renderEncoder;
 
 /// Added to a map view
 - (void)didMoveToMapView:(MLNMapView *)mapView;
- 
 
 @end
 
