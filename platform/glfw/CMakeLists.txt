@@ -1,9 +1,4 @@
 if(WIN32)
-    if(MLN_WITH_OSMESA)
-        message(WARNING "mbgl-glfw does not work with -DMLN_WITH_OSMESA=ON. If you want to build this target, don't use this option.")
-        return()
-    endif()
-
     find_package(glfw3 REQUIRED)
     find_package(libuv REQUIRED)
 else()
