@@ -7583,7 +7583,7 @@ static void *windowScreenContext = &windowScreenContext;
                                                tileKind);
 
     __weak MLNMapView *weakMapView = self;
-    
+
     Class layerClass = pluginLayerClass;
     factory->setOnLayerCreatedEvent([layerClass, weakMapView](mbgl::style::PluginLayer *pluginLayer) {
 

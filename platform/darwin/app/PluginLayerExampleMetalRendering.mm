@@ -20,7 +20,7 @@ typedef struct
     // The render pipeline state
     id<MTLRenderPipelineState> _pipelineState;
     id<MTLDepthStencilState> _depthStencilStateWithoutStencil;
-    
+
     // Properties
     float _offsetX;
 }
@@ -162,9 +162,9 @@ typedef struct
 
 -(void)onUpdateLayerProperties:(NSDictionary *)layerProperties {
     NSLog(@"Metal Layer Rendering Properties: %@", layerProperties);
-    
+
     _offsetX = [[layerProperties objectForKey:@"offset-x"] floatValue];
-    
+
 }
 
 @end
