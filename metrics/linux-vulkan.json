@@ -6,8 +6,7 @@
   "ignore_paths": [
       "ignores/platform-all.json",
       "ignores/platform-linux.json",
-      "ignores/linux-drawable.json",
-      "ignores/linux-vulkan.json"
+      "ignores/platform-linux-vulkan.json"
   ],
   "metric_path": "linux-gcc8-release",
   "probes": [
