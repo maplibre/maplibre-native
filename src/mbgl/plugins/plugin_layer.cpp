@@ -7,6 +7,7 @@
 
 #include <mbgl/plugins/plugin_layer.hpp>
 #include <mbgl/plugins/plugin_layer_impl.hpp>
+#include <iostream>
 /*
 //#include <mbgl/style/layers/heatmap_layer.hpp>
 //#include <mbgl/style/layers/heatmap_layer_impl.hpp>
@@ -104,8 +105,10 @@ namespace style {
 //}
 
 void PluginLayer::setRenderFunction(OnRenderLayer renderFunction) {
-    auto i = impl();
-    i.setRenderFunction(renderFunction);
+//    auto i = impl();
+//    auto i2 = mutableImpl();
+//    i.setRenderFunction(renderFunction);
+//    i2->setRenderFunction(renderFunction);
     _renderFunction = renderFunction;
 }
 
@@ -121,7 +124,10 @@ PluginLayer::PluginLayer(const std::string& layerID,
 PluginLayer::PluginLayer(Immutable<Impl> impl_)
     : Layer(std::move(impl_)) {}
 
-PluginLayer::~PluginLayer() = default;
+PluginLayer::~PluginLayer() {
+    std::cout << "Destructor\n";
+    Layer::~Layer();
+}
 
 const PluginLayer::Impl& PluginLayer::impl() const {
     return static_cast<const Impl&>(*baseImpl);

@@ -1,9 +1,10 @@
-//
-//  PluginLayerExampleMetalRendering.h
-//  MapLibre
-//
-//  Created by Malcolm Toon on 4/29/25.
-//
+/*
+ PluginLayerExampleMetalRendering
+ 
+ This is a port lf the CustomStyleLayerExample into the plug-in architecture.   It assumes
+ that the rendering is being done in metal since it's added to the core via a darwin method
+ 
+ */
 
 #import "MLNPluginLayer.h"
 

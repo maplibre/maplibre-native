@@ -29,6 +29,7 @@
 
 // The overrides
 -(void)onRenderLayer {
+    NSLog(@"PluginLayerExample: On Render Layer");
 
 }
 

@@ -24,7 +24,8 @@
     // Base class does nothing
 }
 
-- (void)onRenderLayer {
+- (void)onRenderLayer:(MLNMapView *)mapView
+        renderEncoder:(id<MTLRenderCommandEncoder>)renderEncoder {
     // Base class does nothing
 }
 
@@ -33,6 +34,11 @@
 }
 
 -(void)onUpdateLayerProperties:(NSDictionary *)layerProperties {
+    // Base class does nothing
+}
+
+/// Added to a map view
+- (void)didMoveToMapView:(MLNMapView *)mapView {
     // Base class does nothing
 }
 

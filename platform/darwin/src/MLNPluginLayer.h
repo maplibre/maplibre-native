@@ -6,6 +6,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <Metal/Metal.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -28,6 +29,8 @@ typedef enum {
 
 @end
 
+@class MLNMapView;
+
 @interface MLNPluginLayer : NSObject
 
 /// Returns the layer capabilities of the plugin layer.
@@ -39,7 +42,8 @@ typedef enum {
 
 // These are public methods that can be overridden by the plugin layer
 /// Called when the layer is rendered
-- (void)onRenderLayer;
+- (void)onRenderLayer:(MLNMapView *)mapView
+renderEncoder:(id<MTLRenderCommandEncoder>)renderEncoder;
 
 /// Called when the layer is updated in the render loop.  This would update animations/etc
 - (void)onUpdateLayer;
@@ -47,6 +51,10 @@ typedef enum {
 /// Called when the layer properties are updated.  Can be on initial load from the JSON or when
 /// dynamic properties are updated
 - (void)onUpdateLayerProperties:(NSDictionary *)layerProperties;
+
+/// Added to a map view
+- (void)didMoveToMapView:(MLNMapView *)mapView;
+ 
 
 @end
 

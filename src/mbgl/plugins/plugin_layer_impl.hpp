@@ -5,8 +5,7 @@
 // #include <mbgl/style/layers/plugin_layer_properties.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 
-namespace mbgl {
-namespace style {
+namespace mbgl { namespace style {
 
 class PluginLayer::Impl : public Layer::Impl {
 public:
@@ -25,9 +24,13 @@ public:
         // return nullptr;
     }
 
-    void setRenderFunction(OnRenderLayer renderFunction) { _renderFunction = renderFunction; }
+    void setRenderFunction(OnRenderLayer renderFunction) {
+        _renderFunction = renderFunction;
+        _renderFunctionSet = true;
+    }
 
     OnRenderLayer _renderFunction;
+    bool _renderFunctionSet = false;
 
 private:
     LayerTypeInfo _layerTypeInfo;

@@ -136,9 +136,8 @@ void RenderPluginLayer::upload(gfx::UploadPass& uploadPass) {
 
 void RenderPluginLayer::render(PaintParameters& paintParameters) {
     std::cout << "Render\n";
-
     if (_renderFunction) {
-        _renderFunction();
+        _renderFunction(paintParameters);
     }
 }
 

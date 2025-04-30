@@ -5,8 +5,11 @@
 // #include <mbgl/style/filter.hpp>
 // #include <mbgl/style/property_value.hpp>
 // #include <mbgl/util/color.hpp>
+#include <mbgl/renderer/paint_parameters.hpp>
 
-namespace mbgl::style {
+namespace mbgl {
+
+namespace style {
 
 class PluginLayer final : public Layer {
 public:
@@ -28,7 +31,7 @@ public:
     std::unique_ptr<Layer> cloneRef(const std::string& id) const final;
 
 public:
-    typedef std::function<void()> OnRenderLayer;
+    typedef std::function<void(PaintParameters&)> OnRenderLayer;
     void setRenderFunction(OnRenderLayer renderFunction);
 
     typedef std::function<void()> OnUpdateLayer;
@@ -58,4 +61,4 @@ protected:
 };
 
 } // namespace mbgl::style
-// } // namespace mbgl
+} // namespace mbgl

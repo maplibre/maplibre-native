@@ -75,6 +75,10 @@
 #import "MLNStyleLayerManager.h"
 #include <mbgl/plugins/plugin_layer_factory.hpp>
 #include <mbgl/plugins/plugin_layer.hpp>
+#include <mbgl/plugins/plugin_layer_impl.hpp>
+#include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/mtl/mtl_fwd.hpp>
+#include <mbgl/mtl/render_pass.hpp>
 
 #include <algorithm>
 #include <cstdlib>
@@ -7578,18 +7582,65 @@ static void *windowScreenContext = &windowScreenContext;
                                                crossTileIndex,
                                                tileKind);
 
+    __weak MLNMapView *weakMapView = self;
+    
     Class layerClass = [pluginLayer class];
-    factory->setOnLayerCreatedEvent([layerClass](mbgl::style::PluginLayer *pluginLayer) {
+    factory->setOnLayerCreatedEvent([layerClass, weakMapView](mbgl::style::PluginLayer *pluginLayer) {
 
         NSLog(@"Creating Plugin Layer");
         MLNPluginLayer *layer = [[layerClass alloc] init];
 
         // Use weak here so there isn't a retain cycle
         MLNPluginLayer *weakPlugInLayer = layer;
-        pluginLayer->setRenderFunction([weakPlugInLayer](){
-            [weakPlugInLayer onRenderLayer];
-        });
 
+        // Set the render function
+        auto renderFunction = [weakPlugInLayer, weakMapView](mbgl::PaintParameters& paintParameters){
+            
+            const mbgl::mtl::RenderPass& renderPass = static_cast<mbgl::mtl::RenderPass&>(*paintParameters.renderPass);
+            id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)renderPass.getMetalEncoder().get();
+
+            //id<MTLRenderCommandEncoder> encoder =  (__bridge id<MTLRenderCommandEncoder>)paintParameters.encoder.get();
+            //id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)ptr;
+            /*
+//            layer.renderEncoder = encoder;
+
+            void render(const mbgl::style::CustomLayerRenderParameters& parameters) {
+                if (!layer) return;
+
+        #if MLN_RENDER_BACKEND_METAL
+                MTL::RenderCommandEncoder* ptr =
+                    static_cast<const mbgl::style::mtl::CustomLayerRenderParameters&>(parameters).encoder.get();
+                id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)ptr;
+                layer.renderEncoder = encoder;
+        #endif
+
+                MLNStyleLayerDrawingContext drawingContext = {
+                    .size = CGSizeMake(parameters.width, parameters.height),
+                    .centerCoordinate = CLLocationCoordinate2DMake(parameters.latitude, parameters.longitude),
+                    .zoomLevel = parameters.zoom,
+                    .direction = mbgl::util::wrap(parameters.bearing, 0., 360.),
+                    .pitch = static_cast<CGFloat>(parameters.pitch),
+                    .fieldOfView = static_cast<CGFloat>(parameters.fieldOfView),
+                    .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix)
+                };
+
+                if (layer.mapView) {
+                    [layer drawInMapView:layer.mapView withContext:drawingContext];
+                }
+            }
+*/
+            
+            NSLog(@"IMPL pluginLayer->setRenderFunction");
+            MLNMapView *strongMapView = weakMapView;
+            [weakPlugInLayer onRenderLayer:strongMapView
+                             renderEncoder:encoder];
+        };
+
+        // this one works
+        auto bi = (mbgl::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
+        bi->setRenderFunction(renderFunction);
+
+        // Set update lambda
         pluginLayer->setUpdateFunction([weakPlugInLayer](){
             [weakPlugInLayer onUpdateLayer];
         });
