@@ -74,7 +74,7 @@ public:
         std::shared_ptr<FeatureIndex> featureIndex;
         gfx::GlyphAtlas glyphAtlas;
         gfx::ImageAtlas imageAtlas;
-        gfx::DynamicTextureAtlasPtr& dynamicTextureAtlas;
+        gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
 
         LayerRenderData* getLayerRenderData(const style::Layer::Impl&);
 
@@ -82,7 +82,7 @@ public:
                      std::unique_ptr<FeatureIndex> featureIndex_,
                      gfx::GlyphAtlas glyphAtlas_,
                      gfx::ImageAtlas imageAtlas_,
-                     gfx::DynamicTextureAtlasPtr& dynamicTextureAtlas_)
+                     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas_)
             : layerRenderData(std::move(renderData_)),
               featureIndex(std::move(featureIndex_)),
               glyphAtlas(std::move(glyphAtlas_)),

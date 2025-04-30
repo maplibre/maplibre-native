@@ -153,7 +153,7 @@ void RenderOrchestrator::setObserver(RendererObserver* observer_) {
 }
 
 std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
-    const std::shared_ptr<UpdateParameters>& updateParameters, gfx::DynamicTextureAtlasPtr& dynamicTextureAtlas) {
+    const std::shared_ptr<UpdateParameters>& updateParameters, gfx::DynamicTextureAtlasPtr dynamicTextureAtlas) {
     MLN_TRACE_FUNC();
 
     const auto startTime = util::MonotonicTimer::now().count();

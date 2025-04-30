@@ -38,7 +38,7 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
                                        const MapMode mode_,
                                        const float pixelRatio_,
                                        const bool showCollisionBoxes_,
-                                       gfx::DynamicTextureAtlasPtr& dynamicTextureAtlas_)
+                                       gfx::DynamicTextureAtlasPtr dynamicTextureAtlas_)
     : self(std::move(self_)),
       parent(std::move(parent_)),
       scheduler(scheduler_),

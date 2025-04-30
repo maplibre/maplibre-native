@@ -28,7 +28,7 @@ class Layer;
 
 namespace gfx {
 class DynamicTextureAtlas;
-using DynamicTextureAtlasPtr = std::unique_ptr<gfx::DynamicTextureAtlas>;
+using DynamicTextureAtlasPtr = std::shared_ptr<gfx::DynamicTextureAtlas>;
 } // namespace gfx
 
 class GeometryTileWorker {
@@ -42,7 +42,7 @@ public:
                        MapMode,
                        float pixelRatio,
                        bool showCollisionBoxes_,
-                       gfx::DynamicTextureAtlasPtr&);
+                       gfx::DynamicTextureAtlasPtr);
     ~GeometryTileWorker();
 
     void setLayers(std::vector<Immutable<style::LayerProperties>>,
@@ -117,7 +117,7 @@ private:
     bool showCollisionBoxes;
     bool firstLoad = true;
 
-    gfx::DynamicTextureAtlasPtr& dynamicTextureAtlas;
+    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
 };
 
 } // namespace mbgl

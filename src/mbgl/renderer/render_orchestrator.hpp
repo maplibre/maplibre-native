@@ -42,7 +42,7 @@ class ShaderRegistry;
 class Drawable;
 using DrawablePtr = std::shared_ptr<Drawable>;
 class DynamicTextureAtlas;
-using DynamicTextureAtlasPtr = std::unique_ptr<gfx::DynamicTextureAtlas>;
+using DynamicTextureAtlasPtr = std::shared_ptr<gfx::DynamicTextureAtlas>;
 } // namespace gfx
 
 namespace style {
@@ -67,7 +67,7 @@ public:
     void setObserver(RendererObserver*);
 
     std::unique_ptr<RenderTree> createRenderTree(const std::shared_ptr<UpdateParameters>&,
-                                                 gfx::DynamicTextureAtlasPtr&);
+                                                 gfx::DynamicTextureAtlasPtr);
 
     std::vector<Feature> queryRenderedFeatures(const ScreenLineString&, const RenderedQueryOptions&) const;
     std::vector<Feature> querySourceFeatures(const std::string& sourceID, const SourceQueryOptions&) const;
