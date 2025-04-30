@@ -2157,7 +2157,7 @@ vertically on the map.
 /**
  Adds a plug-in layer that is external to this library
  */
-- (void)addPluginLayerType:(MLNPluginLayer *)pluginLayer;
+- (void)addPluginLayerType:(Class)pluginLayerClass;
 
 @end
 

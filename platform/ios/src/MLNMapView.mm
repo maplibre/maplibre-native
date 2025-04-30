@@ -7522,12 +7522,12 @@ static void *windowScreenContext = &windowScreenContext;
 /**
  Adds a plug-in layer that is external to this library
  */
--(void)addPluginLayerType:(MLNPluginLayer *)pluginLayer {
+-(void)addPluginLayerType:(Class)pluginLayerClass {
 
     auto layerManager = mbgl::LayerManager::get();
     auto darwinLayerManager = (mbgl::LayerManagerDarwin *)layerManager;
 
-    MLNPluginLayerCapabilities *capabilities = [pluginLayer layerCapabilities];
+    MLNPluginLayerCapabilities *capabilities = [pluginLayerClass layerCapabilities];
     //mbgl::style::LayerTypeInfo::
 
     std::string layerType = [capabilities.layerID UTF8String];
@@ -7583,8 +7583,8 @@ static void *windowScreenContext = &windowScreenContext;
                                                tileKind);
 
     __weak MLNMapView *weakMapView = self;
-
-    Class layerClass = [pluginLayer class];
+    
+    Class layerClass = pluginLayerClass;
     factory->setOnLayerCreatedEvent([layerClass, weakMapView](mbgl::style::PluginLayer *pluginLayer) {
 
         NSLog(@"Creating Plugin Layer");

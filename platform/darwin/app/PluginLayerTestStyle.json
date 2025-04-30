@@ -541,13 +541,15 @@
         {   "id": "metal-rendering-layer-1",
             "type": "plugin-layer-metal-rendering",
             "properties": {
-                "color1":"#FFAADD"
+                "color1":"#FFAADD",
+                "offset-x": -300
             }
         },
         {   "id": "metal-rendering-layer-2",
             "type": "plugin-layer-metal-rendering",
             "properties": {
-                "color1":"#DDAAFF"
+                "color1":"#DDAAFF",
+                "offset-x": 300
             }
         },
         {

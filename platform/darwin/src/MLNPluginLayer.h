@@ -35,10 +35,7 @@ typedef enum {
 
 /// Returns the layer capabilities of the plugin layer.
 /// This must be overridden by the plug-in layer and return a set of capabilities
-- (MLNPluginLayerCapabilities *)layerCapabilities;
-
-// Creates the layer
-- (void)createLayerFromProperties:(NSDictionary *)properties;
++(MLNPluginLayerCapabilities *)layerCapabilities;
 
 // These are public methods that can be overridden by the plugin layer
 /// Called when the layer is rendered

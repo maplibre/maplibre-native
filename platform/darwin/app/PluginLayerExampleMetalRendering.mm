@@ -10,10 +10,19 @@
 #import <MetalKit/MetalKit.h>
 #import "Mapbox.h"
 
+typedef struct
+{
+    vector_float2 position;
+    vector_float4 color;
+} Vertex;
+
 @interface PluginLayerExampleMetalRendering () {
     // The render pipeline state
     id<MTLRenderPipelineState> _pipelineState;
     id<MTLDepthStencilState> _depthStencilStateWithoutStencil;
+    
+    // Properties
+    float _offsetX;
 }
 
 @end
@@ -23,19 +32,13 @@
 
 
 // This is the layer type in the style that is used
--(MLNPluginLayerCapabilities *)layerCapabilities {
++(MLNPluginLayerCapabilities *)layerCapabilities {
 
     MLNPluginLayerCapabilities *tempResult = [[MLNPluginLayerCapabilities alloc] init];
     tempResult.layerID = @"plugin-layer-metal-rendering";
     tempResult.tileKind = MLNPluginLayerTileKindNotRequired;
     tempResult.requiresPass3D = YES;
     return tempResult;
-
-}
-
-// This is called from the core to create the layer with the properties
-// in the style
--(void)createLayerFromProperties:(NSDictionary *)properties {
 
 }
 
@@ -126,18 +129,13 @@
     _viewportSize.x = resource.mtkView.drawableSize.width;
     _viewportSize.y = resource.mtkView.drawableSize.height;
 
-    typedef struct
-    {
-        vector_float2 position;
-        vector_float4 color;
-    } Vertex;
 
-    static const Vertex triangleVertices[] =
+    Vertex triangleVertices[] =
     {
         // 2D positions,    RGBA colors
-        { {  250,  -250 }, { 1, 0, 0, 1 } },
-        { { -250,  -250 }, { 0, 1, 0, 1 } },
-        { {    0,   250 }, { 0, 0, 1, 1 } },
+        { {  250 + _offsetX,  -250 }, { 1, 0, 0, 1 } },
+        { { -250 + _offsetX,  -250 }, { 0, 1, 0, 1 } },
+        { {    0 + _offsetX,   250 }, { 0, 0, 1, 1 } },
     };
 
     [renderEncoder setRenderPipelineState:_pipelineState];
@@ -164,6 +162,9 @@
 
 -(void)onUpdateLayerProperties:(NSDictionary *)layerProperties {
     NSLog(@"Metal Layer Rendering Properties: %@", layerProperties);
+    
+    _offsetX = [[layerProperties objectForKey:@"offset-x"] floatValue];
+    
 }
 
 @end
