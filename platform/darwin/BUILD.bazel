@@ -302,6 +302,8 @@ exports_files(
         "app/PluginLayerTestStyle.json",
         "app/PluginLayerExample.h",
         "app/PluginLayerExample.mm",
+        "app/PluginLayerExampleMetalRendering.h",
+        "app/PluginLayerExampleMetalRendering.mm",
         "test/amsterdam.geojson",
         "test/MLNSDKTestHelpers.swift",
         "app/CustomStyleLayerExample.h",

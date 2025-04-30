@@ -33,6 +33,15 @@ public:
 
     void prepare(const LayerPrepareParameters&) override;
 
+    void upload(gfx::UploadPass&) override;
+    void render(PaintParameters&) override;
+    
+    void setRenderFunction(style::PluginLayer::OnRenderLayer renderFunction) {
+        _renderFunction = renderFunction;
+    }
+
+    
+    
 private:
     void transition(const TransitionParameters&) override;
     void evaluate(const PropertyEvaluationParameters&) override;
@@ -76,6 +85,8 @@ private:
     // This is the layer tweaker for applying the off-screen texture to the framebuffer.
     // The inherited layer tweaker is for applying tiles to the off-screen texture.
     //    LayerTweakerPtr textureTweaker;
+    
+    style::PluginLayer::OnRenderLayer _renderFunction = nullptr;
 };
 
 } // namespace mbgl

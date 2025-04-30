@@ -22,7 +22,10 @@
 #import "MBXFrameTimeGraphView.h"
 #import "MLNMapView_Experimental.h"
 #import <objc/runtime.h>
+
+// Plug In Examples
 #import "PluginLayerExample.h"
+#import "PluginLayerExampleMetalRendering.h"
 
 static const CLLocationCoordinate2D WorldTourDestinations[] = {
     { .latitude = 38.8999418, .longitude = -77.033996 },
@@ -262,7 +265,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 // extensible layers for the style can be added to the map view
 -(void)addPluginLayers {
 
-  [self.mapView addPluginLayerType:[[PluginLayerExample alloc] init]];
+    [self.mapView addPluginLayerType:[[PluginLayerExample alloc] init]];
+    [self.mapView addPluginLayerType:[[PluginLayerExampleMetalRendering alloc] init]];
 
 }
 

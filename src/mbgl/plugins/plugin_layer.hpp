@@ -29,7 +29,7 @@ public:
 
 public:
     typedef std::function<void()> OnRenderLayer;
-    void setRenderFunction(OnRenderLayer renderFunction) { _renderFunction = renderFunction; }
+    void setRenderFunction(OnRenderLayer renderFunction);
 
     typedef std::function<void()> OnUpdateLayer;
     void setUpdateFunction(OnUpdateLayer updateFunction) { _updateFunction = updateFunction; }

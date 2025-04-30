@@ -7585,7 +7585,7 @@ static void *windowScreenContext = &windowScreenContext;
         MLNPluginLayer *layer = [[layerClass alloc] init];
 
         // Use weak here so there isn't a retain cycle
-        __weak MLNPluginLayer *weakPlugInLayer = layer;
+        MLNPluginLayer *weakPlugInLayer = layer;
         pluginLayer->setRenderFunction([weakPlugInLayer](){
             [weakPlugInLayer onRenderLayer];
         });
