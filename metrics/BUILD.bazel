@@ -8,6 +8,7 @@ filegroup(
             "ignores/**",
             "ios-render-test-runner/**",  # iOS only
             "expectations/platform-ios/**",  # iOS only
+            "expectations/platform-linux/**",
         ],
     ) + select({
         "//:metal_renderer": glob(["expectations/platform-ios-metal/**"]),  # iOS Metal only
