@@ -329,7 +329,7 @@ namespace mbgl {
 using namespace shaders;
 
 MBGL_DEFINE_ENUM(BuiltIn, {
-    ${shaderNames.map(name => `\n{BuiltIn::` + name + `, "` + name + `"}`)}
+{BuiltIn::None, "None"},${shaderNames.map(name => `\n{BuiltIn::` + name + `, "` + name + `"}`)}
 });
 
 } // namespace mbgl
