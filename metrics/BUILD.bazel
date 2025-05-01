@@ -21,6 +21,7 @@ filegroup(
         "ios-render-test-runner-style.json",  # iOS only
         "linux-gcc8-release-metrics.json",
         "linux-gcc8-release-style.json",
+        "linux-drawable.json",
     ],
     visibility = [
         "//platform/ios/test/common:__pkg__",

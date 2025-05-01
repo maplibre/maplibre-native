@@ -57,7 +57,7 @@
 	url = https://github.com/protomaps/PMTiles.git
 [submodule "vendor/maplibre-native-base/extras/args"]
 	path = vendor/maplibre-native-base/extras/args
-	url = git@github.com:Taywee/args.git
+	url = https://github.com/Taywee/args.git
 [submodule "vendor/maplibre-native-base/extras/expected-lite"]
 	path = vendor/maplibre-native-base/extras/expected-lite
 	url = https://github.com/martinmoene/expected-lite.git

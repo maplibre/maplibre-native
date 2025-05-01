@@ -38,6 +38,8 @@ extension MLNMapViewDelegateIntegrationTests: MLNMapViewDelegate {
 
     func mapView(_: MLNMapView, didFinishLoading _: MLNStyle) {}
 
+    func mapView(_: MLNMapView, sourceDidChange _: MLNSource) {}
+
     func mapViewWillStartRenderingFrame(_: MLNMapView) {}
 
     func mapViewWillStartRenderingMap(_: MLNMapView) {}
