@@ -46,7 +46,6 @@ public:
 
     ActionJournalTest(const ActionJournalOptions& options, MapMode mode = MapMode::Static)
         : options(options) {
-
         clear();
         createMap(mode);
     }
@@ -60,10 +59,8 @@ public:
     void createMap(MapMode mode = MapMode::Static) {
         fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
         frontend = std::make_unique<HeadlessFrontend>(1.0f);
-        map = std::make_unique<MapAdapter>(*frontend,
-                                           observer,
-                                           fileSource, MapOptions().withMapMode(mode).withSize(frontend->getSize()),
-                                           options);
+        map = std::make_unique<MapAdapter>(
+            *frontend, observer, fileSource, MapOptions().withMapMode(mode).withSize(frontend->getSize()), options);
     }
 
     std::filesystem::path getDirectoryPath() {
@@ -71,7 +68,6 @@ public:
     }
 
     void clear() { std::filesystem::remove_all(getDirectoryPath()); }
-
 };
 
 TEST(ActionJournal, Create) {
@@ -101,7 +97,6 @@ TEST(ActionJournal, Clear) {
 }
 
 TEST(ActionJournal, ReadPreviousSession) {
-
     // generate `onMapCreate` event
     ActionJournalTest test(ActionJournalOptions().enable().withPath("."));
 
@@ -119,7 +114,6 @@ TEST(ActionJournal, ReadPreviousSession) {
 }
 
 TEST(ActionJournal, RollFiles) {
-
     // limit the number of files and the size of the file
     ActionJournalTest test(ActionJournalOptions().enable().withPath(".").withLogFileSize(1).withLogFileCount(2));
 
@@ -146,10 +140,9 @@ namespace {
 
 template <typename EventMethod, typename... Args>
 void validateEventList(ActionJournalTest& test,
-                   std::vector<std::pair<const char*, std::function<void(const mbgl::JSValue&)>>>&& generatedEvents,
-                   EventMethod&& eventGenerator,
-                   Args&&... args) {
-
+                       std::vector<std::pair<const char*, std::function<void(const mbgl::JSValue&)>>>&& generatedEvents,
+                       EventMethod&& eventGenerator,
+                       Args&&... args) {
     test.map->getActionJournal()->clearLog();
     (test.map->getImpl().*eventGenerator)(std::forward<Args>(args)...);
     test.map->getActionJournal()->impl->flush();
@@ -411,5 +404,4 @@ TEST(ActionJournal, ValidateEvents) {
                   false,
                   0.0,
                   0.0);
-
 }
