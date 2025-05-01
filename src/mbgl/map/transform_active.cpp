@@ -68,8 +68,6 @@ void TransformActive::easeTo(const CameraOptions& inputCamera, const AnimationOp
                             .withRotatingInProgress(bearing != startBearing));
     const EdgeInsets startEdgeInsets = state.getEdgeInsets();
 
-    visit_pas([this](std::shared_ptr<PropertyAnimation>& pa) { animationFinishFrame(pa); });
-
     auto pa = std::make_shared<PropertyAnimation>(Clock::now(), duration, animation);
 
     // NOTE: For tests only
@@ -77,6 +75,7 @@ void TransformActive::easeTo(const CameraOptions& inputCamera, const AnimationOp
     transitionDuration = pa->duration;
 
     if (!pas.zoom.set || startZoom != zoom) {
+        animationFinishFrame(pas.zoom.pa);
         pas.zoom = {
             .pa = pa,
             .current = startZoom,
@@ -89,6 +88,7 @@ void TransformActive::easeTo(const CameraOptions& inputCamera, const AnimationOp
         };
     }
     if (!pas.latlng.set || startPoint != endPoint) {
+        animationFinishFrame(pas.latlng.pa);
         pas.latlng = {
             .pa = pa,
             .current = startPoint,
@@ -103,6 +103,7 @@ void TransformActive::easeTo(const CameraOptions& inputCamera, const AnimationOp
         };
     }
     if (!pas.bearing.set || bearing != startBearing) {
+        animationFinishFrame(pas.bearing.pa);
         pas.bearing = {
             .pa = pa,
             .current = startBearing,
@@ -111,6 +112,7 @@ void TransformActive::easeTo(const CameraOptions& inputCamera, const AnimationOp
         };
     }
     if (!pas.padding.set || padding != startEdgeInsets) {
+        animationFinishFrame(pas.padding.pa);
         pas.padding = {
             .pa = pa,
             .current = startEdgeInsets,
@@ -119,6 +121,7 @@ void TransformActive::easeTo(const CameraOptions& inputCamera, const AnimationOp
         };
     }
     if (!pas.pitch.set || pitch != startPitch) {
+        animationFinishFrame(pas.pitch.pa);
         pas.pitch = {
             .pa = pa,
             .current = startPitch,
@@ -259,8 +262,6 @@ void TransformActive::flyTo(const CameraOptions& inputCamera,
             bearing != startBearing));
     const EdgeInsets startEdgeInsets = state.getEdgeInsets();
 
-    visit_pas([this](std::shared_ptr<PropertyAnimation>& pa) { animationFinishFrame(pa); });
-
     auto pa = std::make_shared<PropertyAnimation>(Clock::now(), duration, animation);
 
     // NOTE: For tests only
@@ -268,6 +269,7 @@ void TransformActive::flyTo(const CameraOptions& inputCamera,
     transitionDuration = pa->duration;
 
     if (!pas.zoom.set || startZoom != zoom) {
+        animationFinishFrame(pas.zoom.pa);
         pas.zoom = {
             .pa = pa,
             .current = startZoom,
@@ -289,6 +291,7 @@ void TransformActive::flyTo(const CameraOptions& inputCamera,
         };
     }
     if (!pas.latlng.set || startPoint != endPoint) {
+        animationFinishFrame(pas.latlng.pa);
         pas.latlng = {
             .pa = pa,
             .current = startPoint,
@@ -306,6 +309,7 @@ void TransformActive::flyTo(const CameraOptions& inputCamera,
         };
     }
     if (!pas.bearing.set || bearing != startBearing) {
+        animationFinishFrame(pas.bearing.pa);
         pas.bearing = {
             .pa = pa,
             .current = startBearing,
@@ -314,9 +318,11 @@ void TransformActive::flyTo(const CameraOptions& inputCamera,
         };
     }
     if (!pas.padding.set || padding != startEdgeInsets) {
+        animationFinishFrame(pas.padding.pa);
         pas.padding = {.pa = pa, .current = startEdgeInsets, .target = padding, .set = true};
     }
     if (!pas.pitch.set || pitch != startPitch) {
+        animationFinishFrame(pas.pitch.pa);
         pas.pitch = {
             .pa = pa,
             .current = startPitch,
