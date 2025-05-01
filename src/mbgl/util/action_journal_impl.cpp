@@ -117,11 +117,15 @@ ActionJournal::Impl::Impl(const Map& map_, const ActionJournalOptions& options_)
     assert(options.logFileSize() > 0);
     assert(options.logFileCount() > 1);
 
-    options.withPath(options.path() + "/" + ACTION_JOURNAL_DIRECTORY_NAME);
+    options.withPath((std::filesystem::canonical(options.path()) / ACTION_JOURNAL_DIRECTORY_NAME).generic_string());
 
     if (!openFile(detectFiles(), false)) {
         Log::Error(Event::General, "Failed to open Action Journal file");
     }
+}
+
+ActionJournal::Impl::~Impl() {
+    flush();
 }
 
 std::string ActionJournal::Impl::getLogDirectory() const {
@@ -135,7 +139,7 @@ std::vector<std::string> ActionJournal::Impl::getLogFiles() const {
             continue;
         }
 
-        files.emplace(entry.path().string());
+        files.emplace(std::filesystem::canonical(entry.path()).generic_string());
     }
 
     return std::vector<std::string>(files.begin(), files.end());
@@ -153,6 +157,8 @@ std::vector<std::string> ActionJournal::Impl::getLog() {
         for (std::string line; std::getline(file, line);) {
             logEvents.emplace_back(line);
         }
+
+        file.clear();
     };
 
     // read current file
@@ -197,13 +203,19 @@ void ActionJournal::Impl::clearLog() {
     }
 }
 
+void ActionJournal::Impl::flush() {
+    scheduler->waitForEmpty();
+}
+
+std::string ActionJournal::Impl::getDirectoryName() {
+    return ACTION_JOURNAL_DIRECTORY_NAME;
+}
+
 void ActionJournal::Impl::onCameraWillChange(CameraChangeMode mode) {
     scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
         log(ActionJournalEvent("onCameraWillChange", env).addEvent("cameraMode", static_cast<int>(mode)));
     });
 }
-
-void ActionJournal::Impl::onCameraIsChanging() {}
 
 void ActionJournal::Impl::onCameraDidChange(CameraChangeMode mode) {
     scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
@@ -228,10 +240,6 @@ void ActionJournal::Impl::onDidFailLoadingMap(MapLoadError error, const std::str
                 .addEvent("code", static_cast<int>(error)));
     });
 }
-
-void ActionJournal::Impl::onWillStartRenderingFrame() {}
-
-void ActionJournal::Impl::onDidFinishRenderingFrame(RenderFrameStatus) {}
 
 void ActionJournal::Impl::onWillStartRenderingMap() {
     scheduler->schedule(

@@ -18,26 +18,25 @@ class ActionJournalEvent;
 class ActionJournal::Impl : public MapObserver {
 public:
     Impl(const Map& map, const ActionJournalOptions& options);
-    ~Impl() = default;
+    ~Impl();
 
     const Map& getMap() const { return map; }
-
     std::string getLogDirectory() const;
     std::vector<std::string> getLogFiles() const;
     std::vector<std::string> getLog();
     void clearLog();
+    void flush();
+
+    static std::string getDirectoryName();
 
     // Logged events
 
     // MapObserver
     void onCameraWillChange(CameraChangeMode) override;
-    void onCameraIsChanging() override;
     void onCameraDidChange(CameraChangeMode) override;
     void onWillStartLoadingMap() override;
     void onDidFinishLoadingMap() override;
     void onDidFailLoadingMap(MapLoadError, const std::string&) override;
-    void onWillStartRenderingFrame() override;
-    void onDidFinishRenderingFrame(RenderFrameStatus) override;
     void onWillStartRenderingMap() override;
     void onDidFinishRenderingMap(RenderMode) override;
     void onDidFinishLoadingStyle() override;

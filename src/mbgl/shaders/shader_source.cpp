@@ -9,6 +9,7 @@ using namespace shaders;
 MBGL_DEFINE_ENUM(BuiltIn,
                  {
 
+                     {BuiltIn::None, "None"},
                      {BuiltIn::BackgroundShader, "BackgroundShader"},
                      {BuiltIn::BackgroundPatternShader, "BackgroundPatternShader"},
                      {BuiltIn::CircleShader, "CircleShader"},

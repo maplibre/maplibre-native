@@ -48,8 +48,13 @@ Map::Map(RendererFrontend& frontend,
     }
 }
 
-Map::Map(std::unique_ptr<Impl> impl_)
-    : impl(std::move(impl_)) {}
+Map::Map(std::unique_ptr<Impl> impl_, const util::ActionJournalOptions& actionJournalOptions)
+    : impl(std::move(impl_)) {
+    if (actionJournalOptions.enabled()) {
+        impl->actionJournal = std::make_unique<util::ActionJournal>(*this, actionJournalOptions);
+        impl->actionJournal->impl->onMapCreate();
+    }
+}
 
 Map::~Map() {
     if (impl->actionJournal) {

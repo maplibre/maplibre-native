@@ -167,7 +167,7 @@ protected:
     const std::unique_ptr<Impl> impl;
 
     // For testing only.
-    Map(std::unique_ptr<Impl>);
+    Map(std::unique_ptr<Impl>, const util::ActionJournalOptions& = {});
 };
 
 } // namespace mbgl
