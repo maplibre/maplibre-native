@@ -4,7 +4,6 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/gfx/dynamic_texture_atlas.hpp>
 #include <mbgl/gfx/render_pass.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gfx/renderable.hpp>
@@ -220,7 +219,6 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         staticData->upload(*uploadPass);
         renderTree.getLineAtlas().upload(*uploadPass);
         renderTree.getPatternAtlas().upload(*uploadPass);
-        dynamicTextureAtlas->uploadDeferredImages();
     }
 
     // - LAYER GROUP UPDATE ------------------------------------------------------------------------

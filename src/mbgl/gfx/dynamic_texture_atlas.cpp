@@ -238,17 +238,6 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
     return imageAtlas;
 }
 
-void DynamicTextureAtlas::uploadDeferredImages() {
-    mutex.lock();
-    for (const auto& dynamicTexture : dynamicTextures) {
-        dynamicTexture->uploadDeferredImages();
-    }
-    for (const auto& pair : dummyDynamicTexture) {
-        pair.second->uploadDeferredImages();
-    }
-    mutex.unlock();
-}
-
 void DynamicTextureAtlas::removeTextures(const std::vector<TextureHandle>& textureHandles,
                                          const DynamicTexturePtr& dynamicTexture) {
     if (!dynamicTexture) {

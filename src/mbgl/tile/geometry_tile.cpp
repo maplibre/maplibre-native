@@ -126,9 +126,11 @@ void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
     assert(atlasTextures);
 
     if (const auto& glyphDynamicTexture = layoutResult->glyphAtlas.dynamicTexture) {
+        glyphDynamicTexture->uploadDeferredImages();
         atlasTextures->glyph = glyphDynamicTexture->getTexture();
     }
     if (const auto& imageDynamicTexture = layoutResult->imageAtlas.dynamicTexture) {
+        imageDynamicTexture->uploadDeferredImages();
         atlasTextures->icon = imageDynamicTexture->getTexture();
     }
 
