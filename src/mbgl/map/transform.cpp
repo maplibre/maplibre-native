@@ -22,7 +22,7 @@ namespace mbgl {
 
 /** Converts the given angle (in radians) to be numerically close to the anchor
  * angle, allowing it to be interpolated properly without sudden jumps. */
-static double _normalizeAngle(double angle, double anchorAngle) {
+double normalizeAngle(double angle, double anchorAngle) {
     if (std::isnan(angle) || std::isnan(anchorAngle)) {
         return 0;
     }
@@ -152,8 +152,8 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
     pitch = util::clamp(pitch, state.getMinPitch(), state.getMaxPitch());
 
     // Minimize rotation by taking the shorter path around the circle.
-    bearing = _normalizeAngle(bearing, state.getBearing());
-    state.setBearing(_normalizeAngle(state.getBearing(), bearing));
+    bearing = normalizeAngle(bearing, state.getBearing());
+    state.setBearing(normalizeAngle(state.getBearing(), bearing));
 
     const double startZoom = state.getZoom();
     const double startBearing = state.getBearing();
@@ -232,8 +232,8 @@ void Transform::flyTo(const CameraOptions& inputCamera,
     pitch = util::clamp(pitch, state.getMinPitch(), state.getMaxPitch());
 
     // Minimize rotation by taking the shorter path around the circle.
-    bearing = _normalizeAngle(bearing, state.getBearing());
-    state.setBearing(_normalizeAngle(state.getBearing(), bearing));
+    bearing = normalizeAngle(bearing, state.getBearing());
+    state.setBearing(normalizeAngle(state.getBearing(), bearing));
     const double startZoom = state.scaleZoom(state.getScale());
     const double startBearing = state.getBearing();
     const double startPitch = state.getPitch();
