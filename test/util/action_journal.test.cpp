@@ -44,8 +44,8 @@ public:
 
     util::RunLoop runLoop;
 
-    ActionJournalTest(const ActionJournalOptions& options, MapMode mode = MapMode::Static)
-        : options(options) {
+    ActionJournalTest(const ActionJournalOptions& options_, MapMode mode = MapMode::Static)
+        : options(options_) {
         clear();
         createMap(mode);
     }
@@ -166,7 +166,14 @@ void validateEventList(ActionJournalTest& test,
 
         EXPECT_TRUE(json.HasMember("time"));
         EXPECT_TRUE(json["time"].IsString());
-        EXPECT_THAT(json["time"].GetString(), MatchesRegex(R"(\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d\d\dZ)"));
+
+        // using this longer version instead of `MatchesRegex(R"(\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d\d\dZ)")`
+        // due to it failing on linux gcc
+        // https://github.com/google/googletest/issues/3084
+        EXPECT_THAT(
+            json["time"].GetString(),
+            MatchesRegex(
+                R"([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]\.[0-9][0-9][0-9]Z)"));
 
         if (generatedEvent.second) {
             EXPECT_TRUE(json.HasMember("event"));
