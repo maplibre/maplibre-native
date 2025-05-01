@@ -2,7 +2,8 @@
     "base_test_path": "tests",
     "cache_path": "cache-metrics.db",
     "expectation_paths": [
-        "expectations/platform-android"
+        "expectations/platform-android",
+        "expectations/platform-android-opengl"
     ],
     "ignore_paths": [
         "ignores/platform-all.json",
