@@ -1387,6 +1387,10 @@ public:
     // Compass, logo and attribution button constraints needs to be updated.z
     [self installConstraints];
 }
+- (void)toggleTransform
+{
+    self.mbglMap.toggleTransform();
+}
 
 /// Returns the frame of inset content within the map view.
 - (CGRect)contentFrame

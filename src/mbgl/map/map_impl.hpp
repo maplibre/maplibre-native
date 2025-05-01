@@ -13,6 +13,7 @@
 #include <mbgl/style/style.hpp>
 #include <mbgl/util/size.hpp>
 #include <mbgl/tile/tile_operation.hpp>
+#include <mbgl/map/transform_active.hpp>
 
 #include <numbers>
 
@@ -72,7 +73,9 @@ public:
     MapObserver& observer;
     RendererFrontend& rendererFrontend;
 
-    Transform transform;
+    Transform* transform;
+    Transform _transform;
+    TransformActive _transformActive;
 
     const MapMode mode;
     const float pixelRatio;

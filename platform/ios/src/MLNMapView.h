@@ -1613,6 +1613,8 @@ vertically on the map.
                animated:(BOOL)animated
       completionHandler:(nullable void (^)(void))completion;
 
+- (void)toggleTransform;
+
 // MARK: Converting Geographic Coordinates
 
 /**

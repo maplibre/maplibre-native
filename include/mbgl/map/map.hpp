@@ -115,6 +115,7 @@ public:
 
     // Transform
     TransformState getTransfromState() const;
+    void toggleTransform();
 
     // Annotations
     void addAnnotationImage(std::unique_ptr<style::Image>);
