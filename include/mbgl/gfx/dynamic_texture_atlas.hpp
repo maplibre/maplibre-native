@@ -41,10 +41,9 @@ public:
 private:
     Context& context;
     std::vector<DynamicTexturePtr> dynamicTextures;
+    std::unordered_map<TexturePixelType, DynamicTexturePtr> dummyDynamicTexture;
     std::mutex mutex;
 };
-
-#define MLN_DEFER_UPLOAD_ON_RENDER_THREAD (MLN_RENDER_BACKEND_OPENGL || MLN_RENDER_BACKEND_VULKAN)
 
 } // namespace gfx
 } // namespace mbgl

@@ -21,7 +21,7 @@ namespace gfx {
 class RendererBackend;
 class ShadeRegistry;
 class DynamicTextureAtlas;
-using DynamicTextureAtlasPtr = std::unique_ptr<gfx::DynamicTextureAtlas>;
+using DynamicTextureAtlasPtr = std::shared_ptr<gfx::DynamicTextureAtlas>;
 } // namespace gfx
 
 class Renderer::Impl : public gfx::ContextObserver {

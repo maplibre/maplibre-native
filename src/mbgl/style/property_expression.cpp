@@ -3,9 +3,7 @@
 #include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/util/convert.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/gpu_expression.hpp>
-#endif // MLN_DRAWABLE_RENDERER
 
 namespace mbgl {
 namespace style {
@@ -72,12 +70,10 @@ PropertyExpressionBase& PropertyExpressionBase::operator=(const PropertyExpressi
     return *this;
 }
 
-#if MLN_DRAWABLE_RENDERER
 gfx::UniqueGPUExpression PropertyExpressionBase::getGPUExpression(bool intZoom) const {
     return isGPUCapable_ ? gfx::GPUExpression::create(*expression, zoomCurve, useIntegerZoom_ || intZoom)
                          : gfx::UniqueGPUExpression{};
 }
-#endif // MLN_DRAWABLE_RENDERER
 
 float PropertyExpressionBase::interpolationFactor(const Range<float>& inputLevels,
                                                   const float inputValue) const noexcept {

@@ -38,7 +38,7 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
                                        const MapMode mode_,
                                        const float pixelRatio_,
                                        const bool showCollisionBoxes_,
-                                       gfx::DynamicTextureAtlasPtr& dynamicTextureAtlas_)
+                                       gfx::DynamicTextureAtlasPtr dynamicTextureAtlas_)
     : self(std::move(self_)),
       parent(std::move(parent_)),
       scheduler(scheduler_),
@@ -498,10 +498,15 @@ void GeometryTileWorker::finalizeLayout() {
     }
 
     MBGL_TIMING_START(watch);
-    gfx::ImageAtlas imageAtlas = dynamicTextureAtlas->uploadIconsAndPatterns(iconMap, patternMap, versionMap);
+    gfx::ImageAtlas imageAtlas;
     gfx::GlyphAtlas glyphAtlas;
+    if (dynamicTextureAtlas) {
+        imageAtlas = dynamicTextureAtlas->uploadIconsAndPatterns(iconMap, patternMap, versionMap);
+    }
     if (!layouts.empty()) {
-        glyphAtlas = dynamicTextureAtlas->uploadGlyphs(glyphMap);
+        if (dynamicTextureAtlas) {
+            glyphAtlas = dynamicTextureAtlas->uploadGlyphs(glyphMap);
+        }
 
         for (auto& layout : layouts) {
             if (obsolete) {

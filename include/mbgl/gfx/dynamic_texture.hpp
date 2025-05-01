@@ -6,6 +6,8 @@
 
 #include <mapbox/shelf-pack.hpp>
 
+#include <optional>
+
 namespace mbgl {
 
 namespace gfx {

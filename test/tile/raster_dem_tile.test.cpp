@@ -11,6 +11,7 @@
 #include <mbgl/renderer/buckets/hillshade_bucket.hpp>
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/text/glyph_manager.hpp>
+#include <mbgl/gfx/dynamic_texture_atlas.hpp>
 
 using namespace mbgl;
 
@@ -23,6 +24,8 @@ public:
     AnnotationManager annotationManager{style};
     std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
+    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
+
     Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
     TileParameters tileParameters;
     style::Style style;
@@ -37,7 +40,8 @@ public:
                          imageManager,
                          glyphManager,
                          0,
-                         {Scheduler::GetBackground(), uniqueID}},
+                         {Scheduler::GetBackground(), uniqueID},
+                         dynamicTextureAtlas},
           style{fileSource, 1, tileParameters.threadPool} {}
 };
 

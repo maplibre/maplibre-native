@@ -40,14 +40,6 @@ To configure build with EGL support (ANGLE libraries will be build), use the fol
 cmake . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DMLN_WITH_EGL=ON
 ```
 
-To configure build with OSMesa (software rendering), use the following command:
-
-```
-cmake . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DMLN_WITH_OSMESA=ON
-```
-
-**WARNING:** as OSMesa doesn't have static libraries, it's necessary to copy `libglapi.dll`, `libGLESv2.dll` and `osmesa.dll` from `platform\windows\vendor\mesa3d\<arch>` to executable/dll directory you want to use, otherwise it won't run.
-
 ## Building
 
 Finally, build the project with the following command:
@@ -68,10 +60,6 @@ The same can be done with alternative configure commands:
 
 ```cmd
 cmake . -B build -DMLN_WITH_EGL=ON
-```
-or
-```cmd
-cmake . -B build -DMLN_WITH_OSMESA=ON
 ```
 
 Once configure is done, open the file `build\Mapbox GL Native.sln`. Build the target `ALL_BUILD` to build all targets, or pick a specific target. Don't forget to pick a build configuration (`Release`, `RelWithDebInfo`, `MinSizeRel` or `Debug`), otherwise the project will be built with default configuration (`Debug`).

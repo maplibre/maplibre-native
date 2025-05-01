@@ -16,8 +16,7 @@
         "CMAKE_SYSTEM_NAME": "iOS",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
         "MLN_WITH_METAL": "ON",
-        "MLN_WITH_OPENGL": "OFF",
-        "MLN_DRAWABLE_RENDERER": "ON"
+        "MLN_WITH_OPENGL": "OFF"
       }
     },
     {
@@ -30,21 +29,34 @@
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
         "MLN_WITH_METAL": "ON",
         "MLN_WITH_OPENGL": "OFF",
-        "MLN_DRAWABLE_RENDERER": "ON"
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
+      "name": "macos-xcode",
+      "displayName": "macOS (Xcode)",
+      "generator": "Xcode",
+      "binaryDir": "${sourceDir}/build-macos-xcode",
+      "inherits": "macos"
+    },
+    {
       "name": "macos-vulkan",
-      "displayName": "macOS",
+      "displayName": "macOS Vulkan",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-macos-vulkan",
+      "inherits": "macos",
       "cacheVariables": {
-        "CMAKE_SYSTEM_NAME": "Darwin",
-        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
         "MLN_WITH_VULKAN": "ON",
-        "MLN_WITH_OPENGL": "OFF",
-        "MLN_DRAWABLE_RENDERER": "ON"
+        "MLN_WITH_METAL": "OFF",
+        "MLN_WITH_OPENGL": "OFF"
       }
+    },
+    {
+      "name": "macos-vulkan-xcode",
+      "displayName": "macOS Vulkan (Xcode)",
+      "generator": "Xcode",
+      "binaryDir": "${sourceDir}/build-macos-vulkan-xcode",
+      "inherits": "macos-vulkan"
     },
     {
       "name": "macos-node",
@@ -72,7 +84,6 @@
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
         "MLN_WITH_METAL": "OFF",
         "MLN_WITH_OPENGL": "ON",
-        "MLN_DRAWABLE_RENDERER": "ON",
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++"
       }

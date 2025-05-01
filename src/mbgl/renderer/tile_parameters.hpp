@@ -17,7 +17,7 @@ class GlyphManager;
 
 namespace gfx {
 class DynamicTextureAtlas;
-using DynamicTextureAtlasPtr = std::unique_ptr<gfx::DynamicTextureAtlas>;
+using DynamicTextureAtlasPtr = std::shared_ptr<gfx::DynamicTextureAtlas>;
 } // namespace gfx
 
 class TileParameters {
@@ -32,7 +32,7 @@ public:
     std::shared_ptr<GlyphManager> glyphManager;
     const uint8_t prefetchZoomDelta;
     TaggedScheduler threadPool;
-    gfx::DynamicTextureAtlasPtr& dynamicTextureAtlas;
+    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
 };
 
 } // namespace mbgl

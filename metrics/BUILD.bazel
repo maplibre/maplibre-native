@@ -8,6 +8,7 @@ filegroup(
             "ignores/**",
             "ios-render-test-runner/**",  # iOS only
             "expectations/platform-ios/**",  # iOS only
+            "expectations/platform-linux/**",
         ],
     ) + select({
         "//:metal_renderer": glob(["expectations/platform-ios-metal/**"]),  # iOS Metal only
@@ -21,6 +22,7 @@ filegroup(
         "ios-render-test-runner-style.json",  # iOS only
         "linux-gcc8-release-metrics.json",
         "linux-gcc8-release-style.json",
+        "linux-drawable.json",
     ],
     visibility = [
         "//platform/ios/test/common:__pkg__",
