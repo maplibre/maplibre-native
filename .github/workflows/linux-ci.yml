@@ -52,7 +52,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        renderer: [vulkan, drawable]
+        renderer: [vulkan, drawable, drawable-rust]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -78,6 +78,10 @@ jobs:
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
+      - if: matrix.renderer == 'drawable-rust'
+        run: |
+          echo "renderer_flag_cmake=DMLN_WITH_OPENGL=ON -DMLN_USE_RUST=ON" >> "$GITHUB_ENV"
+          cargo install cxxbridge-cmd --version 1.0.157 --locked
 
       - if: matrix.renderer == 'drawable'
         run: |

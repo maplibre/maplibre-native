@@ -2264,6 +2264,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
 // MARK: - MLNMapViewDelegate
 
+- (void)mapView:(MLNMapView *)mapView sourceDidChange:(MLNSource *)source
+{
+    NSLog(@"A source was updated: %@", source.identifier);
+}
+
 - (void)mapView:(MLNMapView *)mapView
     shaderWillCompile:(NSInteger)id
               backend:(NSInteger)backend

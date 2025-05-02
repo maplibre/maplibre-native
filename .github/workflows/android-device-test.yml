@@ -134,6 +134,7 @@ jobs:
           role-duration-seconds: 14400
 
       - name: Run ${{ matrix.test.name }} on AWS Device Farm
+        if: env.run_device_test == 'true'
         run: |
           export name="${{ matrix.test.name }}"
           export appType=ANDROID_APP
@@ -147,7 +148,16 @@ jobs:
           export testSpecArn="${{ matrix.test.testSpecArn }}"
           export wait_for_completion=true
 
-          echo run_arn="$(./scripts/aws-device-farm/aws-device-farm-run.sh)" > "$GITHUB_ENV"
+          set +e
+
+          run_arn="$(./scripts/aws-device-farm/aws-device-farm-run.sh)"
+          exit_status=$?
+          echo "run_arn=$run_arn" >> "$GITHUB_ENV"
+
+          # make sure workflow fails
+          if [ $exit_status -ne 0 ]; then
+            exit $exit_status
+          fi
 
       - name: Store Test Artifacts
         if: (matrix.test.name == 'Android Benchmark' || failure()) && env.run_device_test == 'true'

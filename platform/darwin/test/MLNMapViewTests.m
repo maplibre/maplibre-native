@@ -9,11 +9,13 @@
 #endif
 
 static MLNMapView *mapView;
-
-@interface MLNMapViewTests : XCTestCase
+@interface MLNMapViewTests : XCTestCase <MLNMapViewDelegate>
 @end
 
-@implementation MLNMapViewTests
+@implementation MLNMapViewTests {
+    XCTestExpectation *_styleLoadingExpectation;
+    XCTestExpectation *_styleLoadErrorExpectation;
+}
 
 - (void)setUp {
     [super setUp];
@@ -21,12 +23,33 @@ static MLNMapView *mapView;
     [MLNSettings setApiKey:@"pk.feedcafedeadbeefbadebede"];
     NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"one-liner" withExtension:@"json"];
     mapView = [[MLNMapView alloc] initWithFrame:CGRectMake(0, 0, 64, 64) styleURL:styleURL];
+    mapView.delegate = self;
+    if (!mapView.style) {
+        _styleLoadingExpectation = [self expectationWithDescription:@"Map view should finish loading style."];
+        [self waitForExpectationsWithTimeout:10 handler:nil];
+    }
 }
 
 - (void)tearDown {
+    _styleLoadingExpectation = nil;
     mapView = nil;
     [MLNSettings setApiKey:nil];
     [super tearDown];
+}
+
+- (void)mapView:(MLNMapView *)mapView didFinishLoadingStyle:(MLNStyle *)style {
+    XCTAssertNotNil(mapView.style);
+    XCTAssertEqual(mapView.style, style);
+
+    [_styleLoadingExpectation fulfill];
+}
+
+- (void)mapViewDidFailLoadingMap:(MLNMapView *)mapView withError:(NSError *)error {
+    XCTAssertNotNil(error);
+    XCTAssertEqual(error.domain, MLNErrorDomain);
+    if (error.code == MLNErrorCodeLoadStyleFailed || error.code == MLNErrorCodeParseStyleFailed) {
+        [_styleLoadErrorExpectation fulfill];
+    }
 }
 
 - (void)testCoordinateBoundsConversion {
@@ -160,5 +183,105 @@ static MLNMapView *mapView;
     XCTAssertEqual(mapView.tileCacheEnabled, YES);
 }
 
+- (void)testStyleJSONWhenMapViewInitWithStyleURL {
+    // Test getting style JSON
+    NSString *styleJSON = mapView.styleJSON;
+    XCTAssertNotNil(styleJSON, @"Style JSON should not be nil");
+    NSString * expectedJSON = @"{\"version\":8,\"sources\":{},\"layers\":[]}";
+    XCTAssertEqualObjects([self normalizeJSON:expectedJSON],
+                          [self normalizeJSON:styleJSON],
+                         @"Style JSON should be expected");
+
+    // Verify the JSON is valid
+    NSError *error = nil;
+    id jsonObject = [NSJSONSerialization JSONObjectWithData:[styleJSON dataUsingEncoding:NSUTF8StringEncoding]
+                                                   options:0
+                                                     error:&error];
+    XCTAssertNil(error, @"Style JSON should be valid JSON");
+    XCTAssertNotNil(jsonObject, @"Style JSON should parse to a valid object");
+    XCTAssertTrue([jsonObject isKindOfClass:[NSDictionary class]], @"Style JSON should represent a dictionary");
+}
+
+- (void)testMapViewInitWithStyleJSON {
+    // Test setting style JSON
+    NSString *styleJSON = @"{\"version\": 8, \"sources\": { \"mapbox\": {\"type\": \"vector\", \"tiles\": [ \"local://tiles/{z}-{x}-{y}.mvt\" ] }}, \"layers\": [], \"metadata\": { \"test\": 1, \"type\": \"template\"}}";
+    MLNMapView* mapViewWithJSON = [[MLNMapView alloc] initWithFrame:CGRectMake(0, 0, 64, 64) styleJSON:styleJSON];
+
+    // Verify the style was updated
+    NSString *loadedStyleJSON = mapViewWithJSON.styleJSON;
+    XCTAssertEqualObjects([self normalizeJSON:loadedStyleJSON],
+                          [self normalizeJSON:styleJSON],
+                         @"Style JSON should match what was set");
+
+    XCTAssertNotNil(mapViewWithJSON.style);
+    XCTAssertNotNil(mapViewWithJSON.style.sources);
+}
+
+- (void)testUpdateStyleJSON {
+    _styleLoadingExpectation = nil;
+    _styleLoadErrorExpectation = [self expectationWithDescription:@"Style should load error"];
+
+    // Test setting style JSON
+    NSString *newStyleJSON = @"{\"version\": 8, \"sources\": { \"mapbox\": {\"type\": \"vector\", \"tiles\": [ \"local://tiles/{z}-{x}-{y}.mvt\" ] }}, \"layers\": [], \"metadata\": { \"test\": 1, \"type\": \"template\"}}";
+    mapView.styleJSON = newStyleJSON;
+
+    // Verify the style was updated
+    NSString *updatedStyleJSON = mapView.styleJSON;
+    XCTAssertEqualObjects([self normalizeJSON:updatedStyleJSON],
+                         [self normalizeJSON:newStyleJSON],
+                         @"Style JSON should match what was set");
+
+    XCTAssertNotNil(mapView.style);
+    XCTAssertNotNil(mapView.style.sources);
+    // source "org.maplibre.annotations" is added by default
+    XCTAssertEqual(mapView.style.sources.count, 2UL);
+
+    // Test invalid JSON syntax
+    NSString *invalidJSON = @"{invalid json";
+    mapView.styleJSON = invalidJSON;
+    [self waitForExpectations:@[_styleLoadErrorExpectation] timeout:10];
+}
+
+- (void)testStyleJSONAfterAddLayer {
+    // Test getting style JSON
+    NSString *styleJSON = mapView.styleJSON;
+    XCTAssertNotNil(styleJSON, @"Style JSON should not be nil");
+
+    // Add a raster tile source
+    MLNVectorTileSource *vectorTileSource = [[MLNVectorTileSource alloc] initWithIdentifier:@"some-identifier" tileURLTemplates:@[] options:nil];
+    [mapView.style addSource:vectorTileSource];
+
+    // Add a layer using it
+    MLNFillStyleLayer *fillLayer = [[MLNFillStyleLayer alloc] initWithIdentifier:@"fillLayer" source:vectorTileSource];
+    [mapView.style addLayer:fillLayer];
+
+    // Style JSON should not be updated
+    NSString *updatedStyleJSON = mapView.styleJSON;
+
+    XCTAssertEqualObjects([self normalizeJSON:updatedStyleJSON],
+                          [self normalizeJSON:styleJSON],
+                         @"Style JSON should be updated");
+}
+
+// Helper method to normalize JSON strings for comparison
+- (NSString *)normalizeJSON:(NSString *)jsonString {
+    NSError *error = nil;
+    id jsonObject = [NSJSONSerialization JSONObjectWithData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]
+                                                   options:0
+                                                     error:&error];
+    if (error) {
+        return jsonString;
+    }
+
+    NSData *normalizedData = [NSJSONSerialization dataWithJSONObject:jsonObject
+                                                           options:0
+                                                             error:&error];
+    if (error) {
+        return jsonString;
+    }
+
+    NSString *normalizedString = [[NSString alloc] initWithData:normalizedData encoding:NSUTF8StringEncoding];
+    return normalizedString ?: jsonString;
+}
 
 @end
