@@ -24,8 +24,8 @@ using PatternLayerMap = std::map<std::string, PatternDependency>;
 class PatternFeature {
 public:
     PatternFeature(std::size_t i_,
-                   std::unique_ptr<GeometryTileFeature> feature_,
-                   PatternLayerMap patterns_,
+                   std::unique_ptr<GeometryTileFeature>&& feature_,
+                   PatternLayerMap&& patterns_,
                    float sortKey_ = 0.0f)
         : i(i_),
           feature(std::move(feature_)),
@@ -33,6 +33,11 @@ public:
           sortKey(sortKey_) {}
 
     friend bool operator<(const PatternFeature& lhs, const PatternFeature& rhs) { return lhs.sortKey < rhs.sortKey; }
+
+    PatternFeature(const PatternFeature&) = delete;
+    PatternFeature(PatternFeature&&) = default;
+    PatternFeature& operator=(const PatternFeature&) = delete;
+    PatternFeature& operator=(PatternFeature&&) = default;
 
     std::size_t i;
     std::unique_ptr<GeometryTileFeature> feature;
@@ -48,8 +53,8 @@ struct PatternFeatureInserter<void> {
     template <typename PropertiesType>
     static void insert(std::vector<PatternFeature>& features,
                        std::size_t index,
-                       std::unique_ptr<GeometryTileFeature> feature,
-                       PatternLayerMap patternDependencyMap,
+                       std::unique_ptr<GeometryTileFeature>&& feature,
+                       PatternLayerMap&& patternDependencyMap,
                        float /*zoom*/,
                        const PropertiesType&,
                        const CanonicalTileID&) {
@@ -62,8 +67,8 @@ struct PatternFeatureInserter {
     template <typename PropertiesType>
     static void insert(std::vector<PatternFeature>& features,
                        std::size_t index,
-                       std::unique_ptr<GeometryTileFeature> feature,
-                       PatternLayerMap patternDependencyMap,
+                       std::unique_ptr<GeometryTileFeature>&& feature,
+                       PatternLayerMap&& patternDependencyMap,
                        float zoom,
                        const PropertiesType& properties,
                        const CanonicalTileID& canonical) {
@@ -85,7 +90,7 @@ class PatternLayout : public Layout {
 public:
     PatternLayout(const BucketParameters& parameters,
                   const std::vector<Immutable<style::LayerProperties>>& group,
-                  std::unique_ptr<GeometryTileLayer> sourceLayer_,
+                  std::unique_ptr<GeometryTileLayer>&& sourceLayer_,
                   const LayoutParameters& layoutParameters)
         : sourceLayer(std::move(sourceLayer_)),
           zoom(parameters.tileID.overscaledZ),
