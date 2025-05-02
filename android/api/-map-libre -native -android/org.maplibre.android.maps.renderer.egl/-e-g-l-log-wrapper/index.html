@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>EGLLogWrapper</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+                    <a class="library-name--link" href="../../../index.html">
+                            MapLibre Native Android
+                    </a>
+            </div>
+            <div class="library-version">
+11.8.7            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":MapLibreAndroid/vulkanRelease">androidJvm</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="MapLibre Native Android::org.maplibre.android.maps.renderer.egl/EGLLogWrapper///PointingToDeclaration//-1401641919">
+  <div class="breadcrumbs"><a href="../../../index.html">MapLibre Native Android</a><span class="delimiter">/</span><a href="../index.html">org.maplibre.android.maps.renderer.egl</a><span class="delimiter">/</span><span class="current">EGLLogWrapper</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>EGLLog</span><wbr></wbr><span><span>Wrapper</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">EGLLogWrapper</a> : <a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGL11.html">EGL11</a></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="-1505469194%2FConstructors%2F-1401641919" anchor-label="EGLLogWrapper" id="-1505469194%2FConstructors%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-e-g-l-log-wrapper.html"><span>EGLLog</span><wbr></wbr><span><span>Wrapper</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1505469194%2FConstructors%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">egl<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGL.html">EGL</a><span class="token punctuation">, </span></span><span class="parameter ">configFlags<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">log<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/io/Writer.html">Writer</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="124771635%2FProperties%2F-1401641919" anchor-label="EGL_ALPHA_FORMAT" id="124771635%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#124771635%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>ALPHA_</span><wbr></wbr><span>FORMAT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="124771635%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#124771635%2FProperties%2F-1401641919">EGL_ALPHA_FORMAT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12424</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="879349788%2FProperties%2F-1401641919" anchor-label="EGL_ALPHA_MASK_SIZE" id="879349788%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#879349788%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>ALPHA_</span><wbr></wbr><span>MASK_</span><wbr></wbr><span>SIZE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="879349788%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#879349788%2FProperties%2F-1401641919">EGL_ALPHA_MASK_SIZE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12350</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-283398231%2FProperties%2F-1401641919" anchor-label="EGL_ALPHA_SIZE" id="-283398231%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-283398231%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>ALPHA_</span><wbr></wbr><span>SIZE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-283398231%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-283398231%2FProperties%2F-1401641919">EGL_ALPHA_SIZE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12321</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="693492365%2FProperties%2F-1401641919" anchor-label="EGL_BAD_ACCESS" id="693492365%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#693492365%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>BAD_</span><wbr></wbr><span>ACCESS</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="693492365%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#693492365%2FProperties%2F-1401641919">EGL_BAD_ACCESS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12290</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1201398764%2FProperties%2F-1401641919" anchor-label="EGL_BAD_ALLOC" id="-1201398764%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1201398764%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>BAD_</span><wbr></wbr><span>ALLOC</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1201398764%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1201398764%2FProperties%2F-1401641919">EGL_BAD_ALLOC</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12291</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1889167219%2FProperties%2F-1401641919" anchor-label="EGL_BAD_ATTRIBUTE" id="-1889167219%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1889167219%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>BAD_</span><wbr></wbr><span>ATTRIBUTE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1889167219%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1889167219%2FProperties%2F-1401641919">EGL_BAD_ATTRIBUTE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12292</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1088109969%2FProperties%2F-1401641919" anchor-label="EGL_BAD_CONFIG" id="-1088109969%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1088109969%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>BAD_</span><wbr></wbr><span>CONFIG</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1088109969%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1088109969%2FProperties%2F-1401641919">EGL_BAD_CONFIG</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12293</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1761992742%2FProperties%2F-1401641919" anchor-label="EGL_BAD_CONTEXT" id="-1761992742%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1761992742%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>BAD_</span><wbr></wbr><span>CONTEXT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1761992742%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1761992742%2FProperties%2F-1401641919">EGL_BAD_CONTEXT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12294</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1242226882%2FProperties%2F-1401641919" anchor-label="EGL_BAD_CURRENT_SURFACE" id="1242226882%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1242226882%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>BAD_</span><wbr></wbr><span>CURRENT_</span><wbr></wbr><span>SURFACE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1242226882%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1242226882%2FProperties%2F-1401641919">EGL_BAD_CURRENT_SURFACE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12295</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2021836839%2FProperties%2F-1401641919" anchor-label="EGL_BAD_DISPLAY" id="2021836839%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#2021836839%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>BAD_</span><wbr></wbr><span>DISPLAY</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2021836839%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#2021836839%2FProperties%2F-1401641919">EGL_BAD_DISPLAY</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12296</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-637048956%2FProperties%2F-1401641919" anchor-label="EGL_BAD_MATCH" id="-637048956%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-637048956%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>BAD_</span><wbr></wbr><span>MATCH</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-637048956%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-637048956%2FProperties%2F-1401641919">EGL_BAD_MATCH</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12297</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1312266076%2FProperties%2F-1401641919" anchor-label="EGL_BAD_NATIVE_PIXMAP" id="-1312266076%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1312266076%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>BAD_</span><wbr></wbr><span>NATIVE_</span><wbr></wbr><span>PIXMAP</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1312266076%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1312266076%2FProperties%2F-1401641919">EGL_BAD_NATIVE_PIXMAP</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12298</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1594745713%2FProperties%2F-1401641919" anchor-label="EGL_BAD_NATIVE_WINDOW" id="1594745713%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1594745713%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>BAD_</span><wbr></wbr><span>NATIVE_</span><wbr></wbr><span>WINDOW</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1594745713%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1594745713%2FProperties%2F-1401641919">EGL_BAD_NATIVE_WINDOW</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12299</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1551636448%2FProperties%2F-1401641919" anchor-label="EGL_BAD_PARAMETER" id="-1551636448%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1551636448%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>BAD_</span><wbr></wbr><span>PARAMETER</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1551636448%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1551636448%2FProperties%2F-1401641919">EGL_BAD_PARAMETER</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12300</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-987716964%2FProperties%2F-1401641919" anchor-label="EGL_BAD_SURFACE" id="-987716964%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-987716964%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>BAD_</span><wbr></wbr><span>SURFACE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-987716964%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-987716964%2FProperties%2F-1401641919">EGL_BAD_SURFACE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12301</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-379601943%2FProperties%2F-1401641919" anchor-label="EGL_BLUE_SIZE" id="-379601943%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-379601943%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>BLUE_</span><wbr></wbr><span>SIZE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-379601943%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-379601943%2FProperties%2F-1401641919">EGL_BLUE_SIZE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12322</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="461635791%2FProperties%2F-1401641919" anchor-label="EGL_BUFFER_SIZE" id="461635791%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#461635791%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>BUFFER_</span><wbr></wbr><span>SIZE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="461635791%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#461635791%2FProperties%2F-1401641919">EGL_BUFFER_SIZE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12320</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="118475186%2FProperties%2F-1401641919" anchor-label="EGL_COLOR_BUFFER_TYPE" id="118475186%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#118475186%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>COLOR_</span><wbr></wbr><span>BUFFER_</span><wbr></wbr><span>TYPE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="118475186%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#118475186%2FProperties%2F-1401641919">EGL_COLOR_BUFFER_TYPE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12351</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1757159848%2FProperties%2F-1401641919" anchor-label="EGL_COLORSPACE" id="1757159848%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1757159848%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>COLORSPACE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1757159848%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1757159848%2FProperties%2F-1401641919">EGL_COLORSPACE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12423</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1423212686%2FProperties%2F-1401641919" anchor-label="EGL_CONFIG_CAVEAT" id="-1423212686%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1423212686%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>CONFIG_</span><wbr></wbr><span>CAVEAT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1423212686%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1423212686%2FProperties%2F-1401641919">EGL_CONFIG_CAVEAT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12327</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-557614665%2FProperties%2F-1401641919" anchor-label="EGL_CONFIG_ID" id="-557614665%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-557614665%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>CONFIG_</span><wbr></wbr><span>ID</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-557614665%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-557614665%2FProperties%2F-1401641919">EGL_CONFIG_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12328</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-544010824%2FProperties%2F-1401641919" anchor-label="EGL_CONTEXT_LOST" id="-544010824%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-544010824%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>CONTEXT_</span><wbr></wbr><span>LOST</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-544010824%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-544010824%2FProperties%2F-1401641919">EGL_CONTEXT_LOST</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12302</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1380191809%2FProperties%2F-1401641919" anchor-label="EGL_CORE_NATIVE_ENGINE" id="1380191809%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1380191809%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>CORE_</span><wbr></wbr><span>NATIVE_</span><wbr></wbr><span>ENGINE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1380191809%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1380191809%2FProperties%2F-1401641919">EGL_CORE_NATIVE_ENGINE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12379</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-138251157%2FProperties%2F-1401641919" anchor-label="EGL_DEFAULT_DISPLAY" id="-138251157%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-138251157%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>DEFAULT_</span><wbr></wbr><span>DISPLAY</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-138251157%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-138251157%2FProperties%2F-1401641919">EGL_DEFAULT_DISPLAY</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-any/index.html">Any</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1818757710%2FProperties%2F-1401641919" anchor-label="EGL_DEPTH_SIZE" id="1818757710%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1818757710%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>DEPTH_</span><wbr></wbr><span>SIZE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1818757710%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1818757710%2FProperties%2F-1401641919">EGL_DEPTH_SIZE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12325</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2003397584%2FProperties%2F-1401641919" anchor-label="EGL_DONT_CARE" id="2003397584%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#2003397584%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>DONT_</span><wbr></wbr><span>CARE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2003397584%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#2003397584%2FProperties%2F-1401641919">EGL_DONT_CARE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">-1</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1950597753%2FProperties%2F-1401641919" anchor-label="EGL_DRAW" id="-1950597753%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1950597753%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>DRAW</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1950597753%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1950597753%2FProperties%2F-1401641919">EGL_DRAW</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12377</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1080111671%2FProperties%2F-1401641919" anchor-label="EGL_EXTENSIONS" id="1080111671%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1080111671%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>EXTENSIONS</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1080111671%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1080111671%2FProperties%2F-1401641919">EGL_EXTENSIONS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12373</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-706011506%2FProperties%2F-1401641919" anchor-label="EGL_GREEN_SIZE" id="-706011506%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-706011506%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>GREEN_</span><wbr></wbr><span>SIZE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-706011506%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-706011506%2FProperties%2F-1401641919">EGL_GREEN_SIZE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12323</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-412743804%2FProperties%2F-1401641919" anchor-label="EGL_HEIGHT" id="-412743804%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-412743804%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>HEIGHT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-412743804%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-412743804%2FProperties%2F-1401641919">EGL_HEIGHT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12374</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-623551192%2FProperties%2F-1401641919" anchor-label="EGL_HORIZONTAL_RESOLUTION" id="-623551192%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-623551192%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>HORIZONTAL_</span><wbr></wbr><span>RESOLUTION</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-623551192%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-623551192%2FProperties%2F-1401641919">EGL_HORIZONTAL_RESOLUTION</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12432</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2046631166%2FProperties%2F-1401641919" anchor-label="EGL_LARGEST_PBUFFER" id="-2046631166%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-2046631166%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>LARGEST_</span><wbr></wbr><span>PBUFFER</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2046631166%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-2046631166%2FProperties%2F-1401641919">EGL_LARGEST_PBUFFER</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12376</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1496047605%2FProperties%2F-1401641919" anchor-label="EGL_LEVEL" id="-1496047605%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1496047605%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>LEVEL</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1496047605%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1496047605%2FProperties%2F-1401641919">EGL_LEVEL</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12329</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-196398684%2FProperties%2F-1401641919" anchor-label="EGL_LUMINANCE_BUFFER" id="-196398684%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-196398684%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>LUMINANCE_</span><wbr></wbr><span>BUFFER</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-196398684%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-196398684%2FProperties%2F-1401641919">EGL_LUMINANCE_BUFFER</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12431</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="390908611%2FProperties%2F-1401641919" anchor-label="EGL_LUMINANCE_SIZE" id="390908611%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#390908611%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>LUMINANCE_</span><wbr></wbr><span>SIZE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="390908611%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#390908611%2FProperties%2F-1401641919">EGL_LUMINANCE_SIZE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12349</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1754815194%2FProperties%2F-1401641919" anchor-label="EGL_MAX_PBUFFER_HEIGHT" id="1754815194%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1754815194%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>MAX_</span><wbr></wbr><span>PBUFFER_</span><wbr></wbr><span>HEIGHT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1754815194%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1754815194%2FProperties%2F-1401641919">EGL_MAX_PBUFFER_HEIGHT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12330</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2146922476%2FProperties%2F-1401641919" anchor-label="EGL_MAX_PBUFFER_PIXELS" id="-2146922476%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-2146922476%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>MAX_</span><wbr></wbr><span>PBUFFER_</span><wbr></wbr><span>PIXELS</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2146922476%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-2146922476%2FProperties%2F-1401641919">EGL_MAX_PBUFFER_PIXELS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12331</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1118689805%2FProperties%2F-1401641919" anchor-label="EGL_MAX_PBUFFER_WIDTH" id="-1118689805%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1118689805%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>MAX_</span><wbr></wbr><span>PBUFFER_</span><wbr></wbr><span>WIDTH</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1118689805%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1118689805%2FProperties%2F-1401641919">EGL_MAX_PBUFFER_WIDTH</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12332</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1622432297%2FProperties%2F-1401641919" anchor-label="EGL_NATIVE_RENDERABLE" id="-1622432297%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1622432297%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>NATIVE_</span><wbr></wbr><span>RENDERABLE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1622432297%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1622432297%2FProperties%2F-1401641919">EGL_NATIVE_RENDERABLE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12333</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-423136967%2FProperties%2F-1401641919" anchor-label="EGL_NATIVE_VISUAL_ID" id="-423136967%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-423136967%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>NATIVE_</span><wbr></wbr><span>VISUAL_</span><wbr></wbr><span>ID</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-423136967%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-423136967%2FProperties%2F-1401641919">EGL_NATIVE_VISUAL_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12334</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1518801466%2FProperties%2F-1401641919" anchor-label="EGL_NATIVE_VISUAL_TYPE" id="1518801466%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1518801466%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>NATIVE_</span><wbr></wbr><span>VISUAL_</span><wbr></wbr><span>TYPE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1518801466%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1518801466%2FProperties%2F-1401641919">EGL_NATIVE_VISUAL_TYPE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12335</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1097297958%2FProperties%2F-1401641919" anchor-label="EGL_NO_CONTEXT" id="-1097297958%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1097297958%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>NO_</span><wbr></wbr><span>CONTEXT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1097297958%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1097297958%2FProperties%2F-1401641919">EGL_NO_CONTEXT</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLContext.html">EGLContext</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1608435673%2FProperties%2F-1401641919" anchor-label="EGL_NO_DISPLAY" id="-1608435673%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1608435673%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>NO_</span><wbr></wbr><span>DISPLAY</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1608435673%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1608435673%2FProperties%2F-1401641919">EGL_NO_DISPLAY</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLDisplay.html">EGLDisplay</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-323022180%2FProperties%2F-1401641919" anchor-label="EGL_NO_SURFACE" id="-323022180%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-323022180%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>NO_</span><wbr></wbr><span>SURFACE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-323022180%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-323022180%2FProperties%2F-1401641919">EGL_NO_SURFACE</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLSurface.html">EGLSurface</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="849119585%2FProperties%2F-1401641919" anchor-label="EGL_NON_CONFORMANT_CONFIG" id="849119585%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#849119585%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>NON_</span><wbr></wbr><span>CONFORMANT_</span><wbr></wbr><span>CONFIG</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="849119585%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#849119585%2FProperties%2F-1401641919">EGL_NON_CONFORMANT_CONFIG</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12369</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="507385363%2FProperties%2F-1401641919" anchor-label="EGL_NONE" id="507385363%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#507385363%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>NONE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="507385363%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#507385363%2FProperties%2F-1401641919">EGL_NONE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12344</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-253682105%2FProperties%2F-1401641919" anchor-label="EGL_NOT_INITIALIZED" id="-253682105%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-253682105%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>NOT_</span><wbr></wbr><span><span>INITIALIZED</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-253682105%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-253682105%2FProperties%2F-1401641919">EGL_NOT_INITIALIZED</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12289</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2135295375%2FProperties%2F-1401641919" anchor-label="EGL_PBUFFER_BIT" id="-2135295375%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-2135295375%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>PBUFFER_</span><wbr></wbr><span>BIT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2135295375%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-2135295375%2FProperties%2F-1401641919">EGL_PBUFFER_BIT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">1</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1886573074%2FProperties%2F-1401641919" anchor-label="EGL_PIXEL_ASPECT_RATIO" id="-1886573074%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1886573074%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>PIXEL_</span><wbr></wbr><span>ASPECT_</span><wbr></wbr><span>RATIO</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1886573074%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1886573074%2FProperties%2F-1401641919">EGL_PIXEL_ASPECT_RATIO</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12434</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1935799584%2FProperties%2F-1401641919" anchor-label="EGL_PIXMAP_BIT" id="1935799584%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1935799584%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>PIXMAP_</span><wbr></wbr><span>BIT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1935799584%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1935799584%2FProperties%2F-1401641919">EGL_PIXMAP_BIT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">2</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1885090165%2FProperties%2F-1401641919" anchor-label="EGL_READ" id="1885090165%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1885090165%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>READ</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1885090165%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1885090165%2FProperties%2F-1401641919">EGL_READ</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12378</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1660191516%2FProperties%2F-1401641919" anchor-label="EGL_RED_SIZE" id="1660191516%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1660191516%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>RED_</span><wbr></wbr><span>SIZE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1660191516%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1660191516%2FProperties%2F-1401641919">EGL_RED_SIZE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12324</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1988225542%2FProperties%2F-1401641919" anchor-label="EGL_RENDER_BUFFER" id="1988225542%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1988225542%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>RENDER_</span><wbr></wbr><span>BUFFER</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1988225542%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1988225542%2FProperties%2F-1401641919">EGL_RENDER_BUFFER</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12422</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1742763622%2FProperties%2F-1401641919" anchor-label="EGL_RENDERABLE_TYPE" id="1742763622%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1742763622%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>RENDERABLE_</span><wbr></wbr><span>TYPE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1742763622%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1742763622%2FProperties%2F-1401641919">EGL_RENDERABLE_TYPE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12352</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1937131513%2FProperties%2F-1401641919" anchor-label="EGL_RGB_BUFFER" id="1937131513%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1937131513%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>RGB_</span><wbr></wbr><span>BUFFER</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1937131513%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1937131513%2FProperties%2F-1401641919">EGL_RGB_BUFFER</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12430</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-733890547%2FProperties%2F-1401641919" anchor-label="EGL_SAMPLE_BUFFERS" id="-733890547%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-733890547%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>SAMPLE_</span><wbr></wbr><span>BUFFERS</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-733890547%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-733890547%2FProperties%2F-1401641919">EGL_SAMPLE_BUFFERS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12338</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1946082650%2FProperties%2F-1401641919" anchor-label="EGL_SAMPLES" id="-1946082650%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1946082650%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>SAMPLES</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1946082650%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1946082650%2FProperties%2F-1401641919">EGL_SAMPLES</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12337</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1561860936%2FProperties%2F-1401641919" anchor-label="EGL_SINGLE_BUFFER" id="-1561860936%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1561860936%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>SINGLE_</span><wbr></wbr><span>BUFFER</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1561860936%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1561860936%2FProperties%2F-1401641919">EGL_SINGLE_BUFFER</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12421</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-598776273%2FProperties%2F-1401641919" anchor-label="EGL_SLOW_CONFIG" id="-598776273%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-598776273%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>SLOW_</span><wbr></wbr><span>CONFIG</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-598776273%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-598776273%2FProperties%2F-1401641919">EGL_SLOW_CONFIG</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12368</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1045902329%2FProperties%2F-1401641919" anchor-label="EGL_STENCIL_SIZE" id="-1045902329%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1045902329%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>STENCIL_</span><wbr></wbr><span>SIZE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1045902329%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1045902329%2FProperties%2F-1401641919">EGL_STENCIL_SIZE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12326</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1692717076%2FProperties%2F-1401641919" anchor-label="EGL_SUCCESS" id="-1692717076%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1692717076%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>SUCCESS</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1692717076%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1692717076%2FProperties%2F-1401641919">EGL_SUCCESS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12288</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1074601441%2FProperties%2F-1401641919" anchor-label="EGL_SURFACE_TYPE" id="-1074601441%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1074601441%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>SURFACE_</span><wbr></wbr><span>TYPE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1074601441%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1074601441%2FProperties%2F-1401641919">EGL_SURFACE_TYPE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12339</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1176928914%2FProperties%2F-1401641919" anchor-label="EGL_TRANSPARENT_BLUE_VALUE" id="1176928914%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1176928914%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>TRANSPARENT_</span><wbr></wbr><span>BLUE_</span><wbr></wbr><span>VALUE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1176928914%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1176928914%2FProperties%2F-1401641919">EGL_TRANSPARENT_BLUE_VALUE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12341</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2042246663%2FProperties%2F-1401641919" anchor-label="EGL_TRANSPARENT_GREEN_VALUE" id="2042246663%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#2042246663%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>TRANSPARENT_</span><wbr></wbr><span>GREEN_</span><wbr></wbr><span>VALUE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2042246663%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#2042246663%2FProperties%2F-1401641919">EGL_TRANSPARENT_GREEN_VALUE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12342</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="462977657%2FProperties%2F-1401641919" anchor-label="EGL_TRANSPARENT_RED_VALUE" id="462977657%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#462977657%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>TRANSPARENT_</span><wbr></wbr><span>RED_</span><wbr></wbr><span>VALUE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="462977657%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#462977657%2FProperties%2F-1401641919">EGL_TRANSPARENT_RED_VALUE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12343</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1400339377%2FProperties%2F-1401641919" anchor-label="EGL_TRANSPARENT_RGB" id="-1400339377%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1400339377%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>TRANSPARENT_</span><wbr></wbr><span>RGB</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1400339377%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1400339377%2FProperties%2F-1401641919">EGL_TRANSPARENT_RGB</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12370</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1352103172%2FProperties%2F-1401641919" anchor-label="EGL_TRANSPARENT_TYPE" id="1352103172%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1352103172%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>TRANSPARENT_</span><wbr></wbr><span>TYPE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1352103172%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1352103172%2FProperties%2F-1401641919">EGL_TRANSPARENT_TYPE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12340</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1782437245%2FProperties%2F-1401641919" anchor-label="EGL_VENDOR" id="-1782437245%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1782437245%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>VENDOR</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1782437245%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1782437245%2FProperties%2F-1401641919">EGL_VENDOR</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12371</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1492974775%2FProperties%2F-1401641919" anchor-label="EGL_VERSION" id="1492974775%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1492974775%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>VERSION</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1492974775%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1492974775%2FProperties%2F-1401641919">EGL_VERSION</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12372</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="262774778%2FProperties%2F-1401641919" anchor-label="EGL_VERTICAL_RESOLUTION" id="262774778%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#262774778%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>VERTICAL_</span><wbr></wbr><span>RESOLUTION</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="262774778%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#262774778%2FProperties%2F-1401641919">EGL_VERTICAL_RESOLUTION</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12433</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1188611063%2FProperties%2F-1401641919" anchor-label="EGL_WIDTH" id="-1188611063%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1188611063%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>WIDTH</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1188611063%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1188611063%2FProperties%2F-1401641919">EGL_WIDTH</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">12375</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1197260435%2FProperties%2F-1401641919" anchor-label="EGL_WINDOW_BIT" id="-1197260435%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1197260435%2FProperties%2F-1401641919"><span>EGL_</span><wbr></wbr><span>WINDOW_</span><wbr></wbr><span>BIT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1197260435%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-1197260435%2FProperties%2F-1401641919">EGL_WINDOW_BIT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">4</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-2063289833%2FFunctions%2F-1401641919" anchor-label="eglChooseConfig" id="-2063289833%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-choose-config.html"><span>egl</span><wbr></wbr><span>Choose</span><wbr></wbr><span><span>Config</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2063289833%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-choose-config.html"><span class="token function">eglChooseConfig</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">display<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLDisplay.html">EGLDisplay</a><span class="token punctuation">, </span></span><span class="parameter ">attrib_list<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">configs<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLConfig.html">EGLConfig</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">config_size<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">num_config<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="279045601%2FFunctions%2F-1401641919" anchor-label="eglCopyBuffers" id="279045601%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-copy-buffers.html"><span>egl</span><wbr></wbr><span>Copy</span><wbr></wbr><span><span>Buffers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="279045601%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-copy-buffers.html"><span class="token function">eglCopyBuffers</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">display<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLDisplay.html">EGLDisplay</a><span class="token punctuation">, </span></span><span class="parameter ">surface<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLSurface.html">EGLSurface</a><span class="token punctuation">, </span></span><span class="parameter ">native_pixmap<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-any/index.html">Any</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-146968563%2FFunctions%2F-1401641919" anchor-label="eglCreateContext" id="-146968563%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-create-context.html"><span>egl</span><wbr></wbr><span>Create</span><wbr></wbr><span><span>Context</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-146968563%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-create-context.html"><span class="token function">eglCreateContext</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">display<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLDisplay.html">EGLDisplay</a><span class="token punctuation">, </span></span><span class="parameter ">config<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLConfig.html">EGLConfig</a><span class="token punctuation">, </span></span><span class="parameter ">share_context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLContext.html">EGLContext</a><span class="token punctuation">, </span></span><span class="parameter ">attrib_list<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLContext.html">EGLContext</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-65483433%2FFunctions%2F-1401641919" anchor-label="eglCreatePbufferSurface" id="-65483433%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-create-pbuffer-surface.html"><span>egl</span><wbr></wbr><span>Create</span><wbr></wbr><span>Pbuffer</span><wbr></wbr><span><span>Surface</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-65483433%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-create-pbuffer-surface.html"><span class="token function">eglCreatePbufferSurface</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">display<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLDisplay.html">EGLDisplay</a><span class="token punctuation">, </span></span><span class="parameter ">config<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLConfig.html">EGLConfig</a><span class="token punctuation">, </span></span><span class="parameter ">attrib_list<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLSurface.html">EGLSurface</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="935109196%2FFunctions%2F-1401641919" anchor-label="eglCreatePixmapSurface" id="935109196%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-create-pixmap-surface.html"><span>egl</span><wbr></wbr><span>Create</span><wbr></wbr><span>Pixmap</span><wbr></wbr><span><span>Surface</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="935109196%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-create-pixmap-surface.html"><span class="token function">eglCreatePixmapSurface</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">display<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLDisplay.html">EGLDisplay</a><span class="token punctuation">, </span></span><span class="parameter ">config<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLConfig.html">EGLConfig</a><span class="token punctuation">, </span></span><span class="parameter ">native_pixmap<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-any/index.html">Any</a><span class="token punctuation">, </span></span><span class="parameter ">attrib_list<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLSurface.html">EGLSurface</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="696878873%2FFunctions%2F-1401641919" anchor-label="eglCreateWindowSurface" id="696878873%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-create-window-surface.html"><span>egl</span><wbr></wbr><span>Create</span><wbr></wbr><span>Window</span><wbr></wbr><span><span>Surface</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="696878873%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-create-window-surface.html"><span class="token function">eglCreateWindowSurface</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">display<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLDisplay.html">EGLDisplay</a><span class="token punctuation">, </span></span><span class="parameter ">config<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLConfig.html">EGLConfig</a><span class="token punctuation">, </span></span><span class="parameter ">native_window<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-any/index.html">Any</a><span class="token punctuation">, </span></span><span class="parameter ">attrib_list<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLSurface.html">EGLSurface</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1317752632%2FFunctions%2F-1401641919" anchor-label="eglDestroyContext" id="-1317752632%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-destroy-context.html"><span>egl</span><wbr></wbr><span>Destroy</span><wbr></wbr><span><span>Context</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1317752632%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-destroy-context.html"><span class="token function">eglDestroyContext</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">display<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLDisplay.html">EGLDisplay</a><span class="token punctuation">, </span></span><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLContext.html">EGLContext</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="51166728%2FFunctions%2F-1401641919" anchor-label="eglDestroySurface" id="51166728%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-destroy-surface.html"><span>egl</span><wbr></wbr><span>Destroy</span><wbr></wbr><span><span>Surface</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="51166728%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-destroy-surface.html"><span class="token function">eglDestroySurface</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">display<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLDisplay.html">EGLDisplay</a><span class="token punctuation">, </span></span><span class="parameter ">surface<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLSurface.html">EGLSurface</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1171117430%2FFunctions%2F-1401641919" anchor-label="eglGetConfigAttrib" id="-1171117430%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-get-config-attrib.html"><span>egl</span><wbr></wbr><span>Get</span><wbr></wbr><span>Config</span><wbr></wbr><span><span>Attrib</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1171117430%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-get-config-attrib.html"><span class="token function">eglGetConfigAttrib</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">display<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLDisplay.html">EGLDisplay</a><span class="token punctuation">, </span></span><span class="parameter ">config<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLConfig.html">EGLConfig</a><span class="token punctuation">, </span></span><span class="parameter ">attribute<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1048458055%2FFunctions%2F-1401641919" anchor-label="eglGetConfigs" id="1048458055%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-get-configs.html"><span>egl</span><wbr></wbr><span>Get</span><wbr></wbr><span><span>Configs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1048458055%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-get-configs.html"><span class="token function">eglGetConfigs</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">display<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLDisplay.html">EGLDisplay</a><span class="token punctuation">, </span></span><span class="parameter ">configs<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLConfig.html">EGLConfig</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">config_size<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">num_config<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1776703653%2FFunctions%2F-1401641919" anchor-label="eglGetCurrentContext" id="1776703653%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-get-current-context.html"><span>egl</span><wbr></wbr><span>Get</span><wbr></wbr><span>Current</span><wbr></wbr><span><span>Context</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1776703653%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-get-current-context.html"><span class="token function">eglGetCurrentContext</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLContext.html">EGLContext</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1265565938%2FFunctions%2F-1401641919" anchor-label="eglGetCurrentDisplay" id="1265565938%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-get-current-display.html"><span>egl</span><wbr></wbr><span>Get</span><wbr></wbr><span>Current</span><wbr></wbr><span><span>Display</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1265565938%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-get-current-display.html"><span class="token function">eglGetCurrentDisplay</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLDisplay.html">EGLDisplay</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1345701844%2FFunctions%2F-1401641919" anchor-label="eglGetCurrentSurface" id="-1345701844%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-get-current-surface.html"><span>egl</span><wbr></wbr><span>Get</span><wbr></wbr><span>Current</span><wbr></wbr><span><span>Surface</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1345701844%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-get-current-surface.html"><span class="token function">eglGetCurrentSurface</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">readdraw<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLSurface.html">EGLSurface</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1450832406%2FFunctions%2F-1401641919" anchor-label="eglGetDisplay" id="-1450832406%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-get-display.html"><span>egl</span><wbr></wbr><span>Get</span><wbr></wbr><span><span>Display</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1450832406%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-get-display.html"><span class="token function">eglGetDisplay</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">native_display<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-any/index.html">Any</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLDisplay.html">EGLDisplay</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="741824215%2FFunctions%2F-1401641919" anchor-label="eglGetError" id="741824215%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-get-error.html"><span>egl</span><wbr></wbr><span>Get</span><wbr></wbr><span><span>Error</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="741824215%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-get-error.html"><span class="token function">eglGetError</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-528223859%2FFunctions%2F-1401641919" anchor-label="eglInitialize" id="-528223859%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-initialize.html"><span>egl</span><wbr></wbr><span><span>Initialize</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-528223859%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-initialize.html"><span class="token function">eglInitialize</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">display<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLDisplay.html">EGLDisplay</a><span class="token punctuation">, </span></span><span class="parameter ">major_minor<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1104037046%2FFunctions%2F-1401641919" anchor-label="eglMakeCurrent" id="-1104037046%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-make-current.html"><span>egl</span><wbr></wbr><span>Make</span><wbr></wbr><span><span>Current</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1104037046%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-make-current.html"><span class="token function">eglMakeCurrent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">display<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLDisplay.html">EGLDisplay</a><span class="token punctuation">, </span></span><span class="parameter ">draw<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLSurface.html">EGLSurface</a><span class="token punctuation">, </span></span><span class="parameter ">read<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLSurface.html">EGLSurface</a><span class="token punctuation">, </span></span><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLContext.html">EGLContext</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1414046848%2FFunctions%2F-1401641919" anchor-label="eglQueryContext" id="1414046848%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-query-context.html"><span>egl</span><wbr></wbr><span>Query</span><wbr></wbr><span><span>Context</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1414046848%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-query-context.html"><span class="token function">eglQueryContext</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">display<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLDisplay.html">EGLDisplay</a><span class="token punctuation">, </span></span><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLContext.html">EGLContext</a><span class="token punctuation">, </span></span><span class="parameter ">attribute<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-769188048%2FFunctions%2F-1401641919" anchor-label="eglQueryString" id="-769188048%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-query-string.html"><span>egl</span><wbr></wbr><span>Query</span><wbr></wbr><span><span>String</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-769188048%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-query-string.html"><span class="token function">eglQueryString</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">display<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLDisplay.html">EGLDisplay</a><span class="token punctuation">, </span></span><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1579229632%2FFunctions%2F-1401641919" anchor-label="eglQuerySurface" id="1579229632%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-query-surface.html"><span>egl</span><wbr></wbr><span>Query</span><wbr></wbr><span><span>Surface</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1579229632%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-query-surface.html"><span class="token function">eglQuerySurface</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">display<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLDisplay.html">EGLDisplay</a><span class="token punctuation">, </span></span><span class="parameter ">surface<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLSurface.html">EGLSurface</a><span class="token punctuation">, </span></span><span class="parameter ">attribute<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1714430509%2FFunctions%2F-1401641919" anchor-label="eglSwapBuffers" id="1714430509%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-swap-buffers.html"><span>egl</span><wbr></wbr><span>Swap</span><wbr></wbr><span><span>Buffers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1714430509%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-swap-buffers.html"><span class="token function">eglSwapBuffers</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">display<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLDisplay.html">EGLDisplay</a><span class="token punctuation">, </span></span><span class="parameter ">surface<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLSurface.html">EGLSurface</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1165055876%2FFunctions%2F-1401641919" anchor-label="eglTerminate" id="1165055876%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-terminate.html"><span>egl</span><wbr></wbr><span><span>Terminate</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1165055876%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-terminate.html"><span class="token function">eglTerminate</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">display<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/javax/microedition/khronos/egl/EGLDisplay.html">EGLDisplay</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1574598129%2FFunctions%2F-1401641919" anchor-label="eglWaitGL" id="-1574598129%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-wait-g-l.html"><span>egl</span><wbr></wbr><span>Wait</span><wbr></wbr><span><span>GL</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1574598129%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-wait-g-l.html"><span class="token function">eglWaitGL</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="404152822%2FFunctions%2F-1401641919" anchor-label="eglWaitNative" id="404152822%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="egl-wait-native.html"><span>egl</span><wbr></wbr><span>Wait</span><wbr></wbr><span><span>Native</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="404152822%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="egl-wait-native.html"><span class="token function">eglWaitNative</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">engine<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">bindTarget<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-any/index.html">Any</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1700202961%2FFunctions%2F-1401641919" anchor-label="getErrorString" id="-1700202961%2FFunctions%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-error-string.html"><span>get</span><wbr></wbr><span>Error</span><wbr></wbr><span><span>String</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1700202961%2FFunctions%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-error-string.html"><span class="token function">getErrorString</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">error<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+        <span>© 2025 Copyright</span>
+        <span class="pull-right">
+            <span>Generated by </span>
+            <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                <span>dokka</span>
+            </a>
+        </span>
+    </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
