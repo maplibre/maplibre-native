@@ -17,6 +17,8 @@
 #include <gmock/gmock-matchers.h>
 #include <gmock/gmock-more-matchers.h>
 
+#include <regex>
+
 using namespace mbgl;
 using namespace mbgl::util;
 using namespace ::testing;
@@ -53,6 +55,7 @@ public:
     ~ActionJournalTest() {
         map.reset();
         frontend.reset();
+        fileSource.reset();
         clear();
     }
 
@@ -167,13 +170,14 @@ void validateEventList(ActionJournalTest& test,
         EXPECT_TRUE(json.HasMember("time"));
         EXPECT_TRUE(json["time"].IsString());
 
-        // using this longer version instead of `MatchesRegex(R"(\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d\d\dZ)")`
-        // due to it failing on linux gcc
+        // `MatchesRegex(R"(\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d\d\dZ)")` fails on linux gcc
         // https://github.com/google/googletest/issues/3084
-        EXPECT_THAT(
-            json["time"].GetString(),
-            MatchesRegex(
-                R"([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]\.[0-9][0-9][0-9]Z)"));
+        // `MatchesRegex(R"([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]\.[0-9][0-9][0-9]Z)"))`
+        // fails on windows CI
+        // using std::regex for now
+        std::cmatch match;
+        const std::regex timeRegex(R"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z)");
+        EXPECT_TRUE(std::regex_match(json["time"].GetString(), match, timeRegex));
 
         if (generatedEvent.second) {
             EXPECT_TRUE(json.HasMember("event"));
