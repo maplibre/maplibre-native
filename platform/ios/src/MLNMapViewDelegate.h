@@ -321,6 +321,14 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)mapView:(MLNMapView *)mapView didFinishLoadingStyle:(MLNStyle *)style;
 
 /**
+ Tells the delegate that the source changed.
+
+ @param mapView The map view that owns the source.
+ @param source The source that changed.
+ */
+- (void)mapView:(MLNMapView *)mapView sourceDidChange:(MLNSource *)source;
+
+/**
  Tells the delegate that the `mapView` is missing an image. The image should be added synchronously
  with ``MLNStyle/setImage:forName:`` to be rendered on the current zoom level. When loading icons
  asynchronously, you can load a placeholder image and replace it when your image has loaded.

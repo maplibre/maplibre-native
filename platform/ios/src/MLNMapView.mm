@@ -6947,8 +6947,13 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (void)sourceDidChange:(MLNSource *)source {
-    // no-op: we only show attribution after tapping the info button, so there's no
-    // interactive update needed.
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:sourceDidChange:)]) {
+        [self.delegate mapView:self sourceDidChange:source];
+    }
 }
 
 - (void)didFailToLoadImage:(NSString *)imageName {

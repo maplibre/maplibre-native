@@ -137,6 +137,7 @@ jobs:
           role-duration-seconds: 14400
 
       - name: Run ${{ matrix.test.name }} on AWS Device Farm
+        if: env.run_device_test == 'true'
         run: |
           export name="${{ matrix.test.name }}"
           export appType=ANDROID_APP
@@ -149,6 +150,8 @@ jobs:
           export AWS_DEVICE_FARM_DEVICE_POOL_ARN="${{ matrix.test.devicePool }}"
           export testSpecArn="${{ matrix.test.testSpecArn }}"
           export wait_for_completion=true
+
+          set +e
 
           run_arn="$(./scripts/aws-device-farm/aws-device-farm-run.sh)"
           exit_status=$?

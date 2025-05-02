@@ -1006,6 +1006,11 @@ public:
     if (!_mbglMap) {
         return;
     }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:sourceDidChange:)]) {
+        [self.delegate mapView:self sourceDidChange:source];
+    }
+
     // Attribution only applies to tiled sources
     if ([source isKindOfClass:[MLNTileSource class]]) {
         [self installAttributionView];

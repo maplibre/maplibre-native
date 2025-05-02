@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -o xtrace
 
 # List of required environment variables
 required_vars=(
@@ -86,6 +87,14 @@ arn="$(aws devicefarm schedule-run \
   --test type=$testType,testPackageArn=$test_package_arn${testFilter:+,filter=$testFilter}${testSpecArn:+,testSpecArn=$testSpecArn} \
   --execution-configuration videoCapture=false \
   --output text --query run.arn)"
+
+echo ARN: $arn  >&2
+
+if [ -z "$arn" ]; then
+  echo "Error: Failed to schedule Device Farm run or got empty ARN" >&2
+  exit 1
+fi
+
 
 echo "$arn"
 
