@@ -51,7 +51,7 @@ swift_library(
 ios_unit_test(
     name = "ios_test",
     timeout = "long",
-    minimum_os_version = "13.0",
+    minimum_os_version = "12.0",
     runner = "@rules_apple//apple/testing/default_runner:ios_xctestrun_ordered_runner",
     visibility = [
         "@rules_xcodeproj//xcodeproj:generated",

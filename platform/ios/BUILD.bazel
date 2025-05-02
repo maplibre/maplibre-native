@@ -4,7 +4,7 @@ load("@rules_apple//apple:apple.bzl", "apple_static_xcframework", "apple_xcframe
 load("@rules_apple//apple:ios.bzl", "ios_application", "ios_framework")
 load("@rules_apple//apple:resources.bzl", "apple_resource_bundle")
 load("@rules_apple//apple:versioning.bzl", "apple_bundle_version")
-
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load(
     "@rules_xcodeproj//xcodeproj:defs.bzl",
     "top_level_target",
@@ -110,7 +110,7 @@ apple_static_xcframework(
         ],
         "device": ["arm64"],
     },
-    minimum_os_versions = {"ios": "13.0"},
+    minimum_os_versions = {"ios": "12.0"},
     public_hdrs = public_hdrs,
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk"],
@@ -146,7 +146,7 @@ apple_xcframework(
         ],
         "device": ["arm64"],
     },
-    minimum_os_versions = {"ios": "13.0"},
+    minimum_os_versions = {"ios": "12.0"},
     public_hdrs = public_hdrs,
     version = ":maplibre_ios_version",
     visibility = ["//visibility:public"],
@@ -160,7 +160,7 @@ ios_framework(
     families = ["iphone"],
     infoplists = ["info_plist"],
     linkopts = [""],
-    minimum_os_version = "13.0",
+    minimum_os_version = "12.0",
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk"],
 )
@@ -208,7 +208,7 @@ ios_application(
         "ipad",
     ],
     infoplists = ["info_app_plist"],
-    minimum_os_version = "13.0",
+    minimum_os_version = "12.0",
     provisioning_profile = "xcode_profile",
     resources = _IOS_APPLICATION_RESOURCES,
     version = ":maplibre_app_version",
@@ -229,7 +229,7 @@ ios_application(
         "MapLibre.link",
     ],
     infoplists = ["app/Info.plist"],
-    minimum_os_version = "13.0",
+    minimum_os_version = "12.0",
     provisioning_profile = ":xcode_profile",
     resources = _IOS_APPLICATION_RESOURCES,
     visibility = ["//visibility:public"],
@@ -246,7 +246,7 @@ ios_application(
         "ipad",
     ],
     infoplists = ["//platform/ios/benchmark:info_benchmark_plist"],
-    minimum_os_version = "13.0",
+    minimum_os_version = "12.0",
     provisioning_profile = "xcode_profile",
     resources = [
         "//platform/ios/benchmark:bundle_resources",

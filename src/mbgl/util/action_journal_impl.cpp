@@ -9,6 +9,18 @@
 
 #include <regex>
 
+#if defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#include <ghc/filesystem.hpp>
+namespace mbgl {
+namespace filesystem = ghc::filesystem;
+}
+#else
+#include <filesystem>
+namespace mbgl {
+namespace filesystem = std::filesystem;
+}
+#endif
+
 namespace mbgl {
 namespace util {
 
@@ -117,7 +129,7 @@ ActionJournal::Impl::Impl(const Map& map_, const ActionJournalOptions& options_)
     assert(options.logFileSize() > 0);
     assert(options.logFileCount() > 1);
 
-    options.withPath((std::filesystem::canonical(options.path()) / ACTION_JOURNAL_DIRECTORY_NAME).generic_string());
+    options.withPath((mbgl::filesystem::canonical(options.path()) / ACTION_JOURNAL_DIRECTORY_NAME).generic_string());
 
     if (!openFile(detectFiles(), false)) {
         Log::Error(Event::General, "Failed to open Action Journal file");
@@ -134,12 +146,12 @@ std::string ActionJournal::Impl::getLogDirectory() const {
 
 std::vector<std::string> ActionJournal::Impl::getLogFiles() const {
     std::set<std::string> files;
-    for (const auto& entry : std::filesystem::directory_iterator(options.path())) {
+    for (const auto& entry : mbgl::filesystem::directory_iterator(options.path())) {
         if (!entry.is_regular_file()) {
             continue;
         }
 
-        files.emplace(std::filesystem::canonical(entry.path()).generic_string());
+        files.emplace(mbgl::filesystem::canonical(entry.path()).generic_string());
     }
 
     return std::vector<std::string>(files.begin(), files.end());
@@ -194,7 +206,7 @@ void ActionJournal::Impl::clearLog() {
     currentFileIndex = 0;
     currentFileSize = 0;
 
-    if (!std::filesystem::remove_all(options.path())) {
+    if (!mbgl::filesystem::remove_all(options.path())) {
         Log::Error(Event::General, "Failed to clear ActionJournal");
     }
 
@@ -426,16 +438,16 @@ std::string ActionJournal::Impl::getFilepath(uint32_t fileIndex) const {
 }
 
 uint32_t ActionJournal::Impl::detectFiles() const {
-    if (!std::filesystem::exists(options.path())) {
+    if (!mbgl::filesystem::exists(options.path())) {
         return 0;
     }
 
-    std::map<uint32_t, std::filesystem::path> existingFiles;
+    std::map<uint32_t, mbgl::filesystem::path> existingFiles;
 
     const std::regex fileRegex(std::string(R"(.*\.([0-9]+)\.)") + ACTION_JOURNAL_FILE_EXTENSION);
     std::smatch fileMatch;
 
-    for (const auto& entry : std::filesystem::directory_iterator(options.path())) {
+    for (const auto& entry : mbgl::filesystem::directory_iterator(options.path())) {
         if (!entry.is_regular_file()) {
             continue;
         }
@@ -454,7 +466,7 @@ uint32_t ActionJournal::Impl::detectFiles() const {
 
     // removing extra files (old files or due to the file count changing)
     for (auto it = existingFiles.begin(); existingFiles.size() > options.logFileCount();) {
-        std::filesystem::remove(it->second);
+        mbgl::filesystem::remove(it->second);
         it = existingFiles.erase(it);
     }
 
@@ -463,7 +475,7 @@ uint32_t ActionJournal::Impl::detectFiles() const {
     // validate file index
     for (const auto& file : existingFiles) {
         if (file.first != expectedIndex) {
-            std::filesystem::rename(file.second, getFilepath(expectedIndex));
+            mbgl::filesystem::rename(file.second, getFilepath(expectedIndex));
         }
 
         ++expectedIndex;
@@ -475,16 +487,16 @@ uint32_t ActionJournal::Impl::detectFiles() const {
 uint32_t ActionJournal::Impl::rollFiles() {
     // delete the oldest file
     const auto& oldestFilepath = getFilepath(0);
-    if (std::filesystem::exists(oldestFilepath)) {
-        std::filesystem::remove(oldestFilepath);
+    if (mbgl::filesystem::exists(oldestFilepath)) {
+        mbgl::filesystem::remove(oldestFilepath);
     }
 
     // rename the rest
     uint32_t expectedIndex = 0;
     for (uint32_t index = 1; index < options.logFileCount(); ++index) {
         const auto& filepath = getFilepath(index);
-        if (std::filesystem::exists(filepath)) {
-            std::filesystem::rename(filepath, getFilepath(expectedIndex++));
+        if (mbgl::filesystem::exists(filepath)) {
+            mbgl::filesystem::rename(filepath, getFilepath(expectedIndex++));
         }
     }
 
@@ -494,8 +506,8 @@ uint32_t ActionJournal::Impl::rollFiles() {
 bool ActionJournal::Impl::openFile(uint32_t fileIndex, bool truncate) {
     assert(fileIndex < options.logFileCount());
 
-    if (!std::filesystem::exists(options.path())) {
-        std::filesystem::create_directories(options.path());
+    if (!mbgl::filesystem::exists(options.path())) {
+        mbgl::filesystem::create_directories(options.path());
     }
 
     const auto& filepath = getFilepath(fileIndex);
@@ -506,7 +518,7 @@ bool ActionJournal::Impl::openFile(uint32_t fileIndex, bool truncate) {
 
     if (currentFile.is_open()) {
         currentFileIndex = fileIndex;
-        currentFileSize = std::filesystem::file_size(filepath);
+        currentFileSize = mbgl::filesystem::file_size(filepath);
         return true;
     }
 

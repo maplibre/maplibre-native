@@ -16,7 +16,7 @@ swift_library(
 ios_ui_test(
     name = "uitest",
     size = "large",
-    minimum_os_version = "13.0",
+    minimum_os_version = "12.0",
     provisioning_profile = "xcode_profile",
     test_host = "//platform/ios:App",
     visibility = [

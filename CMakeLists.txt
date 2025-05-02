@@ -1504,6 +1504,7 @@ set(EXPORT_TARGETS
     mbgl-core
     maplibre-native-base
     maplibre-native-base-cheap-ruler-cpp
+    maplibre-native-base-extras-filesystem
     maplibre-native-base-extras-expected-lite
     maplibre-native-base-extras-kdbush.hpp
     maplibre-native-base-extras-rapidjson
