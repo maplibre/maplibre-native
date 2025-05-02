@@ -73,9 +73,8 @@ public:
     MapObserver& observer;
     RendererFrontend& rendererFrontend;
 
-    Transform* transform;
-    Transform _transform;
-    TransformActive _transformActive;
+    std::unique_ptr<Transform> transform;
+    bool using_active_transform = false;
 
     const MapMode mode;
     const float pixelRatio;

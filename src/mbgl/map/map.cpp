@@ -442,11 +442,17 @@ TransformState Map::getTransfromState() const {
 }
 
 void Map::toggleTransform() {
-    if (impl->transform == &impl->_transform) {
-        impl->transform = &impl->_transformActive;
+    MapOptions options = getMapOptions();
+    if (impl->using_active_transform) {
+        impl->transform = std::make_unique<Transform>(impl->observer, options.constrainMode(), options.viewportMode());
+        impl->using_active_transform = false;
     } else {
-        impl->transform = &impl->_transform;
+        impl->transform = std::make_unique<TransformActive>(
+            impl->observer, options.constrainMode(), options.viewportMode());
+        impl->using_active_transform = true;
     }
+    impl->transform->setNorthOrientation(options.northOrientation());
+    impl->transform->resize(options.size());
 }
 
 // MARK: - Annotations

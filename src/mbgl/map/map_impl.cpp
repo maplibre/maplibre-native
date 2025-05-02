@@ -47,22 +47,17 @@ Map::Impl::Impl(RendererFrontend& frontend_,
                 const MapOptions& mapOptions)
     : observer(observer_),
       rendererFrontend(frontend_),
-      _transform(observer, mapOptions.constrainMode(), mapOptions.viewportMode()),
-      _transformActive(observer, mapOptions.constrainMode(), mapOptions.viewportMode()),
+      transform(std::make_unique<Transform>(observer, mapOptions.constrainMode(), mapOptions.viewportMode())),
       mode(mapOptions.mapMode()),
       pixelRatio(mapOptions.pixelRatio()),
       crossSourceCollisions(mapOptions.crossSourceCollisions()),
       fileSource(std::move(fileSource_)),
       style(std::make_unique<style::Style>(fileSource, pixelRatio, frontend_.getThreadPool())),
       annotationManager(*style) {
-    _transform.setNorthOrientation(mapOptions.northOrientation());
-    _transformActive.setNorthOrientation(mapOptions.northOrientation());
+    transform->setNorthOrientation(mapOptions.northOrientation());
     style->impl->setObserver(this);
     rendererFrontend.setObserver(*this);
-    _transform.resize(mapOptions.size());
-    _transformActive.resize(mapOptions.size());
-
-    transform = &_transform;
+    transform->resize(mapOptions.size());
 }
 
 Map::Impl::~Impl() {
