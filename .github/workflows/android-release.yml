@@ -112,7 +112,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-drawable-debug.aar
-          asset_name: MapLibreAndroid-release.aar
+          asset_name: MapLibreAndroid-debug.aar
           asset_content_type: application/zip
 
       - name: Upload aar (Vulkan)
@@ -131,8 +131,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-vulkan-release.aar
-          asset_name: MapLibreAndroid-release-vulkan.aar
+          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-vulkan-debug.aar
+          asset_name: MapLibreAndroid-debug-vulkan.aar
           asset_content_type: application/zip
 
       - name: Upload debug symbols (OpenGL)
