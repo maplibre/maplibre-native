@@ -12,7 +12,6 @@
 /cmake-build-debug
 /platform/android/build
 /platform/android/MapLibreAndroid/src/main/assets/sdk_versions/com.mapbox.mapboxsdk
-/platform/windows/vendor/mesa3d/
 *.code-workspace
 
 local.properties

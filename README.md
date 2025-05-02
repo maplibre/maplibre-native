@@ -203,7 +203,7 @@ The go-to reference is the [MapLibre Native Developer Documentation](https://map
 
 Open `platform/android` with Android Studio.
 
-More information: [MapLibre Android Developer Guide](https://maplibre.org/maplibre-native/docs/book/android/index.html).
+More information: [MapLibre Android Developer Guide](https://maplibre.org/maplibre-native/docs/book/platforms/android/index.html).
 
 ### iOS
 
@@ -216,7 +216,7 @@ xed platform/ios/MapLibre.xcodeproj
 
 To generate and open the Xcode project.
 
-More information: [MapLibre iOS Developer Guide](https://maplibre.org/maplibre-native/docs/book/ios/index.html).
+More information: [MapLibre iOS Developer Guide](https://maplibre.org/maplibre-native/docs/book/platforms/ios/index.html).
 
 ## Other Platforms
 

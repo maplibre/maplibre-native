@@ -5,8 +5,7 @@
   ],
   "ignore_paths": [
       "ignores/platform-all.json",
-      "ignores/platform-linux.json",
-      "ignores/linux-drawable.json"
+      "ignores/platform-linux.json"
   ],
   "metric_path": "linux-gcc8-release",
   "probes": [

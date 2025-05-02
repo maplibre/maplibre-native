@@ -424,6 +424,7 @@ public:
 @property (nonatomic, copy) MLNMapCamera *residualCamera;
 @property (nonatomic) MLNMapDebugMaskOptions residualDebugMask;
 @property (nonatomic, copy) NSURL *residualStyleURL;
+@property (nonatomic, copy, nullable) NSString *initialStyleJSON;
 
 /// Tilt gesture recognizer helper
 @property (nonatomic, assign) CGPoint dragGestureMiddlePoint;
@@ -522,6 +523,20 @@ public:
     return self;
 }
 
+- (instancetype)initWithFrame:(CGRect)frame styleJSON:(NSString *)styleJSON
+{
+    if (self = [super initWithFrame:frame])
+    {
+        MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
+        MLNLogDebug(@"Initializing frame: %@ styleJSON: %@", NSStringFromCGRect(frame), styleJSON);
+        [self commonInit];
+        self.styleJSON = styleJSON;
+        _initialStyleJSON = [styleJSON copy];
+        MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
+    }
+    return self;
+}
+
 - (instancetype)initWithCoder:(nonnull NSCoder *)decoder
 {
     if (self = [super initWithCoder:decoder])
@@ -552,6 +567,11 @@ public:
         return self.residualStyleURL;
     }
 
+    if (self.mbglMap.getStyle().getJSON().length() > 0 &&
+        self.mbglMap.getStyle().getURL().empty()) {
+        return [NSURL URLWithString:@"local://style.json"];
+    }
+
     NSString *styleURLString = @(self.mbglMap.getStyle().getURL().c_str()).mgl_stringOrNilIfEmpty;
     MLNAssert(styleURLString, @"Invalid style URL string %@", styleURLString);
     return styleURLString ? [NSURL URLWithString:styleURLString] : nil;
@@ -567,6 +587,16 @@ public:
     styleURL = styleURL.mgl_URLByStandardizingScheme;
     self.style = nil;
     self.mbglMap.getStyle().loadURL([[styleURL absoluteString] UTF8String]);
+}
+
+- (NSString *)styleJSON {
+    return self.style.styleJSON;
+}
+
+- (void)setStyleJSON:(NSString *)styleJSON {
+    // Reset style and load new JSON
+    self.style = nil;
+    self.mbglMap.getStyle().loadJSON([styleJSON UTF8String]);
 }
 
 - (IBAction)reloadStyle:(__unused id)sender {
@@ -890,7 +920,9 @@ public:
     self.terminated = YES;
     self.residualCamera = self.camera;
     self.residualDebugMask = self.debugMask;
-    self.residualStyleURL = self.styleURL;
+    if (!_initialStyleJSON) {
+        self.residualStyleURL = self.styleURL;
+    }
 
     // Tear down C++ objects, insuring worker threads correctly terminate.
     // Because of how _mbglMap is constructed, we need to destroy it first.
@@ -6917,8 +6949,13 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (void)sourceDidChange:(MLNSource *)source {
-    // no-op: we only show attribution after tapping the info button, so there's no
-    // interactive update needed.
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:sourceDidChange:)]) {
+        [self.delegate mapView:self sourceDidChange:source];
+    }
 }
 
 - (void)didFailToLoadImage:(NSString *)imageName {
