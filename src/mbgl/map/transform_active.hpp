@@ -14,14 +14,18 @@ struct TransformProperty {
     std::function<double(TimePoint)> frameZoomFunc = nullptr;
 
     // Anchor
-    std::optional<ScreenCoordinate> anchor;
-    LatLng anchorLatLng;
+    std::optional<ScreenCoordinate> anchor = std::nullopt;
+    LatLng anchorLatLng = {};
 };
 
 struct PropertyAnimations {
     TransformProperty<Point<double>> latlng;
     TransformProperty<double> zoom, bearing, pitch;
     TransformProperty<EdgeInsets> padding;
+
+    // Anchor
+    std::optional<ScreenCoordinate> anchor;
+    LatLng anchorLatLng;
 };
 
 class TransformActive : public Transform {

@@ -80,11 +80,11 @@ void TransformActive::easeTo(const CameraOptions& inputCamera, const AnimationOp
             .pa = pa,
             .current = startZoom,
             .target = zoom,
+            .set = true,
             .frameZoomFunc =
                 [=, this](TimePoint now) {
                     return util::interpolate(pas.zoom.current, pas.zoom.target, pas.zoom.pa->t(now));
                 },
-            .set = true,
         };
     }
     if (!pas.latlng.set || startPoint != endPoint) {
@@ -93,13 +93,13 @@ void TransformActive::easeTo(const CameraOptions& inputCamera, const AnimationOp
             .pa = pa,
             .current = startPoint,
             .target = endPoint,
+            .set = true,
             .frameLatLngFunc =
                 [=, this](TimePoint now) {
                     Point<double> framePoint = util::interpolate(
                         pas.latlng.current, pas.latlng.target, pas.latlng.pa->t(now));
                     return Projection::unproject(framePoint, state.zoomScale(startZoom));
                 },
-            .set = true,
         };
     }
     if (!pas.bearing.set || bearing != startBearing) {
@@ -274,6 +274,7 @@ void TransformActive::flyTo(const CameraOptions& inputCamera,
             .pa = pa,
             .current = startZoom,
             .target = zoom,
+            .set = true,
             .frameZoomFunc =
                 [=, this](TimePoint now) {
                     double t = pas.zoom.pa->t(now);
@@ -287,7 +288,6 @@ void TransformActive::flyTo(const CameraOptions& inputCamera,
 
                     return frameZoom;
                 },
-            .set = true,
         };
     }
     if (!pas.latlng.set || startPoint != endPoint) {
@@ -296,6 +296,7 @@ void TransformActive::flyTo(const CameraOptions& inputCamera,
             .pa = pa,
             .current = startPoint,
             .target = endPoint,
+            .set = true,
             .frameLatLngFunc =
                 [=, this](TimePoint now) {
                     double t = pas.latlng.pa->t(now);
@@ -305,7 +306,6 @@ void TransformActive::flyTo(const CameraOptions& inputCamera,
                     Point<double> framePoint = util::interpolate(pas.latlng.current, pas.latlng.target, us);
                     return Projection::unproject(framePoint, startScale);
                 },
-            .set = true,
         };
     }
     if (!pas.bearing.set || bearing != startBearing) {
@@ -382,10 +382,10 @@ void TransformActive::startTransition(const CameraOptions& camera, const Duratio
     // Associate the anchor, if given, with a coordinate.
     // Anchor and center points are mutually exclusive, with preference for the
     // center point when both are set.
-    pas.latlng.anchor = camera.center ? std::nullopt : camera.anchor;
-    if (pas.latlng.anchor) {
-        pas.latlng.anchor->y = state.getSize().height - pas.latlng.anchor->y;
-        pas.latlng.anchorLatLng = state.screenCoordinateToLatLng(*pas.latlng.anchor);
+    pas.anchor = camera.center ? std::nullopt : camera.anchor;
+    if (pas.anchor) {
+        pas.anchor->y = state.getSize().height - pas.anchor->y;
+        pas.anchorLatLng = state.screenCoordinateToLatLng(*pas.anchor);
     }
 
     if (!isAnimated) {
@@ -444,8 +444,8 @@ void TransformActive::updateTransitions(const TimePoint& now) {
             }
         }
 
-        if (pas.latlng.anchor) {
-            state.moveLatLng(pas.latlng.anchorLatLng, *pas.latlng.anchor);
+        if (pas.anchor) {
+            state.moveLatLng(pas.anchorLatLng, *pas.anchor);
         }
 
         visit_pas([this](std::shared_ptr<PropertyAnimation>& pa) {
