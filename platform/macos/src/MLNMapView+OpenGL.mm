@@ -87,3 +87,7 @@ CGLContextObj MLNMapViewOpenGLImpl::getCGLContextObj() {
     MLNOpenGLLayer* layer = (MLNOpenGLLayer*)mapView.layer;
     return layer.openGLContext.CGLContextObj;
 }
+
+MLNBackendResource MLNMapViewOpenGLImpl::getObject() {
+    return MLNBackendResource();
+}

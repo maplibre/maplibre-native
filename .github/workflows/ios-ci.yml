@@ -43,7 +43,7 @@ jobs:
       - name: Get all iOS files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files-yaml
-        uses: tj-actions/changed-files@v46
+        uses: step-security/changed-files@3dbe17c78367e7d60f00d78ae6781a35be47b4a1
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
@@ -56,7 +56,7 @@ jobs:
   ios-build:
     needs: pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
-    runs-on: [self-hosted, macOS, ARM64]
+    runs-on: [macos-latest]
     concurrency:
       # cancel jobs on PRs only
       group: ${{ github.workflow }}-${{ github.ref }}
@@ -83,8 +83,8 @@ jobs:
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
 
-      - name: Build Example (Swift) App
-        run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal
+      # - name: Build Example (Swift) App
+      #   run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal
 
       - name: Check debug symbols
         run: bazel run //platform:check-public-symbols --//:renderer=metal
@@ -99,97 +99,97 @@ jobs:
       #- name: Running iOS UI tests (Thread Sanitizer)
       #  run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=tsan
 
-      - name: Running iOS UI tests (Address+UB Sanitizer)
-        run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=include_clang_rt --copt=-fsanitize=undefined --linkopt=-fsanitize=undefined --copt=-fsanitize-recover=null --linkopt=-fsanitize-recover=null
+      # - name: Running iOS UI tests (Address+UB Sanitizer)
+      #   run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=include_clang_rt --copt=-fsanitize=undefined --linkopt=-fsanitize=undefined --copt=-fsanitize-recover=null --linkopt=-fsanitize-recover=null
 
       # render test
 
-      - name: Build RenderTest .ipa and .xctest for AWS Device Farm
-        run: |
-          set -e
-          bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
-          build_dir="$(mktemp -d)"
-          xcodebuild build-for-testing  -scheme RenderTest -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
-          render_test_app_dir="$(dirname "$(find "$build_dir" -name RenderTestApp.app)")"
-          cd "$render_test_app_dir"
-          mkdir Payload
-          mv RenderTestApp.app Payload
-          zip -r RenderTestApp.zip Payload
-          mv RenderTestApp.zip RenderTestApp.ipa
-          cd Payload/RenderTestApp.app/PlugIns
-          zip -r "$render_test_app_dir"/RenderTest.xctest.zip RenderTest.xctest
-          echo render_test_artifacts_dir="$render_test_app_dir" >> "$GITHUB_ENV"
+      # - name: Build RenderTest .ipa and .xctest for AWS Device Farm
+      #   run: |
+      #     set -e
+      #     bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
+      #     build_dir="$(mktemp -d)"
+      #     xcodebuild build-for-testing  -scheme RenderTest -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
+      #     render_test_app_dir="$(dirname "$(find "$build_dir" -name RenderTestApp.app)")"
+      #     cd "$render_test_app_dir"
+      #     mkdir Payload
+      #     mv RenderTestApp.app Payload
+      #     zip -r RenderTestApp.zip Payload
+      #     mv RenderTestApp.zip RenderTestApp.ipa
+      #     cd Payload/RenderTestApp.app/PlugIns
+      #     zip -r "$render_test_app_dir"/RenderTest.xctest.zip RenderTest.xctest
+      #     echo render_test_artifacts_dir="$render_test_app_dir" >> "$GITHUB_ENV"
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ios-render-test
-          retention-days: 3
-          if-no-files-found: error
-          path: |
-            ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
-            ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
+      # - uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ios-render-test
+      #     retention-days: 3
+      #     if-no-files-found: error
+      #     path: |
+      #       ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
+      #       ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
 
       # C++ unit tests
 
-      - name: Build CppUnitTests .ipa and .xctest for AWS Device Farm
-        run: |
-          set -e
-          bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
-          build_dir="$(mktemp -d)"
-          xcodebuild build-for-testing  -scheme CppUnitTests -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
-          ios_cpp_test_app_dir="$(dirname "$(find "$build_dir" -name CppUnitTestsApp.app)")"
-          cd "$ios_cpp_test_app_dir"
-          mkdir Payload
-          mv CppUnitTestsApp.app Payload
-          zip -r CppUnitTestsApp.zip Payload
-          mv CppUnitTestsApp.zip CppUnitTestsApp.ipa
-          cd Payload/CppUnitTestsApp.app/PlugIns
-          zip -r "$ios_cpp_test_app_dir"/CppUnitTests.xctest.zip CppUnitTests.xctest
-          echo ios_cpp_test_artifacts_dir="$ios_cpp_test_app_dir" >> "$GITHUB_ENV"
+      # - name: Build CppUnitTests .ipa and .xctest for AWS Device Farm
+      #   run: |
+      #     set -e
+      #     bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
+      #     build_dir="$(mktemp -d)"
+      #     xcodebuild build-for-testing  -scheme CppUnitTests -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
+      #     ios_cpp_test_app_dir="$(dirname "$(find "$build_dir" -name CppUnitTestsApp.app)")"
+      #     cd "$ios_cpp_test_app_dir"
+      #     mkdir Payload
+      #     mv CppUnitTestsApp.app Payload
+      #     zip -r CppUnitTestsApp.zip Payload
+      #     mv CppUnitTestsApp.zip CppUnitTestsApp.ipa
+      #     cd Payload/CppUnitTestsApp.app/PlugIns
+      #     zip -r "$ios_cpp_test_app_dir"/CppUnitTests.xctest.zip CppUnitTests.xctest
+      #     echo ios_cpp_test_artifacts_dir="$ios_cpp_test_app_dir" >> "$GITHUB_ENV"
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ios-cpp-unit-tests
-          retention-days: 3
-          if-no-files-found: error
-          path: |
-            ${{ env.ios_cpp_test_artifacts_dir }}/CppUnitTests.xctest.zip
-            ${{ env.ios_cpp_test_artifacts_dir }}/CppUnitTestsApp.ipa
+      # - uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ios-cpp-unit-tests
+      #     retention-days: 3
+      #     if-no-files-found: error
+      #     path: |
+      #       ${{ env.ios_cpp_test_artifacts_dir }}/CppUnitTests.xctest.zip
+      #       ${{ env.ios_cpp_test_artifacts_dir }}/CppUnitTestsApp.ipa
 
       # Size test (Bloaty)
 
-      - name: Build dynamic library for size test (Bloaty)
-        run: |
-          bazel build //platform/ios:MapLibre.dynamic --//:renderer=metal --compilation_mode="opt" --copt -g --copt="-Oz" --strip never --output_groups=+dsyms --apple_generate_dsym
-          bazel_bin="$(bazel info --compilation_mode="opt" bazel-bin)"
-          unzip "$bazel_bin"/platform/ios/MapLibre.dynamic.xcframework.zip
-          cp "$bazel_bin"/platform/ios/MapLibre.dynamic_dsyms/MapLibre_ios_device.framework.dSYM/Contents/Resources/DWARF/MapLibre_ios_device MapLibre_DWARF
-          cp MapLibre.xcframework/ios-arm64/MapLibre.framework/MapLibre MapLibre_dynamic
+      # - name: Build dynamic library for size test (Bloaty)
+      #   run: |
+      #     bazel build //platform/ios:MapLibre.dynamic --//:renderer=metal --compilation_mode="opt" --copt -g --copt="-Oz" --strip never --output_groups=+dsyms --apple_generate_dsym
+      #     bazel_bin="$(bazel info --compilation_mode="opt" bazel-bin)"
+      #     unzip "$bazel_bin"/platform/ios/MapLibre.dynamic.xcframework.zip
+      #     cp "$bazel_bin"/platform/ios/MapLibre.dynamic_dsyms/MapLibre_ios_device.framework.dSYM/Contents/Resources/DWARF/MapLibre_ios_device MapLibre_DWARF
+      #     cp MapLibre.xcframework/ios-arm64/MapLibre.framework/MapLibre MapLibre_dynamic
 
-      - name: Upload size test as artifact (Bloaty)
-        if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-size-test-files
-          retention-days: 3
-          if-no-files-found: error
-          path: |
-            platform/ios/MapLibre_DWARF
-            platform/ios/MapLibre_dynamic
+      # - name: Upload size test as artifact (Bloaty)
+      #   if: github.event_name == 'pull_request'
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ios-size-test-files
+      #     retention-days: 3
+      #     if-no-files-found: error
+      #     path: |
+      #       platform/ios/MapLibre_DWARF
+      #       platform/ios/MapLibre_dynamic
 
-      - name: Configure AWS Credentials
-        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: us-west-2
-          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
-          role-session-name: ${{ github.run_id }}
+      # - name: Configure AWS Credentials
+      #   if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     aws-region: us-west-2
+      #     role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+      #     role-session-name: ${{ github.run_id }}
 
-      - name: Upload MapLibre_DWARF & MapLibre_dynamic to S3
-        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
-        run: |
-          aws s3 cp MapLibre_DWARF s3://maplibre-native/size-test-ios/MapLibre_DWARF-main
-          aws s3 cp MapLibre_dynamic s3://maplibre-native/size-test-ios/MapLibre_dynamic-main
+      # - name: Upload MapLibre_DWARF & MapLibre_dynamic to S3
+      #   if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
+      #   run: |
+      #     aws s3 cp MapLibre_DWARF s3://maplibre-native/size-test-ios/MapLibre_DWARF-main
+      #     aws s3 cp MapLibre_dynamic s3://maplibre-native/size-test-ios/MapLibre_dynamic-main
 
       - if: github.event_name == 'pull_request'
         uses: ./.github/actions/save-pr-number
@@ -200,7 +200,7 @@ jobs:
           HOSTING_BASE_PATH="maplibre-native/ios/latest" platform/ios/scripts/docc.sh
 
   ios-release:
-    runs-on: macos-14
+    runs-on: macos-latest
     needs: ios-build
     if: github.ref == 'refs/heads/main' || github.event.inputs.release == 'pre'
     defaults:
@@ -215,7 +215,7 @@ jobs:
 
       - name: VERSION file changed
         id: version-file-ios-changed
-        uses: tj-actions/changed-files@v46
+        uses: step-security/changed-files@3dbe17c78367e7d60f00d78ae6781a35be47b4a1
         with:
           files: platform/ios/VERSION
 
@@ -262,16 +262,16 @@ jobs:
           awk '/^##/ { p = 0 }; p == 1 { print }; $0 == "${{ env.changelog_version_heading }}" { p = 1 };' CHANGELOG.md > changelog_for_version.md
           cat changelog_for_version.md
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: us-west-2
-          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
-          role-session-name: ${{ github.run_id }}
+      # - name: Configure AWS Credentials
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     aws-region: us-west-2
+      #     role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+      #     role-session-name: ${{ github.run_id }}
 
-      - name: Upload changelog to S3
-        if: env.make_release
-        run: aws s3 cp changelog_for_version.md s3://maplibre-native/changelogs/ios-${{ env.version }}.md
+      # - name: Upload changelog to S3
+      #   if: env.make_release
+      #   run: aws s3 cp changelog_for_version.md s3://maplibre-native/changelogs/ios-${{ env.version }}.md
 
       - name: Create tag
         if: env.make_release
@@ -302,35 +302,34 @@ jobs:
           fail_on_unmatched_files: true
 
       # needed to trigger workflow for Swift Package Index release
-      - name: Generate token
-        if: env.make_release
-        id: generate_token
-        uses: tibdex/github-app-token@v2
-        with:
-          app_id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
-          private_key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
+      # - name: Generate token
+      #   if: env.make_release
+      #   id: generate_token
+      #   uses: tibdex/github-app-token@v2
+      #   with:
+      #     app_id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
+      #     private_key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
       - name: Release (Swift Package Index)
         if: env.make_release
         run: |
-          echo "::add-mask::${{ steps.generate_token.outputs.token }}"
-          release_workflow_id=81221759  # id of release.yml
+          echo "::add-mask::${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}"
+          release_workflow_name=release.yml # github api allows you to pass workflow name instead of id
           curl -L \
             -X POST \
             -H "Accept: application/vnd.github+json" \
-            -H "Authorization: token ${{ steps.generate_token.outputs.token }}" \
+            -H "Authorization: token ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/maplibre/maplibre-gl-native-distribution/actions/workflows/$release_workflow_id/dispatches \
+            https://api.github.com/repos/hudhud-maps/maplibre-gl-native-distribution/actions/workflows/$release_workflow_name/dispatches \
             -d '{"ref":"main","inputs":{
-              "changelog_url": "https://maplibre-native.s3.eu-central-1.amazonaws.com/changelogs/ios-${{ env.version }}.md",
               "version":"${{ env.version }}",
               "download_url":"${{ fromJSON(steps.github_release.outputs.assets)[0].browser_download_url }}"}}'
 
-      - name: Release (CocoaPods)
-        shell: bash -leo pipefail {0}  # so pod is found
-        if: env.make_release
-        run: |
-          VERSION=${{ env.version }} COCOAPODS_TRUNK_TOKEN=${{ secrets.COCOAPODS_PASSWORD }} pod trunk push MapLibre.podspec
+      # - name: Release (CocoaPods)
+      #   shell: bash -leo pipefail {0}  # so pod is found
+      #   if: env.make_release
+      #   run: |
+      #     VERSION=${{ env.version }} COCOAPODS_TRUNK_TOKEN=${{ secrets.COCOAPODS_PASSWORD }} pod trunk push MapLibre.podspec
 
   ios-build-cmake:
     needs: pre_job

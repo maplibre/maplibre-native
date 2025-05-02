@@ -39,9 +39,10 @@ struct alignas(16) SymbolDrawableUBO {
     /* 244 */ float opacity_t;
     /* 248 */ float halo_width_t;
     /* 252 */ float halo_blur_t;
-    /* 256 */
+    /* 256 */ /*bool*/ int is_offset;
+    /* 260 */
 };
-static_assert(sizeof(SymbolDrawableUBO) == 16 * 16, "wrong size");
+static_assert(sizeof(SymbolDrawableUBO) == 17 * 16, "wrong size");
 
 struct alignas(16) SymbolTilePropsUBO {
     /*  0 */ /*bool*/ int is_text;
@@ -149,7 +150,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
             0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
             4.0);
 
-    size *= perspective_ratio;
+    if (!drawable.is_offset) {
+        size *= perspective_ratio;
+    }
 
     const float fontScale = drawable.is_text_prop ? size / 24.0 : size;
 
@@ -316,7 +319,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
         4.0);
 
-    size *= perspective_ratio;
+    if (!drawable.is_offset) {
+        size *= perspective_ratio;
+    }
 
     const float fontScale = drawable.is_text_prop ? size / 24.0 : size;
 
@@ -529,7 +534,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
         4.0);
 
-    size *= perspective_ratio;
+    if (!drawable.is_offset) {
+        size *= perspective_ratio;
+    }
 
     const float fontScale = size / 24.0;
 

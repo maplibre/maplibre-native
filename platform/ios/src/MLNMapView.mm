@@ -24,7 +24,6 @@
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/string.hpp>
-#include <mbgl/util/projection.hpp>
 
 #import "Mapbox.h"
 #import "MLNShape_Private.h"
@@ -69,6 +68,7 @@
 #import "MLNReachability.h"
 #import "MLNSettings_Private.h"
 #import "MLNMapProjection.h"
+#import "MLNLocationIndicatorUserLocationAnnotationView.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -585,6 +585,7 @@ public:
     }
     MLNLogDebug(@"Setting styleURL: %@", styleURL);
     styleURL = styleURL.mgl_URLByStandardizingScheme;
+    [self removeLocationIndicatorLayer];
     self.style = nil;
     self.mbglMap.getStyle().loadURL([[styleURL absoluteString] UTF8String]);
 }
@@ -602,8 +603,15 @@ public:
 - (IBAction)reloadStyle:(__unused id)sender {
     MLNLogInfo(@"Reloading style.");
     NSURL *styleURL = self.styleURL;
+    [self removeLocationIndicatorLayer];
     self.mbglMap.getStyle().loadURL("");
     self.styleURL = styleURL;
+}
+
+- (void)removeLocationIndicatorLayer {
+    if (self.userLocationAnnotationView && [self.userLocationAnnotationView isKindOfClass:[MLNLocationIndicatorUserLocationAnnotationView class]]) {
+        [(MLNLocationIndicatorUserLocationAnnotationView*)self.userLocationAnnotationView removeLayer];
+    }
 }
 
 - (mbgl::Map &)mbglMap
@@ -1367,13 +1375,13 @@ public:
     if (self.userTrackingMode == MLNUserTrackingModeNone)
     {
         // Don’t call -setCenterCoordinate:, which resets the user tracking mode.
-        [self _setCenterCoordinate:self.centerCoordinate edgePadding:contentInset zoomLevel:self.zoomLevel direction:self.direction duration:animated ? MLNAnimationDuration : 0 animationTimingFunction:nil completionHandler:completion];
+        [self _setCenterCoordinate:self.centerCoordinate edgePadding:contentInset zoomLevel:self.zoomLevel direction:self.direction duration:animated ? MLNAnimationDuration : 0 animationTimingFunction:nil completionHandler:completion cancelTransitions:true];
         _contentInset = contentInset;
     }
     else
     {
         _contentInset = contentInset;
-        [self didUpdateLocationWithUserTrackingAnimated:animated completionHandler:completion];
+        [self didUpdateLocationWithUserTrackingAnimated:animated completionHandler:completion cancelTransitions:true];
     }
 
     // Compass, logo and attribution button constraints needs to be updated.z
@@ -2158,6 +2166,9 @@ public:
         }
 
         [self cameraIsChanging];
+        if (self.followLocationIndicatorDuringGesture) {
+            [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+        }
     }
     else if (pan.state == UIGestureRecognizerStateEnded || pan.state == UIGestureRecognizerStateCancelled)
     {
@@ -2244,6 +2255,9 @@ public:
             }
         }
         [self cameraIsChanging];
+        if (self.followLocationIndicatorDuringGesture) {
+            [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+        }
     }
     else if (pinch.state == UIGestureRecognizerStateEnded || pinch.state == UIGestureRecognizerStateCancelled)
     {
@@ -2368,7 +2382,9 @@ public:
         }
 
         [self cameraIsChanging];
-
+        if (self.followLocationIndicatorDuringGesture) {
+            [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+        }
         // Trigger a light haptic feedback event when the user rotates to due north.
         if (@available(iOS 10.0, *))
         {
@@ -2625,6 +2641,9 @@ public:
         }
 
         [self cameraIsChanging];
+        if (self.followLocationIndicatorDuringGesture) {
+            [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+        }
     }
     else if (quickZoom.state == UIGestureRecognizerStateEnded || quickZoom.state == UIGestureRecognizerStateCancelled)
     {
@@ -2692,6 +2711,9 @@ public:
             }
 
             [self cameraIsChanging];
+            if (self.followLocationIndicatorDuringGesture) {
+                [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+            }
 
         }
 
@@ -3189,6 +3211,46 @@ static void *windowScreenContext = &windowScreenContext;
 - (BOOL)tileCacheEnabled
 {
     return _rendererFrontend->getTileCacheEnabled();
+}
+
+- (void)setTileLodMinRadius:(double)radius
+{
+    self.mbglMap.setTileLodMinRadius(radius);
+}
+
+- (double)tileLodMinRadius
+{
+    return self.mbglMap.getTileLodMinRadius();
+}
+
+- (void)setTileLodScale:(double)scale
+{
+    self.mbglMap.setTileLodScale(scale);
+}
+
+- (double)tileLodScale
+{
+    return self.mbglMap.getTileLodScale();
+}
+
+- (void)setTileLodPitchThreshold:(double)threshold
+{
+    self.mbglMap.setTileLodPitchThreshold(threshold);
+}
+
+- (double)tileLodPitchThreshold
+{
+    return self.mbglMap.getTileLodPitchThreshold();
+}
+
+- (void)setTileLodZoomShift:(double)shift
+{
+    self.mbglMap.setTileLodZoomShift(shift);
+}
+
+- (double)tileLodZoomShift
+{
+    return self.mbglMap.getTileLodZoomShift();
 }
 
 // MARK: - Accessibility -
@@ -3778,10 +3840,10 @@ static void *windowScreenContext = &windowScreenContext;
 
     self.cameraChangeReasonBitmask |= MLNCameraChangeReasonProgrammatic;
 
-    [self _setCenterCoordinate:centerCoordinate edgePadding:self.contentInset zoomLevel:zoomLevel direction:direction duration:animated ? MLNAnimationDuration : 0 animationTimingFunction:nil completionHandler:completion];
+    [self _setCenterCoordinate:centerCoordinate edgePadding:self.contentInset zoomLevel:zoomLevel direction:direction duration:animated ? MLNAnimationDuration : 0 animationTimingFunction:nil completionHandler:completion cancelTransitions:true];
 }
 
-- (void)_setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate edgePadding:(UIEdgeInsets)insets zoomLevel:(double)zoomLevel direction:(CLLocationDirection)direction duration:(NSTimeInterval)duration animationTimingFunction:(nullable CAMediaTimingFunction *)function completionHandler:(nullable void (^)(void))completion
+- (void)_setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate edgePadding:(UIEdgeInsets)insets zoomLevel:(double)zoomLevel direction:(CLLocationDirection)direction duration:(NSTimeInterval)duration animationTimingFunction:(nullable CAMediaTimingFunction *)function completionHandler:(nullable void (^)(void))completion cancelTransitions:(bool)cancelOtherTransitions
 {
     if (!_mbglMap)
     {
@@ -3840,7 +3902,9 @@ static void *windowScreenContext = &windowScreenContext;
         return;
     }
 
-    [self cancelTransitions];
+    if (cancelOtherTransitions) {
+        [self cancelTransitions];
+    }
 
     self.cameraChangeReasonBitmask |= MLNCameraChangeReasonProgrammatic;
 
@@ -5947,7 +6011,7 @@ static void *windowScreenContext = &windowScreenContext;
             }
         }
 
-        self.userLocationAnnotationView = userLocationAnnotationView ?: [[MLNFaux3DUserLocationAnnotationView alloc] init];
+        self.userLocationAnnotationView = userLocationAnnotationView ?: self.useLocationIndicatorLayer ? [[MLNLocationIndicatorUserLocationAnnotationView alloc] init] : [[MLNFaux3DUserLocationAnnotationView alloc] init];
         self.userLocationAnnotationView.mapView = self;
         self.userLocationAnnotationView.userLocation = self.userLocation;
 
@@ -6193,7 +6257,7 @@ static void *windowScreenContext = &windowScreenContext;
         }
     }
 
-    [self didUpdateLocationWithUserTrackingAnimated:animated completionHandler:completion];
+    [self didUpdateLocationWithUserTrackingAnimated:animated completionHandler:completion cancelTransitions:true];
 
     NSTimeInterval duration = MLNAnimationDuration;
     if (oldLocation && ! CGPointEqualToPoint(self.userLocationAnnotationView.center, CGPointZero))
@@ -6210,7 +6274,7 @@ static void *windowScreenContext = &windowScreenContext;
     }
 }
 
-- (void)didUpdateLocationWithUserTrackingAnimated:(BOOL)animated completionHandler:(nullable void (^)(void))completion
+- (void)didUpdateLocationWithUserTrackingAnimated:(BOOL)animated completionHandler:(nullable void (^)(void))completion cancelTransitions:(bool)cancelTransitions
 {
     CLLocation *location = self.userLocation.location;
     if ( ! _showsUserLocation || ! location
@@ -6256,13 +6320,13 @@ static void *windowScreenContext = &windowScreenContext;
     else if (self.userTrackingState == MLNUserTrackingStateChanged)
     {
         // Subsequent updates get a more subtle animation.
-        [self didUpdateLocationIncrementallyAnimated:animated completionHandler:completion];
+        [self didUpdateLocationIncrementallyAnimated:animated completionHandler:completion cancelTransitions:cancelTransitions];
     }
     [self unrotateIfNeededAnimated:YES];
 }
 
 /// Changes the viewport based on an incremental location update.
-- (void)didUpdateLocationIncrementallyAnimated:(BOOL)animated completionHandler:(nullable void (^)(void))completion
+- (void)didUpdateLocationIncrementallyAnimated:(BOOL)animated completionHandler:(nullable void (^)(void))completion cancelTransitions:(bool)cancelTransitions
 {
     [self _setCenterCoordinate:self.userLocation.location.coordinate
                    edgePadding:self.edgePaddingForFollowing
@@ -6270,7 +6334,8 @@ static void *windowScreenContext = &windowScreenContext;
                      direction:self.directionByFollowingWithCourse
                       duration:animated ? MLNUserLocationAnimationDuration : 0
        animationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear]
-             completionHandler:completion];
+             completionHandler:completion
+             cancelTransitions:cancelTransitions];
 }
 
 /// Changes the viewport based on a significant location update, such as the

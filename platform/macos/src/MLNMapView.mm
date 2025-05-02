@@ -3195,4 +3195,8 @@ public:
     _mbglMap->setDebug(options);
 }
 
+- (MLNBackendResource *)backendResource {
+    return _mbglView->getObject();
+}
+
 @end

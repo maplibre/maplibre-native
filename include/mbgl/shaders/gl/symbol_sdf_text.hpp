@@ -36,6 +36,7 @@ uniform highp float u_aspect_ratio;
 uniform highp float u_camera_to_center_distance;
 uniform float u_fade_change;
 uniform vec2 u_texsize;
+uniform bool u_is_offset;
 
 out vec2 v_data0;
 out vec3 v_data1;
@@ -139,7 +140,9 @@ lowp float halo_blur = u_halo_blur;
         0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
         4.0);
 
-    size *= perspective_ratio;
+    if (!u_is_offset) {
+        size *= perspective_ratio;
+    }
 
     float fontScale = u_is_text ? size / 24.0 : size;
 
