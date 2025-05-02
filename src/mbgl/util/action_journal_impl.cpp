@@ -9,16 +9,29 @@
 
 #include <regex>
 
-#if defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#ifdef __APPLE__
+#include <TargetConditionals.h>
+#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+
+#define USE_GHC_FILESYSTEM
+
+#endif
+#endif
+
+#ifdef USE_GHC_FILESYSTEM
+
 #include <ghc/filesystem.hpp>
 namespace mbgl {
 namespace filesystem = ghc::filesystem;
 }
+
 #else
+
 #include <filesystem>
 namespace mbgl {
 namespace filesystem = std::filesystem;
 }
+
 #endif
 
 namespace mbgl {
