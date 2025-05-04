@@ -1613,6 +1613,16 @@ vertically on the map.
                animated:(BOOL)animated
       completionHandler:(nullable void (^)(void))completion;
 
+/**
+ Toggling between the Transform and the TransformActive implementation.
+
+ It allows us to switch between the two implementations at runtime.
+
+ It also resets the current transform state so be careful when using it
+ in the middle of a transformation.
+ */
+- (void)toggleTransform;
+
 // MARK: Converting Geographic Coordinates
 
 /**

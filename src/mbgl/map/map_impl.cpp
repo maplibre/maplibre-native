@@ -47,17 +47,17 @@ Map::Impl::Impl(RendererFrontend& frontend_,
                 const MapOptions& mapOptions)
     : observer(observer_),
       rendererFrontend(frontend_),
-      transform(observer, mapOptions.constrainMode(), mapOptions.viewportMode()),
+      transform(std::make_unique<Transform>(observer, mapOptions.constrainMode(), mapOptions.viewportMode())),
       mode(mapOptions.mapMode()),
       pixelRatio(mapOptions.pixelRatio()),
       crossSourceCollisions(mapOptions.crossSourceCollisions()),
       fileSource(std::move(fileSource_)),
       style(std::make_unique<style::Style>(fileSource, pixelRatio, frontend_.getThreadPool())),
       annotationManager(*style) {
-    transform.setNorthOrientation(mapOptions.northOrientation());
+    transform->setNorthOrientation(mapOptions.northOrientation());
     style->impl->setObserver(this);
     rendererFrontend.setObserver(*this);
-    transform.resize(mapOptions.size());
+    transform->resize(mapOptions.size());
 }
 
 Map::Impl::~Impl() {
@@ -80,14 +80,14 @@ void Map::Impl::onUpdate() {
 
     TimePoint timePoint = mode == MapMode::Continuous ? Clock::now() : Clock::time_point::max();
 
-    transform.updateTransitions(timePoint);
+    transform->updateTransitions(timePoint);
 
     UpdateParameters params = {style->impl->isLoaded(),
                                mode,
                                pixelRatio,
                                debugOptions,
                                timePoint,
-                               transform.getState(),
+                               transform->getState(),
                                style->impl->getGlyphURL(),
                                style->impl->areSpritesLoaded(),
                                style->impl->getTransitionOptions(),
@@ -196,7 +196,7 @@ void Map::Impl::onDidFinishRenderingFrame(RenderMode renderMode,
                                             frameEncodingTime,
                                             frameRenderingTime});
 
-        if (needsRepaint || transform.inTransition()) {
+        if (needsRepaint || transform->inTransition()) {
             onUpdate();
         } else if (rendererFullyLoaded) {
             observer.onDidBecomeIdle();
@@ -225,7 +225,7 @@ void Map::Impl::onDidFinishRenderingMap() {
 
 void Map::Impl::jumpTo(const CameraOptions& camera) {
     cameraMutated = true;
-    transform.jumpTo(camera);
+    transform->jumpTo(camera);
     onUpdate();
 }
 
