@@ -28,6 +28,21 @@ struct PropertyAnimations {
     LatLng anchorLatLng;
 };
 
+/*
+ `TransformActive` implements the same interface that `Transform`
+ implements but overrides how transformations happen to allow
+ for concurrent independent transformations to happen. Previously,
+ any new transformation overrides the previous transformation operation.
+ `TransformActive`, on the other hand, makes it so that two independetn
+ transformations such as translation and zoom can happen at the same
+ time without canceling the first one.
+
+ The goal eventually is to replace the `Transform` implementation with
+ this one since currently they both produce the same results but to avoid
+ any potential issues that might arise we keep both implementation and allow
+ switching between them through the `Map::toggleTransform` function for
+ testing and to ensure we haven't overlooked any potential issues.
+*/
 class TransformActive : public Transform {
 public:
     using Transform::Transform;

@@ -164,6 +164,11 @@ struct PropertyAnimation {
     AnimationOptions animation;
     bool ran = false, finished = false, done = false;
 
+    PropertyAnimation(TimePoint start_, Duration duration_, AnimationOptions animation_)
+        : start(start_),
+          duration(duration_),
+          animation(animation_) {}
+
     double t(TimePoint now) {
         bool isAnimated = duration != Duration::zero();
         double t = isAnimated ? (std::chrono::duration<double>(now - start) / duration) : 1.0f;
