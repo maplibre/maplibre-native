@@ -211,18 +211,6 @@ function(add_node_module NAME)
         )
 
         if(WIN32)
-            if(MLN_WITH_OSMESA)
-                get_filename_component(_OUTPUT_PATH "${_OUTPUT_PATH}" DIRECTORY "${CMAKE_CURRENT_SOURCE_PATH}")
-
-                add_custom_command(
-                    TARGET ${_TARGET}
-                    POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/platform/windows/vendor/mesa3d/${_ARCH}/libglapi.dll"  "${_OUTPUT_PATH}"
-                    COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/platform/windows/vendor/mesa3d/${_ARCH}/libGLESv2.dll" "${_OUTPUT_PATH}"
-                    COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/platform/windows/vendor/mesa3d/${_ARCH}/osmesa.dll"    "${_OUTPUT_PATH}"
-                )
-            endif()
-
             unset(_ARCH)
         endif()
     endforeach()

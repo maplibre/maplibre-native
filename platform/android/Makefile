@@ -231,7 +231,7 @@ apackage:
 	make android-lib-arm-v7 && make android-lib-arm-v8 && make android-lib-x86 && make android-lib-x86-64
 	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=all assemble$(RENDERER)$(BUILDTYPE)
 	mkdir -p build
-	tar -czvf build/$(DEBUG_TAR_FILE_NAME) -C MapLibreAndroid/build/intermediates/library_jni/$(RENDERER)Release/*JniLibsProjectOnly/jni .
+	tar -czvf build/$(DEBUG_TAR_FILE_NAME) -C MapLibreAndroid/build/intermediates/library_jni/$(RENDERER)$(BUILDTYPE)/*JniLibsProjectOnly/jni .
 
 # Build test app instrumentation tests apk and test app apk for all abi's
 .PHONY: android-ui-test
