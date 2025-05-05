@@ -8,6 +8,8 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 - Allow initializing MLNMapView with style JSON ([#3240](https://github.com/maplibre/maplibre-native/pull/3240)).
 - Remove legacy renderer from source, build files and CI ([#3384](https://github.com/maplibre/maplibre-native/pull/3384)). Should have no impact on iOS since releases where already using the new drawable renderer architecture since 6.0.0.
+- Add missing `sourceDidChange` event ([#3421](https://github.com/maplibre/maplibre-native/pull/3421)).
+- Fix: follow with heading tracking mode cancels user location indicator update ([#3401](https://github.com/maplibre/maplibre-native/pull/3401)).
 
 ## 6.12.3
 
