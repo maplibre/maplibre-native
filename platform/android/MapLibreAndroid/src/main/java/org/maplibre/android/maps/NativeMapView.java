@@ -91,6 +91,13 @@ final class NativeMapView implements NativeMap {
   // Constructors
   //
 
+  public NativeMapView(@NonNull final Context context,
+                       final ViewCallback viewCallback, final StateCallback stateCallback,
+                       final MapRenderer mapRenderer) {
+    this(context, new NativeMapOptions(context.getResources().getDisplayMetrics().density, false),
+            viewCallback, stateCallback, mapRenderer);
+  }
+
   public NativeMapView(@NonNull final Context context, final MapLibreMapOptions options,
                        final ViewCallback viewCallback, final StateCallback stateCallback,
                        final MapRenderer mapRenderer) {

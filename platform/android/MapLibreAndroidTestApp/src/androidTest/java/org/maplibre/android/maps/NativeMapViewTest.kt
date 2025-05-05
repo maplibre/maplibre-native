@@ -46,7 +46,7 @@ class NativeMapViewTest : AppCenter() {
     fun before() {
         val context = InstrumentationRegistry.getInstrumentation().context
         val apiKey = MapLibre.getApiKey()
-        val options = MapLibreMapOptions.createFromAttributes(context).pixelRatio(2.0F).crossSourceCollisions(false)
+        val options = NativeMapOptions(2.0f, false)
 
         MapLibre.getInstance(context, apiKey, WellKnownTileServer.MapTiler)
         nativeMapView = NativeMapView(context, options, null, null, DummyRenderer(context))

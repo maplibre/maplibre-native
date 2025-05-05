@@ -20,6 +20,16 @@ public class NativeMapOptions {
     actionJournalLogFileCount = options.getActionJournalLogFileCount();
   }
 
+  public NativeMapOptions(float pixelRatio, boolean crossSourceCollisions) {
+    this.pixelRatio = pixelRatio;
+    this.crossSourceCollisions = crossSourceCollisions;
+
+    actionJournalEnabled = false;
+    actionJournalPath = "";
+    actionJournalLogFileSize = 0;
+    actionJournalLogFileCount = 0;
+  }
+
   public float pixelRatio() {
     return pixelRatio;
   }

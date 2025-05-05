@@ -17,8 +17,7 @@ abstract class BaseLayerTest : AppCenter() {
 
     fun before() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        val options = MapLibreMapOptions.createFromAttributes(context).crossSourceCollisions(false)
-        nativeMapView = NativeMapView(context, options, null, null, NativeMapViewTest.DummyRenderer(context))
+        nativeMapView = NativeMapView(context, null, null, NativeMapViewTest.DummyRenderer(context))
         nativeMapView.resizeView(WIDTH, HEIGHT)
     }
 
