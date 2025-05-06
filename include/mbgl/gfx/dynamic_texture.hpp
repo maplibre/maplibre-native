@@ -7,6 +7,7 @@
 #include <mapbox/shelf-pack.hpp>
 
 #include <optional>
+#include <mutex>
 
 namespace mbgl {
 
@@ -71,6 +72,7 @@ private:
     int numTextures = 0;
     bool deferredCreation = false;
     ImagesToUpload imagesToUpload;
+    std::mutex mutex;
 };
 
 #define MLN_DEFER_UPLOAD_ON_RENDER_THREAD (MLN_RENDER_BACKEND_OPENGL || MLN_RENDER_BACKEND_VULKAN)
