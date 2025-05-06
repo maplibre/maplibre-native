@@ -2,6 +2,12 @@
 
 ## main
 
+## 11.8.7
+
+We now make releases with debug builds to make it easier to report issues with relevant logs.
+
+They are available with a `-debug` postfix on Maven Central, for example `org.maplibre.gl:android-sdk-vulkan-debug`.
+
 ## 11.8.6
 
 ### ✨ Features and improvements
