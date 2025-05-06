@@ -18,15 +18,25 @@ using MapLibreTile = mlt::MapLibreTile;
 
 class VectorMLTTileFeature : public GeometryTileFeature {
 public:
-    VectorMLTTileFeature(std::shared_ptr<const MapLibreTile>, const mlt::Feature&, std::uint32_t extent, int version);
+    VectorMLTTileFeature(std::shared_ptr<const MapLibreTile>,
+                         const mlt::Feature&,
+#if MLT_UNPACK_MULTI_GEOMETRY
+                         std::uint32_t subIndex_,
+#endif
+                         std::uint32_t extent,
+                         int version);
     VectorMLTTileFeature(const VectorMLTTileFeature&) = delete;
     VectorMLTTileFeature(VectorMLTTileFeature&& other)
         : tile(std::move(other.tile)),
           feature(other.feature),
+#if MLT_UNPACK_MULTI_GEOMETRY
+          subIndex(other.subIndex),
+#endif
           extent(other.extent),
           version(other.version),
           lines(std::move(other.lines)),
-          properties(std::move(other.properties)) {}
+          properties(std::move(other.properties)) {
+    }
 
     VectorMLTTileFeature& operator=(VectorMLTTileFeature&&) = delete;
     VectorMLTTileFeature& operator=(const VectorMLTTileFeature&) = delete;
@@ -40,6 +50,9 @@ public:
 private:
     std::shared_ptr<const MapLibreTile> tile;
     mlt::Feature const& feature;
+#if MLT_UNPACK_MULTI_GEOMETRY
+    std::uint32_t subIndex;
+#endif
     std::uint32_t extent;
     int version;
 
@@ -59,6 +72,9 @@ public:
 private:
     const std::shared_ptr<const MapLibreTile> tile;
     const mlt::Layer& layer;
+#if MLT_UNPACK_MULTI_GEOMETRY
+    const std::size_t featuresCount;
+#endif
 };
 
 class VectorMLTTileData : public GeometryTileData {
