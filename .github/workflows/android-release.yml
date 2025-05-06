@@ -57,7 +57,9 @@ jobs:
       - name: Build package
         run: |
           RENDERER=vulkan make apackage
+          BUILDTYPE=Debug RENDERER=vulkan make apackage
           RENDERER=drawable make apackage
+          BUILDTYPE=Debug RENDERER=drawable make apackage
 
       # create github release
       - name: Prepare release
@@ -103,6 +105,16 @@ jobs:
           asset_name: MapLibreAndroid-release.aar
           asset_content_type: application/zip
 
+      - name: Upload aar (OpenGL, Debug)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-drawable-debug.aar
+          asset_name: MapLibreAndroid-debug.aar
+          asset_content_type: application/zip
+
       - name: Upload aar (Vulkan)
         uses: actions/upload-release-asset@v1
         env:
@@ -111,6 +123,16 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-vulkan-release.aar
           asset_name: MapLibreAndroid-release-vulkan.aar
+          asset_content_type: application/zip
+
+      - name: Upload aar (Vulkan, Debug)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-vulkan-debug.aar
+          asset_name: MapLibreAndroid-debug-vulkan.aar
           asset_content_type: application/zip
 
       - name: Upload debug symbols (OpenGL)
