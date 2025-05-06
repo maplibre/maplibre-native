@@ -34,7 +34,7 @@ class ActionJournalOptions;
 class ActionJournal {
 public:
     ActionJournal(const Map& map, const ActionJournalOptions& options);
-    ~ActionJournal() = default;
+    ~ActionJournal();
 
     /**
      * @brief Get the action journal umbrella directory containing all logs.

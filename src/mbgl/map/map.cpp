@@ -21,7 +21,6 @@
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/tile_coordinate.hpp>
 #include <mbgl/util/action_journal.hpp>
-#include <mbgl/util/action_journal_impl.hpp>
 
 #include <utility>
 
@@ -44,7 +43,6 @@ Map::Map(RendererFrontend& frontend,
                                   mapOptions)) {
     if (actionJournalOptions.enabled()) {
         impl->actionJournal = std::make_unique<util::ActionJournal>(*this, actionJournalOptions);
-        impl->actionJournal->impl->onMapCreate();
     }
 }
 
@@ -52,14 +50,11 @@ Map::Map(std::unique_ptr<Impl> impl_, const util::ActionJournalOptions& actionJo
     : impl(std::move(impl_)) {
     if (actionJournalOptions.enabled()) {
         impl->actionJournal = std::make_unique<util::ActionJournal>(*this, actionJournalOptions);
-        impl->actionJournal->impl->onMapCreate();
     }
 }
 
 Map::~Map() {
-    if (impl->actionJournal) {
-        impl->actionJournal->impl->onMapDestroy();
-    }
+    impl->actionJournal.reset();
 }
 
 void Map::renderStill(StillImageCallback callback) {
