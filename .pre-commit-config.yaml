@@ -19,7 +19,7 @@ repos:
         exclude: '(platform/android/MapLibreAndroid/src/main/java/org/maplibre/android/(location/LocationIndicatorLayer|style/layers/PropertyFactory)\.java$)|(platform/windows/vendor/.*)'
 
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v20.1.0
+    rev: v20.1.3
     hooks:
       - id: clang-format
         files: '.*\.(hpp|cpp|h)'
@@ -37,7 +37,7 @@ repos:
         additional_dependencies: [ shellcheck-py ]
 
   - repo: https://github.com/nicklockwood/SwiftFormat
-    rev: "0.55.5"
+    rev: "0.55.6"
     hooks:
       - id: swiftformat
         args: [ --swiftversion, "5.8" ]
