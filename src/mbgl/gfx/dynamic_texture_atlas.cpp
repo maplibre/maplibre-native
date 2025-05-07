@@ -27,7 +27,7 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
     size_t dynTexIndex = 0;
     Size dynTexSize = startSize;
     GlyphsToUpload glyphsToUpload;
-    
+
     while (!glyphAtlas.dynamicTexture) {
         if (dynTexIndex < dynamicTextures.size()) {
             glyphAtlas.dynamicTexture = dynamicTextures[dynTexIndex++];
@@ -232,7 +232,7 @@ void DynamicTextureAtlas::removeTextures(const std::vector<TextureHandle>& textu
     if (!dynamicTexture) {
         return;
     }
-    
+
     for (const auto& texHandle : textureHandles) {
         dynamicTexture->removeTexture(texHandle);
     }
