@@ -63,7 +63,7 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
                 }
             }
             if (!hasSpace) {
-                for (const auto& [texHandle, glyph, fontStack] : glyphsToUpload) {
+                for (const auto& [texHandle, glyph, fontStack_] : glyphsToUpload) {
                     glyphAtlas.dynamicTexture->removeTexture(texHandle);
                 }
                 glyphsToUpload.clear();
