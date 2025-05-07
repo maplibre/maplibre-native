@@ -37,21 +37,19 @@ bool DynamicTexture::isEmpty() const {
 }
 
 std::optional<TextureHandle> DynamicTexture::reserveSize(const Size& size, int32_t uniqueId) {
-    mutex.lock();
+    std::lock_guard<std::mutex> lock(mutex);
     mapbox::Bin* bin = shelfPack.packOne(uniqueId, size.width, size.height);
     if (!bin) {
-        mutex.unlock();
         return std::nullopt;
     }
     if (bin->refcount() == 1) {
         numTextures++;
     }
-    mutex.unlock();
     return TextureHandle(*bin);
 }
 
 void DynamicTexture::uploadImage(const uint8_t* pixelData, TextureHandle& texHandle) {
-    mutex.lock();
+    std::lock_guard<std::mutex> lock(mutex);
     const auto& rect = texHandle.getRectangle();
     const auto imageSize = Size(rect.w, rect.h);
 
@@ -64,7 +62,6 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, TextureHandle& texHan
     texture->uploadSubRegion(pixelData, imageSize, rect.x, rect.y);
 #endif
     texHandle.needsUpload = false;
-    mutex.unlock();
 }
 
 std::optional<TextureHandle> DynamicTexture::addImage(const uint8_t* pixelData,
@@ -78,7 +75,7 @@ std::optional<TextureHandle> DynamicTexture::addImage(const uint8_t* pixelData,
 }
 
 void DynamicTexture::uploadDeferredImages() {
-    mutex.lock();
+    std::lock_guard<std::mutex> lock(mutex);
     if (deferredCreation) {
         texture->create();
         deferredCreation = false;
@@ -88,14 +85,12 @@ void DynamicTexture::uploadDeferredImages() {
         texture->uploadSubRegion(pair.second.get(), Size(rect.w, rect.h), rect.x, rect.y);
     }
     imagesToUpload.clear();
-    mutex.unlock();
 }
 
 void DynamicTexture::removeTexture(const TextureHandle& texHandle) {
-    mutex.lock();
+    std::lock_guard<std::mutex> lock(mutex);
     auto* bin = shelfPack.getBin(texHandle.getId());
     if (!bin) {
-        mutex.unlock();
         return;
     }
     auto refcount = shelfPack.unref(*bin);
@@ -103,7 +98,6 @@ void DynamicTexture::removeTexture(const TextureHandle& texHandle) {
         numTextures--;
         imagesToUpload.erase(texHandle);
     }
-    mutex.unlock();
 }
 
 } // namespace gfx
