@@ -127,7 +127,8 @@ LayerFactory* LayerManagerDarwin::getFactory(const mbgl::style::LayerTypeInfo* i
     }
 
     for (const auto& factory: coreFactories) {
-        if (factory->getTypeInfo() == info) {
+        if (layerTypeInfoEquals(factory->getTypeInfo(), info)) {
+      //  if (factory->getTypeInfo() == info) {
             return factory.get();
         }
     }

@@ -25,6 +25,7 @@
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/projection.hpp>
+#include <mbgl/layermanager/layer_manager.hpp>
 
 #import "Mapbox.h"
 #import "MLNShape_Private.h"
@@ -69,6 +70,15 @@
 #import "MLNReachability.h"
 #import "MLNSettings_Private.h"
 #import "MLNMapProjection.h"
+
+#import "MLNPluginLayer.h"
+#import "MLNStyleLayerManager.h"
+#include <mbgl/plugins/plugin_layer_factory.hpp>
+#include <mbgl/plugins/plugin_layer.hpp>
+#include <mbgl/plugins/plugin_layer_impl.hpp>
+#include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/mtl/mtl_fwd.hpp>
+#include <mbgl/mtl/render_pass.hpp>
 
 #include <algorithm>
 #include <cstdlib>
@@ -7524,6 +7534,158 @@ static void *windowScreenContext = &windowScreenContext;
 {
     _mbglMap->triggerRepaint();
 }
+
+/**
+ Adds a plug-in layer that is external to this library
+ */
+-(void)addPluginLayerType:(Class)pluginLayerClass {
+
+    auto layerManager = mbgl::LayerManager::get();
+    auto darwinLayerManager = (mbgl::LayerManagerDarwin *)layerManager;
+
+    MLNPluginLayerCapabilities *capabilities = [pluginLayerClass layerCapabilities];
+    //mbgl::style::LayerTypeInfo::
+
+    std::string layerType = [capabilities.layerID UTF8String];
+
+    mbgl::style::LayerTypeInfo::Source source = mbgl::style::LayerTypeInfo::Source::NotRequired;
+    if (capabilities.requiresSource) {
+        source = mbgl::style::LayerTypeInfo::Source::Required;
+    }
+
+    mbgl::style::LayerTypeInfo::Pass3D pass3D = mbgl::style::LayerTypeInfo::Pass3D::NotRequired;
+    if (capabilities.requiresPass3D) {
+        pass3D = mbgl::style::LayerTypeInfo::Pass3D::Required;
+    }
+
+    mbgl::style::LayerTypeInfo::Layout layout = mbgl::style::LayerTypeInfo::Layout::NotRequired;
+    if (capabilities.requiresLayout) {
+        layout = mbgl::style::LayerTypeInfo::Layout::Required;
+    }
+
+    mbgl::style::LayerTypeInfo::FadingTiles fadingTiles = mbgl::style::LayerTypeInfo::FadingTiles::NotRequired;
+    if (capabilities.requiresRenderingFadingTiles) {
+        fadingTiles = mbgl::style::LayerTypeInfo::FadingTiles::Required;
+    }
+
+    mbgl::style::LayerTypeInfo::CrossTileIndex crossTileIndex = mbgl::style::LayerTypeInfo::CrossTileIndex::NotRequired;
+    if (capabilities.requiresCrossTileIndex) {
+        crossTileIndex = mbgl::style::LayerTypeInfo::CrossTileIndex::Required;
+    }
+
+    mbgl::style::LayerTypeInfo::TileKind tileKind = mbgl::style::LayerTypeInfo::TileKind::Geometry;
+    switch (capabilities.tileKind) {
+        case MLNPluginLayerTileKindRaster:
+            tileKind = mbgl::style::LayerTypeInfo::TileKind::Raster;
+            break;
+        case MLNPluginLayerTileKindRasterDEM:
+            tileKind = mbgl::style::LayerTypeInfo::TileKind::RasterDEM;
+            break;
+        case MLNPluginLayerTileKindNotRequired:
+            tileKind = mbgl::style::LayerTypeInfo::TileKind::NotRequired;
+            break;
+        case MLNPluginLayerTileKindGeometry:
+            tileKind = mbgl::style::LayerTypeInfo::TileKind::Geometry;
+            break;
+    }
+
+
+    auto factory = std::make_unique<mbgl::PluginLayerFactory>(layerType,
+                                               source,
+                                               pass3D,
+                                               layout,
+                                               fadingTiles,
+                                               crossTileIndex,
+                                               tileKind);
+
+    __weak MLNMapView *weakMapView = self;
+
+    Class layerClass = pluginLayerClass;
+    factory->setOnLayerCreatedEvent([layerClass, weakMapView](mbgl::style::PluginLayer *pluginLayer) {
+
+        NSLog(@"Creating Plugin Layer");
+        MLNPluginLayer *layer = [[layerClass alloc] init];
+
+        // Use weak here so there isn't a retain cycle
+        MLNPluginLayer *weakPlugInLayer = layer;
+
+        // Set the render function
+        auto renderFunction = [weakPlugInLayer, weakMapView](mbgl::PaintParameters& paintParameters){
+
+            const mbgl::mtl::RenderPass& renderPass = static_cast<mbgl::mtl::RenderPass&>(*paintParameters.renderPass);
+            id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)renderPass.getMetalEncoder().get();
+
+            //id<MTLRenderCommandEncoder> encoder =  (__bridge id<MTLRenderCommandEncoder>)paintParameters.encoder.get();
+            //id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)ptr;
+            /*
+//            layer.renderEncoder = encoder;
+
+            void render(const mbgl::style::CustomLayerRenderParameters& parameters) {
+                if (!layer) return;
+
+        #if MLN_RENDER_BACKEND_METAL
+                MTL::RenderCommandEncoder* ptr =
+                    static_cast<const mbgl::style::mtl::CustomLayerRenderParameters&>(parameters).encoder.get();
+                id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)ptr;
+                layer.renderEncoder = encoder;
+        #endif
+
+                MLNStyleLayerDrawingContext drawingContext = {
+                    .size = CGSizeMake(parameters.width, parameters.height),
+                    .centerCoordinate = CLLocationCoordinate2DMake(parameters.latitude, parameters.longitude),
+                    .zoomLevel = parameters.zoom,
+                    .direction = mbgl::util::wrap(parameters.bearing, 0., 360.),
+                    .pitch = static_cast<CGFloat>(parameters.pitch),
+                    .fieldOfView = static_cast<CGFloat>(parameters.fieldOfView),
+                    .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix)
+                };
+
+                if (layer.mapView) {
+                    [layer drawInMapView:layer.mapView withContext:drawingContext];
+                }
+            }
+*/
+
+            NSLog(@"IMPL pluginLayer->setRenderFunction");
+            MLNMapView *strongMapView = weakMapView;
+            [weakPlugInLayer onRenderLayer:strongMapView
+                             renderEncoder:encoder];
+        };
+
+        // this one works
+        auto bi = (mbgl::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
+        bi->setRenderFunction(renderFunction);
+
+        // Set update lambda
+        pluginLayer->setUpdateFunction([weakPlugInLayer](){
+            [weakPlugInLayer onUpdateLayer];
+        });
+
+        pluginLayer->setOnUpdateLayerPropertiesFunction([weakPlugInLayer](const std::string & jsonProperties) {
+            // Use autorelease pools in lambdas
+            @autoreleasepool {
+                // Just wrap the string with NSData so it can be run through properties
+                NSData *d = [NSData dataWithBytesNoCopy:(void *)jsonProperties.data() length:jsonProperties.length() freeWhenDone:NO];
+                NSError *error = nil;
+                NSDictionary *properties = [NSJSONSerialization JSONObjectWithData:d
+                                                                           options:0
+                                                                             error:&error];
+                if (error) {
+                    // TODO: What should we do here?
+                }
+                [weakPlugInLayer onUpdateLayerProperties:properties];
+            }
+        });
+
+    });
+
+
+    darwinLayerManager->addLayerTypeCoreOnly(std::move(factory));
+
+   //darwinLayerManager->addLayerType(<#std::unique_ptr<LayerPeerFactory>#>)
+
+}
+
 
 - (MLNBackendResource *)backendResource {
     return _mbglView->getObject();
