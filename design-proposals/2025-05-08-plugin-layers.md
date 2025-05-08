@@ -1,4 +1,4 @@
-# Design Proposal Template
+# Plug-In Layer Architecture Design Proposal
 
 ## Motivation
 
