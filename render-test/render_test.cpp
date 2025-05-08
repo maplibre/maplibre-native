@@ -291,7 +291,8 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
         printf(ANSI_COLOR_YELLOW "%u passed but were ignored (%.1lf%%)" ANSI_COLOR_RESET "\n",
                stats.ignorePassedTests,
                100.0 * stats.ignorePassedTests / count);
-        mbgl::Log::Info(mbgl::Event::General, std::to_string(stats.ignorePassedTests) + " passed tests but were ignored");
+        mbgl::Log::Info(mbgl::Event::General,
+                        std::to_string(stats.ignorePassedTests) + " passed tests but were ignored");
     }
     if (stats.ignoreFailedTests) {
         printf(ANSI_COLOR_LIGHT_GRAY "%u ignored (%.1lf%%)" ANSI_COLOR_RESET "\n",
