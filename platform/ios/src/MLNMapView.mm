@@ -7630,7 +7630,6 @@ static void *windowScreenContext = &windowScreenContext;
             }
 */
 
-            NSLog(@"IMPL pluginLayer->setRenderFunction");
             MLNMapView *strongMapView = weakMapView;
             [weakPlugInLayer onRenderLayer:strongMapView
                              renderEncoder:encoder];
@@ -7639,11 +7638,14 @@ static void *windowScreenContext = &windowScreenContext;
         // this one works
         auto bi = (mbgl::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
         bi->setRenderFunction(renderFunction);
-
-        // Set update lambda
-        pluginLayer->setUpdateFunction([weakPlugInLayer](){
+        bi->setUpdateFunction([weakPlugInLayer](const mbgl::LayerPrepareParameters & prepareParameters) {
             [weakPlugInLayer onUpdateLayer];
         });
+
+        // Set update lambda
+//        pluginLayer->setUpdateFunction([weakPlugInLayer](){
+//            [weakPlugInLayer onUpdateLayer];
+//        });
 
         pluginLayer->setOnUpdateLayerPropertiesFunction([weakPlugInLayer](const std::string & jsonProperties) {
             // Use autorelease pools in lambdas

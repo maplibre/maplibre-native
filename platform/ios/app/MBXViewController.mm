@@ -2201,7 +2201,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
     /// Style that does not require an `apiKey` nor any further configuration
     [self.styleNames addObject:@"MapLibre Basic - Local With Plugin"];
-    NSURL *url = [[NSBundle mainBundle] URLForResource:@"PluginLayerTestStyle.json" withExtension:nil];
+//    NSURL *url = [[NSBundle mainBundle] URLForResource:@"PluginLayerTestStyle.json" withExtension:nil];
+    NSURL *url = [[NSBundle mainBundle] URLForResource:@"PluginLayerTestStyleSimple.json" withExtension:nil];
     [self.styleURLs addObject:url];
 
 

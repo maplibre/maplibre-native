@@ -268,6 +268,7 @@ std::unique_ptr<RenderLayer> PluginLayerFactory::createRenderLayer(Immutable<sty
 
     auto tempResult = std::make_unique<RenderPluginLayer>(staticImmutableCast<style::PluginLayer::Impl>(impl));
     tempResult->setRenderFunction(localImpl->_renderFunction);
+    tempResult->setUpdateFunction(localImpl->_updateFunction);
     // tempResult
     return tempResult;
 

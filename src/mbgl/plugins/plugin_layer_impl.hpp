@@ -27,11 +27,15 @@ public:
 
     void setRenderFunction(OnRenderLayer renderFunction) {
         _renderFunction = renderFunction;
-        _renderFunctionSet = true;
+    }
+    
+    void setUpdateFunction(OnUpdateLayer updateFunction) {
+        _updateFunction = updateFunction;
     }
 
+
     OnRenderLayer _renderFunction;
-    bool _renderFunctionSet = false;
+    OnUpdateLayer _updateFunction;
 
 private:
     LayerTypeInfo _layerTypeInfo;

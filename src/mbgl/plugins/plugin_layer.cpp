@@ -8,6 +8,9 @@
 #include <mbgl/plugins/plugin_layer.hpp>
 #include <mbgl/plugins/plugin_layer_impl.hpp>
 #include <iostream>
+#include <mbgl/style/properties.hpp>
+#include <mbgl/style/property_value.hpp>
+
 /*
 //#include <mbgl/style/layers/heatmap_layer.hpp>
 //#include <mbgl/style/layers/heatmap_layer_impl.hpp>
@@ -103,7 +106,7 @@ namespace style {
 //                                        .tileKind = LayerTypeInfo::TileKind::Geometry};
 //    return &typeInfo;
 //}
-
+/*
 void PluginLayer::setRenderFunction(OnRenderLayer renderFunction) {
     //    auto i = impl();
     //    auto i2 = mutableImpl();
@@ -111,6 +114,11 @@ void PluginLayer::setRenderFunction(OnRenderLayer renderFunction) {
     //    i2->setRenderFunction(renderFunction);
     _renderFunction = renderFunction;
 }
+
+void PluginLayer::setUpdateFunction(OnUpdateLayer updateFunction) {
+    _updateFunction = updateFunction;
+}
+*/
 
 PluginLayer::PluginLayer(const std::string& layerID,
                          const std::string& sourceID,
@@ -124,10 +132,7 @@ PluginLayer::PluginLayer(const std::string& layerID,
 PluginLayer::PluginLayer(Immutable<Impl> impl_)
     : Layer(std::move(impl_)) {}
 
-PluginLayer::~PluginLayer() {
-    std::cout << "Destructor\n";
-    Layer::~Layer();
-}
+PluginLayer::~PluginLayer() = default;
 
 const PluginLayer::Impl& PluginLayer::impl() const {
     return static_cast<const Impl&>(*baseImpl);
@@ -179,6 +184,23 @@ Value PluginLayer::serialize() const {
 
 using namespace conversion;
 
+class PluginLayerProperty {
+public:
+    std::string _propertyName;
+    void setPropertyValue(const conversion::Convertible& value);
+private:
+    
+};
+
+void PluginLayerProperty::setPropertyValue(const conversion::Convertible& value) {
+    // TODO: What goes here?
+    
+}
+
+
+static std::map<std::string, PluginLayerProperty *> _properties;
+
+
 std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::string& name,
                                                                   const conversion::Convertible& value) {
     // std::optional<Error> PluginLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
@@ -192,7 +214,33 @@ std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::str
         return Error{"layer doesn't support this property"};
      */
 
-    return Error{"Not implemented yet"};
+    /*
+    Property<
+    
+
+    auto property = static_cast<Property>(it->second);
+    
+    Error error;
+    std::optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
+    if (!transition) {
+        return error;
+    }
+*/
+    
+    std::cout << "Property Name: " << name << "\n";
+    
+    auto property = _properties[name];
+    if (property == nullptr) {
+        property = new PluginLayerProperty();
+        property->_propertyName = name;
+        _properties[name] = property;
+    }
+    
+    property->setPropertyValue(value);
+    
+    return std::nullopt;
+    
+    //return Error{"Not implemented yet"};
 }
 
 StyleProperty PluginLayer::getProperty(const std::string& name) const {

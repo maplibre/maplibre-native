@@ -189,6 +189,7 @@ _IOS_APPLICATION_RESOURCES = [
     "app/simple_route.json",
     "app/fill_filter_style.json",
     "//platform/darwin:app/PluginLayerTestStyle.json",
+    "//platform/darwin:app/PluginLayerTestStyleSimple.json",
     "//platform/darwin:test/amsterdam.geojson",
 ] + glob([
     "app/*.lproj/**",

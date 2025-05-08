@@ -37,6 +37,7 @@ public:
     void render(PaintParameters&) override;
 
     void setRenderFunction(style::PluginLayer::OnRenderLayer renderFunction) { _renderFunction = renderFunction; }
+    void setUpdateFunction(style::PluginLayer::OnUpdateLayer updateFunction) { _updateFunction = updateFunction; }
 
 private:
     void transition(const TransitionParameters&) override;
@@ -83,6 +84,9 @@ private:
     //    LayerTweakerPtr textureTweaker;
 
     style::PluginLayer::OnRenderLayer _renderFunction = nullptr;
+    
+    style::PluginLayer::OnUpdateLayer _updateFunction = nullptr;
+
 };
 
 } // namespace mbgl

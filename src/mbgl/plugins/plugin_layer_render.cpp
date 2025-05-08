@@ -38,11 +38,11 @@ protected:
 };
 
 void RenderPluginLayerTweaker::init(mbgl::gfx::Drawable& drawablee) {
-    std::cout << "RenderPluginLayerTweaker::init\n";
+   // std::cout << "RenderPluginLayerTweaker::init\n";
 };
 
 void RenderPluginLayerTweaker::execute(mbgl::gfx::Drawable& drawable, mbgl::PaintParameters& paintParameters) {
-    std::cout << "RenderPluginLayerTweaker::execute\n";
+   // std::cout << "RenderPluginLayerTweaker::execute\n";
 
     // custom drawing
     auto& context = paintParameters.context;
@@ -82,7 +82,7 @@ RenderPluginLayer::RenderPluginLayer(Immutable<style::PluginLayer::Impl> _impl)
 RenderPluginLayer::~RenderPluginLayer() = default;
 
 void RenderPluginLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
-    std::cout << "markLayerRenderable\n";
+   // std::cout << "markLayerRenderable\n";
     isRenderable = true;
 }
 
@@ -94,7 +94,7 @@ void RenderPluginLayer::update(gfx::ShaderRegistry& shaderRegistery,
                                const RenderTree& renderTree,
                                UniqueChangeRequestVec& changes) {
     // TODO: What should be implemented here?
-    std::cout << "Update\n";
+    // std::cout << "Update\n";
 
     // create layer group
     if (!layerGroup) {
@@ -131,11 +131,11 @@ void RenderPluginLayer::update(gfx::ShaderRegistry& shaderRegistery,
 }
 
 void RenderPluginLayer::upload(gfx::UploadPass& uploadPass) {
-    std::cout << "Upload\n";
+   // std::cout << "Upload\n";
 }
 
 void RenderPluginLayer::render(PaintParameters& paintParameters) {
-    std::cout << "Render\n";
+   // std::cout << "Render\n";
     if (_renderFunction) {
         _renderFunction(paintParameters);
     }
@@ -143,20 +143,25 @@ void RenderPluginLayer::render(PaintParameters& paintParameters) {
 
 void RenderPluginLayer::prepare(const LayerPrepareParameters& layerParameters) {
     // TODO: What should be implemented here?
-    std::cout << "prepare\n";
+//    std::cout << "prepare\n";
+    if (_updateFunction) {
+        _updateFunction(layerParameters);
+    }
+
 }
 
 // --- Private methods
-void RenderPluginLayer::transition(const TransitionParameters&) {
-    std::cout << "transition\n";
+void RenderPluginLayer::transition(const TransitionParameters& parameters) {
+    // Called when switching between styles
+   std::cout << "transition\n";
 }
 
-void RenderPluginLayer::evaluate(const PropertyEvaluationParameters&) {
-    std::cout << "evaluate\n";
+void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters) {
+   std::cout << "evaluate\n";
 }
 
 bool RenderPluginLayer::hasTransition() const {
-    return false;
+    return true;
 }
 
 bool RenderPluginLayer::hasCrossfade() const {
@@ -175,7 +180,7 @@ bool RenderPluginLayer::queryIntersectsFeature(const GeometryCoordinates&,
 void RenderPluginLayer::layerChanged(const TransitionParameters& parameters,
                                      const Immutable<style::Layer::Impl>& impl,
                                      UniqueChangeRequestVec& changes) {
-    std::cout << "layerChanged\n";
+  //  std::cout << "layerChanged\n";
 }
 
 /// Remove all drawables for the tile from the layer group

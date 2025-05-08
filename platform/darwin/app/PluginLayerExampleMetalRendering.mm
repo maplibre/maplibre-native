@@ -157,13 +157,15 @@ typedef struct
 }
 
 -(void)onUpdateLayer {
-
+    // Update any metadata needed for the frame
+    NSLog(@"onUpdateLayer");
 }
 
 -(void)onUpdateLayerProperties:(NSDictionary *)layerProperties {
     NSLog(@"Metal Layer Rendering Properties: %@", layerProperties);
 
     _offsetX = [[layerProperties objectForKey:@"offset-x"] floatValue];
+    //_scale = [[layerProperties objectForKey:@"scale"] floatValue];
 
 }
 
