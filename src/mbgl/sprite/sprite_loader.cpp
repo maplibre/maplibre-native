@@ -58,9 +58,10 @@ void SpriteLoader::load(const std::optional<style::Sprite> sprite, FileSource& f
             emitSpriteLoadedIfComplete(*sprite);
         } else {
             // Only trigger a sprite loaded event we got new data.
-            assert(data->json != res.data);
-            data->json = std::move(res.data);
-            emitSpriteLoadedIfComplete(*sprite);
+            if (data->json != res.data) {
+                data->json = std::move(res.data);
+                emitSpriteLoadedIfComplete(*sprite);
+            }
         }
     });
 
@@ -76,9 +77,11 @@ void SpriteLoader::load(const std::optional<style::Sprite> sprite, FileSource& f
                 data->image = std::make_shared<std::string>();
                 emitSpriteLoadedIfComplete(*sprite);
             } else {
-                assert(dataMap[sprite->id]->image != res.data);
-                data->image = std::move(res.data);
-                emitSpriteLoadedIfComplete(*sprite);
+                auto movedData = std::move(res.data);
+                if (data->image != movedData) {
+                    data->image = movedData;
+                    emitSpriteLoadedIfComplete(*sprite);
+                }
             }
         });
 }
