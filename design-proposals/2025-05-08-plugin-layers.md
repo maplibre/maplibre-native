@@ -2,7 +2,7 @@
 
 ## Motivation
 
-This project is to add the ability to "register" additional layer types at runtime and have them integrated into the standard parameter/rendering pipeline. 
+This project is to add the ability to "register" additional layer types at runtime and have them integrated into the standard parameter/rendering pipeline.
 
 ## Proposed Change
 
