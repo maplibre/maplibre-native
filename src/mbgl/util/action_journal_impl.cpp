@@ -282,8 +282,8 @@ void ActionJournal::Impl::onDidFinishLoadingStyle() {
 }
 
 void ActionJournal::Impl::onSourceChanged(style::Source& source) {
-    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this), type = source.getType()]() {
-        log(ActionJournalEvent("onSourceChanged", env).addEventEnum("type", type));
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this), type = source.getType(), id = source.getID()]() {
+        log(ActionJournalEvent("onSourceChanged", env).addEventEnum("type", type).addEvent("id", id));
     });
 }
 

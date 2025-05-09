@@ -60,7 +60,8 @@ public:
     }
 
     void createMap(MapMode mode = MapMode::Static) {
-        fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions());
+        fileSource = std::make_shared<StubFileSource>(ResourceOptions::Default(),
+                                                      ClientOptions().withName("ActionJournalTest").withVersion("1.0"));
         frontend = std::make_unique<HeadlessFrontend>(1.0f);
         map = std::make_unique<MapAdapter>(
             *frontend, observer, fileSource, MapOptions().withMapMode(mode).withSize(frontend->getSize()), options);
@@ -170,6 +171,14 @@ void validateEventList(ActionJournalTest& test,
         EXPECT_TRUE(json.HasMember("time"));
         EXPECT_TRUE(json["time"].IsString());
 
+        EXPECT_TRUE(json.HasMember("clientName"));
+        EXPECT_TRUE(json["clientName"].IsString());
+        EXPECT_STREQ(json["clientName"].GetString(), test.fileSource->getClientOptions().name().c_str());
+
+        EXPECT_TRUE(json.HasMember("clientVersion"));
+        EXPECT_TRUE(json["clientVersion"].IsString());
+        EXPECT_STREQ(json["clientVersion"].GetString(), test.fileSource->getClientOptions().version().c_str());
+
         // `MatchesRegex(R"(\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d\d\dZ)")` fails on linux gcc
         // https://github.com/google/googletest/issues/3084
         // `MatchesRegex(R"([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]\.[0-9][0-9][0-9]Z)"))`
@@ -247,6 +256,10 @@ TEST(ActionJournal, ValidateEvents) {
             EXPECT_TRUE(json.HasMember("type"));
             EXPECT_TRUE(json["type"].IsString());
             EXPECT_EQ(Enum<style::SourceType>::toEnum(json["type"].GetString()), style::SourceType::GeoJSON);
+
+            EXPECT_TRUE(json.HasMember("id"));
+            EXPECT_TRUE(json["id"].IsString());
+            EXPECT_STREQ(json["id"].GetString(), testSource->getID().c_str());
         },
         &style::Observer::onSourceChanged,
         *testSource);
