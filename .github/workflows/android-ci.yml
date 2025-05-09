@@ -51,7 +51,7 @@ jobs:
         if: startsWith(runner.name, 'GitHub Actions')
         uses: jlumbroso/free-disk-space@main
         with:
-          tool-cache: false
+          tool-cache: true
           android: false
           dotnet: true
           haskell: true

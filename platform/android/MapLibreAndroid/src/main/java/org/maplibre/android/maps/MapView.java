@@ -306,15 +306,13 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   private void initializeDrawingSurface(MapLibreMapOptions options) {
-    mapRenderer = MapRenderer.create(options, getContext(), () -> MapView.this.onSurfaceCreated());
+    mapRenderer = MapRenderer.create(options, getContext(), MapView.this::onSurfaceCreated);
     renderView = mapRenderer.getView();
 
     addView(renderView, 0);
 
-    boolean crossSourceCollisions = options.getCrossSourceCollisions();
-    nativeMapView = new NativeMapView(
-            getContext(), getPixelRatio(), crossSourceCollisions, this, mapChangeReceiver, mapRenderer
-    );
+    options.pixelRatio(getPixelRatio());
+    nativeMapView = new NativeMapView(getContext(), options, this, mapChangeReceiver, mapRenderer);
   }
 
   private void onSurfaceCreated() {

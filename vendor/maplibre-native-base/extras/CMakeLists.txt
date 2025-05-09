@@ -21,6 +21,7 @@ add_library(maplibre-native-base-extras INTERFACE)
 add_library(MapLibreNative::Base::Extras ALIAS maplibre-native-base-extras)
 
 maplibre_native_base_extras_add_library(args ${CMAKE_CURRENT_LIST_DIR}/args)
+maplibre_native_base_extras_add_library(filesystem ${CMAKE_CURRENT_LIST_DIR}/filesystem/include)
 maplibre_native_base_extras_add_library(expected-lite ${CMAKE_CURRENT_LIST_DIR}/expected-lite/include)
 maplibre_native_base_extras_add_library(kdbush.hpp ${CMAKE_CURRENT_LIST_DIR}/kdbush.hpp/include)
 

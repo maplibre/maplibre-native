@@ -3,6 +3,7 @@ package org.maplibre.android.testapp.activity.events
 import android.app.ActivityManager
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.MapLibre
@@ -18,6 +19,7 @@ import kotlin.time.TimeSource
 import kotlin.time.TimeSource.Monotonic
 import org.maplibre.android.log.Logger
 import org.maplibre.android.log.Logger.INFO
+import org.maplibre.android.maps.MapLibreMap
 
 /**
  * Test activity showcasing logging observer actions from the core
@@ -38,7 +40,7 @@ class ObserverActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_map_simple)
+        setContentView(R.layout.activity_map_events)
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.addOnPreCompileShaderListener(this)
@@ -50,10 +52,30 @@ class ObserverActivity : AppCompatActivity(),
         mapView.addOnSpriteRequestedListener(this)
         mapView.getMapAsync {
             it.setStyle(
-                Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
+                Style.Builder().fromUri(TestStyles.DEMOTILES)
             )
         }
+
+        // print and clear action journal
+        val fab = findViewById<View>(R.id.fab)
+        fab?.setOnClickListener { _: View? ->
+            mapView.getMapAsync {
+                printActionJournal(it)
+            }
+        }
     }
+
+    // # --8<-- [start:printActionJournal]
+    public fun printActionJournal(map: MapLibreMap) {
+        // configure using `MapLibreMapOptions.actionJournal*` methods
+
+        Logger.i(TAG,"ActionJournal files: \n${map.actionJournalLogFiles.joinToString("\n")}")
+        Logger.i(TAG,"ActionJournal : \n${map.actionJournalLog.joinToString("\n")}")
+
+        // print only the newest events on each call
+        map.clearActionJournalLog()
+    }
+    // # --8<-- [end:printActionJournal]
 
     private val shaderTimes: HashMap<String, TimeMark> = HashMap()
 
