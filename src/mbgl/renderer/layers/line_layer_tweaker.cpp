@@ -140,15 +140,16 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             .expressionMask = expressionMask,
             .pad1 = 0};
 #else
-        const LineEvaluatedPropsUBO propsUBO{/*color =*/evaluate<LineColor>(parameters),
-                                             /*blur =*/evaluate<LineBlur>(parameters),
-                                             /*opacity =*/evaluate<LineOpacity>(parameters),
-                                             /*gapwidth =*/evaluate<LineGapWidth>(parameters),
-                                             /*offset =*/evaluate<LineOffset>(parameters),
-                                             /*width =*/evaluate<LineWidth>(parameters),
-                                             /*floorwidth =*/evaluate<LineFloorWidth>(parameters),
-                                             LineExpressionMask::None,
-                                             0};
+        const LineEvaluatedPropsUBO propsUBO{
+            .color = evaluate<LineColor>(parameters),
+            .blur = evaluate<LineBlur>(parameters),
+            .opacity = evaluate<LineOpacity>(parameters),
+            .gapwidth = evaluate<LineGapWidth>(parameters),
+            .offset = evaluate<LineOffset>(parameters),
+            .width = evaluate<LineWidth>(parameters),
+            .floorwidth = evaluate<LineFloorWidth>(parameters),
+            .expressionMask = LineExpressionMask::None,
+            .pad1 = 0};
 #endif // MLN_RENDER_BACKEND_METAL
 
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);

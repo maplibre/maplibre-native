@@ -11,8 +11,6 @@
 #include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/util/io.hpp>
 
-#include <unordered_map>
-
 #include <mbgl/shaders/shader_manifest.hpp>
 #if MLN_RENDER_BACKEND_OPENGL
 #include <mbgl/gl/program.hpp>

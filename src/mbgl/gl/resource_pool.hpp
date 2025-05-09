@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstddef>
-#include <functional>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -45,7 +44,7 @@ public:
     // Allocate a texture with the given size, pixel format, and channel type
     // If the texture is already allocated in the pool, the existing texture ID will be returned
     TextureID alloc(const Size& size, gfx::TexturePixelType pixelFormat, gfx::TextureChannelDataType channelType) {
-        return alloc({size, pixelFormat, channelType});
+        return alloc({.size=size, .pixelFormat=pixelFormat, .channelType=channelType});
     }
 
     TextureID alloc(const Texture2DDesc& desc);

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/math/minmax.hpp>
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
@@ -171,9 +172,10 @@ void FeatureIndex::query(std::unordered_map<std::string, std::vector<Feature>>& 
     std::vector<RefIndexedSubfeature> features = grid.query(
         {convertPoint<float>(box.min - additionalPadding), convertPoint<float>(box.max + additionalPadding)});
 
-    std::sort(features.begin(), features.end(), [](const RefIndexedSubfeature& a, const RefIndexedSubfeature& b) {
-        return a.getSortIndex() > b.getSortIndex();
-    });
+    std::ranges::sort(features,
+                      [](const RefIndexedSubfeature& a, const RefIndexedSubfeature& b) {
+                          return a.getSortIndex() > b.getSortIndex();
+                      });
     size_t previousSortIndex = std::numeric_limits<size_t>::max();
     for (const auto& indexedFeature : features) {
         // If this feature is the same as the previous feature, skip it.
@@ -206,9 +208,8 @@ std::unordered_map<std::string, std::vector<Feature>> FeatureIndex::lookupSymbol
     std::vector<std::reference_wrapper<const RefIndexedSubfeature>> sortedFeatures(symbolFeatures.begin(),
                                                                                    symbolFeatures.end());
 
-    std::sort(sortedFeatures.begin(),
-              sortedFeatures.end(),
-              [featureSortOrder](const RefIndexedSubfeature& a, const RefIndexedSubfeature& b) {
+    std::ranges::sort(sortedFeatures,
+             [featureSortOrder](const RefIndexedSubfeature& a, const RefIndexedSubfeature& b) {
                   // Same idea as the non-symbol sort order, but symbol features may
                   // have changed their sort order since their corresponding
                   // IndexedSubfeature was added to the CollisionIndex The

@@ -21,7 +21,7 @@ public:
         using Object = std::unordered_map<std::string, expression::Value>;
         if (context.formattedSection && context.formattedSection->is<Object>()) {
             const auto& section = context.formattedSection->get<Object>();
-            if (section.find(propertyName) != section.end()) {
+            if (section.contains(propertyName)) {
                 return section.at(propertyName);
             }
         }
