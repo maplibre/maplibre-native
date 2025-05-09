@@ -21,9 +21,9 @@ apt install build-essential clang cmake ccache ninja-build pkg-config
 apt install libcurl4-openssl-dev libglfw3-dev libuv1-dev libpng-dev libicu-dev libjpeg-turbo8-dev libwebp-dev xvfb
 ```
 
-Optional: `libsqlite3-dev` (also available as vendored dependency).
+Optional: `libsqlite3-dev` (when not found will use SQLite as vendored dependency).
 
-When using Wayland: `libegl1-mesa-dev`.
+When using Wayland (now default for `linux-opengl` preset): `libegl1-mesa-dev`.
 
 ## Build with CMake
 
