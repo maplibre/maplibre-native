@@ -110,6 +110,8 @@ add_library(maplibre SHARED
             ${PROJECT_SOURCE_DIR}/map_renderer_runnable.hpp
             ${PROJECT_SOURCE_DIR}/native_map_view.cpp
             ${PROJECT_SOURCE_DIR}/native_map_view.hpp
+            ${PROJECT_SOURCE_DIR}/rendering_stats.cpp
+            ${PROJECT_SOURCE_DIR}/rendering_stats.hpp
             ${PROJECT_SOURCE_DIR}/offline/offline_manager.cpp
             ${PROJECT_SOURCE_DIR}/offline/offline_manager.hpp
             ${PROJECT_SOURCE_DIR}/offline/offline_region.cpp

@@ -919,6 +919,19 @@ public class SymbolLayerTest extends BaseLayerTest {
 
   @Test
   @UiThreadTest
+  public void testSymbolScreenSpaceAsConstant() {
+    Timber.i("symbol-screen-space");
+    assertNotNull(layer);
+    assertNull(layer.getSymbolScreenSpace().getValue());
+
+    // Set and Get
+    Boolean propertyValue = true;
+    layer.setProperties(symbolScreenSpace(propertyValue));
+    assertEquals(layer.getSymbolScreenSpace().getValue(), propertyValue);
+  }
+
+  @Test
+  @UiThreadTest
   public void testIconOpacityTransition() {
     Timber.i("icon-opacityTransitionOptions");
     assertNotNull(layer);

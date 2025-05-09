@@ -1,6 +1,7 @@
 #import <UIKit/UIKit.h>
 
 #import "MLNCameraChangeReason.h"
+#import "MLNRenderingStats.h"
 #import "MLNTileOperation.h"
 #import "Mapbox.h"
 
@@ -267,6 +268,23 @@ NS_ASSUME_NONNULL_BEGIN
                          fullyRendered:(BOOL)fullyRendered
                      frameEncodingTime:(double)frameEncodingTime
                     frameRenderingTime:(double)frameRenderingTime;
+/**
+ Tells the delegate that the map view has just redrawn.
+
+ This method is called any time the map view needs to redraw due to a change in
+ the viewpoint or style property transition. This method may be called very
+ frequently, even moreso than `-mapViewRegionIsChanging:`. Therefore, your
+ implementation of this method should be as lightweight as possible to avoid
+ affecting performance.
+
+ @param mapView The map view that has just redrawn.
+ @param fullyRendered A Boolean value indicating whether the map is fully rendered or not.
+ @param renderingStats A collection of rendering statistics
+ */
+- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView
+                         fullyRendered:(BOOL)fullyRendered
+                        renderingStats:(MLNRenderingStats *)renderingStats;
+
 /**
  Tells the delegate that the map view is entering an idle state, and no more
  drawing will be necessary until new data is loaded or there is some interaction

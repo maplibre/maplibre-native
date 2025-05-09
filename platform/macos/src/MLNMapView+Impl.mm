@@ -80,9 +80,9 @@ void MLNMapViewImpl::onWillStartRenderingFrame() {
     [mapView mapViewWillStartRenderingFrame];
 }
 
-void MLNMapViewImpl::onDidFinishRenderingFrame(mbgl::MapObserver::RenderFrameStatus status) {
+void MLNMapViewImpl::onDidFinishRenderingFrame(const mbgl::MapObserver::RenderFrameStatus& status) {
     bool fullyRendered = status.mode == mbgl::MapObserver::RenderMode::Full;
-    [mapView mapViewDidFinishRenderingFrameFullyRendered:fullyRendered];
+    [mapView mapViewDidFinishRenderingFrameFullyRendered:fullyRendered renderingStats:status.renderingStats];
 }
 
 void MLNMapViewImpl::onWillStartRenderingMap() {

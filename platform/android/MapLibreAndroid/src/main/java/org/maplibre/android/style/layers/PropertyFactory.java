@@ -2652,6 +2652,26 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
+   * Internal use only
+   *
+   * @param value a Boolean value
+   * @return property wrapper around Boolean
+   */
+  public static PropertyValue<Boolean> symbolScreenSpace(Boolean value) {
+    return new LayoutPropertyValue<>("symbol-screen-space", value);
+  }
+
+  /**
+   * Internal use only
+   *
+   * @param value a Boolean value
+   * @return property wrapper around Boolean
+   */
+  public static PropertyValue<Expression> symbolScreenSpace(Expression value) {
+    return new LayoutPropertyValue<>("symbol-screen-space", value);
+  }
+
+  /**
    * Sorts features in ascending order based on this value. Features with a higher sort key will appear above features with a lower sort key.
    *
    * @param value a Float value
