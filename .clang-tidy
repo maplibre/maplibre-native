@@ -116,7 +116,10 @@ Checks: [
     -readability-avoid-nested-conditional-operator,
     -readability-math-missing-parentheses,
     -readability-enum-initial-value,
-    -boost-use-ranges
+    -boost-use-ranges,
+    # https://clang.llvm.org/extra/clang-tidy/checks/portability/template-virtual-member-function.html
+    # not caring about this check might cause issues with MSVC
+    -portability-template-virtual-member-function 
 ]
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
