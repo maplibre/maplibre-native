@@ -19,6 +19,7 @@ import kotlin.time.TimeSource
 import kotlin.time.TimeSource.Monotonic
 import org.maplibre.android.log.Logger
 import org.maplibre.android.log.Logger.INFO
+import org.maplibre.android.maps.MapLibreMap
 
 /**
  * Test activity showcasing logging observer actions from the core
@@ -59,12 +60,22 @@ class ObserverActivity : AppCompatActivity(),
         val fab = findViewById<View>(R.id.fab)
         fab?.setOnClickListener { _: View? ->
             mapView.getMapAsync {
-                Logger.i(TAG,"ActionJournal files: \n${it.actionJournalLogFiles.joinToString("\n")}")
-                Logger.i(TAG,"ActionJournal : \n${it.actionJournalLog.joinToString("\n")}")
-                it.clearActionJournalLog()
+                printActionJournal(it)
             }
         }
     }
+
+    // # --8<-- [start:printActionJournal]
+    public fun printActionJournal(map: MapLibreMap) {
+        // configure using `MapLibreMapOptions.actionJournal*` methods
+
+        Logger.i(TAG,"ActionJournal files: \n${map.actionJournalLogFiles.joinToString("\n")}")
+        Logger.i(TAG,"ActionJournal : \n${map.actionJournalLog.joinToString("\n")}")
+
+        // print only the newest events on each call
+        map.clearActionJournalLog()
+    }
+    // # --8<-- [end:printActionJournal]
 
     private val shaderTimes: HashMap<String, TimeMark> = HashMap()
 

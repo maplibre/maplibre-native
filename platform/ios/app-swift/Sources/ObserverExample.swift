@@ -37,6 +37,7 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
 
         print("ActionJournalLog files: \(mapView.getActionJournalLogFiles())")
         print("ActionJournalLog : \(mapView.getActionJournalLog())")
+        // print only the newest events on each call
         mapView.clearActionJournalLog()
     }
 
