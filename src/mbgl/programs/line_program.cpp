@@ -1,7 +1,6 @@
 #include <mbgl/programs/line_program.hpp>
 #include <mbgl/style/layers/line_layer_properties.hpp>
 #include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/util/mat2.hpp>
 #include <mbgl/geometry/line_atlas.hpp>

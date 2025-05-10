@@ -54,6 +54,7 @@ public:
     gfx::Texture2D& setImage(std::shared_ptr<PremultipliedImage>) noexcept override;
     gfx::Texture2D& setUsage(Texture2DUsage) noexcept;
 
+    gfx::TexturePixelType getFormat() const noexcept override { return pixelFormat; }
     Size getSize() const noexcept override { return size; }
     size_t getDataSize() const noexcept override;
     size_t getPixelStride() const noexcept override;

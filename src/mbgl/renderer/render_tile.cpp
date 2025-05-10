@@ -96,24 +96,6 @@ std::optional<ImagePosition> RenderTile::getPattern(const std::string& pattern) 
     return renderData->getPattern(pattern);
 }
 
-static const gfx::Texture2DPtr noTexture;
-
-bool RenderTile::hasGlyphAtlasTexture() const {
-    return renderData && renderData->getGlyphAtlasTexture();
-}
-
-const gfx::Texture2DPtr& RenderTile::getGlyphAtlasTexture() const {
-    return renderData ? renderData->getGlyphAtlasTexture() : noTexture;
-}
-
-bool RenderTile::hasIconAtlasTexture() const {
-    return renderData && renderData->getIconAtlasTexture();
-}
-
-const gfx::Texture2DPtr& RenderTile::getIconAtlasTexture() const {
-    return renderData ? renderData->getIconAtlasTexture() : noTexture;
-}
-
 static const std::shared_ptr<TileAtlasTextures> noAtlas;
 const std::shared_ptr<TileAtlasTextures>& RenderTile::getAtlasTextures() const {
     return renderData ? renderData->getAtlasTextures() : noAtlas;
