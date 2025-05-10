@@ -329,8 +329,7 @@ jobs:
       - name: Release (CocoaPods)
         shell: bash -leo pipefail {0}  # so pod is found
         if: env.make_release
-        run: |
-          VERSION=${{ env.version }} COCOAPODS_TRUNK_TOKEN=${{ secrets.COCOAPODS_PASSWORD }} pod trunk push MapLibre.podspec
+        run: gh workflow run ios-release-cocoapods.yml --field version=${{ env.version }}
 
   ios-build-cmake:
     needs: pre_job
