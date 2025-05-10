@@ -14,6 +14,8 @@
     - [Release](./platforms/ios/release.md)
     - [Development Apps](./platforms/ios/dev-apps.md)
   - [macOS](./platforms/macos/README.md)
+  - [Linux](./platforms/linux/README.md)
+    - [Using Docker](./platforms/linux/using-docker.md)
 
 - [Release Policy](./release-policy.md)
 
