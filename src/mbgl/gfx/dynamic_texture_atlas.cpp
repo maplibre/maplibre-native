@@ -12,7 +12,7 @@ constexpr const Size startSize = {512, 512};
 
 Rect<uint16_t> rectWithoutExtraPadding(const Rect<uint16_t>& rect) {
     return Rect<uint16_t>{
-        rect.x + extraPadding, rect.y + extraPadding, rect.w - 2 * extraPadding, rect.h - 2 * extraPadding};
+        rect.x + extraPadding, rect.y + extraPadding, static_cast<uint16_t>(rect.w - 2 * extraPadding), static_cast<uint16_t>(rect.h - 2 * extraPadding)};
 }
 
 GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
