@@ -11,8 +11,10 @@ constexpr const uint16_t padding = ImagePosition::padding + extraPadding;
 constexpr const Size startSize = {512, 512};
 
 Rect<uint16_t> rectWithoutExtraPadding(const Rect<uint16_t>& rect) {
-    return Rect<uint16_t>{
-        rect.x + extraPadding, rect.y + extraPadding, static_cast<uint16_t>(rect.w - 2 * extraPadding), static_cast<uint16_t>(rect.h - 2 * extraPadding)};
+    return Rect<uint16_t>{rect.x + extraPadding,
+                          rect.y + extraPadding,
+                          static_cast<uint16_t>(rect.w - 2 * extraPadding),
+                          static_cast<uint16_t>(rect.h - 2 * extraPadding)};
 }
 
 GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
