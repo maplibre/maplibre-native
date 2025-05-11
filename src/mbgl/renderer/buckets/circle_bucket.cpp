@@ -33,8 +33,9 @@ bool CircleBucket::hasData() const {
     return !segments.empty();
 }
 
+namespace {
 template <class Property>
-static float get(const CirclePaintProperties::PossiblyEvaluated& evaluated,
+float get(const CirclePaintProperties::PossiblyEvaluated& evaluated,
                  const std::string& id,
                  const std::map<std::string, CircleProgram::Binders>& paintPropertyBinders) {
     auto it = paintPropertyBinders.find(id);
@@ -43,6 +44,7 @@ static float get(const CirclePaintProperties::PossiblyEvaluated& evaluated,
     } else {
         return *it->second.statistics<Property>().max();
     }
+}
 }
 
 float CircleBucket::getQueryRadius(const RenderLayer& layer) const {

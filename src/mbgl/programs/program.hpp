@@ -50,6 +50,7 @@ public:
 
     std::unique_ptr<gfx::Program<Name>> program;
 
+    // NOLINTNEXTLINE(bugprone-crtp-constructor-accessibility)
     Program([[maybe_unused]] const ProgramParameters& programParameters) {
         switch (gfx::Backend::GetType()) {
 #if MLN_RENDER_BACKEND_METAL

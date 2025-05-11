@@ -364,12 +364,12 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
             const auto& debugBucket = tile.debugBucket;
             if (!debugBucket) continue;
 
-            const DebugUBO outlineUBO = {/* .matrix = */ util::cast<float>(tile.matrix),
-                                         /* .color = */ Color::white(),
-                                         /* .overlay_scale = */ 1.0f,
-                                         /* .pad1 = */ 0,
-                                         /* .pad2 = */ 0,
-                                         /* .pad3 = */ 0};
+            const DebugUBO outlineUBO = {.matrix=util::cast<float>(tile.matrix),
+                                         .color=Color::white(),
+                                         .overlay_scale=1.0f,
+                                         .pad1=0,
+                                         .pad2=0,
+                                         .pad3=0};
             if (0 == updateDrawables(outlineLayerGroup, tileID, outlineUBO)) {
                 addDrawable(outlineLayerGroup,
                             tileID,
@@ -380,12 +380,12 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                             debugBucket->segments);
             }
 
-            const DebugUBO textUBO = {/* .matrix = */ util::cast<float>(tile.matrix),
-                                      /* .color = */ Color::black(),
-                                      /* .overlay_scale = */ 1.0f,
-                                      /* .pad1 = */ 0,
-                                      /* .pad2 = */ 0,
-                                      /* .pad3 = */ 0};
+            const DebugUBO textUBO = {.matrix=util::cast<float>(tile.matrix),
+                                      .color=Color::black(),
+                                      .overlay_scale=1.0f,
+                                      .pad1=0,
+                                      .pad2=0,
+                                      .pad3=0};
             if (0 == updateDrawables(textLayerGroup, tileID, textUBO) && tile.getNeedsRendering()) {
                 addDrawable(textLayerGroup,
                             tileID,
@@ -427,12 +427,12 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                 addPolylineDrawable(tileLayerGroup, tile);
             }
 #else
-            const DebugUBO debugUBO = {/* .matrix = */ util::cast<float>(tile.matrix),
-                                       /* .color = */ Color::red(),
-                                       /* .overlay_scale = */ 1.0f,
-                                       /* .pad1 = */ 0,
-                                       /* .pad2 = */ 0,
-                                       /* .pad3 = */ 0};
+                const DebugUBO debugUBO = {.matrix=util::cast<float>(tile.matrix),
+                                        .color=Color::red(),
+                                        .overlay_scale=1.0f,
+                                        .pad1=0,
+                                        .pad2=0,
+                                        .pad3=0};
 
             if (0 == updateDrawables(tileLayerGroup, tileID, debugUBO) && tile.getNeedsRendering()) {
                 addDrawable(tileLayerGroup,

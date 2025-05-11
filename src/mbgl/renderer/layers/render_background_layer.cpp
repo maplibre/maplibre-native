@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <mbgl/renderer/layers/render_background_layer.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
@@ -188,7 +189,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
     // (Note that `RenderTiles` is empty, and this layer does not use it)
     tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) -> bool {
         return drawable.getTileID() &&
-               (std::find(tileCover.begin(), tileCover.end(), *drawable.getTileID()) == tileCover.end());
+               (std::ranges::find(tileCover, *drawable.getTileID()) == tileCover.end());
     });
 
     // For each tile in the cover set, add a tile drawable if one doesn't already exist.

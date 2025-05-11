@@ -145,10 +145,10 @@ std::optional<style::ImageContent> getContent(const JSValue& value, const char* 
         if (content.IsArray() && content.Size() == 4 && content[rapidjson::SizeType(0)].IsNumber() &&
             content[rapidjson::SizeType(1)].IsNumber() && content[rapidjson::SizeType(2)].IsNumber() &&
             content[rapidjson::SizeType(3)].IsNumber()) {
-            return style::ImageContent{content[rapidjson::SizeType(0)].GetFloat(),
-                                       content[rapidjson::SizeType(1)].GetFloat(),
-                                       content[rapidjson::SizeType(2)].GetFloat(),
-                                       content[rapidjson::SizeType(3)].GetFloat()};
+            return style::ImageContent{.left=content[rapidjson::SizeType(0)].GetFloat(),
+                                       .top=content[rapidjson::SizeType(1)].GetFloat(),
+                                       .right=content[rapidjson::SizeType(2)].GetFloat(),
+                                       .bottom=content[rapidjson::SizeType(3)].GetFloat()};
         } else {
             Log::Warning(Event::Sprite,
                          "Invalid sprite image '" + std::string(name) + "': value of '" + property +

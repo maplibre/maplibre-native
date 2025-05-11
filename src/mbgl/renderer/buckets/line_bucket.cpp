@@ -12,6 +12,20 @@ namespace mbgl {
 
 using namespace style;
 
+namespace {
+    template <class Property>
+    float get(const LinePaintProperties::PossiblyEvaluated& evaluated,
+                 const std::string& id,
+                 const std::map<std::string, LineProgram::Binders>& paintPropertyBinders) {
+    auto it = paintPropertyBinders.find(id);
+    if (it == paintPropertyBinders.end() || !it->second.statistics<Property>().max()) {
+        return evaluated.get<Property>().constantOr(Property::defaultValue());
+    } else {
+        return *it->second.statistics<Property>().max();
+    }
+}
+}
+
 LineBucket::LineBucket(LineBucket::PossiblyEvaluatedLayoutProperties layout_,
                        const std::map<std::string, Immutable<LayerProperties>>& layerPaintProperties,
                        const float zoom_,
@@ -132,18 +146,6 @@ void LineBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
 
 bool LineBucket::hasData() const {
     return !segments.empty();
-}
-
-template <class Property>
-static float get(const LinePaintProperties::PossiblyEvaluated& evaluated,
-                 const std::string& id,
-                 const std::map<std::string, LineProgram::Binders>& paintPropertyBinders) {
-    auto it = paintPropertyBinders.find(id);
-    if (it == paintPropertyBinders.end() || !it->second.statistics<Property>().max()) {
-        return evaluated.get<Property>().constantOr(Property::defaultValue());
-    } else {
-        return *it->second.statistics<Property>().max();
-    }
 }
 
 float LineBucket::getQueryRadius(const RenderLayer& layer) const {

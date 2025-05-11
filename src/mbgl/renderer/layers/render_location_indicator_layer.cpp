@@ -823,7 +823,7 @@ protected:
                                std::shared_ptr<Texture>& texture,
                                const mbgl::LocationIndicatorRenderParameters& params) {
         bool updated = false;
-        if (textures.find(imagePath) == textures.end()) {
+        if (!textures.contains(imagePath)) {
             std::shared_ptr<Texture> tx = std::make_shared<Texture>();
             if (!imagePath.empty() && params.imageManager) {
                 tx->assign(params.imageManager->getSharedImage(imagePath));

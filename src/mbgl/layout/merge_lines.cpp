@@ -2,17 +2,16 @@
 #include <mbgl/layout/symbol_feature.hpp>
 #include <mbgl/util/hash.hpp>
 
-namespace mbgl {
-namespace util {
-
 // Map of key -> index into features
 using Index = std::unordered_map<size_t, size_t>;
 
-size_t mergeFromRight(std::vector<SymbolFeature>& features,
+namespace {
+
+size_t mergeFromRight(std::vector<mbgl::SymbolFeature>& features,
                       Index& rightIndex,
                       Index::iterator left,
                       size_t rightKey,
-                      GeometryCollection& geom) {
+                      mbgl::GeometryCollection& geom) {
     const size_t index = left->second;
     rightIndex.erase(left);
     rightIndex[rightKey] = index;
@@ -22,11 +21,11 @@ size_t mergeFromRight(std::vector<SymbolFeature>& features,
     return index;
 }
 
-size_t mergeFromLeft(std::vector<SymbolFeature>& features,
+size_t mergeFromLeft(std::vector<mbgl::SymbolFeature>& features,
                      Index& leftIndex,
                      Index::iterator right,
                      size_t leftKey,
-                     GeometryCollection& geom) {
+                     mbgl::GeometryCollection& geom) {
     const size_t index = right->second;
     leftIndex.erase(right);
     leftIndex[leftKey] = index;
@@ -37,9 +36,14 @@ size_t mergeFromLeft(std::vector<SymbolFeature>& features,
     return index;
 }
 
-size_t getKey(const std::u16string& text, const GeometryCoordinate& coord) {
-    return util::hash(text, coord.x, coord.y);
+size_t getKey(const std::u16string& text, const mbgl::GeometryCoordinate& coord) {
+    return mbgl::util::hash(text, coord.x, coord.y);
 }
+
+}
+
+namespace mbgl {
+    namespace util {
 
 void mergeLines(std::vector<SymbolFeature>& features) {
     Index leftIndex;

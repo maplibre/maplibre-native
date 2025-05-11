@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <mbgl/renderer/renderer.hpp>
 
 #include <mbgl/annotation/annotation_manager.hpp>
@@ -84,7 +85,7 @@ AnnotationIDs Renderer::getAnnotationIDs(const std::vector<Feature>& features) c
     }
     AnnotationIDs ids;
     ids.reserve(set.size());
-    std::move(set.begin(), set.end(), std::back_inserter(ids));
+    std::ranges::move(set, std::back_inserter(ids));
     return ids;
 }
 

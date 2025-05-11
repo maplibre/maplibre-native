@@ -1,7 +1,6 @@
 // This is an implementation file, so omit include guards.
 
 #include <cstdint>
-#include <map>
 
 const int8_t simplex_1[] = {5, 21, 5, 7, -1, -1, 5, 2, 4, 1, 5, 0, 6, 1, 5, 2};
 const int8_t simplex_2[] = {4, 21, 4, 14, -1, -1, 12, 21, 12, 14};
@@ -155,6 +154,8 @@ struct glyph {
 // Font data From Hershey Simplex Font
 // http://paulbourke.net/dataformats/hershey/
 
+
+// NOLINTBEGIN(modernize-use-designated-initializers)
 const glyph simplex[] = {
     /* 32	  */ {16, 0, nullptr},
     /* 33	! */
@@ -228,28 +229,6 @@ const glyph simplex[] = {
     /* 67	C */
     {21, sizeof(simplex_35), simplex_35},
     /* 68	D */
-    {21, sizeof(simplex_36), simplex_36},
-    /* 69	E */
-    {19, sizeof(simplex_37), simplex_37},
-    /* 70	F */
-    {18, sizeof(simplex_38), simplex_38},
-    /* 71	G */
-    {21, sizeof(simplex_39), simplex_39},
-    /* 72	H */
-    {22, sizeof(simplex_40), simplex_40},
-    /* 73	I */
-    {8, sizeof(simplex_41), simplex_41},
-    /* 74	J */
-    {16, sizeof(simplex_42), simplex_42},
-    /* 75	K */
-    {21, sizeof(simplex_43), simplex_43},
-    /* 76	L */
-    {17, sizeof(simplex_44), simplex_44},
-    /* 77	M */
-    {24, sizeof(simplex_45), simplex_45},
-    /* 78	N */
-    {22, sizeof(simplex_46), simplex_46},
-    /* 79	O */
     {22, sizeof(simplex_47), simplex_47},
     /* 80	P */
     {21, sizeof(simplex_48), simplex_48},
@@ -346,3 +325,4 @@ const glyph simplex[] = {
     /* 126	~ */
     {24, sizeof(simplex_94), simplex_94},
 };
+// NOLINTEND(modernize-use-designated-initializers)

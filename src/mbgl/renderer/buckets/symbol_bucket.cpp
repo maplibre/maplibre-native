@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <mbgl/renderer/bucket_parameters.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
@@ -14,6 +15,18 @@ namespace mbgl {
 using namespace style;
 namespace {
 std::atomic<uint32_t> maxBucketInstanceId;
+
+void addPlacedSymbol(gfx::IndexVector<gfx::Triangles>& triangles, const PlacedSymbol& placedSymbol) {
+    auto endIndex = placedSymbol.vertexStartIndex + placedSymbol.glyphOffsets.size() * 4;
+    for (auto vertexIndex = placedSymbol.vertexStartIndex; vertexIndex < endIndex; vertexIndex += 4) {
+        triangles.emplace_back(static_cast<uint16_t>(vertexIndex + 0),
+                               static_cast<uint16_t>(vertexIndex + 1),
+                               static_cast<uint16_t>(vertexIndex + 2));
+        triangles.emplace_back(static_cast<uint16_t>(vertexIndex + 1),
+                               static_cast<uint16_t>(vertexIndex + 2),
+                               static_cast<uint16_t>(vertexIndex + 3));
+    }
+}
 } // namespace
 
 SymbolBucket::SymbolBucket(Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout_,
@@ -103,18 +116,6 @@ bool SymbolBucket::hasTextCollisionCircleData() const {
     return textCollisionCircle && !textCollisionCircle->segments.empty();
 }
 
-void addPlacedSymbol(gfx::IndexVector<gfx::Triangles>& triangles, const PlacedSymbol& placedSymbol) {
-    auto endIndex = placedSymbol.vertexStartIndex + placedSymbol.glyphOffsets.size() * 4;
-    for (auto vertexIndex = placedSymbol.vertexStartIndex; vertexIndex < endIndex; vertexIndex += 4) {
-        triangles.emplace_back(static_cast<uint16_t>(vertexIndex + 0),
-                               static_cast<uint16_t>(vertexIndex + 1),
-                               static_cast<uint16_t>(vertexIndex + 2));
-        triangles.emplace_back(static_cast<uint16_t>(vertexIndex + 1),
-                               static_cast<uint16_t>(vertexIndex + 2),
-                               static_cast<uint16_t>(vertexIndex + 3));
-    }
-}
-
 void SymbolBucket::sortFeatures(const float angle) {
     if (!sortFeaturesByY) {
         return;
@@ -190,7 +191,7 @@ SymbolInstanceReferences SymbolBucket::getSortedSymbols(const float angle) const
     const float sin = std::sin(angle);
     const float cos = std::cos(angle);
 
-    std::sort(result.begin(), result.end(), [sin, cos](const SymbolInstance& a, const SymbolInstance& b) {
+    std::ranges::sort(result, [sin, cos](const SymbolInstance& a, const SymbolInstance& b) {
         const auto aRotated = std::lround(sin * a.getAnchor().point.x + cos * a.getAnchor().point.y);
         const auto bRotated = std::lround(sin * b.getAnchor().point.x + cos * b.getAnchor().point.y);
         if (aRotated != bRotated) {

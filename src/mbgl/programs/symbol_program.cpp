@@ -34,6 +34,7 @@ std::unique_ptr<SymbolSizeBinder> SymbolSizeBinder::create(const float tileZoom,
         });
 }
 
+namespace {
 template <class Values, class... Args>
 Values makeValues(const bool isText,
                   const bool hasVariablePacement,
@@ -89,6 +90,7 @@ Values makeValues(const bool isText,
                   uniforms::rotate_symbol::Value(rotateInShader),
                   uniforms::aspect_ratio::Value(state.getSize().aspectRatio()),
                   std::forward<Args>(args)...};
+}
 }
 
 SymbolIconProgram::LayoutUniformValues SymbolIconProgram::layoutUniformValues(

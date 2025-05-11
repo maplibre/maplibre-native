@@ -95,7 +95,7 @@ gfx::DepthMode PaintParameters::depthModeForSublayer([[maybe_unused]] uint8_t n,
 
 #if MLN_RENDER_BACKEND_OPENGL
     float depth = depthRangeSize + ((1 + currentLayer) * numSublayers + n) * depthEpsilon;
-    return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, mask, {depth, depth}};
+    return gfx::DepthMode{.func=gfx::DepthFunctionType::LessEqual, .mask=mask, .range={depth, depth}};
 #else
     return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, mask};
 #endif
@@ -103,7 +103,7 @@ gfx::DepthMode PaintParameters::depthModeForSublayer([[maybe_unused]] uint8_t n,
 
 gfx::DepthMode PaintParameters::depthModeFor3D() const {
 #if MLN_RENDER_BACKEND_OPENGL
-    return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, gfx::DepthMaskType::ReadWrite, {0.0, depthRangeSize}};
+    return gfx::DepthMode{.func=gfx::DepthFunctionType::LessEqual, .mask=gfx::DepthMaskType::ReadWrite, .range={0.0, depthRangeSize}};
 #else
     return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, gfx::DepthMaskType::ReadWrite};
 #endif
@@ -271,12 +271,12 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
                       *renderPass,
                       gfx::Triangles(),
                       gfx::DepthMode::disabled(),
-                      gfx::StencilMode{gfx::StencilMode::Always{},
-                                       stencilID,
-                                       0b11111111,
-                                       gfx::StencilOpType::Keep,
-                                       gfx::StencilOpType::Keep,
-                                       gfx::StencilOpType::Replace},
+                      gfx::StencilMode{.test=gfx::StencilMode::Always{},
+                                       .ref=stencilID,
+                                       .mask=0b11111111,
+                                       .fail=gfx::StencilOpType::Keep,
+                                       .depthFail=gfx::StencilOpType::Keep,
+                                       .pass=gfx::StencilOpType::Replace},
                       gfx::ColorMode::disabled(),
                       gfx::CullFaceMode::disabled(),
                       *staticData.quadTriangleIndexBuffer,
@@ -300,12 +300,12 @@ gfx::StencilMode PaintParameters::stencilModeForClipping(const UnwrappedTileID& 
     auto it = tileClippingMaskIDs.find(tileID);
     assert(it != tileClippingMaskIDs.end());
     const int32_t id = it != tileClippingMaskIDs.end() ? it->second : 0b00000000;
-    return gfx::StencilMode{gfx::StencilMode::Equal{0b11111111},
-                            id,
-                            0b00000000,
-                            gfx::StencilOpType::Keep,
-                            gfx::StencilOpType::Keep,
-                            gfx::StencilOpType::Replace};
+    return gfx::StencilMode{.test=gfx::StencilMode::Equal{0b11111111},
+                            .ref=id,
+                            .mask=0b00000000,
+                            .fail=gfx::StencilOpType::Keep,
+                            .depthFail=gfx::StencilOpType::Keep,
+                            .pass=gfx::StencilOpType::Replace};
 }
 
 gfx::StencilMode PaintParameters::stencilModeFor3D() {
@@ -318,21 +318,21 @@ gfx::StencilMode PaintParameters::stencilModeFor3D() {
     tileClippingMaskIDs.clear();
 
     const int32_t id = nextStencilID++;
-    return gfx::StencilMode{gfx::StencilMode::NotEqual{0b11111111},
-                            id,
-                            0b11111111,
-                            gfx::StencilOpType::Keep,
-                            gfx::StencilOpType::Keep,
-                            gfx::StencilOpType::Replace};
+    return gfx::StencilMode{.test=gfx::StencilMode::NotEqual{0b11111111},
+                            .ref=id,
+                            .mask=0b11111111,
+                            .fail=gfx::StencilOpType::Keep,
+                            .depthFail=gfx::StencilOpType::Keep,
+                            .pass=gfx::StencilOpType::Replace};
 }
 
 gfx::ColorMode PaintParameters::colorModeForRenderPass() const {
     if (debugOptions & MapDebugOptions::Overdraw) {
         constexpr float overdraw = 1.0f / 8.0f;
         return gfx::ColorMode{
-            gfx::ColorMode::Add{gfx::ColorBlendFactorType::ConstantColor, gfx::ColorBlendFactorType::One},
-            Color{overdraw, overdraw, overdraw, 0.0f},
-            gfx::ColorMode::Mask{true, true, true, true}};
+            .blendFunction=gfx::ColorMode::Add{gfx::ColorBlendFactorType::ConstantColor, gfx::ColorBlendFactorType::One},
+            .blendColor=Color{overdraw, overdraw, overdraw, 0.0f},
+            .mask=gfx::ColorMode::Mask{.r=true, .g=true, .b=true, .a=true}};
     } else if (pass == RenderPass::Translucent) {
         return gfx::ColorMode::alphaBlended();
     } else {
