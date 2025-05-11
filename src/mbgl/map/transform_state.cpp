@@ -689,7 +689,7 @@ ScreenCoordinate TransformState::latLngToScreenCoordinate(const LatLng& latLng, 
 
 TileCoordinate TransformState::screenCoordinateToTileCoordinate(const ScreenCoordinate& point, uint8_t atZoom) const {
     if (size.isEmpty()) {
-        return {.p={}, .z=0};
+        return {.p = {}, .z = 0};
     }
 
     float targetZ = 0;
@@ -718,7 +718,7 @@ TileCoordinate TransformState::screenCoordinateToTileCoordinate(const ScreenCoor
     double t = z0 == z1 ? 0 : (targetZ - z0) / (z1 - z0);
 
     Point<double> p = util::interpolate(p0, p1, t) / scale * static_cast<double>(1 << atZoom);
-    return {.p={p.x, p.y}, .z=static_cast<double>(atZoom)};
+    return {.p = {p.x, p.y}, .z = static_cast<double>(atZoom)};
 }
 
 LatLng TransformState::screenCoordinateToLatLng(const ScreenCoordinate& point, LatLng::WrapMode wrapMode) const {

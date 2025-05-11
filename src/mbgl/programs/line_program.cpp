@@ -27,7 +27,7 @@ Values makeValues(const style::LinePaintProperties::PossiblyEvaluated& propertie
                   uniforms::device_pixel_ratio::Value(pixelRatio),
                   std::forward<Args>(args)...};
 }
-}
+} // namespace
 
 LineProgram::LayoutUniformValues LineProgram::layoutUniformValues(
     const style::LinePaintProperties::PossiblyEvaluated& properties,

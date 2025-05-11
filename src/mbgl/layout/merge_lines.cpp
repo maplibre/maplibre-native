@@ -40,10 +40,10 @@ size_t getKey(const std::u16string& text, const mbgl::GeometryCoordinate& coord)
     return mbgl::util::hash(text, coord.x, coord.y);
 }
 
-}
+} // namespace
 
 namespace mbgl {
-    namespace util {
+namespace util {
 
 void mergeLines(std::vector<SymbolFeature>& features) {
     Index leftIndex;

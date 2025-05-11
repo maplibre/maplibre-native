@@ -13,10 +13,10 @@ namespace mbgl {
 using namespace style;
 
 namespace {
-    template <class Property>
-    float get(const LinePaintProperties::PossiblyEvaluated& evaluated,
-                 const std::string& id,
-                 const std::map<std::string, LineProgram::Binders>& paintPropertyBinders) {
+template <class Property>
+float get(const LinePaintProperties::PossiblyEvaluated& evaluated,
+          const std::string& id,
+          const std::map<std::string, LineProgram::Binders>& paintPropertyBinders) {
     auto it = paintPropertyBinders.find(id);
     if (it == paintPropertyBinders.end() || !it->second.statistics<Property>().max()) {
         return evaluated.get<Property>().constantOr(Property::defaultValue());
@@ -24,7 +24,7 @@ namespace {
         return *it->second.statistics<Property>().max();
     }
 }
-}
+} // namespace
 
 LineBucket::LineBucket(LineBucket::PossiblyEvaluatedLayoutProperties layout_,
                        const std::map<std::string, Immutable<LayerProperties>>& layerPaintProperties,

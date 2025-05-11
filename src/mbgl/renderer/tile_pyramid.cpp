@@ -22,8 +22,10 @@ namespace mbgl {
 
 using namespace style;
 
-static TileObserver nullObserver;
-static const std::map<OverscaledTileID, std::unique_ptr<Tile>> emptyPrefetchedTiles;
+namespace {
+TileObserver nullObserver;
+const std::map<OverscaledTileID, std::unique_ptr<Tile>> emptyPrefetchedTiles;
+} // namespace
 
 TilePyramid::TilePyramid(const TaggedScheduler& threadPool_)
     : cache(threadPool_),
@@ -103,7 +105,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     std::vector<OverscaledTileID> idealTiles;
     std::vector<OverscaledTileID> panTiles;
 
-    if (overscaledZoom >= zoomRange.min) {
+    if (std::cmp_greater_equal(overscaledZoom, zoomRange.min)) {
         int32_t idealZoom = std::min<int32_t>(zoomRange.max, overscaledZoom);
 
         // Make sure we're not reparsing overzoomed raster tiles.
@@ -146,7 +148,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
 
     auto retainTileFn = [&](Tile& tile, TileNecessity necessity) -> void {
         if (retain.emplace(tile.id).second) {
-            tile.setUpdateParameters({minimumUpdateInterval, isVolatile});
+            tile.setUpdateParameters({.minimumUpdateInterval = minimumUpdateInterval, .isVolatile = isVolatile});
             tile.setNecessity(necessity);
         }
 

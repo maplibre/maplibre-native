@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <boost/algorithm/string/join.hpp>
 #include <mbgl/style/expression/collator.hpp>
 #include <mbgl/style/expression/compound_expression.hpp>
@@ -968,7 +969,7 @@ const auto& filterIdInCompoundExpression() {
         "filter-id-in",
         [](const EvaluationContext& params, const Varargs<Value>& ids) -> Result<bool> {
             auto id = featureIdAsExpressionValue(params);
-            return std::find(ids.begin(), ids.end(), id) != ids.end();
+            return std::ranges::find(ids, id) != ids.end();
         },
         Dependency::Feature);
     return signature;

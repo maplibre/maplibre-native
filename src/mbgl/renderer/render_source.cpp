@@ -59,7 +59,7 @@ std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>
 }
 
 namespace {
-    RenderSourceObserver nullObserver;
+RenderSourceObserver nullObserver;
 }
 
 RenderSource::RenderSource(Immutable<style::Source::Impl> impl)

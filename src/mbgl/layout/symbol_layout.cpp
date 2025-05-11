@@ -125,10 +125,11 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
         auto modes = layout->get<TextWritingMode>();
         // Remove duplicates and preserve order.
         std::set<style::TextWritingModeType> seen;
-        auto end = std::remove_if(modes.begin(), modes.end(), [&seen, this](const auto& placementMode) {
-            allowVerticalPlacement = allowVerticalPlacement || placementMode == style::TextWritingModeType::Vertical;
-            return !seen.insert(placementMode).second;
-        });
+        auto end = std::ranges::remove_if(modes, [&seen, this](const auto& placementMode) {
+                       allowVerticalPlacement = allowVerticalPlacement ||
+                                                placementMode == style::TextWritingModeType::Vertical;
+                       return !seen.insert(placementMode).second;
+                   }).begin();
         modes.erase(end, modes.end());
         placementModes = std::move(modes);
     }
@@ -212,7 +213,7 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
         if (ft.formattedText || ft.icon) {
             if (sortFeaturesByKey) {
                 ft.sortKey = layout->evaluate<SymbolSortKey>(zoom, ft, canonicalID);
-                const auto lowerBound = std::lower_bound(features.begin(), features.end(), ft);
+                const auto lowerBound = std::ranges::lower_bound(features, ft, std::less<>{});
                 features.insert(lowerBound, std::move(ft));
             } else {
                 features.push_back(std::move(ft));
@@ -998,7 +999,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
             if (!firstLoad) {
                 bucket->justReloaded = true;
             }
-            renderData.emplace(pair.first, LayerRenderData{.bucket=bucket, .layerProperties=pair.second});
+            renderData.emplace(pair.first, LayerRenderData{.bucket = bucket, .layerProperties = pair.second});
         }
     }
 }

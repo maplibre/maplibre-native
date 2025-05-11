@@ -65,7 +65,7 @@ std::ostream& optionalStatLine(std::ostream& stream, T value, std::string_view l
     }
     return stream;
 }
-}
+} // namespace
 
 std::string RenderingStats::toString(std::string_view sep) const {
     std::stringstream ss;

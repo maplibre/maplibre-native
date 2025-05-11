@@ -130,14 +130,6 @@ float evaluateSizeForFeature(const ZoomEvaluatedSize& zoomEvaluatedSize, const P
     }
 }
 
-bool isVisible(const vec4& anchorPos, const std::array<double, 2>& clippingBuffer) {
-    const double x = anchorPos[0] / anchorPos[3];
-    const double y = anchorPos[1] / anchorPos[3];
-    const bool inPaddedViewport = (x >= -clippingBuffer[0] && x <= clippingBuffer[0] && y >= -clippingBuffer[1] &&
-                                   y <= clippingBuffer[1]);
-    return inPaddedViewport;
-}
-
 void addDynamicAttributes(const Point<float>& anchorPoint,
                           const float angle,
                           gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray) {
@@ -165,6 +157,16 @@ enum PlacementResult {
     UseVertical
 };
 
+namespace {
+
+bool isVisible(const vec4& anchorPos, const std::array<double, 2>& clippingBuffer) {
+    const double x = anchorPos[0] / anchorPos[3];
+    const double y = anchorPos[1] / anchorPos[3];
+    const bool inPaddedViewport = (x >= -clippingBuffer[0] && x <= clippingBuffer[0] && y >= -clippingBuffer[1] &&
+                                   y <= clippingBuffer[1]);
+    return inPaddedViewport;
+}
+
 Point<float> projectTruncatedLineSegment(const Point<float>& previousTilePoint,
                                          const Point<float>& currentTilePoint,
                                          const Point<float>& previousProjectedPoint,
@@ -181,7 +183,6 @@ Point<float> projectTruncatedLineSegment(const Point<float>& previousTilePoint,
 
     return previousProjectedPoint + (projectedUnitSegment * (minimumLength / util::mag<float>(projectedUnitSegment)));
 }
-
 std::optional<PlacedGlyph> placeGlyphAlongLine(const float offsetX,
                                                const float lineOffsetX,
                                                const float lineOffsetY,
@@ -220,7 +221,7 @@ std::optional<PlacedGlyph> placeGlyphAlongLine(const float offsetX,
         currentIndex += dir;
 
         // offset does not fit on the projected line
-        if (currentIndex < 0 || currentIndex >= static_cast<int32_t>(line.size())) {
+        if (currentIndex < 0 || std::cmp_greater_equal(currentIndex, static_cast<int32_t>(line.size()))) {
             return {};
         }
 
@@ -259,52 +260,6 @@ std::optional<PlacedGlyph> placeGlyphAlongLine(const float offsetX,
                  ? TileDistance((currentIndex - dir) == initialIndex ? 0 : tileDistances[currentIndex - dir],
                                 absOffsetX - distanceToPrev)
                  : std::optional<TileDistance>()}};
-}
-
-std::optional<std::pair<PlacedGlyph, PlacedGlyph>> placeFirstAndLastGlyph(const float fontScale,
-                                                                          const float lineOffsetX,
-                                                                          const float lineOffsetY,
-                                                                          const bool flip,
-                                                                          const Point<float>& anchorPoint,
-                                                                          const Point<float>& tileAnchorPoint,
-                                                                          const PlacedSymbol& symbol,
-                                                                          const mat4& labelPlaneMatrix,
-                                                                          const bool returnTileDistance) {
-    if (symbol.glyphOffsets.empty()) {
-        assert(false);
-        return {};
-    }
-
-    const float firstGlyphOffset = symbol.glyphOffsets.front();
-    const float lastGlyphOffset = symbol.glyphOffsets.back();
-
-    std::optional<PlacedGlyph> firstPlacedGlyph = placeGlyphAlongLine(fontScale * firstGlyphOffset,
-                                                                      lineOffsetX,
-                                                                      lineOffsetY,
-                                                                      flip,
-                                                                      anchorPoint,
-                                                                      tileAnchorPoint,
-                                                                      static_cast<uint16_t>(symbol.segment),
-                                                                      symbol.line,
-                                                                      symbol.tileDistances,
-                                                                      labelPlaneMatrix,
-                                                                      returnTileDistance);
-    if (!firstPlacedGlyph) return {};
-
-    std::optional<PlacedGlyph> lastPlacedGlyph = placeGlyphAlongLine(fontScale * lastGlyphOffset,
-                                                                     lineOffsetX,
-                                                                     lineOffsetY,
-                                                                     flip,
-                                                                     anchorPoint,
-                                                                     tileAnchorPoint,
-                                                                     static_cast<uint16_t>(symbol.segment),
-                                                                     symbol.line,
-                                                                     symbol.tileDistances,
-                                                                     labelPlaneMatrix,
-                                                                     returnTileDistance);
-    if (!lastPlacedGlyph) return {};
-
-    return std::make_pair(*firstPlacedGlyph, *lastPlacedGlyph);
 }
 
 std::optional<PlacementResult> requiresOrientationChange(const WritingModeType writingModes,
@@ -444,6 +399,53 @@ PlacementResult placeGlyphsAlongLine(const PlacedSymbol& symbol,
     }
 
     return PlacementResult::OK;
+}
+} // namespace
+
+std::optional<std::pair<PlacedGlyph, PlacedGlyph>> placeFirstAndLastGlyph(const float fontScale,
+                                                                          const float lineOffsetX,
+                                                                          const float lineOffsetY,
+                                                                          const bool flip,
+                                                                          const Point<float>& anchorPoint,
+                                                                          const Point<float>& tileAnchorPoint,
+                                                                          const PlacedSymbol& symbol,
+                                                                          const mat4& labelPlaneMatrix,
+                                                                          const bool returnTileDistance) {
+    if (symbol.glyphOffsets.empty()) {
+        assert(false);
+        return {};
+    }
+
+    const float firstGlyphOffset = symbol.glyphOffsets.front();
+    const float lastGlyphOffset = symbol.glyphOffsets.back();
+
+    std::optional<PlacedGlyph> firstPlacedGlyph = placeGlyphAlongLine(fontScale * firstGlyphOffset,
+                                                                      lineOffsetX,
+                                                                      lineOffsetY,
+                                                                      flip,
+                                                                      anchorPoint,
+                                                                      tileAnchorPoint,
+                                                                      static_cast<uint16_t>(symbol.segment),
+                                                                      symbol.line,
+                                                                      symbol.tileDistances,
+                                                                      labelPlaneMatrix,
+                                                                      returnTileDistance);
+    if (!firstPlacedGlyph) return {};
+
+    std::optional<PlacedGlyph> lastPlacedGlyph = placeGlyphAlongLine(fontScale * lastGlyphOffset,
+                                                                     lineOffsetX,
+                                                                     lineOffsetY,
+                                                                     flip,
+                                                                     anchorPoint,
+                                                                     tileAnchorPoint,
+                                                                     static_cast<uint16_t>(symbol.segment),
+                                                                     symbol.line,
+                                                                     symbol.tileDistances,
+                                                                     labelPlaneMatrix,
+                                                                     returnTileDistance);
+    if (!lastPlacedGlyph) return {};
+
+    return std::make_pair(*firstPlacedGlyph, *lastPlacedGlyph);
 }
 
 void reprojectLineLabels(gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray,

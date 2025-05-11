@@ -66,7 +66,7 @@ struct StencilFunc {
         int32_t ref;
         uint32_t mask;
     };
-    static const constexpr Type Default = {.func=gfx::StencilMode::Always::func, .ref=0, .mask=~0u};
+    static const constexpr Type Default = {.func = gfx::StencilMode::Always::func, .ref = 0, .mask = ~0u};
     static void Set(const Type&);
     static Type Get();
 };
@@ -89,7 +89,7 @@ struct StencilOp {
         gfx::StencilOpType dppass;
     };
     static const constexpr Type Default = {
-        .sfail=gfx::StencilOpType::Keep, .dpfail=gfx::StencilOpType::Keep, .dppass=gfx::StencilOpType::Keep};
+        .sfail = gfx::StencilOpType::Keep, .dpfail = gfx::StencilOpType::Keep, .dppass = gfx::StencilOpType::Keep};
     static void Set(const Type&);
     static Type Get();
 };
@@ -140,7 +140,8 @@ struct BlendFunc {
         gfx::ColorBlendFactorType sfactor;
         gfx::ColorBlendFactorType dfactor;
     };
-    static const constexpr Type Default = {.sfactor=gfx::ColorBlendFactorType::One, .dfactor=gfx::ColorBlendFactorType::Zero};
+    static const constexpr Type Default = {.sfactor = gfx::ColorBlendFactorType::One,
+                                           .dfactor = gfx::ColorBlendFactorType::Zero};
     static void Set(const Type&);
     static Type Get();
 };
@@ -183,7 +184,7 @@ struct Viewport {
         int32_t y;
         Size size;
     };
-    static const constexpr Type Default = {.x=0, .y=0, .size={0, 0}};
+    static const constexpr Type Default = {.x = 0, .y = 0, .size = {0, 0}};
     static void Set(const Type&);
     static Type Get();
 };

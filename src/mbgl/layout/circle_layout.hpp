@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/layout/layout.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>
@@ -45,8 +46,8 @@ public:
 
             const auto& sortKeyProperty = layout.template get<style::CircleSortKey>();
             float sortKey = sortKeyProperty.evaluate(*feature, zoom, style::CircleSortKey::defaultValue());
-            CircleFeature circleFeature{.i=i, .feature=std::move(feature), .sortKey=sortKey};
-            const auto sortPosition = std::lower_bound(features.cbegin(), features.cend(), circleFeature);
+            CircleFeature circleFeature{.i = i, .feature = std::move(feature), .sortKey = sortKey};
+            const auto sortPosition = std::ranges::lower_bound(features, circleFeature, std::less<>{});
             features.insert(sortPosition, std::move(circleFeature));
         }
     }
@@ -75,7 +76,7 @@ public:
         if (!bucket->hasData()) return;
 
         for (const auto& pair : layerPropertiesMap) {
-            renderData.emplace(pair.first, LayerRenderData{.bucket=bucket, .layerProperties=pair.second});
+            renderData.emplace(pair.first, LayerRenderData{.bucket = bucket, .layerProperties = pair.second});
         }
     }
 

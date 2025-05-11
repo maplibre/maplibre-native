@@ -261,8 +261,9 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         std::array<uint8_t, 4> data{{0, 0, 0, 0}};
         auto emptyImage = std::make_shared<PremultipliedImage>(Size(1, 1), data.data(), data.size());
         texture->setImage(emptyImage);
-        texture->setSamplerConfiguration(
-            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+        texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                          .wrapU = gfx::TextureWrapType::Clamp,
+                                          .wrapV = gfx::TextureWrapType::Clamp});
     }
 
     // function to update existing tile drawables with UBO value. return number of updated drawables
@@ -364,12 +365,12 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
             const auto& debugBucket = tile.debugBucket;
             if (!debugBucket) continue;
 
-            const DebugUBO outlineUBO = {.matrix=util::cast<float>(tile.matrix),
-                                         .color=Color::white(),
-                                         .overlay_scale=1.0f,
-                                         .pad1=0,
-                                         .pad2=0,
-                                         .pad3=0};
+            const DebugUBO outlineUBO = {.matrix = util::cast<float>(tile.matrix),
+                                         .color = Color::white(),
+                                         .overlay_scale = 1.0f,
+                                         .pad1 = 0,
+                                         .pad2 = 0,
+                                         .pad3 = 0};
             if (0 == updateDrawables(outlineLayerGroup, tileID, outlineUBO)) {
                 addDrawable(outlineLayerGroup,
                             tileID,
@@ -380,12 +381,12 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                             debugBucket->segments);
             }
 
-            const DebugUBO textUBO = {.matrix=util::cast<float>(tile.matrix),
-                                      .color=Color::black(),
-                                      .overlay_scale=1.0f,
-                                      .pad1=0,
-                                      .pad2=0,
-                                      .pad3=0};
+            const DebugUBO textUBO = {.matrix = util::cast<float>(tile.matrix),
+                                      .color = Color::black(),
+                                      .overlay_scale = 1.0f,
+                                      .pad1 = 0,
+                                      .pad2 = 0,
+                                      .pad3 = 0};
             if (0 == updateDrawables(textLayerGroup, tileID, textUBO) && tile.getNeedsRendering()) {
                 addDrawable(textLayerGroup,
                             tileID,
@@ -410,7 +411,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         // erase drawables that are not in the current tile set
         tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
             return drawable.getName() == drawableName &&
-                   !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
+                   !(drawable.getTileID().has_value() && newTiles.contains(*drawable.getTileID()));
         });
 
         // add new drawables and update existing ones
@@ -427,12 +428,12 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                 addPolylineDrawable(tileLayerGroup, tile);
             }
 #else
-                const DebugUBO debugUBO = {.matrix=util::cast<float>(tile.matrix),
-                                        .color=Color::red(),
-                                        .overlay_scale=1.0f,
-                                        .pad1=0,
-                                        .pad2=0,
-                                        .pad3=0};
+            const DebugUBO debugUBO = {.matrix = util::cast<float>(tile.matrix),
+                                       .color = Color::red(),
+                                       .overlay_scale = 1.0f,
+                                       .pad1 = 0,
+                                       .pad2 = 0,
+                                       .pad3 = 0};
 
             if (0 == updateDrawables(tileLayerGroup, tileID, debugUBO) && tile.getNeedsRendering()) {
                 addDrawable(tileLayerGroup,

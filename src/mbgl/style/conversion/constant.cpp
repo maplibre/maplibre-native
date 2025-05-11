@@ -111,7 +111,7 @@ std::optional<Color> Converter<Color>::operator()(const Convertible& value, Erro
         return std::nullopt;
     }
 
-    return *color;
+    return color;
 }
 
 std::optional<Padding> Converter<Padding>::operator()(const Convertible& value, Error& error) const {

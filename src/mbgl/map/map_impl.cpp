@@ -82,24 +82,24 @@ void Map::Impl::onUpdate() {
 
     transform.updateTransitions(timePoint);
 
-    UpdateParameters params = {.styleLoaded=style->impl->isLoaded(),
-                               .mode=mode,
-                               .pixelRatio=pixelRatio,
-                               .debugOptions=debugOptions,
-                               .timePoint=timePoint,
-                               .transformState=transform.getState(),
-                               .glyphURL=style->impl->getGlyphURL(),
-                               .spriteLoaded=style->impl->areSpritesLoaded(),
-                               .transitionOptions=style->impl->getTransitionOptions(),
-                               .light=style->impl->getLight()->impl,
-                               .images=style->impl->getImageImpls(),
-                               .sources=style->impl->getSourceImpls(),
-                               .layers=style->impl->getLayerImpls(),
-                               .annotationManager=annotationManager.makeWeakPtr(),
-                               .fileSource=fileSource,
-                               .prefetchZoomDelta=prefetchZoomDelta,
-                               .stillImageRequest=bool(stillImageRequest),
-                               .crossSourceCollisions=crossSourceCollisions};
+    UpdateParameters params = {.styleLoaded = style->impl->isLoaded(),
+                               .mode = mode,
+                               .pixelRatio = pixelRatio,
+                               .debugOptions = debugOptions,
+                               .timePoint = timePoint,
+                               .transformState = transform.getState(),
+                               .glyphURL = style->impl->getGlyphURL(),
+                               .spriteLoaded = style->impl->areSpritesLoaded(),
+                               .transitionOptions = style->impl->getTransitionOptions(),
+                               .light = style->impl->getLight()->impl,
+                               .images = style->impl->getImageImpls(),
+                               .sources = style->impl->getSourceImpls(),
+                               .layers = style->impl->getLayerImpls(),
+                               .annotationManager = annotationManager.makeWeakPtr(),
+                               .fileSource = fileSource,
+                               .prefetchZoomDelta = prefetchZoomDelta,
+                               .stillImageRequest = bool(stillImageRequest),
+                               .crossSourceCollisions = crossSourceCollisions};
 
     rendererFrontend.update(std::make_shared<UpdateParameters>(std::move(params)));
 }
@@ -186,11 +186,11 @@ void Map::Impl::onDidFinishRenderingFrame(RenderMode renderMode,
     rendererFullyLoaded = renderMode == RenderMode::Full;
 
     if (mode == MapMode::Continuous) {
-        observer.onDidFinishRenderingFrame({.mode=MapObserver::RenderMode(renderMode),
-                                            .needsRepaint=needsRepaint,
-                                            .placementChanged=placemenChanged,
-                                            .frameEncodingTime=frameEncodingTime,
-                                            .frameRenderingTime=frameRenderingTime});
+        observer.onDidFinishRenderingFrame({.mode = MapObserver::RenderMode(renderMode),
+                                            .needsRepaint = needsRepaint,
+                                            .placementChanged = placemenChanged,
+                                            .frameEncodingTime = frameEncodingTime,
+                                            .frameRenderingTime = frameRenderingTime});
 
         if (needsRepaint || transform.inTransition()) {
             onUpdate();

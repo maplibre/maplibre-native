@@ -94,7 +94,7 @@ GeometryCoordinates projectQueryGeometry(const GeometryCoordinates& queryGeometr
     }
     return projectedGeometry;
 }
-}
+} // namespace
 
 bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeometry,
                                                const GeometryTileFeature& feature,

@@ -60,7 +60,7 @@ void updateRenderables(GetTileFn getTile,
             covered = true;
             parentOrChildTileFound = false;
             overscaledZ = idealDataTileID.overscaledZ + 1;
-            if (overscaledZ > zoomRange.max) {
+            if (std::cmp_greater(overscaledZ, zoomRange.max)) {
                 // We're looking for an overzoomed child tile.
                 const auto childDataTileID = idealDataTileID.scaledTo(overscaledZ);
                 tile = getTile(childDataTileID);

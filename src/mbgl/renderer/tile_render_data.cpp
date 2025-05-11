@@ -9,7 +9,9 @@ TileRenderData::TileRenderData(std::shared_ptr<TileAtlasTextures> atlasTextures_
 
 TileRenderData::~TileRenderData() = default;
 
-static gfx::Texture2DPtr noTexture;
+namespace {
+gfx::Texture2DPtr noTexture;
+}
 
 const gfx::Texture2DPtr& TileRenderData::getGlyphAtlasTexture() const {
     return atlasTextures ? atlasTextures->glyph : noTexture;

@@ -119,7 +119,7 @@ Checks: [
     -boost-use-ranges,
     # https://clang.llvm.org/extra/clang-tidy/checks/portability/template-virtual-member-function.html
     # not caring about this check might cause issues with MSVC
-    -portability-template-virtual-member-function 
+    -portability-template-virtual-member-function
 ]
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'

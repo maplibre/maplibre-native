@@ -36,11 +36,11 @@ repos:
       - id: actionlint
         additional_dependencies: [ shellcheck-py ]
 
-  - repo: https://github.com/nicklockwood/SwiftFormat
-    rev: "0.55.6"
-    hooks:
-      - id: swiftformat
-        args: [ --swiftversion, "5.8" ]
+  # - repo: https://github.com/nicklockwood/SwiftFormat
+  #   rev: "0.55.6"
+  #   hooks:
+  #     - id: swiftformat
+  #       args: [ --swiftversion, "5.8" ]
 
   - repo: local
     hooks:
