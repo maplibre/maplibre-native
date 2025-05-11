@@ -6,8 +6,17 @@
 namespace mbgl {
 namespace gfx {
 
-constexpr const uint16_t padding = ImagePosition::padding;
+constexpr const uint16_t extraPadding = 1;
+constexpr const uint16_t padding = ImagePosition::padding + extraPadding;
 constexpr const Size startSize = {512, 512};
+
+Rect<uint16_t> rectWithoutExtraPadding(const Rect<uint16_t>& rect) {
+    return Rect<uint16_t>{
+        rect.x + extraPadding,
+        rect.y + extraPadding,
+        rect.w - 2 * extraPadding,
+        rect.h - 2 * extraPadding};
+}
 
 GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
     using GlyphsToUpload = std::vector<std::tuple<TextureHandle, Immutable<Glyph>, FontStackHash>>;
@@ -87,7 +96,7 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
             glyphAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
         }
         glyphAtlas.textureHandles.emplace_back(texHandle);
-        glyphAtlas.glyphPositions[fontStack].emplace(glyph->id, GlyphPosition{rect, glyph->metrics});
+        glyphAtlas.glyphPositions[fontStack].emplace(glyph->id, GlyphPosition{rectWithoutExtraPadding(rect), glyph->metrics});
     }
     return glyphAtlas;
 }
@@ -192,7 +201,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
         imageAtlas.textureHandles.emplace_back(texHandle);
         const auto it = versionMap.find(icon->id);
         const auto version = it != versionMap.end() ? it->second : 0;
-        imageAtlas.iconPositions.emplace(icon->id, ImagePosition{rect, *icon, version});
+        imageAtlas.iconPositions.emplace(icon->id, ImagePosition{rectWithoutExtraPadding(rect), *icon, version});
     }
 
     imageAtlas.patternPositions.reserve(patterns.size());
@@ -220,7 +229,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
         imageAtlas.textureHandles.emplace_back(texHandle);
         const auto it = versionMap.find(pattern->id);
         const auto version = it != versionMap.end() ? it->second : 0;
-        imageAtlas.patternPositions.emplace(pattern->id, ImagePosition{rect, *pattern, version});
+        imageAtlas.patternPositions.emplace(pattern->id, ImagePosition{rectWithoutExtraPadding(rect), *pattern, version});
     }
 
     return imageAtlas;
