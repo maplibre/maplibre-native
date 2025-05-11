@@ -73,8 +73,7 @@ EvaluationResult In::evaluate(const EvaluationContext& params) const {
         return EvaluationResult(haystackString.find(needleString) != std::string::npos);
     } else {
         const auto haystackArray = evaluatedHaystack->get<std::vector<Value>>();
-        return EvaluationResult(std::find(haystackArray.begin(), haystackArray.end(), *evaluatedNeedle) !=
-                                haystackArray.end());
+        return EvaluationResult(std::ranges::find(haystackArray, *evaluatedNeedle) != haystackArray.end());
     }
 }
 

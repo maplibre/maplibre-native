@@ -126,10 +126,10 @@ template class Match<std::string>;
 using InputType = variant<int64_t, std::string>;
 
 using namespace mbgl::style::conversion;
-std::optional<InputType> parseInputValue(const Convertible& input,
-                                         ParsingContext& parentContext,
-                                         std::size_t index,
-                                         std::optional<type::Type>& inputType) {
+static std::optional<InputType> parseInputValue(const Convertible& input,
+                                                ParsingContext& parentContext,
+                                                std::size_t index,
+                                                std::optional<type::Type>& inputType) {
     using namespace mbgl::style::conversion;
     std::optional<InputType> result;
     std::optional<type::Type> type;

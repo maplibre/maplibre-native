@@ -51,9 +51,8 @@ EvaluationResult toColor(const Value& colorValue) {
         },
         [&colorValue](const std::vector<Value>& components) -> EvaluationResult {
             const std::size_t len = components.size();
-            bool isNumeric = std::all_of(components.begin(), components.end(), [](const Value& item) -> bool {
-                return item.template is<double>();
-            });
+            bool isNumeric = std::ranges::all_of(components,
+                                                 [](const Value& item) -> bool { return item.template is<double>(); });
             if ((len == 3 || len == 4) && isNumeric) {
                 Result<Color> c = {rgba(components[0].template get<double>(),
                                         components[1].template get<double>(),
@@ -77,9 +76,8 @@ EvaluationResult toPadding(const Value& paddingValue) {
         [](const Padding& padding) -> EvaluationResult { return padding; },
         [&](const std::vector<Value>& components) -> EvaluationResult {
             const std::size_t len = components.size();
-            const bool isNumeric = std::all_of(components.begin(), components.end(), [](const Value& item) -> bool {
-                return item.template is<double>();
-            });
+            const bool isNumeric = std::ranges::all_of(
+                components, [](const Value& item) -> bool { return item.template is<double>(); });
             if ((len >= 1 && len <= 4) && isNumeric) {
                 float componentsAsFloats[4] = {0};
                 for (std::size_t i = 0; i < len; i++) {

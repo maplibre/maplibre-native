@@ -5,9 +5,11 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
+namespace {
 std::string stringifyColor(double r, double g, double b, double a) {
     return stringify(r) + ", " + stringify(g) + ", " + stringify(b) + ", " + stringify(a);
 }
+} // namespace
 
 Result<Color> rgba(double r, double g, double b, double a) {
     if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {

@@ -15,8 +15,8 @@ namespace conversion {
 using namespace mbgl::style::expression;
 
 static bool isExpression(const Convertible& filter);
-ParseResult convertLegacyFilter(const Convertible& values, Error& error);
-std::optional<mbgl::Value> serializeLegacyFilter(const Convertible& values);
+static ParseResult convertLegacyFilter(const Convertible& values, Error& error);
+static std::optional<mbgl::Value> serializeLegacyFilter(const Convertible& values);
 
 std::optional<Filter> Converter<Filter>::operator()(const Convertible& value, Error& error) const {
     if (isExpression(value)) {
@@ -34,7 +34,7 @@ std::optional<Filter> Converter<Filter>::operator()(const Convertible& value, Er
             assert(error.message.size() > 0);
             return std::nullopt;
         }
-        return Filter(std::optional<std::unique_ptr<Expression>>(std::move(*expression)), serializeLegacyFilter(value));
+        return Filter(std::optional<std::unique_ptr<Expression>>(std::move(expression)), serializeLegacyFilter(value));
     }
 }
 
@@ -80,9 +80,9 @@ bool isExpression(const Convertible& filter) {
     }
 }
 
-ParseResult createExpression(const std::string& op,
-                             std::optional<std::vector<std::unique_ptr<Expression>>> args,
-                             Error& error) {
+static ParseResult createExpression(const std::string& op,
+                                    std::optional<std::vector<std::unique_ptr<Expression>>> args,
+                                    Error& error) {
     if (!args) return {};
     assert(std::all_of(args->begin(), args->end(), [](const std::unique_ptr<Expression>& e) { return bool(e.get()); }));
 
@@ -102,7 +102,7 @@ ParseResult createExpression(const std::string& op,
     }
 }
 
-ParseResult createExpression(const std::string& op, ParseResult arg, Error& error) {
+static ParseResult createExpression(const std::string& op, ParseResult arg, Error& error) {
     if (!arg) {
         return {};
     }
@@ -112,7 +112,7 @@ ParseResult createExpression(const std::string& op, ParseResult arg, Error& erro
     return createExpression(op, std::move(args), error);
 }
 
-ParseResult convertLiteral(const Convertible& convertible, Error& error) {
+static ParseResult convertLiteral(const Convertible& convertible, Error& error) {
     ParsingContext parsingContext;
     ParseResult parseResult = Literal::parse(convertible, parsingContext);
     if (parseResult) {
@@ -123,9 +123,9 @@ ParseResult convertLiteral(const Convertible& convertible, Error& error) {
     }
 }
 
-std::optional<std::vector<std::unique_ptr<Expression>>> convertLiteralArray(const Convertible& input,
-                                                                            Error& error,
-                                                                            std::size_t startIndex = 0) {
+static std::optional<std::vector<std::unique_ptr<Expression>>> convertLiteralArray(const Convertible& input,
+                                                                                   Error& error,
+                                                                                   std::size_t startIndex = 0) {
     std::vector<std::unique_ptr<Expression>> output;
     output.reserve(arrayLength(input));
     for (std::size_t i = startIndex; i < arrayLength(input); ++i) {
@@ -138,9 +138,9 @@ std::optional<std::vector<std::unique_ptr<Expression>>> convertLiteralArray(cons
     return {std::move(output)};
 }
 
-ParseResult convertLegacyComparisonFilter(const Convertible& values,
-                                          Error& error,
-                                          const std::optional<std::string>& opOverride = std::nullopt) {
+static ParseResult convertLegacyComparisonFilter(const Convertible& values,
+                                                 Error& error,
+                                                 const std::optional<std::string>& opOverride = std::nullopt) {
     auto op = opOverride ? opOverride : toString(arrayMember(values, 0));
     auto property = toString(arrayMember(values, 1));
 
@@ -156,7 +156,7 @@ ParseResult convertLegacyComparisonFilter(const Convertible& values,
     }
 }
 
-ParseResult convertLegacyHasFilter(const Convertible& values, Error& error) {
+static ParseResult convertLegacyHasFilter(const Convertible& values, Error& error) {
     std::optional<std::string> property = toString(arrayMember(values, 1));
 
     if (!property) {
@@ -171,7 +171,7 @@ ParseResult convertLegacyHasFilter(const Convertible& values, Error& error) {
     }
 }
 
-ParseResult convertLegacyInFilter(const Convertible& values, Error& error) {
+static ParseResult convertLegacyInFilter(const Convertible& values, Error& error) {
     std::optional<std::string> property = toString(arrayMember(values, 1));
 
     if (!property) {
@@ -188,9 +188,9 @@ ParseResult convertLegacyInFilter(const Convertible& values, Error& error) {
     }
 }
 
-std::optional<std::vector<std::unique_ptr<Expression>>> convertLegacyFilterArray(const Convertible& input,
-                                                                                 Error& error,
-                                                                                 std::size_t startIndex = 0) {
+static std::optional<std::vector<std::unique_ptr<Expression>>> convertLegacyFilterArray(const Convertible& input,
+                                                                                        Error& error,
+                                                                                        std::size_t startIndex = 0) {
     std::vector<std::unique_ptr<Expression>> output;
     output.reserve(arrayLength(input));
     for (std::size_t i = startIndex; i < arrayLength(input); ++i) {

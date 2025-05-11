@@ -355,7 +355,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         for (auto& lg : {outlineLayerGroup, textLayerGroup}) {
             lg->removeDrawablesIf([&](gfx::Drawable& drawable) {
                 return drawable.getName() == drawableName &&
-                       !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
+                       !(drawable.getTileID().has_value() && newTiles.contains(*drawable.getTileID()));
             });
         }
 

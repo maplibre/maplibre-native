@@ -236,6 +236,7 @@ static std::unique_ptr<detail::SignatureBase> makeSignature(std::string name,
 
 } // namespace detail
 
+namespace {
 Value featureIdAsExpressionValue(const EvaluationContext& params) {
     assert(params.feature);
     auto id = params.feature->getID();
@@ -298,17 +299,17 @@ std::optional<std::string> featureIdAsString(const EvaluationContext& params) {
 };
 
 const auto& eCompoundExpression() {
-    static auto signature = detail::makeSignature("e", []() -> Result<double> { return 2.718281828459045; });
+    static auto signature = detail::makeSignature("e", []() -> Result<double> { return std::numbers::e; });
     return signature;
 }
 
 const auto& piCompoundExpression() {
-    static auto signature = detail::makeSignature("pi", []() -> Result<double> { return 3.141592653589793; });
+    static auto signature = detail::makeSignature("pi", []() -> Result<double> { return std::numbers::pi; });
     return signature;
 }
 
 const auto& ln2CompoundExpression() {
-    static auto signature = detail::makeSignature("ln2", []() -> Result<double> { return 0.6931471805599453; });
+    static auto signature = detail::makeSignature("ln2", []() -> Result<double> { return std::numbers::ln2; });
     return signature;
 }
 
@@ -410,7 +411,7 @@ const auto& hasObjectCompoundExpression() {
     static auto signature = detail::makeSignature(
         "has",
         [](const std::string& key, const std::unordered_map<std::string, Value>& object) -> Result<bool> {
-            return object.find(key) != object.end();
+            return object.contains(key);
         },
         Dependency::Feature);
     return signature;
@@ -440,7 +441,7 @@ const auto& getObjectCompoundExpression() {
     static auto signature = detail::makeSignature(
         "get",
         [](const std::string& key, const std::unordered_map<std::string, Value>& object) -> Result<Value> {
-            if (object.find(key) == object.end()) {
+            if (!object.contains(key)) {
                 return Null;
             }
             return object.at(key);
@@ -987,6 +988,7 @@ const auto& filterInCompoundExpression() {
         Dependency::Feature);
     return signature;
 }
+} // namespace
 
 using ParseCompoundFunction = const std::unique_ptr<detail::SignatureBase>& (*)();
 constexpr const auto compoundExpressionRegistry =

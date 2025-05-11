@@ -87,7 +87,7 @@ ParseResult Coalesce::parse(const Convertible& value, ParsingContext& ctx) {
     // preempt the desired null-coalescing behavior.
     // Thus, if any of our arguments would have needed an annotation, we
     // need to wrap the enclosing coalesce expression with it instead.
-    bool needsAnnotation = expectedType && std::any_of(args.begin(), args.end(), [&](const auto& arg) {
+    bool needsAnnotation = expectedType && std::ranges::any_of(args, [&](const auto& arg) {
                                return type::checkSubtype(*expectedType, arg->getType());
                            });
 

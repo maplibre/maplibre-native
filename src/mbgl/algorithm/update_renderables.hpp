@@ -6,6 +6,7 @@
 
 #include <unordered_set>
 #include <optional>
+#include <utility>
 
 namespace mbgl {
 namespace algorithm {
@@ -90,7 +91,8 @@ void updateRenderables(GetTileFn getTile,
 
             if (!covered) {
                 // We couldn't find child tiles that entirely cover the ideal tile.
-                for (overscaledZ = idealDataTileID.overscaledZ - 1; overscaledZ >= zoomRange.min; --overscaledZ) {
+                for (overscaledZ = idealDataTileID.overscaledZ - 1; std::cmp_greater_equal(overscaledZ, zoomRange.min);
+                     --overscaledZ) {
                     const auto parentDataTileID = idealDataTileID.scaledTo(overscaledZ);
 
                     // Request / render parent tile only if it's overscale
