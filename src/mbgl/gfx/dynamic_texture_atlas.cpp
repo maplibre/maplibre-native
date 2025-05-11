@@ -12,10 +12,7 @@ constexpr const Size startSize = {512, 512};
 
 Rect<uint16_t> rectWithoutExtraPadding(const Rect<uint16_t>& rect) {
     return Rect<uint16_t>{
-        rect.x + extraPadding,
-        rect.y + extraPadding,
-        rect.w - 2 * extraPadding,
-        rect.h - 2 * extraPadding};
+        rect.x + extraPadding, rect.y + extraPadding, rect.w - 2 * extraPadding, rect.h - 2 * extraPadding};
 }
 
 GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
@@ -96,7 +93,8 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
             glyphAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
         }
         glyphAtlas.textureHandles.emplace_back(texHandle);
-        glyphAtlas.glyphPositions[fontStack].emplace(glyph->id, GlyphPosition{rectWithoutExtraPadding(rect), glyph->metrics});
+        glyphAtlas.glyphPositions[fontStack].emplace(glyph->id,
+                                                     GlyphPosition{rectWithoutExtraPadding(rect), glyph->metrics});
     }
     return glyphAtlas;
 }
@@ -229,7 +227,8 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
         imageAtlas.textureHandles.emplace_back(texHandle);
         const auto it = versionMap.find(pattern->id);
         const auto version = it != versionMap.end() ? it->second : 0;
-        imageAtlas.patternPositions.emplace(pattern->id, ImagePosition{rectWithoutExtraPadding(rect), *pattern, version});
+        imageAtlas.patternPositions.emplace(pattern->id,
+                                            ImagePosition{rectWithoutExtraPadding(rect), *pattern, version});
     }
 
     return imageAtlas;
