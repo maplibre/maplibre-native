@@ -1,3 +1,4 @@
+#include <mapbox/feature.hpp>
 #include <mbgl/tile/vector_mlt_tile_data.hpp>
 
 #include <mbgl/util/constants.hpp>
@@ -5,6 +6,7 @@
 #include <mbgl/util/logging.hpp>
 
 #include <mlt/decoder.hpp>
+#include <mlt/layer.hpp>
 #include <mlt/metadata/tileset_protozero.hpp>
 #include <mlt/metadata/tileset.hpp>
 
@@ -13,6 +15,7 @@ namespace mbgl {
 using GeometryType = mlt::metadata::tileset::GeometryType;
 
 VectorMLTTileFeature::VectorMLTTileFeature(std::shared_ptr<const MapLibreTile> tile_,
+                                           const mlt::Layer& layer_,
                                            const mlt::Feature& feature_,
 #if MLT_UNPACK_MULTI_GEOMETRY
                                            std::uint32_t subIndex_,
@@ -20,6 +23,7 @@ VectorMLTTileFeature::VectorMLTTileFeature(std::shared_ptr<const MapLibreTile> t
                                            std::uint32_t extent_,
                                            int version_)
     : tile(std::move(tile_)),
+      layer(layer_),
       feature(feature_),
 #if MLT_UNPACK_MULTI_GEOMETRY
       subIndex(subIndex_),
@@ -62,18 +66,21 @@ struct PropertyVisitor {
 } // namespace
 
 std::optional<Value> VectorMLTTileFeature::getValue(const std::string& key) const {
-    if (const auto hit = feature.getProperties().find(key); hit != feature.getProperties().end()) {
-        return std::visit(PropertyVisitor(), hit->second);
+    if (auto prop = feature.getProperty(key, layer)) {
+        return std::visit(PropertyVisitor(), *prop);
     }
     return std::nullopt;
 }
 
 const PropertyMap& VectorMLTTileFeature::getProperties() const {
     if (!properties) {
+        const PropertyVisitor visitor;
         properties.emplace();
-        properties->reserve(feature.getProperties().size());
-        for (const auto& [key, value] : feature.getProperties()) {
-            properties->emplace(key, std::visit(PropertyVisitor(), value));
+        properties->reserve(layer.getProperties().size());
+        for (const auto& [key, props] : layer.getProperties()) {
+            auto value = props.getProperty(feature.getIndex());
+            auto prop = value ? std::visit(visitor, std::move(*value)) : mapbox::feature::null_value;
+            properties->emplace(key, std::move(prop));
         }
     }
     return *properties;
@@ -230,6 +237,7 @@ std::unique_ptr<GeometryTileFeature> VectorMLTTileLayer::getFeature(std::size_t 
         targetFeature = &features[index];
     }
     return std::make_unique<VectorMLTTileFeature>(tile,
+                                                  layer,
                                                   *targetFeature,
 #if MLT_UNPACK_MULTI_GEOMETRY
                                                   subIndex,

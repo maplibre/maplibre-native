@@ -19,6 +19,7 @@ using MapLibreTile = mlt::MapLibreTile;
 class VectorMLTTileFeature : public GeometryTileFeature {
 public:
     VectorMLTTileFeature(std::shared_ptr<const MapLibreTile>,
+                         const mlt::Layer& layer_,
                          const mlt::Feature&,
 #if MLT_UNPACK_MULTI_GEOMETRY
                          std::uint32_t subIndex_,
@@ -28,6 +29,7 @@ public:
     VectorMLTTileFeature(const VectorMLTTileFeature&) = delete;
     VectorMLTTileFeature(VectorMLTTileFeature&& other)
         : tile(std::move(other.tile)),
+          layer(other.layer),
           feature(other.feature),
 #if MLT_UNPACK_MULTI_GEOMETRY
           subIndex(other.subIndex),
@@ -49,6 +51,7 @@ public:
 
 private:
     std::shared_ptr<const MapLibreTile> tile;
+    const mlt::Layer& layer;
     mlt::Feature const& feature;
 #if MLT_UNPACK_MULTI_GEOMETRY
     std::uint32_t subIndex;
