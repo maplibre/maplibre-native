@@ -1,8 +1,6 @@
 #include <mbgl/gfx/rendering_stats.hpp>
 
-#include <algorithm>
 #include <initializer_list>
-#include <sstream>
 
 namespace mbgl {
 namespace gfx {
@@ -20,7 +18,7 @@ bool RenderingStats::isZero() const {
                                 memIndexBuffers,
                                 memVertexBuffers,
                                 memUniformBuffers};
-    return std::all_of(expectedZeros.begin(), expectedZeros.end(), [](auto x) { return x == 0; });
+    return std::ranges::all_of(expectedZeros, [](auto x) { return x == 0; });
 }
 
 RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {

@@ -52,6 +52,7 @@ public:
 
     std::unique_ptr<gfx::Program<Name>> program;
 
+    // NOLINTNEXTLINE(bugprone-crtp-constructor-accessibility) We don't want to list every derived class as a friend
     Program([[maybe_unused]] const ProgramParameters& programParameters) {
         switch (gfx::Backend::GetType()) {
 #if MLN_RENDER_BACKEND_METAL
