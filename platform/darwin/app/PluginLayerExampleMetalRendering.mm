@@ -172,7 +172,7 @@ typedef struct
     if (offsetX) {
         _offsetX = [[layerProperties objectForKey:@"offset-x"] floatValue];
     }
-    
+
     NSNumber *scale = [layerProperties objectForKey:@"scale"];
     if (scale) {
         if ([scale isKindOfClass:[NSNumber class]]) {
