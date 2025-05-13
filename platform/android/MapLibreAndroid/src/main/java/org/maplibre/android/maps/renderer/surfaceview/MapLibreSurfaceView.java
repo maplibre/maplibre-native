@@ -435,9 +435,9 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
       synchronized (renderThreadManager) {
         shouldExit = true;
         renderThreadManager.notifyAll();
-        while (!exited) {
+        while (!exited && this.isAlive()) {
           try {
-            renderThreadManager.wait();
+            renderThreadManager.wait(100);
           } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
           }
