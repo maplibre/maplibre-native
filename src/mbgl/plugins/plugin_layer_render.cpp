@@ -41,11 +41,11 @@ protected:
 };
 
 void RenderPluginLayerTweaker::init(mbgl::gfx::Drawable& drawablee) {
-   // std::cout << "RenderPluginLayerTweaker::init\n";
+    // std::cout << "RenderPluginLayerTweaker::init\n";
 };
 
 void RenderPluginLayerTweaker::execute(mbgl::gfx::Drawable& drawable, mbgl::PaintParameters& paintParameters) {
-   // std::cout << "RenderPluginLayerTweaker::execute\n";
+    // std::cout << "RenderPluginLayerTweaker::execute\n";
 
     // custom drawing
     auto& context = paintParameters.context;
@@ -85,7 +85,7 @@ RenderPluginLayer::RenderPluginLayer(Immutable<style::PluginLayer::Impl> _impl)
 RenderPluginLayer::~RenderPluginLayer() = default;
 
 void RenderPluginLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
-   // std::cout << "markLayerRenderable\n";
+    // std::cout << "markLayerRenderable\n";
     isRenderable = true;
 }
 
@@ -134,11 +134,11 @@ void RenderPluginLayer::update(gfx::ShaderRegistry& shaderRegistery,
 }
 
 void RenderPluginLayer::upload(gfx::UploadPass& uploadPass) {
-   // std::cout << "Upload\n";
+    // std::cout << "Upload\n";
 }
 
 void RenderPluginLayer::render(PaintParameters& paintParameters) {
-   // std::cout << "Render\n";
+    // std::cout << "Render\n";
     if (_renderFunction) {
         _renderFunction(paintParameters);
     }
@@ -146,11 +146,10 @@ void RenderPluginLayer::render(PaintParameters& paintParameters) {
 
 void RenderPluginLayer::prepare(const LayerPrepareParameters& layerParameters) {
     // TODO: What should be implemented here?
-//    std::cout << "prepare\n";
+    //    std::cout << "prepare\n";
     if (_updateFunction) {
         _updateFunction(layerParameters);
     }
-
 }
 
 // --- Private methods
@@ -161,8 +160,7 @@ void RenderPluginLayer::transition(const TransitionParameters& parameters) {
 #endif
 }
 
-//static Color defaultValue() { return Color::black(); }
-
+// static Color defaultValue() { return Color::black(); }
 
 void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters) {
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
@@ -171,13 +169,14 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
     
     //auto i = staticImmutableCast<style::PluginLayer::Impl>(baseImpl);
     auto i = static_cast<const style::PluginLayer::Impl *>(baseImpl.get());
+
     auto pm = i->_propertyManager;
     auto p = pm.getProperty("scale");
     if (p == nullptr) {
         return;
     }
-    
-    auto & f = p->getSingleFloat();
+
+    auto& f = p->getSingleFloat();
     using Evaluator = typename style::Scale::EvaluatorType;
     auto df = p->_defaultSingleFloatValue;
     auto newF = f.evaluate(Evaluator(parameters, df), parameters.now);
@@ -205,19 +204,28 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
 //    property->getScale().evaluate(Evaluator(parameters, P::defaultValue()), parameters.now));
    // property->getScale().evaluate(Evaluator(parameters, 1.0), parameters.now));
 
-    
-    
-//
-//    auto properties = makeMutable<HeatmapLayerProperties>(
-//        staticImmutableCast<HeatmapLayer::Impl>(baseImpl),
-//        unevaluated.evaluate(parameters, previousProperties->evaluated));
-//
-//    evaluatedProperties = std::move(properties);
-    
+
+    //    auto & scale = p->getScale();
+    //    using Evaluator = typename style::Scale::EvaluatorType;
+    //    auto newScale = scale.evaluate(Evaluator(parameters, style::Scale::defaultValue()), parameters.now);
+    // p->getScale().evaluate(<#const Evaluator &evaluator#>)
+    // using Evaluator = typename style::Scale::EvaluatorType;
+    // p->getScale().evaluate(Evaluator(parameters, style::Scale::defaultValue()), parameters.now);
+
+    //    property->getScale().evaluate(Evaluator(parameters, P::defaultValue()), parameters.now));
+    // property->getScale().evaluate(Evaluator(parameters, 1.0), parameters.now));
+
+    //
+    //    auto properties = makeMutable<HeatmapLayerProperties>(
+    //        staticImmutableCast<HeatmapLayer::Impl>(baseImpl),
+    //        unevaluated.evaluate(parameters, previousProperties->evaluated));
+    //
+    //    evaluatedProperties = std::move(properties);
+
     /*
-    
+
     const auto previousProperties = staticImmutableCast<>(evaluatedProperties);
-    
+
     const auto previousProperties = staticImmutableCast<HeatmapLayerProperties>(evaluatedProperties);
     auto properties = makeMutable<HeatmapLayerProperties>(
         staticImmutableCast<HeatmapLayer::Impl>(baseImpl),
@@ -236,7 +244,6 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
     }
 
     */
-    
 }
 
 bool RenderPluginLayer::hasTransition() const {
@@ -259,7 +266,7 @@ bool RenderPluginLayer::queryIntersectsFeature(const GeometryCoordinates&,
 void RenderPluginLayer::layerChanged(const TransitionParameters& parameters,
                                      const Immutable<style::Layer::Impl>& impl,
                                      UniqueChangeRequestVec& changes) {
-  //  std::cout << "layerChanged\n";
+    //  std::cout << "layerChanged\n";
 }
 
 /// Remove all drawables for the tile from the layer group

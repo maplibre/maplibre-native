@@ -10,12 +10,6 @@
 #include <iostream>
 #include "plugin_layer_debug.hpp"
 
-
-
-
-
-
-
 /*
 //#include <mbgl/style/layers/heatmap_layer.hpp>
 //#include <mbgl/style/layers/heatmap_layer_impl.hpp>
@@ -202,10 +196,10 @@ std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::str
 
     /*
     Property<
-    
+
 
     auto property = static_cast<Property>(it->second);
-    
+
     Error error;
     std::optional<TransitionOptions> transition = convert<TransitionOptions>(value, error);
     if (!transition) {
@@ -218,10 +212,10 @@ std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::str
     std::cout << "Property Name: " << name << "\n";
 #endif
     
-    //auto i = impl();
-    auto i = (mbgl::style::PluginLayer::Impl *)baseImpl.get();
+    // auto i = impl();
+    auto i = (mbgl::style::PluginLayer::Impl*)baseImpl.get();
 
-    PluginLayerProperty *property = i->_propertyManager.getProperty(name);
+    PluginLayerProperty* property = i->_propertyManager.getProperty(name);
     if (property == nullptr) {
         property = new PluginLayerProperty();
         property->_propertyName = name;
@@ -237,28 +231,25 @@ std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::str
     */
     // Hard coding for testing
     if (name == "scale") {
-        
-//        auto tv = convert<Scale>(value, error, false, false)
+        //        auto tv = convert<Scale>(value, error, false, false)
         Error error;
-        const auto & tv = convert<PropertyValue<Scale>>(value, error, false, false);
-//        const auto & tv = convert<Scale>(value, error, false, false);
+        const auto& tv = convert<PropertyValue<Scale>>(value, error, false, false);
+        //        const auto & tv = convert<Scale>(value, error, false, false);
         if (!tv) {
             return error;
         }
-        const auto & tv2 = convert<PropertyValue<float>>(value, error, false, false);
+        const auto& tv2 = convert<PropertyValue<float>>(value, error, false, false);
         if (!tv2) {
             return error;
         }
 
         auto tv3 = tv2.value();
-        
-        property->setSingleFloat(tv3);
-        
-//        property->setScale(*tv2);
-//        property->setScale2(*tv);
-//        property->setPropertyValue(value); // *tv);
 
-        
+        property->setSingleFloat(tv3);
+
+        //        property->setScale(*tv2);
+        //        property->setScale2(*tv);
+        //        property->setPropertyValue(value); // *tv);
     }
     /*
     Error error;
@@ -267,15 +258,11 @@ std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::str
         return error;
     }
 */
-    //setHeatmapColor(*typedValue);
+    // setHeatmapColor(*typedValue);
 
-    
-    
-    
-    
     return std::nullopt;
-    
-    //return Error{"Not implemented yet"};
+
+    // return Error{"Not implemented yet"};
 }
 
 StyleProperty PluginLayer::getProperty(const std::string& name) const {

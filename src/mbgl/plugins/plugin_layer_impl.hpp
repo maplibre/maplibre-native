@@ -5,8 +5,6 @@
 // #include <mbgl/style/layers/plugin_layer_properties.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 
-
-
 // ---------------------------------------------------
 // Properties stuff
 #include <map>
@@ -39,7 +37,6 @@
 */
 // ---------------------------------------------------
 
-
 namespace mbgl {
 namespace style {
 
@@ -49,14 +46,11 @@ struct SingleFloatProperty : DataDrivenPaintProperty<float, attributes::width, u
     static float defaultValue() { return 1.f; }
 };
 
-
 struct Scale : DataDrivenPaintProperty<float, attributes::width, uniforms::width> {
     static float defaultValue() { return 1.f; }
 };
 
-class PluginPaintProperties : public Properties<
-    Scale
->{};
+class PluginPaintProperties : public Properties<Scale> {};
 
 template <>
 struct Converter<Scale> {
@@ -69,23 +63,23 @@ struct Converter<Scale> {
 template <>
 struct Converter<PropertyValue<Scale>> {
     std::optional<PropertyValue<Scale>> operator()(const Convertible& value,
-                                    Error& error,
-                                    bool /* allowDataExpressions */ = true,
-                                    bool /* convertTokens */ = false) const;
+                                                   Error& error,
+                                                   bool /* allowDataExpressions */ = true,
+                                                   bool /* convertTokens */ = false) const;
 };
 
-
 //
-//template std::optional<PropertyValue<Scale>> Converter<PropertyValue<Scale>>::operator()(conversion::Convertible const&,
+// template std::optional<PropertyValue<Scale>> Converter<PropertyValue<Scale>>::operator()(conversion::Convertible
+// const&,
 //                                                                                         conversion::Error&,
 //                                                                                         bool,
 //                                                                                         bool) const;
-
 
 class PluginLayerProperty {
 public:
     std::string _propertyName;
     void setPropertyValue(const conversion::Convertible& value);
+
 public:
     const PropertyValue<float> &getSingleFloat() const;
     void setSingleFloat(const PropertyValue<float> &value);
@@ -104,32 +98,26 @@ public:
     void setScale(const PropertyValue<float>& value);
     void setScaleTransition(const TransitionOptions& options);
     TransitionOptions getScaleTransition() const;
-    
+
     const PropertyValue<Scale>& getScale2() const;
     void setScale2(const PropertyValue<Scale>& value);
     void setScale2Transition(const TransitionOptions& options);
     TransitionOptions getScale2Transition() const;
-    
-    
+
 private:
     PluginPaintProperties::Transitionable paint;
-
-    
-    
 };
 
 class PluginLayerPropertyManager {
 public:
-    PluginLayerProperty *getProperty(const std::string & propertyName);
-    void addProperty(PluginLayerProperty *property);
+    PluginLayerProperty* getProperty(const std::string& propertyName);
+    void addProperty(PluginLayerProperty* property);
 
     std::string propertiesAsJSON();
     
 private:
-    std::map<std::string, PluginLayerProperty *> _properties;
-
+    std::map<std::string, PluginLayerProperty*> _properties;
 };
-
 
 class PluginLayer::Impl : public Layer::Impl {
 public:
@@ -148,19 +136,15 @@ public:
         // return nullptr;
     }
 
-    void setRenderFunction(OnRenderLayer renderFunction) {
-        _renderFunction = renderFunction;
-    }
-    
-    void setUpdateFunction(OnUpdateLayer updateFunction) {
-        _updateFunction = updateFunction;
-    }
-    
-    void setUpdatePropertiesFunction(OnUpdateLayerProperties updateLayerPropertiesFunction) { _updateLayerPropertiesFunction = updateLayerPropertiesFunction; }
+    void setRenderFunction(OnRenderLayer renderFunction) { _renderFunction = renderFunction; }
 
-    
+    void setUpdateFunction(OnUpdateLayer updateFunction) { _updateFunction = updateFunction; }
+
+    void setUpdatePropertiesFunction(OnUpdateLayerProperties updateLayerPropertiesFunction) {
+        _updateLayerPropertiesFunction = updateLayerPropertiesFunction;
+    }
+
     PluginLayerPropertyManager _propertyManager;
-
 
     OnRenderLayer _renderFunction;
     OnUpdateLayer _updateFunction;
