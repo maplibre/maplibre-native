@@ -10,7 +10,6 @@
 #include <iostream>
 #include "plugin_layer_debug.hpp"
 
-
 namespace mbgl {
 namespace style {
 
@@ -82,13 +81,13 @@ std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::str
     if (property == nullptr) {
         return Error{"layer doesn't support this property"};
 
-//        property = new PluginLayerProperty();
-//        // TODO: This needs ot be passed in
-//        property->_propertyType = PluginLayerProperty::PropertyType::SingleFloat;
-//        property->_propertyName = name;
-//        i->_propertyManager.addProperty(property);
+        //        property = new PluginLayerProperty();
+        //        // TODO: This needs ot be passed in
+        //        property->_propertyType = PluginLayerProperty::PropertyType::SingleFloat;
+        //        property->_propertyName = name;
+        //        i->_propertyManager.addProperty(property);
     }
-    
+
     Error error;
 
     if (property->_propertyType == PluginLayerProperty::PropertyType::SingleFloat) {
@@ -98,7 +97,7 @@ std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::str
         }
         property->setSingleFloat(tempValue.value());
     }
-    
+
     /*
     // Hard coding for testing
     if (name == "scale") {

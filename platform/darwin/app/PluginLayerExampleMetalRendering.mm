@@ -39,16 +39,16 @@ typedef struct
     tempResult.layerID = @"plugin-layer-metal-rendering";
     tempResult.tileKind = MLNPluginLayerTileKindNotRequired;
     tempResult.requiresPass3D = YES;
-    
+
     // Setup the properties
     tempResult.layerProperties = @[
         // The scale property
         [MLNPluginLayerProperty propertyWithName:@"scale"
                                     propertyType:MLNPluginLayerPropertyTypeSingleFloat]
-        
+
         // TBD
     ];
-    
+
     return tempResult;
 
 }

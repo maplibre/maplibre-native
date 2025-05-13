@@ -7574,7 +7574,7 @@ static void *windowScreenContext = &windowScreenContext;
     }
 
 
-    
+
     auto factory = std::make_unique<mbgl::PluginLayerFactory>(layerType,
                                                source,
                                                pass3D,
@@ -7594,7 +7594,7 @@ static void *windowScreenContext = &windowScreenContext;
         // Use weak here so there isn't a retain cycle
         MLNPluginLayer *weakPlugInLayer = layer;
 
-        
+
         MLNPluginLayerCapabilities *capabilities = [pluginLayerClass layerCapabilities];
         auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
         auto & pm = pluginLayerImpl->_propertyManager;
@@ -7613,7 +7613,7 @@ static void *windowScreenContext = &windowScreenContext;
             pm.addProperty(p);
         }
 
-        
+
         // Set the render function
         auto renderFunction = [weakPlugInLayer, weakMapView](mbgl::PaintParameters& paintParameters){
 

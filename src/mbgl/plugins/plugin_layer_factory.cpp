@@ -239,7 +239,7 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
         auto layerRaw = tempResult.get();
         auto pluginLayer = static_cast<mbgl::style::PluginLayer*>(layerRaw);
         _onLayerCreated(pluginLayer);
-        auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
+        auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl*)pluginLayer->baseImpl.get();
         if (pluginLayerImpl->_updateLayerPropertiesFunction != nullptr) {
             pluginLayerImpl->_updateLayerPropertiesFunction(layerProperties);
         }

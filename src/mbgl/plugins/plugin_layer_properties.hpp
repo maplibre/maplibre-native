@@ -30,11 +30,6 @@ public:
     //    HeatmapPaintProperties::PossiblyEvaluated evaluated;
 };
 
-
-
-
-
-
 } // namespace style
 } // namespace mbgl
 
