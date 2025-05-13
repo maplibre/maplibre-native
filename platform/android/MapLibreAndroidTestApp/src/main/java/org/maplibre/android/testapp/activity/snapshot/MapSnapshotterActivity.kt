@@ -70,13 +70,12 @@ class MapSnapshotterActivity : AppCompatActivity() {
         val styles = arrayOf(
             TestStyles.DEMOTILES,
             TestStyles.AMERICANA,
-            TestStyles.OPENFREEMAP_LIBERY,
+            TestStyles.OPENFREEMAP_LIBERTY,
             TestStyles.AWS_OPEN_DATA_STANDARD_LIGHT,
             TestStyles.PROTOMAPS_LIGHT,
             TestStyles.PROTOMAPS_DARK,
             TestStyles.PROTOMAPS_WHITE,
-            TestStyles.PROTOMAPS_GRAYSCALE,
-            TestStyles.VERSATILES
+            TestStyles.PROTOMAPS_GRAYSCALE
         )
         val builder = Style.Builder().fromUri(
             styles[(row * grid.rowCount + column) % styles.size]

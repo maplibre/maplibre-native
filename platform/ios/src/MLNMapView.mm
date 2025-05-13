@@ -4098,10 +4098,10 @@ static void *windowScreenContext = &windowScreenContext;
         self.userTrackingMode = MLNUserTrackingModeFollow;
     }
 
-    [self _setDirection:direction animated:animated];
+    [self _setDirection:direction center:kCLLocationCoordinate2DInvalid animated:animated];
 }
 
-- (void)_setDirection:(CLLocationDirection)direction animated:(BOOL)animated
+- (void)_setDirection:(CLLocationDirection)direction center:(CLLocationCoordinate2D)center animated:(BOOL)animated
 {
     if (!_mbglMap)
     {
@@ -4123,10 +4123,26 @@ static void *windowScreenContext = &windowScreenContext;
     else
     {
         CGPoint anchor = self.userLocationAnnotationViewCenter;
-        self.mbglMap.easeTo(mbgl::CameraOptions()
-                                .withBearing(direction)
-                                .withAnchor(mbgl::ScreenCoordinate { anchor.x, anchor.y }),
-                            MLNDurationFromTimeInterval(duration));
+
+        mbgl::CameraOptions cameraOptions = mbgl::CameraOptions()
+            .withBearing(direction)
+            .withAnchor(mbgl::ScreenCoordinate { anchor.x, anchor.y });
+
+        mbgl::AnimationOptions animationOptions;
+        animationOptions.duration.emplace(MLNDurationFromTimeInterval(duration));
+
+        if (CLLocationCoordinate2DIsValid(center))
+        {
+            cameraOptions.center = MLNLatLngFromLocationCoordinate2D(center);
+
+            if (duration)
+            {
+                CAMediaTimingFunction *function = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
+                animationOptions.easing.emplace(MLNUnitBezierForMediaTimingFunction(function));
+            }
+        }
+
+        self.mbglMap.easeTo(cameraOptions, animationOptions);
     }
 }
 
@@ -6460,7 +6476,7 @@ static void *windowScreenContext = &windowScreenContext;
         if (headingDirection >= 0 && self.userTrackingMode == MLNUserTrackingModeFollowWithHeading
             && self.userTrackingState != MLNUserTrackingStateBegan)
         {
-            [self _setDirection:headingDirection animated:YES];
+            [self _setDirection:headingDirection center:self.userLocation.coordinate animated:YES];
             [self updateUserLocationAnnotationView];
         }
     });
@@ -6933,8 +6949,13 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (void)sourceDidChange:(MLNSource *)source {
-    // no-op: we only show attribution after tapping the info button, so there's no
-    // interactive update needed.
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:sourceDidChange:)]) {
+        [self.delegate mapView:self sourceDidChange:source];
+    }
 }
 
 - (void)didFailToLoadImage:(NSString *)imageName {
