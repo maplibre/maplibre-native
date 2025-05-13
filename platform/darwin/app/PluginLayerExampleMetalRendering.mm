@@ -23,6 +23,7 @@ typedef struct
 
     // Properties
     float _offsetX;
+    float _offsetY;
     float _scale;
 }
 
@@ -147,9 +148,9 @@ typedef struct
     Vertex triangleVertices[] =
     {
         // 2D positions,    RGBA colors
-        { {  (250 + _offsetX) * _scale,  -250 * _scale }, { 1, 0, 0, 1 } },
-        { { (-250 + _offsetX) * _scale,  -250 * _scale }, { 0, 1, 0, 1 } },
-        { {    (0 + _offsetX) * _scale,   250 * _scale }, { 0, 0, 1, 1 } },
+        { {  (250 + _offsetX) * _scale,  (-250 + _offsetY) * _scale }, { 1, 0, 0, 1 } },
+        { { (-250 + _offsetX) * _scale,  (-250 + _offsetY) * _scale }, { 0, 1, 0, 1 } },
+        { {    (0 + _offsetX) * _scale,   (250 + _offsetY) * _scale }, { 0, 0, 1, 1 } },
     };
 
     [renderEncoder setRenderPipelineState:_pipelineState];
@@ -181,6 +182,11 @@ typedef struct
     NSNumber *offsetX = [layerProperties objectForKey:@"offset-x"];
     if (offsetX) {
         _offsetX = [[layerProperties objectForKey:@"offset-x"] floatValue];
+    }
+
+    NSNumber *offsetY = [layerProperties objectForKey:@"offset-y"];
+    if (offsetY) {
+        _offsetY = [[layerProperties objectForKey:@"offset-y"] floatValue];
     }
 
     NSNumber *scale = [layerProperties objectForKey:@"scale"];

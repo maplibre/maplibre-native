@@ -40,6 +40,17 @@
             "type": "plugin-layer-metal-rendering",
             "properties": {
                 "color1":"#FFAADD",
+                "offset-x": -300,
+                "offset-y": -300
+            },
+            "paint": {
+                "scale": 2.5
+            }
+        },
+        {   "id": "metal-rendering-layer-2",
+            "type": "plugin-layer-metal-rendering",
+            "properties": {
+                "color1":"#FFAADD",
                 "offset-x": -300
             },
             "paint": {
@@ -54,7 +65,7 @@
                 ]
             }
         },
-        {   "id": "metal-rendering-layer-2",
+        {   "id": "metal-rendering-layer-3",
             "type": "plugin-layer-metal-rendering",
             "properties": {
                 "color1":"#DDAAFF",
