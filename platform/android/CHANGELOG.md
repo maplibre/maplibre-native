@@ -8,7 +8,7 @@
 
 ### 🐞 Bug fixes
 
-- Make sure renderThread is alive before calling requestExitAndWait().
+- Make sure renderThread is alive before calling requestExitAndWait() ([#3461](https://github.com/maplibre/maplibre-native/pull/3461)).
 
 ## 11.8.7
 
