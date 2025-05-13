@@ -1,27 +1,28 @@
-#include <algorithm>
 #include <mbgl/renderer/layers/render_background_layer.hpp>
+
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
+#include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/programs/programs.hpp>
+#include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/image_manager.hpp>
+#include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/layers/background_layer_tweaker.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/pattern_atlas.hpp>
 #include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
+#include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/renderer/upload_parameters.hpp>
-#include <mbgl/style/layers/background_layer_impl.hpp>
+#include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/layer_properties.hpp>
-#include <mbgl/util/tile_cover.hpp>
+#include <mbgl/style/layers/background_layer_impl.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/tile_cover.hpp>
 
-#include <mbgl/renderer/layers/background_layer_tweaker.hpp>
-#include <mbgl/gfx/drawable_builder.hpp>
-#include <mbgl/renderer/change_request.hpp>
-#include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/renderer/update_parameters.hpp>
-#include <mbgl/shaders/shader_program_base.hpp>
+#include <algorithm>
 
 namespace mbgl {
 

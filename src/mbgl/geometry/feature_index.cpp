@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/math/minmax.hpp>
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
@@ -15,8 +14,8 @@
 
 #include <mapbox/geometry/envelope.hpp>
 
+#include <algorithm>
 #include <cassert>
-#include <string>
 
 namespace {
 mbgl::LatLng screenCoordinateToLatLng(mbgl::ScreenCoordinate point,

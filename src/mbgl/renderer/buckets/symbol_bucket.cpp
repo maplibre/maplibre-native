@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <mbgl/renderer/bucket_parameters.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
@@ -8,6 +7,7 @@
 #include <mbgl/text/glyph_atlas.hpp>
 #include <mbgl/text/placement.hpp>
 
+#include <algorithm>
 #include <utility>
 
 namespace mbgl {

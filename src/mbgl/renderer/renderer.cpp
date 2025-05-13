@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <mbgl/renderer/renderer.hpp>
 
 #include <mbgl/annotation/annotation_manager.hpp>
@@ -10,6 +9,8 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/util/instrumentation.hpp>
+
+#include <algorithm>
 
 namespace mbgl {
 

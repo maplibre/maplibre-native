@@ -1,5 +1,5 @@
-#include <algorithm>
 #include <mbgl/style/conversion/function.hpp>
+
 #include <mbgl/style/conversion/position.hpp>
 #include <mbgl/style/conversion/rotation.hpp>
 #include <mbgl/style/conversion_impl.hpp>
@@ -13,6 +13,7 @@
 #include <mbgl/style/expression/step.hpp>
 #include <mbgl/util/string.hpp>
 
+#include <algorithm>
 #include <cassert>
 #include <utility>
 
