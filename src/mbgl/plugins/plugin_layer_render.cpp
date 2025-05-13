@@ -171,23 +171,43 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
     auto i = static_cast<const style::PluginLayer::Impl*>(baseImpl.get());
 
     auto pm = i->_propertyManager;
-    auto p = pm.getProperty("scale");
-    if (p == nullptr) {
+    auto property = pm.getProperty("scale");
+    if (property == nullptr) {
         return;
     }
+    
+    if (property->_propertyType == style::PluginLayerProperty::PropertyType::SingleFloat) {
+      
+        auto& f = property->getSingleFloat();
+        // TODO: need a float based evaluator
+        using Evaluator = typename style::Scale::EvaluatorType;
+        auto df = property->_defaultSingleFloatValue;
+        auto newF = f.evaluate(Evaluator(parameters, df), parameters.now);
+        auto v = newF.constant().value();
+    #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
+        std::cout << "V: " << v << "\n";
+    #endif
+        property->setCurrentSingleFloatValue(v);
 
-    auto& f = p->getSingleFloat();
-    using Evaluator = typename style::Scale::EvaluatorType;
-    auto df = p->_defaultSingleFloatValue;
-    auto newF = f.evaluate(Evaluator(parameters, df), parameters.now);
-    //    auto newF = f.evaluate(Evaluator(parameters, style::Scale::defaultValue()), parameters.now);
-    auto v = newF.constant().value();
-#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-    std::cout << "V: " << v << "\n";
-#endif
+    }
 
-    p->setCurrentSingleFloatValue(v);
+    /*
+     auto& f = property->getSingleFloat();
+     using Evaluator = typename style::Scale::EvaluatorType;
+     auto df = property->_defaultSingleFloatValue;
+     auto newF = f.evaluate(Evaluator(parameters, df), parameters.now);
+     //    auto newF = f.evaluate(Evaluator(parameters, style::Scale::defaultValue()), parameters.now);
+     auto v = newF.constant().value();
+ #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
+     std::cout << "V: " << v << "\n";
+ #endif
 
+     p->setCurrentSingleFloatValue(v);
+
+     */
+    
+    
+    
     std::string jsonProperties = pm.propertiesAsJSON();
 
     i->_updateLayerPropertiesFunction(jsonProperties);

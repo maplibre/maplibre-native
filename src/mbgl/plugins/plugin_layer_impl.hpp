@@ -77,6 +77,13 @@ struct Converter<PropertyValue<Scale>> {
 
 class PluginLayerProperty {
 public:
+    typedef enum {
+        Unknown,
+        SingleFloat
+    } PropertyType;
+    
+public:
+    PropertyType _propertyType = PropertyType::Unknown;
     std::string _propertyName;
     void setPropertyValue(const conversion::Convertible& value);
 
@@ -134,9 +141,13 @@ public:
         // return nullptr;
     }
 
-    void setRenderFunction(OnRenderLayer renderFunction) { _renderFunction = renderFunction; }
+    void setRenderFunction(OnRenderLayer renderFunction) {
+        _renderFunction = renderFunction;
+    }
 
-    void setUpdateFunction(OnUpdateLayer updateFunction) { _updateFunction = updateFunction; }
+    void setUpdateFunction(OnUpdateLayer updateFunction) {
+        _updateFunction = updateFunction;
+    }
 
     void setUpdatePropertiesFunction(OnUpdateLayerProperties updateLayerPropertiesFunction) {
         _updateLayerPropertiesFunction = updateLayerPropertiesFunction;

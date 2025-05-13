@@ -52,25 +52,7 @@ public:
     typedef std::function<void(const LayerPrepareParameters&)> OnUpdateLayer;
     typedef std::function<void(const std::string& properties)> OnUpdateLayerProperties;
 
-    //    void setRenderFunction(OnRenderLayer renderFunction);
-    //
-    //
-    //    void setUpdateFunction(OnUpdateLayer updateFunction);
-    //
-    //
-    void setOnUpdateLayerPropertiesFunction(OnUpdateLayerProperties updateFunction) {
-        _updateLayerPropertiesFunction = updateFunction;
-    }
-    //
-    //    // Don't love that these are here, would like to move to private but factory needs access (for now)
-    //    OnRenderLayer _renderFunction;
-    //    OnUpdateLayer _updateFunction;
-    OnUpdateLayerProperties _updateLayerPropertiesFunction;
-
 protected:
-    // Dynamic properties
-    //    std::optional<conversion::Error> setPropertyInternal(const std::string& name,
-    //                                                         const conversion::Convertible& value) final;
     std::optional<conversion::Error> setPropertyInternal(const std::string& name,
                                                          const conversion::Convertible& value) final;
 

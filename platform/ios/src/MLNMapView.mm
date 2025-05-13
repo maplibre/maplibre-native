@@ -7599,8 +7599,6 @@ static void *windowScreenContext = &windowScreenContext;
             const mbgl::mtl::RenderPass& renderPass = static_cast<mbgl::mtl::RenderPass&>(*paintParameters.renderPass);
             id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)renderPass.getMetalEncoder().get();
 
-            //id<MTLRenderCommandEncoder> encoder =  (__bridge id<MTLRenderCommandEncoder>)paintParameters.encoder.get();
-            //id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)ptr;
             /*
 //            layer.renderEncoder = encoder;
 
@@ -7624,9 +7622,6 @@ static void *windowScreenContext = &windowScreenContext;
                     .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix)
                 };
 
-                if (layer.mapView) {
-                    [layer drawInMapView:layer.mapView withContext:drawingContext];
-                }
             }
 */
 
@@ -7635,20 +7630,13 @@ static void *windowScreenContext = &windowScreenContext;
                              renderEncoder:encoder];
         };
 
-        // this one works
-        auto bi = (mbgl::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
-        bi->setRenderFunction(renderFunction);
-        bi->setUpdateFunction([weakPlugInLayer](const mbgl::LayerPrepareParameters & prepareParameters) {
+        // Set the lambdas
+        auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
+        pluginLayerImpl->setRenderFunction(renderFunction);
+        pluginLayerImpl->setUpdateFunction([weakPlugInLayer](const mbgl::LayerPrepareParameters & prepareParameters) {
             [weakPlugInLayer onUpdateLayer];
         });
-
-
-        // Set update lambda
-//        pluginLayer->setUpdateFunction([weakPlugInLayer](){
-//            [weakPlugInLayer onUpdateLayer];
-//        });
-
-        pluginLayer->setOnUpdateLayerPropertiesFunction([weakPlugInLayer](const std::string & jsonProperties) {
+        pluginLayerImpl->setUpdatePropertiesFunction([weakPlugInLayer](const std::string & jsonProperties) {
             // Use autorelease pools in lambdas
             @autoreleasepool {
                 // Just wrap the string with NSData so it can be run through properties
@@ -7664,8 +7652,8 @@ static void *windowScreenContext = &windowScreenContext;
             }
         });
 
-        // TODO: This needs to be the same as above.  I think this method can just be on the impl
-        bi->setUpdatePropertiesFunction(pluginLayer->_updateLayerPropertiesFunction);
+//        // TODO: This needs to be the same as above.  I think this method can just be on the impl
+//        bi->setUpdatePropertiesFunction(pluginLayer->_updateLayerPropertiesFunction);
 
     });
 
