@@ -17,6 +17,56 @@ For the initial implemention, the following functionality is proposed:
 Future features:
 * Placeholder for ideas that could be implemented in the future
 
+## Example IOS Utilization
+An example implemention is shown in the PR: https://github.com/maplibre/maplibre-native/pull/3430
+The platform/darwin/app/PluginLayerExampleMetalRendering.h/mm class shows how the layer manages it's own rendering and how properties from the style are passed to it.  In platform/ios/app/MBXViewController.mm there's a single line where the plug-in layer class is registered with the map view
+```
+    [self.mapView addPluginLayerType:[PluginLayerExampleMetalRendering class]];
+```
+
+The layer is then added to the style in the platform/darwin/app/PluginLayerTestStyleSimple.json file and an expression based scale property
+is added
+
+```
+ {   "id": "metal-rendering-layer-1",
+            "type": "plugin-layer-metal-rendering",
+            "properties": {
+                "color1":"#FFAADD",
+                "offset-x": -300
+            },
+            "paint": {
+                "scale": [
+                    "interpolate",
+                    ["linear"],
+                    ["zoom"],
+                    5,
+                    0.5,
+                    15,
+                    3.0
+                ]
+            }
+        },
+```
+
+That scale property is then evaluated by the internal implementation and passed back to the plug-in layer via the onUpdateLayerProperties virtual method where it's incorporated by the rendering.
+```
+-(void)onUpdateLayerProperties:(NSDictionary *)layerProperties {
+    NSLog(@"Metal Layer Rendering Properties: %@", layerProperties);
+
+    NSNumber *offsetX = [layerProperties objectForKey:@"offset-x"];
+    if (offsetX) {
+        _offsetX = [[layerProperties objectForKey:@"offset-x"] floatValue];
+    }
+    
+    NSNumber *scale = [layerProperties objectForKey:@"scale"];
+    if (scale) {
+        if ([scale isKindOfClass:[NSNumber class]]) {
+            _scale = [scale floatValue];
+        }
+    }
+
+}
+```
 
 ## API Modifications
 
