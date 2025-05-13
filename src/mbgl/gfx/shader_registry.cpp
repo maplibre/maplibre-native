@@ -38,7 +38,7 @@ bool ShaderRegistry::replaceShader(ShaderGroupPtr&& shader, const std::string& s
 
 bool ShaderRegistry::registerShaderGroup(ShaderGroupPtr&& shader, const std::string& shaderGroupName) noexcept {
     std::unique_lock<std::shared_mutex> writerLock(shaderGroupLock);
-    if (!shaderGroups.contains(shaderGroupName)) {
+    if (shaderGroups.contains(shaderGroupName)) {
         return false;
     }
 
