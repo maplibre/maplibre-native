@@ -57,7 +57,7 @@ That scale property is then evaluated by the internal implementation and passed 
     if (offsetX) {
         _offsetX = [[layerProperties objectForKey:@"offset-x"] floatValue];
     }
-    
+
     NSNumber *scale = [layerProperties objectForKey:@"scale"];
     if (scale) {
         if ([scale isKindOfClass:[NSNumber class]]) {
