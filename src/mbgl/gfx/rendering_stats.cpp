@@ -1,6 +1,7 @@
 #include <mbgl/gfx/rendering_stats.hpp>
 
 #include <initializer_list>
+#include <sstream>
 
 namespace mbgl {
 namespace gfx {
