@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Release Policy - MapLibre Native Developer Documentation</title>
+        <title>Using Docker - MapLibre Native Developer Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -49,34 +49,34 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="favicon.svg">
-        <link rel="shortcut icon" href="favicon.png">
-        <link rel="stylesheet" href="css/variables.css">
-        <link rel="stylesheet" href="css/general.css">
-        <link rel="stylesheet" href="css/chrome.css">
-        <link rel="stylesheet" href="css/print.css" media="print">
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="fonts/fonts.css">
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="highlight-css" href="highlight.css">
-        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
-        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
-        <link rel="stylesheet" href="diff.css">
+        <link rel="stylesheet" href="../../diff.css">
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "";
+            const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc.js"></script>
+        <script src="../../toc.js"></script>
     </head>
     <body>
     <div id="body-container">
@@ -129,7 +129,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
             </noscript>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -164,7 +164,7 @@
                     <h1 class="menu-title">MapLibre Native Developer Documentation</h1>
 
                     <div class="right-buttons">
-                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
 
@@ -260,41 +260,54 @@
 }
 
 </style>
-<h1 id="release-policy"><a class="header" href="#release-policy">Release Policy</a></h1>
-<div class="mdbook-alerts mdbook-alerts-note">
+<h1 id="building-with-docker"><a class="header" href="#building-with-docker">Building with Docker</a></h1>
+<p>These steps will allow you to compile code as described <a href="./README.html">here</a> using a Docker container. All the steps should be executed from the root of the repository.</p>
+<div class="mdbook-alerts mdbook-alerts-important">
 <p class="mdbook-alerts-title">
   <span class="mdbook-alerts-icon"></span>
-  note
+  important
 </p>
-<p>The following release policiy applies specifically to MapLibre <strong>Android</strong> and MapLibre <strong>iOS</strong>.</p>
+<p>Not all platform builds are currently supported. Docker builds are a work in progress.</p>
 </div>
-<ul>
-<li>We use <a href="https://semver.org/">semantic versioning</a>. Breaking changes will always result in a major release.</li>
-<li>Despite having extensive tests in place, as a FOSS project we have limited QA testing capabilities. When major changes took place we may opt to put out a pre-release to let the community help with testing.</li>
-<li>In principle the <code>main</code> branch should always be in a releasable state.</li>
-<li>The release process is automated and documented (see <a href="./ios/release.html">Release MapLibre iOS</a> and <a href="./android/release.html">Release MapLibre Android</a>). Anyone with write access should be able to push out a release.</li>
-<li>There is no fixed release cadence, but you are welcome to request a release on any of the communication channels.</li>
-<li>We do not have long-term support (LTS) releases.</li>
-<li>If you need a feature or a bugfix ported to and old version of MapLibre, you need to do the backporting yourself (see steps below).</li>
-</ul>
-<h2 id="backporting"><a class="header" href="#backporting">Backporting</a></h2>
-<p>We understand that MapLibre is used in large mission critical applications where updating to the latest version is not always immediately possible. We do not have the capacity to offer LTS releases, but we do want to facilitate backporting.</p>
-<ol>
-<li>Create an issue and request that a branch is created from the release you want to target. Also mention the feature or bugfix you want to backport.</li>
-<li>Once the branch is created, make a PR that includes the feature or bugfix and that targets this branch. Also update the relevant changelog.</li>
-<li>When the PR is approved and merged, a release is attempted. If the release workflow significantly changed and the release fails, you may need to help to backport changes to the release workflow as well.</li>
-</ol>
-<p>The branch names for older versions follow a pattern as follows: <code>platform-x.x.x</code> (e.g. <a href="https://github.com/maplibre/maplibre-native/tree/android-10.x.x"><code>android-10.x.x</code></a> for the MapLibre Native Android 10.x.x release series). These branches have some minimal branch protection (a pull request is required to push changes to them).</p>
+<div class="mdbook-alerts mdbook-alerts-important">
+<p class="mdbook-alerts-title">
+  <span class="mdbook-alerts-icon"></span>
+  important
+</p>
+<p>You cannot build MapLibre native using both Docker and host methods at the same time. If you want to switch, you need to clean the repository first, e.g. by using this command:</p>
+<pre><code class="language-bash">git clean -dxfi -e .idea -e .clwb -e .vscode
+</code></pre>
+</div>
+<h3 id="build-docker-image"><a class="header" href="#build-docker-image">Build Docker Image</a></h3>
+<p>You must build your own Docker image, specific with your user and group IDs to ensure file permissions stay correct.</p>
+<pre><code class="language-bash"># Build docker image from the repo __root__
+# Specifying USER_UID and USER_GID allows container to create files with the same owner as the host user,
+# and avoids having to pass -u $(id -u):$(id -g) to docker run.
+docker build \
+  -t maplibre-native-image \
+  --build-arg USER_UID=$(id -u) \
+  --build-arg USER_GID=$(id -g) \
+  -f docker/Dockerfile \
+  docker
+</code></pre>
+<h2 id="run-docker-container"><a class="header" href="#run-docker-container">Run Docker Container</a></h2>
+<pre><code class="language-bash"># Run all build commands using the docker container.
+# You can also execute build commands from inside the docker container by starting it without the build command.
+docker run --rm -it -v "$PWD:/app/" -v "$PWD/docker/.cache:/home/ubuntu/.cache" maplibre-native-image
+</code></pre>
+<p>You can also use the container to run just one specific commands, e.g. <code>cmake</code> or <code>bazel</code>. Any downloaded dependencies will be cached in the <code>docker/.cache</code> directory.</p>
+<pre><code class="language-bash">docker run --rm -it -v "$PWD:/app/" -v "$PWD/docker/.cache:/home/ubuntu/.cache" maplibre-native-image cmake ...
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="platforms/linux/using-docker.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../platforms/linux/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="render-tests.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../release-policy.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -304,11 +317,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="platforms/linux/using-docker.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../platforms/linux/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="render-tests.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../release-policy.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
@@ -323,13 +336,13 @@
         </script>
 
 
-        <script src="elasticlunr.min.js"></script>
-        <script src="mark.min.js"></script>
-        <script src="searcher.js"></script>
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
 
-        <script src="clipboard.min.js"></script>
-        <script src="highlight.js"></script>
-        <script src="book.js"></script>
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
 
         <!-- Custom JS scripts -->
 
