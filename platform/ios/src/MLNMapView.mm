@@ -7574,6 +7574,7 @@ static void *windowScreenContext = &windowScreenContext;
     }
 
 
+    
     auto factory = std::make_unique<mbgl::PluginLayerFactory>(layerType,
                                                source,
                                                pass3D,
@@ -7585,7 +7586,7 @@ static void *windowScreenContext = &windowScreenContext;
     __weak MLNMapView *weakMapView = self;
 
     Class layerClass = pluginLayerClass;
-    factory->setOnLayerCreatedEvent([layerClass, weakMapView](mbgl::style::PluginLayer *pluginLayer) {
+    factory->setOnLayerCreatedEvent([layerClass, weakMapView, pluginLayerClass](mbgl::style::PluginLayer *pluginLayer) {
 
         NSLog(@"Creating Plugin Layer");
         MLNPluginLayer *layer = [[layerClass alloc] init];
@@ -7593,6 +7594,26 @@ static void *windowScreenContext = &windowScreenContext;
         // Use weak here so there isn't a retain cycle
         MLNPluginLayer *weakPlugInLayer = layer;
 
+        
+        MLNPluginLayerCapabilities *capabilities = [pluginLayerClass layerCapabilities];
+        auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
+        auto & pm = pluginLayerImpl->_propertyManager;
+        for (MLNPluginLayerProperty *property in capabilities.layerProperties) {
+            mbgl::style::PluginLayerProperty *p = new mbgl::style::PluginLayerProperty();
+            switch (property.propertyType) {
+                case MLNPluginLayerPropertyTypeSingleFloat:
+                    p->_propertyType = mbgl::style::PluginLayerProperty::PropertyType::SingleFloat;
+                    p->_defaultSingleFloatValue = property.singleFloatDefaultValue;
+                    break;
+                default:
+                    p->_propertyType = mbgl::style::PluginLayerProperty::PropertyType::Unknown;
+                    break;
+            }
+            p->_propertyName = [property.propertyName UTF8String];
+            pm.addProperty(p);
+        }
+
+        
         // Set the render function
         auto renderFunction = [weakPlugInLayer, weakMapView](mbgl::PaintParameters& paintParameters){
 
@@ -7631,7 +7652,7 @@ static void *windowScreenContext = &windowScreenContext;
         };
 
         // Set the lambdas
-        auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
+        //auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
         pluginLayerImpl->setRenderFunction(renderFunction);
         pluginLayerImpl->setUpdateFunction([weakPlugInLayer](const mbgl::LayerPrepareParameters & prepareParameters) {
             [weakPlugInLayer onUpdateLayer];

@@ -17,6 +17,9 @@ typedef enum {
 
 @interface MLNPluginLayerProperty : NSObject
 
++(MLNPluginLayerProperty *)propertyWithName:(NSString *)propertyName
+                               propertyType:(MLNPluginLayerPropertyType) propertyType;
+
 // The name of the property
 @property NSString *propertyName;
 

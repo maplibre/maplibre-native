@@ -9,6 +9,15 @@
 
 @implementation MLNPluginLayerProperty
 
++(MLNPluginLayerProperty *)propertyWithName:(NSString *)propertyName
+                               propertyType:(MLNPluginLayerPropertyType) propertyType {
+    MLNPluginLayerProperty *tempResult = [[MLNPluginLayerProperty alloc] init];
+    tempResult.propertyName = propertyName;
+    tempResult.propertyType = propertyType;
+    return tempResult;
+}
+
+
 -(id)init {
     // Base class implemenation
     if (self = [super init]) {

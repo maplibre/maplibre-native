@@ -77,13 +77,16 @@ std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::str
 
     auto i = (mbgl::style::PluginLayer::Impl*)baseImpl.get();
 
+    // The properties should be defined when the plugin layer is created
     PluginLayerProperty* property = i->_propertyManager.getProperty(name);
     if (property == nullptr) {
-        property = new PluginLayerProperty();
-        // TODO: This needs ot be passed in
-        property->_propertyType = PluginLayerProperty::PropertyType::SingleFloat;
-        property->_propertyName = name;
-        i->_propertyManager.addProperty(property);
+        return Error{"layer doesn't support this property"};
+
+//        property = new PluginLayerProperty();
+//        // TODO: This needs ot be passed in
+//        property->_propertyType = PluginLayerProperty::PropertyType::SingleFloat;
+//        property->_propertyName = name;
+//        i->_propertyManager.addProperty(property);
     }
     
     Error error;

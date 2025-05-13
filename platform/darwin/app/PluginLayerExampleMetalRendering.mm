@@ -39,6 +39,16 @@ typedef struct
     tempResult.layerID = @"plugin-layer-metal-rendering";
     tempResult.tileKind = MLNPluginLayerTileKindNotRequired;
     tempResult.requiresPass3D = YES;
+    
+    // Setup the properties
+    tempResult.layerProperties = @[
+        // The scale property
+        [MLNPluginLayerProperty propertyWithName:@"scale"
+                                    propertyType:MLNPluginLayerPropertyTypeSingleFloat]
+        
+        // TBD
+    ];
+    
     return tempResult;
 
 }
@@ -162,11 +172,11 @@ typedef struct
 
 -(void)onUpdateLayer {
     // Update any metadata needed for the frame
-    NSLog(@"onUpdateLayer");
+    //NSLog(@"onUpdateLayer");
 }
 
 -(void)onUpdateLayerProperties:(NSDictionary *)layerProperties {
-    NSLog(@"Metal Layer Rendering Properties: %@", layerProperties);
+    //NSLog(@"Metal Layer Rendering Properties: %@", layerProperties);
 
     NSNumber *offsetX = [layerProperties objectForKey:@"offset-x"];
     if (offsetX) {
