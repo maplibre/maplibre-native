@@ -228,6 +228,28 @@ const glyph simplex[] = {
     /* 67	C */
     {21, sizeof(simplex_35), simplex_35},
     /* 68	D */
+    {21, sizeof(simplex_36), simplex_36},
+    /* 69	E */
+    {19, sizeof(simplex_37), simplex_37},
+    /* 70	F */
+    {18, sizeof(simplex_38), simplex_38},
+    /* 71	G */
+    {21, sizeof(simplex_39), simplex_39},
+    /* 72	H */
+    {22, sizeof(simplex_40), simplex_40},
+    /* 73	I */
+    {8, sizeof(simplex_41), simplex_41},
+    /* 74	J */
+    {16, sizeof(simplex_42), simplex_42},
+    /* 75	K */
+    {21, sizeof(simplex_43), simplex_43},
+    /* 76	L */
+    {17, sizeof(simplex_44), simplex_44},
+    /* 77	M */
+    {24, sizeof(simplex_45), simplex_45},
+    /* 78	N */
+    {22, sizeof(simplex_46), simplex_46},
+    /* 79	O */
     {22, sizeof(simplex_47), simplex_47},
     /* 80	P */
     {21, sizeof(simplex_48), simplex_48},
