@@ -15,6 +15,8 @@
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
 
+#include <mbgl/style/properties.hpp>
+
 using namespace mbgl;
 
 namespace mbgl {
@@ -156,8 +158,75 @@ void RenderPluginLayer::transition(const TransitionParameters& parameters) {
    std::cout << "transition\n";
 }
 
+//static Color defaultValue() { return Color::black(); }
+
+
 void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters) {
    std::cout << "evaluate\n";
+    
+    //auto i = staticImmutableCast<style::PluginLayer::Impl>(baseImpl);
+    auto i = static_cast<const style::PluginLayer::Impl *>(baseImpl.get());
+    auto pm = i->_propertyManager;
+    auto p = pm.getProperty("scale");
+    if (p == nullptr) {
+        return;
+    }
+    
+    auto & f = p->getSingleFloat();
+    using Evaluator = typename style::Scale::EvaluatorType;
+    auto newF = f.evaluate(Evaluator(parameters, style::Scale::defaultValue()), parameters.now);
+    auto v = newF.constant().value();
+    std::cout << "V: " << v << "\n";
+    
+    p->setCurrentSingleFloatValue(v);
+    
+    std::string jsonProperties = "{\"scale\":"+std::to_string(v)+"}";
+    i->_updateLayerPropertiesFunction(jsonProperties);
+    
+    
+    
+//    auto & scale = p->getScale();
+//    using Evaluator = typename style::Scale::EvaluatorType;
+//    auto newScale = scale.evaluate(Evaluator(parameters, style::Scale::defaultValue()), parameters.now);
+    //p->getScale().evaluate(<#const Evaluator &evaluator#>)
+    //using Evaluator = typename style::Scale::EvaluatorType;
+    //p->getScale().evaluate(Evaluator(parameters, style::Scale::defaultValue()), parameters.now);
+    
+//    property->getScale().evaluate(Evaluator(parameters, P::defaultValue()), parameters.now));
+   // property->getScale().evaluate(Evaluator(parameters, 1.0), parameters.now));
+
+    
+    
+//
+//    auto properties = makeMutable<HeatmapLayerProperties>(
+//        staticImmutableCast<HeatmapLayer::Impl>(baseImpl),
+//        unevaluated.evaluate(parameters, previousProperties->evaluated));
+//
+//    evaluatedProperties = std::move(properties);
+    
+    /*
+    
+    const auto previousProperties = staticImmutableCast<>(evaluatedProperties);
+    
+    const auto previousProperties = staticImmutableCast<HeatmapLayerProperties>(evaluatedProperties);
+    auto properties = makeMutable<HeatmapLayerProperties>(
+        staticImmutableCast<HeatmapLayer::Impl>(baseImpl),
+        unevaluated.evaluate(parameters, previousProperties->evaluated));
+
+    passes = (properties->evaluated.get<style::HeatmapOpacity>() > 0) ? (RenderPass::Translucent | RenderPass::Pass3D)
+                                                                      : RenderPass::None;
+    properties->renderPasses = mbgl::underlying_type(passes);
+    evaluatedProperties = std::move(properties);
+
+    if (layerTweaker) {
+        layerTweaker->updateProperties(evaluatedProperties);
+    }
+    if (textureTweaker) {
+        textureTweaker->updateProperties(evaluatedProperties);
+    }
+
+    */
+    
 }
 
 bool RenderPluginLayer::hasTransition() const {

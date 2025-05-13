@@ -47,9 +47,9 @@
                     "interpolate",
                     ["linear"],
                     ["zoom"],
-                    1,
+                    5,
                     0.5,
-                    23,
+                    15,
                     3.0
                 ]
             }
@@ -58,16 +58,7 @@
             "type": "plugin-layer-metal-rendering",
             "properties": {
                 "color1":"#DDAAFF",
-                "offset-x": 300,
-                "scale": [
-                    "interpolate",
-                    ["linear"],
-                    ["zoom"],
-                    1,
-                    0.5,
-                    23,
-                    3.0
-                ]
+                "offset-x": 300
             }
         },
         {
@@ -75,7 +66,17 @@
             "type": "fill",
             "source": "crimea",
             "paint": {
-                "fill-color": "#D6C7FF"
+                "fill-color":[
+                    "interpolate",
+                    ["linear"],
+                    ["zoom"],
+                    1,
+                    "#ff0000",
+                    22,
+                    "#00ff00"
+                
+                ]
+
             }
         }
     ],

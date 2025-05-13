@@ -38,6 +38,7 @@ public:
 
     void setRenderFunction(style::PluginLayer::OnRenderLayer renderFunction) { _renderFunction = renderFunction; }
     void setUpdateFunction(style::PluginLayer::OnUpdateLayer updateFunction) { _updateFunction = updateFunction; }
+    void setUpdatePropertiesFunction(style::PluginLayer::OnUpdateLayerProperties updateLayerPropertiesFunction) { _updateLayerPropertiesFunction = updateLayerPropertiesFunction; }
 
 private:
     void transition(const TransitionParameters&) override;
@@ -86,6 +87,8 @@ private:
     style::PluginLayer::OnRenderLayer _renderFunction = nullptr;
     
     style::PluginLayer::OnUpdateLayer _updateFunction = nullptr;
+
+    style::PluginLayer::OnUpdateLayerProperties _updateLayerPropertiesFunction = nullptr;
 
 };
 

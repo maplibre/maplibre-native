@@ -23,6 +23,7 @@ typedef struct
 
     // Properties
     float _offsetX;
+    float _scale;
 }
 
 @end
@@ -117,6 +118,9 @@ typedef struct
 
     if (_pipelineState == nil) {
         [self createShaders:mapView];
+        if (_scale == 0) {
+            _scale = 1;
+        }
     }
 
 
@@ -133,9 +137,9 @@ typedef struct
     Vertex triangleVertices[] =
     {
         // 2D positions,    RGBA colors
-        { {  250 + _offsetX,  -250 }, { 1, 0, 0, 1 } },
-        { { -250 + _offsetX,  -250 }, { 0, 1, 0, 1 } },
-        { {    0 + _offsetX,   250 }, { 0, 0, 1, 1 } },
+        { {  (250 + _offsetX) * _scale,  -250 * _scale }, { 1, 0, 0, 1 } },
+        { { (-250 + _offsetX) * _scale,  -250 * _scale }, { 0, 1, 0, 1 } },
+        { {    (0 + _offsetX) * _scale,   250 * _scale }, { 0, 0, 1, 1 } },
     };
 
     [renderEncoder setRenderPipelineState:_pipelineState];
@@ -164,8 +168,17 @@ typedef struct
 -(void)onUpdateLayerProperties:(NSDictionary *)layerProperties {
     NSLog(@"Metal Layer Rendering Properties: %@", layerProperties);
 
-    _offsetX = [[layerProperties objectForKey:@"offset-x"] floatValue];
-    //_scale = [[layerProperties objectForKey:@"scale"] floatValue];
+    NSNumber *offsetX = [layerProperties objectForKey:@"offset-x"];
+    if (offsetX) {
+        _offsetX = [[layerProperties objectForKey:@"offset-x"] floatValue];
+    }
+    
+    NSNumber *scale = [layerProperties objectForKey:@"scale"];
+    if (scale) {
+        if ([scale isKindOfClass:[NSNumber class]]) {
+            _scale = [scale floatValue];
+        }
+    }
 
 }
 

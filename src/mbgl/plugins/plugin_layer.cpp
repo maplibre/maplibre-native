@@ -8,8 +8,12 @@
 #include <mbgl/plugins/plugin_layer.hpp>
 #include <mbgl/plugins/plugin_layer_impl.hpp>
 #include <iostream>
-#include <mbgl/style/properties.hpp>
-#include <mbgl/style/property_value.hpp>
+
+
+
+
+
+
 
 /*
 //#include <mbgl/style/layers/heatmap_layer.hpp>
@@ -182,25 +186,6 @@ Value PluginLayer::serialize() const {
     return result;
 }
 
-using namespace conversion;
-
-class PluginLayerProperty {
-public:
-    std::string _propertyName;
-    void setPropertyValue(const conversion::Convertible& value);
-private:
-    
-};
-
-void PluginLayerProperty::setPropertyValue(const conversion::Convertible& value) {
-    // TODO: What goes here?
-    
-}
-
-
-static std::map<std::string, PluginLayerProperty *> _properties;
-
-
 std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::string& name,
                                                                   const conversion::Convertible& value) {
     // std::optional<Error> PluginLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
@@ -227,16 +212,64 @@ std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::str
     }
 */
     
+    
+    
     std::cout << "Property Name: " << name << "\n";
     
-    auto property = _properties[name];
+    //auto i = impl();
+    auto i = (mbgl::style::PluginLayer::Impl *)baseImpl.get();
+
+    PluginLayerProperty *property = i->_propertyManager.getProperty(name);
     if (property == nullptr) {
         property = new PluginLayerProperty();
         property->_propertyName = name;
-        _properties[name] = property;
+        i->_propertyManager.addProperty(property);
     }
+    /*
+    auto property = i._propertyManager._properties[name];
+    if (property == nullptr) {
+        property = new PluginLayerProperty();
+        property->_propertyName = name;
+        i._propertyManager._properties[name] = property;
+    }
+    */
+    // Hard coding for testing
+    if (name == "scale") {
+        
+//        auto tv = convert<Scale>(value, error, false, false)
+        Error error;
+        const auto & tv = convert<PropertyValue<Scale>>(value, error, false, false);
+//        const auto & tv = convert<Scale>(value, error, false, false);
+        if (!tv) {
+            return error;
+        }
+        const auto & tv2 = convert<PropertyValue<float>>(value, error, false, false);
+        if (!tv2) {
+            return error;
+        }
+
+        auto tv3 = tv2.value();
+        
+        property->setSingleFloat(tv3);
+        
+//        property->setScale(*tv2);
+//        property->setScale2(*tv);
+//        property->setPropertyValue(value); // *tv);
+
+        
+    }
+    /*
+    Error error;
+    const auto& typedValue = convert<ColorRampPropertyValue>(value, error, false, false);
+    if (!typedValue) {
+        return error;
+    }
+*/
+    //setHeatmapColor(*typedValue);
+
     
-    property->setPropertyValue(value);
+    
+    
     
     return std::nullopt;
     

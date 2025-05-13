@@ -7641,6 +7641,7 @@ static void *windowScreenContext = &windowScreenContext;
         bi->setUpdateFunction([weakPlugInLayer](const mbgl::LayerPrepareParameters & prepareParameters) {
             [weakPlugInLayer onUpdateLayer];
         });
+        
 
         // Set update lambda
 //        pluginLayer->setUpdateFunction([weakPlugInLayer](){
@@ -7662,6 +7663,9 @@ static void *windowScreenContext = &windowScreenContext;
                 [weakPlugInLayer onUpdateLayerProperties:properties];
             }
         });
+        
+        // TODO: This needs to be the same as above.  I think this method can just be on the impl
+        bi->setUpdatePropertiesFunction(pluginLayer->_updateLayerPropertiesFunction);
 
     });
 
