@@ -14,6 +14,9 @@
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/math.hpp>
 */
+
+#include "plugin_layer_debug.hpp"
+
 namespace mbgl {
 /*
 using namespace style;

@@ -13,6 +13,7 @@
 #include <mbgl/style/conversion_impl.hpp>
 #include <iostream>
 #include <string>
+#include "plugin_layer_debug.hpp"
 
 namespace mbgl {
 
@@ -95,8 +96,10 @@ void jsonStringFromConvertible(const style::conversion::Convertible& value, std:
         eachMember(value,
                    [&output, &firstItem](const std::string& name, const style::conversion::Convertible& value)
                        -> std::optional<style::conversion::Error> {
+#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
                        std::cout << "Working on: " << name << "\n";
-
+#endif
+            
                        if (!firstItem) {
                            output.append(",");
                        }
@@ -156,11 +159,15 @@ void jsonStringFromConvertible(const style::conversion::Convertible& value, std:
          */
         auto v = toValue(value);
         if (auto i = v.value().getInt()) {
+#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
             std::cout << "Int: " << i << "\n";
+#endif
             std::string tempResult = std::to_string(*i);
             output.append(tempResult);
         } else if (auto i = v.value().getUint()) {
+#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
             std::cout << "Int: " << i << "\n";
+#endif
             std::string tempResult = std::to_string(*i);
             output.append(tempResult);
 
@@ -171,8 +178,10 @@ void jsonStringFromConvertible(const style::conversion::Convertible& value, std:
 
             //  std::cout << "String: " << v.value().getString()->c_str() << "\n";
         } else if (auto d = v.value().getDouble()) {
+#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
             std::cout << "Double: " << d << "\n";
-
+#endif
+            
             output.append(std::to_string(*d));
         }
         //        std::cout << v.value().getInt() << "\n";
@@ -196,8 +205,9 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
 
     if (auto memberValue = objectMember(value, "properties")) {
         jsonStringFromConvertible(*memberValue, layerProperties);
+#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
         std::cout << "Properties: " << layerProperties << "\n";
-
+#endif
         if (isObject(*memberValue)) {
             eachMember(*memberValue,
                        [](const std::string& name, const style::conversion::Convertible& value)

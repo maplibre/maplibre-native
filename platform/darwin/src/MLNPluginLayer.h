@@ -11,11 +11,31 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef enum {
+    MLNPluginLayerPropertyTypeUnknown,
+    MLNPluginLayerPropertyTypeSingleFloat
+} MLNPluginLayerPropertyType;
+
+@interface MLNPluginLayerProperty: NSObject
+
+// The name of the property
+@property NSString *propertyName;
+
+// The type of property
+@property MLNPluginLayerPropertyType propertyType;
+
+// Single float default value
+@property float singleFloatDefaultValue;
+
+@end
+
+
+typedef enum {
   MLNPluginLayerTileKindGeometry,
   MLNPluginLayerTileKindRaster,
   MLNPluginLayerTileKindRasterDEM,
   MLNPluginLayerTileKindNotRequired
 } MLNPluginLayerTileKind;
+
 
 @interface MLNPluginLayerCapabilities : NSObject
 
@@ -26,6 +46,9 @@ typedef enum {
 @property BOOL requiresRenderingFadingTiles;
 @property BOOL requiresCrossTileIndex;
 @property MLNPluginLayerTileKind tileKind;
+
+//! This is a list of layer properties that this layer supports.
+@property NSArray<MLNPluginLayerProperty *> *layerProperties;
 
 @end
 

@@ -8,6 +8,7 @@
 #include <mbgl/plugins/plugin_layer.hpp>
 #include <mbgl/plugins/plugin_layer_impl.hpp>
 #include <iostream>
+#include "plugin_layer_debug.hpp"
 
 
 
@@ -213,8 +214,9 @@ std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::str
 */
     
     
-    
+#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
     std::cout << "Property Name: " << name << "\n";
+#endif
     
     //auto i = impl();
     auto i = (mbgl::style::PluginLayer::Impl *)baseImpl.get();

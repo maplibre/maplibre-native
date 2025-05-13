@@ -7,6 +7,23 @@
 
 #import "MLNPluginLayer.h"
 
+@implementation MLNPluginLayerProperty
+
+-(id)init {
+    // Base class implemenation
+    if (self = [super init]) {
+        // Default setup
+        self.propertyType = MLNPluginLayerPropertyTypeUnknown;
+        self.propertyName = @"unknown";
+        
+        // Default values for the various types
+        self.singleFloatDefaultValue = 1.0;
+    }
+    return self;
+}
+
+@end
+
 @implementation MLNPluginLayer
 
 // This is the layer type in the style that is used

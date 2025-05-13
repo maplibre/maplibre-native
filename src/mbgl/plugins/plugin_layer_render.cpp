@@ -16,6 +16,7 @@
 #include <mbgl/gfx/renderer_backend.hpp>
 
 #include <mbgl/style/properties.hpp>
+#include "plugin_layer_debug.hpp"
 
 using namespace mbgl;
 
@@ -155,14 +156,18 @@ void RenderPluginLayer::prepare(const LayerPrepareParameters& layerParameters) {
 // --- Private methods
 void RenderPluginLayer::transition(const TransitionParameters& parameters) {
     // Called when switching between styles
+#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
    std::cout << "transition\n";
+#endif
 }
 
 //static Color defaultValue() { return Color::black(); }
 
 
 void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters) {
+#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
    std::cout << "evaluate\n";
+#endif
     
     //auto i = staticImmutableCast<style::PluginLayer::Impl>(baseImpl);
     auto i = static_cast<const style::PluginLayer::Impl *>(baseImpl.get());
@@ -174,13 +179,18 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
     
     auto & f = p->getSingleFloat();
     using Evaluator = typename style::Scale::EvaluatorType;
-    auto newF = f.evaluate(Evaluator(parameters, style::Scale::defaultValue()), parameters.now);
+    auto df = p->_defaultSingleFloatValue;
+    auto newF = f.evaluate(Evaluator(parameters, df), parameters.now);
+//    auto newF = f.evaluate(Evaluator(parameters, style::Scale::defaultValue()), parameters.now);
     auto v = newF.constant().value();
+#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
     std::cout << "V: " << v << "\n";
+#endif
     
     p->setCurrentSingleFloatValue(v);
     
-    std::string jsonProperties = "{\"scale\":"+std::to_string(v)+"}";
+    std::string jsonProperties = pm.propertiesAsJSON();
+    
     i->_updateLayerPropertiesFunction(jsonProperties);
     
     

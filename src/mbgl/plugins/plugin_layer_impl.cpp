@@ -7,6 +7,7 @@
 
 #include "plugin_layer_impl.hpp"
 #include <iostream>
+#include "plugin_layer_debug.hpp"
 
 namespace mbgl {
 namespace style {
@@ -22,7 +23,10 @@ PluginLayer::Impl::Impl(std::string layerID,
       _layerProperties(layerProperties)
 //, _layerProperties(layerProperties)
 {
+#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
     std::cout << "Init\n";
+#endif
+    
 }
 
 bool PluginLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
@@ -36,6 +40,12 @@ bool PluginLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
 
 
 
+// Return this property as json
+std::string PluginLayerProperty::asJSON() {
+    
+    return "\""+_propertyName+"\":"+std::to_string(_singleFloatValue);
+    
+}
 
 
 
@@ -79,9 +89,22 @@ void PluginLayerPropertyManager::addProperty(PluginLayerProperty *property) {
     _properties[property->_propertyName] = property;
 }
 
+// TODO: Possibly pass in the string
+std::string PluginLayerPropertyManager::propertiesAsJSON() {
 
-
-
+    std::string tempResult = "{";
+    
+    bool firstItem = true;
+    for (auto d: _properties) {
+        if (!firstItem) {
+            tempResult.append(", ");
+        }
+        tempResult.append(d.second->asJSON());
+    }
+    tempResult.append("}");
+    
+    return tempResult;
+}
 
 
 const PropertyValue<float>& PluginLayerProperty::getScale() const {
