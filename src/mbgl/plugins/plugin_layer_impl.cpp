@@ -26,7 +26,6 @@ PluginLayer::Impl::Impl(std::string layerID,
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
     std::cout << "Init\n";
 #endif
-    
 }
 
 bool PluginLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
@@ -38,13 +37,9 @@ bool PluginLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
     //    paint.hasDataDrivenPropertyDifference(impl.paint);
 }
 
-
-
 // Return this property as json
 std::string PluginLayerProperty::asJSON() {
-    
-    return "\""+_propertyName+"\":"+std::to_string(_singleFloatValue);
-    
+    return "\"" + _propertyName + "\":" + std::to_string(_singleFloatValue);
 }
 
 void PluginLayerProperty::setPropertyValue(const conversion::Convertible& value) {
@@ -86,21 +81,19 @@ void PluginLayerPropertyManager::addProperty(PluginLayerProperty* property) {
 
 // TODO: Possibly pass in the string
 std::string PluginLayerPropertyManager::propertiesAsJSON() {
-
     std::string tempResult = "{";
-    
+
     bool firstItem = true;
-    for (auto d: _properties) {
+    for (auto d : _properties) {
         if (!firstItem) {
             tempResult.append(", ");
         }
         tempResult.append(d.second->asJSON());
     }
     tempResult.append("}");
-    
+
     return tempResult;
 }
-
 
 const PropertyValue<float>& PluginLayerProperty::getScale() const {
     return paint.template get<Scale>().value;

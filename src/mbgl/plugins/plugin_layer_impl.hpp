@@ -81,19 +81,17 @@ public:
     void setPropertyValue(const conversion::Convertible& value);
 
 public:
-    const PropertyValue<float> &getSingleFloat() const;
-    void setSingleFloat(const PropertyValue<float> &value);
-    
+    const PropertyValue<float>& getSingleFloat() const;
+    void setSingleFloat(const PropertyValue<float>& value);
+
     float _defaultSingleFloatValue = 1.0;
     float _singleFloatValue = 0;
     PropertyValue<float> _singleFloatProperty;
     void setCurrentSingleFloatValue(float value);
-    
+
     // Return this property as json
     std::string asJSON();
-    
-    
-    
+
     const PropertyValue<float>& getScale() const;
     void setScale(const PropertyValue<float>& value);
     void setScaleTransition(const TransitionOptions& options);
@@ -114,7 +112,7 @@ public:
     void addProperty(PluginLayerProperty* property);
 
     std::string propertiesAsJSON();
-    
+
 private:
     std::map<std::string, PluginLayerProperty*> _properties;
 };

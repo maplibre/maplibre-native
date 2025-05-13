@@ -15,5 +15,4 @@
 #define MLN_PLUGIN_LAYER_LOGGING_ENABLED 1
 #endif
 
-
 #endif /* plugin_layer_debug_h */

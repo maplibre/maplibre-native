@@ -206,12 +206,11 @@ std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::str
         return error;
     }
 */
-    
-    
+
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
     std::cout << "Property Name: " << name << "\n";
 #endif
-    
+
     // auto i = impl();
     auto i = (mbgl::style::PluginLayer::Impl*)baseImpl.get();
 

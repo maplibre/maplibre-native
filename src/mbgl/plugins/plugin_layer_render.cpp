@@ -156,7 +156,7 @@ void RenderPluginLayer::prepare(const LayerPrepareParameters& layerParameters) {
 void RenderPluginLayer::transition(const TransitionParameters& parameters) {
     // Called when switching between styles
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-   std::cout << "transition\n";
+    std::cout << "transition\n";
 #endif
 }
 
@@ -164,11 +164,11 @@ void RenderPluginLayer::transition(const TransitionParameters& parameters) {
 
 void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters) {
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-   std::cout << "evaluate\n";
+    std::cout << "evaluate\n";
 #endif
-    
-    //auto i = staticImmutableCast<style::PluginLayer::Impl>(baseImpl);
-    auto i = static_cast<const style::PluginLayer::Impl *>(baseImpl.get());
+
+    // auto i = staticImmutableCast<style::PluginLayer::Impl>(baseImpl);
+    auto i = static_cast<const style::PluginLayer::Impl*>(baseImpl.get());
 
     auto pm = i->_propertyManager;
     auto p = pm.getProperty("scale");
@@ -180,30 +180,27 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
     using Evaluator = typename style::Scale::EvaluatorType;
     auto df = p->_defaultSingleFloatValue;
     auto newF = f.evaluate(Evaluator(parameters, df), parameters.now);
-//    auto newF = f.evaluate(Evaluator(parameters, style::Scale::defaultValue()), parameters.now);
+    //    auto newF = f.evaluate(Evaluator(parameters, style::Scale::defaultValue()), parameters.now);
     auto v = newF.constant().value();
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
     std::cout << "V: " << v << "\n";
 #endif
-    
-    p->setCurrentSingleFloatValue(v);
-    
-    std::string jsonProperties = pm.propertiesAsJSON();
-    
-    i->_updateLayerPropertiesFunction(jsonProperties);
-    
-    
-    
-//    auto & scale = p->getScale();
-//    using Evaluator = typename style::Scale::EvaluatorType;
-//    auto newScale = scale.evaluate(Evaluator(parameters, style::Scale::defaultValue()), parameters.now);
-    //p->getScale().evaluate(<#const Evaluator &evaluator#>)
-    //using Evaluator = typename style::Scale::EvaluatorType;
-    //p->getScale().evaluate(Evaluator(parameters, style::Scale::defaultValue()), parameters.now);
-    
-//    property->getScale().evaluate(Evaluator(parameters, P::defaultValue()), parameters.now));
-   // property->getScale().evaluate(Evaluator(parameters, 1.0), parameters.now));
 
+    p->setCurrentSingleFloatValue(v);
+
+    std::string jsonProperties = pm.propertiesAsJSON();
+
+    i->_updateLayerPropertiesFunction(jsonProperties);
+
+    //    auto & scale = p->getScale();
+    //    using Evaluator = typename style::Scale::EvaluatorType;
+    //    auto newScale = scale.evaluate(Evaluator(parameters, style::Scale::defaultValue()), parameters.now);
+    // p->getScale().evaluate(<#const Evaluator &evaluator#>)
+    // using Evaluator = typename style::Scale::EvaluatorType;
+    // p->getScale().evaluate(Evaluator(parameters, style::Scale::defaultValue()), parameters.now);
+
+    //    property->getScale().evaluate(Evaluator(parameters, P::defaultValue()), parameters.now));
+    // property->getScale().evaluate(Evaluator(parameters, 1.0), parameters.now));
 
     //    auto & scale = p->getScale();
     //    using Evaluator = typename style::Scale::EvaluatorType;

@@ -99,7 +99,7 @@ void jsonStringFromConvertible(const style::conversion::Convertible& value, std:
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
                        std::cout << "Working on: " << name << "\n";
 #endif
-            
+
                        if (!firstItem) {
                            output.append(",");
                        }
@@ -181,7 +181,7 @@ void jsonStringFromConvertible(const style::conversion::Convertible& value, std:
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
             std::cout << "Double: " << d << "\n";
 #endif
-            
+
             output.append(std::to_string(*d));
         }
         //        std::cout << v.value().getInt() << "\n";

@@ -15,7 +15,7 @@
         // Default setup
         self.propertyType = MLNPluginLayerPropertyTypeUnknown;
         self.propertyName = @"unknown";
-        
+
         // Default values for the various types
         self.singleFloatDefaultValue = 1.0;
     }

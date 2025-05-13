@@ -11,11 +11,11 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef enum {
-    MLNPluginLayerPropertyTypeUnknown,
-    MLNPluginLayerPropertyTypeSingleFloat
+  MLNPluginLayerPropertyTypeUnknown,
+  MLNPluginLayerPropertyTypeSingleFloat
 } MLNPluginLayerPropertyType;
 
-@interface MLNPluginLayerProperty: NSObject
+@interface MLNPluginLayerProperty : NSObject
 
 // The name of the property
 @property NSString *propertyName;
@@ -28,14 +28,12 @@ typedef enum {
 
 @end
 
-
 typedef enum {
   MLNPluginLayerTileKindGeometry,
   MLNPluginLayerTileKindRaster,
   MLNPluginLayerTileKindRasterDEM,
   MLNPluginLayerTileKindNotRequired
 } MLNPluginLayerTileKind;
-
 
 @interface MLNPluginLayerCapabilities : NSObject
 
