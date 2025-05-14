@@ -12,9 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Create maplibre-native-headers.tar.gz
-        run: tar czf maplibre-native-headers.tar.gz include
+        with:
+          submodules: recursive
 
+      - name: Create maplibre-native-headers.tar.gz
+        run: tar czf maplibre-native-headers.tar.gz \
+          include \
+          vendor/maplibre-native-base/deps/variant/include \
+          vendor/maplibre-native-base/deps/geometry.hpp/include
       - name: Create Release
         run: |
           gh release create core-${{ github.sha }} \
@@ -22,7 +27,7 @@ jobs:
             --prerelease=false \
             --latest=false \
             --title "core-${{ github.sha }}" \
-            maplibre-native-headers.tar.gz
+            maplibre-native-headers.tar.gz LICENSE.core.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

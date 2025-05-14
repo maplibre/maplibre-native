@@ -107,7 +107,8 @@
       "name": "linux-opengl-core",
       "inherits": "linux-opengl",
       "cacheVariables": {
-        "MLN_CORE_INCLUDE_DEPS": "ON"
+        "MLN_CORE_INCLUDE_DEPS": "ON",
+        "MLN_USE_BUILTIN_ICU": "ON"
       }
     },
     {
@@ -124,7 +125,8 @@
       "name": "linux-vulkan-core",
       "inherits": "linux-vulkan",
       "cacheVariables": {
-        "MLN_CORE_INCLUDE_DEPS": "ON"
+        "MLN_CORE_INCLUDE_DEPS": "ON",
+        "MLN_USE_BUILTIN_ICU": "ON"
       }
     }
   ],
