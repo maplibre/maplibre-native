@@ -46,28 +46,27 @@ struct SingleFloatProperty : DataDrivenPaintProperty<float, attributes::width, u
     static float defaultValue() { return 1.f; }
 };
 
-//struct Scale : DataDrivenPaintProperty<float, attributes::width, uniforms::width> {
-//    static float defaultValue() { return 1.f; }
-//};
+// struct Scale : DataDrivenPaintProperty<float, attributes::width, uniforms::width> {
+//     static float defaultValue() { return 1.f; }
+// };
 
-//class PluginPaintProperties : public Properties<Scale> {};
+// class PluginPaintProperties : public Properties<Scale> {};
 
-
-//template <>
-//struct Converter<Scale> {
-//    std::optional<Scale> operator()(const Convertible& value,
-//                                    Error& error,
-//                                    bool /* allowDataExpressions */ = true,
-//                                    bool /* convertTokens */ = false) const;
-//};
+// template <>
+// struct Converter<Scale> {
+//     std::optional<Scale> operator()(const Convertible& value,
+//                                     Error& error,
+//                                     bool /* allowDataExpressions */ = true,
+//                                     bool /* convertTokens */ = false) const;
+// };
 //
-//template <>
-//struct Converter<PropertyValue<Scale>> {
-//    std::optional<PropertyValue<Scale>> operator()(const Convertible& value,
-//                                                   Error& error,
-//                                                   bool /* allowDataExpressions */ = true,
-//                                                   bool /* convertTokens */ = false) const;
-//};
+// template <>
+// struct Converter<PropertyValue<Scale>> {
+//     std::optional<PropertyValue<Scale>> operator()(const Convertible& value,
+//                                                    Error& error,
+//                                                    bool /* allowDataExpressions */ = true,
+//                                                    bool /* convertTokens */ = false) const;
+// };
 
 //
 // template std::optional<PropertyValue<Scale>> Converter<PropertyValue<Scale>>::operator()(conversion::Convertible
@@ -101,7 +100,7 @@ public:
     std::string asJSON();
 
 private:
-    //PluginPaintProperties::Transitionable paint;
+    // PluginPaintProperties::Transitionable paint;
 };
 
 class PluginLayerPropertyManager {
@@ -126,17 +125,11 @@ public:
     bool hasLayoutDifference(const Layer::Impl&) const override;
     void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const override;
 
-    const LayerTypeInfo* getTypeInfo() const noexcept final {
-        return &_layerTypeInfo;
-    }
+    const LayerTypeInfo* getTypeInfo() const noexcept final { return &_layerTypeInfo; }
 
-    void setRenderFunction(OnRenderLayer renderFunction) {
-        _renderFunction = renderFunction;
-    }
+    void setRenderFunction(OnRenderLayer renderFunction) { _renderFunction = renderFunction; }
 
-    void setUpdateFunction(OnUpdateLayer updateFunction) {
-        _updateFunction = updateFunction;
-    }
+    void setUpdateFunction(OnUpdateLayer updateFunction) { _updateFunction = updateFunction; }
 
     void setUpdatePropertiesFunction(OnUpdateLayerProperties updateLayerPropertiesFunction) {
         _updateLayerPropertiesFunction = updateLayerPropertiesFunction;
@@ -147,12 +140,12 @@ public:
 
     //! Optional: Called when the layer is expected to render itself.
     OnRenderLayer _renderFunction;
-    
+
     //! Optional: Called when the layer is expected to update it's animations/etc.
     // TODO: Does this need to be here or can it be done via the render function.  Potentially, we could
     // have this method called on a background thread/etc or use another way to parallalize work
     OnUpdateLayer _updateFunction;
-    
+
     //! Optional: Called when the layer properties change.  The properties are passed as JSON for now
     OnUpdateLayerProperties _updateLayerPropertiesFunction;
 
@@ -162,7 +155,6 @@ private:
     // style::conversion::Convertible _layerProperties;
 
     // HeatmapPaintProperties::Transitionable paint;
-
 };
 
 } // namespace style
