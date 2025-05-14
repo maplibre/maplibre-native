@@ -77,6 +77,7 @@ bool RenderCircleLayer::hasCrossfade() const {
     return false;
 }
 
+namespace {
 GeometryCoordinate projectPoint(const GeometryCoordinate& p, const mat4& posMatrix, const Size& size) {
     vec4 pos = {{static_cast<double>(p.x), static_cast<double>(p.y), 0, 1}};
     matrix::transformMat4(pos, pos, posMatrix);
@@ -93,6 +94,7 @@ GeometryCoordinates projectQueryGeometry(const GeometryCoordinates& queryGeometr
     }
     return projectedGeometry;
 }
+} // namespace
 
 bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeometry,
                                                const GeometryTileFeature& feature,

@@ -100,7 +100,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
     }();
 
     // Ignore invalid geometry.
-    if (len < (options.type == FeatureType::Polygon ? 3 : 2)) {
+    if (std::cmp_less(len, (options.type == FeatureType::Polygon ? 3 : 2))) {
         return;
     }
 

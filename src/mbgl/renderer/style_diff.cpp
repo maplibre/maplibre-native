@@ -6,6 +6,7 @@
 
 namespace mbgl {
 
+namespace {
 template <class T, class Eq>
 StyleDifference<T> diff(const Immutable<std::vector<T>>& a, const Immutable<std::vector<T>>& b, const Eq& eq) {
     StyleDifference<T> result;
@@ -41,6 +42,7 @@ StyleDifference<T> diff(const Immutable<std::vector<T>>& a, const Immutable<std:
 
     return result;
 }
+} // namespace
 
 ImageDifference diffImages(const Immutable<std::vector<ImmutableImage>>& a,
                            const Immutable<std::vector<ImmutableImage>>& b) {

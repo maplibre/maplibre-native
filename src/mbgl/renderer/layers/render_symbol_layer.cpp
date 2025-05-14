@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
 
 #include <mbgl/gfx/cull_face_mode.hpp>
@@ -246,8 +247,8 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
                                                   .featureIndex = featureIndex,
                                                   .sourceId = baseImpl->source,
                                                   .sortKeyRange = sortKeyRange};
-                    auto sortPosition = std::upper_bound(
-                        placementData.cbegin(), placementData.cend(), layerData, [](const auto& lhs, const auto& rhs) {
+                    auto sortPosition = std::ranges::upper_bound(
+                        placementData, layerData, [](const auto& lhs, const auto& rhs) {
                             assert(lhs.sortKeyRange && rhs.sortKeyRange);
                             return lhs.sortKeyRange->sortKey < rhs.sortKeyRange->sortKey;
                         });
@@ -462,8 +463,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
     const auto& getCollisionTileLayerGroup = [&] {
         if (!collisionTileLayerGroup) {
-            if ((collisionTileLayerGroup = context.createTileLayerGroup(
-                     layerIndex, /*initialCapacity=*/64, getID() + "-collision"))) {
+            collisionTileLayerGroup = context.createTileLayerGroup(
+                layerIndex, /*initialCapacity=*/64, getID() + "-collision");
+            if (collisionTileLayerGroup) {
                 activateLayerGroup(collisionTileLayerGroup, true, changes);
             }
         }

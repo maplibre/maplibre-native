@@ -18,6 +18,7 @@ Programs::Programs(const ProgramParameters& programParameters_)
 
 Programs::~Programs() = default;
 
+namespace {
 /// @brief Register a list of types with a shader registry instance
 /// @tparam ...T Type list parameter pack
 /// @param registry A shader registry instance
@@ -38,6 +39,7 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
         }(registry.getLegacyGroup().registerShader(std::make_shared<T>(programParameters_))),
         ...);
 }
+} // namespace
 
 void Programs::registerWith(gfx::ShaderRegistry& registry) {
     /// The following types will be registered

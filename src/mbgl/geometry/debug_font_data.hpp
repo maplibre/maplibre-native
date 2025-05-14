@@ -1,7 +1,6 @@
 // This is an implementation file, so omit include guards.
 
 #include <cstdint>
-#include <map>
 
 const int8_t simplex_1[] = {5, 21, 5, 7, -1, -1, 5, 2, 4, 1, 5, 0, 6, 1, 5, 2};
 const int8_t simplex_2[] = {4, 21, 4, 14, -1, -1, 12, 21, 12, 14};
@@ -155,6 +154,7 @@ struct glyph {
 // Font data From Hershey Simplex Font
 // http://paulbourke.net/dataformats/hershey/
 
+// NOLINTBEGIN(modernize-use-designated-initializers)
 const glyph simplex[] = {
     /* 32	  */ {16, 0, nullptr},
     /* 33	! */
@@ -346,3 +346,4 @@ const glyph simplex[] = {
     /* 126	~ */
     {24, sizeof(simplex_94), simplex_94},
 };
+// NOLINTEND(modernize-use-designated-initializers)

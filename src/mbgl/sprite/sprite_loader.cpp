@@ -17,7 +17,9 @@
 
 namespace mbgl {
 
-static SpriteLoaderObserver nullObserver;
+namespace {
+SpriteLoaderObserver nullObserver;
+}
 
 struct SpriteLoader::Data {
     std::shared_ptr<const std::string> image;
@@ -50,7 +52,7 @@ void SpriteLoader::load(const std::optional<style::Sprite> sprite, FileSource& f
         std::lock_guard<std::mutex> lock(dataMapMutex);
         Data* data = dataMap[sprite->id].get();
         if (res.error) {
-            observer->onSpriteError(*sprite, std::make_exception_ptr(std::runtime_error(res.error->message)));
+            observer->onSpriteError(sprite, std::make_exception_ptr(std::runtime_error(res.error->message)));
         } else if (res.notModified) {
             return;
         } else if (res.noContent) {
@@ -69,7 +71,7 @@ void SpriteLoader::load(const std::optional<style::Sprite> sprite, FileSource& f
             std::lock_guard<std::mutex> lock(dataMapMutex);
             Data* data = dataMap[sprite->id].get();
             if (res.error) {
-                observer->onSpriteError(*sprite, std::make_exception_ptr(std::runtime_error(res.error->message)));
+                observer->onSpriteError(sprite, std::make_exception_ptr(std::runtime_error(res.error->message)));
             } else if (res.notModified) {
                 return;
             } else if (res.noContent) {
@@ -99,9 +101,9 @@ void SpriteLoader::emitSpriteLoadedIfComplete(style::Sprite sprite) {
         /* parseClosure */
         [sprite = sprite, image = data->image, json = data->json]() -> ParseResult {
             try {
-                return {parseSprite(sprite.id, *image, *json), nullptr};
+                return {.images = parseSprite(sprite.id, *image, *json), .error = nullptr};
             } catch (...) {
-                return {{}, std::current_exception()};
+                return {.images = {}, .error = std::current_exception()};
             }
         },
         /* resultClosure */

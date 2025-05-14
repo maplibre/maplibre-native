@@ -11,8 +11,6 @@
 #include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/util/io.hpp>
 
-#include <unordered_map>
-
 #include <mbgl/shaders/shader_manifest.hpp>
 #if MLN_RENDER_BACKEND_OPENGL
 #include <mbgl/gl/program.hpp>
@@ -52,6 +50,7 @@ public:
 
     std::unique_ptr<gfx::Program<Name>> program;
 
+    // NOLINTNEXTLINE(bugprone-crtp-constructor-accessibility)
     Program([[maybe_unused]] const ProgramParameters& programParameters) {
         switch (gfx::Backend::GetType()) {
 #if MLN_RENDER_BACKEND_METAL

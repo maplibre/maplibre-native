@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <mbgl/style/expression/within.hpp>
 
 #include <mapbox/geojson.hpp>
@@ -158,16 +159,15 @@ bool featureWithinPolygons(const GeometryTileFeature& feature,
             MultiPoint<int64_t> points = getTilePoints(geometries.at(0), canonical, pointBBox, polyBBox);
             if (!boxWithinBox(pointBBox, polyBBox)) return false;
 
-            return std::all_of(points.begin(), points.end(), [&polygons](const auto& p) {
-                return pointWithinPolygons<int64_t>(p, polygons);
-            });
+            return std::ranges::all_of(
+                points, [&polygons](const auto& p) { return pointWithinPolygons<int64_t>(p, polygons); });
         }
         case FeatureType::LineString: {
             WithinBBox lineBBox = DefaultWithinBBox;
             MultiLineString<int64_t> multiLineString = getTileLines(geometries, canonical, lineBBox, polyBBox);
             if (!boxWithinBox(lineBBox, polyBBox)) return false;
 
-            return std::all_of(multiLineString.begin(), multiLineString.end(), [&polygons](const auto& line) {
+            return std::ranges::all_of(multiLineString, [&polygons](const auto& line) {
                 return lineStringWithinPolygons<int64_t>(line, polygons);
             });
         }

@@ -46,10 +46,10 @@ bool ImageManager::isLoaded() const {
 
 void ImageManager::addImage(Immutable<style::Image::Impl> image_) {
     std::lock_guard<std::recursive_mutex> readLock(rwLock);
-    assert(images.find(image_->id) == images.end());
+    assert(!images.contains(image_->id));
 
     // Increase cache size if requested image was provided.
-    if (requestedImages.find(image_->id) != requestedImages.end()) {
+    if (requestedImages.contains(image_->id)) {
         requestedImagesCacheSize += image_->image.bytes();
     }
 
@@ -68,7 +68,7 @@ bool ImageManager::updateImage(Immutable<style::Image::Impl> image_) {
 
     if (sizeChanged) {
         // Update cache size if requested image size has changed.
-        if (requestedImages.find(image_->id) != requestedImages.end()) {
+        if (requestedImages.contains(image_->id)) {
             int64_t diff = image_->image.bytes() - oldImage->second->image.bytes();
             assert(static_cast<int64_t>(requestedImagesCacheSize + diff) >= 0ll);
             requestedImagesCacheSize += diff;
@@ -133,7 +133,7 @@ void ImageManager::getImages(ImageRequestor& requestor, ImageRequestPair&& pair)
     if (!isLoaded()) {
         bool hasAllDependencies = true;
         for (const auto& dependency : pair.first) {
-            if (images.find(dependency.first) == images.end()) {
+            if (images.contains(dependency.first)) {
                 hasAllDependencies = false;
                 break;
             }
@@ -180,7 +180,7 @@ void ImageManager::reduceMemoryUse() {
     unusedIDs.reserve(requestedImages.size());
 
     for (const auto& pair : requestedImages) {
-        if (pair.second.empty() && images.find(pair.first) != images.end()) {
+        if (pair.second.empty() && images.contains(pair.first)) {
             unusedIDs.push_back(pair.first);
         }
     }
@@ -224,14 +224,14 @@ void ImageManager::checkMissingAndNotify(ImageRequestor& requestor, const ImageR
     ImageDependencies missingDependencies;
 
     for (const auto& dependency : pair.first) {
-        if (images.find(dependency.first) == images.end()) {
+        if (!images.contains(dependency.first)) {
             missingDependencies.emplace(dependency);
         }
     }
 
     if (!missingDependencies.empty()) {
         ImageRequestor* requestorPtr = &requestor;
-        assert(!missingImageRequestors.count(requestorPtr));
+        assert(!missingImageRequestors.contains(requestorPtr));
         missingImageRequestors.emplace(requestorPtr, pair);
 
         for (const auto& dependency : missingDependencies) {
@@ -277,7 +277,7 @@ void ImageManager::checkMissingAndNotify(ImageRequestor& requestor, const ImageR
     } else {
         // Associate requestor with an image that was provided by the client.
         for (const auto& dependency : pair.first) {
-            if (requestedImages.find(dependency.first) != requestedImages.end()) {
+            if (requestedImages.contains(dependency.first)) {
                 requestedImages[dependency.first].emplace(&requestor);
             }
         }

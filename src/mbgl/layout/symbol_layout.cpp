@@ -27,13 +27,14 @@ namespace mbgl {
 
 using namespace style;
 
+namespace {
+
 template <class Property>
-static bool has(const style::SymbolLayoutProperties::PossiblyEvaluated& layout) {
+bool has(const style::SymbolLayoutProperties::PossiblyEvaluated& layout) {
     return layout.get<Property>().match([](const typename Property::Type& t) { return !t.empty(); },
                                         [](const auto&) { return true; });
 }
 
-namespace {
 expression::Value sectionOptionsToValue(const SectionOptions& options) {
     std::unordered_map<std::string, expression::Value> result;
     // TODO: Data driven properties that can be overridden on per section basis.
@@ -124,10 +125,11 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
         auto modes = layout->get<TextWritingMode>();
         // Remove duplicates and preserve order.
         std::set<style::TextWritingModeType> seen;
-        auto end = std::remove_if(modes.begin(), modes.end(), [&seen, this](const auto& placementMode) {
-            allowVerticalPlacement = allowVerticalPlacement || placementMode == style::TextWritingModeType::Vertical;
-            return !seen.insert(placementMode).second;
-        });
+        auto end = std::ranges::remove_if(modes, [&seen, this](const auto& placementMode) {
+                       allowVerticalPlacement = allowVerticalPlacement ||
+                                                placementMode == style::TextWritingModeType::Vertical;
+                       return !seen.insert(placementMode).second;
+                   }).begin();
         modes.erase(end, modes.end());
         placementModes = std::move(modes);
     }
@@ -211,7 +213,7 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
         if (ft.formattedText || ft.icon) {
             if (sortFeaturesByKey) {
                 ft.sortKey = layout->evaluate<SymbolSortKey>(zoom, ft, canonicalID);
-                const auto lowerBound = std::lower_bound(features.begin(), features.end(), ft);
+                const auto lowerBound = std::ranges::lower_bound(features, ft, std::less<>{});
                 features.insert(lowerBound, std::move(ft));
             } else {
                 features.push_back(std::move(ft));
@@ -808,7 +810,7 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
 }
 
 bool SymbolLayout::anchorIsTooClose(const std::u16string& text, const float repeatDistance, const Anchor& anchor) {
-    if (compareText.find(text) == compareText.end()) {
+    if (!compareText.contains(text)) {
         compareText.emplace(text, Anchors());
     } else {
         const auto& otherAnchors = compareText.find(text)->second;
@@ -997,7 +999,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
             if (!firstLoad) {
                 bucket->justReloaded = true;
             }
-            renderData.emplace(pair.first, LayerRenderData{bucket, pair.second});
+            renderData.emplace(pair.first, LayerRenderData{.bucket = bucket, .layerProperties = pair.second});
         }
     }
 }

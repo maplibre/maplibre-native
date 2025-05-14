@@ -6,9 +6,11 @@ namespace style {
 namespace expression {
 namespace type {
 
+namespace {
 std::string errorMessage(const Type& expected, const Type& t) {
     return {"Expected " + toString(expected) + " but found " + toString(t) + " instead."};
 }
+} // namespace
 
 std::optional<std::string> checkSubtype(const Type& expected, const Type& t) {
     if (t.is<ErrorType>()) return {};
