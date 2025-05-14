@@ -46,28 +46,28 @@ struct SingleFloatProperty : DataDrivenPaintProperty<float, attributes::width, u
     static float defaultValue() { return 1.f; }
 };
 
-struct Scale : DataDrivenPaintProperty<float, attributes::width, uniforms::width> {
-    static float defaultValue() { return 1.f; }
-};
+//struct Scale : DataDrivenPaintProperty<float, attributes::width, uniforms::width> {
+//    static float defaultValue() { return 1.f; }
+//};
 
-class PluginPaintProperties : public Properties<Scale> {};
+//class PluginPaintProperties : public Properties<Scale> {};
 
 
-template <>
-struct Converter<Scale> {
-    std::optional<Scale> operator()(const Convertible& value,
-                                    Error& error,
-                                    bool /* allowDataExpressions */ = true,
-                                    bool /* convertTokens */ = false) const;
-};
-
-template <>
-struct Converter<PropertyValue<Scale>> {
-    std::optional<PropertyValue<Scale>> operator()(const Convertible& value,
-                                                   Error& error,
-                                                   bool /* allowDataExpressions */ = true,
-                                                   bool /* convertTokens */ = false) const;
-};
+//template <>
+//struct Converter<Scale> {
+//    std::optional<Scale> operator()(const Convertible& value,
+//                                    Error& error,
+//                                    bool /* allowDataExpressions */ = true,
+//                                    bool /* convertTokens */ = false) const;
+//};
+//
+//template <>
+//struct Converter<PropertyValue<Scale>> {
+//    std::optional<PropertyValue<Scale>> operator()(const Convertible& value,
+//                                                   Error& error,
+//                                                   bool /* allowDataExpressions */ = true,
+//                                                   bool /* convertTokens */ = false) const;
+//};
 
 //
 // template std::optional<PropertyValue<Scale>> Converter<PropertyValue<Scale>>::operator()(conversion::Convertible
@@ -101,7 +101,7 @@ public:
     std::string asJSON();
 
 private:
-    PluginPaintProperties::Transitionable paint;
+    //PluginPaintProperties::Transitionable paint;
 };
 
 class PluginLayerPropertyManager {

@@ -179,7 +179,7 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
     if (property->_propertyType == style::PluginLayerProperty::PropertyType::SingleFloat) {
         auto& f = property->getSingleFloat();
         // TODO: need a float based evaluator
-        using Evaluator = typename style::Scale::EvaluatorType;
+        using Evaluator = typename style::SingleFloatProperty::EvaluatorType;
         auto df = property->_defaultSingleFloatValue;
         auto newF = f.evaluate(Evaluator(parameters, df), parameters.now);
         auto v = newF.constant().value();
