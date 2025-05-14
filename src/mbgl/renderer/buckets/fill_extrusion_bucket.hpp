@@ -47,7 +47,7 @@ public:
     const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
     TriangleIndexVector& triangles = *sharedTriangles;
 
-    SegmentVector<FillExtrusionAttributes> triangleSegments;
+    SegmentVector triangleSegments;
 
     std::unordered_map<std::string, FillExtrusionProgram::Binders> paintPropertyBinders;
 };

@@ -60,26 +60,26 @@ RenderStaticData::RenderStaticData(float pixelRatio, std::unique_ptr<gfx::Shader
 {
 }
 
-SegmentVector<BackgroundAttributes> RenderStaticData::tileTriangleSegments() {
-    SegmentVector<BackgroundAttributes> segments;
+SegmentVector RenderStaticData::tileTriangleSegments() {
+    SegmentVector segments;
     segments.emplace_back(0, 0, 4, 6);
     return segments;
 }
 
-SegmentVector<DebugAttributes> RenderStaticData::tileBorderSegments() {
-    SegmentVector<DebugAttributes> segments;
+SegmentVector RenderStaticData::tileBorderSegments() {
+    SegmentVector segments;
     segments.emplace_back(0, 0, 4, 5);
     return segments;
 }
 
-SegmentVector<RasterAttributes> RenderStaticData::rasterSegments() {
-    SegmentVector<RasterAttributes> segments;
+SegmentVector RenderStaticData::rasterSegments() {
+    SegmentVector segments;
     segments.emplace_back(0, 0, 4, 6);
     return segments;
 }
 
-SegmentVector<HeatmapTextureAttributes> RenderStaticData::heatmapTextureSegments() {
-    SegmentVector<HeatmapTextureAttributes> segments;
+SegmentVector RenderStaticData::heatmapTextureSegments() {
+    SegmentVector segments;
     segments.emplace_back(0, 0, 4, 6);
     return segments;
 }

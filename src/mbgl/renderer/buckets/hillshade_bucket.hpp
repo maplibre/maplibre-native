@@ -51,7 +51,7 @@ public:
     std::shared_ptr<IndexVector> sharedIndices = std::make_shared<IndexVector>();
     IndexVector& indices = *sharedIndices;
 
-    SegmentVector<HillshadeAttributes> segments;
+    SegmentVector segments;
 
 private:
     DEMData demdata;

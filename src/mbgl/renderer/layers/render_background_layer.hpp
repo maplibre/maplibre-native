@@ -42,7 +42,7 @@ private:
 
     // Paint properties
     style::BackgroundPaintProperties::Unevaluated unevaluated;
-    SegmentVector<BackgroundAttributes> segments;
+    SegmentVector segments;
 
     // Drawable shaders
     gfx::ShaderProgramBasePtr plainShader;

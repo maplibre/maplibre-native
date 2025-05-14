@@ -18,8 +18,7 @@
 
 namespace mbgl {
 
-template <class Attributes>
-bool operator==(const Segment<Attributes>& lhs, const Segment<Attributes>& rhs) {
+bool operator==(const SegmentBase& lhs, const SegmentBase& rhs) {
     return std::tie(lhs.vertexOffset, lhs.indexOffset, lhs.vertexLength, lhs.indexLength) ==
            std::tie(rhs.vertexOffset, rhs.indexOffset, rhs.vertexLength, rhs.indexLength);
 }
@@ -221,7 +220,7 @@ TEST(Buckets, RasterBucketMaskEmpty) {
     bucket.setMask({});
     EXPECT_EQ((std::vector<RasterLayoutVertex>{}), bucket.vertices.vector());
     EXPECT_EQ((std::vector<uint16_t>{}), bucket.indices.vector());
-    SegmentVector<RasterAttributes> expectedSegments;
+    SegmentVector expectedSegments;
     expectedSegments.emplace_back(0, 0, 0, 0);
     EXPECT_EQ(expectedSegments, bucket.segments);
 }
@@ -233,7 +232,7 @@ TEST(Buckets, RasterBucketMaskNoChildren) {
     // A mask of 0/0/0 doesn't produce buffers since we're instead using the global shared buffers.
     EXPECT_EQ((std::vector<RasterLayoutVertex>{}), bucket.vertices.vector());
     EXPECT_EQ((std::vector<uint16_t>{}), bucket.indices.vector());
-    EXPECT_EQ((SegmentVector<RasterAttributes>{}), bucket.segments);
+    EXPECT_EQ((SegmentVector{}), bucket.segments);
 }
 
 TEST(Buckets, RasterBucketMaskTwoChildren) {
@@ -274,7 +273,7 @@ TEST(Buckets, RasterBucketMaskTwoChildren) {
               }),
               bucket.indices.vector());
 
-    SegmentVector<RasterAttributes> expectedSegments;
+    SegmentVector expectedSegments;
     expectedSegments.emplace_back(0, 0, 8, 12);
     EXPECT_EQ(expectedSegments, bucket.segments);
 }
@@ -378,7 +377,7 @@ TEST(Buckets, RasterBucketMaskComplex) {
               }),
               bucket.indices.vector());
 
-    SegmentVector<RasterAttributes> expectedSegments;
+    SegmentVector expectedSegments;
     expectedSegments.emplace_back(0, 0, 24, 36);
     EXPECT_EQ(expectedSegments, bucket.segments);
 }

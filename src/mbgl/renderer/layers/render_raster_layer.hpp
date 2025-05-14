@@ -62,7 +62,7 @@ private:
     using TriangleIndexVectorPtr = std::shared_ptr<TriangleIndexVector>;
     TriangleIndexVectorPtr staticDataIndices;
 
-    using RasterSegmentVector = SegmentVector<RasterAttributes>;
+    using RasterSegmentVector = SegmentVector;
     using RasterSegmentVectorPtr = std::shared_ptr<RasterSegmentVector>;
     std::shared_ptr<RasterSegmentVector> staticDataSegments;
 };

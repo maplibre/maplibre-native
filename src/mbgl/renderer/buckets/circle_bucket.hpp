@@ -38,7 +38,7 @@ public:
     const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
     TriangleIndexVector& triangles = *sharedTriangles;
 
-    SegmentVector<CircleAttributes> segments;
+    SegmentVector segments;
 
     std::map<std::string, CircleProgram::Binders> paintPropertyBinders;
 

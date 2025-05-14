@@ -47,7 +47,7 @@ public:
     const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
     TriangleIndexVector& indices = *sharedTriangles;
 
-    SegmentVector<RasterAttributes> segments;
+    SegmentVector segments;
 };
 
 } // namespace mbgl

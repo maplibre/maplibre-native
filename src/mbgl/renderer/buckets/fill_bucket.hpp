@@ -58,14 +58,14 @@ public:
     const std::shared_ptr<LineIndexVector> sharedLineIndexes = std::make_shared<LineIndexVector>();
     LineIndexVector& lineIndexes = *sharedLineIndexes;
 
-    SegmentVector<LineAttributes> lineSegments;
+    SegmentVector lineSegments;
 #endif // MLN_TRIANGULATE_FILL_OUTLINES
 
     using BasicLineIndexVector = gfx::IndexVector<gfx::Lines>;
     const std::shared_ptr<BasicLineIndexVector> sharedBasicLineIndexes = std::make_shared<BasicLineIndexVector>();
     BasicLineIndexVector& basicLines = *sharedBasicLineIndexes;
 
-    SegmentVector<FillAttributes> basicLineSegments;
+    SegmentVector basicLineSegments;
 
     using VertexVector = gfx::VertexVector<FillLayoutVertex>;
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
@@ -75,7 +75,7 @@ public:
     const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
     TriangleIndexVector& triangles = *sharedTriangles;
 
-    SegmentVector<FillAttributes> triangleSegments;
+    SegmentVector triangleSegments;
 
     std::map<std::string, FillProgram::Binders> paintPropertyBinders;
 };

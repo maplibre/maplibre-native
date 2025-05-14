@@ -62,7 +62,7 @@ private:
     std::shared_ptr<PremultipliedImage> colorRamp;
     std::unique_ptr<gfx::OffscreenTexture> renderTexture;
     std::optional<gfx::Texture> colorRampTexture;
-    SegmentVector<HeatmapTextureAttributes> segments;
+    SegmentVector segments;
 
     gfx::ShaderGroupPtr heatmapShaderGroup;
     gfx::ShaderProgramBasePtr heatmapTextureShader;

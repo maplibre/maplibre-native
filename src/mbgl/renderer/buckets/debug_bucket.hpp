@@ -33,8 +33,8 @@ public:
     gfx::VertexVector<FillLayoutVertex> vertices;
     gfx::IndexVector<gfx::Lines> indices;
 
-    SegmentVector<DebugAttributes> segments;
-    SegmentVector<DebugAttributes> tileBorderSegments;
+    SegmentVector segments;
+    SegmentVector tileBorderSegments;
     std::optional<gfx::VertexBuffer<DebugLayoutVertex>> vertexBuffer;
     std::optional<gfx::IndexBuffer> indexBuffer;
     std::optional<gfx::Texture> texture;

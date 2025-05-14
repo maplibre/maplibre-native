@@ -37,10 +37,10 @@ public:
     static gfx::VertexVector<RasterLayoutVertex> rasterVertices();
     static gfx::VertexVector<HeatmapTextureLayoutVertex> heatmapTextureVertices();
 
-    static SegmentVector<BackgroundAttributes> tileTriangleSegments();
-    static SegmentVector<DebugAttributes> tileBorderSegments();
-    static SegmentVector<RasterAttributes> rasterSegments();
-    static SegmentVector<HeatmapTextureAttributes> heatmapTextureSegments();
+    static SegmentVector tileTriangleSegments();
+    static SegmentVector tileBorderSegments();
+    static SegmentVector rasterSegments();
+    static SegmentVector heatmapTextureSegments();
 
     std::optional<gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>> depthRenderbuffer;
     bool has3D = false;
@@ -52,7 +52,7 @@ public:
 
     std::unique_ptr<gfx::ShaderRegistry> shaders;
 
-    const SegmentVector<BackgroundAttributes> clippingMaskSegments;
+    const SegmentVector clippingMaskSegments;
 
 #ifndef NDEBUG
     Programs overdrawPrograms;

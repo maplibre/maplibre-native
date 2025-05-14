@@ -54,14 +54,14 @@ void LineBucket::addFeature(const GeometryTileFeature& feature,
 void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
                              const GeometryTileFeature& feature,
                              const CanonicalTileID& canonical) {
-    gfx::PolylineGenerator<LineLayoutVertex, Segment<LineAttributes>> generator(
+    gfx::PolylineGenerator<LineLayoutVertex, SegmentBase> generator(
         vertices,
         LineProgram::layoutVertex,
         segments,
-        [](std::size_t vertexOffset, std::size_t indexOffset) -> Segment<LineAttributes> {
-            return Segment<LineAttributes>(vertexOffset, indexOffset);
+        [](std::size_t vertexOffset, std::size_t indexOffset) -> SegmentBase {
+            return SegmentBase(vertexOffset, indexOffset);
         },
-        [](auto& seg) -> Segment<LineAttributes>& { return seg; },
+        [](auto& seg) -> SegmentBase& { return seg; },
         triangles);
 
     gfx::PolylineGeneratorOptions options;

@@ -180,7 +180,7 @@ public:
         const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
         TriangleIndexVector& triangles = *sharedTriangles;
 
-        SegmentVector<SymbolTextAttributes> segments;
+        SegmentVector segments;
         std::vector<PlacedSymbol> placedSymbols;
     } text;
 
@@ -202,7 +202,7 @@ public:
         CollisionDynamicVertexVector& dynamicVertices() { return *sharedDynamicVertices; }
         const CollisionDynamicVertexVector& dynamicVertices() const { return *sharedDynamicVertices; }
 
-        SegmentVector<CollisionBoxProgram::AttributeList> segments;
+        SegmentVector segments;
     };
 
     struct CollisionBoxBuffer : public CollisionBuffer {
