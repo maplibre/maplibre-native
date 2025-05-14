@@ -43,6 +43,7 @@ public:
     void removeTextures(const std::vector<TextureHandle>& textureHandles, const DynamicTexturePtr& dynamicTexture);
 
     Context& context;
+
 private:
     std::vector<DynamicTexturePtr> dynamicTextures;
     std::unordered_map<TexturePixelType, DynamicTexturePtr> dummyDynamicTexture;

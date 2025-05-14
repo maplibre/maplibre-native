@@ -205,8 +205,8 @@ void Texture2D::uploadSubRegion(const void* pixelData,
         }
     };
 
-    //context.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) { 
-        enqueueCommands(commandBuffer); 
+    // context.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) {
+    enqueueCommands(commandBuffer);
     //});
 
     const auto function = [buffAlloc = std::move(bufferAllocation)](auto&) mutable {

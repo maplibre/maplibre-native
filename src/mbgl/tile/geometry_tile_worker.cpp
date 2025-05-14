@@ -512,7 +512,8 @@ void GeometryTileWorker::finalizeLayout() {
         std::vector<std::function<void(gfx::Context&)>> deletionQueue;
         const auto& contextVK = static_cast<vulkan::Context&>(dynamicTextureAtlas->context);
         contextVK.submitOneTimeCommand(&commandPool, [&](const vk::UniqueCommandBuffer& commandBuffer) {
-            imageAtlas = dynamicTextureAtlas->uploadIconsAndPatterns(iconMap, patternMap, versionMap, deletionQueue, commandBuffer);
+            imageAtlas = dynamicTextureAtlas->uploadIconsAndPatterns(
+                iconMap, patternMap, versionMap, deletionQueue, commandBuffer);
             glyphAtlas = dynamicTextureAtlas->uploadGlyphs(glyphMap, deletionQueue, commandBuffer);
         });
         for (const auto& function : deletionQueue) function(dynamicTextureAtlas->context);
@@ -534,12 +535,8 @@ void GeometryTileWorker::finalizeLayout() {
             }
 
             // layout adds the bucket to buckets
-            layout->createBucket(imageAtlas.patternPositions,
-                                    featureIndex,
-                                    renderData,
-                                    firstLoad,
-                                    showCollisionBoxes,
-                                    id.canonical);
+            layout->createBucket(
+                imageAtlas.patternPositions, featureIndex, renderData, firstLoad, showCollisionBoxes, id.canonical);
         }
     }
 
