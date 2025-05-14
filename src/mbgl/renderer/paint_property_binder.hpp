@@ -7,7 +7,6 @@
 #include <mbgl/layout/pattern_layout.hpp>
 #include <mbgl/programs/attributes.hpp>
 #include <mbgl/renderer/cross_faded_property_evaluator.hpp>
-#include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/renderer/paint_property_statistics.hpp>
 #include <mbgl/renderer/possibly_evaluated_property_value.hpp>
 #include <mbgl/util/indexed_tuple.hpp>

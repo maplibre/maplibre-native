@@ -2,6 +2,7 @@
 
 #include <mbgl/actor/actor.hpp>
 #include <mbgl/geometry/feature_index.hpp>
+#include <mbgl/gfx/dynamic_texture_atlas.hpp>
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/text/glyph_manager.hpp>
@@ -22,8 +23,6 @@ class GeometryTileData;
 class RenderLayer;
 class SourceQueryOptions;
 class TileParameters;
-class GlyphAtlas;
-class ImageAtlas;
 class TileAtlasTextures;
 
 class GeometryTile : public Tile, public GlyphRequestor, public ImageRequestor {
@@ -73,19 +72,24 @@ public:
     public:
         mbgl::unordered_map<std::string, LayerRenderData> layerRenderData;
         std::shared_ptr<FeatureIndex> featureIndex;
-        std::optional<AlphaImage> glyphAtlasImage;
-        ImageAtlas iconAtlas;
+        gfx::GlyphAtlas glyphAtlas;
+        gfx::ImageAtlas imageAtlas;
+        gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
 
         LayerRenderData* getLayerRenderData(const style::Layer::Impl&);
 
         LayoutResult(mbgl::unordered_map<std::string, LayerRenderData> renderData_,
                      std::unique_ptr<FeatureIndex> featureIndex_,
-                     std::optional<AlphaImage> glyphAtlasImage_,
-                     ImageAtlas iconAtlas_)
+                     gfx::GlyphAtlas glyphAtlas_,
+                     gfx::ImageAtlas imageAtlas_,
+                     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas_)
             : layerRenderData(std::move(renderData_)),
               featureIndex(std::move(featureIndex_)),
-              glyphAtlasImage(std::move(glyphAtlasImage_)),
-              iconAtlas(std::move(iconAtlas_)) {}
+              glyphAtlas(std::move(glyphAtlas_)),
+              imageAtlas(std::move(imageAtlas_)),
+              dynamicTextureAtlas(dynamicTextureAtlas_) {}
+
+        ~LayoutResult();
     };
     void onLayout(std::shared_ptr<LayoutResult>, uint64_t correlationID);
 

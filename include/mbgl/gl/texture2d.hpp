@@ -26,6 +26,8 @@ public: // gfx::Texture2D
 
     Texture2D& setImage(std::shared_ptr<PremultipliedImage> image_) noexcept override;
 
+    gfx::TexturePixelType getFormat() const noexcept override { return pixelFormat; }
+
     Size getSize() const noexcept override { return size; }
 
     size_t getDataSize() const noexcept override;

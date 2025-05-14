@@ -1,5 +1,4 @@
 #include <mbgl/programs/background_program.hpp>
-#include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/renderer/cross_faded_property_evaluator.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/map/transform_state.hpp>

@@ -5,7 +5,6 @@
 #include <mbgl/gfx/line_drawable_data.hpp>
 #include <mbgl/geometry/line_atlas.hpp>
 #include <mbgl/programs/line_program.hpp>
-#include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_tile.hpp>

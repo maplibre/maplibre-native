@@ -498,11 +498,15 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
             if (patternBuilder) {
                 patternBuilder->clearTweakers();
-                patternBuilder->addTweaker(getAtlasTweaker());
+                if (const auto& tweaker = getAtlasTweaker()) {
+                    patternBuilder->addTweaker(tweaker);
+                }
             }
             if (doOutline && outlinePatternBuilder) {
                 outlinePatternBuilder->clearTweakers();
-                outlinePatternBuilder->addTweaker(getAtlasTweaker());
+                if (const auto& tweaker = getAtlasTweaker()) {
+                    outlinePatternBuilder->addTweaker(tweaker);
+                }
             }
 
             if (patternBuilder && bucket.sharedTriangles->elements()) {
