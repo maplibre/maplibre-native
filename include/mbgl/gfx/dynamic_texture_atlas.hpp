@@ -31,15 +31,19 @@ public:
         : context(context_) {}
     ~DynamicTextureAtlas() = default;
 
-    GlyphAtlas uploadGlyphs(const GlyphMap& glyphs);
+    GlyphAtlas uploadGlyphs(const GlyphMap& glyphs,
+                            std::vector<std::function<void(Context&)>>& deletionQueue,
+                            const vk::UniqueCommandBuffer& commandBuffer);
     ImageAtlas uploadIconsAndPatterns(const ImageMap& icons,
                                       const ImageMap& patterns,
-                                      const ImageVersionMap& versionMap);
+                                      const ImageVersionMap& versionMap,
+                                      std::vector<std::function<void(Context&)>>& deletionQueue,
+                                      const vk::UniqueCommandBuffer& commandBuffer);
 
     void removeTextures(const std::vector<TextureHandle>& textureHandles, const DynamicTexturePtr& dynamicTexture);
 
-private:
     Context& context;
+private:
     std::vector<DynamicTexturePtr> dynamicTextures;
     std::unordered_map<TexturePixelType, DynamicTexturePtr> dummyDynamicTexture;
     std::mutex mutex;

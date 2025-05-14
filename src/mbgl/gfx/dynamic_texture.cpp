@@ -2,6 +2,8 @@
 #include <mbgl/gfx/texture2d.hpp>
 #include <mbgl/gfx/context.hpp>
 
+#include <mbgl/vulkan/texture2d.hpp>
+
 namespace mbgl {
 namespace gfx {
 
@@ -48,7 +50,10 @@ std::optional<TextureHandle> DynamicTexture::reserveSize(const Size& size, int32
     return TextureHandle(*bin);
 }
 
-void DynamicTexture::uploadImage(const uint8_t* pixelData, TextureHandle& texHandle) {
+void DynamicTexture::uploadImage(const uint8_t* pixelData,
+                                 TextureHandle& texHandle,
+                                 std::vector<std::function<void(Context&)>>& deletionQueue,
+                                 const vk::UniqueCommandBuffer& commandBuffer) {
     std::lock_guard<std::mutex> lock(mutex);
     const auto& rect = texHandle.getRectangle();
     const auto imageSize = Size(rect.w, rect.h);
@@ -59,17 +64,19 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, TextureHandle& texHan
     std::copy(pixelData, pixelData + size, imageData.get());
     imagesToUpload.emplace(texHandle, std::move(imageData));
 #else
-    texture->uploadSubRegion(pixelData, imageSize, rect.x, rect.y);
+    static_cast<vulkan::Texture2D*>(texture.get())->uploadSubRegion(pixelData, imageSize, rect.x, rect.y, &deletionQueue, commandBuffer);
 #endif
     texHandle.needsUpload = false;
 }
 
 std::optional<TextureHandle> DynamicTexture::addImage(const uint8_t* pixelData,
                                                       const Size& imageSize,
+                                                      std::vector<std::function<void(Context&)>>& deletionQueue,
+                                                      const vk::UniqueCommandBuffer& commandBuffer,
                                                       int32_t uniqueId) {
     auto texHandle = reserveSize(imageSize, uniqueId);
     if (texHandle && texHandle->isUploadNeeded()) {
-        uploadImage(pixelData, *texHandle);
+        uploadImage(pixelData, *texHandle, deletionQueue, commandBuffer);
     }
     return texHandle;
 }

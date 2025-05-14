@@ -148,14 +148,15 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
     const auto& encoder = context.createCommandEncoder();
     const auto& encoderImpl = static_cast<const CommandEncoder&>(*encoder);
 
-    uploadSubRegion(pixelData, size_, xOffset, yOffset, encoderImpl.getCommandBuffer());
+    uploadSubRegion(pixelData, size_, xOffset, yOffset, nullptr, encoderImpl.getCommandBuffer());
 }
 
 void Texture2D::uploadSubRegion(const void* pixelData,
                                 const Size& size_,
                                 uint16_t xOffset,
                                 uint16_t yOffset,
-                                const vk::UniqueCommandBuffer& commandBuffer) noexcept {
+                                std::vector<std::function<void(gfx::Context&)>>* deletionQueue,
+                                [[maybe_unused]] const vk::UniqueCommandBuffer& commandBuffer) noexcept {
     if (!pixelData || size_.width == 0 || size_.height == 0) return;
 
     create();
@@ -204,9 +205,19 @@ void Texture2D::uploadSubRegion(const void* pixelData,
         }
     };
 
-    enqueueCommands(commandBuffer);
+    //context.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) { 
+        enqueueCommands(commandBuffer); 
+    //});
 
-    context.enqueueDeletion([buffAlloc = std::move(bufferAllocation)](auto&) mutable { buffAlloc.reset(); });
+    const auto function = [buffAlloc = std::move(bufferAllocation)](auto&) mutable {
+        buffAlloc.reset();
+    };
+
+    if (deletionQueue) {
+        deletionQueue->push_back(std::move(function));
+    } else {
+        context.enqueueDeletion(std::move(function));
+    }
 
     context.renderingStats().numTextureUpdates++;
 }
@@ -483,7 +494,7 @@ void Texture2D::copyImage(vk::Image image) {
 
     create();
 
-    context.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) {
+    context.submitOneTimeCommand(nullptr, [&](const vk::UniqueCommandBuffer& commandBuffer) {
         const auto copyInfo = vk::ImageCopy()
                                   .setSrcSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
                                   .setDstSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
