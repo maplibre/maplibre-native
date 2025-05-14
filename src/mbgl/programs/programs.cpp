@@ -1,5 +1,4 @@
 #include <mbgl/programs/programs.hpp>
-#include <mbgl/programs/background_program.hpp>
 #include <mbgl/programs/circle_program.hpp>
 #include <mbgl/programs/heatmap_program.hpp>
 #include <mbgl/programs/hillshade_program.hpp>

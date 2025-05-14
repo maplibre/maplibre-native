@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/programs/background_program.hpp>
+#include <mbgl/programs/program.hpp>
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/style/layers/background_layer_impl.hpp>
 #include <mbgl/style/layers/background_layer_properties.hpp>
