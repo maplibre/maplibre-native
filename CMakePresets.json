@@ -76,16 +76,31 @@
       }
     },
     {
-      "name": "linux-opengl",
-      "binaryDir": "${sourceDir}/build-linux-opengl",
+      "name": "linux",
+      "hidden": true,
       "generator": "Ninja",
       "cacheVariables": {
         "CMAKE_SYSTEM_NAME": "Linux",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
         "MLN_WITH_METAL": "OFF",
-        "MLN_WITH_OPENGL": "ON",
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_WITH_VULKAN": "OFF",
         "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++"
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_BUILD_WITH_INSTALL_RPATH": "ON",
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "MLN_WITH_CLANG_TIDY": "OFF",
+        "MLN_WITH_WAYLAND": "ON",
+        "MLN_WITH_X11": "OFF"
+      }
+    },
+    {
+      "name": "linux-opengl",
+      "binaryDir": "${sourceDir}/build-linux-opengl",
+      "generator": "Ninja",
+      "inherits": "linux",
+      "cacheVariables": {
+        "MLN_WITH_OPENGL": "ON"
       }
     },
     {
@@ -98,11 +113,11 @@
     {
       "name": "linux-vulkan",
       "binaryDir": "${sourceDir}/build-linux-vulkan",
-      "generator": "Ninja",
-      "inherits": "linux-opengl",
+      "inherits": "linux",
       "cacheVariables": {
-        "MLN_WITH_OPENGL": "OFF",
-        "MLN_WITH_VULKAN": "ON"
+        "MLN_WITH_VULKAN": "ON",
+        "MLN_WITH_WAYLAND": "OFF",
+        "MLN_WITH_X11": "ON"
       }
     },
     {

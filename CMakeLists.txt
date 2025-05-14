@@ -157,6 +157,8 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_atlases_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_custom_layer_host_tweaker.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/dynamic_texture.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/dynamic_texture_atlas.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/gpu_expression.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/uniform_buffer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/vertex_attribute.hpp
@@ -175,6 +177,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_atlases_tweaker.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_custom_layer_host_tweaker.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/dynamic_texture.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/dynamic_texture_atlas.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/gpu_expression.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/hillshade_prepare_drawable_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/image_drawable_data.hpp
@@ -619,8 +623,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/data_driven_property_evaluator.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/group_by_layout.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/group_by_layout.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/image_atlas.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/image_atlas.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/image_manager.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/image_manager.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/image_manager_observer.hpp
@@ -885,8 +887,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/get_anchors.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/get_anchors.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/glyph.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/text/glyph_atlas.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/text/glyph_atlas.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/glyph_manager.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/glyph_manager.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/glyph_manager_observer.hpp

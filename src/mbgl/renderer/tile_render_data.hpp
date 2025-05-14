@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/texture.hpp>
-#include <mbgl/renderer/image_atlas.hpp>
+#include <mbgl/style/image_impl.hpp>
 #include <mbgl/style/layer_impl.hpp>
 
 #include <memory>
@@ -29,9 +29,6 @@ public:
 class TileRenderData {
 public:
     virtual ~TileRenderData();
-
-    const gfx::Texture2DPtr& getGlyphAtlasTexture() const;
-    const gfx::Texture2DPtr& getIconAtlasTexture() const;
 
     const std::shared_ptr<TileAtlasTextures>& getAtlasTextures() const { return atlasTextures; }
     // To be implemented for concrete tile types.

@@ -14,7 +14,6 @@
 #include <mbgl/renderer/tile_render_data.hpp>
 #include <mbgl/renderer/upload_parameters.hpp>
 #include <mbgl/style/layers/symbol_layer_impl.hpp>
-#include <mbgl/text/glyph_atlas.hpp>
 #include <mbgl/text/shaping.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
