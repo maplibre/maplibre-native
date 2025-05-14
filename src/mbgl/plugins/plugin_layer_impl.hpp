@@ -52,6 +52,7 @@ struct Scale : DataDrivenPaintProperty<float, attributes::width, uniforms::width
 
 class PluginPaintProperties : public Properties<Scale> {};
 
+
 template <>
 struct Converter<Scale> {
     std::optional<Scale> operator()(const Convertible& value,
@@ -99,16 +100,6 @@ public:
     // Return this property as json
     std::string asJSON();
 
-    const PropertyValue<float>& getScale() const;
-    void setScale(const PropertyValue<float>& value);
-    void setScaleTransition(const TransitionOptions& options);
-    TransitionOptions getScaleTransition() const;
-
-    const PropertyValue<Scale>& getScale2() const;
-    void setScale2(const PropertyValue<Scale>& value);
-    void setScale2Transition(const TransitionOptions& options);
-    TransitionOptions getScale2Transition() const;
-
 private:
     PluginPaintProperties::Transitionable paint;
 };
@@ -137,22 +128,32 @@ public:
 
     const LayerTypeInfo* getTypeInfo() const noexcept final {
         return &_layerTypeInfo;
-        // TODO: Return the right thing here
-        // return nullptr;
     }
 
-    void setRenderFunction(OnRenderLayer renderFunction) { _renderFunction = renderFunction; }
+    void setRenderFunction(OnRenderLayer renderFunction) {
+        _renderFunction = renderFunction;
+    }
 
-    void setUpdateFunction(OnUpdateLayer updateFunction) { _updateFunction = updateFunction; }
+    void setUpdateFunction(OnUpdateLayer updateFunction) {
+        _updateFunction = updateFunction;
+    }
 
     void setUpdatePropertiesFunction(OnUpdateLayerProperties updateLayerPropertiesFunction) {
         _updateLayerPropertiesFunction = updateLayerPropertiesFunction;
     }
 
+    //! The property manager handles all of the custom properties for this layer type / instance
     PluginLayerPropertyManager _propertyManager;
 
+    //! Optional: Called when the layer is expected to render itself.
     OnRenderLayer _renderFunction;
+    
+    //! Optional: Called when the layer is expected to update it's animations/etc.
+    // TODO: Does this need to be here or can it be done via the render function.  Potentially, we could
+    // have this method called on a background thread/etc or use another way to parallalize work
     OnUpdateLayer _updateFunction;
+    
+    //! Optional: Called when the layer properties change.  The properties are passed as JSON for now
     OnUpdateLayerProperties _updateLayerPropertiesFunction;
 
 private:
@@ -162,13 +163,6 @@ private:
 
     // HeatmapPaintProperties::Transitionable paint;
 
-    // Not needed for this
-    // DECLARE_LAYER_TYPE_INFO;
-
-    //    const LayerTypeInfo* getTypeInfo() const noexcept final {
-    //        return staticTypeInfo();
-    //    }
-    //    static const LayerTypeInfo* staticTypeInfo() noexcept;
 };
 
 } // namespace style
