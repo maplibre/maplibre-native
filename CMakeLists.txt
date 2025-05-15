@@ -546,11 +546,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/attributes.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/clipping_mask_program.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/clipping_mask_program.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/line_gradient_program.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/line_pattern_program.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/line_program.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/line_program.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/line_sdf_program.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/program.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/program_parameters.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/program_parameters.hpp
@@ -1028,10 +1023,6 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_text_and_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_wide_vector.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/clipping_mask.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line_gradient.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line_pattern.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line_sdf.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/raster.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_sdf_icon.hpp

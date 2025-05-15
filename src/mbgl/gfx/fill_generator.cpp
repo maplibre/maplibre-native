@@ -156,7 +156,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                                   SegmentVector& lineSegments) {
     gfx::PolylineGenerator<LineLayoutVertex, SegmentBase> lineGenerator(
         lineVertices,
-        LineProgram::layoutVertex,
+        LineBucket::layoutVertex,
         lineSegments,
         [](std::size_t vertexOffset, std::size_t indexOffset) -> SegmentBase {
             return SegmentBase(vertexOffset, indexOffset);
@@ -195,7 +195,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                                   SegmentVector& basicLineSegments) {
     gfx::PolylineGenerator<LineLayoutVertex, SegmentBase> lineGenerator(
         lineVertices,
-        LineProgram::layoutVertex,
+        LineBucket::layoutVertex,
         lineSegments,
         [](std::size_t vertexOffset, std::size_t indexOffset) -> SegmentBase {
             return SegmentBase(vertexOffset, indexOffset);

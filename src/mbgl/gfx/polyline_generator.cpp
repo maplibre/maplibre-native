@@ -2,7 +2,7 @@
 
 #include <mbgl/style/types.hpp>
 #include <mbgl/util/constants.hpp>
-#include <mbgl/programs/line_program.hpp>
+#include <mbgl/renderer/buckets/line_bucket.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/drawable_builder_impl.hpp>
 #include <mbgl/gfx/drawable_impl.hpp>

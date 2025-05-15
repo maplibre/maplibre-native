@@ -56,7 +56,7 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
                              const CanonicalTileID& canonical) {
     gfx::PolylineGenerator<LineLayoutVertex, SegmentBase> generator(
         vertices,
-        LineProgram::layoutVertex,
+        LineBucket::layoutVertex,
         segments,
         [](std::size_t vertexOffset, std::size_t indexOffset) -> SegmentBase {
             return SegmentBase(vertexOffset, indexOffset);
@@ -137,7 +137,7 @@ bool LineBucket::hasData() const {
 template <class Property>
 static float get(const LinePaintProperties::PossiblyEvaluated& evaluated,
                  const std::string& id,
-                 const std::map<std::string, LineProgram::Binders>& paintPropertyBinders) {
+                 const std::map<std::string, LineBinders>& paintPropertyBinders) {
     auto it = paintPropertyBinders.find(id);
     if (it == paintPropertyBinders.end() || !it->second.statistics<Property>().max()) {
         return evaluated.get<Property>().constantOr(Property::defaultValue());

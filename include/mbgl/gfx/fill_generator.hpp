@@ -5,7 +5,7 @@
 #include <mbgl/gfx/vertex_vector.hpp>
 #include <mbgl/gfx/index_vector.hpp>
 #include <mbgl/renderer/buckets/fill_bucket.hpp>
-#include <mbgl/programs/line_program.hpp>
+#include <mbgl/renderer/buckets/line_bucket.hpp>
 
 namespace mbgl {
 namespace gfx {

@@ -223,30 +223,6 @@
         "glsl_frag": "clipping_mask.fragment.glsl"
     },
     {
-        "name": "LineGradientProgram",
-        "header": "line_gradient",
-        "glsl_vert": "line_gradient.vertex.glsl",
-        "glsl_frag": "line_gradient.fragment.glsl"
-    },
-    {
-        "name": "LinePatternProgram",
-        "header": "line_pattern",
-        "glsl_vert": "line_pattern.vertex.glsl",
-        "glsl_frag": "line_pattern.fragment.glsl"
-    },
-    {
-        "name": "LineSDFProgram",
-        "header": "line_sdf",
-        "glsl_vert": "line_sdf.vertex.glsl",
-        "glsl_frag": "line_sdf.fragment.glsl"
-    },
-    {
-        "name": "LineProgram",
-        "header": "line",
-        "glsl_vert": "line.vertex.glsl",
-        "glsl_frag": "line.fragment.glsl"
-    },
-    {
         "name": "RasterProgram",
         "header": "raster",
         "glsl_vert": "raster.vertex.glsl",

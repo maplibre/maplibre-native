@@ -16,7 +16,7 @@
 #define MLN_TRIANGULATE_FILL_OUTLINES (MLN_RENDER_BACKEND_METAL)
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
-#include <mbgl/programs/line_program.hpp>
+#include <mbgl/renderer/buckets/line_bucket.hpp>
 #endif
 
 namespace mbgl {
