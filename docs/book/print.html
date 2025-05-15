@@ -924,29 +924,12 @@ scripts/aws-device-farm/plot-android-benchmark-results.py
 </code></pre>
 </li>
 <li>
-<p>Update <code>android/MapLibreAndroid/gradle.properties</code> with the new version.</p>
+<p>Update <code>android/VERSION</code> with the new version.</p>
 </li>
 </ul>
 </li>
 <li>
-<p>Once the pull request updating the changelog is merged, tag the commit:</p>
-<ul>
-<li>Create a tag locally, with for example:
-<pre><code>git tag -a android-v9.6.0 -m "Release android-v9.6.0"
-</code></pre>
-</li>
-<li>You need write access to push the tag, use for example:
-<pre><code>git push --atomic origin main android-v9.6.0
-</code></pre>
-</li>
-</ul>
-</li>
-<li>
-<p>Once the tag is pushed, you can run the <a href="https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/android-release.yml"><code>android-release.yml</code></a> workflow.</p>
-<ul>
-<li>Open the <a href="https://github.com/maplibre/maplibre-native/actions/workflows/android-release.yml">android-release</a> workflow page.</li>
-<li>Press <em>Run workflow</em> and select the tag you pushed.</li>
-</ul>
+<p>Once the PR is merged, the <a href="https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/android-release.yml"><code>android-release.yml</code></a> workflow will run automatically to make the release.</p>
 </li>
 </ol>
 <div style="break-before: page; page-break-before: always;"></div><style>
