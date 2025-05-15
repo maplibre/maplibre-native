@@ -242,14 +242,18 @@ public:
         if (!textCollisionCircle) textCollisionCircle = std::make_unique<CollisionCircleBuffer>();
         return *textCollisionCircle;
     }
-    
-    static gfx::Vertex<CollisionBoxLayoutAttributes> collisionLayoutVertex(Point<float> a, Point<float> anchor, Point<float> o) {
+
+    static gfx::Vertex<CollisionBoxLayoutAttributes> collisionLayoutVertex(Point<float> a,
+                                                                           Point<float> anchor,
+                                                                           Point<float> o) {
         return {{{static_cast<int16_t>(a.x), static_cast<int16_t>(a.y)}},
-            {{static_cast<int16_t>(anchor.x), static_cast<int16_t>(anchor.y)}},
-            {{static_cast<int16_t>(::round(o.x)), static_cast<int16_t>(::round(o.y))}}};
+                {{static_cast<int16_t>(anchor.x), static_cast<int16_t>(anchor.y)}},
+                {{static_cast<int16_t>(::round(o.x)), static_cast<int16_t>(::round(o.y))}}};
     }
 
-    static gfx::Vertex<CollisionBoxDynamicAttributes> collisionDynamicVertex(bool placed, bool notUsed, Point<float> shift) {
+    static gfx::Vertex<CollisionBoxDynamicAttributes> collisionDynamicVertex(bool placed,
+                                                                             bool notUsed,
+                                                                             Point<float> shift) {
         return {{{static_cast<uint16_t>(placed), static_cast<uint16_t>(notUsed)}}, {{shift.x, shift.y}}};
     }
 
