@@ -43,7 +43,7 @@ public:
         return CircleLayoutVertex{
             {{static_cast<int16_t>((p.x * 2) + ((ex + 1) / 2)), static_cast<int16_t>((p.y * 2) + ((ey + 1) / 2))}}};
     }
-    
+
     using VertexVector = gfx::VertexVector<CircleLayoutVertex>;
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
