@@ -3,7 +3,6 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/layout/symbol_layout.hpp>
 #include <mbgl/programs/programs.hpp>
-#include <mbgl/programs/symbol_program.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>

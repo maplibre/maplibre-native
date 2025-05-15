@@ -6,7 +6,6 @@
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gfx/symbol_drawable_data.hpp>
 #include <mbgl/layout/symbol_projection.hpp>
-#include <mbgl/programs/symbol_program.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
