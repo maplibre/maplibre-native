@@ -214,7 +214,8 @@ TEST(ShaderRegistry, DISABLED_GLSLReplacement_NoOp) {
 
     // Just replace with a default instance
     observer.registerShaders = [&](gfx::ShaderRegistry& registry) {
-        if (!registry.getLegacyGroup().replaceShader(std::make_shared<ClippingMaskProgram>(ProgramParameters(1.0f, false)))) {
+        if (!registry.getLegacyGroup().replaceShader(
+                std::make_shared<ClippingMaskProgram>(ProgramParameters(1.0f, false)))) {
             throw std::runtime_error("Failed to register shader!");
         }
     };
