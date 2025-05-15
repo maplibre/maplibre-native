@@ -4,7 +4,7 @@
 #include <mbgl/util/interpolate.hpp>
 
 #include <mbgl/programs/attributes.hpp>
-#include <mbgl/programs/collision_box_program.hpp>
+#include <mbgl/programs/program.hpp>
 #include <mbgl/programs/uniforms.hpp>
 #include <mbgl/programs/textures.hpp>
 #include <mbgl/programs/segment.hpp>

@@ -2,7 +2,6 @@
 
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/layout/symbol_layout.hpp>
-#include <mbgl/programs/collision_box_program.hpp>
 #include <mbgl/programs/programs.hpp>
 #include <mbgl/programs/symbol_program.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>

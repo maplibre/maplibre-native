@@ -5,7 +5,6 @@
 #include <mbgl/layout/symbol_feature.hpp>
 #include <mbgl/layout/symbol_instance.hpp>
 #include <mbgl/map/mode.hpp>
-#include <mbgl/programs/collision_box_program.hpp>
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/programs/symbol_program.hpp>
 #include <mbgl/renderer/bucket.hpp>
@@ -19,6 +18,9 @@
 namespace mbgl {
 
 class CrossTileSymbolLayerIndex;
+
+using CollisionBoxLayoutAttributes = TypeList<attributes::pos, attributes::anchor_pos, attributes::extrude>;
+using CollisionBoxDynamicAttributes = TypeList<attributes::placed, attributes::shift>;
 
 class PlacedSymbol {
 public:
@@ -239,6 +241,16 @@ public:
     CollisionCircleBuffer& getOrCreateTextCollisionCircleBuffer() {
         if (!textCollisionCircle) textCollisionCircle = std::make_unique<CollisionCircleBuffer>();
         return *textCollisionCircle;
+    }
+    
+    static gfx::Vertex<CollisionBoxLayoutAttributes> collisionLayoutVertex(Point<float> a, Point<float> anchor, Point<float> o) {
+        return {{{static_cast<int16_t>(a.x), static_cast<int16_t>(a.y)}},
+            {{static_cast<int16_t>(anchor.x), static_cast<int16_t>(anchor.y)}},
+            {{static_cast<int16_t>(::round(o.x)), static_cast<int16_t>(::round(o.y))}}};
+    }
+
+    static gfx::Vertex<CollisionBoxDynamicAttributes> collisionDynamicVertex(bool placed, bool notUsed, Point<float> shift) {
+        return {{{static_cast<uint16_t>(placed), static_cast<uint16_t>(notUsed)}}, {{shift.x, shift.y}}};
     }
 
     const float tilePixelRatio;

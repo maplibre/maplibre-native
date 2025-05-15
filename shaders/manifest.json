@@ -223,18 +223,6 @@
         "glsl_frag": "clipping_mask.fragment.glsl"
     },
     {
-        "name": "CollisionBoxProgram",
-        "header": "collision_box",
-        "glsl_vert": "collision_box.vertex.glsl",
-        "glsl_frag": "collision_box.fragment.glsl"
-    },
-    {
-        "name": "CollisionCircleProgram",
-        "header": "collision_circle",
-        "glsl_vert": "collision_circle.vertex.glsl",
-        "glsl_frag": "collision_circle.fragment.glsl"
-    },
-    {
         "name": "DebugProgram",
         "header": "debug",
         "glsl_vert": "debug.vertex.glsl",
