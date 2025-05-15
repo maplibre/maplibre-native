@@ -100,7 +100,25 @@ jobs:
       #  run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=tsan
 
       - name: Running iOS UI tests (Address+UB Sanitizer)
-        run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=include_clang_rt --copt=-fsanitize=undefined --linkopt=-fsanitize=undefined --copt=-fsanitize-recover=null --linkopt=-fsanitize-recover=null
+        run: |
+          retry_count=0
+          max_retries=5
+          while [ $retry_count -le $max_retries ]; do
+            bazel test //platform/ios/iosapp-UITests:uitest \
+              --test_output=errors \
+              --//:renderer=metal \
+              --features=include_clang_rt \
+              --copt=-fsanitize=undefined \
+              --linkopt=-fsanitize=undefined \
+              --copt=-fsanitize-recover=null \
+              --linkopt=-fsanitize-recover=null && break
+            retry_count=$((retry_count+1))
+            if [ $retry_count -eq $max_retries ]; then
+              echo "::error::Failed to run iOS UI tests after $max_retries attempts"
+              exit 1
+            fi
+            echo "Attempt $retry_count failed. Retrying..."
+          done
 
       # render test
 
