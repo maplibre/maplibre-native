@@ -71,7 +71,7 @@ public:
               static_cast<uint8_t>(((dir == 0 ? 0 : (dir < 0 ? -1 : 1)) + 1) | ((linesofar & 0x3F) << 2)),
               static_cast<uint8_t>(linesofar >> 6)}}};
     }
-    
+
     /*
      * Scale the extrusion vector so that the normal length is this value.
      * Contains the "texture" normals (-1..1). This is distinct from the extrude
@@ -80,7 +80,7 @@ public:
      * create the acute/bevelled line join.
      */
     static const int8_t extrudeScale = 63;
-    
+
     PossiblyEvaluatedLayoutProperties layout;
 
     using VertexVector = gfx::VertexVector<LineLayoutVertex>;
