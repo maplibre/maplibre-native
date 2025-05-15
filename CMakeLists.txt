@@ -1018,7 +1018,6 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_manifest.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_group_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/prelude.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/background.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_background.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_background_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_circle.hpp
@@ -1049,8 +1048,6 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_sdf.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_text_and_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_wide_vector.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/background_pattern.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/clipping_mask.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/collision_box.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/collision_circle.hpp
