@@ -43,24 +43,25 @@ public:
 
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
 
-    static FillExtrusionLayoutVertex layoutVertex(Point<int16_t> p, double nx, double ny, double nz, unsigned short t, uint16_t e) {
+    static FillExtrusionLayoutVertex layoutVertex(
+        Point<int16_t> p, double nx, double ny, double nz, unsigned short t, uint16_t e) {
         const auto factor = pow(2, 13);
 
         return FillExtrusionLayoutVertex{{{p.x, p.y}},
-                                        {{// Multiply normal vector components by 2^13 to pack them into
-                                          // integers We pack a bool (`t`) into the x component indicating
-                                          // whether it is an upper or lower vertex
-                                          static_cast<int16_t>(floor(nx * factor) * 2 + t),
-                                          static_cast<int16_t>(ny * factor * 2),
-                                          static_cast<int16_t>(nz * factor * 2),
-                                          // The edgedistance attribute is used for wrapping fill_extrusion patterns
-                                          static_cast<int16_t>(e)}}};
+                                         {{// Multiply normal vector components by 2^13 to pack them into
+                                           // integers We pack a bool (`t`) into the x component indicating
+                                           // whether it is an upper or lower vertex
+                                           static_cast<int16_t>(floor(nx * factor) * 2 + t),
+                                           static_cast<int16_t>(ny * factor * 2),
+                                           static_cast<int16_t>(nz * factor * 2),
+                                           // The edgedistance attribute is used for wrapping fill_extrusion patterns
+                                           static_cast<int16_t>(e)}}};
     }
 
     static std::array<float, 3> lightColor(const EvaluatedLight&);
     static std::array<float, 3> lightPosition(const EvaluatedLight&, const TransformState&);
     static float lightIntensity(const EvaluatedLight&);
-    
+
     using VertexVector = gfx::VertexVector<FillExtrusionLayoutVertex>;
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
