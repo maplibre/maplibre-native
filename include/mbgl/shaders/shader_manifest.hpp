@@ -35,7 +35,6 @@
 #include <mbgl/shaders/gl/drawable_wide_vector.hpp>
 #include <mbgl/shaders/gl/prelude.hpp>
 #include <mbgl/shaders/gl/clipping_mask.hpp>
-#include <mbgl/shaders/gl/raster.hpp>
 #include <mbgl/shaders/gl/symbol_icon.hpp>
 #include <mbgl/shaders/gl/symbol_sdf_text.hpp>
 #include <mbgl/shaders/gl/symbol_sdf_icon.hpp>

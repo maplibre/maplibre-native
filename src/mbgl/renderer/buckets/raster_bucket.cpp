@@ -1,6 +1,5 @@
 #include <mbgl/renderer/buckets/raster_bucket.hpp>
 #include <mbgl/renderer/layers/render_raster_layer.hpp>
-#include <mbgl/programs/raster_program.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
 
 namespace mbgl {
@@ -78,13 +77,13 @@ void RasterBucket::setMask(TileMask&& mask_) {
             segments.emplace_back(vertices.elements(), indices.elements());
         }
 
-        vertices.emplace_back(RasterProgram::layoutVertex(
+        vertices.emplace_back(RasterBucket::layoutVertex(
             {tlVertex.x, tlVertex.y}, {static_cast<uint16_t>(tlVertex.x), static_cast<uint16_t>(tlVertex.y)}));
-        vertices.emplace_back(RasterProgram::layoutVertex(
+        vertices.emplace_back(RasterBucket::layoutVertex(
             {brVertex.x, tlVertex.y}, {static_cast<uint16_t>(brVertex.x), static_cast<uint16_t>(tlVertex.y)}));
-        vertices.emplace_back(RasterProgram::layoutVertex(
+        vertices.emplace_back(RasterBucket::layoutVertex(
             {tlVertex.x, brVertex.y}, {static_cast<uint16_t>(tlVertex.x), static_cast<uint16_t>(brVertex.y)}));
-        vertices.emplace_back(RasterProgram::layoutVertex(
+        vertices.emplace_back(RasterBucket::layoutVertex(
             {brVertex.x, brVertex.y}, {static_cast<uint16_t>(brVertex.x), static_cast<uint16_t>(brVertex.y)}));
 
         auto& segment = segments.back();

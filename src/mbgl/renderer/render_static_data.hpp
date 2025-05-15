@@ -5,8 +5,8 @@
 #include <mbgl/gfx/renderbuffer.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/programs/programs.hpp>
-#include <mbgl/programs/raster_program.hpp>
 #include <mbgl/renderer/buckets/heatmap_bucket.hpp>
+#include <mbgl/renderer/buckets/raster_bucket.hpp>
 
 #include <string>
 #include <optional>

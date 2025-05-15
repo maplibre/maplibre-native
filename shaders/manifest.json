@@ -223,12 +223,6 @@
         "glsl_frag": "clipping_mask.fragment.glsl"
     },
     {
-        "name": "RasterProgram",
-        "header": "raster",
-        "glsl_vert": "raster.vertex.glsl",
-        "glsl_frag": "raster.fragment.glsl"
-    },
-    {
         "name": "SymbolIconProgram",
         "header": "symbol_icon",
         "glsl_vert": "symbol_icon.vertex.glsl",

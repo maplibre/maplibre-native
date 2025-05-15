@@ -551,8 +551,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/program_parameters.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/programs.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/programs.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/raster_program.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/raster_program.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/segment.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/symbol_icon_program.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/symbol_program.cpp
@@ -1023,7 +1021,6 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_text_and_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_wide_vector.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/clipping_mask.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/raster.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_sdf_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_sdf_text.hpp

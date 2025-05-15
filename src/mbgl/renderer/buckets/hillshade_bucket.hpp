@@ -5,7 +5,7 @@
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/geometry/dem_data.hpp>
-#include <mbgl/programs/program.hpp>
+#include <mbgl/programs/segment.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/tile_mask.hpp>
 #include <mbgl/style/layers/hillshade_layer_properties.hpp>

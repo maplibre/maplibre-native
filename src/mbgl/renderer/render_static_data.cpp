@@ -33,10 +33,10 @@ gfx::IndexVector<gfx::LineStrip> RenderStaticData::tileLineStripIndices() {
 
 gfx::VertexVector<RasterLayoutVertex> RenderStaticData::rasterVertices() {
     gfx::VertexVector<RasterLayoutVertex> result;
-    result.emplace_back(RasterProgram::layoutVertex({0, 0}, {0, 0}));
-    result.emplace_back(RasterProgram::layoutVertex({util::EXTENT, 0}, {util::EXTENT, 0}));
-    result.emplace_back(RasterProgram::layoutVertex({0, util::EXTENT}, {0, util::EXTENT}));
-    result.emplace_back(RasterProgram::layoutVertex({util::EXTENT, util::EXTENT}, {util::EXTENT, util::EXTENT}));
+    result.emplace_back(RasterBucket::layoutVertex({0, 0}, {0, 0}));
+    result.emplace_back(RasterBucket::layoutVertex({util::EXTENT, 0}, {util::EXTENT, 0}));
+    result.emplace_back(RasterBucket::layoutVertex({0, util::EXTENT}, {0, util::EXTENT}));
+    result.emplace_back(RasterBucket::layoutVertex({util::EXTENT, util::EXTENT}, {util::EXTENT, util::EXTENT}));
     return result;
 }
 
