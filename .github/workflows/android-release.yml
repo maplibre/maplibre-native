@@ -75,10 +75,25 @@ jobs:
             echo "prerelease=true" >> "$GITHUB_ENV"
           fi
 
-      - name: Create tag
+      - name: Create tag if it does not exist
         run: |
-          git tag -s -a android-v${{ env.version }} -m "Publish android-v${{ env.version }}" ${{ github.sha }}
-          git push origin android-v${{ env.version }}
+          git config user.name "MapLibre Team"
+          git config user.email "team@maplibre.org"
+          tag="android-v${{ env.version }}"
+
+          if git rev-parse "$tag" >/dev/null 2>&1; then
+            tag_sha=$(git rev-parse "$tag^{commit}")
+            if [ "$tag_sha" = "${{ github.sha }}" ]; then
+              echo "✅ Tag $tag exists and matches current commit SHA."
+              exit 0
+            else
+              echo "::error::❌ Tag $tag exists but points to a different commit. Aborting."
+              exit 1
+            fi
+          else
+            git tag -a "$tag" -m "Publish $tag" ${{ github.sha }}
+            git push origin "$tag"
+          fi
 
       - name: Create release
         id: create_release
