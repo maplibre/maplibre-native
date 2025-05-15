@@ -44,9 +44,11 @@ public:
         return HeatmapLayoutVertex{
             {{static_cast<int16_t>((p.x * 2) + ((ex + 1) / 2)), static_cast<int16_t>((p.y * 2) + ((ey + 1) / 2))}}};
     }
-    
-    static HeatmapTextureLayoutVertex textureVertex(Point<int16_t> p) { return HeatmapTextureLayoutVertex{{{p.x, p.y}}}; }
-    
+
+    static HeatmapTextureLayoutVertex textureVertex(Point<int16_t> p) {
+        return HeatmapTextureLayoutVertex{{{p.x, p.y}}};
+    }
+
     using VertexVector = gfx::VertexVector<HeatmapLayoutVertex>;
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
