@@ -42,17 +42,9 @@ jobs:
       - name: Android nitpick
         run: make run-android-nitpick
 
-      - name: Update version name
+      - name: Set version name
         run: |
-          RELEASE_VERSION="$( git describe --tags --match=android-v*.*.* --abbrev=0 | sed 's/^android-v//' )"
-          echo version="$RELEASE_VERSION" >> "$GITHUB_ENV"
-          echo "Latest version from tag: $RELEASE_VERSION"
-          if [ -n "$RELEASE_VERSION" ]; then
-            sed -i -e "s/^VERSION_NAME=.*/VERSION_NAME=${RELEASE_VERSION}/" MapLibreAndroid/gradle.properties
-            echo "MapLibreAndroid/gradle.properties:"
-            cat MapLibreAndroid/gradle.properties
-          fi
-        shell: bash
+          echo version="$(cat VERSION)" > "$GITHUB_ENV"
 
       - name: Build package
         run: |
@@ -68,7 +60,7 @@ jobs:
           RELEASE_NOTES_PATH="${PWD}/release_notes.txt"
           node scripts/release-notes.mjs > "${RELEASE_NOTES_PATH}"
           echo release_notes="${RELEASE_NOTES_PATH}" >> "$GITHUB_OUTPUT"
-          echo version_tag="$( git describe --tags --match=android-v*.*.* --abbrev=0 )" >> "$GITHUB_OUTPUT"
+          echo version_tag=android-v${{ env.version }} >> "$GITHUB_OUTPUT"
         shell: bash
 
       - name: Check if version is pre-release
@@ -82,6 +74,11 @@ jobs:
             echo "Invalid semver: $version"
             echo "prerelease=true" >> "$GITHUB_ENV"
           fi
+
+      - name: Create tag
+        run: |
+          git tag -s -a android-v${{ env.version }} -m "Publish android-v${{ env.version }}" ${{ github.sha }}
+          git push origin android-v${{ env.version }}
 
       - name: Create release
         id: create_release

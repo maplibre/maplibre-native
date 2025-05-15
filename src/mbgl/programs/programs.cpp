@@ -1,13 +1,4 @@
 #include <mbgl/programs/programs.hpp>
-#include <mbgl/programs/background_program.hpp>
-#include <mbgl/programs/circle_program.hpp>
-#include <mbgl/programs/heatmap_program.hpp>
-#include <mbgl/programs/hillshade_program.hpp>
-#include <mbgl/programs/fill_extrusion_program.hpp>
-#include <mbgl/programs/fill_program.hpp>
-#include <mbgl/programs/line_program.hpp>
-#include <mbgl/programs/raster_program.hpp>
-#include <mbgl/programs/symbol_program.hpp>
 #include <mbgl/util/logging.hpp>
 #include <exception>
 
@@ -41,7 +32,7 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
 
 void Programs::registerWith(gfx::ShaderRegistry& registry) {
     /// The following types will be registered
-    registerTypes<DebugProgram, ClippingMaskProgram>(registry, programParameters);
+    registerTypes<ClippingMaskProgram>(registry, programParameters);
 }
 
 } // namespace mbgl

@@ -10,12 +10,6 @@
 
 namespace mbgl {
 
-class FillBucket;
-class FillProgram;
-class FillPatternProgram;
-class FillOutlineProgram;
-class FillOutlinePatternProgram;
-
 class FillLayerTweaker;
 using FillLayerTweakerPtr = std::shared_ptr<FillLayerTweaker>;
 

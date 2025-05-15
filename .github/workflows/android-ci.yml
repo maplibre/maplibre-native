@@ -46,6 +46,8 @@ jobs:
       BUILDTYPE: Debug
       IS_LOCAL_DEVELOPMENT: false
       MLN_ANDROID_STL: c++_static
+    outputs:
+      make_release: ${{ steps.make_release.outputs.make_release }}
     steps:
       - name: Free Disk Space (Ubuntu)
         if: startsWith(runner.name, 'GitHub Actions')
@@ -200,6 +202,17 @@ jobs:
             platform/android/InstrumentationTestApp.apk
             platform/android/InstrumentationTests.apk
 
+      - name: VERSION file changed
+        id: version-file-android-changed
+        uses: tj-actions/changed-files@v46
+        with:
+          files: platform/android/VERSION
+
+      - name: Should make release?
+        id: make_release
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.version-file-android-changed.outputs.any_changed == 'true'
+        run: echo make_release=true >> "$GITHUB_OUTPUT"
+
   android-build-cpp-test:
     runs-on: ubuntu-24.04
 
@@ -328,5 +341,9 @@ jobs:
       - android-build-render-test
     steps:
       - name: Mark result as failed
-        if: needs.android-build.result != 'success'
+        if: needs.android-build.result != 'success' || needs.android-build-cpp-test.result != 'success' || needs.android-build-render-test.result != 'success'
         run: exit 1
+
+      - name: Trigger release
+        if: needs.android-build.outputs.make_release == 'true' && needs.android-build.result == 'success' && needs.android-build-cpp-test.result == 'success' && needs.android-build-render-test.result == 'success'
+        run: gh workflow run android-release.yml --ref ${{ github.sha }}

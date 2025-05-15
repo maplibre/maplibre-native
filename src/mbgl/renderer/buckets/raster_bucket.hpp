@@ -3,9 +3,11 @@
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
-#include <mbgl/programs/raster_program.hpp>
+#include <mbgl/programs/segment.hpp>
 #include <mbgl/renderer/bucket.hpp>
+#include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/renderer/tile_mask.hpp>
+#include <mbgl/style/layers/raster_layer_properties.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/mat4.hpp>
 
@@ -19,6 +21,9 @@ class Texture2D;
 using Texture2DPtr = std::shared_ptr<Texture2D>;
 } // namespace gfx
 
+using RasterBinders = PaintPropertyBinders<style::RasterPaintProperties::DataDrivenProperties>;
+using RasterLayoutVertex = gfx::Vertex<TypeList<attributes::pos, attributes::texture_pos>>;
+
 class RasterBucket final : public Bucket {
 public:
     RasterBucket(PremultipliedImage&&);
@@ -31,6 +36,10 @@ public:
     void clear();
     void setImage(std::shared_ptr<PremultipliedImage>);
     void setMask(TileMask&&);
+
+    static RasterLayoutVertex layoutVertex(Point<int16_t> p, Point<uint16_t> t) {
+        return RasterLayoutVertex{{{p.x, p.y}}, {{t.x, t.y}}};
+    }
 
     std::shared_ptr<PremultipliedImage> image;
     std::optional<gfx::Texture> texture;
@@ -47,7 +56,7 @@ public:
     const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
     TriangleIndexVector& indices = *sharedTriangles;
 
-    SegmentVector<RasterAttributes> segments;
+    SegmentVector segments;
 };
 
 } // namespace mbgl

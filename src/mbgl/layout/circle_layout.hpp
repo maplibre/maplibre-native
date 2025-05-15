@@ -126,10 +126,10 @@ private:
                 // │ 1     2 │
                 // └─────────┘
                 //
-                vertices.emplace_back(CircleProgram::vertex(point, -1, -1)); // 1
-                vertices.emplace_back(CircleProgram::vertex(point, 1, -1));  // 2
-                vertices.emplace_back(CircleProgram::vertex(point, 1, 1));   // 3
-                vertices.emplace_back(CircleProgram::vertex(point, -1, 1));  // 4
+                vertices.emplace_back(CircleBucket::vertex(point, -1, -1)); // 1
+                vertices.emplace_back(CircleBucket::vertex(point, 1, -1));  // 2
+                vertices.emplace_back(CircleBucket::vertex(point, 1, 1));   // 3
+                vertices.emplace_back(CircleBucket::vertex(point, -1, 1));  // 4
 
                 auto& segment = segments.back();
                 assert(segment.vertexLength <= std::numeric_limits<uint16_t>::max());

@@ -2,12 +2,15 @@
 precision highp float;
 #endif
 
-uniform sampler2D u_image;
 in vec2 v_pos;
-uniform vec2 u_dimension;
-uniform float u_zoom;
-uniform float u_maxzoom;
-uniform vec4 u_unpack;
+uniform sampler2D u_image;
+
+layout (std140) uniform HillshadePrepareTilePropsUBO {
+    highp vec4 u_unpack;
+    highp vec2 u_dimension;
+    highp float u_zoom;
+    highp float u_maxzoom;
+};
 
 float getElevation(vec2 coord, float bias) {
     // Convert encoded elevation value to meters
