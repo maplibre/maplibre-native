@@ -201,7 +201,7 @@
         "uses_ubos": true
     },
     {
-        "name": "SymbolSDFIconShader",
+        "name": "SymbolSDFShader",
         "header": "symbol_sdf",
         "glsl_vert": "symbol_sdf.vertex.glsl",
         "glsl_frag": "symbol_sdf.fragment.glsl",

@@ -38,7 +38,7 @@ enum class BuiltIn {
     LineSDFShader,
     RasterShader,
     SymbolIconShader,
-    SymbolSDFIconShader,
+    SymbolSDFShader,
     SymbolTextAndIconShader,
     WideVectorShader
 };
