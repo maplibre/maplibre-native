@@ -318,6 +318,16 @@ jobs:
         with:
           flavor: ${{ matrix.flavor }}
 
+      - name: VERSION file changed
+        id: version-file-android-changed
+        uses: tj-actions/changed-files@v46
+        with:
+          files: platform/android/VERSION
+
+      - name: Should make release?
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.version-file-android-changed.outputs.any_changed == 'true'
+        run: echo make_release=true >> "$GITHUB_OUTPUT"
+
   android-ci-result:
     runs-on: ubuntu-latest
     if: needs.pre_job.outputs.should_skip != 'true' && always()
@@ -328,5 +338,9 @@ jobs:
       - android-build-render-test
     steps:
       - name: Mark result as failed
-        if: needs.android-build.result != 'success'
+        if: needs.android-build.result != 'success' || needs.android-build-cpp-test.result != 'success' || needs.android-build-render-test.result != 'success'
         run: exit 1
+
+      - name: Trigger release
+        if: needs.android-build.result == 'success' && needs.android-build-cpp-test.result == 'success' && needs.android-build-render-test.result == 'success'
+        run: gh workflow run android-release.yml --ref ${{ github.sha }}

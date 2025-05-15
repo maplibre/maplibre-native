@@ -19,20 +19,6 @@ To make an Android release, do the following:
         ## 9.6.0
         ```
 
-    - Update `android/MapLibreAndroid/gradle.properties` with the new version.
+    - Update `android/VERSION` with the new version.
 
-2. Once the pull request updating the changelog is merged, tag the commit:
-
-    - Create a tag locally, with for example:
-      ```
-      git tag -a android-v9.6.0 -m "Release android-v9.6.0"
-      ```
-    - You need write access to push the tag, use for example:
-      ```
-      git push --atomic origin main android-v9.6.0
-      ```
-
-3. Once the tag is pushed, you can run the [`android-release.yml`](https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/android-release.yml) workflow.
-
-    - Open the [android-release](https://github.com/maplibre/maplibre-native/actions/workflows/android-release.yml) workflow page.
-    - Press *Run workflow* and select the tag you pushed.
+2. Once the PR is merged, the [`android-release.yml`](https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/android-release.yml) workflow will run automatically to make the release.
