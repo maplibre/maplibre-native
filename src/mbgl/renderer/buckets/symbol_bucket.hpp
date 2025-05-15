@@ -21,7 +21,8 @@ class CrossTileSymbolLayerIndex;
 
 using SymbolIconBinders = PaintPropertyBinders<style::IconPaintProperties::DataDrivenProperties>;
 using SymbolTextBinders = PaintPropertyBinders<style::TextPaintProperties::DataDrivenProperties>;
-using SymbolLayoutVertex = gfx::Vertex<TypeList<attributes::pos_offset, attributes::data<uint16_t, 4>, attributes::pixeloffset>>;
+using SymbolLayoutVertex =
+    gfx::Vertex<TypeList<attributes::pos_offset, attributes::data<uint16_t, 4>, attributes::pixeloffset>>;
 using SymbolDynamicLayoutAttributes = TypeList<attributes::projected_pos>;
 using SymbolOpacityAttributes = TypeList<attributes::fade_opacity>;
 
@@ -48,8 +49,8 @@ class SymbolSizeBinder {
 public:
     virtual ~SymbolSizeBinder() = default;
 
-    //using UniformList = TypeList<uniforms::is_size_zoom_constant, uniforms::is_size_feature_constant, uniforms::size_t, uniforms::size>;
-    //using UniformValues = gfx::UniformValues<UniformList>;
+    // using UniformList = TypeList<uniforms::is_size_zoom_constant, uniforms::is_size_feature_constant,
+    // uniforms::size_t, uniforms::size>; using UniformValues = gfx::UniformValues<UniformList>;
 
     static std::unique_ptr<SymbolSizeBinder> create(float tileZoom,
                                                     const style::PropertyValue<float>& sizeProperty,
@@ -299,7 +300,7 @@ public:
     static gfx::Vertex<SymbolOpacityAttributes> opacityVertex(bool placed, float opacity) {
         return {{{static_cast<float>((static_cast<uint8_t>(opacity * 127) << 1) | static_cast<uint8_t>(placed))}}};
     }
-    
+
     Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout;
     const std::string bucketLeaderID;
     float sortedAngle = std::numeric_limits<float>::max();

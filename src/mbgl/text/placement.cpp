@@ -1012,7 +1012,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
         if (symbolInstance.hasText()) {
             size_t textOpacityVerticesSize = 0u;
             const auto& opacityVertex = SymbolBucket::opacityVertex(opacityState.text.placed,
-                                                                            opacityState.text.opacity);
+                                                                    opacityState.text.opacity);
             if (symbolInstance.getPlacedRightTextIndex()) {
                 textOpacityVerticesSize += symbolInstance.getRightJustifiedGlyphQuadsSize() * 4;
                 PlacedSymbol& placed = bucket.text.placedSymbols[*symbolInstance.getPlacedRightTextIndex()];
@@ -1053,7 +1053,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
         if (symbolInstance.hasIcon()) {
             size_t iconOpacityVerticesSize = 0u;
             const auto& opacityVertex = SymbolBucket::opacityVertex(opacityState.icon.placed,
-                                                                         opacityState.icon.opacity);
+                                                                    opacityState.icon.opacity);
             auto& iconBuffer = symbolInstance.hasSdfIcon() ? bucket.sdfIcon : bucket.icon;
 
             if (symbolInstance.getPlacedIconIndex()) {
