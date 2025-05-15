@@ -47,12 +47,6 @@ public:
     float sortKey;
 };
 
-template <class AttributeList>
-class Segment : public SegmentBase {
-    using SegmentBase::SegmentBase;
-};
-
-template <class AttributeList>
-using SegmentVector = std::vector<Segment<AttributeList>>;
+using SegmentVector = std::vector<SegmentBase>;
 
 } // namespace mbgl

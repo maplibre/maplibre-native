@@ -1,238 +1,9 @@
 [
     {
-        "name": "BackgroundShader",
-        "header": "drawable_background",
-        "glsl_vert": "drawable.background.vertex.glsl",
-        "glsl_frag": "drawable.background.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "BackgroundPatternShader",
-        "header": "drawable_background_pattern",
-        "glsl_vert": "drawable.background_pattern.vertex.glsl",
-        "glsl_frag": "drawable.background_pattern.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "CircleShader",
-        "header": "drawable_circle",
-        "glsl_vert": "drawable.circle.vertex.glsl",
-        "glsl_frag": "drawable.circle.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "CollisionBoxShader",
-        "header": "drawable_collision_box",
-        "glsl_vert": "drawable.collision_box.vertex.glsl",
-        "glsl_frag": "drawable.collision_box.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "CollisionCircleShader",
-        "header": "drawable_collision_circle",
-        "glsl_vert": "drawable.collision_circle.vertex.glsl",
-        "glsl_frag": "drawable.collision_circle.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "CustomGeometryShader",
-        "header": "drawable_custom_geometry",
-        "glsl_vert": "drawable.custom_geometry.vertex.glsl",
-        "glsl_frag": "drawable.custom_geometry.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "CustomSymbolIconShader",
-        "header": "drawable_custom_symbol_icon",
-        "glsl_vert": "drawable.custom.symbol_icon.vertex.glsl",
-        "glsl_frag": "drawable.custom.symbol_icon.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "DebugShader",
-        "header": "drawable_debug",
-        "glsl_vert": "drawable.debug.vertex.glsl",
-        "glsl_frag": "drawable.debug.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "FillShader",
-        "header": "drawable_fill",
-        "glsl_vert": "drawable.fill.vertex.glsl",
-        "glsl_frag": "drawable.fill.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "FillOutlineShader",
-        "header": "drawable_fill_outline",
-        "glsl_vert": "drawable.fill_outline.vertex.glsl",
-        "glsl_frag": "drawable.fill_outline.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "FillPatternShader",
-        "header": "drawable_fill_pattern",
-        "glsl_vert": "drawable.fill_pattern.vertex.glsl",
-        "glsl_frag": "drawable.fill_pattern.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "FillOutlinePatternShader",
-        "header": "drawable_fill_outline_pattern",
-        "glsl_vert": "drawable.fill_outline_pattern.vertex.glsl",
-        "glsl_frag": "drawable.fill_outline_pattern.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "FillOutlineTriangulatedShader",
-        "header": "drawable_fill_outline_triangulated",
-        "glsl_vert": "drawable.fill_outline_triangulated.vertex.glsl",
-        "glsl_frag": "drawable.fill_outline_triangulated.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "FillExtrusionShader",
-        "header": "drawable_fill_extrusion",
-        "glsl_vert": "drawable.fill_extrusion.vertex.glsl",
-        "glsl_frag": "drawable.fill_extrusion.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "FillExtrusionPatternShader",
-        "header": "drawable_fill_extrusion_pattern",
-        "glsl_vert": "drawable.fill_extrusion_pattern.vertex.glsl",
-        "glsl_frag": "drawable.fill_extrusion_pattern.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "HeatmapShader",
-        "header": "drawable_heatmap",
-        "glsl_vert": "drawable.heatmap.vertex.glsl",
-        "glsl_frag": "drawable.heatmap.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "HeatmapTextureShader",
-        "header": "drawable_heatmap_texture",
-        "glsl_vert": "drawable.heatmap_texture.vertex.glsl",
-        "glsl_frag": "drawable.heatmap_texture.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "HillshadePrepareShader",
-        "header": "drawable_hillshade_prepare",
-        "glsl_vert": "drawable.hillshade_prepare.vertex.glsl",
-        "glsl_frag": "drawable.hillshade_prepare.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "HillshadeShader",
-        "header": "drawable_hillshade",
-        "glsl_vert": "drawable.hillshade.vertex.glsl",
-        "glsl_frag": "drawable.hillshade.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "LineShader",
-        "header": "drawable_line",
-        "glsl_vert": "drawable.line.vertex.glsl",
-        "glsl_frag": "drawable.line.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "LineGradientShader",
-        "header": "drawable_line_gradient",
-        "glsl_vert": "drawable.line_gradient.vertex.glsl",
-        "glsl_frag": "drawable.line_gradient.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "LinePatternShader",
-        "header": "drawable_line_pattern",
-        "glsl_vert": "drawable.line_pattern.vertex.glsl",
-        "glsl_frag": "drawable.line_pattern.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "LocationIndicatorShader",
-        "header": "drawable_location_indicator",
-        "glsl_vert": "drawable.location_indicator.vertex.glsl",
-        "glsl_frag": "drawable.location_indicator.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "LocationIndicatorTexturedShader",
-        "header": "drawable_location_indicator_textured",
-        "glsl_vert": "drawable.location_indicator_textured.vertex.glsl",
-        "glsl_frag": "drawable.location_indicator_textured.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "LineSDFShader",
-        "header": "drawable_line_sdf",
-        "glsl_vert": "drawable.line_sdf.vertex.glsl",
-        "glsl_frag": "drawable.line_sdf.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "RasterShader",
-        "header": "drawable_raster",
-        "glsl_vert": "drawable.raster.vertex.glsl",
-        "glsl_frag": "drawable.raster.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "SymbolIconShader",
-        "header": "drawable_symbol_icon",
-        "glsl_vert": "drawable.symbol_icon.vertex.glsl",
-        "glsl_frag": "drawable.symbol_icon.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "SymbolSDFIconShader",
-        "header": "drawable_symbol_sdf",
-        "glsl_vert": "drawable.symbol_sdf.vertex.glsl",
-        "glsl_frag": "drawable.symbol_sdf.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "SymbolTextAndIconShader",
-        "header": "drawable_symbol_text_and_icon",
-        "glsl_vert": "drawable.symbol_text_and_icon.vertex.glsl",
-        "glsl_frag": "drawable.symbol_text_and_icon.fragment.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "WideVectorShader",
-        "header": "drawable_wide_vector",
-        "glsl_vert": "_empty.glsl",
-        "glsl_frag": "_empty.glsl",
-        "uses_ubos": true
-    },
-
-    {
         "name": "Prelude",
         "header": "prelude",
         "glsl_vert": "_prelude.vertex.glsl",
         "glsl_frag": "_prelude.fragment.glsl"
-    },
-    {
-        "name": "BackgroundProgram",
-        "header": "background",
-        "glsl_vert": "background.vertex.glsl",
-        "glsl_frag": "background.fragment.glsl"
-    },
-    {
-        "name": "BackgroundPatternProgram",
-        "header": "background_pattern",
-        "glsl_vert": "background_pattern.vertex.glsl",
-        "glsl_frag": "background_pattern.fragment.glsl"
-    },
-    {
-        "name": "CircleProgram",
-        "header": "circle",
-        "glsl_vert": "circle.vertex.glsl",
-        "glsl_frag": "circle.fragment.glsl"
     },
     {
         "name": "ClippingMaskProgram",
@@ -241,135 +12,213 @@
         "glsl_frag": "clipping_mask.fragment.glsl"
     },
     {
-        "name": "CollisionBoxProgram",
+        "name": "BackgroundShader",
+        "header": "background",
+        "glsl_vert": "background.vertex.glsl",
+        "glsl_frag": "background.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "BackgroundPatternShader",
+        "header": "background_pattern",
+        "glsl_vert": "background_pattern.vertex.glsl",
+        "glsl_frag": "background_pattern.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "CircleShader",
+        "header": "circle",
+        "glsl_vert": "circle.vertex.glsl",
+        "glsl_frag": "circle.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "CollisionBoxShader",
         "header": "collision_box",
         "glsl_vert": "collision_box.vertex.glsl",
-        "glsl_frag": "collision_box.fragment.glsl"
+        "glsl_frag": "collision_box.fragment.glsl",
+        "uses_ubos": true
     },
     {
-        "name": "CollisionCircleProgram",
+        "name": "CollisionCircleShader",
         "header": "collision_circle",
         "glsl_vert": "collision_circle.vertex.glsl",
-        "glsl_frag": "collision_circle.fragment.glsl"
+        "glsl_frag": "collision_circle.fragment.glsl",
+        "uses_ubos": true
     },
     {
-        "name": "DebugProgram",
+        "name": "CustomGeometryShader",
+        "header": "custom_geometry",
+        "glsl_vert": "custom_geometry.vertex.glsl",
+        "glsl_frag": "custom_geometry.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "CustomSymbolIconShader",
+        "header": "custom_symbol_icon",
+        "glsl_vert": "custom.symbol_icon.vertex.glsl",
+        "glsl_frag": "custom.symbol_icon.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "DebugShader",
         "header": "debug",
         "glsl_vert": "debug.vertex.glsl",
-        "glsl_frag": "debug.fragment.glsl"
+        "glsl_frag": "debug.fragment.glsl",
+        "uses_ubos": true
     },
     {
-        "name": "FillExtrusionPatternProgram",
-        "header": "fill_extrusion_pattern",
-        "glsl_vert": "fill_extrusion_pattern.vertex.glsl",
-        "glsl_frag": "fill_extrusion_pattern.fragment.glsl"
-    },
-    {
-        "name": "FillExtrusionProgram",
-        "header": "fill_extrusion",
-        "glsl_vert": "fill_extrusion.vertex.glsl",
-        "glsl_frag": "fill_extrusion.fragment.glsl"
-    },
-    {
-        "name": "FillOutlinePatternProgram",
-        "header": "fill_outline_pattern",
-        "glsl_vert": "fill_outline_pattern.vertex.glsl",
-        "glsl_frag": "fill_outline_pattern.fragment.glsl"
-    },
-    {
-        "name": "FillOutlineProgram",
-        "header": "fill_outline",
-        "glsl_vert": "fill_outline.vertex.glsl",
-        "glsl_frag": "fill_outline.fragment.glsl"
-    },
-    {
-        "name": "FillPatternProgram",
-        "header": "fill_pattern",
-        "glsl_vert": "fill_pattern.vertex.glsl",
-        "glsl_frag": "fill_pattern.fragment.glsl"
-    },
-    {
-        "name": "FillProgram",
+        "name": "FillShader",
         "header": "fill",
         "glsl_vert": "fill.vertex.glsl",
-        "glsl_frag": "fill.fragment.glsl"
+        "glsl_frag": "fill.fragment.glsl",
+        "uses_ubos": true
     },
     {
-        "name": "HeatmapTextureProgram",
-        "header": "heatmap_texture",
-        "glsl_vert": "heatmap_texture.vertex.glsl",
-        "glsl_frag": "heatmap_texture.fragment.glsl"
+        "name": "FillOutlineShader",
+        "header": "fill_outline",
+        "glsl_vert": "fill_outline.vertex.glsl",
+        "glsl_frag": "fill_outline.fragment.glsl",
+        "uses_ubos": true
     },
     {
-        "name": "HeatmapProgram",
+        "name": "FillPatternShader",
+        "header": "fill_pattern",
+        "glsl_vert": "fill_pattern.vertex.glsl",
+        "glsl_frag": "fill_pattern.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "FillOutlinePatternShader",
+        "header": "fill_outline_pattern",
+        "glsl_vert": "fill_outline_pattern.vertex.glsl",
+        "glsl_frag": "fill_outline_pattern.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "FillOutlineTriangulatedShader",
+        "header": "fill_outline_triangulated",
+        "glsl_vert": "fill_outline_triangulated.vertex.glsl",
+        "glsl_frag": "fill_outline_triangulated.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "FillExtrusionShader",
+        "header": "fill_extrusion",
+        "glsl_vert": "fill_extrusion.vertex.glsl",
+        "glsl_frag": "fill_extrusion.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "FillExtrusionPatternShader",
+        "header": "fill_extrusion_pattern",
+        "glsl_vert": "fill_extrusion_pattern.vertex.glsl",
+        "glsl_frag": "fill_extrusion_pattern.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "HeatmapShader",
         "header": "heatmap",
         "glsl_vert": "heatmap.vertex.glsl",
-        "glsl_frag": "heatmap.fragment.glsl"
+        "glsl_frag": "heatmap.fragment.glsl",
+        "uses_ubos": true
     },
     {
-        "name": "HillshadePrepareProgram",
+        "name": "HeatmapTextureShader",
+        "header": "heatmap_texture",
+        "glsl_vert": "heatmap_texture.vertex.glsl",
+        "glsl_frag": "heatmap_texture.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "HillshadePrepareShader",
         "header": "hillshade_prepare",
         "glsl_vert": "hillshade_prepare.vertex.glsl",
-        "glsl_frag": "hillshade_prepare.fragment.glsl"
+        "glsl_frag": "hillshade_prepare.fragment.glsl",
+        "uses_ubos": true
     },
     {
-        "name": "HillshadeProgram",
+        "name": "HillshadeShader",
         "header": "hillshade",
         "glsl_vert": "hillshade.vertex.glsl",
-        "glsl_frag": "hillshade.fragment.glsl"
+        "glsl_frag": "hillshade.fragment.glsl",
+        "uses_ubos": true
     },
     {
-        "name": "LineGradientProgram",
-        "header": "line_gradient",
-        "glsl_vert": "line_gradient.vertex.glsl",
-        "glsl_frag": "line_gradient.fragment.glsl"
-    },
-    {
-        "name": "LinePatternProgram",
-        "header": "line_pattern",
-        "glsl_vert": "line_pattern.vertex.glsl",
-        "glsl_frag": "line_pattern.fragment.glsl"
-    },
-    {
-        "name": "LineSDFProgram",
-        "header": "line_sdf",
-        "glsl_vert": "line_sdf.vertex.glsl",
-        "glsl_frag": "line_sdf.fragment.glsl"
-    },
-    {
-        "name": "LineProgram",
+        "name": "LineShader",
         "header": "line",
         "glsl_vert": "line.vertex.glsl",
-        "glsl_frag": "line.fragment.glsl"
+        "glsl_frag": "line.fragment.glsl",
+        "uses_ubos": true
     },
     {
-        "name": "RasterProgram",
+        "name": "LineGradientShader",
+        "header": "line_gradient",
+        "glsl_vert": "line_gradient.vertex.glsl",
+        "glsl_frag": "line_gradient.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "LinePatternShader",
+        "header": "line_pattern",
+        "glsl_vert": "line_pattern.vertex.glsl",
+        "glsl_frag": "line_pattern.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "LocationIndicatorShader",
+        "header": "location_indicator",
+        "glsl_vert": "location_indicator.vertex.glsl",
+        "glsl_frag": "location_indicator.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "LocationIndicatorTexturedShader",
+        "header": "location_indicator_textured",
+        "glsl_vert": "location_indicator_textured.vertex.glsl",
+        "glsl_frag": "location_indicator_textured.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "LineSDFShader",
+        "header": "line_sdf",
+        "glsl_vert": "line_sdf.vertex.glsl",
+        "glsl_frag": "line_sdf.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "RasterShader",
         "header": "raster",
         "glsl_vert": "raster.vertex.glsl",
-        "glsl_frag": "raster.fragment.glsl"
+        "glsl_frag": "raster.fragment.glsl",
+        "uses_ubos": true
     },
     {
-        "name": "SymbolIconProgram",
+        "name": "SymbolIconShader",
         "header": "symbol_icon",
         "glsl_vert": "symbol_icon.vertex.glsl",
-        "glsl_frag": "symbol_icon.fragment.glsl"
+        "glsl_frag": "symbol_icon.fragment.glsl",
+        "uses_ubos": true
     },
     {
-        "name": "SymbolSDFTextProgram",
-        "header": "symbol_sdf_text",
+        "name": "SymbolSDFIconShader",
+        "header": "symbol_sdf",
         "glsl_vert": "symbol_sdf.vertex.glsl",
-        "glsl_frag": "symbol_sdf.fragment.glsl"
+        "glsl_frag": "symbol_sdf.fragment.glsl",
+        "uses_ubos": true
     },
     {
-        "name": "SymbolSDFIconProgram",
-        "header": "symbol_sdf_icon",
-        "glsl_vert": "symbol_sdf.vertex.glsl",
-        "glsl_frag": "symbol_sdf.fragment.glsl"
-    },
-    {
-        "name": "SymbolTextAndIconProgram",
+        "name": "SymbolTextAndIconShader",
         "header": "symbol_text_and_icon",
         "glsl_vert": "symbol_text_and_icon.vertex.glsl",
-        "glsl_frag": "symbol_text_and_icon.fragment.glsl"
+        "glsl_frag": "symbol_text_and_icon.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "WideVectorShader",
+        "header": "wide_vector",
+        "glsl_vert": "_empty.glsl",
+        "glsl_frag": "_empty.glsl",
+        "uses_ubos": true
     }
 ]

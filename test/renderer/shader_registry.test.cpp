@@ -21,7 +21,7 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/headless_frontend.hpp>
 #include <mbgl/test/map_adapter.hpp>
-#include <mbgl/programs/fill_program.hpp>
+#include <mbgl/programs/clipping_mask_program.hpp>
 
 using namespace mbgl;
 
@@ -214,7 +214,8 @@ TEST(ShaderRegistry, DISABLED_GLSLReplacement_NoOp) {
 
     // Just replace with a default instance
     observer.registerShaders = [&](gfx::ShaderRegistry& registry) {
-        if (!registry.getLegacyGroup().replaceShader(std::make_shared<FillProgram>(ProgramParameters(1.0f, false)))) {
+        if (!registry.getLegacyGroup().replaceShader(
+                std::make_shared<ClippingMaskProgram>(ProgramParameters(1.0f, false)))) {
             throw std::runtime_error("Failed to register shader!");
         }
     };
@@ -240,7 +241,7 @@ TEST(ShaderRegistry, DISABLED_GLSLReplacement1) {
 
     // Replace with an instance that only renders blue
     observer.registerShaders = [&](gfx::ShaderRegistry& registry) {
-        if (!registry.getLegacyGroup().replaceShader(std::make_shared<FillProgram>(
+        if (!registry.getLegacyGroup().replaceShader(std::make_shared<ClippingMaskProgram>(
                 ProgramParameters(1.0f, false)
                     .withShaderSource(ProgramParameters::ProgramSource(gfx::Backend::Type::OpenGL,
                                                                        "",
@@ -274,7 +275,7 @@ TEST(ShaderRegistry, DISABLED_GLSLReplacement2) {
 
     // Replace with an instance that adds some red and green
     observer.registerShaders = [&](gfx::ShaderRegistry& registry) {
-        if (!registry.getLegacyGroup().replaceShader(std::make_shared<FillProgram>(
+        if (!registry.getLegacyGroup().replaceShader(std::make_shared<ClippingMaskProgram>(
                 ProgramParameters(1.0f, false)
                     .withShaderSource(ProgramParameters::ProgramSource(gfx::Backend::Type::OpenGL,
                                                                        "",

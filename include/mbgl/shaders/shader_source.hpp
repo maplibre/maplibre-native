@@ -9,6 +9,8 @@ namespace shaders {
 /// source code for the desired program and graphics back-end.
 enum class BuiltIn {
     None,
+    Prelude,
+    ClippingMaskProgram,
     BackgroundShader,
     BackgroundPatternShader,
     CircleShader,
@@ -38,34 +40,7 @@ enum class BuiltIn {
     SymbolIconShader,
     SymbolSDFIconShader,
     SymbolTextAndIconShader,
-    WideVectorShader,
-    Prelude,
-    BackgroundProgram,
-    BackgroundPatternProgram,
-    CircleProgram,
-    ClippingMaskProgram,
-    CollisionBoxProgram,
-    CollisionCircleProgram,
-    DebugProgram,
-    FillExtrusionPatternProgram,
-    FillExtrusionProgram,
-    FillOutlinePatternProgram,
-    FillOutlineProgram,
-    FillPatternProgram,
-    FillProgram,
-    HeatmapTextureProgram,
-    HeatmapProgram,
-    HillshadePrepareProgram,
-    HillshadeProgram,
-    LineGradientProgram,
-    LinePatternProgram,
-    LineSDFProgram,
-    LineProgram,
-    RasterProgram,
-    SymbolIconProgram,
-    SymbolSDFTextProgram,
-    SymbolSDFIconProgram,
-    SymbolTextAndIconProgram
+    WideVectorShader
 };
 
 /// @brief Select shader source based on a program type and a desired

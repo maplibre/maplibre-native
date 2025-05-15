@@ -66,7 +66,6 @@ public:
 
     void upload(gfx::UploadPass&) const;
     void prepare(const SourcePrepareParameters&);
-    void finishRender(PaintParameters&) const;
 
     static mat4 translateVtxMatrix(const UnwrappedTileID& id,
                                    const mat4& tileMatrix,

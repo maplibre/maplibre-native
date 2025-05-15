@@ -1087,53 +1087,53 @@ size_t SymbolLayout::addSymbol(SymbolBucket::Buffer& buffer,
 
     // coordinates (2 triangles)
     auto& vertices = buffer.vertices();
-    vertices.emplace_back(SymbolSDFIconProgram::layoutVertex(labelAnchor.point,
-                                                             tl,
-                                                             symbol.glyphOffset.y,
-                                                             tex.x,
-                                                             tex.y,
-                                                             sizeData,
-                                                             symbol.isSDF,
-                                                             pixelOffsetTL,
-                                                             minFontScale));
-    vertices.emplace_back(SymbolSDFIconProgram::layoutVertex(labelAnchor.point,
-                                                             tr,
-                                                             symbol.glyphOffset.y,
-                                                             tex.x + tex.w,
-                                                             tex.y,
-                                                             sizeData,
-                                                             symbol.isSDF,
-                                                             {pixelOffsetBR.x, pixelOffsetTL.y},
-                                                             minFontScale));
-    vertices.emplace_back(SymbolSDFIconProgram::layoutVertex(labelAnchor.point,
-                                                             bl,
-                                                             symbol.glyphOffset.y,
-                                                             tex.x,
-                                                             tex.y + tex.h,
-                                                             sizeData,
-                                                             symbol.isSDF,
-                                                             {pixelOffsetTL.x, pixelOffsetBR.y},
-                                                             minFontScale));
-    vertices.emplace_back(SymbolSDFIconProgram::layoutVertex(labelAnchor.point,
-                                                             br,
-                                                             symbol.glyphOffset.y,
-                                                             tex.x + tex.w,
-                                                             tex.y + tex.h,
-                                                             sizeData,
-                                                             symbol.isSDF,
-                                                             pixelOffsetBR,
-                                                             minFontScale));
+    vertices.emplace_back(SymbolBucket::layoutVertex(labelAnchor.point,
+                                                     tl,
+                                                     symbol.glyphOffset.y,
+                                                     tex.x,
+                                                     tex.y,
+                                                     sizeData,
+                                                     symbol.isSDF,
+                                                     pixelOffsetTL,
+                                                     minFontScale));
+    vertices.emplace_back(SymbolBucket::layoutVertex(labelAnchor.point,
+                                                     tr,
+                                                     symbol.glyphOffset.y,
+                                                     tex.x + tex.w,
+                                                     tex.y,
+                                                     sizeData,
+                                                     symbol.isSDF,
+                                                     {pixelOffsetBR.x, pixelOffsetTL.y},
+                                                     minFontScale));
+    vertices.emplace_back(SymbolBucket::layoutVertex(labelAnchor.point,
+                                                     bl,
+                                                     symbol.glyphOffset.y,
+                                                     tex.x,
+                                                     tex.y + tex.h,
+                                                     sizeData,
+                                                     symbol.isSDF,
+                                                     {pixelOffsetTL.x, pixelOffsetBR.y},
+                                                     minFontScale));
+    vertices.emplace_back(SymbolBucket::layoutVertex(labelAnchor.point,
+                                                     br,
+                                                     symbol.glyphOffset.y,
+                                                     tex.x + tex.w,
+                                                     tex.y + tex.h,
+                                                     sizeData,
+                                                     symbol.isSDF,
+                                                     pixelOffsetBR,
+                                                     minFontScale));
 
     // Dynamic/Opacity vertices are initialized so that the vertex count always
     // agrees with the layout vertex buffer, but they will always be updated
     // before rendering happens
-    auto dynamicVertex = SymbolSDFIconProgram::dynamicLayoutVertex(labelAnchor.point, 0);
+    auto dynamicVertex = SymbolBucket::dynamicLayoutVertex(labelAnchor.point, 0);
     buffer.dynamicVertices().emplace_back(dynamicVertex);
     buffer.dynamicVertices().emplace_back(dynamicVertex);
     buffer.dynamicVertices().emplace_back(dynamicVertex);
     buffer.dynamicVertices().emplace_back(dynamicVertex);
 
-    auto opacityVertex = SymbolSDFIconProgram::opacityVertex(true, 1.0);
+    auto opacityVertex = SymbolBucket::opacityVertex(true, 1.0);
     buffer.opacityVertices().emplace_back(opacityVertex);
     buffer.opacityVertices().emplace_back(opacityVertex);
     buffer.opacityVertices().emplace_back(opacityVertex);
@@ -1209,18 +1209,18 @@ void SymbolLayout::addToDebugBuffers(SymbolBucket& bucket) {
                 auto index = static_cast<uint16_t>(segment.vertexLength);
 
                 collisionBuffer.vertices().emplace_back(
-                    CollisionBoxProgram::layoutVertex(anchor, symbolInstance.getAnchor().point, tl));
+                    SymbolBucket::collisionLayoutVertex(anchor, symbolInstance.getAnchor().point, tl));
                 collisionBuffer.vertices().emplace_back(
-                    CollisionBoxProgram::layoutVertex(anchor, symbolInstance.getAnchor().point, tr));
+                    SymbolBucket::collisionLayoutVertex(anchor, symbolInstance.getAnchor().point, tr));
                 collisionBuffer.vertices().emplace_back(
-                    CollisionBoxProgram::layoutVertex(anchor, symbolInstance.getAnchor().point, br));
+                    SymbolBucket::collisionLayoutVertex(anchor, symbolInstance.getAnchor().point, br));
                 collisionBuffer.vertices().emplace_back(
-                    CollisionBoxProgram::layoutVertex(anchor, symbolInstance.getAnchor().point, bl));
+                    SymbolBucket::collisionLayoutVertex(anchor, symbolInstance.getAnchor().point, bl));
 
                 // Dynamic vertices are initialized so that the vertex count
                 // always agrees with the layout vertex buffer, but they will
                 // always be updated before rendering happens
-                auto dynamicVertex = CollisionBoxProgram::dynamicVertex(false, false, {});
+                auto dynamicVertex = SymbolBucket::collisionDynamicVertex(false, false, {});
                 collisionBuffer.dynamicVertices().emplace_back(dynamicVertex);
                 collisionBuffer.dynamicVertices().emplace_back(dynamicVertex);
                 collisionBuffer.dynamicVertices().emplace_back(dynamicVertex);

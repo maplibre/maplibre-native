@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/drawable.hpp>
-#include <mbgl/programs/circle_program.hpp>
+#include <mbgl/renderer/buckets/circle_bucket.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_tree.hpp>
@@ -70,7 +70,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         }
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
-        auto* binders = static_cast<CircleProgram::Binders*>(drawable.getBinders());
+        auto* binders = static_cast<CircleBinders*>(drawable.getBinders());
         if (!binders) {
             assert(false);
             return;

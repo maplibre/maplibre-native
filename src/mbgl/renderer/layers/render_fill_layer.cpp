@@ -3,7 +3,6 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/programs/fill_program.hpp>
 #include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/buckets/fill_bucket.hpp>
 #include <mbgl/renderer/image_manager.hpp>

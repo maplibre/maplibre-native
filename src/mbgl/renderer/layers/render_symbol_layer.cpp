@@ -2,9 +2,7 @@
 
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/layout/symbol_layout.hpp>
-#include <mbgl/programs/collision_box_program.hpp>
 #include <mbgl/programs/programs.hpp>
-#include <mbgl/programs/symbol_program.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
@@ -73,8 +71,8 @@ style::SymbolPropertyValues textPropertyValues(const style::SymbolPaintPropertie
         .hasFill = evaluated_.get<style::TextColor>().constantOr(Color::black()).a > 0};
 }
 
-using SegmentWrapper = std::reference_wrapper<const Segment<SymbolTextAttributes>>;
-using SegmentVectorWrapper = std::reference_wrapper<const SegmentVector<SymbolTextAttributes>>;
+using SegmentWrapper = std::reference_wrapper<const SegmentBase>;
+using SegmentVectorWrapper = std::reference_wrapper<const SegmentVector>;
 using SegmentsWrapper = variant<SegmentWrapper, SegmentVectorWrapper>;
 
 struct RenderableSegment {
@@ -258,7 +256,7 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
 }
 
 namespace {
-const SegmentVector<SymbolTextAttributes> emptySegmentVector;
+const SegmentVector emptySegmentVector;
 constexpr auto posOffsetAttribName = "a_pos_offset";
 
 void updateTileAttributes(const SymbolBucket::Buffer& buffer,

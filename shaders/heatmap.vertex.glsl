@@ -1,10 +1,21 @@
-uniform mat4 u_matrix;
-uniform float u_extrude_scale;
-uniform float u_opacity;
-uniform float u_intensity;
-
 layout (location = 0) in vec2 a_pos;
 out vec2 v_extrude;
+
+layout (std140) uniform HeatmapDrawableUBO {
+    highp mat4 u_matrix;
+    highp float u_extrude_scale;
+    // Interpolations
+    lowp float u_weight_t;
+    lowp float u_radius_t;
+    lowp float drawable_pad1;
+};
+
+layout (std140) uniform HeatmapEvaluatedPropsUBO {
+    highp float u_weight;
+    highp float u_radius;
+    highp float u_intensity;
+    lowp float props_pad1;
+};
 
 #pragma mapbox: define highp float weight
 #pragma mapbox: define mediump float radius

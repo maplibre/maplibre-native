@@ -4,10 +4,9 @@
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/gfx/renderbuffer.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/programs/background_program.hpp>
-#include <mbgl/programs/heatmap_texture_program.hpp>
 #include <mbgl/programs/programs.hpp>
-#include <mbgl/programs/raster_program.hpp>
+#include <mbgl/renderer/buckets/heatmap_bucket.hpp>
+#include <mbgl/renderer/buckets/raster_bucket.hpp>
 
 #include <string>
 #include <optional>
@@ -37,10 +36,10 @@ public:
     static gfx::VertexVector<RasterLayoutVertex> rasterVertices();
     static gfx::VertexVector<HeatmapTextureLayoutVertex> heatmapTextureVertices();
 
-    static SegmentVector<BackgroundAttributes> tileTriangleSegments();
-    static SegmentVector<DebugAttributes> tileBorderSegments();
-    static SegmentVector<RasterAttributes> rasterSegments();
-    static SegmentVector<HeatmapTextureAttributes> heatmapTextureSegments();
+    static SegmentVector tileTriangleSegments();
+    static SegmentVector tileBorderSegments();
+    static SegmentVector rasterSegments();
+    static SegmentVector heatmapTextureSegments();
 
     std::optional<gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>> depthRenderbuffer;
     bool has3D = false;
@@ -52,7 +51,7 @@ public:
 
     std::unique_ptr<gfx::ShaderRegistry> shaders;
 
-    const SegmentVector<BackgroundAttributes> clippingMaskSegments;
+    const SegmentVector clippingMaskSegments;
 
 #ifndef NDEBUG
     Programs overdrawPrograms;
