@@ -38,7 +38,7 @@ namespace {
 
 std::size_t addRingVertices(gfx::VertexVector<FillLayoutVertex>& vertices, const GeometryCoordinates& ring) {
     for (auto& point : ring) {
-        vertices.emplace_back(FillProgram::layoutVertex(point));
+        vertices.emplace_back(FillBucket::layoutVertex(point));
     }
     return ring.size();
 }

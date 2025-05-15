@@ -15,7 +15,6 @@
 #include <mbgl/shaders/line_layer_ubo.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/geometry.hpp>
-#include <mbgl/programs/fill_program.hpp>
 #include <mbgl/shaders/fill_layer_ubo.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>

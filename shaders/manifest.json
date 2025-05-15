@@ -223,30 +223,6 @@
         "glsl_frag": "clipping_mask.fragment.glsl"
     },
     {
-        "name": "FillOutlinePatternProgram",
-        "header": "fill_outline_pattern",
-        "glsl_vert": "fill_outline_pattern.vertex.glsl",
-        "glsl_frag": "fill_outline_pattern.fragment.glsl"
-    },
-    {
-        "name": "FillOutlineProgram",
-        "header": "fill_outline",
-        "glsl_vert": "fill_outline.vertex.glsl",
-        "glsl_frag": "fill_outline.fragment.glsl"
-    },
-    {
-        "name": "FillPatternProgram",
-        "header": "fill_pattern",
-        "glsl_vert": "fill_pattern.vertex.glsl",
-        "glsl_frag": "fill_pattern.fragment.glsl"
-    },
-    {
-        "name": "FillProgram",
-        "header": "fill",
-        "glsl_vert": "fill.vertex.glsl",
-        "glsl_frag": "fill.fragment.glsl"
-    },
-    {
         "name": "HeatmapTextureProgram",
         "header": "heatmap_texture",
         "glsl_vert": "heatmap_texture.vertex.glsl",

@@ -4,7 +4,7 @@
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/gfx/vertex_vector.hpp>
 #include <mbgl/gfx/index_vector.hpp>
-#include <mbgl/programs/fill_program.hpp>
+#include <mbgl/renderer/buckets/fill_bucket.hpp>
 #include <mbgl/programs/line_program.hpp>
 
 namespace mbgl {

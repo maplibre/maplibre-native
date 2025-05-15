@@ -546,11 +546,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/attributes.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/clipping_mask_program.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/clipping_mask_program.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/fill_outline_pattern_program.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/fill_outline_program.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/fill_pattern_program.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/fill_program.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/fill_program.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/heatmap_program.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/heatmap_program.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/heatmap_texture_program.cpp
@@ -1041,10 +1036,6 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_text_and_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_wide_vector.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/clipping_mask.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_outline_pattern.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_outline.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_pattern.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/heatmap_texture.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/heatmap.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/hillshade_prepare.hpp

@@ -1,11 +1,11 @@
 #pragma once
 
 #include <mbgl/renderer/bucket.hpp>
+#include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/programs/segment.hpp>
-#include <mbgl/programs/fill_program.hpp>
 #include <mbgl/style/layers/fill_layer_properties.hpp>
 
 /**
@@ -23,6 +23,9 @@ namespace mbgl {
 
 class BucketParameters;
 class RenderFillLayer;
+
+using FillBinders = PaintPropertyBinders<style::FillPaintProperties::DataDrivenProperties>;
+using FillLayoutVertex = gfx::Vertex<TypeList<attributes::pos>>;
 
 class FillBucket final : public Bucket {
 public:
@@ -49,6 +52,8 @@ public:
 
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
 
+    static FillLayoutVertex layoutVertex(Point<int16_t> p) { return FillLayoutVertex{{{p.x, p.y}}}; }
+    
 #if MLN_TRIANGULATE_FILL_OUTLINES
     using LineVertexVector = gfx::VertexVector<LineLayoutVertex>;
     const std::shared_ptr<LineVertexVector> sharedLineVertices = std::make_shared<LineVertexVector>();
@@ -77,7 +82,7 @@ public:
 
     SegmentVector triangleSegments;
 
-    std::map<std::string, FillProgram::Binders> paintPropertyBinders;
+    std::map<std::string, FillBinders> paintPropertyBinders;
 };
 
 } // namespace mbgl

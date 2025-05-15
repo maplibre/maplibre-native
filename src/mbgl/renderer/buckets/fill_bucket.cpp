@@ -1,5 +1,4 @@
 #include <mbgl/renderer/buckets/fill_bucket.hpp>
-#include <mbgl/programs/fill_program.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>
 #include <mbgl/style/layers/fill_layer_impl.hpp>
 #include <mbgl/renderer/layers/render_fill_layer.hpp>
