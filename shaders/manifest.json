@@ -221,29 +221,5 @@
         "header": "clipping_mask",
         "glsl_vert": "clipping_mask.vertex.glsl",
         "glsl_frag": "clipping_mask.fragment.glsl"
-    },
-    {
-        "name": "SymbolIconProgram",
-        "header": "symbol_icon",
-        "glsl_vert": "symbol_icon.vertex.glsl",
-        "glsl_frag": "symbol_icon.fragment.glsl"
-    },
-    {
-        "name": "SymbolSDFTextProgram",
-        "header": "symbol_sdf_text",
-        "glsl_vert": "symbol_sdf.vertex.glsl",
-        "glsl_frag": "symbol_sdf.fragment.glsl"
-    },
-    {
-        "name": "SymbolSDFIconProgram",
-        "header": "symbol_sdf_icon",
-        "glsl_vert": "symbol_sdf.vertex.glsl",
-        "glsl_frag": "symbol_sdf.fragment.glsl"
-    },
-    {
-        "name": "SymbolTextAndIconProgram",
-        "header": "symbol_text_and_icon",
-        "glsl_vert": "symbol_text_and_icon.vertex.glsl",
-        "glsl_frag": "symbol_text_and_icon.fragment.glsl"
     }
 ]

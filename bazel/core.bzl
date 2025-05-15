@@ -87,10 +87,6 @@ MLN_GENERATED_OPENGL_SHADER_HEADERS = [
     "include/mbgl/shaders/gl/drawable_symbol_text_and_icon.hpp",
     "include/mbgl/shaders/gl/drawable_wide_vector.hpp",
     "include/mbgl/shaders/gl/prelude.hpp",
-    "include/mbgl/shaders/gl/symbol_icon.hpp",
-    "include/mbgl/shaders/gl/symbol_sdf_text.hpp",
-    "include/mbgl/shaders/gl/symbol_sdf_icon.hpp",
-    "include/mbgl/shaders/gl/symbol_text_and_icon.hpp",
 ]
 
 MLN_CORE_SOURCE = [
@@ -197,12 +193,6 @@ MLN_CORE_SOURCE = [
     "src/mbgl/programs/programs.cpp",
     "src/mbgl/programs/programs.hpp",
     "src/mbgl/programs/segment.hpp",
-    "src/mbgl/programs/symbol_icon_program.hpp",
-    "src/mbgl/programs/symbol_program.cpp",
-    "src/mbgl/programs/symbol_program.hpp",
-    "src/mbgl/programs/symbol_sdf_icon_program.hpp",
-    "src/mbgl/programs/symbol_sdf_text_program.hpp",
-    "src/mbgl/programs/symbol_text_and_icon_program.hpp",
     "src/mbgl/programs/textures.hpp",
     "src/mbgl/programs/uniforms.hpp",
     "src/mbgl/renderer/backend_scope.cpp",

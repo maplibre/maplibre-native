@@ -40,11 +40,7 @@ enum class BuiltIn {
     SymbolTextAndIconShader,
     WideVectorShader,
     Prelude,
-    ClippingMaskProgram,
-    SymbolIconProgram,
-    SymbolSDFTextProgram,
-    SymbolSDFIconProgram,
-    SymbolTextAndIconProgram
+    ClippingMaskProgram
 };
 
 /// @brief Select shader source based on a program type and a desired

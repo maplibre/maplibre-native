@@ -1011,7 +1011,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
         }
         if (symbolInstance.hasText()) {
             size_t textOpacityVerticesSize = 0u;
-            const auto& opacityVertex = SymbolSDFTextProgram::opacityVertex(opacityState.text.placed,
+            const auto& opacityVertex = SymbolBucket::opacityVertex(opacityState.text.placed,
                                                                             opacityState.text.opacity);
             if (symbolInstance.getPlacedRightTextIndex()) {
                 textOpacityVerticesSize += symbolInstance.getRightJustifiedGlyphQuadsSize() * 4;
@@ -1052,7 +1052,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
         }
         if (symbolInstance.hasIcon()) {
             size_t iconOpacityVerticesSize = 0u;
-            const auto& opacityVertex = SymbolIconProgram::opacityVertex(opacityState.icon.placed,
+            const auto& opacityVertex = SymbolBucket::opacityVertex(opacityState.icon.placed,
                                                                          opacityState.icon.opacity);
             auto& iconBuffer = symbolInstance.hasSdfIcon() ? bucket.sdfIcon : bucket.icon;
 
