@@ -223,18 +223,6 @@
         "glsl_frag": "clipping_mask.fragment.glsl"
     },
     {
-        "name": "HeatmapTextureProgram",
-        "header": "heatmap_texture",
-        "glsl_vert": "heatmap_texture.vertex.glsl",
-        "glsl_frag": "heatmap_texture.fragment.glsl"
-    },
-    {
-        "name": "HeatmapProgram",
-        "header": "heatmap",
-        "glsl_vert": "heatmap.vertex.glsl",
-        "glsl_frag": "heatmap.fragment.glsl"
-    },
-    {
         "name": "HillshadePrepareProgram",
         "header": "hillshade_prepare",
         "glsl_vert": "hillshade_prepare.vertex.glsl",

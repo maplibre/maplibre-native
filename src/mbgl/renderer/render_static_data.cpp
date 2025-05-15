@@ -42,10 +42,10 @@ gfx::VertexVector<RasterLayoutVertex> RenderStaticData::rasterVertices() {
 
 gfx::VertexVector<HeatmapTextureLayoutVertex> RenderStaticData::heatmapTextureVertices() {
     gfx::VertexVector<HeatmapTextureLayoutVertex> result;
-    result.emplace_back(HeatmapTextureProgram::layoutVertex({0, 0}));
-    result.emplace_back(HeatmapTextureProgram::layoutVertex({1, 0}));
-    result.emplace_back(HeatmapTextureProgram::layoutVertex({0, 1}));
-    result.emplace_back(HeatmapTextureProgram::layoutVertex({1, 1}));
+    result.emplace_back(HeatmapBucket::textureVertex({0, 0}));
+    result.emplace_back(HeatmapBucket::textureVertex({1, 0}));
+    result.emplace_back(HeatmapBucket::textureVertex({0, 1}));
+    result.emplace_back(HeatmapBucket::textureVertex({1, 1}));
     return result;
 }
 

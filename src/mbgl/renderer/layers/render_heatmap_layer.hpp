@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/offscreen_texture.hpp>
 #include <mbgl/gfx/texture.hpp>
-#include <mbgl/programs/heatmap_program.hpp>
+#include <mbgl/renderer/buckets/heatmap_bucket.hpp>
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/style/layers/heatmap_layer_impl.hpp>
 #include <mbgl/style/layers/heatmap_layer_properties.hpp>
