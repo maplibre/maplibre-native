@@ -984,37 +984,37 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_manifest.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_group_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/prelude.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_background.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_background_pattern.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_circle.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_collision_box.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_collision_circle.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_custom_geometry.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_custom_symbol_icon.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_debug.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_outline.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_pattern.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_outline_pattern.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_outline_triangulated.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_extrusion.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_extrusion_pattern.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_heatmap.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_heatmap_texture.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_hillshade_prepare.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_hillshade.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_line.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_line_gradient.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_line_pattern.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_line_sdf.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_location_indicator.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_location_indicator_textured.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_raster.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_icon.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_sdf.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_text_and_icon.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_wide_vector.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/background.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/background_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/clipping_mask.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/collision_box.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/collision_circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/custom_geometry.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/custom_symbol_icon.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/debug.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_outline.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_outline_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_outline_triangulated.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_extrusion.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_extrusion_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/heatmap.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/heatmap_texture.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/hillshade_prepare.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/hillshade.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line_gradient.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line_sdf.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/location_indicator.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/location_indicator_textured.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/raster.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_icon.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_sdf.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_text_and_icon.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/wide_vector.hpp
     )
     list(APPEND
         SRC_FILES
