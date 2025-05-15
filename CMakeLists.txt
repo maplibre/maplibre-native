@@ -544,8 +544,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/math/log2.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/platform/settings.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/attributes.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/circle_program.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/circle_program.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/clipping_mask_program.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/clipping_mask_program.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/collision_box_program.cpp

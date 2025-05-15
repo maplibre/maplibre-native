@@ -207,8 +207,6 @@ MLN_CORE_SOURCE = [
     "src/mbgl/math/log2.cpp",
     "src/mbgl/platform/settings.cpp",
     "src/mbgl/programs/attributes.hpp",
-    "src/mbgl/programs/circle_program.cpp",
-    "src/mbgl/programs/circle_program.hpp",
     "src/mbgl/programs/clipping_mask_program.cpp",
     "src/mbgl/programs/clipping_mask_program.hpp",
     "src/mbgl/programs/collision_box_program.cpp",
