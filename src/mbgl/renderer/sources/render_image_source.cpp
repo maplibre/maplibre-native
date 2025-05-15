@@ -173,7 +173,8 @@ void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
     bucket->vertices.emplace_back(RasterBucket::layoutVertex({geomCoords[0].x, geomCoords[0].y}, {0, 0}));
     bucket->vertices.emplace_back(RasterBucket::layoutVertex({geomCoords[1].x, geomCoords[1].y}, {util::EXTENT, 0}));
     bucket->vertices.emplace_back(RasterBucket::layoutVertex({geomCoords[3].x, geomCoords[3].y}, {0, util::EXTENT}));
-    bucket->vertices.emplace_back(RasterBucket::layoutVertex({geomCoords[2].x, geomCoords[2].y}, {util::EXTENT, util::EXTENT}));
+    bucket->vertices.emplace_back(
+        RasterBucket::layoutVertex({geomCoords[2].x, geomCoords[2].y}, {util::EXTENT, util::EXTENT}));
 
     bucket->indices.emplace_back(0, 1, 2);
     bucket->indices.emplace_back(1, 2, 3);

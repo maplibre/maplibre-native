@@ -40,7 +40,7 @@ public:
     static RasterLayoutVertex layoutVertex(Point<int16_t> p, Point<uint16_t> t) {
         return RasterLayoutVertex{{{p.x, p.y}}, {{t.x, t.y}}};
     }
-    
+
     std::shared_ptr<PremultipliedImage> image;
     std::optional<gfx::Texture> texture;
     gfx::Texture2DPtr texture2d;
