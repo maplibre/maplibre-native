@@ -45,7 +45,7 @@ public:
     bool isPrepared() const { return prepared; }
 
     void setPrepared(bool preparedState) { prepared = preparedState; }
-    
+
     static HillshadeLayoutVertex layoutVertex(Point<int16_t> p, Point<uint16_t> t) {
         return HillshadeLayoutVertex{{{p.x, p.y}}, {{t.x, t.y}}};
     }
