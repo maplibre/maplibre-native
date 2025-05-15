@@ -41,7 +41,6 @@ enum class BuiltIn {
     WideVectorShader,
     Prelude,
     ClippingMaskProgram,
-    DebugProgram,
     FillExtrusionPatternProgram,
     FillExtrusionProgram,
     FillOutlinePatternProgram,

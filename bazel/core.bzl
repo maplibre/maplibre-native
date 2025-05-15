@@ -56,7 +56,6 @@ MLN_GENERATED_SHADER_HEADERS = [
 
 MLN_GENERATED_OPENGL_SHADER_HEADERS = [
     "include/mbgl/shaders/gl/clipping_mask.hpp",
-    "include/mbgl/shaders/gl/debug.hpp",
     "include/mbgl/shaders/gl/drawable_background.hpp",
     "include/mbgl/shaders/gl/drawable_background_pattern.hpp",
     "include/mbgl/shaders/gl/drawable_circle.hpp",
@@ -207,8 +206,6 @@ MLN_CORE_SOURCE = [
     "src/mbgl/programs/attributes.hpp",
     "src/mbgl/programs/clipping_mask_program.cpp",
     "src/mbgl/programs/clipping_mask_program.hpp",
-    "src/mbgl/programs/debug_program.cpp",
-    "src/mbgl/programs/debug_program.hpp",
     "src/mbgl/programs/fill_extrusion_pattern_program.hpp",
     "src/mbgl/programs/fill_extrusion_program.cpp",
     "src/mbgl/programs/fill_extrusion_program.hpp",

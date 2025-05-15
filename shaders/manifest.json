@@ -223,12 +223,6 @@
         "glsl_frag": "clipping_mask.fragment.glsl"
     },
     {
-        "name": "DebugProgram",
-        "header": "debug",
-        "glsl_vert": "debug.vertex.glsl",
-        "glsl_frag": "debug.fragment.glsl"
-    },
-    {
         "name": "FillExtrusionPatternProgram",
         "header": "fill_extrusion_pattern",
         "glsl_vert": "fill_extrusion_pattern.vertex.glsl",

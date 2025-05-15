@@ -26,43 +26,6 @@ void ImageSourceRenderData::upload(gfx::UploadPass& uploadPass) const {
     }
 }
 
-void ImageSourceRenderData::render(PaintParameters& parameters) const {
-    if (!bucket || !(parameters.debugOptions & MapDebugOptions::TileBorders)) {
-        return;
-    }
-    assert(debugTexture);
-    static const style::Properties<>::PossiblyEvaluated properties{};
-    static const DebugProgram::Binders paintAttributeData(properties, 0);
-
-    auto programInstance = parameters.shaders.getLegacyGroup().get<DebugProgram>();
-    if (!programInstance) {
-        return;
-    }
-
-    for (auto matrix : matrices) {
-        programInstance->draw(parameters.context,
-                              *parameters.renderPass,
-                              gfx::LineStrip{4.0f * parameters.pixelRatio},
-                              gfx::DepthMode::disabled(),
-                              gfx::StencilMode::disabled(),
-                              gfx::ColorMode::unblended(),
-                              gfx::CullFaceMode::disabled(),
-                              *parameters.staticData.tileBorderIndexBuffer,
-                              RenderStaticData::tileBorderSegments(),
-                              DebugProgram::computeAllUniformValues(
-                                  DebugProgram::LayoutUniformValues{uniforms::matrix::Value(matrix),
-                                                                    uniforms::color::Value(Color::red()),
-                                                                    uniforms::overlay_scale::Value(1.0f)},
-                                  paintAttributeData,
-                                  properties,
-                                  static_cast<float>(parameters.state.getZoom())),
-                              DebugProgram::computeAllAttributeBindings(
-                                  *parameters.staticData.tileVertexBuffer, paintAttributeData, properties),
-                              DebugProgram::TextureBindings{textures::image::Value{debugTexture->getResource()}},
-                              "image");
-    }
-}
-
 RenderImageSource::RenderImageSource(Immutable<style::ImageSource::Impl> impl_)
     : RenderSource(std::move(impl_)) {}
 
