@@ -41,8 +41,6 @@ enum class BuiltIn {
     WideVectorShader,
     Prelude,
     ClippingMaskProgram,
-    HillshadePrepareProgram,
-    HillshadeProgram,
     LineGradientProgram,
     LinePatternProgram,
     LineSDFProgram,

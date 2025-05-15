@@ -223,18 +223,6 @@
         "glsl_frag": "clipping_mask.fragment.glsl"
     },
     {
-        "name": "HillshadePrepareProgram",
-        "header": "hillshade_prepare",
-        "glsl_vert": "hillshade_prepare.vertex.glsl",
-        "glsl_frag": "hillshade_prepare.fragment.glsl"
-    },
-    {
-        "name": "HillshadeProgram",
-        "header": "hillshade",
-        "glsl_vert": "hillshade.vertex.glsl",
-        "glsl_frag": "hillshade.fragment.glsl"
-    },
-    {
         "name": "LineGradientProgram",
         "header": "line_gradient",
         "glsl_vert": "line_gradient.vertex.glsl",

@@ -35,8 +35,6 @@
 #include <mbgl/shaders/gl/drawable_wide_vector.hpp>
 #include <mbgl/shaders/gl/prelude.hpp>
 #include <mbgl/shaders/gl/clipping_mask.hpp>
-#include <mbgl/shaders/gl/hillshade_prepare.hpp>
-#include <mbgl/shaders/gl/hillshade.hpp>
 #include <mbgl/shaders/gl/line_gradient.hpp>
 #include <mbgl/shaders/gl/line_pattern.hpp>
 #include <mbgl/shaders/gl/line_sdf.hpp>

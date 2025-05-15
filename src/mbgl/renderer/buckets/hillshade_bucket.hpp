@@ -1,18 +1,22 @@
 #pragma once
 
 #include <mbgl/gfx/index_buffer.hpp>
+#include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
-#include <mbgl/programs/hillshade_program.hpp>
-#include <mbgl/programs/hillshade_prepare_program.hpp>
+#include <mbgl/geometry/dem_data.hpp>
+#include <mbgl/programs/program.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/tile_mask.hpp>
-#include <mbgl/geometry/dem_data.hpp>
+#include <mbgl/style/layers/hillshade_layer_properties.hpp>
 #include <mbgl/util/tileset.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/mat4.hpp>
 
 namespace mbgl {
+
+using HillshadeBinders = PaintPropertyBinders<style::HillshadePaintProperties::DataDrivenProperties>;
+using HillshadeLayoutVertex = gfx::Vertex<TypeList<attributes::pos, attributes::texture_pos>>;
 
 class HillshadeBucket final : public Bucket {
 public:
@@ -41,6 +45,10 @@ public:
     bool isPrepared() const { return prepared; }
 
     void setPrepared(bool preparedState) { prepared = preparedState; }
+    
+    static HillshadeLayoutVertex layoutVertex(Point<int16_t> p, Point<uint16_t> t) {
+        return HillshadeLayoutVertex{{{p.x, p.y}}, {{t.x, t.y}}};
+    }
 
     // Raster-DEM Tile Sources use the default buffers from Painter
     using VertexVector = gfx::VertexVector<HillshadeLayoutVertex>;
