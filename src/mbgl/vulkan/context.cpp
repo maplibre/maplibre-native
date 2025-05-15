@@ -100,14 +100,12 @@ void Context::initFrameResources() {
     for (uint32_t index = 0; index < frameCount; ++index) {
         frameResources.emplace_back(commandBuffers[index],
                                     device->createSemaphoreUnique({}),
-                                    device->createSemaphoreUnique({}),
                                     device->createFenceUnique(vk::FenceCreateInfo(vk::FenceCreateFlagBits::eSignaled)));
 
         const auto& frame = frameResources.back();
 
         backend.setDebugName(frame.commandBuffer.get(), "FrameCommandBuffer_" + std::to_string(index));
-        backend.setDebugName(frame.frameSemaphore.get(), "FrameSemaphore_" + std::to_string(index));
-        backend.setDebugName(frame.surfaceSemaphore.get(), "SurfaceSemaphore_" + std::to_string(index));
+        backend.setDebugName(frame.acquireSurfaceSemaphore.get(), "AcquireSurfaceSemaphore_" + std::to_string(index));
         backend.setDebugName(frame.flightFrameFence.get(), "FrameFence_" + std::to_string(index));
     }
 
@@ -259,7 +257,7 @@ void Context::beginFrame() {
         MLN_TRACE_ZONE(acquireNextImageKHR);
         try {
             const vk::ResultValue acquireImageResult = device->acquireNextImageKHR(
-                renderableResource.getSwapchain().get(), timeout, frame.surfaceSemaphore.get(), nullptr);
+                renderableResource.getSwapchain().get(), timeout, frame.acquireSurfaceSemaphore.get(), nullptr);
 
             if (acquireImageResult.result == vk::Result::eSuccess) {
                 renderableResource.setAcquiredImageIndex(acquireImageResult.value);
@@ -303,8 +301,8 @@ void Context::submitFrame() {
     auto submitInfo = vk::SubmitInfo().setCommandBuffers(frame.commandBuffer.get());
 
     if (platformSurface) {
-        submitInfo.setSignalSemaphores(frame.frameSemaphore.get())
-            .setWaitSemaphores(frame.surfaceSemaphore.get())
+        submitInfo.setSignalSemaphores(renderableResource.getAcquiredSemaphore())
+            .setWaitSemaphores(frame.acquireSurfaceSemaphore.get())
             .setWaitDstStageMask(waitStageMask);
     }
 
@@ -320,7 +318,7 @@ void Context::submitFrame() {
         const auto acquiredImage = renderableResource.getAcquiredImageIndex();
         const auto presentInfo = vk::PresentInfoKHR()
                                      .setSwapchains(renderableResource.getSwapchain().get())
-                                     .setWaitSemaphores(frame.frameSemaphore.get())
+                                     .setWaitSemaphores(renderableResource.getAcquiredSemaphore())
                                      .setImageIndices(acquiredImage);
 
         try {
