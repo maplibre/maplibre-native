@@ -40,7 +40,7 @@ using namespace shaders;
 namespace {
 
 constexpr std::string_view SymbolIconShaderName = "SymbolIconShader";
-constexpr std::string_view SymbolSDFIconShaderName = "SymbolSDFIconShader";
+constexpr std::string_view SymbolSDFShaderName = "SymbolSDFShader";
 constexpr std::string_view SymbolTextAndIconShaderName = "SymbolTextAndIconShader";
 constexpr std::string_view CollisionBoxShaderName = "CollisionBoxShader";
 constexpr std::string_view CollisionCircleShaderName = "CollisionCircleShader";
@@ -475,7 +475,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         symbolIconGroup = shaders.getShaderGroup(std::string(SymbolIconShaderName));
     }
     if (!symbolSDFGroup) {
-        symbolSDFGroup = shaders.getShaderGroup(std::string(SymbolSDFIconShaderName));
+        symbolSDFGroup = shaders.getShaderGroup(std::string(SymbolSDFShaderName));
     }
     if (!symbolTextAndIconGroup) {
         symbolTextAndIconGroup = shaders.getShaderGroup(std::string(SymbolTextAndIconShaderName));

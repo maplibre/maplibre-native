@@ -6,8 +6,8 @@ namespace mbgl {
 namespace shaders {
 
 template <>
-struct ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::OpenGL> {
-    static constexpr const char* name = "SymbolSDFIconShader";
+struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* name = "SymbolSDFShader";
     static constexpr const char* vertex = R"(layout (location = 0) in vec4 a_pos_offset;
 layout (location = 1) in vec4 a_data;
 layout (location = 2) in vec4 a_pixeloffset;
