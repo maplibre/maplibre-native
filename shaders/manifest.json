@@ -223,18 +223,6 @@
         "glsl_frag": "clipping_mask.fragment.glsl"
     },
     {
-        "name": "FillExtrusionPatternProgram",
-        "header": "fill_extrusion_pattern",
-        "glsl_vert": "fill_extrusion_pattern.vertex.glsl",
-        "glsl_frag": "fill_extrusion_pattern.fragment.glsl"
-    },
-    {
-        "name": "FillExtrusionProgram",
-        "header": "fill_extrusion",
-        "glsl_vert": "fill_extrusion.vertex.glsl",
-        "glsl_frag": "fill_extrusion.fragment.glsl"
-    },
-    {
         "name": "FillOutlinePatternProgram",
         "header": "fill_outline_pattern",
         "glsl_vert": "fill_outline_pattern.vertex.glsl",

@@ -35,8 +35,6 @@
 #include <mbgl/shaders/gl/drawable_wide_vector.hpp>
 #include <mbgl/shaders/gl/prelude.hpp>
 #include <mbgl/shaders/gl/clipping_mask.hpp>
-#include <mbgl/shaders/gl/fill_extrusion_pattern.hpp>
-#include <mbgl/shaders/gl/fill_extrusion.hpp>
 #include <mbgl/shaders/gl/fill_outline_pattern.hpp>
 #include <mbgl/shaders/gl/fill_outline.hpp>
 #include <mbgl/shaders/gl/fill_pattern.hpp>
