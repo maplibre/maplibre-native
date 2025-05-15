@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef ALEX_LEGACY
+
 #include <mbgl/programs/program.hpp>
 #include <mbgl/programs/attributes.hpp>
 #include <mbgl/programs/uniforms.hpp>
@@ -46,3 +48,5 @@ using CircleLayoutVertex = CircleProgram::LayoutVertex;
 using CircleAttributes = CircleProgram::AttributeList;
 
 } // namespace mbgl
+
+#endif

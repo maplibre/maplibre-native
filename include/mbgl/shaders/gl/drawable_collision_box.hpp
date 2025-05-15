@@ -73,7 +73,8 @@ void main() {
         // This box not used, fade it out
         fragColor *= .1;
     }
-})";
+}
+)";
 };
 
 } // namespace shaders

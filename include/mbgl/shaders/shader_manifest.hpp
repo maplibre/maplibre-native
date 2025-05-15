@@ -34,9 +34,6 @@
 #include <mbgl/shaders/gl/drawable_symbol_text_and_icon.hpp>
 #include <mbgl/shaders/gl/drawable_wide_vector.hpp>
 #include <mbgl/shaders/gl/prelude.hpp>
-#include <mbgl/shaders/gl/background.hpp>
-#include <mbgl/shaders/gl/background_pattern.hpp>
-#include <mbgl/shaders/gl/circle.hpp>
 #include <mbgl/shaders/gl/clipping_mask.hpp>
 #include <mbgl/shaders/gl/collision_box.hpp>
 #include <mbgl/shaders/gl/collision_circle.hpp>

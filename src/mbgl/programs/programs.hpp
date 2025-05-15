@@ -8,17 +8,6 @@
 
 namespace mbgl {
 
-class BackgroundLayerPrograms;
-
-class CircleLayerPrograms;
-class RasterLayerPrograms;
-class HeatmapLayerPrograms;
-class HillshadeLayerPrograms;
-class FillLayerPrograms;
-class FillExtrusionLayerPrograms;
-class LineLayerPrograms;
-class SymbolLayerPrograms;
-
 class Programs {
 public:
     Programs(const ProgramParameters&);

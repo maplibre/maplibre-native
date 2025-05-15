@@ -55,9 +55,6 @@ MLN_GENERATED_SHADER_HEADERS = [
 ]
 
 MLN_GENERATED_OPENGL_SHADER_HEADERS = [
-    "include/mbgl/shaders/gl/background.hpp",
-    "include/mbgl/shaders/gl/background_pattern.hpp",
-    "include/mbgl/shaders/gl/circle.hpp",
     "include/mbgl/shaders/gl/clipping_mask.hpp",
     "include/mbgl/shaders/gl/collision_box.hpp",
     "include/mbgl/shaders/gl/collision_circle.hpp",

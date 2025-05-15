@@ -21,7 +21,8 @@ out vec2 frag_uv;
 void main() {
     frag_uv = a_uv;
     gl_Position = u_matrix * vec4(a_pos, 1.0);
-})";
+}
+)";
     static constexpr const char* fragment = R"(layout (std140) uniform CustomGeometryDrawableUBO {
     mat4 u_matrix;
     vec4 u_color;
@@ -32,7 +33,8 @@ uniform sampler2D u_image;
 
 void main() {
     fragColor = texture(u_image, frag_uv) * u_color;
-})";
+}
+)";
 };
 
 } // namespace shaders

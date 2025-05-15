@@ -217,24 +217,6 @@
         "glsl_frag": "_prelude.fragment.glsl"
     },
     {
-        "name": "BackgroundProgram",
-        "header": "background",
-        "glsl_vert": "background.vertex.glsl",
-        "glsl_frag": "background.fragment.glsl"
-    },
-    {
-        "name": "BackgroundPatternProgram",
-        "header": "background_pattern",
-        "glsl_vert": "background_pattern.vertex.glsl",
-        "glsl_frag": "background_pattern.fragment.glsl"
-    },
-    {
-        "name": "CircleProgram",
-        "header": "circle",
-        "glsl_vert": "circle.vertex.glsl",
-        "glsl_frag": "circle.fragment.glsl"
-    },
-    {
         "name": "ClippingMaskProgram",
         "header": "clipping_mask",
         "glsl_vert": "clipping_mask.vertex.glsl",
