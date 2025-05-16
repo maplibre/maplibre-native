@@ -81,23 +81,6 @@ void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource, c
     static_cast<IndexBufferResource&>(resource).get().update(data, size, /*offset=*/0);
 }
 
-void UploadPass::updateTextureResource(
-    gfx::TextureResource&, const Size, const void*, gfx::TexturePixelType, gfx::TextureChannelDataType) {
-    assert(false);
-    throw std::runtime_error("UploadPass::updateTextureResource not implemented on Metal!");
-}
-
-void UploadPass::updateTextureResourceSub(gfx::TextureResource&,
-                                          const uint16_t,
-                                          const uint16_t,
-                                          const Size,
-                                          const void*,
-                                          gfx::TexturePixelType,
-                                          gfx::TextureChannelDataType) {
-    assert(false);
-    throw std::runtime_error("UploadPass::updateTextureResourceSub not implemented on Metal!");
-}
-
 struct VertexBuffer : public gfx::VertexBufferBase {
     ~VertexBuffer() override = default;
 
