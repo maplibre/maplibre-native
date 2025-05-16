@@ -19,7 +19,7 @@ struct Texture2DDesc {
     Size size;
     gfx::TexturePixelType pixelFormat;
     gfx::TextureChannelDataType channelType;
-    
+
     size_t channelCount() const;
     size_t channelStorageSize() const;
     size_t getStorageSize() const;

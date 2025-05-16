@@ -114,18 +114,18 @@ public:
         }
 
         programBase->draw(context,
-                      renderPass,
-                      drawMode,
-                      depthMode,
-                      stencilMode,
-                      colorMode,
-                      cullFaceMode,
-                      uniformValues,
-                      drawScopeIt->second,
-                      allAttributeBindings.offset(segment.vertexOffset),
-                      indexBuffer,
-                      segment.indexOffset,
-                      segment.indexLength);
+                          renderPass,
+                          drawMode,
+                          depthMode,
+                          stencilMode,
+                          colorMode,
+                          cullFaceMode,
+                          uniformValues,
+                          drawScopeIt->second,
+                          allAttributeBindings.offset(segment.vertexOffset),
+                          indexBuffer,
+                          segment.indexOffset,
+                          segment.indexLength);
     }
 
     template <class DrawMode>
@@ -155,18 +155,18 @@ public:
             }
 
             programBase->draw(context,
-                          renderPass,
-                          drawMode,
-                          depthMode,
-                          stencilMode,
-                          colorMode,
-                          cullFaceMode,
-                          uniformValues,
-                          drawScopeIt->second,
-                          allAttributeBindings.offset(segment.vertexOffset),
-                          indexBuffer,
-                          segment.indexOffset,
-                          segment.indexLength);
+                              renderPass,
+                              drawMode,
+                              depthMode,
+                              stencilMode,
+                              colorMode,
+                              cullFaceMode,
+                              uniformValues,
+                              drawScopeIt->second,
+                              allAttributeBindings.offset(segment.vertexOffset),
+                              indexBuffer,
+                              segment.indexOffset,
+                              segment.indexLength);
         }
     }
 };

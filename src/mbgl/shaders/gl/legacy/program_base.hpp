@@ -33,7 +33,7 @@ public:
     ProgramBase(const ProgramBase&) = delete;
     ProgramBase& operator=(ProgramBase&&) = delete;
     ProgramBase& operator=(const ProgramBase&) = delete;
-    
+
     const ProgramParameters programParameters;
 
     class Instance {

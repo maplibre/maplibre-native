@@ -51,9 +51,7 @@ gfx::VertexVector<HeatmapTextureLayoutVertex> RenderStaticData::heatmapTextureVe
 
 RenderStaticData::RenderStaticData(std::unique_ptr<gfx::ShaderRegistry>&& shaders_)
     : shaders(std::move(shaders_)),
-      clippingMaskSegments(tileTriangleSegments())
-{
-}
+      clippingMaskSegments(tileTriangleSegments()) {}
 
 SegmentVector RenderStaticData::tileTriangleSegments() {
     SegmentVector segments;

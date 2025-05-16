@@ -147,7 +147,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader>(shaders, programParameters);
-    
+
     // Initialize legacy shader programs
     Programs programs(programParameters);
     programs.registerWith(shaders);
