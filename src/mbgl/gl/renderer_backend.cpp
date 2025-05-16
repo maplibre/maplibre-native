@@ -6,7 +6,7 @@
 #include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
-
+#include <mbgl/programs/programs.hpp>
 #include <mbgl/shaders/gl/shader_group_gl.hpp>
 
 #include <cassert>
@@ -146,6 +146,10 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader>(shaders, programParameters);
+    
+    // Initialize legacy shader programs
+    Programs programs(programParameters);
+    programs.registerWith(shaders);
 }
 
 } // namespace gl

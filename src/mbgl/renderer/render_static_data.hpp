@@ -46,9 +46,6 @@ public:
     bool uploaded = false;
     Size backendSize;
 
-    // @TODO: Migrate away from and remove `Programs`
-    Programs programs;
-
     std::unique_ptr<gfx::ShaderRegistry> shaders;
 
     const SegmentVector clippingMaskSegments;

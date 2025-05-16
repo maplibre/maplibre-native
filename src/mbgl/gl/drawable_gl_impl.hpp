@@ -2,11 +2,9 @@
 
 #include <mbgl/gfx/drawable_impl.hpp>
 #include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/gfx/program.hpp>
 #include <mbgl/gfx/uniform.hpp>
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/enum.hpp>
-#include <mbgl/gl/program.hpp>
 #include <mbgl/gl/uniform_buffer_gl.hpp>
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/platform/gl_functions.hpp>

@@ -160,9 +160,6 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     if (!staticData) {
         staticData = std::make_unique<RenderStaticData>(pixelRatio, std::make_unique<gfx::ShaderRegistry>());
 
-        // Initialize legacy shader programs
-        staticData->programs.registerWith(*staticData->shaders);
-
         // Initialize shaders for drawables
         const auto programParameters = ProgramParameters{pixelRatio, false};
         backend.initShaders(*staticData->shaders, programParameters);

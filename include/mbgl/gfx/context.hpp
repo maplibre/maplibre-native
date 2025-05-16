@@ -5,7 +5,6 @@
 #include <mbgl/gfx/command_encoder.hpp>
 #include <mbgl/gfx/context_observer.hpp>
 #include <mbgl/gfx/draw_scope.hpp>
-#include <mbgl/gfx/program.hpp>
 #include <mbgl/gfx/renderbuffer.hpp>
 #include <mbgl/gfx/rendering_stats.hpp>
 #include <mbgl/gfx/types.hpp>
@@ -29,6 +28,8 @@ using RenderTargetPtr = std::shared_ptr<RenderTarget>;
 
 namespace gfx {
 
+class DepthMode;
+class ColorMode;
 class OffscreenTexture;
 class ShaderRegistry;
 

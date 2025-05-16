@@ -50,8 +50,7 @@ gfx::VertexVector<HeatmapTextureLayoutVertex> RenderStaticData::heatmapTextureVe
 }
 
 RenderStaticData::RenderStaticData(float pixelRatio, std::unique_ptr<gfx::ShaderRegistry>&& shaders_)
-    : programs(ProgramParameters{pixelRatio, false}),
-      shaders(std::move(shaders_)),
+    : shaders(std::move(shaders_)),
       clippingMaskSegments(tileTriangleSegments())
 #ifndef NDEBUG
       ,

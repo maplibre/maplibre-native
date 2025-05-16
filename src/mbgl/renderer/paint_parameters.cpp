@@ -65,11 +65,6 @@ PaintParameters::PaintParameters(gfx::Context& context_,
       debugOptions(debugOptions_),
       timePoint(timePoint_),
       pixelRatio(pixelRatio_),
-#ifndef NDEBUG
-      programs((debugOptions & MapDebugOptions::Overdraw) ? staticData_.overdrawPrograms : staticData_.programs),
-#else
-      programs(staticData_.programs),
-#endif
       shaders(*staticData_.shaders),
       frameCount(frameCount_) {
     pixelsToGLUnits = {{2.0f / state.getSize().width, -2.0f / state.getSize().height}};
