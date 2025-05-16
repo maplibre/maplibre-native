@@ -13,7 +13,7 @@ namespace gl {
 
 class Context;
 
-void bindTexture(gl::Context&, uint8_t unit, const gfx::TextureBinding&);
+//void bindTexture(gl::Context&, uint8_t unit, const gfx::TextureBinding&);
 
 template <class>
 class TextureStates;
@@ -26,7 +26,7 @@ private:
     State state;
 
 public:
-    void queryLocations(const ProgramID& id) {
+    /*void queryLocations(const ProgramID& id) {
         state = State{
             gl::uniformLocation(id, concat_literals<&string_literal<'u', '_'>::value, &Ts::name>::value())...};
     }
@@ -40,7 +40,7 @@ public:
         util::ignore({(state.template get<Ts>() = TypeIndex<Ts, Ts...>::value,
                        gl::bindTexture(context, TypeIndex<Ts, Ts...>::value, bindings.template get<Ts>()),
                        0)...});
-    }
+    }*/
 };
 
 } // namespace gl

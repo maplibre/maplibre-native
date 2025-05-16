@@ -1,5 +1,5 @@
 #pragma once
-
+/*
 #include <mbgl/gfx/texture.hpp>
 
 namespace mbgl {
@@ -15,3 +15,4 @@ MBGL_DEFINE_TEXTURE(overlay);
 
 } // namespace textures
 } // namespace mbgl
+*/

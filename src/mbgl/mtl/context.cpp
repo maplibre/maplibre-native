@@ -456,13 +456,6 @@ std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size
     return createOffscreenTexture(size, type, false, false);
 }
 
-std::unique_ptr<gfx::TextureResource> Context::createTextureResource(Size,
-                                                                     gfx::TexturePixelType,
-                                                                     gfx::TextureChannelDataType) {
-    assert(false);
-    return nullptr;
-}
-
 std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size) {
     return std::make_unique<RenderbufferResource>();
 }

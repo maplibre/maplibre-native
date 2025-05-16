@@ -6,7 +6,6 @@
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/enum.hpp>
-#include <mbgl/gl/texture_resource.hpp>
 #include <mbgl/util/hash.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
@@ -18,10 +17,6 @@ using namespace platform;
 
 namespace {
 
-size_t storageSize(const Texture2DDesc& desc) {
-    return static_cast<size_t>(TextureResource::getStorageSize(desc.size, desc.pixelFormat, desc.channelType));
-}
-
 #if !defined(NDEBUG)
 void logDebugMessage(const std::string& message) {
     Log::Debug(Event::General, "Texture2DPool: " + message);
@@ -31,6 +26,37 @@ void logDebugMessage(const std::string&) {}
 #endif
 
 } // namespace
+
+size_t Texture2DDesc::channelCount() const {
+    switch (pixelFormat) {
+        case gfx::TexturePixelType::Alpha:
+        case gfx::TexturePixelType::Depth:
+        case gfx::TexturePixelType::Luminance:
+        case gfx::TexturePixelType::Stencil:
+            return 1;
+        case gfx::TexturePixelType::RGBA:
+            return 4;
+        default:
+            assert(!"Unknown texture pixel type");
+            return 0;
+    }
+}
+
+size_t Texture2DDesc::channelStorageSize() const {
+    switch (channelType) {
+        case gfx::TextureChannelDataType::HalfFloat:
+            return 2;
+        case gfx::TextureChannelDataType::UnsignedByte:
+            return 1;
+        default:
+            assert(!"Unknown texture channel data type");
+            return 0;
+    }
+}
+
+size_t Texture2DDesc::getStorageSize() const {
+    return size.width * size.height * channelCount() * channelStorageSize();
+}
 
 std::size_t Texture2DDescHash::operator()(const Texture2DDesc& desc) const {
     std::size_t seed = 0;
@@ -133,7 +159,7 @@ TextureID Texture2DPool::allocateGLMemory(const Texture2DDesc& desc) {
     pool[desc].used.insert(id);
 
     // Update poolStorage
-    auto storage = storageSize(desc);
+    auto storage = desc.getStorageSize();
     poolStorage += storage;
     context->renderingStats().memTextures += storage;
     MLN_TRACE_ALLOC_TEXTURE(id, storage);
@@ -167,7 +193,7 @@ void Texture2DPool::freeAllocatedGLMemory(TextureID id) {
     }
 
     // Update poolStorage
-    auto storage = storageSize(desc);
+    auto storage = desc.getStorageSize();
     poolStorage -= storage;
     context->renderingStats().memTextures -= storage;
     assert(context->renderingStats().memTextures >= 0);
@@ -224,7 +250,7 @@ bool Texture2DPool::isUnused(TextureID id) const {
 size_t Texture2DPool::usedStorage() const {
     size_t total = 0;
     for (const auto& set : pool) {
-        total += storageSize(set.first) * set.second.used.size();
+        total += set.first.getStorageSize() * set.second.used.size();
     }
     return total;
 }
@@ -232,7 +258,7 @@ size_t Texture2DPool::usedStorage() const {
 size_t Texture2DPool::unusedStorage() const {
     size_t total = 0;
     for (const auto& set : pool) {
-        total += storageSize(set.first) * set.second.free.size();
+        total += set.first.getStorageSize() * set.second.free.size();
     }
     return total;
 }
@@ -244,7 +270,7 @@ const Texture2DDesc& Texture2DPool::desc(TextureID id) const {
 
 size_t Texture2DPool::storage(TextureID id) const {
     assert(descriptions.find(id) != descriptions.end());
-    return storageSize(descriptions.at(id));
+    return descriptions.at(id).getStorageSize();
 }
 
 } // namespace gl

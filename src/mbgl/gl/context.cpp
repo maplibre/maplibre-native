@@ -7,7 +7,6 @@
 #include <mbgl/gl/enum.hpp>
 #include <mbgl/gl/renderer_backend.hpp>
 #include <mbgl/gl/renderbuffer_resource.hpp>
-#include <mbgl/gl/texture_resource.hpp>
 #include <mbgl/gl/texture.hpp>
 #include <mbgl/gl/offscreen_texture.hpp>
 #include <mbgl/gl/debugging_extension.hpp>
@@ -293,29 +292,6 @@ UniqueFramebuffer Context::createFramebuffer() {
     stats.numFrameBuffers++;
     // NOLINTNEXTLINE(performance-move-const-arg)
     return UniqueFramebuffer{std::move(id), {this}};
-}
-
-std::unique_ptr<gfx::TextureResource> Context::createTextureResource(const Size size,
-                                                                     const gfx::TexturePixelType format,
-                                                                     const gfx::TextureChannelDataType type) {
-    MLN_TRACE_FUNC();
-
-    auto obj = createUniqueTexture(size, format, type);
-    std::unique_ptr<gfx::TextureResource> resource = std::make_unique<gl::TextureResource>(std::move(obj));
-
-    // Always use texture unit 0 for manipulating it.
-    activeTextureUnit = 0;
-    texture[0] = static_cast<gl::TextureResource&>(*resource).texture;
-
-    // We are using clamp to edge here since OpenGL ES doesn't allow GL_REPEAT
-    // on NPOT textures. We use those when the pixelRatio isn't a power of two,
-    // e.g. on iPhone 6 Plus.
-    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-
-    return resource;
 }
 
 std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(const gfx::RenderbufferPixelType type,

@@ -845,8 +845,6 @@ MLN_OPENGL_SOURCE = [
     "src/mbgl/gl/state.hpp",
     "src/mbgl/gl/texture.cpp",
     "src/mbgl/gl/texture.hpp",
-    "src/mbgl/gl/texture_resource.cpp",
-    "src/mbgl/gl/texture_resource.hpp",
     "src/mbgl/gl/timestamp_query_extension.cpp",
     "src/mbgl/gl/timestamp_query_extension.hpp",
     "src/mbgl/gl/types.hpp",

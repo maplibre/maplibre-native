@@ -7,7 +7,7 @@
 
 #include <memory>
 #include <cassert>
-
+/*
 #define MBGL_DEFINE_TEXTURE(name_)                 \
     struct name_ {                                 \
         using Value = ::mbgl::gfx::TextureBinding; \
@@ -15,11 +15,12 @@
             return #name_;                         \
         }                                          \
     }
-
+*/
 namespace mbgl {
 namespace gfx {
 
 constexpr int32_t MaxActiveTextureUnits = 8;
+
 class TextureResource {
 protected:
     TextureResource() = default;

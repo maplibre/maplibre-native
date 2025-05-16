@@ -1,6 +1,6 @@
+/*
 #include <mbgl/gl/texture.hpp>
 #include <mbgl/gl/context.hpp>
-#include <mbgl/gl/texture_resource.hpp>
 #include <mbgl/gl/defines.hpp>
 
 namespace mbgl {
@@ -53,3 +53,4 @@ void bindTexture(gl::Context& context, const uint8_t unit, const gfx::TextureBin
 
 } // namespace gl
 } // namespace mbgl
+*/

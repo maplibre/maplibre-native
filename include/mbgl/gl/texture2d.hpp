@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/texture2d.hpp>
+#include <mbgl/gl/object.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/util/image.hpp>
 
@@ -66,7 +67,7 @@ private:
 
 private:
     gl::Context& context;
-    std::unique_ptr<gfx::TextureResource> textureResource{nullptr};
+    std::unique_ptr<UniqueTexture> texture;
 
     SamplerState samplerState{};
     gfx::TexturePixelType pixelFormat{gfx::TexturePixelType::RGBA};

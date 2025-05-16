@@ -46,7 +46,7 @@ public:
             attributeLocations.queryLocations(program);
             uniformStates.queryLocations(program);
             // Texture units are specified via uniforms as well, so we need query their locations
-            textureStates.queryLocations(program);
+            //textureStates.queryLocations(program);
         }
 
         static std::unique_ptr<Instance> createInstance(gl::Context& context,
@@ -124,7 +124,7 @@ public:
 
         instance.uniformStates.bind(uniformValues);
 
-        instance.textureStates.bind(context, textureBindings);
+        //instance.textureStates.bind(context, textureBindings);
 
         auto& vertexArray = drawScope.getResource<gl::DrawScopeResource>().vertexArray;
         vertexArray.bind(context, indexBuffer, instance.attributeLocations.toBindingArray(attributeBindings));

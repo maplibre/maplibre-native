@@ -97,22 +97,6 @@ public:
                                                                            BufferUsageType,
                                                                            bool persistent = false) = 0;
     virtual void updateIndexBufferResource(IndexBufferResource&, const void* data, std::size_t size) = 0;
-
-public:
-    virtual std::unique_ptr<TextureResource> createTextureResource(Size,
-                                                                   const void* data,
-                                                                   TexturePixelType,
-                                                                   TextureChannelDataType) = 0;
-    virtual void updateTextureResource(
-        TextureResource&, Size, const void* data, TexturePixelType, TextureChannelDataType) = 0;
-
-    virtual void updateTextureResourceSub(TextureResource&,
-                                          uint16_t xOffset,
-                                          uint16_t yOffset,
-                                          Size,
-                                          const void* data,
-                                          TexturePixelType,
-                                          TextureChannelDataType) = 0;
 };
 
 } // namespace gfx
