@@ -1,8 +1,8 @@
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
 
 #include <mbgl/gfx/cull_face_mode.hpp>
+#include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/layout/symbol_layout.hpp>
-#include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
@@ -40,7 +40,7 @@ using namespace shaders;
 namespace {
 
 constexpr std::string_view SymbolIconShaderName = "SymbolIconShader";
-constexpr std::string_view SymbolSDFIconShaderName = "SymbolSDFIconShader";
+constexpr std::string_view SymbolSDFShaderName = "SymbolSDFShader";
 constexpr std::string_view SymbolTextAndIconShaderName = "SymbolTextAndIconShader";
 constexpr std::string_view CollisionBoxShaderName = "CollisionBoxShader";
 constexpr std::string_view CollisionCircleShaderName = "CollisionCircleShader";
@@ -475,7 +475,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         symbolIconGroup = shaders.getShaderGroup(std::string(SymbolIconShaderName));
     }
     if (!symbolSDFGroup) {
-        symbolSDFGroup = shaders.getShaderGroup(std::string(SymbolSDFIconShaderName));
+        symbolSDFGroup = shaders.getShaderGroup(std::string(SymbolSDFShaderName));
     }
     if (!symbolTextAndIconGroup) {
         symbolTextAndIconGroup = shaders.getShaderGroup(std::string(SymbolTextAndIconShaderName));

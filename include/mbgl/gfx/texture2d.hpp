@@ -15,6 +15,8 @@ class Context;
 class UploadPass;
 class TextureResource;
 
+constexpr int32_t MaxActiveTextureUnits = 8;
+
 class Texture2D {
 public:
     struct SamplerState {

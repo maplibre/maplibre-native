@@ -66,6 +66,10 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Validate VERSION
+        run: ../../.github/scripts/validate-version.sh
+        working-directory: platform/android
+
       - run: echo "cmake.dir=$(dirname "$(dirname "$(command -v cmake)")")" >> local.properties
 
       - uses: actions/setup-java@v4
@@ -347,3 +351,5 @@ jobs:
       - name: Trigger release
         if: needs.android-build.outputs.make_release == 'true' && needs.android-build.result == 'success' && needs.android-build-cpp-test.result == 'success' && needs.android-build-render-test.result == 'success'
         run: gh workflow run android-release.yml --ref ${{ github.sha }}
+        env:
+         GH_TOKEN: ${{ github.token }}

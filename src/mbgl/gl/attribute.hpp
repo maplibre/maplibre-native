@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/attribute.hpp>
 #include <mbgl/gl/types.hpp>
-#include <mbgl/programs/attributes.hpp>
+#include <mbgl/shaders/attributes.hpp>
 #include <mbgl/util/literal.hpp>
 
 #include <vector>

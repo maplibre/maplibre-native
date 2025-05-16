@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
@@ -104,10 +103,6 @@ public:
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType, bool, bool);
 
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
-
-    std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
-                                                                gfx::TexturePixelType,
-                                                                gfx::TextureChannelDataType) override;
 
     std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType,
                                                                           Size size) override;

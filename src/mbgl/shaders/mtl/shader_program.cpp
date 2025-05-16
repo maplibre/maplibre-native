@@ -6,7 +6,7 @@
 #include <mbgl/mtl/renderable_resource.hpp>
 #include <mbgl/mtl/uniform_buffer.hpp>
 #include <mbgl/mtl/vertex_attribute.hpp>
-#include <mbgl/programs/program_parameters.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/util/logging.hpp>
 

@@ -4,7 +4,6 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/sources/render_image_source.hpp>
-#include <mbgl/programs/programs.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>

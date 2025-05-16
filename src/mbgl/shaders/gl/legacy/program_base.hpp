@@ -1,22 +1,19 @@
 #pragma once
 
-#include <mbgl/gfx/program.hpp>
+#include <mbgl/gfx/vertex_buffer.hpp>
+#include <mbgl/gfx/index_buffer.hpp>
+#include <mbgl/gfx/uniform.hpp>
 #include <mbgl/gl/types.hpp>
 #include <mbgl/gl/object.hpp>
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/draw_scope_resource.hpp>
-#include <mbgl/gfx/vertex_buffer.hpp>
-#include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/gfx/uniform.hpp>
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/gl/attribute.hpp>
 #include <mbgl/gl/uniform.hpp>
-#include <mbgl/gl/texture.hpp>
-#include <mbgl/util/io.hpp>
-
-#include <mbgl/util/logging.hpp>
-#include <mbgl/programs/program_parameters.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/shaders/shader_manifest.hpp>
+#include <mbgl/util/io.hpp>
+#include <mbgl/util/logging.hpp>
 
 #include <string>
 
@@ -24,14 +21,18 @@ namespace mbgl {
 namespace gl {
 
 template <class Name>
-class Program final : public gfx::Program<Name> {
+class ProgramBase {
 public:
     using AttributeList = typename Name::AttributeList;
     using UniformList = typename Name::UniformList;
-    using TextureList = typename Name::TextureList;
 
-    Program(ProgramParameters programParameters_)
+    ProgramBase(ProgramParameters programParameters_)
         : programParameters(std::move(programParameters_)) {}
+
+    ProgramBase(ProgramBase&&) = delete;
+    ProgramBase(const ProgramBase&) = delete;
+    ProgramBase& operator=(ProgramBase&&) = delete;
+    ProgramBase& operator=(const ProgramBase&) = delete;
 
     const ProgramParameters programParameters;
 
@@ -45,8 +46,6 @@ public:
                                             attributeLocations.getFirstAttribName())) {
             attributeLocations.queryLocations(program);
             uniformStates.queryLocations(program);
-            // Texture units are specified via uniforms as well, so we need query their locations
-            textureStates.queryLocations(program);
         }
 
         static std::unique_ptr<Instance> createInstance(gl::Context& context,
@@ -79,7 +78,6 @@ public:
         UniqueProgram program;
         gl::AttributeLocations<AttributeList> attributeLocations;
         gl::UniformStates<UniformList> uniformStates;
-        gl::TextureStates<TextureList> textureStates;
     };
 
     void draw(gfx::Context& genericContext,
@@ -92,10 +90,9 @@ public:
               const gfx::UniformValues<UniformList>& uniformValues,
               gfx::DrawScope& drawScope,
               const gfx::AttributeBindings<AttributeList>& attributeBindings,
-              const gfx::TextureBindings<TextureList>& textureBindings,
               const gfx::IndexBuffer& indexBuffer,
               std::size_t indexOffset,
-              std::size_t indexLength) override {
+              std::size_t indexLength) {
         auto& context = static_cast<gl::Context&>(genericContext);
 
         context.setDepthMode(depthMode);
@@ -123,8 +120,6 @@ public:
         context.program = instance.program;
 
         instance.uniformStates.bind(uniformValues);
-
-        instance.textureStates.bind(context, textureBindings);
 
         auto& vertexArray = drawScope.getResource<gl::DrawScopeResource>().vertexArray;
         vertexArray.bind(context, indexBuffer, instance.attributeLocations.toBindingArray(attributeBindings));
