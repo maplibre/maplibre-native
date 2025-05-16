@@ -30,22 +30,14 @@ jobs:
           cmakeVersion: 3.24.1
           ninjaVersion: latest
 
-      - name: Ensure source code revision
-        run: scripts/ensure-code-revision.sh
-        working-directory: platform/android
-        shell: bash
-
       - name: npm install
         run: npm install --ignore-scripts
-        working-directory: platform/android
 
       - name: Android nitpick
         run: make run-android-nitpick
 
       - name: Validate and set version
-        working-directory: platform/android
-        run: |
-          ../../.github/scripts/validate-version.sh
+        run: ../../.github/scripts/validate-version.sh
 
       - name: Build package
         run: |
