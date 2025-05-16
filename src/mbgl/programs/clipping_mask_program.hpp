@@ -12,7 +12,6 @@ class ClippingMaskProgram final : public Program<ClippingMaskProgram,
                                                  gfx::PrimitiveType::Triangle,
                                                  PositionOnlyLayoutAttributes,
                                                  TypeList<uniforms::matrix>,
-                                                 TypeList<>,
                                                  style::Properties<>> {
 public:
     static constexpr std::string_view Name{"ClippingMaskProgram"};

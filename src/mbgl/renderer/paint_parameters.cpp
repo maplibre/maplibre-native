@@ -290,7 +290,6 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
                           static_cast<float>(state.getZoom())),
                       ClippingMaskProgram::computeAllAttributeBindings(
                           *staticData.tileVertexBuffer, paintAttributeData, properties),
-                      ClippingMaskProgram::TextureBindings{},
                       "clipping/" + util::toString(stencilID));
     }
 #endif // MLN_RENDER_BACKEND_METAL

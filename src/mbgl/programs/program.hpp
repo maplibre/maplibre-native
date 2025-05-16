@@ -29,7 +29,6 @@ template <class Name,
           gfx::PrimitiveType Primitive,
           class LayoutAttributeList,
           class LayoutUniformList,
-          class Textures,
           class PaintProps>
 class Program : public gfx::Shader {
 public:
@@ -46,9 +45,6 @@ public:
     using UniformList = TypeListConcat<LayoutUniformList, PaintUniformList>;
     using LayoutUniformValues = gfx::UniformValues<LayoutUniformList>;
     using UniformValues = gfx::UniformValues<UniformList>;
-
-    using TextureList = Textures;
-    using TextureBindings = gfx::TextureBindings<TextureList>;
 
     std::unique_ptr<gfx::Program<Name>> program;
 
@@ -108,7 +104,6 @@ public:
               const SegmentBase& segment,
               const UniformValues& uniformValues,
               const AttributeBindings& allAttributeBindings,
-              const TextureBindings& textureBindings,
               const std::string& layerID) {
         static_assert(Primitive == gfx::PrimitiveTypeOf<DrawMode>::value, "incompatible draw mode");
 
@@ -131,7 +126,6 @@ public:
                       uniformValues,
                       drawScopeIt->second,
                       allAttributeBindings.offset(segment.vertexOffset),
-                      textureBindings,
                       indexBuffer,
                       segment.indexOffset,
                       segment.indexLength);
@@ -149,7 +143,6 @@ public:
               const SegmentVector& segments,
               const UniformValues& uniformValues,
               const AttributeBindings& allAttributeBindings,
-              const TextureBindings& textureBindings,
               const std::string& layerID) {
         static_assert(Primitive == gfx::PrimitiveTypeOf<DrawMode>::value, "incompatible draw mode");
 
@@ -174,7 +167,6 @@ public:
                           uniformValues,
                           drawScopeIt->second,
                           allAttributeBindings.offset(segment.vertexOffset),
-                          textureBindings,
                           indexBuffer,
                           segment.indexOffset,
                           segment.indexLength);

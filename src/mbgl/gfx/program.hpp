@@ -18,8 +18,6 @@ template <class>
 class UniformValues;
 template <class>
 class AttributeBindings;
-template <class>
-class TextureBindings;
 
 template <class Name>
 class Program {
@@ -36,7 +34,6 @@ public:
 
     using AttributeList = typename Name::AttributeList;
     using UniformList = typename Name::UniformList;
-    using TextureList = typename Name::TextureList;
 
     virtual void draw(Context&,
                       RenderPass&,
@@ -48,7 +45,6 @@ public:
                       const UniformValues<UniformList>&,
                       DrawScope&,
                       const AttributeBindings<AttributeList>&,
-                      const TextureBindings<TextureList>&,
                       const IndexBuffer&,
                       std::size_t indexOffset,
                       std::size_t indexLength) = 0;

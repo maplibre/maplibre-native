@@ -3,7 +3,6 @@
 #include <mbgl/actor/actor.hpp>
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/gfx/dynamic_texture_atlas.hpp>
-#include <mbgl/gfx/texture.hpp>
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/text/glyph_manager.hpp>
 #include <mbgl/tile/tile.hpp>

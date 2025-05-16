@@ -7,7 +7,6 @@
 #include <mbgl/gl/enum.hpp>
 #include <mbgl/gl/renderer_backend.hpp>
 #include <mbgl/gl/renderbuffer_resource.hpp>
-#include <mbgl/gl/texture.hpp>
 #include <mbgl/gl/offscreen_texture.hpp>
 #include <mbgl/gl/debugging_extension.hpp>
 #include <mbgl/gl/timestamp_query_extension.hpp>

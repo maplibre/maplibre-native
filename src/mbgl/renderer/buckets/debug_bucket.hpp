@@ -7,7 +7,6 @@
 #include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/programs/segment.hpp>
-#include <mbgl/programs/textures.hpp>
 #include <mbgl/renderer/buckets/fill_bucket.hpp>
 
 namespace mbgl {

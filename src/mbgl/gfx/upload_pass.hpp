@@ -6,7 +6,6 @@
 #include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/gfx/index_vector.hpp>
 #include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/gfx/texture.hpp>
 #include <mbgl/util/size.hpp>
 #include <mbgl/util/image.hpp>
 

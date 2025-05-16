@@ -11,7 +11,6 @@
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/gl/attribute.hpp>
 #include <mbgl/gl/uniform.hpp>
-#include <mbgl/gl/texture.hpp>
 #include <mbgl/util/io.hpp>
 
 #include <mbgl/util/logging.hpp>
@@ -28,7 +27,6 @@ class Program final : public gfx::Program<Name> {
 public:
     using AttributeList = typename Name::AttributeList;
     using UniformList = typename Name::UniformList;
-    using TextureList = typename Name::TextureList;
 
     Program(ProgramParameters programParameters_)
         : programParameters(std::move(programParameters_)) {}
@@ -45,8 +43,6 @@ public:
                                             attributeLocations.getFirstAttribName())) {
             attributeLocations.queryLocations(program);
             uniformStates.queryLocations(program);
-            // Texture units are specified via uniforms as well, so we need query their locations
-            //textureStates.queryLocations(program);
         }
 
         static std::unique_ptr<Instance> createInstance(gl::Context& context,
@@ -79,7 +75,6 @@ public:
         UniqueProgram program;
         gl::AttributeLocations<AttributeList> attributeLocations;
         gl::UniformStates<UniformList> uniformStates;
-        gl::TextureStates<TextureList> textureStates;
     };
 
     void draw(gfx::Context& genericContext,
@@ -92,7 +87,6 @@ public:
               const gfx::UniformValues<UniformList>& uniformValues,
               gfx::DrawScope& drawScope,
               const gfx::AttributeBindings<AttributeList>& attributeBindings,
-              const gfx::TextureBindings<TextureList>& textureBindings,
               const gfx::IndexBuffer& indexBuffer,
               std::size_t indexOffset,
               std::size_t indexLength) override {
@@ -123,8 +117,6 @@ public:
         context.program = instance.program;
 
         instance.uniformStates.bind(uniformValues);
-
-        //instance.textureStates.bind(context, textureBindings);
 
         auto& vertexArray = drawScope.getResource<gl::DrawScopeResource>().vertexArray;
         vertexArray.bind(context, indexBuffer, instance.attributeLocations.toBindingArray(attributeBindings));

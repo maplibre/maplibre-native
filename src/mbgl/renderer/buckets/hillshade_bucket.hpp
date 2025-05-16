@@ -2,7 +2,6 @@
 
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
-#include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/geometry/dem_data.hpp>
 #include <mbgl/programs/segment.hpp>

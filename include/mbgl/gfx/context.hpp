@@ -8,7 +8,6 @@
 #include <mbgl/gfx/program.hpp>
 #include <mbgl/gfx/renderbuffer.hpp>
 #include <mbgl/gfx/rendering_stats.hpp>
-#include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/types.hpp>
 
 #include <mbgl/gfx/uniform_buffer.hpp>

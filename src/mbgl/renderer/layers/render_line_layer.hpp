@@ -6,7 +6,6 @@
 #include <mbgl/programs/uniforms.hpp>
 #include <mbgl/style/image_impl.hpp>
 #include <mbgl/layout/pattern_layout.hpp>
-#include <mbgl/gfx/texture.hpp>
 
 #include <optional>
 #include <memory>

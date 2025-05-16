@@ -5,8 +5,6 @@
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/util/instrumentation.hpp>
 
-#include <mbgl/gfx/texture.hpp>
-
 namespace mbgl {
 namespace gl {
 
