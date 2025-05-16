@@ -449,51 +449,6 @@ Framebuffer Context::createFramebuffer(const gfx::Renderbuffer<gfx::Renderbuffer
     return {color.getSize(), std::move(fbo)};
 }
 
-Framebuffer Context::createFramebuffer(
-    const gfx::Texture& color, const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>& depthStencil) {
-    MLN_TRACE_FUNC();
-
-    if (color.size != depthStencil.getSize()) {
-        throw std::runtime_error("Renderbuffer size mismatch");
-    }
-    auto fbo = createFramebuffer();
-    bindFramebuffer = fbo;
-    MBGL_CHECK_ERROR(glFramebufferTexture2D(
-        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color.getResource<gl::TextureResource>().texture, 0));
-    bindDepthStencilRenderbuffer(depthStencil);
-    checkFramebuffer();
-    return {color.size, std::move(fbo)};
-}
-
-Framebuffer Context::createFramebuffer(const gfx::Texture& color) {
-    MLN_TRACE_FUNC();
-
-    auto fbo = createFramebuffer();
-    bindFramebuffer = fbo;
-    MBGL_CHECK_ERROR(glFramebufferTexture2D(
-        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color.getResource<gl::TextureResource>().texture, 0));
-    checkFramebuffer();
-    return {color.size, std::move(fbo)};
-}
-
-Framebuffer Context::createFramebuffer(const gfx::Texture& color,
-                                       const gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>& depth) {
-    MLN_TRACE_FUNC();
-    if (color.size != depth.getSize()) {
-        throw std::runtime_error("Renderbuffer size mismatch");
-    }
-    auto fbo = createFramebuffer();
-    bindFramebuffer = fbo;
-    MBGL_CHECK_ERROR(glFramebufferTexture2D(
-        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color.getResource<gl::TextureResource>().texture, 0));
-
-    auto& depthResource = depth.getResource<gl::RenderbufferResource>();
-    MBGL_CHECK_ERROR(
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthResource.renderbuffer));
-    checkFramebuffer();
-    return {depth.getSize(), std::move(fbo)};
-}
-
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(const Size size,
                                                                        const gfx::TextureChannelDataType type) {
     MLN_TRACE_FUNC();

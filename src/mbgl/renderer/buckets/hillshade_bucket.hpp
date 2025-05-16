@@ -31,9 +31,6 @@ public:
     void clear();
     void setMask(TileMask&&);
 
-    std::optional<gfx::Texture> dem;
-    std::optional<gfx::Texture> texture;
-
     RenderTargetPtr renderTarget;
     bool renderTargetPrepared = false;
 

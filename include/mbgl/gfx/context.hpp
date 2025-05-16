@@ -79,13 +79,6 @@ public:
 
     virtual std::unique_ptr<OffscreenTexture> createOffscreenTexture(Size, TextureChannelDataType) = 0;
 
-    /// Creates an empty texture with the specified dimensions.
-    Texture createTexture(const Size size,
-                          TexturePixelType format = TexturePixelType::RGBA,
-                          TextureChannelDataType type = TextureChannelDataType::UnsignedByte) {
-        return {size, createTextureResource(size, format, type)};
-    }
-
     template <RenderbufferPixelType pixelType>
     Renderbuffer<pixelType> createRenderbuffer(const Size size) {
         return {size, createRenderbufferResource(pixelType, size)};

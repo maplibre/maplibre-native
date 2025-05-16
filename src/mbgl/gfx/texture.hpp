@@ -28,26 +28,6 @@ public:
     virtual ~TextureResource() = default;
 };
 
-class Texture {
-public:
-    Texture(const Size size_, std::unique_ptr<TextureResource>&& resource_)
-        : size(size_),
-          resource(std::move(resource_)) {}
-
-    template <typename T = TextureResource>
-    T& getResource() const {
-        assert(resource);
-        return static_cast<T&>(*resource);
-    }
-
-    const Size& getSize() const noexcept { return size; }
-
-    Size size;
-
-protected:
-    std::unique_ptr<TextureResource> resource;
-};
-
 class TextureBinding {
 public:
     TextureBinding(TextureResource& resource_,

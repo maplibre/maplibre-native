@@ -188,8 +188,6 @@ void RenderLineLayer::updateColorRamp() {
         return;
     }
 
-    colorRampTexture = std::nullopt;
-
     if (colorRampTexture2D) {
         colorRampTexture2D.reset();
 

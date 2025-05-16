@@ -63,10 +63,6 @@ public:
     Framebuffer createFramebuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA>&,
                                   const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>&);
     Framebuffer createFramebuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA>&);
-    Framebuffer createFramebuffer(const gfx::Texture&,
-                                  const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>&);
-    Framebuffer createFramebuffer(const gfx::Texture&);
-    Framebuffer createFramebuffer(const gfx::Texture&, const gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>&);
 
     template <typename Image,
               gfx::TexturePixelType format = Image::channels == 4 ? gfx::TexturePixelType::RGBA

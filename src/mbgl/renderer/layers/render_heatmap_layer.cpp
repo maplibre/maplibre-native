@@ -93,9 +93,7 @@ void RenderHeatmapLayer::updateColorRamp() {
             colorValue = HeatmapLayer::getDefaultHeatmapColor();
         }
 
-        if (applyColorRamp(colorValue, *colorRamp)) {
-            colorRampTexture = std::nullopt;
-        }
+        applyColorRamp(colorValue, *colorRamp);
     }
 }
 

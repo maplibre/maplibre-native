@@ -26,7 +26,6 @@ private:
     const std::string& getName() const override { return name; }
     std::string name;
     void updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const override {};
-    mutable std::optional<gfx::Texture> debugTexture;
 };
 
 class RenderImageSource final : public RenderSource {

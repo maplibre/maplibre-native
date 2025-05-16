@@ -42,7 +42,6 @@ public:
     }
 
     std::shared_ptr<PremultipliedImage> image;
-    std::optional<gfx::Texture> texture;
     gfx::Texture2DPtr texture2d;
     TileMask mask{{0, 0, 0}};
 

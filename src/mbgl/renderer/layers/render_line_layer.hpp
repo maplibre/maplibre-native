@@ -58,8 +58,6 @@ private:
     void updateColorRamp();
 
     std::shared_ptr<PremultipliedImage> colorRamp;
-    std::optional<gfx::Texture> colorRampTexture;
-
     gfx::Texture2DPtr colorRampTexture2D;
 
     gfx::ShaderGroupPtr lineShaderGroup;
