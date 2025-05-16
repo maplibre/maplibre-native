@@ -21,6 +21,15 @@ set_target_properties(
 )
 
 set_target_properties(
+    maplibre-native-base-extras-filesystem
+    PROPERTIES
+        INTERFACE_MAPLIBRE_NAME "filesystem"
+        INTERFACE_MAPLIBRE_URL "https://github.com/gulrak/filesystem"
+        INTERFACE_MAPLIBRE_AUTHOR "Steffen Schümann"
+        INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/maplibre-native-base/extras/filesystem/LICENSE.txt
+)
+
+set_target_properties(
     maplibre-native-base-supercluster.hpp
     PROPERTIES
         INTERFACE_MAPLIBRE_NAME "supercluster.hpp"

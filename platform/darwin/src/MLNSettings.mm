@@ -10,6 +10,7 @@
 @property (atomic) NSString *apiKey;
 @property (atomic) mbgl::TileServerOptions *tileServerOptionsInternal;
 @property (atomic) NSString *tileServerOptionsChangeToken;
+@property (atomic, readwrite) MLNActionJournalOptions *actionJournalOptionsInternal;
 
 @end
 
@@ -20,6 +21,7 @@
 - (instancetype)init {
     if (self = [super init]) {
         self.tileServerOptionsInternal = new mbgl::TileServerOptions(mbgl::TileServerOptions::DefaultConfiguration());
+        self.actionJournalOptionsInternal = [[MLNActionJournalOptions alloc] init];
     }
     return self;
 }
@@ -228,5 +230,11 @@
     return nil;
 
 }
+
++ (MLNActionJournalOptions*)actionJournalOptions {
+    return [MLNSettings sharedSettings].actionJournalOptionsInternal;
+}
+
+
 
 @end
