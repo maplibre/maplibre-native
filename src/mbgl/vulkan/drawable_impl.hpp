@@ -9,7 +9,7 @@
 #include <mbgl/vulkan/upload_pass.hpp>
 #include <mbgl/vulkan/pipeline.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/util/mat4.hpp>
 
 #include <cstdint>

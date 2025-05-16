@@ -279,6 +279,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer_frontend.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer_observer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer_state.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/program_parameters.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/storage/database_file_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/storage/file_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/storage/file_source_manager.hpp
@@ -485,7 +486,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/offscreen_texture.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/polyline_generator.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/fill_generator.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/program.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/render_pass.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/renderbuffer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/renderer_backend.cpp
@@ -493,7 +493,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_group.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_registry.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/stencil_mode.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/texture.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/upload_pass.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_buffer.hpp
@@ -543,17 +542,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/zoom_history.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/math/log2.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/platform/settings.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/attributes.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/clipping_mask_program.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/clipping_mask_program.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/program.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/program_parameters.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/program_parameters.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/programs.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/programs.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/segment.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/textures.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/uniforms.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/backend_scope.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/bucket.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/bucket_parameters.cpp
@@ -657,6 +645,10 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/transition_parameters.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/update_parameters.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/upload_parameters.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/attributes.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/program_parameters.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/segment.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/uniforms.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/sprite/sprite_loader.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/sprite/sprite_loader.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/sprite/sprite_loader_observer.hpp
@@ -1040,7 +1032,6 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/object.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/offscreen_texture.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/offscreen_texture.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/program.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_pass.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_pass.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/renderbuffer_resource.cpp
@@ -1049,10 +1040,6 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/resource_pool.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/resource_pool.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/state.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture_resource.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture_resource.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/timestamp_query_extension.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/timestamp_query_extension.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/types.hpp
@@ -1067,6 +1054,11 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/platform/gl_functions.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/legacy/clipping_mask_program.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/legacy/program_base.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/legacy/program.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/legacy/programs.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/legacy/programs.hpp
     )
 
     list(APPEND INCLUDE_FILES

@@ -1,22 +1,19 @@
 #pragma once
 
+#include <mbgl/shaders/gl/legacy/program_base.hpp>
 #include <mbgl/gfx/attribute.hpp>
 #include <mbgl/gfx/shader.hpp>
 #include <mbgl/gfx/uniform.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
-#include <mbgl/programs/segment.hpp>
-#include <mbgl/programs/attributes.hpp>
-#include <mbgl/programs/program_parameters.hpp>
+#include <mbgl/shaders/segment.hpp>
+#include <mbgl/shaders/attributes.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
+#include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/style/paint_property.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/util/io.hpp>
 
 #include <unordered_map>
-
-#include <mbgl/shaders/shader_manifest.hpp>
-#if MLN_RENDER_BACKEND_OPENGL
-#include <mbgl/gl/program.hpp>
-#endif
 
 namespace mbgl {
 
@@ -29,7 +26,6 @@ template <class Name,
           gfx::PrimitiveType Primitive,
           class LayoutAttributeList,
           class LayoutUniformList,
-          class Textures,
           class PaintProps>
 class Program : public gfx::Shader {
 public:
@@ -47,10 +43,7 @@ public:
     using LayoutUniformValues = gfx::UniformValues<LayoutUniformList>;
     using UniformValues = gfx::UniformValues<UniformList>;
 
-    using TextureList = Textures;
-    using TextureBindings = gfx::TextureBindings<TextureList>;
-
-    std::unique_ptr<gfx::Program<Name>> program;
+    std::unique_ptr<gl::ProgramBase<Name>> programBase;
 
     Program([[maybe_unused]] const ProgramParameters& programParameters) {
         switch (gfx::Backend::GetType()) {
@@ -64,7 +57,7 @@ public:
             }
 #else // MLN_RENDER_BACKEND_OPENGL
             case gfx::Backend::Type::OpenGL: {
-                program = std::make_unique<gl::Program<Name>>(programParameters.withDefaultSource(
+                programBase = std::make_unique<gl::ProgramBase<Name>>(programParameters.withDefaultSource(
                     {gfx::Backend::Type::OpenGL,
                      shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::vertex,
                      shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::fragment}));
@@ -108,11 +101,10 @@ public:
               const SegmentBase& segment,
               const UniformValues& uniformValues,
               const AttributeBindings& allAttributeBindings,
-              const TextureBindings& textureBindings,
               const std::string& layerID) {
         static_assert(Primitive == gfx::PrimitiveTypeOf<DrawMode>::value, "incompatible draw mode");
 
-        if (!program) {
+        if (!programBase) {
             return;
         }
 
@@ -121,20 +113,19 @@ public:
             drawScopeIt = segment.drawScopes.emplace(layerID, context.createDrawScope()).first;
         }
 
-        program->draw(context,
-                      renderPass,
-                      drawMode,
-                      depthMode,
-                      stencilMode,
-                      colorMode,
-                      cullFaceMode,
-                      uniformValues,
-                      drawScopeIt->second,
-                      allAttributeBindings.offset(segment.vertexOffset),
-                      textureBindings,
-                      indexBuffer,
-                      segment.indexOffset,
-                      segment.indexLength);
+        programBase->draw(context,
+                          renderPass,
+                          drawMode,
+                          depthMode,
+                          stencilMode,
+                          colorMode,
+                          cullFaceMode,
+                          uniformValues,
+                          drawScopeIt->second,
+                          allAttributeBindings.offset(segment.vertexOffset),
+                          indexBuffer,
+                          segment.indexOffset,
+                          segment.indexLength);
     }
 
     template <class DrawMode>
@@ -149,11 +140,10 @@ public:
               const SegmentVector& segments,
               const UniformValues& uniformValues,
               const AttributeBindings& allAttributeBindings,
-              const TextureBindings& textureBindings,
               const std::string& layerID) {
         static_assert(Primitive == gfx::PrimitiveTypeOf<DrawMode>::value, "incompatible draw mode");
 
-        if (!program) {
+        if (!programBase) {
             return;
         }
 
@@ -164,20 +154,19 @@ public:
                 drawScopeIt = segment.drawScopes.emplace(layerID, context.createDrawScope()).first;
             }
 
-            program->draw(context,
-                          renderPass,
-                          drawMode,
-                          depthMode,
-                          stencilMode,
-                          colorMode,
-                          cullFaceMode,
-                          uniformValues,
-                          drawScopeIt->second,
-                          allAttributeBindings.offset(segment.vertexOffset),
-                          textureBindings,
-                          indexBuffer,
-                          segment.indexOffset,
-                          segment.indexLength);
+            programBase->draw(context,
+                              renderPass,
+                              drawMode,
+                              depthMode,
+                              stencilMode,
+                              colorMode,
+                              cullFaceMode,
+                              uniformValues,
+                              drawScopeIt->second,
+                              allAttributeBindings.offset(segment.vertexOffset),
+                              indexBuffer,
+                              segment.indexOffset,
+                              segment.indexLength);
         }
     }
 };

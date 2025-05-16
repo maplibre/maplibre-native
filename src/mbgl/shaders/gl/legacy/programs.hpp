@@ -1,7 +1,6 @@
 #pragma once
 
-#include <mbgl/programs/clipping_mask_program.hpp>
-#include <mbgl/programs/program_parameters.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
 #include <memory>
 

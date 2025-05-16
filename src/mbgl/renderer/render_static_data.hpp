@@ -4,7 +4,6 @@
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/gfx/renderbuffer.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/buckets/heatmap_bucket.hpp>
 #include <mbgl/renderer/buckets/raster_bucket.hpp>
 
@@ -19,7 +18,7 @@ class UploadPass;
 
 class RenderStaticData {
 public:
-    RenderStaticData(float pixelRatio, std::unique_ptr<gfx::ShaderRegistry>&& shaders_);
+    RenderStaticData(std::unique_ptr<gfx::ShaderRegistry>&& shaders_);
 
     void upload(gfx::UploadPass&);
 
@@ -46,16 +45,9 @@ public:
     bool uploaded = false;
     Size backendSize;
 
-    // @TODO: Migrate away from and remove `Programs`
-    Programs programs;
-
     std::unique_ptr<gfx::ShaderRegistry> shaders;
 
     const SegmentVector clippingMaskSegments;
-
-#ifndef NDEBUG
-    Programs overdrawPrograms;
-#endif
 };
 
 } // namespace mbgl

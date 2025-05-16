@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/programs/program.hpp>
-#include <mbgl/programs/attributes.hpp>
-#include <mbgl/programs/uniforms.hpp>
+#include <mbgl/shaders/gl/legacy/program.hpp>
+#include <mbgl/shaders/attributes.hpp>
+#include <mbgl/shaders/uniforms.hpp>
 #include <mbgl/style/properties.hpp>
 
 namespace mbgl {
@@ -12,7 +12,6 @@ class ClippingMaskProgram final : public Program<ClippingMaskProgram,
                                                  gfx::PrimitiveType::Triangle,
                                                  PositionOnlyLayoutAttributes,
                                                  TypeList<uniforms::matrix>,
-                                                 TypeList<>,
                                                  style::Properties<>> {
 public:
     static constexpr std::string_view Name{"ClippingMaskProgram"};

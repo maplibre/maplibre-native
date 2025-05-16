@@ -3,10 +3,9 @@
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/style/layers/line_layer_impl.hpp>
 #include <mbgl/style/layers/line_layer_properties.hpp>
-#include <mbgl/programs/uniforms.hpp>
+#include <mbgl/shaders/uniforms.hpp>
 #include <mbgl/style/image_impl.hpp>
 #include <mbgl/layout/pattern_layout.hpp>
-#include <mbgl/gfx/texture.hpp>
 
 #include <optional>
 #include <memory>
@@ -58,8 +57,6 @@ private:
     void updateColorRamp();
 
     std::shared_ptr<PremultipliedImage> colorRamp;
-    std::optional<gfx::Texture> colorRampTexture;
-
     gfx::Texture2DPtr colorRampTexture2D;
 
     gfx::ShaderGroupPtr lineShaderGroup;

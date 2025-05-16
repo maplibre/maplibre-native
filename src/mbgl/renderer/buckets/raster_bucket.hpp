@@ -1,9 +1,8 @@
 #pragma once
 
 #include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/renderer/tile_mask.hpp>
@@ -42,7 +41,6 @@ public:
     }
 
     std::shared_ptr<PremultipliedImage> image;
-    std::optional<gfx::Texture> texture;
     gfx::Texture2DPtr texture2d;
     TileMask mask{{0, 0, 0}};
 

@@ -6,7 +6,6 @@
 #include <mbgl/renderer/sources/render_image_source.hpp>
 #include <mbgl/renderer/tile_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
-#include <mbgl/programs/programs.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/instrumentation.hpp>

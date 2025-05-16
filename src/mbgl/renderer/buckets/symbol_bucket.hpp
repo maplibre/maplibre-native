@@ -5,7 +5,7 @@
 #include <mbgl/layout/symbol_feature.hpp>
 #include <mbgl/layout/symbol_instance.hpp>
 #include <mbgl/map/mode.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
@@ -49,23 +49,12 @@ class SymbolSizeBinder {
 public:
     virtual ~SymbolSizeBinder() = default;
 
-    // using UniformList = TypeList<uniforms::is_size_zoom_constant, uniforms::is_size_feature_constant,
-    // uniforms::size_t, uniforms::size>; using UniformValues = gfx::UniformValues<UniformList>;
-
     static std::unique_ptr<SymbolSizeBinder> create(float tileZoom,
                                                     const style::PropertyValue<float>& sizeProperty,
                                                     float defaultValue);
 
     virtual Range<float> getVertexSizeData(const GeometryTileFeature& feature) = 0;
     virtual ZoomEvaluatedSize evaluateForZoom(float currentZoom) const = 0;
-
-    /*UniformValues uniformValues(float currentZoom) const {
-        const ZoomEvaluatedSize u = evaluateForZoom(currentZoom);
-        return UniformValues{uniforms::is_size_zoom_constant::Value(u.isZoomConstant),
-                             uniforms::is_size_feature_constant::Value(u.isFeatureConstant),
-                             uniforms::size_t::Value(u.sizeT),
-                             uniforms::size::Value(u.size)};
-    }*/
 };
 
 class ConstantSymbolSizeBinder final : public SymbolSizeBinder {

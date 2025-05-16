@@ -4,7 +4,7 @@
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/style/layers/line_layer_properties.hpp>
 #include <mbgl/style/image_impl.hpp>
 

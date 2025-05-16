@@ -4,7 +4,6 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/buckets/circle_bucket.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
