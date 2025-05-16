@@ -848,7 +848,6 @@ MLN_OPENGL_SOURCE = [
     "src/mbgl/gl/vertex_buffer_resource.cpp",
     "src/mbgl/gl/vertex_buffer_resource.hpp",
     "src/mbgl/platform/gl_functions.cpp",
-    "src/mbgl/shaders/gl/legacy/clipping_mask_program.cpp",
     "src/mbgl/shaders/gl/legacy/clipping_mask_program.hpp",
     "src/mbgl/shaders/gl/legacy/program_base.hpp",
     "src/mbgl/shaders/gl/legacy/program.hpp",

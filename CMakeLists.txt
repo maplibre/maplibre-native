@@ -1054,7 +1054,6 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/platform/gl_functions.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/legacy/clipping_mask_program.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/legacy/clipping_mask_program.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/legacy/program_base.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/legacy/program.hpp
