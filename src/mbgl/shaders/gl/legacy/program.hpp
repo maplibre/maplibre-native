@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/shaders/gl/legacy/program_base.hpp>
 #include <mbgl/gfx/attribute.hpp>
 #include <mbgl/gfx/shader.hpp>
 #include <mbgl/gfx/uniform.hpp>
@@ -7,16 +8,12 @@
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/programs/attributes.hpp>
 #include <mbgl/shaders/program_parameters.hpp>
+#include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/style/paint_property.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/util/io.hpp>
 
 #include <unordered_map>
-
-#include <mbgl/shaders/shader_manifest.hpp>
-#if MLN_RENDER_BACKEND_OPENGL
-#include <mbgl/gl/program.hpp>
-#endif
 
 namespace mbgl {
 
@@ -46,7 +43,7 @@ public:
     using LayoutUniformValues = gfx::UniformValues<LayoutUniformList>;
     using UniformValues = gfx::UniformValues<UniformList>;
 
-    std::unique_ptr<gfx::Program<Name>> program;
+    std::unique_ptr<gl::ProgramBase<Name>> programBase;
 
     Program([[maybe_unused]] const ProgramParameters& programParameters) {
         switch (gfx::Backend::GetType()) {
@@ -60,7 +57,7 @@ public:
             }
 #else // MLN_RENDER_BACKEND_OPENGL
             case gfx::Backend::Type::OpenGL: {
-                program = std::make_unique<gl::Program<Name>>(programParameters.withDefaultSource(
+                programBase = std::make_unique<gl::ProgramBase<Name>>(programParameters.withDefaultSource(
                     {gfx::Backend::Type::OpenGL,
                      shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::vertex,
                      shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::fragment}));
@@ -107,7 +104,7 @@ public:
               const std::string& layerID) {
         static_assert(Primitive == gfx::PrimitiveTypeOf<DrawMode>::value, "incompatible draw mode");
 
-        if (!program) {
+        if (!programBase) {
             return;
         }
 
@@ -116,7 +113,7 @@ public:
             drawScopeIt = segment.drawScopes.emplace(layerID, context.createDrawScope()).first;
         }
 
-        program->draw(context,
+        programBase->draw(context,
                       renderPass,
                       drawMode,
                       depthMode,
@@ -146,7 +143,7 @@ public:
               const std::string& layerID) {
         static_assert(Primitive == gfx::PrimitiveTypeOf<DrawMode>::value, "incompatible draw mode");
 
-        if (!program) {
+        if (!programBase) {
             return;
         }
 
@@ -157,7 +154,7 @@ public:
                 drawScopeIt = segment.drawScopes.emplace(layerID, context.createDrawScope()).first;
             }
 
-            program->draw(context,
+            programBase->draw(context,
                           renderPass,
                           drawMode,
                           depthMode,
