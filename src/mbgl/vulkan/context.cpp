@@ -1,7 +1,6 @@
 #include <mbgl/vulkan/context.hpp>
 
 #include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_target.hpp>
@@ -16,6 +15,7 @@
 #include <mbgl/vulkan/vertex_attribute.hpp>
 #include <mbgl/shaders/vulkan/shader_program.hpp>
 #include <mbgl/shaders/vulkan/clipping_mask.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>

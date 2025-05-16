@@ -158,7 +158,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     context.beginFrame();
 
     if (!staticData) {
-        staticData = std::make_unique<RenderStaticData>(pixelRatio, std::make_unique<gfx::ShaderRegistry>());
+        staticData = std::make_unique<RenderStaticData>(std::make_unique<gfx::ShaderRegistry>());
 
         // Initialize shaders for drawables
         const auto programParameters = ProgramParameters{pixelRatio, false};
