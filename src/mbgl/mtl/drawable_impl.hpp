@@ -11,7 +11,7 @@
 #include <mbgl/mtl/upload_pass.hpp>
 #include <mbgl/mtl/vertex_attribute.hpp>
 #include <mbgl/mtl/vertex_buffer_resource.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>
 

@@ -3,7 +3,7 @@
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/style/layers/line_layer_impl.hpp>
 #include <mbgl/style/layers/line_layer_properties.hpp>
-#include <mbgl/programs/uniforms.hpp>
+#include <mbgl/shaders/uniforms.hpp>
 #include <mbgl/style/image_impl.hpp>
 #include <mbgl/layout/pattern_layout.hpp>
 

@@ -5,7 +5,7 @@
 #include <mbgl/layout/symbol_feature.hpp>
 #include <mbgl/layout/symbol_instance.hpp>
 #include <mbgl/map/mode.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>

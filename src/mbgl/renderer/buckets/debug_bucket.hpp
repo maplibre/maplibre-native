@@ -6,7 +6,7 @@
 #include <mbgl/util/noncopyable.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/renderer/buckets/fill_bucket.hpp>
 
 namespace mbgl {

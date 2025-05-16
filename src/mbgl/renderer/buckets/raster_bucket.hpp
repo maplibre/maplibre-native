@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/renderer/tile_mask.hpp>

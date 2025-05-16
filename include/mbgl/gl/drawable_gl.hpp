@@ -4,7 +4,7 @@
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/gl/vertex_attribute_gl.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 
 #include <memory>
 

@@ -8,7 +8,7 @@
 #include <mbgl/gl/uniform_buffer_gl.hpp>
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/platform/gl_functions.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>
 

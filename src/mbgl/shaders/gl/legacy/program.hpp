@@ -5,8 +5,8 @@
 #include <mbgl/gfx/shader.hpp>
 #include <mbgl/gfx/uniform.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
-#include <mbgl/programs/segment.hpp>
-#include <mbgl/programs/attributes.hpp>
+#include <mbgl/shaders/segment.hpp>
+#include <mbgl/shaders/attributes.hpp>
 #include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/style/paint_property.hpp>
