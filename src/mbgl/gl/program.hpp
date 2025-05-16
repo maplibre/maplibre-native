@@ -14,7 +14,7 @@
 #include <mbgl/util/io.hpp>
 
 #include <mbgl/util/logging.hpp>
-#include <mbgl/programs/program_parameters.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/shaders/shader_manifest.hpp>
 
 #include <string>

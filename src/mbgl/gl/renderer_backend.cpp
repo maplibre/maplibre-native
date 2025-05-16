@@ -6,8 +6,9 @@
 #include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/programs/programs.hpp>
+
 #include <mbgl/shaders/gl/shader_group_gl.hpp>
+#include <mbgl/shaders/gl/legacy/programs.hpp>
 
 #include <cassert>
 

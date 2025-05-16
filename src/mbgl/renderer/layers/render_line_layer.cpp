@@ -3,7 +3,7 @@
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/geometry/line_atlas.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/programs/programs.hpp>
+#include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/renderer/buckets/line_bucket.hpp>
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>

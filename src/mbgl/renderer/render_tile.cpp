@@ -2,7 +2,6 @@
 
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/map/transform_state.hpp>
-#include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/buckets/debug_bucket.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>

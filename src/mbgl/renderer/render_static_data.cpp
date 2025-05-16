@@ -1,7 +1,7 @@
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
-#include <mbgl/programs/program_parameters.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 
 namespace mbgl {
 
@@ -52,10 +52,6 @@ gfx::VertexVector<HeatmapTextureLayoutVertex> RenderStaticData::heatmapTextureVe
 RenderStaticData::RenderStaticData(float pixelRatio, std::unique_ptr<gfx::ShaderRegistry>&& shaders_)
     : shaders(std::move(shaders_)),
       clippingMaskSegments(tileTriangleSegments())
-#ifndef NDEBUG
-      ,
-      overdrawPrograms(ProgramParameters{pixelRatio, true})
-#endif
 {
 }
 

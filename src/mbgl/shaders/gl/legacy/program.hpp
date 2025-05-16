@@ -6,7 +6,7 @@
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/programs/attributes.hpp>
-#include <mbgl/programs/program_parameters.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/style/paint_property.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/util/io.hpp>

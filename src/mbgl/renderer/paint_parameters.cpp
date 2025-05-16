@@ -11,6 +11,10 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/logging.hpp>
 
+#if MLN_RENDER_BACKEND_OPENGL
+#include <mbgl/shaders/gl/legacy/clipping_mask_program.hpp>
+#endif
+
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/mtl/context.hpp>
 #include <mbgl/shaders/mtl/clipping_mask.hpp>
@@ -237,7 +241,7 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
         vulkanContext.renderingStats().stencilUpdates++;
     }
 
-#else  // !MLN_RENDER_BACKEND_METAL
+#else  // MLN_RENDER_BACKEND_OPENGL
     auto program = staticData.shaders->getLegacyGroup().get<ClippingMaskProgram>();
 
     if (!program) {
@@ -287,7 +291,7 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
                           *staticData.tileVertexBuffer, paintAttributeData, properties),
                       "clipping/" + util::toString(stencilID));
     }
-#endif // MLN_RENDER_BACKEND_METAL
+#endif // MLN_RENDER_BACKEND_OPENGL
 }
 
 gfx::StencilMode PaintParameters::stencilModeForClipping(const UnwrappedTileID& tileID) const {

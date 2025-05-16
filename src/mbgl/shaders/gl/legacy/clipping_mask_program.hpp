@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/programs/program.hpp>
+#include <mbgl/shaders/gl/legacy/program.hpp>
 #include <mbgl/programs/attributes.hpp>
 #include <mbgl/programs/uniforms.hpp>
 #include <mbgl/style/properties.hpp>

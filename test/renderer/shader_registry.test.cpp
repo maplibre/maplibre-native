@@ -21,7 +21,7 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/headless_frontend.hpp>
 #include <mbgl/test/map_adapter.hpp>
-#include <mbgl/programs/clipping_mask_program.hpp>
+#include <mbgl/shaders/gl/legacy/clipping_mask_program.hpp>
 
 using namespace mbgl;
 

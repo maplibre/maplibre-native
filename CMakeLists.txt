@@ -279,6 +279,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer_frontend.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer_observer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer_state.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/program_parameters.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/storage/database_file_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/storage/file_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/storage/file_source_manager.hpp
@@ -543,12 +544,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/math/log2.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/platform/settings.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/attributes.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/clipping_mask_program.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/program.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/program_parameters.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/program_parameters.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/programs.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/programs/programs.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/segment.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/programs/uniforms.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/backend_scope.cpp
@@ -654,6 +649,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/transition_parameters.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/update_parameters.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/upload_parameters.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/program_parameters.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/sprite/sprite_loader.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/sprite/sprite_loader.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/sprite/sprite_loader_observer.hpp
@@ -1060,6 +1056,10 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/platform/gl_functions.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/legacy/clipping_mask_program.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/legacy/program.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/legacy/programs.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/legacy/programs.hpp
     )
 
     list(APPEND INCLUDE_FILES
