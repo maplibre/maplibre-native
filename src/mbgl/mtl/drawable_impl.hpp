@@ -3,7 +3,6 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/drawable_impl.hpp>
 #include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/gfx/program.hpp>
 #include <mbgl/gfx/uniform.hpp>
 #include <mbgl/gfx/uniform_buffer.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
