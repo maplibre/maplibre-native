@@ -66,6 +66,10 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Validate VERSION
+        run: ../../.github/scripts/validate-version.sh
+        working-directory: platform/android
+
       - run: echo "cmake.dir=$(dirname "$(dirname "$(command -v cmake)")")" >> local.properties
 
       - uses: actions/setup-java@v4
