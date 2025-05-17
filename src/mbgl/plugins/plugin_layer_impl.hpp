@@ -23,7 +23,6 @@
 // Property types
 #include <mbgl/util/color.hpp>
 
-
 /*
 //#include <mbgl/style/layers/line_layer.hpp>
 #include <mbgl/style/layer.hpp>
@@ -34,7 +33,7 @@
 */
 // ---------------------------------------------------
 
-//#define INCLUDE_DATA_DRIVEN_COLOR_PROPERTY 1
+// #define INCLUDE_DATA_DRIVEN_COLOR_PROPERTY 1
 
 namespace mbgl {
 namespace style {
@@ -49,7 +48,7 @@ struct SingleFloatProperty : DataDrivenPaintProperty<float, attributes::width, u
 struct DataDrivenColorProperty : DataDrivenPaintProperty<mbgl::Color, attributes::color, uniforms::color> {
     static mbgl::Color defaultValue() { return mbgl::Color::black(); }
     static constexpr auto expressionType() { return expression::type::ColorType{}; };
-//    using EvaluatorType = DataDrivenPropertyEvaluator<Color, true>;
+    //    using EvaluatorType = DataDrivenPropertyEvaluator<Color, true>;
 };
 #endif
 
@@ -112,7 +111,7 @@ public:
     PropertyValue<DataDrivenColorProperty> _dataDrivenColorProperty;
     void setCurrentColorValue(Color value);
 #endif
-    
+
     // Return this property as json
     std::string asJSON();
 

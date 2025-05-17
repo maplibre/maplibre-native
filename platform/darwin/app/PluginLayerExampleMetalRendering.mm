@@ -174,7 +174,7 @@ typedef struct
 -(void)onUpdateLayer:(MLNPluginLayerDrawingContext)drawingContext {
     // Update any metadata needed for the frame
     //NSLog(@"onUpdateLayer");
-    
+
  //   NSLog(@"Update Layer");
 }
 

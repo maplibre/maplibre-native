@@ -59,7 +59,6 @@ MLN_EXPORT
 
 @class MLNMapView;
 
-
 // Copied initially from MLNStyleLayerDrawingContext.  Decided to copy instead of use since we
 // might add additional properties here
 /// A structure containing context needed to draw a frame in an ``MLNCustomStyleLayer``.
@@ -79,8 +78,6 @@ typedef struct MLNPluginLayerDrawingContext {
   /// A 4×4 matrix representing the map view’s current projection state.
   MLNMatrix4 projectionMatrix;
 } MLNPluginLayerDrawingContext;
-
-
 
 MLN_EXPORT
 @interface MLNPluginLayer : NSObject

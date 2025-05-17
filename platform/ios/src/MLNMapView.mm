@@ -7587,7 +7587,7 @@ static void *windowScreenContext = &windowScreenContext;
                                                tileKind);
 
     __weak MLNMapView *weakMapView = self;
-    
+
     Class layerClass = pluginLayerClass;
     factory->setOnLayerCreatedEvent([layerClass, weakMapView, pluginLayerClass](mbgl::style::PluginLayer *pluginLayer) {
 
@@ -7655,11 +7655,11 @@ static void *windowScreenContext = &windowScreenContext;
 
             }
 */
-            
-            
+
+
 
             MLNMapView *strongMapView = weakMapView;
-            
+
             const mbgl::TransformState& state = paintParameters.state;
 
             MLNPluginLayerDrawingContext drawingContext;
@@ -7674,12 +7674,12 @@ static void *windowScreenContext = &windowScreenContext;
             mbgl::mat4 projMatrix;
             state.getProjMatrix(projMatrix);
             drawingContext.projectionMatrix = MLNMatrix4Make(projMatrix);
-            
+
             //NSLog(@"Rendering");
-            
+
             // Call update with the scene state variables
             [weakPlugInLayer onUpdateLayer:drawingContext];
-            
+
             // Call render
             [weakPlugInLayer onRenderLayer:strongMapView
                              renderEncoder:encoder];
@@ -7688,12 +7688,12 @@ static void *windowScreenContext = &windowScreenContext;
         // Set the lambdas
         //auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
         pluginLayerImpl->setRenderFunction(renderFunction);
-        
+
         // TODO: Does this update function need to go away and we'll just call onUpdateLayer from the render call?
 //        pluginLayerImpl->setUpdateFunction([weakPlugInLayer](const mbgl::LayerPrepareParameters & prepareParameters) {
 //            [weakPlugInLayer onUpdateLayer:];
 //        });
-        
+
         pluginLayerImpl->setUpdatePropertiesFunction([weakPlugInLayer](const std::string & jsonProperties) {
             // Use autorelease pools in lambdas
             @autoreleasepool {

@@ -235,13 +235,12 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
                                                         style::PluginLayer(id, source, _layerTypeInfo, layerProperties
                                                                            //,*customProperties
                                                                            ));
-    
+
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-        std::cout << "tempResultCreated: " << id << "\n";
+    std::cout << "tempResultCreated: " << id << "\n";
 #endif
 
     if (_onLayerCreated != nullptr) {
-        
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
         std::cout << "_onLayerCreated: " << id << "\n";
 #endif
@@ -288,7 +287,7 @@ std::unique_ptr<RenderLayer> PluginLayerFactory::createRenderLayer(Immutable<sty
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
     std::cout << "Create Render Layer\n";
 #endif
-    
+
     auto localImpl = staticImmutableCast<style::PluginLayer::Impl>(impl);
 
     auto tempResult = std::make_unique<RenderPluginLayer>(staticImmutableCast<style::PluginLayer::Impl>(impl));

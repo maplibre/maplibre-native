@@ -204,7 +204,6 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
         property->setCurrentColorValue(v);
 
 #endif
-        
     }
 
     /*

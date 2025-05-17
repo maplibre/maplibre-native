@@ -26,9 +26,8 @@ PluginLayer::Impl::Impl(std::string layerID,
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
     std::cout << "Init\n";
 #endif
-    
-   // auto d = new DataDrivenPropertyEvaluator<mbgl::Color, true>();
-    
+
+    // auto d = new DataDrivenPropertyEvaluator<mbgl::Color, true>();
 }
 
 bool PluginLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
@@ -102,11 +101,6 @@ void PluginLayerProperty::setCurrentColorValue(Color value) {
     _dataDrivenColorValue = value;
 }
 #endif
-
-
-
-
-
 
 namespace conversion {
 /*
