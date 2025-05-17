@@ -7,6 +7,7 @@
 
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
+#import "MLNFoundation.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -55,6 +56,7 @@ typedef enum {
 
 @class MLNMapView;
 
+MLN_EXPORT
 @interface MLNPluginLayer : NSObject
 
 /// Returns the layer capabilities of the plugin layer.

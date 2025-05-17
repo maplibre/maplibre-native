@@ -20,22 +20,21 @@
 #include <mbgl/style/property_value.hpp>
 #include <mbgl/style/conversion/property_value.hpp>
 
+// Property types
+#include <mbgl/util/color.hpp>
+
+
 /*
-#include <mbgl/style/types.hpp>
-#include <mbgl/style/layer_properties.hpp>
 //#include <mbgl/style/layers/line_layer.hpp>
 #include <mbgl/style/layer.hpp>
 #include <mbgl/style/filter.hpp>
 #include <mbgl/style/property_value.hpp>
-#include <mbgl/style/layout_property.hpp>
-#include <mbgl/style/paint_property.hpp>
-#include <mbgl/programs/attributes.hpp>
-#include <mbgl/programs/uniforms.hpp>
-#include <mbgl/style/properties.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_layer.hpp>
 */
 // ---------------------------------------------------
+
+//#define INCLUDE_DATA_DRIVEN_COLOR_PROPERTY 1
 
 namespace mbgl {
 namespace style {
@@ -45,6 +44,14 @@ using namespace conversion;
 struct SingleFloatProperty : DataDrivenPaintProperty<float, attributes::width, uniforms::width> {
     static float defaultValue() { return 1.f; }
 };
+
+#if INCLUDE_DATA_DRIVEN_COLOR_PROPERTY
+struct DataDrivenColorProperty : DataDrivenPaintProperty<mbgl::Color, attributes::color, uniforms::color> {
+    static mbgl::Color defaultValue() { return mbgl::Color::black(); }
+    static constexpr auto expressionType() { return expression::type::ColorType{}; };
+//    using EvaluatorType = DataDrivenPropertyEvaluator<Color, true>;
+};
+#endif
 
 // struct Scale : DataDrivenPaintProperty<float, attributes::width, uniforms::width> {
 //     static float defaultValue() { return 1.f; }
@@ -79,7 +86,8 @@ class PluginLayerProperty {
 public:
     typedef enum {
         Unknown,
-        SingleFloat
+        SingleFloat,
+        DataDrivenColor
     } PropertyType;
 
 public:
@@ -90,12 +98,21 @@ public:
 public:
     const PropertyValue<float>& getSingleFloat() const;
     void setSingleFloat(const PropertyValue<float>& value);
-
     float _defaultSingleFloatValue = 1.0;
     float _singleFloatValue = 0;
     PropertyValue<float> _singleFloatProperty;
     void setCurrentSingleFloatValue(float value);
 
+#if INCLUDE_DATA_DRIVEN_COLOR_PROPERTY
+    // Color
+    const PropertyValue<DataDrivenColorProperty>& getColor() const;
+    void setColor(const PropertyValue<DataDrivenColorProperty>& value);
+    Color _defaultColorValue = Color::black();
+    Color _dataDrivenColorValue = Color::black();
+    PropertyValue<DataDrivenColorProperty> _dataDrivenColorProperty;
+    void setCurrentColorValue(Color value);
+#endif
+    
     // Return this property as json
     std::string asJSON();
 

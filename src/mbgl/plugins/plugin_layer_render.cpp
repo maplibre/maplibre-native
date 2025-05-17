@@ -178,7 +178,6 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
 
     if (property->_propertyType == style::PluginLayerProperty::PropertyType::SingleFloat) {
         auto& f = property->getSingleFloat();
-        // TODO: need a float based evaluator
         using Evaluator = typename style::SingleFloatProperty::EvaluatorType;
         auto df = property->_defaultSingleFloatValue;
         auto newF = f.evaluate(Evaluator(parameters, df), parameters.now);
@@ -187,6 +186,22 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
         std::cout << "V: " << v << "\n";
 #endif
         property->setCurrentSingleFloatValue(v);
+    } else if (property->_propertyType == style::PluginLayerProperty::PropertyType::DataDrivenColor) {
+#if INCLUDE_DATA_DRIVEN_COLOR_PROPERTY
+
+        auto& f = property->getColor();
+        // TODO: need a float based evaluator
+        using Evaluator = typename style::DataDrivenColorProperty::EvaluatorType;
+        auto df = property->_defaultColorValue;
+        auto newF = f.evaluate(Evaluator(parameters, df), parameters.now);
+        auto v = newF.constant().value();
+#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
+        std::cout << "V: " << v << "\n";
+#endif
+        property->setCurrentColorValue(v);
+
+#endif
+        
     }
 
     /*
