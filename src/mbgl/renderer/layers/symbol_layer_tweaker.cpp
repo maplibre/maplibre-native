@@ -58,7 +58,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
     auto& context = parameters.context;
     const auto& state = parameters.state;
-    const auto& evaluated = static_cast<const SymbolLayerProperties&>(*evaluatedProperties).evaluated;
+    const auto& symbolLayerProperties = static_cast<const SymbolLayerProperties&>(*evaluatedProperties);
+    const auto& evaluated = symbolLayerProperties.evaluated;
 
 #if !defined(NDEBUG)
     const auto label = layerGroup.getName() + "-update-uniforms";
@@ -94,6 +95,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 #endif
 
     const auto camDist = state.getCameraToCenterDistance();
+    const auto screenSpaceProp = symbolLayerProperties.layerImpl().layout.get<SymbolScreenSpace>();
+    const auto isScreenSpace = screenSpaceProp.isConstant() ? screenSpaceProp.asConstant()
+                                                            : SymbolScreenSpace::defaultValue();
+
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
             return;
@@ -117,12 +122,20 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
         // from RenderTile::translatedMatrix
         const auto translate = isText ? evaluated.get<style::TextTranslate>() : evaluated.get<style::IconTranslate>();
-        const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()
-                                   : evaluated.get<style::IconTranslateAnchor>();
-        constexpr bool nearClipped = false;
-        constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(
-            tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
+
+        mat4 matrix;
+
+        if (isScreenSpace) {
+            matrix::ortho(matrix, 0, util::EXTENT, -util::EXTENT, 0, 0, 1);
+            matrix::translate(matrix, matrix, 0, -util::EXTENT, 0);
+            matrix::translate(matrix, matrix, translate[0], translate[1], 0);
+        } else {
+            constexpr bool nearClipped = false;
+            constexpr bool inViewportPixelUnits = false;
+            const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()
+                                       : evaluated.get<style::IconTranslateAnchor>();
+            matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
+        }
 
         // from symbol_program, makeValues
         const auto currentZoom = static_cast<float>(parameters.state.getZoom());

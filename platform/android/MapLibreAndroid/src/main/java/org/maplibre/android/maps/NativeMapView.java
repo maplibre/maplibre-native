@@ -1046,6 +1046,16 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public boolean isRenderingStatsViewEnabled() {
+    return nativeIsRenderingStatsViewEnabled();
+  }
+
+  @Override
+  public void enableRenderingStatsView(boolean value) {
+    nativeEnableRenderingStatsView(value);
+  }
+
+  @Override
   public void setSwapBehaviorFlush(boolean flush) {
     mapRenderer.setSwapBehaviorFlush(flush);
   }
@@ -1115,9 +1125,9 @@ final class NativeMapView implements NativeMap {
   }
 
   @Keep
-  private void onDidFinishRenderingFrame(boolean fully, double frameEncodingTime, double frameRenderingTime) {
+  private void onDidFinishRenderingFrame(boolean fully, RenderingStats stats) {
     if (stateCallback != null) {
-      stateCallback.onDidFinishRenderingFrame(fully, frameEncodingTime, frameRenderingTime);
+      stateCallback.onDidFinishRenderingFrame(fully, stats);
     }
   }
 
@@ -1604,6 +1614,12 @@ final class NativeMapView implements NativeMap {
   @Keep
   private native void nativeTriggerRepaint();
 
+  @Keep
+  private native boolean nativeIsRenderingStatsViewEnabled();
+
+  @Keep
+  private native void nativeEnableRenderingStatsView(boolean enabled);
+
   //
   // Snapshot
   //
@@ -1681,7 +1697,7 @@ final class NativeMapView implements NativeMap {
 
     void onWillStartRenderingFrame();
 
-    void onDidFinishRenderingFrame(boolean fully, double frameEncodingTime, double frameRenderingTime);
+    void onDidFinishRenderingFrame(boolean fully, RenderingStats stats);
 
     void onWillStartRenderingMap();
 

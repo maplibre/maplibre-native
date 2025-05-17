@@ -67,6 +67,12 @@ Context::~Context() noexcept {
     if (--glslangRefCount == 0) {
         glslang::FinalizeProcess();
     }
+
+#if !defined(NDEBUG)
+    Log::Debug(Event::General, "Rendering Stats:\n" + stats.toString("\n"));
+#endif
+
+    assert(stats.isZero());
 }
 
 void Context::initFrameResources() {
@@ -134,10 +140,20 @@ void Context::destroyResources() {
         frame.runDeletionQueue(*this);
     }
 
-    globalUniformBuffers.freeDescriptorSets();
-
     // all resources have unique handles
     frameResources.clear();
+
+    globalUniformBuffers.freeDescriptorSets();
+
+    for (size_t i = 0; i < globalUniformBuffers.allocatedSize(); i++) {
+        globalUniformBuffers.set(i, nullptr);
+    }
+
+    dummyBuffer.reset();
+    dummyTexture2D.reset();
+
+    clipping.indexBuffer.reset();
+    clipping.vertexBuffer.reset();
 }
 
 void Context::enqueueDeletion(std::function<void(Context&)>&& function) {
@@ -353,6 +369,11 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
     auto program = std::make_unique<ShaderProgram>(
         shaderID, name, vertex, fragment, programParameters, additionalDefines, backend, *observer);
     return program;
+}
+
+void Context::performCleanup() {
+    stats.numDrawCalls = 0;
+    ++stats.numFrames;
 }
 
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {

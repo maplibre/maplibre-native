@@ -26,12 +26,21 @@ int64_t generateDebugId() noexcept {
 
 } // namespace
 
-UniformBufferGL::UniformBufferGL(const void* data_, std::size_t size_, IBufferAllocator& allocator_)
+UniformBufferGL::UniformBufferGL(Context& context_, const void* data_, std::size_t size_, IBufferAllocator& allocator_)
     : UniformBuffer(size_),
+      context(context_),
 #ifdef MLN_TRACY_ENABLE
       uniqueDebugId(generateDebugId()),
 #endif
       managedBuffer(allocator_, this) {
+
+    context.renderingStats().numUniformBuffers++;
+    context.renderingStats().memUniformBuffers += size;
+
+    context.renderingStats().totalBuffers++;
+    context.renderingStats().numBuffers++;
+    context.renderingStats().memBuffers += size;
+
     MLN_TRACE_ALLOC_CONST_BUFFER(uniqueDebugId, size_);
     if (size_ > managedBuffer.allocator.pageSize()) {
         // Buffer is very large, won't fit in the provided allocator
@@ -48,6 +57,7 @@ UniformBufferGL::UniformBufferGL(const void* data_, std::size_t size_, IBufferAl
 
 UniformBufferGL::UniformBufferGL(UniformBufferGL&& rhs) noexcept
     : UniformBuffer(rhs.size),
+      context(rhs.context),
 #ifdef MLN_TRACY_ENABLE
       uniqueDebugId(rhs.uniqueDebugId),
 #endif
@@ -62,6 +72,7 @@ UniformBufferGL::UniformBufferGL(UniformBufferGL&& rhs) noexcept
 
 UniformBufferGL::UniformBufferGL(const UniformBufferGL& other)
     : UniformBuffer(other),
+      context(other.context),
 #ifdef MLN_TRACY_ENABLE
       uniqueDebugId(generateDebugId()),
 #endif
@@ -83,6 +94,13 @@ UniformBufferGL::~UniformBufferGL() {
 #ifdef MLN_TRACY_ENABLE
     assert(uniqueDebugId > 0);
 #endif
+
+    context.renderingStats().numUniformBuffers--;
+    context.renderingStats().memUniformBuffers -= size;
+
+    context.renderingStats().numBuffers--;
+    context.renderingStats().memBuffers -= size;
+
     MLN_TRACE_FREE_CONST_BUFFER(uniqueDebugId);
     if (isManagedAllocation) {
         return;
@@ -123,6 +141,12 @@ void UniformBufferGL::update(const void* data, std::size_t dataSize) {
         MBGL_CHECK_ERROR(glBufferSubData(GL_UNIFORM_BUFFER, 0, dataSize, data));
         MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, 0));
     }
+
+    context.renderingStats().numUniformUpdates++;
+    context.renderingStats().bufferUpdates++;
+    context.renderingStats().bufferObjUpdates++;
+    context.renderingStats().uniformUpdateBytes += dataSize;
+    context.renderingStats().bufferUpdateBytes += dataSize;
 }
 
 void UniformBufferArrayGL::bind() const {
