@@ -8,6 +8,7 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import "MLNFoundation.h"
+#import "MLNGeometry.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -16,6 +17,7 @@ typedef enum {
   MLNPluginLayerPropertyTypeSingleFloat
 } MLNPluginLayerPropertyType;
 
+MLN_EXPORT
 @interface MLNPluginLayerProperty : NSObject
 
 + (MLNPluginLayerProperty *)propertyWithName:(NSString *)propertyName
@@ -39,6 +41,7 @@ typedef enum {
   MLNPluginLayerTileKindNotRequired
 } MLNPluginLayerTileKind;
 
+MLN_EXPORT
 @interface MLNPluginLayerCapabilities : NSObject
 
 @property NSString *layerID;
@@ -56,6 +59,29 @@ typedef enum {
 
 @class MLNMapView;
 
+
+// Copied initially from MLNStyleLayerDrawingContext.  Decided to copy instead of use since we
+// might add additional properties here
+/// A structure containing context needed to draw a frame in an ``MLNCustomStyleLayer``.
+typedef struct MLNPluginLayerDrawingContext {
+  /// The size of the drawable area, in points.
+  CGSize size;
+  /// The center coordinate of the map view.
+  CLLocationCoordinate2D centerCoordinate;
+  /// The current zoom level of the map view.
+  double zoomLevel;
+  /// The heading (direction) in degrees clockwise from true north.
+  CLLocationDirection direction;
+  /// The current pitch of the map view in degrees, measured from the map plane.
+  CGFloat pitch;
+  /// The vertical field of view, in degrees, for the map’s perspective.
+  CGFloat fieldOfView;
+  /// A 4×4 matrix representing the map view’s current projection state.
+  MLNMatrix4 projectionMatrix;
+} MLNPluginLayerDrawingContext;
+
+
+
 MLN_EXPORT
 @interface MLNPluginLayer : NSObject
 
@@ -69,7 +95,7 @@ MLN_EXPORT
         renderEncoder:(id<MTLRenderCommandEncoder>)renderEncoder;
 
 /// Called when the layer is updated in the render loop.  This would update animations/etc
-- (void)onUpdateLayer;
+- (void)onUpdateLayer:(MLNPluginLayerDrawingContext)drawingContext;
 
 /// Called when the layer properties are updated.  Can be on initial load from the JSON or when
 /// dynamic properties are updated

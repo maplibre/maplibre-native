@@ -45,8 +45,9 @@ void RenderPluginLayerTweaker::init(mbgl::gfx::Drawable& drawablee) {
 };
 
 void RenderPluginLayerTweaker::execute(mbgl::gfx::Drawable& drawable, mbgl::PaintParameters& paintParameters) {
-    // std::cout << "RenderPluginLayerTweaker::execute\n";
-
+#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
+    std::cout << "RenderPluginLayerTweaker::execute\n";
+#endif
     // custom drawing
     auto& context = paintParameters.context;
     context.resetState(paintParameters.depthModeForSublayer(0, mbgl::gfx::DepthMaskType::ReadOnly),
@@ -138,7 +139,9 @@ void RenderPluginLayer::upload(gfx::UploadPass& uploadPass) {
 }
 
 void RenderPluginLayer::render(PaintParameters& paintParameters) {
-    // std::cout << "Render\n";
+#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
+    std::cout << "RenderPluginLayer::render\n";
+#endif
     if (_renderFunction) {
         _renderFunction(paintParameters);
     }

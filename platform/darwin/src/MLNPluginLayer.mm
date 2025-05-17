@@ -49,7 +49,7 @@
     // Base class does nothing
 }
 
-- (void)onUpdateLayer {
+- (void)onUpdateLayer:(MLNPluginLayerDrawingContext)drawingContext {
     // Base class does nothing
 }
 

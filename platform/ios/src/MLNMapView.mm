@@ -449,6 +449,9 @@ public:
 @property (nonatomic) CADisplayLink *displayLink;
 @property (nonatomic, assign) BOOL needsDisplayRefresh;
 
+// Plugin Layers
+@property NSMutableArray *pluginLayers;
+
 @end
 
 @implementation MLNMapView
@@ -7584,12 +7587,16 @@ static void *windowScreenContext = &windowScreenContext;
                                                tileKind);
 
     __weak MLNMapView *weakMapView = self;
-
+    
     Class layerClass = pluginLayerClass;
     factory->setOnLayerCreatedEvent([layerClass, weakMapView, pluginLayerClass](mbgl::style::PluginLayer *pluginLayer) {
 
-        NSLog(@"Creating Plugin Layer");
+        NSLog(@"Creating Plugin Layer: %@", layerClass);
         MLNPluginLayer *layer = [[layerClass alloc] init];
+        if (!weakMapView.pluginLayers) {
+            weakMapView.pluginLayers = [NSMutableArray array];
+        }
+        [weakMapView.pluginLayers addObject:layer];
 
         // Use weak here so there isn't a retain cycle
         MLNPluginLayer *weakPlugInLayer = layer;
@@ -7613,9 +7620,12 @@ static void *windowScreenContext = &windowScreenContext;
             pm.addProperty(p);
         }
 
+        // NSLog(@"Setting Render Function: %@", layerClass);
 
         // Set the render function
         auto renderFunction = [weakPlugInLayer, weakMapView](mbgl::PaintParameters& paintParameters){
+
+           // NSLog(@"Render Function: %@", weakPlugInLayer);
 
             const mbgl::mtl::RenderPass& renderPass = static_cast<mbgl::mtl::RenderPass&>(*paintParameters.renderPass);
             id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)renderPass.getMetalEncoder().get();
@@ -7645,8 +7655,32 @@ static void *windowScreenContext = &windowScreenContext;
 
             }
 */
+            
+            
 
             MLNMapView *strongMapView = weakMapView;
+            
+            const mbgl::TransformState& state = paintParameters.state;
+
+            MLNPluginLayerDrawingContext drawingContext;
+            drawingContext.size = CGSizeMake(state.getSize().width,
+                                             state.getSize().height);
+            drawingContext.centerCoordinate = CLLocationCoordinate2DMake(state.getLatLng().latitude(),
+                                                                         state.getLatLng().longitude());
+            drawingContext.zoomLevel = state.getZoom();
+            drawingContext.direction = mbgl::util::rad2deg(-state.getBearing());
+            drawingContext.pitch = state.getPitch();
+            drawingContext.fieldOfView = state.getFieldOfView();
+            mbgl::mat4 projMatrix;
+            state.getProjMatrix(projMatrix);
+            drawingContext.projectionMatrix = MLNMatrix4Make(projMatrix);
+            
+            //NSLog(@"Rendering");
+            
+            // Call update with the scene state variables
+            [weakPlugInLayer onUpdateLayer:drawingContext];
+            
+            // Call render
             [weakPlugInLayer onRenderLayer:strongMapView
                              renderEncoder:encoder];
         };
@@ -7654,9 +7688,12 @@ static void *windowScreenContext = &windowScreenContext;
         // Set the lambdas
         //auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
         pluginLayerImpl->setRenderFunction(renderFunction);
-        pluginLayerImpl->setUpdateFunction([weakPlugInLayer](const mbgl::LayerPrepareParameters & prepareParameters) {
-            [weakPlugInLayer onUpdateLayer];
-        });
+        
+        // TODO: Does this update function need to go away and we'll just call onUpdateLayer from the render call?
+//        pluginLayerImpl->setUpdateFunction([weakPlugInLayer](const mbgl::LayerPrepareParameters & prepareParameters) {
+//            [weakPlugInLayer onUpdateLayer:];
+//        });
+        
         pluginLayerImpl->setUpdatePropertiesFunction([weakPlugInLayer](const std::string & jsonProperties) {
             // Use autorelease pools in lambdas
             @autoreleasepool {

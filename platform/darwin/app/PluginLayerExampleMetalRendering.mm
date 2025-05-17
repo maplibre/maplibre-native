@@ -171,9 +171,11 @@ typedef struct
                       vertexCount:3];
 }
 
--(void)onUpdateLayer {
+-(void)onUpdateLayer:(MLNPluginLayerDrawingContext)drawingContext {
     // Update any metadata needed for the frame
     //NSLog(@"onUpdateLayer");
+    
+ //   NSLog(@"Update Layer");
 }
 
 -(void)onUpdateLayerProperties:(NSDictionary *)layerProperties {
