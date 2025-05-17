@@ -4,7 +4,7 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/programs/fill_extrusion_program.hpp>
+#include <mbgl/renderer/buckets/fill_extrusion_bucket.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/render_tree.hpp>
@@ -43,12 +43,12 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
     // but the resulting buffer can be shared across all the drawables from the layer.
     const FillExtrusionPropsUBO propsUBO = {
         .color = constOrDefault<FillExtrusionColor>(evaluated),
-        .light_color = FillExtrusionProgram::lightColor(parameters.evaluatedLight),
+        .light_color = FillExtrusionBucket::lightColor(parameters.evaluatedLight),
         .pad1 = 0,
-        .light_position = FillExtrusionProgram::lightPosition(parameters.evaluatedLight, state),
+        .light_position = FillExtrusionBucket::lightPosition(parameters.evaluatedLight, state),
         .base = constOrDefault<FillExtrusionBase>(evaluated),
         .height = constOrDefault<FillExtrusionHeight>(evaluated),
-        .light_intensity = FillExtrusionProgram::lightIntensity(parameters.evaluatedLight),
+        .light_intensity = FillExtrusionBucket::lightIntensity(parameters.evaluatedLight),
         .vertical_gradient = evaluated.get<FillExtrusionVerticalGradient>() ? 1.0f : 0.0f,
         .opacity = evaluated.get<FillExtrusionOpacity>(),
         .fade = crossfade.t,
@@ -75,7 +75,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
             return;
         }
 
-        auto* binders = static_cast<FillExtrusionProgram::Binders*>(drawable.getBinders());
+        auto* binders = static_cast<FillExtrusionBinders*>(drawable.getBinders());
         const auto* tile = drawable.getRenderTile();
         if (!binders || !tile) {
             assert(false);

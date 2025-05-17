@@ -6,13 +6,21 @@ namespace mbgl {
 namespace shaders {
 
 template <>
-struct ShaderSource<BuiltIn::HillshadePrepareProgram, gfx::Backend::Type::OpenGL> {
-    static constexpr const char* name = "HillshadePrepareProgram";
-    static constexpr const char* vertex = R"(uniform mat4 u_matrix;
-uniform vec2 u_dimension;
-
-layout (location = 0) in vec2 a_pos;
+struct ShaderSource<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* name = "HillshadePrepareShader";
+    static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec2 a_texture_pos;
+
+layout (std140) uniform HillshadePrepareDrawableUBO {
+    highp mat4 u_matrix;
+};
+
+layout (std140) uniform HillshadePrepareTilePropsUBO {
+    highp vec4 u_unpack;
+    highp vec2 u_dimension;
+    highp float u_zoom;
+    highp float u_maxzoom;
+};
 
 out vec2 v_pos;
 
@@ -28,12 +36,15 @@ void main() {
 precision highp float;
 #endif
 
-uniform sampler2D u_image;
 in vec2 v_pos;
-uniform vec2 u_dimension;
-uniform float u_zoom;
-uniform float u_maxzoom;
-uniform vec4 u_unpack;
+uniform sampler2D u_image;
+
+layout (std140) uniform HillshadePrepareTilePropsUBO {
+    highp vec4 u_unpack;
+    highp vec2 u_dimension;
+    highp float u_zoom;
+    highp float u_maxzoom;
+};
 
 float getElevation(vec2 coord, float bias) {
     // Convert encoded elevation value to meters

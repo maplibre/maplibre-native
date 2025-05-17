@@ -21,12 +21,11 @@ public:
 
 private:
     void upload(gfx::UploadPass&) const override;
-    void render(PaintParameters&) const override;
+    void render(PaintParameters&) const override {}
     bool hasRenderPass(RenderPass) const override { return false; }
     const std::string& getName() const override { return name; }
     std::string name;
     void updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const override {};
-    mutable std::optional<gfx::Texture> debugTexture;
 };
 
 class RenderImageSource final : public RenderSource {

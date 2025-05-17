@@ -58,6 +58,7 @@ public:
     uint32_t getAcquiredImageIndex() const { return acquiredImageIndex; };
     void setAcquiredImageIndex(uint32_t index) { acquiredImageIndex = index; };
     const vk::Image getAcquiredImage() const;
+    const vk::Semaphore& getAcquiredSemaphore() const;
 
     bool hasSurfaceTransformSupport() const;
     bool didSurfaceTransformUpdate() const;
@@ -86,6 +87,7 @@ protected:
     std::vector<vk::Image> swapchainImages;
     std::vector<vk::UniqueImageView> swapchainImageViews;
     std::vector<vk::UniqueFramebuffer> swapchainFramebuffers;
+    std::vector<vk::UniqueSemaphore> swapchainSemaphores;
     vk::Format colorFormat{vk::Format::eUndefined};
 
     UniqueImageAllocation depthAllocation;
