@@ -29,12 +29,13 @@ public:
      */
     void addLayerTypeCoreOnly(std::unique_ptr<mbgl::LayerFactory>);
 
-private:
-    LayerManagerDarwin();
     /**
      * Enables a layer type for both JSON style and runtime API.
      */
     void addLayerType(std::unique_ptr<LayerPeerFactory>);
+
+private:
+    LayerManagerDarwin();
 
     void registerCoreFactory(LayerFactory*);
     LayerPeerFactory* getPeerFactory(const style::LayerTypeInfo* typeInfo);

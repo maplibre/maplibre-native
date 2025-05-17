@@ -79,6 +79,7 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/render_pass.hpp>
+#include "MLNPLuginStyleLayer_Private.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -7578,7 +7579,15 @@ static void *windowScreenContext = &windowScreenContext;
 
 
 
-    auto factory = std::make_unique<mbgl::PluginLayerFactory>(layerType,
+//    auto factory = std::make_unique<mbgl::PluginLayerFactory>(layerType,
+//                                               source,
+//                                               pass3D,
+//                                               layout,
+//                                               fadingTiles,
+//                                               crossTileIndex,
+//                                               tileKind);
+
+    auto factory = std::make_unique<mbgl::PluginLayerPeerFactory>(layerType,
                                                source,
                                                pass3D,
                                                layout,
@@ -7586,6 +7595,7 @@ static void *windowScreenContext = &windowScreenContext;
                                                crossTileIndex,
                                                tileKind);
 
+    
     __weak MLNMapView *weakMapView = self;
 
     Class layerClass = pluginLayerClass;
@@ -7716,7 +7726,8 @@ static void *windowScreenContext = &windowScreenContext;
     });
 
 
-    darwinLayerManager->addLayerTypeCoreOnly(std::move(factory));
+    darwinLayerManager->addLayerType(std::move(factory));
+    //darwinLayerManager->addLayerTypeCoreOnly(std::move(factory));
 
    //darwinLayerManager->addLayerType(<#std::unique_ptr<LayerPeerFactory>#>)
 
