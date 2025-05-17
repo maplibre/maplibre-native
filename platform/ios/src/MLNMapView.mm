@@ -7611,7 +7611,7 @@ static void *windowScreenContext = &windowScreenContext;
                                                crossTileIndex,
                                                tileKind);
 
-    
+
     __weak MLNMapView *weakMapView = self;
 
     Class layerClass = pluginLayerClass;
