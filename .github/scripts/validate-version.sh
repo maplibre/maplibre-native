@@ -3,7 +3,7 @@
 validate_version() {
   local version="$1"
   if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-pre.*)?$ ]]; then
-    echo "::error::Invalid version format in VERSION file. Expected: X.Y.Z or X.Y.Z-pre*"
+    echo "::error::Invalid version '$version' in $(realpath VERSION). Expected: X.Y.Z or X.Y.Z-pre*"
     return 1
   fi
   return 0
@@ -11,7 +11,7 @@ validate_version() {
 
 version=$(cat VERSION 2>/dev/null)
 if [ -z "$version" ]; then
-  echo "::error::VERSION file not found or empty"
+  echo "::error::No VERSION file found or empty in $PWD"
   exit 1
 fi
 
