@@ -1,8 +1,7 @@
 #pragma once
 
 #include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/programs/hillshade_program.hpp>
-#include <mbgl/programs/hillshade_prepare_program.hpp>
+#include <mbgl/renderer/buckets/hillshade_bucket.hpp>
 #include <mbgl/style/layers/hillshade_layer_impl.hpp>
 #include <mbgl/style/layers/hillshade_layer_properties.hpp>
 #include <mbgl/tile/tile_id.hpp>

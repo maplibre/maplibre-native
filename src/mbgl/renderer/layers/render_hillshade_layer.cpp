@@ -4,7 +4,6 @@
 #include <mbgl/renderer/sources/render_raster_dem_source.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
-#include <mbgl/programs/programs.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/style/layers/hillshade_layer_impl.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>

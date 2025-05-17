@@ -220,7 +220,7 @@ struct ShaderInfo<BuiltIn::SymbolIconShader, gfx::Backend::Type::OpenGL> {
 };
 
 template <>
-struct ShaderInfo<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::OpenGL> {
+struct ShaderInfo<BuiltIn::SymbolSDFShader, gfx::Backend::Type::OpenGL> {
     static const std::vector<AttributeInfo> attributes;
     static const std::vector<UniformBlockInfo> uniformBlocks;
     static const std::vector<TextureInfo> textures;
