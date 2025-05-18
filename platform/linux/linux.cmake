@@ -167,7 +167,7 @@ target_link_libraries(
         ${WEBP_LIBRARIES}
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::i18n>
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::uc>
-        $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:mbgl-vendor-icu>
+        $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:$<IF:$<BOOL:${MLN_CORE_INCLUDE_DEPS}>,$<TARGET_OBJECTS:mbgl-vendor-icu>,mbgl-vendor-icu>>
         PNG::PNG
         mbgl-vendor-nunicode
         mbgl-vendor-sqlite
