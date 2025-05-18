@@ -142,7 +142,7 @@ target_include_directories(
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
 
-if(NOT ${ICU_FOUND} OR "${ICU_VERSION}" VERSION_LESS 62.0)
+if(NOT ${ICU_FOUND} OR "${ICU_VERSION}" VERSION_LESS 62.0 OR MLN_USE_BUILTIN_ICU)
     message(STATUS "ICU not found or too old, using builtin.")
 
     set(MLN_USE_BUILTIN_ICU TRUE)
