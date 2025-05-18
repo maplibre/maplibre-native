@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/offscreen_texture.hpp>
-#include <mbgl/gfx/texture.hpp>
+//#include <mbgl/gfx/texture.hpp>
 // #include <mbgl/programs/heatmap_program.hpp>
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/plugins/plugin_layer_impl.hpp>
