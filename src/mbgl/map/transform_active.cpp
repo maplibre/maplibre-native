@@ -392,6 +392,20 @@ void TransformActive::updateTransitions(const TimePoint& now) {
     if (!activeAnimation) {
         activeAnimation = true;
 
+        bool panning = false, scaling = false, rotating = false;
+        visit_pas([&](std::shared_ptr<PropertyAnimation>& pa) {
+            if (pa) {
+                panning |= pa->panning;
+                scaling |= pa->scaling;
+                rotating |= pa->rotating;
+            }
+        });
+
+        state.setProperties(TransformStateProperties()
+                                .withPanningInProgress(panning)
+                                .withScalingInProgress(scaling)
+                                .withRotatingInProgress(rotating));
+
         if (pas.latlng.frameLatLngFunc && pas.zoom.frameZoomFunc) {
             if (pas.latlng.set || pas.zoom.set) {
                 state.setLatLngZoom(pas.latlng.frameLatLngFunc(now), pas.zoom.frameZoomFunc(now));
@@ -438,21 +452,12 @@ void TransformActive::updateTransitions(const TimePoint& now) {
             state.moveLatLng(pas.anchorLatLng, *pas.anchor);
         }
 
-        bool panning = false, scaling = false, rotating = false;
         visit_pas([&](std::shared_ptr<PropertyAnimation>& pa) {
             if (pa) {
                 if (pa->done) animationFinishFrame(pa);
-                panning |= pa->panning;
-                scaling |= pa->scaling;
-                rotating |= pa->rotating;
                 pa->ran = false;
             }
         });
-
-        state.setProperties(TransformStateProperties()
-                                .withPanningInProgress(panning)
-                                .withScalingInProgress(scaling)
-                                .withRotatingInProgress(rotating));
 
         activeAnimation = false;
     }
