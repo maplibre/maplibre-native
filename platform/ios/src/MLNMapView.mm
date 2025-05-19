@@ -4293,6 +4293,11 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (void)setCamera:(MLNMapCamera *)camera withDuration:(NSTimeInterval)duration animationTimingFunction:(nullable CAMediaTimingFunction *)function edgePadding:(UIEdgeInsets)edgePadding completionHandler:(nullable void (^)(void))completion {
+    MLNLogDebug(@"Setting camera: %@ duration: %f animationTimingFunction: %@ edgePadding: %@ completionHandler: %@", camera, duration, function, edgePadding, completion);
+    [self setCamera:camera withDuration:duration animationTimingFunction:function edgePadding:edgePadding cancelTransitions:false completionHandler:completion];
+}
+
+- (void)setCamera:(MLNMapCamera *)camera withDuration:(NSTimeInterval)duration animationTimingFunction:(nullable CAMediaTimingFunction *)function edgePadding:(UIEdgeInsets)edgePadding cancelTransitions:(BOOL)cancelOtherTransitions completionHandler:(nullable void (^)(void))completion {
     if (!_mbglMap)
     {
         if (completion)
@@ -4302,7 +4307,7 @@ static void *windowScreenContext = &windowScreenContext;
         return;
     }
 
-    MLNLogDebug(@"Setting camera: %@ duration: %f animationTimingFunction: %@ edgePadding: %@ completionHandler: %@", camera, duration, function, NSStringFromUIEdgeInsets(edgePadding), completion);
+    MLNLogDebug(@"Setting camera: %@ duration: %f animationTimingFunction: %@ edgePadding: %@ cancelTransitions: %@ completionHandler: %@", camera, duration, function, NSStringFromUIEdgeInsets(edgePadding), cancelOtherTransitions, completion);
 
     edgePadding = MLNEdgeInsetsInsetEdgeInset(edgePadding, self.contentInset);
 
@@ -4341,7 +4346,9 @@ static void *windowScreenContext = &windowScreenContext;
     }
 
     [self willChangeValueForKey:@"camera"];
-    [self cancelTransitions];
+    if (cancelOtherTransitions) {
+        [self cancelTransitions];
+    }
 
     self.cameraChangeReasonBitmask |= MLNCameraChangeReasonProgrammatic;
 
