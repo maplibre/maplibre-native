@@ -62,13 +62,10 @@ void TransformActive::easeTo(const CameraOptions& inputCamera, const AnimationOp
     const double startZoom = state.getZoom();
     const double startBearing = state.getBearing();
     const double startPitch = state.getPitch();
-    state.setProperties(TransformStateProperties()
-                            .withPanningInProgress(unwrappedLatLng != startLatLng)
-                            .withScalingInProgress(zoom != startZoom)
-                            .withRotatingInProgress(bearing != startBearing));
     const EdgeInsets startEdgeInsets = state.getEdgeInsets();
 
-    auto pa = std::make_shared<PropertyAnimation>(Clock::now(), duration, animation);
+    auto pa = std::make_shared<PropertyAnimation>(
+        Clock::now(), duration, animation, unwrappedLatLng != startLatLng, zoom != startZoom, bearing != startBearing);
 
     // NOTE: For tests only
     transitionStart = pa->start;
@@ -257,12 +254,10 @@ void TransformActive::flyTo(const CameraOptions& inputCamera,
     }
 
     const double startScale = state.getScale();
-    state.setProperties(
-        TransformStateProperties().withPanningInProgress(true).withScalingInProgress(true).withRotatingInProgress(
-            bearing != startBearing));
     const EdgeInsets startEdgeInsets = state.getEdgeInsets();
 
-    auto pa = std::make_shared<PropertyAnimation>(Clock::now(), duration, animation);
+    auto pa = std::make_shared<PropertyAnimation>(
+        Clock::now(), duration, animation, true, true, bearing != startBearing);
 
     // NOTE: For tests only
     transitionStart = pa->start;
@@ -359,11 +354,6 @@ void TransformActive::animationFinishFrame(std::shared_ptr<PropertyAnimation>& p
         return;
     }
 
-    // TODO(yousifd): The state isn't necessarily all set to false for all properties, double check what you can do
-    state.setProperties(
-        TransformStateProperties().withPanningInProgress(false).withScalingInProgress(false).withRotatingInProgress(
-            false));
-
     if (pa->animation.transitionFinishFn) {
         pa->animation.transitionFinishFn();
     }
@@ -448,12 +438,21 @@ void TransformActive::updateTransitions(const TimePoint& now) {
             state.moveLatLng(pas.anchorLatLng, *pas.anchor);
         }
 
-        visit_pas([this](std::shared_ptr<PropertyAnimation>& pa) {
+        bool panning = false, scaling = false, rotating = false;
+        visit_pas([&](std::shared_ptr<PropertyAnimation>& pa) {
             if (pa) {
                 if (pa->done) animationFinishFrame(pa);
+                panning |= pa->panning;
+                scaling |= pa->scaling;
+                rotating |= pa->rotating;
                 pa->ran = false;
             }
         });
+
+        state.setProperties(TransformStateProperties()
+                                .withPanningInProgress(panning)
+                                .withScalingInProgress(scaling)
+                                .withRotatingInProgress(rotating));
 
         activeAnimation = false;
     }
