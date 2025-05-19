@@ -11,6 +11,10 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/logging.hpp>
 
+#if MLN_RENDER_BACKEND_OPENGL
+#include <mbgl/shaders/gl/legacy/clipping_mask_program.hpp>
+#endif
+
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/mtl/context.hpp>
 #include <mbgl/shaders/mtl/clipping_mask.hpp>
@@ -65,11 +69,6 @@ PaintParameters::PaintParameters(gfx::Context& context_,
       debugOptions(debugOptions_),
       timePoint(timePoint_),
       pixelRatio(pixelRatio_),
-#ifndef NDEBUG
-      programs((debugOptions & MapDebugOptions::Overdraw) ? staticData_.overdrawPrograms : staticData_.programs),
-#else
-      programs(staticData_.programs),
-#endif
       shaders(*staticData_.shaders),
       frameCount(frameCount_) {
     pixelsToGLUnits = {{2.0f / state.getSize().width, -2.0f / state.getSize().height}};
@@ -242,7 +241,7 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
         vulkanContext.renderingStats().stencilUpdates++;
     }
 
-#else  // !MLN_RENDER_BACKEND_METAL
+#else  // MLN_RENDER_BACKEND_OPENGL
     auto program = staticData.shaders->getLegacyGroup().get<ClippingMaskProgram>();
 
     if (!program) {
@@ -290,10 +289,9 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
                           static_cast<float>(state.getZoom())),
                       ClippingMaskProgram::computeAllAttributeBindings(
                           *staticData.tileVertexBuffer, paintAttributeData, properties),
-                      ClippingMaskProgram::TextureBindings{},
                       "clipping/" + util::toString(stencilID));
     }
-#endif // MLN_RENDER_BACKEND_METAL
+#endif // MLN_RENDER_BACKEND_OPENGL
 }
 
 gfx::StencilMode PaintParameters::stencilModeForClipping(const UnwrappedTileID& tileID) const {

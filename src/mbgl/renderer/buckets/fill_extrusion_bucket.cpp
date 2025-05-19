@@ -1,8 +1,8 @@
 #include <mbgl/renderer/buckets/fill_extrusion_bucket.hpp>
-#include <mbgl/programs/fill_extrusion_program.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>
 #include <mbgl/style/layers/fill_extrusion_layer_impl.hpp>
 #include <mbgl/renderer/layers/render_fill_extrusion_layer.hpp>
+#include <mbgl/map/transform_state.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/constants.hpp>
 
@@ -102,7 +102,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                 const auto& p1 = ring[i];
 
                 vertices.emplace_back(
-                    FillExtrusionProgram::layoutVertex(p1, 0, 0, 1, 1, static_cast<uint16_t>(edgeDistance)));
+                    FillExtrusionBucket::layoutVertex(p1, 0, 0, 1, 1, static_cast<uint16_t>(edgeDistance)));
                 flatIndices.emplace_back(triangleIndex);
                 triangleIndex++;
 
@@ -118,16 +118,16 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                         edgeDistance = 0;
                     }
 
-                    vertices.emplace_back(FillExtrusionProgram::layoutVertex(
+                    vertices.emplace_back(FillExtrusionBucket::layoutVertex(
                         p1, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)));
-                    vertices.emplace_back(FillExtrusionProgram::layoutVertex(
+                    vertices.emplace_back(FillExtrusionBucket::layoutVertex(
                         p1, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)));
 
                     edgeDistance += dist;
 
-                    vertices.emplace_back(FillExtrusionProgram::layoutVertex(
+                    vertices.emplace_back(FillExtrusionBucket::layoutVertex(
                         p2, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)));
-                    vertices.emplace_back(FillExtrusionProgram::layoutVertex(
+                    vertices.emplace_back(FillExtrusionBucket::layoutVertex(
                         p2, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)));
 
                     // ┌──────┐
@@ -196,6 +196,26 @@ void FillExtrusionBucket::update(const FeatureStates& states,
 
         sharedVertices->updateModified();
     }
+}
+
+std::array<float, 3> FillExtrusionBucket::lightColor(const EvaluatedLight& light) {
+    const auto color = light.get<LightColor>();
+    return {{color.r, color.g, color.b}};
+}
+
+std::array<float, 3> FillExtrusionBucket::lightPosition(const EvaluatedLight& light, const TransformState& state) {
+    auto lightPos = light.get<LightPosition>().getCartesian();
+    mat3 lightMat;
+    matrix::identity(lightMat);
+    if (light.get<LightAnchor>() == LightAnchorType::Viewport) {
+        matrix::rotate(lightMat, lightMat, -state.getBearing());
+    }
+    matrix::transformMat3f(lightPos, lightPos, lightMat);
+    return lightPos;
+}
+
+float FillExtrusionBucket::lightIntensity(const EvaluatedLight& light) {
+    return light.get<LightIntensity>();
 }
 
 } // namespace mbgl

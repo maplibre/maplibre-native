@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/map/mode.hpp>
-#include <mbgl/gfx/texture.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/mat4.hpp>
 #include <mbgl/style/image_impl.hpp>
@@ -66,7 +65,6 @@ public:
 
     void upload(gfx::UploadPass&) const;
     void prepare(const SourcePrepareParameters&);
-    void finishRender(PaintParameters&) const;
 
     static mat4 translateVtxMatrix(const UnwrappedTileID& id,
                                    const mat4& tileMatrix,

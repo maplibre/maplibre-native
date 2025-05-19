@@ -1,4 +1,3 @@
-
 in float v_placed;
 in float v_notUsed;
 

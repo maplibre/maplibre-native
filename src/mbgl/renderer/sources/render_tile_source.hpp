@@ -99,7 +99,7 @@ public:
 
 private:
     void upload(gfx::UploadPass&) const override;
-    void render(PaintParameters&) const override;
+    void render(PaintParameters&) const override {}
     bool hasRenderPass(RenderPass) const override { return false; }
     const std::string& getName() const override { return name; }
 

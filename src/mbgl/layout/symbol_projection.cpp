@@ -141,7 +141,7 @@ bool isVisible(const vec4& anchorPos, const std::array<double, 2>& clippingBuffe
 void addDynamicAttributes(const Point<float>& anchorPoint,
                           const float angle,
                           gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray) {
-    auto dynamicVertex = SymbolSDFIconProgram::dynamicLayoutVertex(anchorPoint, angle);
+    auto dynamicVertex = SymbolBucket::dynamicLayoutVertex(anchorPoint, angle);
     dynamicVertexArray.emplace_back(dynamicVertex);
     dynamicVertexArray.emplace_back(dynamicVertex);
     dynamicVertexArray.emplace_back(dynamicVertex);

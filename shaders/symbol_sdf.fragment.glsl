@@ -1,10 +1,28 @@
 #define SDF_PX 8.0
 
-uniform bool u_is_halo;
+layout (std140) uniform SymbolTilePropsUBO {
+    bool u_is_text;
+    bool u_is_halo;
+    highp float u_gamma_scale;
+    lowp float tileprops_pad1;
+};
+
+layout (std140) uniform SymbolEvaluatedPropsUBO {
+    highp vec4 u_text_fill_color;
+    highp vec4 u_text_halo_color;
+    highp float u_text_opacity;
+    highp float u_text_halo_width;
+    highp float u_text_halo_blur;
+    lowp float props_pad1;
+    highp vec4 u_icon_fill_color;
+    highp vec4 u_icon_halo_color;
+    highp float u_icon_opacity;
+    highp float u_icon_halo_width;
+    highp float u_icon_halo_blur;
+    lowp float props_pad2;
+};
+
 uniform sampler2D u_texture;
-uniform highp float u_gamma_scale;
-uniform lowp float u_device_pixel_ratio;
-uniform bool u_is_text;
 
 in vec2 v_data0;
 in vec3 v_data1;
@@ -16,13 +34,19 @@ in vec3 v_data1;
 #pragma mapbox: define lowp float halo_blur
 
 void main() {
+    highp vec4 u_fill_color = u_is_text ? u_text_fill_color : u_icon_fill_color;
+    highp vec4 u_halo_color = u_is_text ? u_text_halo_color : u_icon_halo_color;
+    highp float u_opacity = u_is_text ? u_text_opacity : u_icon_opacity;
+    highp float u_halo_width = u_is_text ? u_text_halo_width : u_icon_halo_width;
+    highp float u_halo_blur = u_is_text ? u_text_halo_blur : u_icon_halo_blur;
+
     #pragma mapbox: initialize highp vec4 fill_color
     #pragma mapbox: initialize highp vec4 halo_color
     #pragma mapbox: initialize lowp float opacity
     #pragma mapbox: initialize lowp float halo_width
     #pragma mapbox: initialize lowp float halo_blur
 
-    float EDGE_GAMMA = 0.105 / u_device_pixel_ratio;
+    float EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
 
     vec2 tex = v_data0.xy;
     float gamma_scale = v_data1.x;
