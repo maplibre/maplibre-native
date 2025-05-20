@@ -14,7 +14,7 @@
 #include <mbgl/mtl/uniform_buffer.hpp>
 #include <mbgl/mtl/vertex_buffer_resource.hpp>
 #include <mbgl/mtl/vertex_attribute.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/variant.hpp>

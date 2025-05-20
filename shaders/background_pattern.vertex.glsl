@@ -1,15 +1,29 @@
-uniform mat4 u_matrix;
-uniform vec2 u_pattern_size_a;
-uniform vec2 u_pattern_size_b;
-uniform vec2 u_pixel_coord_upper;
-uniform vec2 u_pixel_coord_lower;
-uniform float u_scale_a;
-uniform float u_scale_b;
-uniform float u_tile_units_to_pixels;
+layout (std140) uniform BackgroundPatternDrawableUBO {
+    highp mat4 u_matrix;
+    highp vec2 u_pixel_coord_upper;
+    highp vec2 u_pixel_coord_lower;
+    highp float u_tile_units_to_pixels;
+    lowp float drawable_pad1;
+    lowp float drawable_pad2;
+    lowp float drawable_pad3;
+};
+
+layout (std140) uniform BackgroundPatternPropsUBO {
+    highp vec2 u_pattern_tl_a;
+    highp vec2 u_pattern_br_a;
+    highp vec2 u_pattern_tl_b;
+    highp vec2 u_pattern_br_b;
+    highp vec2 u_pattern_size_a;
+    highp vec2 u_pattern_size_b;
+    highp float u_scale_a;
+    highp float u_scale_b;
+    highp float u_mix;
+    highp float u_opacity;
+};
 
 layout (location = 0) in vec2 a_pos;
-out vec2 v_pos_a;
-out vec2 v_pos_b;
+out mediump vec2 v_pos_a;
+out mediump vec2 v_pos_b;
 
 void main() {
     gl_Position = u_matrix * vec4(a_pos, 0, 1);

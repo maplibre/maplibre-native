@@ -36,8 +36,7 @@
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/renderable_resource.hpp>
 #include <mbgl/gl/defines.hpp>
-#include <mbgl/gl/texture.hpp>
-#include <mbgl/gl/texture_resource.hpp>
+#include <mbgl/gl/uniform.hpp>
 #include <mbgl/gl/types.hpp>
 
 #endif

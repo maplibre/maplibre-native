@@ -1,8 +1,42 @@
-uniform mat4 u_matrix;
-uniform vec2 u_world;
-uniform vec2 u_pixel_coord_upper;
-uniform vec2 u_pixel_coord_lower;
-uniform vec4 u_scale;
+layout (std140) uniform GlobalPaintParamsUBO {
+    highp vec2 u_pattern_atlas_texsize;
+    highp vec2 u_units_to_pixels;
+    highp vec2 u_world_size;
+    highp float u_camera_to_center_distance;
+    highp float u_symbol_fade_change;
+    highp float u_aspect_ratio;
+    highp float u_pixel_ratio;
+    highp float u_map_zoom;
+    lowp float global_pad1;
+};
+
+layout (std140) uniform FillOutlinePatternDrawableUBO {
+    highp mat4 u_matrix;
+    highp vec2 u_pixel_coord_upper;
+    highp vec2 u_pixel_coord_lower;
+    highp float u_tile_ratio;
+    // Interpolations
+    highp float u_pattern_from_t;
+    highp float u_pattern_to_t;
+    highp float u_opacity_t;
+};
+
+layout (std140) uniform FillOutlinePatternTilePropsUBO {
+    highp vec4 u_pattern_from;
+    highp vec4 u_pattern_to;
+    highp vec2 u_texsize;
+    lowp float tileprops_pad1;
+    lowp float tileprops_pad2;
+};
+
+layout (std140) uniform FillEvaluatedPropsUBO {
+    highp vec4 u_color;
+    highp vec4 u_outline_color;
+    highp float u_opacity;
+    highp float u_fade;
+    highp float u_from_scale;
+    highp float u_to_scale;
+};
 
 layout (location = 0) in vec2 a_pos;
 
@@ -11,8 +45,8 @@ out vec2 v_pos_b;
 out vec2 v_pos;
 
 #pragma mapbox: define lowp float opacity
-#pragma mapbox: define mediump vec4 pattern_from
-#pragma mapbox: define mediump vec4 pattern_to
+#pragma mapbox: define lowp vec4 pattern_from
+#pragma mapbox: define lowp vec4 pattern_to
 
 void main() {
     #pragma mapbox: initialize lowp float opacity
@@ -24,10 +58,10 @@ void main() {
     vec2 pattern_tl_b = pattern_to.xy;
     vec2 pattern_br_b = pattern_to.zw;
 
-    float pixelRatio = u_scale.x;
-    float tileRatio = u_scale.y;
-    float fromScale = u_scale.z;
-    float toScale = u_scale.w;
+    float pixelRatio = u_pixel_ratio;
+    float tileRatio = u_tile_ratio;
+    float fromScale = u_from_scale;
+    float toScale = u_to_scale;
 
     gl_Position = u_matrix * vec4(a_pos, 0, 1);
 
@@ -37,5 +71,5 @@ void main() {
     v_pos_a = get_pattern_pos(u_pixel_coord_upper, u_pixel_coord_lower, fromScale * display_size_a, tileRatio, a_pos);
     v_pos_b = get_pattern_pos(u_pixel_coord_upper, u_pixel_coord_lower, toScale * display_size_b, tileRatio, a_pos);
 
-    v_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * u_world;
+    v_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * u_world_size;
 }

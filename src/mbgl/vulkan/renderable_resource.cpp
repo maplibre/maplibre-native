@@ -159,6 +159,12 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
 
     colorFormat = swapchainCreateInfo.imageFormat;
     extent = swapchainCreateInfo.imageExtent;
+
+    swapchainSemaphores.reserve(swapchainImages.size());
+    for (uint32_t index = 0; index < swapchainImages.size(); ++index) {
+        swapchainSemaphores.emplace_back(device->createSemaphoreUnique({}));
+        backend.setDebugName(swapchainSemaphores.back().get(), "SurfaceSemaphore_" + std::to_string(index));
+    }
 }
 
 void SurfaceRenderableResource::initDepthStencil() {
@@ -239,6 +245,10 @@ const vk::Image SurfaceRenderableResource::getAcquiredImage() const {
     }
 
     return colorAllocations[acquiredImageIndex]->image;
+}
+
+const vk::Semaphore& SurfaceRenderableResource::getAcquiredSemaphore() const {
+    return swapchainSemaphores[acquiredImageIndex].get();
 }
 
 bool SurfaceRenderableResource::hasSurfaceTransformSupport() const {
@@ -391,6 +401,7 @@ void SurfaceRenderableResource::recreateSwapchain() {
     renderPass.reset();
     swapchainImageViews.clear();
     swapchainImages.clear();
+    swapchainSemaphores.clear();
 
     init(extent.width, extent.height);
 }
