@@ -7,6 +7,7 @@
     android:orientation="vertical"
     android:id="@+id/coordinator_layout">
 
+    <!-- -8<- [start:MapView] -->
     <org.maplibre.android.maps.MapView
         android:id="@id/mapView"
         android:layout_width="match_parent"
@@ -14,6 +15,7 @@
         app:maplibre_actionJournalEnabled="true"
         app:maplibre_actionJournalLogFileSize="1024"
         app:maplibre_actionJournalLogFileCount="2"/>
+    <!-- -8<- [end:MapView] -->
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"

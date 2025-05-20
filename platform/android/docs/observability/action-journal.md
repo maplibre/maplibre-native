@@ -8,18 +8,28 @@ It's primary use case is to assist in debugging problematic sessions and crashes
 
 We are always interested in improving observability, so if you have a special use case, feel free to [open an issue or pull request](https://github.com/maplibre/maplibre-native) to extend the types of observability methods.
 
+## Enabling the Action Journal
+
+You can enable the action journal either through XML:
+
+```xml
+--8<-- "MapLibreAndroidTestApp/src/main/res/layout/activity_map_events.xml:MapView"
+```
+
+Or by passing the corresponding options with `MapLibreMapOptions` to `MapView`. For more information see [Configuration](../configuration.md).
+
 ## Logging implementation details
 
 The logging is implemented using rolling files with a size based policy:
 
-- A new file is created when the current log size exceeds ``MapLibreMapOptions.actionJournalLogFileSize``
-- When the maximum number of files exceeds ``MapLibreMapOptions.actionJournalLogFileCount``:
-    - The oldest one is deleted
-    - The remaining files are renamed sequentially to maintain the naming convention "action_journal.0.log" through "action_journal.{logFileCount - 1}.log"
-- Each file contains one event per line
-- All files are stored in an umbrella "action_journal" directory at ``MapLibreMapOptions.actionJournalPath``
+- A new file is created when the current log size exceeds `MapLibreMapOptions.actionJournalLogFileSize`.
+- When the maximum number of files exceeds `MapLibreMapOptions.actionJournalLogFileCount`:
+    - The oldest one is deleted.
+    - The remaining files are renamed sequentially to maintain the naming convention `action_journal.0.log` through `action_journal.{logFileCount - 1}.log`.
+- Each file contains one event per line.
+- All files are stored in an umbrella `action_journal` directory at `MapLibreMapOptions.actionJournalPath`.
 
-See also: ``MapLibreMap``, ``MapLibreMapOptions``.
+See also: `MapLibreMap`, `MapLibreMapOptions`.
 
 ## Event format
 
@@ -33,7 +43,7 @@ Events are stored as JSON objects with the following format:
 | styleURL | string | false | currently loaded style URL |
 | clientName | string | false | `ClientOptions::name()` passed on map initialization |
 | clientVersion | string | false | `ClientOptions::version()` passed on map initialization |
-| event | object | false | event specific data - consists of encoded values of the parameters passed to their ``MLNMapViewDelegate`` counterparts
+| event | object | false | event specific data - consists of encoded values of the parameters passed to their `MLNMapViewDelegate` counterparts
 
 
 ```
@@ -64,4 +74,5 @@ Events are stored as JSON objects with the following format:
 ## Alternative
 
 The implementation is kept close to the core events to minimize additional locking and avoid platform-specific conversions and calls. As a result customization options and extensibility is limited.
-For greater flexibility, consider using the ``MapView`` event interface (see also ``MapChangeReceiver``). It provides hooks for most Action Journal events and allows for more customizable querying and storage of map data. However, this comes at the cost of added complexity.
+
+For greater flexibility, consider using the `MapView` event interface (see also `MapChangeReceiver`). It provides hooks for most Action Journal events and allows for more customizable querying and storage of map data. However, this comes at the cost of added complexity. See [Observe Map Events](./observe-map-events.md) to learn about the map events that you can listen for, which mirror the events available in the action journal.

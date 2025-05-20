@@ -21,6 +21,9 @@ import org.maplibre.android.log.Logger
 import org.maplibre.android.log.Logger.INFO
 import org.maplibre.android.maps.MapLibreMap
 
+
+
+// # --8<-- [start:ObserverActivity]
 /**
  * Test activity showcasing logging observer actions from the core
  */
@@ -32,6 +35,8 @@ class ObserverActivity : AppCompatActivity(),
     MapView.OnGlyphsRequestedListener,
     MapView.OnSpriteLoadedListener,
     MapView.OnSpriteRequestedListener {
+    // # --8<-- [end:ObserverActivity]
+
     private lateinit var mapView: MapView
 
     companion object {
@@ -43,6 +48,8 @@ class ObserverActivity : AppCompatActivity(),
         setContentView(R.layout.activity_map_events)
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
+
+        // # --8<-- [start:addListeners]
         mapView.addOnPreCompileShaderListener(this)
         mapView.addOnPostCompileShaderListener(this)
         mapView.addOnTileActionListener(this)
@@ -50,6 +57,8 @@ class ObserverActivity : AppCompatActivity(),
         mapView.addOnGlyphsRequestedListener(this)
         mapView.addOnSpriteLoadedListener(this)
         mapView.addOnSpriteRequestedListener(this)
+        // # --8<-- [end:addListeners]
+
         mapView.getMapAsync {
             it.setStyle(
                 Style.Builder().fromUri(TestStyles.DEMOTILES)
@@ -66,7 +75,7 @@ class ObserverActivity : AppCompatActivity(),
     }
 
     // # --8<-- [start:printActionJournal]
-    public fun printActionJournal(map: MapLibreMap) {
+    fun printActionJournal(map: MapLibreMap) {
         // configure using `MapLibreMapOptions.actionJournal*` methods
 
         Logger.i(TAG,"ActionJournal files: \n${map.actionJournalLogFiles.joinToString("\n")}")
@@ -79,35 +88,36 @@ class ObserverActivity : AppCompatActivity(),
 
     private val shaderTimes: HashMap<String, TimeMark> = HashMap()
 
-    public override fun onPreCompileShader(id: Int, type: Int, defines: String) {
+    // # --8<-- [start:mapEvents]
+    override fun onPreCompileShader(id: Int, type: Int, defines: String) {
         shaderTimes["${id}-${type}-${defines}"] = TimeSource.Monotonic.markNow()
         Logger.i(TAG, "A new shader is being compiled, shaderID:${id}, backend type:${type}, program configuration:${defines}")
     }
 
-    public override fun onPostCompileShader(id: Int, type: Int, defines: String) {
+    override fun onPostCompileShader(id: Int, type: Int, defines: String) {
         val startTime = shaderTimes.get("${id}-${type}-${defines}")
         if (startTime != null) {
             Logger.i(TAG, "A shader has been compiled in ${startTime.elapsedNow()}, shaderID:${id}, backend type:${type}, program configuration:${defines}")
         }
     }
 
-    public override fun onGlyphsRequested(fontStack: Array<String>, rangeStart: Int, rangeEnd: Int) {
+    override fun onGlyphsRequested(fontStack: Array<String>, rangeStart: Int, rangeEnd: Int) {
         Logger.i(TAG, "Glyphs are being requested for the font stack $fontStack, ranging from $rangeStart to $rangeEnd")
     }
 
-    public override fun onGlyphsLoaded(fontStack: Array<String>, rangeStart: Int, rangeEnd: Int) {
+    override fun onGlyphsLoaded(fontStack: Array<String>, rangeStart: Int, rangeEnd: Int) {
         Logger.i(TAG, "Glyphs have been loaded for the font stack $fontStack, ranging from $rangeStart to $rangeEnd")
     }
 
-    public override fun onSpriteRequested(id: String, url: String) {
+    override fun onSpriteRequested(id: String, url: String) {
         Logger.i(TAG, "The sprite $id has been requested from $url")
     }
 
-    public override fun onSpriteLoaded(id: String, url: String) {
+    override fun onSpriteLoaded(id: String, url: String) {
         Logger.i(TAG, "The sprite $id has been loaded from $url")
     }
 
-    public override fun onTileAction(op: TileOperation, x: Int, y: Int, z: Int, wrap: Int, overscaledZ: Int, sourceID: String) {
+    override fun onTileAction(op: TileOperation, x: Int, y: Int, z: Int, wrap: Int, overscaledZ: Int, sourceID: String) {
         val tile = "X:${x}, Y:${y}, Z:${z}, Wrap:${wrap}, OverscaledZ:${overscaledZ}, SourceID:${sourceID}"
         when (op) {
             TileOperation.RequestedFromCache -> Logger.i(TAG, "Requesting tile ${tile} from the cache")
@@ -121,6 +131,7 @@ class ObserverActivity : AppCompatActivity(),
             TileOperation.NullOp -> Logger.e(TAG, "An unknown tile operation was emitted for tile ${tile}")
         }
     }
+    // # --8<-- [end:mapEvents]
 
     override fun onStart() {
         super.onStart()
