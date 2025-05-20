@@ -8,7 +8,6 @@
 #include <mbgl/gl/command_encoder.hpp>
 #include <mbgl/gl/vertex_buffer_resource.hpp>
 #include <mbgl/gl/index_buffer_resource.hpp>
-#include <mbgl/gl/texture_resource.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
 
@@ -68,68 +67,6 @@ void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource, c
     commandEncoder.context.bindVertexArray = 0;
     commandEncoder.context.globalVertexArrayState.indexBuffer = static_cast<gl::IndexBufferResource&>(resource).buffer;
     MBGL_CHECK_ERROR(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, size, data));
-}
-
-std::unique_ptr<gfx::TextureResource> UploadPass::createTextureResource(const Size size,
-                                                                        const void* data,
-                                                                        gfx::TexturePixelType format,
-                                                                        gfx::TextureChannelDataType type) {
-    MLN_TRACE_FUNC();
-
-    auto obj = commandEncoder.context.createUniqueTexture(size, format, type);
-    auto resource = std::make_unique<gl::TextureResource>(std::move(obj));
-    commandEncoder.context.pixelStoreUnpack = {1};
-    updateTextureResourceSub(*resource, 0, 0, size, data, format, type);
-    // We are using clamp to edge here since OpenGL ES doesn't allow GL_REPEAT
-    // on NPOT textures. We use those when the pixelRatio isn't a power of two,
-    // e.g. on iPhone 6 Plus.
-    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-    return resource;
-}
-
-void UploadPass::updateTextureResource(gfx::TextureResource& resource,
-                                       const Size size,
-                                       const void* data,
-                                       gfx::TexturePixelType format,
-                                       gfx::TextureChannelDataType type) {
-    MLN_TRACE_FUNC();
-
-    updateTextureResourceSub(resource, 0, 0, size, data, format, type);
-}
-
-void UploadPass::updateTextureResourceSub(gfx::TextureResource& resource,
-                                          const uint16_t xOffset,
-                                          const uint16_t yOffset,
-                                          const Size size,
-                                          const void* data,
-                                          gfx::TexturePixelType format,
-                                          gfx::TextureChannelDataType type) {
-    MLN_TRACE_FUNC();
-
-    auto& ctx = commandEncoder.context;
-    assert(ctx.getTexturePool().isUsed(static_cast<gl::TextureResource&>(resource).texture));
-    assert(ctx.getTexturePool().desc(static_cast<gl::TextureResource&>(resource).texture).channelType == type);
-    assert(ctx.getTexturePool().desc(static_cast<gl::TextureResource&>(resource).texture).pixelFormat == format);
-    assert(ctx.getTexturePool().desc(static_cast<gl::TextureResource&>(resource).texture).size.width >=
-           xOffset + size.width);
-    assert(ctx.getTexturePool().desc(static_cast<gl::TextureResource&>(resource).texture).size.height >=
-           yOffset + size.height);
-
-    // Always use texture unit 0 for manipulating it.
-    ctx.activeTextureUnit = 0;
-    ctx.texture[0] = static_cast<const gl::TextureResource&>(resource).texture;
-    MBGL_CHECK_ERROR(glTexSubImage2D(GL_TEXTURE_2D,
-                                     0,
-                                     xOffset,
-                                     yOffset,
-                                     size.width,
-                                     size.height,
-                                     Enum<gfx::TexturePixelType>::to(format),
-                                     Enum<gfx::TextureChannelDataType>::to(type),
-                                     data));
 }
 
 struct VertexBufferGL : public gfx::VertexBufferBase {

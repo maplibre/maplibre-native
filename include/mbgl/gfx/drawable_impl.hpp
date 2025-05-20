@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/gfx/drawable.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 
 namespace mbgl {
 namespace gfx {

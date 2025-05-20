@@ -27,9 +27,9 @@ const std::array<TextureInfo, 1> SymbolIconShaderSource::textures = {
 //
 // Symbol sdf
 
-using SymbolSDFIconShaderSource = ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Metal>;
+using SymbolSDFShaderSource = ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::Metal>;
 
-const std::array<AttributeInfo, 10> SymbolSDFIconShaderSource::attributes = {
+const std::array<AttributeInfo, 10> SymbolSDFShaderSource::attributes = {
     // always attributes
     AttributeInfo{symbolUBOCount + 0, gfx::AttributeDataType::Short4, idSymbolPosOffsetVertexAttribute},
     AttributeInfo{symbolUBOCount + 1, gfx::AttributeDataType::UShort4, idSymbolDataVertexAttribute},
@@ -44,7 +44,7 @@ const std::array<AttributeInfo, 10> SymbolSDFIconShaderSource::attributes = {
     AttributeInfo{symbolUBOCount + 8, gfx::AttributeDataType::Float, idSymbolHaloWidthVertexAttribute},
     AttributeInfo{symbolUBOCount + 9, gfx::AttributeDataType::Float, idSymbolHaloBlurVertexAttribute},
 };
-const std::array<TextureInfo, 1> SymbolSDFIconShaderSource::textures = {
+const std::array<TextureInfo, 1> SymbolSDFShaderSource::textures = {
     TextureInfo{0, idSymbolImageTexture},
 };
 
