@@ -213,6 +213,19 @@
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
+            android:name=".activity.fragment.LongRunningActivity"
+            android:description="@string/description_long_running_maps"
+            android:exported="true"
+            android:label="@string/activity_long_running_maps"
+            android:launchMode="singleInstance">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_integration" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
             android:name=".activity.fragment.MultiMapActivity"
             android:description="@string/description_multimap"
             android:exported="true"
