@@ -7638,6 +7638,17 @@ static void *windowScreenContext = &windowScreenContext;
                     p->_propertyType = mbgl::style::PluginLayerProperty::PropertyType::SingleFloat;
                     p->_defaultSingleFloatValue = property.singleFloatDefaultValue;
                     break;
+                case MLNPluginLayerPropertyTypeColor:
+                {
+                    p->_propertyType = mbgl::style::PluginLayerProperty::PropertyType::Color;
+                    if (property.colorDefaultValue) {
+                        CGFloat r, g, b, a;
+                        [property.colorDefaultValue getRed:&r green:&g blue:&b alpha:&a];
+                        p->_defaultColorValue = mbgl::Color(r, g, b, a);
+                    }
+                }
+                    
+                    break;
                 default:
                     p->_propertyType = mbgl::style::PluginLayerProperty::PropertyType::Unknown;
                     break;

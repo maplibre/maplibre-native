@@ -25,6 +25,9 @@ typedef struct
     float _offsetX;
     float _offsetY;
     float _scale;
+    float _r, _g, _b, _a;
+    
+    
 }
 
 @end
@@ -45,7 +48,13 @@ typedef struct
     tempResult.layerProperties = @[
         // The scale property
         [MLNPluginLayerProperty propertyWithName:@"scale"
-                                    propertyType:MLNPluginLayerPropertyTypeSingleFloat]
+                                    propertyType:MLNPluginLayerPropertyTypeSingleFloat
+                                    defaultValue:@(1.0)],
+
+        // The scale property
+        [MLNPluginLayerProperty propertyWithName:@"fill-color"
+                                    propertyType:MLNPluginLayerPropertyTypeColor
+                                    defaultValue:[UIColor blueColor]]
 
         // TBD
     ];
@@ -132,6 +141,10 @@ typedef struct
         if (_scale == 0) {
             _scale = 1;
         }
+        _r = 0;
+        _g = 0;
+        _b = 0;
+        _a = 1;
     }
 
 
@@ -145,21 +158,27 @@ typedef struct
     _viewportSize.y = resource.mtkView.drawableSize.height;
 
 
-    Vertex triangleVertices[] =
-    {
+    Vertex triangleVerticesWithColor[] = {
         // 2D positions,    RGBA colors
-        { {  (250 + _offsetX) * _scale,  (-250 + _offsetY) * _scale }, { 1, 0, 0, 1 } },
-        { { (-250 + _offsetX) * _scale,  (-250 + _offsetY) * _scale }, { 0, 1, 0, 1 } },
-        { {    (0 + _offsetX) * _scale,   (250 + _offsetY) * _scale }, { 0, 0, 1, 1 } },
+        { {  (250 + _offsetX) * _scale,  (-250 + _offsetY) * _scale }, { _r, _g, _b, _a } },
+        { { (-250 + _offsetX) * _scale,  (-250 + _offsetY) * _scale }, { _r, _g, _b, _a} },
+        { {    (0 + _offsetX) * _scale,   (250 + _offsetY) * _scale }, { _r, _g, _b, _a } },
     };
+    
+//    Vertex triangleVertices[] = {
+//        // 2D positions,    RGBA colors
+//        { {  (250 + _offsetX) * _scale,  (-250 + _offsetY) * _scale }, { 1, 0, 0, 1 } },
+//        { { (-250 + _offsetX) * _scale,  (-250 + _offsetY) * _scale }, { 0, 1, 0, 1} },
+//        { {    (0 + _offsetX) * _scale,   (250 + _offsetY) * _scale }, { 0, 0, 1, 1 } },
+//    };
 
     [renderEncoder setRenderPipelineState:_pipelineState];
     [renderEncoder setDepthStencilState:_depthStencilStateWithoutStencil];
 
     // Pass in the parameter data.
-    [renderEncoder setVertexBytes:triangleVertices
-                           length:sizeof(triangleVertices)
-                           atIndex:0];
+    [renderEncoder setVertexBytes:triangleVerticesWithColor
+                           length:sizeof(triangleVerticesWithColor)
+                          atIndex:0];
 
     [renderEncoder setVertexBytes:&_viewportSize
                            length:sizeof(_viewportSize)
@@ -196,6 +215,28 @@ typedef struct
         if ([scale isKindOfClass:[NSNumber class]]) {
             _scale = [scale floatValue];
         }
+    }
+    
+    NSString *fillColor = [layerProperties objectForKey:@"fill-color"];
+    if (fillColor) {
+        NSLog(@"Fill Color: %@", fillColor);
+        fillColor = [fillColor stringByReplacingOccurrencesOfString:@"rgba(" withString:@""];
+        fillColor = [fillColor stringByReplacingOccurrencesOfString:@")" withString:@""];
+        NSArray *components = [fillColor componentsSeparatedByString:@","];
+        if ([components count] == 4) {
+            _r = [[components objectAtIndex:0] floatValue] / 255.0;
+            _g = [[components objectAtIndex:1] floatValue] / 255.0;
+            _b = [[components objectAtIndex:2] floatValue] / 255.0;
+            _a = [[components objectAtIndex:3] floatValue];
+//            UIColor *c = [UIColor colorWithRed:
+//                                         green:
+//                                          blue:
+//                                         alpha:
+//            self.triangleColor = c;
+        }
+        
+        
+        
     }
 
 }

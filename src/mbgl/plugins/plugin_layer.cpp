@@ -96,6 +96,12 @@ std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::str
             return error;
         }
         property->setSingleFloat(tempValue.value());
+    } else if (property->_propertyType == PluginLayerProperty::PropertyType::Color) {
+        const auto& tempValue = convert<PropertyValue<mbgl::Color>>(value, error, false, false);
+        if (!tempValue) {
+            return error;
+        }
+        property->setColor(tempValue.value());
     }
 
     /*

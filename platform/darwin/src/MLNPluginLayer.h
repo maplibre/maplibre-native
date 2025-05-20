@@ -7,21 +7,24 @@
 
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
+#import <UIKit/UIKit.h>
 #import "MLNFoundation.h"
 #import "MLNGeometry.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 typedef enum {
-  MLNPluginLayerPropertyTypeUnknown,
-  MLNPluginLayerPropertyTypeSingleFloat
+    MLNPluginLayerPropertyTypeUnknown,
+    MLNPluginLayerPropertyTypeSingleFloat,
+    MLNPluginLayerPropertyTypeColor
 } MLNPluginLayerPropertyType;
 
 MLN_EXPORT
 @interface MLNPluginLayerProperty : NSObject
 
 + (MLNPluginLayerProperty *)propertyWithName:(NSString *)propertyName
-                                propertyType:(MLNPluginLayerPropertyType)propertyType;
+                                propertyType:(MLNPluginLayerPropertyType)propertyType
+                                defaultValue:(id)defaultValue;
 
 // The name of the property
 @property NSString *propertyName;
@@ -31,6 +34,9 @@ MLN_EXPORT
 
 // Single float default value
 @property float singleFloatDefaultValue;
+
+// Color default value
+@property UIColor *colorDefaultValue;
 
 @end
 

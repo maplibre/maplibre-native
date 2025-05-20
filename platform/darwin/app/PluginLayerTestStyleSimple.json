@@ -80,6 +80,15 @@
                     3.0,
                     15,
                     0.5
+                ],
+                "fill-color": [
+                    "interpolate",
+                    ["linear"],
+                    ["zoom"],
+                    1,
+                    "#ff0000",
+                    22,
+                    "#00ff00"
                 ]
             }
         },

@@ -6,14 +6,26 @@
 //
 
 #import "MLNPluginLayer.h"
-
+#import <UIKit/UIKit.h>
 @implementation MLNPluginLayerProperty
 
 +(MLNPluginLayerProperty *)propertyWithName:(NSString *)propertyName
-                               propertyType:(MLNPluginLayerPropertyType) propertyType {
+                               propertyType:(MLNPluginLayerPropertyType)propertyType
+                               defaultValue:(id)defaultValue {
     MLNPluginLayerProperty *tempResult = [[MLNPluginLayerProperty alloc] init];
     tempResult.propertyName = propertyName;
     tempResult.propertyType = propertyType;
+    
+    if (propertyType == MLNPluginLayerPropertyTypeSingleFloat) {
+        if ([defaultValue isKindOfClass:[NSNumber class]]) {
+            tempResult.singleFloatDefaultValue = [defaultValue floatValue];
+        }
+    } else if (propertyType == MLNPluginLayerPropertyTypeColor) {
+        if ([defaultValue isKindOfClass:[UIColor class]]) {
+            tempResult.colorDefaultValue = defaultValue;
+        }
+    }
+    
     return tempResult;
 }
 

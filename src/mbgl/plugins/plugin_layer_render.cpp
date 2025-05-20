@@ -174,36 +174,48 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
     auto i = static_cast<const style::PluginLayer::Impl*>(baseImpl.get());
 
     auto pm = i->_propertyManager;
-    auto property = pm.getProperty("scale");
-    if (property == nullptr) {
-        return;
-    }
-
-    if (property->_propertyType == style::PluginLayerProperty::PropertyType::SingleFloat) {
-        auto& f = property->getSingleFloat();
-        using Evaluator = typename style::SingleFloatProperty::EvaluatorType;
-        auto df = property->_defaultSingleFloatValue;
-        auto newF = f.evaluate(Evaluator(parameters, df), parameters.now);
-        auto v = newF.constant().value();
+    for (auto property: pm.getProperties()) {
+        //    auto property = pm.getProperty("scale");
+        //    if (property == nullptr) {
+        //        return;
+        //    }
+        
+        if (property->_propertyType == style::PluginLayerProperty::PropertyType::SingleFloat) {
+            auto& f = property->getSingleFloat();
+            using Evaluator = typename style::SingleFloatProperty::EvaluatorType;
+            auto df = property->_defaultSingleFloatValue;
+            auto newF = f.evaluate(Evaluator(parameters, df), parameters.now);
+            auto v = newF.constant().value();
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-        std::cout << "V: " << v << "\n";
+            std::cout << "V: " << v << "\n";
 #endif
-        property->setCurrentSingleFloatValue(v);
-    } else if (property->_propertyType == style::PluginLayerProperty::PropertyType::DataDrivenColor) {
+            property->setCurrentSingleFloatValue(v);
+        } else if (property->_propertyType == style::PluginLayerProperty::PropertyType::Color) {
 #if INCLUDE_DATA_DRIVEN_COLOR_PROPERTY
-
-        auto& f = property->getColor();
-        // TODO: need a float based evaluator
-        using Evaluator = typename style::DataDrivenColorProperty::EvaluatorType;
-        auto df = property->_defaultColorValue;
-        auto newF = f.evaluate(Evaluator(parameters, df), parameters.now);
-        auto v = newF.constant().value();
+            
+            auto& f = property->getColor();
+            if (f.isExpression()) {
+                std::cout << "Expression\n";
+            }
+            using Evaluator = typename style::DataDrivenColorProperty::EvaluatorType;
+            auto df = property->_defaultColorValue;
+            auto newF = f.evaluate(Evaluator(parameters, df), parameters.now);
+            
+            if (newF.isConstant()) {
+                std::cout << "Is Constant\n";
+            }
+            
+            auto v = newF.constant().value();
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-        std::cout << "V: " << v << "\n";
+            std::cout << "V: " << v << "\n";
 #endif
-        property->setCurrentColorValue(v);
-
+            std::cout << "V: " << v.stringify() << "\n";
+            
+            property->setCurrentColorValue(v);
+            
 #endif
+        }
+        
     }
 
     /*

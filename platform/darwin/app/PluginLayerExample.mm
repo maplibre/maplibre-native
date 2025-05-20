@@ -32,7 +32,7 @@
 }
 
 -(void)onUpdateLayerProperties:(NSDictionary *)layerProperties {
-    NSLog(@"Layer Properties: %@", layerProperties);
+    // NSLog(@"Layer Properties: %@", layerProperties);
 }
 
 @end
