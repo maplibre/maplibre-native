@@ -194,22 +194,21 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
 #if INCLUDE_DATA_DRIVEN_COLOR_PROPERTY
             
             auto& f = property->getColor();
-            if (f.isExpression()) {
-                std::cout << "Expression\n";
-            }
+//            if (f.isExpression()) {
+//                std::cout << "Expression\n";
+//            }
             using Evaluator = typename style::DataDrivenColorProperty::EvaluatorType;
             auto df = property->_defaultColorValue;
             auto newF = f.evaluate(Evaluator(parameters, df), parameters.now);
             
-            if (newF.isConstant()) {
-                std::cout << "Is Constant\n";
-            }
+//            if (newF.isConstant()) {
+//                std::cout << "Is Constant\n";
+//            }
             
             auto v = newF.constant().value();
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-            std::cout << "V: " << v << "\n";
-#endif
             std::cout << "V: " << v.stringify() << "\n";
+#endif
             
             property->setCurrentColorValue(v);
             

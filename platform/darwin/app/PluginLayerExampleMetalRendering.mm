@@ -219,7 +219,7 @@ typedef struct
     
     NSString *fillColor = [layerProperties objectForKey:@"fill-color"];
     if (fillColor) {
-        NSLog(@"Fill Color: %@", fillColor);
+        //NSLog(@"Fill Color: %@", fillColor);
         fillColor = [fillColor stringByReplacingOccurrencesOfString:@"rgba(" withString:@""];
         fillColor = [fillColor stringByReplacingOccurrencesOfString:@")" withString:@""];
         NSArray *components = [fillColor componentsSeparatedByString:@","];
