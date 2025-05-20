@@ -85,8 +85,6 @@ PluginLayerFactory::PluginLayerFactory(std::string& layerType,
 
 const style::LayerTypeInfo* PluginLayerFactory::getTypeInfo() const noexcept {
     return &_layerTypeInfo;
-    // return nullptr;
-    // return style::PluginLayer::Impl::staticTypeInfo();
 }
 
 void jsonStringFromConvertible(const style::conversion::Convertible& value, std::string& output) {
@@ -128,24 +126,6 @@ void jsonStringFromConvertible(const style::conversion::Convertible& value, std:
         }
 
         output.append("]");
-        /*
-                eachMember(value, [&output, &firstItem](const std::string& name,
-                                                        const style::conversion::Convertible& value) ->
-           std::optional<style::conversion::Error> {
-
-                    std::cout << "Working on: " << name << "\n";
-
-                    if (!firstItem) {
-                        output.append(",");
-                    }
-                    firstItem = false;
-
-                    jsonStringFromConvertible(value, output);
-
-                    return std::nullopt;
-                });
-                output.append("]");
-                */
     } else {
         /*
          DECLARE_VALUE_TYPE_ACCESOR(Int, int64_t)
@@ -224,11 +204,7 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
         //            return false;
         //        }
     }
-    // return true;
 
-    // std::string json =
-
-    // auto customProperties = objectMember(value, "properties");
     std::string source = "source";
 
     auto tempResult = std::unique_ptr<style::Layer>(new (std::nothrow)
@@ -253,7 +229,6 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
             pluginLayerImpl->_updateLayerPropertiesFunction(layerProperties);
         }
 
-        //        _onLayerCreated();
     }
 
     return tempResult;
@@ -276,29 +251,25 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
 
 std::unique_ptr<Bucket> PluginLayerFactory::createBucket(
     const BucketParameters& parameters, const std::vector<Immutable<style::LayerProperties>>& layers) noexcept {
-    return nullptr;
     // return std::make_unique<PluginLayerBucket>(parameters, layers);
+    
+    // Returning null for now.  Not using buckets in plug-ins yet.
+    return nullptr;
 }
 
 std::unique_ptr<RenderLayer> PluginLayerFactory::createRenderLayer(Immutable<style::Layer::Impl> impl) noexcept {
-    //    assert(impl->getTypeInfo() == getTypeInfo());
-    //    return std::make_unique<RenderHeatmapLayer>(staticImmutableCast<style::HeatmapLayer::Impl>(impl));
 
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
     std::cout << "Create Render Layer\n";
 #endif
 
     auto localImpl = staticImmutableCast<style::PluginLayer::Impl>(impl);
-
     auto tempResult = std::make_unique<RenderPluginLayer>(staticImmutableCast<style::PluginLayer::Impl>(impl));
     tempResult->setRenderFunction(localImpl->_renderFunction);
     tempResult->setUpdateFunction(localImpl->_updateFunction);
     tempResult->setUpdatePropertiesFunction(localImpl->_updateLayerPropertiesFunction);
-    // tempResult
     return tempResult;
 
-    //  return std::make_unique<RenderPluginLayer>(impl);
-    //  return nullptr;
 }
 
 } // namespace mbgl

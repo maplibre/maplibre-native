@@ -46,7 +46,7 @@ void PluginLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffe
 Value PluginLayer::serialize() const {
     auto result = Layer::serialize();
     /*
-    // TODO: Implement this
+    // TODO: Implement this?
     assert(result.getObject());
 
     for (const auto& property : layerProperties) {
@@ -60,15 +60,6 @@ Value PluginLayer::serialize() const {
 
 std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::string& name,
                                                                   const conversion::Convertible& value) {
-    /*
-     TODO: Implement this
-        const auto it = layerProperties.find(name.c_str());
-        if (it == layerProperties.end()) return Error{"layer doesn't support this property"};
-
-        auto property = static_cast<Property>(it->second);
-
-        return Error{"layer doesn't support this property"};
-     */
 
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
     std::cout << "Property Name: " << name << "\n";
@@ -79,17 +70,16 @@ std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::str
     // The properties should be defined when the plugin layer is created
     PluginLayerProperty* property = i->_propertyManager.getProperty(name);
     if (property == nullptr) {
-        return Error{"layer doesn't support this property"};
-
+        // TODO: Should we allow properties that haven't been defined yet?
         //        property = new PluginLayerProperty();
-        //        // TODO: This needs ot be passed in
         //        property->_propertyType = PluginLayerProperty::PropertyType::SingleFloat;
         //        property->_propertyName = name;
         //        i->_propertyManager.addProperty(property);
+
+        return Error{"layer doesn't support this property"};
     }
 
     Error error;
-
     if (property->_propertyType == PluginLayerProperty::PropertyType::SingleFloat) {
         const auto& tempValue = convert<PropertyValue<float>>(value, error, false, false);
         if (!tempValue) {
@@ -104,42 +94,8 @@ std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::str
         property->setColor(tempValue.value());
     }
 
-    /*
-    // Hard coding for testing
-    if (name == "scale") {
-        //        auto tv = convert<Scale>(value, error, false, false)
-        Error error;
-//        const auto& tv = convert<PropertyValue<Scale>>(value, error, false, false);
-//        //        const auto & tv = convert<Scale>(value, error, false, false);
-//        if (!tv) {
-//            return error;
-//        }
-        const auto& tv2 = convert<PropertyValue<float>>(value, error, false, false);
-        if (!tv2) {
-            return error;
-        }
-
-        //auto tv3 = tv2.value();
-
-        property->setSingleFloat(tv2.value());
-
-        //        property->setScale(*tv2);
-        //        property->setScale2(*tv);
-        //        property->setPropertyValue(value); // *tv);
-    }
-     */
-    /*
-    Error error;
-    const auto& typedValue = convert<ColorRampPropertyValue>(value, error, false, false);
-    if (!typedValue) {
-        return error;
-    }
-*/
-    // setHeatmapColor(*typedValue);
-
     return std::nullopt;
 
-    // return Error{"Not implemented yet"};
 }
 
 StyleProperty PluginLayer::getProperty(const std::string& name) const {

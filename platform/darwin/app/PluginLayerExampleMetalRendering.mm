@@ -193,8 +193,6 @@ typedef struct
 -(void)onUpdateLayer:(MLNPluginLayerDrawingContext)drawingContext {
     // Update any metadata needed for the frame
     //NSLog(@"onUpdateLayer");
-
- //   NSLog(@"Update Layer");
 }
 
 -(void)onUpdateLayerProperties:(NSDictionary *)layerProperties {
@@ -228,15 +226,8 @@ typedef struct
             _g = [[components objectAtIndex:1] floatValue] / 255.0;
             _b = [[components objectAtIndex:2] floatValue] / 255.0;
             _a = [[components objectAtIndex:3] floatValue];
-//            UIColor *c = [UIColor colorWithRed:
-//                                         green:
-//                                          blue:
-//                                         alpha:
-//            self.triangleColor = c;
         }
-
-
-
+        
     }
 
 }
