@@ -248,7 +248,15 @@ public:
         MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
         MLNLogDebug(@"Initializing frame: %@ with options", NSStringFromRect(frame));
         [self commonInitWithOptions:options];
-        self.styleURL = nil;
+
+        if (options) {
+            if (options.styleURL) {
+                self.styleURL = options.styleURL;
+            }
+        } else {
+            self.styleURL = nil;
+        }
+
         MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
     }
     return self;

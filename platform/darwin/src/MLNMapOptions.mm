@@ -11,6 +11,9 @@
     self = [super init];
     if (self)
     {
+        _styleURL = nil;
+        _styleJSON = nil;
+
         _actionJournalOptions = [[MLNActionJournalOptions alloc] init];
     }
 
