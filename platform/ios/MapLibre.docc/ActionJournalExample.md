@@ -58,12 +58,18 @@ Events are stored as JSON objects with the following format:
 
 ## Usage
 
+Enabling the action journal.
+
+<!-- include-example(actionJournalOptions) -->
+
+```swift
+MLNSettings.actionJournalOptions.enabled = true
+```
+
 <!-- include-example(ObserverExampleActionJournal) -->
 
 ```swift
 @objc func printActionJournal() {
-        // configure using `MLNSettings.actionJournalOptions`
-
         print("ActionJournalLog files: \(mapView.getActionJournalLogFiles())")
         print("ActionJournalLog : \(mapView.getActionJournalLog())")
         // print only the newest events on each call
