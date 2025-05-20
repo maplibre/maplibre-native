@@ -5,6 +5,7 @@
 #import "MLNFoundation.h"
 #import "MLNGeometry.h"
 #import "MLNMapCamera.h"
+#import "MLNMapOptions.h"
 #import "MLNStyle.h"
 #import "MLNTypes.h"
 
@@ -218,6 +219,16 @@ MLN_EXPORT
  * @return An initialized map view.
  */
 - (instancetype)initWithFrame:(CGRect)frame styleJSON:(NSString *)styleJSON;
+
+/**
+ Initializes and returns a newly allocated map view with the specified frame
+ and the default style.
+
+ @param frame The frame for the view, measured in points.
+ @param options The map instance options
+ @return An initialized map view.
+ */
+- (instancetype)initWithFrame:(CGRect)frame options:(MLNMapOptions *)options;
 
 // MARK: Accessing the Delegate
 

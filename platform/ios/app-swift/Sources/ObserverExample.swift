@@ -10,10 +10,12 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
         super.viewDidLoad()
 
         // #-example-code(actionJournalOptions)
-        MLNSettings.actionJournalOptions.enabled = true
+        let options = MLNMapOptions()
+        options.actionJournalOptions.enabled = true
+        mapView = MLNMapView(frame: view.bounds, options: options)
         // #-end-example-code
 
-        mapView = MLNMapView(frame: view.bounds, styleURL: AMERICANA_STYLE)
+        mapView.styleURL = AMERICANA_STYLE
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
         mapView.setCenter(

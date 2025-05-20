@@ -24,8 +24,6 @@ NS_ASSUME_NONNULL_BEGIN
 /// called internally to signal tile server options changed
 + (void)tileServerOptionsChanged;
 
-@property (atomic, readwrite) MLNActionJournalOptions *actionJournalOptionsInternal;
-
 @end
 
 NS_ASSUME_NONNULL_END

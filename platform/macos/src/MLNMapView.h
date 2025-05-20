@@ -4,6 +4,7 @@
 
 #import "MLNFoundation.h"
 #import "MLNGeometry.h"
+#import "MLNMapOptions.h"
 #import "MLNStyle.h"
 #import "MLNTypes.h"
 
@@ -89,6 +90,16 @@ MLN_EXPORT IB_DESIGNABLE @interface MLNMapView : NSView<MLNStylable>
  @return An initialized map view.
  */
 - (instancetype)initWithFrame:(NSRect)frame styleURL:(nullable NSURL *)styleURL;
+
+/**
+ Initializes and returns a newly allocated map view with the specified frame
+ and the default style.
+
+ @param frame The frame for the view, measured in points.
+ @param options The map instance options
+ @return An initialized map view.
+ */
+- (instancetype)initWithFrame:(CGRect)frame options:(MLNMapOptions *)options;
 
 // MARK: Accessing the Delegate
 

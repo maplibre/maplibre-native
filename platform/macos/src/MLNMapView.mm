@@ -223,7 +223,7 @@ public:
     if (self = [super initWithFrame:frameRect]) {
         MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
         MLNLogDebug(@"Initializing frame: %@", NSStringFromRect(frameRect));
-        [self commonInit];
+        [self commonInitWithOptions:nil];
         self.styleURL = nil;
         MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
     }
@@ -234,8 +234,21 @@ public:
     if (self = [super initWithFrame:frame]) {
         MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
         MLNLogDebug(@"Initializing frame: %@ styleURL: %@", NSStringFromRect(frame), styleURL);
-        [self commonInit];
+        [self commonInitWithOptions:nil];
         self.styleURL = styleURL;
+        MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
+    }
+    return self;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame options:(MLNMapOptions *)options
+{
+    if (self = [super initWithFrame:frame])
+    {
+        MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
+        MLNLogDebug(@"Initializing frame: %@ with options", NSStringFromRect(frame));
+        [self commonInitWithOptions:options];
+        self.styleURL = nil;
         MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
     }
     return self;
@@ -244,7 +257,7 @@ public:
 - (instancetype)initWithCoder:(nonnull NSCoder *)decoder {
     if (self = [super initWithCoder:decoder]) {
         MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
-        [self commonInit];
+        [self commonInitWithOptions:nil];
         MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
     }
     return self;
@@ -264,7 +277,13 @@ public:
     return @[@"camera", @"debugMask"];
 }
 
-- (void)commonInit {
+- (void)commonInitWithOptions:(MLNMapOptions*)mlnMapoptions
+{
+    if (mlnMapoptions == nil)
+    {
+        mlnMapoptions = [[MLNMapOptions alloc] init];
+    }
+
     [MLNNetworkConfiguration sharedManager];
 
     _isTargetingInterfaceBuilder = NSProcessInfo.processInfo.mgl_isInterfaceBuilderDesignablesAgent;
@@ -310,7 +329,7 @@ public:
         resourceOptions.withApiKey([apiKey UTF8String]);
     }
 
-    const mbgl::util::ActionJournalOptions& actionJournalOptions = [MLNSettings.actionJournalOptions getCoreOptions];
+    const mbgl::util::ActionJournalOptions& actionJournalOptions = [mlnMapoptions.actionJournalOptions getCoreOptions];
     _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions, clientOptions, actionJournalOptions);
 
     // Notify map object when network reachability status changes.

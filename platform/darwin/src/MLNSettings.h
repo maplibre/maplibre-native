@@ -1,6 +1,5 @@
 #import <Foundation/Foundation.h>
 
-#import "MLNActionJournalOptions.h"
 #import "MLNFoundation.h"
 #import "MLNTileServerOptions.h"
 
@@ -52,11 +51,6 @@ MLN_EXPORT
     application delegate’s `-applicationDidFinishLaunching:` method.
  */
 @property (class, copy, nullable) NSString* apiKey;
-
-/**
- Action journal  options
- */
-@property (class, readonly, nonnull) MLNActionJournalOptions* actionJournalOptions;
 
 /**
  Instructs the SDk to use the give tile server
