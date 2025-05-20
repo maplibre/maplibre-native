@@ -544,9 +544,10 @@ MLN_EXPORT
 @property (nonatomic, assign) BOOL useLocationIndicatorLayer;
 
 /**
- A boolean value indicating whether the camera follows the puck during gesture handling
+ A boolean value indicating whether the camera allows for concurrent animations. This is
+ a temporary feature flag to avoid breaking existing functionality.
  */
-@property (nonatomic, assign) BOOL followLocationIndicatorDuringGesture;
+@property (nonatomic, assign) BOOL concurrentAnimations;
 
 /**
  A Boolean value indicating whether the map may request authorization to use location services.

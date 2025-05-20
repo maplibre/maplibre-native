@@ -163,11 +163,16 @@ struct PropertyAnimation {
     Duration duration;
     AnimationOptions animation;
     bool ran = false, finished = false, done = false;
+    bool panning = false, scaling = false, rotating = false;
 
-    PropertyAnimation(TimePoint start_, Duration duration_, AnimationOptions animation_)
+    PropertyAnimation(
+        TimePoint start_, Duration duration_, AnimationOptions animation_, bool panning_, bool scaling_, bool rotating_)
         : start(start_),
           duration(duration_),
-          animation(animation_) {}
+          animation(animation_),
+          panning(panning_),
+          scaling(scaling_),
+          rotating(rotating_) {}
 
     double t(TimePoint now) {
         bool isAnimated = duration != Duration::zero();
