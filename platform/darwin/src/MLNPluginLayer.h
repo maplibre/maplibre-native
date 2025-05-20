@@ -14,9 +14,9 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef enum {
-    MLNPluginLayerPropertyTypeUnknown,
-    MLNPluginLayerPropertyTypeSingleFloat,
-    MLNPluginLayerPropertyTypeColor
+  MLNPluginLayerPropertyTypeUnknown,
+  MLNPluginLayerPropertyTypeSingleFloat,
+  MLNPluginLayerPropertyTypeColor
 } MLNPluginLayerPropertyType;
 
 MLN_EXPORT

@@ -15,7 +15,7 @@
     MLNPluginLayerProperty *tempResult = [[MLNPluginLayerProperty alloc] init];
     tempResult.propertyName = propertyName;
     tempResult.propertyType = propertyType;
-    
+
     if (propertyType == MLNPluginLayerPropertyTypeSingleFloat) {
         if ([defaultValue isKindOfClass:[NSNumber class]]) {
             tempResult.singleFloatDefaultValue = [defaultValue floatValue];
@@ -25,7 +25,7 @@
             tempResult.colorDefaultValue = defaultValue;
         }
     }
-    
+
     return tempResult;
 }
 

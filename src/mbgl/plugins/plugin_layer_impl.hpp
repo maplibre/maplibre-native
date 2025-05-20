@@ -11,7 +11,7 @@
 #include <vector>
 #include <mbgl/style/types.hpp>
 #include <mbgl/style/layer_properties.hpp>
-//#include <mbgl/style/layers/heatmap_layer.hpp>
+// #include <mbgl/style/layers/heatmap_layer.hpp>
 #include <mbgl/style/layout_property.hpp>
 #include <mbgl/style/paint_property.hpp>
 #include <mbgl/style/properties.hpp>
@@ -23,8 +23,6 @@
 
 // Property types
 #include <mbgl/util/color.hpp>
-
-
 
 /*
 //#include <mbgl/style/layers/line_layer.hpp>
@@ -55,7 +53,6 @@ struct DataDrivenColorProperty : DataDrivenPaintProperty<mbgl::Color, attributes
 };
 #endif
 
-
 /*
  Unique PluginLayerProperty types for now
  SingleFloat:   DataDrivenPaintProperty<float>
@@ -63,8 +60,8 @@ struct DataDrivenColorProperty : DataDrivenPaintProperty<mbgl::Color, attributes
 
  Float2:        DataDrivenPaintProperty<std::array<float, 2>>
  Alignment:     DataDrivenPaintProperty<AlignmentType>
- 
- 
+
+
  Unique property types (from Tim)
  : DataDrivenLayoutProperty<expression::Formatted>
  : DataDrivenLayoutProperty<expression::Image>
@@ -120,9 +117,6 @@ struct DataDrivenColorProperty : DataDrivenPaintProperty<mbgl::Color, attributes
  : PaintProperty<std::array<float, 2>>
  : PaintProperty<TranslateAnchorType>
  */
-
-
-
 
 // struct Scale : DataDrivenPaintProperty<float, attributes::width, uniforms::width> {
 //     static float defaultValue() { return 1.f; }
@@ -207,8 +201,8 @@ public:
     void addProperty(PluginLayerProperty* property);
 
     std::string propertiesAsJSON();
-    
-    std::vector<PluginLayerProperty *> getProperties();
+
+    std::vector<PluginLayerProperty*> getProperties();
 
 private:
     std::map<std::string, PluginLayerProperty*> _properties;
