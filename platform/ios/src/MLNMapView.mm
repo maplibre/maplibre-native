@@ -7647,7 +7647,7 @@ static void *windowScreenContext = &windowScreenContext;
                         p->_defaultColorValue = mbgl::Color(r, g, b, a);
                     }
                 }
-                    
+
                     break;
                 default:
                     p->_propertyType = mbgl::style::PluginLayerProperty::PropertyType::Unknown;

@@ -26,8 +26,8 @@ typedef struct
     float _offsetY;
     float _scale;
     float _r, _g, _b, _a;
-    
-    
+
+
 }
 
 @end
@@ -164,7 +164,7 @@ typedef struct
         { { (-250 + _offsetX) * _scale,  (-250 + _offsetY) * _scale }, { _r, _g, _b, _a} },
         { {    (0 + _offsetX) * _scale,   (250 + _offsetY) * _scale }, { _r, _g, _b, _a } },
     };
-    
+
 //    Vertex triangleVertices[] = {
 //        // 2D positions,    RGBA colors
 //        { {  (250 + _offsetX) * _scale,  (-250 + _offsetY) * _scale }, { 1, 0, 0, 1 } },
@@ -216,7 +216,7 @@ typedef struct
             _scale = [scale floatValue];
         }
     }
-    
+
     NSString *fillColor = [layerProperties objectForKey:@"fill-color"];
     if (fillColor) {
         //NSLog(@"Fill Color: %@", fillColor);
@@ -234,9 +234,9 @@ typedef struct
 //                                         alpha:
 //            self.triangleColor = c;
         }
-        
-        
-        
+
+
+
     }
 
 }

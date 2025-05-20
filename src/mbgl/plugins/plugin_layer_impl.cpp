@@ -42,29 +42,29 @@ bool PluginLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
 std::string byte_to_hex_string(const uint8_t input) {
     static const char characters[] = "0123456789ABCDEF";
 
-  // Zeroes out the buffer unnecessarily, can't be avoided for std::string.
+    // Zeroes out the buffer unnecessarily, can't be avoided for std::string.
     std::string ret = "  ";
-  
-  // Hack... Against the rules but avoids copying the whole buffer.
-  auto buf = const_cast<char *>(ret.data());
-  
+
+    // Hack... Against the rules but avoids copying the whole buffer.
+    auto buf = const_cast<char*>(ret.data());
+
     *buf++ = characters[input >> 4];
     *buf++ = characters[input & 0x0F];
 
-  return ret;
+    return ret;
 }
 
 // Return this property as json
 std::string PluginLayerProperty::asJSON() {
     std::string tempResult;
-    
+
     if (_propertyType == PropertyType::SingleFloat) {
         tempResult = "\"" + _propertyName + "\":" + std::to_string(_singleFloatValue);
     } else if (_propertyType == PropertyType::Color) {
         // In RGBA format
-        tempResult = "\"" + _propertyName + "\":\"" + _dataDrivenColorValue.stringify()+"\"";
+        tempResult = "\"" + _propertyName + "\":\"" + _dataDrivenColorValue.stringify() + "\"";
     }
-    
+
     return tempResult;
 }
 
@@ -112,15 +112,14 @@ std::string PluginLayerPropertyManager::propertiesAsJSON() {
     return tempResult;
 }
 
-std::vector<PluginLayerProperty *> PluginLayerPropertyManager::getProperties() {
-    std::vector<PluginLayerProperty *> tempResult;
+std::vector<PluginLayerProperty*> PluginLayerPropertyManager::getProperties() {
+    std::vector<PluginLayerProperty*> tempResult;
     tempResult.reserve(_properties.size());
     for (auto it = _properties.begin(); it != _properties.end(); ++it) {
         tempResult.push_back(it->second);
     }
     return tempResult;
 }
-
 
 #if INCLUDE_DATA_DRIVEN_COLOR_PROPERTY
 // Color

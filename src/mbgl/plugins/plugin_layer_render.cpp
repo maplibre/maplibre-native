@@ -174,12 +174,12 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
     auto i = static_cast<const style::PluginLayer::Impl*>(baseImpl.get());
 
     auto pm = i->_propertyManager;
-    for (auto property: pm.getProperties()) {
+    for (auto property : pm.getProperties()) {
         //    auto property = pm.getProperty("scale");
         //    if (property == nullptr) {
         //        return;
         //    }
-        
+
         if (property->_propertyType == style::PluginLayerProperty::PropertyType::SingleFloat) {
             auto& f = property->getSingleFloat();
             using Evaluator = typename style::SingleFloatProperty::EvaluatorType;
@@ -192,7 +192,7 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
             property->setCurrentSingleFloatValue(v);
         } else if (property->_propertyType == style::PluginLayerProperty::PropertyType::Color) {
 #if INCLUDE_DATA_DRIVEN_COLOR_PROPERTY
-            
+
             auto& f = property->getColor();
 //            if (f.isExpression()) {
 //                std::cout << "Expression\n";
@@ -204,17 +204,15 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
 //            if (newF.isConstant()) {
 //                std::cout << "Is Constant\n";
 //            }
-            
             auto v = newF.constant().value();
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
             std::cout << "V: " << v.stringify() << "\n";
 #endif
             
             property->setCurrentColorValue(v);
-            
+
 #endif
         }
-        
     }
 
     /*
