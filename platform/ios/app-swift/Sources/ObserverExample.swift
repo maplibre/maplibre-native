@@ -9,7 +9,9 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        // #-example-code(actionJournalOptions)
         MLNSettings.actionJournalOptions.enabled = true
+        // #-end-example-code
 
         mapView = MLNMapView(frame: view.bounds, styleURL: AMERICANA_STYLE)
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -33,8 +35,6 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
 
     // #-example-code(ObserverExampleActionJournal)
     @objc func printActionJournal() {
-        // configure using `MLNSettings.actionJournalOptions`
-
         print("ActionJournalLog files: \(mapView.getActionJournalLogFiles())")
         print("ActionJournalLog : \(mapView.getActionJournalLog())")
         // print only the newest events on each call

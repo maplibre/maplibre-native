@@ -2,9 +2,11 @@
 
 Learn about the ``MLNMapView`` methods for logging and viewing map actions.
 
+<!-- NOTE: keep this text in sync with platform/android/docs/observability/action-journal.md -->
+
 The Action Journal provides functionality for persistent logging of top level map events.
 
-It's primary use case is to assist in debugging problematic sessions and crashes by offering additional insight into the actions performed by the map at the time of failure. Data is stored in human readable format, which is useful for analyzing individual cases, but can also be easily translated and aggregated into a database, allowing for efficient analysis of multiple cases and helping to identify recurring patterns (Google BigQuery, AWS Glue + S3 + Athena, etc).
+Its primary use case is to assist in debugging problematic sessions and crashes by offering additional insight into the actions performed by the map at the time of failure. Data is stored in human readable format, which is useful for analyzing individual cases, but can also be easily translated and aggregated into a database, allowing for efficient analysis of multiple cases and helping to identify recurring patterns (Google BigQuery, AWS Glue + S3 + Athena, etc).
 
 We are always interested in improving observability, so if you have a special use case, feel free to [open an issue or pull request](https://github.com/maplibre/maplibre-native) to extend the types of observability methods.
 
@@ -12,12 +14,12 @@ We are always interested in improving observability, so if you have a special us
 
 The logging is implemented using rolling files with a size based policy:
 
-- A new file is created when the current log size exceeds ``MLNActionJournalOptions/logFileSize``
+- A new file is created when the current log size exceeds ``MLNActionJournalOptions/logFileSize``.
 - When the maximum number of files exceeds ``MLNActionJournalOptions/logFileCount``:
-    - The oldest one is deleted
-    - The remaining files are renamed sequentially to maintain the naming convention "action_journal.0.log" through "action_journal.<logFileCount - 1>.log"
-- Each file contains one event per line
-- All files are stored in an umbrella "action_journal" directory at ``MLNActionJournalOptions/path``
+    - The oldest one is deleted.
+    - The remaining files are renamed sequentially to maintain the naming convention `action_journal.0.log` through `action_journal.{logFileCount - 1}.log`.
+- Each file contains one event per line.
+- All files are stored in an umbrella "action_journal" directory at ``MLNActionJournalOptions/path``.
 
 See also: ``MLNSettings``, ``MLNActionJournalOptions``.
 
@@ -34,8 +36,6 @@ Events are stored as JSON objects with the following format:
 | clientName | string | false | `ClientOptions::name()` passed on map initialization |
 | clientVersion | string | false | `ClientOptions::version()` passed on map initialization |
 | event | object | false | event specific data - consists of encoded values of the parameters passed to their ``MLNMapViewDelegate`` counterparts
-
-
 
 ```
 {
@@ -74,4 +74,5 @@ Events are stored as JSON objects with the following format:
 ## Alternative
 
 The implementation is kept close to the core events to minimize additional locking and avoid platform-specific conversions and calls. As a result customization options and extensibility is limited.
-For greater flexibility, consider using the ``MLNMapViewDelegate`` interface. It provides hooks for most Action Journal events and allows for more customizable querying and storage of map data. However, this comes at the cost of added complexity.
+
+For greater flexibility, consider using the ``MLNMapViewDelegate`` interface. It provides hooks for most Action Journal events and allows for more customizable querying and storage of map data. However, this comes at the cost of added complexity. See [Observe Low-Level Events](./ObserverExample.md) to learn about the map events that you can listen for, which mirror the events available in the action journal.
