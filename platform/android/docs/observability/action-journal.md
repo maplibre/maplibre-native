@@ -43,8 +43,8 @@ Events are stored as JSON objects with the following format:
 | time | string | true | event time ([ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) with milliseconds) |
 | styleName | string | false | currently loaded style name |
 | styleURL | string | false | currently loaded style URL |
-| clientName | string | false | `ClientOptions::name()` passed on map initialization |
-| clientVersion | string | false | `ClientOptions::version()` passed on map initialization |
+| clientName | string | false | |
+| clientVersion | string | false | |
 | event | object | false | event specific data - consists of encoded values of the parameters passed to their `MLNMapViewDelegate` counterparts
 
 
