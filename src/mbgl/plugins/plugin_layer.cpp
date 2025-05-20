@@ -60,7 +60,6 @@ Value PluginLayer::serialize() const {
 
 std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::string& name,
                                                                   const conversion::Convertible& value) {
-
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
     std::cout << "Property Name: " << name << "\n";
 #endif
@@ -95,7 +94,6 @@ std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::str
     }
 
     return std::nullopt;
-
 }
 
 StyleProperty PluginLayer::getProperty(const std::string& name) const {

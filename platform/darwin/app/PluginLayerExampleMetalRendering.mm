@@ -227,7 +227,7 @@ typedef struct
             _b = [[components objectAtIndex:2] floatValue] / 255.0;
             _a = [[components objectAtIndex:3] floatValue];
         }
-        
+
     }
 
 }

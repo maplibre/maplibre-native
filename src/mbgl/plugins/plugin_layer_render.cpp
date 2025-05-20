@@ -89,11 +89,10 @@ void RenderPluginLayer::update(gfx::ShaderRegistry& shaderRegistery,
                                const std::shared_ptr<UpdateParameters>& updateParameters,
                                const RenderTree& renderTree,
                                UniqueChangeRequestVec& changes) {
-    
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
     std::cout << "RenderPluginLayer::update\n";
 #endif
-    
+
     // create layer group
     if (!layerGroup) {
         if (auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID())) {
@@ -169,7 +168,6 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
 
     auto pm = i->_propertyManager;
     for (auto property : pm.getProperties()) {
-
         if (property->_propertyType == style::PluginLayerProperty::PropertyType::SingleFloat) {
             auto& f = property->getSingleFloat();
             using Evaluator = typename style::SingleFloatProperty::EvaluatorType;
@@ -199,7 +197,6 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
     std::string jsonProperties = pm.propertiesAsJSON();
 
     i->_updateLayerPropertiesFunction(jsonProperties);
-
 }
 
 bool RenderPluginLayer::hasTransition() const {
@@ -225,7 +222,6 @@ void RenderPluginLayer::layerChanged(const TransitionParameters& parameters,
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
     //  std::cout << "RenderPluginLayer::layerChanged\n";
 #endif
-    
 }
 
 /// Remove all drawables for the tile from the layer group

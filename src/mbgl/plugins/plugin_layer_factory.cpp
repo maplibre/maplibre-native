@@ -228,7 +228,6 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
         if (pluginLayerImpl->_updateLayerPropertiesFunction != nullptr) {
             pluginLayerImpl->_updateLayerPropertiesFunction(layerProperties);
         }
-
     }
 
     return tempResult;
@@ -252,13 +251,12 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
 std::unique_ptr<Bucket> PluginLayerFactory::createBucket(
     const BucketParameters& parameters, const std::vector<Immutable<style::LayerProperties>>& layers) noexcept {
     // return std::make_unique<PluginLayerBucket>(parameters, layers);
-    
+
     // Returning null for now.  Not using buckets in plug-ins yet.
     return nullptr;
 }
 
 std::unique_ptr<RenderLayer> PluginLayerFactory::createRenderLayer(Immutable<style::Layer::Impl> impl) noexcept {
-
 #if MLN_PLUGIN_LAYER_LOGGING_ENABLED
     std::cout << "Create Render Layer\n";
 #endif
@@ -269,7 +267,6 @@ std::unique_ptr<RenderLayer> PluginLayerFactory::createRenderLayer(Immutable<sty
     tempResult->setUpdateFunction(localImpl->_updateFunction);
     tempResult->setUpdatePropertiesFunction(localImpl->_updateLayerPropertiesFunction);
     return tempResult;
-
 }
 
 } // namespace mbgl
