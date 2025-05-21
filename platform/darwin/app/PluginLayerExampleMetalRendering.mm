@@ -57,7 +57,7 @@ typedef struct
         [MLNPluginLayerProperty propertyWithName:@"fill-color"
                                     propertyType:MLNPluginLayerPropertyTypeColor
                                     defaultValue:[UIColor blueColor]]
-        
+
     ];
 
     return tempResult;
