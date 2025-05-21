@@ -160,8 +160,8 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
     colorFormat = swapchainCreateInfo.imageFormat;
     extent = swapchainCreateInfo.imageExtent;
 
-    swapchainSemaphores.reserve(swapchainImageCount);
-    for (uint32_t index = 0; index < swapchainImageCount; ++index) {
+    swapchainSemaphores.reserve(swapchainImages.size());
+    for (uint32_t index = 0; index < swapchainImages.size(); ++index) {
         swapchainSemaphores.emplace_back(device->createSemaphoreUnique({}));
         backend.setDebugName(swapchainSemaphores.back().get(), "SurfaceSemaphore_" + std::to_string(index));
     }
@@ -230,7 +230,7 @@ void SurfaceRenderableResource::initDepthStencil() {
 
     depthAllocation->imageView = device->createImageViewUnique(imageViewCreateInfo);
 
-    backend.setDebugName(vk::Image(depthAllocation->image), "SwapchainDepthImage");
+    backend.setDebugName(depthAllocation->image, "SwapchainDepthImage");
     backend.setDebugName(depthAllocation->imageView.get(), "SwapchainDepthImageView");
 }
 
@@ -309,8 +309,8 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
         swapchainImageViews.push_back(device->createImageViewUnique(imageViewCreateInfo));
 
         const size_t index = swapchainImageViews.size() - 1;
-        backend.setDebugName(vk::Image(image), "SwapchainImage_" + std::to_string(index));
-        backend.setDebugName(vk::Image(image), "SwapchainImageView_" + std::to_string(index));
+        backend.setDebugName(image, "SwapchainImage_" + std::to_string(index));
+        backend.setDebugName(image, "SwapchainImageView_" + std::to_string(index));
     }
 
     // depth resources
