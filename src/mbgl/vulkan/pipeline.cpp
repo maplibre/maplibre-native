@@ -6,9 +6,7 @@
 namespace mbgl {
 namespace vulkan {
 
-#ifndef USE_DYNAMIC_VIEWPORT
 #define USE_DYNAMIC_VIEWPORT 0
-#endif
 
 vk::Format PipelineInfo::vulkanFormat(const gfx::AttributeDataType& value) {
     switch (value) {
