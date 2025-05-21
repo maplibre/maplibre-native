@@ -527,37 +527,59 @@
             "minzoom": 2,
             "source-layer": "centroids"
         },
-        {
-            "id": "plugin-layer",
-            "type": "plugin-layer-test",
-            "properties": {
-                "property1":"value1",
-                "property2":{"p1":"v1", "p2":"v2"},
-                "property3":["a1","a2","a3"],
-                "property4":1,
-                "property5":2.5
-            }
-        },
         {   "id": "metal-rendering-layer-1",
             "type": "plugin-layer-metal-rendering",
             "properties": {
                 "color1":"#FFAADD",
-                "offset-x": -300
+                "offset-x": -300,
+                "offset-y": -300
+            },
+            "paint": {
+                "scale": 2.5
             }
         },
         {   "id": "metal-rendering-layer-2",
             "type": "plugin-layer-metal-rendering",
             "properties": {
-                "color1":"#DDAAFF",
-                "offset-x": 300,
+                "color1":"#FFAADD",
+                "offset-x": -300
+            },
+            "paint": {
                 "scale": [
                     "interpolate",
                     ["linear"],
                     ["zoom"],
-                    1,
+                    5,
                     0.5,
-                    23,
+                    15,
                     3.0
+                ]
+            }
+        },
+        {   "id": "metal-rendering-layer-3",
+            "type": "plugin-layer-metal-rendering",
+            "properties": {
+                "color1":"#DDAAFF",
+                "offset-x": 300
+            },
+            "paint": {
+                "scale": [
+                    "interpolate",
+                    ["linear"],
+                    ["zoom"],
+                    5,
+                    3.0,
+                    15,
+                    0.5
+                ],
+                "fill-color": [
+                    "interpolate",
+                    ["linear"],
+                    ["zoom"],
+                    1,
+                    "#ff0000",
+                    22,
+                    "#00ff00"
                 ]
             }
         },
