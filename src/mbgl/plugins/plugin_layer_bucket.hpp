@@ -13,6 +13,11 @@ namespace mbgl {
 
 class BucketParameters;
 
+/*
+ TODO: This is not used, but I kind of like the idea of leaving it here as a placeholder.
+ What is the MVP of that?
+ */
+
 class PluginLayerBucket final : public Bucket {
 public:
     PluginLayerBucket(const BucketParameters&, const std::vector<Immutable<style::LayerProperties>>&);

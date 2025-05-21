@@ -21,8 +21,10 @@ public:
     //        HeatmapPaintProperties::PossiblyEvaluated);
     ~PluginLayerProperties() override;
 
+    // TODO: What is this?
     unsigned long constantsMask() const override;
 
+    // TODO: What is this?
     expression::Dependency getDependencies() const noexcept override;
 
     // const PluginLayerProperties::Impl& layerImpl() const noexcept;
