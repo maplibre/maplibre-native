@@ -7548,7 +7548,6 @@ static void *windowScreenContext = &windowScreenContext;
     auto darwinLayerManager = (mbgl::LayerManagerDarwin *)layerManager;
 
     MLNPluginLayerCapabilities *capabilities = [pluginLayerClass layerCapabilities];
-    //mbgl::style::LayerTypeInfo::
 
     std::string layerType = [capabilities.layerID UTF8String];
 
@@ -7594,7 +7593,8 @@ static void *windowScreenContext = &windowScreenContext;
     }
 
 
-
+// TODO: This commented code can probably go away, but wanted to check about
+// why we might want to have a non-peer factory
 //    auto factory = std::make_unique<mbgl::PluginLayerFactory>(layerType,
 //                                               source,
 //                                               pass3D,
@@ -7611,13 +7611,12 @@ static void *windowScreenContext = &windowScreenContext;
                                                crossTileIndex,
                                                tileKind);
 
-
     __weak MLNMapView *weakMapView = self;
 
     Class layerClass = pluginLayerClass;
     factory->setOnLayerCreatedEvent([layerClass, weakMapView, pluginLayerClass](mbgl::style::PluginLayer *pluginLayer) {
 
-        NSLog(@"Creating Plugin Layer: %@", layerClass);
+        //NSLog(@"Creating Plugin Layer: %@", layerClass);
         MLNPluginLayer *layer = [[layerClass alloc] init];
         if (!weakMapView.pluginLayers) {
             weakMapView.pluginLayers = [NSMutableArray array];
@@ -7626,7 +7625,6 @@ static void *windowScreenContext = &windowScreenContext;
 
         // Use weak here so there isn't a retain cycle
         MLNPluginLayer *weakPlugInLayer = layer;
-
 
         MLNPluginLayerCapabilities *capabilities = [pluginLayerClass layerCapabilities];
         auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
@@ -7647,7 +7645,6 @@ static void *windowScreenContext = &windowScreenContext;
                         p->_defaultColorValue = mbgl::Color(r, g, b, a);
                     }
                 }
-
                     break;
                 default:
                     p->_propertyType = mbgl::style::PluginLayerProperty::PropertyType::Unknown;
@@ -7657,43 +7654,11 @@ static void *windowScreenContext = &windowScreenContext;
             pm.addProperty(p);
         }
 
-        // NSLog(@"Setting Render Function: %@", layerClass);
-
         // Set the render function
         auto renderFunction = [weakPlugInLayer, weakMapView](mbgl::PaintParameters& paintParameters){
 
-           // NSLog(@"Render Function: %@", weakPlugInLayer);
-
             const mbgl::mtl::RenderPass& renderPass = static_cast<mbgl::mtl::RenderPass&>(*paintParameters.renderPass);
             id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)renderPass.getMetalEncoder().get();
-
-            /*
-//            layer.renderEncoder = encoder;
-
-            void render(const mbgl::style::CustomLayerRenderParameters& parameters) {
-                if (!layer) return;
-
-        #if MLN_RENDER_BACKEND_METAL
-                MTL::RenderCommandEncoder* ptr =
-                    static_cast<const mbgl::style::mtl::CustomLayerRenderParameters&>(parameters).encoder.get();
-                id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)ptr;
-                layer.renderEncoder = encoder;
-        #endif
-
-                MLNStyleLayerDrawingContext drawingContext = {
-                    .size = CGSizeMake(parameters.width, parameters.height),
-                    .centerCoordinate = CLLocationCoordinate2DMake(parameters.latitude, parameters.longitude),
-                    .zoomLevel = parameters.zoom,
-                    .direction = mbgl::util::wrap(parameters.bearing, 0., 360.),
-                    .pitch = static_cast<CGFloat>(parameters.pitch),
-                    .fieldOfView = static_cast<CGFloat>(parameters.fieldOfView),
-                    .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix)
-                };
-
-            }
-*/
-
-
 
             MLNMapView *strongMapView = weakMapView;
 
@@ -7726,11 +7691,7 @@ static void *windowScreenContext = &windowScreenContext;
         //auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
         pluginLayerImpl->setRenderFunction(renderFunction);
 
-        // TODO: Does this update function need to go away and we'll just call onUpdateLayer from the render call?
-//        pluginLayerImpl->setUpdateFunction([weakPlugInLayer](const mbgl::LayerPrepareParameters & prepareParameters) {
-//            [weakPlugInLayer onUpdateLayer:];
-//        });
-
+        // Set the update properties function
         pluginLayerImpl->setUpdatePropertiesFunction([weakPlugInLayer](const std::string & jsonProperties) {
             // Use autorelease pools in lambdas
             @autoreleasepool {
@@ -7747,16 +7708,12 @@ static void *windowScreenContext = &windowScreenContext;
             }
         });
 
-//        // TODO: This needs to be the same as above.  I think this method can just be on the impl
-//        bi->setUpdatePropertiesFunction(pluginLayer->_updateLayerPropertiesFunction);
-
     });
 
-
+    // TODO: Same question as above.  Do we ever want to have a core only layer type?
+    //       This could actually be something that we could set in the layer capabilities class
     darwinLayerManager->addLayerType(std::move(factory));
     //darwinLayerManager->addLayerTypeCoreOnly(std::move(factory));
-
-   //darwinLayerManager->addLayerType(<#std::unique_ptr<LayerPeerFactory>#>)
 
 }
 
