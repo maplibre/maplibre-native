@@ -6,6 +6,10 @@
 namespace mbgl {
 namespace vulkan {
 
+#ifndef USE_DYNAMIC_VIEWPORT
+#define USE_DYNAMIC_VIEWPORT 0
+#endif
+
 vk::Format PipelineInfo::vulkanFormat(const gfx::AttributeDataType& value) {
     switch (value) {
         case gfx::AttributeDataType::Byte:
@@ -398,6 +402,10 @@ std::size_t PipelineInfo::hash() const {
                       stencilDepthFail,
                       wideLines,
                       VkRenderPass(renderPass),
+#if !USE_DYNAMIC_VIEWPORT
+                      viewExtent.width,
+                      viewExtent.height,
+#endif
                       vertexInputHash);
 }
 
@@ -415,6 +423,14 @@ void PipelineInfo::setDynamicValues(const RendererBackend& backend, const vk::Un
     if (backend.getDeviceFeatures().wideLines && wideLines) {
         buffer->setLineWidth(dynamicValues.lineWidth);
     }
+
+#if USE_DYNAMIC_VIEWPORT
+    const vk::Viewport viewport(0.0f, 0.0f, viewExtent.width, viewExtent.height, 0.0f, 1.0f);
+    const vk::Rect2D scissorRect({}, {viewExtent.width, viewExtent.height});
+
+    buffer->setViewport(0, viewport);
+    buffer->setScissor(0, scissorRect);
+#endif
 }
 
 std::vector<vk::DynamicState> PipelineInfo::getDynamicStates(const RendererBackend& backend) const {
@@ -433,6 +449,11 @@ std::vector<vk::DynamicState> PipelineInfo::getDynamicStates(const RendererBacke
     if (backend.getDeviceFeatures().wideLines && wideLines) {
         dynamicStates.push_back(vk::DynamicState::eLineWidth);
     }
+
+#if USE_DYNAMIC_VIEWPORT
+    dynamicStates.push_back(vk::DynamicState::eViewport);
+    dynamicStates.push_back(vk::DynamicState::eScissor);
+#endif
 
     return dynamicStates;
 }
