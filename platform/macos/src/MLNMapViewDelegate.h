@@ -11,6 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class MLNPolyline;
 @class MLNShape;
 @class MLNStyle;
+@class MLNSource;
 @protocol MLNAnnotation;
 
 /**

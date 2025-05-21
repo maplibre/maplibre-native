@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/coordinator_layout">
+
+    <!-- -8<- [start:MapView] -->
+    <org.maplibre.android.maps.MapView
+        android:id="@id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:maplibre_actionJournalEnabled="true"
+        app:maplibre_actionJournalLogFileSize="1024"
+        app:maplibre_actionJournalLogFileCount="2"/>
+    <!-- -8<- [end:MapView] -->
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@drawable/ic_print"
+        app:backgroundTint="@color/accent"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
