@@ -264,7 +264,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 // This will add the plug-in layers.  This is a demo of how
 // extensible layers for the style can be added to the map view
 -(void)addPluginLayers {
-    
+
     [self.mapView addPluginLayerType:[PluginLayerExample class]];
     [self.mapView addPluginLayerType:[PluginLayerExampleMetalRendering class]];
 
