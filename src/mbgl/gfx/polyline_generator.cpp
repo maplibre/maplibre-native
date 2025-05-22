@@ -2,7 +2,7 @@
 
 #include <mbgl/style/types.hpp>
 #include <mbgl/util/constants.hpp>
-#include <mbgl/programs/line_program.hpp>
+#include <mbgl/renderer/buckets/line_bucket.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/drawable_builder_impl.hpp>
 #include <mbgl/gfx/drawable_impl.hpp>
@@ -637,7 +637,7 @@ void PolylineGenerator<PLV, PS>::addPieSliceVertex(const GeometryCoordinate& cur
 template class PolylineGenerator<gfx::DrawableBuilder::Impl::LineLayoutVertex,
                                  std::unique_ptr<gfx::Drawable::DrawSegment>>;
 
-template class PolylineGenerator<LineLayoutVertex, Segment<LineAttributes>>;
+template class PolylineGenerator<LineLayoutVertex, SegmentBase>;
 
 } // namespace gfx
 } // namespace mbgl

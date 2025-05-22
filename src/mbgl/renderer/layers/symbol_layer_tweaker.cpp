@@ -6,7 +6,6 @@
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gfx/symbol_drawable_data.hpp>
 #include <mbgl/layout/symbol_projection.hpp>
-#include <mbgl/programs/symbol_program.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
@@ -104,8 +103,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const auto& symbolData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
         const auto isText = (symbolData.symbolType == SymbolType::Text);
 
-        const auto* textBinders = isText ? static_cast<SymbolSDFTextProgram::Binders*>(drawable.getBinders()) : nullptr;
-        const auto* iconBinders = isText ? nullptr : static_cast<SymbolIconProgram::Binders*>(drawable.getBinders());
+        const auto* textBinders = isText ? static_cast<SymbolTextBinders*>(drawable.getBinders()) : nullptr;
+        const auto* iconBinders = isText ? nullptr : static_cast<SymbolIconBinders*>(drawable.getBinders());
 
         const auto bucket = std::static_pointer_cast<SymbolBucket>(drawable.getBucket());
         const auto* tile = drawable.getRenderTile();
@@ -169,6 +168,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             .pitch_with_map = (symbolData.pitchAlignment == style::AlignmentType::Map),
             .is_size_zoom_constant = size.isZoomConstant,
             .is_size_feature_constant = size.isFeatureConstant,
+            .is_offset = symbolData.isOffset,
 
             .size_t = size.sizeT,
             .size = size.size,
@@ -178,7 +178,6 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             .opacity_t = getInterpFactor<TextOpacity, IconOpacity, 0>(paintProperties, isText, zoom),
             .halo_width_t = getInterpFactor<TextHaloWidth, IconHaloWidth, 0>(paintProperties, isText, zoom),
             .halo_blur_t = getInterpFactor<TextHaloBlur, IconHaloBlur, 0>(paintProperties, isText, zoom),
-            .is_offset = symbolData.isOffset,
         };
 
 #if MLN_UBO_CONSOLIDATION

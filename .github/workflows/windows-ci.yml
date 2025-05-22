@@ -198,7 +198,7 @@ jobs:
         if: matrix.renderer == 'vulkan'
         run: |
           $version = (Invoke-WebRequest -Uri "https://vulkan.lunarg.com/sdk/latest.json" | ConvertFrom-Json).windows
-          Invoke-WebRequest https://sdk.lunarg.com/sdk/download/$version/windows/VulkanRT-$version-Components.zip -OutFile VulkanRT.zip
+          Invoke-WebRequest https://sdk.lunarg.com/sdk/download/$version/windows/VulkanRT-X64-$version-Components.zip -OutFile VulkanRT.zip
           & 'C:\Program Files\7-Zip\7z.exe' e -bb3 -obuild -r .\VulkanRT.zip *x64\vulkan-1.*
 
       - name: Run C++ tests

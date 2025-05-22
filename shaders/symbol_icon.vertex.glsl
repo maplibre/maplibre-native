@@ -4,25 +4,58 @@ layout (location = 2) in vec4 a_pixeloffset;
 layout (location = 3) in vec3 a_projected_pos;
 layout (location = 4) in float a_fade_opacity;
 
-uniform bool u_is_size_zoom_constant;
-uniform bool u_is_size_feature_constant;
-uniform highp float u_size_t; // used to interpolate between zoom stops when size is a composite function
-uniform highp float u_size; // used when size is both zoom and feature constant
-uniform highp float u_camera_to_center_distance;
-uniform highp float u_pitch;
-uniform bool u_rotate_symbol;
-uniform highp float u_aspect_ratio;
-uniform float u_fade_change;
+layout (std140) uniform GlobalPaintParamsUBO {
+    highp vec2 u_pattern_atlas_texsize;
+    highp vec2 u_units_to_pixels;
+    highp vec2 u_world_size;
+    highp float u_camera_to_center_distance;
+    highp float u_symbol_fade_change;
+    highp float u_aspect_ratio;
+    highp float u_pixel_ratio;
+    highp float u_map_zoom;
+    lowp float global_pad1;
+};
 
-uniform mat4 u_matrix;
-uniform mat4 u_label_plane_matrix;
-uniform mat4 u_coord_matrix;
+layout (std140) uniform SymbolDrawableUBO {
+    highp mat4 u_matrix;
+    highp mat4 u_label_plane_matrix;
+    highp mat4 u_coord_matrix;
 
-uniform bool u_is_text;
-uniform bool u_pitch_with_map;
+    highp vec2 u_texsize;
+    highp vec2 u_texsize_icon;
 
-uniform vec2 u_texsize;
-uniform bool u_is_offset;
+    bool u_is_text_prop;
+    bool u_rotate_symbol;
+    bool u_pitch_with_map;
+    bool u_is_size_zoom_constant;
+    bool u_is_size_feature_constant;
+    bool u_is_offset;
+
+    highp float u_size_t; // used to interpolate between zoom stops when size is a composite function
+    highp float u_size; // used when size is both zoom and feature constant
+
+    // Interpolations
+    highp float u_fill_color_t;
+    highp float u_halo_color_t;
+    highp float u_opacity_t;
+    highp float u_halo_width_t;
+    highp float u_halo_blur_t;
+};
+
+layout (std140) uniform SymbolEvaluatedPropsUBO {
+    highp vec4 u_text_fill_color;
+    highp vec4 u_text_halo_color;
+    highp float u_text_opacity;
+    highp float u_text_halo_width;
+    highp float u_text_halo_blur;
+    lowp float props_pad1;
+    highp vec4 u_icon_fill_color;
+    highp vec4 u_icon_halo_color;
+    highp float u_icon_opacity;
+    highp float u_icon_halo_width;
+    highp float u_icon_halo_blur;
+    lowp float props_pad2;
+};
 
 out vec2 v_tex;
 out float v_fade_opacity;
@@ -30,6 +63,8 @@ out float v_fade_opacity;
 #pragma mapbox: define lowp float opacity
 
 void main() {
+    highp float u_opacity = u_is_text_prop ? u_text_opacity : u_icon_opacity;
+
     #pragma mapbox: initialize lowp float opacity
 
     vec2 a_pos = a_pos_offset.xy;
@@ -68,7 +103,7 @@ void main() {
         size *= perspective_ratio;
     }
 
-    float fontScale = u_is_text ? size / 24.0 : size;
+    float fontScale = u_is_text_prop ? size / 24.0 : size;
 
     highp float symbol_rotation = 0.0;
     if (u_rotate_symbol) {
@@ -90,6 +125,6 @@ void main() {
 
     v_tex = a_tex / u_texsize;
     vec2 fade_opacity = unpack_opacity(a_fade_opacity);
-    float fade_change = fade_opacity[1] > 0.5 ? u_fade_change : -u_fade_change;
+    float fade_change = fade_opacity[1] > 0.5 ? u_symbol_fade_change : -u_symbol_fade_change;
     v_fade_opacity = max(0.0, min(1.0, fade_opacity[0] + fade_change));
 }

@@ -21,7 +21,6 @@ namespace mbgl {
 
 class UpdateParameters;
 class RenderStaticData;
-class Programs;
 class TransformState;
 class ImageManager;
 class LineAtlas;
@@ -85,9 +84,6 @@ public:
     float pixelRatio;
     std::array<float, 2> pixelsToGLUnits;
 
-    // Programs is, in effect, an immutable shader registry
-    Programs& programs;
-    // We're migrating to a dynamic one
     gfx::ShaderRegistry& shaders;
 
     gfx::DepthMode depthModeForSublayer(uint8_t n, gfx::DepthMaskType) const;

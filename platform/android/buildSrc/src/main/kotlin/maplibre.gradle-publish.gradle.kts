@@ -49,6 +49,7 @@ fun PublishingExtension.configureMavenPublication(
     publicationName: String,
     artifactIdPostfix: String,
     descriptionPostfix: String,
+    buildType: String = "Release"
 ) {
     publications {
         create<MavenPublication>(publicationName) {
@@ -56,7 +57,7 @@ fun PublishingExtension.configureMavenPublication(
             artifactId = "${project.extra["mapLibreArtifactId"]}$artifactIdPostfix"
             version = project.version.toString()
 
-            from(components["${renderer}Release"])
+            from(components["${renderer}${buildType}"])
 
             pom {
                 name.set("${project.extra["mapLibreArtifactTitle"]}$descriptionPostfix")
@@ -88,7 +89,9 @@ fun PublishingExtension.configureMavenPublication(
 afterEvaluate {
     publishing {
         configureMavenPublication("drawable", "opengl", "", "")
+        configureMavenPublication("drawable", "opengldebug", "-debug", " (Debug)", "Debug")
         configureMavenPublication("vulkan", "vulkan", "-vulkan", "(Vulkan)")
+        configureMavenPublication("vulkan", "vulkandebug", "-vulkan-debug", "(Vulkan, Debug)", "Debug")
 
         repositories {
             maven {

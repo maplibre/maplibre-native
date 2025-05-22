@@ -16,6 +16,11 @@ class AnnotationManager;
 class ImageManager;
 class GlyphManager;
 
+namespace gfx {
+class DynamicTextureAtlas;
+using DynamicTextureAtlasPtr = std::shared_ptr<gfx::DynamicTextureAtlas>;
+} // namespace gfx
+
 class TileParameters {
 public:
     const float pixelRatio;
@@ -28,6 +33,7 @@ public:
     std::shared_ptr<GlyphManager> glyphManager;
     const uint8_t prefetchZoomDelta;
     TaggedScheduler threadPool;
+    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
     double tileLodMinRadius = 3;
     double tileLodScale = 1;
     double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;

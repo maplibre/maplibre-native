@@ -56,27 +56,10 @@ enum class SymbolType : uint8_t {
 
 } // namespace style
 
-class SymbolIconProgram;
-class SymbolSDFIconProgram;
-class SymbolSDFTextProgram;
-class SymbolTextAndIconProgram;
-class CollisionBoxProgram;
-class CollisionCircleProgram;
-
 class SymbolLayerTweaker;
 using SymbolLayerTweakerPtr = std::shared_ptr<SymbolLayerTweaker>;
 
 class RenderSymbolLayer final : public RenderLayer {
-public:
-    struct Programs {
-        std::shared_ptr<SymbolIconProgram> symbolIconProgram;
-        std::shared_ptr<SymbolSDFIconProgram> symbolSDFIconProgram;
-        std::shared_ptr<SymbolSDFTextProgram> symbolSDFTextProgram;
-        std::shared_ptr<SymbolTextAndIconProgram> symbolTextAndIconProgram;
-        std::shared_ptr<CollisionBoxProgram> collisionBoxProgram;
-        std::shared_ptr<CollisionCircleProgram> collisionCircleProgram;
-    };
-
 public:
     explicit RenderSymbolLayer(Immutable<style::SymbolLayer::Impl>);
     ~RenderSymbolLayer() override;

@@ -6,8 +6,8 @@ namespace mbgl {
 namespace shaders {
 
 template <>
-struct ShaderSource<BuiltIn::LineSDFProgram, gfx::Backend::Type::OpenGL> {
-    static constexpr const char* name = "LineSDFProgram";
+struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* name = "LineSDFShader";
     static constexpr const char* vertex = R"(// floor(127 / 2) == 63.0
 // the maximum allowed miter limit is 2.0 at the moment. the extrude normal is
 // stored in a byte (-128..127). we scale regular normals up to length 63, but
@@ -23,14 +23,48 @@ struct ShaderSource<BuiltIn::LineSDFProgram, gfx::Backend::Type::OpenGL> {
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
-uniform mat4 u_matrix;
-uniform mediump float u_ratio;
-uniform lowp float u_device_pixel_ratio;
-uniform vec2 u_patternscale_a;
-uniform float u_tex_y_a;
-uniform vec2 u_patternscale_b;
-uniform float u_tex_y_b;
-uniform vec2 u_units_to_pixels;
+layout (std140) uniform GlobalPaintParamsUBO {
+    highp vec2 u_pattern_atlas_texsize;
+    highp vec2 u_units_to_pixels;
+    highp vec2 u_world_size;
+    highp float u_camera_to_center_distance;
+    highp float u_symbol_fade_change;
+    highp float u_aspect_ratio;
+    highp float u_pixel_ratio;
+    highp float u_map_zoom;
+    lowp float global_pad1;
+};
+
+layout (std140) uniform LineSDFDrawableUBO {
+    highp mat4 u_matrix;
+    highp vec2 u_patternscale_a;
+    highp vec2 u_patternscale_b;
+    highp float u_tex_y_a;
+    highp float u_tex_y_b;
+    mediump float u_ratio;
+    // Interpolations
+    lowp float u_color_t;
+    lowp float u_blur_t;
+    lowp float u_opacity_t;
+    lowp float u_gapwidth_t;
+    lowp float u_offset_t;
+    lowp float u_width_t;
+    lowp float u_floorwidth_t;
+    lowp float drawable_pad1;
+    lowp float drawable_pad2;
+};
+
+layout (std140) uniform LineEvaluatedPropsUBO {
+    highp vec4 u_color;
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+    lowp float u_floorwidth;
+    lowp float props_pad1;
+    lowp float props_pad2;
+};
 
 out vec2 v_normal;
 out vec2 v_width2;
@@ -39,51 +73,30 @@ out vec2 v_tex_b;
 out float v_gamma_scale;
 
 #ifndef HAS_UNIFORM_u_color
-uniform lowp float u_color_t;
 layout (location = 2) in highp vec4 a_color;
 out highp vec4 color;
-#else
-uniform highp vec4 u_color;
 #endif
 #ifndef HAS_UNIFORM_u_blur
-uniform lowp float u_blur_t;
 layout (location = 3) in lowp vec2 a_blur;
 out lowp float blur;
-#else
-uniform lowp float u_blur;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
-uniform lowp float u_opacity_t;
 layout (location = 4) in lowp vec2 a_opacity;
 out lowp float opacity;
-#else
-uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_gapwidth
-uniform lowp float u_gapwidth_t;
 layout (location = 5) in mediump vec2 a_gapwidth;
-#else
-uniform mediump float u_gapwidth;
 #endif
 #ifndef HAS_UNIFORM_u_offset
-uniform lowp float u_offset_t;
 layout (location = 6) in lowp vec2 a_offset;
-#else
-uniform lowp float u_offset;
 #endif
 #ifndef HAS_UNIFORM_u_width
-uniform lowp float u_width_t;
 layout (location = 7) in mediump vec2 a_width;
 out mediump float width;
-#else
-uniform mediump float u_width;
 #endif
 #ifndef HAS_UNIFORM_u_floorwidth
-uniform lowp float u_floorwidth_t;
 layout (location = 8) in lowp vec2 a_floorwidth;
 out lowp float floorwidth;
-#else
-uniform lowp float u_floorwidth;
 #endif
 
 void main() {
@@ -125,7 +138,7 @@ lowp float floorwidth = u_floorwidth;
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
-    float ANTIALIASING = 1.0 / u_device_pixel_ratio / 2.0;
+    float ANTIALIASING = 1.0 / DEVICE_PIXEL_RATIO / 2.0;
 
     vec2 a_extrude = a_data.xy - 128.0;
     float a_direction = mod(a_data.z, 4.0) - 1.0;
@@ -175,11 +188,26 @@ lowp float floorwidth = u_floorwidth;
     v_width2 = vec2(outset, inset);
 }
 )";
-    static constexpr const char* fragment = R"(
-uniform lowp float u_device_pixel_ratio;
+    static constexpr const char* fragment = R"(layout (std140) uniform LineSDFTilePropsUBO {
+    highp float u_sdfgamma;
+    highp float u_mix;
+    lowp float tileprops_pad1;
+    lowp float tileprops_pad2;
+};
+
+layout (std140) uniform LineEvaluatedPropsUBO {
+    highp vec4 u_color;
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+    lowp float u_floorwidth;
+    lowp float props_pad1;
+    lowp float props_pad2;
+};
+
 uniform sampler2D u_image;
-uniform float u_sdfgamma;
-uniform float u_mix;
 
 in vec2 v_normal;
 in vec2 v_width2;
@@ -189,28 +217,18 @@ in float v_gamma_scale;
 
 #ifndef HAS_UNIFORM_u_color
 in highp vec4 color;
-#else
-uniform highp vec4 u_color;
 #endif
 #ifndef HAS_UNIFORM_u_blur
 in lowp float blur;
-#else
-uniform lowp float u_blur;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
 in lowp float opacity;
-#else
-uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_width
 in mediump float width;
-#else
-uniform mediump float u_width;
 #endif
 #ifndef HAS_UNIFORM_u_floorwidth
 in lowp float floorwidth;
-#else
-uniform lowp float u_floorwidth;
 #endif
 
 void main() {
@@ -236,7 +254,7 @@ lowp float floorwidth = u_floorwidth;
     // Calculate the antialiasing fade factor. This is either when fading in
     // the line in case of an offset line (v_width2.t) or when fading out
     // (v_width2.s)
-    float blur2 = (blur + 1.0 / u_device_pixel_ratio) * v_gamma_scale;
+    float blur2 = (blur + 1.0 / DEVICE_PIXEL_RATIO) * v_gamma_scale;
     float alpha = clamp(min(dist - (v_width2.t - blur2), v_width2.s - dist) / blur2, 0.0, 1.0);
 
     float sdfdist_a = texture(u_image, v_tex_a).a;

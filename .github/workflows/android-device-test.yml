@@ -17,16 +17,17 @@ jobs:
             testFile: RenderTests-opengl.apk,
             appFile: RenderTestsApp-opengl.apk,
             name: "Android Render Tests (OpenGL)",
-            # Google Pixel 7 Pro
-            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/9692fe7f-86a9-4ecc-908f-175600968564"
+            # Pixel 4a Android 12, Pixel 7 Pro Android 13
+            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/55db2b56-930a-4485-bdc0-03409a5a6060",
+            testSpecArn: "arn:aws:devicefarm:us-west-2:373521797162:upload:20687d72-0e46-403e-8f03-0941850665bc/c1fc7d3e-dfe3-4a31-9ee0-7b0f71b08872"
           },
           {
             artifactName: android-render-tests-vulkan,
             testFile: RenderTests-vulkan.apk,
             appFile: RenderTestsApp-vulkan.apk,
             name: "Android Render Tests (Vulkan)",
-            # Google Pixel 7 Pro
-            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/9692fe7f-86a9-4ecc-908f-175600968564",
+            # Pixel 4a Android 12, Pixel 7 Pro Android 13
+            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/55db2b56-930a-4485-bdc0-03409a5a6060",
             # android-render-test.yml
             # see https://github.com/maplibre/ci-runners/tree/main/aws-device-farm/custom-test-envs
             testSpecArn: "arn:aws:devicefarm:us-west-2:373521797162:upload:20687d72-0e46-403e-8f03-0941850665bc/c1fc7d3e-dfe3-4a31-9ee0-7b0f71b08872"
@@ -166,6 +167,8 @@ jobs:
           results_dir="$(mktemp -d)"
           echo results_dir="$results_dir" >> "$GITHUB_ENV"
           node scripts/aws-device-farm/store-test-artifacts.mjs --runArn ${{ env.run_arn }} --outputDir "$results_dir"
+          # unzip and delete .zip files so we don't have nested .zip
+          find "$results_dir" -type f -name '*.zip' -exec sh -c 'unzip -o -d "$(dirname "$1")" "$1" && rm "$1"' _ {} \;
           zip -r test_artifacts.zip "$results_dir"
 
       - name: Store Benchmark Results

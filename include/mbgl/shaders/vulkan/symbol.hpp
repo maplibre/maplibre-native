@@ -52,6 +52,7 @@ struct SymbolDrawableUBO {
     bool pitch_with_map;
     bool is_size_zoom_constant;
     bool is_size_feature_constant;
+    bool is_offset;
 
     float size_t;
     float size;
@@ -62,7 +63,6 @@ struct SymbolDrawableUBO {
     float opacity_t;
     float halo_width_t;
     float halo_blur_t;
-    bool is_offset;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly buffer SymbolDrawableUBOVector {
@@ -206,8 +206,8 @@ void main() {
 };
 
 template <>
-struct ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Vulkan> {
-    static constexpr const char* name = "SymbolSDFIconShader";
+struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::Vulkan> {
+    static constexpr const char* name = "SymbolSDFShader";
 
     static const std::array<AttributeInfo, 10> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
@@ -259,6 +259,7 @@ struct SymbolDrawableUBO {
     bool pitch_with_map;
     bool is_size_zoom_constant;
     bool is_size_feature_constant;
+    bool is_offset;
 
     float size_t;
     float size;
@@ -269,7 +270,6 @@ struct SymbolDrawableUBO {
     float opacity_t;
     float halo_width_t;
     float halo_blur_t;
-    bool is_offset;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly buffer SymbolDrawableUBOVector {
@@ -559,6 +559,7 @@ struct SymbolDrawableUBO {
     bool pitch_with_map;
     bool is_size_zoom_constant;
     bool is_size_feature_constant;
+    bool is_offset;
 
     float size_t;
     float size;
@@ -569,7 +570,6 @@ struct SymbolDrawableUBO {
     float opacity_t;
     float halo_width_t;
     float halo_blur_t;
-    bool is_offset;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly buffer SymbolDrawableUBOVector {

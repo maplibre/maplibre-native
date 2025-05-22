@@ -1,7 +1,20 @@
-uniform mat4 u_matrix;
-uniform vec2 u_tl_parent;
-uniform float u_scale_parent;
-uniform float u_buffer_scale;
+layout (std140) uniform RasterDrawableUBO {
+    highp mat4 u_matrix;
+};
+layout (std140) uniform RasterEvaluatedPropsUBO {
+    highp vec3 u_spin_weights;
+    highp vec2 u_tl_parent;
+    highp float u_scale_parent;
+    highp float u_buffer_scale;
+    highp float u_fade_t;
+    highp float u_opacity;
+    highp float u_brightness_low;
+    highp float u_brightness_high;
+    highp float u_saturation_factor;
+    highp float u_contrast_factor;
+    lowp float props_pad1;
+    lowp float props_pad2;
+};
 
 layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec2 a_texture_pos;
