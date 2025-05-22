@@ -26,7 +26,7 @@ static void TileCoverPitchedViewport(benchmark::State& state) {
 
     std::size_t length = 0;
     while (state.KeepRunning()) {
-        auto tiles = util::tileCover(transform.getState(), 8);
+        auto tiles = util::tileCover({transform.getState()}, 8);
         length += tiles.size();
     }
     benchmark::DoNotOptimize(length);

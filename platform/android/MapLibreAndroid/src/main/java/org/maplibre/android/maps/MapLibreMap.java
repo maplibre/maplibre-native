@@ -344,6 +344,101 @@ public final class MapLibreMap {
     return nativeMapView.getTileCacheEnabled();
   }
 
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @param radius minimum radius around the view point in unit of tiles in which the fine
+   * grained zoom level tiles are always used when performing LOD
+   * radius must be greater than 1 (At least 1 fine detailed tile is present)
+   * A smaller radius value may improve performance at the cost of quality (tiles away from
+   * camera use lower Zoom levels)
+   */
+  public void setTileLodMinRadius(@FloatRange(from = 1, fromInclusive = true) double radius) {
+    nativeMapView.setTileLodMinRadius(radius);
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @return minimum radius around the view point in unit of tiles in which the fine grained
+   * zoom level tiles are always used when performing LOD
+   * @see MapLibreMap#setTileLodMinRadius(double)
+   */
+  public double getTileLodMinRadius() {
+    return nativeMapView.getTileLodMinRadius();
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @param scale factor for the distance to the camera view point
+   * A value larger than 1 increases the distance to the camera view point reducing LOD
+   * Larger values may improve performance at the cost of quality (tiles away from camera
+   * use lower Zoom levels)
+   */
+  public void setTileLodScale(@FloatRange(from = 0, fromInclusive = false) double scale) {
+    nativeMapView.setTileLodScale(scale);
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @return scale factor for the distance to the camera view point
+   * @see MapLibreMap#setTileLodScale(double)
+   */
+  public double getTileLodScale() {
+    return nativeMapView.getTileLodScale();
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @param threshold pitch angle in radians above which LOD calculation is performed
+   * A smaller radius value may improve performance at the cost of quality
+   */
+  public void setTileLodPitchThreshold(@FloatRange(from = 0, to = Math.PI) double threshold) {
+    nativeMapView.setTileLodPitchThreshold(threshold);
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @return pitch angle threshold in radians above which LOD calculation is performed
+   * @see MapLibreMap#setTileLodPitchThreshold(double)
+   */
+  public double getTileLodPitchThreshold() {
+    return nativeMapView.getTileLodPitchThreshold();
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @param shift shift applied to the Zoom level during LOD calculation
+   * A negative value shifts the Zoom level to a coarser level reducing quality but
+   * improving performance
+   * A positive value shifts the Zoom level to a finer level increasing details but
+   * negatively affecting performance
+   * A value of zero (default) does not apply any shift to the Zoom level
+   * It is not recommended to change the default value unless performance is critical
+   * and the loss of quality is acceptable. A value of -1 reduces the number of
+   * displayed tiles by a factor of 4 on average
+   * It is recommended to first configure the pixelRatio before adjusting
+   * TileLodZoomShift. {@link MapLibreMapOptions#pixelRatio(float)}
+   */
+  public void setTileLodZoomShift(double shift) {
+    nativeMapView.setTileLodZoomShift(shift);
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @return shift applied to the Zoom level during LOD calculation
+   * @see MapLibreMap#setTileLodZoomShift(double)
+   */
+  public double getTileLodZoomShift() {
+    return nativeMapView.getTileLodZoomShift();
+  }
+
   //
   // MinZoom
   //

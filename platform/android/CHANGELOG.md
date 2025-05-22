@@ -21,6 +21,12 @@ We now make releases with debug builds to make it easier to report issues with r
 
 They are available with a `-debug` postfix on Maven Central, for example `org.maplibre.gl:android-sdk-vulkan-debug`.
 
+## 11.8.7
+
+### ✨ Features and improvements
+
+- Change Java Transfrom class from final to normal ([#3332](https://github.com/maplibre/maplibre-native/pull/3332)).
+
 ## 11.8.6
 
 ### ✨ Features and improvements
@@ -32,6 +38,7 @@ They are available with a `-debug` postfix on Maven Central, for example `org.ma
 - Fix rare crash LatLngAnimator ([#3352](https://github.com/maplibre/maplibre-native/pull/3352)).
 - Sync surface destruction with main thread ([#3368](https://github.com/maplibre/maplibre-native/pull/3368)).
 - Prevent exception SymbolLocationLayerRenderer with new style ([#3369](https://github.com/maplibre/maplibre-native/pull/3369)).
+- Fix issue related to symbol icon scaling with offset
 
 ## 11.8.5
 
@@ -133,6 +140,20 @@ Thanks to everyone who helped test the pre-releases!
 ### 🐞 Bug fixes
 
 - Fix crash on unsupported attribute type conversion ([#3066](https://github.com/maplibre/maplibre-native/pull/3066)).
+## 11.6.3
+
+## Features and improvements
+
+### Bug fixes
+
+- LoD Clamping fixed to be based on view range and not source range to support over/under zooming
+- Disable depth writing for the location indicator layer
+
+## 11.6.2
+
+### Features and Improvements
+
+- Add LoD Support
 
 ## 11.6.1
 
