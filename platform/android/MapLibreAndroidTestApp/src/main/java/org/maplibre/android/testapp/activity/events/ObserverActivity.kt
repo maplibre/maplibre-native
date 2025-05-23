@@ -53,7 +53,7 @@ class ObserverActivity : AppCompatActivity(),
         mapView.addOnDidFinishRenderingFrameListener(this)
         mapView.getMapAsync {
             it.setStyle(
-                Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
+                Style.Builder().fromUri(TestStyles.DEMOTILES)
             )
             it.enableRenderingStatsView(true)
         }
