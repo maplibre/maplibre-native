@@ -31,7 +31,7 @@ class ObserverActivity : AppCompatActivity(),
     MapView.OnGlyphsRequestedListener,
     MapView.OnSpriteLoadedListener,
     MapView.OnSpriteRequestedListener,
-    MapView.OnDidFinishRenderingFrameListener {
+    MapView.OnDidFinishRenderingFrameWithStatsListener {
     private lateinit var mapView: MapView
 
     companion object {

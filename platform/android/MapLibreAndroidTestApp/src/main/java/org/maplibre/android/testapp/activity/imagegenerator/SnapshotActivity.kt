@@ -22,7 +22,7 @@ class SnapshotActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var maplibreMap: MapLibreMap
 
     private val idleListener = object : MapView.OnDidFinishRenderingFrameListener {
-        override fun onDidFinishRenderingFrame(fully: Boolean, renderingStats: RenderingStats) {
+        override fun onDidFinishRenderingFrame(fully: Boolean, frameEncodingTime: Double, frameRenderingTime: Double) {
             if (fully) {
                 binding.mapView.removeOnDidFinishRenderingFrameListener(this)
                 Logger.v(TAG, LOG_MESSAGE)

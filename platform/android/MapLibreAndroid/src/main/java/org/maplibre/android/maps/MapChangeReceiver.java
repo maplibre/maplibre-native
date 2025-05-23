@@ -23,6 +23,8 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     = new CopyOnWriteArrayList<>();
   private final List<MapView.OnDidFinishRenderingFrameListener> onDidFinishRenderingFrameList
     = new CopyOnWriteArrayList<>();
+  private final List<MapView.OnDidFinishRenderingFrameWithStatsListener> onDidFinishRenderingFrameWithStatsList
+          = new CopyOnWriteArrayList<>();
   private final List<MapView.OnWillStartRenderingMapListener> onWillStartRenderingMapListenerList
     = new CopyOnWriteArrayList<>();
   private final List<MapView.OnDidFinishRenderingMapListener> onDidFinishRenderingMapListenerList
@@ -160,6 +162,12 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     try {
       if (!onDidFinishRenderingFrameList.isEmpty()) {
         for (MapView.OnDidFinishRenderingFrameListener listener : onDidFinishRenderingFrameList) {
+          listener.onDidFinishRenderingFrame(fully, stats.encodingTime, stats.renderingTime);
+        }
+      }
+
+      if (!onDidFinishRenderingFrameWithStatsList.isEmpty()) {
+        for (MapView.OnDidFinishRenderingFrameWithStatsListener listener : onDidFinishRenderingFrameWithStatsList) {
           listener.onDidFinishRenderingFrame(fully, stats);
         }
       }
@@ -478,6 +486,14 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
 
   void removeOnDidFinishRenderingFrameListener(MapView.OnDidFinishRenderingFrameListener listener) {
     onDidFinishRenderingFrameList.remove(listener);
+  }
+
+  void addOnDidFinishRenderingFrameListener(MapView.OnDidFinishRenderingFrameWithStatsListener listener) {
+    onDidFinishRenderingFrameWithStatsList.add(listener);
+  }
+
+  void removeOnDidFinishRenderingFrameListener(MapView.OnDidFinishRenderingFrameWithStatsListener listener) {
+    onDidFinishRenderingFrameWithStatsList.remove(listener);
   }
 
   void addOnWillStartRenderingMapListener(MapView.OnWillStartRenderingMapListener listener) {

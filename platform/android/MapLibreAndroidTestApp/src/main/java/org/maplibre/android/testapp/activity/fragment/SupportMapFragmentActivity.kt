@@ -76,7 +76,7 @@ class SupportMapFragmentActivity :
         mapView.removeOnDidFinishRenderingFrameListener(this)
     }
 
-    override fun onDidFinishRenderingFrame(fully: Boolean, stats: RenderingStats) {
+    override fun onDidFinishRenderingFrame(fully: Boolean, frameEncodingTime: Double, frameRenderingTime: Double) {
         if (initialCameraAnimation && fully && this::maplibreMap.isInitialized) {
             maplibreMap.animateCamera(
                 CameraUpdateFactory.newCameraPosition(CameraPosition.Builder().tilt(45.0).build()),

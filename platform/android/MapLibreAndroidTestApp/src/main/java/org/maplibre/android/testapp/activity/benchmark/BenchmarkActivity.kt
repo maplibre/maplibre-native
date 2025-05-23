@@ -251,7 +251,7 @@ class BenchmarkActivity : AppCompatActivity() {
 
         maplibreMap.setSwapBehaviorFlush(benchmarkRun.syncRendering)
 
-        val listener = MapView.OnDidFinishRenderingFrameListener { _: Boolean, stats: RenderingStats ->
+        val listener = MapView.OnDidFinishRenderingFrameWithStatsListener { _: Boolean, stats: RenderingStats ->
             encodingTimeStore.add(stats.encodingTime * 1e3)
             renderingTimeStore.add(stats.renderingTime * 1e3)
             numFrames++;
