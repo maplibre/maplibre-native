@@ -88,11 +88,11 @@ public:
             return;
         }
         Image newImage(size_);
-        if (valid()) {
+        if (!size_.isEmpty() && valid()) {
             assert(bytes()); // gcc12 bug
             newImage.fill(0);
+            copy(*this, newImage, {0, 0}, {0, 0}, {std::min(size.width, size_.width), std::min(size.height, size_.height)});
         }
-        copy(*this, newImage, {0, 0}, {0, 0}, {std::min(size.width, size_.width), std::min(size.height, size_.height)});
         operator=(std::move(newImage));
     }
 
