@@ -331,8 +331,7 @@ void RendererBackend::initDebug() {
         const vk::DebugUtilsMessageTypeFlagsEXT type = vk::DebugUtilsMessageTypeFlagsEXT() |
                                                        vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
                                                        vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
-                                                       vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
-                                                       vk::DebugUtilsMessageTypeFlagBitsEXT::eDeviceAddressBinding;
+                                                       vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance;
 
         const auto createInfo =
             vk::DebugUtilsMessengerCreateInfoEXT().setMessageSeverity(severity).setMessageType(type).setPfnUserCallback(

@@ -17,7 +17,9 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
     }
 
     func mapViewDidFinishLoadingMap(_: MLNMapView) {
+        // #-example-code(enableRenderingStatsView)
         mapView.enableRenderingStatsView(true)
+        // #-end-example-code
     }
 
     // #-example-code(ObserverExampleShaders)
