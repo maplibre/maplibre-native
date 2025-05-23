@@ -1,10 +1,4 @@
-# ignore .git, but make sure we can get commit hash
-!.git/HEAD
-!.git/refs
-!.git/refs/heads
-!.git/packed-refs
-.git/*
-
+.git
 node_modules
 bazel-out
 bazel-bin
@@ -13,3 +7,5 @@ bazel-testlogs
 .idea
 .vscode
 .cxx
+build-*
+build

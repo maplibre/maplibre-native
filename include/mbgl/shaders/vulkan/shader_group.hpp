@@ -1,8 +1,8 @@
 #pragma once
 
 #include <mbgl/gfx/shader_group.hpp>
-#include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/shaders/vulkan/shader_program.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/hash.hpp>
 #include <mbgl/util/containers.hpp>

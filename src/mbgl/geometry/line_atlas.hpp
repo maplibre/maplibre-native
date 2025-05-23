@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/gfx/texture2d.hpp>

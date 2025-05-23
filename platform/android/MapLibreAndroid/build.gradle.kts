@@ -67,7 +67,7 @@ android {
         buildConfigField(
             "String",
             "MAPLIBRE_VERSION_STRING",
-            "\"MapLibre Native/${project.property("VERSION_NAME")}\""
+            "\"MapLibre Android/${project.extra["versionName"]}\""
         )
         consumerProguardFiles("proguard-rules.pro")
     }

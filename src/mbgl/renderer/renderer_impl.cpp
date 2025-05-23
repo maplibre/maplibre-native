@@ -8,12 +8,12 @@
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
-#include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/pattern_atlas.hpp>
 #include <mbgl/renderer/renderer_observer.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_tree.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/logging.hpp>
@@ -158,10 +158,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     context.beginFrame();
 
     if (!staticData) {
-        staticData = std::make_unique<RenderStaticData>(pixelRatio, std::make_unique<gfx::ShaderRegistry>());
-
-        // Initialize legacy shader programs
-        staticData->programs.registerWith(*staticData->shaders);
+        staticData = std::make_unique<RenderStaticData>(std::make_unique<gfx::ShaderRegistry>());
 
         // Initialize shaders for drawables
         const auto programParameters = ProgramParameters{pixelRatio, false};

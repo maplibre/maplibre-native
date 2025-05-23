@@ -2,7 +2,6 @@ import * as fs from "node:fs";
 import { Readable } from "node:stream";
 import { finished } from "node:stream/promises";
 import * as path from "node:path";
-import * as crypto from "node:crypto";
 import { parseArgs } from "node:util";
 
 import { ArtifactType, ListArtifactsCommand, ListJobsCommand, ListSuitesCommand } from "@aws-sdk/client-device-farm";
@@ -104,7 +103,8 @@ async function storeRunArtifacts(arnArr, outputDir) {
           if (!artifact.name || !artifact.url || !artifact.type) return;
           if (artifactsToDownload.includes(artifact.type)) {
             if (!artifact.arn) return;
-            const destination = path.join(outputDir, `${Buffer.from(artifact.arn).toString('base64')}.${artifact.extension}`);
+            const destination = path.join(outputDir, ...[job.device?.name || ""].filter(x => x), `${Buffer.from(artifact.arn).toString('base64')}.${artifact.extension}`);
+            await fs.promises.mkdir(path.dirname(destination), { recursive: true });
             try {
               await fs.promises.access(destination);
               return; // already exists

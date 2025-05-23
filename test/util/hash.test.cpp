@@ -153,7 +153,7 @@ TEST(OrderIndependentHash, Shaders) {
                       BuiltIn::LocationIndicatorTexturedShader,
                       BuiltIn::RasterShader,
                       BuiltIn::SymbolIconShader,
-                      BuiltIn::SymbolSDFIconShader,
+                      BuiltIn::SymbolSDFShader,
                       BuiltIn::SymbolTextAndIconShader>();
 }
 

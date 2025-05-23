@@ -49,6 +49,7 @@ fun configureMavenPublication(
     publicationName: String,
     artifactIdPostfix: String,
     descriptionPostfix: String,
+    buildType: String = "Release"
 ) {
     publishing {
         publications {
@@ -57,7 +58,7 @@ fun configureMavenPublication(
                 artifactId = "${project.extra["mapLibreArtifactId"]}$artifactIdPostfix"
                 version = project.version.toString()
 
-                from(components["${renderer}Release"])
+                from(components["${renderer}${buildType}"])
 
                 pom {
                     name.set("${project.extra["mapLibreArtifactTitle"]}$descriptionPostfix")
@@ -98,11 +99,14 @@ tasks {
 
 afterEvaluate {
     configureMavenPublication("drawable", "opengl", "", "")
+    configureMavenPublication("drawable", "opengldebug", "-debug", " (Debug)", "Debug")
     configureMavenPublication("vulkan", "vulkan", "-vulkan", "(Vulkan)")
+    configureMavenPublication("vulkan", "vulkandebug", "-vulkan-debug", "(Vulkan, Debug)", "Debug")
     // Right now this is the same as the first, but in the future we might release a major version
     // which defaults to Vulkan (or has support for multiple backends). We will keep using only
     // OpenGL ES with this artifact ID if that happens.
     configureMavenPublication("drawable", "opengl2", "-opengl", " (OpenGL ES)")
+    configureMavenPublication("drawable", "opengl2debug", "-opengl-debug", " (OpenGL ES, Debug)", "Debug")
 }
 
 
