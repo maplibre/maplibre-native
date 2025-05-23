@@ -111,18 +111,14 @@ std::string RenderingStats::toString(std::string_view sep) const {
 }
 #endif
 
-void RenderingStatsView::create(const std::unique_ptr<style::Style>& style) {
-    if (!style) {
-        return;
-    }
-
-    if (!style->getSource(sourceID)) {
+void RenderingStatsView::create(style::Style& style) {
+    if (!style.getSource(sourceID)) {
         style::CustomGeometrySource::Options sourceOptions;
 
         sourceOptions.zoomRange = {0, 0};
 
         sourceOptions.fetchTileFunction = [&](const CanonicalTileID& tileID) {
-            auto source = static_cast<style::CustomGeometrySource*>(style->getSource(sourceID));
+            auto source = static_cast<style::CustomGeometrySource*>(style.getSource(sourceID));
 
             if (!source) {
                 return;
@@ -137,10 +133,10 @@ void RenderingStatsView::create(const std::unique_ptr<style::Style>& style) {
             source->setTileData(tileID, features);
         };
 
-        style->addSource(std::make_unique<style::CustomGeometrySource>(sourceID, sourceOptions));
+        style.addSource(std::make_unique<style::CustomGeometrySource>(sourceID, sourceOptions));
     }
 
-    if (!style->getLayer(layerID)) {
+    if (!style.getLayer(layerID)) {
         auto infoLayer = std::make_unique<style::SymbolLayer>(layerID, sourceID);
 
         // required
@@ -160,25 +156,22 @@ void RenderingStatsView::create(const std::unique_ptr<style::Style>& style) {
         infoLayer->setTextTranslateAnchor(mbgl::style::TranslateAnchorType::Viewport);
         infoLayer->setTextTranslate(std::array<float, 2>{translation, translation});
 
-        style->addLayer(std::move(infoLayer));
+        style.addLayer(std::move(infoLayer));
     }
 }
 
-void RenderingStatsView::destroy(const std::unique_ptr<style::Style>& style) {
-    if (!style) {
-        return;
-    }
-
-    style->removeLayer(layerID);
-    style->removeSource(sourceID);
+void RenderingStatsView::destroy(style::Style& style) {
+    style.removeLayer(layerID);
+    style.removeSource(sourceID);
 }
 
-mbgl::style::SymbolLayer* RenderingStatsView::getLayer(const std::unique_ptr<style::Style>& style) {
-    return static_cast<mbgl::style::SymbolLayer*>(style->getLayer(layerID));
+mbgl::style::SymbolLayer* RenderingStatsView::getLayer(style::Style& style) {
+    return static_cast<mbgl::style::SymbolLayer*>(style.getLayer(layerID));
 }
 
+namespace {
 template <typename T>
-static void printNumber(std::stringstream& ss, const std::string_view label, const T& value, bool print) {
+void printNumber(std::stringstream& ss, const std::string_view label, const T& value, bool print) {
     if (!print) {
         return;
     }
@@ -199,7 +192,7 @@ static void printNumber(std::stringstream& ss, const std::string_view label, con
 };
 
 template <typename T>
-static void printMemory(std::stringstream& ss, const std::string_view label, const T& value, bool print) {
+void printMemory(std::stringstream& ss, const std::string_view label, const T& value, bool print) {
     if (!print) {
         return;
     }
@@ -224,11 +217,9 @@ static void printMemory(std::stringstream& ss, const std::string_view label, con
     ss << "\n";
 };
 
-void RenderingStatsView::update(const std::unique_ptr<style::Style>& style, const gfx::RenderingStats& stats) {
-    if (!style) {
-        return;
-    }
+} // namespace
 
+void RenderingStatsView::update(style::Style& style, const gfx::RenderingStats& stats) {
     auto layer = getLayer(style);
 
     // style reloaded? layer got removed?

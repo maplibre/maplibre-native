@@ -111,12 +111,12 @@ public:
         : options(options_) {}
     ~RenderingStatsView() = default;
 
-    void create(const std::unique_ptr<style::Style>& style);
-    void destroy(const std::unique_ptr<style::Style>& style);
+    void create(style::Style& style);
+    void destroy(style::Style& style);
 
-    mbgl::style::SymbolLayer* getLayer(const std::unique_ptr<style::Style>& style);
+    mbgl::style::SymbolLayer* getLayer(style::Style& style);
 
-    void update(const std::unique_ptr<style::Style>& style, const gfx::RenderingStats& stats);
+    void update(style::Style& style, const gfx::RenderingStats& stats);
 
 protected:
     const std::string layerID = "rendering-stats";

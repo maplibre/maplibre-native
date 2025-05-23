@@ -185,8 +185,8 @@ void Map::Impl::onDidFinishRenderingFrame(RenderMode renderMode,
                                           const gfx::RenderingStats& stats) {
     rendererFullyLoaded = renderMode == RenderMode::Full;
 
-    if (renderingStatsView) {
-        renderingStatsView->update(style, stats);
+    if (renderingStatsView && style) {
+        renderingStatsView->update(*style, stats);
     }
 
     if (mode == MapMode::Continuous) {
@@ -233,11 +233,15 @@ void Map::Impl::enableRenderingStatsView(bool value) {
     if (value) {
         if (!renderingStatsView) {
             renderingStatsView = std::make_unique<gfx::RenderingStatsView>();
-            renderingStatsView->create(style);
+            if (style) {
+                renderingStatsView->create(*style);
+            }
         }
     } else {
         if (renderingStatsView) {
-            renderingStatsView->destroy(style);
+            if (style) {
+                renderingStatsView->destroy(*style);
+            }
             renderingStatsView = nullptr;
         }
     }
