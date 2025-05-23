@@ -5,6 +5,7 @@
 #include <mbgl/test/fake_file_source.hpp>
 #include <mbgl/text/glyph_manager.hpp>
 #include <mbgl/util/run_loop.hpp>
+#include <mbgl/gfx/dynamic_texture_atlas.hpp>
 
 #include <memory>
 
@@ -24,11 +25,10 @@ public:
 
     const std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
     const std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
-
-    Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
-
+    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
     TaggedScheduler threadPool;
 
+    Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
     TileParameters tileParameters;
     style::Style style;
 
@@ -43,7 +43,8 @@ public:
                          imageManager,
                          glyphManager,
                          0,
-                         threadPool},
+                         threadPool,
+                         dynamicTextureAtlas},
           style{fileSource, 1, threadPool} {}
 
     ~VectorTileTest() {

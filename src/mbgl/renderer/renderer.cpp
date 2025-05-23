@@ -2,6 +2,7 @@
 
 #include <mbgl/annotation/annotation_manager.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
+#include <mbgl/gfx/dynamic_texture_atlas.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/layermanager/layer_manager.hpp>
 #include <mbgl/renderer/renderer_impl.hpp>
@@ -32,7 +33,13 @@ void Renderer::setObserver(RendererObserver* observer) {
 void Renderer::render(const std::shared_ptr<UpdateParameters>& updateParameters) {
     MLN_TRACE_FUNC();
     assert(updateParameters);
-    if (auto renderTree = impl->orchestrator.createRenderTree(updateParameters)) {
+    const bool styleChanged = impl->styleLoaded && !updateParameters->styleLoaded;
+    impl->styleLoaded = updateParameters->styleLoaded;
+    if (!impl->dynamicTextureAtlas || styleChanged) {
+        auto& context = impl->backend.getContext();
+        impl->dynamicTextureAtlas = std::make_unique<gfx::DynamicTextureAtlas>(context);
+    }
+    if (auto renderTree = impl->orchestrator.createRenderTree(updateParameters, impl->dynamicTextureAtlas)) {
         renderTree->prepare();
         impl->render(*renderTree, updateParameters);
     }

@@ -51,7 +51,7 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
   @Override
   protected void finalize() throws Throwable {
     try {
-      if (renderThread != null) {
+      if (renderThread != null && renderThread.isAlive()) {
         // thread may still be running if this view was never
         // attached to a window.
         renderThread.requestExitAndWait();
@@ -249,7 +249,7 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
     if (detachedListener != null) {
       detachedListener.onSurfaceViewDetached();
     }
-    if (renderThread != null) {
+    if (renderThread != null && renderThread.isAlive()) {
       renderThread.requestExitAndWait();
     }
     detached = true;
@@ -435,9 +435,9 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
       synchronized (renderThreadManager) {
         shouldExit = true;
         renderThreadManager.notifyAll();
-        while (!exited) {
+        while (!exited && this.isAlive()) {
           try {
-            renderThreadManager.wait();
+            renderThreadManager.wait(100);
           } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
           }

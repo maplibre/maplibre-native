@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/programs/raster_program.hpp>
+#include <mbgl/renderer/buckets/raster_bucket.hpp>
 #include <mbgl/style/layers/raster_layer_impl.hpp>
 #include <mbgl/style/layers/raster_layer_properties.hpp>
 #include <mbgl/gfx/context.hpp>
@@ -9,7 +9,6 @@
 namespace mbgl {
 
 class ImageSourceRenderData;
-class RasterProgram;
 
 class RenderRasterLayer final : public RenderLayer {
 public:
@@ -62,7 +61,7 @@ private:
     using TriangleIndexVectorPtr = std::shared_ptr<TriangleIndexVector>;
     TriangleIndexVectorPtr staticDataIndices;
 
-    using RasterSegmentVector = SegmentVector<RasterAttributes>;
+    using RasterSegmentVector = SegmentVector;
     using RasterSegmentVectorPtr = std::shared_ptr<RasterSegmentVector>;
     std::shared_ptr<RasterSegmentVector> staticDataSegments;
 };

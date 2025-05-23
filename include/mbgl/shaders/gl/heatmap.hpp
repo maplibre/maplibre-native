@@ -6,28 +6,33 @@ namespace mbgl {
 namespace shaders {
 
 template <>
-struct ShaderSource<BuiltIn::HeatmapProgram, gfx::Backend::Type::OpenGL> {
-    static constexpr const char* name = "HeatmapProgram";
-    static constexpr const char* vertex = R"(uniform mat4 u_matrix;
-uniform float u_extrude_scale;
-uniform float u_opacity;
-uniform float u_intensity;
-
-layout (location = 0) in vec2 a_pos;
+struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* name = "HeatmapShader";
+    static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
 out vec2 v_extrude;
 
+layout (std140) uniform HeatmapDrawableUBO {
+    highp mat4 u_matrix;
+    highp float u_extrude_scale;
+    // Interpolations
+    lowp float u_weight_t;
+    lowp float u_radius_t;
+    lowp float drawable_pad1;
+};
+
+layout (std140) uniform HeatmapEvaluatedPropsUBO {
+    highp float u_weight;
+    highp float u_radius;
+    highp float u_intensity;
+    lowp float props_pad1;
+};
+
 #ifndef HAS_UNIFORM_u_weight
-uniform lowp float u_weight_t;
 layout (location = 1) in highp vec2 a_weight;
 out highp float weight;
-#else
-uniform highp float u_weight;
 #endif
 #ifndef HAS_UNIFORM_u_radius
-uniform lowp float u_radius_t;
 layout (location = 2) in mediump vec2 a_radius;
-#else
-uniform mediump float u_radius;
 #endif
 
 // Effective "0" in the kernel density texture to adjust the kernel size to;
@@ -80,14 +85,17 @@ mediump float radius = u_radius;
     gl_Position = u_matrix * pos;
 }
 )";
-    static constexpr const char* fragment = R"(uniform highp float u_intensity;
+    static constexpr const char* fragment = R"(in vec2 v_extrude;
 
-in vec2 v_extrude;
+layout (std140) uniform HeatmapEvaluatedPropsUBO {
+    highp float u_weight;
+    highp float u_radius;
+    highp float u_intensity;
+    lowp float props_pad1;
+};
 
 #ifndef HAS_UNIFORM_u_weight
 in highp float weight;
-#else
-uniform highp float u_weight;
 #endif
 
 // Gaussian kernel coefficient: 1 / sqrt(2 * PI)
