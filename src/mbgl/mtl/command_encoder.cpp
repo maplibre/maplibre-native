@@ -15,9 +15,7 @@ namespace mtl {
 CommandEncoder::CommandEncoder(Context& context_)
     : context(context_) {}
 
-CommandEncoder::~CommandEncoder() {
-    context.performCleanup();
-}
+CommandEncoder::~CommandEncoder() {}
 
 std::unique_ptr<gfx::UploadPass> CommandEncoder::createUploadPass(const char* name, gfx::Renderable& renderable) {
     return std::make_unique<UploadPass>(renderable, *this, name);

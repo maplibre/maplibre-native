@@ -39,11 +39,10 @@ public:
     void onDidFinishRenderingFrame(RenderMode mode,
                                    bool repaintNeeded,
                                    bool placementChanged,
-                                   double frameEncodingTime,
-                                   double frameRenderingTime) override {
+                                   const gfx::RenderingStats& stats) override {
         void (RendererObserver::*f)(
-            RenderMode, bool, bool, double, double) = &RendererObserver::onDidFinishRenderingFrame;
-        delegate.invoke(f, mode, repaintNeeded, placementChanged, frameEncodingTime, frameRenderingTime);
+            RenderMode, bool, bool, const gfx::RenderingStats&) = &RendererObserver::onDidFinishRenderingFrame;
+        delegate.invoke(f, mode, repaintNeeded, placementChanged, stats);
     }
 
     void onStyleImageMissing(const std::string& image, const StyleImageMissingCallback& cb) override {
@@ -93,6 +92,16 @@ public:
         }
         rendererObserver->onDidFinishRenderingFrame(
             mode, repaintNeeded, placementChanged, frameEncodingTime, frameRenderingTime);
+    }
+
+    void onDidFinishRenderingFrame(RenderMode mode,
+                                   bool repaint,
+                                   bool placementChanged,
+                                   const gfx::RenderingStats& stats) override {
+        if (mode == RenderMode::Full && hasPendingStillImageRequest) {
+            stillImage = frontend.readStillImage();
+        }
+        rendererObserver->onDidFinishRenderingFrame(mode, repaint, placementChanged, stats);
     }
 
     void onStyleImageMissing(const std::string& id, const StyleImageMissingCallback& done) override {

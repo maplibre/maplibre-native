@@ -8,17 +8,18 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        mapView = MLNMapView(frame: view.bounds, styleURL: AMERICANA_STYLE)
+        mapView = MLNMapView(frame: view.bounds)
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
-        mapView.setCenter(
-            CLLocationCoordinate2D(latitude: 45.5076, longitude: -122.6736),
-            zoomLevel: 11,
-            animated: false
-        )
         view.addSubview(mapView)
 
         mapView.delegate = self
+    }
+
+    func mapViewDidFinishLoadingMap(_: MLNMapView) {
+        // #-example-code(enableRenderingStatsView)
+        mapView.enableRenderingStatsView(true)
+        // #-end-example-code
     }
 
     // #-example-code(ObserverExampleShaders)
@@ -101,7 +102,7 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
     // #-end-example-code
 }
 
-struct ObserverExampleViewExampleUIViewControllerRepresentable: UIViewControllerRepresentable {
+struct ObserverExampleViewUIViewControllerRepresentable: UIViewControllerRepresentable {
     typealias UIViewControllerType = ObserverExampleView
 
     func makeUIViewController(context _: Context) -> ObserverExampleView {
