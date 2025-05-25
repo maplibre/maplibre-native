@@ -16,6 +16,30 @@
 
 namespace mbgl {
 
+template <class T>
+struct TransformProperty {
+    std::shared_ptr<PropertyAnimation> pa;
+    T current, target;
+    bool set = false;
+
+    std::function<LatLng(TimePoint)> frameLatLngFunc = nullptr;
+    std::function<double(TimePoint)> frameZoomFunc = nullptr;
+
+    // Anchor
+    std::optional<ScreenCoordinate> anchor = std::nullopt;
+    LatLng anchorLatLng = {};
+};
+
+struct PropertyAnimations {
+    TransformProperty<Point<double>> latlng;
+    TransformProperty<double> zoom, bearing, pitch;
+    TransformProperty<EdgeInsets> padding;
+
+    // Anchor
+    std::optional<ScreenCoordinate> anchor;
+    LatLng anchorLatLng;
+};
+
 class Transform : private util::noncopyable {
 public:
     Transform(MapObserver& = MapObserver::nullObserver(),
@@ -122,18 +146,26 @@ private:
     MapObserver& observer;
     TransformState state;
 
-    void startTransition(const CameraOptions&,
-                         const AnimationOptions&,
-                         const std::function<void(double)>&,
-                         const Duration&);
+    void startTransition(const CameraOptions&, const Duration&);
+    bool animationTransitionFrame(std::shared_ptr<PropertyAnimation>&, double);
+    void animationFinishFrame(std::shared_ptr<PropertyAnimation>&);
+
+    void visit_pas(const std::function<void(std::shared_ptr<PropertyAnimation>&)>& f) {
+        f(pas.latlng.pa);
+        f(pas.zoom.pa);
+        f(pas.bearing.pa);
+        f(pas.pitch.pa);
+        f(pas.padding.pa);
+    }
 
     // We don't want to show horizon: limit max pitch based on edge insets.
     double getMaxPitchForEdgeInsets(const EdgeInsets& insets) const;
 
+    PropertyAnimations pas;
+    bool activeAnimation = false;
+
     TimePoint transitionStart;
     Duration transitionDuration;
-    std::function<bool(const TimePoint)> transitionFrameFn;
-    std::function<void()> transitionFinishFn;
 };
 
 } // namespace mbgl

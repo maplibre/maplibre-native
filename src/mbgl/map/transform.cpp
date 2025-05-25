@@ -158,37 +158,72 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
     const double startZoom = state.getZoom();
     const double startBearing = state.getBearing();
     const double startPitch = state.getPitch();
-    state.setProperties(TransformStateProperties()
-                            .withPanningInProgress(unwrappedLatLng != startLatLng)
-                            .withScalingInProgress(zoom != startZoom)
-                            .withRotatingInProgress(bearing != startBearing));
     const EdgeInsets startEdgeInsets = state.getEdgeInsets();
 
-    startTransition(
-        camera,
-        animation,
-        [=, this](double t) {
-            Point<double> framePoint = util::interpolate(startPoint, endPoint, t);
-            LatLng frameLatLng = Projection::unproject(framePoint, state.zoomScale(startZoom));
-            double frameZoom = util::interpolate(startZoom, zoom, t);
-            state.setLatLngZoom(frameLatLng, frameZoom);
-            if (bearing != startBearing) {
-                state.setBearing(util::wrap(util::interpolate(startBearing, bearing, t), -pi, pi));
-            }
-            if (padding != startEdgeInsets) {
-                // Interpolate edge insets
-                EdgeInsets edgeInsets;
-                state.setEdgeInsets({util::interpolate(startEdgeInsets.top(), padding.top(), t),
-                                     util::interpolate(startEdgeInsets.left(), padding.left(), t),
-                                     util::interpolate(startEdgeInsets.bottom(), padding.bottom(), t),
-                                     util::interpolate(startEdgeInsets.right(), padding.right(), t)});
-            }
-            double maxPitch = getMaxPitchForEdgeInsets(state.getEdgeInsets());
-            if (pitch != startPitch || maxPitch < startPitch) {
-                state.setPitch(std::min(maxPitch, util::interpolate(startPitch, pitch, t)));
-            }
-        },
-        duration);
+    auto pa = std::make_shared<PropertyAnimation>(
+        Clock::now(), duration, animation, unwrappedLatLng != startLatLng, zoom != startZoom, bearing != startBearing);
+
+    // NOTE: For tests only
+    transitionStart = pa->start;
+    transitionDuration = pa->duration;
+
+    if (!pas.zoom.set || startZoom != zoom) {
+        animationFinishFrame(pas.zoom.pa);
+        pas.zoom = {
+            .pa = pa,
+            .current = startZoom,
+            .target = zoom,
+            .set = true,
+            .frameZoomFunc =
+                [=, this](TimePoint now) {
+                    return util::interpolate(pas.zoom.current, pas.zoom.target, pas.zoom.pa->t(now));
+                },
+        };
+    }
+    if (!pas.latlng.set || startPoint != endPoint) {
+        animationFinishFrame(pas.latlng.pa);
+        pas.latlng = {
+            .pa = pa,
+            .current = startPoint,
+            .target = endPoint,
+            .set = true,
+            .frameLatLngFunc =
+                [=, this](TimePoint now) {
+                    Point<double> framePoint = util::interpolate(
+                        pas.latlng.current, pas.latlng.target, pas.latlng.pa->t(now));
+                    return Projection::unproject(framePoint, state.zoomScale(startZoom));
+                },
+        };
+    }
+    if (!pas.bearing.set || bearing != startBearing) {
+        animationFinishFrame(pas.bearing.pa);
+        pas.bearing = {
+            .pa = pa,
+            .current = startBearing,
+            .target = bearing,
+            .set = true,
+        };
+    }
+    if (!pas.padding.set || padding != startEdgeInsets) {
+        animationFinishFrame(pas.padding.pa);
+        pas.padding = {
+            .pa = pa,
+            .current = startEdgeInsets,
+            .target = padding,
+            .set = true,
+        };
+    }
+    if (!pas.pitch.set || pitch != startPitch) {
+        animationFinishFrame(pas.pitch.pa);
+        pas.pitch = {
+            .pa = pa,
+            .current = startPitch,
+            .target = pitch,
+            .set = true,
+        };
+    }
+
+    startTransition(camera, duration);
 }
 
 /** This method implements an “optimal path” animation, as detailed in:
@@ -323,51 +358,99 @@ void Transform::flyTo(const CameraOptions& inputCamera,
     }
 
     const double startScale = state.getScale();
-    state.setProperties(
-        TransformStateProperties().withPanningInProgress(true).withScalingInProgress(true).withRotatingInProgress(
-            bearing != startBearing));
     const EdgeInsets startEdgeInsets = state.getEdgeInsets();
 
-    startTransition(
-        camera,
-        animation,
-        [=, this](double k) {
-            /// s: The distance traveled along the flight path, measured in
-            /// ρ-screenfuls.
-            double s = k * S;
-            double us = k == 1.0 ? 1.0 : u(s);
+    auto pa = std::make_shared<PropertyAnimation>(
+        Clock::now(), duration, animation, true, true, bearing != startBearing);
 
-            // Calculate the current point and zoom level along the flight path.
-            Point<double> framePoint = util::interpolate(startPoint, endPoint, us);
-            double frameZoom = linearZoomInterpolation ? util::interpolate(startZoom, zoom, k)
-                                                       : startZoom + state.scaleZoom(1 / w(s));
+    // NOTE: For tests only
+    transitionStart = pa->start;
+    transitionDuration = pa->duration;
 
-            // Zoom can be NaN if size is empty.
-            if (std::isnan(frameZoom)) {
-                frameZoom = zoom;
-            }
+    if (!pas.zoom.set || startZoom != zoom) {
+        animationFinishFrame(pas.zoom.pa);
+        pas.zoom = {
+            .pa = pa,
+            .current = startZoom,
+            .target = zoom,
+            .set = true,
+            .frameZoomFunc =
+                [=, this](TimePoint now) {
+                    double t = pas.zoom.pa->t(now);
+                    double s = t * S;
+                    double frameZoom = linearZoomInterpolation ? util::interpolate(pas.zoom.current, pas.zoom.target, t)
+                                                               : pas.zoom.current + state.scaleZoom(1 / w(s));
 
-            // Convert to geographic coordinates and set the new viewpoint.
-            LatLng frameLatLng = Projection::unproject(framePoint, startScale);
-            state.setLatLngZoom(frameLatLng, frameZoom);
-            if (bearing != startBearing) {
-                state.setBearing(util::wrap(util::interpolate(startBearing, bearing, k), -pi, pi));
-            }
+                    if (std::isnan(frameZoom)) {
+                        frameZoom = pas.zoom.target;
+                    }
 
-            if (padding != startEdgeInsets) {
-                // Interpolate edge insets
-                state.setEdgeInsets({util::interpolate(startEdgeInsets.top(), padding.top(), k),
-                                     util::interpolate(startEdgeInsets.left(), padding.left(), k),
-                                     util::interpolate(startEdgeInsets.bottom(), padding.bottom(), k),
-                                     util::interpolate(startEdgeInsets.right(), padding.right(), k)});
-            }
-            double maxPitch = getMaxPitchForEdgeInsets(state.getEdgeInsets());
+                    return frameZoom;
+                },
+        };
+    }
+    if (!pas.latlng.set || startPoint != endPoint) {
+        animationFinishFrame(pas.latlng.pa);
+        pas.latlng = {
+            .pa = pa,
+            .current = startPoint,
+            .target = endPoint,
+            .set = true,
+            .frameLatLngFunc =
+                [=, this](TimePoint now) {
+                    double t = pas.latlng.pa->t(now);
+                    double s = t * S;
+                    double us = t == 1.0 ? 1.0 : u(s);
 
-            if (pitch != startPitch || maxPitch < startPitch) {
-                state.setPitch(std::min(maxPitch, util::interpolate(startPitch, pitch, k)));
-            }
-        },
-        duration);
+                    Point<double> framePoint = util::interpolate(pas.latlng.current, pas.latlng.target, us);
+                    return Projection::unproject(framePoint, startScale);
+                },
+        };
+    }
+    if (!pas.bearing.set || bearing != startBearing) {
+        animationFinishFrame(pas.bearing.pa);
+        pas.bearing = {
+            .pa = pa,
+            .current = startBearing,
+            .target = bearing,
+            .set = true,
+        };
+    }
+    if (!pas.padding.set || padding != startEdgeInsets) {
+        animationFinishFrame(pas.padding.pa);
+        pas.padding = {.pa = pa, .current = startEdgeInsets, .target = padding, .set = true};
+    }
+    if (!pas.pitch.set || pitch != startPitch) {
+        animationFinishFrame(pas.pitch.pa);
+        pas.pitch = {
+            .pa = pa,
+            .current = startPitch,
+            .target = pitch,
+            .set = true,
+        };
+    }
+
+    startTransition(camera, duration);
+}
+
+bool Transform::animationTransitionFrame(std::shared_ptr<PropertyAnimation>& pa, double t) {
+    if (pa->ran) {
+        return pa->done;
+    }
+
+    pa->ran = true;
+    if (t < 1.0) {
+        if (pa->animation.transitionFrameFn) {
+            pa->animation.transitionFrameFn(t);
+        }
+
+        observer.onCameraIsChanging();
+        pa->done = false;
+    } else {
+        pa->done = true;
+    }
+
+    return pa->done;
 }
 
 // MARK: - Position
@@ -519,14 +602,22 @@ ProjectionMode Transform::getProjectionMode() const {
 
 // MARK: - Transition
 
-void Transform::startTransition(const CameraOptions& camera,
-                                const AnimationOptions& animation,
-                                const std::function<void(double)>& frame,
-                                const Duration& duration) {
-    if (transitionFinishFn) {
-        transitionFinishFn();
+void Transform::animationFinishFrame(std::shared_ptr<PropertyAnimation>& pa) {
+    if (!pa || pa->finished) {
+        return;
     }
 
+    if (pa->animation.transitionFinishFn) {
+        pa->animation.transitionFinishFn();
+    }
+
+    pa->finished = true;
+
+    observer.onCameraDidChange(pa->isAnimated() ? MapObserver::CameraChangeMode::Animated
+                                                : MapObserver::CameraChangeMode::Immediate);
+}
+
+void Transform::startTransition(const CameraOptions& camera, const Duration& duration) {
     bool isAnimated = duration != Duration::zero();
     observer.onCameraWillChange(isAnimated ? MapObserver::CameraChangeMode::Animated
                                            : MapObserver::CameraChangeMode::Immediate);
@@ -534,115 +625,102 @@ void Transform::startTransition(const CameraOptions& camera,
     // Associate the anchor, if given, with a coordinate.
     // Anchor and center points are mutually exclusive, with preference for the
     // center point when both are set.
-    std::optional<ScreenCoordinate> anchor = camera.center ? std::nullopt : camera.anchor;
-    LatLng anchorLatLng;
-    if (anchor) {
-        anchor->y = state.getSize().height - anchor->y;
-        anchorLatLng = state.screenCoordinateToLatLng(*anchor);
+    pas.anchor = camera.center ? std::nullopt : camera.anchor;
+    if (pas.anchor) {
+        pas.anchor->y = state.getSize().height - pas.anchor->y;
+        pas.anchorLatLng = state.screenCoordinateToLatLng(*pas.anchor);
     }
 
-    transitionStart = Clock::now();
-    transitionDuration = duration;
-
-    transitionFrameFn = [isAnimated, animation, frame, anchor, anchorLatLng, this](const TimePoint now) {
-        float t = isAnimated ? (std::chrono::duration<float>(now - transitionStart) / transitionDuration) : 1.0f;
-        if (t >= 1.0) {
-            frame(1.0);
-        } else {
-            util::UnitBezier ease = animation.easing ? *animation.easing : util::DEFAULT_TRANSITION_EASE;
-            frame(ease.solve(t, 0.001));
-        }
-
-        if (anchor) state.moveLatLng(anchorLatLng, *anchor);
-
-        // At t = 1.0, a DidChangeAnimated notification should be sent from finish().
-        if (t < 1.0) {
-            if (animation.transitionFrameFn) {
-                animation.transitionFrameFn(t);
-            }
-            observer.onCameraIsChanging();
-            return false;
-        } else {
-            // Indicate that we need to terminate this transition
-            return true;
-        }
-    };
-
-    transitionFinishFn = [isAnimated, animation, this] {
-        state.setProperties(
-            TransformStateProperties().withPanningInProgress(false).withScalingInProgress(false).withRotatingInProgress(
-                false));
-        if (animation.transitionFinishFn) {
-            animation.transitionFinishFn();
-        }
-        observer.onCameraDidChange(isAnimated ? MapObserver::CameraChangeMode::Animated
-                                              : MapObserver::CameraChangeMode::Immediate);
-    };
-
     if (!isAnimated) {
-        auto update = std::move(transitionFrameFn);
-        auto finish = std::move(transitionFinishFn);
-
-        transitionFrameFn = nullptr;
-        transitionFinishFn = nullptr;
-
-        update(Clock::now());
-        finish();
+        activeAnimation = false;
+        updateTransitions(Clock::now());
     }
 }
 
 bool Transform::inTransition() const {
-    return transitionFrameFn != nullptr;
+    return pas.latlng.set || pas.zoom.set || pas.bearing.set || pas.padding.set || pas.pitch.set;
 }
 
 void Transform::updateTransitions(const TimePoint& now) {
-    // Use a temporary function to ensure that the transitionFrameFn lambda is
-    // called only once per update.
+    if (!activeAnimation) {
+        activeAnimation = true;
 
-    // This addresses the symptoms of
-    // https://github.com/mapbox/mapbox-gl-native/issues/11180 where setting a
-    // shape source to nil (or similar) in the `onCameraIsChanging` observer
-    // function causes `Map::Impl::onUpdate()` to be called which in turn calls
-    // this function (before the current iteration has completed), leading to an
-    // infinite loop. See https://github.com/mapbox/mapbox-gl-native/issues/5833
-    // for a similar, related, issue.
-    //
-    // By temporarily nulling the `transitionFrameFn` (and then restoring it
-    // after the temporary has been called) we stop this recursion.
-    //
-    // It's important to note that the scope of this change is stop the above
-    // crashes. It doesn't address any potential deeper issue (for example
-    // user error, how often and when transition callbacks are called).
+        bool panning = false, scaling = false, rotating = false;
+        visit_pas([&](std::shared_ptr<PropertyAnimation>& pa) {
+            if (pa) {
+                panning |= pa->panning;
+                scaling |= pa->scaling;
+                rotating |= pa->rotating;
+            }
+        });
 
-    auto transition = std::move(transitionFrameFn);
-    transitionFrameFn = nullptr;
+        state.setProperties(TransformStateProperties()
+                                .withPanningInProgress(panning)
+                                .withScalingInProgress(scaling)
+                                .withRotatingInProgress(rotating));
 
-    if (transition && transition(now)) {
-        // If the transition indicates that it is complete, then we should call
-        // the finish lambda (going via a temporary as above)
-        auto finish = std::move(transitionFinishFn);
-
-        transitionFinishFn = nullptr;
-        transitionFrameFn = nullptr;
-
-        if (finish) {
-            finish();
+        if (pas.latlng.frameLatLngFunc && pas.zoom.frameZoomFunc) {
+            if (pas.latlng.set || pas.zoom.set) {
+                state.setLatLngZoom(pas.latlng.frameLatLngFunc(now), pas.zoom.frameZoomFunc(now));
+                if (animationTransitionFrame(pas.latlng.pa, pas.latlng.pa->t(now))) {
+                    pas.latlng.set = false;
+                }
+                if (animationTransitionFrame(pas.zoom.pa, pas.zoom.pa->t(now))) {
+                    pas.zoom.set = false;
+                }
+            }
         }
-    } else if (!transitionFrameFn) {
-        // We have to check `transitionFrameFn` is nil here, since a new
-        // transition may have been triggered in a user callback (from the
-        // transition call above)
-        transitionFrameFn = std::move(transition);
+
+        if (pas.bearing.set) {
+            double bearing_t = pas.bearing.pa->t(now);
+            state.setBearing(
+                util::wrap(util::interpolate(pas.bearing.current, pas.bearing.target, bearing_t), -pi, pi));
+            if (animationTransitionFrame(pas.bearing.pa, bearing_t)) {
+                pas.bearing.set = false;
+            }
+        }
+
+        if (pas.padding.set) {
+            double padding_t = pas.padding.pa->t(now);
+            state.setEdgeInsets(
+                {util::interpolate(pas.padding.current.top(), pas.padding.target.top(), padding_t),
+                 util::interpolate(pas.padding.current.left(), pas.padding.target.left(), padding_t),
+                 util::interpolate(pas.padding.current.bottom(), pas.padding.target.bottom(), padding_t),
+                 util::interpolate(pas.padding.current.right(), pas.padding.target.right(), padding_t)});
+            if (animationTransitionFrame(pas.padding.pa, padding_t)) {
+                pas.padding.set = false;
+            }
+        }
+
+        double maxPitch = getMaxPitchForEdgeInsets(state.getEdgeInsets());
+        if (pas.pitch.set || maxPitch < pas.pitch.current) {
+            double pitch_t = pas.pitch.pa->t(now);
+            state.setPitch(std::min(maxPitch, util::interpolate(pas.pitch.current, pas.pitch.target, pitch_t)));
+            if (animationTransitionFrame(pas.pitch.pa, pitch_t)) {
+                pas.pitch.set = false;
+            }
+        }
+
+        if (pas.anchor) {
+            state.moveLatLng(pas.anchorLatLng, *pas.anchor);
+        }
+
+        visit_pas([&](std::shared_ptr<PropertyAnimation>& pa) {
+            if (pa) {
+                if (pa->done) animationFinishFrame(pa);
+                pa->ran = false;
+            }
+        });
+
+        activeAnimation = false;
     }
 }
 
 void Transform::cancelTransitions() {
-    if (transitionFinishFn) {
-        transitionFinishFn();
-    }
+    visit_pas([this](std::shared_ptr<PropertyAnimation>& pa) { animationFinishFrame(pa); });
 
-    transitionFrameFn = nullptr;
-    transitionFinishFn = nullptr;
+    pas = {};
+    activeAnimation = false;
 }
 
 void Transform::setGestureInProgress(bool inProgress) {
