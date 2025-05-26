@@ -28,8 +28,8 @@ public:
                    float sortKey_ = 0.0f)
         : i(i_),
           feature(std::move(feature_)),
-          patterns(std::make_unique<PatternLayerMap>(std::move(patterns_))),
-          sortKey(sortKey_) {}
+          sortKey(sortKey_),
+          patterns(std::make_unique<PatternLayerMap>(std::move(patterns_))) {}
 
     PatternLayerMap& getPatterns() const { return *patterns; }
 
