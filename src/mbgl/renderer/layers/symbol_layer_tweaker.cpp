@@ -6,7 +6,6 @@
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gfx/symbol_drawable_data.hpp>
 #include <mbgl/layout/symbol_projection.hpp>
-#include <mbgl/programs/symbol_program.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
@@ -104,8 +103,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const auto& symbolData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
         const auto isText = (symbolData.symbolType == SymbolType::Text);
 
-        const auto* textBinders = isText ? static_cast<SymbolSDFTextProgram::Binders*>(drawable.getBinders()) : nullptr;
-        const auto* iconBinders = isText ? nullptr : static_cast<SymbolIconProgram::Binders*>(drawable.getBinders());
+        const auto* textBinders = isText ? static_cast<SymbolTextBinders*>(drawable.getBinders()) : nullptr;
+        const auto* iconBinders = isText ? nullptr : static_cast<SymbolIconBinders*>(drawable.getBinders());
 
         const auto bucket = std::static_pointer_cast<SymbolBucket>(drawable.getBucket());
         const auto* tile = drawable.getRenderTile();

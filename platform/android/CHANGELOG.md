@@ -2,6 +2,39 @@
 
 ## main
 
+### ✨ Features and improvements
+
+### 🐞 Bug fixes
+
+## 11.9.0
+
+### ✨ Features and improvements
+
+- Add dynamic texture atlas ([#3198](https://github.com/maplibre/maplibre-native/pull/3198)).
+- Remove some of unused legacy uniforms ([#3481](https://github.com/maplibre/maplibre-native/pull/3481)).
+
+### 🐞 Bug fixes
+
+- Fix vulkan scaling issue ([#3489](https://github.com/maplibre/maplibre-native/pull/3489)).
+- Fix swapchain out of bounds ([#3486](https://github.com/maplibre/maplibre-native/pull/3486)).
+- Fix validation error reported by VulkanSDK 1.4.313.0 ([#3471](https://github.com/maplibre/maplibre-native/pull/3471)).P
+
+## 11.9.0-pre0
+
+Pre-release to test out the new [dynamic texture atlas](https://github.com/maplibre/maplibre-native/pull/3198). This should result in a memory reduction. Please [open an issue](https://github.com/maplibre/maplibre-native/issues) if you encounter any problems.
+
+## 11.8.8
+
+### ✨ Features and improvements
+
+- Update NDK to 28.1.13356709 ([#3450](https://github.com/maplibre/maplibre-native/pull/3450)).
+- Add support to range requests in AssetFileSource ([#3461](https://github.com/maplibre/maplibre-native/pull/3404)).
+- Force PMTiles metadata to always have XYZ tile scheme ([#3403](https://github.com/maplibre/maplibre-native/pull/3403)).
+
+### 🐞 Bug fixes
+
+- Make sure renderThread is alive before calling requestExitAndWait() ([#3461](https://github.com/maplibre/maplibre-native/pull/3461)).
+
 ## 11.8.7
 
 We now make releases with debug builds to make it easier to report issues with relevant logs.

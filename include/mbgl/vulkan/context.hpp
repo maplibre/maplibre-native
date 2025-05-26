@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
@@ -105,10 +104,6 @@ public:
 
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
 
-    std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
-                                                                gfx::TexturePixelType,
-                                                                gfx::TextureChannelDataType) override;
-
     std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType,
                                                                           Size size) override;
 
@@ -157,19 +152,14 @@ private:
     struct FrameResources {
         vk::UniqueCommandBuffer commandBuffer;
 
-        vk::UniqueSemaphore surfaceSemaphore;
-        vk::UniqueSemaphore frameSemaphore;
+        vk::UniqueSemaphore acquireSurfaceSemaphore;
         vk::UniqueFence flightFrameFence;
 
         std::vector<std::function<void(Context&)>> deletionQueue;
 
-        FrameResources(vk::UniqueCommandBuffer& cb,
-                       vk::UniqueSemaphore&& surf,
-                       vk::UniqueSemaphore&& frame,
-                       vk::UniqueFence&& flight)
+        FrameResources(vk::UniqueCommandBuffer& cb, vk::UniqueSemaphore&& surf, vk::UniqueFence&& flight)
             : commandBuffer(std::move(cb)),
-              surfaceSemaphore(std::move(surf)),
-              frameSemaphore(std::move(frame)),
+              acquireSurfaceSemaphore(std::move(surf)),
               flightFrameFence(std::move(flight)) {}
 
         void runDeletionQueue(Context&);

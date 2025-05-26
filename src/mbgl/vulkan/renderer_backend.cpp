@@ -331,8 +331,7 @@ void RendererBackend::initDebug() {
         const vk::DebugUtilsMessageTypeFlagsEXT type = vk::DebugUtilsMessageTypeFlagsEXT() |
                                                        vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
                                                        vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
-                                                       vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
-                                                       vk::DebugUtilsMessageTypeFlagBitsEXT::eDeviceAddressBinding;
+                                                       vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance;
 
         const auto createInfo =
             vk::DebugUtilsMessengerCreateInfoEXT().setMessageSeverity(severity).setMessageType(type).setPfnUserCallback(
@@ -692,7 +691,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::LocationIndicatorTexturedShader,
                   shaders::BuiltIn::RasterShader,
                   shaders::BuiltIn::SymbolIconShader,
-                  shaders::BuiltIn::SymbolSDFIconShader,
+                  shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader,
                   shaders::BuiltIn::WideVectorShader>(shaders, programParameters);
 }

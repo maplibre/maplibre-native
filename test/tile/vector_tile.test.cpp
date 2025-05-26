@@ -5,6 +5,7 @@
 #include <mbgl/tile/tile_loader_impl.hpp>
 #include <mbgl/storage/resource_options.hpp>
 
+#include <mbgl/util/io.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/map/transform.hpp>
 #include <mbgl/style/style.hpp>

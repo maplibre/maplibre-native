@@ -3,7 +3,7 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 
 #include <memory>
 
