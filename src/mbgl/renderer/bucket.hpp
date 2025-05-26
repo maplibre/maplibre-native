@@ -19,7 +19,7 @@ class RenderLayer;
 class CrossTileSymbolLayerIndex;
 class OverscaledTileID;
 class PatternDependency;
-using PatternLayerMap = std::map<std::string, PatternDependency>;
+using PatternLayerMap = mbgl::unordered_map<std::string, PatternDependency>;
 class Placement;
 class TransformState;
 class BucketPlacementData;
