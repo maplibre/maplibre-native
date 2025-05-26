@@ -38,6 +38,7 @@ public:
     std::size_t i;
     std::unique_ptr<GeometryTileFeature> feature;
     float sortKey;
+
 protected:
     std::unique_ptr<PatternLayerMap> patterns;
 };
