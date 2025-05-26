@@ -7627,7 +7627,7 @@ static void *windowScreenContext = &windowScreenContext;
         MLNPluginLayer *weakPlugInLayer = layer;
 
         pluginLayer->_platformReference = (__bridge void *)layer;
-        
+
         MLNPluginLayerCapabilities *capabilities = [pluginLayerClass layerCapabilities];
         auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
         auto & pm = pluginLayerImpl->_propertyManager;

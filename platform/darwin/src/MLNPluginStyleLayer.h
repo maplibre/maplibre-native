@@ -13,7 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MLNPluginStyleLayer : MLNStyleLayer
 
--(MLNPluginLayer *)pluginLayer;
+- (MLNPluginLayer *)pluginLayer;
 
 @end
 
