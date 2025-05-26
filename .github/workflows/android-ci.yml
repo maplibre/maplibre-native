@@ -12,6 +12,9 @@ on:
     branches:
       - "*"
 
+permissions:
+  actions: write
+
 concurrency:
   # cancel jobs on PRs only
   group: ${{ github.workflow }}-${{ github.ref }}
