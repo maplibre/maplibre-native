@@ -175,7 +175,6 @@ swift_library(
         "test/amsterdam.geojson",
         "test/one-liner.json",
         "app/PluginLayerTestStyle.json",
-        "app/PluginLayerTestStyleSimple.json",
     ],
     visibility = [
         "//platform/ios/test:__pkg__",
@@ -300,7 +299,6 @@ objc_library(
 exports_files(
     [
         "app/PluginLayerTestStyle.json",
-        "app/PluginLayerTestStyleSimple.json",
         "app/PluginLayerExample.h",
         "app/PluginLayerExample.mm",
         "app/PluginLayerExampleMetalRendering.h",

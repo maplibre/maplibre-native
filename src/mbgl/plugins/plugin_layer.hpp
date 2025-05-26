@@ -48,6 +48,8 @@ public:
     typedef std::function<void(const LayerPrepareParameters&)> OnUpdateLayer;
     typedef std::function<void(const std::string& properties)> OnUpdateLayerProperties;
 
+    void *_platformReference = nullptr;
+    
 protected:
     std::optional<conversion::Error> setPropertyInternal(const std::string& name,
                                                          const conversion::Convertible& value) final;

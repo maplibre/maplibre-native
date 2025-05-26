@@ -26,6 +26,7 @@
 // Plug In Examples
 #import "PluginLayerExample.h"
 #import "PluginLayerExampleMetalRendering.h"
+#import "MLNPluginStyleLayer.h"
 
 static const CLLocationCoordinate2D WorldTourDestinations[] = {
     { .latitude = 38.8999418, .longitude = -77.033996 },

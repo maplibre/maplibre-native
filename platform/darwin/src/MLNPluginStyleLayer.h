@@ -1,5 +1,5 @@
 //
-//  MLNPLuginStyleLayer.h
+//  MLNPluginStyleLayer.h
 //  App
 //
 //  Created by Malcolm Toon on 5/17/25.
@@ -9,7 +9,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MLNPLuginStyleLayer : MLNStyleLayer
+@class MLNPluginLayer;
+
+@interface MLNPluginStyleLayer : MLNStyleLayer
+
+-(MLNPluginLayer *)pluginLayer;
 
 @end
 

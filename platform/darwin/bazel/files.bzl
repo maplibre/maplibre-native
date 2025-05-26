@@ -104,7 +104,7 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/NSPredicate+MLNAdditions.h",
     "src/NSValue+MLNAdditions.h",
     "src/MLNPluginLayer.h",
-    "src/MLNPLuginStyleLayer.h",
+    "src/MLNPluginStyleLayer.h",
 ]
 
 MLN_DARWIN_OBJCPP_HEADERS = [
@@ -160,7 +160,7 @@ MLN_DARWIN_PRIVATE_HEADERS = [
     "src/MLNVectorTileSource_Private.h",
     "src/NSExpression+MLNPrivateAdditions.h",
     "src/NSPredicate+MLNPrivateAdditions.h",
-     "src/MLNPLuginStyleLayer_Private.h"
+     "src/MLNPluginStyleLayer_Private.h"
 
 ]
 
@@ -214,7 +214,7 @@ MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/NSPredicate+MLNAdditions.mm",
     "src/NSValue+MLNStyleAttributeAdditions.mm",
     "src/MLNPluginLayer.mm",
-    "src/MLNPLuginStyleLayer.mm"
+    "src/MLNPluginStyleLayer.mm"
 
 ]
 MLN_DARWIN_PUBLIC_OBJCPP_CUSTOM_DRAWABLE_SOURCE = [

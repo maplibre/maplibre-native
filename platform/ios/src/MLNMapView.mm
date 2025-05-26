@@ -79,7 +79,7 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/render_pass.hpp>
-#include "MLNPLuginStyleLayer_Private.h"
+#include "MLNPluginStyleLayer_Private.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -7626,6 +7626,8 @@ static void *windowScreenContext = &windowScreenContext;
         // Use weak here so there isn't a retain cycle
         MLNPluginLayer *weakPlugInLayer = layer;
 
+        pluginLayer->_platformReference = (__bridge void *)layer;
+        
         MLNPluginLayerCapabilities *capabilities = [pluginLayerClass layerCapabilities];
         auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
         auto & pm = pluginLayerImpl->_propertyManager;
