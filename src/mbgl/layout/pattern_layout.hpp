@@ -23,8 +23,8 @@ using PatternLayerMap = mbgl::unordered_map<std::string, PatternDependency>;
 class PatternFeature {
 public:
     PatternFeature(std::size_t i_,
-                   std::unique_ptr<GeometryTileFeature> feature_,
-                   PatternLayerMap patterns_,
+                   std::unique_ptr<GeometryTileFeature>&& feature_,
+                   PatternLayerMap&& patterns_,
                    float sortKey_ = 0.0f)
         : i(i_),
           feature(std::move(feature_)),
