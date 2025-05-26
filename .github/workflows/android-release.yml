@@ -51,7 +51,7 @@ jobs:
         id: prepare_release
         run: |
           RELEASE_NOTES_PATH="${PWD}/release_notes.txt"
-          node scripts/release-notes.mjs > "${RELEASE_NOTES_PATH}"
+          node scripts/release-notes.mjs ${{ env.version }} > "${RELEASE_NOTES_PATH}"
           echo release_notes="${RELEASE_NOTES_PATH}" >> "$GITHUB_OUTPUT"
           echo version_tag=android-v${{ env.version }} >> "$GITHUB_OUTPUT"
         shell: bash
