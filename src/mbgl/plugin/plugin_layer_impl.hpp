@@ -30,7 +30,7 @@ namespace style {
 
 using namespace conversion;
 
-struct SingleFloatProperty : DataDrivenPaintProperty<float, attributes::width, uniforms::width> {
+struct DataDrivenSingleFloatProperty : DataDrivenPaintProperty<float, attributes::width, uniforms::width> {
     static float defaultValue() { return 1.f; }
 };
 
