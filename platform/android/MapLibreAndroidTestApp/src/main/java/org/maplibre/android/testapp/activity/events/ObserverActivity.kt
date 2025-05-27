@@ -35,7 +35,6 @@ class ObserverActivity : AppCompatActivity(),
     MapView.OnGlyphsRequestedListener,
     MapView.OnSpriteLoadedListener,
     MapView.OnSpriteRequestedListener,
-    MapView.OnSpriteRequestedListener,
     MapView.OnDidFinishRenderingFrameWithStatsListener {
     // # --8<-- [end:ObserverActivity]
 
@@ -135,11 +134,11 @@ class ObserverActivity : AppCompatActivity(),
             TileOperation.NullOp -> Logger.e(TAG, "An unknown tile operation was emitted for tile ${tile}")
         }
     }
-    // # --8<-- [end:mapEvents]
 
     override fun onDidFinishRenderingFrame(fully: Boolean, stats: RenderingStats) {
 
     }
+    // # --8<-- [end:mapEvents]
 
     override fun onStart() {
         super.onStart()
