@@ -46,6 +46,11 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
         // #-end-example-code
     }
 
+    // #-example-code(ObserverExampleRenderingStats)
+    func mapViewDidFinishRenderingFrame(_: MLNMapView, fullyRendered _: Bool, renderingStats _: MLNRenderingStats) {}
+
+    // #-end-example-code
+
     // #-example-code(ObserverExampleShaders)
     func mapView(_: MLNMapView, shaderWillCompile id: Int, backend: Int, defines: String) {
         print("A new shader is being compiled - shaderID:\(id), backend type:\(backend), program configuration:\(defines)")
