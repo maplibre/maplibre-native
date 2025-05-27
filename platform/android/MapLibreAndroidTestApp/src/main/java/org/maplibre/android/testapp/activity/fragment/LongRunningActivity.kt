@@ -1,15 +1,22 @@
 package org.maplibre.android.testapp.activity.fragment
 
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.location.Location
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.lifecycleScope
+import com.google.gson.Gson
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.maplibre.android.annotations.IconFactory
 import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.annotations.PolygonOptions
@@ -19,12 +26,28 @@ import org.maplibre.android.camera.CameraUpdate
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
+import org.maplibre.android.location.LocationComponentActivationOptions
+import org.maplibre.android.location.OnLocationCameraTransitionListener
+import org.maplibre.android.location.modes.CameraMode
+import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.CancelableCallback
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
+import org.maplibre.android.testapp.utils.ResourceUtils
+import org.maplibre.geojson.Point
+import org.maplibre.navigation.android.navigation.v5.location.replay.ReplayRouteLocationEngine
+import org.maplibre.navigation.android.navigation.v5.models.DirectionsResponse
+import org.maplibre.navigation.android.navigation.v5.models.DirectionsRoute
+import org.maplibre.navigation.android.navigation.v5.models.RouteOptions
+import org.maplibre.navigation.android.navigation.v5.navigation.MapLibreNavigation
+import org.maplibre.navigation.android.navigation.v5.navigation.MapLibreNavigationOptions
+import org.maplibre.navigation.android.navigation.v5.navigation.NavigationMapRoute
+import org.maplibre.navigation.android.navigation.v5.routeprogress.RouteProgress
 import java.lang.reflect.Field
+import java.util.Locale
+import java.util.logging.Logger
 import kotlin.coroutines.resume
 import kotlin.math.min
 import kotlin.random.Random
@@ -34,8 +57,15 @@ class LongRunningActivity : AppCompatActivity() {
     private lateinit var mapView2: MapView
     private lateinit var bitmapDrawables: List<Drawable>
 
+    private lateinit var navigation: MapLibreNavigation
+    private lateinit var navigationMapRoute: NavigationMapRoute
+    private val replayRouteLocationEngine = ReplayRouteLocationEngine()
+    private var routeUpdateTimer = 0.0
+
     // config
     companion object {
+        private val LOG = Logger.getLogger(LongRunningActivity::class.java.name)
+
         private const val RANDOM_SEED = 42
         private val RANDOM = Random(RANDOM_SEED)
 
@@ -68,6 +98,9 @@ class LongRunningActivity : AppCompatActivity() {
             LatLng(31.2304, 121.4737) // SHA
         )
 
+        // controls the list of icons available
+        // false -> use `ICONS` list
+        // true -> use all bitmap drawables in `org.maplibre.android.R.drawable.*`
         private const val USE_ALL_DRAWABLES = false
         private val ICONS = arrayListOf(
             org.maplibre.android.R.drawable.maplibre_info_icon_default,
@@ -75,6 +108,21 @@ class LongRunningActivity : AppCompatActivity() {
             org.maplibre.android.R.drawable.maplibre_marker_icon_default,
             org.maplibre.android.R.drawable.maplibre_compass_icon,
             org.maplibre.android.R.drawable.maplibre_user_puck_icon
+        )
+
+        enum class RouteProvider {
+            Local,
+            OSRM,
+            Valhalla
+        }
+
+        private val ROUTE_PROVIDER = RouteProvider.Local
+
+        private val ROUTES = arrayOf(
+            Pair(LatLng(), LatLng()),
+            Pair(LatLng(), LatLng()),
+            Pair(LatLng(), LatLng()),
+            Pair(LatLng(), LatLng()),
         )
 
         private fun random(min: Double, max: Double): Double {
@@ -155,12 +203,37 @@ class LongRunningActivity : AppCompatActivity() {
                 RANDOM.nextInt(256)
             )
         }
+
+        private fun randomNavZoom(): Double {
+            return random(13.0, 18.0)
+        }
+
+        private fun randomNavTilt(): Double {
+            return random(30.0, 60.0)
+        }
+
+        // in km/h
+        private fun randomNavSpeed(): Int {
+            return random(30, 130)
+        }
+
+        private const val ROUTE_UPDATE_INTERVAL = 10.0
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_long_running_maps)
 
+        mapView1 = supportFragmentManager.findFragmentById(R.id.map1)!!.view as MapView
+        mapView2 = supportFragmentManager.findFragmentById(R.id.map2)!!.view as MapView
+
+        LOG.info("Running activity with seed $RANDOM_SEED")
+
+        mapView1.getMapAsync { map: MapLibreMap -> run(map, mapView1) }
+        mapView2.getMapAsync { map: MapLibreMap -> runNavigation(map, mapView2) }
+    }
+
+    private fun run(map: MapLibreMap, mapView: MapView) {
         if (USE_ALL_DRAWABLES) {
             bitmapDrawables =
                 org.maplibre.android.R.drawable::class.java.fields.map { field: Field ->
@@ -180,16 +253,6 @@ class LongRunningActivity : AppCompatActivity() {
             }
         }
 
-        mapView1 = supportFragmentManager.findFragmentById(R.id.map1)!!.view as MapView
-        mapView2 = supportFragmentManager.findFragmentById(R.id.map2)!!.view as MapView
-
-        mapView1.getMapAsync { map: MapLibreMap -> run(map, mapView1) }
-
-        // TODO setup this for slow navigation
-        mapView2.getMapAsync { map: MapLibreMap -> map.setStyle(TestStyles.DEMOTILES) }
-    }
-
-    private fun run(map: MapLibreMap, mapView: MapView) {
         lifecycleScope.launch {
 
             // since the random generator was not reset each run will have different values
@@ -198,12 +261,17 @@ class LongRunningActivity : AppCompatActivity() {
 
                 runStyleActions(map, mapView)
             }
+
+            // TODO which view determines the activity duration?
+            // TODO poll app memory on exit
+            // close activity
+            finish()
         }
     }
 
     private suspend fun runStyleActions(map: MapLibreMap, mapView: MapView) {
         for (style in STYLES.shuffled(RANDOM)) {
-            println("Running test using $style at $TIME_SCALE speed")
+            LOG.info("Running using $style at $TIME_SCALE speed")
             mapView.setStyleSuspend(style)
             runCameraActions(map)
         }
@@ -242,8 +310,6 @@ class LongRunningActivity : AppCompatActivity() {
                     )
                 }
 
-                // TODO add geojsons?
-
                 runAnnotationActions(map)
             }
 
@@ -251,9 +317,7 @@ class LongRunningActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun runAnnotationActions(map: MapLibreMap) {
-        // TODO add/remove annotations (random?) -> use android `markers` (deprecated) or annotation plugin?
-
+    private fun runAnnotationActions(map: MapLibreMap) {
         // remove some annotations
         repeat(min(map.annotations.size, randomAnnotationRemove())) {
             map.removeAnnotation(map.annotations.random(RANDOM))
@@ -290,8 +354,169 @@ class LongRunningActivity : AppCompatActivity() {
             )
         }
     }
+
+    private fun runNavigation(map: MapLibreMap, mapView: MapView) {
+        navigation = MapLibreNavigation(this,
+            MapLibreNavigationOptions.builder().snapToRoute(true).build())
+            .apply {
+                snapEngine
+                addProgressChangeListener { location: Location, progress: RouteProgress ->
+                    map.locationComponent.forceLocationUpdate(location)
+
+                    if (routeUpdateTimer - progress.durationRemaining() > ROUTE_UPDATE_INTERVAL) {
+                        map.locationComponent.zoomWhileTracking(randomNavZoom())
+                        map.locationComponent.tiltWhileTracking(randomNavTilt())
+
+                        replayRouteLocationEngine.updateSpeed(randomNavSpeed())
+
+                        routeUpdateTimer = progress.durationRemaining()
+
+                        LOG.info("navigation - duration ${progress.durationRemaining()}")
+                    }
+                }
+
+                addNavigationEventListener { running: Boolean ->
+                    LOG.info("navigation $running")
+                }
+            }
+
+        navigation.locationEngine = replayRouteLocationEngine
+        navigationMapRoute = NavigationMapRoute(navigation, mapView, map)
+
+        lifecycleScope.launch {
+            mapView.setStyleSuspend(TestStyles.AMERICANA)
+            enableLocation(map)
+
+            navigationMapRoute.removeRoute()
+
+            val route = getRoute() ?: return@launch
+
+            replayRouteLocationEngine.assign(route)
+            navigationMapRoute.addRoute(route)
+            routeUpdateTimer = route.duration()
+
+            navigation.startNavigation(route)
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun enableLocation(map: MapLibreMap) {
+        map.locationComponent.activateLocationComponent(
+            LocationComponentActivationOptions.builder(this, map.style!!)
+                .useDefaultLocationEngine(false)
+                .build()
+        )
+
+        map.locationComponent.isLocationComponentEnabled = true
+        map.locationComponent.renderMode = RenderMode.GPS
+        map.locationComponent.setCameraMode(CameraMode.TRACKING_GPS,
+            object :
+                OnLocationCameraTransitionListener {
+                override fun onLocationCameraTransitionFinished(cameraMode: Int) {
+                    map.locationComponent.zoomWhileTracking(randomNavZoom())
+                    map.locationComponent.tiltWhileTracking(randomNavTilt())
+                }
+
+                override fun onLocationCameraTransitionCanceled(cameraMode: Int) {}
+            }
+        )
+    }
+
+    private fun getRoute(): DirectionsRoute? {
+        // used by remote providers
+        val routePoints = ROUTES.random(RANDOM)
+        val location = routePoints.first
+        val destination = routePoints.second
+
+        val routeString: String? = when (ROUTE_PROVIDER) {
+            RouteProvider.Local -> {
+                ResourceUtils.readRawResource(this, R.raw.routes)
+            }
+
+            RouteProvider.OSRM -> {
+                val get = "${location.longitude},${location.latitude};" +
+                        "${destination.longitude},${destination.latitude}" +
+                        "?steps=true"
+
+                val request = Request.Builder()
+                    .header("User-Agent", "MapLibre Android")
+                    .url("https://router.project-osrm.org/route/v1/driving/$get")
+                    .get()
+                    .build()
+
+                val response = OkHttpClient().newCall(request).execute()
+                response.body?.string()
+            }
+
+            RouteProvider.Valhalla -> {
+                val requestBody = Gson().toJson(
+                    mapOf(
+                        "format" to "osrm",
+                        "costing" to "auto",
+                        "banner_instructions" to true,
+                        "voice_instructions" to true,
+                        "language" to Locale.getDefault().language,
+                        "directions_options" to mapOf(
+                            "units" to "kilometers"
+                        ),
+                        "costing_options" to mapOf(
+                            "auto" to mapOf(
+                                "top_speed" to 130
+                            )
+                        ),
+                        "locations" to listOf(
+                            mapOf(
+                                "lon" to location.longitude,
+                                "lat" to location.latitude,
+                                "type" to "break"
+                            ),
+                            mapOf(
+                                "lon" to destination.longitude,
+                                "lat" to destination.latitude,
+                                "type" to "break"
+                            )
+                        )
+                    )
+                ).toRequestBody("application/json; charset=utf-8".toMediaType())
+
+                val request = Request.Builder()
+                    .header("User-Agent", "MapLibre Android")
+                    .url("https://valhalla1.openstreetmap.de/route")
+                    .post(requestBody)
+                    .build()
+
+                val response = OkHttpClient().newCall(request).execute()
+                response.body?.string()
+            }
+        }
+
+        if (routeString == null) {
+            LOG.warning("Failed to get route data")
+            return null
+        }
+
+        val directionsResponse = DirectionsResponse.fromJson(routeString)
+        val route = directionsResponse.routes().first()
+
+        val routeOptions = RouteOptions.builder()
+            .baseUrl("https://maplibre.org")
+            .profile("maplibre")
+            .user("maplibre")
+            .accessToken("maplibre")
+            .voiceInstructions(true)
+            .bannerInstructions(true)
+            .language(Locale.getDefault().language)
+            .coordinates(mutableListOf(
+                Point.fromLngLat(location.longitude, location.latitude),
+                Point.fromLngLat(destination.longitude, destination.latitude)))
+            .requestUuid("0000-0000-0000-0000")
+            .build()
+
+        return route.toBuilder().routeOptions(routeOptions).build()
+    }
 }
 
+// helper functions
 suspend fun MapView.setStyleSuspend(styleUrl: String): Unit =
     suspendCancellableCoroutine { continuation ->
         var listener: MapView.OnDidFinishLoadingStyleListener? = null
