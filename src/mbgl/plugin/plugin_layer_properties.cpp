@@ -1,9 +1,3 @@
-//
-//  plugin_layer_properties.cpp
-//  App
-//
-//  Created by Malcolm Toon on 4/25/25.
-//
 
 #include "plugin_layer_properties.hpp"
 #include <mbgl/plugin/plugin_layer_impl.hpp>

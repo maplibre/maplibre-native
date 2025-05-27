@@ -1,10 +1,3 @@
-//
-//  plugin_layer_debug.h
-//  MapLibre
-//
-//  Created by Malcolm Toon on 5/13/25.
-//
-
 #ifndef plugin_layer_debug_h
 #define plugin_layer_debug_h
 

@@ -1,10 +1,3 @@
-//
-//  PluginLayerExample.m
-//  App
-//
-//  Created by Malcolm Toon on 4/23/25.
-//
-
 #import "PluginLayerExample.h"
 
 @implementation PluginLayerExample

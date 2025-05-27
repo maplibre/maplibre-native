@@ -1,10 +1,3 @@
-//
-//  plugin_layer_factory.cpp
-//  MapLibre
-//
-//  Created by Malcolm Toon on 4/24/25.
-//
-
 #include "plugin_layer_factory.hpp"
 #include "plugin_layer.hpp"
 #include "plugin_layer_impl.hpp"

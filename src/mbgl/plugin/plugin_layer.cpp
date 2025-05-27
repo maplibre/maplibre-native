@@ -1,10 +1,3 @@
-//
-//  plugin_layer.cpp
-//  App
-//
-//  Created by Malcolm Toon on 4/24/25.
-//
-
 #include <mbgl/plugin/plugin_layer.hpp>
 #include <mbgl/plugin/plugin_layer_impl.hpp>
 #include <iostream>

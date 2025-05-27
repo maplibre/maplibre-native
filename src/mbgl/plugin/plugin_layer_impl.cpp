@@ -1,10 +1,3 @@
-//
-//  plugin_layer_impl.cpp
-//  App
-//
-//  Created by Malcolm Toon on 4/25/25.
-//
-
 #include "plugin_layer_impl.hpp"
 #include <iostream>
 #include "plugin_layer_debug.hpp"
