@@ -569,13 +569,14 @@ void Map::setTileLodZoomShift(double shift) {
 
 double Map::getTileLodZoomShift() const {
     return impl->tileLodZoomShift;
+}
 
-    ClientOptions Map::getClientOptions() const {
-        return impl->fileSource ? impl->fileSource->getClientOptions() : ClientOptions();
-    }
+ClientOptions Map::getClientOptions() const {
+    return impl->fileSource ? impl->fileSource->getClientOptions() : ClientOptions();
+}
 
-    const std::unique_ptr<util::ActionJournal>& Map::getActionJournal() {
-        return impl->actionJournal;
-    }
+const std::unique_ptr<util::ActionJournal>& Map::getActionJournal() {
+    return impl->actionJournal;
+}
 
 } // namespace mbgl
