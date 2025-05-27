@@ -37,8 +37,9 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
         // print only the newest events on each call
         mapView.clearActionJournalLog()
     }
+
     // #-end-example-code
-  
+
     func mapViewDidFinishLoadingMap(_: MLNMapView) {
         // #-example-code(enableRenderingStatsView)
         mapView.enableRenderingStatsView(true)

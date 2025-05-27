@@ -249,7 +249,6 @@ void Map::Impl::onDidFinishRenderingFrame(RenderMode renderMode,
     }
 
     if (mode == MapMode::Continuous) {
-
         observer.onDidFinishRenderingFrame({MapObserver::RenderMode(renderMode), needsRepaint, placemenChanged, stats});
 
         if (actionJournal) {
