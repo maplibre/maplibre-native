@@ -7551,46 +7551,57 @@ static void *windowScreenContext = &windowScreenContext;
 
     std::string layerType = [capabilities.layerID UTF8String];
 
+    // Default values
     mbgl::style::LayerTypeInfo::Source source = mbgl::style::LayerTypeInfo::Source::NotRequired;
-    if (capabilities.requiresSource) {
-        source = mbgl::style::LayerTypeInfo::Source::Required;
-    }
+    mbgl::style::LayerTypeInfo::TileKind tileKind = mbgl::style::LayerTypeInfo::TileKind::NotRequired;
+    mbgl::style::LayerTypeInfo::FadingTiles fadingTiles = mbgl::style::LayerTypeInfo::FadingTiles::NotRequired;
+    mbgl::style::LayerTypeInfo::Layout layout = mbgl::style::LayerTypeInfo::Layout::NotRequired;
+    mbgl::style::LayerTypeInfo::CrossTileIndex crossTileIndex = mbgl::style::LayerTypeInfo::CrossTileIndex::NotRequired;
+
+
+    /* Future properties for MLNPluginLayerCapabilities
+     @property MLNPluginLayerTileKind tileKind;
+     @property BOOL requiresSource;
+     @property BOOL requiresLayout;
+     @property BOOL requiresRenderingFadingTiles;
+     @property BOOL requiresCrossTileIndex;
+     if (capabilities.requiresSource) {
+         source = mbgl::style::LayerTypeInfo::Source::Required;
+     }
+     
+     if (capabilities.requiresLayout) {
+         layout = mbgl::style::LayerTypeInfo::Layout::Required;
+     }
+
+     if (capabilities.requiresRenderingFadingTiles) {
+         fadingTiles = mbgl::style::LayerTypeInfo::FadingTiles::Required;
+     }
+
+     if (capabilities.requiresCrossTileIndex) {
+         crossTileIndex = mbgl::style::LayerTypeInfo::CrossTileIndex::Required;
+     }
+
+     switch (capabilities.tileKind) {
+         case MLNPluginLayerTileKindRaster:
+             tileKind = mbgl::style::LayerTypeInfo::TileKind::Raster;
+             break;
+         case MLNPluginLayerTileKindRasterDEM:
+             tileKind = mbgl::style::LayerTypeInfo::TileKind::RasterDEM;
+             break;
+         case MLNPluginLayerTileKindNotRequired:
+             tileKind = mbgl::style::LayerTypeInfo::TileKind::NotRequired;
+             break;
+         case MLNPluginLayerTileKindGeometry:
+             tileKind = mbgl::style::LayerTypeInfo::TileKind::Geometry;
+             break;
+     }
+*/
 
     mbgl::style::LayerTypeInfo::Pass3D pass3D = mbgl::style::LayerTypeInfo::Pass3D::NotRequired;
     if (capabilities.requiresPass3D) {
         pass3D = mbgl::style::LayerTypeInfo::Pass3D::Required;
     }
 
-    mbgl::style::LayerTypeInfo::Layout layout = mbgl::style::LayerTypeInfo::Layout::NotRequired;
-    if (capabilities.requiresLayout) {
-        layout = mbgl::style::LayerTypeInfo::Layout::Required;
-    }
-
-    mbgl::style::LayerTypeInfo::FadingTiles fadingTiles = mbgl::style::LayerTypeInfo::FadingTiles::NotRequired;
-    if (capabilities.requiresRenderingFadingTiles) {
-        fadingTiles = mbgl::style::LayerTypeInfo::FadingTiles::Required;
-    }
-
-    mbgl::style::LayerTypeInfo::CrossTileIndex crossTileIndex = mbgl::style::LayerTypeInfo::CrossTileIndex::NotRequired;
-    if (capabilities.requiresCrossTileIndex) {
-        crossTileIndex = mbgl::style::LayerTypeInfo::CrossTileIndex::Required;
-    }
-
-    mbgl::style::LayerTypeInfo::TileKind tileKind = mbgl::style::LayerTypeInfo::TileKind::Geometry;
-    switch (capabilities.tileKind) {
-        case MLNPluginLayerTileKindRaster:
-            tileKind = mbgl::style::LayerTypeInfo::TileKind::Raster;
-            break;
-        case MLNPluginLayerTileKindRasterDEM:
-            tileKind = mbgl::style::LayerTypeInfo::TileKind::RasterDEM;
-            break;
-        case MLNPluginLayerTileKindNotRequired:
-            tileKind = mbgl::style::LayerTypeInfo::TileKind::NotRequired;
-            break;
-        case MLNPluginLayerTileKindGeometry:
-            tileKind = mbgl::style::LayerTypeInfo::TileKind::Geometry;
-            break;
-    }
 
 
 // TODO: This commented code can probably go away, but wanted to check about

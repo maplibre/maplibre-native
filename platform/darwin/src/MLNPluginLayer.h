@@ -51,12 +51,7 @@ MLN_EXPORT
 @interface MLNPluginLayerCapabilities : NSObject
 
 @property NSString *layerID;
-@property BOOL requiresSource;
 @property BOOL requiresPass3D;
-@property BOOL requiresLayout;
-@property BOOL requiresRenderingFadingTiles;
-@property BOOL requiresCrossTileIndex;
-@property MLNPluginLayerTileKind tileKind;
 
 //! This is a list of layer properties that this layer supports.
 @property NSArray<MLNPluginLayerProperty *> *layerProperties;

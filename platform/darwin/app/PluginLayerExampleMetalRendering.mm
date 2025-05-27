@@ -42,7 +42,6 @@ typedef struct
 
     MLNPluginLayerCapabilities *tempResult = [[MLNPluginLayerCapabilities alloc] init];
     tempResult.layerID = @"plugin-layer-metal-rendering";
-    tempResult.tileKind = MLNPluginLayerTileKindNotRequired;
     tempResult.requiresPass3D = YES;
 
     // Define the paint properties that this layer implements and
