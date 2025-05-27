@@ -4,6 +4,7 @@
 
 #import "MLNFoundation.h"
 #import "MLNGeometry.h"
+#import "MLNMapOptions.h"
 #import "MLNStyle.h"
 #import "MLNTypes.h"
 
@@ -89,6 +90,16 @@ MLN_EXPORT IB_DESIGNABLE @interface MLNMapView : NSView<MLNStylable>
  @return An initialized map view.
  */
 - (instancetype)initWithFrame:(NSRect)frame styleURL:(nullable NSURL *)styleURL;
+
+/**
+ Initializes and returns a newly allocated map view with the specified frame
+ and the default style.
+
+ @param frame The frame for the view, measured in points.
+ @param options The map instance options
+ @return An initialized map view.
+ */
+- (instancetype)initWithFrame:(CGRect)frame options:(MLNMapOptions *)options;
 
 // MARK: Accessing the Delegate
 
@@ -1269,6 +1280,17 @@ around the returned camera object if it were set as the receiver’s camera.
  released software for performance and aesthetic reasons.
  */
 @property (nonatomic) MLNMapDebugMaskOptions debugMask;
+
+/**
+ Get the action journal events from oldest to newest.
+ Each element contains a serialized json object with the event data.
+ */
+- (NSArray<NSString *> *)getActionJournalLog;
+
+/**
+ Clear stored action journal events.
+ */
+- (void)clearActionJournalLog;
 
 @end
 
