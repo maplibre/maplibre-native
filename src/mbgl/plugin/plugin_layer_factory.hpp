@@ -22,7 +22,7 @@ public:
                        mbgl::style::LayerTypeInfo::CrossTileIndex crossTileIndex,
                        mbgl::style::LayerTypeInfo::TileKind tileKind);
 
-    typedef std::function<void(mbgl::style::PluginLayer* pluginLayer)> OnLayerCreatedEvent;
+    using OnLayerCreatedEvent = std::function<void(mbgl::style::PluginLayer* pluginLayer)>;
     void setOnLayerCreatedEvent(OnLayerCreatedEvent onLayerCreated) { _onLayerCreated = onLayerCreated; }
 
 protected:
