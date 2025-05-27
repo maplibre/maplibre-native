@@ -16,6 +16,23 @@
     * TBD
  */
 
+/*
+ Merge TODOs
+ 
+ * Render test (?)
+ * iOS Documentation
+    * Link to triangle layer
+ * Clean up TODOs
+ * Remove unused classes
+    * Proprties
+    * Bucket
+ 
+ 
+ 
+ */
+
+
+
 #include <mbgl/style/layer.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_layer.hpp>

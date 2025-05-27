@@ -168,6 +168,7 @@ public:
     PropertyValue<float> _singleFloatProperty;
     void setCurrentSingleFloatValue(float value);
 
+    // TODO: Remove this
 #if INCLUDE_DATA_DRIVEN_COLOR_PROPERTY_OLD
     // Color
     const PropertyValue<DataDrivenColorProperty>& getColor() const;

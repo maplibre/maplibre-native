@@ -12,6 +12,8 @@
 namespace mbgl {
 namespace style {
 
+// TODO: Maybe remove
+
 class PluginLayerProperties final : public LayerProperties {
 public:
     // explicit PluginLayerProperties(Immutable<PluginLayer::Impl>);
