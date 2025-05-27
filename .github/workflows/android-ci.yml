@@ -65,8 +65,8 @@ jobs:
           fetch-depth: 0
 
       - name: Validate VERSION
-        run: ../../.github/scripts/validate-version.sh
-        working-directory: platform/android
+        run: .github/scripts/validate-version.sh platform/android/VERSION
+        working-directory: .
 
       - run: echo "cmake.dir=$(dirname "$(dirname "$(command -v cmake)")")" >> local.properties
 
