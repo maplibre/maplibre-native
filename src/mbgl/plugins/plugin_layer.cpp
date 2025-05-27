@@ -69,12 +69,6 @@ std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::str
     // The properties should be defined when the plugin layer is created
     PluginLayerProperty* property = i->_propertyManager.getProperty(name);
     if (property == nullptr) {
-        // TODO: Should we allow properties that haven't been defined yet?
-        //        property = new PluginLayerProperty();
-        //        property->_propertyType = PluginLayerProperty::PropertyType::SingleFloat;
-        //        property->_propertyName = name;
-        //        i->_propertyManager.addProperty(property);
-
         return Error{"layer doesn't support this property"};
     }
 

@@ -39,21 +39,6 @@ bool PluginLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
     //    paint.hasDataDrivenPropertyDifference(impl.paint);
 }
 
-std::string byte_to_hex_string(const uint8_t input) {
-    static const char characters[] = "0123456789ABCDEF";
-
-    // Zeroes out the buffer unnecessarily, can't be avoided for std::string.
-    std::string ret = "  ";
-
-    // Hack... Against the rules but avoids copying the whole buffer.
-    auto buf = const_cast<char*>(ret.data());
-
-    *buf++ = characters[input >> 4];
-    *buf++ = characters[input & 0x0F];
-
-    return ret;
-}
-
 // Return this property as json
 std::string PluginLayerProperty::asJSON() {
     std::string tempResult;
