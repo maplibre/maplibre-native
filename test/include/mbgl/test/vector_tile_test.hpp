@@ -34,17 +34,17 @@ public:
 
     VectorTileTest()
         : threadPool(Scheduler::GetBackground(), uniqueID),
-          tileParameters{1.0,
-                         MapDebugOptions(),
-                         transformState,
-                         fileSource,
-                         MapMode::Continuous,
-                         annotationManager.makeWeakPtr(),
-                         imageManager,
-                         glyphManager,
-                         0,
-                         threadPool,
-                         dynamicTextureAtlas},
+          tileParameters{.pixelRatio = 1.0,
+                         .debugOptions = MapDebugOptions(),
+                         .transformState = transformState,
+                         .fileSource = fileSource,
+                         .mode = MapMode::Continuous,
+                         .annotationManager = annotationManager.makeWeakPtr(),
+                         .imageManager = imageManager,
+                         .glyphManager = glyphManager,
+                         .prefetchZoomDelta = 0,
+                         .threadPool = threadPool,
+                         .dynamicTextureAtlas = dynamicTextureAtlas},
           style{fileSource, 1, threadPool} {}
 
     ~VectorTileTest() {
