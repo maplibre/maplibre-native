@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://www.maplibre.org/maplibre-native/android/examples/camera/lat-lng-bounds/">
+        <link rel="canonical" href="https://www.maplibre.org/maplibre-native/android/examples/observability/observe-map-events/">
       
       
-        <link rel="prev" href="../gesture-detector/">
+        <link rel="prev" href="../action-journal/">
       
       
-        <link rel="next" href="../max-min-zoom/">
+        <link rel="next" href="../../styling/animated-image-source/">
       
       
       <link rel="icon" href="https://maplibre.org/favicon.ico">
@@ -24,7 +24,7 @@
     
     
       
-        <title>LatLngBounds API - MapLibre Android Examples</title>
+        <title>Observe Map Events - MapLibre Android Examples</title>
       
     
     
@@ -61,11 +61,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="LatLngBounds API - MapLibre Android Examples" >
+        <meta  property="og:title"  content="Observe Map Events - MapLibre Android Examples" >
       
         <meta  property="og:description"  content="MapLibre Android Examples" >
       
-        <meta  property="og:image"  content="https://www.maplibre.org/maplibre-native/android/examples/assets/images/social/camera/lat-lng-bounds.png" >
+        <meta  property="og:image"  content="https://www.maplibre.org/maplibre-native/android/examples/assets/images/social/observability/observe-map-events.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -73,15 +73,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://www.maplibre.org/maplibre-native/android/examples/camera/lat-lng-bounds/" >
+        <meta  property="og:url"  content="https://www.maplibre.org/maplibre-native/android/examples/observability/observe-map-events/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="LatLngBounds API - MapLibre Android Examples" >
+        <meta  name="twitter:title"  content="Observe Map Events - MapLibre Android Examples" >
       
         <meta  name="twitter:description"  content="MapLibre Android Examples" >
       
-        <meta  name="twitter:image"  content="https://www.maplibre.org/maplibre-native/android/examples/assets/images/social/camera/lat-lng-bounds.png" >
+        <meta  name="twitter:image"  content="https://www.maplibre.org/maplibre-native/android/examples/assets/images/social/observability/observe-map-events.png" >
       
     
     
@@ -104,7 +104,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#latlngbounds-api" class="md-skip">
+        <a href="#observe-map-events" class="md-skip">
           Skip to content
         </a>
       
@@ -139,7 +139,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              LatLngBounds API
+              Observe Map Events
             
           </span>
         </div>
@@ -523,8 +523,6 @@
       
   
   
-    
-  
   
   
     
@@ -537,11 +535,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
           <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
@@ -557,7 +555,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             Camera
@@ -571,7 +569,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../animation-types/" class="md-nav__link">
+      <a href="../../camera/animation-types/" class="md-nav__link">
         
   
   
@@ -594,7 +592,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../animator-animation/" class="md-nav__link">
+      <a href="../../camera/animator-animation/" class="md-nav__link">
         
   
   
@@ -617,7 +615,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../cameraposition/" class="md-nav__link">
+      <a href="../../camera/cameraposition/" class="md-nav__link">
         
   
   
@@ -640,7 +638,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../gesture-detector/" class="md-nav__link">
+      <a href="../../camera/gesture-detector/" class="md-nav__link">
         
   
   
@@ -660,19 +658,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../camera/lat-lng-bounds/" class="md-nav__link">
         
   
   
@@ -683,7 +672,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -696,7 +684,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../max-min-zoom/" class="md-nav__link">
+      <a href="../../camera/max-min-zoom/" class="md-nav__link">
         
   
   
@@ -719,7 +707,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../move-map-pixels/" class="md-nav__link">
+      <a href="../../camera/move-map-pixels/" class="md-nav__link">
         
   
   
@@ -742,7 +730,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../zoom-methods/" class="md-nav__link">
+      <a href="../../camera/zoom-methods/" class="md-nav__link">
         
   
   
@@ -865,8 +853,10 @@
       
   
   
+    
   
   
+  
     
     
     
@@ -877,11 +867,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" checked>
         
           
           <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
@@ -897,7 +887,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             Observability
@@ -911,7 +901,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../observability/action-journal/" class="md-nav__link">
+      <a href="../action-journal/" class="md-nav__link">
         
   
   
@@ -931,10 +921,19 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../observability/observe-map-events/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -945,6 +944,7 @@
   
 
       </a>
+      
     </li>
   
 
@@ -1230,7 +1230,7 @@
 
 
   
-    <a href="https://github.com/maplibre/maplibre-native/edit/main/platform/android/docs/camera/lat-lng-bounds.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/maplibre/maplibre-native/edit/main/platform/android/docs/observability/observe-map-events.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -1238,38 +1238,76 @@
   
 
 
-<h1 id="latlngbounds-api">LatLngBounds API</h1>
+<h1 id="observe-map-events">Observe Map Events</h1>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>You can find the full source code of this example in <a href="https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/camera/LatLngBoundsActivity.kt"><code>LatLngBoundsActivity.kt</code></a> of the MapLibreAndroidTestApp.</p>
+<p>You can find the full source code of this example in <a href="https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/events/ObserverActivity.kt"><code>ObserverActivity.kt</code></a> of the MapLibreAndroidTestApp.</p>
 </div>
-<p>This example demonstrates setting the camera to some bounds defined by some features. It sets these bounds when the map is initialized and when the <a href="https://m2.material.io/components/sheets-bottom">bottom sheet</a> is opened or closed.</p>
-<figure>
-<br />
-<video controls="controls" poster="https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/lat_lng_bounds_thumbnail.jpg" width="250">
-    <source src="https://dwxvn1oqw6mkc.cloudfront.net/android-documentation-resources/lat_lng_bounds.mp4" />
-  </video>
-</figure>
-<p>Here you can see how the feature collection is loaded and how <code>MapLibreMap.getCameraForLatLngBounds</code> is used to set the bounds during map initialization:</p>
-<div class="language-kotlin highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">val</span><span class="w"> </span><span class="nv">featureCollection</span><span class="p">:</span><span class="w"> </span><span class="n">FeatureCollection</span><span class="w"> </span><span class="o">=</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="n">fromJson</span><span class="p">(</span><span class="n">GeoParseUtil</span><span class="p">.</span><span class="na">loadStringFromAssets</span><span class="p">(</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;points-sf.geojson&quot;</span><span class="p">))</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">bounds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">createBounds</span><span class="p">(</span><span class="n">featureCollection</span><span class="p">)</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">map</span><span class="p">.</span><span class="na">getCameraForLatLngBounds</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span><span class="w"> </span><span class="n">createPadding</span><span class="p">(</span><span class="n">peekHeight</span><span class="p">))</span><span class="o">?.</span><span class="na">let</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="n">map</span><span class="p">.</span><span class="na">cameraPosition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">it</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">}</span>
+<p>You can observe-low level map events that are happening by registering listeners to a <code>MapView</code>. Below you can see the the map events that are currently available.</p>
+<div class="language-kotlin highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">override</span><span class="w"> </span><span class="kd">fun</span><span class="w"> </span><span class="nf">onPreCompileShader</span><span class="p">(</span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="kt">Int</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="kt">Int</span><span class="p">,</span><span class="w"> </span><span class="n">defines</span><span class="p">:</span><span class="w"> </span><span class="kt">String</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="n">shaderTimes</span><span class="o">[</span><span class="s">&quot;</span><span class="si">${</span><span class="n">id</span><span class="si">}</span><span class="s">-</span><span class="si">${</span><span class="n">type</span><span class="si">}</span><span class="s">-</span><span class="si">${</span><span class="n">defines</span><span class="si">}</span><span class="s">&quot;</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">TimeSource</span><span class="p">.</span><span class="na">Monotonic</span><span class="p">.</span><span class="na">markNow</span><span class="p">()</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="n">Logger</span><span class="p">.</span><span class="na">i</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;A new shader is being compiled, shaderID:</span><span class="si">${</span><span class="n">id</span><span class="si">}</span><span class="s">, backend type:</span><span class="si">${</span><span class="n">type</span><span class="si">}</span><span class="s">, program configuration:</span><span class="si">${</span><span class="n">defines</span><span class="si">}</span><span class="s">&quot;</span><span class="p">)</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">}</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="kd">override</span><span class="w"> </span><span class="kd">fun</span><span class="w"> </span><span class="nf">onPostCompileShader</span><span class="p">(</span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="kt">Int</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="p">:</span><span class="w"> </span><span class="kt">Int</span><span class="p">,</span><span class="w"> </span><span class="n">defines</span><span class="p">:</span><span class="w"> </span><span class="kt">String</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">startTime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">shaderTimes</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;</span><span class="si">${</span><span class="n">id</span><span class="si">}</span><span class="s">-</span><span class="si">${</span><span class="n">type</span><span class="si">}</span><span class="s">-</span><span class="si">${</span><span class="n">defines</span><span class="si">}</span><span class="s">&quot;</span><span class="p">)</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">startTime</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">        </span><span class="n">Logger</span><span class="p">.</span><span class="na">i</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;A shader has been compiled in </span><span class="si">${</span><span class="n">startTime</span><span class="p">.</span><span class="na">elapsedNow</span><span class="p">()</span><span class="si">}</span><span class="s">, shaderID:</span><span class="si">${</span><span class="n">id</span><span class="si">}</span><span class="s">, backend type:</span><span class="si">${</span><span class="n">type</span><span class="si">}</span><span class="s">, program configuration:</span><span class="si">${</span><span class="n">defines</span><span class="si">}</span><span class="s">&quot;</span><span class="p">)</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="p">}</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="kd">override</span><span class="w"> </span><span class="kd">fun</span><span class="w"> </span><span class="nf">onGlyphsRequested</span><span class="p">(</span><span class="n">fontStack</span><span class="p">:</span><span class="w"> </span><span class="n">Array</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">rangeStart</span><span class="p">:</span><span class="w"> </span><span class="kt">Int</span><span class="p">,</span><span class="w"> </span><span class="n">rangeEnd</span><span class="p">:</span><span class="w"> </span><span class="kt">Int</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="n">Logger</span><span class="p">.</span><span class="na">i</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Glyphs are being requested for the font stack </span><span class="si">$</span><span class="n">fontStack</span><span class="s">, ranging from </span><span class="si">$</span><span class="n">rangeStart</span><span class="s"> to </span><span class="si">$</span><span class="n">rangeEnd</span><span class="s">&quot;</span><span class="p">)</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="p">}</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="kd">override</span><span class="w"> </span><span class="kd">fun</span><span class="w"> </span><span class="nf">onGlyphsLoaded</span><span class="p">(</span><span class="n">fontStack</span><span class="p">:</span><span class="w"> </span><span class="n">Array</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">rangeStart</span><span class="p">:</span><span class="w"> </span><span class="kt">Int</span><span class="p">,</span><span class="w"> </span><span class="n">rangeEnd</span><span class="p">:</span><span class="w"> </span><span class="kt">Int</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="n">Logger</span><span class="p">.</span><span class="na">i</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Glyphs have been loaded for the font stack </span><span class="si">$</span><span class="n">fontStack</span><span class="s">, ranging from </span><span class="si">$</span><span class="n">rangeStart</span><span class="s"> to </span><span class="si">$</span><span class="n">rangeEnd</span><span class="s">&quot;</span><span class="p">)</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="p">}</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="kd">override</span><span class="w"> </span><span class="kd">fun</span><span class="w"> </span><span class="nf">onSpriteRequested</span><span class="p">(</span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="kt">String</span><span class="p">,</span><span class="w"> </span><span class="n">url</span><span class="p">:</span><span class="w"> </span><span class="kt">String</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span><span class="n">Logger</span><span class="p">.</span><span class="na">i</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;The sprite </span><span class="si">$</span><span class="n">id</span><span class="s"> has been requested from </span><span class="si">$</span><span class="n">url</span><span class="s">&quot;</span><span class="p">)</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="p">}</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="kd">override</span><span class="w"> </span><span class="kd">fun</span><span class="w"> </span><span class="nf">onSpriteLoaded</span><span class="p">(</span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="kt">String</span><span class="p">,</span><span class="w"> </span><span class="n">url</span><span class="p">:</span><span class="w"> </span><span class="kt">String</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">    </span><span class="n">Logger</span><span class="p">.</span><span class="na">i</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;The sprite </span><span class="si">$</span><span class="n">id</span><span class="s"> has been loaded from </span><span class="si">$</span><span class="n">url</span><span class="s">&quot;</span><span class="p">)</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="p">}</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="kd">override</span><span class="w"> </span><span class="kd">fun</span><span class="w"> </span><span class="nf">onTileAction</span><span class="p">(</span><span class="n">op</span><span class="p">:</span><span class="w"> </span><span class="n">TileOperation</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">:</span><span class="w"> </span><span class="kt">Int</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">:</span><span class="w"> </span><span class="kt">Int</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">:</span><span class="w"> </span><span class="kt">Int</span><span class="p">,</span><span class="w"> </span><span class="n">wrap</span><span class="p">:</span><span class="w"> </span><span class="kt">Int</span><span class="p">,</span><span class="w"> </span><span class="n">overscaledZ</span><span class="p">:</span><span class="w"> </span><span class="kt">Int</span><span class="p">,</span><span class="w"> </span><span class="n">sourceID</span><span class="p">:</span><span class="w"> </span><span class="kt">String</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">tile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;X:</span><span class="si">${</span><span class="n">x</span><span class="si">}</span><span class="s">, Y:</span><span class="si">${</span><span class="n">y</span><span class="si">}</span><span class="s">, Z:</span><span class="si">${</span><span class="n">z</span><span class="si">}</span><span class="s">, Wrap:</span><span class="si">${</span><span class="n">wrap</span><span class="si">}</span><span class="s">, OverscaledZ:</span><span class="si">${</span><span class="n">overscaledZ</span><span class="si">}</span><span class="s">, SourceID:</span><span class="si">${</span><span class="n">sourceID</span><span class="si">}</span><span class="s">&quot;</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">    </span><span class="k">when</span><span class="w"> </span><span class="p">(</span><span class="n">op</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">        </span><span class="n">TileOperation</span><span class="p">.</span><span class="na">RequestedFromCache</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Logger</span><span class="p">.</span><span class="na">i</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Requesting tile </span><span class="si">${</span><span class="n">tile</span><span class="si">}</span><span class="s"> from the cache&quot;</span><span class="p">)</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="w">        </span><span class="n">TileOperation</span><span class="p">.</span><span class="na">RequestedFromNetwork</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Logger</span><span class="p">.</span><span class="na">i</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Requesting tile </span><span class="si">${</span><span class="n">tile</span><span class="si">}</span><span class="s"> from the network&quot;</span><span class="p">)</span>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">        </span><span class="n">TileOperation</span><span class="p">.</span><span class="na">LoadFromCache</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Logger</span><span class="p">.</span><span class="na">i</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Loading tile </span><span class="si">${</span><span class="n">tile</span><span class="si">}</span><span class="s">, requested from the cache&quot;</span><span class="p">)</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="w">        </span><span class="n">TileOperation</span><span class="p">.</span><span class="na">LoadFromNetwork</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Logger</span><span class="p">.</span><span class="na">i</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Loading tile </span><span class="si">${</span><span class="n">tile</span><span class="si">}</span><span class="s">, requested from the network&quot;</span><span class="p">)</span>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="w">        </span><span class="n">TileOperation</span><span class="p">.</span><span class="na">StartParse</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Logger</span><span class="p">.</span><span class="na">i</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Parsing tile </span><span class="si">${</span><span class="n">tile</span><span class="si">}</span><span class="s">&quot;</span><span class="p">)</span>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="w">        </span><span class="n">TileOperation</span><span class="p">.</span><span class="na">EndParse</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Logger</span><span class="p">.</span><span class="na">i</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Completed parsing tile </span><span class="si">${</span><span class="n">tile</span><span class="si">}</span><span class="s">&quot;</span><span class="p">)</span>
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="w">        </span><span class="n">TileOperation</span><span class="p">.</span><span class="na">Error</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Logger</span><span class="p">.</span><span class="na">e</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;An error occured during proccessing for tile </span><span class="si">${</span><span class="n">tile</span><span class="si">}</span><span class="s">&quot;</span><span class="p">)</span>
+</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="w">        </span><span class="n">TileOperation</span><span class="p">.</span><span class="na">Cancelled</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Logger</span><span class="p">.</span><span class="na">i</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Pending work on tile </span><span class="si">${</span><span class="n">tile</span><span class="si">}</span><span class="s"> was cancelled&quot;</span><span class="p">)</span>
+</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="w">        </span><span class="n">TileOperation</span><span class="p">.</span><span class="na">NullOp</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Logger</span><span class="p">.</span><span class="na">e</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;An unknown tile operation was emitted for tile </span><span class="si">${</span><span class="n">tile</span><span class="si">}</span><span class="s">&quot;</span><span class="p">)</span>
+</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>The <code>createBounds</code> function uses the <code>LatLngBounds</code> API to include all points within the bounds:</p>
-<div class="language-kotlin highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">private</span><span class="w"> </span><span class="kd">fun</span><span class="w"> </span><span class="nf">createBounds</span><span class="p">(</span><span class="n">featureCollection</span><span class="p">:</span><span class="w"> </span><span class="n">FeatureCollection</span><span class="p">):</span><span class="w"> </span><span class="n">LatLngBounds</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">boundsBuilder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LatLngBounds</span><span class="p">.</span><span class="na">Builder</span><span class="p">()</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="n">featureCollection</span><span class="p">.</span><span class="na">features</span><span class="p">()</span><span class="o">?.</span><span class="na">let</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">feature</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nb">it</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">            </span><span class="kd">val</span><span class="w"> </span><span class="nv">point</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">feature</span><span class="p">.</span><span class="na">geometry</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">Point</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">            </span><span class="n">boundsBuilder</span><span class="p">.</span><span class="na">include</span><span class="p">(</span><span class="n">LatLng</span><span class="p">(</span><span class="n">point</span><span class="p">.</span><span class="na">latitude</span><span class="p">(),</span><span class="w"> </span><span class="n">point</span><span class="p">.</span><span class="na">longitude</span><span class="p">()))</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">        </span><span class="p">}</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">boundsBuilder</span><span class="p">.</span><span class="na">build</span><span class="p">()</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="p">}</span>
+<p>You need to register them with these APIs:</p>
+<div class="language-kotlin highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">mapView</span><span class="p">.</span><span class="na">addOnPreCompileShaderListener</span><span class="p">(</span><span class="k">this</span><span class="p">)</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">mapView</span><span class="p">.</span><span class="na">addOnPostCompileShaderListener</span><span class="p">(</span><span class="k">this</span><span class="p">)</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">mapView</span><span class="p">.</span><span class="na">addOnTileActionListener</span><span class="p">(</span><span class="k">this</span><span class="p">)</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">mapView</span><span class="p">.</span><span class="na">addOnGlyphsLoadedListener</span><span class="p">(</span><span class="k">this</span><span class="p">)</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">mapView</span><span class="p">.</span><span class="na">addOnGlyphsRequestedListener</span><span class="p">(</span><span class="k">this</span><span class="p">)</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">mapView</span><span class="p">.</span><span class="na">addOnSpriteLoadedListener</span><span class="p">(</span><span class="k">this</span><span class="p">)</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">mapView</span><span class="p">.</span><span class="na">addOnSpriteRequestedListener</span><span class="p">(</span><span class="k">this</span><span class="p">)</span>
+</span></code></pre></div>
+<p>In this case we implement them by implementing the interfaces below in the activity class, but you could also use lambdas.</p>
+<div class="language-kotlin highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="cm">/**</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="cm"> * Test activity showcasing logging observer actions from the core</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="cm"> */</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="kd">class</span><span class="w"> </span><span class="nc">ObserverActivity</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">AppCompatActivity</span><span class="p">(),</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="n">MapView</span><span class="p">.</span><span class="na">OnPreCompileShaderListener</span><span class="p">,</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="n">MapView</span><span class="p">.</span><span class="na">OnPostCompileShaderListener</span><span class="p">,</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="n">MapView</span><span class="p">.</span><span class="na">OnTileActionListener</span><span class="p">,</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="n">MapView</span><span class="p">.</span><span class="na">OnGlyphsLoadedListener</span><span class="p">,</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="n">MapView</span><span class="p">.</span><span class="na">OnGlyphsRequestedListener</span><span class="p">,</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="n">MapView</span><span class="p">.</span><span class="na">OnSpriteLoadedListener</span><span class="p">,</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="n">MapView</span><span class="p">.</span><span class="na">OnSpriteRequestedListener</span><span class="w"> </span><span class="p">{</span>
 </span></code></pre></div>
 
 
