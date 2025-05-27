@@ -1,5 +1,4 @@
 #pragma once
-#include <list>
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/layout/layout.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>
@@ -18,7 +17,7 @@ public:
     std::string max;
 };
 
-using PatternLayerMap = mbgl::unordered_map<std::string, PatternDependency>;
+using PatternLayerMap = std::map<std::string, PatternDependency>;
 
 class PatternFeature {
 public:
@@ -30,8 +29,12 @@ public:
           feature(std::move(feature_)),
           sortKey(sortKey_),
           patterns(std::make_unique<PatternLayerMap>(std::move(patterns_))) {}
+    PatternFeature(const PatternFeature&) = delete;
+    PatternFeature(PatternFeature&&) = default;
+    PatternFeature& operator=(const PatternFeature&) = delete;
+    PatternFeature& operator=(PatternFeature&&) = default;
 
-    PatternLayerMap& getPatterns() const { return *patterns; }
+    const PatternLayerMap& getPatterns() const { return *patterns; }
 
     friend bool operator<(const PatternFeature& lhs, const PatternFeature& rhs) { return lhs.sortKey < rhs.sortKey; }
 
