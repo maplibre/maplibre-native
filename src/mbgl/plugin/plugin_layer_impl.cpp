@@ -120,46 +120,6 @@ void PluginLayerProperty::setCurrentColorValue(mbgl::Color value) {
 }
 
 namespace conversion {
-/*
-std::optional<Scale> Converter<Scale>::operator()(const Convertible& value, Error& error, bool, bool) const {
-    return Scale();
-}
-
-std::optional<PropertyValue<Scale>> Converter<PropertyValue<Scale>>::operator()(const Convertible& value,
-                                                                                Error& error,
-                                                                                bool allowDataExpressions,
-                                                                                bool convertTokens) const {
-    using namespace mbgl::style::expression;
-    if (isUndefined(value)) {
-        return Scale();
-    } else if (isExpression(value)) {
-        ParsingContext ctx(type::Number);
-        ParseResult expression = ctx.parseLayerPropertyExpression(value);
-        if (!expression) {
-            error.message = ctx.getCombinedErrors();
-            return std::nullopt;
-        }
-        assert(*expression);
-        if (!isFeatureConstant(**expression)) {
-            error.message = "data expressions not supported";
-            return std::nullopt;
-        }
-        //        if (!isZoomConstant(**expression)) {
-        //            error.message = "zoom expressions not supported";
-        //            return std::nullopt;
-        //        }
-
-        //        return ColorRampPropertyValue(std::move(*expression));
-        return PropertyValue<Scale>(std::move(*expression));
-    } else {
-        error.message = "color ramp must be an expression";
-        return std::nullopt;
-    }
-
-    return Scale();
-
-}
- */
 
 } // namespace conversion
 

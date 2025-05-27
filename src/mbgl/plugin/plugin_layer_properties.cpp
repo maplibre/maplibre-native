@@ -14,13 +14,6 @@ namespace style {
 
 PluginLayerProperties::PluginLayerProperties(Immutable<PluginLayer::Impl> impl_)
     : LayerProperties(std::move(impl_)) {}
-/*
- PluginLayerProperties::PluginLayerProperties(
- Immutable<PluginLayer::Impl> impl_,
- HeatmapPaintProperties::PossiblyEvaluated evaluated_)
- : LayerProperties(std::move(impl_)),
- evaluated(std::move(evaluated_)) {}
- */
 
 PluginLayerProperties::~PluginLayerProperties() = default;
 
@@ -29,11 +22,6 @@ unsigned long PluginLayerProperties::constantsMask() const {
     return 0; // evaluated.constantsMask();
 }
 
-/*
- const HeatmapLayer::Impl& HeatmapLayerProperties::layerImpl() const noexcept {
- return static_cast<const HeatmapLayer::Impl&>(*baseImpl);
- }
- */
 expression::Dependency PluginLayerProperties::getDependencies() const noexcept {
     // TODO: What are dependencies and how should they be implemented in the plugin paradigm
     return expression::Dependency::None;

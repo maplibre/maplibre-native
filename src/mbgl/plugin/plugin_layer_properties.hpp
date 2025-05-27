@@ -16,11 +16,7 @@ namespace style {
 
 class PluginLayerProperties final : public LayerProperties {
 public:
-    // explicit PluginLayerProperties(Immutable<PluginLayer::Impl>);
     PluginLayerProperties(Immutable<PluginLayer::Impl>);
-    //    PluginLayerProperties(
-    //        Immutable<PluginLayer::Impl>,
-    //        HeatmapPaintProperties::PossiblyEvaluated);
     ~PluginLayerProperties() override;
 
     // TODO: What is this?
@@ -29,9 +25,6 @@ public:
     // TODO: What is this?
     expression::Dependency getDependencies() const noexcept override;
 
-    // const PluginLayerProperties::Impl& layerImpl() const noexcept;
-    //  Data members.
-    //    HeatmapPaintProperties::PossiblyEvaluated evaluated;
 };
 
 } // namespace style
