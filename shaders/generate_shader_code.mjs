@@ -220,6 +220,7 @@ const root = path.dirname(import.meta.dirname);
 const outLocation = args.out ? args.out : root;
 const shaderRoot = path.join(root, "shaders");
 const outputRoot = path.join(outLocation, "include/mbgl/shaders");
+const cppOutputRoot = path.join(outLocation, "src/mbgl/shaders");
 let generatedHeaders = [];
 let shaderNames = [];
 
@@ -314,6 +315,23 @@ struct ShaderSource<BuiltIn::None, gfx::Backend::Type::OpenGL> {
 };
 
 } // namespace shaders
+} // namespace mbgl
+`);
+
+// Generate shader_source.cpp
+fs.writeFileSync(path.join(cppOutputRoot, "shader_source.cpp"),
+`${generatedHeader}
+#include <mbgl/shaders/shader_source.hpp>
+#include <mbgl/util/enum.hpp>
+
+namespace mbgl {
+
+using namespace shaders;
+
+MBGL_DEFINE_ENUM(BuiltIn, {
+{BuiltIn::None, "None"},${shaderNames.map(name => `\n{BuiltIn::` + name + `, "` + name + `"}`)}
+});
+
 } // namespace mbgl
 `);
 

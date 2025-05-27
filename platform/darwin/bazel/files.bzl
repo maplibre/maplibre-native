@@ -50,6 +50,7 @@ MLN_GENERATED_DARWIN_TEST_CODE = [
 ]
 
 MLN_DARWIN_OBJC_HEADERS = [
+    "src/MLNActionJournalOptions.h",
     "src/MLNAnnotation.h",
     "src/MLNAttributedExpression.h",
     "src/MLNAttributionInfo.h",
@@ -71,6 +72,7 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/MLNLocationManager.h",
     "src/MLNLoggingConfiguration.h",
     "src/MLNMapCamera.h",
+    "src/MLNMapOptions.h",
     "src/MLNMapSnapshotter.h",
     "src/MLNMultiPoint.h",
     "src/MLNNetworkConfiguration.h",
@@ -128,6 +130,7 @@ MLN_DARWIN_OBJCPP_HEADERS = [
 ]
 
 MLN_DARWIN_PRIVATE_HEADERS = [
+    "src/MLNActionJournalOptions_Private.h",
     "src/MLNAttributionInfo_Private.h",
     "src/MLNComputedShapeSource_Private.h",
     "src/MLNCustomStyleLayer_Private.h",
@@ -165,6 +168,7 @@ MLN_DARWIN_PRIVATE_HEADERS = [
 ]
 
 MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
+    "src/MLNActionJournalOptions.mm",
     "src/MLNAttributionInfo.mm",
     "src/MLNBackendResource.mm",
     "src/MLNComputedShapeSource.mm",
@@ -177,6 +181,7 @@ MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/MLNImageSource.mm",
     "src/MLNLoggingConfiguration.mm",
     "src/MLNMapCamera.mm",
+    "src/MLNMapOptions.mm",
     "src/MLNMapSnapshotter.mm",
     "src/MLNMultiPoint.mm",
     "src/MLNNetworkConfiguration.mm",

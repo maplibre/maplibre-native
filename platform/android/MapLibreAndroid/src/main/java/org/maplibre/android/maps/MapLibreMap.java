@@ -897,6 +897,49 @@ public final class MapLibreMap {
     nativeMapView.setDebug(debugActive);
   }
 
+  /**
+   * <p>
+   * Get the list of action journal log files from oldest to newest.
+   * </p>
+   */
+  public String[] getActionJournalLogFiles() {
+    return nativeMapView.getActionJournalLogFiles();
+  }
+
+  /**
+   * <p>
+   * Get the action journal events from oldest to newest.
+   * </p>
+   * Each element contains a serialized json object with the event data.
+   * Example
+   * `{
+   *   "name" : "onTileAction",
+   *   "time" : "2025-04-17T13:13:13.974Z",
+   *   "styleName" : "Streets",
+   *   "styleURL" : "maptiler://maps/streets",
+   *   "event" : {
+   *     "action" : "RequestedFromNetwork",
+   *     "tileX" : 0,
+   *     "tileY" : 0,
+   *     "tileZ" : 0,
+   *     "overscaledZ" : 0,
+   *     "sourceID" : "openmaptiles"
+   *   }
+   * }`
+   */
+  public String[] getActionJournalLog() {
+    return nativeMapView.getActionJournalLog();
+  }
+
+  /**
+   * <p>
+   * Clear stored action journal events.
+   * </p>
+   */
+  public void clearActionJournalLog() {
+    nativeMapView.clearActionJournalLog();
+  }
+
   //
   // API endpoint config
   //

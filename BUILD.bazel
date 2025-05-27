@@ -16,6 +16,7 @@ load(
     "MLN_DRAWABLES_SOURCE",
     "MLN_GENERATED_OPENGL_SHADER_HEADERS",
     "MLN_GENERATED_SHADER_HEADERS",
+    "MLN_GENERATED_SHADER_SOURCE",
     "MLN_GENERATED_STYLE_SOURCE",
     "MLN_OPENGL_HEADERS",
     "MLN_OPENGL_SOURCE",
@@ -45,6 +46,7 @@ js_run_binary(
         allow_empty = False,
     ),
     outs = MLN_GENERATED_SHADER_HEADERS +
+           MLN_GENERATED_SHADER_SOURCE +
            MLN_GENERATED_OPENGL_SHADER_HEADERS,
     tool = ":generate-shader-code-script",
 )
@@ -78,6 +80,7 @@ cc_library(
     name = "mbgl-core",
     srcs = MLN_LAYER_PLUGIN_SOURCE +
            MLN_CORE_SOURCE +
+           MLN_GENERATED_SHADER_SOURCE +
            MLN_GENERATED_STYLE_SOURCE + select({
         ":drawable_renderer": MLN_OPENGL_SOURCE + MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_GL_SOURCE,
         ":metal_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_MTL_SOURCE,

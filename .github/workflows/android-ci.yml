@@ -53,7 +53,7 @@ jobs:
         if: startsWith(runner.name, 'GitHub Actions')
         uses: jlumbroso/free-disk-space@main
         with:
-          tool-cache: false
+          tool-cache: true
           android: false
           dotnet: true
           haskell: true
@@ -344,12 +344,19 @@ jobs:
       - android-build-cpp-test
       - android-build-render-test
     steps:
+      - name: Set success=true
+        if: needs.android-build.result == 'success' && needs.android-build-cpp-test.result == 'success' && needs.android-build-render-test.result == 'success'
+        run: echo success=true > "$GITHUB_ENV"
+
       - name: Mark result as failed
-        if: needs.android-build.result != 'success' || needs.android-build-cpp-test.result != 'success' || needs.android-build-render-test.result != 'success'
+        if: env.success != 'true'
         run: exit 1
 
+      - uses: actions/checkout@v4
+        if: needs.android-build.outputs.make_release == 'true' && env.success
+
       - name: Trigger release
-        if: needs.android-build.outputs.make_release == 'true' && needs.android-build.result == 'success' && needs.android-build-cpp-test.result == 'success' && needs.android-build-render-test.result == 'success'
+        if: needs.android-build.outputs.make_release == 'true' && env.success
         run: gh workflow run android-release.yml --ref ${{ github.sha }}
         env:
          GH_TOKEN: ${{ github.token }}
