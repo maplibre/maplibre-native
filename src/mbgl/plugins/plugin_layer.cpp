@@ -64,10 +64,11 @@ std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::str
     std::cout << "Property Name: " << name << "\n";
 #endif
 
-    auto i = (mbgl::style::PluginLayer::Impl*)baseImpl.get();
+    auto i = static_cast<const mbgl::style::PluginLayer::Impl *>(baseImpl.get());
+    auto pm = i->_propertyManager;
 
     // The properties should be defined when the plugin layer is created
-    PluginLayerProperty* property = i->_propertyManager.getProperty(name);
+    PluginLayerProperty* property = pm.getProperty(name); // i->_propertyManager.getProperty(name);
     if (property == nullptr) {
         return Error{"layer doesn't support this property"};
     }
