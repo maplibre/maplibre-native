@@ -112,9 +112,7 @@ void PluginLayerProperty::setCurrentColorValue(mbgl::Color value) {
     _dataDrivenColorValue = value;
 }
 
-namespace conversion {
-
-} // namespace conversion
+namespace conversion {} // namespace conversion
 
 } // namespace style
 } // namespace mbgl

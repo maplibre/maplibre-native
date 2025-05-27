@@ -7605,7 +7605,7 @@ static void *windowScreenContext = &windowScreenContext;
      if (capabilities.requiresSource) {
          source = mbgl::style::LayerTypeInfo::Source::Required;
      }
-     
+
      if (capabilities.requiresLayout) {
          layout = mbgl::style::LayerTypeInfo::Layout::Required;
      }

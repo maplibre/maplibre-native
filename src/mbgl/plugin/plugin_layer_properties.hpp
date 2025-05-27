@@ -19,7 +19,6 @@ public:
 
     // TODO: What is this?
     expression::Dependency getDependencies() const noexcept override;
-
 };
 
 } // namespace style

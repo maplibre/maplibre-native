@@ -57,7 +57,7 @@ std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::str
     std::cout << "Property Name: " << name << "\n";
 #endif
 
-    auto i = static_cast<const mbgl::style::PluginLayer::Impl *>(baseImpl.get());
+    auto i = static_cast<const mbgl::style::PluginLayer::Impl*>(baseImpl.get());
     auto pm = i->_propertyManager;
 
     // The properties should be defined when the plugin layer is created

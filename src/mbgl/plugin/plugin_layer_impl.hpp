@@ -22,7 +22,6 @@
 // Property types
 #include <mbgl/util/color.hpp>
 
-
 // ---------------------------------------------------
 
 namespace mbgl {
