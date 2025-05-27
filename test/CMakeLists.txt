@@ -18,7 +18,6 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/math/minmax.test.cpp
     ${PROJECT_SOURCE_DIR}/test/math/wrap.test.cpp
     ${PROJECT_SOURCE_DIR}/test/platform/settings.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/programs/symbol_program.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/image_manager.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/pattern_atlas.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/shader_registry.test.cpp
@@ -86,6 +85,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/tile/tile_coordinate.test.cpp
     ${PROJECT_SOURCE_DIR}/test/tile/tile_id.test.cpp
     ${PROJECT_SOURCE_DIR}/test/tile/vector_tile.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/action_journal.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/async_task.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/bounding_volumes.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/camera.test.cpp
@@ -239,8 +239,8 @@ target_link_libraries(
     mbgl-test
     PRIVATE
         ${MLN_CORE_PRIVATE_LIBRARIES}
-        Mapbox::Base::Extras::args
-        Mapbox::Base::pixelmatch-cpp
+        MapLibreNative::Base::Extras::args
+        MapLibreNative::Base::pixelmatch-cpp
         mbgl-compiler-options
         mbgl-vendor-cpp-httplib
     PUBLIC mbgl-core

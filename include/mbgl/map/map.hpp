@@ -13,6 +13,7 @@
 #include <mbgl/map/projection_mode.hpp>
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/util/client_options.hpp>
+#include <mbgl/util/action_journal_options.hpp>
 
 #include <cstdint>
 #include <string>
@@ -31,13 +32,18 @@ class Image;
 class Style;
 } // namespace style
 
+namespace util {
+class ActionJournal;
+} // namespace util
+
 class Map : private util::noncopyable {
 public:
     explicit Map(RendererFrontend&,
                  MapObserver&,
                  const MapOptions&,
                  const ResourceOptions&,
-                 const ClientOptions& = ClientOptions());
+                 const ClientOptions& = ClientOptions(),
+                 const util::ActionJournalOptions& = util::ActionJournalOptions());
     ~Map();
 
     /// Register a callback that will get called (on the render thread) when all
@@ -184,12 +190,16 @@ public:
     void setTileLodZoomShift(double shift);
     double getTileLodZoomShift() const;
 
+    ClientOptions getClientOptions() const;
+
+    const std::unique_ptr<util::ActionJournal>& getActionJournal();
+
 protected:
     class Impl;
     const std::unique_ptr<Impl> impl;
 
     // For testing only.
-    Map(std::unique_ptr<Impl>);
+    Map(std::unique_ptr<Impl>, const util::ActionJournalOptions& = {});
 };
 
 } // namespace mbgl

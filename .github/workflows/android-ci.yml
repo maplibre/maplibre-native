@@ -30,7 +30,7 @@ jobs:
       - name: Get all Android files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files
-        uses: tj-actions/changed-files@v45
+        uses: tj-actions/changed-files@v46
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
@@ -46,12 +46,14 @@ jobs:
       BUILDTYPE: Debug
       IS_LOCAL_DEVELOPMENT: false
       MLN_ANDROID_STL: c++_static
+    outputs:
+      make_release: ${{ steps.make_release.outputs.make_release }}
     steps:
       - name: Free Disk Space (Ubuntu)
         if: startsWith(runner.name, 'GitHub Actions')
         uses: jlumbroso/free-disk-space@main
         with:
-          tool-cache: false
+          tool-cache: true
           android: false
           dotnet: true
           haskell: true
@@ -63,6 +65,10 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - name: Validate VERSION
+        run: ../../.github/scripts/validate-version.sh
+        working-directory: platform/android
 
       - run: echo "cmake.dir=$(dirname "$(dirname "$(command -v cmake)")")" >> local.properties
 
@@ -187,9 +193,9 @@ jobs:
 
       - name: Build Instrumentation Tests, copy to platform/android
         run: |
-          ./gradlew assembleLegacyDebug assembleLegacyDebugAndroidTest -PtestBuildType=debug
-          cp MapLibreAndroidTestApp/build/outputs/apk/legacy/debug/MapLibreAndroidTestApp-legacy-debug.apk InstrumentationTestApp.apk
-          cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/legacy/debug/MapLibreAndroidTestApp-legacy-debug-androidTest.apk InstrumentationTests.apk
+          ./gradlew assembleDrawableDebug assembleDrawableDebugAndroidTest -PtestBuildType=debug
+          cp MapLibreAndroidTestApp/build/outputs/apk/drawable/debug/MapLibreAndroidTestApp-drawable-debug.apk InstrumentationTestApp.apk
+          cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/drawable/debug/MapLibreAndroidTestApp-drawable-debug-androidTest.apk InstrumentationTests.apk
 
       - name: Upload android-ui-test
         uses: actions/upload-artifact@v4
@@ -199,6 +205,17 @@ jobs:
           path: |
             platform/android/InstrumentationTestApp.apk
             platform/android/InstrumentationTests.apk
+
+      - name: VERSION file changed
+        id: version-file-android-changed
+        uses: tj-actions/changed-files@v46
+        with:
+          files: platform/android/VERSION
+
+      - name: Should make release?
+        id: make_release
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.version-file-android-changed.outputs.any_changed == 'true'
+        run: echo make_release=true >> "$GITHUB_OUTPUT"
 
   android-build-cpp-test:
     runs-on: ubuntu-24.04
@@ -327,6 +344,19 @@ jobs:
       - android-build-cpp-test
       - android-build-render-test
     steps:
+      - name: Set success=true
+        if: needs.android-build.result == 'success' && needs.android-build-cpp-test.result == 'success' && needs.android-build-render-test.result == 'success'
+        run: echo success=true > "$GITHUB_ENV"
+
       - name: Mark result as failed
-        if: needs.android-build.result != 'success'
+        if: env.success != 'true'
         run: exit 1
+
+      - uses: actions/checkout@v4
+        if: needs.android-build.outputs.make_release == 'true' && env.success
+
+      - name: Trigger release
+        if: needs.android-build.outputs.make_release == 'true' && env.success
+        run: gh workflow run android-release.yml --ref ${{ github.sha }}
+        env:
+         GH_TOKEN: ${{ github.token }}

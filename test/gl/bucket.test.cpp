@@ -18,8 +18,7 @@
 
 namespace mbgl {
 
-template <class Attributes>
-bool operator==(const Segment<Attributes>& lhs, const Segment<Attributes>& rhs) {
+bool operator==(const SegmentBase& lhs, const SegmentBase& rhs) {
     return std::tie(lhs.vertexOffset, lhs.indexOffset, lhs.vertexLength, lhs.indexLength) ==
            std::tie(rhs.vertexOffset, rhs.indexOffset, rhs.vertexLength, rhs.indexLength);
 }
@@ -221,7 +220,7 @@ TEST(Buckets, RasterBucketMaskEmpty) {
     bucket.setMask({});
     EXPECT_EQ((std::vector<RasterLayoutVertex>{}), bucket.vertices.vector());
     EXPECT_EQ((std::vector<uint16_t>{}), bucket.indices.vector());
-    SegmentVector<RasterAttributes> expectedSegments;
+    SegmentVector expectedSegments;
     expectedSegments.emplace_back(0, 0, 0, 0);
     EXPECT_EQ(expectedSegments, bucket.segments);
 }
@@ -233,7 +232,7 @@ TEST(Buckets, RasterBucketMaskNoChildren) {
     // A mask of 0/0/0 doesn't produce buffers since we're instead using the global shared buffers.
     EXPECT_EQ((std::vector<RasterLayoutVertex>{}), bucket.vertices.vector());
     EXPECT_EQ((std::vector<uint16_t>{}), bucket.indices.vector());
-    EXPECT_EQ((SegmentVector<RasterAttributes>{}), bucket.segments);
+    EXPECT_EQ((SegmentVector{}), bucket.segments);
 }
 
 TEST(Buckets, RasterBucketMaskTwoChildren) {
@@ -242,16 +241,16 @@ TEST(Buckets, RasterBucketMaskTwoChildren) {
 
     EXPECT_EQ((std::vector<RasterLayoutVertex>{
                   // 1/0/1
-                  RasterProgram::layoutVertex({0, 0}, {0, 0}),
-                  RasterProgram::layoutVertex({4096, 0}, {4096, 0}),
-                  RasterProgram::layoutVertex({0, 4096}, {0, 4096}),
-                  RasterProgram::layoutVertex({4096, 4096}, {4096, 4096}),
+                  RasterBucket::layoutVertex({0, 0}, {0, 0}),
+                  RasterBucket::layoutVertex({4096, 0}, {4096, 0}),
+                  RasterBucket::layoutVertex({0, 4096}, {0, 4096}),
+                  RasterBucket::layoutVertex({4096, 4096}, {4096, 4096}),
 
                   // 1/1/1
-                  RasterProgram::layoutVertex({4096, 4096}, {4096, 4096}),
-                  RasterProgram::layoutVertex({8192, 4096}, {8192, 4096}),
-                  RasterProgram::layoutVertex({4096, 8192}, {4096, 8192}),
-                  RasterProgram::layoutVertex({8192, 8192}, {8192, 8192}),
+                  RasterBucket::layoutVertex({4096, 4096}, {4096, 4096}),
+                  RasterBucket::layoutVertex({8192, 4096}, {8192, 4096}),
+                  RasterBucket::layoutVertex({4096, 8192}, {4096, 8192}),
+                  RasterBucket::layoutVertex({8192, 8192}, {8192, 8192}),
               }),
               bucket.vertices.vector());
 
@@ -274,7 +273,7 @@ TEST(Buckets, RasterBucketMaskTwoChildren) {
               }),
               bucket.indices.vector());
 
-    SegmentVector<RasterAttributes> expectedSegments;
+    SegmentVector expectedSegments;
     expectedSegments.emplace_back(0, 0, 8, 12);
     EXPECT_EQ(expectedSegments, bucket.segments);
 }
@@ -290,40 +289,40 @@ TEST(Buckets, RasterBucketMaskComplex) {
 
     EXPECT_EQ((std::vector<RasterLayoutVertex>{
                   // 1/0/1
-                  RasterProgram::layoutVertex({0, 4096}, {0, 4096}),
-                  RasterProgram::layoutVertex({4096, 4096}, {4096, 4096}),
-                  RasterProgram::layoutVertex({0, 8192}, {0, 8192}),
-                  RasterProgram::layoutVertex({4096, 8192}, {4096, 8192}),
+                  RasterBucket::layoutVertex({0, 4096}, {0, 4096}),
+                  RasterBucket::layoutVertex({4096, 4096}, {4096, 4096}),
+                  RasterBucket::layoutVertex({0, 8192}, {0, 8192}),
+                  RasterBucket::layoutVertex({4096, 8192}, {4096, 8192}),
 
                   // 1/1/0
-                  RasterProgram::layoutVertex({4096, 0}, {4096, 0}),
-                  RasterProgram::layoutVertex({8192, 0}, {8192, 0}),
-                  RasterProgram::layoutVertex({4096, 4096}, {4096, 4096}),
-                  RasterProgram::layoutVertex({8192, 4096}, {8192, 4096}),
+                  RasterBucket::layoutVertex({4096, 0}, {4096, 0}),
+                  RasterBucket::layoutVertex({8192, 0}, {8192, 0}),
+                  RasterBucket::layoutVertex({4096, 4096}, {4096, 4096}),
+                  RasterBucket::layoutVertex({8192, 4096}, {8192, 4096}),
 
                   // 2/2/3
-                  RasterProgram::layoutVertex({4096, 6144}, {4096, 6144}),
-                  RasterProgram::layoutVertex({6144, 6144}, {6144, 6144}),
-                  RasterProgram::layoutVertex({4096, 8192}, {4096, 8192}),
-                  RasterProgram::layoutVertex({6144, 8192}, {6144, 8192}),
+                  RasterBucket::layoutVertex({4096, 6144}, {4096, 6144}),
+                  RasterBucket::layoutVertex({6144, 6144}, {6144, 6144}),
+                  RasterBucket::layoutVertex({4096, 8192}, {4096, 8192}),
+                  RasterBucket::layoutVertex({6144, 8192}, {6144, 8192}),
 
                   // 2/3/2
-                  RasterProgram::layoutVertex({6144, 4096}, {6144, 4096}),
-                  RasterProgram::layoutVertex({8192, 4096}, {8192, 4096}),
-                  RasterProgram::layoutVertex({6144, 6144}, {6144, 6144}),
-                  RasterProgram::layoutVertex({8192, 6144}, {8192, 6144}),
+                  RasterBucket::layoutVertex({6144, 4096}, {6144, 4096}),
+                  RasterBucket::layoutVertex({8192, 4096}, {8192, 4096}),
+                  RasterBucket::layoutVertex({6144, 6144}, {6144, 6144}),
+                  RasterBucket::layoutVertex({8192, 6144}, {8192, 6144}),
 
                   // 3/6/7
-                  RasterProgram::layoutVertex({6144, 7168}, {6144, 7168}),
-                  RasterProgram::layoutVertex({7168, 7168}, {7168, 7168}),
-                  RasterProgram::layoutVertex({6144, 8192}, {6144, 8192}),
-                  RasterProgram::layoutVertex({7168, 8192}, {7168, 8192}),
+                  RasterBucket::layoutVertex({6144, 7168}, {6144, 7168}),
+                  RasterBucket::layoutVertex({7168, 7168}, {7168, 7168}),
+                  RasterBucket::layoutVertex({6144, 8192}, {6144, 8192}),
+                  RasterBucket::layoutVertex({7168, 8192}, {7168, 8192}),
 
                   // 3/7/6
-                  RasterProgram::layoutVertex({7168, 6144}, {7168, 6144}),
-                  RasterProgram::layoutVertex({8192, 6144}, {8192, 6144}),
-                  RasterProgram::layoutVertex({7168, 7168}, {7168, 7168}),
-                  RasterProgram::layoutVertex({8192, 7168}, {8192, 7168}),
+                  RasterBucket::layoutVertex({7168, 6144}, {7168, 6144}),
+                  RasterBucket::layoutVertex({8192, 6144}, {8192, 6144}),
+                  RasterBucket::layoutVertex({7168, 7168}, {7168, 7168}),
+                  RasterBucket::layoutVertex({8192, 7168}, {8192, 7168}),
               }),
               bucket.vertices.vector());
 
@@ -378,7 +377,7 @@ TEST(Buckets, RasterBucketMaskComplex) {
               }),
               bucket.indices.vector());
 
-    SegmentVector<RasterAttributes> expectedSegments;
+    SegmentVector expectedSegments;
     expectedSegments.emplace_back(0, 0, 24, 36);
     EXPECT_EQ(expectedSegments, bucket.segments);
 }

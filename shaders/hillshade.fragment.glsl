@@ -1,11 +1,16 @@
-uniform sampler2D u_image;
 in vec2 v_pos;
+uniform sampler2D u_image;
 
-uniform vec2 u_latrange;
-uniform vec2 u_light;
-uniform vec4 u_shadow;
-uniform vec4 u_highlight;
-uniform vec4 u_accent;
+layout (std140) uniform HillshadeTilePropsUBO {
+    highp vec2 u_latrange;
+    highp vec2 u_light;
+};
+
+layout (std140) uniform HillshadeEvaluatedPropsUBO {
+    highp vec4 u_highlight;
+    highp vec4 u_shadow;
+    highp vec4 u_accent;
+};
 
 #define PI 3.141592653589793
 

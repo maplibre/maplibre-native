@@ -1,0 +1,24 @@
+name: ios-release-cocoapods
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        type: string
+
+jobs:
+  ios-release-cocoapods:
+    defaults:
+      run:
+        working-directory: platform/ios
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Release (CocoaPods)
+        shell: bash -leo pipefail {0}  # so pod is found
+        run: |
+          VERSION=${{ github.event.inputs.version }} COCOAPODS_TRUNK_TOKEN=${{ secrets.COCOAPODS_PASSWORD }} pod trunk push MapLibre.podspec

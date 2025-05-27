@@ -12,10 +12,7 @@
 #include <mbgl/layermanager/raster_layer_factory.hpp>
 #include <mbgl/layermanager/symbol_layer_factory.hpp>
 #include <mbgl/util/logging.hpp>
-
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/layermanager/custom_drawable_layer_factory.hpp>
-#endif
 
 #include <map>
 #include <memory>
@@ -73,10 +70,8 @@ LayerManagerDefault::LayerManagerDefault() {
 #if !defined(MBGL_LAYER_LOCATION_INDICATOR_DISABLE_ALL)
     addLayerType(std::make_unique<LocationIndicatorLayerFactory>());
 #endif
-#if MLN_DRAWABLE_RENDERER
 #if !defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_ALL)
     addLayerType(std::make_unique<CustomDrawableLayerFactory>());
-#endif
 #endif
 }
 

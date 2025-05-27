@@ -6,5 +6,7 @@
       "groupName": "bazel"
     }
   ],
-  "schedule": "* * 1,15 * *"
+  "ignoreDeps": ["cxx.rs"],
+  "schedule": "* * 1,15 * *",
+  "dependencyDashboard": true
 }

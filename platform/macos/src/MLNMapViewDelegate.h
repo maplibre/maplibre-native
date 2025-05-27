@@ -11,6 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class MLNPolyline;
 @class MLNShape;
 @class MLNStyle;
+@class MLNSource;
 @protocol MLNAnnotation;
 
 /**
@@ -203,6 +204,14 @@ NS_ASSUME_NONNULL_BEGIN
  @param style The style that was loaded.
  */
 - (void)mapView:(MLNMapView *)mapView didFinishLoadingStyle:(MLNStyle *)style;
+
+/**
+ Tells the delegate that the source changed.
+
+ @param mapView The map view that owns the source.
+ @param source The source that changed.
+ */
+- (void)mapView:(MLNMapView *)mapView sourceDidChange:(MLNSource *)source;
 
 /**
  Tells the delegate that the `mapView` is missing an image. The image should be added synchronously

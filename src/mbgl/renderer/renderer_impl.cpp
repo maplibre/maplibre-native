@@ -8,7 +8,6 @@
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
-#include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/pattern_atlas.hpp>
 #include <mbgl/renderer/renderer_observer.hpp>
@@ -20,13 +19,9 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/instrumentation.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/renderer/render_target.hpp>
-
-#include <limits>
-#endif // MLN_DRAWABLE_RENDERER
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/mtl/renderer_backend.hpp>
@@ -39,9 +34,7 @@ constexpr auto CaptureFrameStart = 0; // frames are 0-based
 constexpr auto CaptureFrameCount = 1;
 #elif MLN_RENDER_BACKEND_OPENGL
 #include <mbgl/gl/defines.hpp>
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gl/drawable_gl.hpp>
-#endif // MLN_DRAWABLE_RENDERER
 #endif // !MLN_RENDER_BACKEND_METAL
 
 namespace mbgl {
@@ -166,16 +159,11 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     context.beginFrame();
 
     if (!staticData) {
-        staticData = std::make_unique<RenderStaticData>(pixelRatio, std::make_unique<gfx::ShaderRegistry>());
+        staticData = std::make_unique<RenderStaticData>(std::make_unique<gfx::ShaderRegistry>());
 
-        // Initialize legacy shader programs
-        staticData->programs.registerWith(*staticData->shaders);
-
-#if MLN_DRAWABLE_RENDERER
         // Initialize shaders for drawables
         const auto programParameters = ProgramParameters{pixelRatio, false};
         backend.initShaders(*staticData->shaders, programParameters);
-#endif
 
         // Notify post-shader registration
         observer->onRegisterShaders(*staticData->shaders);
@@ -211,11 +199,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
     const auto& sourceRenderItems = renderTree.getSourceRenderItems();
 
-#if MLN_DRAWABLE_RENDERER
     const auto& layerRenderItems = renderTree.getLayerRenderItemMap();
-#else
-    const auto& layerRenderItems = renderTree.getLayerRenderItems();
-#endif
 
     // - UPLOAD PASS -------------------------------------------------------------------------------
     // Uploads all required buffers and images before we do any actual rendering.
@@ -238,7 +222,6 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         renderTree.getPatternAtlas().upload(*uploadPass);
     }
 
-#if MLN_DRAWABLE_RENDERER
     // - LAYER GROUP UPDATE ------------------------------------------------------------------------
     // Updates all layer groups and process changes
     if (staticData && staticData->shaders) {
@@ -284,19 +267,18 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     const Size atlasSize = parameters.patternAtlas.getPixelSize();
     const auto& worldSize = parameters.staticData.backendSize;
     const shaders::GlobalPaintParamsUBO globalPaintParamsUBO = {
-        /* .pattern_atlas_texsize = */ {static_cast<float>(atlasSize.width), static_cast<float>(atlasSize.height)},
-        /* .units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
-        /* .world_size = */ {static_cast<float>(worldSize.width), static_cast<float>(worldSize.height)},
-        /* .camera_to_center_distance = */ parameters.state.getCameraToCenterDistance(),
-        /* .symbol_fade_change = */ parameters.symbolFadeChange,
-        /* .aspect_ratio = */ parameters.state.getSize().aspectRatio(),
-        /* .pixel_ratio = */ parameters.pixelRatio,
-        /* .map_zoom = */ static_cast<float>(parameters.state.getZoom()),
-        /* .pad1 = */ 0,
+        .pattern_atlas_texsize = {static_cast<float>(atlasSize.width), static_cast<float>(atlasSize.height)},
+        .units_to_pixels = {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
+        .world_size = {static_cast<float>(worldSize.width), static_cast<float>(worldSize.height)},
+        .camera_to_center_distance = parameters.state.getCameraToCenterDistance(),
+        .symbol_fade_change = parameters.symbolFadeChange,
+        .aspect_ratio = parameters.state.getSize().aspectRatio(),
+        .pixel_ratio = parameters.pixelRatio,
+        .map_zoom = static_cast<float>(parameters.state.getZoom()),
+        .pad1 = 0,
     };
     auto& globalUniforms = context.mutableGlobalUniformBuffers();
     globalUniforms.createOrUpdate(shaders::idGlobalPaintParamsUBO, &globalPaintParamsUBO, context);
-#endif
 
     // - 3D PASS
     // -------------------------------------------------------------------------------------
@@ -320,7 +302,6 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         }
     };
 
-#if MLN_DRAWABLE_RENDERER
     const auto drawable3DPass = [&] {
         const auto debugGroup(parameters.encoder->createDebugGroup("drawables-3d"));
         assert(parameters.pass == RenderPass::Pass3D);
@@ -334,30 +315,12 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
             }
         });
     };
-#endif // MLN_DRAWABLE_RENDERER
 
-#if MLN_LEGACY_RENDERER
-    const auto renderLayer3DPass = [&] {
-        const auto debugGroup(parameters.encoder->createDebugGroup("3d"));
-        int32_t i = static_cast<int32_t>(layerRenderItems.size()) - 1;
-        for (auto it = layerRenderItems.begin(); it != layerRenderItems.end() && i >= 0; ++it, --i) {
-            parameters.currentLayer = i;
-            const RenderItem& renderItem = it->get();
-            if (renderItem.hasRenderPass(parameters.pass)) {
-                const auto layerDebugGroup(parameters.encoder->createDebugGroup(renderItem.getName().c_str()));
-                renderItem.render(parameters);
-            }
-        }
-    };
-#endif // MLN_LEGACY_RENDERER
-
-#if MLN_DRAWABLE_RENDERER
     const auto drawableTargetsPass = [&] {
         // draw render targets
         orchestrator.visitRenderTargets(
             [&](RenderTarget& renderTarget) { renderTarget.render(orchestrator, renderTree, parameters); });
     };
-#endif
 
     const auto commonClearPass = [&] {
         // - CLEAR
@@ -372,12 +335,15 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                 color = renderTreeParameters.backgroundColor;
             }
             parameters.renderPass = parameters.encoder->createRenderPass(
-                "main buffer", {parameters.backend.getDefaultRenderable(), color, 1.0f, 0});
+                "main buffer",
+                {.renderable = parameters.backend.getDefaultRenderable(),
+                 .clearColor = color,
+                 .clearDepth = 1.0f,
+                 .clearStencil = 0});
         }
     };
 
     // Actually render the layers
-#if MLN_DRAWABLE_RENDERER
     // Drawables
     const auto drawableOpaquePass = [&] {
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-opaque"));
@@ -421,47 +387,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
             }
         }
     };
-#endif
 
-#if MLN_LEGACY_RENDERER
-    // Render everything top-to-bottom by using reverse iterators. Render opaque objects first.
-    const auto renderLayerOpaquePass = [&] {
-        const auto debugGroup(parameters.renderPass->createDebugGroup("opaque"));
-        parameters.pass = RenderPass::Opaque;
-        parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * PaintParameters::numSublayers *
-                                            PaintParameters::depthEpsilon;
-
-        uint32_t i = 0;
-        for (auto it = layerRenderItems.rbegin(); it != layerRenderItems.rend(); ++it, ++i) {
-            parameters.currentLayer = i;
-            const RenderItem& renderItem = it->get();
-            if (renderItem.hasRenderPass(parameters.pass)) {
-                const auto layerDebugGroup(parameters.renderPass->createDebugGroup(renderItem.getName().c_str()));
-                renderItem.render(parameters);
-            }
-        }
-    };
-
-    // Make a second pass, rendering translucent objects. This time, we render bottom-to-top.
-    const auto renderLayerTranslucentPass = [&] {
-        const auto debugGroup(parameters.renderPass->createDebugGroup("translucent"));
-        parameters.pass = RenderPass::Translucent;
-        parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * PaintParameters::numSublayers *
-                                            PaintParameters::depthEpsilon;
-
-        int32_t i = static_cast<int32_t>(layerRenderItems.size()) - 1;
-        for (auto it = layerRenderItems.begin(); it != layerRenderItems.end() && i >= 0; ++it, --i) {
-            parameters.currentLayer = i;
-            const RenderItem& renderItem = it->get();
-            if (renderItem.hasRenderPass(parameters.pass)) {
-                const auto layerDebugGroup(parameters.renderPass->createDebugGroup(renderItem.getName().c_str()));
-                renderItem.render(parameters);
-            }
-        }
-    };
-#endif // MLN_LEGACY_RENDERER
-
-#if MLN_DRAWABLE_RENDERER
     const auto drawableDebugOverlays = [&] {
         // Renders debug overlays.
         {
@@ -473,36 +399,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
             });
         }
     };
-#endif // MLN_DRAWABLE_RENDERER
 
-#if MLN_LEGACY_RENDERER
-    const auto renderDebugOverlays = [&] {
-        // Renders debug overlays.
-        {
-            const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
-
-            // Finalize the rendering, e.g. by calling debug render calls per tile.
-            // This guarantees that we have at least one function per tile called.
-            // When only rendering layers via the stylesheet, it's possible that we
-            // don't ever visit a tile during rendering.
-            for (const RenderItem& renderItem : sourceRenderItems) {
-                renderItem.render(parameters);
-            }
-        }
-
-#if !defined(NDEBUG)
-        if (parameters.debugOptions & MapDebugOptions::StencilClip) {
-            // Render tile clip boundaries, using stencil buffer to calculate fill color.
-            parameters.context.visualizeStencilBuffer();
-        } else if (parameters.debugOptions & MapDebugOptions::DepthBuffer) {
-            // Render the depth buffer.
-            parameters.context.visualizeDepthBuffer(parameters.depthRangeSize);
-        }
-#endif
-    };
-#endif // MLN_LEGACY_RENDERER
-
-#if (MLN_DRAWABLE_RENDERER && !MLN_LEGACY_RENDERER)
     if (parameters.staticData.has3D) {
         common3DPass();
         drawable3DPass();
@@ -513,24 +410,10 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     drawableOpaquePass();
     drawableTranslucentPass();
     drawableDebugOverlays();
-#elif (MLN_LEGACY_RENDERER && !MLN_DRAWABLE_RENDERER)
-    if (parameters.staticData.has3D) {
-        common3DPass();
-        renderLayer3DPass();
-    }
-    commonClearPass();
-    renderLayerOpaquePass();
-    renderLayerTranslucentPass();
-    renderDebugOverlays();
-#else
-    static_assert(0, "Must define one of (MLN_DRAWABLE_RENDERER, MLN_LEGACY_RENDERER)");
-#endif // MLN_LEGACY_RENDERER
 
-#if MLN_DRAWABLE_RENDERER
     // Give the layers a chance to do cleanup
     orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.postRender(orchestrator, parameters); });
     context.unbindGlobalUniformBuffers(*parameters.renderPass);
-#endif
 
     // Ends the RenderPass
     parameters.renderPass.reset();

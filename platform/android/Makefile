@@ -15,10 +15,9 @@ else
 endif
 
 ifeq ($(RENDERER), drawable)
-else ifeq ($(RENDERER), legacy)
 else ifeq ($(RENDERER), vulkan)
 else
-  $(error RENDERER must be 'legacy' (OpenGL), 'drawable' (OpenGL) or 'vulkan')
+  $(error RENDERER must be 'drawable' (OpenGL) or 'vulkan')
 endif
 
 buildtype := $(shell echo "$(BUILDTYPE)" | tr "[A-Z]" "[a-z]")
@@ -219,9 +218,9 @@ run-android-ui-test-%: run-android-ui-test-arm-v7-%
 # Run Java Unit tests on the JVM of the development machine executing this
 .PHONY: run-android-unit-test
 run-android-unit-test:
-	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:testLegacyDebugUnitTest --info
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:testDrawableDebugUnitTest --info
 run-android-unit-test-%:
-	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:testLegacyDebugUnitTest --info --tests "$*"
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:testDrawableDebugUnitTest --info --tests "$*"
 
 DEBUG_TAR_FILE_NAME := $(if $(findstring drawable,$(RENDERER)),debug-symbols-opengl.tar.gz,debug-symbols-$(RENDERER).tar.gz)
 
@@ -232,7 +231,7 @@ apackage:
 	make android-lib-arm-v7 && make android-lib-arm-v8 && make android-lib-x86 && make android-lib-x86-64
 	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=all assemble$(RENDERER)$(BUILDTYPE)
 	mkdir -p build
-	tar -czvf build/$(DEBUG_TAR_FILE_NAME) -C MapLibreAndroid/build/intermediates/library_jni/$(RENDERER)Release/*JniLibsProjectOnly/jni .
+	tar -czvf build/$(DEBUG_TAR_FILE_NAME) -C MapLibreAndroid/build/intermediates/library_jni/$(RENDERER)$(BUILDTYPE)/*JniLibsProjectOnly/jni .
 
 # Build test app instrumentation tests apk and test app apk for all abi's
 .PHONY: android-ui-test

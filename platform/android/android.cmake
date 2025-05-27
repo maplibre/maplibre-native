@@ -101,7 +101,7 @@ target_link_libraries(
     PRIVATE
         EGL
         GLESv3
-        Mapbox::Base::jni.hpp
+        MapLibreNative::Base::jni.hpp
         android
         atomic
         jnigraphics
@@ -125,7 +125,7 @@ target_link_libraries(
     example-custom-layer
     PRIVATE
         GLESv3
-        Mapbox::Base
+        MapLibreNative::Base
         log
         mbgl-compiler-options
 )
@@ -160,7 +160,7 @@ find_package(curl CONFIG)
 target_link_libraries(
     mbgl-test-runner
     PRIVATE
-        Mapbox::Base::jni.hpp
+        MapLibreNative::Base::jni.hpp
         mbgl-compiler-options
         $<$<BOOL:${curl_FOUND}>:curl::curl_static>
         $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
@@ -214,7 +214,7 @@ target_include_directories(
 target_link_libraries(
     mbgl-benchmark-runner
     PRIVATE
-        Mapbox::Base::jni.hpp
+        MapLibreNative::Base::jni.hpp
         mbgl-compiler-options
         $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-benchmark>
 )
@@ -265,7 +265,7 @@ target_include_directories(
 target_link_libraries(
     mbgl-render-test-runner
     PRIVATE
-        Mapbox::Base::jni.hpp
+        MapLibreNative::Base::jni.hpp
         android
         log
         mbgl-compiler-options

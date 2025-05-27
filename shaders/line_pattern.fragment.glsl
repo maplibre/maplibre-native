@@ -1,7 +1,23 @@
-uniform lowp float u_device_pixel_ratio;
-uniform vec2 u_texsize;
-uniform float u_fade;
-uniform mediump vec4 u_scale;
+layout (std140) uniform LinePatternTilePropsUBO {
+    lowp vec4 u_pattern_from;
+    lowp vec4 u_pattern_to;
+    mediump vec4 u_scale;
+    highp vec2 u_texsize;
+    highp float u_fade;
+    lowp float tileprops_pad1;
+};
+
+layout (std140) uniform LineEvaluatedPropsUBO {
+    highp vec4 u_color;
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+    lowp float u_floorwidth;
+    lowp float props_pad1;
+    lowp float props_pad2;
+};
 
 uniform sampler2D u_image;
 
@@ -10,14 +26,15 @@ in vec2 v_width2;
 in float v_linesofar;
 in float v_gamma_scale;
 
-#pragma mapbox: define mediump vec4 pattern_from
-#pragma mapbox: define mediump vec4 pattern_to
+#pragma mapbox: define lowp vec4 pattern_from
+#pragma mapbox: define lowp vec4 pattern_to
 #pragma mapbox: define lowp float blur
 #pragma mapbox: define lowp float opacity
 
 void main() {
     #pragma mapbox: initialize mediump vec4 pattern_from
     #pragma mapbox: initialize mediump vec4 pattern_to
+
     #pragma mapbox: initialize lowp float blur
     #pragma mapbox: initialize lowp float opacity
 
@@ -43,7 +60,7 @@ void main() {
     // Calculate the antialiasing fade factor. This is either when fading in
     // the line in case of an offset line (v_width2.t) or when fading out
     // (v_width2.s)
-    float blur2 = (blur + 1.0 / u_device_pixel_ratio) * v_gamma_scale;
+    float blur2 = (blur + 1.0 / DEVICE_PIXEL_RATIO) * v_gamma_scale;
     float alpha = clamp(min(dist - (v_width2.t - blur2), v_width2.s - dist) / blur2, 0.0, 1.0);
 
     float x_a = mod(v_linesofar / pattern_size_a.x, 1.0);

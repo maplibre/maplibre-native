@@ -1,7 +1,5 @@
 if(MLN_WITH_EGL)
     set(_RENDERER EGL)
-elseif(MLN_WITH_OSMESA)
-    set(_RENDERER OSMesa)
 elseif(MLN_WITH_VULKAN)
     set(_RENDERER Vulkan)
 else()
@@ -106,29 +104,6 @@ if(MLN_WITH_EGL)
         PRIVATE
             unofficial::angle::libEGL
             unofficial::angle::libGLESv2
-    )
-elseif(MLN_WITH_OSMESA)
-    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
-    list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_LIST_DIR}/vendor/mesa3d)
-
-    find_package(OSMesa REQUIRED)
-    target_sources(
-        mbgl-core
-        PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/windows/src/headless_backend_osmesa.cpp
-            ${PROJECT_SOURCE_DIR}/platform/windows/src/gl_functions.cpp
-    )
-
-    set_property(
-        SOURCE ${PROJECT_SOURCE_DIR}/platform/windows/src/headless_backend_osmesa.cpp
-        PROPERTY INCLUDE_DIRECTORIES ${OSMesa_INCLUDE_DIRS}
-    )
-
-    target_link_libraries(
-        mbgl-core
-        PRIVATE
-            OSMesa::osmesa
-            OSMesa::libGLESv2
     )
 elseif(MLN_WITH_VULKAN)
     target_sources(

@@ -1,9 +1,7 @@
 #include <mbgl/renderer/pattern_atlas.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gfx/context.hpp>
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/texture2d.hpp>
-#endif
 
 namespace mbgl {
 
@@ -67,7 +65,9 @@ std::optional<ImagePosition> PatternAtlas::addPattern(const style::Image::Impl& 
 
     dirty = true;
 
-    return patterns.emplace(image.id, Pattern{bin, {*bin, image}}).first->second.position;
+    return patterns
+        .emplace(image.id, Pattern{.bin = bin, .position = {Rect<uint16_t>(bin->x, bin->y, bin->w, bin->h), image}})
+        .first->second.position;
 }
 
 void PatternAtlas::removePattern(const std::string& id) {
@@ -90,7 +90,6 @@ Size PatternAtlas::getPixelSize() const {
 }
 
 void PatternAtlas::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
-#if MLN_DRAWABLE_RENDERER
     if (!atlasTexture2D) {
         atlasTexture2D = uploadPass.getContext().createTexture2D();
         if (atlasTexture2D) {
@@ -99,29 +98,11 @@ void PatternAtlas::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
     } else if (dirty) {
         atlasTexture2D->upload(atlasImage);
     }
-#else
-    if (!atlasTexture) {
-        atlasTexture = uploadPass.createTexture(atlasImage);
-    } else if (dirty) {
-        uploadPass.updateTexture(*atlasTexture, atlasImage);
-    }
-#endif
     dirty = false;
 }
 
-#if MLN_LEGACY_RENDERER
-// @note: Deprecated
-gfx::TextureBinding PatternAtlas::textureBinding() const {
-    assert(atlasTexture);
-    assert(!dirty);
-    return {atlasTexture->getResource(), gfx::TextureFilterType::Linear};
-}
-#endif
-
-#if MLN_DRAWABLE_RENDERER
 const std::shared_ptr<gfx::Texture2D>& PatternAtlas::texture() const {
     return atlasTexture2D;
 }
-#endif
 
 } // namespace mbgl

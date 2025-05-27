@@ -43,7 +43,7 @@ jobs:
       - name: Get all iOS files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files-yaml
-        uses: tj-actions/changed-files@v45
+        uses: tj-actions/changed-files@v46
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
@@ -100,7 +100,25 @@ jobs:
       #  run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=tsan
 
       - name: Running iOS UI tests (Address+UB Sanitizer)
-        run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=include_clang_rt --copt=-fsanitize=undefined --linkopt=-fsanitize=undefined --copt=-fsanitize-recover=null --linkopt=-fsanitize-recover=null
+        run: |
+          retry_count=0
+          max_retries=5
+          while [ $retry_count -le $max_retries ]; do
+            bazel test //platform/ios/iosapp-UITests:uitest \
+              --test_output=errors \
+              --//:renderer=metal \
+              --features=include_clang_rt \
+              --copt=-fsanitize=undefined \
+              --linkopt=-fsanitize=undefined \
+              --copt=-fsanitize-recover=null \
+              --linkopt=-fsanitize-recover=null && break
+            retry_count=$((retry_count+1))
+            if [ $retry_count -eq $max_retries ]; then
+              echo "::error::Failed to run iOS UI tests after $max_retries attempts"
+              exit 1
+            fi
+            echo "Attempt $retry_count failed. Retrying..."
+          done
 
       # render test
 
@@ -215,7 +233,7 @@ jobs:
 
       - name: VERSION file changed
         id: version-file-ios-changed
-        uses: tj-actions/changed-files@v45
+        uses: tj-actions/changed-files@v46
         with:
           files: platform/ios/VERSION
 
@@ -252,6 +270,10 @@ jobs:
           version="${{ github.event.inputs.pre_release_version }}"
           if [[ -z "$version" ]]; then
             version="$(head VERSION)"-pre${{ github.sha }}
+          fi
+          if [[ "$version" != *"pre"* ]]; then
+            echo "::error::Pre-release version must include 'pre' (Current version: $version)"
+            exit 1
           fi
           echo version="$version" >> "$GITHUB_ENV"
           echo changelog_version_heading="## main" >> "$GITHUB_ENV"
@@ -329,8 +351,9 @@ jobs:
       - name: Release (CocoaPods)
         shell: bash -leo pipefail {0}  # so pod is found
         if: env.make_release
-        run: |
-          VERSION=${{ env.version }} COCOAPODS_TRUNK_TOKEN=${{ secrets.COCOAPODS_PASSWORD }} pod trunk push MapLibre.podspec
+        run: gh workflow run ios-release-cocoapods.yml --field version=${{ env.version }}
+        env:
+         GH_TOKEN: ${{ github.token }}
 
   ios-build-cmake:
     needs: pre_job

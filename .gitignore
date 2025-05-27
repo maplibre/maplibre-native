@@ -12,7 +12,6 @@
 /cmake-build-debug
 /platform/android/build
 /platform/android/MapLibreAndroid/src/main/assets/sdk_versions/com.mapbox.mapboxsdk
-/platform/windows/vendor/mesa3d/
 *.code-workspace
 
 local.properties
@@ -21,6 +20,7 @@ local.properties
 .cache
 compile_commands.json
 /build
+/build-*
 **/.idea
 **/.clwb
 /new_offline.db
@@ -34,6 +34,7 @@ compile_commands.json
 /platform/android/site
 node_modules
 .cxx
+.env
 
 # Node binaries.
 /lib

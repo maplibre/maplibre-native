@@ -5,15 +5,11 @@
 #include <mbgl/gfx/command_encoder.hpp>
 #include <mbgl/gfx/context_observer.hpp>
 #include <mbgl/gfx/draw_scope.hpp>
-#include <mbgl/gfx/program.hpp>
 #include <mbgl/gfx/renderbuffer.hpp>
 #include <mbgl/gfx/rendering_stats.hpp>
-#include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/types.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/uniform_buffer.hpp>
-#endif
 
 #include <memory>
 #include <string>
@@ -23,21 +19,20 @@ namespace mbgl {
 class PaintParameters;
 class ProgramParameters;
 
-#if MLN_DRAWABLE_RENDERER
 class TileLayerGroup;
 class LayerGroup;
 class RenderTarget;
 using TileLayerGroupPtr = std::shared_ptr<TileLayerGroup>;
 using LayerGroupPtr = std::shared_ptr<LayerGroup>;
 using RenderTargetPtr = std::shared_ptr<RenderTarget>;
-#endif
 
 namespace gfx {
 
+class DepthMode;
+class ColorMode;
 class OffscreenTexture;
 class ShaderRegistry;
 
-#if MLN_DRAWABLE_RENDERER
 class Drawable;
 class DrawableBuilder;
 class ShaderProgramBase;
@@ -50,7 +45,6 @@ using Texture2DPtr = std::shared_ptr<Texture2D>;
 using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 using UniqueDrawableBuilder = std::unique_ptr<DrawableBuilder>;
 using VertexAttributeArrayPtr = std::shared_ptr<VertexAttributeArray>;
-#endif
 
 namespace {
 ContextObserver nullObserver;
@@ -85,13 +79,6 @@ public:
 
     virtual std::unique_ptr<OffscreenTexture> createOffscreenTexture(Size, TextureChannelDataType) = 0;
 
-    /// Creates an empty texture with the specified dimensions.
-    Texture createTexture(const Size size,
-                          TexturePixelType format = TexturePixelType::RGBA,
-                          TextureChannelDataType type = TextureChannelDataType::UnsignedByte) {
-        return {size, createTextureResource(size, format, type)};
-    }
-
     template <RenderbufferPixelType pixelType>
     Renderbuffer<pixelType> createRenderbuffer(const Size size) {
         return {size, createRenderbufferResource(pixelType, size)};
@@ -114,7 +101,6 @@ public:
     /// Sets dirty state
     virtual void setDirtyState() = 0;
 
-#if MLN_DRAWABLE_RENDERER
     /// Create a new vertex attribute array
     virtual gfx::VertexAttributeArrayPtr createVertexAttributeArray() const = 0;
 
@@ -178,10 +164,8 @@ public:
 
     /// Unbind the global uniform buffers
     virtual void unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept = 0;
-#endif
 
 protected:
-    virtual std::unique_ptr<TextureResource> createTextureResource(Size, TexturePixelType, TextureChannelDataType) = 0;
     virtual std::unique_ptr<RenderbufferResource> createRenderbufferResource(RenderbufferPixelType, Size) = 0;
     virtual std::unique_ptr<DrawScopeResource> createDrawScopeResource() = 0;
 

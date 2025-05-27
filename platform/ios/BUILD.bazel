@@ -4,6 +4,7 @@ load("@rules_apple//apple:apple.bzl", "apple_static_xcframework", "apple_xcframe
 load("@rules_apple//apple:ios.bzl", "ios_application", "ios_framework")
 load("@rules_apple//apple:resources.bzl", "apple_resource_bundle")
 load("@rules_apple//apple:versioning.bzl", "apple_bundle_version")
+
 load(
     "@rules_xcodeproj//xcodeproj:defs.bzl",
     "top_level_target",
@@ -82,7 +83,17 @@ info_plist(
     base_info_plist = "app/Info.plist",
 )
 
+genrule(
+    name = "mln_defines",
+    outs = ["MLNDefines.h"],
+    cmd = select({
+        "//:metal_renderer": "echo '#define MLN_RENDER_BACKEND_METAL 1' > $@",
+        "//conditions:default": "echo '' > $@",
+    }),
+)
+
 public_hdrs = [
+    ":mln_defines",
     ":ios_public_hdrs",
     ":ios_sdk_hdrs",
     "//platform/darwin:darwin_objc_hdrs",
@@ -123,8 +134,10 @@ apple_xcframework(
     data = glob([
         "resources/*.lproj/**",
         "resources/*.xcassets/**",
+    ]) + [
+        "PrivacyInfo.xcprivacy",
         "resources/metal-cpp-ignores.txt",
-    ]) + ["PrivacyInfo.xcprivacy"],
+    ],
     infoplists = ["info_plist"],
     ios = {
         "simulator": [

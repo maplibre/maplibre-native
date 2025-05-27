@@ -5,6 +5,7 @@
 #import "MLNFoundation.h"
 #import "MLNGeometry.h"
 #import "MLNMapCamera.h"
+#import "MLNMapOptions.h"
 #import "MLNStyle.h"
 #import "MLNTypes.h"
 
@@ -207,6 +208,28 @@ MLN_EXPORT
  */
 - (instancetype)initWithFrame:(CGRect)frame styleURL:(nullable NSURL *)styleURL;
 
+/**
+ * Initializes and returns a newly allocated map view with the specified frame
+ * and style JSON.
+ *
+ * @param frame The frame for the view, measured in points.
+ * @param styleJSON JSON string of the map style to display. The JSON must conform to the
+ *        <a href="https://maplibre.org/maplibre-style-spec/">MapLibre Style Specification</a>.
+ *        Specify `nil` for the default style.
+ * @return An initialized map view.
+ */
+- (instancetype)initWithFrame:(CGRect)frame styleJSON:(NSString *)styleJSON;
+
+/**
+ Initializes and returns a newly allocated map view with the specified frame
+ and the default style.
+
+ @param frame The frame for the view, measured in points.
+ @param options The map instance options
+ @return An initialized map view.
+ */
+- (instancetype)initWithFrame:(CGRect)frame options:(MLNMapOptions *)options;
+
 // MARK: Accessing the Delegate
 
 /**
@@ -252,6 +275,20 @@ MLN_EXPORT
  - TODO: change the style of a map at runtime.
  */
 @property (nonatomic, null_resettable) NSURL *styleURL;
+
+/**
+ * The style JSON representation of the map.
+ *
+ * Setting this property results in an asynchronous style change. If you wish to know when the style
+ * change is complete, observe the ``MLNMapViewDelegate/mapView:didFinishLoadingStyle:`` method
+ * on ``MLNMapViewDelegate``.
+ *
+ * The JSON must conform to the
+ * <a href="https://maplibre.org/maplibre-style-spec/">MapLibre Style Specification</a>.
+ *
+ * @throws NSInvalidArgumentException if styleJSON is nil or invalid JSON
+ */
+@property (nonatomic, copy) NSString *styleJSON;
 
 /**
  Reloads the style.
@@ -592,8 +629,8 @@ MLN_EXPORT
  `-setUserLocationVerticalAlignment:animated:` method instead.
  */
 @property (nonatomic, assign) MLNAnnotationVerticalAlignment userLocationVerticalAlignment
-    __attribute__((deprecated("Use ``MLNMapViewDelegate/mapViewUserLocationAnchorPoint:`` instead.")
-                       ));
+    __attribute__((
+        deprecated("Use ``MLNMapViewDelegate/mapViewUserLocationAnchorPoint:`` instead.")));
 
 /**
  Sets the vertical alignment of the user location annotation within the
@@ -2163,6 +2200,40 @@ vertically on the map.
  released software for performance and aesthetic reasons.
  */
 @property (nonatomic) MLNMapDebugMaskOptions debugMask;
+
+/**
+ Get the list of action journal log files from oldest to newest.
+
+ @return An array of log file paths.
+*/
+- (NSArray<NSString *> *)getActionJournalLogFiles;
+
+/**
+ Get the action journal events from oldest to newest.
+
+ Each element contains a serialized json object with the event data.
+ Example
+ `{
+    "name" : "onTileAction",
+    "time" : "2025-04-17T13:13:13.974Z",
+    "styleName" : "Streets",
+    "styleURL" : "maptiler://maps/streets",
+    "event" : {
+        "action" : "RequestedFromNetwork",
+        "tileX" : 0,
+        "tileY" : 0,
+        "tileZ" : 0,
+        "overscaledZ" : 0,
+        "sourceID" : "openmaptiles"
+    }
+ }`
+ */
+- (NSArray<NSString *> *)getActionJournalLog;
+
+/**
+ Clear stored action journal events.
+ */
+- (void)clearActionJournalLog;
 
 - (MLNBackendResource *)backendResource;
 

@@ -6,9 +6,7 @@
 #include <mbgl/style/sources/vector_source_impl.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/context.hpp>
-#endif
 
 namespace mbgl {
 
@@ -101,13 +99,11 @@ public:
 
 private:
     void upload(gfx::UploadPass&) const override;
-    void render(PaintParameters&) const override;
+    void render(PaintParameters&) const override {}
     bool hasRenderPass(RenderPass) const override { return false; }
     const std::string& getName() const override { return name; }
 
-#if MLN_DRAWABLE_RENDERER
     void updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const override;
-#endif
 
     Immutable<std::vector<RenderTile>> renderTiles;
     std::string name;

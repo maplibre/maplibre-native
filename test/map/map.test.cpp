@@ -19,8 +19,10 @@
 #include <mbgl/storage/network_status.hpp>
 #include <mbgl/storage/online_file_source.hpp>
 #include <mbgl/storage/resource_options.hpp>
-#include <mbgl/style/image.hpp>
+#include <mbgl/style/expression/dsl.hpp>
 #include <mbgl/style/image_impl.hpp>
+#include <mbgl/style/image.hpp>
+#include <mbgl/style/layers/background_layer.hpp>
 #include <mbgl/style/layers/background_layer.hpp>
 #include <mbgl/style/layers/fill_layer.hpp>
 #include <mbgl/style/layers/raster_layer.hpp>
@@ -29,8 +31,8 @@
 #include <mbgl/style/sources/geojson_source.hpp>
 #include <mbgl/style/sources/image_source.hpp>
 #include <mbgl/style/sources/vector_source.hpp>
-#include <mbgl/style/style.hpp>
 #include <mbgl/style/style_impl.hpp>
+#include <mbgl/style/style.hpp>
 #include <mbgl/util/async_task.hpp>
 #include <mbgl/util/client_options.hpp>
 #include <mbgl/util/color.hpp>
@@ -1632,12 +1634,8 @@ TEST(Map, StencilOverflow) {
     test.map.jumpTo(CameraOptions().withZoom(5));
     auto result = test.frontend.render(test.map);
 
-    // In drawable builds, no drawables are built because no bucket/tiledata is available.
-#if MLN_DRAWABLE_RENDERER
+    // No drawables are built because no bucket/tiledata is available.
     ASSERT_LE(0, result.stats.stencilUpdates);
-#else
-    ASSERT_LT(0, result.stats.stencilClears);
-#endif // MLN_DRAWABLE_RENDERER
 
 #if !defined(NDEBUG)
     Log::Info(Event::General, result.stats.toString("\n"));
@@ -1865,4 +1863,32 @@ TEST(Map, ObserveTileLifecycle) {
         EXPECT_THAT(stage, testing::AnyOf(TileOperation::EndParse, TileOperation::Cancelled));
         EXPECT_FALSE(parsing);
     }
+}
+
+TEST(BackgroundLayer, StyleUpdateZoomDependency) {
+    using namespace mbgl::style::expression::dsl;
+
+    MapTest<> test;
+    test.map.getStyle().loadJSON(util::read_file("test/fixtures/map/style_update_zoom_dependency/style.json"));
+    test.map.jumpTo(CameraOptions().withZoom(0.0));
+
+    // Initial render: background should be red at zoom 0
+    test::checkImage("test/fixtures/map/style_update_zoom_dependency/initial_red",
+                     test.frontend.render(test.map).image,
+                     0.0006,
+                     0.1);
+
+    // Update background layer to use zoom-dependent color
+    auto layer = static_cast<style::BackgroundLayer*>(test.map.getStyle().getLayer("background"));
+    layer->setBackgroundColor(PropertyExpression<Color>(
+        interpolate(linear(), zoom(), 0.0, literal(Color::red()), 14.0, literal(Color::green()))));
+
+    test.frontend.render(test.map);
+
+    // Change zoom to 14 and re-render
+    test.map.jumpTo(CameraOptions().withZoom(14.0));
+    test::checkImage("test/fixtures/map/style_update_zoom_dependency/after_update_green",
+                     test.frontend.render(test.map).image,
+                     0.0006,
+                     0.1);
 }

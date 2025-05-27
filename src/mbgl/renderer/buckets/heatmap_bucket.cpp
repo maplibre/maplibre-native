@@ -1,6 +1,5 @@
 #include <mbgl/renderer/buckets/heatmap_bucket.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>
-#include <mbgl/programs/heatmap_program.hpp>
 #include <mbgl/style/layers/heatmap_layer_impl.hpp>
 #include <mbgl/renderer/layers/render_heatmap_layer.hpp>
 #include <mbgl/util/constants.hpp>
@@ -26,15 +25,6 @@ HeatmapBucket::~HeatmapBucket() {
 }
 
 void HeatmapBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
-#if MLN_LEGACY_RENDERER
-    vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
-    indexBuffer = uploadPass.createIndexBuffer(std::move(triangles));
-
-    for (auto& pair : paintPropertyBinders) {
-        pair.second.upload(uploadPass);
-    }
-#endif // MLN_LEGACY_RENDERER
-
     uploaded = true;
 }
 
@@ -75,10 +65,10 @@ void HeatmapBucket::addFeature(const GeometryTileFeature& feature,
             // │ 1     2 │
             // └─────────┘
             //
-            vertices.emplace_back(HeatmapProgram::vertex(point, -1, -1)); // 1
-            vertices.emplace_back(HeatmapProgram::vertex(point, 1, -1));  // 2
-            vertices.emplace_back(HeatmapProgram::vertex(point, 1, 1));   // 3
-            vertices.emplace_back(HeatmapProgram::vertex(point, -1, 1));  // 4
+            vertices.emplace_back(HeatmapBucket::vertex(point, -1, -1)); // 1
+            vertices.emplace_back(HeatmapBucket::vertex(point, 1, -1));  // 2
+            vertices.emplace_back(HeatmapBucket::vertex(point, 1, 1));   // 3
+            vertices.emplace_back(HeatmapBucket::vertex(point, -1, 1));  // 4
 
             auto& segment = segments.back();
             assert(segment.vertexLength <= std::numeric_limits<uint16_t>::max());

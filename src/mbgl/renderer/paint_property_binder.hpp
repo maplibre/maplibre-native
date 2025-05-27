@@ -5,9 +5,8 @@
 #include <mbgl/gfx/uniform.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/layout/pattern_layout.hpp>
-#include <mbgl/programs/attributes.hpp>
+#include <mbgl/shaders/attributes.hpp>
 #include <mbgl/renderer/cross_faded_property_evaluator.hpp>
-#include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/renderer/paint_property_statistics.hpp>
 #include <mbgl/renderer/possibly_evaluated_property_value.hpp>
 #include <mbgl/util/indexed_tuple.hpp>
@@ -120,13 +119,6 @@ public:
 
     virtual void updateVertexVector(std::size_t, std::size_t, const GeometryTileFeature&, const FeatureState&) = 0;
 
-#if MLN_LEGACY_RENDERER
-    virtual void upload(gfx::UploadPass&) = 0;
-
-    virtual std::tuple<ExpandToType<As, std::optional<gfx::AttributeBinding>>...> attributeBinding(
-        const PossiblyEvaluatedType& currentValue) const = 0;
-#endif // MLN_LEGACY_RENDERER
-
     virtual void setPatternParameters(const std::optional<ImagePosition>&,
                                       const std::optional<ImagePosition>&,
                                       const CrossfadeParameters&) = 0;
@@ -166,15 +158,6 @@ public:
                               const CanonicalTileID&,
                               const style::expression::Value&) override {}
     void updateVertexVector(std::size_t, std::size_t, const GeometryTileFeature&, const FeatureState&) override {}
-
-#if MLN_LEGACY_RENDERER
-    void upload(gfx::UploadPass&) override {}
-
-    std::tuple<std::optional<gfx::AttributeBinding>> attributeBinding(
-        const PossiblyEvaluatedPropertyValue<T>&) const override {
-        return {};
-    }
-#endif // MLN_LEGACY_RENDERER
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
@@ -218,15 +201,6 @@ public:
                               const CanonicalTileID&,
                               const style::expression::Value&) override {}
     void updateVertexVector(std::size_t, std::size_t, const GeometryTileFeature&, const FeatureState&) override {}
-
-#if MLN_LEGACY_RENDERER
-    void upload(gfx::UploadPass&) override {}
-
-    std::tuple<std::optional<gfx::AttributeBinding>, std::optional<gfx::AttributeBinding>> attributeBinding(
-        const PossiblyEvaluatedPropertyValue<Faded<T>>&) const override {
-        return {};
-    }
-#endif // MLN_LEGACY_RENDERER
 
     void setPatternParameters(const std::optional<ImagePosition>& posA,
                               const std::optional<ImagePosition>& posB,
@@ -331,19 +305,6 @@ public:
         vertexVector.updateModified();
     }
 
-#if MLN_LEGACY_RENDERER
-    void upload(gfx::UploadPass& uploadPass) override { vertexBuffer = uploadPass.createVertexBuffer(vertexVector); }
-
-    std::tuple<std::optional<gfx::AttributeBinding>> attributeBinding(
-        const PossiblyEvaluatedPropertyValue<T>& currentValue) const override {
-        if (currentValue.isConstant()) {
-            return {};
-        } else {
-            return std::tuple<std::optional<gfx::AttributeBinding>>{gfx::attributeBinding(*vertexBuffer)};
-        }
-    }
-#endif // MLN_LEGACY_RENDERER
-
     std::tuple<float> interpolationFactor(float) const override { return std::tuple<float>{0.0f}; }
 
     std::tuple<T> uniformValue(const PossiblyEvaluatedPropertyValue<T>& currentValue) const override {
@@ -370,10 +331,6 @@ private:
 
     gfx::VertexVectorPtr<BaseVertex> sharedVertexVector = std::make_shared<gfx::VertexVector<BaseVertex>>();
     gfx::VertexVector<BaseVertex>& vertexVector = *sharedVertexVector;
-
-#if MLN_LEGACY_RENDERER
-    std::optional<gfx::VertexBuffer<BaseVertex>> vertexBuffer;
-#endif // MLN_LEGACY_RENDERER
 
     FeatureVertexRangeMap featureMap;
 };
@@ -469,19 +426,6 @@ public:
         vertexVector.updateModified();
     }
 
-#if MLN_LEGACY_RENDERER
-    void upload(gfx::UploadPass& uploadPass) override { vertexBuffer = uploadPass.createVertexBuffer(vertexVector); }
-
-    std::tuple<std::optional<gfx::AttributeBinding>> attributeBinding(
-        const PossiblyEvaluatedPropertyValue<T>& currentValue) const override {
-        if (currentValue.isConstant()) {
-            return {};
-        } else {
-            return std::tuple<std::optional<gfx::AttributeBinding>>{gfx::attributeBinding(*vertexBuffer)};
-        }
-    }
-#endif // MLN_LEGACY_RENDERER
-
     std::tuple<float> interpolationFactor(float currentZoom) const override {
         const float possiblyRoundedZoom = expression.getUseIntegerZoom() ? std::floor(currentZoom) : currentZoom;
 
@@ -515,10 +459,6 @@ private:
 
     gfx::VertexVectorPtr<Vertex> sharedVertexVector = std::make_shared<gfx::VertexVector<Vertex>>();
     gfx::VertexVector<Vertex>& vertexVector = *sharedVertexVector;
-
-#if MLN_LEGACY_RENDERER
-    std::optional<gfx::VertexBuffer<Vertex>> vertexBuffer;
-#endif // MLN_LEGACY_RENDERER
 
     FeatureVertexRangeMap featureMap;
 };
@@ -586,36 +526,6 @@ public:
 
     void updateVertexVector(std::size_t, std::size_t, const GeometryTileFeature&, const FeatureState&) override {}
 
-#if MLN_LEGACY_RENDERER
-    void upload(gfx::UploadPass& uploadPass) override {
-        if (!patternToVertexVector.empty()) {
-            assert(!zoomInVertexVector.empty());
-            assert(!zoomOutVertexVector.empty());
-            patternToVertexBuffer = uploadPass.createVertexBuffer(patternToVertexVector);
-            zoomInVertexBuffer = uploadPass.createVertexBuffer(zoomInVertexVector);
-            zoomOutVertexBuffer = uploadPass.createVertexBuffer(zoomOutVertexVector);
-        }
-    }
-
-    std::tuple<std::optional<gfx::AttributeBinding>, std::optional<gfx::AttributeBinding>> attributeBinding(
-        const PossiblyEvaluatedPropertyValue<Faded<T>>& currentValue) const override {
-        if (currentValue.isConstant()) {
-            return {};
-        } else {
-            if (patternToVertexBuffer) {
-                assert(zoomInVertexBuffer);
-                assert(zoomOutVertexBuffer);
-                return std::tuple<std::optional<gfx::AttributeBinding>, std::optional<gfx::AttributeBinding>>{
-                    gfx::attributeBinding(*patternToVertexBuffer),
-                    gfx::attributeBinding(crossfade.fromScale == 2 ? *zoomInVertexBuffer : *zoomOutVertexBuffer)};
-            }
-
-            return std::tuple<std::optional<gfx::AttributeBinding>, std::optional<gfx::AttributeBinding>>{std::nullopt,
-                                                                                                          std::nullopt};
-        }
-    }
-#endif // MLN_LEGACY_RENDERER
-
     std::tuple<float, float> interpolationFactor(float) const override { return std::tuple<float, float>{0.0f, 0.0f}; }
 
     std::tuple<std::array<uint16_t, 4>, std::array<uint16_t, 4>> uniformValue(
@@ -647,12 +557,6 @@ private:
 
     gfx::VertexVector<Vertex2> zoomInVertexVector;
     gfx::VertexVector<Vertex2> zoomOutVertexVector;
-
-#if MLN_LEGACY_RENDERER
-    std::optional<gfx::VertexBuffer<Vertex>> patternToVertexBuffer;
-    std::optional<gfx::VertexBuffer<Vertex2>> zoomInVertexBuffer;
-    std::optional<gfx::VertexBuffer<Vertex2>> zoomOutVertexBuffer;
-#endif // MLN_LEGACY_RENDERER
 
     CrossfadeParameters crossfade;
 };
@@ -779,10 +683,6 @@ public:
                               const CrossfadeParameters& crossfade) {
         util::ignore({(binders.template get<Ps>()->setPatternParameters(posA, posB, crossfade), 0)...});
     }
-
-#if MLN_LEGACY_RENDERER
-    void upload(gfx::UploadPass& uploadPass) { util::ignore({(binders.template get<Ps>()->upload(uploadPass), 0)...}); }
-#endif // MLN_LEGACY_RENDERER
 
     template <class P>
     using ZoomInterpolatedAttributeList = typename Property<P>::ZoomInterpolatedAttributeList;

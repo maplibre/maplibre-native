@@ -15,6 +15,7 @@
 #include <mbgl/style/layers/custom_layer.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/math/wrap.hpp>
+#include <mbgl/util/action_journal.hpp>
 #include <mbgl/util/client_options.hpp>
 #include <mbgl/util/exception.hpp>
 #include <mbgl/util/geo.hpp>
@@ -68,6 +69,7 @@
 #import "MLNNetworkConfiguration_Private.h"
 #import "MLNReachability.h"
 #import "MLNSettings_Private.h"
+#import "MLNActionJournalOptions_Private.h"
 #import "MLNMapProjection.h"
 
 #include <algorithm>
@@ -424,6 +426,7 @@ public:
 @property (nonatomic, copy) MLNMapCamera *residualCamera;
 @property (nonatomic) MLNMapDebugMaskOptions residualDebugMask;
 @property (nonatomic, copy) NSURL *residualStyleURL;
+@property (nonatomic, copy, nullable) NSString *initialStyleJSON;
 
 /// Tilt gesture recognizer helper
 @property (nonatomic, assign) CGPoint dragGestureMiddlePoint;
@@ -502,7 +505,7 @@ public:
     {
         MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
         MLNLogDebug(@"Initializing frame: %@", NSStringFromCGRect(frame));
-        [self commonInit];
+        [self commonInitWithOptions:nil];
         self.styleURL = nil;
         MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
     }
@@ -515,8 +518,49 @@ public:
     {
         MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
         MLNLogDebug(@"Initializing frame: %@ styleURL: %@", NSStringFromCGRect(frame), styleURL);
-        [self commonInit];
+        [self commonInitWithOptions:nil];
         self.styleURL = styleURL;
+        MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
+    }
+    return self;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame styleJSON:(NSString *)styleJSON
+{
+    if (self = [super initWithFrame:frame])
+    {
+        MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
+        MLNLogDebug(@"Initializing frame: %@ styleJSON: %@", NSStringFromCGRect(frame), styleJSON);
+        [self commonInitWithOptions:nil];
+        self.styleJSON = styleJSON;
+        _initialStyleJSON = [styleJSON copy];
+        MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
+    }
+    return self;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame options:(MLNMapOptions *)options
+{
+    if (self = [super initWithFrame:frame])
+    {
+        MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
+        MLNLogDebug(@"Initializing frame: %@ with options", NSStringFromCGRect(frame));
+        [self commonInitWithOptions:options];
+
+        if (options)
+        {
+            if (options.styleURL) {
+                self.styleURL = options.styleURL;
+            } else if (options.styleJSON) {
+                self.styleJSON = options.styleJSON;
+                _initialStyleJSON = [options.styleJSON copy];
+            } else {
+                self.styleURL = nil;
+            }
+        } else {
+            self.styleURL = nil;
+        }
+
         MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
     }
     return self;
@@ -527,7 +571,7 @@ public:
     if (self = [super initWithCoder:decoder])
     {
         MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
-        [self commonInit];
+        [self commonInitWithOptions:nil];
         self.styleURL = nil;
         MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
     }
@@ -552,6 +596,11 @@ public:
         return self.residualStyleURL;
     }
 
+    if (self.mbglMap.getStyle().getJSON().length() > 0 &&
+        self.mbglMap.getStyle().getURL().empty()) {
+        return [NSURL URLWithString:@"local://style.json"];
+    }
+
     NSString *styleURLString = @(self.mbglMap.getStyle().getURL().c_str()).mgl_stringOrNilIfEmpty;
     MLNAssert(styleURLString, @"Invalid style URL string %@", styleURLString);
     return styleURLString ? [NSURL URLWithString:styleURLString] : nil;
@@ -567,6 +616,16 @@ public:
     styleURL = styleURL.mgl_URLByStandardizingScheme;
     self.style = nil;
     self.mbglMap.getStyle().loadURL([[styleURL absoluteString] UTF8String]);
+}
+
+- (NSString *)styleJSON {
+    return self.style.styleJSON;
+}
+
+- (void)setStyleJSON:(NSString *)styleJSON {
+    // Reset style and load new JSON
+    self.style = nil;
+    self.mbglMap.getStyle().loadJSON([styleJSON UTF8String]);
 }
 
 - (IBAction)reloadStyle:(__unused id)sender {
@@ -591,8 +650,13 @@ public:
     return _rendererFrontend->getRenderer();
 }
 
-- (void)commonInit
+- (void)commonInitWithOptions:(MLNMapOptions*)mlnMapoptions
 {
+    if (mlnMapoptions == nil)
+    {
+        mlnMapoptions = [[MLNMapOptions alloc] init];
+    }
+
     _opaque = NO;
 
     // setup accessibility
@@ -653,8 +717,11 @@ public:
         resourceOptions.withApiKey([apiKey UTF8String]);
     }
 
+    const mbgl::util::ActionJournalOptions& actionJournalOptions = [mlnMapoptions.actionJournalOptions getCoreOptions];
+
     NSAssert(!_mbglMap, @"_mbglMap should be NULL");
-    _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions, clientOptions);
+    _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions,
+                                           resourceOptions, clientOptions, actionJournalOptions);
 
     // start paused if launch into the background
     if (background) {
@@ -890,7 +957,9 @@ public:
     self.terminated = YES;
     self.residualCamera = self.camera;
     self.residualDebugMask = self.debugMask;
-    self.residualStyleURL = self.styleURL;
+    if (!_initialStyleJSON) {
+        self.residualStyleURL = self.styleURL;
+    }
 
     // Tear down C++ objects, insuring worker threads correctly terminate.
     // Because of how _mbglMap is constructed, we need to destroy it first.
@@ -4106,10 +4175,10 @@ static void *windowScreenContext = &windowScreenContext;
         self.userTrackingMode = MLNUserTrackingModeFollow;
     }
 
-    [self _setDirection:direction animated:animated];
+    [self _setDirection:direction center:kCLLocationCoordinate2DInvalid animated:animated];
 }
 
-- (void)_setDirection:(CLLocationDirection)direction animated:(BOOL)animated
+- (void)_setDirection:(CLLocationDirection)direction center:(CLLocationCoordinate2D)center animated:(BOOL)animated
 {
     if (!_mbglMap)
     {
@@ -4131,10 +4200,26 @@ static void *windowScreenContext = &windowScreenContext;
     else
     {
         CGPoint anchor = self.userLocationAnnotationViewCenter;
-        self.mbglMap.easeTo(mbgl::CameraOptions()
-                                .withBearing(direction)
-                                .withAnchor(mbgl::ScreenCoordinate { anchor.x, anchor.y }),
-                            MLNDurationFromTimeInterval(duration));
+
+        mbgl::CameraOptions cameraOptions = mbgl::CameraOptions()
+            .withBearing(direction)
+            .withAnchor(mbgl::ScreenCoordinate { anchor.x, anchor.y });
+
+        mbgl::AnimationOptions animationOptions;
+        animationOptions.duration.emplace(MLNDurationFromTimeInterval(duration));
+
+        if (CLLocationCoordinate2DIsValid(center))
+        {
+            cameraOptions.center = MLNLatLngFromLocationCoordinate2D(center);
+
+            if (duration)
+            {
+                CAMediaTimingFunction *function = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
+                animationOptions.easing.emplace(MLNUnitBezierForMediaTimingFunction(function));
+            }
+        }
+
+        self.mbglMap.easeTo(cameraOptions, animationOptions);
     }
 }
 
@@ -6468,7 +6553,7 @@ static void *windowScreenContext = &windowScreenContext;
         if (headingDirection >= 0 && self.userTrackingMode == MLNUserTrackingModeFollowWithHeading
             && self.userTrackingState != MLNUserTrackingStateBegan)
         {
-            [self _setDirection:headingDirection animated:YES];
+            [self _setDirection:headingDirection center:self.userLocation.coordinate animated:YES];
             [self updateUserLocationAnnotationView];
         }
     });
@@ -6941,8 +7026,13 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (void)sourceDidChange:(MLNSource *)source {
-    // no-op: we only show attribution after tapping the info button, so there's no
-    // interactive update needed.
+    if (!_mbglMap) {
+        return;
+    }
+
+    if ([self.delegate respondsToSelector:@selector(mapView:sourceDidChange:)]) {
+        [self.delegate mapView:self sourceDidChange:source];
+    }
 }
 
 - (void)didFailToLoadImage:(NSString *)imageName {
@@ -7510,6 +7600,50 @@ static void *windowScreenContext = &windowScreenContext;
 - (void)triggerRepaint
 {
     _mbglMap->triggerRepaint();
+}
+
+- (NSArray<NSString*>*)getActionJournalLogFiles
+{
+    const auto& actionJournal = _mbglMap->getActionJournal();
+    if (!actionJournal) {
+        return nil;
+    }
+
+    const auto& files = actionJournal->getLogFiles();
+    NSMutableArray<NSString*>* objcFiles = [NSMutableArray new];
+
+    for (const auto& file : files) {
+        [objcFiles addObject:[NSString stringWithUTF8String:file.c_str()]];
+    }
+
+    return objcFiles;
+}
+
+- (NSArray<NSString*>*)getActionJournalLog
+{
+    const auto& actionJournal = _mbglMap->getActionJournal();
+    if (!actionJournal) {
+        return nil;
+    }
+
+    const auto& log = actionJournal->getLog();
+    NSMutableArray<NSString*>* objcLog = [NSMutableArray new];
+
+    for (const auto& event : log) {
+        [objcLog addObject:[NSString stringWithUTF8String:event.c_str()]];
+    }
+
+    return objcLog;
+}
+
+- (void)clearActionJournalLog
+{
+    const auto& actionJournal = _mbglMap->getActionJournal();
+    if (!actionJournal) {
+        return;
+    }
+
+    actionJournal->clearLog();
 }
 
 - (MLNBackendResource *)backendResource {

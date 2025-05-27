@@ -16,8 +16,7 @@
         "CMAKE_SYSTEM_NAME": "iOS",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
         "MLN_WITH_METAL": "ON",
-        "MLN_WITH_OPENGL": "OFF",
-        "MLN_DRAWABLE_RENDERER": "ON"
+        "MLN_WITH_OPENGL": "OFF"
       }
     },
     {
@@ -30,21 +29,34 @@
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
         "MLN_WITH_METAL": "ON",
         "MLN_WITH_OPENGL": "OFF",
-        "MLN_DRAWABLE_RENDERER": "ON"
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
+      "name": "macos-xcode",
+      "displayName": "macOS (Xcode)",
+      "generator": "Xcode",
+      "binaryDir": "${sourceDir}/build-macos-xcode",
+      "inherits": "macos"
+    },
+    {
       "name": "macos-vulkan",
-      "displayName": "macOS",
+      "displayName": "macOS Vulkan",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-macos-vulkan",
+      "inherits": "macos",
       "cacheVariables": {
-        "CMAKE_SYSTEM_NAME": "Darwin",
-        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
         "MLN_WITH_VULKAN": "ON",
-        "MLN_WITH_OPENGL": "OFF",
-        "MLN_DRAWABLE_RENDERER": "ON"
+        "MLN_WITH_METAL": "OFF",
+        "MLN_WITH_OPENGL": "OFF"
       }
+    },
+    {
+      "name": "macos-vulkan-xcode",
+      "displayName": "macOS Vulkan (Xcode)",
+      "generator": "Xcode",
+      "binaryDir": "${sourceDir}/build-macos-vulkan-xcode",
+      "inherits": "macos-vulkan"
     },
     {
       "name": "macos-node",
@@ -64,41 +76,57 @@
       }
     },
     {
-      "name": "linux-opengl",
-      "binaryDir": "${sourceDir}/build-linux-opengl",
+      "name": "linux",
+      "hidden": true,
       "generator": "Ninja",
       "cacheVariables": {
         "CMAKE_SYSTEM_NAME": "Linux",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
         "MLN_WITH_METAL": "OFF",
-        "MLN_WITH_OPENGL": "ON",
-        "MLN_DRAWABLE_RENDERER": "ON",
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_WITH_VULKAN": "OFF",
         "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++"
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_BUILD_WITH_INSTALL_RPATH": "ON",
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "MLN_WITH_CLANG_TIDY": "OFF",
+        "MLN_WITH_WAYLAND": "ON",
+        "MLN_WITH_X11": "OFF"
+      }
+    },
+    {
+      "name": "linux-opengl",
+      "binaryDir": "${sourceDir}/build-linux-opengl",
+      "generator": "Ninja",
+      "inherits": "linux",
+      "cacheVariables": {
+        "MLN_WITH_OPENGL": "ON"
       }
     },
     {
       "name": "linux-opengl-core",
       "inherits": "linux-opengl",
       "cacheVariables": {
-        "MLN_CORE_INCLUDE_DEPS": "ON"
+        "MLN_CORE_INCLUDE_DEPS": "ON",
+        "MLN_USE_BUILTIN_ICU": "ON"
       }
     },
     {
       "name": "linux-vulkan",
       "binaryDir": "${sourceDir}/build-linux-vulkan",
-      "generator": "Ninja",
-      "inherits": "linux-opengl",
+      "inherits": "linux",
       "cacheVariables": {
-        "MLN_WITH_OPENGL": "OFF",
-        "MLN_WITH_VULKAN": "ON"
+        "MLN_WITH_VULKAN": "ON",
+        "MLN_WITH_WAYLAND": "OFF",
+        "MLN_WITH_X11": "ON"
       }
     },
     {
       "name": "linux-vulkan-core",
       "inherits": "linux-vulkan",
       "cacheVariables": {
-        "MLN_CORE_INCLUDE_DEPS": "ON"
+        "MLN_CORE_INCLUDE_DEPS": "ON",
+        "MLN_USE_BUILTIN_ICU": "ON"
       }
     }
   ],

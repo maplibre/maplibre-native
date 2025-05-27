@@ -1,7 +1,5 @@
 #include "example_custom_drawable_style_layer.hpp"
 
-#if MLN_DRAWABLE_RENDERER
-
 #include <mbgl/style/layer.hpp>
 #include <mbgl/style/layers/custom_drawable_layer.hpp>
 #include <mbgl/util/io.hpp>
@@ -271,8 +269,9 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
         Interface::SymbolOptions options;
         options.texture = interface.context.createTexture2D();
         options.texture->setImage(image);
-        options.texture->setSamplerConfiguration(
-            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Repeat, gfx::TextureWrapType::Repeat});
+        options.texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                                  .wrapU = gfx::TextureWrapType::Repeat,
+                                                  .wrapV = gfx::TextureWrapType::Repeat});
 
         const std::array<std::array<float, 2>, 2> textureCoordinates = {{{0.0f, 0.0f}, {10.0f, 10.0f}}};
         options.size = {static_cast<uint32_t>(image->size.width), static_cast<uint32_t>(image->size.height)};
@@ -300,8 +299,9 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
         Interface::SymbolOptions options;
         options.texture = interface.context.createTexture2D();
         options.texture->setImage(image);
-        options.texture->setSamplerConfiguration(
-            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+        options.texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                                  .wrapU = gfx::TextureWrapType::Clamp,
+                                                  .wrapV = gfx::TextureWrapType::Clamp});
 
         options.size = {static_cast<uint32_t>(image->size.width), static_cast<uint32_t>(image->size.height)};
 
@@ -414,8 +414,9 @@ void ExampleCustomDrawableStyleLayerHost::generateGeometry(Interface& interface)
 
     options.texture = interface.context.createTexture2D();
     options.texture->setImage(image);
-    options.texture->setSamplerConfiguration(
-        {mbgl::gfx::TextureFilterType::Linear, mbgl::gfx::TextureWrapType::Clamp, mbgl::gfx::TextureWrapType::Clamp});
+    options.texture->setSamplerConfiguration({.filter = mbgl::gfx::TextureFilterType::Linear,
+                                              .wrapU = mbgl::gfx::TextureWrapType::Clamp,
+                                              .wrapV = mbgl::gfx::TextureWrapType::Clamp});
 
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
@@ -426,7 +427,7 @@ void ExampleCustomDrawableStyleLayerHost::generateGeometry(Interface& interface)
     const unsigned long numVtxCircumference = 72;
     const float bearingStep = 360.0f / static_cast<float>(numVtxCircumference - 1);
 
-    vertices.emplace_back(Interface::GeometryVertex{{0.0f, 0.0f, 0.0f}, {0.5f, 0.5f}});
+    vertices.emplace_back(Interface::GeometryVertex{.position = {0.0f, 0.0f, 0.0f}, .texcoords = {0.5f, 0.5f}});
 
     for (unsigned long i = 1; i <= numVtxCircumference; ++i) {
         const float rad = mbgl::util::deg2radf((i - 1) * bearingStep);
@@ -596,11 +597,10 @@ mbgl::gfx::Texture2DPtr ExampleCustomDrawableStyleLayerHost::createCheckerboardT
     }
 
     auto texture = interface.context.createTexture2D();
-    texture->setSamplerConfiguration(
-        {mbgl::gfx::TextureFilterType::Linear, mbgl::gfx::TextureWrapType::Clamp, mbgl::gfx::TextureWrapType::Clamp});
+    texture->setSamplerConfiguration({.filter = mbgl::gfx::TextureFilterType::Linear,
+                                      .wrapU = mbgl::gfx::TextureWrapType::Clamp,
+                                      .wrapV = mbgl::gfx::TextureWrapType::Clamp});
     texture->setImage(std::move(image));
 
     return texture;
 }
-
-#endif

@@ -1,9 +1,4 @@
 if(WIN32)
-    if(MLN_WITH_OSMESA)
-        message(WARNING "mbgl-glfw does not work with -DMLN_WITH_OSMESA=ON. If you want to build this target, don't use this option.")
-        return()
-    endif()
-
     find_package(glfw3 REQUIRED)
     find_package(libuv REQUIRED)
 else()
@@ -128,12 +123,11 @@ endif()
 target_link_libraries(
     mbgl-glfw
     PRIVATE
-        Mapbox::Base::Extras::args
-        Mapbox::Base::Extras::filesystem
-        Mapbox::Base::Extras::rapidjson
+        MapLibreNative::Base::Extras::args
+        MapLibreNative::Base::Extras::rapidjson
         Mapbox::Map
         mbgl-compiler-options
-        Mapbox::Base::cheap-ruler-cpp
+        MapLibreNative::Base::cheap-ruler-cpp
 )
 
 if(NOT WIN32 AND MLN_WITH_OPENGL)

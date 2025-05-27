@@ -1,5 +1,65 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+### ✨ Features and improvements
+
+### 🐞 Bug fixes
+
+## 11.9.0
+
+### ✨ Features and improvements
+
+- Add dynamic texture atlas ([#3198](https://github.com/maplibre/maplibre-native/pull/3198)).
+- Remove some of unused legacy uniforms ([#3481](https://github.com/maplibre/maplibre-native/pull/3481)).
+
+### 🐞 Bug fixes
+
+- Fix vulkan scaling issue ([#3489](https://github.com/maplibre/maplibre-native/pull/3489)).
+- Fix swapchain out of bounds ([#3486](https://github.com/maplibre/maplibre-native/pull/3486)).
+- Fix validation error reported by VulkanSDK 1.4.313.0 ([#3471](https://github.com/maplibre/maplibre-native/pull/3471)).P
+
+## 11.9.0-pre0
+
+Pre-release to test out the new [dynamic texture atlas](https://github.com/maplibre/maplibre-native/pull/3198). This should result in a memory reduction. Please [open an issue](https://github.com/maplibre/maplibre-native/issues) if you encounter any problems.
+
+## 11.8.8
+
+### ✨ Features and improvements
+
+- Update NDK to 28.1.13356709 ([#3450](https://github.com/maplibre/maplibre-native/pull/3450)).
+- Add support to range requests in AssetFileSource ([#3461](https://github.com/maplibre/maplibre-native/pull/3404)).
+- Force PMTiles metadata to always have XYZ tile scheme ([#3403](https://github.com/maplibre/maplibre-native/pull/3403)).
+
+### 🐞 Bug fixes
+
+- Make sure renderThread is alive before calling requestExitAndWait() ([#3461](https://github.com/maplibre/maplibre-native/pull/3461)).
+
+## 11.8.7
+
+We now make releases with debug builds to make it easier to report issues with relevant logs.
+
+They are available with a `-debug` postfix on Maven Central, for example `org.maplibre.gl:android-sdk-vulkan-debug`.
+
+## 11.8.6
+
+### ✨ Features and improvements
+
+- Change Java Transfrom class from final to normal ([#3332](https://github.com/maplibre/maplibre-native/pull/3332)).
+
+### 🐞 Bug fixes
+
+- Fix rare crash LatLngAnimator ([#3352](https://github.com/maplibre/maplibre-native/pull/3352)).
+- Sync surface destruction with main thread ([#3368](https://github.com/maplibre/maplibre-native/pull/3368)).
+- Prevent exception SymbolLocationLayerRenderer with new style ([#3369](https://github.com/maplibre/maplibre-native/pull/3369)).
+
+## 11.8.5
+
+### 🐞 Bug fixes
+
+- Add regression test for [#3323](https://github.com/maplibre/maplibre-native/pull/3323), bug in layer dependency tracking ([#3326](https://github.com/maplibre/maplibre-native/pull/3326))
+- Fix `ErrorSurfaceLostKHR` exception ([#3337](https://github.com/maplibre/maplibre-native/pull/3337)).
+
 ## 11.8.4
 
 ### 🐞 Bug fixes

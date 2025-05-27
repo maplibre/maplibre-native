@@ -49,6 +49,22 @@ std::string iso8601(Timestamp timestamp) {
     return buffer;
 }
 
+std::string iso8601(std::chrono::time_point<std::chrono::system_clock, Milliseconds> timestamp) {
+    std::time_t time = std::chrono::system_clock::to_time_t(timestamp);
+    std::tm info;
+    _gmtime(&time, &info);
+
+    long long ms =
+        std::chrono::duration_cast<Milliseconds>(timestamp - std::chrono::system_clock::from_time_t(time)).count() %
+        1000;
+
+    char buffer[sizeof("yyyy-mm-ddThh:mm:ss.000Z")];
+    const std::size_t offset = std::strftime(buffer, sizeof(buffer), "%FT%T", &info);
+    snprintf(buffer + offset, sizeof(buffer) - offset, ".%03lldZ", ms);
+
+    return buffer;
+}
+
 Timestamp parseTimestamp(const char *timestamp) {
     return std::chrono::time_point_cast<Seconds>(std::chrono::system_clock::from_time_t(parse_date(timestamp)));
 }

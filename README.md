@@ -14,14 +14,14 @@ This project originated as a fork of Mapbox GL Native, before their switch to a 
 
 ## Getting Started
 
-## Android
+### Android
 
 Add [the latest version](https://central.sonatype.com/artifact/org.maplibre.gl/android-sdk/versions) of MapLibre Native Android as a dependency to your project.
 
 ```gradle
     dependencies {
         ...
-        implementation 'org.maplibre.gl:android-sdk:11.5.1'
+        implementation 'org.maplibre.gl:android-sdk:11.8.5'
         ...
     }
 ```
@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity() {
 ```
 </details>
 
-For more information, refer to the [Android API Documentation](https://maplibre.org/maplibre-native/android/api/), [Android Examples Documentation](https://maplibre.org/maplibre-native/android/examples/getting-started/) or the [MapLibre Native Android `README.md`](platform/android/README.md).
+For more information, refer to the [Android API Documentation](https://maplibre.org/maplibre-native/android/api/) or the [Android Examples Documentation](https://maplibre.org/maplibre-native/android/examples/getting-started/).
 
 ## iOS
 
@@ -155,9 +155,10 @@ struct SimpleMap: UIViewRepresentable {
 }
 ```
 
-You can also use [MapLibreSwiftUI](https://github.com/maplibre/swiftui-dsl), a wrapper around MapLibre Native iOS that offers a declarative API like SwiftUI.
+> [!TIP]
+> You can also use [MapLibreSwiftUI](https://github.com/maplibre/swiftui-dsl), a wrapper around MapLibre Native iOS that offers a declarative API like SwiftUI.
 
-The [iOS Documentation](https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre/) contains many examples and the entire API of the library. You might also want to check out the [MapLibre Native iOS `README.md`](platform/ios/README.md).
+The [iOS Documentation](https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre/) contains many examples and the entire API of the library.
 
 ## Node.js
 
@@ -187,22 +188,24 @@ git clone --recurse-submodules git@github.com:<YOUR NAME>/maplibre-native.git
 git remote add origin https://github.com/maplibre/maplibre-native.git
 ```
 
-Check out issues labelled as a [good first issue](https://github.com/maplibre/maplibre-native/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+The go-to reference is the [MapLibre Native Developer Documentation](https://maplibre.org/maplibre-native/docs/book/).
 
-## Core
+> [!TIP]
+> Check out issues labelled as a [good first issue](https://github.com/maplibre/maplibre-native/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+
+### Core
 
 - [`CONTRIBUTING.md`](CONTRIBUTING.md)
-- [MapLibre Native Markdown Book](https://maplibre.org/maplibre-native/docs/book/design/ten-thousand-foot-view.html): architectural notes
 - [GitHub Wiki](https://github.com/maplibre/maplibre-native/wiki): low-friction way to share information with the community
 - [Core C++ API Documentation](https://maplibre.org/maplibre-native/cpp/api/) (unstable)
 
-## Android
+### Android
 
 Open `platform/android` with Android Studio.
 
-More information: [`platform/android/DEVELOPING.md`](platform/android/DEVELOPING.md).
+More information: [MapLibre Android Developer Guide](https://maplibre.org/maplibre-native/docs/book/platforms/android/index.html).
 
-## iOS
+### iOS
 
 You need to use [Bazel](https://bazel.build/) to generate an Xcode project. Install [`bazelisk`](https://formulae.brew.sh/formula/bazelisk) (a wrapper that installs the required Bazel version). Next, use:
 
@@ -213,7 +216,7 @@ xed platform/ios/MapLibre.xcodeproj
 
 To generate and open the Xcode project.
 
-More information: [`platform/ios/CONTRIBUTING.md`](platform/ios/CONTRIBUTING.md).
+More information: [MapLibre iOS Developer Guide](https://maplibre.org/maplibre-native/docs/book/platforms/ios/index.html).
 
 ## Other Platforms
 
@@ -252,6 +255,8 @@ Silver:
 <a href="https://www.mappedin.com/"><img src="https://maplibre.org/img/mappedin-logo.svg" alt="Logo mappedin" width="25%"/></a>
 
 <a href="https://www.mapme.com/"><img src="https://maplibre.org/img/mapme-logo.svg" alt="Logo mapme" width="25%"/></a>
+
+<a href="https://www.maptiler.com/"><img src="https://maplibre.org/img/maptiler-logo.svg" alt="Logo maptiler" width="25%"/></a>
 
 Backers and Supporters:
 

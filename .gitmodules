@@ -22,9 +22,6 @@
 [submodule "vendor/eternal"]
 	path = vendor/eternal
 	url = https://github.com/mapbox/eternal.git
-[submodule "vendor/mapbox-base"]
-	path = vendor/mapbox-base
-	url = https://github.com/maplibre/maplibre-native-base.git
 [submodule "vendor/googletest"]
 	path = vendor/googletest
 	url = https://github.com/google/googletest.git
@@ -58,3 +55,48 @@
 [submodule "vendor/PMTiles"]
 	path = vendor/PMTiles
 	url = https://github.com/protomaps/PMTiles.git
+[submodule "vendor/maplibre-native-base/extras/args"]
+	path = vendor/maplibre-native-base/extras/args
+	url = https://github.com/Taywee/args.git
+[submodule "vendor/maplibre-native-base/extras/expected-lite"]
+	path = vendor/maplibre-native-base/extras/expected-lite
+	url = https://github.com/martinmoene/expected-lite.git
+[submodule "vendor/maplibre-native-base/extras/kdbush.hpp"]
+	path = vendor/maplibre-native-base/extras/kdbush.hpp
+	url = https://github.com/mourner/kdbush.hpp.git
+[submodule "vendor/maplibre-native-base/extras/rapidjson"]
+	path = vendor/maplibre-native-base/extras/rapidjson
+	url = https://github.com/Tencent/rapidjson.git
+[submodule "vendor/maplibre-native-base/deps/cheap-ruler-cpp"]
+	path = vendor/maplibre-native-base/deps/cheap-ruler-cpp
+	url = https://github.com/mapbox/cheap-ruler-cpp.git
+[submodule "vendor/maplibre-native-base/deps/geojson-vt-cpp"]
+	path = vendor/maplibre-native-base/deps/geojson-vt-cpp
+	url = https://github.com/mapbox/geojson-vt-cpp.git
+[submodule "vendor/maplibre-native-base/deps/geojson-cpp"]
+	path = vendor/maplibre-native-base/deps/geojson-cpp
+	url = https://github.com/mapbox/geojson-cpp.git
+[submodule "vendor/maplibre-native-base/deps/geometry.hpp"]
+	path = vendor/maplibre-native-base/deps/geometry.hpp
+	url = https://github.com/mapbox/geometry.hpp.git
+[submodule "vendor/maplibre-native-base/deps/jni.hpp"]
+	path = vendor/maplibre-native-base/deps/jni.hpp
+	url = https://github.com/mapbox/jni.hpp.git
+[submodule "vendor/maplibre-native-base/deps/pixelmatch-cpp"]
+	path = vendor/maplibre-native-base/deps/pixelmatch-cpp
+	url = https://github.com/mapbox/pixelmatch-cpp.git
+[submodule "vendor/maplibre-native-base/deps/shelf-pack-cpp"]
+	path = vendor/maplibre-native-base/deps/shelf-pack-cpp
+	url = https://github.com/mapbox/shelf-pack-cpp.git
+[submodule "vendor/maplibre-native-base/deps/supercluster.hpp"]
+	path = vendor/maplibre-native-base/deps/supercluster.hpp
+	url = https://github.com/mapbox/supercluster.hpp.git
+[submodule "vendor/maplibre-native-base/deps/variant"]
+	path = vendor/maplibre-native-base/deps/variant
+	url = https://github.com/mapbox/variant.git
+[submodule "vendor/maplibre-native-base/deps/geojson.hpp"]
+	path = vendor/maplibre-native-base/deps/geojson.hpp
+	url = https://github.com/mapbox/geojson-cpp.git
+[submodule "vendor/maplibre-native-base/extras/filesystem"]
+	path = vendor/maplibre-native-base/extras/filesystem
+	url = https://github.com/gulrak/filesystem.git

@@ -11,9 +11,7 @@
 #import "MLNSymbolStyleLayer_Private.h"
 #import "MLNCustomStyleLayer_Private.h"
 
-#if MLN_DRAWABLE_RENDERER
 #import "MLNCustomDrawableStyleLayer_Private.h"
-#endif
 
 #include <vector>
 
@@ -71,12 +69,10 @@ LayerManagerDarwin::LayerManagerDarwin() {
     addLayerType(std::make_unique<CustomStyleLayerPeerFactory>());
 #endif
 
-#if MLN_DRAWABLE_RENDERER
 #if defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_RUNTIME)
     addLayerTypeCoreOnly(std::make_unique<CustomDrawableLayerFactory>());
 #elif !defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_ALL)
     addLayerType(std::make_unique<CustomDrawableStyleLayerPeerFactory>());
-#endif
 #endif
 }
 

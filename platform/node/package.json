@@ -1,6 +1,6 @@
 {
   "name": "@maplibre/maplibre-gl-native",
-  "version": "6.0.1-pre.0",
+  "version": "6.1.0",
   "description": "Renders map tiles with MapLibre Native",
   "keywords": [
     "maplibre",
@@ -21,8 +21,8 @@
   },
   "license": "BSD-2-Clause",
   "dependencies": {
-    "@acalcutt/node-pre-gyp": "^1.0.15",
-    "@acalcutt/node-pre-gyp-github": "1.4.8",
+    "@mapbox/node-pre-gyp": "2.0.0",
+    "@acalcutt/node-pre-gyp-github": "2.0.1",
     "minimatch": "^9.0.4",
     "npm-run-all": "^4.1.5"
   },
@@ -33,9 +33,9 @@
     "@mapbox/mvt-fixtures": "3.10.0",
     "@octokit/plugin-retry": "^7.1.0",
     "@octokit/rest": "^20.1.0",
-    "@types/node": "^20.12.7",
+    "@types/node": "^22.9.0",
     "argparse": "^2.0.1",
-    "csscolorparser": "~1.0.3",
+    "csscolorparser": "^1.0.3",
     "d3-queue": "3.0.7",
     "diff": "5.2.0",
     "ejs": "^3.1.10",
@@ -43,13 +43,10 @@
     "express": "^4.19.2",
     "json-stringify-pretty-compact": "^4.0.0",
     "jsonwebtoken": "^9.0.2",
-    "lodash": "^4.17.21",
-    "lodash.template": "4.5.0",
     "mapbox-gl-styles": "2.0.2",
     "pixelmatch": "^5.3.0",
     "pngjs": "^7.0.0",
     "pretty-bytes": "^6.1.1",
-    "request": "^2.88.0",
     "semver": "^7.6.0",
     "shuffle-seed": "1.1.6",
     "st": "3.0.0",
@@ -58,7 +55,7 @@
     "xcode": "^3.0.1"
   },
   "engines": {
-    "node": ">=6"
+    "node": ">=18"
   },
   "scripts": {
     "install": "node-pre-gyp install --fallback-to-build=false",

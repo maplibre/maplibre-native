@@ -23,6 +23,8 @@ public class VulkanTextureViewRenderThread extends TextureViewRenderThread {
     mapRenderer.onSurfaceDestroyed();
     surface.release();
     surface = null;
+
+    hasNativeSurface = false;
   }
 
   // Thread implementation
@@ -68,6 +70,7 @@ public class VulkanTextureViewRenderThread extends TextureViewRenderThread {
 
               if (surface == null) {
                 surface = new Surface(surfaceTexture);
+                this.hasNativeSurface = true;
                 createSurface = true;
               }
 
@@ -111,13 +114,21 @@ public class VulkanTextureViewRenderThread extends TextureViewRenderThread {
         if (destroySurface) {
           mapRenderer.onSurfaceDestroyed();
           destroySurface = false;
-          break;
+          synchronized (lock) {
+            this.hasNativeSurface = false;
+            lock.notifyAll();
+          }
+          continue;
         }
 
         // If the surface size has changed inform the map renderer.
         if (sizeChanged) {
           mapRenderer.onSurfaceChanged(w, h);
           sizeChanged = false;
+          continue;
+        }
+
+        if (surface == null) {
           continue;
         }
 

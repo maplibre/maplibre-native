@@ -4,6 +4,32 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+## 6.14.0
+
+> [!IMPORTANT]
+> Please verify glyphs are loading correctly for your styles with this release. Despite careful testing, we also rely on our users to help test the new dynamic texture atlas and to [report any issues](https://github.com/maplibre/maplibre-native/issues/new?template=ios-bug-report.yml).
+
+- Force PMTiles metadata to always have XYZ tile scheme ([#3403](https://github.com/maplibre/maplibre-native/pull/3403)).
+- Add support to range requests in AssetFileSource ([#3404](https://github.com/maplibre/maplibre-native/pull/3404)).
+- Implement dynamic texture atlas ([#3198](https://github.com/maplibre/maplibre-native/pull/3198)).
+
+## 6.13.0
+
+- Allow initializing MLNMapView with style JSON ([#3240](https://github.com/maplibre/maplibre-native/pull/3240)).
+- Remove legacy renderer from source, build files and CI ([#3384](https://github.com/maplibre/maplibre-native/pull/3384)). Should have no impact on iOS since releases where already using the new drawable renderer architecture since 6.0.0.
+- Add missing `sourceDidChange` event ([#3421](https://github.com/maplibre/maplibre-native/pull/3421)).
+- Fix: follow with heading tracking mode cancels user location indicator update ([#3401](https://github.com/maplibre/maplibre-native/pull/3401)).
+
+## 6.12.3
+
+- add MLNDefines.h to make sure Metal backend is available in headers ([#3335](https://github.com/maplibre/maplibre-native/issues/3335)).
+
+## 6.12.2
+
+- Strip punctuation from attribution ([#3287](https://github.com/maplibre/maplibre-native/pull/3287)).
+- Revert [#3035](https://github.com/maplibre/maplibre-native/pull/3035) which was causing memory growth issue (#3315).
+- Apply clang-tidy fixes (mostly use designated initializers) ([#3328](https://github.com/maplibre/maplibre-native/pull/3328)).
+
 ## 6.12.1
 
 - Use double quotes for MLNTileOperation.h import ([#3277](https://github.com/maplibre/maplibre-native/issues/3277)).

@@ -1,6 +1,36 @@
 # Ten Thousand Foot View
 
-![](media/ten-thousand-foot-view-diagram.png)
+```mermaid
+graph TD
+    subgraph Platform
+        MV[Map View]
+        MR[Map Renderer]
+    end
+
+    subgraph "MapLibre Native Core"
+        M[Map]
+        S[Style]
+        L[Layers]
+        I[Images]
+        Glyphs
+        R[Renderer]
+        TW[TileWorker]
+    end
+
+    %% Platform Interactions
+    MV -- initializes --> MR
+    MV -- Initializes --> M
+
+    %% Core Interactions
+    MR -- runs the rendering loop --> R
+    R -- Renders Map --> M
+    L -- Fetches --> S
+    L -- Fetches --> I
+    R -- Sends messages to generate tiles --> TW
+    TW -- Prepares layers to be rendered --> L
+    L -- Fetches --> Glyphs
+```
+
 *Figure 1: MapLibre Native Components – Ten Thousand Foot view*
 
 From ten thousand foot, MapLibre Native is composed of *Map View* and a

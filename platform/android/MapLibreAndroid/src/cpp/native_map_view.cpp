@@ -16,6 +16,7 @@
 #include <mbgl/map/map.hpp>
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/math/minmax.hpp>
+#include <mbgl/util/action_journal.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/event.hpp>
 #include <mbgl/util/exception.hpp>
@@ -62,11 +63,10 @@ NativeMapView::NativeMapView(jni::JNIEnv& _env,
                              const jni::Object<NativeMapView>& _obj,
                              const jni::Object<FileSource>& jFileSource,
                              const jni::Object<MapRenderer>& jMapRenderer,
-                             jni::jfloat pixelRatio_,
-                             jni::jboolean crossSourceCollisions_)
+                             const jni::Object<NativeMapOptions>& jNativeMapOptions)
     : javaPeer(_env, _obj),
       mapRenderer(MapRenderer::getNativePeer(_env, jMapRenderer)),
-      pixelRatio(pixelRatio_) {
+      pixelRatio(NativeMapOptions::pixelRatio(_env, jNativeMapOptions)) {
     // Get a reference to the JavaVM for callbacks
     if (_env.GetJavaVM(&vm) < 0) {
         _env.ExceptionDescribe();
@@ -83,14 +83,16 @@ NativeMapView::NativeMapView(jni::JNIEnv& _env,
         .withPixelRatio(pixelRatio)
         .withConstrainMode(ConstrainMode::HeightOnly)
         .withViewportMode(ViewportMode::Default)
-        .withCrossSourceCollisions(crossSourceCollisions_);
+        .withCrossSourceCollisions(NativeMapOptions::crossSourceCollisions(_env, jNativeMapOptions));
 
     // Create the core map
-    map = std::make_unique<mbgl::Map>(*rendererFrontend,
-                                      *this,
-                                      options,
-                                      mbgl::android::FileSource::getSharedResourceOptions(_env, jFileSource),
-                                      mbgl::android::FileSource::getSharedClientOptions(_env, jFileSource));
+    map = std::make_unique<mbgl::Map>(
+        *rendererFrontend,
+        *this,
+        options,
+        mbgl::android::FileSource::getSharedResourceOptions(_env, jFileSource),
+        mbgl::android::FileSource::getSharedClientOptions(_env, jFileSource),
+        mbgl::android::NativeMapOptions::getActionJournalOptions(_env, jNativeMapOptions));
 }
 
 /**
@@ -693,6 +695,47 @@ jni::jboolean NativeMapView::getDebug(JNIEnv&) {
     return map->getDebug() != DebugOptions::NoDebug;
 }
 
+jni::Local<jni::Array<jni::String>> NativeMapView::getActionJournalLogFiles(JNIEnv& env) {
+    const auto& actionJournal = map->getActionJournal();
+    if (!actionJournal) {
+        return jni::Local<jni::Array<jni::String>>();
+    }
+
+    const auto& files = actionJournal->getLogFiles();
+    auto jFiles = jni::Array<jni::String>::New(env, files.size());
+
+    uint32_t index = 0;
+    for (const auto& file : files) {
+        jFiles.Set(env, index++, jni::Make<jni::String>(env, file));
+    }
+
+    return jFiles;
+}
+
+jni::Local<jni::Array<jni::String>> NativeMapView::getActionJournalLog(JNIEnv& env) {
+    const auto& actionJournal = map->getActionJournal();
+    if (!actionJournal) {
+        return jni::Local<jni::Array<jni::String>>();
+    }
+
+    const auto& events = actionJournal->getLog();
+    auto jEvents = jni::Array<jni::String>::New(env, events.size());
+
+    uint32_t index = 0;
+    for (const auto& event : events) {
+        jEvents.Set(env, index++, jni::Make<jni::String>(env, event));
+    }
+
+    return jEvents;
+}
+
+void NativeMapView::clearActionJournalLog(JNIEnv&) {
+    const auto& actionJournal = map->getActionJournal();
+    if (actionJournal) {
+        actionJournal->clearLog();
+    }
+}
+
 jni::jboolean NativeMapView::isFullyLoaded(JNIEnv&) {
     return map->isFullyLoaded();
 }
@@ -1278,8 +1321,7 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
                       const jni::Object<NativeMapView>&,
                       const jni::Object<FileSource>&,
                       const jni::Object<MapRenderer>&,
-                      jni::jfloat,
-                      jni::jboolean>,
+                      const jni::Object<NativeMapOptions>&>,
         "nativeInitialize",
         "nativeDestroy",
         METHOD(&NativeMapView::resizeView, "nativeResizeView"),
@@ -1324,6 +1366,9 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::addMarkers, "nativeAddMarkers"),
         METHOD(&NativeMapView::setDebug, "nativeSetDebug"),
         METHOD(&NativeMapView::getDebug, "nativeGetDebug"),
+        METHOD(&NativeMapView::getActionJournalLogFiles, "nativeGetActionJournalLogFiles"),
+        METHOD(&NativeMapView::getActionJournalLog, "nativeGetActionJournalLog"),
+        METHOD(&NativeMapView::clearActionJournalLog, "nativeClearActionJournalLog"),
         METHOD(&NativeMapView::isFullyLoaded, "nativeIsFullyLoaded"),
         METHOD(&NativeMapView::onLowMemory, "nativeOnLowMemory"),
         METHOD(&NativeMapView::getMetersPerPixelAtLatitude, "nativeGetMetersPerPixelAtLatitude"),

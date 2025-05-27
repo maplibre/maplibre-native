@@ -30,43 +30,30 @@ jobs:
           cmakeVersion: 3.24.1
           ninjaVersion: latest
 
-      - name: Ensure source code revision
-        run: scripts/ensure-code-revision.sh
-        working-directory: platform/android
-        shell: bash
-
       - name: npm install
         run: npm install --ignore-scripts
-        working-directory: platform/android
 
       - name: Android nitpick
         run: make run-android-nitpick
 
-      - name: Update version name
-        run: |
-          RELEASE_VERSION="$( git describe --tags --match=android-v*.*.* --abbrev=0 | sed 's/^android-v//' )"
-          echo version="$RELEASE_VERSION" >> "$GITHUB_ENV"
-          echo "Latest version from tag: $RELEASE_VERSION"
-          if [ -n "$RELEASE_VERSION" ]; then
-            sed -i -e "s/^VERSION_NAME=.*/VERSION_NAME=${RELEASE_VERSION}/" MapLibreAndroid/gradle.properties
-            echo "MapLibreAndroid/gradle.properties:"
-            cat MapLibreAndroid/gradle.properties
-          fi
-        shell: bash
+      - name: Validate and set version
+        run: ../../.github/scripts/validate-version.sh
 
       - name: Build package
         run: |
           RENDERER=vulkan make apackage
+          BUILDTYPE=Debug RENDERER=vulkan make apackage
           RENDERER=drawable make apackage
+          BUILDTYPE=Debug RENDERER=drawable make apackage
 
       # create github release
       - name: Prepare release
         id: prepare_release
         run: |
           RELEASE_NOTES_PATH="${PWD}/release_notes.txt"
-          node scripts/release-notes.mjs > "${RELEASE_NOTES_PATH}"
+          node scripts/release-notes.mjs ${{ env.version }} > "${RELEASE_NOTES_PATH}"
           echo release_notes="${RELEASE_NOTES_PATH}" >> "$GITHUB_OUTPUT"
-          echo version_tag="$( git describe --tags --match=android-v*.*.* --abbrev=0 )" >> "$GITHUB_OUTPUT"
+          echo version_tag=android-v${{ env.version }} >> "$GITHUB_OUTPUT"
         shell: bash
 
       - name: Check if version is pre-release
@@ -79,6 +66,26 @@ jobs:
           else
             echo "Invalid semver: $version"
             echo "prerelease=true" >> "$GITHUB_ENV"
+          fi
+
+      - name: Create tag if it does not exist
+        run: |
+          git config user.name "MapLibre Team"
+          git config user.email "team@maplibre.org"
+          tag="android-v${{ env.version }}"
+
+          if git rev-parse "$tag" >/dev/null 2>&1; then
+            tag_sha=$(git rev-parse "$tag^{commit}")
+            if [ "$tag_sha" = "${{ github.sha }}" ]; then
+              echo "✅ Tag $tag exists and matches current commit SHA."
+              exit 0
+            else
+              echo "::error::❌ Tag $tag exists but points to a different commit. Aborting."
+              exit 1
+            fi
+          else
+            git tag -a "$tag" -m "Publish $tag" ${{ github.sha }}
+            git push origin "$tag"
           fi
 
       - name: Create release
@@ -103,6 +110,16 @@ jobs:
           asset_name: MapLibreAndroid-release.aar
           asset_content_type: application/zip
 
+      - name: Upload aar (OpenGL, Debug)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-drawable-debug.aar
+          asset_name: MapLibreAndroid-debug.aar
+          asset_content_type: application/zip
+
       - name: Upload aar (Vulkan)
         uses: actions/upload-release-asset@v1
         env:
@@ -111,6 +128,16 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-vulkan-release.aar
           asset_name: MapLibreAndroid-release-vulkan.aar
+          asset_content_type: application/zip
+
+      - name: Upload aar (Vulkan, Debug)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-vulkan-debug.aar
+          asset_name: MapLibreAndroid-debug-vulkan.aar
           asset_content_type: application/zip
 
       - name: Upload debug symbols (OpenGL)
