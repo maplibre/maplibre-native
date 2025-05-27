@@ -23,6 +23,7 @@
 #include "map/camera_position.hpp"
 #include "map/image.hpp"
 #include "style/light.hpp"
+#include "native_map_options.hpp"
 #include "bitmap.hpp"
 
 #include <exception>
@@ -50,8 +51,7 @@ public:
                   const jni::Object<NativeMapView>&,
                   const jni::Object<FileSource>&,
                   const jni::Object<MapRenderer>&,
-                  jni::jfloat,
-                  jni::jboolean);
+                  const jni::Object<NativeMapOptions>&);
 
     virtual ~NativeMapView();
 
@@ -199,6 +199,12 @@ public:
     void setDebug(JNIEnv&, jni::jboolean);
 
     jni::jboolean getDebug(JNIEnv&);
+
+    jni::Local<jni::Array<jni::String>> getActionJournalLogFiles(JNIEnv&);
+
+    jni::Local<jni::Array<jni::String>> getActionJournalLog(JNIEnv&);
+
+    void clearActionJournalLog(JNIEnv&);
 
     jni::jboolean isFullyLoaded(JNIEnv&);
 

@@ -6,6 +6,8 @@
 #include <mbgl/util/exception.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/traits.hpp>
+#include <mbgl/util/action_journal.hpp>
+#include <mbgl/util/action_journal_impl.hpp>
 #include <mbgl/gfx/rendering_stats.hpp>
 
 namespace mbgl {
@@ -48,7 +50,7 @@ Map::Impl::Impl(RendererFrontend& frontend_,
                 const MapOptions& mapOptions)
     : observer(observer_),
       rendererFrontend(frontend_),
-      transform(observer, mapOptions.constrainMode(), mapOptions.viewportMode()),
+      transform(*this, mapOptions.constrainMode(), mapOptions.viewportMode()),
       mode(mapOptions.mapMode()),
       pixelRatio(mapOptions.pixelRatio()),
       crossSourceCollisions(mapOptions.crossSourceCollisions()),
@@ -67,10 +69,38 @@ Map::Impl::~Impl() {
     rendererFrontend.reset();
 };
 
+void Map::Impl::onCameraWillChange(MapObserver::CameraChangeMode cameraMode) {
+    observer.onCameraWillChange(cameraMode);
+
+    if (actionJournal) {
+        actionJournal->impl->onCameraWillChange(cameraMode);
+    }
+}
+
+void Map::Impl::onCameraIsChanging() {
+    observer.onCameraIsChanging();
+
+    if (actionJournal) {
+        actionJournal->impl->onCameraIsChanging();
+    }
+}
+
+void Map::Impl::onCameraDidChange(MapObserver::CameraChangeMode cameraMode) {
+    observer.onCameraDidChange(cameraMode);
+
+    if (actionJournal) {
+        actionJournal->impl->onCameraDidChange(cameraMode);
+    }
+}
+
 // MARK: - Map::Impl StyleObserver
 
 void Map::Impl::onSourceChanged(style::Source& source) {
     observer.onSourceChanged(source);
+
+    if (actionJournal) {
+        actionJournal->impl->onSourceChanged(source);
+    }
 }
 
 void Map::Impl::onUpdate() {
@@ -109,6 +139,10 @@ void Map::Impl::onStyleLoading() {
     loading = true;
     rendererFullyLoaded = false;
     observer.onWillStartLoadingMap();
+
+    if (actionJournal) {
+        actionJournal->impl->onWillStartLoadingMap();
+    }
 }
 
 void Map::Impl::onStyleLoaded() {
@@ -118,7 +152,12 @@ void Map::Impl::onStyleLoaded() {
     if (LayerManager::annotationsEnabled) {
         annotationManager.onStyleLoaded();
     }
+
     observer.onDidFinishLoadingStyle();
+
+    if (actionJournal) {
+        actionJournal->impl->onDidFinishLoadingStyle();
+    }
 
 #if !defined(NDEBUG)
     logStyleDependencies(EventSeverity::Info, Event::Style, *style);
@@ -146,18 +185,34 @@ void Map::Impl::onStyleError(std::exception_ptr error) {
     }
 
     observer.onDidFailLoadingMap(type, description);
+
+    if (actionJournal) {
+        actionJournal->impl->onDidFailLoadingMap(type, description);
+    }
 }
 
 void Map::Impl::onSpriteLoaded(const std::optional<style::Sprite>& sprite) {
     observer.onSpriteLoaded(sprite);
+
+    if (actionJournal) {
+        actionJournal->impl->onSpriteLoaded(sprite);
+    }
 }
 
 void Map::Impl::onSpriteError(const std::optional<style::Sprite>& sprite, std::exception_ptr ex) {
     observer.onSpriteError(sprite, ex);
+
+    if (actionJournal) {
+        actionJournal->impl->onSpriteError(sprite, ex);
+    }
 }
 
 void Map::Impl::onSpriteRequested(const std::optional<style::Sprite>& sprite) {
     observer.onSpriteRequested(sprite);
+
+    if (actionJournal) {
+        actionJournal->impl->onSpriteRequested(sprite);
+    }
 }
 
 // MARK: - Map::Impl RendererObserver
@@ -176,6 +231,10 @@ void Map::Impl::onResourceError(std::exception_ptr error) {
 void Map::Impl::onWillStartRenderingFrame() {
     if (mode == MapMode::Continuous) {
         observer.onWillStartRenderingFrame();
+
+        if (actionJournal) {
+            actionJournal->impl->onWillStartRenderingFrame();
+        }
     }
 }
 
@@ -190,12 +249,21 @@ void Map::Impl::onDidFinishRenderingFrame(RenderMode renderMode,
     }
 
     if (mode == MapMode::Continuous) {
+
         observer.onDidFinishRenderingFrame({MapObserver::RenderMode(renderMode), needsRepaint, placemenChanged, stats});
+
+        if (actionJournal) {
+            actionJournal->impl->onDidFinishRenderingFrame(frameStatus);
+        }
 
         if (needsRepaint || transform.inTransition()) {
             onUpdate();
         } else if (rendererFullyLoaded) {
             observer.onDidBecomeIdle();
+
+            if (actionJournal) {
+                actionJournal->impl->onDidBecomeIdle();
+            }
         }
     } else if (stillImageRequest && rendererFullyLoaded) {
         auto request = std::move(stillImageRequest);
@@ -206,15 +274,28 @@ void Map::Impl::onDidFinishRenderingFrame(RenderMode renderMode,
 void Map::Impl::onWillStartRenderingMap() {
     if (mode == MapMode::Continuous) {
         observer.onWillStartRenderingMap();
+
+        if (actionJournal) {
+            actionJournal->impl->onWillStartRenderingMap();
+        }
     }
 }
 
 void Map::Impl::onDidFinishRenderingMap() {
     if (mode == MapMode::Continuous && loading) {
         observer.onDidFinishRenderingMap(MapObserver::RenderMode::Full);
+
+        if (actionJournal) {
+            actionJournal->impl->onDidFinishRenderingMap(MapObserver::RenderMode::Full);
+        }
+
         if (loading) {
             loading = false;
             observer.onDidFinishLoadingMap();
+
+            if (actionJournal) {
+                actionJournal->impl->onDidFinishLoadingMap();
+            }
         }
     }
 };
@@ -248,7 +329,13 @@ void Map::Impl::enableRenderingStatsView(bool value) {
 }
 
 void Map::Impl::onStyleImageMissing(const std::string& id, const std::function<void()>& done) {
-    if (!style->getImage(id)) observer.onStyleImageMissing(id);
+    if (!style->getImage(id)) {
+        observer.onStyleImageMissing(id);
+
+        if (actionJournal) {
+            actionJournal->impl->onStyleImageMissing(id);
+        }
+    }
 
     done();
     onUpdate();
@@ -264,40 +351,72 @@ void Map::Impl::onRemoveUnusedStyleImages(const std::vector<std::string>& unused
 
 void Map::Impl::onRegisterShaders(gfx::ShaderRegistry& registry) {
     observer.onRegisterShaders(registry);
+
+    if (actionJournal) {
+        actionJournal->impl->onRegisterShaders(registry);
+    }
 }
 
 void Map::Impl::onPreCompileShader(shaders::BuiltIn shaderID,
                                    gfx::Backend::Type type,
                                    const std::string& additionalDefines) {
     observer.onPreCompileShader(shaderID, type, additionalDefines);
+
+    if (actionJournal) {
+        actionJournal->impl->onPreCompileShader(shaderID, type, additionalDefines);
+    }
 }
 
 void Map::Impl::onPostCompileShader(shaders::BuiltIn shaderID,
                                     gfx::Backend::Type type,
                                     const std::string& additionalDefines) {
     observer.onPostCompileShader(shaderID, type, additionalDefines);
+
+    if (actionJournal) {
+        actionJournal->impl->onPostCompileShader(shaderID, type, additionalDefines);
+    }
 }
 
 void Map::Impl::onShaderCompileFailed(shaders::BuiltIn shaderID,
                                       gfx::Backend::Type type,
                                       const std::string& additionalDefines) {
     observer.onShaderCompileFailed(shaderID, type, additionalDefines);
+
+    if (actionJournal) {
+        actionJournal->impl->onShaderCompileFailed(shaderID, type, additionalDefines);
+    }
 }
 
 void Map::Impl::onGlyphsLoaded(const FontStack& fontStack, const GlyphRange& ranges) {
     observer.onGlyphsLoaded(fontStack, ranges);
+
+    if (actionJournal) {
+        actionJournal->impl->onGlyphsLoaded(fontStack, ranges);
+    }
 }
 
 void Map::Impl::onGlyphsError(const FontStack& fontStack, const GlyphRange& ranges, std::exception_ptr ex) {
     observer.onGlyphsError(fontStack, ranges, ex);
+
+    if (actionJournal) {
+        actionJournal->impl->onGlyphsError(fontStack, ranges, ex);
+    }
 }
 
 void Map::Impl::onGlyphsRequested(const FontStack& fontStack, const GlyphRange& ranges) {
     observer.onGlyphsRequested(fontStack, ranges);
+
+    if (actionJournal) {
+        actionJournal->impl->onGlyphsRequested(fontStack, ranges);
+    }
 }
 
 void Map::Impl::onTileAction(TileOperation op, const OverscaledTileID& id, const std::string& sourceID) {
     observer.onTileAction(op, id, sourceID);
+
+    if (actionJournal) {
+        actionJournal->impl->onTileAction(op, id, sourceID);
+    }
 }
 
 } // namespace mbgl
