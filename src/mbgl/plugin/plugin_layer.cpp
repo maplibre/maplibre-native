@@ -5,8 +5,8 @@
 //  Created by Malcolm Toon on 4/24/25.
 //
 
-#include <mbgl/plugins/plugin_layer.hpp>
-#include <mbgl/plugins/plugin_layer_impl.hpp>
+#include <mbgl/plugin/plugin_layer.hpp>
+#include <mbgl/plugin/plugin_layer_impl.hpp>
 #include <iostream>
 #include "plugin_layer_debug.hpp"
 

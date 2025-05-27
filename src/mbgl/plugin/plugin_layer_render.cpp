@@ -179,8 +179,6 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
 #endif
             property->setCurrentSingleFloatValue(v);
         } else if (property->_propertyType == style::PluginLayerProperty::PropertyType::Color) {
-#if INCLUDE_DATA_DRIVEN_COLOR_PROPERTY
-
             auto& f = property->getColor();
             using Evaluator = typename style::DataDrivenColorProperty::EvaluatorType;
             auto df = property->_defaultColorValue;
@@ -190,7 +188,6 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
             std::cout << "V: " << v.stringify() << "\n";
 #endif
             property->setCurrentColorValue(v);
-#endif
         }
     }
 

@@ -2,7 +2,7 @@
 
 #include <mbgl/style/types.hpp>
 #include <mbgl/style/layer_properties.hpp>
-#include <mbgl/plugins/plugin_layer.hpp>
+#include <mbgl/plugin/plugin_layer.hpp>
 // #include <mbgl/style/layout_property.hpp>
 // #include <mbgl/style/paint_property.hpp>
 // #include <mbgl/style/properties.hpp>

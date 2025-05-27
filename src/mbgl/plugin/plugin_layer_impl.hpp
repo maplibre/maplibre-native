@@ -1,8 +1,7 @@
 #pragma once
 
 #include <mbgl/style/layer_impl.hpp>
-#include <mbgl/plugins/plugin_layer.hpp>
-// #include <mbgl/style/layers/plugin_layer_properties.hpp>
+#include <mbgl/plugin/plugin_layer.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 
 // ---------------------------------------------------
@@ -11,7 +10,6 @@
 #include <vector>
 #include <mbgl/style/types.hpp>
 #include <mbgl/style/layer_properties.hpp>
-// #include <mbgl/style/layers/heatmap_layer.hpp>
 #include <mbgl/style/layout_property.hpp>
 #include <mbgl/style/paint_property.hpp>
 #include <mbgl/style/properties.hpp>
@@ -24,17 +22,8 @@
 // Property types
 #include <mbgl/util/color.hpp>
 
-/*
-//#include <mbgl/style/layers/line_layer.hpp>
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/filter.hpp>
-#include <mbgl/style/property_value.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/renderer/render_layer.hpp>
-*/
-// ---------------------------------------------------
 
-#define INCLUDE_DATA_DRIVEN_COLOR_PROPERTY 1
+// ---------------------------------------------------
 
 namespace mbgl {
 namespace style {
@@ -45,13 +34,11 @@ struct SingleFloatProperty : DataDrivenPaintProperty<float, attributes::width, u
     static float defaultValue() { return 1.f; }
 };
 
-#if INCLUDE_DATA_DRIVEN_COLOR_PROPERTY
 struct DataDrivenColorProperty : DataDrivenPaintProperty<mbgl::Color, attributes::color, uniforms::color> {
     static mbgl::Color defaultValue() { return mbgl::Color::black(); }
     static constexpr auto expressionType() { return expression::type::ColorType{}; };
     using EvaluatorType = DataDrivenPropertyEvaluator<Color, false>;
 };
-#endif
 
 /*
  Unique PluginLayerProperty types for now
@@ -168,18 +155,6 @@ public:
     PropertyValue<float> _singleFloatProperty;
     void setCurrentSingleFloatValue(float value);
 
-    // TODO: Remove this
-#if INCLUDE_DATA_DRIVEN_COLOR_PROPERTY_OLD
-    // Color
-    const PropertyValue<DataDrivenColorProperty>& getColor() const;
-    void setColor(const PropertyValue<DataDrivenColorProperty>& value);
-    Color _defaultColorValue = Color::black();
-    Color _dataDrivenColorValue = Color::black();
-    PropertyValue<DataDrivenColorProperty> _dataDrivenColorProperty;
-    void setCurrentColorValue(Color value);
-#endif
-
-#if INCLUDE_DATA_DRIVEN_COLOR_PROPERTY
     // Color
     const PropertyValue<mbgl::Color>& getColor() const;
     void setColor(const PropertyValue<mbgl::Color>& value);
@@ -187,7 +162,6 @@ public:
     mbgl::Color _dataDrivenColorValue = mbgl::Color::black();
     PropertyValue<mbgl::Color> _dataDrivenColorProperty;
     void setCurrentColorValue(mbgl::Color value);
-#endif
 
     // Return this property as json
     std::string asJSON();

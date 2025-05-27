@@ -2,7 +2,7 @@
 
 #include "MLNStyleLayer_Private.h"
 
-#include <mbgl/plugins/plugin_layer_factory.hpp>
+#include <mbgl/plugin/plugin_layer_factory.hpp>
 
 namespace mbgl {
 

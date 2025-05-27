@@ -7,8 +7,8 @@
 
 #import "MLNPluginStyleLayer.h"
 #import "MLNPluginStyleLayer_Private.h"
-#import <mbgl/plugins/plugin_layer.hpp>
-#import <mbgl/plugins/plugin_layer_impl.hpp>
+#import <mbgl/plugin/plugin_layer.hpp>
+#import <mbgl/plugin/plugin_layer_impl.hpp>
 #import "MLNPluginLayer.h"
 
 @implementation MLNPluginStyleLayer

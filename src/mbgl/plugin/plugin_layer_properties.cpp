@@ -6,7 +6,7 @@
 //
 
 #include "plugin_layer_properties.hpp"
-#include <mbgl/plugins/plugin_layer_impl.hpp>
+#include <mbgl/plugin/plugin_layer_impl.hpp>
 #include "plugin_layer_debug.hpp"
 
 namespace mbgl {

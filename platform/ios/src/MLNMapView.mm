@@ -73,9 +73,9 @@
 
 #import "MLNPluginLayer.h"
 #import "MLNStyleLayerManager.h"
-#include <mbgl/plugins/plugin_layer_factory.hpp>
-#include <mbgl/plugins/plugin_layer.hpp>
-#include <mbgl/plugins/plugin_layer_impl.hpp>
+#include <mbgl/plugin/plugin_layer_factory.hpp>
+#include <mbgl/plugin/plugin_layer.hpp>
+#include <mbgl/plugin/plugin_layer_impl.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/render_pass.hpp>

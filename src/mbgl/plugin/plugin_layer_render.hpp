@@ -2,8 +2,8 @@
 
 #include <mbgl/gfx/offscreen_texture.hpp>
 #include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/plugins/plugin_layer_impl.hpp>
-#include <mbgl/plugins/plugin_layer_properties.hpp>
+#include <mbgl/plugin/plugin_layer_impl.hpp>
+#include <mbgl/plugin/plugin_layer_properties.hpp>
 
 #include <optional>
 

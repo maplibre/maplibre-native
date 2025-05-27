@@ -106,7 +106,6 @@ std::vector<PluginLayerProperty*> PluginLayerPropertyManager::getProperties() {
     return tempResult;
 }
 
-#if INCLUDE_DATA_DRIVEN_COLOR_PROPERTY
 // Color
 const PropertyValue<mbgl::Color>& PluginLayerProperty::getColor() const {
     return _dataDrivenColorProperty;
@@ -119,7 +118,6 @@ void PluginLayerProperty::setColor(const PropertyValue<mbgl::Color>& value) {
 void PluginLayerProperty::setCurrentColorValue(mbgl::Color value) {
     _dataDrivenColorValue = value;
 }
-#endif
 
 namespace conversion {
 /*
