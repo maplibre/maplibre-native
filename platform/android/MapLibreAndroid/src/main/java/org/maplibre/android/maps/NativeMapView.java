@@ -91,23 +91,29 @@ final class NativeMapView implements NativeMap {
   // Constructors
   //
 
-  public NativeMapView(@NonNull final Context context, final boolean crossSourceCollisions,
+  public NativeMapView(@NonNull final Context context,
                        final ViewCallback viewCallback, final StateCallback stateCallback,
                        final MapRenderer mapRenderer) {
-    this(context, context.getResources().getDisplayMetrics().density, crossSourceCollisions, viewCallback,
-      stateCallback, mapRenderer);
+    this(context, new NativeMapOptions(context.getResources().getDisplayMetrics().density, false),
+            viewCallback, stateCallback, mapRenderer);
   }
 
-  public NativeMapView(final Context context, final float pixelRatio, final boolean crossSourceCollisions,
+  public NativeMapView(@NonNull final Context context, final MapLibreMapOptions options,
+                       final ViewCallback viewCallback, final StateCallback stateCallback,
+                       final MapRenderer mapRenderer) {
+    this(context, new NativeMapOptions(options), viewCallback, stateCallback, mapRenderer);
+  }
+
+  public NativeMapView(@NonNull final Context context, final NativeMapOptions nativeOptions,
                        final ViewCallback viewCallback, final StateCallback stateCallback,
                        final MapRenderer mapRenderer) {
     this.mapRenderer = mapRenderer;
     this.viewCallback = viewCallback;
     this.fileSource = FileSource.getInstance(context);
-    this.pixelRatio = pixelRatio;
+    this.pixelRatio = nativeOptions.pixelRatio();
     this.thread = Thread.currentThread();
     this.stateCallback = stateCallback;
-    nativeInitialize(this, fileSource, mapRenderer, pixelRatio, crossSourceCollisions);
+    nativeInitialize(this, fileSource, mapRenderer, nativeOptions);
   }
 
   //
@@ -644,6 +650,30 @@ final class NativeMapView implements NativeMap {
       return false;
     }
     return nativeGetDebug();
+  }
+
+  @Override
+  public String[] getActionJournalLogFiles() {
+    if (checkState("getActionJournalLogFiles")) {
+      return null;
+    }
+    return nativeGetActionJournalLogFiles();
+  }
+
+  @Override
+  public String[] getActionJournalLog() {
+    if (checkState("getActionJournalLog")) {
+      return null;
+    }
+    return nativeGetActionJournalLog();
+  }
+
+  @Override
+  public void clearActionJournalLog() {
+    if (checkState("clearActionJournalLog")) {
+      return;
+    }
+    nativeClearActionJournalLog();
   }
 
   @Override
@@ -1275,8 +1305,7 @@ final class NativeMapView implements NativeMap {
   private native void nativeInitialize(NativeMapView nativeMap,
                                        FileSource fileSource,
                                        MapRenderer mapRenderer,
-                                       float pixelRatio,
-                                       boolean crossSourceCollisions);
+                                       NativeMapOptions nativeOptions);
 
   @Keep
   private native void nativeDestroy();
@@ -1428,6 +1457,15 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native boolean nativeGetDebug();
+
+  @Keep
+  private native String[] nativeGetActionJournalLogFiles();
+
+  @Keep
+  private native String[] nativeGetActionJournalLog();
+
+  @Keep
+  private native void nativeClearActionJournalLog();
 
   @Keep
   private native boolean nativeIsFullyLoaded();

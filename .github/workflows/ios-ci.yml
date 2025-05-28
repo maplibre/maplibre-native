@@ -352,6 +352,8 @@ jobs:
         shell: bash -leo pipefail {0}  # so pod is found
         if: env.make_release
         run: gh workflow run ios-release-cocoapods.yml --field version=${{ env.version }}
+        env:
+         GH_TOKEN: ${{ github.token }}
 
   ios-build-cmake:
     needs: pre_job
