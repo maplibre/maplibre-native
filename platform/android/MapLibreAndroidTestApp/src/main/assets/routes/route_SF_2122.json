@@ -1,0 +1,1220 @@
+{
+    "routes" : [ {
+        "voiceLocale" : "en",
+        "weight_name" : "auto",
+        "weight" : 650.409,
+        "duration" : 245.354,
+        "distance" : 2122.105,
+        "legs" : [ {
+            "via_waypoints" : [ ],
+            "admins" : [ {
+                "iso_3166_1_alpha3" : "USA",
+                "iso_3166_1" : "US"
+            } ],
+            "weight" : 650.409,
+            "duration" : 245.354,
+            "steps" : [ {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "right",
+                        "text" : "Mabini Street",
+                        "components" : [ {
+                            "text" : "Mabini Street",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 132.105
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Drive northeast on Folsom Street. Then, in 100 meters, Turn right onto Mabini Street.</speak>",
+                    "announcement" : "Drive northeast on Folsom Street. Then, in 100 meters, Turn right onto Mabini Street.",
+                    "distanceAlongGeometry" : 132.1
+                }, {
+                    "ssmlAnnouncement" : "<speak>Turn right onto Mabini Street.</speak>",
+                    "announcement" : "Turn right onto Mabini Street.",
+                    "distanceAlongGeometry" : 33.0
+                } ],
+                "intersections" : [ {
+                    "entry" : [ true ],
+                    "bearings" : [ 46 ],
+                    "duration" : 2.04,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 2.5,
+                    "geometry_index" : 0,
+                    "location" : [ -122.401477, 37.781832 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 45, 134, 226, 317 ],
+                    "duration" : 1.036,
+                    "turn_weight" : 7.0,
+                    "turn_duration" : 0.021,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 8.244,
+                    "geometry_index" : 1,
+                    "location" : [ -122.401294, 37.781974 ]
+                }, {
+                    "entry" : [ true, true, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 45, 135, 225, 315 ],
+                    "duration" : 3.115,
+                    "turn_weight" : 21.0,
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 22.329,
+                    "geometry_index" : 2,
+                    "location" : [ -122.401203, 37.782046 ]
+                }, {
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "bearings" : [ 45, 141, 225, 325 ],
+                    "duration" : 7.392,
+                    "turn_weight" : 6.2,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 15.062,
+                    "geometry_index" : 3,
+                    "location" : [ -122.40111, 37.78212 ]
+                }, {
+                    "bearings" : [ 46, 141, 225, 321 ],
+                    "entry" : [ true, false, false, false ],
+                    "in" : 2,
+                    "turn_weight" : 6.2,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "geometry_index" : 5,
+                    "location" : [ -122.400469, 37.782633 ]
+                } ],
+                "maneuver" : {
+                    "instruction" : "Drive northeast on Folsom Street.",
+                    "type" : "depart",
+                    "bearing_after" : 46,
+                    "bearing_before" : 0,
+                    "location" : [ -122.401477, 37.781832 ]
+                },
+                "name" : "Folsom Street",
+                "duration" : 14.236,
+                "distance" : 132.105,
+                "driving_side" : "right",
+                "weight" : 55.11,
+                "mode" : "driving",
+                "geometry" : "os_agAhkxmhF{GmJoCuDsCyDuFsHkWm]uAqB"
+            }, {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "end of road",
+                        "modifier" : "left",
+                        "text" : "Bonifacio Street",
+                        "components" : [ {
+                            "text" : "Bonifacio Street",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 72.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Turn left onto Bonifacio Street. Then Turn right onto Lapu Lapu Street.</speak>",
+                    "announcement" : "Turn left onto Bonifacio Street. Then Turn right onto Lapu Lapu Street.",
+                    "distanceAlongGeometry" : 49.9
+                } ],
+                "intersections" : [ {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 46, 135, 226 ],
+                    "duration" : 6.708,
+                    "turn_weight" : 8.1,
+                    "turn_duration" : 3.908,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 11.46,
+                    "geometry_index" : 6,
+                    "location" : [ -122.400412, 37.782676 ]
+                }, {
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "bearings" : [ 49, 135, 228, 315 ],
+                    "duration" : 9.407,
+                    "turn_weight" : 18.6,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 29.88,
+                    "geometry_index" : 7,
+                    "location" : [ -122.4003, 37.782586 ]
+                }, {
+                    "bearings" : [ 135, 224, 315 ],
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "turn_weight" : 4.65,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "geometry_index" : 8,
+                    "location" : [ -122.399924, 37.782286 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "right",
+                    "instruction" : "Turn right onto Mabini Street.",
+                    "type" : "turn",
+                    "bearing_after" : 135,
+                    "bearing_before" : 46,
+                    "location" : [ -122.400412, 37.782676 ]
+                },
+                "name" : "Mabini Street",
+                "duration" : 18.322,
+                "distance" : 72.0,
+                "driving_side" : "right",
+                "weight" : 48.63,
+                "mode" : "driving",
+                "geometry" : "ghaagAvhvmhFrD_FvQoV`@i@nBkC"
+            }, {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "new name",
+                        "modifier" : "right",
+                        "text" : "Lapu Lapu Street",
+                        "components" : [ {
+                            "text" : "Lapu Lapu Street",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 60.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Turn right onto Lapu Lapu Street.</speak>",
+                    "announcement" : "Turn right onto Lapu Lapu Street.",
+                    "distanceAlongGeometry" : 40.0
+                } ],
+                "intersections" : [ {
+                    "bearings" : [ 45, 225, 315 ],
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "turn_weight" : 28.25,
+                    "turn_duration" : 5.395,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "geometry_index" : 10,
+                    "location" : [ -122.399833, 37.782213 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "left",
+                    "instruction" : "Turn left onto Bonifacio Street.",
+                    "type" : "end of road",
+                    "bearing_after" : 45,
+                    "bearing_before" : 135,
+                    "location" : [ -122.399833, 37.782213 ]
+                },
+                "name" : "Bonifacio Street",
+                "duration" : 17.395,
+                "distance" : 60.0,
+                "driving_side" : "right",
+                "weight" : 42.35,
+                "mode" : "driving",
+                "geometry" : "ik`agApdumhFuV}\\"
+            }, {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "end of road",
+                        "modifier" : "right",
+                        "text" : "Harrison Street",
+                        "components" : [ {
+                            "text" : "Harrison Street",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 124.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Turn right onto Harrison Street.</speak>",
+                    "announcement" : "Turn right onto Harrison Street.",
+                    "distanceAlongGeometry" : 49.9
+                } ],
+                "intersections" : [ {
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "bearings" : [ 136, 225 ],
+                    "duration" : 11.0,
+                    "turn_weight" : 13.4,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 26.325,
+                    "geometry_index" : 11,
+                    "location" : [ -122.399354, 37.782592 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 46, 136, 316 ],
+                    "duration" : 0.208,
+                    "turn_weight" : 4.2,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 4.435,
+                    "geometry_index" : 12,
+                    "location" : [ -122.398917, 37.782239 ]
+                }, {
+                    "entry" : [ true, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 135, 224, 316 ],
+                    "duration" : 11.207,
+                    "turn_weight" : 4.2,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "weight" : 17.36,
+                    "geometry_index" : 13,
+                    "location" : [ -122.398906, 37.78223 ]
+                }, {
+                    "bearings" : [ 45, 136, 227, 315 ],
+                    "entry" : [ false, true, false, false ],
+                    "in" : 3,
+                    "turn_weight" : 16.8,
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "geometry_index" : 14,
+                    "location" : [ -122.398464, 37.781875 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "right",
+                    "instruction" : "Turn right onto Lapu Lapu Street.",
+                    "type" : "new name",
+                    "bearing_after" : 136,
+                    "bearing_before" : 45,
+                    "location" : [ -122.399354, 37.782592 ]
+                },
+                "name" : "Lapu Lapu Street",
+                "duration" : 24.823,
+                "distance" : 124.0,
+                "driving_side" : "right",
+                "weight" : 67.74,
+                "mode" : "driving",
+                "geometry" : "_caagArftmhF`UiZPUdUsZ`DeE"
+            }, {
+                "bannerInstructions" : [ {
+                    "sub" : {
+                        "text" : "",
+                        "components" : [ {
+                            "active_direction" : "left",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "left", "slight left" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "slight left", "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        } ]
+                    },
+                    "secondary" : {
+                        "text" : "I 80 West, US 101 South: San Jose",
+                        "components" : [ {
+                            "text" : "I 80 West, US 101 South: San Jose",
+                            "type" : "text"
+                        } ]
+                    },
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "left",
+                        "text" : "James Lick Freeway",
+                        "components" : [ {
+                            "text" : "James Lick Freeway",
+                            "type" : "text"
+                        }, {
+                            "text" : "/",
+                            "type" : "delimiter"
+                        }, {
+                            "text" : "I 80 West",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 158.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Turn left to take the Interstate 80 West ramp toward San Jose.</speak>",
+                    "announcement" : "Turn left to take the Interstate 80 West ramp toward San Jose.",
+                    "distanceAlongGeometry" : 103.2
+                } ],
+                "intersections" : [ {
+                    "entry" : [ false, true, false ],
+                    "in" : 2,
+                    "bearings" : [ 45, 225, 316 ],
+                    "duration" : 8.567,
+                    "turn_weight" : 19.0,
+                    "turn_duration" : 2.105,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 26.592,
+                    "geometry_index" : 15,
+                    "location" : [ -122.398365, 37.781794 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 45, 225 ],
+                    "duration" : 1.754,
+                    "turn_weight" : 1.4,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 3.461,
+                    "geometry_index" : 16,
+                    "location" : [ -122.398924, 37.781348 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 45, 225, 314 ],
+                    "duration" : 5.268,
+                    "turn_weight" : 1.55,
+                    "lanes" : [ {
+                        "indications" : [ "left", "slight left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "slight left", "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 7.864,
+                    "geometry_index" : 17,
+                    "location" : [ -122.399076, 37.781226 ]
+                }, {
+                    "bearings" : [ 45, 135, 225, 315 ],
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "turn_weight" : 6.2,
+                    "lanes" : [ {
+                        "indications" : [ "left", "slight left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "slight left", "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "geometry_index" : 18,
+                    "location" : [ -122.39954, 37.780865 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "right",
+                    "instruction" : "Turn right onto Harrison Street.",
+                    "type" : "end of road",
+                    "bearing_after" : 225,
+                    "bearing_before" : 136,
+                    "location" : [ -122.398365, 37.781794 ]
+                },
+                "name" : "Harrison Street",
+                "duration" : 16.704,
+                "distance" : 158.0,
+                "driving_side" : "right",
+                "weight" : 45.446,
+                "mode" : "driving",
+                "geometry" : "cq_agAxhrmhFzZ|a@rFnHpU~[rC|D"
+            }, {
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Continue for 800 meters.</speak>",
+                    "announcement" : "Continue for 800 meters.",
+                    "distanceAlongGeometry" : 802.0
+                }, {
+                    "ssmlAnnouncement" : "<speak>In 600 meters, Take exit 1C.</speak>",
+                    "announcement" : "In 600 meters, Take exit 1C.",
+                    "distanceAlongGeometry" : 578.7
+                }, {
+                    "ssmlAnnouncement" : "<speak>Take exit 1C toward Civic Center.</speak>",
+                    "announcement" : "Take exit 1C toward Civic Center.",
+                    "distanceAlongGeometry" : 266.5
+                } ],
+                "intersections" : [ {
+                    "entry" : [ false, true, true, true, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 45, 115, 146, 179, 225, 315 ],
+                    "duration" : 11.482,
+                    "turn_weight" : 32.55,
+                    "lanes" : [ {
+                        "indications" : [ "left", "slight left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "slight left", "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 2.582,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 43.23,
+                    "geometry_index" : 19,
+                    "location" : [ -122.399635, 37.780791 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 29, 214 ],
+                    "duration" : 12.533,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 15.04,
+                    "geometry_index" : 26,
+                    "location" : [ -122.39987, 37.780029 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 41, 224 ],
+                    "duration" : 25.2,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 30.87,
+                    "geometry_index" : 31,
+                    "location" : [ -122.400526, 37.779359 ]
+                }, {
+                    "bearings" : [ 40, 45, 226 ],
+                    "entry" : [ false, false, true ],
+                    "classes" : [ "motorway" ],
+                    "in" : 0,
+                    "turn_weight" : 54.0,
+                    "turn_duration" : 0.012,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "geometry_index" : 35,
+                    "location" : [ -122.401955, 37.778094 ]
+                } ],
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "off ramp",
+                        "modifier" : "slight right",
+                        "text" : "Civic Center, Ninth Street",
+                        "components" : [ {
+                            "text" : "Exit",
+                            "type" : "exit"
+                        }, {
+                            "text" : "1C",
+                            "type" : "exit-number"
+                        }, {
+                            "text" : "Civic Center, Ninth Street",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 812.0
+                }, {
+                    "distanceAlongGeometry" : 400.0,
+                    "primary" : {
+                        "type" : "off ramp",
+                        "modifier" : "slight right",
+                        "text" : "Civic Center, Ninth Street",
+                        "components" : [ {
+                            "text" : "Exit",
+                            "type" : "exit"
+                        }, {
+                            "text" : "1C",
+                            "type" : "exit-number"
+                        }, {
+                            "text" : "Civic Center, Ninth Street",
+                            "type" : "text"
+                        } ]
+                    },
+                    "sub" : {
+                        "text" : "",
+                        "components" : [ {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active_direction" : "slight right",
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight", "slight right" ],
+                            "type" : "lane"
+                        }, {
+                            "active_direction" : "slight right",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "slight right" ],
+                            "type" : "lane"
+                        } ]
+                    }
+                } ],
+                "destinations" : "I 80 West, US 101 South: San Jose",
+                "maneuver" : {
+                    "modifier" : "left",
+                    "instruction" : "Turn left to take the I 80 West ramp toward San Jose.",
+                    "type" : "turn",
+                    "bearing_after" : 179,
+                    "bearing_before" : 225,
+                    "location" : [ -122.399635, 37.780791 ]
+                },
+                "name" : "James Lick Freeway",
+                "duration" : 65.727,
+                "distance" : 812.0,
+                "driving_side" : "right",
+                "weight" : 163.353,
+                "mode" : "driving",
+                "ref" : "I 80 West",
+                "geometry" : "mr}`gAdxtmhF`GQ~CPfFZtE~@zExAxEvB|EfDzFpEpF~EpGfG~GlHzGvHfWl\\`EzExHnJ|e@nh@zJvN~JxOdJhOnIbOdInO~k@hmA|Rp`@lRj[`O`S"
+            }, {
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Keep right toward Civic Center. Then Bear left onto Harrison Street.</speak>",
+                    "announcement" : "Keep right toward Civic Center. Then Bear left onto Harrison Street.",
+                    "distanceAlongGeometry" : 92.0
+                } ],
+                "intersections" : [ {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 45, 217, 231 ],
+                    "duration" : 22.01,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "slight right" ],
+                        "valid_indication" : "slight right",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "slight right" ],
+                        "valid_indication" : "slight right",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.01,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 26.95,
+                    "geometry_index" : 44,
+                    "location" : [ -122.405824, 37.775595 ]
+                }, {
+                    "bearings" : [ 39, 225 ],
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "geometry_index" : 54,
+                    "location" : [ -122.407312, 37.774022 ]
+                } ],
+                "exits" : "1C",
+                "bannerInstructions" : [ {
+                    "sub" : {
+                        "text" : "",
+                        "components" : [ {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "slight left" ],
+                            "type" : "lane"
+                        }, {
+                            "active_direction" : "slight right",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "slight right" ],
+                            "type" : "lane"
+                        } ]
+                    },
+                    "primary" : {
+                        "type" : "fork",
+                        "modifier" : "slight right",
+                        "text" : "Civic Center, 9th Street",
+                        "components" : [ {
+                            "text" : "Civic Center, 9th Street",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 244.0
+                } ],
+                "destinations" : "Civic Center, Ninth Street",
+                "maneuver" : {
+                    "modifier" : "slight right",
+                    "instruction" : "Take exit 1C toward Civic Center.",
+                    "type" : "off ramp",
+                    "bearing_after" : 231,
+                    "bearing_before" : 225,
+                    "location" : [ -122.405824, 37.775595 ]
+                },
+                "name" : "",
+                "duration" : 25.21,
+                "distance" : 244.0,
+                "driving_side" : "right",
+                "weight" : 30.87,
+                "mode" : "driving",
+                "geometry" : "ums`gA~z`nhF|KfSrCnCdI|HnHtGbIpGtIfGfXtQlDlC`DrCnC`DzC|DnC~D"
+            }, {
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Bear left onto Harrison Street.</speak>",
+                    "announcement" : "Bear left onto Harrison Street.",
+                    "distanceAlongGeometry" : 59.7
+                } ],
+                "intersections" : [ {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 45, 229, 243 ],
+                    "duration" : 3.125,
+                    "lanes" : [ {
+                        "indications" : [ "slight left" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "slight right" ],
+                        "valid_indication" : "slight right",
+                        "valid" : true,
+                        "active" : true
+                    } ],
+                    "turn_duration" : 0.025,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 3.797,
+                    "geometry_index" : 56,
+                    "location" : [ -122.407503, 37.773872 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 73, 264 ],
+                    "duration" : 5.467,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 6.697,
+                    "geometry_index" : 59,
+                    "location" : [ -122.407829, 37.773768 ]
+                }, {
+                    "entry" : [ false, false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 84, 144, 259, 322 ],
+                    "duration" : 2.026,
+                    "turn_weight" : 7.0,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.026,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 9.45,
+                    "geometry_index" : 60,
+                    "location" : [ -122.408292, 37.77373 ]
+                }, {
+                    "bearings" : [ 79, 135, 261, 315 ],
+                    "entry" : [ false, true, true, false ],
+                    "in" : 0,
+                    "turn_weight" : 49.0,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "geometry_index" : 61,
+                    "location" : [ -122.408464, 37.773704 ]
+                } ],
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "slight left",
+                        "text" : "Harrison Street",
+                        "components" : [ {
+                            "text" : "Harrison Street",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 102.0
+                } ],
+                "destinations" : "Civic Center, 9th Street",
+                "maneuver" : {
+                    "modifier" : "slight right",
+                    "instruction" : "Keep right toward Civic Center.",
+                    "type" : "fork",
+                    "bearing_after" : 243,
+                    "bearing_before" : 225,
+                    "location" : [ -122.407503, 37.773872 ]
+                },
+                "name" : "",
+                "duration" : 14.625,
+                "distance" : 102.0,
+                "driving_side" : "right",
+                "weight" : 71.394,
+                "mode" : "driving",
+                "geometry" : "_bp`gA|cdnhFjBtEz@bEf@pFjA|[r@vIf@nI"
+            }, {
+                "bannerInstructions" : [ {
+                    "sub" : {
+                        "text" : "",
+                        "components" : [ {
+                            "active_direction" : "left",
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "left" ],
+                            "type" : "lane"
+                        }, {
+                            "active_direction" : "left",
+                            "active" : true,
+                            "text" : "",
+                            "directions" : [ "left" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        }, {
+                            "active" : false,
+                            "text" : "",
+                            "directions" : [ "straight" ],
+                            "type" : "lane"
+                        } ]
+                    },
+                    "primary" : {
+                        "type" : "turn",
+                        "modifier" : "left",
+                        "text" : "10th Street",
+                        "components" : [ {
+                            "text" : "10th Street",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 331.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>Turn left onto 10th Street. Then You will arrive at your destination.</speak>",
+                    "announcement" : "Turn left onto 10th Street. Then You will arrive at your destination.",
+                    "distanceAlongGeometry" : 100.8
+                } ],
+                "intersections" : [ {
+                    "entry" : [ false, false, false, true, false ],
+                    "in" : 1,
+                    "bearings" : [ 45, 81, 137, 226, 315 ],
+                    "duration" : 1.182,
+                    "turn_weight" : 12.0,
+                    "turn_duration" : 0.259,
+                    "admin_index" : 0,
+                    "out" : 3,
+                    "weight" : 13.131,
+                    "geometry_index" : 62,
+                    "location" : [ -122.408632, 37.773684 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 46, 135, 225 ],
+                    "duration" : 2.142,
+                    "turn_weight" : 1.75,
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 4.351,
+                    "geometry_index" : 63,
+                    "location" : [ -122.408717, 37.773618 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 45, 135, 225 ],
+                    "duration" : 0.284,
+                    "turn_weight" : 1.75,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 2.089,
+                    "geometry_index" : 64,
+                    "location" : [ -122.4089, 37.773473 ]
+                }, {
+                    "entry" : [ false, true ],
+                    "in" : 0,
+                    "bearings" : [ 45, 225 ],
+                    "duration" : 5.262,
+                    "turn_weight" : 1.75,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 8.195,
+                    "geometry_index" : 65,
+                    "location" : [ -122.408923, 37.773455 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 45, 137, 226 ],
+                    "duration" : 1.393,
+                    "turn_weight" : 1.75,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.008,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 3.446,
+                    "geometry_index" : 66,
+                    "location" : [ -122.409378, 37.773093 ]
+                }, {
+                    "entry" : [ false, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 46, 225, 318 ],
+                    "duration" : 2.235,
+                    "turn_weight" : 1.75,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.019,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 4.464,
+                    "geometry_index" : 67,
+                    "location" : [ -122.409503, 37.772996 ]
+                }, {
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 45, 225, 315 ],
+                    "duration" : 4.53,
+                    "turn_weight" : 1.75,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 7.291,
+                    "geometry_index" : 68,
+                    "location" : [ -122.409693, 37.772846 ]
+                }, {
+                    "entry" : [ false, false, true, true ],
+                    "in" : 0,
+                    "bearings" : [ 45, 135, 225, 315 ],
+                    "duration" : 8.93,
+                    "turn_weight" : 21.0,
+                    "lanes" : [ {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight", "right" ],
+                        "valid_indication" : "straight",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "right" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 2.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "weight" : 29.481,
+                    "geometry_index" : 69,
+                    "location" : [ -122.410083, 37.772538 ]
+                }, {
+                    "bearings" : [ 45, 137, 225 ],
+                    "entry" : [ false, true, true ],
+                    "in" : 0,
+                    "turn_weight" : 1.75,
+                    "turn_duration" : 0.007,
+                    "admin_index" : 0,
+                    "out" : 2,
+                    "geometry_index" : 71,
+                    "location" : [ -122.410688, 37.77206 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "slight left",
+                    "instruction" : "Bear left onto Harrison Street.",
+                    "type" : "turn",
+                    "bearing_after" : 226,
+                    "bearing_before" : 261,
+                    "location" : [ -122.408632, 37.773684 ]
+                },
+                "name" : "Harrison Street",
+                "duration" : 32.887,
+                "distance" : 331.0,
+                "driving_side" : "right",
+                "weight" : 82.679,
+                "mode" : "driving",
+                "geometry" : "gvo`gAnjfnhFbChD`HlJb@l@rUl[`ExFjHzJfRjWhLxOpO~SvXr_@xBxC"
+            }, {
+                "bannerInstructions" : [ {
+                    "primary" : {
+                        "type" : "arrive",
+                        "text" : "You have arrived at your destination.",
+                        "components" : [ {
+                            "text" : "You have arrived at your destination.",
+                            "type" : "text"
+                        } ]
+                    },
+                    "distanceAlongGeometry" : 87.0
+                } ],
+                "voiceInstructions" : [ {
+                    "ssmlAnnouncement" : "<speak>You have arrived at your destination.</speak>",
+                    "announcement" : "You have arrived at your destination.",
+                    "distanceAlongGeometry" : 65.0
+                } ],
+                "intersections" : [ {
+                    "entry" : [ false, true, true, false ],
+                    "in" : 0,
+                    "bearings" : [ 45, 135, 225, 315 ],
+                    "duration" : 11.826,
+                    "turn_weight" : 31.25,
+                    "lanes" : [ {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : false
+                    }, {
+                        "indications" : [ "left" ],
+                        "valid_indication" : "left",
+                        "valid" : true,
+                        "active" : true
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    }, {
+                        "indications" : [ "straight" ],
+                        "valid" : false,
+                        "active" : false
+                    } ],
+                    "turn_duration" : 7.395,
+                    "admin_index" : 0,
+                    "out" : 1,
+                    "weight" : 36.678,
+                    "geometry_index" : 73,
+                    "location" : [ -122.411287, 37.771587 ]
+                }, {
+                    "bearings" : [ 135, 315 ],
+                    "entry" : [ true, false ],
+                    "in" : 1,
+                    "turn_weight" : 1.75,
+                    "admin_index" : 0,
+                    "out" : 0,
+                    "geometry_index" : 75,
+                    "location" : [ -122.410905, 37.771281 ]
+                } ],
+                "maneuver" : {
+                    "modifier" : "left",
+                    "instruction" : "Turn left onto 10th Street.",
+                    "type" : "turn",
+                    "bearing_after" : 135,
+                    "bearing_before" : 225,
+                    "location" : [ -122.411287, 37.771587 ]
+                },
+                "name" : "10th Street",
+                "duration" : 15.426,
+                "distance" : 87.0,
+                "driving_side" : "right",
+                "weight" : 42.838,
+                "mode" : "driving",
+                "geometry" : "esk`gAlpknhFfCgDzMsQjNqR"
+            }, {
+                "intersections" : [ {
+                    "bearings" : [ 315 ],
+                    "entry" : [ true ],
+                    "in" : 0,
+                    "admin_index" : 0,
+                    "geometry_index" : 76,
+                    "location" : [ -122.410592, 37.771035 ]
+                } ],
+                "voiceInstructions" : [ ],
+                "bannerInstructions" : [ ],
+                "maneuver" : {
+                    "instruction" : "You have arrived at your destination.",
+                    "type" : "arrive",
+                    "bearing_after" : 0,
+                    "bearing_before" : 135,
+                    "location" : [ -122.410592, 37.771035 ]
+                },
+                "name" : "10th Street",
+                "duration" : 0.0,
+                "distance" : 0.0,
+                "driving_side" : "right",
+                "weight" : 0.0,
+                "mode" : "driving",
+                "geometry" : "upj`gA~djnhF??"
+            } ],
+            "distance" : 2122.105,
+            "summary" : "Harrison Street, I 80 West"
+        } ],
+        "geometry" : "os_agAhkxmhF{GmJoCuDsCyDuFsHkWm]uAqBrD_FvQoV`@i@nBkCuV}\\`UiZPUdUsZ`DeEzZ|a@rFnHpU~[rC|D`GQ~CPfFZtE~@zExAxEvB|EfDzFpEpF~EpGfG~GlHzGvHfWl\\`EzExHnJ|e@nh@zJvN~JxOdJhOnIbOdInO~k@hmA|Rp`@lRj[`O`S|KfSrCnCdI|HnHtGbIpGtIfGfXtQlDlC`DrCnC`DzC|DnC~DjBtEz@bEf@pFjA|[r@vIf@nIbChD`HlJb@l@rUl[`ExFjHzJfRjWhLxOpO~SvXr_@xBxCfCgDzMsQjNqR"
+    } ],
+    "waypoints" : [ {
+        "distance" : 4.402,
+        "name" : "Folsom Street",
+        "location" : [ -122.401477, 37.781832 ]
+    }, {
+        "distance" : 4.188,
+        "name" : "10th Street",
+        "location" : [ -122.410592, 37.771035 ]
+    } ],
+    "code" : "Ok"
+}

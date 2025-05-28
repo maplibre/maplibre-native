@@ -11,8 +11,13 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -35,7 +40,7 @@ import org.maplibre.android.maps.MapLibreMap.CancelableCallback
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
-import org.maplibre.android.testapp.utils.ResourceUtils
+import org.maplibre.android.testapp.utils.GeoParseUtil
 import org.maplibre.geojson.Point
 import org.maplibre.navigation.android.navigation.v5.location.replay.ReplayRouteLocationEngine
 import org.maplibre.navigation.android.navigation.v5.models.DirectionsResponse
@@ -66,6 +71,7 @@ class LongRunningActivity : AppCompatActivity() {
     companion object {
         private val LOG = Logger.getLogger(LongRunningActivity::class.java.name)
 
+        // TODO leave this as const? generate a new seed on each activity run?
         private const val RANDOM_SEED = 42
         private val RANDOM = Random(RANDOM_SEED)
 
@@ -95,7 +101,7 @@ class LongRunningActivity : AppCompatActivity() {
             LatLng(-13.1639, -74.2236), // AYA
             LatLng(52.5200, 13.4050), // BER
             LatLng(12.9716, 77.5946), // BAN
-            LatLng(31.2304, 121.4737) // SHA
+            LatLng(31.2304, 121.4737), // SHA
         )
 
         // controls the list of icons available
@@ -107,78 +113,37 @@ class LongRunningActivity : AppCompatActivity() {
             org.maplibre.android.R.drawable.maplibre_user_icon,
             org.maplibre.android.R.drawable.maplibre_marker_icon_default,
             org.maplibre.android.R.drawable.maplibre_compass_icon,
-            org.maplibre.android.R.drawable.maplibre_user_puck_icon
+            org.maplibre.android.R.drawable.maplibre_user_puck_icon,
         )
 
         enum class RouteProvider {
             Local,
             OSRM,
-            Valhalla
+            Valhalla,
         }
 
-        private val ROUTE_PROVIDER = RouteProvider.Local
+        private fun random(min: Double, max: Double): Double = min + RANDOM.nextDouble() * (max - min)
+        private fun random(min: Int, max: Int): Int = RANDOM.nextInt(min, max)
 
-        private val ROUTES = arrayOf(
-            Pair(LatLng(), LatLng()),
-            Pair(LatLng(), LatLng()),
-            Pair(LatLng(), LatLng()),
-            Pair(LatLng(), LatLng()),
-        )
+        private fun randomSlowDuration(): Double = random(3000.0, 5000.0) * TIME_SCALE
+        private fun randomFastDuration(): Double = random(500.0, 1000.0) * TIME_SCALE
 
-        private fun random(min: Double, max: Double): Double {
-            return min + RANDOM.nextDouble() * (max - min)
-        }
+        private fun randomPlacePoints(): Int = random(10, 20)
+        private fun randomPlaceActions(): Int = random(10, 20)
 
-        private fun random(min: Int, max: Int): Int {
-            return RANDOM.nextInt(min, max)
-        }
-
-        private fun randomSlowDuration(): Double {
-            return random(3000.0, 5000.0) * TIME_SCALE
-        }
-
-        private fun randomFastDuration(): Double {
-            return random(500.0, 1000.0) * TIME_SCALE
-        }
-
-        private fun randomPlacePoints(): Int {
-            return random(10, 20)
-        }
-
-        private fun randomPlaceActions(): Int {
-            return random(10, 20)
-        }
-
-        private fun randomLatLng(bounds: LatLngBounds): LatLng {
-            return LatLng(
+        private fun randomLatLng(bounds: LatLngBounds): LatLng =
+            LatLng(
                 random(bounds.latitudeSouth, bounds.latitudeNorth),
                 random(bounds.longitudeWest, bounds.longitudeEast)
             )
-        }
 
-        private fun randomLatLng(map: MapLibreMap): LatLng {
-            return randomLatLng(map.projection.visibleRegion.latLngBounds)
-        }
+        private fun randomLatLng(map: MapLibreMap): LatLng = randomLatLng(map.projection.visibleRegion.latLngBounds)
+        private fun randomZoom(): Double = random(14.0, 20.0)
+        private fun randomTilt(): Double = random(0.0, 60.0)
+        private fun randomBearing(): Double = random(0.0, 360.0)
 
-        private fun randomZoom(): Double {
-            return random(14.0, 20.0)
-        }
-
-        private fun randomTilt(): Double {
-            return random(0.0, 60.0)
-        }
-
-        private fun randomBearing(): Double {
-            return random(0.0, 360.0)
-        }
-
-        private fun randomAnnotationRemove(): Int {
-            return random(4, 8)
-        }
-
-        private fun randomAnnotationAdd(): Int {
-            return random(2, 4)
-        }
+        private fun randomAnnotationRemove(): Int = random(4, 8)
+        private fun randomAnnotationAdd(): Int = random(2, 4)
 
         private fun randomPolyPoints(bounds: LatLngBounds): List<LatLng> {
             val boundMultiplier = 0.25
@@ -195,29 +160,31 @@ class LongRunningActivity : AppCompatActivity() {
             }
         }
 
-        private fun randomColor(): Int {
-            return Color.argb(
-                RANDOM.nextInt(127,256),
+        private fun randomColor(): Int =
+            Color.argb(
+                RANDOM.nextInt(127, 256),
                 RANDOM.nextInt(256),
                 RANDOM.nextInt(256),
                 RANDOM.nextInt(256)
             )
-        }
 
-        private fun randomNavZoom(): Double {
-            return random(13.0, 18.0)
-        }
-
-        private fun randomNavTilt(): Double {
-            return random(30.0, 60.0)
-        }
-
-        // in km/h
-        private fun randomNavSpeed(): Int {
-            return random(30, 130)
-        }
-
+        private val ROUTE_PROVIDER = RouteProvider.Local
         private const val ROUTE_UPDATE_INTERVAL = 10.0
+
+        // used by remote providers
+        private val ROUTES = arrayOf(
+            Pair(LatLng(52.521487, 13.409961), LatLng(52.502501, 13.423342)), // BER short
+            Pair(LatLng(52.46314, 13.339116), LatLng(52.545929, 13.457635)), // BER long
+            Pair(LatLng(38.903727, -77.000668), LatLng(38.890509, -77.025958)), // DC short
+            Pair(LatLng(38.876664, -77.206788), LatLng(38.957716, -77.027674)), // DC long
+            Pair(LatLng(37.781832, -122.401477), LatLng(37.771035, -122.410592)), // SF short
+            Pair(LatLng(37.736431, -122.504263), LatLng(37.785594, -122.401209)), // SF long
+        )
+
+        private fun randomNavZoom(): Double = random(13.0, 18.0)
+        private fun randomNavTilt(): Double = random(30.0, 60.0)
+        private fun randomNavSpeed(): Int = random(30, 130) // in km/h
+        private fun randomNavWaitTime(): Long = random(5000, 10000).toLong()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -254,7 +221,6 @@ class LongRunningActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-
             // since the random generator was not reset each run will have different values
             repeat(RUN_COUNT) {
                 TIME_SCALE *= RUN_TIME_SCALE_FACTOR
@@ -281,7 +247,8 @@ class LongRunningActivity : AppCompatActivity() {
         for (placeCenter in PLACES) {
             // update all values to simulate a long jump
             // (generated by the app, searching for a city/street, etc)
-            val cameraPosition = CameraPosition.Builder()
+            val cameraPosition = CameraPosition
+                .Builder()
                 .target(placeCenter)
                 .zoom(randomZoom())
                 .tilt(randomTilt())
@@ -304,10 +271,7 @@ class LongRunningActivity : AppCompatActivity() {
                 // perform a series of fast camera actions
                 repeat(randomPlaceActions()) {
                     // update each value individually to simulate user interaction
-                    map.animateCameraSuspend(
-                        actions.random()(),
-                        randomFastDuration()
-                    )
+                    map.animateCameraSuspend(actions.random()(), randomFastDuration())
                 }
 
                 runAnnotationActions(map)
@@ -329,36 +293,44 @@ class LongRunningActivity : AppCompatActivity() {
         // markers
         repeat(randomAnnotationAdd()) {
             // get a random drawable
-            map.addMarker(MarkerOptions()
-                .position(randomLatLng(bounds))
-                .icon(IconFactory.getInstance(this).fromBitmap(
-                    bitmapDrawables.random().mutate().apply { setTint(randomColor()) }.toBitmap()
-                ))
+            map.addMarker(
+                MarkerOptions()
+                    .position(randomLatLng(bounds))
+                    .icon(
+                        IconFactory.getInstance(this).fromBitmap(
+                            bitmapDrawables
+                                .random()
+                                .mutate()
+                                .apply { setTint(randomColor()) }
+                                .toBitmap(),
+                        )
+                    )
             )
         }
 
         // polylines
         repeat(randomAnnotationAdd()) {
-            map.addPolyline(PolylineOptions()
-                .color(randomColor()).
-                addAll(randomPolyPoints(bounds))
+            map.addPolyline(
+                PolylineOptions()
+                    .color(randomColor())
+                    .addAll(randomPolyPoints(bounds)),
             )
         }
 
         // polygons
         repeat(randomAnnotationAdd()) {
-            map.addPolygon(PolygonOptions()
-                .fillColor(randomColor())
-                .strokeColor(randomColor())
-                .addAll(randomPolyPoints(bounds))
+            map.addPolygon(
+                PolygonOptions()
+                    .fillColor(randomColor())
+                    .strokeColor(randomColor())
+                    .addAll(randomPolyPoints(bounds)),
             )
         }
     }
 
     private fun runNavigation(map: MapLibreMap, mapView: MapView) {
         navigation = MapLibreNavigation(this,
-            MapLibreNavigationOptions.builder().snapToRoute(true).build())
-            .apply {
+            MapLibreNavigationOptions.builder().snapToRoute(true).build()).apply {
                 snapEngine
                 addProgressChangeListener { location: Location, progress: RouteProgress ->
                     map.locationComponent.forceLocationUpdate(location)
@@ -371,45 +343,34 @@ class LongRunningActivity : AppCompatActivity() {
 
                         routeUpdateTimer = progress.durationRemaining()
 
-                        LOG.info("navigation - duration ${progress.durationRemaining()}")
+                        LOG.info("Navigation - duration ${progress.durationRemaining()}")
                     }
-                }
 
-                addNavigationEventListener { running: Boolean ->
-                    LOG.info("navigation $running")
+                    if (progress.fractionTraveled() > 0.99) {
+                        startNewRoute(map, mapView)
+                    }
                 }
             }
 
         navigation.locationEngine = replayRouteLocationEngine
         navigationMapRoute = NavigationMapRoute(navigation, mapView, map)
 
-        lifecycleScope.launch {
-            mapView.setStyleSuspend(TestStyles.AMERICANA)
-            enableLocation(map)
-
-            navigationMapRoute.removeRoute()
-
-            val route = getRoute() ?: return@launch
-
-            replayRouteLocationEngine.assign(route)
-            navigationMapRoute.addRoute(route)
-            routeUpdateTimer = route.duration()
-
-            navigation.startNavigation(route)
-        }
+        startNewRoute(map, mapView)
     }
 
     @SuppressLint("MissingPermission")
     private fun enableLocation(map: MapLibreMap) {
         map.locationComponent.activateLocationComponent(
-            LocationComponentActivationOptions.builder(this, map.style!!)
+            LocationComponentActivationOptions
+                .builder(this, map.style!!)
                 .useDefaultLocationEngine(false)
                 .build()
         )
 
         map.locationComponent.isLocationComponentEnabled = true
         map.locationComponent.renderMode = RenderMode.GPS
-        map.locationComponent.setCameraMode(CameraMode.TRACKING_GPS,
+        map.locationComponent.setCameraMode(
+            CameraMode.TRACKING_GPS,
             object :
                 OnLocationCameraTransitionListener {
                 override fun onLocationCameraTransitionFinished(cameraMode: Int) {
@@ -423,32 +384,70 @@ class LongRunningActivity : AppCompatActivity() {
     }
 
     private fun getRoute(): DirectionsRoute? {
-        // used by remote providers
-        val routePoints = ROUTES.random(RANDOM)
-        val location = routePoints.first
-        val destination = routePoints.second
+        var location: LatLng? = null
+        var destination: LatLng? = null
 
         val routeString: String? = when (ROUTE_PROVIDER) {
             RouteProvider.Local -> {
-                ResourceUtils.readRawResource(this, R.raw.routes)
+                val routeFile = this.assets.list("routes/")!!.random(RANDOM)
+                LOG.info("Navigation - local route: $routeFile")
+
+                val routeStr = GeoParseUtil.loadStringFromAssets(this, "routes/$routeFile")
+
+                // quick parse to get the waypoints before starting the route
+                val json = Json.parseToJsonElement(routeStr).jsonObject
+
+                val waypoints = json["waypoints"]?.jsonArray
+                val startWaypoint = waypoints?.first()?.jsonObject?.get("location")?.jsonArray
+                val endWaypoint = waypoints?.last()?.jsonObject?.get("location")?.jsonArray
+
+                if (startWaypoint != null) {
+                    location = LatLng(
+                        Json.decodeFromJsonElement<Double>(startWaypoint.last()),
+                        Json.decodeFromJsonElement<Double>(startWaypoint.first()),
+                    )
+                }
+
+                if (endWaypoint != null) {
+                    destination = LatLng(
+                        Json.decodeFromJsonElement<Double>(endWaypoint.last()),
+                        Json.decodeFromJsonElement<Double>(endWaypoint.first()),
+                    )
+                }
+
+                routeStr
             }
 
             RouteProvider.OSRM -> {
+                val routePoints = ROUTES.random(RANDOM)
+                location = routePoints.first
+                destination = routePoints.second
+
                 val get = "${location.longitude},${location.latitude};" +
                         "${destination.longitude},${destination.latitude}" +
                         "?steps=true"
 
-                val request = Request.Builder()
+                val request = Request
+                    .Builder()
                     .header("User-Agent", "MapLibre Android")
                     .url("https://router.project-osrm.org/route/v1/driving/$get")
                     .get()
                     .build()
+
+                LOG.info("Navigation - OSRM route request " +
+                        "(${location.longitude},${location.latitude}) -> " +
+                        "(${destination.longitude},${destination.latitude})"
+                )
 
                 val response = OkHttpClient().newCall(request).execute()
                 response.body?.string()
             }
 
             RouteProvider.Valhalla -> {
+                val routePoints = ROUTES.random(RANDOM)
+                location = routePoints.first
+                destination = routePoints.second
+
                 val requestBody = Gson().toJson(
                     mapOf(
                         "format" to "osrm",
@@ -479,11 +478,17 @@ class LongRunningActivity : AppCompatActivity() {
                     )
                 ).toRequestBody("application/json; charset=utf-8".toMediaType())
 
-                val request = Request.Builder()
+                val request = Request
+                    .Builder()
                     .header("User-Agent", "MapLibre Android")
                     .url("https://valhalla1.openstreetmap.de/route")
                     .post(requestBody)
                     .build()
+
+                LOG.info("Navigation - Valhalla route request " +
+                        "(${location.longitude},${location.latitude}) -> " +
+                        "(${destination.longitude},${destination.latitude})"
+                )
 
                 val response = OkHttpClient().newCall(request).execute()
                 response.body?.string()
@@ -498,7 +503,8 @@ class LongRunningActivity : AppCompatActivity() {
         val directionsResponse = DirectionsResponse.fromJson(routeString)
         val route = directionsResponse.routes().first()
 
-        val routeOptions = RouteOptions.builder()
+        val routeOptions = RouteOptions
+            .builder()
             .baseUrl("https://maplibre.org")
             .profile("maplibre")
             .user("maplibre")
@@ -507,12 +513,47 @@ class LongRunningActivity : AppCompatActivity() {
             .bannerInstructions(true)
             .language(Locale.getDefault().language)
             .coordinates(mutableListOf(
-                Point.fromLngLat(location.longitude, location.latitude),
-                Point.fromLngLat(destination.longitude, destination.latitude)))
+                location?.let { Point.fromLngLat(it.longitude, location.latitude) },
+                destination?.let { Point.fromLngLat(it.longitude, destination.latitude) },
+            ))
             .requestUuid("0000-0000-0000-0000")
             .build()
 
         return route.toBuilder().routeOptions(routeOptions).build()
+    }
+
+    private fun startNewRoute(map: MapLibreMap, mapView: MapView) {
+        lifecycleScope.launch {
+            delay(randomNavWaitTime())
+
+            navigation.stopNavigation()
+            navigationMapRoute.removeRoute()
+
+            mapView.setStyleSuspend(STYLES.random(RANDOM))
+            enableLocation(map)
+
+            val route = getRoute() ?: return@launch
+
+            // display route
+            navigationMapRoute.addRoute(route)
+
+            // force tile load at starting position
+            val startingPoint = route.routeOptions()?.coordinates()?.firstOrNull()
+            if (startingPoint != null) {
+                map.locationComponent.forceLocationUpdate(
+                    Location("StartingLocation").apply {
+                        latitude = startingPoint.latitude()
+                        longitude = startingPoint.longitude()
+                    }
+                )
+            }
+
+            delay(randomNavWaitTime())
+
+            replayRouteLocationEngine.assign(route)
+            routeUpdateTimer = route.duration()
+            navigation.startNavigation(route)
+        }
     }
 }
 
@@ -522,13 +563,14 @@ suspend fun MapView.setStyleSuspend(styleUrl: String): Unit =
         var listener: MapView.OnDidFinishLoadingStyleListener? = null
 
         var resumed = false
-        listener = MapView.OnDidFinishLoadingStyleListener {
-            if (!resumed) {
-                resumed = true
-                listener?.let { removeOnDidFinishLoadingStyleListener(it) }
-                continuation.resume(Unit)
+        listener =
+            MapView.OnDidFinishLoadingStyleListener {
+                if (!resumed) {
+                    resumed = true
+                    listener?.let { removeOnDidFinishLoadingStyleListener(it) }
+                    continuation.resume(Unit)
+                }
             }
-        }
 
         addOnDidFinishLoadingStyleListener(listener)
         getMapAsync { map -> map.setStyle(styleUrl) }
@@ -536,25 +578,29 @@ suspend fun MapView.setStyleSuspend(styleUrl: String): Unit =
         continuation.invokeOnCancellation {
             removeOnDidFinishLoadingStyleListener(listener)
         }
-
     }
 
 suspend fun MapLibreMap.animateCameraSuspend(
     cameraUpdate: CameraUpdate,
-    durationMs: Double
-): Unit = suspendCancellableCoroutine { continuation ->
-    animateCamera(cameraUpdate, durationMs.toInt(), object : CancelableCallback {
-        var resumed = false
+    durationMs: Double,
+): Unit =
+    suspendCancellableCoroutine { continuation ->
+        animateCamera(
+            cameraUpdate,
+            durationMs.toInt(),
+            object : CancelableCallback {
+                var resumed = false
 
-        override fun onCancel() {
-            continuation.cancel()
-        }
+                override fun onCancel() {
+                    continuation.cancel()
+                }
 
-        override fun onFinish() {
-            if (!resumed) {
-                resumed = true
-                continuation.resume(Unit)
-            }
-        }
-    })
-}
+                override fun onFinish() {
+                    if (!resumed) {
+                        resumed = true
+                        continuation.resume(Unit)
+                    }
+                }
+            },
+        )
+    }
