@@ -17,7 +17,7 @@ public:
     std::string max;
 };
 
-using PatternLayerMap = std::map<std::string, PatternDependency>;
+using PatternLayerMap = mbgl::unordered_map<std::string, PatternDependency>;
 
 class PatternFeature {
 public:
