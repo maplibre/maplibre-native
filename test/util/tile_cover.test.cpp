@@ -389,10 +389,10 @@ TEST(TileCover, GeomPolygon) {
 
     auto results = util::tileCover(polygon, 8);
 
-    EXPECT_NE(std::find(results.begin(), results.end(), UnwrappedTileID{8, 134, 87}), results.end());
-    EXPECT_NE(std::find(results.begin(), results.end(), UnwrappedTileID{8, 139, 87}), results.end());
+    EXPECT_NE(std::ranges::find(results, UnwrappedTileID{8, 134, 87}), results.end());
+    EXPECT_NE(std::ranges::find(results, UnwrappedTileID{8, 139, 87}), results.end());
     // Should have a hole
-    EXPECT_EQ(std::find(results.begin(), results.end(), UnwrappedTileID{8, 136, 87}), results.end());
+    EXPECT_EQ(std::ranges::find(results, UnwrappedTileID{8, 136, 87}), results.end());
 }
 
 TEST(TileCover, GeomMultiPolygon) {
@@ -414,9 +414,9 @@ TEST(TileCover, GeomMultiPolygon) {
     auto results = util::tileCover(multiPolygon, 8);
 
     EXPECT_EQ(424u, results.size());
-    EXPECT_NE(std::find(results.begin(), results.end(), UnwrappedTileID{8, 139, 87}), results.end());
-    EXPECT_NE(std::find(results.begin(), results.end(), UnwrappedTileID{8, 136, 87}), results.end());
-    EXPECT_NE(std::find(results.begin(), results.end(), UnwrappedTileID{8, 174, 94}), results.end());
+    EXPECT_NE(std::ranges::find(results, UnwrappedTileID{8, 139, 87}), results.end());
+    EXPECT_NE(std::ranges::find(results, UnwrappedTileID{8, 136, 87}), results.end());
+    EXPECT_NE(std::ranges::find(results, UnwrappedTileID{8, 174, 94}), results.end());
 }
 
 TEST(TileCover, GeomSanFranciscoPoly) {

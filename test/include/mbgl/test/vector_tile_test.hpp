@@ -1,3 +1,4 @@
+#include <mbgl/annotation/annotation_manager.hpp>
 #include <mbgl/map/transform.hpp>
 #include <mbgl/renderer/tile_parameters.hpp>
 #include <mbgl/renderer/image_manager.hpp>
@@ -17,7 +18,7 @@ namespace mbgl {
 
 class VectorTileTest {
 public:
-    util::SimpleIdentity uniqueID;
+    util::SimpleIdentity uniqueID{};
     std::shared_ptr<FileSource> fileSource = std::make_shared<FakeFileSource>();
     TransformState transformState;
     util::RunLoop loop;
@@ -34,17 +35,17 @@ public:
 
     VectorTileTest()
         : threadPool(Scheduler::GetBackground(), uniqueID),
-          tileParameters{1.0,
-                         MapDebugOptions(),
-                         transformState,
-                         fileSource,
-                         MapMode::Continuous,
-                         annotationManager.makeWeakPtr(),
-                         imageManager,
-                         glyphManager,
-                         0,
-                         threadPool,
-                         dynamicTextureAtlas},
+          tileParameters{.pixelRatio = 1.0,
+                         .debugOptions = MapDebugOptions(),
+                         .transformState = transformState,
+                         .fileSource = fileSource,
+                         .mode = MapMode::Continuous,
+                         .annotationManager = annotationManager.makeWeakPtr(),
+                         .imageManager = imageManager,
+                         .glyphManager = glyphManager,
+                         .prefetchZoomDelta = 0,
+                         .threadPool = threadPool,
+                         .dynamicTextureAtlas = dynamicTextureAtlas},
           style{fileSource, 1, threadPool} {}
 
     ~VectorTileTest() {

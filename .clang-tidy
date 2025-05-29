@@ -119,7 +119,8 @@ Checks: [
     -boost-use-ranges,
     -clang-analyzer-optin.core.EnumCastOutOfRange,
     -misc-use-anonymous-namespace,
-    -modernize-use-ranges
+    -modernize-use-ranges,
+    -clang-diagnostic-deprecated-declarations
 ]
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
