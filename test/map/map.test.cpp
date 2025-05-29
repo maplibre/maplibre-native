@@ -1945,7 +1945,6 @@ struct TestTile : public GeometryTile {
                 if (info_.safeWeakCheck) {
                     guard.emplace(self.lock());
                 }
-                // auto guard = self.lock();
                 if (self) {
                     setData(std::make_unique<GeoJSONTileData>(mapbox::feature::feature_collection<int16_t>{}));
                 } else {
