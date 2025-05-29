@@ -563,6 +563,12 @@ public:
 
         if (options)
         {
+            if (options.pluginLayers) {
+                for (Class c in options.pluginLayers) {
+                    [self addPluginLayerType:c];
+                }
+            }
+            
             if (options.styleURL) {
                 self.styleURL = options.styleURL;
             } else if (options.styleJSON) {
