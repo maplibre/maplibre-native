@@ -568,7 +568,7 @@ public:
                     [self addPluginLayerType:c];
                 }
             }
-            
+
             if (options.styleURL) {
                 self.styleURL = options.styleURL;
             } else if (options.styleJSON) {
