@@ -13,6 +13,8 @@
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/math/log2.hpp>
 #include <mbgl/renderer/renderer.hpp>
+#include <mbgl/renderer/render_source.hpp>
+#include <mbgl/renderer/sources/render_tile_source.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/storage/file_source_manager.hpp>
 #include <mbgl/storage/main_resource_loader.hpp>
@@ -27,12 +29,15 @@
 #include <mbgl/style/layers/fill_layer.hpp>
 #include <mbgl/style/layers/raster_layer.hpp>
 #include <mbgl/style/layers/symbol_layer.hpp>
+#include <mbgl/style/source_impl.hpp>
 #include <mbgl/style/sources/custom_geometry_source.hpp>
 #include <mbgl/style/sources/geojson_source.hpp>
 #include <mbgl/style/sources/image_source.hpp>
 #include <mbgl/style/sources/vector_source.hpp>
 #include <mbgl/style/style_impl.hpp>
 #include <mbgl/style/style.hpp>
+#include <mbgl/tile/geojson_tile_data.hpp>
+#include <mbgl/tile/geometry_tile.hpp>
 #include <mbgl/util/async_task.hpp>
 #include <mbgl/util/client_options.hpp>
 #include <mbgl/util/color.hpp>
@@ -40,8 +45,9 @@
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/run_loop.hpp>
+#include <mbgl/util/std.hpp>
 
-#include <atomic>
+#include <mapbox/std/weak.hpp>
 
 using namespace mbgl;
 using namespace mbgl::style;
@@ -1717,16 +1723,18 @@ TEST(Map, ObserveTileLifecycle) {
     observer.onTileActionCallback = [&](TileOperation op, const OverscaledTileID& id, const std::string& sourceID) {
         if (sourceID != "mapbox") return;
         std::lock_guard<std::mutex> lock(tileMutex);
-        tileOps.push_back(TileEntry{id, sourceID, op});
+        tileOps.push_back(TileEntry{.id = id, .sourceID = sourceID, .op = op});
     };
-    observer.onPreCompileShaderCallback =
-        [&](shaders::BuiltIn id, gfx::Backend::Type type, const std::string& additionalDefines) {
-            shaderOps.push_back(ShaderEntry{id, type, additionalDefines, false});
-        };
-    observer.onPostCompileShaderCallback =
-        [&](shaders::BuiltIn id, gfx::Backend::Type type, const std::string& additionalDefines) {
-            shaderOps.push_back(ShaderEntry{id, type, additionalDefines, true});
-        };
+    observer.onPreCompileShaderCallback = [&](shaders::BuiltIn id,
+                                              gfx::Backend::Type type,
+                                              const std::string& additionalDefines) {
+        shaderOps.push_back(ShaderEntry{.id = id, .type = type, .defines = additionalDefines, .isPostCompile = false});
+    };
+    observer.onPostCompileShaderCallback = [&](shaders::BuiltIn id,
+                                               gfx::Backend::Type type,
+                                               const std::string& additionalDefines) {
+        shaderOps.push_back(ShaderEntry{.id = id, .type = type, .defines = additionalDefines, .isPostCompile = true});
+    };
 
     HeadlessFrontend frontend{{512, 512}, 1};
     MapAdapter map(
@@ -1865,7 +1873,7 @@ TEST(Map, ObserveTileLifecycle) {
     }
 }
 
-TEST(BackgroundLayer, StyleUpdateZoomDependency) {
+TEST(Map, StyleUpdateZoomDependency) {
     using namespace mbgl::style::expression::dsl;
 
     MapTest<> test;
@@ -1891,4 +1899,197 @@ TEST(BackgroundLayer, StyleUpdateZoomDependency) {
                      test.frontend.render(test.map).image,
                      0.0006,
                      0.1);
+}
+
+namespace {
+// Custom source type for testing purposes
+const auto customSourceType = static_cast<SourceType>(std::to_underlying(SourceType::CustomVector) + 1);
+
+struct TestTile;
+struct TestInfo {
+    bool safeWeakCheck = true;
+    std::vector<mapbox::base::WeakPtr<TestTile>> tiles;
+    std::atomic<int> tileExpired{0};
+    std::atomic<int> tileDeleted{0};
+    std::atomic<int> tileComplete{0};
+    // This should be a semaphore, but that's not available until we increase the iOS target version
+    std::mutex waitLock;
+};
+
+// Custom tile simulates an extended data loading delay
+struct TestTile : public GeometryTile {
+    TestTile(const OverscaledTileID& id_,
+             std::string sourceID_,
+             const TileParameters& parameters,
+             TileObserver* observer_,
+             TaggedScheduler& scheduler_,
+             TestInfo& info_)
+        : GeometryTile(id_, std::move(sourceID_), parameters, observer_),
+          scheduler(scheduler_),
+          info(info_) {
+        updateData(false /*needsRelayout*/);
+    }
+    ~TestTile() { info.get().tileDeleted++; }
+
+    void updateData(bool needsRelayout) {
+        if (needsRelayout) reset();
+        scheduler.scheduleAndReplyValue(
+            [&]() -> int {
+                assert(!waitStarted);
+                waitStarted = true;
+                std::lock_guard<std::mutex> guard(info.get().waitLock);
+                return 0;
+            },
+            [this, self = getWeakPtr(), &info_ = info.get()](int) {
+                std::optional<mapbox::base::WeakPtrGuard> guard;
+                if (info_.safeWeakCheck) {
+                    guard.emplace(self.lock());
+                }
+                // auto guard = self.lock();
+                if (self) {
+                    setData(std::make_unique<GeoJSONTileData>(mapbox::feature::feature_collection<int16_t>{}));
+                } else {
+                    info_.tileExpired++;
+                }
+                info_.tileComplete++;
+            });
+    }
+
+    mapbox::base::WeakPtr<TestTile> getWeakPtr() { return weakFactory.makeWeakPtr(); }
+
+    bool waitStarted = false;
+
+private:
+    TaggedScheduler& scheduler;
+    std::reference_wrapper<TestInfo> info;
+    mapbox::base::WeakPtrFactory<TestTile> weakFactory{this};
+    // Do not add members here, see `WeakPtrFactory`
+};
+
+// Custom source exists solely to cause `TestRenderSource` to be used
+struct TestSource final : public Source {
+    TestSource(std::string id)
+        : Source(makeMutable<Impl>(std::move(id))),
+          sequencedScheduler(Scheduler::GetSequenced()) {}
+
+    void loadDescription(FileSource&) override { loaded = true; }
+    bool supportsLayerType(const LayerTypeInfo*) const override { return true; }
+
+    struct Impl : public Source::Impl {
+        Impl(std::string id_)
+            : Source::Impl(customSourceType, std::move(id_)) {}
+        std::optional<std::string> getAttribution() const override { return ""; }
+    };
+    const Impl& impl() const { return static_cast<const Impl&>(*baseImpl); }
+    Mutable<Source::Impl> createMutable() const noexcept final {
+        return staticMutableCast<Source::Impl>(makeMutable<Impl>(impl()));
+    }
+
+    mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
+
+private:
+    std::shared_ptr<Scheduler> sequencedScheduler;
+    mapbox::base::WeakPtrFactory<Source> weakFactory{this};
+    // Do not add members here, see `WeakPtrFactory`
+};
+
+// Custom render source creates `TestTile` instances
+struct TestRenderSource : public RenderTileSource {
+    TestRenderSource(Immutable<TestSource::Impl> impl_, TaggedScheduler& scheduler_, TestInfo& info_)
+        : RenderTileSource(std::move(impl_), scheduler_),
+          scheduler(scheduler_),
+          info(info_) {}
+
+    const TestSource::Impl& impl() const { return static_cast<const TestSource::Impl&>(*baseImpl); }
+
+    void update(Immutable<style::Source::Impl> baseImpl_,
+                const std::vector<Immutable<LayerProperties>>& layers,
+                const bool needsRendering,
+                const bool needsRelayout,
+                const TileParameters& parameters) {
+        std::swap(baseImpl, baseImpl_);
+        enabled = needsRendering;
+        tilePyramid.update(layers,
+                           needsRendering,
+                           needsRelayout,
+                           parameters,
+                           *baseImpl,
+                           util::tileSize_I,
+                           {0, 20},
+                           std::optional<LatLngBounds>{},
+                           [&](const OverscaledTileID& tileID, TileObserver* observer_) {
+                               auto tile = std::make_unique<TestTile>(
+                                   tileID, impl().id, parameters, observer_, scheduler, info);
+                               info.get().tiles.push_back(tile->getWeakPtr());
+                               return tile;
+                           });
+    }
+
+    TaggedScheduler& scheduler;
+    std::reference_wrapper<TestInfo> info;
+};
+} // namespace
+
+// Forces the case where an asynchronous tile load occurs after the source that created it has been removed
+TEST(Map, RemovedSource) {
+    TaggedScheduler scheduler{Scheduler::GetBackground(), {}};
+
+    // Register the custom source, created tiles will be stored in `tiles`
+    TestInfo info;
+    RenderSource::registerRenderSourceType(customSourceType, [&](Immutable<Source::Impl> impl) {
+        return std::make_unique<TestRenderSource>(staticImmutableCast<TestSource::Impl>(impl), scheduler, info);
+    });
+    // Automatic cleanup.  Use `std::scope_exit` when available.
+    std::unique_ptr<void, void (*)(void*)> unregister{&info, [](auto) {
+                                                          RenderSource::unregisterRenderSourceType(customSourceType);
+                                                      }};
+
+    // Cause the test tile to block when asked to load
+    std::unique_lock<std::mutex> waitLock(info.waitLock);
+
+    // Set up a source and layer so that our tile is created
+    // Patterned after Map.RendererState
+    MapTest<> test;
+    test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
+    test.frontend.render(test.map);
+    test.map.getStyle().addSource(std::make_unique<TestSource>("TestSource"));
+    test.frontend.render(test.map);
+    test.map.getStyle().addLayer(std::make_unique<SymbolLayer>("SymbolLayer", "TestSource"));
+
+    // Run the map until complete, based on `HeadlessFrontend::render`
+    bool mapComplete = false;
+    std::exception_ptr error;
+    gfx::BackendScope scopeGuard{*test.frontend.getBackend()};
+    test.map.renderStill([&](const std::exception_ptr& e) {
+        if (e) {
+            error = e;
+        } else {
+            mapComplete = true;
+        }
+    });
+
+    while ((!mapComplete || !info.tileComplete) && !error) {
+        util::RunLoop::Get()->runOnce();
+
+        // Step 1
+        // Once the artificially long tile load is in progress, remove the source
+        // This should cause the tile to unload and be deleted
+        if (!info.tiles.empty()) {
+            auto& tile = info.tiles.front();
+            if (auto tileGuard = tile.lock(); tile && tile->waitStarted) {
+                if (test.map.getStyle().getSource("TestSource")) {
+                    test.map.getStyle().removeLayer("SymbolLayer");
+                    test.map.getStyle().removeSource("TestSource");
+                }
+            }
+        }
+        // Step 2
+        // After the source is deleted, wait for the tile to be
+        // deleted, then release the tile data request to complete.
+        if (info.tileDeleted && waitLock.owns_lock()) {
+            waitLock.unlock();
+        }
+    }
+    EXPECT_FALSE(error);
+    EXPECT_TRUE(info.tileExpired == 1);
 }

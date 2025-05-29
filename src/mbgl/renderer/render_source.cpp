@@ -14,11 +14,30 @@
 #include <mbgl/util/constants.hpp>
 
 #include <memory>
+#include <stdexcept>
 #include <utility>
 
 namespace mbgl {
 
 using namespace style;
+
+using CustomRenderSourceMap =
+    std::unordered_map<SourceType, std::function<std::unique_ptr<RenderSource>(Immutable<style::Source::Impl>)>>;
+namespace {
+CustomRenderSourceMap& getCustomRenderSourceMap() {
+    static CustomRenderSourceMap customRenderSourceMap;
+    return customRenderSourceMap;
+}
+} // namespace
+
+bool RenderSource::registerRenderSourceType(
+    const style::SourceType& type,
+    std::function<std::unique_ptr<RenderSource>(Immutable<style::Source::Impl>)> factory) {
+    return getCustomRenderSourceMap().try_emplace(type, std::move(factory)).second;
+}
+bool RenderSource::unregisterRenderSourceType(const style::SourceType& type) {
+    return 0 < getCustomRenderSourceMap().erase(type);
+}
 
 std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>& impl,
                                                    const TaggedScheduler& threadPool_) {
@@ -51,6 +70,15 @@ std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>
         case SourceType::CustomVector:
             return std::make_unique<RenderCustomGeometrySource>(staticImmutableCast<CustomGeometrySource::Impl>(impl),
                                                                 std::move(threadPool_));
+        default: {
+            // Check if the source type is registered in the custom render source map.
+            const auto& map = getCustomRenderSourceMap();
+            if (const auto it = map.find(impl->type); it != map.end()) {
+                return it->second(impl);
+            }
+            throw std::runtime_error("Unregistered custom source type: " +
+                                     util::toString(static_cast<int>(impl->type)));
+        }
     }
 
     // Not reachable, but placate GCC.
@@ -58,7 +86,9 @@ std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>
     return nullptr;
 }
 
-static RenderSourceObserver nullObserver;
+namespace {
+RenderSourceObserver nullObserver;
+}
 
 RenderSource::RenderSource(Immutable<style::Source::Impl> impl)
     : baseImpl(std::move(impl)),
