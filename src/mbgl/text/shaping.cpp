@@ -169,15 +169,15 @@ void PositionedIcon::fitIconToText(const Shaping& shapedText,
     }
 }
 
-void align(Shaping& shaping,
-           float justify,
-           float horizontalAlign,
-           float verticalAlign,
-           float maxLineLength,
-           float maxLineHeight,
-           float lineHeight,
-           float blockHeight,
-           std::size_t lineCount) {
+static void align(Shaping& shaping,
+                  float justify,
+                  float horizontalAlign,
+                  float verticalAlign,
+                  float maxLineLength,
+                  float maxLineHeight,
+                  float lineHeight,
+                  float blockHeight,
+                  std::size_t lineCount) {
     const float shiftX = (justify - horizontalAlign) * maxLineLength;
     float shiftY = 0.0f;
 
@@ -196,7 +196,7 @@ void align(Shaping& shaping,
 }
 
 // justify left = 0, right = 1, center = .5
-void justifyLine(std::vector<PositionedGlyph>& positionedGlyphs, float justify, float lineOffset) {
+static void justifyLine(std::vector<PositionedGlyph>& positionedGlyphs, float justify, float lineOffset) {
     if (!justify && !lineOffset) {
         return;
     }
@@ -210,12 +210,12 @@ void justifyLine(std::vector<PositionedGlyph>& positionedGlyphs, float justify, 
     }
 }
 
-float getGlyphAdvance(char16_t codePoint,
-                      const SectionOptions& section,
-                      const GlyphMap& glyphMap,
-                      const ImagePositions& imagePositions,
-                      float layoutTextSize,
-                      float spacing) {
+static float getGlyphAdvance(char16_t codePoint,
+                             const SectionOptions& section,
+                             const GlyphMap& glyphMap,
+                             const ImagePositions& imagePositions,
+                             float layoutTextSize,
+                             float spacing) {
     if (!section.imageID) {
         auto glyphs = glyphMap.find(section.fontStackHash);
         if (glyphs == glyphMap.end()) {
@@ -236,12 +236,12 @@ float getGlyphAdvance(char16_t codePoint,
     }
 }
 
-float determineAverageLineWidth(const TaggedString& logicalInput,
-                                float spacing,
-                                float maxWidth,
-                                const GlyphMap& glyphMap,
-                                const ImagePositions& imagePositions,
-                                float layoutTextSize) {
+static float determineAverageLineWidth(const TaggedString& logicalInput,
+                                       float spacing,
+                                       float maxWidth,
+                                       const GlyphMap& glyphMap,
+                                       const ImagePositions& imagePositions,
+                                       float layoutTextSize) {
     float totalWidth = 0;
 
     for (std::size_t i = 0; i < logicalInput.length(); i++) {
@@ -254,7 +254,10 @@ float determineAverageLineWidth(const TaggedString& logicalInput,
     return totalWidth / targetLineCount;
 }
 
-float calculateBadness(const float lineWidth, const float targetWidth, const float penalty, const bool isLastBreak) {
+static float calculateBadness(const float lineWidth,
+                              const float targetWidth,
+                              const float penalty,
+                              const bool isLastBreak) {
     const float raggedness = static_cast<float>(std::pow(lineWidth - targetWidth, 2));
     if (isLastBreak) {
         // Favor finals lines shorter than average over longer than average
@@ -270,7 +273,7 @@ float calculateBadness(const float lineWidth, const float targetWidth, const flo
     return raggedness + penalty * penalty;
 }
 
-float calculatePenalty(char16_t codePoint, char16_t nextCodePoint, bool penalizableIdeographicBreak) {
+static float calculatePenalty(char16_t codePoint, char16_t nextCodePoint, bool penalizableIdeographicBreak) {
     float penalty = 0;
     // Force break on newline
     if (codePoint == 0x0a) {
@@ -312,12 +315,12 @@ struct PotentialBreak {
     const float badness;
 };
 
-PotentialBreak evaluateBreak(const std::size_t breakIndex,
-                             const float breakX,
-                             const float targetWidth,
-                             const std::list<PotentialBreak>& potentialBreaks,
-                             const float penalty,
-                             const bool isLastBreak) {
+static PotentialBreak evaluateBreak(const std::size_t breakIndex,
+                                    const float breakX,
+                                    const float targetWidth,
+                                    const std::list<PotentialBreak>& potentialBreaks,
+                                    const float penalty,
+                                    const bool isLastBreak) {
     // We could skip evaluating breaks where the line length (breakX - priorBreak.x) > maxWidth
     //  ...but in fact we allow lines longer than maxWidth (if there's no break points)
     //  ...and when targetWidth and maxWidth are close, strictly enforcing maxWidth can give
@@ -337,7 +340,7 @@ PotentialBreak evaluateBreak(const std::size_t breakIndex,
     return {breakIndex, breakX, bestPriorBreak, bestBreakBadness};
 }
 
-std::set<std::size_t> leastBadBreaks(const PotentialBreak& lastLineBreak) {
+static std::set<std::size_t> leastBadBreaks(const PotentialBreak& lastLineBreak) {
     std::set<std::size_t> leastBadBreaks = {lastLineBreak.index};
     const PotentialBreak* priorBreak = lastLineBreak.priorBreak;
     while (priorBreak) {
@@ -349,12 +352,12 @@ std::set<std::size_t> leastBadBreaks(const PotentialBreak& lastLineBreak) {
 
 // We determine line breaks based on shaped text in logical order. Working in visual order would be
 //  more intuitive, but we can't do that because the visual order may be changed by line breaks!
-std::set<std::size_t> determineLineBreaks(const TaggedString& logicalInput,
-                                          const float spacing,
-                                          float maxWidth,
-                                          const GlyphMap& glyphMap,
-                                          const ImagePositions& imagePositions,
-                                          float layoutTextSize) {
+static std::set<std::size_t> determineLineBreaks(const TaggedString& logicalInput,
+                                                 const float spacing,
+                                                 float maxWidth,
+                                                 const GlyphMap& glyphMap,
+                                                 const ImagePositions& imagePositions,
+                                                 float layoutTextSize) {
     if (!maxWidth) {
         return {};
     }
@@ -399,18 +402,18 @@ std::set<std::size_t> determineLineBreaks(const TaggedString& logicalInput,
     return leastBadBreaks(evaluateBreak(logicalInput.length(), currentX, targetWidth, potentialBreaks, 0, true));
 }
 
-void shapeLines(Shaping& shaping,
-                std::vector<TaggedString>& lines,
-                const float spacing,
-                const float lineHeight,
-                const style::SymbolAnchorType textAnchor,
-                const style::TextJustifyType textJustify,
-                const WritingModeType writingMode,
-                const GlyphMap& glyphMap,
-                const GlyphPositions& glyphPositions,
-                const ImagePositions& imagePositions,
-                float layoutTextSize,
-                bool allowVerticalPlacement) {
+static void shapeLines(Shaping& shaping,
+                       std::vector<TaggedString>& lines,
+                       const float spacing,
+                       const float lineHeight,
+                       const style::SymbolAnchorType textAnchor,
+                       const style::TextJustifyType textJustify,
+                       const WritingModeType writingMode,
+                       const GlyphMap& glyphMap,
+                       const GlyphPositions& glyphPositions,
+                       const ImagePositions& imagePositions,
+                       float layoutTextSize,
+                       bool allowVerticalPlacement) {
     float x = 0.0f;
     float y = Shaping::yOffset;
 

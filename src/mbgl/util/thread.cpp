@@ -4,6 +4,7 @@
 
 namespace mbgl {
 namespace util {
+
 std::function<void()> makeThreadPrioritySetter(std::string threadType_) {
     return [threadType = std::move(threadType_)] {
         auto& settings = platform::Settings::getInstance();

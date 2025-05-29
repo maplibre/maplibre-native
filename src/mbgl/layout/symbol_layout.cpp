@@ -996,7 +996,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
             if (!firstLoad) {
                 bucket->justReloaded = true;
             }
-            renderData.emplace(pair.first, LayerRenderData{bucket, pair.second});
+            renderData.emplace(pair.first, LayerRenderData{.bucket = bucket, .layerProperties = pair.second});
         }
     }
 }

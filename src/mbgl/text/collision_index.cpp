@@ -361,7 +361,7 @@ void CollisionIndex::insertFeature(const CollisionFeature& feature,
     }
 }
 
-bool polygonIntersectsBox(const LineString<float>& polygon, const GridIndex<IndexedSubfeature>::BBox& bbox) {
+static bool polygonIntersectsBox(const LineString<float>& polygon, const GridIndex<IndexedSubfeature>::BBox& bbox) {
     // This is just a wrapper that allows us to use the integer-based
     // util::polygonIntersectsPolygon Conversion limits our query accuracy to
     // single-pixel resolution

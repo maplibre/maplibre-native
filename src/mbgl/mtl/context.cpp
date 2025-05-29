@@ -139,6 +139,7 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
     // options->setOptimizationLevel(MTL::LibraryOptimizationLevelDefault);
 
     NS::Error* error = nullptr;
+    // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
     NS::String* nsSource = NS::String::string(source.data(), NS::UTF8StringEncoding);
 
     const auto& device = backend.getDevice();
@@ -152,6 +153,7 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
         return nullptr;
     }
 
+    // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
     const auto nsVertName = NS::String::string(vertexName.data(), NS::UTF8StringEncoding);
     MTLFunctionPtr vertexFunction = NS::TransferPtr(library->newFunction(nsVertName));
     if (!vertexFunction) {
@@ -164,6 +166,7 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
     // fragment function is optional
     MTLFunctionPtr fragmentFunction;
     if (!fragmentName.empty()) {
+        // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
         const auto nsFragName = NS::String::string(fragmentName.data(), NS::UTF8StringEncoding);
         fragmentFunction = NS::TransferPtr(library->newFunction(nsFragName));
         if (!fragmentFunction) {
@@ -286,15 +289,15 @@ const UniqueVertexBufferResource& Context::getEmptyVertexBuffer() {
 
 namespace {
 const auto clipMaskStencilMode = gfx::StencilMode{
-    /*.test=*/gfx::StencilMode::Always(),
-    /*.ref=*/0,
-    /*.mask=*/0b11111111,
-    /*.fail=*/gfx::StencilOpType::Keep,
-    /*.depthFail=*/gfx::StencilOpType::Keep,
-    /*.pass=*/gfx::StencilOpType::Replace,
+    /*.test=*/.test = gfx::StencilMode::Always(),
+    /*.ref=*/.ref = 0,
+    /*.mask=*/.mask = 0b11111111,
+    /*.fail=*/.fail = gfx::StencilOpType::Keep,
+    /*.depthFail=*/.depthFail = gfx::StencilOpType::Keep,
+    /*.pass=*/.pass = gfx::StencilOpType::Replace,
 };
-const auto clipMaskDepthMode = gfx::DepthMode{/*.func=*/gfx::DepthFunctionType::Always,
-                                              /*.mask=*/gfx::DepthMaskType::ReadOnly};
+const auto clipMaskDepthMode = gfx::DepthMode{/*.func=*/.func = gfx::DepthFunctionType::Always,
+                                              /*.mask=*/.mask = gfx::DepthMaskType::ReadOnly};
 } // namespace
 
 bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,

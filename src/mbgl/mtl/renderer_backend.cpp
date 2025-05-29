@@ -80,7 +80,7 @@ void RendererBackend::setScissorTest(bool) {}
 /// @param registry A shader registry instance
 /// @param programParameters ProgramParameters used to initialize each instance
 template <shaders::BuiltIn... ShaderID>
-void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& programParameters) {
+static void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& programParameters) {
     /// The following fold expression will create a shader for every type
     /// in the parameter pack and register it with the shader registry.
 

@@ -17,13 +17,13 @@ static bool isComparableType(const std::string& op, const type::Type& type) noex
     }
 }
 
-bool eq(const Value& a, const Value& b) noexcept {
+static bool eq(const Value& a, const Value& b) noexcept {
     return a == b;
 }
-bool neq(const Value& a, const Value& b) noexcept {
+static bool neq(const Value& a, const Value& b) noexcept {
     return a != b;
 }
-bool lt(const Value& lhs, const Value& rhs) noexcept {
+static bool lt(const Value& lhs, const Value& rhs) noexcept {
     return lhs.match([&](const std::string& a) { return a < rhs.get<std::string>(); },
                      [&](double a) { return a < rhs.get<double>(); },
                      [&](const auto&) {
@@ -31,7 +31,7 @@ bool lt(const Value& lhs, const Value& rhs) noexcept {
                          return false;
                      });
 }
-bool gt(const Value& lhs, const Value& rhs) noexcept {
+static bool gt(const Value& lhs, const Value& rhs) noexcept {
     return lhs.match([&](const std::string& a) { return a > rhs.get<std::string>(); },
                      [&](double a) { return a > rhs.get<double>(); },
                      [&](const auto&) {
@@ -39,7 +39,7 @@ bool gt(const Value& lhs, const Value& rhs) noexcept {
                          return false;
                      });
 }
-bool lteq(const Value& lhs, const Value& rhs) noexcept {
+static bool lteq(const Value& lhs, const Value& rhs) noexcept {
     return lhs.match([&](const std::string& a) { return a <= rhs.get<std::string>(); },
                      [&](double a) { return a <= rhs.get<double>(); },
                      [&](const auto&) {
@@ -47,7 +47,7 @@ bool lteq(const Value& lhs, const Value& rhs) noexcept {
                          return false;
                      });
 }
-bool gteq(const Value& lhs, const Value& rhs) noexcept {
+static bool gteq(const Value& lhs, const Value& rhs) noexcept {
     return lhs.match([&](const std::string& a) { return a >= rhs.get<std::string>(); },
                      [&](double a) { return a >= rhs.get<double>(); },
                      [&](const auto&) {
@@ -56,22 +56,22 @@ bool gteq(const Value& lhs, const Value& rhs) noexcept {
                      });
 }
 
-bool eqCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
+static bool eqCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
     return c.compare(a, b) == 0;
 }
-bool neqCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
+static bool neqCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
     return !eqCollate(a, b, c);
 }
-bool ltCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
+static bool ltCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
     return c.compare(a, b) < 0;
 }
-bool gtCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
+static bool gtCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
     return c.compare(a, b) > 0;
 }
-bool lteqCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
+static bool lteqCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
     return c.compare(a, b) <= 0;
 }
-bool gteqCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
+static bool gteqCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
     return c.compare(a, b) >= 0;
 }
 

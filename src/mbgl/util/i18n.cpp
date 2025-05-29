@@ -359,7 +359,7 @@ bool allowsWordBreaking(char16_t chr) {
     );
 }
 
-bool charAllowsLetterSpacing(char16_t chr) {
+static bool charAllowsLetterSpacing(char16_t chr) {
     return !(isInArabic(chr) || isInArabicSupplement(chr) || isInArabicExtendedA(chr) ||
              isInArabicPresentationFormsA(chr) || isInArabicPresentationFormsB(chr));
 }
@@ -586,7 +586,7 @@ char16_t verticalizePunctuation(char16_t chr) {
     return verticalPunctuation.count(chr) ? verticalPunctuation.at(chr) : 0;
 }
 
-bool charInSupportedScript(char16_t chr) {
+static bool charInSupportedScript(char16_t chr) {
     // This is a rough heuristic: whether we "can render" a script
     // actually depends on the properties of the font being used
     // and whether differences from the ideal rendering are considered

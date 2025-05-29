@@ -35,10 +35,10 @@ using namespace style;
 // Generic functions
 
 template <class RegionDefinition>
-Range<uint8_t> coveringZoomRange(const RegionDefinition& definition,
-                                 style::SourceType type,
-                                 uint16_t tileSize,
-                                 const Range<uint8_t>& zoomRange) {
+static Range<uint8_t> coveringZoomRange(const RegionDefinition& definition,
+                                        style::SourceType type,
+                                        uint16_t tileSize,
+                                        const Range<uint8_t>& zoomRange) {
     double minZ = std::max<double>(util::coveringZoomLevel(definition.minZoom, type, tileSize), zoomRange.min);
     double maxZ = std::min<double>(util::coveringZoomLevel(definition.maxZoom, type, tileSize), zoomRange.max);
 
@@ -50,7 +50,7 @@ Range<uint8_t> coveringZoomRange(const RegionDefinition& definition,
 }
 
 template <class Geometry, class Fn>
-void tileCover(const Geometry& geometry, uint8_t z, Fn&& fn) {
+static void tileCover(const Geometry& geometry, uint8_t z, Fn&& fn) {
     util::TileCover cover(geometry, z);
     while (cover.hasNext()) {
         fn(cover.next()->canonical);
@@ -58,11 +58,11 @@ void tileCover(const Geometry& geometry, uint8_t z, Fn&& fn) {
 }
 
 template <class Fn>
-void tileCover(const OfflineRegionDefinition& definition,
-               style::SourceType type,
-               uint16_t tileSize,
-               const Range<uint8_t>& zoomRange,
-               Fn&& fn) {
+static void tileCover(const OfflineRegionDefinition& definition,
+                      style::SourceType type,
+                      uint16_t tileSize,
+                      const Range<uint8_t>& zoomRange,
+                      Fn&& fn) {
     const Range<uint8_t> clampedZoomRange = std::visit(
         [&](auto& reg) { return coveringZoomRange(reg, type, tileSize, zoomRange); }, definition);
 
@@ -75,10 +75,10 @@ void tileCover(const OfflineRegionDefinition& definition,
     }
 }
 
-uint64_t tileCount(const OfflineRegionDefinition& definition,
-                   style::SourceType type,
-                   uint16_t tileSize,
-                   const Range<uint8_t>& zoomRange) {
+static uint64_t tileCount(const OfflineRegionDefinition& definition,
+                          style::SourceType type,
+                          uint16_t tileSize,
+                          const Range<uint8_t>& zoomRange) {
     const Range<uint8_t> clampedZoomRange = std::visit(
         [&](auto& reg) { return coveringZoomRange(reg, type, tileSize, zoomRange); }, definition);
 

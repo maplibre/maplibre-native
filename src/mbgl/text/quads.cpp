@@ -20,7 +20,7 @@ using namespace style;
 
 constexpr const auto border = ImagePosition::padding;
 
-float computeStretchSum(const ImageStretches& stretches) {
+static float computeStretchSum(const ImageStretches& stretches) {
     float sum = 0;
     for (auto& stretch : stretches) {
         sum += stretch.second - stretch.first;
@@ -28,7 +28,7 @@ float computeStretchSum(const ImageStretches& stretches) {
     return sum;
 }
 
-float sumWithinRange(const ImageStretches& stretches, const float min, const float max) {
+static float sumWithinRange(const ImageStretches& stretches, const float min, const float max) {
     float sum = 0;
     for (auto& stretch : stretches) {
         sum += util::max(min, util::min(max, stretch.second)) - util::max(min, util::min(max, stretch.first));
@@ -36,11 +36,11 @@ float sumWithinRange(const ImageStretches& stretches, const float min, const flo
     return sum;
 }
 
-inline float getEmOffset(float stretchOffset, float stretchSize, float iconSize, float iconOffset) {
+inline static float getEmOffset(float stretchOffset, float stretchSize, float iconSize, float iconOffset) {
     return iconOffset + iconSize * stretchOffset / stretchSize;
 }
 
-inline float getPxOffset(float fixedOffset, float fixedSize, float stretchOffset, float stretchSize) {
+inline static float getPxOffset(float fixedOffset, float fixedSize, float stretchOffset, float stretchSize) {
     return fixedOffset - fixedSize * stretchOffset / stretchSize;
 }
 
@@ -51,17 +51,17 @@ struct Cut {
 
 using Cuts = std::vector<Cut>;
 
-Cuts stretchZonesToCuts(const ImageStretches& stretchZones, const float fixedSize, const float stretchSize) {
-    Cuts cuts{{-border, 0}};
+static Cuts stretchZonesToCuts(const ImageStretches& stretchZones, const float fixedSize, const float stretchSize) {
+    Cuts cuts{{.fixed = -border, .stretch = 0}};
 
     for (auto& zone : stretchZones) {
         const auto c1 = zone.first;
         const auto c2 = zone.second;
         const auto lastStretch = cuts.back().stretch;
-        cuts.emplace_back(Cut{c1 - lastStretch, lastStretch});
-        cuts.emplace_back(Cut{c1 - lastStretch, lastStretch + (c2 - c1)});
+        cuts.emplace_back(Cut{.fixed = c1 - lastStretch, .stretch = lastStretch});
+        cuts.emplace_back(Cut{.fixed = c1 - lastStretch, .stretch = lastStretch + (c2 - c1)});
     }
-    cuts.emplace_back(Cut{fixedSize + border, stretchSize});
+    cuts.emplace_back(Cut{.fixed = fixedSize + border, .stretch = stretchSize});
     return cuts;
 }
 
@@ -184,7 +184,10 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
     };
 
     if (!hasIconTextFit || (image.stretchX.empty() && image.stretchY.empty())) {
-        makeBox({0, -1}, {0, -1}, {0, static_cast<float>(imageWidth + 1)}, {0, static_cast<float>(imageHeight + 1)});
+        makeBox({.fixed = 0, .stretch = -1},
+                {.fixed = 0, .stretch = -1},
+                {.fixed = 0, .stretch = static_cast<float>(imageWidth + 1)},
+                {.fixed = 0, .stretch = static_cast<float>(imageHeight + 1)});
     } else {
         const auto xCuts = stretchZonesToCuts(stretchX, fixedWidth, stretchWidth);
         const auto yCuts = stretchZonesToCuts(stretchY, fixedHeight, stretchHeight);

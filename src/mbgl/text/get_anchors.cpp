@@ -8,11 +8,14 @@
 
 namespace mbgl {
 
-float getAngleWindowSize(const float textLeft, const float textRight, const float glyphSize, const float boxScale) {
+static float getAngleWindowSize(const float textLeft,
+                                const float textRight,
+                                const float glyphSize,
+                                const float boxScale) {
     return (textLeft - textRight) != 0.0f ? 3.0f / 5.0f * glyphSize * boxScale : 0;
 }
 
-float getLineLength(const GeometryCoordinates& line) {
+static float getLineLength(const GeometryCoordinates& line) {
     float lineLength = 0;
     for (auto it = line.begin(), end = line.end() - 1; it != end; it++) {
         lineLength += util::dist<float>(*(it), *(it + 1));

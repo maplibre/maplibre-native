@@ -4,7 +4,7 @@
 namespace mbgl {
 namespace util {
 
-bool polygonContainsPoint(const GeometryCoordinates& ring, const GeometryCoordinate& p) {
+static bool polygonContainsPoint(const GeometryCoordinates& ring, const GeometryCoordinate& p) {
     bool c = false;
     for (auto i = ring.begin(), j = ring.end() - 1; i != ring.end(); j = i++) {
         auto& p1 = *i;
@@ -19,7 +19,9 @@ bool polygonContainsPoint(const GeometryCoordinates& ring, const GeometryCoordin
 }
 
 // Code from http://stackoverflow.com/a/1501725/331379.
-float distToSegmentSquared(const GeometryCoordinate& p, const GeometryCoordinate& v, const GeometryCoordinate& w) {
+static float distToSegmentSquared(const GeometryCoordinate& p,
+                                  const GeometryCoordinate& v,
+                                  const GeometryCoordinate& w) {
     if (v == w) return util::distSqr<float>(p, v);
     const auto l2 = util::distSqr<float>(v, w);
     const float t = static_cast<float>((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
@@ -28,7 +30,9 @@ float distToSegmentSquared(const GeometryCoordinate& p, const GeometryCoordinate
     return util::distSqr<float>(p, convertPoint<float>(w - v) * t + convertPoint<float>(v));
 }
 
-bool pointIntersectsBufferedLine(const GeometryCoordinate& p, const GeometryCoordinates& line, const float radius) {
+static bool pointIntersectsBufferedLine(const GeometryCoordinate& p,
+                                        const GeometryCoordinates& line,
+                                        const float radius) {
     const float radiusSquared = radius * radius;
 
     if (line.size() == 1) return util::distSqr<float>(p, line.at(0)) < radiusSquared;
@@ -45,18 +49,18 @@ bool pointIntersectsBufferedLine(const GeometryCoordinate& p, const GeometryCoor
 }
 
 // http://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/
-bool isCounterClockwise(const GeometryCoordinate& a, const GeometryCoordinate& b, const GeometryCoordinate& c) {
+static bool isCounterClockwise(const GeometryCoordinate& a, const GeometryCoordinate& b, const GeometryCoordinate& c) {
     return (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x);
 }
 
-bool lineSegmentIntersectsLineSegment(const GeometryCoordinate& a0,
-                                      const GeometryCoordinate& a1,
-                                      const GeometryCoordinate& b0,
-                                      const GeometryCoordinate& b1) {
+static bool lineSegmentIntersectsLineSegment(const GeometryCoordinate& a0,
+                                             const GeometryCoordinate& a1,
+                                             const GeometryCoordinate& b0,
+                                             const GeometryCoordinate& b1) {
     return isCounterClockwise(a0, b0, b1) != isCounterClockwise(a1, b0, b1) &&
            isCounterClockwise(a0, a1, b0) != isCounterClockwise(a0, a1, b1);
 }
-bool lineIntersectsLine(const GeometryCoordinates& lineA, const GeometryCoordinates& lineB) {
+static bool lineIntersectsLine(const GeometryCoordinates& lineA, const GeometryCoordinates& lineB) {
     if (lineA.empty() || lineB.empty()) return false;
     for (auto i = lineA.begin(); i != lineA.end() - 1; i++) {
         auto& a0 = *i;
@@ -70,7 +74,9 @@ bool lineIntersectsLine(const GeometryCoordinates& lineA, const GeometryCoordina
     return false;
 }
 
-bool lineIntersectsBufferedLine(const GeometryCoordinates& lineA, const GeometryCoordinates& lineB, float radius) {
+static bool lineIntersectsBufferedLine(const GeometryCoordinates& lineA,
+                                       const GeometryCoordinates& lineB,
+                                       float radius) {
     if (lineA.size() > 1) {
         if (lineIntersectsLine(lineA, lineB)) return true;
 

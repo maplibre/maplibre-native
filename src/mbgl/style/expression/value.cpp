@@ -48,7 +48,7 @@ std::string toString(const Value& value) {
                        [](const auto& v_) { return stringify(v_); });
 }
 
-void writeJSON(rapidjson::Writer<rapidjson::StringBuffer>& writer, const Value& value) {
+static void writeJSON(rapidjson::Writer<rapidjson::StringBuffer>& writer, const Value& value) {
     value.match([&](const NullValue&) { writer.Null(); },
                 [&](bool b) { writer.Bool(b); },
                 [&](double f) {
@@ -201,7 +201,7 @@ std::optional<float> ValueConverter<float>::fromExpressionValue(const Value& val
 }
 
 template <typename T, typename Container>
-std::vector<Value> toArrayValue(const Container& value) {
+static std::vector<Value> toArrayValue(const Container& value) {
     std::vector<Value> result;
     result.reserve(value.size());
     for (const T& item : value) {

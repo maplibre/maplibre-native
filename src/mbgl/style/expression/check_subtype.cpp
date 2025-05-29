@@ -6,7 +6,7 @@ namespace style {
 namespace expression {
 namespace type {
 
-std::string errorMessage(const Type& expected, const Type& t) {
+static std::string errorMessage(const Type& expected, const Type& t) {
     return {"Expected " + toString(expected) + " but found " + toString(t) + " instead."};
 }
 

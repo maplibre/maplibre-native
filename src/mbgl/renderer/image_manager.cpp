@@ -231,7 +231,7 @@ void ImageManager::checkMissingAndNotify(ImageRequestor& requestor, const ImageR
 
     if (!missingDependencies.empty()) {
         ImageRequestor* requestorPtr = &requestor;
-        assert(!missingImageRequestors.count(requestorPtr));
+        assert(!missingImageRequestors.contains(requestorPtr));
         missingImageRequestors.emplace(requestorPtr, pair);
 
         for (const auto& dependency : missingDependencies) {

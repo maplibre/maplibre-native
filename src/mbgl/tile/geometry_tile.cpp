@@ -51,9 +51,9 @@ public:
     Rect<uint16_t> paddedRect;
 };
 
-void populateImagePatches(ImagePositions& imagePositions,
-                          const ImageManager& imageManager,
-                          std::vector<ImagePatch>& /*out*/ patches) {
+static void populateImagePatches(ImagePositions& imagePositions,
+                                 const ImageManager& imageManager,
+                                 std::vector<ImagePatch>& /*out*/ patches) {
     if (imagePositions.empty()) {
         imagePositions.reserve(imageManager.updatedImageVersions.size());
     }

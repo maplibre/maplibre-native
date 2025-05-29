@@ -7,7 +7,7 @@ namespace style {
 namespace expression {
 
 template <typename T>
-std::optional<Value> checkNumber(T n) {
+static std::optional<Value> checkNumber(T n) {
     if (n > std::numeric_limits<double>::max()) {
         return {std::numeric_limits<double>::infinity()};
     } else {
@@ -16,7 +16,7 @@ std::optional<Value> checkNumber(T n) {
 }
 
 using namespace mbgl::style::conversion;
-std::optional<Value> parseValue(const Convertible& value, ParsingContext& ctx) {
+static std::optional<Value> parseValue(const Convertible& value, ParsingContext& ctx) {
     if (isUndefined(value)) return {Null};
     if (isObject(value)) {
         std::unordered_map<std::string, Value> result;

@@ -128,7 +128,7 @@ void RenderPass::bindVertex(const BufferResource& buf, std::size_t offset, std::
                 return;
             }
         }
-        vertexBinds[index] = BindInfo{&buf, actualSize, offset};
+        vertexBinds[index] = BindInfo{.buf = &buf, .size = actualSize, .offset = offset};
     }
     buf.bindVertex(encoder, offset, index, actualSize);
 }
@@ -154,7 +154,7 @@ void RenderPass::bindFragment(const BufferResource& buf, std::size_t offset, std
                 return;
             }
         }
-        fragmentBinds[index] = BindInfo{&buf, actualSize, offset};
+        fragmentBinds[index] = BindInfo{.buf = &buf, .size = actualSize, .offset = offset};
     }
     buf.bindFragment(encoder, offset, index, actualSize);
 }

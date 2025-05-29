@@ -282,7 +282,7 @@ ParseResult Within::parse(const Convertible& value, ParsingContext& ctx) {
     return ParseResult();
 }
 
-mbgl::Value valueConverter(const mapbox::geojson::rapidjson_value& v) {
+static mbgl::Value valueConverter(const mapbox::geojson::rapidjson_value& v) {
     if (v.IsNumber()) {
         if (v.IsInt64()) return std::int64_t(v.GetInt64());
         if (v.IsUint64()) return std::uint64_t(v.GetUint64());
