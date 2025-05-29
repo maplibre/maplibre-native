@@ -442,7 +442,7 @@ OnlineFileRequest::~OnlineFileRequest() {
     }
 }
 
-Timestamp interpolateExpiration(const Timestamp& current, std::optional<Timestamp> prior, bool& expired) {
+static Timestamp interpolateExpiration(const Timestamp& current, std::optional<Timestamp> prior, bool& expired) {
     auto now = util::now();
     if (current > now) {
         return current;

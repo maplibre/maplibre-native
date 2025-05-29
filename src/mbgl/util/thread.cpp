@@ -5,6 +5,7 @@
 namespace mbgl {
 namespace util {
 
+// NOLINTNEXTLINE(misc-use-internal-linkage)
 std::function<void()> makeThreadPrioritySetter(std::string threadType_) {
     return [threadType = std::move(threadType_)] {
         auto& settings = platform::Settings::getInstance();

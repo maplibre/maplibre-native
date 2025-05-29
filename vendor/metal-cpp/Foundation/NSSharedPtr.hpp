@@ -270,7 +270,9 @@ _NS_INLINE NS::SharedPtr<_Class>& NS::SharedPtr<_Class>::operator=(SharedPtr<_Cl
     else
     {
         m_pObject = other.m_pObject;
-        other.m_pObject->release();
+        if (other.m_pObject) {
+            other.m_pObject->release();
+        }
     }
     other.m_pObject = nullptr;
     return *this;

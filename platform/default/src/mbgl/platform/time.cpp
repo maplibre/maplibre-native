@@ -3,6 +3,7 @@
 namespace mbgl {
 namespace platform {
 
+// NOLINTNEXTLINE(misc-use-internal-linkage)
 std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds> now() {
     return std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now());
 }

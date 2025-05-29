@@ -18,6 +18,7 @@ UniformBuffer::UniformBuffer(BufferResource&& buffer_)
 
 UniformBuffer::UniformBuffer(UniformBuffer&& other)
     : gfx::UniformBuffer(std::move(other)),
+      // NOLINTNEXTLINE(bugprone-use-after-move)
       buffer(std::move(other.buffer)) {}
 
 UniformBuffer::~UniformBuffer() {
