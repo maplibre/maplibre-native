@@ -131,7 +131,7 @@ void RenderLayer::addRenderPassesFromTiles() {
 
 const LayerRenderData* RenderLayer::getRenderDataForPass(const RenderTile& tile, RenderPass pass) const {
     if (const LayerRenderData* renderData = tile.getLayerRenderData(*baseImpl)) {
-        return bool(RenderPass(renderData->layerProperties->renderPasses) & pass) ? renderData : nullptr;
+        return (RenderPass(renderData->layerProperties->renderPasses) & pass) ? renderData : nullptr;
     }
     return nullptr;
 }

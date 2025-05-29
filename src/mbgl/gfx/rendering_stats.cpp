@@ -20,7 +20,7 @@ bool RenderingStats::isZero() const {
                                 memIndexBuffers,
                                 memVertexBuffers,
                                 memUniformBuffers};
-    return std::all_of(expectedZeros.begin(), expectedZeros.end(), [](auto x) { return x == 0; });
+    return std::ranges::all_of(expectedZeros, [](auto x) { return x == 0; });
 }
 
 RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {
@@ -58,7 +58,7 @@ RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {
 
 #if !defined(NDEBUG)
 template <typename T>
-std::ostream& optionalStatLine(std::ostream& stream, T value, std::string_view label, std::string_view sep) {
+static std::ostream& optionalStatLine(std::ostream& stream, T value, std::string_view label, std::string_view sep) {
     if (value) {
         stream << label << " = " << value << sep;
     }

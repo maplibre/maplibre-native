@@ -31,6 +31,23 @@ inline const style::CircleLayer::Impl& impl_cast(const Immutable<style::Layer::I
     return static_cast<const style::CircleLayer::Impl&>(*impl);
 }
 
+GeometryCoordinate projectPoint(const GeometryCoordinate& p, const mat4& posMatrix, const Size& size) {
+    vec4 pos = {{static_cast<double>(p.x), static_cast<double>(p.y), 0, 1}};
+    matrix::transformMat4(pos, pos, posMatrix);
+    return {static_cast<int16_t>((static_cast<float>(pos[0] / pos[3]) + 1) * size.width * 0.5),
+            static_cast<int16_t>((static_cast<float>(pos[1] / pos[3]) + 1) * size.height * 0.5)};
+}
+
+GeometryCoordinates projectQueryGeometry(const GeometryCoordinates& queryGeometry,
+                                         const mat4& posMatrix,
+                                         const Size& size) {
+    GeometryCoordinates projectedGeometry;
+    for (auto& p : queryGeometry) {
+        projectedGeometry.push_back(projectPoint(p, posMatrix, size));
+    }
+    return projectedGeometry;
+}
+
 } // namespace
 
 RenderCircleLayer::RenderCircleLayer(Immutable<style::CircleLayer::Impl> _impl)
@@ -73,23 +90,6 @@ bool RenderCircleLayer::hasTransition() const {
 
 bool RenderCircleLayer::hasCrossfade() const {
     return false;
-}
-
-GeometryCoordinate projectPoint(const GeometryCoordinate& p, const mat4& posMatrix, const Size& size) {
-    vec4 pos = {{static_cast<double>(p.x), static_cast<double>(p.y), 0, 1}};
-    matrix::transformMat4(pos, pos, posMatrix);
-    return {static_cast<int16_t>((static_cast<float>(pos[0] / pos[3]) + 1) * size.width * 0.5),
-            static_cast<int16_t>((static_cast<float>(pos[1] / pos[3]) + 1) * size.height * 0.5)};
-}
-
-GeometryCoordinates projectQueryGeometry(const GeometryCoordinates& queryGeometry,
-                                         const mat4& posMatrix,
-                                         const Size& size) {
-    GeometryCoordinates projectedGeometry;
-    for (auto& p : queryGeometry) {
-        projectedGeometry.push_back(projectPoint(p, posMatrix, size));
-    }
-    return projectedGeometry;
 }
 
 bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeometry,

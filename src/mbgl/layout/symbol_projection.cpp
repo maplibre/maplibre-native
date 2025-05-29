@@ -130,7 +130,7 @@ float evaluateSizeForFeature(const ZoomEvaluatedSize& zoomEvaluatedSize, const P
     }
 }
 
-bool isVisible(const vec4& anchorPos, const std::array<double, 2>& clippingBuffer) {
+static bool isVisible(const vec4& anchorPos, const std::array<double, 2>& clippingBuffer) {
     const double x = anchorPos[0] / anchorPos[3];
     const double y = anchorPos[1] / anchorPos[3];
     const bool inPaddedViewport = (x >= -clippingBuffer[0] && x <= clippingBuffer[0] && y >= -clippingBuffer[1] &&
@@ -165,11 +165,11 @@ enum PlacementResult {
     UseVertical
 };
 
-Point<float> projectTruncatedLineSegment(const Point<float>& previousTilePoint,
-                                         const Point<float>& currentTilePoint,
-                                         const Point<float>& previousProjectedPoint,
-                                         const float minimumLength,
-                                         const mat4& projectionMatrix) {
+static Point<float> projectTruncatedLineSegment(const Point<float>& previousTilePoint,
+                                                const Point<float>& currentTilePoint,
+                                                const Point<float>& previousProjectedPoint,
+                                                const float minimumLength,
+                                                const mat4& projectionMatrix) {
     // We are assuming "previousTilePoint" won't project to a point within one
     // unit of the camera plane If it did, that would mean our label extended
     // all the way out from within the viewport to a (very distant) point near
@@ -182,17 +182,17 @@ Point<float> projectTruncatedLineSegment(const Point<float>& previousTilePoint,
     return previousProjectedPoint + (projectedUnitSegment * (minimumLength / util::mag<float>(projectedUnitSegment)));
 }
 
-std::optional<PlacedGlyph> placeGlyphAlongLine(const float offsetX,
-                                               const float lineOffsetX,
-                                               const float lineOffsetY,
-                                               const bool flip,
-                                               const Point<float>& projectedAnchorPoint,
-                                               const Point<float>& tileAnchorPoint,
-                                               const uint16_t anchorSegment,
-                                               const GeometryCoordinates& line,
-                                               const std::vector<float>& tileDistances,
-                                               const mat4& labelPlaneMatrix,
-                                               const bool returnTileDistance) {
+static std::optional<PlacedGlyph> placeGlyphAlongLine(const float offsetX,
+                                                      const float lineOffsetX,
+                                                      const float lineOffsetY,
+                                                      const bool flip,
+                                                      const Point<float>& projectedAnchorPoint,
+                                                      const Point<float>& tileAnchorPoint,
+                                                      const uint16_t anchorSegment,
+                                                      const GeometryCoordinates& line,
+                                                      const std::vector<float>& tileDistances,
+                                                      const mat4& labelPlaneMatrix,
+                                                      const bool returnTileDistance) {
     const float combinedOffsetX = flip ? offsetX - lineOffsetX : offsetX + lineOffsetX;
 
     int16_t dir = combinedOffsetX > 0 ? 1 : -1;
@@ -307,10 +307,10 @@ std::optional<std::pair<PlacedGlyph, PlacedGlyph>> placeFirstAndLastGlyph(const 
     return std::make_pair(*firstPlacedGlyph, *lastPlacedGlyph);
 }
 
-std::optional<PlacementResult> requiresOrientationChange(const WritingModeType writingModes,
-                                                         const Point<float>& firstPoint,
-                                                         const Point<float>& lastPoint,
-                                                         const float aspectRatio) {
+static std::optional<PlacementResult> requiresOrientationChange(const WritingModeType writingModes,
+                                                                const Point<float>& firstPoint,
+                                                                const Point<float>& lastPoint,
+                                                                const float aspectRatio) {
     if (writingModes == (WritingModeType::Horizontal | WritingModeType::Vertical)) {
         // On top of choosing whether to flip, choose whether to render this
         // version of the glyphs or the alternate vertical glyphs. We can't just
@@ -331,16 +331,17 @@ std::optional<PlacementResult> requiresOrientationChange(const WritingModeType w
     return {};
 }
 
-PlacementResult placeGlyphsAlongLine(const PlacedSymbol& symbol,
-                                     const float fontSize,
-                                     const bool flip,
-                                     const bool keepUpright,
-                                     const mat4& posMatrix,
-                                     const mat4& labelPlaneMatrix,
-                                     const mat4& glCoordMatrix,
-                                     gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray,
-                                     const Point<float>& projectedAnchorPoint,
-                                     const float aspectRatio) {
+static PlacementResult placeGlyphsAlongLine(
+    const PlacedSymbol& symbol,
+    const float fontSize,
+    const bool flip,
+    const bool keepUpright,
+    const mat4& posMatrix,
+    const mat4& labelPlaneMatrix,
+    const mat4& glCoordMatrix,
+    gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray,
+    const Point<float>& projectedAnchorPoint,
+    const float aspectRatio) {
     const float fontScale = fontSize / util::ONE_EM;
     const float lineOffsetX = symbol.lineOffset[0] * fontScale;
     const float lineOffsetY = symbol.lineOffset[1] * fontScale;

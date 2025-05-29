@@ -24,10 +24,10 @@ using namespace style;
 using namespace shaders;
 
 #if MLN_RENDER_BACKEND_METAL && !defined(NDEBUG)
-constexpr bool diff(float actual, float expected, float e = 1.0e-6) {
+constexpr static bool diff(float actual, float expected, float e = 1.0e-6) {
     return actual != expected && (expected == 0 || std::fabs((actual - expected) / expected) > e);
 }
-constexpr bool diff(Color actual, Color expected, float e = 1.0e-6) {
+constexpr static bool diff(Color actual, Color expected, float e = 1.0e-6) {
     return diff(actual.r, expected.r, e) || diff(actual.g, expected.g, e) || diff(actual.b, expected.b, e) ||
            diff(actual.a, expected.a, e);
 }

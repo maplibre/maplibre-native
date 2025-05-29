@@ -99,9 +99,9 @@ void SpriteLoader::emitSpriteLoadedIfComplete(style::Sprite sprite) {
         /* parseClosure */
         [sprite = sprite, image = data->image, json = data->json]() -> ParseResult {
             try {
-                return {parseSprite(sprite.id, *image, *json), nullptr};
+                return {.images = parseSprite(sprite.id, *image, *json), .error = nullptr};
             } catch (...) {
-                return {{}, std::current_exception()};
+                return {.images = {}, .error = std::current_exception()};
             }
         },
         /* resultClosure */

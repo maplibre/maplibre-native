@@ -21,6 +21,8 @@
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 
+#include <algorithm>
+
 namespace mbgl {
 
 using namespace style;
@@ -186,8 +188,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
     // Remove drawables for tiles that are no longer in the cover set.
     // (Note that `RenderTiles` is empty, and this layer does not use it)
     tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) -> bool {
-        return drawable.getTileID() &&
-               (std::find(tileCover.begin(), tileCover.end(), *drawable.getTileID()) == tileCover.end());
+        return drawable.getTileID() && (std::ranges::find(tileCover, *drawable.getTileID()) == tileCover.end());
     });
 
     // For each tile in the cover set, add a tile drawable if one doesn't already exist.

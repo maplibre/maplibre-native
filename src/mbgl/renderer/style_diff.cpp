@@ -7,7 +7,7 @@
 namespace mbgl {
 
 template <class T, class Eq>
-StyleDifference<T> diff(const Immutable<std::vector<T>>& a, const Immutable<std::vector<T>>& b, const Eq& eq) {
+static StyleDifference<T> diff(const Immutable<std::vector<T>>& a, const Immutable<std::vector<T>>& b, const Eq& eq) {
     StyleDifference<T> result;
 
     if (a == b) {

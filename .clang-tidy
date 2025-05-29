@@ -116,7 +116,10 @@ Checks: [
     -readability-avoid-nested-conditional-operator,
     -readability-math-missing-parentheses,
     -readability-enum-initial-value,
-    -boost-use-ranges
+    -boost-use-ranges,
+    -clang-analyzer-optin.core.EnumCastOutOfRange,
+    -misc-use-anonymous-namespace,
+    -modernize-use-ranges
 ]
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
