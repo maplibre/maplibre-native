@@ -1,6 +1,7 @@
 package org.maplibre.android.testapp.activity.fragment
 
 import android.annotation.SuppressLint
+import android.app.ActivityManager
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -58,10 +59,7 @@ import kotlin.math.min
 import kotlin.random.Random
 
 class LongRunningActivity : AppCompatActivity() {
-    private lateinit var mapView1: MapView
-    private lateinit var mapView2: MapView
     private lateinit var bitmapDrawables: List<Drawable>
-
     private lateinit var navigation: MapLibreNavigation
     private lateinit var navigationMapRoute: NavigationMapRoute
     private val replayRouteLocationEngine = ReplayRouteLocationEngine()
@@ -70,15 +68,11 @@ class LongRunningActivity : AppCompatActivity() {
     // config
     companion object {
         private val LOG = Logger.getLogger(LongRunningActivity::class.java.name)
+        // activity lifetime (seconds)
+        private const val DURATION = 3 * 60 * 60
 
-        // TODO leave this as const? generate a new seed on each activity run?
         private const val RANDOM_SEED = 42
         private val RANDOM = Random(RANDOM_SEED)
-
-        // each run the time scale gets updated
-        private const val RUN_COUNT = 5
-        private const val RUN_TIME_SCALE_FACTOR = 1.5
-        private var TIME_SCALE = 1.0
 
         private val STYLES = arrayListOf(
             TestStyles.DEMOTILES,
@@ -93,7 +87,7 @@ class LongRunningActivity : AppCompatActivity() {
             TestStyles.PROTOMAPS_BLACK,
         )
 
-        private val PLACES = arrayOf(
+        private val PLACES = arrayListOf(
             LatLng(37.7749, -122.4194), // SF
             LatLng(38.9072, -77.0369), // DC
             LatLng(52.3702, 4.8952), // AMS
@@ -116,17 +110,27 @@ class LongRunningActivity : AppCompatActivity() {
             org.maplibre.android.R.drawable.maplibre_user_puck_icon,
         )
 
-        enum class RouteProvider {
-            Local,
-            OSRM,
-            Valhalla,
+        private fun newDoubleRandom(random: Random): (min: Double, max: Double) -> Double =
+            { min, max -> min + random.nextDouble() * (max - min) }
+
+        private fun newIntRandom(random: Random): (min: Int, max: Int) -> Int =
+            { min, max -> random.nextInt(min, max) }
+
+        private fun random(min: Double, max: Double): Double = newDoubleRandom(RANDOM).invoke(min, max)
+        private fun random(min: Int, max: Int): Int = newIntRandom(RANDOM).invoke(min, max)
+
+        private fun <T> weightedRandom(values :List<Pair<T, Double>>): T {
+            val cumulativeWeights = values.scan(0.0) { acc, value -> acc + value.second }
+            var index = cumulativeWeights.binarySearch(random(0.00001, cumulativeWeights.last()))
+
+            if (index < 0)
+                index = -index - 1
+
+            return values[index - 1].first
         }
 
-        private fun random(min: Double, max: Double): Double = min + RANDOM.nextDouble() * (max - min)
-        private fun random(min: Int, max: Int): Int = RANDOM.nextInt(min, max)
-
-        private fun randomSlowDuration(): Double = random(3000.0, 5000.0) * TIME_SCALE
-        private fun randomFastDuration(): Double = random(500.0, 1000.0) * TIME_SCALE
+        private fun randomSlowDuration(): Double = random(3000.0, 5000.0)
+        private fun randomFastDuration(): Double = random(500.0, 1000.0)
 
         private fun randomPlacePoints(): Int = random(10, 20)
         private fun randomPlaceActions(): Int = random(10, 20)
@@ -168,6 +172,16 @@ class LongRunningActivity : AppCompatActivity() {
                 RANDOM.nextInt(256)
             )
 
+        // use a different random generator for navigation since web requests
+        // can reorder invocations between the 2 views
+        private val NAV_RANDOM = Random(RANDOM_SEED + 1)
+
+        enum class RouteProvider {
+            Local,
+            OSRM,
+            Valhalla,
+        }
+
         private val ROUTE_PROVIDER = RouteProvider.Local
         private const val ROUTE_UPDATE_INTERVAL = 10.0
 
@@ -181,23 +195,35 @@ class LongRunningActivity : AppCompatActivity() {
             Pair(LatLng(37.736431, -122.504263), LatLng(37.785594, -122.401209)), // SF long
         )
 
-        private fun randomNavZoom(): Double = random(13.0, 18.0)
-        private fun randomNavTilt(): Double = random(30.0, 60.0)
-        private fun randomNavSpeed(): Int = random(30, 130) // in km/h
-        private fun randomNavWaitTime(): Long = random(5000, 10000).toLong()
+        private fun navRandom(min: Double, max: Double): Double = newDoubleRandom(NAV_RANDOM).invoke(min, max)
+        private fun navRandom(min: Int, max: Int): Int = newIntRandom(NAV_RANDOM).invoke(min, max)
+
+        private fun randomNavZoom(): Double = navRandom(13.0, 18.0)
+        private fun randomNavTilt(): Double = navRandom(30.0, 60.0)
+        private fun randomNavSpeed(): Int = navRandom(30, 130) // in km/h
+        private fun randomNavWaitTime(): Long = navRandom(5000, 10000).toLong()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_long_running_maps)
 
-        mapView1 = supportFragmentManager.findFragmentById(R.id.map1)!!.view as MapView
-        mapView2 = supportFragmentManager.findFragmentById(R.id.map2)!!.view as MapView
+        LOG.info("Running activity with seed $RANDOM_SEED for $DURATION seconds")
 
-        LOG.info("Running activity with seed $RANDOM_SEED")
+        val mapView1 = supportFragmentManager.findFragmentById(R.id.map1)!!.view as MapView
+        val mapView2 = supportFragmentManager.findFragmentById(R.id.map2)!!.view as MapView
 
         mapView1.getMapAsync { map: MapLibreMap -> run(map, mapView1) }
         mapView2.getMapAsync { map: MapLibreMap -> runNavigation(map, mapView2) }
+
+        lifecycleScope.launch {
+            delay(DURATION * 1000L)
+
+            LOG.info("Finished running activity with seed $RANDOM_SEED")
+
+            printStats()
+            finish()
+        }
     }
 
     private fun run(map: MapLibreMap, mapView: MapView) {
@@ -222,29 +248,30 @@ class LongRunningActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             // since the random generator was not reset each run will have different values
-            repeat(RUN_COUNT) {
-                TIME_SCALE *= RUN_TIME_SCALE_FACTOR
-
+            while (true) {
                 runStyleActions(map, mapView)
             }
-
-            // TODO which view determines the activity duration?
-            // TODO poll app memory on exit
-            // close activity
-            finish()
         }
     }
 
     private suspend fun runStyleActions(map: MapLibreMap, mapView: MapView) {
         for (style in STYLES.shuffled(RANDOM)) {
-            LOG.info("Running using $style at $TIME_SCALE speed")
             mapView.setStyleSuspend(style)
             runCameraActions(map)
         }
     }
 
     private suspend fun runCameraActions(map: MapLibreMap) {
-        for (placeCenter in PLACES) {
+        // camera actions with different weights
+        // position updates are more frequent
+        val actions = listOf(
+            Pair({ CameraUpdateFactory.newLatLng(randomLatLng(map)) }, 2.0),
+            Pair({ CameraUpdateFactory.zoomTo(randomZoom()) }, 1.0),
+            Pair({ CameraUpdateFactory.tiltTo(randomTilt()) }, 1.0),
+            Pair({ CameraUpdateFactory.bearingTo(randomBearing()) }, 1.0),
+        )
+
+        for (placeCenter in PLACES.shuffled(RANDOM)) {
             // update all values to simulate a long jump
             // (generated by the app, searching for a city/street, etc)
             val cameraPosition = CameraPosition
@@ -260,18 +287,11 @@ class LongRunningActivity : AppCompatActivity() {
                 randomSlowDuration()
             )
 
-            val actions = arrayOf(
-                { CameraUpdateFactory.newLatLng(randomLatLng(map)) },
-                { CameraUpdateFactory.zoomTo(randomZoom()) },
-                { CameraUpdateFactory.tiltTo(randomTilt()) },
-                { CameraUpdateFactory.bearingTo(randomBearing()) },
-            )
-
             repeat(randomPlacePoints()) {
                 // perform a series of fast camera actions
                 repeat(randomPlaceActions()) {
                     // update each value individually to simulate user interaction
-                    map.animateCameraSuspend(actions.random()(), randomFastDuration())
+                    map.animateCameraSuspend(weightedRandom(actions)(), randomFastDuration())
                 }
 
                 runAnnotationActions(map)
@@ -299,7 +319,7 @@ class LongRunningActivity : AppCompatActivity() {
                     .icon(
                         IconFactory.getInstance(this).fromBitmap(
                             bitmapDrawables
-                                .random()
+                                .random(RANDOM)
                                 .mutate()
                                 .apply { setTint(randomColor()) }
                                 .toBitmap(),
@@ -389,7 +409,7 @@ class LongRunningActivity : AppCompatActivity() {
 
         val routeString: String? = when (ROUTE_PROVIDER) {
             RouteProvider.Local -> {
-                val routeFile = this.assets.list("routes/")!!.random(RANDOM)
+                val routeFile = this.assets.list("routes/")!!.random(NAV_RANDOM)
                 LOG.info("Navigation - local route: $routeFile")
 
                 val routeStr = GeoParseUtil.loadStringFromAssets(this, "routes/$routeFile")
@@ -419,7 +439,7 @@ class LongRunningActivity : AppCompatActivity() {
             }
 
             RouteProvider.OSRM -> {
-                val routePoints = ROUTES.random(RANDOM)
+                val routePoints = ROUTES.random(NAV_RANDOM)
                 location = routePoints.first
                 destination = routePoints.second
 
@@ -444,7 +464,7 @@ class LongRunningActivity : AppCompatActivity() {
             }
 
             RouteProvider.Valhalla -> {
-                val routePoints = ROUTES.random(RANDOM)
+                val routePoints = ROUTES.random(NAV_RANDOM)
                 location = routePoints.first
                 destination = routePoints.second
 
@@ -529,7 +549,7 @@ class LongRunningActivity : AppCompatActivity() {
             navigation.stopNavigation()
             navigationMapRoute.removeRoute()
 
-            mapView.setStyleSuspend(STYLES.random(RANDOM))
+            mapView.setStyleSuspend(STYLES.random(NAV_RANDOM))
             enableLocation(map)
 
             val route = getRoute() ?: return@launch
@@ -554,6 +574,26 @@ class LongRunningActivity : AppCompatActivity() {
             routeUpdateTimer = route.duration()
             navigation.startNavigation(route)
         }
+    }
+
+    @SuppressLint("NewApi")
+    private fun printStats() {
+        val activityManager = this.getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        val sysMemInfo = ActivityManager.MemoryInfo()
+        activityManager.getMemoryInfo(sysMemInfo)
+
+        LOG.info("System: \n" +
+            "\tavailable memory - ${sysMemInfo.availMem / 1048576} MB\n" +
+            "\ttotal memory - ${sysMemInfo.totalMem / 1048576} MB\n" +
+            "\tlow memory threshold - ${sysMemInfo.threshold / 1048576} MB\n" +
+            "\tlow memory - ${sysMemInfo.lowMemory}\n"
+        )
+
+        val appMemInfo = activityManager.getProcessMemoryInfo(intArrayOf(android.os.Process.myPid())).first()
+
+        LOG.info("Application memory: \n" +
+            appMemInfo.memoryStats.map { "\t${it.key} - ${it.value} KB" }.joinToString("\n")
+        )
     }
 }
 
