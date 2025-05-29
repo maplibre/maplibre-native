@@ -26,7 +26,7 @@ permissions:
 
 jobs:
   pre_job:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.linux_any_modified != 'true' }}
     steps:
@@ -54,7 +54,7 @@ jobs:
       fail-fast: true
       matrix:
         renderer: [vulkan, drawable, drawable-rust]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -178,7 +178,7 @@ jobs:
         uses: ./.github/actions/save-pr-number
 
   linux-coverage:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
