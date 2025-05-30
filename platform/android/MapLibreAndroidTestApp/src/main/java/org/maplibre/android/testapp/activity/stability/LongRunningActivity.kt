@@ -17,7 +17,7 @@ class LongRunningActivity : AppCompatActivity() {
         private val LOG = Logger.getLogger(LongRunningActivity::class.java.name)
 
         // activity lifetime (seconds)
-        private const val DURATION = 5//10 * 60 * 60
+        private const val DURATION = 10 * 60 * 60
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

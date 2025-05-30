@@ -330,7 +330,7 @@ class NavigationMap : SupportMapFragment(), ProgressChangeListener {
 
             routeUpdateTimer = progress.durationRemaining()
 
-            LOG.info("duration ${progress.durationRemaining()}")
+            LOG.info("Navigation - remaining duration ${progress.durationRemaining()}")
         }
 
         if (progress.fractionTraveled() > 0.99) {
