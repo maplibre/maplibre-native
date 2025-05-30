@@ -46,8 +46,6 @@ jobs:
       BUILDTYPE: Debug
       IS_LOCAL_DEVELOPMENT: false
       MLN_ANDROID_STL: c++_static
-    outputs:
-      make_release: ${{ steps.make_release.outputs.make_release }}
     steps:
       - name: Free Disk Space (Ubuntu)
         if: startsWith(runner.name, 'GitHub Actions')
@@ -67,8 +65,8 @@ jobs:
           fetch-depth: 0
 
       - name: Validate VERSION
-        run: ../../.github/scripts/validate-version.sh
-        working-directory: platform/android
+        run: .github/scripts/validate-version.sh platform/android/VERSION
+        working-directory: .
 
       - run: echo "cmake.dir=$(dirname "$(dirname "$(command -v cmake)")")" >> local.properties
 
@@ -206,17 +204,6 @@ jobs:
             platform/android/InstrumentationTestApp.apk
             platform/android/InstrumentationTests.apk
 
-      - name: VERSION file changed
-        id: version-file-android-changed
-        uses: tj-actions/changed-files@v46
-        with:
-          files: platform/android/VERSION
-
-      - name: Should make release?
-        id: make_release
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.version-file-android-changed.outputs.any_changed == 'true'
-        run: echo make_release=true >> "$GITHUB_OUTPUT"
-
   android-build-cpp-test:
     runs-on: ubuntu-24.04
 
@@ -352,11 +339,33 @@ jobs:
         if: env.success != 'true'
         run: exit 1
 
+      # automatically trigger android-release when code is pushed to main
+      # and the platform/android/VERSION file has changed
       - uses: actions/checkout@v4
-        if: needs.android-build.outputs.make_release == 'true' && env.success
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+      - name: VERSION file changed
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        id: version-file-android-changed
+        uses: tj-actions/changed-files@v46
+        with:
+          files: platform/android/VERSION
+
+      - name: Should make release?
+        if: env.success && github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.version-file-android-changed.outputs.any_changed == 'true'
+        run: echo make_release=true >> "$GITHUB_ENV"
+
+      - name: Validate and set version
+        if: env.make_release == 'true'
+        working-directory: .
+        run: .github/scripts/validate-version.sh platform/android/VERSION
+
+      - name: Create tag if it does not exist
+        if: env.make_release == 'true'
+        run: .github/scripts/ensure-tag.sh android-v${{ env.version }} ${{ github.sha }}
 
       - name: Trigger release
-        if: needs.android-build.outputs.make_release == 'true' && env.success
-        run: gh workflow run android-release.yml --ref ${{ github.sha }}
+        if: env.make_release == 'true'
+        run: gh workflow run android-release.yml --ref android-v${{ env.version }}
         env:
          GH_TOKEN: ${{ github.token }}
