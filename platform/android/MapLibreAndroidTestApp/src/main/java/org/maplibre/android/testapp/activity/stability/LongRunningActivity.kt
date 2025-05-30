@@ -1,4 +1,4 @@
-package org.maplibre.android.testapp.activity.fragment
+package org.maplibre.android.testapp.activity.stability
 
 import android.annotation.SuppressLint
 import android.app.ActivityManager
@@ -14,7 +14,6 @@ import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonArray
@@ -28,7 +27,6 @@ import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.annotations.PolygonOptions
 import org.maplibre.android.annotations.PolylineOptions
 import org.maplibre.android.camera.CameraPosition
-import org.maplibre.android.camera.CameraUpdate
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
@@ -37,11 +35,12 @@ import org.maplibre.android.location.OnLocationCameraTransitionListener
 import org.maplibre.android.location.modes.CameraMode
 import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.MapLibreMap.CancelableCallback
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.GeoParseUtil
+import org.maplibre.android.testapp.utils.animateCameraSuspend
+import org.maplibre.android.testapp.utils.setStyleSuspend
 import org.maplibre.geojson.Point
 import org.maplibre.navigation.android.navigation.v5.location.replay.ReplayRouteLocationEngine
 import org.maplibre.navigation.android.navigation.v5.models.DirectionsResponse
@@ -54,7 +53,6 @@ import org.maplibre.navigation.android.navigation.v5.routeprogress.RouteProgress
 import java.lang.reflect.Field
 import java.util.Locale
 import java.util.logging.Logger
-import kotlin.coroutines.resume
 import kotlin.math.min
 import kotlin.random.Random
 
@@ -69,7 +67,7 @@ class LongRunningActivity : AppCompatActivity() {
     companion object {
         private val LOG = Logger.getLogger(LongRunningActivity::class.java.name)
         // activity lifetime (seconds)
-        private const val DURATION = 3 * 60 * 60
+        private const val DURATION = 10 * 60 * 60
 
         private const val RANDOM_SEED = 42
         private val RANDOM = Random(RANDOM_SEED)
@@ -129,8 +127,8 @@ class LongRunningActivity : AppCompatActivity() {
             return values[index - 1].first
         }
 
-        private fun randomSlowDuration(): Double = random(3000.0, 5000.0)
-        private fun randomFastDuration(): Double = random(500.0, 1000.0)
+        private fun randomSlowDuration(): Int = random(3000, 5000)
+        private fun randomFastDuration(): Int = random(500, 1000)
 
         private fun randomPlacePoints(): Int = random(10, 20)
         private fun randomPlaceActions(): Int = random(10, 20)
@@ -378,6 +376,40 @@ class LongRunningActivity : AppCompatActivity() {
         startNewRoute(map, mapView)
     }
 
+    private fun startNewRoute(map: MapLibreMap, mapView: MapView) {
+        lifecycleScope.launch {
+            delay(randomNavWaitTime())
+
+            navigation.stopNavigation()
+            navigationMapRoute.removeRoute()
+
+            mapView.setStyleSuspend(STYLES.random(NAV_RANDOM))
+            enableLocation(map)
+
+            val route = getRoute() ?: return@launch
+
+            // display route
+            navigationMapRoute.addRoute(route)
+
+            // force tile load at starting position
+            val startingPoint = route.routeOptions()?.coordinates()?.firstOrNull()
+            if (startingPoint != null) {
+                map.locationComponent.forceLocationUpdate(
+                    Location("StartingLocation").apply {
+                        latitude = startingPoint.latitude()
+                        longitude = startingPoint.longitude()
+                    }
+                )
+            }
+
+            delay(randomNavWaitTime())
+
+            replayRouteLocationEngine.assign(route)
+            routeUpdateTimer = route.duration()
+            navigation.startNavigation(route)
+        }
+    }
+
     @SuppressLint("MissingPermission")
     private fun enableLocation(map: MapLibreMap) {
         map.locationComponent.activateLocationComponent(
@@ -542,40 +574,6 @@ class LongRunningActivity : AppCompatActivity() {
         return route.toBuilder().routeOptions(routeOptions).build()
     }
 
-    private fun startNewRoute(map: MapLibreMap, mapView: MapView) {
-        lifecycleScope.launch {
-            delay(randomNavWaitTime())
-
-            navigation.stopNavigation()
-            navigationMapRoute.removeRoute()
-
-            mapView.setStyleSuspend(STYLES.random(NAV_RANDOM))
-            enableLocation(map)
-
-            val route = getRoute() ?: return@launch
-
-            // display route
-            navigationMapRoute.addRoute(route)
-
-            // force tile load at starting position
-            val startingPoint = route.routeOptions()?.coordinates()?.firstOrNull()
-            if (startingPoint != null) {
-                map.locationComponent.forceLocationUpdate(
-                    Location("StartingLocation").apply {
-                        latitude = startingPoint.latitude()
-                        longitude = startingPoint.longitude()
-                    }
-                )
-            }
-
-            delay(randomNavWaitTime())
-
-            replayRouteLocationEngine.assign(route)
-            routeUpdateTimer = route.duration()
-            navigation.startNavigation(route)
-        }
-    }
-
     @SuppressLint("NewApi")
     private fun printStats() {
         val activityManager = this.getSystemService(ACTIVITY_SERVICE) as ActivityManager
@@ -596,51 +594,3 @@ class LongRunningActivity : AppCompatActivity() {
         )
     }
 }
-
-// helper functions
-suspend fun MapView.setStyleSuspend(styleUrl: String): Unit =
-    suspendCancellableCoroutine { continuation ->
-        var listener: MapView.OnDidFinishLoadingStyleListener? = null
-
-        var resumed = false
-        listener =
-            MapView.OnDidFinishLoadingStyleListener {
-                if (!resumed) {
-                    resumed = true
-                    listener?.let { removeOnDidFinishLoadingStyleListener(it) }
-                    continuation.resume(Unit)
-                }
-            }
-
-        addOnDidFinishLoadingStyleListener(listener)
-        getMapAsync { map -> map.setStyle(styleUrl) }
-
-        continuation.invokeOnCancellation {
-            removeOnDidFinishLoadingStyleListener(listener)
-        }
-    }
-
-suspend fun MapLibreMap.animateCameraSuspend(
-    cameraUpdate: CameraUpdate,
-    durationMs: Double,
-): Unit =
-    suspendCancellableCoroutine { continuation ->
-        animateCamera(
-            cameraUpdate,
-            durationMs.toInt(),
-            object : CancelableCallback {
-                var resumed = false
-
-                override fun onCancel() {
-                    continuation.cancel()
-                }
-
-                override fun onFinish() {
-                    if (!resumed) {
-                        resumed = true
-                        continuation.resume(Unit)
-                    }
-                }
-            },
-        )
-    }
