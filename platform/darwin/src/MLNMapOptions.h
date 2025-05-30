@@ -32,6 +32,11 @@ MLN_EXPORT
  */
 @property (nonatomic, nonnull) MLNActionJournalOptions *actionJournalOptions;
 
+/**
+ List of plugin classes
+ */
+@property NSArray *pluginLayers;
+
 @end
 
 NS_ASSUME_NONNULL_END
