@@ -9,8 +9,9 @@ std::function<void()> Scheduler::bindOnce(std::function<void()> fn) {
     assert(fn);
     return [scheduler = makeWeakPtr(), scheduled = std::move(fn)]() mutable {
         if (!scheduled) return; // Repeated call.
-        auto schedulerGuard = scheduler.lock();
-        if (scheduler) scheduler->schedule(std::move(scheduled));
+        if (auto guard = scheduler.lock(); scheduler) {
+            scheduler->schedule(std::move(scheduled));
+        }
     };
 }
 
