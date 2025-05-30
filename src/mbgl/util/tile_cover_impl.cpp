@@ -19,7 +19,7 @@ struct TileSpan {
 };
 
 // Reorder a ring of points such that it starts at a point with a local minimum y-coordinate
-void start_list_on_local_minimum(PointList& points) {
+static void start_list_on_local_minimum(PointList& points) {
     auto prev_pt = std::prev(points.end(), 2);
     auto pt = points.begin();
     auto next_pt = std::next(pt);
@@ -46,7 +46,7 @@ void start_list_on_local_minimum(PointList& points) {
 // Create a bound towards a local maximum point, starting from pt.
 //  Traverse from current pt until the next pt changes y-direction, and copy
 //  all points from start to end (inclusive) into a Bound.
-Bound create_bound_towards_maximum(PointList& points, PointList::iterator& pt) {
+static Bound create_bound_towards_maximum(PointList& points, PointList::iterator& pt) {
     if (std::distance(pt, points.end()) < 2) {
         return {};
     }
@@ -77,7 +77,7 @@ Bound create_bound_towards_maximum(PointList& points, PointList::iterator& pt) {
 // Create a bound towards a local minimum point, starting from pt.
 //  Traverse from current pt until the next pt changes y-direction, and copy
 //  all points from start to end (inclusive) into a Bound.
-Bound create_bound_towards_minimum(PointList& points, PointList::iterator& pt) {
+static Bound create_bound_towards_minimum(PointList& points, PointList::iterator& pt) {
     if (std::distance(pt, points.end()) < 2) {
         return {};
     }
@@ -109,7 +109,7 @@ Bound create_bound_towards_minimum(PointList& points, PointList::iterator& pt) {
 // Bounds, where each Bound represents edges going from a local minima to a
 // local maxima point. The BoundsMap is an edge table indexed on the starting
 // Y-tile of each Bound.
-void build_bounds_map(PointList& points, uint32_t maxTile, BoundsMap& et, bool closed = false) {
+static void build_bounds_map(PointList& points, uint32_t maxTile, BoundsMap& et, bool closed = false) {
     if (points.size() < 2) return;
     // While traversing closed rings, start the bounds at a local minimum.
     //  (For linestrings the starting point is always a local maxima/minima)
@@ -137,7 +137,7 @@ void build_bounds_map(PointList& points, uint32_t maxTile, BoundsMap& et, bool c
     assert(pointsIter == points.end());
 }
 
-void update_span(TileSpan& xp, double x) {
+static void update_span(TileSpan& xp, double x) {
     xp.xmin = std::min(xp.xmin, static_cast<int32_t>(std::floor(x)));
     xp.xmax = std::max(xp.xmax, static_cast<int32_t>(std::ceil(x)));
 }
@@ -147,12 +147,12 @@ void update_span(TileSpan& xp, double x) {
 // Iterate all points of a bound until it exits the row (or ends) and compute the
 // set of X tiles it spans across. The winding direction of the bound is also
 // captured for each span to later fill tiles between bounds for polygons
-std::vector<TileSpan> scan_row(uint32_t y, Bounds& activeBounds) {
+static std::vector<TileSpan> scan_row(uint32_t y, Bounds& activeBounds) {
     std::vector<TileSpan> tile_range;
     tile_range.reserve(activeBounds.size());
 
     for (Bound& b : activeBounds) {
-        TileSpan xp = {INT_MAX, 0, b.winding};
+        TileSpan xp = {.xmin = INT_MAX, .xmax = 0, .winding = b.winding};
         double x;
         const auto numEdges = b.points.size() - 1;
         while (b.currentPoint < numEdges) {

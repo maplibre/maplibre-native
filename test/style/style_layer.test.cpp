@@ -384,11 +384,11 @@ TEST(Layer, SymbolLayerOverrides) {
 
         MockPaintProperties::Transitionable current;
         MockPaintProperties::Transitionable updated;
-        current.get<TextColor>() = Transitionable<PropertyValue<Color>>{{Color::green()}, {}};
-        updated.get<TextColor>() = Transitionable<PropertyValue<Color>>{{Color::green()}, {}};
+        current.get<TextColor>() = Transitionable<PropertyValue<Color>>{.value = {Color::green()}, .options = {}};
+        updated.get<TextColor>() = Transitionable<PropertyValue<Color>>{.value = {Color::green()}, .options = {}};
         EXPECT_FALSE(MockOverrides::hasPaintPropertyDifference(current, updated));
 
-        current.get<TextColor>() = Transitionable<PropertyValue<Color>>{{Color::red()}, {}};
+        current.get<TextColor>() = Transitionable<PropertyValue<Color>>{.value = {Color::red()}, .options = {}};
         EXPECT_TRUE(MockOverrides::hasPaintPropertyDifference(current, updated));
     }
 

@@ -11,6 +11,7 @@
 
 namespace mbgl {
 
+// NOLINTNEXTLINE(misc-use-internal-linkage)
 void requestLocalFile(const std::string& path,
                       const ActorRef<FileSourceRequest>& req,
                       const std::optional<std::pair<uint64_t, uint64_t>>& dataRange) {

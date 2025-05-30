@@ -29,7 +29,7 @@
 
 namespace {
 bool acceptsURL(const std::string &url) {
-    return 0 == url.rfind(mbgl::util::MBTILES_PROTOCOL, 0);
+    return url.starts_with(mbgl::util::MBTILES_PROTOCOL);
 }
 
 std::string url_to_path(const std::string &url) {
@@ -107,7 +107,7 @@ public:
         auto format_ptr = values.find("format");
         std::string format = format_ptr == values.end() ? "png" : format_ptr->second;
 
-        if (format != "pbf" && values.count("scale") == 0) {
+        if (format != "pbf" && !values.contains("scale")) {
             values["scale"] = "1";
         }
 

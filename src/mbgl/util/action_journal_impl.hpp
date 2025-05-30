@@ -18,7 +18,7 @@ class ActionJournalEvent;
 class ActionJournal::Impl : public MapObserver {
 public:
     Impl(const Map& map, const ActionJournalOptions& options);
-    ~Impl();
+    ~Impl() override;
 
     const Map& getMap() const { return map; }
     std::string getLogDirectory() const;

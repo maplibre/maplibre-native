@@ -156,193 +156,193 @@ struct glyph {
 // http://paulbourke.net/dataformats/hershey/
 
 const glyph simplex[] = {
-    /* 32	  */ {16, 0, nullptr},
+    /* 32	  */ {.width = 16, .length = 0, .data = nullptr},
     /* 33	! */
-    {10, sizeof(simplex_1), simplex_1},
+    {.width = 10, .length = sizeof(simplex_1), .data = simplex_1},
     /* 34	" */
-    {16, sizeof(simplex_2), simplex_2},
+    {.width = 16, .length = sizeof(simplex_2), .data = simplex_2},
     /* 35	# */
-    {21, sizeof(simplex_3), simplex_3},
+    {.width = 21, .length = sizeof(simplex_3), .data = simplex_3},
     /* 36	$ */
-    {20, sizeof(simplex_4), simplex_4},
+    {.width = 20, .length = sizeof(simplex_4), .data = simplex_4},
     /* 37	% */
-    {24, sizeof(simplex_5), simplex_5},
+    {.width = 24, .length = sizeof(simplex_5), .data = simplex_5},
     /* 38	& */
-    {26, sizeof(simplex_6), simplex_6},
+    {.width = 26, .length = sizeof(simplex_6), .data = simplex_6},
     /* 39	' */
-    {10, sizeof(simplex_7), simplex_7},
+    {.width = 10, .length = sizeof(simplex_7), .data = simplex_7},
     /* 40	( */
-    {14, sizeof(simplex_8), simplex_8},
+    {.width = 14, .length = sizeof(simplex_8), .data = simplex_8},
     /* 41	) */
-    {14, sizeof(simplex_9), simplex_9},
+    {.width = 14, .length = sizeof(simplex_9), .data = simplex_9},
     /* 42	* */
-    {16, sizeof(simplex_10), simplex_10},
+    {.width = 16, .length = sizeof(simplex_10), .data = simplex_10},
     /* 43	+ */
-    {26, sizeof(simplex_11), simplex_11},
+    {.width = 26, .length = sizeof(simplex_11), .data = simplex_11},
     /* 44	, */
-    {10, sizeof(simplex_12), simplex_12},
+    {.width = 10, .length = sizeof(simplex_12), .data = simplex_12},
     /* 45	- */
-    {26, sizeof(simplex_13), simplex_13},
+    {.width = 26, .length = sizeof(simplex_13), .data = simplex_13},
     /* 46	. */
-    {10, sizeof(simplex_14), simplex_14},
+    {.width = 10, .length = sizeof(simplex_14), .data = simplex_14},
     /* 47	/ */
-    {22, sizeof(simplex_15), simplex_15},
+    {.width = 22, .length = sizeof(simplex_15), .data = simplex_15},
     /* 48	0 */
-    {20, sizeof(simplex_16), simplex_16},
+    {.width = 20, .length = sizeof(simplex_16), .data = simplex_16},
     /* 49	1 */
-    {20, sizeof(simplex_17), simplex_17},
+    {.width = 20, .length = sizeof(simplex_17), .data = simplex_17},
     /* 50	2 */
-    {20, sizeof(simplex_18), simplex_18},
+    {.width = 20, .length = sizeof(simplex_18), .data = simplex_18},
     /* 51	3 */
-    {20, sizeof(simplex_19), simplex_19},
+    {.width = 20, .length = sizeof(simplex_19), .data = simplex_19},
     /* 52	4 */
-    {20, sizeof(simplex_20), simplex_20},
+    {.width = 20, .length = sizeof(simplex_20), .data = simplex_20},
     /* 53	5 */
-    {20, sizeof(simplex_21), simplex_21},
+    {.width = 20, .length = sizeof(simplex_21), .data = simplex_21},
     /* 54	6 */
-    {20, sizeof(simplex_22), simplex_22},
+    {.width = 20, .length = sizeof(simplex_22), .data = simplex_22},
     /* 55	7 */
-    {20, sizeof(simplex_23), simplex_23},
+    {.width = 20, .length = sizeof(simplex_23), .data = simplex_23},
     /* 56	8 */
-    {20, sizeof(simplex_24), simplex_24},
+    {.width = 20, .length = sizeof(simplex_24), .data = simplex_24},
     /* 57	9 */
-    {20, sizeof(simplex_25), simplex_25},
+    {.width = 20, .length = sizeof(simplex_25), .data = simplex_25},
     /* 58	: */
-    {10, sizeof(simplex_26), simplex_26},
+    {.width = 10, .length = sizeof(simplex_26), .data = simplex_26},
     /* 59	; */
-    {10, sizeof(simplex_27), simplex_27},
+    {.width = 10, .length = sizeof(simplex_27), .data = simplex_27},
     /* 60	< */
-    {24, sizeof(simplex_28), simplex_28},
+    {.width = 24, .length = sizeof(simplex_28), .data = simplex_28},
     /* 61	= */
-    {26, sizeof(simplex_29), simplex_29},
+    {.width = 26, .length = sizeof(simplex_29), .data = simplex_29},
     /* 62	> */
-    {24, sizeof(simplex_30), simplex_30},
+    {.width = 24, .length = sizeof(simplex_30), .data = simplex_30},
     /* 63	? */
-    {18, sizeof(simplex_31), simplex_31},
+    {.width = 18, .length = sizeof(simplex_31), .data = simplex_31},
     /* 64	@ */
-    {27, sizeof(simplex_32), simplex_32},
+    {.width = 27, .length = sizeof(simplex_32), .data = simplex_32},
     /* 65	A */
-    {18, sizeof(simplex_33), simplex_33},
+    {.width = 18, .length = sizeof(simplex_33), .data = simplex_33},
     /* 66	B */
-    {21, sizeof(simplex_34), simplex_34},
+    {.width = 21, .length = sizeof(simplex_34), .data = simplex_34},
     /* 67	C */
-    {21, sizeof(simplex_35), simplex_35},
+    {.width = 21, .length = sizeof(simplex_35), .data = simplex_35},
     /* 68	D */
-    {21, sizeof(simplex_36), simplex_36},
+    {.width = 21, .length = sizeof(simplex_36), .data = simplex_36},
     /* 69	E */
-    {19, sizeof(simplex_37), simplex_37},
+    {.width = 19, .length = sizeof(simplex_37), .data = simplex_37},
     /* 70	F */
-    {18, sizeof(simplex_38), simplex_38},
+    {.width = 18, .length = sizeof(simplex_38), .data = simplex_38},
     /* 71	G */
-    {21, sizeof(simplex_39), simplex_39},
+    {.width = 21, .length = sizeof(simplex_39), .data = simplex_39},
     /* 72	H */
-    {22, sizeof(simplex_40), simplex_40},
+    {.width = 22, .length = sizeof(simplex_40), .data = simplex_40},
     /* 73	I */
-    {8, sizeof(simplex_41), simplex_41},
+    {.width = 8, .length = sizeof(simplex_41), .data = simplex_41},
     /* 74	J */
-    {16, sizeof(simplex_42), simplex_42},
+    {.width = 16, .length = sizeof(simplex_42), .data = simplex_42},
     /* 75	K */
-    {21, sizeof(simplex_43), simplex_43},
+    {.width = 21, .length = sizeof(simplex_43), .data = simplex_43},
     /* 76	L */
-    {17, sizeof(simplex_44), simplex_44},
+    {.width = 17, .length = sizeof(simplex_44), .data = simplex_44},
     /* 77	M */
-    {24, sizeof(simplex_45), simplex_45},
+    {.width = 24, .length = sizeof(simplex_45), .data = simplex_45},
     /* 78	N */
-    {22, sizeof(simplex_46), simplex_46},
+    {.width = 22, .length = sizeof(simplex_46), .data = simplex_46},
     /* 79	O */
-    {22, sizeof(simplex_47), simplex_47},
+    {.width = 22, .length = sizeof(simplex_47), .data = simplex_47},
     /* 80	P */
-    {21, sizeof(simplex_48), simplex_48},
+    {.width = 21, .length = sizeof(simplex_48), .data = simplex_48},
     /* 81	Q */
-    {22, sizeof(simplex_49), simplex_49},
+    {.width = 22, .length = sizeof(simplex_49), .data = simplex_49},
     /* 82	R */
-    {21, sizeof(simplex_50), simplex_50},
+    {.width = 21, .length = sizeof(simplex_50), .data = simplex_50},
     /* 83	S */
-    {20, sizeof(simplex_51), simplex_51},
+    {.width = 20, .length = sizeof(simplex_51), .data = simplex_51},
     /* 84	T */
-    {16, sizeof(simplex_52), simplex_52},
+    {.width = 16, .length = sizeof(simplex_52), .data = simplex_52},
     /* 85	U */
-    {22, sizeof(simplex_53), simplex_53},
+    {.width = 22, .length = sizeof(simplex_53), .data = simplex_53},
     /* 86	V */
-    {18, sizeof(simplex_54), simplex_54},
+    {.width = 18, .length = sizeof(simplex_54), .data = simplex_54},
     /* 87	W */
-    {24, sizeof(simplex_55), simplex_55},
+    {.width = 24, .length = sizeof(simplex_55), .data = simplex_55},
     /* 88	X */
-    {20, sizeof(simplex_56), simplex_56},
+    {.width = 20, .length = sizeof(simplex_56), .data = simplex_56},
     /* 89	Y */
-    {18, sizeof(simplex_57), simplex_57},
+    {.width = 18, .length = sizeof(simplex_57), .data = simplex_57},
     /* 90	Z */
-    {20, sizeof(simplex_58), simplex_58},
+    {.width = 20, .length = sizeof(simplex_58), .data = simplex_58},
     /* 91	[ */
-    {14, sizeof(simplex_59), simplex_59},
+    {.width = 14, .length = sizeof(simplex_59), .data = simplex_59},
     /* 92	\ */
-    {14, sizeof(simplex_60), simplex_60},
+    {.width = 14, .length = sizeof(simplex_60), .data = simplex_60},
     /* 93	] */
-    {14, sizeof(simplex_61), simplex_61},
+    {.width = 14, .length = sizeof(simplex_61), .data = simplex_61},
     /* 94	^ */
-    {16, sizeof(simplex_62), simplex_62},
+    {.width = 16, .length = sizeof(simplex_62), .data = simplex_62},
     /* 95	_ */
-    {16, sizeof(simplex_63), simplex_63},
+    {.width = 16, .length = sizeof(simplex_63), .data = simplex_63},
     /* 96	` */
-    {10, sizeof(simplex_64), simplex_64},
+    {.width = 10, .length = sizeof(simplex_64), .data = simplex_64},
     /* 97	a */
-    {19, sizeof(simplex_65), simplex_65},
+    {.width = 19, .length = sizeof(simplex_65), .data = simplex_65},
     /* 98	b */
-    {19, sizeof(simplex_66), simplex_66},
+    {.width = 19, .length = sizeof(simplex_66), .data = simplex_66},
     /* 99	c */
-    {18, sizeof(simplex_67), simplex_67},
+    {.width = 18, .length = sizeof(simplex_67), .data = simplex_67},
     /* 100	d */
-    {19, sizeof(simplex_68), simplex_68},
+    {.width = 19, .length = sizeof(simplex_68), .data = simplex_68},
     /* 101	e */
-    {18, sizeof(simplex_69), simplex_69},
+    {.width = 18, .length = sizeof(simplex_69), .data = simplex_69},
     /* 102	f */
-    {12, sizeof(simplex_70), simplex_70},
+    {.width = 12, .length = sizeof(simplex_70), .data = simplex_70},
     /* 103	g */
-    {19, sizeof(simplex_71), simplex_71},
+    {.width = 19, .length = sizeof(simplex_71), .data = simplex_71},
     /* 104	h */
-    {19, sizeof(simplex_72), simplex_72},
+    {.width = 19, .length = sizeof(simplex_72), .data = simplex_72},
     /* 105	i */
-    {8, sizeof(simplex_73), simplex_73},
+    {.width = 8, .length = sizeof(simplex_73), .data = simplex_73},
     /* 106	j */
-    {10, sizeof(simplex_74), simplex_74},
+    {.width = 10, .length = sizeof(simplex_74), .data = simplex_74},
     /* 107	k */
-    {17, sizeof(simplex_75), simplex_75},
+    {.width = 17, .length = sizeof(simplex_75), .data = simplex_75},
     /* 108	l */
-    {8, sizeof(simplex_76), simplex_76},
+    {.width = 8, .length = sizeof(simplex_76), .data = simplex_76},
     /* 109	m */
-    {30, sizeof(simplex_77), simplex_77},
+    {.width = 30, .length = sizeof(simplex_77), .data = simplex_77},
     /* 110	n */
-    {19, sizeof(simplex_78), simplex_78},
+    {.width = 19, .length = sizeof(simplex_78), .data = simplex_78},
     /* 111	o */
-    {19, sizeof(simplex_79), simplex_79},
+    {.width = 19, .length = sizeof(simplex_79), .data = simplex_79},
     /* 112	p */
-    {19, sizeof(simplex_80), simplex_80},
+    {.width = 19, .length = sizeof(simplex_80), .data = simplex_80},
     /* 113	q */
-    {19, sizeof(simplex_81), simplex_81},
+    {.width = 19, .length = sizeof(simplex_81), .data = simplex_81},
     /* 114	r */
-    {13, sizeof(simplex_82), simplex_82},
+    {.width = 13, .length = sizeof(simplex_82), .data = simplex_82},
     /* 115	s */
-    {17, sizeof(simplex_83), simplex_83},
+    {.width = 17, .length = sizeof(simplex_83), .data = simplex_83},
     /* 116	t */
-    {12, sizeof(simplex_84), simplex_84},
+    {.width = 12, .length = sizeof(simplex_84), .data = simplex_84},
     /* 117	u */
-    {19, sizeof(simplex_85), simplex_85},
+    {.width = 19, .length = sizeof(simplex_85), .data = simplex_85},
     /* 118	v */
-    {16, sizeof(simplex_86), simplex_86},
+    {.width = 16, .length = sizeof(simplex_86), .data = simplex_86},
     /* 119	w */
-    {22, sizeof(simplex_87), simplex_87},
+    {.width = 22, .length = sizeof(simplex_87), .data = simplex_87},
     /* 120	x */
-    {17, sizeof(simplex_88), simplex_88},
+    {.width = 17, .length = sizeof(simplex_88), .data = simplex_88},
     /* 121	y */
-    {16, sizeof(simplex_89), simplex_89},
+    {.width = 16, .length = sizeof(simplex_89), .data = simplex_89},
     /* 122	z */
-    {17, sizeof(simplex_90), simplex_90},
+    {.width = 17, .length = sizeof(simplex_90), .data = simplex_90},
     /* 123	{ */
-    {14, sizeof(simplex_91), simplex_91},
+    {.width = 14, .length = sizeof(simplex_91), .data = simplex_91},
     /* 124	| */
-    {8, sizeof(simplex_92), simplex_92},
+    {.width = 8, .length = sizeof(simplex_92), .data = simplex_92},
     /* 125	} */
-    {14, sizeof(simplex_93), simplex_93},
+    {.width = 14, .length = sizeof(simplex_93), .data = simplex_93},
     /* 126	~ */
-    {24, sizeof(simplex_94), simplex_94},
+    {.width = 24, .length = sizeof(simplex_94), .data = simplex_94},
 };

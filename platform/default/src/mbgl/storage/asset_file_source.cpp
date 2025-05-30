@@ -13,7 +13,7 @@
 
 namespace {
 bool acceptsURL(const std::string& url) {
-    return 0 == url.rfind(mbgl::util::ASSET_PROTOCOL, 0);
+    return url.starts_with(mbgl::util::ASSET_PROTOCOL);
 }
 } // namespace
 

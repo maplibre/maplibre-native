@@ -1,3 +1,5 @@
+// NOLINTBEGIN(clang-analyzer-optin.cplusplus.VirtualCall)
+
 #include <mbgl/mtl/texture2d.hpp>
 #include <mbgl/mtl/context.hpp>
 #include <mbgl/mtl/render_pass.hpp>
@@ -277,3 +279,5 @@ void Texture2D::upload() noexcept {
 
 } // namespace mtl
 } // namespace mbgl
+
+// NOLINTEND(clang-analyzer-optin.cplusplus.VirtualCall)

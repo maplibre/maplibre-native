@@ -87,6 +87,7 @@ private:
     // Used to expand a tuple holding the constructor arguments
     template <class ArgsTuple, std::size_t... I>
     void emplaceObject(ArgsTuple&& args, std::index_sequence<I...>) {
+        // NOLINTNEXTLINE(bugprone-use-after-move)
         emplaceObject(std::move(std::get<I>(std::forward<ArgsTuple>(args)))...);
         (void)args; // mark args as used: if it's empty tuple, it's not actually used above.
     }

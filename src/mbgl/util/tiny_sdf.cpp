@@ -12,7 +12,7 @@ namespace tinysdf {
 static const double INF = 1e20;
 
 // 1D squared distance transform
-void edt1d(
+static void edt1d(
     std::vector<double>& f, std::vector<double>& d, std::vector<int16_t>& v, std::vector<double>& z, uint32_t n) {
     v[0] = 0;
     z[0] = -INF;
@@ -37,13 +37,13 @@ void edt1d(
 }
 
 // 2D Euclidean distance transform by Felzenszwalb & Huttenlocher https://cs.brown.edu/~pff/dt/
-void edt(std::vector<double>& data,
-         uint32_t width,
-         uint32_t height,
-         std::vector<double>& f,
-         std::vector<double>& d,
-         std::vector<int16_t>& v,
-         std::vector<double>& z) {
+static void edt(std::vector<double>& data,
+                uint32_t width,
+                uint32_t height,
+                std::vector<double>& f,
+                std::vector<double>& d,
+                std::vector<int16_t>& v,
+                std::vector<double>& z) {
     for (uint32_t x = 0; x < width; x++) {
         for (uint32_t y = 0; y < height; y++) {
             f[y] = data[y * width + x];

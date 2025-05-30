@@ -18,6 +18,7 @@ UniformBuffer::UniformBuffer(BufferResource&& buffer_)
 
 UniformBuffer::UniformBuffer(UniformBuffer&& other)
     : gfx::UniformBuffer(std::move(other)),
+      // NOLINTNEXTLINE(bugprone-use-after-move)
       buffer(std::move(other.buffer)) {}
 
 UniformBuffer::~UniformBuffer() {
@@ -43,7 +44,7 @@ void UniformBufferArray::bindMtl(RenderPass& renderPass) const noexcept {
     for (size_t id = 0; id < allocatedSize(); id++) {
         const auto& uniformBuffer = get(id);
         if (!uniformBuffer) continue;
-        const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer.get());
+        const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer);
         const auto& resource = buffer.getBufferResource();
         if (id != shaders::idDrawableReservedFragmentOnlyUBO) {
             renderPass.bindVertex(resource, 0, id);

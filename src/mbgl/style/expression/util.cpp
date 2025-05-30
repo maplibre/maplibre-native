@@ -5,7 +5,7 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-std::string stringifyColor(double r, double g, double b, double a) {
+static std::string stringifyColor(double r, double g, double b, double a) {
     return stringify(r) + ", " + stringify(g) + ", " + stringify(b) + ", " + stringify(a);
 }
 

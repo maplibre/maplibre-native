@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mbgl/util/work_task.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mbgl/util/run_loop.hpp> // NOLINT(misc-header-include-cycle)
 
 #include <mutex>
 
