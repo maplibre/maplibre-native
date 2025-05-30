@@ -96,6 +96,11 @@ struct SymbolPlacement : LayoutProperty<SymbolPlacementType> {
     static SymbolPlacementType defaultValue() { return SymbolPlacementType::Point; }
 };
 
+struct SymbolScreenSpace : LayoutProperty<bool> {
+    static constexpr const char *name() { return "symbol-screen-space"; }
+    static bool defaultValue() { return false; }
+};
+
 struct SymbolSortKey : DataDrivenLayoutProperty<float> {
     static constexpr const char *name() { return "symbol-sort-key"; }
     static float defaultValue() { return 0.f; }
@@ -302,6 +307,7 @@ class SymbolLayoutProperties : public Properties<
     IconTextFitPadding,
     SymbolAvoidEdges,
     SymbolPlacement,
+    SymbolScreenSpace,
     SymbolSortKey,
     SymbolSpacing,
     SymbolZOrder,

@@ -63,7 +63,10 @@ Enabling the action journal.
 <!-- include-example(actionJournalOptions) -->
 
 ```swift
-MLNSettings.actionJournalOptions.enabled = true
+let options = MLNMapOptions()
+        options.actionJournalOptions.enabled = true
+        options.styleURL = AMERICANA_STYLE
+        mapView = MLNMapView(frame: view.bounds, options: options)
 ```
 
 <!-- include-example(ObserverExampleActionJournal) -->

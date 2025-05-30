@@ -40,6 +40,7 @@
 #include "conversion/collection.hpp"
 #include "style/conversion/filter.hpp"
 #include "geojson/feature.hpp"
+#include "rendering_stats.hpp"
 
 #include "android_renderer_frontend.hpp"
 #include "attach_env.hpp"
@@ -187,20 +188,25 @@ void NativeMapView::onWillStartRenderingFrame() {
     }
 }
 
-void NativeMapView::onDidFinishRenderingFrame(MapObserver::RenderFrameStatus status) {
+void NativeMapView::onDidFinishRenderingFrame(const MapObserver::RenderFrameStatus& status) {
     assert(vm != nullptr);
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onDidFinishRenderingFrame = javaClass.GetMethod<void(jboolean, jdouble, jdouble)>(
+    static auto onDidFinishRenderingFrame = javaClass.GetMethod<void(jboolean, jni::Object<RenderingStats>)>(
         *_env, "onDidFinishRenderingFrame");
     auto weakReference = javaPeer.get(*_env);
     if (weakReference) {
+        if (!renderingStats) {
+            renderingStats = jni::NewGlobal(*_env, RenderingStats::Create(*_env));
+        }
+
+        RenderingStats::Update(*_env, renderingStats, status.renderingStats);
+
         weakReference.Call(*_env,
                            onDidFinishRenderingFrame,
                            (jboolean)(status.mode != MapObserver::RenderMode::Partial),
-                           (jdouble)status.frameEncodingTime,
-                           (jdouble)status.frameRenderingTime);
+                           renderingStats);
     }
 }
 
@@ -1272,6 +1278,16 @@ void NativeMapView::triggerRepaint(JNIEnv&) {
     map->triggerRepaint();
 }
 
+jni::jboolean NativeMapView::isRenderingStatsViewEnabled(JNIEnv&) {
+    assert(map);
+    return jni::jboolean(map->isRenderingStatsViewEnabled());
+}
+
+void NativeMapView::enableRenderingStatsView(JNIEnv&, jni::jboolean value) {
+    assert(map);
+    map->enableRenderingStatsView(value);
+}
+
 // Static methods //
 
 void NativeMapView::registerNative(jni::JNIEnv& env) {
@@ -1384,7 +1400,9 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::getPrefetchZoomDelta, "nativeGetPrefetchZoomDelta"),
         METHOD(&NativeMapView::setTileCacheEnabled, "nativeSetTileCacheEnabled"),
         METHOD(&NativeMapView::getTileCacheEnabled, "nativeGetTileCacheEnabled"),
-        METHOD(&NativeMapView::triggerRepaint, "nativeTriggerRepaint"));
+        METHOD(&NativeMapView::triggerRepaint, "nativeTriggerRepaint"),
+        METHOD(&NativeMapView::isRenderingStatsViewEnabled, "nativeIsRenderingStatsViewEnabled"),
+        METHOD(&NativeMapView::enableRenderingStatsView, "nativeEnableRenderingStatsView"));
 }
 
 void NativeMapView::onRegisterShaders(gfx::ShaderRegistry&) {};

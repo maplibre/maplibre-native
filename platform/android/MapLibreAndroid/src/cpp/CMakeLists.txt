@@ -122,6 +122,8 @@ add_library(maplibre SHARED
             ${PROJECT_SOURCE_DIR}/offline/offline_region_error.hpp
             ${PROJECT_SOURCE_DIR}/offline/offline_region_status.cpp
             ${PROJECT_SOURCE_DIR}/offline/offline_region_status.hpp
+            ${PROJECT_SOURCE_DIR}/rendering_stats.cpp
+            ${PROJECT_SOURCE_DIR}/rendering_stats.hpp
             ${PROJECT_SOURCE_DIR}/snapshotter/map_snapshot.cpp
             ${PROJECT_SOURCE_DIR}/snapshotter/map_snapshot.hpp
             ${PROJECT_SOURCE_DIR}/snapshotter/map_snapshotter.cpp

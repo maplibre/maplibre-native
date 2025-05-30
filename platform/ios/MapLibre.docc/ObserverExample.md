@@ -6,6 +6,20 @@ Learn about the ``MLNMapViewDelegate`` methods for observing map events.
 
 You can observe certain low-level events as they happen. Use these methods to collect metrics or investigate issues during map rendering. This feature is intended primarily for power users. We are always interested in improving observability, so if you have a special use case, feel free to [open an issue or pull request](https://github.com/maplibre/maplibre-native) to extend the types of observability methods.
 
+## Frame Events
+
+Observe frame rendering statistics with ``MLNMapViewDelegate/mapViewDidFinishRenderingFrame:fullyRendered:renderingStats:``.
+
+<!-- include-example(ObserverExampleRenderingStats) -->
+
+```swift
+func mapViewDidFinishRenderingFrame(_: MLNMapView, fullyRendered: Bool, renderingStats: MLNRenderingStats) {
+
+    }
+```
+
+See also: ``MLNMapViewDelegate/mapViewDidFinishRenderingFrame:fullyRendered:`` and ``MLNMapViewDelegate/mapViewDidFinishRenderingFrame:fullyRendered:frameEncodingTime:frameRenderingTime:``
+
 ## Shader Events
 
 Observe shader compilation with ``MLNMapViewDelegate/mapView:shaderWillCompile:backend:defines:`` and ``MLNMapViewDelegate/mapView:shaderDidCompile:backend:defines:``.

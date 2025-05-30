@@ -3,11 +3,14 @@
 #import "MLNTileOperation.h"
 #import "MLNUserLocationAnnotationView.h"
 
-#include <mbgl/util/size.hpp>
-
 namespace mbgl {
 class Map;
 class Renderer;
+
+namespace gfx {
+struct RenderingStats;
+}
+
 }  // namespace mbgl
 
 class MLNMapViewImpl;
@@ -39,8 +42,7 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const _Nonnull MLNUnderlyingMapUna
 - (void)mapViewDidFailLoadingMapWithError:(nonnull NSError *)error;
 - (void)mapViewWillStartRenderingFrame;
 - (void)mapViewDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered
-                                  frameEncodingTime:(double)frameEncodingTime
-                                 frameRenderingTime:(double)frameRenderingTime;
+                                     renderingStats:(const mbgl::gfx::RenderingStats &)stats;
 - (void)mapViewWillStartRenderingMap;
 - (void)mapViewDidFinishRenderingMapFullyRendered:(BOOL)fullyRendered;
 - (void)mapViewDidBecomeIdle;

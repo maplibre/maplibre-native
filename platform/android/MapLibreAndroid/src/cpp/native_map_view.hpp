@@ -39,6 +39,7 @@ namespace android {
 class AndroidRendererFrontend;
 class FileSource;
 class MapRenderer;
+class RenderingStats;
 
 class NativeMapView : public MapObserver {
 public:
@@ -62,7 +63,7 @@ public:
     void onDidFinishLoadingMap() override;
     void onDidFailLoadingMap(MapLoadError, const std::string&) override;
     void onWillStartRenderingFrame() override;
-    void onDidFinishRenderingFrame(MapObserver::RenderFrameStatus) override;
+    void onDidFinishRenderingFrame(const MapObserver::RenderFrameStatus&) override;
     void onWillStartRenderingMap() override;
     void onDidFinishRenderingMap(MapObserver::RenderMode) override;
     void onDidBecomeIdle() override;
@@ -305,6 +306,9 @@ public:
 
     void triggerRepaint(JNIEnv&);
 
+    jni::jboolean isRenderingStatsViewEnabled(JNIEnv&);
+    void enableRenderingStatsView(JNIEnv&, jni::jboolean);
+
     // Shader compilation
     void onRegisterShaders(mbgl::gfx::ShaderRegistry&) override;
     void onPreCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type, const std::string&) override;
@@ -335,6 +339,8 @@ private:
     std::string styleUrl;
 
     float pixelRatio;
+
+    jni::Global<jni::Object<RenderingStats>> renderingStats;
 
     // Minimum texture size according to OpenGL ES 2.0 specification.
     int width = 64;

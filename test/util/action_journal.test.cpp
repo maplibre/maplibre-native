@@ -416,7 +416,7 @@ TEST(ActionJournal, ValidateEvents) {
                   "");
 
     const auto onDidFinishRenderingFrame =
-        static_cast<void (RendererObserver::*)(RendererObserver::RenderMode, bool, bool, double, double)>(
+        static_cast<void (RendererObserver::*)(RendererObserver::RenderMode, bool, bool, const gfx::RenderingStats&)>(
             &RendererObserver::onDidFinishRenderingFrame);
 
     validateEvent(test,
@@ -426,6 +426,5 @@ TEST(ActionJournal, ValidateEvents) {
                   RendererObserver::RenderMode::Full,
                   false,
                   false,
-                  0.0,
-                  0.0);
+                  gfx::RenderingStats());
 }

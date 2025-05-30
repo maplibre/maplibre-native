@@ -57,6 +57,7 @@ Powerful, free and open-source mapping toolkit with full control over data sourc
 ### Advanced
 
 - <doc:CustomStyleLayerExample>
+- <doc:RenderingStatisticsHud>
 
 ### Other Articles
 

@@ -250,6 +250,10 @@ interface NativeMap {
 
   void triggerRepaint();
 
+  boolean isRenderingStatsViewEnabled();
+
+  void enableRenderingStatsView(boolean value);
+
   void setSwapBehaviorFlush(boolean flush);
 
   //

@@ -6,6 +6,7 @@ import org.maplibre.android.log.Logger
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
+import org.maplibre.android.maps.RenderingStats
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.databinding.ActivitySnapshotBinding
 import org.maplibre.android.testapp.styles.TestStyles

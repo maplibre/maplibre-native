@@ -507,6 +507,14 @@ MapDebugOptions Map::getDebug() const {
     return impl->debugOptions;
 }
 
+bool Map::isRenderingStatsViewEnabled() const {
+    return impl->isRenderingStatsViewEnabled();
+}
+
+void Map::enableRenderingStatsView(bool value) {
+    impl->enableRenderingStatsView(value);
+}
+
 void Map::setPrefetchZoomDelta(uint8_t delta) {
     impl->prefetchZoomDelta = delta;
 }
