@@ -101,12 +101,13 @@ void GeoJSONSource::loadDescription(FileSource& fileSource) {
                 /* onImplReady */
                 [this, self = makeWeakPtr(), capturedReq = req.get()](Immutable<Source::Impl> newImpl) {
                     assert(capturedReq);
-                    if (!self) return;                    // This source has been deleted.
-                    if (capturedReq != req.get()) return; // A new request is being processed, ignore this impl.
-
-                    baseImpl = std::move(newImpl);
-                    loaded = true;
-                    observer->onSourceLoaded(*this);
+                    if (auto guard = self.lock(); self) {
+                        if (capturedReq == req.get()) { // If a new request is being processed, ignore this impl.
+                            baseImpl = std::move(newImpl);
+                            loaded = true;
+                            observer->onSourceLoaded(*this);
+                        }
+                    }
                 });
         }
     });
