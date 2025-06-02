@@ -996,7 +996,6 @@ TEST(Map, Issue15216) {
 }
 
 TEST(Map, PluginLayer) {
-    
     bool _layerCreated = false;
     bool _initialPropertiesFound = false;
     bool _layerRendered = false;
@@ -1004,45 +1003,49 @@ TEST(Map, PluginLayer) {
 
     // Create the plug-in layer type
     std::string layerType = "plugin-layer-test";
-    auto pluginLayerFactory = std::make_unique<PluginLayerFactory>(layerType,
-          mbgl::style::LayerTypeInfo::Source::NotRequired, mbgl::style::LayerTypeInfo::Pass3D::NotRequired, mbgl::style::LayerTypeInfo::Layout::NotRequired, mbgl::style::LayerTypeInfo::FadingTiles::NotRequired, mbgl::style::LayerTypeInfo::CrossTileIndex::NotRequired, mbgl::style::LayerTypeInfo::TileKind::NotRequired);
-    pluginLayerFactory->setOnLayerCreatedEvent([&_layerRendered,
-                                                 &_layerCreated,
-                                                 &_initialPropertiesFound,
-                                               &_paintPropertiesFound](mbgl::style::PluginLayer* pluginLayer){
-        std::cout << "On Layer Created\n";
-        _layerCreated = true;
-        
-        auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
-        auto & pm = pluginLayerImpl->_propertyManager;
-        PluginLayerProperty *p = new PluginLayerProperty();
-        p->_propertyName = "scale";
-        p->_propertyType = PluginLayerProperty::PropertyType::SingleFloat;
-        p->_defaultSingleFloatValue = 1.0;
-        pm.addProperty(p);
-        pluginLayerImpl->setRenderFunction([&_layerRendered](PaintParameters &paintParameters) {
-            std::cout << "On Layer Rendered\n";
-            _layerRendered = true;
+    auto pluginLayerFactory = std::make_unique<PluginLayerFactory>(
+        layerType,
+        mbgl::style::LayerTypeInfo::Source::NotRequired,
+        mbgl::style::LayerTypeInfo::Pass3D::NotRequired,
+        mbgl::style::LayerTypeInfo::Layout::NotRequired,
+        mbgl::style::LayerTypeInfo::FadingTiles::NotRequired,
+        mbgl::style::LayerTypeInfo::CrossTileIndex::NotRequired,
+        mbgl::style::LayerTypeInfo::TileKind::NotRequired);
+    pluginLayerFactory->setOnLayerCreatedEvent(
+        [&_layerRendered, &_layerCreated, &_initialPropertiesFound, &_paintPropertiesFound](
+            mbgl::style::PluginLayer* pluginLayer) {
+            std::cout << "On Layer Created\n";
+            _layerCreated = true;
+
+            auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl*)pluginLayer->baseImpl.get();
+            auto& pm = pluginLayerImpl->_propertyManager;
+            PluginLayerProperty* p = new PluginLayerProperty();
+            p->_propertyName = "scale";
+            p->_propertyType = PluginLayerProperty::PropertyType::SingleFloat;
+            p->_defaultSingleFloatValue = 1.0;
+            pm.addProperty(p);
+            pluginLayerImpl->setRenderFunction([&_layerRendered](PaintParameters& paintParameters) {
+                std::cout << "On Layer Rendered\n";
+                _layerRendered = true;
+            });
+
+            pluginLayerImpl->setUpdatePropertiesFunction(
+                [&_initialPropertiesFound, &_paintPropertiesFound](const std::string& properties) {
+                    std::cout << "On Layer Update Properties\n";
+                    std::cout << "  -> " << properties << "\n";
+
+                    if (properties == "{\"custom-property1\":\"custom-property-value1\"}") {
+                        _initialPropertiesFound = true;
+                    }
+                    if (properties.find("scale") > 0) {
+                        _paintPropertiesFound = true;
+                    }
+                });
         });
 
-        pluginLayerImpl->setUpdatePropertiesFunction([&_initialPropertiesFound, &_paintPropertiesFound](const std::string& properties) {
-            std::cout << "On Layer Update Properties\n";
-            std::cout << "  -> " << properties << "\n";
-            
-            if (properties == "{\"custom-property1\":\"custom-property-value1\"}") {
-                _initialPropertiesFound = true;
-            }
-            if (properties.find("scale") > 0) {
-                _paintPropertiesFound = true;
-            }
-
-        });
-
-    });
-    
     auto lm = LayerManager::get();
     lm->addLayerTypeCoreOnly(std::move(pluginLayerFactory));
-    
+
     MapTest<> test{1, MapMode::Continuous};
     test.map.getStyle().loadJSON(R"STYLE({
       "version": 8,
@@ -1058,14 +1061,10 @@ TEST(Map, PluginLayer) {
 
     test.runLoop.run();
 
-    
-    
     ASSERT_TRUE(_layerCreated);
     ASSERT_TRUE(_initialPropertiesFound);
     ASSERT_TRUE(_layerRendered);
     ASSERT_TRUE(_paintPropertiesFound);
-
-    
 }
 
 // https://github.com/mapbox/mapbox-gl-native/issues/15342
