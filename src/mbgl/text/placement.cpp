@@ -474,9 +474,13 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                             }
                         }
 
-                        variableOffsets.insert(std::make_pair(
-                            symbolInstance.getCrossTileID(),
-                            VariableOffset{variableTextOffset, width, height, anchor, textBoxScale, prevAnchor}));
+                        variableOffsets.insert(std::make_pair(symbolInstance.getCrossTileID(),
+                                                              VariableOffset{.offset = variableTextOffset,
+                                                                             .width = width,
+                                                                             .height = height,
+                                                                             .anchor = anchor,
+                                                                             .textBoxScale = textBoxScale,
+                                                                             .prevAnchor = prevAnchor}));
 
                         if (bucket.allowVerticalPlacement) {
                             placedOrientations.emplace(symbolInstance.getCrossTileID(), orientation);
@@ -1654,14 +1658,14 @@ void TilePlacement::newSymbolPlaced(const SymbolInstance& symbol,
         assert(box.isBox());
         iconCollisionBox = box.box();
     }
-    PlacedSymbolData symbolData{symbol.getKey(),
-                                textCollisionBox,
-                                iconCollisionBox,
-                                placement.text,
-                                placement.icon,
-                                !placement.skipFade && populateIntersections,
-                                collisionIndex.getViewportPadding(),
-                                ctx.getBucket().bucketLeaderID};
+    PlacedSymbolData symbolData{.key = symbol.getKey(),
+                                .textCollisionBox = textCollisionBox,
+                                .iconCollisionBox = iconCollisionBox,
+                                .textPlaced = placement.text,
+                                .iconPlaced = placement.icon,
+                                .intersectsTileBorder = !placement.skipFade && populateIntersections,
+                                .viewportPadding = collisionIndex.getViewportPadding(),
+                                .layer = ctx.getBucket().bucketLeaderID};
     placedSymbolsData.emplace_back(std::move(symbolData));
 }
 

@@ -50,7 +50,7 @@ void SpriteLoader::load(const std::optional<style::Sprite> sprite, FileSource& f
         std::lock_guard<std::mutex> lock(dataMapMutex);
         Data* data = dataMap[sprite->id].get();
         if (res.error) {
-            observer->onSpriteError(*sprite, std::make_exception_ptr(std::runtime_error(res.error->message)));
+            observer->onSpriteError(sprite, std::make_exception_ptr(std::runtime_error(res.error->message)));
         } else if (res.notModified) {
             return;
         } else if (res.noContent) {
@@ -69,7 +69,7 @@ void SpriteLoader::load(const std::optional<style::Sprite> sprite, FileSource& f
             std::lock_guard<std::mutex> lock(dataMapMutex);
             Data* data = dataMap[sprite->id].get();
             if (res.error) {
-                observer->onSpriteError(*sprite, std::make_exception_ptr(std::runtime_error(res.error->message)));
+                observer->onSpriteError(sprite, std::make_exception_ptr(std::runtime_error(res.error->message)));
             } else if (res.notModified) {
                 return;
             } else if (res.noContent) {

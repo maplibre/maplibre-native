@@ -108,7 +108,7 @@ public:
 };
 
 #ifndef NDEBUG
-void logSqlMessage(void*, const int err, const char* msg) {
+static void logSqlMessage(void*, const int err, const char* msg) {
     mbgl::Log::Record(mbgl::EventSeverity::Debug, mbgl::Event::Database, std::to_string(err) + msg);
 }
 #endif
@@ -489,7 +489,7 @@ Transaction::~Transaction() {
     if (needRollback) {
         try {
             rollback();
-        } catch (...) {
+        } catch (...) { // NOLINT(bugprone-empty-catch)
             // Ignore failed rollbacks in destructor.
         }
     }

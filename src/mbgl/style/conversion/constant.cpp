@@ -11,7 +11,7 @@ std::optional<bool> Converter<bool>::operator()(const Convertible& value, Error&
         error.message = "value must be a boolean";
         return std::nullopt;
     }
-    return *converted;
+    return converted;
 }
 
 std::optional<float> Converter<float>::operator()(const Convertible& value, Error& error) const {
@@ -20,7 +20,7 @@ std::optional<float> Converter<float>::operator()(const Convertible& value, Erro
         error.message = "value must be a number";
         return std::nullopt;
     }
-    return *converted;
+    return converted;
 }
 
 std::optional<std::string> Converter<std::string>::operator()(const Convertible& value, Error& error) const {
@@ -29,7 +29,7 @@ std::optional<std::string> Converter<std::string>::operator()(const Convertible&
         error.message = "value must be a string";
         return std::nullopt;
     }
-    return *converted;
+    return converted;
 }
 
 template <class T>
@@ -47,7 +47,7 @@ std::optional<T> Converter<T, typename std::enable_if_t<std::is_enum_v<T>>>::ope
         return std::nullopt;
     }
 
-    return *result;
+    return result;
 }
 
 template <class T>
@@ -111,7 +111,7 @@ std::optional<Color> Converter<Color>::operator()(const Convertible& value, Erro
         return std::nullopt;
     }
 
-    return *color;
+    return color;
 }
 
 std::optional<Padding> Converter<Padding>::operator()(const Convertible& value, Error& error) const {

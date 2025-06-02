@@ -62,7 +62,7 @@ std::vector<std::optional<Value>> All::possibleOutputs() const {
 using namespace mbgl::style::conversion;
 
 template <class T>
-ParseResult parseBooleanOp(const Convertible& value, ParsingContext& ctx) {
+static ParseResult parseBooleanOp(const Convertible& value, ParsingContext& ctx) {
     assert(isArray(value));
     auto length = arrayLength(value);
 

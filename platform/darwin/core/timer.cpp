@@ -5,11 +5,11 @@
 namespace mbgl {
 namespace util {
 
-CFTimeInterval toCFTimeInterval(Duration duration) {
+static CFTimeInterval toCFTimeInterval(Duration duration) {
     return std::chrono::duration<CFTimeInterval>(duration).count();
 }
 
-CFAbsoluteTime toCFAbsoluteTime(Duration duration) {
+static CFAbsoluteTime toCFAbsoluteTime(Duration duration) {
     return CFAbsoluteTimeGetCurrent() + toCFTimeInterval(duration);
 }
 

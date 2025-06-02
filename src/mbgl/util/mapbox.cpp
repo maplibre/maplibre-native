@@ -15,12 +15,12 @@ namespace mbgl {
 namespace util {
 namespace mapbox {
 
-inline bool endsWith(const std::string& str, const std::string& search) {
+inline static bool endsWith(const std::string& str, const std::string& search) {
     if (search.size() > str.size()) return false;
     return std::equal(search.rbegin(), search.rend(), str.rbegin());
 }
 
-inline int nthOccurrenceFromEnd(const std::string& str, const std::string& search, int nth) {
+inline static int nthOccurrenceFromEnd(const std::string& str, const std::string& search, int nth) {
     size_t pos = str.length();
     int cnt = 0;
 
@@ -33,7 +33,7 @@ inline int nthOccurrenceFromEnd(const std::string& str, const std::string& searc
     return static_cast<int>(pos);
 }
 
-inline void replace(std::string& str, const std::string& search, const std::string& replacement) {
+inline static void replace(std::string& str, const std::string& search, const std::string& replacement) {
     std::string::size_type pos = 0u;
     while ((pos = str.find(search, pos)) != std::string::npos) {
         str.replace(pos, search.length(), replacement);
@@ -47,10 +47,10 @@ bool isCanonicalURL(const TileServerOptions& tileServerOptions, const std::strin
     }
 
     const auto& protocol = tileServerOptions.uriSchemeAlias() + "://";
-    return url.compare(0, protocol.length(), protocol) == 0;
+    return url.starts_with(protocol);
 }
 
-std::map<std::string, std::string> createTokenMap(const std::string& urlTemplate, const std::string& url) {
+static std::map<std::string, std::string> createTokenMap(const std::string& urlTemplate, const std::string& url) {
     const URL parsedUrl(url);
 
     // e.g. tiles/satellite/tiles.json
@@ -99,7 +99,7 @@ std::map<std::string, std::string> createTokenMap(const std::string& urlTemplate
     return tokenMap;
 }
 
-bool isNormalizedSourceURL(const std::string& baseURL, const std::string& urlTemplate, const std::string& url) {
+static bool isNormalizedSourceURL(const std::string& baseURL, const std::string& urlTemplate, const std::string& url) {
     if (baseURL.empty() || urlTemplate.empty()) {
         return false;
     }
@@ -116,7 +116,7 @@ bool isNormalizedSourceURL(const std::string& baseURL, const std::string& urlTem
     return false;
 }
 
-bool isNormalizedURL(const TileServerOptions& tileServerOptions, const std::string& str) {
+static bool isNormalizedURL(const TileServerOptions& tileServerOptions, const std::string& str) {
     const URL url(str);
     const Path path(str, url.path.first, url.path.second);
 
@@ -147,7 +147,7 @@ bool isNormalizedURL(const TileServerOptions& tileServerOptions, const std::stri
     return true;
 }
 
-std::string makeQueryString(const TileServerOptions& tileServerOptions, const std::string& apiKey) {
+static std::string makeQueryString(const TileServerOptions& tileServerOptions, const std::string& apiKey) {
     std::string queryString = (!tileServerOptions.requiresApiKey() || tileServerOptions.apiKeyParameterName().empty() ||
                                apiKey.empty())
                                   ? ""

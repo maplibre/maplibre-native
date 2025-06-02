@@ -177,8 +177,10 @@ void Drawable::draw(PaintParameters& parameters) const {
     if (impl->renderPassDescriptor && descriptor != *impl->renderPassDescriptor) {
         impl->pipelineState.reset();
     }
-    impl->renderPassDescriptor.emplace(gfx::RenderPassDescriptor{
-        descriptor.renderable, descriptor.clearColor, descriptor.clearDepth, descriptor.clearStencil});
+    impl->renderPassDescriptor.emplace(gfx::RenderPassDescriptor{.renderable = descriptor.renderable,
+                                                                 .clearColor = descriptor.clearColor,
+                                                                 .clearDepth = descriptor.clearDepth,
+                                                                 .clearStencil = descriptor.clearStencil});
 
     const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
 

@@ -16,6 +16,7 @@
 
 #include <cmath>
 #include <limits>
+#include <numbers>
 
 namespace mbgl {
 namespace style {
@@ -29,7 +30,7 @@ struct VarargsType {
     type::Type type;
 };
 
-bool operator==(const VarargsType& lhs, const VarargsType& rhs) {
+static bool operator==(const VarargsType& lhs, const VarargsType& rhs) {
     return lhs.type == rhs.type;
 }
 
@@ -235,20 +236,20 @@ static std::unique_ptr<detail::SignatureBase> makeSignature(std::string name,
 
 } // namespace detail
 
-Value featureIdAsExpressionValue(const EvaluationContext& params) {
+static Value featureIdAsExpressionValue(const EvaluationContext& params) {
     assert(params.feature);
     auto id = params.feature->getID();
     if (id.is<NullValue>()) return Null;
     return id.match([](const auto& idid) { return toExpressionValue(mbgl::Value(idid)); });
 };
 
-std::optional<Value> featurePropertyAsExpressionValue(const EvaluationContext& params, const std::string& key) {
+static std::optional<Value> featurePropertyAsExpressionValue(const EvaluationContext& params, const std::string& key) {
     assert(params.feature);
     auto property = params.feature->getValue(key);
     return property ? std::optional<Value>(toExpressionValue(*property)) : std::optional<Value>();
 };
 
-std::optional<std::string> featureTypeAsString(FeatureType type) {
+static std::optional<std::string> featureTypeAsString(FeatureType type) {
     switch (type) {
         case FeatureType::Point:
             return std::optional<std::string>("Point");
@@ -263,7 +264,7 @@ std::optional<std::string> featureTypeAsString(FeatureType type) {
     }
 };
 
-std::optional<double> featurePropertyAsDouble(const EvaluationContext& params, const std::string& key) {
+static std::optional<double> featurePropertyAsDouble(const EvaluationContext& params, const std::string& key) {
     assert(params.feature);
     auto property = params.feature->getValue(key);
     if (!property) return {};
@@ -273,7 +274,7 @@ std::optional<double> featurePropertyAsDouble(const EvaluationContext& params, c
                            [](const auto&) -> std::optional<double> { return std::nullopt; });
 };
 
-std::optional<std::string> featurePropertyAsString(const EvaluationContext& params, const std::string& key) {
+static std::optional<std::string> featurePropertyAsString(const EvaluationContext& params, const std::string& key) {
     assert(params.feature);
     auto property = params.feature->getValue(key);
     if (!property) return {};
@@ -281,7 +282,7 @@ std::optional<std::string> featurePropertyAsString(const EvaluationContext& para
                            [](const auto&) { return std::optional<std::string>(); });
 };
 
-std::optional<double> featureIdAsDouble(const EvaluationContext& params) {
+static std::optional<double> featureIdAsDouble(const EvaluationContext& params) {
     assert(params.feature);
     auto id = params.feature->getID();
     return id.match([](double value) { return value; },
@@ -290,52 +291,52 @@ std::optional<double> featureIdAsDouble(const EvaluationContext& params) {
                     [](const auto&) -> std::optional<double> { return std::nullopt; });
 };
 
-std::optional<std::string> featureIdAsString(const EvaluationContext& params) {
+static std::optional<std::string> featureIdAsString(const EvaluationContext& params) {
     assert(params.feature);
     auto id = params.feature->getID();
     return id.match([](std::string value) { return value; }, [](const auto&) { return std::optional<std::string>(); });
 };
 
-const auto& eCompoundExpression() {
-    static auto signature = detail::makeSignature("e", []() -> Result<double> { return 2.718281828459045; });
+const static auto& eCompoundExpression() {
+    static auto signature = detail::makeSignature("e", []() -> Result<double> { return std::numbers::e; });
     return signature;
 }
 
-const auto& piCompoundExpression() {
-    static auto signature = detail::makeSignature("pi", []() -> Result<double> { return 3.141592653589793; });
+const static auto& piCompoundExpression() {
+    static auto signature = detail::makeSignature("pi", []() -> Result<double> { return std::numbers::pi; });
     return signature;
 }
 
-const auto& ln2CompoundExpression() {
-    static auto signature = detail::makeSignature("ln2", []() -> Result<double> { return 0.6931471805599453; });
+const static auto& ln2CompoundExpression() {
+    static auto signature = detail::makeSignature("ln2", []() -> Result<double> { return std::numbers::ln2; });
     return signature;
 }
 
-const auto& typeofCompoundExpression() {
+const static auto& typeofCompoundExpression() {
     static auto signature = detail::makeSignature(
         "typeof", [](const Value& v) -> Result<std::string> { return toString(typeOf(v)); });
     return signature;
 }
 
-const auto& toRgbaCompoundExpression() {
+const static auto& toRgbaCompoundExpression() {
     static auto signature = detail::makeSignature(
         "to-rgba", [](const Color& color) -> Result<std::array<double, 4>> { return color.toArray(); });
     return signature;
 }
 
-const auto& rgbaCompoundExpression() {
+const static auto& rgbaCompoundExpression() {
     static auto signature = detail::makeSignature(
         "rgba", [](double r, double g, double b, double a) { return rgba(r, g, b, a); });
     return signature;
 }
 
-const auto& rgbCompoundExpression() {
+const static auto& rgbCompoundExpression() {
     static auto signature = detail::makeSignature("rgb",
                                                   [](double r, double g, double b) { return rgba(r, g, b, 1.0f); });
     return signature;
 }
 
-const auto& zoomCompoundExpression() {
+const static auto& zoomCompoundExpression() {
     static auto signature = detail::makeSignature(
         "zoom",
         [](const EvaluationContext& params) -> Result<double> {
@@ -350,7 +351,7 @@ const auto& zoomCompoundExpression() {
     return signature;
 }
 
-const auto& heatmapDensityCompoundExpression() {
+const static auto& heatmapDensityCompoundExpression() {
     static auto signature = detail::makeSignature("heatmap-density",
                                                   [](const EvaluationContext& params) -> Result<double> {
                                                       if (!params.colorRampParameter) {
@@ -363,7 +364,7 @@ const auto& heatmapDensityCompoundExpression() {
     return signature;
 }
 
-const auto& lineProgressCompoundExpression() {
+const static auto& lineProgressCompoundExpression() {
     static auto signature = detail::makeSignature("line-progress",
                                                   [](const EvaluationContext& params) -> Result<double> {
                                                       if (!params.colorRampParameter) {
@@ -376,7 +377,7 @@ const auto& lineProgressCompoundExpression() {
     return signature;
 }
 
-const auto& accumulatedCompoundExpression() {
+const static auto& accumulatedCompoundExpression() {
     const static auto signature = detail::makeSignature(
         "accumulated", [](const EvaluationContext& params) -> Result<Value> {
             if (!params.accumulated) {
@@ -389,7 +390,7 @@ const auto& accumulatedCompoundExpression() {
     return signature;
 }
 
-const auto& hasContextCompoundExpression() {
+const static auto& hasContextCompoundExpression() {
     static auto signature = detail::makeSignature(
         "has",
         [](const EvaluationContext& params, const std::string& key) -> Result<bool> {
@@ -405,7 +406,7 @@ const auto& hasContextCompoundExpression() {
     return signature;
 }
 
-const auto& hasObjectCompoundExpression() {
+const static auto& hasObjectCompoundExpression() {
     static auto signature = detail::makeSignature(
         "has",
         [](const std::string& key, const std::unordered_map<std::string, Value>& object) -> Result<bool> {
@@ -415,7 +416,7 @@ const auto& hasObjectCompoundExpression() {
     return signature;
 }
 
-const auto& getContextCompoundExpression() {
+const static auto& getContextCompoundExpression() {
     static auto signature = detail::makeSignature(
         "get",
         [](const EvaluationContext& params, const std::string& key) -> Result<Value> {
@@ -435,7 +436,7 @@ const auto& getContextCompoundExpression() {
     return signature;
 }
 
-const auto& getObjectCompoundExpression() {
+const static auto& getObjectCompoundExpression() {
     static auto signature = detail::makeSignature(
         "get",
         [](const std::string& key, const std::unordered_map<std::string, Value>& object) -> Result<Value> {
@@ -448,7 +449,7 @@ const auto& getObjectCompoundExpression() {
     return signature;
 }
 
-const auto& propertiesCompoundExpression() {
+const static auto& propertiesCompoundExpression() {
     static auto signature = detail::makeSignature(
         "properties",
         [](const EvaluationContext& params) -> Result<std::unordered_map<std::string, Value>> {
@@ -467,7 +468,7 @@ const auto& propertiesCompoundExpression() {
     return signature;
 }
 
-const auto& geometryTypeCompoundExpression() {
+const static auto& geometryTypeCompoundExpression() {
     static auto signature = detail::makeSignature(
         "geometry-type",
         [](const EvaluationContext& params) -> Result<std::string> {
@@ -492,7 +493,7 @@ const auto& geometryTypeCompoundExpression() {
     return signature;
 }
 
-const auto& idCompoundExpression() {
+const static auto& idCompoundExpression() {
     static auto signature = detail::makeSignature(
         "id",
         [](const EvaluationContext& params) -> Result<Value> {
@@ -509,7 +510,7 @@ const auto& idCompoundExpression() {
     return signature;
 }
 
-const auto& plusCompoundExpression() {
+const static auto& plusCompoundExpression() {
     static auto signature = detail::makeSignature("+", [](const Varargs<double>& args) -> Result<double> {
         double sum = 0.0f;
         for (auto arg : args) {
@@ -520,17 +521,17 @@ const auto& plusCompoundExpression() {
     return signature;
 }
 
-const auto& minusCompoundExpression() {
+const static auto& minusCompoundExpression() {
     static auto signature = detail::makeSignature("-", [](double a, double b) -> Result<double> { return a - b; });
     return signature;
 }
 
-const auto& negateCompoundExpression() {
+const static auto& negateCompoundExpression() {
     static auto signature = detail::makeSignature("-", [](double a) -> Result<double> { return -a; });
     return signature;
 }
 
-const auto& multiplyCompoundExpression() {
+const static auto& multiplyCompoundExpression() {
     static auto signature = detail::makeSignature("*", [](const Varargs<double>& args) -> Result<double> {
         double prod = 1.0f;
         for (auto arg : args) {
@@ -541,7 +542,7 @@ const auto& multiplyCompoundExpression() {
     return signature;
 }
 
-const auto& divideCompoundExpression() {
+const static auto& divideCompoundExpression() {
     static auto signature = detail::makeSignature("/", [](double a, double b) -> Result<double> {
         if (b == 0) {
             if (a == 0) return std::numeric_limits<double>::quiet_NaN();
@@ -554,67 +555,67 @@ const auto& divideCompoundExpression() {
     return signature;
 }
 
-const auto& modCompoundExpression() {
+const static auto& modCompoundExpression() {
     static auto signature = detail::makeSignature("%", [](double a, double b) -> Result<double> { return fmod(a, b); });
     return signature;
 }
 
-const auto& powCompoundExpression() {
+const static auto& powCompoundExpression() {
     static auto signature = detail::makeSignature("^", [](double a, double b) -> Result<double> { return pow(a, b); });
     return signature;
 }
 
-const auto& sqrtCompoundExpression() {
+const static auto& sqrtCompoundExpression() {
     static auto signature = detail::makeSignature("sqrt", [](double x) -> Result<double> { return sqrt(x); });
     return signature;
 }
 
-const auto& log10CompoundExpression() {
+const static auto& log10CompoundExpression() {
     static auto signature = detail::makeSignature("log10", [](double x) -> Result<double> { return log10(x); });
     return signature;
 }
 
-const auto& lnCompoundExpression() {
+const static auto& lnCompoundExpression() {
     static auto signature = detail::makeSignature("ln", [](double x) -> Result<double> { return log(x); });
     return signature;
 }
 
-const auto& log2CompoundExpression() {
+const static auto& log2CompoundExpression() {
     static auto signature = detail::makeSignature("log2", [](double x) -> Result<double> { return util::log2(x); });
     return signature;
 }
 
-const auto& sinCompoundExpression() {
+const static auto& sinCompoundExpression() {
     static auto signature = detail::makeSignature("sin", [](double x) -> Result<double> { return sin(x); });
     return signature;
 }
 
-const auto& cosCompoundExpression() {
+const static auto& cosCompoundExpression() {
     static auto signature = detail::makeSignature("cos", [](double x) -> Result<double> { return cos(x); });
     return signature;
 }
 
-const auto& tanCompoundExpression() {
+const static auto& tanCompoundExpression() {
     static auto signature = detail::makeSignature("tan", [](double x) -> Result<double> { return tan(x); });
     return signature;
 }
 
-const auto& asinCompoundExpression() {
+const static auto& asinCompoundExpression() {
     static auto signature = detail::makeSignature("asin", [](double x) -> Result<double> { return asin(x); });
     return signature;
 }
 
-const auto& acosCompoundExpression() {
+const static auto& acosCompoundExpression() {
     static auto signature = detail::makeSignature("acos", [](double x) -> Result<double> { return acos(x); });
     return signature;
 }
 
-const auto& atanCompoundExpression() {
+const static auto& atanCompoundExpression() {
     static auto signature = detail::makeSignature("atan", [](double x) -> Result<double> { return atan(x); });
     return signature;
 }
 
-const auto& minCompoundExpression() {
+const static auto& minCompoundExpression() {
     static auto signature = detail::makeSignature("min", [](const Varargs<double>& args) -> Result<double> {
         double result = std::numeric_limits<double>::infinity();
         for (double arg : args) {
@@ -625,7 +626,7 @@ const auto& minCompoundExpression() {
     return signature;
 }
 
-const auto& maxCompoundExpression() {
+const static auto& maxCompoundExpression() {
     static auto signature = detail::makeSignature("max", [](const Varargs<double>& args) -> Result<double> {
         double result = -std::numeric_limits<double>::infinity();
         for (double arg : args) {
@@ -636,51 +637,51 @@ const auto& maxCompoundExpression() {
     return signature;
 }
 
-const auto& roundCompoundExpression() {
+const static auto& roundCompoundExpression() {
     static auto signature = detail::makeSignature("round", [](double x) -> Result<double> { return ::round(x); });
     return signature;
 }
 
-const auto& floorCompoundExpression() {
+const static auto& floorCompoundExpression() {
     static auto signature = detail::makeSignature("floor", [](double x) -> Result<double> { return std::floor(x); });
     return signature;
 }
 
-const auto& ceilCompoundExpression() {
+const static auto& ceilCompoundExpression() {
     static auto signature = detail::makeSignature("ceil", [](double x) -> Result<double> { return std::ceil(x); });
     return signature;
 }
 
-const auto& absCompoundExpression() {
+const static auto& absCompoundExpression() {
     static auto signature = detail::makeSignature("abs", [](double x) -> Result<double> { return std::abs(x); });
     return signature;
 }
 
-const auto& notCompoundExpression() {
+const static auto& notCompoundExpression() {
     static auto signature = detail::makeSignature("!", [](bool e) -> Result<bool> { return !e; });
     return signature;
 }
 
-const auto& isSupportedScriptCompoundExpression() {
+const static auto& isSupportedScriptCompoundExpression() {
     static auto signature = detail::makeSignature("is-supported-script", [](const std::string& x) -> Result<bool> {
         return util::i18n::isStringInSupportedScript(x);
     });
     return signature;
 }
 
-const auto& upcaseCompoundExpression() {
+const static auto& upcaseCompoundExpression() {
     static auto signature = detail::makeSignature(
         "upcase", [](const std::string& input) -> Result<std::string> { return platform::uppercase(input); });
     return signature;
 }
 
-const auto& downcaseCompoundExpression() {
+const static auto& downcaseCompoundExpression() {
     static auto signature = detail::makeSignature(
         "downcase", [](const std::string& input) -> Result<std::string> { return platform::lowercase(input); });
     return signature;
 }
 
-const auto& concatCompoundExpression() {
+const static auto& concatCompoundExpression() {
     static auto signature = detail::makeSignature("concat", [](const Varargs<Value>& args) -> Result<std::string> {
         std::string s;
         for (const Value& arg : args) {
@@ -691,19 +692,19 @@ const auto& concatCompoundExpression() {
     return signature;
 }
 
-const auto& resolvedLocaleCompoundExpression() {
+const static auto& resolvedLocaleCompoundExpression() {
     static auto signature = detail::makeSignature(
         "resolved-locale", [](const Collator& collator) -> Result<std::string> { return collator.resolvedLocale(); });
     return signature;
 }
 
-const auto& errorCompoundExpression() {
+const static auto& errorCompoundExpression() {
     static auto signature = detail::makeSignature(
         "error", [](const std::string& input) -> Result<type::ErrorType> { return EvaluationError{input}; });
     return signature;
 }
 
-const auto& featureStateCompoundExpression() {
+const static auto& featureStateCompoundExpression() {
     static auto signature = detail::makeSignature(
         "feature-state",
         [](const EvaluationContext& params, const std::string& key) -> Result<Value> {
@@ -721,7 +722,7 @@ const auto& featureStateCompoundExpression() {
 }
 
 // Legacy Filters
-const auto& filterEqualsCompoundExpression() {
+const static auto& filterEqualsCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-==",
         [](const EvaluationContext& params, const std::string& key, const Value& lhs) -> Result<bool> {
@@ -732,7 +733,7 @@ const auto& filterEqualsCompoundExpression() {
     return signature;
 }
 
-const auto& filterIdEqualsCompoundExpression() {
+const static auto& filterIdEqualsCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-id-==",
         [](const EvaluationContext& params, const Value& lhs) -> Result<bool> {
@@ -742,7 +743,7 @@ const auto& filterIdEqualsCompoundExpression() {
     return signature;
 }
 
-const auto& filterTypeEqualsCompoundExpression() {
+const static auto& filterTypeEqualsCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-type-==",
         [](const EvaluationContext& params, const std::string& lhs) -> Result<bool> {
@@ -753,7 +754,7 @@ const auto& filterTypeEqualsCompoundExpression() {
     return signature;
 }
 
-const auto& filterLessThanNumberCompoundExpression() {
+const static auto& filterLessThanNumberCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-<",
         [](const EvaluationContext& params, const std::string& key, double lhs) -> Result<bool> {
@@ -764,7 +765,7 @@ const auto& filterLessThanNumberCompoundExpression() {
     return signature;
 }
 
-const auto& filterLessThanStringCompoundExpression() {
+const static auto& filterLessThanStringCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-<",
         [](const EvaluationContext& params, const std::string& key, const std::string& lhs) -> Result<bool> {
@@ -775,7 +776,7 @@ const auto& filterLessThanStringCompoundExpression() {
     return signature;
 }
 
-const auto& filterIdLessThanNumberCompoundExpression() {
+const static auto& filterIdLessThanNumberCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-id-<",
         [](const EvaluationContext& params, double lhs) -> Result<bool> {
@@ -786,7 +787,7 @@ const auto& filterIdLessThanNumberCompoundExpression() {
     return signature;
 }
 
-const auto& filterIdLessThanStringCompoundExpression() {
+const static auto& filterIdLessThanStringCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-id-<",
         [](const EvaluationContext& params, const std::string& lhs) -> Result<bool> {
@@ -797,7 +798,7 @@ const auto& filterIdLessThanStringCompoundExpression() {
     return signature;
 }
 
-const auto& filterMoreThanNumberCompoundExpression() {
+const static auto& filterMoreThanNumberCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter->",
         [](const EvaluationContext& params, const std::string& key, double lhs) -> Result<bool> {
@@ -808,7 +809,7 @@ const auto& filterMoreThanNumberCompoundExpression() {
     return signature;
 }
 
-const auto& filterMoreThanStringCompoundExpression() {
+const static auto& filterMoreThanStringCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter->",
         [](const EvaluationContext& params, const std::string& key, const std::string& lhs) -> Result<bool> {
@@ -819,7 +820,7 @@ const auto& filterMoreThanStringCompoundExpression() {
     return signature;
 }
 
-const auto& filterIdMoreThanNumberCompoundExpression() {
+const static auto& filterIdMoreThanNumberCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-id->",
         [](const EvaluationContext& params, double lhs) -> Result<bool> {
@@ -830,7 +831,7 @@ const auto& filterIdMoreThanNumberCompoundExpression() {
     return signature;
 }
 
-const auto& filterIdMoreThanStringCompoundExpression() {
+const static auto& filterIdMoreThanStringCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-id->",
         [](const EvaluationContext& params, const std::string& lhs) -> Result<bool> {
@@ -841,7 +842,7 @@ const auto& filterIdMoreThanStringCompoundExpression() {
     return signature;
 }
 
-const auto& filterLessOrEqualThanNumberCompoundExpression() {
+const static auto& filterLessOrEqualThanNumberCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-<=",
         [](const EvaluationContext& params, const std::string& key, double lhs) -> Result<bool> {
@@ -852,7 +853,7 @@ const auto& filterLessOrEqualThanNumberCompoundExpression() {
     return signature;
 }
 
-const auto& filterLessOrEqualThanStringCompoundExpression() {
+const static auto& filterLessOrEqualThanStringCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-<=",
         [](const EvaluationContext& params, const std::string& key, const std::string& lhs) -> Result<bool> {
@@ -863,7 +864,7 @@ const auto& filterLessOrEqualThanStringCompoundExpression() {
     return signature;
 }
 
-const auto& filterIdLessOrEqualThanNumberCompoundExpression() {
+const static auto& filterIdLessOrEqualThanNumberCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-id-<=",
         [](const EvaluationContext& params, double lhs) -> Result<bool> {
@@ -874,7 +875,7 @@ const auto& filterIdLessOrEqualThanNumberCompoundExpression() {
     return signature;
 }
 
-const auto& filterIdLessOrEqualThanStringCompoundExpression() {
+const static auto& filterIdLessOrEqualThanStringCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-id-<=",
         [](const EvaluationContext& params, const std::string& lhs) -> Result<bool> {
@@ -885,7 +886,7 @@ const auto& filterIdLessOrEqualThanStringCompoundExpression() {
     return signature;
 }
 
-const auto& filterGreaterOrEqualThanNumberCompoundExpression() {
+const static auto& filterGreaterOrEqualThanNumberCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter->=",
         [](const EvaluationContext& params, const std::string& key, double lhs) -> Result<bool> {
@@ -896,7 +897,7 @@ const auto& filterGreaterOrEqualThanNumberCompoundExpression() {
     return signature;
 }
 
-const auto& filterGreaterOrEqualThanStringCompoundExpression() {
+const static auto& filterGreaterOrEqualThanStringCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter->=",
         [](const EvaluationContext& params, const std::string& key, const std::string& lhs) -> Result<bool> {
@@ -907,7 +908,7 @@ const auto& filterGreaterOrEqualThanStringCompoundExpression() {
     return signature;
 }
 
-const auto& filterIdGreaterOrEqualThanNumberCompoundExpression() {
+const static auto& filterIdGreaterOrEqualThanNumberCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-id->=",
         [](const EvaluationContext& params, double lhs) -> Result<bool> {
@@ -918,7 +919,7 @@ const auto& filterIdGreaterOrEqualThanNumberCompoundExpression() {
     return signature;
 }
 
-const auto& filterIdGreaterOrEqualThanStringCompoundExpression() {
+const static auto& filterIdGreaterOrEqualThanStringCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-id->=",
         [](const EvaluationContext& params, const std::string& lhs) -> Result<bool> {
@@ -929,7 +930,7 @@ const auto& filterIdGreaterOrEqualThanStringCompoundExpression() {
     return signature;
 }
 
-const auto& filterHasCompoundExpression() {
+const static auto& filterHasCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-has",
         [](const EvaluationContext& params, const std::string& key) -> Result<bool> {
@@ -940,7 +941,7 @@ const auto& filterHasCompoundExpression() {
     return signature;
 }
 
-const auto& filterHasIdCompoundExpression() {
+const static auto& filterHasIdCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-has-id",
         [](const EvaluationContext& params) -> Result<bool> {
@@ -951,7 +952,7 @@ const auto& filterHasIdCompoundExpression() {
     return signature;
 }
 
-const auto& filterTypeInCompoundExpression() {
+const static auto& filterTypeInCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-type-in",
         [](const EvaluationContext& params, const Varargs<std::string>& types) -> Result<bool> {
@@ -963,7 +964,7 @@ const auto& filterTypeInCompoundExpression() {
     return signature;
 }
 
-const auto& filterIdInCompoundExpression() {
+const static auto& filterIdInCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-id-in",
         [](const EvaluationContext& params, const Varargs<Value>& ids) -> Result<bool> {
@@ -974,7 +975,7 @@ const auto& filterIdInCompoundExpression() {
     return signature;
 }
 
-const auto& filterInCompoundExpression() {
+const static auto& filterInCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-in",
         [](const EvaluationContext& params, const Varargs<Value>& varargs) -> Result<bool> {
@@ -1071,7 +1072,8 @@ using namespace mbgl::style::conversion;
 using DefinitionIterator = decltype(compoundExpressionRegistry)::const_iterator;
 using Definitions = std::pair<DefinitionIterator, DefinitionIterator>;
 
-std::string expectedTypesError(const Definitions& definitions, const std::vector<std::unique_ptr<Expression>>& args) {
+static std::string expectedTypesError(const Definitions& definitions,
+                                      const std::vector<std::unique_ptr<Expression>>& args) {
     std::vector<std::string> availableOverloads; // Only used if there are no overloads
                                                  // with matching number of args
     std::vector<std::string> overloads;

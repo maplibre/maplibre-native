@@ -96,7 +96,7 @@ gfx::DepthMode PaintParameters::depthModeForSublayer([[maybe_unused]] uint8_t n,
     float depth = depthRangeSize + ((1 + currentLayer) * numSublayers + n) * depthEpsilon;
     return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, mask, {depth, depth}};
 #else
-    return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, mask};
+    return gfx::DepthMode{.func = gfx::DepthFunctionType::LessEqual, .mask = mask};
 #endif
 }
 
@@ -104,7 +104,7 @@ gfx::DepthMode PaintParameters::depthModeFor3D() const {
 #if MLN_RENDER_BACKEND_OPENGL
     return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, gfx::DepthMaskType::ReadWrite, {0.0, depthRangeSize}};
 #else
-    return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, gfx::DepthMaskType::ReadWrite};
+    return gfx::DepthMode{.func = gfx::DepthFunctionType::LessEqual, .mask = gfx::DepthMaskType::ReadWrite};
 #endif
 }
 
@@ -138,11 +138,11 @@ void PaintParameters::clearStencil() {
 #endif
 
     const std::vector<shaders::ClipUBO> tileUBO = {
-        shaders::ClipUBO{/* .matrix = */ util::cast<float>(matrixForTile({0, 0, 0})),
-                         /* .stencil_ref = */ 0,
-                         /* .pad1 = */ 0,
-                         /* .pad2 = */ 0,
-                         /* .pad3 = */ 0}};
+        shaders::ClipUBO{/* .matrix = */ .matrix = util::cast<float>(matrixForTile({0, 0, 0})),
+                         /* .stencil_ref = */ .stencil_ref = 0,
+                         /* .pad1 = */ .pad1 = 0,
+                         /* .pad2 = */ .pad2 = 0,
+                         /* .pad3 = */ .pad3 = 0}};
     mtlContext.renderTileClippingMasks(*renderPass, staticData, tileUBO);
     context.renderingStats().stencilClears++;
 #elif MLN_RENDER_BACKEND_VULKAN
@@ -190,11 +190,11 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
             tileUBOs.reserve(count);
         }
 
-        tileUBOs.emplace_back(shaders::ClipUBO{/* .matrix = */ util::cast<float>(matrixForTile(tileID)),
-                                               /* .stencil_ref = */ static_cast<uint32_t>(stencilID),
-                                               /* .pad1 = */ 0,
-                                               /* .pad2 = */ 0,
-                                               /* .pad3 = */ 0});
+        tileUBOs.emplace_back(shaders::ClipUBO{/* .matrix = */ .matrix = util::cast<float>(matrixForTile(tileID)),
+                                               /* .stencil_ref = */ .stencil_ref = static_cast<uint32_t>(stencilID),
+                                               /* .pad1 = */ .pad1 = 0,
+                                               /* .pad2 = */ .pad2 = 0,
+                                               /* .pad3 = */ .pad3 = 0});
     }
 
     if (!tileUBOs.empty()) {
@@ -298,12 +298,12 @@ gfx::StencilMode PaintParameters::stencilModeForClipping(const UnwrappedTileID& 
     auto it = tileClippingMaskIDs.find(tileID);
     assert(it != tileClippingMaskIDs.end());
     const int32_t id = it != tileClippingMaskIDs.end() ? it->second : 0b00000000;
-    return gfx::StencilMode{gfx::StencilMode::Equal{0b11111111},
-                            id,
-                            0b00000000,
-                            gfx::StencilOpType::Keep,
-                            gfx::StencilOpType::Keep,
-                            gfx::StencilOpType::Replace};
+    return gfx::StencilMode{.test = gfx::StencilMode::Equal{0b11111111},
+                            .ref = id,
+                            .mask = 0b00000000,
+                            .fail = gfx::StencilOpType::Keep,
+                            .depthFail = gfx::StencilOpType::Keep,
+                            .pass = gfx::StencilOpType::Replace};
 }
 
 gfx::StencilMode PaintParameters::stencilModeFor3D() {
@@ -316,21 +316,21 @@ gfx::StencilMode PaintParameters::stencilModeFor3D() {
     tileClippingMaskIDs.clear();
 
     const int32_t id = nextStencilID++;
-    return gfx::StencilMode{gfx::StencilMode::NotEqual{0b11111111},
-                            id,
-                            0b11111111,
-                            gfx::StencilOpType::Keep,
-                            gfx::StencilOpType::Keep,
-                            gfx::StencilOpType::Replace};
+    return gfx::StencilMode{.test = gfx::StencilMode::NotEqual{0b11111111},
+                            .ref = id,
+                            .mask = 0b11111111,
+                            .fail = gfx::StencilOpType::Keep,
+                            .depthFail = gfx::StencilOpType::Keep,
+                            .pass = gfx::StencilOpType::Replace};
 }
 
 gfx::ColorMode PaintParameters::colorModeForRenderPass() const {
     if (debugOptions & MapDebugOptions::Overdraw) {
         constexpr float overdraw = 1.0f / 8.0f;
-        return gfx::ColorMode{
-            gfx::ColorMode::Add{gfx::ColorBlendFactorType::ConstantColor, gfx::ColorBlendFactorType::One},
-            Color{overdraw, overdraw, overdraw, 0.0f},
-            gfx::ColorMode::Mask{true, true, true, true}};
+        return gfx::ColorMode{.blendFunction = gfx::ColorMode::Add{gfx::ColorBlendFactorType::ConstantColor,
+                                                                   gfx::ColorBlendFactorType::One},
+                              .blendColor = Color{overdraw, overdraw, overdraw, 0.0f},
+                              .mask = gfx::ColorMode::Mask{.r = true, .g = true, .b = true, .a = true}};
     } else if (pass == RenderPass::Translucent) {
         return gfx::ColorMode::alphaBlended();
     } else {

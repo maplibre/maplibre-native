@@ -839,7 +839,7 @@ std::optional<GeoJSON> parseValue(const style::conversion::Convertible& value, s
             style::conversion::Error error;
             auto geojson = toGeoJSON(argument, error);
             if (geojson && error.message.empty()) {
-                return *geojson;
+                return geojson;
             }
             ctx.error(error.message);
         }
@@ -932,7 +932,7 @@ ParseResult Distance::parse(const Convertible& value, ParsingContext& ctx) {
     return ParseResult();
 }
 
-mbgl::Value convertValue(const mapbox::geojson::rapidjson_value& v) {
+static mbgl::Value convertValue(const mapbox::geojson::rapidjson_value& v) {
     if (v.IsNumber()) {
         if (v.IsInt64()) return std::int64_t(v.GetInt64());
         if (v.IsUint64()) return std::uint64_t(v.GetUint64());

@@ -13,8 +13,9 @@ DynamicTexture::DynamicTexture(Context& context, Size size, TexturePixelType pix
     texture = context.createTexture2D();
     texture->setSize(size);
     texture->setFormat(pixelType, TextureChannelDataType::UnsignedByte);
-    texture->setSamplerConfiguration(
-        {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+    texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                      .wrapU = gfx::TextureWrapType::Clamp,
+                                      .wrapV = gfx::TextureWrapType::Clamp});
 #if MLN_DEFER_UPLOAD_ON_RENDER_THREAD
     deferredCreation = true;
 #else

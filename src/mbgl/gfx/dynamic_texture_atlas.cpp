@@ -1,6 +1,7 @@
 #include <mbgl/gfx/dynamic_texture_atlas.hpp>
 #include <mbgl/gfx/context.hpp>
 
+#include <algorithm>
 #include <cmath>
 
 namespace mbgl {
@@ -11,7 +12,7 @@ constexpr const uint16_t padding = ImagePosition::padding + extraPadding;
 constexpr const Size startSize = {512, 512};
 constexpr const Size dummySize = {1, 1};
 
-Rect<uint16_t> rectWithoutExtraPadding(const Rect<uint16_t>& rect) {
+static Rect<uint16_t> rectWithoutExtraPadding(const Rect<uint16_t>& rect) {
     return Rect<uint16_t>(
         rect.x + extraPadding, rect.y + extraPadding, rect.w - 2 * extraPadding, rect.h - 2 * extraPadding);
 }
@@ -97,8 +98,8 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
             glyphAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
         }
         glyphAtlas.textureHandles.emplace_back(texHandle);
-        glyphAtlas.glyphPositions[fontStack].emplace(glyph->id,
-                                                     GlyphPosition{rectWithoutExtraPadding(rect), glyph->metrics});
+        glyphAtlas.glyphPositions[fontStack].emplace(
+            glyph->id, GlyphPosition{.rect = rectWithoutExtraPadding(rect), .metrics = glyph->metrics});
     }
     return glyphAtlas;
 }
@@ -252,7 +253,7 @@ void DynamicTextureAtlas::removeTextures(const std::vector<TextureHandle>& textu
         dynamicTexture->removeTexture(texHandle);
     }
     if (dynamicTexture->isEmpty()) {
-        auto iterator = std::find(dynamicTextures.begin(), dynamicTextures.end(), dynamicTexture);
+        auto iterator = std::ranges::find(dynamicTextures, dynamicTexture);
         if (iterator != dynamicTextures.end()) {
             dynamicTextures.erase(iterator);
         }
