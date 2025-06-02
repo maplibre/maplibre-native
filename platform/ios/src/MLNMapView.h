@@ -463,6 +463,49 @@ MLN_EXPORT
 
 @property (nonatomic, assign) BOOL tileCacheEnabled;
 
+// MARK: Camera based tile level of detail controls
+
+/**
+ Minimum radius around the view point in unit of tiles in which the fine
+ grained zoom level tiles are always used when performing LOD
+ radius must be greater than 1 (At least 1 fine detailed tile is present)
+ A smaller radius value may improve performance at the cost of quality (tiles away from
+ camera use lower Zoom levels)
+ */
+
+@property (nonatomic, assign) double tileLodMinRadius;
+
+/**
+ factor for the distance to the camera view point
+ A value larger than 1 increases the distance to the camera view point reducing LOD
+ Larger values may improve performance at the cost of quality (tiles away from camera
+ use lower Zoom levels)
+ */
+
+@property (nonatomic, assign) double tileLodScale;
+
+/**
+ pitch angle in radians above which LOD calculation is performed
+ A smaller radius value may improve performance at the cost of quality
+ */
+
+@property (nonatomic, assign) double tileLodPitchThreshold;
+
+/**
+ Shift applied to the Zoom level during LOD calculation
+ A negative value shifts the Zoom level to a coarser level reducing quality but
+ improving performance
+ A positive value shifts the Zoom level to a finer level increasing details but
+ negatively affecting performance
+ A value of zero (default) does not apply any shift to the Zoom level
+ It is not recommended to change the default value unless performance is critical
+ and the loss of quality is acceptable. A value of -1 reduces the number of
+ displayed tiles by a factor of 4 on average
+ It is recommended to first configure the pixelRatio before adjusting
+ TileLodZoomShift. {@link MapLibreMapOptions#pixelRatio(float)}
+ */
+@property (nonatomic, assign) double tileLodZoomShift;
+
 // MARK: Displaying the User’s Location
 
 /**
@@ -504,6 +547,18 @@ MLN_EXPORT
  calling `showsUserLocation`.
  */
 @property (nonatomic, assign) BOOL showsUserLocation;
+
+/**
+ A boolean value indicating whether the location indicator is drawn using the location
+ indicator layer or the location indication annotation.
+ */
+@property (nonatomic, assign) BOOL useLocationIndicatorLayer;
+
+/**
+ A boolean value indicating whether the camera allows for concurrent animations. This is
+ a temporary feature flag to avoid breaking existing functionality.
+ */
+@property (nonatomic, assign) BOOL concurrentAnimations;
 
 /**
  A Boolean value indicating whether the map may request authorization to use location services.
@@ -1569,6 +1624,16 @@ vertically on the map.
 - (void)setContentInset:(UIEdgeInsets)contentInset
                animated:(BOOL)animated
       completionHandler:(nullable void (^)(void))completion;
+
+/**
+ Toggling between the Transform and the TransformActive implementation.
+
+ It allows us to switch between the two implementations at runtime.
+
+ It also resets the current transform state so be careful when using it
+ in the middle of a transformation.
+ */
+- (void)toggleTransform;
 
 // MARK: Converting Geographic Coordinates
 

@@ -13,6 +13,9 @@
 #include <mbgl/style/style.hpp>
 #include <mbgl/util/size.hpp>
 #include <mbgl/tile/tile_operation.hpp>
+#include <mbgl/map/transform_active.hpp>
+
+#include <numbers>
 
 namespace mbgl {
 
@@ -80,7 +83,8 @@ public:
     RendererFrontend& rendererFrontend;
     std::unique_ptr<util::ActionJournal> actionJournal;
 
-    Transform transform;
+    std::unique_ptr<Transform> transform;
+    bool using_active_transform = false;
 
     const MapMode mode;
     const float pixelRatio;
@@ -100,6 +104,11 @@ public:
     bool loading = false;
     bool rendererFullyLoaded;
     std::unique_ptr<StillImageRequest> stillImageRequest;
+
+    double tileLodMinRadius = 3;
+    double tileLodScale = 1;
+    double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;
+    double tileLodZoomShift = 0;
 };
 
 // Forward declaration of this method is required for the MapProjection class
