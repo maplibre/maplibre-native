@@ -19,7 +19,6 @@ public:
     MLNStyleLayer* createPeer(style::Layer*);
 
 public:
-    // Testing plugin architecture
     /**
      * Enables a layer type for JSON style only.
      *
@@ -27,7 +26,7 @@ public:
      * in order to save binary size (the corresponding SDK layer wrappers
      * should be excluded from the project build).
      */
-    void addLayerTypeCoreOnly(std::unique_ptr<mbgl::LayerFactory>);
+    void addLayerTypeCoreOnly(std::unique_ptr<mbgl::LayerFactory>) override;
 
     /**
      * Enables a layer type for both JSON style and runtime API.
