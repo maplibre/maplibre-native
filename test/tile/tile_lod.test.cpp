@@ -19,7 +19,7 @@ using namespace mbgl;
 using namespace mbgl::util;
 using namespace ::testing;
 
-//#define UPDATE_EXPECTED
+// #define UPDATE_EXPECTED
 
 class TileLODTest {
 public:
@@ -27,15 +27,14 @@ public:
     Map map;
 
     uint32_t tileCount = 0;
-public:
 
-    TileLODTest(const CameraOptions& cameraOptions = CameraOptions()) :
-        frontend(1.0f),
-        map(frontend,
-            MapObserver::nullObserver(),
-            MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
-            ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"))
-    {
+public:
+    TileLODTest(const CameraOptions& cameraOptions = CameraOptions())
+        : frontend(1.0f),
+          map(frontend,
+              MapObserver::nullObserver(),
+              MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
+              ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets")) {
         map.jumpTo(cameraOptions);
 
         map.setDebug(MapDebugOptions::TileBorders);
@@ -91,13 +90,13 @@ TEST(TileLOD, disabled) {
     TileLODTest test(CameraOptions().withZoom(10.0));
 
     test.map.setTileLodPitchThreshold(std::numbers::pi);
-    
+
     test.checkImage("disabled", 4);
 }
 
 TEST(TileLOD, zoomShift) {
     TileLODTest test(CameraOptions().withZoom(12.0));
-    
+
     test.map.setTileLodZoomShift(4.0);
     test.frontend.render(test.map);
     EXPECT_EQ(test.tileCount, 64);
