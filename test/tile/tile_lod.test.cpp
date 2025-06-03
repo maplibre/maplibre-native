@@ -66,13 +66,21 @@ public:
         map.getStyle().addLayer(std::move(layer));
     }
 
-    void checkImage(std::string name, uint32_t expectedTileCount) {
-        const std::string imageDir = "test/fixtures/tile_lod/" + name;
+    void checkImage(std::string image, uint32_t expectedTileCount) {
+        checkImages(std::vector<std::string>{image}, expectedTileCount);
+    }
 
-        test::checkImage(imageDir, frontend.render(map).image, 0.0002, 0.1);
+    void checkImages(std::vector<std::string> images, uint32_t expectedTileCount) {
+        const auto result = frontend.render(map);
 
         // check this after frontend.render()
         EXPECT_EQ(tileCount, expectedTileCount);
+
+        std::transform(images.begin(), images.end(), images.begin(), [](const auto& img) {
+            return "test/fixtures/tile_lod/" + img;
+        });
+
+        test::checkImages(images, result.image, 0.0002, 0.01);
     }
 };
 
@@ -113,7 +121,12 @@ TEST(TileLOD, pitchThreshold) {
     test.tileCount = 0;
 
     test.map.jumpTo(CameraOptions().withPitch(pitch + 1.0));
-    test.checkImage("pitchThreshold", 22);
+    test.checkImages(
+        {
+            "pitchThreshold-line",
+            "pitchThreshold-polyline",
+        },
+        22);
 }
 
 TEST(TileLOD, scale) {
