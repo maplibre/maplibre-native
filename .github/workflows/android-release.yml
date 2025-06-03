@@ -4,48 +4,23 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: MapLibre_Native_Ubuntu_24_04_x84_16_core
+  android-create-release:
+    runs-on: ubuntu-24.04
+    outputs:
+      version_tag: ${{ steps.prepare_release.outputs.version_tag }}
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
     defaults:
       run:
         working-directory: platform/android
-    env:
-      JOBS: 8
-      BUILDTYPE: Release
-      IS_LOCAL_DEVELOPMENT: false
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: "temurin"
-          java-version: "17"
-
-      - name: Get CMake and Ninja
-        uses: lukka/get-cmake@latest
-        with:
-          cmakeVersion: 3.24.1
-          ninjaVersion: latest
-
-      - name: npm install
-        run: npm install --ignore-scripts
-
-      - name: Android nitpick
-        run: make run-android-nitpick
 
       - name: Validate and set version
         working-directory: .
         run: .github/scripts/validate-version.sh platform/android/VERSION
 
-      - name: Build package
-        run: |
-          RENDERER=vulkan make apackage
-          BUILDTYPE=Debug RENDERER=vulkan make apackage
-          RENDERER=drawable make apackage
-          BUILDTYPE=Debug RENDERER=drawable make apackage
+      - name: npm install
+        run: npm install --ignore-scripts
 
       # create github release
       - name: Prepare release
@@ -85,70 +60,75 @@ jobs:
           draft: false
           prerelease: ${{ env.prerelease }}
 
-      - name: Upload aar (OpenGL)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  android-build-and-upload-release:
+    needs: android-create-release
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: platform/android
+    env:
+      JOBS: 8
+      BUILDTYPE: Release
+      IS_LOCAL_DEVELOPMENT: false
+    strategy:
+      matrix:
+        RENDERER:
+          - vulkan
+          - drawable
+        BUILDTYPE:
+          - Release
+          - Debug
+    steps:
+      - uses: actions/checkout@v4
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-drawable-release.aar
-          asset_name: MapLibreAndroid-release.aar
-          asset_content_type: application/zip
+          submodules: recursive
+          fetch-depth: 0
 
-      - name: Upload aar (OpenGL, Debug)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-java@v4
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-drawable-debug.aar
-          asset_name: MapLibreAndroid-debug.aar
-          asset_content_type: application/zip
+          distribution: "temurin"
+          java-version: "17"
 
-      - name: Upload aar (Vulkan)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get CMake and Ninja
+        uses: lukka/get-cmake@latest
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-vulkan-release.aar
-          asset_name: MapLibreAndroid-release-vulkan.aar
-          asset_content_type: application/zip
+          cmakeVersion: 3.24.1
+          ninjaVersion: latest
 
-      - name: Upload aar (Vulkan, Debug)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-vulkan-debug.aar
-          asset_name: MapLibreAndroid-debug-vulkan.aar
-          asset_content_type: application/zip
+      - name: npm install
+        run: npm install --ignore-scripts
 
-      - name: Upload debug symbols (OpenGL)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/build/debug-symbols-opengl.tar.gz
-          asset_name: debug-symbols-maplibre-android-opengl-${{ steps.prepare_release.outputs.version_tag }}.tar.gz
-          asset_content_type: application/gzip
+      - name: Android nitpick
+        run: make run-android-nitpick
 
-      - name: Upload debug symbols (Vulkan)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/build/debug-symbols-vulkan.tar.gz
-          asset_name: debug-symbols-maplibre-android-vulkan-${{ steps.prepare_release.outputs.version_tag }}.tar.gz
-          asset_content_type: application/gzip
+      - name: Build package
+        run: RENDERER=${{ matrix.RENDERER }} BUILDTYPE=${{ matrix.BUILDTYPE }} make apackage
 
-      - name: Clean release
+      - name: Save buildtype to GITHUB_ENV
         run: |
-          rm -f ${{ steps.prepare_release.outputs.release_notes }}
-        shell: bash
+          buildtype=${{ matrix.BUILDTYPE }}
+          # lowercase
+          echo buildtype=${buildtype,,} > "$GITHUB_ENV"
+
+      - name: Upload aar (${{ matrix.RENDERER }}, ${{ matrix.BUILDTYPE }})
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.android-create-release.outputs.upload_url }}
+          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}.aar
+          asset_name: MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.aar
+          asset_content_type: application/zip
+
+      - name: Upload debug symbols (${{ matrix.RENDERER }}, ${{ matrix.BUILDTYPE }})
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.android-create-release.outputs.upload_url }}
+          asset_path: platform/android/build/debug-symbols-${{ matrix.RENDERER }}-${{ env.buildtype }}.tar.gz
+          asset_name: debug-symbols-maplibre-android-${{ matrix.RENDERER }}-${{ needs.android-create-release.outputs.version_tag }}.tar.gz
+          asset_content_type: application/gzip
 
       - name: Prepare MavenCentral release
         env:
@@ -158,7 +138,14 @@ jobs:
         shell: bash
 
       - name: Publish to MavenCentral
-        run: make run-android-publish
+        run: |
+          renderer=${{ matrix.RENDERER }}
+          if [ "$renderer" = "vulkan" ]; then
+            ./gradlew :MapLibreAndroid:publishOpengl${{ env.buildtype }}PublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+            ./gradlew :MapLibreAndroid:publishDefault${{ env.buildtype }}PublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+          else
+            ./gradlew :MapLibreAndroid:publishVulkan${{ env.buildtype }}PublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+          fi
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
