@@ -9,6 +9,7 @@ namespace gfx {
 constexpr const uint16_t extraPadding = 1;
 constexpr const uint16_t padding = ImagePosition::padding + extraPadding;
 constexpr const Size startSize = {512, 512};
+constexpr const Size dummySize = {1, 1};
 
 Rect<uint16_t> rectWithoutExtraPadding(const Rect<uint16_t>& rect) {
     return Rect<uint16_t>(
@@ -25,8 +26,11 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs,
     if (!glyphs.size()) {
         glyphAtlas.dynamicTexture = dummyDynamicTexture[TexturePixelType::Alpha];
         if (!glyphAtlas.dynamicTexture) {
+            AlphaImage dummyImage(dummySize);
+            dummyImage.fill(0);
             glyphAtlas.dynamicTexture = std::make_shared<gfx::DynamicTexture>(
-                context, Size(1, 1), TexturePixelType::Alpha);
+                context, dummySize, TexturePixelType::Alpha);
+            glyphAtlas.dynamicTexture->addImage(dummyImage.data.get(), dummySize);
             dummyDynamicTexture[TexturePixelType::Alpha] = glyphAtlas.dynamicTexture;
         }
         return glyphAtlas;
@@ -113,8 +117,11 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
     if (!icons.size() && !patterns.size()) {
         imageAtlas.dynamicTexture = dummyDynamicTexture[TexturePixelType::RGBA];
         if (!imageAtlas.dynamicTexture) {
+            PremultipliedImage dummyImage(dummySize);
+            dummyImage.fill(0);
             imageAtlas.dynamicTexture = std::make_shared<gfx::DynamicTexture>(
-                context, Size(1, 1), TexturePixelType::RGBA);
+                context, dummySize, TexturePixelType::RGBA);
+            imageAtlas.dynamicTexture->addImage(dummyImage.data.get(), dummySize);
             dummyDynamicTexture[TexturePixelType::RGBA] = imageAtlas.dynamicTexture;
         }
         return imageAtlas;

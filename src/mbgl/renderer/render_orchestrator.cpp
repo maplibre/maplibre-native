@@ -165,8 +165,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     }
 
     if (LayerManager::annotationsEnabled) {
-        auto guard = updateParameters->annotationManager.lock();
-        if (updateParameters->annotationManager) {
+        if (auto guard = updateParameters->annotationManager.lock(); updateParameters->annotationManager) {
             updateParameters->annotationManager->updateData();
         }
     }

@@ -1239,6 +1239,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/uniform_buffer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/upload_pass.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/vertex_attribute.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/vertex_buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/shader_group.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/shader_program.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/background.hpp
@@ -1282,6 +1283,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/uniform_buffer.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/upload_pass.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/vertex_attribute.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/vertex_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/shader_program.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/background.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/circle.cpp
