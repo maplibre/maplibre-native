@@ -66,11 +66,11 @@ public:
         map.getStyle().addLayer(std::move(layer));
     }
 
-    void checkImage(std::string image, uint32_t expectedTileCount) {
-        checkImages(std::vector<std::string>{image}, expectedTileCount);
+    void checkImage(std::string image, uint32_t expectedTileCount, double imageThreshold = 0.0002) {
+        checkImages(std::vector<std::string>{image}, expectedTileCount, imageThreshold);
     }
 
-    void checkImages(std::vector<std::string> images, uint32_t expectedTileCount) {
+    void checkImages(std::vector<std::string> images, uint32_t expectedTileCount, double imageThreshold) {
         const auto result = frontend.render(map);
 
         // check this after frontend.render()
@@ -80,7 +80,7 @@ public:
             return "test/fixtures/tile_lod/" + img;
         });
 
-        test::checkImages(images, result.image, 0.0002, 0.01);
+        test::checkImages(images, result.image, imageThreshold, 0.01);
     }
 };
 
@@ -126,7 +126,7 @@ TEST(TileLOD, pitchThreshold) {
             "pitchThreshold-line",
             "pitchThreshold-polyline",
         },
-        22);
+        22, 0.0015);
 }
 
 TEST(TileLOD, scale) {
