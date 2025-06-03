@@ -1,10 +1,15 @@
 # Changelog MapLibre Native for Android
 
-## main
+## 11.10.0
 
 ### ✨ Features and improvements
 
+- Add action journal ([#3409](https://github.com/maplibre/maplibre-native/pull/3409)). Documentation: https://maplibre.org/maplibre-native/android/examples/observability/action-journal/
+- Pattern layout performance improvement ([#3495](https://github.com/maplibre/maplibre-native/pull/3495)).
+
 ### 🐞 Bug fixes
+
+- Improve weak pointer use ([#3510](https://github.com/maplibre/maplibre-native/pull/3510)).
 
 ## 11.9.0
 

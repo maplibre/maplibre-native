@@ -62,10 +62,7 @@ android {
     flavorDimensions += "renderer"
 
     productFlavors {
-        create("legacy") {
-            dimension = "renderer"
-        }
-        create("drawable") {
+        create("opengl") {
             dimension = "renderer"
         }
         create("vulkan") {
