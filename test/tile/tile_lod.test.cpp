@@ -126,7 +126,8 @@ TEST(TileLOD, pitchThreshold) {
             "pitchThreshold-line",
             "pitchThreshold-polyline",
         },
-        22, 0.0015);
+        22,
+        0.0015);
 }
 
 TEST(TileLOD, scale) {
