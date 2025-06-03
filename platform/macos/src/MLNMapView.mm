@@ -3274,4 +3274,8 @@ public:
     actionJournal->clearLog();
 }
 
+- (MLNBackendResource *)backendResource {
+    return _mbglView->getObject();
+}
+
 @end

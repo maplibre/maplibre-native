@@ -3,9 +3,12 @@ name: android-release
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
-    runs-on: MapLibre_Native_Ubuntu_24_04_x84_16_core
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: platform/android
@@ -43,9 +46,9 @@ jobs:
       - name: Build package
         run: |
           RENDERER=vulkan make apackage
-          BUILDTYPE=Debug RENDERER=vulkan make apackage
+          # BUILDTYPE=Debug RENDERER=vulkan make apackage
           RENDERER=drawable make apackage
-          BUILDTYPE=Debug RENDERER=drawable make apackage
+          # BUILDTYPE=Debug RENDERER=drawable make apackage
 
       # create github release
       - name: Prepare release
@@ -77,7 +80,7 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
         with:
           tag_name: ${{ steps.prepare_release.outputs.version_tag }}
           release_name: ${{steps.prepare_release.outputs.version_tag }}
@@ -88,47 +91,47 @@ jobs:
       - name: Upload aar (OpenGL)
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-drawable-release.aar
           asset_name: MapLibreAndroid-release.aar
           asset_content_type: application/zip
 
-      - name: Upload aar (OpenGL, Debug)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-drawable-debug.aar
-          asset_name: MapLibreAndroid-debug.aar
-          asset_content_type: application/zip
+      # - name: Upload aar (OpenGL, Debug)
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-drawable-debug.aar
+      #     asset_name: MapLibreAndroid-debug.aar
+      #     asset_content_type: application/zip
 
       - name: Upload aar (Vulkan)
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-vulkan-release.aar
           asset_name: MapLibreAndroid-release-vulkan.aar
           asset_content_type: application/zip
 
-      - name: Upload aar (Vulkan, Debug)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-vulkan-debug.aar
-          asset_name: MapLibreAndroid-debug-vulkan.aar
-          asset_content_type: application/zip
+      # - name: Upload aar (Vulkan, Debug)
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-vulkan-debug.aar
+      #     asset_name: MapLibreAndroid-debug-vulkan.aar
+      #     asset_content_type: application/zip
 
       - name: Upload debug symbols (OpenGL)
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: platform/android/build/debug-symbols-opengl.tar.gz
@@ -138,7 +141,7 @@ jobs:
       - name: Upload debug symbols (Vulkan)
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: platform/android/build/debug-symbols-vulkan.tar.gz
@@ -150,18 +153,7 @@ jobs:
           rm -f ${{ steps.prepare_release.outputs.release_notes }}
         shell: bash
 
-      - name: Prepare MavenCentral release
+      - name: Publish to Github
         env:
-          GPG_KEY_CONTENTS: ${{ secrets.GPG_KEY_CONTENTS }}
-        run: |
-          echo "${GPG_KEY_CONTENTS}" | base64 -d > signing-key.gpg
-        shell: bash
-
-      - name: Publish to MavenCentral
+          GITHUB_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
         run: make run-android-publish
-        env:
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
-          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
-          SONATYPE_STAGING_PROFILE_ID: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}

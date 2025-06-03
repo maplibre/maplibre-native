@@ -38,4 +38,6 @@ public:
 
     mbgl::PremultipliedImage readStillImage() override;
     CGLContextObj getCGLContextObj() override;
+
+    MLNBackendResource getObject() override;
 };
