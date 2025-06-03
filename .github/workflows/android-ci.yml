@@ -167,7 +167,7 @@ jobs:
 
       - name: Build Benchmark, copy to platform/android
         run: |
-          ./gradlew assembleDrawableRelease assembleDrawableReleaseAndroidTest -PtestBuildType=release
+          ./gradlew assembleOpenglRelease assembleOpenglReleaseAndroidTest -PtestBuildType=release
           cp MapLibreAndroidTestApp/build/outputs/apk/drawable/release/MapLibreAndroidTestApp-drawable-release.apk .
           cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/drawable/release/MapLibreAndroidTestApp-drawable-release-androidTest.apk .
 
@@ -191,7 +191,7 @@ jobs:
 
       - name: Build Instrumentation Tests, copy to platform/android
         run: |
-          ./gradlew assembleDrawableDebug assembleDrawableDebugAndroidTest -PtestBuildType=debug
+          ./gradlew assembleOpenglDebug assembleOpenglDebugAndroidTest -PtestBuildType=debug
           cp MapLibreAndroidTestApp/build/outputs/apk/drawable/debug/MapLibreAndroidTestApp-drawable-debug.apk InstrumentationTestApp.apk
           cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/drawable/debug/MapLibreAndroidTestApp-drawable-debug-androidTest.apk InstrumentationTests.apk
 
