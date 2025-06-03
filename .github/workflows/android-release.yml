@@ -68,7 +68,6 @@ jobs:
         working-directory: platform/android
     env:
       JOBS: 8
-      BUILDTYPE: Release
       IS_LOCAL_DEVELOPMENT: false
     strategy:
       matrix:
@@ -140,7 +139,7 @@ jobs:
       - name: Publish to MavenCentral
         run: |
           renderer=${{ matrix.RENDERER }}
-          if [ "$renderer" = "vulkan" ]; then
+          if [ "$renderer" = "opengl" ]; then
             ./gradlew :MapLibreAndroid:publishOpengl${{ env.buildtype }}PublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
             ./gradlew :MapLibreAndroid:publishDefault${{ env.buildtype }}PublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
           else
