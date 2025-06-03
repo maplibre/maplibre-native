@@ -45,6 +45,7 @@
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/run_loop.hpp>
+#include <mbgl/util/scoped.hpp>
 #include <mbgl/util/std.hpp>
 
 #include <mapbox/std/weak.hpp>
@@ -2038,10 +2039,9 @@ TEST(Map, RemovedSource) {
     RenderSource::registerRenderSourceType(customSourceType, [&](Immutable<Source::Impl> impl) {
         return std::make_unique<TestRenderSource>(staticImmutableCast<TestSource::Impl>(impl), scheduler, info);
     });
-    // Automatic cleanup.  Use `std::scope_exit` when available.
-    std::unique_ptr<void, void (*)(void*)> unregister{&info, [](auto) {
-                                                          RenderSource::unregisterRenderSourceType(customSourceType);
-                                                      }};
+    Scoped unregister{[&]() {
+        RenderSource::unregisterRenderSourceType(customSourceType);
+    }};
 
     // Cause the test tile to block when asked to load
     std::unique_lock<std::mutex> waitLock(info.waitLock);
