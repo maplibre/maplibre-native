@@ -19,8 +19,6 @@ using namespace mbgl;
 using namespace mbgl::util;
 using namespace ::testing;
 
-// #define UPDATE_EXPECTED
-
 class TileLODTest {
 public:
     HeadlessFrontend frontend;
@@ -70,14 +68,6 @@ public:
 
     void checkImage(std::string name, uint32_t expectedTileCount) {
         const std::string imageDir = "test/fixtures/tile_lod/" + name;
-
-#ifdef UPDATE_EXPECTED
-        if (!std::filesystem::exists(imageDir)) {
-            std::filesystem::create_directories(imageDir);
-        }
-
-        util::write_file(imageDir + "/expected.png", encodePNG(frontend.render(map).image));
-#endif
 
         test::checkImage(imageDir, frontend.render(map).image, 0.0002, 0.1);
 
@@ -130,12 +120,12 @@ TEST(TileLOD, scale) {
     TileLODTest test(CameraOptions().withZoom(0.0));
 
     test.map.setTileLodMinRadius(1.0);
-    test.map.setTileLodScale(0.5);
+    test.map.setTileLodScale(0.4);
     test.map.setTileLodPitchThreshold(-1.0);
 
     test.map.setTileLodZoomShift(5.0);
 
-    test.checkImage("scale", 91);
+    test.checkImage("scale", 112);
 }
 
 TEST(TileLOD, radius) {
