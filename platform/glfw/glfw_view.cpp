@@ -126,6 +126,7 @@ void cycleTileLodMode(mbgl::Map &map) {
     // TileLodMode::Default parameters
     static const auto defaultRadius = map.getTileLodMinRadius();
     static const auto defaultScale = map.getTileLodScale();
+    static const auto defaultTilePitchThreshold = map.getTilePitchThreshold();
 
     static TileLodMode mode = TileLodMode::Default;
     mode = nextTileLodMode(mode);
@@ -134,7 +135,7 @@ void cycleTileLodMode(mbgl::Map &map) {
         case TileLodMode::Default:
             map.setTileLodMinRadius(defaultRadius);
             map.setTileLodScale(defaultScale);
-            map.setTileLodPitchThreshold(60.0 / 180.0 * std::numbers::pi);
+            map.setTileLodPitchThreshold(defaultTilePitchThreshold);
             mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: default");
             break;
         case TileLodMode::NoLod:
