@@ -2011,11 +2011,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         case MBXTileLodModeDefault:
             self.mapView.tileLodMinRadius = defaultRadius;
             self.mapView.tileLodScale = defaultScale;
-            self.mapView.tileLodPitchThreshold = defaultPitchThreshold;
+            self.mapView.tileLodPitchThreshold = 60.0 / 180.0 * M_PI;
             break;
         case MBXTileLodModeNoLod:
             // When LOD is off we set a maximum PitchThreshold
-            self.mapView.tileLodMinRadius = M_PI;
+            self.mapView.tileLodPitchThreshold = M_PI;
             break;
         case MBXTileLodModeReduced:
             self.mapView.tileLodMinRadius = 2;
