@@ -26,6 +26,10 @@ namespace gfx {
 class ShaderRegistry;
 } // namespace gfx
 
+namespace util {
+class ActionJournal;
+} // namespace util
+
 struct StillImageRequest {
     StillImageRequest(Map::StillImageCallback&& callback_)
         : callback(std::move(callback_)) {}
@@ -33,10 +37,15 @@ struct StillImageRequest {
     Map::StillImageCallback callback;
 };
 
-class Map::Impl final : public style::Observer, public RendererObserver {
+class Map::Impl final : public TransformObserver, public style::Observer, public RendererObserver {
 public:
     Impl(RendererFrontend&, MapObserver&, std::shared_ptr<FileSource>, const MapOptions&);
     ~Impl() final;
+
+    // TransformObserver
+    void onCameraWillChange(MapObserver::CameraChangeMode) final;
+    void onCameraIsChanging() final;
+    void onCameraDidChange(MapObserver::CameraChangeMode) final;
 
     // StyleObserver
     void onSourceChanged(style::Source&) final;
@@ -72,6 +81,7 @@ public:
 
     MapObserver& observer;
     RendererFrontend& rendererFrontend;
+    std::unique_ptr<util::ActionJournal> actionJournal;
 
     std::unique_ptr<Transform> transform;
     bool using_active_transform = false;

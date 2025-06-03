@@ -5,6 +5,7 @@
 #import "MLNFoundation.h"
 #import "MLNGeometry.h"
 #import "MLNMapCamera.h"
+#import "MLNMapOptions.h"
 #import "MLNStyle.h"
 #import "MLNTypes.h"
 
@@ -218,6 +219,16 @@ MLN_EXPORT
  * @return An initialized map view.
  */
 - (instancetype)initWithFrame:(CGRect)frame styleJSON:(NSString *)styleJSON;
+
+/**
+ Initializes and returns a newly allocated map view with the specified frame
+ and the default style.
+
+ @param frame The frame for the view, measured in points.
+ @param options The map instance options
+ @return An initialized map view.
+ */
+- (instancetype)initWithFrame:(CGRect)frame options:(MLNMapOptions *)options;
 
 // MARK: Accessing the Delegate
 
@@ -2210,6 +2221,40 @@ vertically on the map.
  released software for performance and aesthetic reasons.
  */
 @property (nonatomic) MLNMapDebugMaskOptions debugMask;
+
+/**
+ Get the list of action journal log files from oldest to newest.
+
+ @return An array of log file paths.
+*/
+- (NSArray<NSString *> *)getActionJournalLogFiles;
+
+/**
+ Get the action journal events from oldest to newest.
+
+ Each element contains a serialized json object with the event data.
+ Example
+ `{
+    "name" : "onTileAction",
+    "time" : "2025-04-17T13:13:13.974Z",
+    "styleName" : "Streets",
+    "styleURL" : "maptiler://maps/streets",
+    "event" : {
+        "action" : "RequestedFromNetwork",
+        "tileX" : 0,
+        "tileY" : 0,
+        "tileZ" : 0,
+        "overscaledZ" : 0,
+        "sourceID" : "openmaptiles"
+    }
+ }`
+ */
+- (NSArray<NSString *> *)getActionJournalLog;
+
+/**
+ Clear stored action journal events.
+ */
+- (void)clearActionJournalLog;
 
 - (MLNBackendResource *)backendResource;
 

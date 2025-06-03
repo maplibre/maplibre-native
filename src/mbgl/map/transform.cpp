@@ -40,7 +40,7 @@ double normalizeAngle(double angle, double anchorAngle) {
     return angle;
 }
 
-Transform::Transform(MapObserver& observer_, ConstrainMode constrainMode, ViewportMode viewportMode)
+Transform::Transform(TransformObserver& observer_, ConstrainMode constrainMode, ViewportMode viewportMode)
     : observer(observer_),
       state(constrainMode, viewportMode) {}
 

@@ -620,7 +620,7 @@ void testDefaultTransform(Transform& transform,
 }
 
 TEST(Transfrom, DefaultTransform) {
-    struct TransformObserver : public mbgl::MapObserver {
+    struct TransformObserver : public mbgl::TransformObserver {
         void onCameraWillChange(MapObserver::CameraChangeMode) final { cameraWillChangeCallback(); };
 
         void onCameraDidChange(MapObserver::CameraChangeMode) final { cameraDidChangeCallback(); };
@@ -1208,4 +1208,5 @@ TEST_P(TransfromParametrized, FreeCameraOptionsStateSynchronization) {
 
 INSTANTIATE_TEST_SUITE_P(Transform,
                          TransfromParametrized,
-                         ::testing::Values(std::make_shared<Transform>(), std::make_shared<TransformActive>()));
+                         ::testing::Values(std::make_shared<Transform>(TransformObserver::nullObserver()),
+                                           std::make_shared<TransformActive>()));

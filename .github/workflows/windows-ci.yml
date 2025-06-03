@@ -196,8 +196,10 @@ jobs:
 
       - name: Download and configure Vulkan
         if: matrix.renderer == 'vulkan'
+        # 1.4.313.1 doesn't have runtime components?
+        # $version = (Invoke-WebRequest -Uri "https://vulkan.lunarg.com/sdk/latest.json" | ConvertFrom-Json).windows
         run: |
-          $version = (Invoke-WebRequest -Uri "https://vulkan.lunarg.com/sdk/latest.json" | ConvertFrom-Json).windows
+          $version = "1.4.313.0"
           Invoke-WebRequest https://sdk.lunarg.com/sdk/download/$version/windows/VulkanRT-X64-$version-Components.zip -OutFile VulkanRT.zip
           & 'C:\Program Files\7-Zip\7z.exe' e -bb3 -obuild -r .\VulkanRT.zip *x64\vulkan-1.*
 
