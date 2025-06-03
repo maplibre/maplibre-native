@@ -69,7 +69,7 @@ void Mailbox::abandon() {
 }
 
 bool Mailbox::isOpen() const {
-    return bool(weakScheduler) && !closed;
+    return !closed && weakScheduler;
 }
 
 void Mailbox::push(std::unique_ptr<Message> message) {
@@ -152,8 +152,7 @@ void Mailbox::receive() {
 }
 
 void Mailbox::scheduleToRecieve(const std::optional<util::SimpleIdentity>& tag) {
-    auto guard = weakScheduler.lock();
-    if (weakScheduler) {
+    if (auto guard = weakScheduler.lock(); weakScheduler) {
         std::weak_ptr<Mailbox> mailbox = shared_from_this();
         auto setToRecieve = [mbox = std::move(mailbox)]() {
             if (auto locked = mbox.lock()) {

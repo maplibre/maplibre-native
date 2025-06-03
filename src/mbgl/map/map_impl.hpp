@@ -60,7 +60,7 @@ public:
     void onInvalidate() final;
     void onResourceError(std::exception_ptr) final;
     void onWillStartRenderingFrame() final;
-    void onDidFinishRenderingFrame(RenderMode, bool, bool, double, double) final;
+    void onDidFinishRenderingFrame(RenderMode, bool, bool, const gfx::RenderingStats&) final;
     void onWillStartRenderingMap() final;
     void onDidFinishRenderingMap() final;
     void onStyleImageMissing(const std::string&, const std::function<void()>&) final;
@@ -78,6 +78,9 @@ public:
     // Map
     void jumpTo(const CameraOptions&);
 
+    bool isRenderingStatsViewEnabled() const;
+    void enableRenderingStatsView(bool value);
+
     MapObserver& observer;
     RendererFrontend& rendererFrontend;
     std::unique_ptr<util::ActionJournal> actionJournal;
@@ -89,6 +92,7 @@ public:
     const bool crossSourceCollisions;
 
     MapDebugOptions debugOptions{MapDebugOptions::NoDebug};
+    std::unique_ptr<gfx::RenderingStatsView> renderingStatsView;
 
     std::shared_ptr<FileSource> fileSource;
 

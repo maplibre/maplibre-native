@@ -347,6 +347,8 @@ GLFWView::GLFWView(bool fullscreen_,
     printf("- Press `K` to add a random custom runtime imagery annotation\n");
     printf("- Press `L` to add a random line annotation\n");
     printf("- Press `W` to pop the last-added annotation off\n");
+    printf("- Press `V` to toggle custom drawable layer\n");
+    printf("- Press `B` to toggle rendering stats\n");
     printf("- Press `P` to pause tile requests\n");
     printf("\n");
     printf("- Hold `Control` + mouse drag to rotate\n");
@@ -444,6 +446,9 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                 break;
             case GLFW_KEY_V:
                 view->toggleCustomDrawableStyle();
+                break;
+            case GLFW_KEY_B:
+                view->map->enableRenderingStatsView(!view->map->isRenderingStatsViewEnabled());
                 break;
             case GLFW_KEY_I:
                 view->resetDatabaseCallback();

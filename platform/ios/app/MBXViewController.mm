@@ -54,7 +54,8 @@ typedef NS_ENUM(NSInteger, MBXSettingsDebugToolsRows) {
     MBXSettingsDebugToolsOverdrawVisualization,
     MBXSettingsDebugToolsShowZoomLevel,
     MBXSettingsDebugToolsShowFrameTimeGraph,
-    MBXSettingsDebugToolsShowReuseQueueStats
+    MBXSettingsDebugToolsShowReuseQueueStats,
+    MBXSettingsDebugToolsShowRenderingStats
 };
 
 typedef NS_ENUM(NSInteger, MBXSettingsAnnotationsRows) {
@@ -229,6 +230,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 @property (nonatomic, getter=isLocalizingLabels) BOOL localizingLabels;
 @property (nonatomic) BOOL reuseQueueStatsEnabled;
 @property (nonatomic) BOOL frameTimeGraphEnabled;
+@property (nonatomic) BOOL renderingStatsEnabled;
 @property (nonatomic) BOOL shouldLimitCameraChanges;
 @property (nonatomic) BOOL randomWalk;
 @property (nonatomic) BOOL zoomLevelOrnamentEnabled;
@@ -410,7 +412,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                     (debugMask & MLNMapDebugOverdrawVisualizationMask ? @"Hide" :@"Show")],
                 [NSString stringWithFormat:@"%@ zoom level ornament", (self.zoomLevelOrnamentEnabled ? @"Hide" :@"Show")],
                 [NSString stringWithFormat:@"%@ frame time graph", (self.frameTimeGraphEnabled ? @"Hide" :@"Show")],
-                [NSString stringWithFormat:@"%@ reuse queue stats", (self.reuseQueueStatsEnabled ? @"Hide" :@"Show")]
+                [NSString stringWithFormat:@"%@ reuse queue stats", (self.reuseQueueStatsEnabled ? @"Hide" :@"Show")],
+                [NSString stringWithFormat:@"%@ rendering stats", (self.renderingStatsEnabled ? @"Hide" :@"Show")]
             ]];
             break;
         case MBXSettingsAnnotations:
@@ -543,6 +546,12 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                     self.hudLabel.hidden = !self.currentState.reuseQueueStatsEnabled;
                     self.zoomLevelOrnamentEnabled = NO;
                     [self updateHUD];
+                    break;
+                }
+                case MBXSettingsDebugToolsShowRenderingStats:
+                {
+                    self.renderingStatsEnabled = !self.renderingStatsEnabled;
+                    [self.mapView enableRenderingStatsView:self.renderingStatsEnabled];
                     break;
                 }
                 default:
@@ -2814,9 +2823,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     return features;
 }
 
-- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView fullyRendered:(BOOL)fullyRendered frameEncodingTime:(double)frameEncodingTime frameRenderingTime:(double)frameRenderingTime {
+- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView
+                         fullyRendered:(BOOL)fullyRendered
+                        renderingStats:(nonnull MLNRenderingStats *)renderingStats {
     if (self.frameTimeGraphEnabled) {
-        [self.frameTimeGraphView updatePathWithFrameDuration:frameEncodingTime];
+        [self.frameTimeGraphView updatePathWithFrameDuration:renderingStats.encodingTime];
     }
 }
 
