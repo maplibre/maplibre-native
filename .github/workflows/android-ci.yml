@@ -168,13 +168,13 @@ jobs:
       - name: Build Benchmark, copy to platform/android
         run: |
           ./gradlew assembleOpenglRelease assembleOpenglReleaseAndroidTest -PtestBuildType=release
-          cp MapLibreAndroidTestApp/build/outputs/apk/drawable/release/MapLibreAndroidTestApp-drawable-release.apk .
-          cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/drawable/release/MapLibreAndroidTestApp-drawable-release-androidTest.apk .
+          cp MapLibreAndroidTestApp/build/outputs/apk/opengl/release/MapLibreAndroidTestApp-opengl-release.apk .
+          cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/opengl/release/MapLibreAndroidTestApp-opengl-release-androidTest.apk .
 
       # https://developer.android.com/guide/practices/page-sizes
       - name: Check alignment of .apk
         run: |
-          unzip -o MapLibreAndroidTestApp/build/outputs/apk/drawable/release/MapLibreAndroidTestApp-drawable-release.apk -d /tmp/my_apk_out
+          unzip -o MapLibreAndroidTestApp/build/outputs/apk/opengl/release/MapLibreAndroidTestApp-opengl-release.apk -d /tmp/my_apk_out
           scripts/check-alignment.sh /tmp/my_apk_out
 
       - name: Create artifact for benchmark APKs
@@ -183,8 +183,8 @@ jobs:
           if-no-files-found: error
           name: benchmarkAPKs
           path: |
-            platform/android/MapLibreAndroidTestApp-drawable-release.apk
-            platform/android/MapLibreAndroidTestApp-drawable-release-androidTest.apk
+            platform/android/MapLibreAndroidTestApp-opengl-release.apk
+            platform/android/MapLibreAndroidTestApp-opengl-release-androidTest.apk
 
       - if: github.event_name == 'pull_request'
         uses: ./.github/actions/save-pr-number
@@ -192,8 +192,8 @@ jobs:
       - name: Build Instrumentation Tests, copy to platform/android
         run: |
           ./gradlew assembleOpenglDebug assembleOpenglDebugAndroidTest -PtestBuildType=debug
-          cp MapLibreAndroidTestApp/build/outputs/apk/drawable/debug/MapLibreAndroidTestApp-drawable-debug.apk InstrumentationTestApp.apk
-          cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/drawable/debug/MapLibreAndroidTestApp-drawable-debug-androidTest.apk InstrumentationTests.apk
+          cp MapLibreAndroidTestApp/build/outputs/apk/opengl/debug/MapLibreAndroidTestApp-opengl-debug.apk InstrumentationTestApp.apk
+          cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/opengl/debug/MapLibreAndroidTestApp-opengl-debug-androidTest.apk InstrumentationTests.apk
 
       - name: Upload android-ui-test
         uses: actions/upload-artifact@v4

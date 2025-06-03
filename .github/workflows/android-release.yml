@@ -73,7 +73,7 @@ jobs:
       matrix:
         RENDERER:
           - vulkan
-          - drawable
+          - opengl
         BUILDTYPE:
           - Release
           - Debug
