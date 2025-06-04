@@ -62,7 +62,7 @@ jobs:
 
   android-build-and-upload-release:
     needs: android-create-release
-    runs-on: ubuntu-24.04
+    runs-on: MapLibre_Native_Ubuntu_24_04_x84_16_core
     defaults:
       run:
         working-directory: platform/android
