@@ -28,6 +28,10 @@ class AsyncTask;
 namespace android {
 
 class AndroidRendererFrontend : public RendererFrontend, public std::enable_shared_from_this<AndroidRendererFrontend> {
+    struct Private {
+        explicit Private() = default;
+    };
+
 public:
     AndroidRendererFrontend(Private, MapRenderer&);
 
@@ -67,10 +71,6 @@ private:
     util::RunLoop* mapRunLoop;
     std::unique_ptr<util::AsyncTask> updateAsyncTask;
     std::shared_ptr<UpdateParameters> updateParams;
-
-    struct Private {
-        explicit Private() = default;
-    };
 };
 
 } // namespace android
