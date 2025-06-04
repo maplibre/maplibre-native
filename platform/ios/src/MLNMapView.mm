@@ -27,6 +27,12 @@
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/projection.hpp>
 #include <mbgl/layermanager/layer_manager.hpp>
+#include <mbgl/plugin/plugin_layer_factory.hpp>
+#include <mbgl/plugin/plugin_layer.hpp>
+#include <mbgl/plugin/plugin_layer_impl.hpp>
+#include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/mtl/mtl_fwd.hpp>
+#include <mbgl/mtl/render_pass.hpp>
 
 #import "Mapbox.h"
 #import "MLNShape_Private.h"
@@ -73,15 +79,8 @@
 #import "MLNSettings_Private.h"
 #import "MLNActionJournalOptions_Private.h"
 #import "MLNMapProjection.h"
-
 #import "MLNPluginLayer.h"
 #import "MLNStyleLayerManager.h"
-#include <mbgl/plugin/plugin_layer_factory.hpp>
-#include <mbgl/plugin/plugin_layer.hpp>
-#include <mbgl/plugin/plugin_layer_impl.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/mtl/mtl_fwd.hpp>
-#include <mbgl/mtl/render_pass.hpp>
 #include "MLNPluginStyleLayer_Private.h"
 
 #include <algorithm>
