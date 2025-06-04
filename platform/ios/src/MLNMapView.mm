@@ -69,6 +69,7 @@
 #import "MLNLoggingConfiguration_Private.h"
 #import "MLNNetworkConfiguration_Private.h"
 #import "MLNReachability.h"
+#import "MLNRenderingStats_Private.h"
 #import "MLNSettings_Private.h"
 #import "MLNActionJournalOptions_Private.h"
 #import "MLNMapProjection.h"
@@ -509,6 +510,8 @@ public:
     CFTimeInterval _frameCounterStartTime;
     NSInteger _frameCount;
     CFTimeInterval _frameDurations;
+
+    MLNRenderingStats* _renderingStats;
 }
 
 // MARK: - Setup & Teardown -
@@ -3246,6 +3249,46 @@ static void *windowScreenContext = &windowScreenContext;
 - (BOOL)tileCacheEnabled
 {
     return _rendererFrontend->getTileCacheEnabled();
+}
+
+- (void)setTileLodMinRadius:(double)tileLodMinRadius
+{
+    _mbglMap->setTileLodMinRadius(tileLodMinRadius);
+}
+
+- (double)tileLodMinRadius
+{
+    return _mbglMap->getTileLodMinRadius();
+}
+
+- (void)setTileLodScale:(double)tileLodScale
+{
+    _mbglMap->setTileLodScale(tileLodScale);
+}
+
+- (double)tileLodScale
+{
+    return _mbglMap->getTileLodScale();
+}
+
+-(void)setTileLodPitchThreshold:(double)tileLodPitchThreshold
+{
+    _mbglMap->setTileLodPitchThreshold(tileLodPitchThreshold);
+}
+
+-(double)tileLodPitchThreshold
+{
+    return _mbglMap->getTileLodPitchThreshold();
+}
+
+-(void)setTileLodZoomShift:(double)tileLodZoomShift
+{
+    _mbglMap->setTileLodZoomShift(tileLodZoomShift);
+}
+
+-(double)tileLodZoomShift
+{
+    return _mbglMap->getTileLodZoomShift();
 }
 
 // MARK: - Accessibility -
@@ -6933,8 +6976,7 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (void)mapViewDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered
-                                  frameEncodingTime:(double)frameEncodingTime
-                                 frameRenderingTime:(double)frameRenderingTime {
+                                     renderingStats:(const mbgl::gfx::RenderingStats &)stats {
     if (!_mbglMap)
     {
         return;
@@ -6946,9 +6988,21 @@ static void *windowScreenContext = &windowScreenContext;
         [self.style didChangeValueForKey:@"layers"];
     }
 
-    if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:frameEncodingTime:frameRenderingTime:)])
+    if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:renderingStats:)])
     {
-        [self.delegate mapViewDidFinishRenderingFrame:self fullyRendered:fullyRendered frameEncodingTime:frameEncodingTime frameRenderingTime:frameRenderingTime];
+        if (!_renderingStats) {
+            _renderingStats = [[MLNRenderingStats alloc] init];
+        }
+
+        [_renderingStats setCoreData:stats];
+        [self.delegate mapViewDidFinishRenderingFrame:self fullyRendered:fullyRendered renderingStats:_renderingStats];
+    }
+    else if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:frameEncodingTime:frameRenderingTime:)])
+    {
+        [self.delegate mapViewDidFinishRenderingFrame:self
+                                        fullyRendered:fullyRendered
+                                    frameEncodingTime:stats.encodingTime
+                                   frameRenderingTime:stats.renderingTime];
     }
     else if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:)])
     {
@@ -7575,6 +7629,14 @@ static void *windowScreenContext = &windowScreenContext;
     }
 
     return _annotationViewReuseQueueByIdentifier[identifier];
+}
+
+- (BOOL)isRenderingStatsViewEnabled {
+    return _mbglMap->isRenderingStatsViewEnabled();
+}
+
+- (void)enableRenderingStatsView:(BOOL)value {
+    _mbglMap->enableRenderingStatsView(value);
 }
 
 - (void)triggerRepaint

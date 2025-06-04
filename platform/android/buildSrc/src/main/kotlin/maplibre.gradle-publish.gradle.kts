@@ -98,15 +98,15 @@ tasks {
 }
 
 afterEvaluate {
-    configureMavenPublication("drawable", "opengl", "", "")
-    configureMavenPublication("drawable", "opengldebug", "-debug", " (Debug)", "Debug")
-    configureMavenPublication("vulkan", "vulkan", "-vulkan", "(Vulkan)")
+    configureMavenPublication("opengl", "defaultrelease", "", "")
+    configureMavenPublication("opengl", "defaultdebug", "-debug", " (Debug)", "Debug")
+    configureMavenPublication("vulkan", "vulkanrelease", "-vulkan", "(Vulkan)")
     configureMavenPublication("vulkan", "vulkandebug", "-vulkan-debug", "(Vulkan, Debug)", "Debug")
     // Right now this is the same as the first, but in the future we might release a major version
     // which defaults to Vulkan (or has support for multiple backends). We will keep using only
     // OpenGL ES with this artifact ID if that happens.
-    configureMavenPublication("drawable", "opengl2", "-opengl", " (OpenGL ES)")
-    configureMavenPublication("drawable", "opengl2debug", "-opengl-debug", " (OpenGL ES, Debug)", "Debug")
+    configureMavenPublication("opengl", "openglrelease", "-opengl", " (OpenGL ES)")
+    configureMavenPublication("opengl", "opengldebug", "-opengl-debug", " (OpenGL ES, Debug)", "Debug")
 }
 
 

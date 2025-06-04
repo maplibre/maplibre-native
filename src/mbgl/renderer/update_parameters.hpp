@@ -9,6 +9,7 @@
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/immutable.hpp>
 
+#include <numbers>
 #include <vector>
 
 #include <mapbox/std/weak.hpp>
@@ -44,6 +45,11 @@ public:
     const bool stillImageRequest;
 
     const bool crossSourceCollisions;
+
+    double tileLodMinRadius = 3;
+    double tileLodScale = 1;
+    double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;
+    double tileLodZoomShift = 0;
 };
 
 } // namespace mbgl

@@ -39,6 +39,7 @@ namespace android {
 class AndroidRendererFrontend;
 class FileSource;
 class MapRenderer;
+class RenderingStats;
 
 class NativeMapView : public MapObserver {
 public:
@@ -62,7 +63,7 @@ public:
     void onDidFinishLoadingMap() override;
     void onDidFailLoadingMap(MapLoadError, const std::string&) override;
     void onWillStartRenderingFrame() override;
-    void onDidFinishRenderingFrame(MapObserver::RenderFrameStatus) override;
+    void onDidFinishRenderingFrame(const MapObserver::RenderFrameStatus&) override;
     void onWillStartRenderingMap() override;
     void onDidFinishRenderingMap(MapObserver::RenderMode) override;
     void onDidBecomeIdle() override;
@@ -301,9 +302,28 @@ public:
 
     jni::jboolean getTileCacheEnabled(JNIEnv&);
 
+    void setTileLodMinRadius(JNIEnv&, jni::jdouble);
+
+    jni::jdouble getTileLodMinRadius(JNIEnv&);
+
+    void setTileLodScale(JNIEnv&, jni::jdouble);
+
+    jni::jdouble getTileLodScale(JNIEnv&);
+
+    void setTileLodPitchThreshold(JNIEnv&, jni::jdouble);
+
+    jni::jdouble getTileLodPitchThreshold(JNIEnv&);
+
+    void setTileLodZoomShift(JNIEnv&, jni::jdouble);
+
+    jni::jdouble getTileLodZoomShift(JNIEnv&);
+
     mbgl::Map& getMap();
 
     void triggerRepaint(JNIEnv&);
+
+    jni::jboolean isRenderingStatsViewEnabled(JNIEnv&);
+    void enableRenderingStatsView(JNIEnv&, jni::jboolean);
 
     // Shader compilation
     void onRegisterShaders(mbgl::gfx::ShaderRegistry&) override;
@@ -335,6 +355,8 @@ private:
     std::string styleUrl;
 
     float pixelRatio;
+
+    jni::Global<jni::Object<RenderingStats>> renderingStats;
 
     // Minimum texture size according to OpenGL ES 2.0 specification.
     int width = 64;

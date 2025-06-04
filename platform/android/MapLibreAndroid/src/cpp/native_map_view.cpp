@@ -40,6 +40,7 @@
 #include "conversion/collection.hpp"
 #include "style/conversion/filter.hpp"
 #include "geojson/feature.hpp"
+#include "rendering_stats.hpp"
 
 #include "android_renderer_frontend.hpp"
 #include "attach_env.hpp"
@@ -187,20 +188,25 @@ void NativeMapView::onWillStartRenderingFrame() {
     }
 }
 
-void NativeMapView::onDidFinishRenderingFrame(MapObserver::RenderFrameStatus status) {
+void NativeMapView::onDidFinishRenderingFrame(const MapObserver::RenderFrameStatus& status) {
     assert(vm != nullptr);
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onDidFinishRenderingFrame = javaClass.GetMethod<void(jboolean, jdouble, jdouble)>(
+    static auto onDidFinishRenderingFrame = javaClass.GetMethod<void(jboolean, jni::Object<RenderingStats>)>(
         *_env, "onDidFinishRenderingFrame");
     auto weakReference = javaPeer.get(*_env);
     if (weakReference) {
+        if (!renderingStats) {
+            renderingStats = jni::NewGlobal(*_env, RenderingStats::Create(*_env));
+        }
+
+        RenderingStats::Update(*_env, renderingStats, status.renderingStats);
+
         weakReference.Call(*_env,
                            onDidFinishRenderingFrame,
                            (jboolean)(status.mode != MapObserver::RenderMode::Partial),
-                           (jdouble)status.frameEncodingTime,
-                           (jdouble)status.frameRenderingTime);
+                           renderingStats);
     }
 }
 
@@ -1263,6 +1269,38 @@ jni::jboolean NativeMapView::getTileCacheEnabled(JNIEnv&) {
     return jni::jboolean(rendererFrontend->getTileCacheEnabled());
 }
 
+void NativeMapView::setTileLodMinRadius(JNIEnv&, jni::jdouble radius) {
+    map->setTileLodMinRadius(radius);
+}
+
+jni::jdouble NativeMapView::getTileLodMinRadius(JNIEnv&) {
+    return jni::jdouble(map->getTileLodMinRadius());
+}
+
+void NativeMapView::setTileLodScale(JNIEnv&, jni::jdouble scale) {
+    map->setTileLodScale(scale);
+}
+
+jni::jdouble NativeMapView::getTileLodScale(JNIEnv&) {
+    return jni::jdouble(map->getTileLodScale());
+}
+
+void NativeMapView::setTileLodPitchThreshold(JNIEnv&, jni::jdouble threshold) {
+    map->setTileLodPitchThreshold(threshold);
+}
+
+jni::jdouble NativeMapView::getTileLodPitchThreshold(JNIEnv&) {
+    return jni::jdouble(map->getTileLodPitchThreshold());
+}
+
+void NativeMapView::setTileLodZoomShift(JNIEnv&, jni::jdouble shift) {
+    map->setTileLodZoomShift(shift);
+}
+
+jni::jdouble NativeMapView::getTileLodZoomShift(JNIEnv&) {
+    return jni::jdouble(map->getTileLodZoomShift());
+}
+
 mbgl::Map& NativeMapView::getMap() {
     return *map;
 }
@@ -1270,6 +1308,16 @@ mbgl::Map& NativeMapView::getMap() {
 void NativeMapView::triggerRepaint(JNIEnv&) {
     assert(map);
     map->triggerRepaint();
+}
+
+jni::jboolean NativeMapView::isRenderingStatsViewEnabled(JNIEnv&) {
+    assert(map);
+    return jni::jboolean(map->isRenderingStatsViewEnabled());
+}
+
+void NativeMapView::enableRenderingStatsView(JNIEnv&, jni::jboolean value) {
+    assert(map);
+    map->enableRenderingStatsView(value);
 }
 
 // Static methods //
@@ -1384,7 +1432,17 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::getPrefetchZoomDelta, "nativeGetPrefetchZoomDelta"),
         METHOD(&NativeMapView::setTileCacheEnabled, "nativeSetTileCacheEnabled"),
         METHOD(&NativeMapView::getTileCacheEnabled, "nativeGetTileCacheEnabled"),
-        METHOD(&NativeMapView::triggerRepaint, "nativeTriggerRepaint"));
+        METHOD(&NativeMapView::setTileLodMinRadius, "nativeSetTileLodMinRadius"),
+        METHOD(&NativeMapView::getTileLodMinRadius, "nativeGetTileLodMinRadius"),
+        METHOD(&NativeMapView::setTileLodScale, "nativeSetTileLodScale"),
+        METHOD(&NativeMapView::getTileLodScale, "nativeGetTileLodScale"),
+        METHOD(&NativeMapView::setTileLodPitchThreshold, "nativeSetTileLodPitchThreshold"),
+        METHOD(&NativeMapView::getTileLodPitchThreshold, "nativeGetTileLodPitchThreshold"),
+        METHOD(&NativeMapView::setTileLodZoomShift, "nativeSetTileLodZoomShift"),
+        METHOD(&NativeMapView::getTileLodZoomShift, "nativeGetTileLodZoomShift"),
+        METHOD(&NativeMapView::triggerRepaint, "nativeTriggerRepaint"),
+        METHOD(&NativeMapView::isRenderingStatsViewEnabled, "nativeIsRenderingStatsViewEnabled"),
+        METHOD(&NativeMapView::enableRenderingStatsView, "nativeEnableRenderingStatsView"));
 }
 
 void NativeMapView::onRegisterShaders(gfx::ShaderRegistry&) {};

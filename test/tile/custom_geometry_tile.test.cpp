@@ -36,17 +36,17 @@ public:
     style::Style style;
 
     CustomTileTest()
-        : tileParameters{1.0,
-                         MapDebugOptions(),
-                         transformState,
-                         fileSource,
-                         MapMode::Continuous,
-                         annotationManager.makeWeakPtr(),
-                         imageManager,
-                         glyphManager,
-                         0,
-                         {Scheduler::GetBackground(), uniqueID},
-                         dynamicTextureAtlas},
+        : tileParameters{.pixelRatio = 1.0,
+                         .debugOptions = MapDebugOptions(),
+                         .transformState = transformState,
+                         .fileSource = fileSource,
+                         .mode = MapMode::Continuous,
+                         .annotationManager = annotationManager.makeWeakPtr(),
+                         .imageManager = imageManager,
+                         .glyphManager = glyphManager,
+                         .prefetchZoomDelta = 0,
+                         .threadPool = {Scheduler::GetBackground(), uniqueID},
+                         .dynamicTextureAtlas = dynamicTextureAtlas},
           style{fileSource, 1, tileParameters.threadPool} {}
 };
 

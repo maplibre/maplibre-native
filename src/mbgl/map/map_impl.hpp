@@ -14,6 +14,8 @@
 #include <mbgl/util/size.hpp>
 #include <mbgl/tile/tile_operation.hpp>
 
+#include <numbers>
+
 namespace mbgl {
 
 class FileSource;
@@ -58,7 +60,7 @@ public:
     void onInvalidate() final;
     void onResourceError(std::exception_ptr) final;
     void onWillStartRenderingFrame() final;
-    void onDidFinishRenderingFrame(RenderMode, bool, bool, double, double) final;
+    void onDidFinishRenderingFrame(RenderMode, bool, bool, const gfx::RenderingStats&) final;
     void onWillStartRenderingMap() final;
     void onDidFinishRenderingMap() final;
     void onStyleImageMissing(const std::string&, const std::function<void()>&) final;
@@ -76,6 +78,9 @@ public:
     // Map
     void jumpTo(const CameraOptions&);
 
+    bool isRenderingStatsViewEnabled() const;
+    void enableRenderingStatsView(bool value);
+
     MapObserver& observer;
     RendererFrontend& rendererFrontend;
     std::unique_ptr<util::ActionJournal> actionJournal;
@@ -87,6 +92,7 @@ public:
     const bool crossSourceCollisions;
 
     MapDebugOptions debugOptions{MapDebugOptions::NoDebug};
+    std::unique_ptr<gfx::RenderingStatsView> renderingStatsView;
 
     std::shared_ptr<FileSource> fileSource;
 
@@ -100,6 +106,11 @@ public:
     bool loading = false;
     bool rendererFullyLoaded;
     std::unique_ptr<StillImageRequest> stillImageRequest;
+
+    double tileLodMinRadius = 3;
+    double tileLodScale = 1;
+    double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;
+    double tileLodZoomShift = 0;
 };
 
 // Forward declaration of this method is required for the MapProjection class

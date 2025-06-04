@@ -9,6 +9,7 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/map/camera.hpp>
 #include <mbgl/math/angles.hpp>
+#include <mbgl/math/clamp.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/style/expression/dsl.hpp>
 #include <mbgl/style/image.hpp>
@@ -68,7 +69,6 @@
 using namespace std::numbers;
 
 #ifdef ENABLE_LOCATION_INDICATOR
-
 namespace {
 const std::string mbglPuckAssetsPath{MLN_ASSETS_PATH};
 
@@ -83,7 +83,7 @@ std::array<double, 3> toArray(const mbgl::LatLng &crd) {
     return {crd.latitude(), crd.longitude(), 0};
 }
 } // namespace
-#endif
+#endif // ENABLE_LOCATION_INDICATOR
 
 class SnapshotObserver final : public mbgl::MapSnapshotterObserver {
 public:
@@ -99,6 +99,76 @@ public:
 };
 
 namespace {
+
+enum class TileLodMode {
+    Default,    // Default Tile LOD parameters
+    NoLod,      // Disable LOD
+    Reduced,    // Reduce LOD away from camera
+    Aggressive, // Aggressively reduce LOD away from camera at the detriment of quality
+};
+
+constexpr TileLodMode nextTileLodMode(TileLodMode current) {
+    switch (current) {
+        case TileLodMode::Default:
+            return TileLodMode::NoLod;
+        case TileLodMode::NoLod:
+            return TileLodMode::Reduced;
+        case TileLodMode::Reduced:
+            return TileLodMode::Aggressive;
+        case TileLodMode::Aggressive:
+            return TileLodMode::Default;
+        default:
+            return TileLodMode::Default;
+    }
+}
+
+void cycleTileLodMode(mbgl::Map &map) {
+    // TileLodMode::Default parameters
+    static const auto defaultRadius = map.getTileLodMinRadius();
+    static const auto defaultScale = map.getTileLodScale();
+    static const auto defaultTilePitchThreshold = map.getTileLodPitchThreshold();
+
+    static TileLodMode mode = TileLodMode::Default;
+    mode = nextTileLodMode(mode);
+
+    switch (mode) {
+        case TileLodMode::Default:
+            map.setTileLodMinRadius(defaultRadius);
+            map.setTileLodScale(defaultScale);
+            map.setTileLodPitchThreshold(defaultTilePitchThreshold);
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: default");
+            break;
+        case TileLodMode::NoLod:
+            // When LOD is off we set a maximum PitchThreshold
+            map.setTileLodPitchThreshold(std::numbers::pi);
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: disabled");
+            break;
+        case TileLodMode::Reduced:
+            map.setTileLodMinRadius(2);
+            map.setTileLodScale(1.5);
+            map.setTileLodPitchThreshold(std::numbers::pi / 4);
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: reduced");
+            break;
+        case TileLodMode::Aggressive:
+            map.setTileLodMinRadius(1);
+            map.setTileLodScale(2);
+            map.setTileLodPitchThreshold(0);
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: aggressive");
+            break;
+    }
+    map.triggerRepaint();
+}
+
+void tileLodZoomShift(mbgl::Map &map, bool positive) {
+    constexpr auto tileLodZoomShiftStep = 0.25;
+    auto shift = positive ? tileLodZoomShiftStep : -tileLodZoomShiftStep;
+    shift = map.getTileLodZoomShift() + shift;
+    shift = mbgl::util::clamp(shift, -2.5, 2.5);
+    mbgl::Log::Info(mbgl::Event::OpenGL, "Zoom shift: " + std::to_string(shift));
+    map.setTileLodZoomShift(shift);
+    map.triggerRepaint();
+}
+
 void addFillExtrusionLayer(mbgl::style::Style &style, bool visible) {
     MLN_TRACE_FUNC();
 
@@ -278,6 +348,8 @@ GLFWView::GLFWView(bool fullscreen_,
     printf("- Press `K` to add a random custom runtime imagery annotation\n");
     printf("- Press `L` to add a random line annotation\n");
     printf("- Press `W` to pop the last-added annotation off\n");
+    printf("- Press `V` to toggle custom drawable layer\n");
+    printf("- Press `B` to toggle rendering stats\n");
     printf("- Press `P` to pause tile requests\n");
     printf("\n");
     printf("- Hold `Control` + mouse drag to rotate\n");
@@ -286,6 +358,9 @@ GLFWView::GLFWView(bool fullscreen_,
     printf("- Press `F1` to generate a render test for the current view\n");
     printf("\n");
     printf("- Press `Tab` to cycle through the map debug options\n");
+    printf("- Press `F6` to cycle through Tile LOD modes\n");
+    printf("- Press `F7` to lower the zoom level without changing the camera\n");
+    printf("- Press `F8` to higher the zoom level without changing the camera\n");
     printf("- Press `Esc` to quit\n");
     printf("\n");
     printf(
@@ -372,6 +447,9 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                 break;
             case GLFW_KEY_V:
                 view->toggleCustomDrawableStyle();
+                break;
+            case GLFW_KEY_B:
+                view->map->enableRenderingStatsView(!view->map->isRenderingStatsViewEnabled());
                 break;
             case GLFW_KEY_I:
                 view->resetDatabaseCallback();
@@ -561,6 +639,15 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                 view->freeCameraDemoPhase = 0;
                 view->freeCameraDemoStartTime = mbgl::Clock::now();
                 view->invalidate();
+            } break;
+            case GLFW_KEY_F6: {
+                cycleTileLodMode(*view->map);
+            } break;
+            case GLFW_KEY_F7: {
+                tileLodZoomShift(*view->map, false);
+            } break;
+            case GLFW_KEY_F8: {
+                tileLodZoomShift(*view->map, true);
             } break;
         }
     }

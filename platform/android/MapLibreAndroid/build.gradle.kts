@@ -74,7 +74,7 @@ android {
 
     flavorDimensions += "renderer"
     productFlavors {
-        create("drawable") {
+        create("opengl") {
             dimension = "renderer"
         }
         create("vulkan") {
@@ -88,7 +88,7 @@ android {
     }
 
     sourceSets {
-        getByName("drawable") {
+        getByName("opengl") {
             java.srcDirs("src/opengl/java/")
         }
     }

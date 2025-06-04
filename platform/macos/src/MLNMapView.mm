@@ -61,6 +61,7 @@
 #import "MLNLoggingConfiguration_Private.h"
 #import "MLNReachability.h"
 #import "MLNActionJournalOptions_Private.h"
+#import "MLNRenderingStats_Private.h"
 #import "MLNSettings_Private.h"
 
 #import <CoreImage/CIFilter.h>
@@ -207,6 +208,8 @@ public:
 
     /// reachability instance
     MLNReachability *_reachability;
+
+    MLNRenderingStats* _renderingStats;
 }
 
 // MARK: Lifecycle
@@ -707,6 +710,46 @@ public:
     return _mbglMap->getPrefetchZoomDelta() > 0 ? YES : NO;
 }
 
+- (void)setTileLodMinRadius:(double)tileLodMinRadius
+{
+    _mbglMap->setTileLodMinRadius(tileLodMinRadius);
+}
+
+- (double)tileLodMinRadius
+{
+    return _mbglMap->getTileLodMinRadius();
+}
+
+- (void)setTileLodScale:(double)tileLodScale
+{
+    _mbglMap->setTileLodScale(tileLodScale);
+}
+
+- (double)tileLodScale
+{
+    return _mbglMap->getTileLodScale();
+}
+
+-(void)setTileLodPitchThreshold:(double)tileLodPitchThreshold
+{
+    _mbglMap->setTileLodPitchThreshold(tileLodPitchThreshold);
+}
+
+-(double)tileLodPitchThreshold
+{
+    return _mbglMap->getTileLodPitchThreshold();
+}
+
+-(void)setTileLodZoomShift:(double)tileLodZoomShift
+{
+    _mbglMap->setTileLodZoomShift(tileLodZoomShift);
+}
+
+-(double)tileLodZoomShift
+{
+    return _mbglMap->getTileLodZoomShift();
+}
+
 - (mbgl::Renderer *)renderer {
     return _rendererFrontend->getRenderer();
 }
@@ -954,7 +997,8 @@ public:
     }
 }
 
-- (void)mapViewDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered {
+- (void)mapViewDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered
+                                     renderingStats:(const mbgl::gfx::RenderingStats &)stats {
     if (!_mbglMap) {
         return;
     }
@@ -963,7 +1007,25 @@ public:
         _isChangingAnnotationLayers = NO;
         [self.style didChangeValueForKey:@"layers"];
     }
-    if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:)]) {
+
+    if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:renderingStats:)])
+    {
+        if (!_renderingStats) {
+            _renderingStats = [[MLNRenderingStats alloc] init];
+        }
+
+        [_renderingStats setCoreData:stats];
+        [self.delegate mapViewDidFinishRenderingFrame:self fullyRendered:fullyRendered renderingStats:_renderingStats];
+    }
+    else if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:frameEncodingTime:frameRenderingTime:)])
+    {
+        [self.delegate mapViewDidFinishRenderingFrame:self
+                                        fullyRendered:fullyRendered
+                                    frameEncodingTime:stats.encodingTime
+                                   frameRenderingTime:stats.renderingTime];
+    }
+    else if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:)])
+    {
         [self.delegate mapViewDidFinishRenderingFrame:self fullyRendered:fullyRendered];
     }
 }
