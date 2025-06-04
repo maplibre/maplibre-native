@@ -345,7 +345,7 @@ public:
     void onSpriteRequested(const std::optional<mbgl::style::Sprite>&) override;
 
 private:
-    std::unique_ptr<AndroidRendererFrontend> rendererFrontend;
+    std::shared_ptr<AndroidRendererFrontend> rendererFrontend;
 
     JavaVM* vm = nullptr;
     jni::WeakReference<jni::Object<NativeMapView>> javaPeer;
