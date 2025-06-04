@@ -32,11 +32,8 @@ int main(int argc, char* argv[]) {
     // grouping ensures either bounds or center based position is used
     args::Group boundsOrCenterZoom(argumentParser, "Position (either one):", args::Group::Validators::AtMostOne);
 
-    args::Group latLngBoundsGroup(boundsOrCenterZoom, "LatLng bounds:", args::Group::Validators::All);
-    args::ValueFlag<double> northValue(latLngBoundsGroup, "degrees", "North latitude", {"north"});
-    args::ValueFlag<double> westValue(latLngBoundsGroup, "degrees", "West longitude", {"west"});
-    args::ValueFlag<double> southValue(latLngBoundsGroup, "degrees", "South latitude", {"south"});
-    args::ValueFlag<double> eastValue(latLngBoundsGroup, "degrees", "East longitude", {"east"});
+    args::NargsValueFlag<double> boundsValue(
+        boundsOrCenterZoom, "degrees: north west south east", "Bounds of rendered map", {"bounds"}, 4);
 
     args::Group centerGroup(boundsOrCenterZoom, "Center:", args::Group::Validators::AtLeastOne);
     args::ValueFlag<double> zoomValue(centerGroup, "number", "Zoom level", {'z', "zoom"});
@@ -118,11 +115,11 @@ int main(int argc, char* argv[]) {
     }
 
     map.getStyle().loadURL(style);
-    if (latLngBoundsGroup.Get()) {
-        LatLngBounds boundingBox = LatLngBounds::hull(LatLng(args::get(northValue), args::get(westValue)), LatLng(args::get(southValue), args::get(eastValue)));
+    std::vector<double> bounds = args::get(boundsValue);
+    if (bounds.size() == 4) {
+        LatLngBounds boundingBox = LatLngBounds::hull(LatLng(bounds[0], bounds[1]), LatLng(bounds[2], bounds[3]));
         map.jumpTo(map.cameraForLatLngBounds(boundingBox, EdgeInsets(), bearing, pitch));
-    }
-    else {
+    } else {
         map.jumpTo(CameraOptions().withCenter(LatLng{lat, lon}).withZoom(zoom).withBearing(bearing).withPitch(pitch));
     }
 
