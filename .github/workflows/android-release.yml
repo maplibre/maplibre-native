@@ -126,7 +126,7 @@ jobs:
         with:
           upload_url: ${{ needs.android-create-release.outputs.upload_url }}
           asset_path: platform/android/build/debug-symbols-${{ matrix.RENDERER }}-${{ env.buildtype }}.tar.gz
-          asset_name: debug-symbols-maplibre-android-${{ matrix.RENDERER }}-${{ needs.android-create-release.outputs.version_tag }}.tar.gz
+          asset_name: debug-symbols-maplibre-android-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.tar.gz
           asset_content_type: application/gzip
 
       - name: Prepare MavenCentral release
