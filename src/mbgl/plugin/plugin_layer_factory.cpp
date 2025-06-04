@@ -135,7 +135,6 @@ void jsonStringFromConvertible(const style::conversion::Convertible& value, std:
 
 std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string& id,
                                                               const style::conversion::Convertible& value) noexcept {
-
     std::string layerProperties;
 
     if (auto memberValue = objectMember(value, "properties")) {

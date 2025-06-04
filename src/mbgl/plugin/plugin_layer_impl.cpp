@@ -7,13 +7,10 @@ namespace style {
 PluginLayer::Impl::Impl(std::string layerID,
                         std::string sourceID,
                         LayerTypeInfo layerTypeInfo,
-                        const std::string& layerProperties
-                        )
+                        const std::string& layerProperties)
     : Layer::Impl(layerID, sourceID),
       _layerTypeInfo(layerTypeInfo),
-      _layerProperties(layerProperties)
-{
-}
+      _layerProperties(layerProperties) {}
 
 bool PluginLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
     return false;
@@ -33,8 +30,7 @@ std::string PluginLayerProperty::asJSON() {
     return tempResult;
 }
 
-void PluginLayerProperty::setPropertyValue(const conversion::Convertible& value) {
-}
+void PluginLayerProperty::setPropertyValue(const conversion::Convertible& value) {}
 
 const PropertyValue<float>& PluginLayerProperty::getSingleFloat() const {
     return _singleFloatProperty;
