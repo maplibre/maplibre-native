@@ -82,7 +82,6 @@ void RenderPluginLayer::update(gfx::ShaderRegistry& shaderRegistery,
                                const std::shared_ptr<UpdateParameters>& updateParameters,
                                const RenderTree& renderTree,
                                UniqueChangeRequestVec& changes) {
-
     // create layer group
     if (!layerGroup) {
         if (auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID())) {
@@ -117,8 +116,7 @@ void RenderPluginLayer::update(gfx::ShaderRegistry& shaderRegistery,
     }
 }
 
-void RenderPluginLayer::upload(gfx::UploadPass& uploadPass) {
-}
+void RenderPluginLayer::upload(gfx::UploadPass& uploadPass) {}
 
 void RenderPluginLayer::render(PaintParameters& paintParameters) {
     if (_renderFunction) {
@@ -185,8 +183,7 @@ bool RenderPluginLayer::queryIntersectsFeature(const GeometryCoordinates&,
 
 void RenderPluginLayer::layerChanged(const TransitionParameters& parameters,
                                      const Immutable<style::Layer::Impl>& impl,
-                                     UniqueChangeRequestVec& changes) {
-}
+                                     UniqueChangeRequestVec& changes) {}
 
 /// Remove all drawables for the tile from the layer group
 /// @return The number of drawables actually removed.
