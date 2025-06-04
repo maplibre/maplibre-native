@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>RenderingStats</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+                    <a class="library-name--link" href="../../../index.html">
+                            MapLibre Native Android
+                    </a>
+            </div>
+            <div class="library-version">
+11.10.0            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":MapLibreAndroid/vulkanRelease">androidJvm</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="MapLibre Native Android::org.maplibre.android.maps/RenderingStats///PointingToDeclaration//-1401641919">
+  <div class="breadcrumbs"><a href="../../../index.html">MapLibre Native Android</a><span class="delimiter">/</span><a href="../index.html">org.maplibre.android.maps</a><span class="delimiter">/</span><span class="current">RenderingStats</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Rendering</span><wbr></wbr><span><span>Stats</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">RenderingStats</a></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="813155839%2FConstructors%2F-1401641919" anchor-label="RenderingStats" id="813155839%2FConstructors%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-rendering-stats.html"><span>Rendering</span><wbr></wbr><span><span>Stats</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="813155839%2FConstructors%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="-104830433%2FProperties%2F-1401641919" anchor-label="bufferObjUpdates" id="-104830433%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="buffer-obj-updates.html"><span>buffer</span><wbr></wbr><span>Obj</span><wbr></wbr><span><span>Updates</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-104830433%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="buffer-obj-updates.html">bufferObjUpdates</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1434255526%2FProperties%2F-1401641919" anchor-label="bufferUpdateBytes" id="1434255526%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="buffer-update-bytes.html"><span>buffer</span><wbr></wbr><span>Update</span><wbr></wbr><span><span>Bytes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1434255526%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="buffer-update-bytes.html">bufferUpdateBytes</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-924493954%2FProperties%2F-1401641919" anchor-label="bufferUpdates" id="-924493954%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="buffer-updates.html"><span>buffer</span><wbr></wbr><span><span>Updates</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-924493954%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="buffer-updates.html">bufferUpdates</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-991692110%2FProperties%2F-1401641919" anchor-label="encodingTime" id="-991692110%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="encoding-time.html"><span>encoding</span><wbr></wbr><span><span>Time</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-991692110%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="encoding-time.html">encodingTime</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2001153026%2FProperties%2F-1401641919" anchor-label="indexUpdateBytes" id="2001153026%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index-update-bytes.html"><span>index</span><wbr></wbr><span>Update</span><wbr></wbr><span><span>Bytes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2001153026%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="index-update-bytes.html">indexUpdateBytes</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2025943084%2FProperties%2F-1401641919" anchor-label="memBuffers" id="-2025943084%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="mem-buffers.html"><span>mem</span><wbr></wbr><span><span>Buffers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2025943084%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="mem-buffers.html">memBuffers</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-339061454%2FProperties%2F-1401641919" anchor-label="memIndexBuffers" id="-339061454%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="mem-index-buffers.html"><span>mem</span><wbr></wbr><span>Index</span><wbr></wbr><span><span>Buffers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-339061454%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="mem-index-buffers.html">memIndexBuffers</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="141860955%2FProperties%2F-1401641919" anchor-label="memTextures" id="141860955%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="mem-textures.html"><span>mem</span><wbr></wbr><span><span>Textures</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="141860955%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="mem-textures.html">memTextures</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1188953964%2FProperties%2F-1401641919" anchor-label="memUniformBuffers" id="-1188953964%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="mem-uniform-buffers.html"><span>mem</span><wbr></wbr><span>Uniform</span><wbr></wbr><span><span>Buffers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1188953964%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="mem-uniform-buffers.html">memUniformBuffers</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1558044184%2FProperties%2F-1401641919" anchor-label="memVertexBuffers" id="1558044184%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="mem-vertex-buffers.html"><span>mem</span><wbr></wbr><span>Vertex</span><wbr></wbr><span><span>Buffers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1558044184%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="mem-vertex-buffers.html">memVertexBuffers</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-334567772%2FProperties%2F-1401641919" anchor-label="numActiveTextures" id="-334567772%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="num-active-textures.html"><span>num</span><wbr></wbr><span>Active</span><wbr></wbr><span><span>Textures</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-334567772%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="num-active-textures.html">numActiveTextures</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1072459387%2FProperties%2F-1401641919" anchor-label="numBuffers" id="-1072459387%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="num-buffers.html"><span>num</span><wbr></wbr><span><span>Buffers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1072459387%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="num-buffers.html">numBuffers</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1896339864%2FProperties%2F-1401641919" anchor-label="numCreatedTextures" id="1896339864%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="num-created-textures.html"><span>num</span><wbr></wbr><span>Created</span><wbr></wbr><span><span>Textures</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1896339864%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="num-created-textures.html">numCreatedTextures</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1944772039%2FProperties%2F-1401641919" anchor-label="numDrawCalls" id="1944772039%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="num-draw-calls.html"><span>num</span><wbr></wbr><span>Draw</span><wbr></wbr><span><span>Calls</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1944772039%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="num-draw-calls.html">numDrawCalls</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-965865796%2FProperties%2F-1401641919" anchor-label="numFrameBuffers" id="-965865796%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="num-frame-buffers.html"><span>num</span><wbr></wbr><span>Frame</span><wbr></wbr><span><span>Buffers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-965865796%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="num-frame-buffers.html">numFrameBuffers</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1578208292%2FProperties%2F-1401641919" anchor-label="numFrames" id="-1578208292%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="num-frames.html"><span>num</span><wbr></wbr><span><span>Frames</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1578208292%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="num-frames.html">numFrames</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-755516895%2FProperties%2F-1401641919" anchor-label="numIndexBuffers" id="-755516895%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="num-index-buffers.html"><span>num</span><wbr></wbr><span>Index</span><wbr></wbr><span><span>Buffers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-755516895%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="num-index-buffers.html">numIndexBuffers</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-918430033%2FProperties%2F-1401641919" anchor-label="numTextureBindings" id="-918430033%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="num-texture-bindings.html"><span>num</span><wbr></wbr><span>Texture</span><wbr></wbr><span><span>Bindings</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-918430033%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="num-texture-bindings.html">numTextureBindings</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1753489523%2FProperties%2F-1401641919" anchor-label="numTextureUpdates" id="1753489523%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="num-texture-updates.html"><span>num</span><wbr></wbr><span>Texture</span><wbr></wbr><span><span>Updates</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1753489523%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="num-texture-updates.html">numTextureUpdates</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1970674237%2FProperties%2F-1401641919" anchor-label="numUniformBuffers" id="-1970674237%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="num-uniform-buffers.html"><span>num</span><wbr></wbr><span>Uniform</span><wbr></wbr><span><span>Buffers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1970674237%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="num-uniform-buffers.html">numUniformBuffers</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1597275892%2FProperties%2F-1401641919" anchor-label="numUniformUpdates" id="-1597275892%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="num-uniform-updates.html"><span>num</span><wbr></wbr><span>Uniform</span><wbr></wbr><span><span>Updates</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1597275892%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="num-uniform-updates.html">numUniformUpdates</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1532827401%2FProperties%2F-1401641919" anchor-label="numVertexBuffers" id="1532827401%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="num-vertex-buffers.html"><span>num</span><wbr></wbr><span>Vertex</span><wbr></wbr><span><span>Buffers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1532827401%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="num-vertex-buffers.html">numVertexBuffers</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="846179151%2FProperties%2F-1401641919" anchor-label="renderingTime" id="846179151%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="rendering-time.html"><span>rendering</span><wbr></wbr><span><span>Time</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="846179151%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="rendering-time.html">renderingTime</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1259688518%2FProperties%2F-1401641919" anchor-label="stencilClears" id="1259688518%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="stencil-clears.html"><span>stencil</span><wbr></wbr><span><span>Clears</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1259688518%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="stencil-clears.html">stencilClears</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="444478596%2FProperties%2F-1401641919" anchor-label="stencilUpdates" id="444478596%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="stencil-updates.html"><span>stencil</span><wbr></wbr><span><span>Updates</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="444478596%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="stencil-updates.html">stencilUpdates</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="989867659%2FProperties%2F-1401641919" anchor-label="textureUpdateBytes" id="989867659%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="texture-update-bytes.html"><span>texture</span><wbr></wbr><span>Update</span><wbr></wbr><span><span>Bytes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="989867659%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="texture-update-bytes.html">textureUpdateBytes</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1655164728%2FProperties%2F-1401641919" anchor-label="totalBufferObjs" id="-1655164728%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="total-buffer-objs.html"><span>total</span><wbr></wbr><span>Buffer</span><wbr></wbr><span><span>Objs</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1655164728%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="total-buffer-objs.html">totalBufferObjs</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-91791357%2FProperties%2F-1401641919" anchor-label="totalBuffers" id="-91791357%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="total-buffers.html"><span>total</span><wbr></wbr><span><span>Buffers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-91791357%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="total-buffers.html">totalBuffers</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-526056251%2FProperties%2F-1401641919" anchor-label="totalDrawCalls" id="-526056251%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="total-draw-calls.html"><span>total</span><wbr></wbr><span>Draw</span><wbr></wbr><span><span>Calls</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-526056251%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="total-draw-calls.html">totalDrawCalls</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1224972964%2FProperties%2F-1401641919" anchor-label="uniformUpdateBytes" id="1224972964%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="uniform-update-bytes.html"><span>uniform</span><wbr></wbr><span>Update</span><wbr></wbr><span><span>Bytes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1224972964%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="uniform-update-bytes.html">uniformUpdateBytes</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1463403510%2FProperties%2F-1401641919" anchor-label="vertexUpdateBytes" id="-1463403510%2FProperties%2F-1401641919" data-filterable-set=":MapLibreAndroid/vulkanRelease"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid/vulkanRelease" data-filterable-set=":MapLibreAndroid/vulkanRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="vertex-update-bytes.html"><span>vertex</span><wbr></wbr><span>Update</span><wbr></wbr><span><span>Bytes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1463403510%2FProperties%2F-1401641919"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/vulkanRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">var </span><a href="vertex-update-bytes.html">vertexUpdateBytes</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+        <span>© 2025 Copyright</span>
+        <span class="pull-right">
+            <span>Generated by </span>
+            <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                <span>dokka</span>
+            </a>
+        </span>
+    </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
