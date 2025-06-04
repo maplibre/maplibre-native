@@ -2,7 +2,7 @@ if(TARGET maplibre-native-base)
     return()
 endif()
 
-cmake_minimum_required(VERSION 3.5.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10...3.24 FATAL_ERROR)
 project(MAPBOX_BASE LANGUAGES CXX C)
 
 option(MAPBOX_BASE_BUILD_TESTING "Bypass project target check and enforce building tests" OFF)
