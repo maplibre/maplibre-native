@@ -137,7 +137,6 @@ public:
     std::string asJSON();
 
 private:
-    // PluginPaintProperties::Transitionable paint;
 };
 
 class PluginLayerPropertyManager {
@@ -191,9 +190,6 @@ public:
 private:
     LayerTypeInfo _layerTypeInfo;
     std::string _layerProperties;
-    // style::conversion::Convertible _layerProperties;
-
-    // HeatmapPaintProperties::Transitionable paint;
 };
 
 } // namespace style

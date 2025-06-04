@@ -1,10 +1,3 @@
-//
-//  MLNPluginLayer.m
-//  App
-//
-//  Created by Malcolm Toon on 4/23/25.
-//
-
 #import "MLNPluginLayer.h"
 #import <UIKit/UIKit.h>
 @implementation MLNPluginLayerProperty

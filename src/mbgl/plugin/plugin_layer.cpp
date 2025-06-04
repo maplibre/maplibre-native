@@ -1,7 +1,6 @@
 #include <mbgl/plugin/plugin_layer.hpp>
 #include <mbgl/plugin/plugin_layer_impl.hpp>
 #include <iostream>
-#include "plugin_layer_debug.hpp"
 
 namespace mbgl {
 namespace style {
@@ -38,25 +37,11 @@ void PluginLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffe
 
 Value PluginLayer::serialize() const {
     auto result = Layer::serialize();
-    /*
-    // TODO: Implement this?
-    assert(result.getObject());
-
-    for (const auto& property : layerProperties) {
-        auto styleProperty = getLayerProperty(*this, static_cast<Property>(property.second));
-        if (styleProperty.getKind() == StyleProperty::Kind::Undefined) continue;
-        serializeProperty(result, styleProperty, property.first.c_str(), property.second < kPaintPropertyCount);
-    }
-*/
     return result;
 }
 
 std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::string& name,
                                                                   const conversion::Convertible& value) {
-#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-    std::cout << "Property Name: " << name << "\n";
-#endif
-
     auto i = static_cast<const mbgl::style::PluginLayer::Impl*>(baseImpl.get());
     auto pm = i->_propertyManager;
 

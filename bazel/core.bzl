@@ -1,5 +1,4 @@
 MLN_LAYER_PLUGIN_HEADERS = [
-    "src/mbgl/plugin/plugin_layer_debug.hpp",
     "src/mbgl/plugin/plugin_layer.hpp",
     "src/mbgl/plugin/plugin_layer_factory.hpp",
     "src/mbgl/plugin/plugin_layer_impl.hpp",

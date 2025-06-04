@@ -1,10 +1,3 @@
-//
-//  MLNPLuginStyleLayer.m
-//  App
-//
-//  Created by Malcolm Toon on 5/17/25.
-//
-
 #import "MLNPluginStyleLayer.h"
 #import "MLNPluginStyleLayer_Private.h"
 #import <mbgl/plugin/plugin_layer.hpp>

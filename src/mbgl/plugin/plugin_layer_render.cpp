@@ -1,9 +1,5 @@
-#include "plugin_layer_render.hpp"
+#include <mbgl/plugin/plugin_layer_render.hpp>
 #include <mbgl/gfx/context.hpp>
-
-#include <iostream>
-
-// These all support RenderPluginLayerTweaker in case we want to break this out into a different class
 #include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
@@ -14,9 +10,9 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
-
 #include <mbgl/style/properties.hpp>
-#include "plugin_layer_debug.hpp"
+
+#include <iostream>
 
 using namespace mbgl;
 
@@ -45,9 +41,6 @@ void RenderPluginLayerTweaker::init(mbgl::gfx::Drawable& drawablee) {
 };
 
 void RenderPluginLayerTweaker::execute(mbgl::gfx::Drawable& drawable, mbgl::PaintParameters& paintParameters) {
-#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-    std::cout << "RenderPluginLayerTweaker::execute\n";
-#endif
     // custom drawing
     auto& context = paintParameters.context;
     context.resetState(paintParameters.depthModeForSublayer(0, mbgl::gfx::DepthMaskType::ReadOnly),
@@ -89,9 +82,6 @@ void RenderPluginLayer::update(gfx::ShaderRegistry& shaderRegistery,
                                const std::shared_ptr<UpdateParameters>& updateParameters,
                                const RenderTree& renderTree,
                                UniqueChangeRequestVec& changes) {
-#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-    std::cout << "RenderPluginLayer::update\n";
-#endif
 
     // create layer group
     if (!layerGroup) {
@@ -128,15 +118,9 @@ void RenderPluginLayer::update(gfx::ShaderRegistry& shaderRegistery,
 }
 
 void RenderPluginLayer::upload(gfx::UploadPass& uploadPass) {
-#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-    std::cout << "RenderPluginLayer::upload\n";
-#endif
 }
 
 void RenderPluginLayer::render(PaintParameters& paintParameters) {
-#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-    std::cout << "RenderPluginLayer::render\n";
-#endif
     if (_renderFunction) {
         _renderFunction(paintParameters);
     }
@@ -153,17 +137,9 @@ void RenderPluginLayer::prepare(const LayerPrepareParameters& layerParameters) {
 // --- Private methods
 void RenderPluginLayer::transition(const TransitionParameters& parameters) {
     // Called when switching between styles
-#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-    std::cout << "transition\n";
-#endif
 }
 
 void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-    std::cout << "evaluate\n";
-#endif
-
-    // auto i = staticImmutableCast<style::PluginLayer::Impl>(baseImpl);
     auto i = static_cast<const style::PluginLayer::Impl*>(baseImpl.get());
 
     auto pm = i->_propertyManager;
@@ -174,9 +150,6 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
             auto df = property->_defaultSingleFloatValue;
             auto newF = f.evaluate(Evaluator(parameters, df), parameters.now);
             auto v = newF.constant().value();
-#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-            std::cout << "V: " << v << "\n";
-#endif
             property->setCurrentSingleFloatValue(v);
         } else if (property->_propertyType == style::PluginLayerProperty::PropertyType::Color) {
             auto& f = property->getColor();
@@ -184,9 +157,6 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
             auto df = property->_defaultColorValue;
             auto newF = f.evaluate(Evaluator(parameters, df), parameters.now);
             auto v = newF.constant().value();
-#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-            std::cout << "V: " << v.stringify() << "\n";
-#endif
             property->setCurrentColorValue(v);
         }
     }
@@ -216,9 +186,6 @@ bool RenderPluginLayer::queryIntersectsFeature(const GeometryCoordinates&,
 void RenderPluginLayer::layerChanged(const TransitionParameters& parameters,
                                      const Immutable<style::Layer::Impl>& impl,
                                      UniqueChangeRequestVec& changes) {
-#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-    //  std::cout << "RenderPluginLayer::layerChanged\n";
-#endif
 }
 
 /// Remove all drawables for the tile from the layer group

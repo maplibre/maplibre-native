@@ -7663,61 +7663,10 @@ static void *windowScreenContext = &windowScreenContext;
     mbgl::style::LayerTypeInfo::Layout layout = mbgl::style::LayerTypeInfo::Layout::NotRequired;
     mbgl::style::LayerTypeInfo::CrossTileIndex crossTileIndex = mbgl::style::LayerTypeInfo::CrossTileIndex::NotRequired;
 
-
-    /* Future properties for MLNPluginLayerCapabilities
-     @property MLNPluginLayerTileKind tileKind;
-     @property BOOL requiresSource;
-     @property BOOL requiresLayout;
-     @property BOOL requiresRenderingFadingTiles;
-     @property BOOL requiresCrossTileIndex;
-     if (capabilities.requiresSource) {
-         source = mbgl::style::LayerTypeInfo::Source::Required;
-     }
-
-     if (capabilities.requiresLayout) {
-         layout = mbgl::style::LayerTypeInfo::Layout::Required;
-     }
-
-     if (capabilities.requiresRenderingFadingTiles) {
-         fadingTiles = mbgl::style::LayerTypeInfo::FadingTiles::Required;
-     }
-
-     if (capabilities.requiresCrossTileIndex) {
-         crossTileIndex = mbgl::style::LayerTypeInfo::CrossTileIndex::Required;
-     }
-
-     switch (capabilities.tileKind) {
-         case MLNPluginLayerTileKindRaster:
-             tileKind = mbgl::style::LayerTypeInfo::TileKind::Raster;
-             break;
-         case MLNPluginLayerTileKindRasterDEM:
-             tileKind = mbgl::style::LayerTypeInfo::TileKind::RasterDEM;
-             break;
-         case MLNPluginLayerTileKindNotRequired:
-             tileKind = mbgl::style::LayerTypeInfo::TileKind::NotRequired;
-             break;
-         case MLNPluginLayerTileKindGeometry:
-             tileKind = mbgl::style::LayerTypeInfo::TileKind::Geometry;
-             break;
-     }
-*/
-
     mbgl::style::LayerTypeInfo::Pass3D pass3D = mbgl::style::LayerTypeInfo::Pass3D::NotRequired;
     if (capabilities.requiresPass3D) {
         pass3D = mbgl::style::LayerTypeInfo::Pass3D::Required;
     }
-
-
-
-// TODO: This commented code can probably go away, but wanted to check about
-// why we might want to have a non-peer factory
-//    auto factory = std::make_unique<mbgl::PluginLayerFactory>(layerType,
-//                                               source,
-//                                               pass3D,
-//                                               layout,
-//                                               fadingTiles,
-//                                               crossTileIndex,
-//                                               tileKind);
 
     auto factory = std::make_unique<mbgl::PluginLayerPeerFactory>(layerType,
                                                source,

@@ -1,12 +1,10 @@
-#include "plugin_layer_factory.hpp"
-#include "plugin_layer.hpp"
-#include "plugin_layer_impl.hpp"
-#include "plugin_layer_render.hpp"
-// #include "plugin_layer_bucket.hpp"
+#include <mbgl/plugin/plugin_layer_factory.hpp>
+#include <mbgl/plugin/plugin_layer.hpp>
+#include <mbgl/plugin/plugin_layer_impl.hpp>
+#include <mbgl/plugin/plugin_layer_render.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 #include <iostream>
 #include <string>
-#include "plugin_layer_debug.hpp"
 
 namespace mbgl {
 
@@ -87,10 +85,6 @@ void jsonStringFromConvertible(const style::conversion::Convertible& value, std:
         eachMember(value,
                    [&output, &firstItem](const std::string& name, const style::conversion::Convertible& value)
                        -> std::optional<style::conversion::Error> {
-#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-                       std::cout << "Working on: " << name << "\n";
-#endif
-
                        if (!firstItem) {
                            output.append(",");
                        }
@@ -120,27 +114,11 @@ void jsonStringFromConvertible(const style::conversion::Convertible& value, std:
 
         output.append("]");
     } else {
-        /*
-         DECLARE_VALUE_TYPE_ACCESOR(Int, int64_t)
-         DECLARE_VALUE_TYPE_ACCESOR(Uint, uint64_t)
-         DECLARE_VALUE_TYPE_ACCESOR(Bool, bool)
-         DECLARE_VALUE_TYPE_ACCESOR(Double, double)
-         DECLARE_VALUE_TYPE_ACCESOR(Array, array_type)
-         DECLARE_VALUE_TYPE_ACCESOR(Object, object_type)
-         DECLARE_VALUE_TYPE_ACCESOR(String, std::string)
-
-         */
         auto v = toValue(value);
         if (auto i = v.value().getInt()) {
-#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-            std::cout << "Int: " << i << "\n";
-#endif
             std::string tempResult = std::to_string(*i);
             output.append(tempResult);
         } else if (auto i = v.value().getUint()) {
-#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-            std::cout << "Int: " << i << "\n";
-#endif
             std::string tempResult = std::to_string(*i);
             output.append(tempResult);
 
@@ -149,53 +127,24 @@ void jsonStringFromConvertible(const style::conversion::Convertible& value, std:
             output.append(v.value().getString()->c_str());
             output.append("\"");
 
-            //  std::cout << "String: " << v.value().getString()->c_str() << "\n";
         } else if (auto d = v.value().getDouble()) {
-#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-            std::cout << "Double: " << d << "\n";
-#endif
-
             output.append(std::to_string(*d));
         }
-        //        std::cout << v.value().getInt() << "\n";
-        //        if (v == std::nullopt) {
-        //            // This means there's no value.. skip
-        //        } else if (v.has_value()) {
-        //
-        //        }
     }
 }
 
 std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string& id,
                                                               const style::conversion::Convertible& value) noexcept {
-    // TODO: What is this and how does it fit in
-    //    const auto source = getSource(value);
-    //    if (!source) {
-    //        return nullptr;
-    //    }
 
     std::string layerProperties;
 
     if (auto memberValue = objectMember(value, "properties")) {
         jsonStringFromConvertible(*memberValue, layerProperties);
-#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-        std::cout << "Properties: " << layerProperties << "\n";
-#endif
         if (isObject(*memberValue)) {
             eachMember(*memberValue,
                        [](const std::string& name, const style::conversion::Convertible& value)
                            -> std::optional<style::conversion::Error> { return std::nullopt; });
         }
-
-        // if (isArray(memberValue)) {
-        //            for (size_t i=0; i < arrayLength(memberValue); i++) {
-        //                auto itemValue = arrayMember(memberValue, i);
-        //            }
-        //}
-        //        if (auto error_ = layer->setProperty(member, *memberValue)) {
-        //            error = *error_;
-        //            return false;
-        //        }
     }
 
     std::string source = "source";
@@ -205,15 +154,7 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
                                                                            //,*customProperties
                                                                            ));
 
-#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-    std::cout << "tempResultCreated: " << id << "\n";
-#endif
-
     if (_onLayerCreated != nullptr) {
-#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-        std::cout << "_onLayerCreated: " << id << "\n";
-#endif
-
         auto layerRaw = tempResult.get();
         auto pluginLayer = static_cast<mbgl::style::PluginLayer*>(layerRaw);
         _onLayerCreated(pluginLayer);
@@ -224,21 +165,6 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
     }
 
     return tempResult;
-    /*
-    return std::unique_ptr<style::Layer>(new (std::nothrow) style::PluginLayer(id
-                                                                               , source
-                                                                               , _layerTypeInfo
-                                                                               , layerProperties
-                                                                               //,*customProperties
-                                                                               ));
-*/
-    /*
-        const auto source = getSource(value);
-        if (!source) {
-            return nullptr;
-        }
-        return std::unique_ptr<style::Layer>(new (std::nothrow) style::PluginLayer(id, *source));
-     */
 }
 
 std::unique_ptr<Bucket> PluginLayerFactory::createBucket(
@@ -248,10 +174,6 @@ std::unique_ptr<Bucket> PluginLayerFactory::createBucket(
 }
 
 std::unique_ptr<RenderLayer> PluginLayerFactory::createRenderLayer(Immutable<style::Layer::Impl> impl) noexcept {
-#if MLN_PLUGIN_LAYER_LOGGING_ENABLED
-    std::cout << "Create Render Layer\n";
-#endif
-
     auto localImpl = staticImmutableCast<style::PluginLayer::Impl>(impl);
     auto tempResult = std::make_unique<RenderPluginLayer>(staticImmutableCast<style::PluginLayer::Impl>(impl));
     tempResult->setRenderFunction(localImpl->_renderFunction);
