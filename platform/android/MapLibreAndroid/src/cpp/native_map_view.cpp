@@ -929,6 +929,7 @@ void NativeMapView::setTransitionOptions(JNIEnv& env, const jni::Object<Transiti
     const mbgl::style::TransitionOptions transitionOptions(
         Duration(mbgl::Milliseconds(TransitionOptions::getDuration(env, options))),
         Duration(mbgl::Milliseconds(TransitionOptions::getDelay(env, options))),
+        util::DEFAULT_TRANSITION_EASE,
         TransitionOptions::isEnablePlacementTransitions(env, options));
     map->getStyle().setTransitionOptions(transitionOptions);
 }
@@ -1432,6 +1433,8 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::getPrefetchZoomDelta, "nativeGetPrefetchZoomDelta"),
         METHOD(&NativeMapView::setTileCacheEnabled, "nativeSetTileCacheEnabled"),
         METHOD(&NativeMapView::getTileCacheEnabled, "nativeGetTileCacheEnabled"),
+        METHOD(&NativeMapView::isRenderingStatsViewEnabled, "nativeIsRenderingStatsViewEnabled"),
+        METHOD(&NativeMapView::enableRenderingStatsView, "nativeEnableRenderingStatsView"),
         METHOD(&NativeMapView::setTileLodMinRadius, "nativeSetTileLodMinRadius"),
         METHOD(&NativeMapView::getTileLodMinRadius, "nativeGetTileLodMinRadius"),
         METHOD(&NativeMapView::setTileLodScale, "nativeSetTileLodScale"),
@@ -1440,9 +1443,7 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::getTileLodPitchThreshold, "nativeGetTileLodPitchThreshold"),
         METHOD(&NativeMapView::setTileLodZoomShift, "nativeSetTileLodZoomShift"),
         METHOD(&NativeMapView::getTileLodZoomShift, "nativeGetTileLodZoomShift"),
-        METHOD(&NativeMapView::triggerRepaint, "nativeTriggerRepaint"),
-        METHOD(&NativeMapView::isRenderingStatsViewEnabled, "nativeIsRenderingStatsViewEnabled"),
-        METHOD(&NativeMapView::enableRenderingStatsView, "nativeEnableRenderingStatsView"));
+        METHOD(&NativeMapView::triggerRepaint, "nativeTriggerRepaint"));
 }
 
 void NativeMapView::onRegisterShaders(gfx::ShaderRegistry&) {};

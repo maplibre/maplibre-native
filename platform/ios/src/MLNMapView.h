@@ -550,6 +550,18 @@ MLN_EXPORT
 @property (nonatomic, assign) BOOL showsUserLocation;
 
 /**
+ A boolean value indicating whether the location indicator is drawn using the location
+ indicator layer or the location indication annotation.
+ */
+@property (nonatomic, assign) BOOL useLocationIndicatorLayer;
+
+/**
+ A boolean value indicating whether the camera allows for concurrent animations. This is
+ a temporary feature flag to avoid breaking existing functionality.
+ */
+@property (nonatomic, assign) BOOL concurrentAnimations;
+
+/**
  A Boolean value indicating whether the map may request authorization to use location services.
 
  Setting this property to `YES` causes the map view to use the Core Location
@@ -1613,6 +1625,16 @@ vertically on the map.
 - (void)setContentInset:(UIEdgeInsets)contentInset
                animated:(BOOL)animated
       completionHandler:(nullable void (^)(void))completion;
+
+/**
+ Toggling between the Transform and the TransformActive implementation.
+
+ It allows us to switch between the two implementations at runtime.
+
+ It also resets the current transform state so be careful when using it
+ in the middle of a transformation.
+ */
+- (void)toggleTransform;
 
 // MARK: Converting Geographic Coordinates
 

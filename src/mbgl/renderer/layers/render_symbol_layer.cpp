@@ -508,9 +508,11 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         });
     }
 
-    const bool sortFeaturesByKey = !impl_cast(baseImpl).layout.get<SymbolSortKey>().isUndefined();
+    const auto& layout = impl_cast(baseImpl).layout;
+    const bool sortFeaturesByKey = !layout.get<SymbolSortKey>().isUndefined();
     std::multiset<SegmentGroup> renderableSegments;
     std::unique_ptr<gfx::DrawableBuilder> builder;
+    const bool isOffset = !layout.get<IconOffset>().isUndefined();
 
     const auto currentZoom = static_cast<float>(state.getZoom());
     const auto layerPrefix = getID() + "/";
@@ -556,8 +558,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 return;
             }
 
-            const auto& layout = *bucket.layout;
-            const auto values = isText ? textPropertyValues(evaluated, layout) : iconPropertyValues(evaluated, layout);
+            const auto& bucketLayout = *bucket.layout;
+            const auto values = isText ? textPropertyValues(evaluated, bucketLayout)
+                                       : iconPropertyValues(evaluated, bucketLayout);
             const std::string suffix = isText ? "text/" : "icon/";
 
             const auto addVertices = [&collisionBuilder](const auto& vertices) {
@@ -704,8 +707,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderable.renderData.layerProperties);
         auto& bucketPaintProperties = bucket.paintProperties.at(getID());
 
-        const auto& layout = *bucket.layout;
-        const auto values = isText ? textPropertyValues(evaluated, layout) : iconPropertyValues(evaluated, layout);
+        const auto& bucketLayout = *bucket.layout;
+        const auto values = isText ? textPropertyValues(evaluated, bucketLayout)
+                                   : iconPropertyValues(evaluated, bucketLayout);
 
         const auto& atlases = tile.getAtlasTextures();
         if (!atlases) {
@@ -755,7 +759,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                                                                      textSizeIsZoomConstant);
             }
             if (!isText && !tileInfo.iconTweaker) {
-                const bool iconScaled = layout.get<IconSize>().constantOr(1.0) != 1.0 || bucket.iconsNeedLinear;
+                const bool iconScaled = bucketLayout.get<IconSize>().constantOr(1.0) != 1.0 || bucket.iconsNeedLinear;
                 tileInfo.iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
                                                                                      idSymbolImageIconTexture,
                                                                                      idSymbolImageTexture,
@@ -815,8 +819,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     /*.symbolType=*/renderable.type,
                     /*.pitchAlignment=*/values.pitchAlignment,
                     /*.rotationAlignment=*/values.rotationAlignment,
-                    /*.placement=*/layout.get<SymbolPlacement>(),
-                    /*.textFit=*/layout.get<IconTextFit>()));
+                    /*.placement=*/bucketLayout.get<SymbolPlacement>(),
+                    /*.textFit=*/bucketLayout.get<IconTextFit>(),
+                    /*.isOffset=*/isOffset));
 
                 tileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
