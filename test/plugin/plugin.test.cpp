@@ -102,7 +102,6 @@ public:
 };
 
 TEST(Plugin, PluginLayerProperty) {
-    
     bool _singleFloatValid = false;
     bool _colorValid = false;
 
@@ -113,47 +112,38 @@ TEST(Plugin, PluginLayerProperty) {
         auto json = p.asJSON();
         _singleFloatValid = json == "\"\":1.000000";
     }
-    
+
     {
         PluginLayerProperty p;
         p._propertyType = PluginLayerProperty::PropertyType::Color;
         p._dataDrivenColorValue = Color(1, 1, 1, 1);
         auto json = p.asJSON();
         _colorValid = json == "\"\":\"rgba(255,255,255,1)\"";
-
     }
-    
+
     ASSERT_TRUE(_colorValid);
     ASSERT_TRUE(_singleFloatValid);
-
-    
-    
 }
 
 TEST(Plugin, PluginLayerPropertyManager) {
-    
     PluginLayerPropertyManager pm;
-    PluginLayerProperty *p1 = new PluginLayerProperty();
+    PluginLayerProperty* p1 = new PluginLayerProperty();
     p1->_propertyType = PluginLayerProperty::PropertyType::SingleFloat;
     p1->_propertyName = "float";
     p1->_singleFloatValue = 1.0;
     pm.addProperty(p1);
 
-    PluginLayerProperty *p2 = new PluginLayerProperty();
+    PluginLayerProperty* p2 = new PluginLayerProperty();
     p2->_propertyType = PluginLayerProperty::PropertyType::Color;
     p2->_propertyName = "color";
     p2->_dataDrivenColorValue = Color(1, 1, 1, 1);
     pm.addProperty(p2);
 
     auto json = pm.propertiesAsJSON();
-    
+
     bool _jsonValid = (json == "{\"color\":\"rgba(255,255,255,1)\", \"float\":1.000000}");
     ASSERT_TRUE(_jsonValid);
-
-    
-    
 }
-
 
 TEST(Plugin, PluginLayer) {
     bool _layerCreated = false;
