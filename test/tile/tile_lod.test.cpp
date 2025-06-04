@@ -21,6 +21,7 @@ using namespace ::testing;
 
 class TileLODTest {
 public:
+    util::RunLoop loop;
     HeadlessFrontend frontend;
     Map map;
 
