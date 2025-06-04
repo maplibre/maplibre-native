@@ -11,7 +11,7 @@
 ### 🐞 Bug fixes
 
 - Improve weak pointer use ([#3510](https://github.com/maplibre/maplibre-native/pull/3510)).
-
+- Make sure AndroidRendererFrontend exists when accessing it ([#3522](https://github.com/maplibre/maplibre-native/pull/3522))
 ## 11.9.0
 
 ### ✨ Features and improvements
