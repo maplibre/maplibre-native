@@ -27,9 +27,13 @@ class AsyncTask;
 
 namespace android {
 
-class AndroidRendererFrontend : public RendererFrontend {
+class AndroidRendererFrontend : public RendererFrontend, public std::enable_shared_from_this<AndroidRendererFrontend> {
 public:
-    AndroidRendererFrontend(MapRenderer&);
+    AndroidRendererFrontend(Private, MapRenderer&);
+
+    static std::shared_ptr<AndroidRendererFrontend> create(MapRenderer&);
+    void init();
+
     ~AndroidRendererFrontend() override;
 
     void reset() override;
@@ -63,6 +67,10 @@ private:
     util::RunLoop* mapRunLoop;
     std::unique_ptr<util::AsyncTask> updateAsyncTask;
     std::shared_ptr<UpdateParameters> updateParams;
+
+    struct Private {
+        explicit Private() = default;
+    };
 };
 
 } // namespace android

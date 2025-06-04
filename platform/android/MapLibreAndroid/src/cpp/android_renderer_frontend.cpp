@@ -91,13 +91,24 @@ private:
     ActorRef<RendererObserver> delegate;
 };
 
-AndroidRendererFrontend::AndroidRendererFrontend(MapRenderer& mapRenderer_)
+AndroidRendererFrontend::AndroidRendererFrontend(Private, MapRenderer& mapRenderer_)
     : mapRenderer(mapRenderer_),
-      mapRunLoop(util::RunLoop::Get()),
-      updateAsyncTask(std::make_unique<util::AsyncTask>([this]() {
-          mapRenderer.update(std::move(updateParams));
-          mapRenderer.requestRender();
-      })) {}
+      mapRunLoop(util::RunLoop::Get()) {}
+
+std::shared_ptr<AndroidRendererFrontend> AndroidRendererFrontend::create(MapRenderer& mapRenderer) {
+    auto ptr = std::make_shared<AndroidRendererFrontend>(Private(), mapRenderer);
+    ptr->init();
+    return ptr;
+}
+
+void AndroidRendererFrontend::init() {
+    updateAsyncTask = std::make_unique<util::AsyncTask>([weakSelf = weak_from_this()]() {
+        if (auto self = weakSelf.lock()) {
+            self->mapRenderer.update(std::move(self->updateParams));
+            self->mapRenderer.requestRender();
+        }
+    });
+}
 
 AndroidRendererFrontend::~AndroidRendererFrontend() = default;
 
