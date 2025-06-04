@@ -1152,6 +1152,10 @@ $dokka.location:org.maplibre.android.maps/MapLibreMap/getPrefetchesTiles/#/Point
 $dokka.location:org.maplibre.android.maps/MapLibreMap/getSelectedMarkers/#/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/get-selected-markers.html
 $dokka.location:org.maplibre.android.maps/MapLibreMap/getStyle/#org.maplibre.android.maps.Style.OnStyleLoaded/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/get-style.html
 $dokka.location:org.maplibre.android.maps/MapLibreMap/getTileCacheEnabled/#/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/get-tile-cache-enabled.html
+$dokka.location:org.maplibre.android.maps/MapLibreMap/getTileLodMinRadius/#/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/get-tile-lod-min-radius.html
+$dokka.location:org.maplibre.android.maps/MapLibreMap/getTileLodPitchThreshold/#/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/get-tile-lod-pitch-threshold.html
+$dokka.location:org.maplibre.android.maps/MapLibreMap/getTileLodScale/#/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/get-tile-lod-scale.html
+$dokka.location:org.maplibre.android.maps/MapLibreMap/getTileLodZoomShift/#/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/get-tile-lod-zoom-shift.html
 $dokka.location:org.maplibre.android.maps/MapLibreMap/getWidth/#/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/get-width.html
 $dokka.location:org.maplibre.android.maps/MapLibreMap/getZoom/#/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/get-zoom.html
 $dokka.location:org.maplibre.android.maps/MapLibreMap/isAllowConcurrentMultipleOpenInfoWindows/#/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/is-allow-concurrent-multiple-open-info-windows.html
@@ -1216,6 +1220,10 @@ $dokka.location:org.maplibre.android.maps/MapLibreMap/setStyle/#org.maplibre.and
 $dokka.location:org.maplibre.android.maps/MapLibreMap/setStyle/#org.maplibre.android.maps.Style.Builder/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/set-style.html
 $dokka.location:org.maplibre.android.maps/MapLibreMap/setSwapBehaviorFlush/#boolean/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/set-swap-behavior-flush.html
 $dokka.location:org.maplibre.android.maps/MapLibreMap/setTileCacheEnabled/#boolean/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/set-tile-cache-enabled.html
+$dokka.location:org.maplibre.android.maps/MapLibreMap/setTileLodMinRadius/#double/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/set-tile-lod-min-radius.html
+$dokka.location:org.maplibre.android.maps/MapLibreMap/setTileLodPitchThreshold/#double/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/set-tile-lod-pitch-threshold.html
+$dokka.location:org.maplibre.android.maps/MapLibreMap/setTileLodScale/#double/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/set-tile-lod-scale.html
+$dokka.location:org.maplibre.android.maps/MapLibreMap/setTileLodZoomShift/#double/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/set-tile-lod-zoom-shift.html
 $dokka.location:org.maplibre.android.maps/MapLibreMap/setZoom/#double#android.graphics.PointF#long/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/set-zoom.html
 $dokka.location:org.maplibre.android.maps/MapLibreMap/snapshot/#org.maplibre.android.maps.MapLibreMap.SnapshotReadyCallback/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/snapshot.html
 $dokka.location:org.maplibre.android.maps/MapLibreMap/style/#/PointingToDeclaration/-map-libre -native -android/org.maplibre.android.maps/-map-libre-map/style.html
