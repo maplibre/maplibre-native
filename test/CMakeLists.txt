@@ -84,6 +84,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/tile/tile_cache.test.cpp
     ${PROJECT_SOURCE_DIR}/test/tile/tile_coordinate.test.cpp
     ${PROJECT_SOURCE_DIR}/test/tile/tile_id.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/tile/tile_lod.test.cpp
     ${PROJECT_SOURCE_DIR}/test/tile/vector_tile.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/action_journal.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/async_task.test.cpp
