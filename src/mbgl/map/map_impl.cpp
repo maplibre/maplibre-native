@@ -8,6 +8,7 @@
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/action_journal.hpp>
 #include <mbgl/util/action_journal_impl.hpp>
+#include <mbgl/gfx/rendering_stats.hpp>
 
 namespace mbgl {
 
@@ -244,14 +245,16 @@ void Map::Impl::onWillStartRenderingFrame() {
 void Map::Impl::onDidFinishRenderingFrame(RenderMode renderMode,
                                           bool needsRepaint,
                                           bool placemenChanged,
-                                          double frameEncodingTime,
-                                          double frameRenderingTime) {
+                                          const gfx::RenderingStats& stats) {
     rendererFullyLoaded = renderMode == RenderMode::Full;
+
+    if (renderingStatsView && style) {
+        renderingStatsView->update(*style, stats);
+    }
 
     if (mode == MapMode::Continuous) {
         const MapObserver::RenderFrameStatus frameStatus{
-            MapObserver::RenderMode(renderMode), needsRepaint, placemenChanged, frameEncodingTime, frameRenderingTime};
-
+            MapObserver::RenderMode(renderMode), needsRepaint, placemenChanged, stats};
         observer.onDidFinishRenderingFrame(frameStatus);
 
         if (actionJournal) {
@@ -306,6 +309,28 @@ void Map::Impl::jumpTo(const CameraOptions& camera) {
     cameraMutated = true;
     transform->jumpTo(camera);
     onUpdate();
+}
+
+bool Map::Impl::isRenderingStatsViewEnabled() const {
+    return !!renderingStatsView;
+}
+
+void Map::Impl::enableRenderingStatsView(bool value) {
+    if (value) {
+        if (!renderingStatsView) {
+            renderingStatsView = std::make_unique<gfx::RenderingStatsView>();
+            if (style) {
+                renderingStatsView->create(*style);
+            }
+        }
+    } else {
+        if (renderingStatsView) {
+            if (style) {
+                renderingStatsView->destroy(*style);
+            }
+            renderingStatsView = nullptr;
+        }
+    }
 }
 
 void Map::Impl::onStyleImageMissing(const std::string& id, const std::function<void()>& done) {

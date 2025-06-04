@@ -35,7 +35,7 @@ class MLNMapViewImpl : public mbgl::MapObserver {
   void onDidFinishLoadingMap() override;
   void onDidFailLoadingMap(mbgl::MapLoadError mapError, const std::string& what) override;
   void onWillStartRenderingFrame() override;
-  void onDidFinishRenderingFrame(mbgl::MapObserver::RenderFrameStatus) override;
+  void onDidFinishRenderingFrame(const mbgl::MapObserver::RenderFrameStatus&) override;
   void onWillStartRenderingMap() override;
   void onDidFinishRenderingMap(mbgl::MapObserver::RenderMode) override;
   void onDidFinishLoadingStyle() override;

@@ -764,6 +764,24 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   /**
+   * Set a callback that's invoked when the map has finished rendering a frame.
+   *
+   * @param listener The callback that's invoked when the map has finished rendering a frame
+   */
+  public void addOnDidFinishRenderingFrameListener(@NonNull OnDidFinishRenderingFrameWithStatsListener listener) {
+    mapChangeReceiver.addOnDidFinishRenderingFrameListener(listener);
+  }
+
+  /**
+   * Set a callback that's invoked when the map has finished rendering a frame.
+   *
+   * @param listener The callback that's invoked when the map has finished rendering a frame
+   */
+  public void removeOnDidFinishRenderingFrameListener(@NonNull OnDidFinishRenderingFrameWithStatsListener listener) {
+    mapChangeReceiver.removeOnDidFinishRenderingFrameListener(listener);
+  }
+
+  /**
    * Set a callback that's invoked when the map will start rendering.
    *
    * @param listener The callback that's invoked when the map will start rendering
@@ -1182,12 +1200,32 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
    * </p>
    */
   public interface OnDidFinishRenderingFrameListener {
+
     /**
      * Called when the map has finished rendering a frame
      *
      * @param fully true if all frames have been rendered, false if partially rendered
+     * @param frameEncodingTime CPU encoding time
+     * @param frameRenderingTime CPU rendering time
      */
     void onDidFinishRenderingFrame(boolean fully, double frameEncodingTime, double frameRenderingTime);
+  }
+
+  /**
+   * Interface definition for a callback to be invoked when the map finished rendering a frame.
+   * <p>
+   * {@link MapView#addOnDidFinishRenderingFrameListener(OnDidFinishRenderingFrameListener)}
+   * </p>
+   */
+  public interface OnDidFinishRenderingFrameWithStatsListener {
+
+    /**
+     * Called when the map has finished rendering a frame
+     *
+     * @param fully true if all frames have been rendered, false if partially rendered
+     * @param stats rendering statistics
+     */
+    void onDidFinishRenderingFrame(boolean fully, RenderingStats stats);
   }
 
   /**
@@ -1528,7 +1566,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
    * The initial render callback waits for rendering to happen before making the map visible for end-users.
    * We wait for the second DID_FINISH_RENDERING_FRAME map change event as the first will still show a black surface.
    */
-  private class InitialRenderCallback implements OnDidFinishRenderingFrameListener {
+  private class InitialRenderCallback implements OnDidFinishRenderingFrameWithStatsListener {
 
     private int renderCount;
 
@@ -1537,7 +1575,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     }
 
     @Override
-    public void onDidFinishRenderingFrame(boolean fully, double frameEncodingTime, double frameRenderingTime) {
+    public void onDidFinishRenderingFrame(boolean fully, RenderingStats stats) {
       if (maplibreMap != null && maplibreMap.getStyle() != null && maplibreMap.getStyle().isFullyLoaded()) {
         renderCount++;
         if (renderCount == 3) {
@@ -1643,7 +1681,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   private class MapCallback implements OnDidFinishLoadingStyleListener,
-          OnDidFinishRenderingFrameListener, OnDidFinishLoadingMapListener,
+          OnDidFinishRenderingFrameWithStatsListener, OnDidFinishLoadingMapListener,
           OnCameraIsChangingListener, OnCameraDidChangeListener, OnDidFailLoadingMapListener {
 
     private final List<OnMapReadyCallback> onMapReadyCallbackList = new ArrayList<>();
@@ -1709,7 +1747,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     }
 
     @Override
-    public void onDidFinishRenderingFrame(boolean fully, double frameEncodingTime, double frameRenderingTime) {
+    public void onDidFinishRenderingFrame(boolean fully, RenderingStats stats) {
       if (maplibreMap != null) {
         maplibreMap.onUpdateFullyRendered();
       }

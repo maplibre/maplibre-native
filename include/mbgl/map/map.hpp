@@ -146,6 +146,9 @@ public:
     void setDebug(MapDebugOptions);
     MapDebugOptions getDebug() const;
 
+    bool isRenderingStatsViewEnabled() const;
+    void enableRenderingStatsView(bool value);
+
     bool isFullyLoaded() const;
     void dumpDebugLogs() const;
 

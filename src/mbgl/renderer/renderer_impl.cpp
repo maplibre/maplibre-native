@@ -422,7 +422,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     const auto startRendering = util::MonotonicTimer::now().count();
     // present submits render commands
     parameters.encoder->present(parameters.backend.getDefaultRenderable());
-    const auto renderingTime = util::MonotonicTimer::now().count() - startRendering;
+    context.renderingStats().renderingTime = util::MonotonicTimer::now().count() - startRendering;
 
     parameters.encoder.reset();
     context.endFrame();
@@ -440,14 +440,13 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     }
 #endif // MLN_RENDER_BACKEND_METAL
 
-    const auto encodingTime = renderTree.getElapsedTime() - renderingTime;
+    context.renderingStats().encodingTime = renderTree.getElapsedTime() - context.renderingStats().renderingTime;
 
     observer->onDidFinishRenderingFrame(
         renderTreeParameters.loaded ? RendererObserver::RenderMode::Full : RendererObserver::RenderMode::Partial,
         renderTreeParameters.needsRepaint,
         renderTreeParameters.placementChanged,
-        encodingTime,
-        renderingTime);
+        context.renderingStats());
 
     if (!renderTreeParameters.loaded) {
         renderState = RenderState::Partial;

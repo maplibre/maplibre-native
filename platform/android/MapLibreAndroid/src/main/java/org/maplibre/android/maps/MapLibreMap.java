@@ -103,6 +103,20 @@ public final class MapLibreMap {
     nativeMapView.triggerRepaint();
   }
 
+  /**
+   * Query rendering statistics overlay status.
+   */
+  public boolean isRenderingStatsViewEnabled() {
+    return nativeMapView.isRenderingStatsViewEnabled();
+  }
+
+  /**
+   * Enable rendering statistics overlay with {@link RenderingStats} values.
+   */
+  public void enableRenderingStatsView(boolean value) {
+    nativeMapView.enableRenderingStatsView(value);
+  }
+
   public void setSwapBehaviorFlush(boolean flush) {
     nativeMapView.setSwapBehaviorFlush(flush);
   }
