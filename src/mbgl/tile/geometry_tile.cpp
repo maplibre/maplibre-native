@@ -559,7 +559,6 @@ void GeometryTile::setFeatureState(const LayerFeatureStates& states) {
             if (featureStates.empty()) {
                 continue;
             }
-            auto bucket = layer.second.bucket;
             if (const auto bucket = renderData.bucket; bucket && bucket->hasData()) {
                 bucket->update(featureStates, *sourceLayer, layerID, layoutResult->iconAtlas.patternPositions);
             }
