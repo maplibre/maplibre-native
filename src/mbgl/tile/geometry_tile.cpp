@@ -560,7 +560,7 @@ void GeometryTile::setFeatureState(const LayerFeatureStates& states) {
                 continue;
             }
             if (const auto bucket = renderData.bucket; bucket && bucket->hasData()) {
-                bucket->update(featureStates, *sourceLayer, layerID, layoutResult->iconAtlas.patternPositions);
+                bucket->update(featureStates, *sourceLayer, layerID, layoutResult->imageAtlas.patternPositions);
             }
         }
     }
