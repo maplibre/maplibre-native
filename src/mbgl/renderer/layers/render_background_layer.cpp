@@ -2,7 +2,6 @@
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/map/transform_state.hpp>
-#include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/pattern_atlas.hpp>
@@ -114,11 +113,16 @@ static constexpr std::string_view BackgroundPatternShaderName = "BackgroundPatte
 void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::Context& context,
                                    const TransformState& state,
-                                   const std::shared_ptr<UpdateParameters>&,
+                                   const std::shared_ptr<UpdateParameters>& updateParameters,
                                    [[maybe_unused]] const RenderTree& renderTree,
                                    [[maybe_unused]] UniqueChangeRequestVec& changes) {
+    assert(updateParameters);
     const auto zoom = state.getIntegerZoom();
-    const auto tileCover = util::tileCover(state, zoom);
+    const auto tileCover = util::tileCover({state,
+                                            updateParameters->tileLodMinRadius,
+                                            updateParameters->tileLodScale,
+                                            updateParameters->tileLodPitchThreshold},
+                                           zoom);
 
     // renderTiles is always empty, we use tileCover instead
     if (tileCover.empty()) {

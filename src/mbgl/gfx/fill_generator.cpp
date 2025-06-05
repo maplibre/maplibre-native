@@ -38,7 +38,7 @@ namespace {
 
 std::size_t addRingVertices(gfx::VertexVector<FillLayoutVertex>& vertices, const GeometryCoordinates& ring) {
     for (auto& point : ring) {
-        vertices.emplace_back(FillProgram::layoutVertex(point));
+        vertices.emplace_back(FillBucket::layoutVertex(point));
     }
     return ring.size();
 }
@@ -52,7 +52,7 @@ std::size_t totalVerticesCheck(const GeometryCollection& polygon) {
     return totalVertices;
 }
 
-void addFillIndices(SegmentVector<FillAttributes>& fillSegments,
+void addFillIndices(SegmentVector& fillSegments,
                     gfx::IndexVector<gfx::Triangles>& fillIndexes,
                     std::vector<uint32_t>& indices,
                     std::size_t startVertices,
@@ -80,7 +80,7 @@ void addFillIndices(SegmentVector<FillAttributes>& fillSegments,
 
 void addOutlineIndices(std::size_t base,
                        std::size_t nVertices,
-                       SegmentVector<FillAttributes>& lineSegments,
+                       SegmentVector& lineSegments,
                        gfx::IndexVector<gfx::Lines>& lineIndexes) {
     if (nVertices == 0) return;
 
@@ -106,7 +106,7 @@ void addOutlineIndices(std::size_t base,
 void generateFillBuffers(const GeometryCollection& geometry,
                          gfx::VertexVector<FillLayoutVertex>& fillVertices,
                          gfx::IndexVector<Triangles>& fillIndexes,
-                         SegmentVector<FillAttributes>& fillSegments) {
+                         SegmentVector& fillSegments) {
     for (auto& polygon : classifyRings(geometry)) {
         // Optimize polygons with many interior rings for earcut tesselation.
         limitHoles(polygon, 500);
@@ -126,9 +126,9 @@ void generateFillBuffers(const GeometryCollection& geometry,
 void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                                   gfx::VertexVector<FillLayoutVertex>& vertices,
                                   gfx::IndexVector<gfx::Triangles>& fillIndexes,
-                                  SegmentVector<FillAttributes>& fillSegments,
+                                  SegmentVector& fillSegments,
                                   gfx::IndexVector<gfx::Lines>& lineIndexes,
-                                  SegmentVector<FillAttributes>& lineSegments) {
+                                  SegmentVector& lineSegments) {
     for (auto& polygon : classifyRings(geometry)) {
         // Optimize polygons with many interior rings for earcut tesselation.
         limitHoles(polygon, 500);
@@ -150,18 +150,18 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
 void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                                   gfx::VertexVector<FillLayoutVertex>& fillVertices,
                                   gfx::IndexVector<gfx::Triangles>& fillIndexes,
-                                  SegmentVector<FillAttributes>& fillSegments,
+                                  SegmentVector& fillSegments,
                                   gfx::VertexVector<LineLayoutVertex>& lineVertices,
                                   gfx::IndexVector<gfx::Triangles>& lineIndexes,
-                                  SegmentVector<LineAttributes>& lineSegments) {
-    gfx::PolylineGenerator<LineLayoutVertex, Segment<LineAttributes>> lineGenerator(
+                                  SegmentVector& lineSegments) {
+    gfx::PolylineGenerator<LineLayoutVertex, SegmentBase> lineGenerator(
         lineVertices,
-        LineProgram::layoutVertex,
+        LineBucket::layoutVertex,
         lineSegments,
-        [](std::size_t vertexOffset, std::size_t indexOffset) -> Segment<LineAttributes> {
-            return Segment<LineAttributes>(vertexOffset, indexOffset);
+        [](std::size_t vertexOffset, std::size_t indexOffset) -> SegmentBase {
+            return SegmentBase(vertexOffset, indexOffset);
         },
-        [](auto& seg) -> Segment<LineAttributes>& { return seg; },
+        [](auto& seg) -> SegmentBase& { return seg; },
         lineIndexes);
 
     gfx::PolylineGeneratorOptions lineOptions;
@@ -187,20 +187,20 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
 void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                                   gfx::VertexVector<FillLayoutVertex>& fillVertices,
                                   gfx::IndexVector<gfx::Triangles>& fillIndexes,
-                                  SegmentVector<FillAttributes>& fillSegments,
+                                  SegmentVector& fillSegments,
                                   gfx::VertexVector<LineLayoutVertex>& lineVertices,
                                   gfx::IndexVector<gfx::Triangles>& lineIndexes,
-                                  SegmentVector<LineAttributes>& lineSegments,
+                                  SegmentVector& lineSegments,
                                   gfx::IndexVector<gfx::Lines>& basicLineIndexes,
-                                  SegmentVector<FillAttributes>& basicLineSegments) {
-    gfx::PolylineGenerator<LineLayoutVertex, Segment<LineAttributes>> lineGenerator(
+                                  SegmentVector& basicLineSegments) {
+    gfx::PolylineGenerator<LineLayoutVertex, SegmentBase> lineGenerator(
         lineVertices,
-        LineProgram::layoutVertex,
+        LineBucket::layoutVertex,
         lineSegments,
-        [](std::size_t vertexOffset, std::size_t indexOffset) -> Segment<LineAttributes> {
-            return Segment<LineAttributes>(vertexOffset, indexOffset);
+        [](std::size_t vertexOffset, std::size_t indexOffset) -> SegmentBase {
+            return SegmentBase(vertexOffset, indexOffset);
         },
-        [](auto& seg) -> Segment<LineAttributes>& { return seg; },
+        [](auto& seg) -> SegmentBase& { return seg; },
         lineIndexes);
 
     gfx::PolylineGeneratorOptions lineOptions;

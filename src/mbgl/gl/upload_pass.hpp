@@ -56,22 +56,6 @@ public:
         const std::optional<std::chrono::duration<double>> lastUpdate,
         /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) override;
 
-public:
-    std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
-                                                                const void* data,
-                                                                gfx::TexturePixelType,
-                                                                gfx::TextureChannelDataType) override;
-    void updateTextureResource(
-        gfx::TextureResource&, Size, const void* data, gfx::TexturePixelType, gfx::TextureChannelDataType) override;
-
-    void updateTextureResourceSub(gfx::TextureResource&,
-                                  uint16_t xOffset,
-                                  uint16_t yOffset,
-                                  Size,
-                                  const void* data,
-                                  gfx::TexturePixelType,
-                                  gfx::TextureChannelDataType) override;
-
 private:
     gl::CommandEncoder& commandEncoder;
     const gfx::DebugGroup<gfx::CommandEncoder> debugGroup;

@@ -14,6 +14,7 @@
 #include <mbgl/annotation/annotation_manager.hpp>
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/text/glyph_manager.hpp>
+#include <mbgl/gfx/dynamic_texture_atlas.hpp>
 
 #include <memory>
 
@@ -29,20 +30,23 @@ public:
     AnnotationManager annotationManager{style};
     std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
+    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
+
     TileParameters tileParameters;
     style::Style style;
 
     CustomTileTest()
-        : tileParameters{1.0,
-                         MapDebugOptions(),
-                         transformState,
-                         fileSource,
-                         MapMode::Continuous,
-                         annotationManager.makeWeakPtr(),
-                         imageManager,
-                         glyphManager,
-                         0,
-                         {Scheduler::GetBackground(), uniqueID}},
+        : tileParameters{.pixelRatio = 1.0,
+                         .debugOptions = MapDebugOptions(),
+                         .transformState = transformState,
+                         .fileSource = fileSource,
+                         .mode = MapMode::Continuous,
+                         .annotationManager = annotationManager.makeWeakPtr(),
+                         .imageManager = imageManager,
+                         .glyphManager = glyphManager,
+                         .prefetchZoomDelta = 0,
+                         .threadPool = {Scheduler::GetBackground(), uniqueID},
+                         .dynamicTextureAtlas = dynamicTextureAtlas},
           style{fileSource, 1, tileParameters.threadPool} {}
 };
 

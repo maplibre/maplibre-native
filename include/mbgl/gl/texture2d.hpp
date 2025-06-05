@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/texture2d.hpp>
+#include <mbgl/gl/object.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/util/image.hpp>
 
@@ -25,6 +26,8 @@ public: // gfx::Texture2D
     Texture2D& setSize(Size size_) noexcept override;
 
     Texture2D& setImage(std::shared_ptr<PremultipliedImage> image_) noexcept override;
+
+    gfx::TexturePixelType getFormat() const noexcept override { return pixelFormat; }
 
     Size getSize() const noexcept override { return size; }
 
@@ -64,7 +67,7 @@ private:
 
 private:
     gl::Context& context;
-    std::unique_ptr<gfx::TextureResource> textureResource{nullptr};
+    std::unique_ptr<UniqueTexture> texture;
 
     SamplerState samplerState{};
     gfx::TexturePixelType pixelFormat{gfx::TexturePixelType::RGBA};

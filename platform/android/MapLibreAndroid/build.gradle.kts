@@ -67,14 +67,14 @@ android {
         buildConfigField(
             "String",
             "MAPLIBRE_VERSION_STRING",
-            "\"MapLibre Native/${project.property("VERSION_NAME")}\""
+            "\"MapLibre Android/${project.extra["versionName"]}\""
         )
         consumerProguardFiles("proguard-rules.pro")
     }
 
     flavorDimensions += "renderer"
     productFlavors {
-        create("drawable") {
+        create("opengl") {
             dimension = "renderer"
         }
         create("vulkan") {
@@ -88,7 +88,7 @@ android {
     }
 
     sourceSets {
-        getByName("drawable") {
+        getByName("opengl") {
             java.srcDirs("src/opengl/java/")
         }
     }

@@ -5,10 +5,8 @@
 #include <mbgl/gfx/command_encoder.hpp>
 #include <mbgl/gfx/context_observer.hpp>
 #include <mbgl/gfx/draw_scope.hpp>
-#include <mbgl/gfx/program.hpp>
 #include <mbgl/gfx/renderbuffer.hpp>
 #include <mbgl/gfx/rendering_stats.hpp>
-#include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/types.hpp>
 
 #include <mbgl/gfx/uniform_buffer.hpp>
@@ -30,6 +28,8 @@ using RenderTargetPtr = std::shared_ptr<RenderTarget>;
 
 namespace gfx {
 
+class DepthMode;
+class ColorMode;
 class OffscreenTexture;
 class ShaderRegistry;
 
@@ -78,13 +78,6 @@ public:
     virtual void reduceMemoryUsage() = 0;
 
     virtual std::unique_ptr<OffscreenTexture> createOffscreenTexture(Size, TextureChannelDataType) = 0;
-
-    /// Creates an empty texture with the specified dimensions.
-    Texture createTexture(const Size size,
-                          TexturePixelType format = TexturePixelType::RGBA,
-                          TextureChannelDataType type = TextureChannelDataType::UnsignedByte) {
-        return {size, createTextureResource(size, format, type)};
-    }
 
     template <RenderbufferPixelType pixelType>
     Renderbuffer<pixelType> createRenderbuffer(const Size size) {
@@ -173,7 +166,6 @@ public:
     virtual void unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept = 0;
 
 protected:
-    virtual std::unique_ptr<TextureResource> createTextureResource(Size, TexturePixelType, TextureChannelDataType) = 0;
     virtual std::unique_ptr<RenderbufferResource> createRenderbufferResource(RenderbufferPixelType, Size) = 0;
     virtual std::unique_ptr<DrawScopeResource> createDrawScopeResource() = 0;
 

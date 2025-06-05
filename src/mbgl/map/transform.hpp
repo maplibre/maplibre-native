@@ -16,14 +16,28 @@
 
 namespace mbgl {
 
+class TransformObserver {
+public:
+    virtual ~TransformObserver() = default;
+
+    static TransformObserver& nullObserver() {
+        static TransformObserver observer;
+        return observer;
+    }
+
+    virtual void onCameraWillChange(MapObserver::CameraChangeMode) {}
+    virtual void onCameraIsChanging() {}
+    virtual void onCameraDidChange(MapObserver::CameraChangeMode) {}
+};
+
 class Transform : private util::noncopyable {
 public:
-    Transform(MapObserver& = MapObserver::nullObserver(),
+    Transform(TransformObserver& = TransformObserver::nullObserver(),
               ConstrainMode = ConstrainMode::HeightOnly,
               ViewportMode = ViewportMode::Default);
 
     Transform(const TransformState& state_)
-        : observer(MapObserver::nullObserver()),
+        : observer(TransformObserver::nullObserver()),
           state(state_) {}
 
     // Map view
@@ -119,7 +133,7 @@ public:
     void setFreeCameraOptions(const FreeCameraOptions& options);
 
 private:
-    MapObserver& observer;
+    TransformObserver& observer;
     TransformState state;
 
     void startTransition(const CameraOptions&,

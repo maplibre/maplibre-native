@@ -27,9 +27,17 @@ class AsyncTask;
 
 namespace android {
 
-class AndroidRendererFrontend : public RendererFrontend {
+class AndroidRendererFrontend : public RendererFrontend, public std::enable_shared_from_this<AndroidRendererFrontend> {
+    struct Private {
+        explicit Private() = default;
+    };
+
 public:
-    AndroidRendererFrontend(MapRenderer&);
+    AndroidRendererFrontend(Private, MapRenderer&);
+
+    static std::shared_ptr<AndroidRendererFrontend> create(MapRenderer&);
+    void init();
+
     ~AndroidRendererFrontend() override;
 
     void reset() override;

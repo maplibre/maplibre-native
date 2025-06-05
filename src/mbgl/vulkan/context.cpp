@@ -1,7 +1,6 @@
 #include <mbgl/vulkan/context.hpp>
 
 #include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_target.hpp>
@@ -16,6 +15,7 @@
 #include <mbgl/vulkan/vertex_attribute.hpp>
 #include <mbgl/shaders/vulkan/shader_program.hpp>
 #include <mbgl/shaders/vulkan/clipping_mask.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>
@@ -67,6 +67,12 @@ Context::~Context() noexcept {
     if (--glslangRefCount == 0) {
         glslang::FinalizeProcess();
     }
+
+#if !defined(NDEBUG)
+    Log::Debug(Event::General, "Rendering Stats:\n" + stats.toString("\n"));
+#endif
+
+    assert(stats.isZero());
 }
 
 void Context::initFrameResources() {
@@ -100,14 +106,12 @@ void Context::initFrameResources() {
     for (uint32_t index = 0; index < frameCount; ++index) {
         frameResources.emplace_back(commandBuffers[index],
                                     device->createSemaphoreUnique({}),
-                                    device->createSemaphoreUnique({}),
                                     device->createFenceUnique(vk::FenceCreateInfo(vk::FenceCreateFlagBits::eSignaled)));
 
         const auto& frame = frameResources.back();
 
         backend.setDebugName(frame.commandBuffer.get(), "FrameCommandBuffer_" + std::to_string(index));
-        backend.setDebugName(frame.frameSemaphore.get(), "FrameSemaphore_" + std::to_string(index));
-        backend.setDebugName(frame.surfaceSemaphore.get(), "SurfaceSemaphore_" + std::to_string(index));
+        backend.setDebugName(frame.acquireSurfaceSemaphore.get(), "AcquireSurfaceSemaphore_" + std::to_string(index));
         backend.setDebugName(frame.flightFrameFence.get(), "FrameFence_" + std::to_string(index));
     }
 
@@ -136,10 +140,20 @@ void Context::destroyResources() {
         frame.runDeletionQueue(*this);
     }
 
-    globalUniformBuffers.freeDescriptorSets();
-
     // all resources have unique handles
     frameResources.clear();
+
+    globalUniformBuffers.freeDescriptorSets();
+
+    for (size_t i = 0; i < globalUniformBuffers.allocatedSize(); i++) {
+        globalUniformBuffers.set(i, nullptr);
+    }
+
+    dummyBuffer.reset();
+    dummyTexture2D.reset();
+
+    clipping.indexBuffer.reset();
+    clipping.vertexBuffer.reset();
 }
 
 void Context::enqueueDeletion(std::function<void(Context&)>&& function) {
@@ -259,7 +273,7 @@ void Context::beginFrame() {
         MLN_TRACE_ZONE(acquireNextImageKHR);
         try {
             const vk::ResultValue acquireImageResult = device->acquireNextImageKHR(
-                renderableResource.getSwapchain().get(), timeout, frame.surfaceSemaphore.get(), nullptr);
+                renderableResource.getSwapchain().get(), timeout, frame.acquireSurfaceSemaphore.get(), nullptr);
 
             if (acquireImageResult.result == vk::Result::eSuccess) {
                 renderableResource.setAcquiredImageIndex(acquireImageResult.value);
@@ -303,8 +317,8 @@ void Context::submitFrame() {
     auto submitInfo = vk::SubmitInfo().setCommandBuffers(frame.commandBuffer.get());
 
     if (platformSurface) {
-        submitInfo.setSignalSemaphores(frame.frameSemaphore.get())
-            .setWaitSemaphores(frame.surfaceSemaphore.get())
+        submitInfo.setSignalSemaphores(renderableResource.getAcquiredSemaphore())
+            .setWaitSemaphores(frame.acquireSurfaceSemaphore.get())
             .setWaitDstStageMask(waitStageMask);
     }
 
@@ -320,7 +334,7 @@ void Context::submitFrame() {
         const auto acquiredImage = renderableResource.getAcquiredImageIndex();
         const auto presentInfo = vk::PresentInfoKHR()
                                      .setSwapchains(renderableResource.getSwapchain().get())
-                                     .setWaitSemaphores(frame.frameSemaphore.get())
+                                     .setWaitSemaphores(renderableResource.getAcquiredSemaphore())
                                      .setImageIndices(acquiredImage);
 
         try {
@@ -355,6 +369,11 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
     auto program = std::make_unique<ShaderProgram>(
         shaderID, name, vertex, fragment, programParameters, additionalDefines, backend, *observer);
     return program;
+}
+
+void Context::performCleanup() {
+    stats.numDrawCalls = 0;
+    ++stats.numFrames;
 }
 
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
@@ -415,13 +434,6 @@ std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size
 
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size, gfx::TextureChannelDataType type) {
     return createOffscreenTexture(size, type, false, false);
-}
-
-std::unique_ptr<gfx::TextureResource> Context::createTextureResource(Size,
-                                                                     gfx::TexturePixelType,
-                                                                     gfx::TextureChannelDataType) {
-    throw std::runtime_error("Vulkan TextureResource not implemented");
-    return nullptr;
 }
 
 std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size) {

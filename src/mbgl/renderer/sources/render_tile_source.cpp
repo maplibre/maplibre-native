@@ -43,12 +43,6 @@ void TileSourceRenderItem::upload(gfx::UploadPass& parameters) const {
     }
 }
 
-void TileSourceRenderItem::render(PaintParameters& parameters) const {
-    for (auto& tile : *renderTiles) {
-        tile.finishRender(parameters);
-    }
-}
-
 #if MLN_ENABLE_POLYLINE_DRAWABLES
 class PolylineLayerImpl : public Layer::Impl {
 public:

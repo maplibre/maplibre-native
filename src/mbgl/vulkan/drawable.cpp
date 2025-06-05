@@ -14,7 +14,7 @@
 #include <mbgl/vulkan/vertex_buffer_resource.hpp>
 #include <mbgl/vulkan/texture2d.hpp>
 #include <mbgl/shaders/vulkan/shader_program.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/variant.hpp>
 #include <mbgl/util/hash.hpp>

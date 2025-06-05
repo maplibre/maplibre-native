@@ -131,4 +131,12 @@ enum class WritingModeType : uint8_t {
 using GlyphDependencies = std::map<FontStack, GlyphIDs>;
 using GlyphRangeDependencies = std::map<FontStack, std::unordered_set<GlyphRange>>;
 
+struct GlyphPosition {
+    Rect<uint16_t> rect;
+    GlyphMetrics metrics;
+};
+
+using GlyphPositionMap = std::map<GlyphID, GlyphPosition>;
+using GlyphPositions = std::map<FontStackHash, GlyphPositionMap>;
+
 } // end namespace mbgl

@@ -13,12 +13,12 @@
 #include <mbgl/mtl/uniform_buffer.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
 #include <mbgl/mtl/vertex_buffer_resource.hpp>
-#include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_target.hpp>
 #include <mbgl/shaders/mtl/clipping_mask.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>
@@ -454,13 +454,6 @@ std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size
 
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size, gfx::TextureChannelDataType type) {
     return createOffscreenTexture(size, type, false, false);
-}
-
-std::unique_ptr<gfx::TextureResource> Context::createTextureResource(Size,
-                                                                     gfx::TexturePixelType,
-                                                                     gfx::TextureChannelDataType) {
-    assert(false);
-    return nullptr;
 }
 
 std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size) {

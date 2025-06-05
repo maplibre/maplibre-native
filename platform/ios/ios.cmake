@@ -4,6 +4,12 @@ target_include_directories(
         ${PROJECT_SOURCE_DIR}/platform/ios/src
 )
 
+target_link_libraries(
+    mbgl-core
+    PRIVATE
+        MapLibreNative::Base::Extras::filesystem
+)
+
 file(GLOB_RECURSE IOS_SDK_SOURCE_FILES
     "${PROJECT_SOURCE_DIR}/platform/darwin/src/*.m"
     "${PROJECT_SOURCE_DIR}/platform/darwin/src/*.mm"

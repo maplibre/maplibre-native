@@ -1,8 +1,6 @@
 #pragma once
 
 #include <mapbox/shelf-pack.hpp>
-#include <mbgl/gfx/texture.hpp>
-#include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/style/image_impl.hpp>
 
 #include <unordered_map>

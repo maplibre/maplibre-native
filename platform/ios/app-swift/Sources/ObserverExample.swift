@@ -4,22 +4,52 @@ import UIKit
 
 class ObserverExampleView: UIViewController, MLNMapViewDelegate {
     var mapView: MLNMapView!
+    var button: UIButton!
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        mapView = MLNMapView(frame: view.bounds, styleURL: AMERICANA_STYLE)
+        // #-example-code(actionJournalOptions)
+        let options = MLNMapOptions()
+        options.actionJournalOptions.enabled = true
+        options.styleURL = AMERICANA_STYLE
+        mapView = MLNMapView(frame: view.bounds, options: options)
+        // #-end-example-code
+
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
-        mapView.setCenter(
-            CLLocationCoordinate2D(latitude: 45.5076, longitude: -122.6736),
-            zoomLevel: 11,
-            animated: false
-        )
         view.addSubview(mapView)
 
         mapView.delegate = self
+
+        button = UIButton(frame: CGRect(x: view.bounds.width / 2 - 100, y: view.bounds.height - 200, width: 200, height: 30))
+        button.setTitle("Print Action Journal", for: .normal)
+        button.layer.cornerRadius = 15
+        button.backgroundColor = UIColor(red: 0.96, green: 0.65, blue: 0.14, alpha: 1.0)
+        button.addTarget(self, action: #selector(printActionJournal), for: .touchUpInside)
+        view.addSubview(button)
     }
+
+    // #-example-code(ObserverExampleActionJournal)
+    @objc func printActionJournal() {
+        print("ActionJournalLog files: \(mapView.getActionJournalLogFiles())")
+        print("ActionJournalLog : \(mapView.getActionJournalLog())")
+        // print only the newest events on each call
+        mapView.clearActionJournalLog()
+    }
+
+    // #-end-example-code
+
+    func mapViewDidFinishLoadingMap(_: MLNMapView) {
+        // #-example-code(enableRenderingStatsView)
+        mapView.enableRenderingStatsView(true)
+        // #-end-example-code
+    }
+
+    // #-example-code(ObserverExampleRenderingStats)
+    func mapViewDidFinishRenderingFrame(_: MLNMapView, fullyRendered _: Bool, renderingStats _: MLNRenderingStats) {}
+
+    // #-end-example-code
 
     // #-example-code(ObserverExampleShaders)
     func mapView(_: MLNMapView, shaderWillCompile id: Int, backend: Int, defines: String) {
@@ -101,7 +131,7 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
     // #-end-example-code
 }
 
-struct ObserverExampleViewExampleUIViewControllerRepresentable: UIViewControllerRepresentable {
+struct ObserverExampleViewUIViewControllerRepresentable: UIViewControllerRepresentable {
     typealias UIViewControllerType = ObserverExampleView
 
     func makeUIViewController(context _: Context) -> ObserverExampleView {

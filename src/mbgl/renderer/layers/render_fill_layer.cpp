@@ -3,8 +3,7 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/programs/fill_program.hpp>
-#include <mbgl/programs/programs.hpp>
+#include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/renderer/buckets/fill_bucket.hpp>
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/renderer/layers/render_fill_layer.hpp>
@@ -498,11 +497,15 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
             if (patternBuilder) {
                 patternBuilder->clearTweakers();
-                patternBuilder->addTweaker(getAtlasTweaker());
+                if (const auto& tweaker = getAtlasTweaker()) {
+                    patternBuilder->addTweaker(tweaker);
+                }
             }
             if (doOutline && outlinePatternBuilder) {
                 outlinePatternBuilder->clearTweakers();
-                outlinePatternBuilder->addTweaker(getAtlasTweaker());
+                if (const auto& tweaker = getAtlasTweaker()) {
+                    outlinePatternBuilder->addTweaker(tweaker);
+                }
             }
 
             if (patternBuilder && bucket.sharedTriangles->elements()) {
