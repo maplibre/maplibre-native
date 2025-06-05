@@ -10,6 +10,8 @@
 -keep class com.google.gson.JsonPrimitive { *; }
 -dontnote com.google.gson.**
 -keep enum org.maplibre.android.tile.TileOperation
+-keep class org.maplibre.android.maps.RenderingStats { *; }
+-keep class org.maplibre.android.maps.NativeMapOptions { *; }
 -keepclassmembers class * extends java.lang.Enum {
     <fields>;
     public static **[] values();

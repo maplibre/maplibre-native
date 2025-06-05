@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## 11.10.1
+
+### 🐞 Bug fixes
+
+- Add missing proguard rules ([#3529](https://github.com/maplibre/maplibre-native/pull/3529)).
+
 ## 11.10.0
 
 ### ✨ Features and improvements
