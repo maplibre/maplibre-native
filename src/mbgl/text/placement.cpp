@@ -276,6 +276,11 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
         // a parent tile that _should_ be placed.
         return kUnplaced;
     }
+
+    if (ctx.getOverscaledID().overscaledZ != int(placementZoom)) {
+        return kUnplaced;
+    }
+
     const SymbolBucket& bucket = ctx.getBucket();
     const mat4& posMatrix = ctx.getRenderTile().matrix;
     const auto& collisionGroup = ctx.collisionGroup;
