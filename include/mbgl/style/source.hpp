@@ -55,7 +55,7 @@ public:
 
     /// Dynamically cast this source to the given subtype.
     template <class T>
-    requires (std::is_base_of_v<Source, T>)
+        requires(std::is_base_of_v<Source, T>)
     T* as() {
         if constexpr (std::is_same_v<T, Source>) {
             return this;
@@ -64,7 +64,7 @@ public:
     }
 
     template <class T>
-    requires (std::is_base_of_v<Source, T>)
+        requires(std::is_base_of_v<Source, T>)
     const T* as() const {
         if constexpr (std::is_same_v<T, Source>) {
             return this;

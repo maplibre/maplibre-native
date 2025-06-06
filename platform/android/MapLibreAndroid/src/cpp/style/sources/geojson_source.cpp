@@ -49,13 +49,13 @@ GeoJSONSource::GeoJSONSource(jni::JNIEnv& env, const jni::String& sourceId, cons
     : Source(env,
              std::make_unique<mbgl::style::GeoJSONSource>(jni::Make<std::string>(env, sourceId),
                                                           convertGeoJSONOptions(env, options))),
-      converter(std::make_unique<Actor<FeatureConverter>>(
-          Scheduler::GetBackground(), getSource<style::GeoJSONSource>().impl().getOptions())) {}
+      converter(std::make_unique<Actor<FeatureConverter>>(Scheduler::GetBackground(),
+                                                          getSource<style::GeoJSONSource>().impl().getOptions())) {}
 
 GeoJSONSource::GeoJSONSource(jni::JNIEnv& env, mbgl::style::Source& coreSource, AndroidRendererFrontend* frontend)
     : Source(env, coreSource, createJavaPeer(env), frontend),
-      converter(std::make_unique<Actor<FeatureConverter>>(
-          Scheduler::GetBackground(), getSource<style::GeoJSONSource>().impl().getOptions())) {}
+      converter(std::make_unique<Actor<FeatureConverter>>(Scheduler::GetBackground(),
+                                                          getSource<style::GeoJSONSource>().impl().getOptions())) {}
 
 GeoJSONSource::~GeoJSONSource() = default;
 
@@ -112,7 +112,7 @@ jni::Local<jni::Array<jni::Object<geojson::Feature>>> GeoJSONSource::getClusterC
         mbgl::Feature _feature = Feature::convert(env, feature);
         _feature.properties["cluster_id"] = static_cast<uint64_t>(_feature.properties["cluster_id"].get<double>());
         const auto featureExtension = rendererFrontend->queryFeatureExtensions(
-                getSource().getID(), _feature, "supercluster", "children", {});
+            getSource().getID(), _feature, "supercluster", "children", {});
         if (featureExtension.is<mbgl::FeatureCollection>()) {
             return Feature::convert(env, featureExtension.get<mbgl::FeatureCollection>());
         }
@@ -131,7 +131,7 @@ jni::Local<jni::Array<jni::Object<geojson::Feature>>> GeoJSONSource::getClusterL
         const std::map<std::string, mbgl::Value> options = {{"limit", static_cast<uint64_t>(limit)},
                                                             {"offset", static_cast<uint64_t>(offset)}};
         auto featureExtension = rendererFrontend->queryFeatureExtensions(
-                getSource().getID(), _feature, "supercluster", "leaves", options);
+            getSource().getID(), _feature, "supercluster", "leaves", options);
         if (featureExtension.is<mbgl::FeatureCollection>()) {
             return Feature::convert(env, featureExtension.get<mbgl::FeatureCollection>());
         }
@@ -148,7 +148,7 @@ jint GeoJSONSource::getClusterExpansionZoom(jni::JNIEnv& env, const jni::Object<
         mbgl::Feature _feature = Feature::convert(env, feature);
         _feature.properties["cluster_id"] = static_cast<uint64_t>(_feature.properties["cluster_id"].get<double>());
         auto featureExtension = rendererFrontend->queryFeatureExtensions(
-                getSource().getID(), _feature, "supercluster", "expansion-zoom", {});
+            getSource().getID(), _feature, "supercluster", "expansion-zoom", {});
         if (featureExtension.is<mbgl::Value>()) {
             auto value = featureExtension.get<mbgl::Value>();
             if (value.is<uint64_t>()) {

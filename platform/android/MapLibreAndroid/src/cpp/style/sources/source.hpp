@@ -65,7 +65,9 @@ public:
 
 protected:
     template <typename T = style::Source>
-    T& getSource() { return *ownedSource->as<T>(); }
+    T& getSource() {
+        return *ownedSource->as<T>();
+    }
 
     std::weak_ptr<std::reference_wrapper<style::Source>> getWeakSource() const { return source; }
 

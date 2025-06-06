@@ -141,14 +141,13 @@ void CustomGeometrySource::setTileData(
 
     // Update the core source if not cancelled
     if (!isCancelled(z, x, y)) {
-        getSource<mbgl::style::CustomGeometrySource>().CustomGeometrySource::setTileData(
-            CanonicalTileID(z, x, y), GeoJSON(geometry));
+        getSource<mbgl::style::CustomGeometrySource>().CustomGeometrySource::setTileData(CanonicalTileID(z, x, y),
+                                                                                         GeoJSON(geometry));
     }
 }
 
 void CustomGeometrySource::invalidateTile(jni::JNIEnv&, jni::jint z, jni::jint x, jni::jint y) {
-    getSource<mbgl::style::CustomGeometrySource>().CustomGeometrySource::invalidateTile(
-        CanonicalTileID(z, x, y));
+    getSource<mbgl::style::CustomGeometrySource>().CustomGeometrySource::invalidateTile(CanonicalTileID(z, x, y));
 }
 
 void CustomGeometrySource::invalidateBounds(jni::JNIEnv& env, const jni::Object<LatLngBounds>& jBounds) {
