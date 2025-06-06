@@ -277,6 +277,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
         return kUnplaced;
     }
 
+    // Place the symbol only at the current level to prevent it from blinking during the transition.
     if (ctx.getOverscaledID().overscaledZ != int(placementZoom)) {
         return kUnplaced;
     }
