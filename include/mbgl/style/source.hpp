@@ -55,13 +55,21 @@ public:
 
     /// Dynamically cast this source to the given subtype.
     template <class T>
+    requires (std::is_base_of_v<Source, T>)
     T* as() {
-        return is<T>() ? reinterpret_cast<T*>(this) : nullptr;
+        if constexpr (std::is_same_v<T, Source>) {
+            return this;
+        }
+        return is<T>() ? static_cast<T*>(this) : nullptr;
     }
 
     template <class T>
+    requires (std::is_base_of_v<Source, T>)
     const T* as() const {
-        return is<T>() ? reinterpret_cast<const T*>(this) : nullptr;
+        if constexpr (std::is_same_v<T, Source>) {
+            return this;
+        }
+        return is<T>() ? static_cast<const T*>(this) : nullptr;
     }
 
     SourceType getType() const;
