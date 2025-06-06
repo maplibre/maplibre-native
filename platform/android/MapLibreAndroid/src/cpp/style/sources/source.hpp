@@ -8,6 +8,7 @@
 #include "../../android_renderer_frontend.hpp"
 
 #include <jni/jni.hpp>
+#include <functional>
 
 namespace mbgl {
 namespace android {
@@ -66,8 +67,8 @@ protected:
     // Set on newly created sources until added to the map.
     std::unique_ptr<mbgl::style::Source> ownedSource;
 
-    // Raw pointer that is valid at all times.
-    mbgl::style::Source& source;
+    // Reference that is valid at all times.
+    std::shared_ptr<std::reference_wrapper<mbgl::style::Source>> source;
 
     // Set when the source is added to a map.
     jni::Global<jni::Object<Source>> javaPeer;
