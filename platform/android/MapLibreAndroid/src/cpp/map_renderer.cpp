@@ -276,7 +276,7 @@ void MapRenderer::onSurfaceCreated(JNIEnv& env, const jni::Object<AndroidSurface
     }
 }
 
-void MapRenderer::onSurfaceChanged(JNIEnv& env, jint width, jint height) {
+void MapRenderer::onSurfaceChanged([[maybe_unused]] JNIEnv& env, jint width, jint height) {
 #if MLN_RENDER_BACKEND_OPENGL
     if (!renderer) {
         // In case the surface has been destroyed (due to app back-grounding)
