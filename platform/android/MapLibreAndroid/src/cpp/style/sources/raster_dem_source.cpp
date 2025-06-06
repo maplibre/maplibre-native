@@ -26,7 +26,7 @@ RasterDEMSource::RasterDEMSource(jni::JNIEnv& env, mbgl::style::Source& coreSour
 RasterDEMSource::~RasterDEMSource() = default;
 
 jni::Local<jni::String> RasterDEMSource::getURL(jni::JNIEnv& env) {
-    std::optional<std::string> url = source->get().as<mbgl::style::RasterDEMSource>()->RasterDEMSource::getURL();
+    auto url = getSource<mbgl::style::RasterDEMSource>().RasterDEMSource::getURL();
     return url ? jni::Make<jni::String>(env, *url) : jni::Local<jni::String>();
 }
 
