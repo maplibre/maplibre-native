@@ -123,6 +123,8 @@ class UserMap : SupportMapFragment() {
             }
         }
 
+        private fun randomLineWidth(): Float = random(1.0, 4.0).toFloat()
+
         private fun randomColor(): Int =
             Color.argb(
                 RANDOM.nextInt(127, 256),
@@ -249,6 +251,7 @@ class UserMap : SupportMapFragment() {
             map.addPolyline(
                 PolylineOptions()
                     .color(randomColor())
+                    .width(randomLineWidth())
                     .addAll(randomPolyPoints(bounds)),
             )
         }
