@@ -37,8 +37,8 @@ jobs:
           },
           {
             artifactName: benchmarkAPKs,
-            testFile: "MapLibreAndroidTestApp-drawable-release-androidTest.apk",
-            appFile: "MapLibreAndroidTestApp-drawable-release.apk",
+            testFile: "MapLibreAndroidTestApp-opengl-release-androidTest.apk",
+            appFile: "MapLibreAndroidTestApp-opengl-release.apk",
             name: "Android Benchmark",
             testFilter: "org.maplibre.android.benchmark.Benchmark",
             # Google Pixel 7 Pro
