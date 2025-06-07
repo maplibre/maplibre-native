@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.maps.MapView
+import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.databinding.ActivityRecyclerviewBinding
 
@@ -49,9 +50,11 @@ open class GLSurfaceRecyclerViewActivity : AppCompatActivity() {
     class ItemAdapter(private val activity: GLSurfaceRecyclerViewActivity, private val inflater: LayoutInflater) : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
 
         private val items: List<Any> = listOf(
-            "one", "two", "three", "four", "five", "seven", "eight", "nine", "ten",
-            "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen",
-            "nineteen", "twenty", "twenty-one"
+            "one", "two", MapItem(Style.getPredefinedStyle("Basic")), "three", "four",
+            "five", "six", MapItem(Style.getPredefinedStyle("Basic")), "seven", "eight",
+            "nine", "ten", MapItem(Style.getPredefinedStyle("Basic")), "eleven", "twelve",
+            "thirteen", "fourteen", MapItem(Style.getPredefinedStyle("Basic")), "fifteen", "sixteen",
+            "seventeen", "eighteen", MapItem(Style.getPredefinedStyle("Basic")), "nineteen", "twenty", "twenty-one"
         )
 
         private var mapHolders: MutableList<MapHolder> = mutableListOf()
