@@ -1,3 +1,19 @@
+MLN_LAYER_PLUGIN_HEADERS = [
+    "src/mbgl/plugin/plugin_layer.hpp",
+    "src/mbgl/plugin/plugin_layer_factory.hpp",
+    "src/mbgl/plugin/plugin_layer_impl.hpp",
+    "src/mbgl/plugin/plugin_layer_render.hpp",
+    "src/mbgl/plugin/plugin_layer_properties.hpp",
+]
+
+MLN_LAYER_PLUGIN_SOURCE = [
+    "src/mbgl/plugin/plugin_layer.cpp",
+    "src/mbgl/plugin/plugin_layer_factory.cpp",
+    "src/mbgl/plugin/plugin_layer_impl.cpp",
+    "src/mbgl/plugin/plugin_layer_render.cpp",
+    "src/mbgl/plugin/plugin_layer_properties.cpp",
+]
+
 MLN_PUBLIC_GENERATED_STYLE_HEADERS = [
     "include/mbgl/style/layers/circle_layer.hpp",
     "include/mbgl/style/layers/fill_layer.hpp",
