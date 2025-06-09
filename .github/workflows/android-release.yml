@@ -4,15 +4,79 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  android-create-release:
+    runs-on: ubuntu-24.04
+    outputs:
+      version_tag: ${{ steps.prepare_release.outputs.version_tag }}
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    defaults:
+      run:
+        working-directory: platform/android
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate and set version
+        working-directory: .
+        run: .github/scripts/validate-version.sh platform/android/VERSION
+
+      - name: npm install
+        run: npm install --ignore-scripts
+
+      # create github release
+      - name: Prepare release
+        id: prepare_release
+        run: |
+          RELEASE_NOTES_PATH="${PWD}/release_notes.txt"
+          node scripts/release-notes.mjs ${{ env.version }} > "${RELEASE_NOTES_PATH}"
+          echo release_notes="${RELEASE_NOTES_PATH}" >> "$GITHUB_OUTPUT"
+          echo version_tag=android-v${{ env.version }} >> "$GITHUB_OUTPUT"
+        shell: bash
+
+      - name: Check if version is pre-release
+        id: check_version
+        run: |
+          version="${{ env.version }}"
+          if [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Valid semver: $version"
+            echo "prerelease=false" >> "$GITHUB_ENV"
+          else
+            echo "Invalid semver: $version"
+            echo "prerelease=true" >> "$GITHUB_ENV"
+          fi
+
+      - name: Create tag if it does not exist
+        working-directory: .
+        run: .github/scripts/ensure-tag.sh android-v${{ env.version }} ${{ github.sha }}
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.prepare_release.outputs.version_tag }}
+          release_name: ${{steps.prepare_release.outputs.version_tag }}
+          body_path: ${{ steps.prepare_release.outputs.release_notes }}
+          draft: false
+          prerelease: ${{ env.prerelease }}
+
+  android-build-and-upload-release:
+    needs: android-create-release
     runs-on: MapLibre_Native_Ubuntu_24_04_x84_16_core
     defaults:
       run:
         working-directory: platform/android
     env:
       JOBS: 8
-      BUILDTYPE: Release
       IS_LOCAL_DEVELOPMENT: false
+    strategy:
+      matrix:
+        RENDERER:
+          - vulkan
+          - opengl
+        BUILDTYPE:
+          - Release
+          - Debug
     steps:
       - uses: actions/checkout@v4
         with:
@@ -36,134 +100,34 @@ jobs:
       - name: Android nitpick
         run: make run-android-nitpick
 
-      - name: Validate and set version
-        run: ../../.github/scripts/validate-version.sh
-
       - name: Build package
+        run: RENDERER=${{ matrix.RENDERER }} BUILDTYPE=${{ matrix.BUILDTYPE }} make apackage
+
+      - name: Save buildtype to GITHUB_ENV
         run: |
-          RENDERER=vulkan make apackage
-          BUILDTYPE=Debug RENDERER=vulkan make apackage
-          RENDERER=drawable make apackage
-          BUILDTYPE=Debug RENDERER=drawable make apackage
+          buildtype=${{ matrix.BUILDTYPE }}
+          # lowercase
+          echo buildtype=${buildtype,,} > "$GITHUB_ENV"
 
-      # create github release
-      - name: Prepare release
-        id: prepare_release
-        run: |
-          RELEASE_NOTES_PATH="${PWD}/release_notes.txt"
-          node scripts/release-notes.mjs > "${RELEASE_NOTES_PATH}"
-          echo release_notes="${RELEASE_NOTES_PATH}" >> "$GITHUB_OUTPUT"
-          echo version_tag=android-v${{ env.version }} >> "$GITHUB_OUTPUT"
-        shell: bash
-
-      - name: Check if version is pre-release
-        id: check_version
-        run: |
-          version="${{ env.version }}"
-          if [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Valid semver: $version"
-            echo "prerelease=false" >> "$GITHUB_ENV"
-          else
-            echo "Invalid semver: $version"
-            echo "prerelease=true" >> "$GITHUB_ENV"
-          fi
-
-      - name: Create tag if it does not exist
-        run: |
-          git config user.name "MapLibre Team"
-          git config user.email "team@maplibre.org"
-          tag="android-v${{ env.version }}"
-
-          if git rev-parse "$tag" >/dev/null 2>&1; then
-            tag_sha=$(git rev-parse "$tag^{commit}")
-            if [ "$tag_sha" = "${{ github.sha }}" ]; then
-              echo "✅ Tag $tag exists and matches current commit SHA."
-              exit 0
-            else
-              echo "::error::❌ Tag $tag exists but points to a different commit. Aborting."
-              exit 1
-            fi
-          else
-            git tag -a "$tag" -m "Publish $tag" ${{ github.sha }}
-            git push origin "$tag"
-          fi
-
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.prepare_release.outputs.version_tag }}
-          release_name: ${{steps.prepare_release.outputs.version_tag }}
-          body_path: ${{ steps.prepare_release.outputs.release_notes }}
-          draft: false
-          prerelease: ${{ env.prerelease }}
-
-      - name: Upload aar (OpenGL)
+      - name: Upload aar (${{ matrix.RENDERER }}, ${{ matrix.BUILDTYPE }})
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-drawable-release.aar
-          asset_name: MapLibreAndroid-release.aar
+          upload_url: ${{ needs.android-create-release.outputs.upload_url }}
+          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}.aar
+          asset_name: MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.aar
           asset_content_type: application/zip
 
-      - name: Upload aar (OpenGL, Debug)
+      - name: Upload debug symbols (${{ matrix.RENDERER }}, ${{ matrix.BUILDTYPE }})
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-drawable-debug.aar
-          asset_name: MapLibreAndroid-debug.aar
-          asset_content_type: application/zip
-
-      - name: Upload aar (Vulkan)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-vulkan-release.aar
-          asset_name: MapLibreAndroid-release-vulkan.aar
-          asset_content_type: application/zip
-
-      - name: Upload aar (Vulkan, Debug)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-vulkan-debug.aar
-          asset_name: MapLibreAndroid-debug-vulkan.aar
-          asset_content_type: application/zip
-
-      - name: Upload debug symbols (OpenGL)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/build/debug-symbols-opengl.tar.gz
-          asset_name: debug-symbols-maplibre-android-opengl-${{ steps.prepare_release.outputs.version_tag }}.tar.gz
+          upload_url: ${{ needs.android-create-release.outputs.upload_url }}
+          asset_path: platform/android/build/debug-symbols-${{ matrix.RENDERER }}-${{ env.buildtype }}.tar.gz
+          asset_name: debug-symbols-maplibre-android-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.tar.gz
           asset_content_type: application/gzip
-
-      - name: Upload debug symbols (Vulkan)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/build/debug-symbols-vulkan.tar.gz
-          asset_name: debug-symbols-maplibre-android-vulkan-${{ steps.prepare_release.outputs.version_tag }}.tar.gz
-          asset_content_type: application/gzip
-
-      - name: Clean release
-        run: |
-          rm -f ${{ steps.prepare_release.outputs.release_notes }}
-        shell: bash
 
       - name: Prepare MavenCentral release
         env:
@@ -173,7 +137,14 @@ jobs:
         shell: bash
 
       - name: Publish to MavenCentral
-        run: make run-android-publish
+        run: |
+          renderer=${{ matrix.RENDERER }}
+          if [ "$renderer" = "opengl" ]; then
+            ./gradlew :MapLibreAndroid:publishOpengl${{ env.buildtype }}PublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+            ./gradlew :MapLibreAndroid:publishDefault${{ env.buildtype }}PublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+          else
+            ./gradlew :MapLibreAndroid:publishVulkan${{ env.buildtype }}PublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+          fi
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}

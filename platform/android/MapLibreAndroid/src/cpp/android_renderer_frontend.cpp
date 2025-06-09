@@ -36,11 +36,10 @@ public:
     void onDidFinishRenderingFrame(RenderMode mode,
                                    bool repaintNeeded,
                                    bool placementChanged,
-                                   double frameEncodingTime,
-                                   double frameRenderingTime) override {
+                                   const gfx::RenderingStats& stats) override {
         void (RendererObserver::*f)(
-            RenderMode, bool, bool, double, double) = &RendererObserver::onDidFinishRenderingFrame;
-        delegate.invoke(f, mode, repaintNeeded, placementChanged, frameEncodingTime, frameRenderingTime);
+            RenderMode, bool, bool, const gfx::RenderingStats&) = &RendererObserver::onDidFinishRenderingFrame;
+        delegate.invoke(f, mode, repaintNeeded, placementChanged, stats);
     }
 
     void onDidFinishRenderingMap() override { delegate.invoke(&RendererObserver::onDidFinishRenderingMap); }
@@ -92,13 +91,24 @@ private:
     ActorRef<RendererObserver> delegate;
 };
 
-AndroidRendererFrontend::AndroidRendererFrontend(MapRenderer& mapRenderer_)
+AndroidRendererFrontend::AndroidRendererFrontend(Private, MapRenderer& mapRenderer_)
     : mapRenderer(mapRenderer_),
-      mapRunLoop(util::RunLoop::Get()),
-      updateAsyncTask(std::make_unique<util::AsyncTask>([this]() {
-          mapRenderer.update(std::move(updateParams));
-          mapRenderer.requestRender();
-      })) {}
+      mapRunLoop(util::RunLoop::Get()) {}
+
+std::shared_ptr<AndroidRendererFrontend> AndroidRendererFrontend::create(MapRenderer& mapRenderer) {
+    auto ptr = std::make_shared<AndroidRendererFrontend>(Private(), mapRenderer);
+    ptr->init();
+    return ptr;
+}
+
+void AndroidRendererFrontend::init() {
+    updateAsyncTask = std::make_unique<util::AsyncTask>([weakSelf = weak_from_this()]() {
+        if (auto self = weakSelf.lock()) {
+            self->mapRenderer.update(std::move(self->updateParams));
+            self->mapRenderer.requestRender();
+        }
+    });
+}
 
 AndroidRendererFrontend::~AndroidRendererFrontend() = default;
 

@@ -35,7 +35,7 @@ struct MapLibreNavigationView: View {
                     AddMarkerSymbolExampleUIViewControllerRepresentable()
                 }
                 NavigationLink("ObserverExample") {
-                    ObserverExampleViewExampleUIViewControllerRepresentable()
+                    ObserverExampleViewUIViewControllerRepresentable()
                 }
                 Group {
                     NavigationLink("AnimatedLineExample") {

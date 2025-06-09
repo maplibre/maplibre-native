@@ -70,7 +70,7 @@ public:
                                       const mbgl::unordered_map<std::string, std::string>& additionalDefines);
 
     /// Called at the end of a frame.
-    void performCleanup() override {}
+    void performCleanup() override;
     void reduceMemoryUsage() override {}
 
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;

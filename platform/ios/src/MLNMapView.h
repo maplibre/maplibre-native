@@ -5,6 +5,7 @@
 #import "MLNFoundation.h"
 #import "MLNGeometry.h"
 #import "MLNMapCamera.h"
+#import "MLNMapOptions.h"
 #import "MLNStyle.h"
 #import "MLNTypes.h"
 
@@ -218,6 +219,16 @@ MLN_EXPORT
  * @return An initialized map view.
  */
 - (instancetype)initWithFrame:(CGRect)frame styleJSON:(NSString *)styleJSON;
+
+/**
+ Initializes and returns a newly allocated map view with the specified frame
+ and the default style.
+
+ @param frame The frame for the view, measured in points.
+ @param options The map instance options
+ @return An initialized map view.
+ */
+- (instancetype)initWithFrame:(CGRect)frame options:(MLNMapOptions *)options;
 
 // MARK: Accessing the Delegate
 
@@ -451,6 +462,50 @@ MLN_EXPORT
  */
 
 @property (nonatomic, assign) BOOL tileCacheEnabled;
+
+// MARK: Tile LOD controls
+
+/**
+ Camera based tile level of detail controls
+
+ Minimum radius around the view point in unit of tiles in which the fine
+ grained zoom level tiles are always used when performing LOD
+ radius must be greater than 1 (At least 1 fine detailed tile is present)
+ A smaller radius value may improve performance at the cost of quality (tiles away from
+ camera use lower Zoom levels)
+ */
+@property (nonatomic, assign) double tileLodMinRadius;
+
+/**
+ Camera based tile level of detail controls
+
+ Factor for the distance to the camera view point
+ A value larger than 1 increases the distance to the camera view point reducing LOD
+ Larger values may improve performance at the cost of quality (tiles away from camera
+ use lower Zoom levels)
+ */
+@property (nonatomic, assign) double tileLodScale;
+
+/**
+ Camera based tile level of detail controls
+
+ Pitch angle in radians above which LOD calculation is performed
+ A smaller radius value may improve performance at the cost of quality
+ */
+@property (nonatomic, assign) double tileLodPitchThreshold;
+
+/**
+ Camera based tile level of detail controls
+
+ Shift applied to the Zoom level during LOD calculation
+ A negative value shifts the Zoom level to a coarser level reducing quality but improving
+ performance A positive value shifts the Zoom level to a finer level increasing details but
+ negatively affecting performance A value of zero (default) does not apply any shift to the Zoom
+ level It is not recommended to change the default value unless performance is critical and the loss
+ of quality is acceptable. A value of -1 reduces the number of displayed tiles by a factor of 4 on
+ average It is recommended to first configure the pixelRatio before adjusting TileLodZoomShift.
+ */
+@property (nonatomic, assign) double tileLodZoomShift;
 
 // MARK: Displaying the User’s Location
 
@@ -2145,6 +2200,50 @@ vertically on the map.
  released software for performance and aesthetic reasons.
  */
 @property (nonatomic) MLNMapDebugMaskOptions debugMask;
+
+/**
+ Returns the status of the rendering statistics overlay.
+ */
+- (BOOL)isRenderingStatsViewEnabled;
+
+/**
+ Enable a rendering statistics overlay with ``MLNRenderingStats`` values.
+ */
+- (void)enableRenderingStatsView:(BOOL)value;
+
+/**
+ Get the list of action journal log files from oldest to newest.
+
+ @return An array of log file paths.
+*/
+- (NSArray<NSString *> *)getActionJournalLogFiles;
+
+/**
+ Get the action journal events from oldest to newest.
+
+ Each element contains a serialized json object with the event data.
+ Example
+ `{
+    "name" : "onTileAction",
+    "time" : "2025-04-17T13:13:13.974Z",
+    "styleName" : "Streets",
+    "styleURL" : "maptiler://maps/streets",
+    "event" : {
+        "action" : "RequestedFromNetwork",
+        "tileX" : 0,
+        "tileY" : 0,
+        "tileZ" : 0,
+        "overscaledZ" : 0,
+        "sourceID" : "openmaptiles"
+    }
+ }`
+ */
+- (NSArray<NSString *> *)getActionJournalLog;
+
+/**
+ Clear stored action journal events.
+ */
+- (void)clearActionJournalLog;
 
 - (MLNBackendResource *)backendResource;
 
