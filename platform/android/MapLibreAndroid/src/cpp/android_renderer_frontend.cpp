@@ -9,8 +9,10 @@
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/thread.hpp>
+#include <mbgl/util/logging.hpp>
 
 #include "android_renderer_backend.hpp"
+#include "attach_env.hpp"
 
 namespace mbgl {
 namespace android {
@@ -91,12 +93,38 @@ private:
     ActorRef<RendererObserver> delegate;
 };
 
-AndroidRendererFrontend::AndroidRendererFrontend(Private, MapRenderer& mapRenderer_)
+// AndroidRendererFrontend::AndroidRendererFrontend(
+//         Private, MapRenderer& mapRenderer_, jni::JNIEnv& env_, const jni::Object<NativeMapView>& nativeMapView_)
+//     : mapRenderer(mapRenderer_),
+//       nativeMapView(env_, nativeMapView_),
+//       mapRunLoop(util::RunLoop::Get()),
+//       updateAsyncTask(std::make_unique<util::AsyncTask>(
+//               // this can't be moved :(
+//               [nativeMapView = std::move(jni::WeakReference<jni::Object<NativeMapView>>(env_, nativeMapView_))]() {
+//           try {
+//               android::UniqueEnv _env = android::AttachEnv();
+//               auto weakReference = nativeMapView.get(*_env);
+//               if (weakReference) {
+//                   // update
+//               }
+//           } catch (const std::exception &exception) {
+//               Log::Error(Event::Android,
+//                          std::string("AndroidRendererFrontend::updateAsyncTask failed: ") +
+//                          exception.what());
+//           }
+//       })) {}
+
+AndroidRendererFrontend::AndroidRendererFrontend(Private,
+                                                 MapRenderer& mapRenderer_,
+                                                 jni::JNIEnv& end_,
+                                                 const jni::Object<NativeMapView>& nativeMapView_)
     : mapRenderer(mapRenderer_),
+      nativeMapView(end_, nativeMapView_),
       mapRunLoop(util::RunLoop::Get()) {}
 
-std::shared_ptr<AndroidRendererFrontend> AndroidRendererFrontend::create(MapRenderer& mapRenderer) {
-    auto ptr = std::make_shared<AndroidRendererFrontend>(Private(), mapRenderer);
+std::shared_ptr<AndroidRendererFrontend> AndroidRendererFrontend::create(
+    MapRenderer& mapRenderer, jni::JNIEnv& end_, const jni::Object<NativeMapView>& nativeMapView_) {
+    auto ptr = std::make_shared<AndroidRendererFrontend>(Private(), mapRenderer, end_, nativeMapView_);
     ptr->init();
     return ptr;
 }
@@ -104,8 +132,18 @@ std::shared_ptr<AndroidRendererFrontend> AndroidRendererFrontend::create(MapRend
 void AndroidRendererFrontend::init() {
     updateAsyncTask = std::make_unique<util::AsyncTask>([weakSelf = weak_from_this()]() {
         if (auto self = weakSelf.lock()) {
-            self->mapRenderer.update(std::move(self->updateParams));
-            self->mapRenderer.requestRender();
+            try {
+                // if `weak_from_this` is needed `NativeMapView` can be replaced with `MapRenderer`
+                android::UniqueEnv _env = android::AttachEnv();
+                auto weakReference = self->nativeMapView.get(*_env);
+                if (weakReference) {
+                    self->mapRenderer.update(std::move(self->updateParams));
+                    self->mapRenderer.requestRender();
+                }
+            } catch (const std::exception& exception) {
+                Log::Error(Event::Android,
+                           std::string("AndroidRendererFrontend::updateAsyncTask failed: ") + exception.what());
+            }
         }
     });
 }

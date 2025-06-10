@@ -14,11 +14,16 @@
 
 #include "map_renderer.hpp"
 
+#include <jni/jni.hpp>
+
 namespace mbgl {
 
 class RenderedQueryOptions;
 class SourceQueryOptions;
 
+namespace android {
+class NativeMapView;
+}
 namespace util {
 
 class AsyncTask;
@@ -33,9 +38,11 @@ class AndroidRendererFrontend : public RendererFrontend, public std::enable_shar
     };
 
 public:
-    AndroidRendererFrontend(Private, MapRenderer&);
+    AndroidRendererFrontend(Private, MapRenderer&, jni::JNIEnv&, const jni::Object<NativeMapView>&);
 
-    static std::shared_ptr<AndroidRendererFrontend> create(MapRenderer&);
+    static std::shared_ptr<AndroidRendererFrontend> create(MapRenderer&,
+                                                           jni::JNIEnv&,
+                                                           const jni::Object<NativeMapView>&);
     void init();
 
     ~AndroidRendererFrontend() override;
@@ -68,6 +75,7 @@ public:
 
 private:
     MapRenderer& mapRenderer;
+    jni::WeakReference<jni::Object<NativeMapView>> nativeMapView;
     util::RunLoop* mapRunLoop;
     std::unique_ptr<util::AsyncTask> updateAsyncTask;
     std::shared_ptr<UpdateParameters> updateParams;
