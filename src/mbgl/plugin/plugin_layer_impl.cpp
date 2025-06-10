@@ -1,4 +1,5 @@
-#include "plugin_layer_impl.hpp"
+#include <mbgl/plugin/plugin_layer_impl.hpp>
+
 #include <iostream>
 
 namespace mbgl {

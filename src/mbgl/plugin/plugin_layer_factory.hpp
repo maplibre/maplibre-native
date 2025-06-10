@@ -1,7 +1,8 @@
 #pragma once
 
-#include <string>
 #include <mbgl/layermanager/layer_factory.hpp>
+
+#include <string>
 #include <functional>
 
 namespace mbgl {

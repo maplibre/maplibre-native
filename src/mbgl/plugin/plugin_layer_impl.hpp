@@ -3,11 +3,6 @@
 #include <mbgl/style/layer_impl.hpp>
 #include <mbgl/plugin/plugin_layer.hpp>
 #include <mbgl/style/conversion_impl.hpp>
-
-// ---------------------------------------------------
-// Properties stuff
-#include <map>
-#include <vector>
 #include <mbgl/style/types.hpp>
 #include <mbgl/style/layer_properties.hpp>
 #include <mbgl/style/layout_property.hpp>
@@ -15,12 +10,12 @@
 #include <mbgl/style/properties.hpp>
 #include <mbgl/shaders/attributes.hpp>
 #include <mbgl/shaders/uniforms.hpp>
-
 #include <mbgl/style/property_value.hpp>
 #include <mbgl/style/conversion/property_value.hpp>
-
-// Property types
 #include <mbgl/util/color.hpp>
+
+#include <map>
+#include <vector>
 
 // ---------------------------------------------------
 
@@ -38,71 +33,6 @@ struct DataDrivenColorProperty : DataDrivenPaintProperty<mbgl::Color, attributes
     static constexpr auto expressionType() { return expression::type::ColorType{}; };
     using EvaluatorType = DataDrivenPropertyEvaluator<Color, false>;
 };
-
-/*
- Unique PluginLayerProperty types for now
- SingleFloat:   DataDrivenPaintProperty<float>
- Color:         DataDrivenPaintProperty<Color>
-
- Float2:        DataDrivenPaintProperty<std::array<float, 2>>
- Alignment:     DataDrivenPaintProperty<AlignmentType>
-
-
- Unique property types (from Tim)
- : DataDrivenLayoutProperty<expression::Formatted>
- : DataDrivenLayoutProperty<expression::Image>
- : DataDrivenLayoutProperty<float>
- : DataDrivenLayoutProperty<LineJoinType>
- : DataDrivenLayoutProperty<Padding>
- : DataDrivenLayoutProperty<std::array<float, 2>>
- : DataDrivenLayoutProperty<std::vector<std::string>>
- : DataDrivenLayoutProperty<SymbolAnchorType>
- : DataDrivenLayoutProperty<TextJustifyType>
- : DataDrivenLayoutProperty<TextTransformType>
- : DataDrivenLayoutProperty<VariableAnchorOffsetCollection>
- : DataDrivenPaintProperty<Color, attributes::color, uniforms::color>
- : DataDrivenPaintProperty<Color, attributes::fill_color, uniforms::fill_color, true>
- : DataDrivenPaintProperty<Color, attributes::fill_color, uniforms::fill_color>
- : DataDrivenPaintProperty<Color, attributes::halo_color, uniforms::halo_color>
- : DataDrivenPaintProperty<Color, attributes::outline_color, uniforms::outline_color>
- : DataDrivenPaintProperty<Color, attributes::stroke_color, uniforms::stroke_color>
- : DataDrivenPaintProperty<float, attributes::base, uniforms::base>
- : DataDrivenPaintProperty<float, attributes::blur, uniforms::blur>
- : DataDrivenPaintProperty<float, attributes::floorwidth, uniforms::floorwidth>
- : DataDrivenPaintProperty<float, attributes::gapwidth, uniforms::gapwidth>
- : DataDrivenPaintProperty<float, attributes::halo_blur, uniforms::halo_blur>
- : DataDrivenPaintProperty<float, attributes::halo_width, uniforms::halo_width>
- : DataDrivenPaintProperty<float, attributes::height, uniforms::height>
- : DataDrivenPaintProperty<float, attributes::offset, uniforms::offset>
- : DataDrivenPaintProperty<float, attributes::opacity, uniforms::opacity>
- : DataDrivenPaintProperty<float, attributes::radius, uniforms::radius>
- : DataDrivenPaintProperty<float, attributes::stroke_opacity, uniforms::stroke_opacity>
- : DataDrivenPaintProperty<float, attributes::stroke_width, uniforms::stroke_width>
- : DataDrivenPaintProperty<float, attributes::weight, uniforms::weight>
- : DataDrivenPaintProperty<float, attributes::width, uniforms::width>
- : LayoutProperty<AlignmentType>
- : LayoutProperty<bool>
- : LayoutProperty<expression::Image>
- : LayoutProperty<float>
- : LayoutProperty<IconTextFitType>
- : LayoutProperty<LineCapType>
- : LayoutProperty<std::array<float, 4>>
- : LayoutProperty<std::vector<TextVariableAnchorType>>
- : LayoutProperty<std::vector<TextWritingModeType>>
- : LayoutProperty<SymbolPlacementType>
- : LayoutProperty<SymbolZOrderType>
- : PaintProperty<AlignmentType>
- : PaintProperty<bool>
- : PaintProperty<CirclePitchScaleType>
- : PaintProperty<Color>
- : PaintProperty<float>
- : PaintProperty<HillshadeIlluminationAnchorType>
- : PaintProperty<RasterResamplingType>
- : PaintProperty<Rotation>
- : PaintProperty<std::array<double, 3>>
- : PaintProperty<std::array<float, 2>>
- : PaintProperty<TranslateAnchorType>
- */
 
 class PluginLayerProperty {
 public:

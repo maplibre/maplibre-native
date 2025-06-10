@@ -3,6 +3,7 @@
 #include <mbgl/plugin/plugin_layer_impl.hpp>
 #include <mbgl/plugin/plugin_layer_render.hpp>
 #include <mbgl/style/conversion_impl.hpp>
+
 #include <iostream>
 #include <string>
 
