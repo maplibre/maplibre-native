@@ -68,6 +68,7 @@ target_compile_options(
         $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MBGL_WITH_QT}>>>:-Wno-error=deprecated-declarations>
         $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MBGL_WITH_QT}>>>:-Wno-error=unused-parameter>
         $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MBGL_WITH_QT}>>>:-Wno-error=unused-property-ivar>
+        $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MBGL_WITH_QT}>>>:-Wno-enum-constexpr-conversion>
         $<$<CXX_COMPILER_ID:MSVC>:/utf-8>
         $<$<CXX_COMPILER_ID:MSVC>:/WX>      # all warnings as errors
         $<$<CXX_COMPILER_ID:MSVC>:/EHsc>    # exceptions

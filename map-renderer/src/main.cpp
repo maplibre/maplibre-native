@@ -25,7 +25,7 @@ nlohmann::json parseJson(std::istream &stream) {
     return jsonData;
 }
 
-void filterSourceWithBidLvl(nlohmann::json &source, int bid, int lvl) {
+void filterSourceWithBidLvl(nlohmann::json &source, const std::string &bid, int lvl) {
     auto &features = source["features"];
     auto it = features.begin();
     while (it != features.end()) {
@@ -41,7 +41,7 @@ void filterSourceWithBidLvl(nlohmann::json &source, int bid, int lvl) {
     }
 }
 
-void filterStyleWithBidLvl(nlohmann::json &style, int bid, int lvl) {
+void filterStyleWithBidLvl(nlohmann::json &style, const std::string &bid, int lvl) {
     auto &layers = style["layers"];
     for (auto &layer : layers) {
         auto it = layer.find("source");
@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
         ("source",                                                                                                //
          "[Optional] Vector tiles url or path to geojson file for source_ptr",                                    //
          cxxopts::value<std::string>())                                                                           //
-        ("bid", "[Optional] Building id to filter style", cxxopts::value<int>())                                  //
+        ("bid", "[Optional] Building id to filter style", cxxopts::value<std::string>())                          //
         ("lvl", "[Optional] Level index to filter style", cxxopts::value<int>())                                  //
         ("symbols", "[Flag] Whether to render symbol layers")                                                     //
         ("verbose", "Verbose mode")                                                                               //
@@ -217,7 +217,7 @@ int main(int argc, char **argv) {
                 }
 
                 if (result.count("bid") && result.count("lvl")) {
-                    int bid = result["bid"].as<int>();
+                    auto bid = result["bid"].as<std::string>();
                     int lvl = result["lvl"].as<int>();
                     if (verbose) {
                         std::cout << "Filtering source with given bid/lvl" << std::endl;
@@ -242,7 +242,7 @@ int main(int argc, char **argv) {
         }
 
         if (result.count("bid") && result.count("lvl")) {
-            int bid = result["bid"].as<int>();
+            auto bid = result["bid"].as<std::string>();
             int lvl = result["lvl"].as<int>();
             if (verbose) {
                 std::cout << "Filtering style with given bid/lvl" << std::endl;
