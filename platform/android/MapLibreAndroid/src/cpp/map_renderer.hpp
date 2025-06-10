@@ -153,7 +153,6 @@ private:
 
     mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
     // Do not add members here, see `WeakPtrFactory`
-    void requestRender(JNIEnv& env, jni::WeakReference<jni::Object<MapRenderer>> weakRef);
 };
 
 } // namespace android
