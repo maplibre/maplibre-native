@@ -75,7 +75,7 @@ NativeMapView::NativeMapView(jni::JNIEnv& _env,
     }
 
     // Create a renderer frontend
-    rendererFrontend = AndroidRendererFrontend::create(mapRenderer, _env, _obj);
+    rendererFrontend = std::make_unique<AndroidRendererFrontend>(mapRenderer, _env, _obj);
 
     // Create Map options
     MapOptions options;

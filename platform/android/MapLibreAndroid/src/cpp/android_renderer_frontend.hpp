@@ -33,18 +33,8 @@ class AsyncTask;
 namespace android {
 
 class AndroidRendererFrontend : public RendererFrontend, public std::enable_shared_from_this<AndroidRendererFrontend> {
-    struct Private {
-        explicit Private() = default;
-    };
-
 public:
-    AndroidRendererFrontend(Private, MapRenderer&, jni::JNIEnv&, const jni::Object<NativeMapView>&);
-
-    static std::shared_ptr<AndroidRendererFrontend> create(MapRenderer&,
-                                                           jni::JNIEnv&,
-                                                           const jni::Object<NativeMapView>&);
-    void init();
-
+    AndroidRendererFrontend(MapRenderer&, jni::JNIEnv&, const jni::Object<NativeMapView>&);
     ~AndroidRendererFrontend() override;
 
     void reset() override;
@@ -75,7 +65,6 @@ public:
 
 private:
     MapRenderer& mapRenderer;
-    jni::WeakReference<jni::Object<NativeMapView>> nativeMapView;
     util::RunLoop* mapRunLoop;
     std::unique_ptr<util::AsyncTask> updateAsyncTask;
     std::shared_ptr<UpdateParameters> updateParams;

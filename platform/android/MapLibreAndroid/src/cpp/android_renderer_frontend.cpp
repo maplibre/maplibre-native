@@ -93,60 +93,27 @@ private:
     ActorRef<RendererObserver> delegate;
 };
 
-// AndroidRendererFrontend::AndroidRendererFrontend(
-//         Private, MapRenderer& mapRenderer_, jni::JNIEnv& env_, const jni::Object<NativeMapView>& nativeMapView_)
-//     : mapRenderer(mapRenderer_),
-//       nativeMapView(env_, nativeMapView_),
-//       mapRunLoop(util::RunLoop::Get()),
-//       updateAsyncTask(std::make_unique<util::AsyncTask>(
-//               // this can't be moved :(
-//               [nativeMapView = std::move(jni::WeakReference<jni::Object<NativeMapView>>(env_, nativeMapView_))]() {
-//           try {
-//               android::UniqueEnv _env = android::AttachEnv();
-//               auto weakReference = nativeMapView.get(*_env);
-//               if (weakReference) {
-//                   // update
-//               }
-//           } catch (const std::exception &exception) {
-//               Log::Error(Event::Android,
-//                          std::string("AndroidRendererFrontend::updateAsyncTask failed: ") +
-//                          exception.what());
-//           }
-//       })) {}
-
-AndroidRendererFrontend::AndroidRendererFrontend(Private,
-                                                 MapRenderer& mapRenderer_,
-                                                 jni::JNIEnv& end_,
+AndroidRendererFrontend::AndroidRendererFrontend(MapRenderer& mapRenderer_,
+                                                 jni::JNIEnv& env,
                                                  const jni::Object<NativeMapView>& nativeMapView_)
     : mapRenderer(mapRenderer_),
-      nativeMapView(end_, nativeMapView_),
-      mapRunLoop(util::RunLoop::Get()) {}
-
-std::shared_ptr<AndroidRendererFrontend> AndroidRendererFrontend::create(
-    MapRenderer& mapRenderer, jni::JNIEnv& end_, const jni::Object<NativeMapView>& nativeMapView_) {
-    auto ptr = std::make_shared<AndroidRendererFrontend>(Private(), mapRenderer, end_, nativeMapView_);
-    ptr->init();
-    return ptr;
-}
-
-void AndroidRendererFrontend::init() {
-    updateAsyncTask = std::make_unique<util::AsyncTask>([weakSelf = weak_from_this()]() {
-        if (auto self = weakSelf.lock()) {
-            try {
-                // if `weak_from_this` is needed `NativeMapView` can be replaced with `MapRenderer`
-                android::UniqueEnv _env = android::AttachEnv();
-                auto weakReference = self->nativeMapView.get(*_env);
-                if (weakReference) {
-                    self->mapRenderer.update(std::move(self->updateParams));
-                    self->mapRenderer.requestRender();
-                }
-            } catch (const std::exception& exception) {
-                Log::Error(Event::Android,
-                           std::string("AndroidRendererFrontend::updateAsyncTask failed: ") + exception.what());
-            }
-        }
-    });
-}
+      mapRunLoop(util::RunLoop::Get()),
+      updateAsyncTask(std::make_unique<util::AsyncTask>(
+          [this,
+           nativeMapView_ = std::move(
+               std::make_shared<jni::WeakReference<jni::Object<NativeMapView>>>(env, nativeMapView_))]() {
+              try {
+                  android::UniqueEnv _env = android::AttachEnv();
+                  auto weakReference = nativeMapView_->get(*_env);
+                  if (weakReference) {
+                      mapRenderer.update(std::move(updateParams));
+                      mapRenderer.requestRender();
+                  }
+              } catch (const std::exception& exception) {
+                  Log::Error(Event::Android,
+                             std::string("AndroidRendererFrontend::updateAsyncTask failed: ") + exception.what());
+              }
+          })) {}
 
 AndroidRendererFrontend::~AndroidRendererFrontend() = default;
 
