@@ -21,9 +21,6 @@ namespace mbgl {
 class RenderedQueryOptions;
 class SourceQueryOptions;
 
-namespace android {
-class NativeMapView;
-}
 namespace util {
 
 class AsyncTask;
@@ -33,8 +30,15 @@ class AsyncTask;
 namespace android {
 
 class AndroidRendererFrontend : public RendererFrontend, public std::enable_shared_from_this<AndroidRendererFrontend> {
+    struct Private {
+        explicit Private() = default;
+    };
+
 public:
-    AndroidRendererFrontend(MapRenderer&, jni::JNIEnv&, const jni::Object<NativeMapView>&);
+    AndroidRendererFrontend(Private, jni::JNIEnv&, const jni::Object<MapRenderer>&);
+    static std::shared_ptr<AndroidRendererFrontend> create(jni::JNIEnv&, const jni::Object<MapRenderer>&);
+    void init(jni::JNIEnv&, const jni::Object<MapRenderer>&);
+
     ~AndroidRendererFrontend() override;
 
     void reset() override;

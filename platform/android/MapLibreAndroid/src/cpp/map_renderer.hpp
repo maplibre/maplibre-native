@@ -81,6 +81,7 @@ public:
     void waitForEmpty(const util::SimpleIdentity tag) override;
 
     void requestRender();
+    void requestRender(JNIEnv&, jni::Local<jni::Object<MapRenderer>>&);
 
     // Snapshot - requires a RunLoop on the calling thread
     using SnapshotCallback = std::function<void(PremultipliedImage)>;
@@ -152,6 +153,7 @@ private:
 
     mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
     // Do not add members here, see `WeakPtrFactory`
+    void requestRender(JNIEnv& env, jni::WeakReference<jni::Object<MapRenderer>> weakRef);
 };
 
 } // namespace android

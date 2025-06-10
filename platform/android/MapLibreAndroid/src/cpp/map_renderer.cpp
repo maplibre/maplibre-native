@@ -138,6 +138,18 @@ void MapRenderer::requestRender() {
     }
 }
 
+void MapRenderer::requestRender(JNIEnv& env, jni::Local<jni::Object<MapRenderer>>& ref) {
+    try {
+        static auto& javaClass = jni::Class<MapRenderer>::Singleton(env);
+        static auto onInvalidate = javaClass.GetMethod<void()>(env, "requestRender");
+        if (ref) {
+            ref.Call(env, onInvalidate);
+        }
+    } catch (const std::exception& exception) {
+        Log::Error(Event::Android, std::string("MapRenderer::requestRender failed: ") + exception.what());
+    }
+}
+
 void MapRenderer::update(std::shared_ptr<UpdateParameters> params) {
     try {
         // Lock on the parameters
