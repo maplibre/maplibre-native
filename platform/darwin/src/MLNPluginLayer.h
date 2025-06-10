@@ -1,10 +1,3 @@
-//
-//  MLNPluginLayer.h
-//  App
-//
-//  Created by Malcolm Toon on 4/23/25.
-//
-
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <UIKit/UIKit.h>
