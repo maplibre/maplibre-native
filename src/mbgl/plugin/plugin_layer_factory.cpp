@@ -85,8 +85,7 @@ void jsonStringFromConvertible(const style::conversion::Convertible& value, std:
         output.append("{");
         bool firstItem = true;
         eachMember(value,
-                   [&output, &firstItem](const std::string& name,
-                                         const style::conversion::Convertible& paramValue)
+                   [&output, &firstItem](const std::string& name, const style::conversion::Convertible& paramValue)
                        -> std::optional<style::conversion::Error> {
                        if (!firstItem) {
                            output.append(",");
@@ -171,8 +170,8 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
 }
 
 std::unique_ptr<Bucket> PluginLayerFactory::createBucket(
-                                                         [[maybe_unused]] const BucketParameters& parameters,
-                                                         [[maybe_unused]] const std::vector<Immutable<style::LayerProperties>>& layers) noexcept {
+    [[maybe_unused]] const BucketParameters& parameters,
+    [[maybe_unused]] const std::vector<Immutable<style::LayerProperties>>& layers) noexcept {
     // Returning null for now.  Not using buckets in plug-ins yet.
     return nullptr;
 }
