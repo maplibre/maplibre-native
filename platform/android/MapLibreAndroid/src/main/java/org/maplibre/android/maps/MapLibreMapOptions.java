@@ -816,7 +816,7 @@ public class MapLibreMapOptions implements Parcelable {
     return this;
   }
 
-   /**
+  /**
    * Set the number of seconds to wait between rendering stats reports.
    *
    * @param actionJournalRenderingReportInterval time interval in seconds
@@ -957,7 +957,7 @@ public class MapLibreMapOptions implements Parcelable {
     return actionJournalLogFileCount;
   }
 
-    /**
+  /**
    * Get the current configured action journal rendering stats report time interval.
    *
    * @return time interval in seconds
