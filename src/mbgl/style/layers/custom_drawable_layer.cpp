@@ -519,8 +519,23 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addPolyline(const LineS
 
     switch (shaderType) {
         case LineShaderType::Classic: {
-            // TODO: build classic polyline with Geo coordinates
-            return util::SimpleIdentity::Empty;
+            // build classic polyline with Geo coordinates
+            if (!updateBuilder(BuilderType::LineClassic, "custom-lines", lineShaderDefault())) {
+                return util::SimpleIdentity::Empty;
+            }
+
+            // geographic coordinates require tile {0, 0, 0}
+            setTileID({0, 0, 0});
+
+            constexpr int32_t zoom = 0;
+            GeometryCoordinates tileCoordinates;
+            for (const auto& coord : coordinates) {
+                const auto point = Projection::project(LatLng(coord.y, coord.x), zoom);
+                tileCoordinates.push_back(Point(static_cast<int16_t>(point.x * mbgl::util::EXTENT),
+                                                static_cast<int16_t>(point.y * mbgl::util::EXTENT)));
+            }
+
+            builder->addPolyline(tileCoordinates, lineOptions.geometry);
         } break;
 
         case LineShaderType::WideVector: {
