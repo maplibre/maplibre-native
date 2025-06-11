@@ -74,7 +74,7 @@ public:
      * in order to save binary size (the corresponding SDK layer wrappers
      * should be excluded from the project build).
      */
-    virtual void addLayerTypeCoreOnly(std::unique_ptr<mbgl::LayerFactory>) {};
+    virtual void addLayerTypeCoreOnly(std::unique_ptr<mbgl::LayerFactory>){};
 
 protected:
     virtual ~LayerManager() = default;
