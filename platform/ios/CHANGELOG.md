@@ -4,6 +4,20 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+## 6.15.0
+
+- Add action journal ([#3409](https://github.com/maplibre/maplibre-native/pull/3409)). Documentation: https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre-native-for-ios/actionjournalexample
+- Expose MLNSource.attributionHtmlString ([#3502](https://github.com/maplibre/maplibre-native/pull/3502)).
+- Rendering statistics view ([#3322](https://github.com/maplibre/maplibre-native/pull/3322)). Documentation: https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre-native-for-ios/renderingstatisticshud
+
+- Clean legacy code ([#3469](https://github.com/maplibre/maplibre-native/pull/3469)).
+- Rename Symbol SDF shader ([#3473](https://github.com/maplibre/maplibre-native/pull/3473)).
+- Clean more legacy code ([#3478](https://github.com/maplibre/maplibre-native/pull/3478)).
+- Remove some of unused legacy uniforms ([#3481](https://github.com/maplibre/maplibre-native/pull/3481)).
+- Pattern layout performance improvement ([#3495](https://github.com/maplibre/maplibre-native/pull/3495)).
+- Improve weak pointer use ([#3510](https://github.com/maplibre/maplibre-native/pull/3510)).
+- Fix incomplete feature state updates in GeometryTile and SourceFeatureState [Vector Tile Layer]. ([#3406](https://github.com/maplibre/maplibre-native/pull/3406)).
+
 ## 6.14.0
 
 > [!IMPORTANT]
