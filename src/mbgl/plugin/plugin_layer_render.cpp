@@ -186,8 +186,7 @@ void RenderPluginLayer::layerChanged([[maybe_unused]] const TransitionParameters
 
 /// Remove all drawables for the tile from the layer group
 /// @return The number of drawables actually removed.
-std::size_t RenderPluginLayer::removeTile([[maybe_unused]] RenderPass,
-                                          [[maybe_unused]] const OverscaledTileID&) {
+std::size_t RenderPluginLayer::removeTile([[maybe_unused]] RenderPass, [[maybe_unused]] const OverscaledTileID&) {
     return 0;
 }
 
