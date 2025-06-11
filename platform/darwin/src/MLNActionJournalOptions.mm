@@ -51,4 +51,8 @@
     return _actionJournalOptionsInternal->logFileCount();
 }
 
+- (NSInteger)renderingStatsReportInterval {
+    return _actionJournalOptionsInternal->renderingStatsReportInterval();
+}
+
 @end

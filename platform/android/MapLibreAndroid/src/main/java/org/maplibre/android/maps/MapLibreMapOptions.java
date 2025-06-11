@@ -811,6 +811,18 @@ public class MapLibreMapOptions implements Parcelable {
     return this;
   }
 
+   /**
+   * Set the number of seconds to wait between rendering stats reports.
+   *
+   * @param actionJournalRenderingReportInterval time interval in seconds
+   * @return This
+   */
+  @NonNull
+  public MapLibreMapOptions actionJournalRenderingReportInterval(int actionJournalRenderingReportInterval) {
+    this.actionJournalRenderingReportInterval = actionJournalRenderingReportInterval;
+    return this;
+  }
+
   /**
    * Enable local ideograph font family, defaults to true.
    *
@@ -938,6 +950,15 @@ public class MapLibreMapOptions implements Parcelable {
    */
   public long getActionJournalLogFileCount() {
     return actionJournalLogFileCount;
+  }
+
+    /**
+   * Get the current configured action journal rendering stats report time interval.
+   *
+   * @return time interval in seconds
+   */
+  public long getActionJournalRenderingReportInterval() {
+    return actionJournalRenderingReportInterval;
   }
 
   /**
