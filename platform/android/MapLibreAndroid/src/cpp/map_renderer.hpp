@@ -81,6 +81,7 @@ public:
     void waitForEmpty(const util::SimpleIdentity tag) override;
 
     void requestRender();
+    void requestRender(JNIEnv&, jni::Local<jni::Object<MapRenderer>>&);
 
     // Snapshot - requires a RunLoop on the calling thread
     using SnapshotCallback = std::function<void(PremultipliedImage)>;
