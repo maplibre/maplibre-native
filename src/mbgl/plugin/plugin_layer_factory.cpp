@@ -3,6 +3,7 @@
 #include <mbgl/plugin/plugin_layer_impl.hpp>
 #include <mbgl/plugin/plugin_layer_render.hpp>
 #include <mbgl/style/conversion_impl.hpp>
+#include <mbgl/renderer/bucket.hpp>
 
 #include <iostream>
 #include <string>
@@ -84,7 +85,8 @@ void jsonStringFromConvertible(const style::conversion::Convertible& value, std:
         output.append("{");
         bool firstItem = true;
         eachMember(value,
-                   [&output, &firstItem](const std::string& name, const style::conversion::Convertible& value)
+                   [&output, &firstItem](const std::string& name,
+                                         const style::conversion::Convertible& paramValue)
                        -> std::optional<style::conversion::Error> {
                        if (!firstItem) {
                            output.append(",");
@@ -94,7 +96,7 @@ void jsonStringFromConvertible(const style::conversion::Convertible& value, std:
                        output.append(name);
                        output.append("\":");
 
-                       jsonStringFromConvertible(value, output);
+                       jsonStringFromConvertible(paramValue, output);
 
                        return std::nullopt;
                    });
@@ -116,16 +118,16 @@ void jsonStringFromConvertible(const style::conversion::Convertible& value, std:
         output.append("]");
     } else {
         auto v = toValue(value);
-        if (auto i = v.value().getInt()) {
-            std::string tempResult = std::to_string(*i);
+        if (auto iVal = v.value().getInt()) {
+            std::string tempResult = std::to_string(*iVal);
             output.append(tempResult);
-        } else if (auto i = v.value().getUint()) {
-            std::string tempResult = std::to_string(*i);
+        } else if (auto uIVal = v.value().getUint()) {
+            std::string tempResult = std::to_string(*uIVal);
             output.append(tempResult);
 
         } else if (auto s = v.value().getString()) {
             output.append("\"");
-            output.append(v.value().getString()->c_str());
+            output.append(s->c_str());
             output.append("\"");
 
         } else if (auto d = v.value().getDouble()) {
@@ -142,7 +144,8 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
         jsonStringFromConvertible(*memberValue, layerProperties);
         if (isObject(*memberValue)) {
             eachMember(*memberValue,
-                       [](const std::string& name, const style::conversion::Convertible& value)
+                       []([[maybe_unused]] const std::string& name,
+                          [[maybe_unused]] const style::conversion::Convertible& paramValue)
                            -> std::optional<style::conversion::Error> { return std::nullopt; });
         }
     }
@@ -168,7 +171,8 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
 }
 
 std::unique_ptr<Bucket> PluginLayerFactory::createBucket(
-    const BucketParameters& parameters, const std::vector<Immutable<style::LayerProperties>>& layers) noexcept {
+                                                         [[maybe_unused]] const BucketParameters& parameters,
+                                                         [[maybe_unused]] const std::vector<Immutable<style::LayerProperties>>& layers) noexcept {
     // Returning null for now.  Not using buckets in plug-ins yet.
     return nullptr;
 }
