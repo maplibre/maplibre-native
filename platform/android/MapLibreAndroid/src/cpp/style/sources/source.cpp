@@ -70,13 +70,13 @@ Source::Source(jni::JNIEnv& env,
                mbgl::style::Source& coreSource,
                const jni::Object<Source>& obj,
                AndroidRendererFrontend* frontend)
-    : source(coreSource),
+    : source(std::make_shared<std::reference_wrapper<mbgl::style::Source>>(coreSource)),
       javaPeer(jni::NewGlobal(env, obj)),
       rendererFrontend(frontend) {}
 
 Source::Source(jni::JNIEnv&, std::unique_ptr<mbgl::style::Source> coreSource)
     : ownedSource(std::move(coreSource)),
-      source(*ownedSource) {}
+      source(std::make_shared<std::reference_wrapper<mbgl::style::Source>>(*ownedSource)) {}
 
 Source::~Source() {
     if (ownedSource) {
@@ -102,24 +102,24 @@ Source::~Source() {
 }
 
 jni::Local<jni::String> Source::getId(jni::JNIEnv& env) {
-    return jni::Make<jni::String>(env, source.getID());
+    return jni::Make<jni::String>(env, source->get().getID());
 }
 
 jni::Local<jni::String> Source::getAttribution(jni::JNIEnv& env) {
-    auto attribution = source.getAttribution();
+    auto attribution = source->get().getAttribution();
     return attribution ? jni::Make<jni::String>(env, attribution.value()) : jni::Make<jni::String>(env, "");
 }
 
 void Source::setPrefetchZoomDelta(jni::JNIEnv& env, jni::Integer& delta) {
     if (!delta) {
-        source.setPrefetchZoomDelta(std::nullopt);
+        source->get().setPrefetchZoomDelta(std::nullopt);
     } else {
-        source.setPrefetchZoomDelta(jni::Unbox(env, delta));
+        source->get().setPrefetchZoomDelta(jni::Unbox(env, delta));
     }
 }
 
 jni::Local<jni::Integer> Source::getPrefetchZoomDelta(jni::JNIEnv& env) {
-    auto delta = source.getPrefetchZoomDelta();
+    auto delta = source->get().getPrefetchZoomDelta();
     if (delta.has_value()) {
         return jni::Box(env, jni::jint(delta.value()));
     }
@@ -128,14 +128,14 @@ jni::Local<jni::Integer> Source::getPrefetchZoomDelta(jni::JNIEnv& env) {
 
 void Source::setMaxOverscaleFactorForParentTiles(jni::JNIEnv& env, jni::Integer& maxOverscaleFactor) {
     if (!maxOverscaleFactor) {
-        source.setMaxOverscaleFactorForParentTiles(std::nullopt);
+        source->get().setMaxOverscaleFactorForParentTiles(std::nullopt);
     } else {
-        source.setMaxOverscaleFactorForParentTiles(jni::Unbox(env, maxOverscaleFactor));
+        source->get().setMaxOverscaleFactorForParentTiles(jni::Unbox(env, maxOverscaleFactor));
     }
 }
 
 jni::Local<jni::Integer> Source::getMaxOverscaleFactorForParentTiles(jni::JNIEnv& env) {
-    auto maxOverscaleFactor = source.getMaxOverscaleFactorForParentTiles();
+    auto maxOverscaleFactor = source->get().getMaxOverscaleFactorForParentTiles();
     if (maxOverscaleFactor) {
         return jni::Box(env, jni::jint(*maxOverscaleFactor));
     }
@@ -151,7 +151,7 @@ void Source::addToStyle(JNIEnv& env, const jni::Object<Source>& obj, mbgl::style
     style.addSource(std::move(ownedSource));
 
     // Add peer to core source
-    source.peer = std::unique_ptr<Source>(this);
+    source->get().peer = std::unique_ptr<Source>(this);
 
     // Add strong reference to java source
     javaPeer = jni::NewGlobal(env, obj);
@@ -167,7 +167,7 @@ void Source::addToMap(JNIEnv& env, const jni::Object<Source>& obj, mbgl::Map& ma
     map.getStyle().addSource(std::move(ownedSource));
 
     // Add peer to core source
-    source.peer = std::unique_ptr<Source>(this);
+    source->get().peer = std::unique_ptr<Source>(this);
 
     // Add strong reference to java source
     javaPeer = jni::NewGlobal(env, obj);
@@ -182,26 +182,26 @@ bool Source::removeFromMap(JNIEnv&, const jni::Object<Source>&, mbgl::Map& map) 
     }
 
     // Remove the source from the map and take ownership
-    ownedSource = map.getStyle().removeSource(source.getID());
+    ownedSource = map.getStyle().removeSource(source->get().getID());
 
     // The source may not be removed if any layers still reference it
     return ownedSource != nullptr;
 }
 
 jni::Local<jni::Boolean> Source::isVolatile(jni::JNIEnv& env) {
-    return jni::Box(env, jni::jboolean(source.isVolatile()));
+    return jni::Box(env, jni::jboolean(source->get().isVolatile()));
 }
 
 void Source::setVolatile(JNIEnv& env, jni::Boolean& value) {
-    source.setVolatile(jni::Unbox(env, value));
+    source->get().setVolatile(jni::Unbox(env, value));
 }
 
 void Source::setMinimumTileUpdateInterval(JNIEnv& env, jni::Long& interval) {
-    source.setMinimumTileUpdateInterval(Milliseconds(jni::Unbox(env, interval)));
+    source->get().setMinimumTileUpdateInterval(Milliseconds(jni::Unbox(env, interval)));
 }
 
 jni::Local<jni::Long> Source::getMinimumTileUpdateInterval(JNIEnv& env) {
-    return jni::Box(env, jni::jlong(source.getMinimumTileUpdateInterval().count() / 1000000));
+    return jni::Box(env, jni::jlong(source->get().getMinimumTileUpdateInterval().count() / 1000000));
 }
 
 void Source::releaseJavaPeer() {

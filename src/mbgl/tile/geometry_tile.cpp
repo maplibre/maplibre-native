@@ -542,18 +542,16 @@ void GeometryTile::performedFadePlacement() {
 void GeometryTile::setFeatureState(const LayerFeatureStates& states) {
     MLN_TRACE_FUNC();
 
-    auto layers = getData();
+    const auto layers = getData();
     if ((layers == nullptr) || states.empty() || !layoutResult) {
         return;
     }
 
-    auto& layerIdToLayerRenderData = layoutResult->layerRenderData;
-    for (auto& layer : layerIdToLayerRenderData) {
-        const auto& layerID = layer.first;
-        const auto sourceLayer = layers->getLayer(layerID);
-        if (sourceLayer) {
-            const auto& sourceLayerID = sourceLayer->getName();
-            auto entry = states.find(sourceLayerID);
+    for (auto& layerIdToLayerRenderData = layoutResult->layerRenderData;
+         auto& [layerID, renderData] : layerIdToLayerRenderData) {
+        std::string sourceLayerId = renderData.layerProperties->baseImpl->sourceLayer;
+        if (const auto sourceLayer = layers->getLayer(sourceLayerId)) {
+            auto entry = states.find(sourceLayerId);
             if (entry == states.end()) {
                 continue;
             }
@@ -561,9 +559,7 @@ void GeometryTile::setFeatureState(const LayerFeatureStates& states) {
             if (featureStates.empty()) {
                 continue;
             }
-
-            auto bucket = layer.second.bucket;
-            if (bucket && bucket->hasData()) {
+            if (const auto bucket = renderData.bucket; bucket && bucket->hasData()) {
                 bucket->update(featureStates, *sourceLayer, layerID, layoutResult->imageAtlas.patternPositions);
             }
         }
