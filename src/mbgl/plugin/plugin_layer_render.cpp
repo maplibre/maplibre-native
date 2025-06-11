@@ -37,7 +37,7 @@ protected:
 };
 
 void RenderPluginLayerTweaker::init(mbgl::gfx::Drawable& drawablee) {
-    
+
 };
 
 void RenderPluginLayerTweaker::execute(mbgl::gfx::Drawable& drawable, mbgl::PaintParameters& paintParameters) {

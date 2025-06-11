@@ -82,11 +82,7 @@ private:
 
 class PluginLayer::Impl : public Layer::Impl {
 public:
-    Impl(std::string layerID,
-         std::string sourceID,
-         LayerTypeInfo layerTypeInfo,
-         const std::string& layerProperties
-    );
+    Impl(std::string layerID, std::string sourceID, LayerTypeInfo layerTypeInfo, const std::string& layerProperties);
 
     using Layer::Impl::Impl;
 
