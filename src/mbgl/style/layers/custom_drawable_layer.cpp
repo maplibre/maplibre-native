@@ -531,8 +531,8 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addPolyline(const LineS
             GeometryCoordinates tileCoordinates;
             for (const auto& coord : coordinates) {
                 const auto point = Projection::project(LatLng(coord.y, coord.x), zoom);
-                tileCoordinates.push_back(Point(static_cast<int16_t>(point.x * mbgl::util::EXTENT),
-                                                static_cast<int16_t>(point.y * mbgl::util::EXTENT)));
+                tileCoordinates.push_back(Point<int16_t>(static_cast<int16_t>(point.x * mbgl::util::EXTENT),
+                                                         static_cast<int16_t>(point.y * mbgl::util::EXTENT)));
             }
 
             builder->addPolyline(tileCoordinates, lineOptions.geometry);
