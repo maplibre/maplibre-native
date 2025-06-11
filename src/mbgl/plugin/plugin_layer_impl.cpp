@@ -13,7 +13,7 @@ PluginLayer::Impl::Impl(std::string layerID,
       _layerTypeInfo(layerTypeInfo),
       _layerProperties(layerProperties) {}
 
-bool PluginLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
+bool PluginLayer::Impl::hasLayoutDifference([[maybe_unused]] const Layer::Impl& other) const {
     return false;
 }
 
@@ -31,7 +31,7 @@ std::string PluginLayerProperty::asJSON() {
     return tempResult;
 }
 
-void PluginLayerProperty::setPropertyValue(const conversion::Convertible& value) {}
+void PluginLayerProperty::setPropertyValue([[maybe_unused]] const conversion::Convertible& value) {}
 
 const PropertyValue<float>& PluginLayerProperty::getSingleFloat() const {
     return _singleFloatProperty;

@@ -6,6 +6,8 @@
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/style/layers/mtl/custom_layer_render_parameters.hpp>
 #include <mbgl/mtl/render_pass.hpp>
+#else
+#include <mbgl/style/layers/custom_layer_render_parameters.hpp>
 #endif
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/context.hpp>
