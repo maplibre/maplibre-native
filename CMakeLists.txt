@@ -1110,6 +1110,20 @@ if(MLN_WITH_OPENGL)
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform_buffer_gl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_attribute_gl.cpp
     )
+    list(APPEND INCLUDE_FILES
+        ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_render.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_properties.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_impl.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_factory.hpp
+    )
+    list(APPEND SRC_FILES
+        ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_render.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_properties.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_impl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_factory.cpp
+    )
 endif()
 
 if(MLN_WITH_METAL)
