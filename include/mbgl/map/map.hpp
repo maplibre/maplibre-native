@@ -162,10 +162,6 @@ public:
     void setFreeCameraOptions(const FreeCameraOptions& camera);
     FreeCameraOptions getFreeCameraOptions() const;
 
-    ClientOptions getClientOptions() const;
-
-    const std::unique_ptr<util::ActionJournal>& getActionJournal();
-
     // Tile LOD controls
     //
     /// The number of map tile requests can be reduced by using a lower level
@@ -197,6 +193,10 @@ public:
     double getTileLodPitchThreshold() const;
     void setTileLodZoomShift(double shift);
     double getTileLodZoomShift() const;
+
+    ClientOptions getClientOptions() const;
+
+    const std::unique_ptr<util::ActionJournal>& getActionJournal();
 
 protected:
     class Impl;

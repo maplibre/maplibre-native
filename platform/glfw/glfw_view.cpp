@@ -126,7 +126,7 @@ void cycleTileLodMode(mbgl::Map &map) {
     // TileLodMode::Default parameters
     static const auto defaultRadius = map.getTileLodMinRadius();
     static const auto defaultScale = map.getTileLodScale();
-    static const auto defaultPitchThreshold = map.getTileLodPitchThreshold();
+    static const auto defaultTilePitchThreshold = map.getTileLodPitchThreshold();
 
     static TileLodMode mode = TileLodMode::Default;
     mode = nextTileLodMode(mode);
@@ -135,21 +135,25 @@ void cycleTileLodMode(mbgl::Map &map) {
         case TileLodMode::Default:
             map.setTileLodMinRadius(defaultRadius);
             map.setTileLodScale(defaultScale);
-            map.setTileLodPitchThreshold(defaultPitchThreshold);
+            map.setTileLodPitchThreshold(defaultTilePitchThreshold);
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: default");
             break;
         case TileLodMode::NoLod:
             // When LOD is off we set a maximum PitchThreshold
-            map.setTileLodMinRadius(std::numbers::pi);
+            map.setTileLodPitchThreshold(std::numbers::pi);
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: disabled");
             break;
         case TileLodMode::Reduced:
             map.setTileLodMinRadius(2);
             map.setTileLodScale(1.5);
             map.setTileLodPitchThreshold(std::numbers::pi / 4);
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: reduced");
             break;
         case TileLodMode::Aggressive:
             map.setTileLodMinRadius(1);
             map.setTileLodScale(2);
             map.setTileLodPitchThreshold(0);
+            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: aggressive");
             break;
     }
     map.triggerRepaint();
@@ -354,7 +358,7 @@ GLFWView::GLFWView(bool fullscreen_,
     printf("- Press `F1` to generate a render test for the current view\n");
     printf("\n");
     printf("- Press `Tab` to cycle through the map debug options\n");
-    printf("- Press `V` to cycle through Tile LOD modes\n");
+    printf("- Press `F6` to cycle through Tile LOD modes\n");
     printf("- Press `F7` to lower the zoom level without changing the camera\n");
     printf("- Press `F8` to higher the zoom level without changing the camera\n");
     printf("- Press `Esc` to quit\n");
@@ -636,7 +640,7 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                 view->freeCameraDemoStartTime = mbgl::Clock::now();
                 view->invalidate();
             } break;
-            case GLFW_KEY_COMMA: {
+            case GLFW_KEY_F6: {
                 cycleTileLodMode(*view->map);
             } break;
             case GLFW_KEY_F7: {

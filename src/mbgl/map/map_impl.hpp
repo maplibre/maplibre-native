@@ -17,6 +17,8 @@
 
 #include <numbers>
 
+#include <numbers>
+
 namespace mbgl {
 
 class FileSource;

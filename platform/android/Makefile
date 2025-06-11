@@ -1,5 +1,5 @@
 export BUILDTYPE ?= Debug
-export RENDERER ?= drawable
+export RENDERER ?= opengl
 export IS_LOCAL_DEVELOPMENT ?= true
 export TARGET_BRANCH ?= main
 
@@ -14,10 +14,10 @@ else
   $(error BUILDTYPE must be Debug, Sanitize, Release or RelWithDebInfo)
 endif
 
-ifeq ($(RENDERER), drawable)
+ifeq ($(RENDERER), opengl)
 else ifeq ($(RENDERER), vulkan)
 else
-  $(error RENDERER must be 'drawable' (OpenGL) or 'vulkan')
+  $(error RENDERER must be 'opengl' or 'vulkan')
 endif
 
 buildtype := $(shell echo "$(BUILDTYPE)" | tr "[A-Z]" "[a-z]")
@@ -218,11 +218,11 @@ run-android-ui-test-%: run-android-ui-test-arm-v7-%
 # Run Java Unit tests on the JVM of the development machine executing this
 .PHONY: run-android-unit-test
 run-android-unit-test:
-	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:testDrawableDebugUnitTest --info
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:testOpenglDebugUnitTest --info
 run-android-unit-test-%:
-	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:testDrawableDebugUnitTest --info --tests "$*"
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:testOpenglDebugUnitTest --info --tests "$*"
 
-DEBUG_TAR_FILE_NAME := $(if $(findstring drawable,$(RENDERER)),debug-symbols-opengl.tar.gz,debug-symbols-$(RENDERER).tar.gz)
+DEBUG_TAR_FILE_NAME := $(if $(findstring opengl,$(RENDERER)),debug-symbols-opengl-$(MLN_ANDROID_APK_SUFFIX).tar.gz,debug-symbols-$(RENDERER)-$(MLN_ANDROID_APK_SUFFIX).tar.gz)
 
 # Builds a release package and .tar.gz with debug symbols of the Android SDK
 .PHONY: apackage
@@ -280,7 +280,7 @@ android-lint-test-app:
 # Generates LICENSE.md file based on all Android project dependencies
 .PHONY: android-license
 android-license:
-	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:licenseDrawableReleaseReport
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:licenseOpenglReleaseReport
 	python3 scripts/generate-license.py
 
 # Symbolicate ndk stack traces for the arm-v7 abi

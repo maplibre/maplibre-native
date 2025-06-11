@@ -463,46 +463,47 @@ MLN_EXPORT
 
 @property (nonatomic, assign) BOOL tileCacheEnabled;
 
-// MARK: Camera based tile level of detail controls
+// MARK: Tile LOD controls
 
 /**
+ Camera based tile level of detail controls
+
  Minimum radius around the view point in unit of tiles in which the fine
  grained zoom level tiles are always used when performing LOD
  radius must be greater than 1 (At least 1 fine detailed tile is present)
  A smaller radius value may improve performance at the cost of quality (tiles away from
  camera use lower Zoom levels)
  */
-
 @property (nonatomic, assign) double tileLodMinRadius;
 
 /**
- factor for the distance to the camera view point
+ Camera based tile level of detail controls
+
+ Factor for the distance to the camera view point
  A value larger than 1 increases the distance to the camera view point reducing LOD
  Larger values may improve performance at the cost of quality (tiles away from camera
  use lower Zoom levels)
  */
-
 @property (nonatomic, assign) double tileLodScale;
 
 /**
- pitch angle in radians above which LOD calculation is performed
+ Camera based tile level of detail controls
+
+ Pitch angle in radians above which LOD calculation is performed
  A smaller radius value may improve performance at the cost of quality
  */
-
 @property (nonatomic, assign) double tileLodPitchThreshold;
 
 /**
+ Camera based tile level of detail controls
+
  Shift applied to the Zoom level during LOD calculation
- A negative value shifts the Zoom level to a coarser level reducing quality but
- improving performance
- A positive value shifts the Zoom level to a finer level increasing details but
- negatively affecting performance
- A value of zero (default) does not apply any shift to the Zoom level
- It is not recommended to change the default value unless performance is critical
- and the loss of quality is acceptable. A value of -1 reduces the number of
- displayed tiles by a factor of 4 on average
- It is recommended to first configure the pixelRatio before adjusting
- TileLodZoomShift. {@link MapLibreMapOptions#pixelRatio(float)}
+ A negative value shifts the Zoom level to a coarser level reducing quality but improving
+ performance A positive value shifts the Zoom level to a finer level increasing details but
+ negatively affecting performance A value of zero (default) does not apply any shift to the Zoom
+ level It is not recommended to change the default value unless performance is critical and the loss
+ of quality is acceptable. A value of -1 reduces the number of displayed tiles by a factor of 4 on
+ average It is recommended to first configure the pixelRatio before adjusting TileLodZoomShift.
  */
 @property (nonatomic, assign) double tileLodZoomShift;
 

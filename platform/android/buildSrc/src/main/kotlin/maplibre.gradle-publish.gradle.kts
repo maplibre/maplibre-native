@@ -88,9 +88,9 @@ fun PublishingExtension.configureMavenPublication(
 
 afterEvaluate {
     publishing {
-        configureMavenPublication("drawable", "opengl", "", "")
-        // configureMavenPublication("drawable", "opengldebug", "-debug", " (Debug)", "Debug")
-        configureMavenPublication("vulkan", "vulkan", "-vulkan", "(Vulkan)")
+        configureMavenPublication("opengl", "defaultrelease", "", "")
+        // configureMavenPublication("opengl", "defaultdebug", "-debug", " (Debug)", "Debug")
+        configureMavenPublication("vulkan", "vulkanrelease", "-vulkan", "(Vulkan)")
         // configureMavenPublication("vulkan", "vulkandebug", "-vulkan-debug", "(Vulkan, Debug)", "Debug")
 
         repositories {

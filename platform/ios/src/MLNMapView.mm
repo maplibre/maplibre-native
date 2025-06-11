@@ -3282,44 +3282,44 @@ static void *windowScreenContext = &windowScreenContext;
     return _rendererFrontend->getTileCacheEnabled();
 }
 
-- (void)setTileLodMinRadius:(double)radius
+- (void)setTileLodMinRadius:(double)tileLodMinRadius
 {
-    self.mbglMap.setTileLodMinRadius(radius);
+    _mbglMap->setTileLodMinRadius(tileLodMinRadius);
 }
 
 - (double)tileLodMinRadius
 {
-    return self.mbglMap.getTileLodMinRadius();
+    return _mbglMap->getTileLodMinRadius();
 }
 
-- (void)setTileLodScale:(double)scale
+- (void)setTileLodScale:(double)tileLodScale
 {
-    self.mbglMap.setTileLodScale(scale);
+    _mbglMap->setTileLodScale(tileLodScale);
 }
 
 - (double)tileLodScale
 {
-    return self.mbglMap.getTileLodScale();
+    return _mbglMap->getTileLodScale();
 }
 
-- (void)setTileLodPitchThreshold:(double)threshold
+-(void)setTileLodPitchThreshold:(double)tileLodPitchThreshold
 {
-    self.mbglMap.setTileLodPitchThreshold(threshold);
+    _mbglMap->setTileLodPitchThreshold(tileLodPitchThreshold);
 }
 
-- (double)tileLodPitchThreshold
+-(double)tileLodPitchThreshold
 {
-    return self.mbglMap.getTileLodPitchThreshold();
+    return _mbglMap->getTileLodPitchThreshold();
 }
 
-- (void)setTileLodZoomShift:(double)shift
+-(void)setTileLodZoomShift:(double)tileLodZoomShift
 {
-    self.mbglMap.setTileLodZoomShift(shift);
+    _mbglMap->setTileLodZoomShift(tileLodZoomShift);
 }
 
-- (double)tileLodZoomShift
+-(double)tileLodZoomShift
 {
-    return self.mbglMap.getTileLodZoomShift();
+    return _mbglMap->getTileLodZoomShift();
 }
 
 // MARK: - Accessibility -

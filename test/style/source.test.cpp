@@ -70,17 +70,17 @@ public:
     Style style;
 
     TileParameters tileParameters(MapMode mapMode = MapMode::Continuous) {
-        return {1.0,
-                MapDebugOptions(),
-                transformState,
-                fileSource,
-                mapMode,
-                annotationManager.makeWeakPtr(),
-                imageManager,
-                glyphManager,
-                0,
-                threadPool,
-                dynamicTextureAtlas};
+        return {.pixelRatio = 1.0,
+                .debugOptions = MapDebugOptions(),
+                .transformState = transformState,
+                .fileSource = fileSource,
+                .mode = mapMode,
+                .annotationManager = annotationManager.makeWeakPtr(),
+                .imageManager = imageManager,
+                .glyphManager = glyphManager,
+                .prefetchZoomDelta = 0,
+                .threadPool = threadPool,
+                .dynamicTextureAtlas = dynamicTextureAtlas};
     };
 
     SourceTest()
