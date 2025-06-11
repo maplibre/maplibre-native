@@ -41,11 +41,6 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/run_loop.hpp>
 
-#include <mbgl/layermanager/layer_manager.hpp>
-#include <mbgl/plugin/plugin_layer_factory.hpp>
-#include <mbgl/plugin/plugin_layer.hpp>
-#include <mbgl/plugin/plugin_layer_impl.hpp>
-
 #include <atomic>
 
 using namespace mbgl;
