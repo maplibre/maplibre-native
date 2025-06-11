@@ -271,7 +271,6 @@ void ActionJournal::Impl::onDidFailLoadingMap(MapLoadError error, const std::str
 }
 
 void ActionJournal::Impl::onDidFinishRenderingFrame(const RenderFrameStatus& frame) {
-
     // update report time
     double currentFrameTime = util::MonotonicTimer::now().count();
     double elapsedTime = currentFrameTime - previousFrameTime;

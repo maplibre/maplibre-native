@@ -436,7 +436,7 @@ TEST(ActionJournal, RenderingStats) {
                                .withLogFileCount(2)
                                .withLogFileSize(1024 * 1024 * 5)
                                .withRenderingInfoReportInterval(2),
-        MapMode::Continuous);
+                           MapMode::Continuous);
 
     test.map->getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
     test.map->getActionJournal()->impl->flush();
@@ -461,7 +461,7 @@ TEST(ActionJournal, RenderingStats) {
         testStats, [](const auto& a, const auto& b) { return a.renderingTime < b.renderingTime; });
     const auto renderingMax = std::ranges::min_element(
         testStats, [](const auto& a, const auto& b) { return a.renderingTime > b.renderingTime; });
-    
+
     const auto encodingAvg = std::accumulate(testStats.begin(),
                                              testStats.end(),
                                              0.0,
@@ -480,7 +480,8 @@ TEST(ActionJournal, RenderingStats) {
         EXPECT_DOUBLE_EQ(json[name].GetDouble(), value);
     };
 
-    const auto validateStats = [&](const mbgl::JSValue& json) {;
+    const auto validateStats = [&](const mbgl::JSValue& json) {
+        ;
         validateDouble(json, "encodingMin", encodingMin->encodingTime);
         validateDouble(json, "encodingMax", encodingMax->encodingTime);
         validateDouble(json, "encodingAvg", encodingAvg);
