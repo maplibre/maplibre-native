@@ -18,14 +18,15 @@ util::ActionJournalOptions NativeMapOptions::getActionJournalOptions(jni::JNIEnv
     auto enabledField = javaClass.GetField<jni::jboolean>(env, "actionJournalEnabled");
     auto pathField = javaClass.GetField<jni::String>(env, "actionJournalPath");
     auto logFileSizeField = javaClass.GetField<jni::jlong>(env, "actionJournalLogFileSize");
-    auto renderingReportIntervalField = javaClass.GetField<jni::jlong>(env, "actionJournalRenderingReportInterval");
+    auto logFileCountField = javaClass.GetField<jni::jlong>(env, "actionJournalLogFileCount");
+    auto renderingReportIntervalField = javaClass.GetField<jni::jint>(env, "actionJournalRenderingReportInterval");
 
     return util::ActionJournalOptions()
         .enable(obj.Get(env, enabledField))
         .withPath(jni::Make<std::string>(env, obj.Get(env, pathField)))
         .withLogFileSize(obj.Get(env, logFileSizeField))
         .withLogFileCount(obj.Get(env, logFileCountField))
-        .withRenderingReportInterval(obj.Get(env, renderingReportIntervalField));
+        .withRenderingStatsReportInterval(obj.Get(env, renderingReportIntervalField));
 }
 
 float NativeMapOptions::pixelRatio(jni::JNIEnv &env, const jni::Object<NativeMapOptions> &obj) {

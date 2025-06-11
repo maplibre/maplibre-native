@@ -51,6 +51,10 @@
     return _actionJournalOptionsInternal->logFileCount();
 }
 
+- (void)setRenderingStatsReportInterval:(NSInteger)value {
+    _actionJournalOptionsInternal->withRenderingStatsReportInterval(static_cast<uint32_t>(value));
+}
+
 - (NSInteger)renderingStatsReportInterval {
     return _actionJournalOptionsInternal->renderingStatsReportInterval();
 }

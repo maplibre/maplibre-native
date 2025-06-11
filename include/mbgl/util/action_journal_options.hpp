@@ -93,7 +93,7 @@ public:
      * @param interval time interval in seconds.
      * @return ActionJournalOptions for chaining options together.
      */
-    ActionJournalOptions& withRenderingReportInterval(const uint32_t interval) {
+    ActionJournalOptions& withRenderingStatsReportInterval(const uint32_t interval) {
         renderingStatsReportInterval_ = interval;
         return *this;
     }

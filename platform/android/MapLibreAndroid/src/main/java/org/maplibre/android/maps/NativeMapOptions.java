@@ -57,7 +57,7 @@ public class NativeMapOptions {
     return actionJournalLogFileCount;
   }
 
-  public long actionJournalRenderingReportInterval() {
+  public int actionJournalRenderingReportInterval() {
     return actionJournalRenderingReportInterval;
   }
 }
