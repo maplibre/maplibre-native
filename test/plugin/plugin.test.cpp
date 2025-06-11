@@ -176,6 +176,7 @@ TEST(Plugin, PluginLayer) {
             pm.addProperty(p);
             pluginLayerImpl->setRenderFunction([&_layerRendered](PaintParameters& paintParameters) {
                 std::cout << "On Layer Rendered\n";
+                std::cout << "  Paint Properties.currentLayer: " << paintParameters.currentLayer << "\n";
                 _layerRendered = true;
             });
 
