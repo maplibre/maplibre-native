@@ -70,7 +70,7 @@ std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::str
     return std::nullopt;
 }
 
-StyleProperty PluginLayer::getProperty(const std::string& name) const {
+StyleProperty PluginLayer::getProperty([[maybe_unused]] const std::string& name) const {
     // TODO: Implement this via callback
     // return getLayerProperty(*this, name);
     return {};

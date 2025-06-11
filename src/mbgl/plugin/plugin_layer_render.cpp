@@ -36,11 +36,12 @@ protected:
     RenderPluginLayer* _plugInRenderer = nullptr;
 };
 
-void RenderPluginLayerTweaker::init(mbgl::gfx::Drawable& drawablee) {
+void RenderPluginLayerTweaker::init([[maybe_unused]] mbgl::gfx::Drawable& drawablee) {
 
 };
 
-void RenderPluginLayerTweaker::execute(mbgl::gfx::Drawable& drawable, mbgl::PaintParameters& paintParameters) {
+void RenderPluginLayerTweaker::execute([[maybe_unused]] mbgl::gfx::Drawable& drawable,
+                                       [[maybe_unused]] mbgl::PaintParameters& paintParameters) {
     // custom drawing
     auto& context = paintParameters.context;
     context.resetState(paintParameters.depthModeForSublayer(0, mbgl::gfx::DepthMaskType::ReadOnly),
@@ -70,17 +71,18 @@ RenderPluginLayer::RenderPluginLayer(Immutable<style::PluginLayer::Impl> _impl)
 
 RenderPluginLayer::~RenderPluginLayer() = default;
 
-void RenderPluginLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
+void RenderPluginLayer::markLayerRenderable([[maybe_unused]] bool willRender,
+                                            [[maybe_unused]] UniqueChangeRequestVec& changes) {
     isRenderable = true;
 }
 
 /// Generate any changes needed by the layer
-void RenderPluginLayer::update(gfx::ShaderRegistry& shaderRegistery,
-                               gfx::Context& context,
-                               const TransformState& transformState,
-                               const std::shared_ptr<UpdateParameters>& updateParameters,
-                               const RenderTree& renderTree,
-                               UniqueChangeRequestVec& changes) {
+void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegistery,
+                               [[maybe_unused]] gfx::Context& context,
+                               [[maybe_unused]] const TransformState& transformState,
+                               [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters,
+                               [[maybe_unused]] const RenderTree& renderTree,
+                               [[maybe_unused]] UniqueChangeRequestVec& changes) {
     // create layer group
     if (!layerGroup) {
         if (auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID())) {
@@ -115,7 +117,7 @@ void RenderPluginLayer::update(gfx::ShaderRegistry& shaderRegistery,
     }
 }
 
-void RenderPluginLayer::upload(gfx::UploadPass& uploadPass) {}
+void RenderPluginLayer::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {}
 
 void RenderPluginLayer::render(PaintParameters& paintParameters) {
     if (_renderFunction) {
@@ -130,7 +132,7 @@ void RenderPluginLayer::prepare(const LayerPrepareParameters& layerParameters) {
 }
 
 // --- Private methods
-void RenderPluginLayer::transition(const TransitionParameters& parameters) {
+void RenderPluginLayer::transition([[maybe_unused]] const TransitionParameters& parameters) {
     // Called when switching between styles
 }
 
@@ -168,23 +170,24 @@ bool RenderPluginLayer::hasTransition() const {
 bool RenderPluginLayer::hasCrossfade() const {
     return false;
 }
-bool RenderPluginLayer::queryIntersectsFeature(const GeometryCoordinates&,
-                                               const GeometryTileFeature&,
-                                               float,
-                                               const TransformState&,
-                                               float,
-                                               const mat4&,
-                                               const FeatureState&) const {
+bool RenderPluginLayer::queryIntersectsFeature([[maybe_unused]] const GeometryCoordinates&,
+                                               [[maybe_unused]] const GeometryTileFeature&,
+                                               [[maybe_unused]] float,
+                                               [[maybe_unused]] const TransformState&,
+                                               [[maybe_unused]] float,
+                                               [[maybe_unused]] const mat4&,
+                                               [[maybe_unused]] const FeatureState&) const {
     return false;
 }
 
-void RenderPluginLayer::layerChanged(const TransitionParameters& parameters,
-                                     const Immutable<style::Layer::Impl>& impl,
-                                     UniqueChangeRequestVec& changes) {}
+void RenderPluginLayer::layerChanged([[maybe_unused]] const TransitionParameters& parameters,
+                                     [[maybe_unused]] const Immutable<style::Layer::Impl>& impl,
+                                     [[maybe_unused]] UniqueChangeRequestVec& changes) {}
 
 /// Remove all drawables for the tile from the layer group
 /// @return The number of drawables actually removed.
-std::size_t RenderPluginLayer::removeTile(RenderPass, const OverscaledTileID&) {
+std::size_t RenderPluginLayer::removeTile([[maybe_unused]] RenderPass,
+                                          [[maybe_unused]] const OverscaledTileID&) {
     return 0;
 }
 
