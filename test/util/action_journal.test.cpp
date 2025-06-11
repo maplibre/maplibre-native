@@ -435,7 +435,7 @@ TEST(ActionJournal, RenderingStats) {
                                .withPath(".")
                                .withLogFileCount(2)
                                .withLogFileSize(1024 * 1024 * 5)
-                               .withRenderingInfoReportInterval(2),
+                               .withRenderingStatsReportInterval(2),
                            MapMode::Continuous);
 
     test.map->getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
