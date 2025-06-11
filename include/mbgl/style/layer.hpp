@@ -92,11 +92,7 @@ struct LayerTypeInfo {
 
 // Added this to support plugins and that their LayerTypeInfo isn't the same point
 // across the board
-static bool layerTypeInfoEquals(const mbgl::style::LayerTypeInfo* one, const mbgl::style::LayerTypeInfo* other) {
-    return ((strcmp(one->type, other->type) == 0) && (one->source == other->source) && (one->pass3d == other->pass3d) &&
-            (one->layout == other->layout) && (one->fadingTiles == other->fadingTiles) &&
-            (one->crossTileIndex == other->crossTileIndex) && (one->tileKind == other->tileKind));
-};
+bool layerTypeInfoEquals(const mbgl::style::LayerTypeInfo* one, const mbgl::style::LayerTypeInfo* other);
 
 /**
  * The runtime representation of a [layer](https://maplibre.org/maplibre-style-spec/#layers)

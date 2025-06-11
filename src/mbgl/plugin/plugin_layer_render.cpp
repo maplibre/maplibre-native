@@ -37,7 +37,7 @@ protected:
 };
 
 void RenderPluginLayerTweaker::init(mbgl::gfx::Drawable& drawablee) {
-    // std::cout << "RenderPluginLayerTweaker::init\n";
+    
 };
 
 void RenderPluginLayerTweaker::execute(mbgl::gfx::Drawable& drawable, mbgl::PaintParameters& paintParameters) {
@@ -56,7 +56,6 @@ void RenderPluginLayerTweaker::execute(mbgl::gfx::Drawable& drawable, mbgl::Pain
 #endif
 
     _plugInRenderer->render(paintParameters);
-    // host->render(parameters);
 
     // Reset the view back to our original one, just in case the CustomLayer
     // changed the viewport or Framebuffer.
@@ -125,8 +124,6 @@ void RenderPluginLayer::render(PaintParameters& paintParameters) {
 }
 
 void RenderPluginLayer::prepare(const LayerPrepareParameters& layerParameters) {
-    // TODO: What should be implemented here?
-    //    std::cout << "prepare\n";
     if (_updateFunction) {
         _updateFunction(layerParameters);
     }

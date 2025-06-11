@@ -19,5 +19,3 @@ public:
 
 } // namespace style
 } // namespace mbgl
-
-// clang-format on
