@@ -1,5 +1,23 @@
 # Changelog MapLibre Native for Android
 
+## 11.10.2
+
+### 🐞 Bug fixes
+
+- Fix segfault this-capture GeoJsonSource which may be deleted ([#3536](https://github.com/maplibre/maplibre-native/pull/3536)).
+- Add `MapRenderer` dangling reference check ([#3541](https://github.com/maplibre/maplibre-native/pull/3541)).
+- Fix incomplete feature state updates in GeometryTile and SourceFeatureState [Vector Tile Layer]. ([#3406](https://github.com/maplibre/maplibre-native/pull/3406)).
+
+### ✨ Features and improvements
+
+- Fix recycler view test ([#3537](https://github.com/maplibre/maplibre-native/pull/3537)).
+
+## 11.10.1
+
+### 🐞 Bug fixes
+
+- Add missing proguard rules ([#3529](https://github.com/maplibre/maplibre-native/pull/3529)).
+
 ## 11.10.0
 
 ### ✨ Features and improvements

@@ -1129,10 +1129,10 @@
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
-            android:name=".activity.maplayout.GLSurfaceRecyclerViewActivity"
-            android:description="@string/description_recyclerview_glsurfaceview"
+            android:name=".activity.maplayout.SurfaceRecyclerViewActivity"
+            android:description="@string/description_recyclerview_surfaceview"
             android:exported="true"
-            android:label="@string/activity_recyclerview_glsurfaceview">
+            android:label="@string/activity_recyclerview_surfaceview">
             <meta-data
                 android:name="@string/category"
                 android:value="@string/category_integration" />
