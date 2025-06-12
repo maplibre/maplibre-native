@@ -13,6 +13,7 @@ on:
       - "*"
 
 permissions:
+  contents: write
   actions: write
 
 concurrency:
@@ -350,7 +351,7 @@ jobs:
       - name: VERSION file changed
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         id: version-file-android-changed
-        uses: tj-actions/changed-files@v46
+        uses: step-security/changed-files@3dbe17c78367e7d60f00d78ae6781a35be47b4a1
         with:
           files: platform/android/VERSION
 
