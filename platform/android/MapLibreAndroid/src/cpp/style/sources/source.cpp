@@ -76,7 +76,8 @@ Source::Source(jni::JNIEnv& env,
       rendererFrontend(frontend) {}
 
 Source::Source(jni::JNIEnv&, std::unique_ptr<mbgl::style::Source> coreSource)
-    : holder(std::make_shared<CoreSourceHolder>(std::move(coreSource))), source(holder->source) {}
+    : holder(std::make_shared<CoreSourceHolder>(std::move(coreSource))),
+      source(holder->source) {}
 
 Source::~Source() {
     if (holder) {

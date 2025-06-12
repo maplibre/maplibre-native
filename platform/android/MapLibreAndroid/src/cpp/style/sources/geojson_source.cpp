@@ -185,8 +185,9 @@ void GeoJSONSource::setAsync(Update::Converter converterFn) {
     updateHolder->awaitingUpdate = std::make_unique<Update>(
         std::move(converterFn),
         std::make_unique<Actor<GeoJSONDataCallback>>(
-            *Scheduler::GetCurrent(), [weakHolder = std::weak_ptr(holder),
-                        weakUpdateHolder = std::weak_ptr(updateHolder)](std::shared_ptr<style::GeoJSONData> geoJSONData) {
+            *Scheduler::GetCurrent(),
+            [weakHolder = std::weak_ptr(holder),
+             weakUpdateHolder = std::weak_ptr(updateHolder)](std::shared_ptr<style::GeoJSONData> geoJSONData) {
                 auto surfaceHolder = weakHolder.lock();
                 auto updateHolder = weakUpdateHolder.lock();
 
@@ -194,8 +195,7 @@ void GeoJSONSource::setAsync(Update::Converter converterFn) {
 
                 // impl ends up null between source setters
                 // when moving impls from immutable to mutable?
-                if (!surfaceHolder->source.baseImpl.get())
-                    return;
+                if (!surfaceHolder->source.baseImpl.get()) return;
 
                 // conversion from Java features to core ones finished
                 android::UniqueEnv _env = android::AttachEnv();
