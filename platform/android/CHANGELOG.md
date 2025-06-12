@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## 11.10.3
+
+### 🐞 Bug fixes
+
+- Fix problem source handling introduced by [#3536](https://github.com/maplibre/maplibre-native/pull/3536) ([#3550](https://github.com/maplibre/maplibre-native/pull/3550)).
+
 ## 11.10.2
 
 ### 🐞 Bug fixes
