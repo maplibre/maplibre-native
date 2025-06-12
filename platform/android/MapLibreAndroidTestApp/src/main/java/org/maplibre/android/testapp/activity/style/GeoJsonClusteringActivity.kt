@@ -73,7 +73,7 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
             try {
                 maplibreMap.setStyle(
                     Style.Builder()
-                        .fromUri(TestStyles.getPredefinedStyleWithFallback("Bright"))
+                        .fromUri(TestStyles.OPENFREEMAP_BRIGHT)
                         .withSource(createClusterSource().also { clusterSource = it })
                         .withLayer(createSymbolLayer())
                         .withLayer(createClusterLevelLayer(0, clusterLayers))
@@ -222,7 +222,8 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
                 PropertyFactory.textSize(12f),
                 PropertyFactory.textColor(Color.WHITE),
                 PropertyFactory.textIgnorePlacement(true),
-                PropertyFactory.textAllowOverlap(true)
+                PropertyFactory.textAllowOverlap(true),
+                PropertyFactory.textFont(arrayOf("Noto Sans Regular"))
             )
     }
 
