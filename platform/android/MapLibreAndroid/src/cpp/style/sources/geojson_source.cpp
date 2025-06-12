@@ -178,41 +178,48 @@ void GeoJSONSource::setCollectionAsync(jni::JNIEnv& env, const jni::Object<JNITy
 }
 
 void GeoJSONSource::setAsync(Update::Converter converterFn) {
-    awaitingUpdate = std::make_unique<Update>(
+    if (!updateHolder) {
+        updateHolder = std::make_shared<UpdateHolder>();
+    }
+
+    updateHolder->awaitingUpdate = std::make_unique<Update>(
         std::move(converterFn),
         std::make_unique<Actor<GeoJSONDataCallback>>(
-            *Scheduler::GetCurrent(),
-            [awaitingUpdateWeak = std::weak_ptr(awaitingUpdate),
-             sourceWeak = std::weak_ptr(source),
-             updateWeak = std::weak_ptr(update)](std::shared_ptr<style::GeoJSONData> geoJSONData) {
-                auto awaitingUpdate = awaitingUpdateWeak.lock();
-                auto source = sourceWeak.lock();
-                auto update = updateWeak.lock();
-                if (!awaitingUpdate || !source || !update) return;
+            *Scheduler::GetCurrent(), [weakHolder = std::weak_ptr(holder),
+                        weakUpdateHolder = std::weak_ptr(updateHolder)](std::shared_ptr<style::GeoJSONData> geoJSONData) {
+                auto surfaceHolder = weakHolder.lock();
+                auto updateHolder = weakUpdateHolder.lock();
+
+                if (!updateHolder || !surfaceHolder) return;
+
+                // impl ends up null between source setters
+                // when moving impls from immutable to mutable?
+                if (!surfaceHolder->source.baseImpl.get())
+                    return;
 
                 // conversion from Java features to core ones finished
                 android::UniqueEnv _env = android::AttachEnv();
 
                 // Update the core source
-                source->get().as<mbgl::style::GeoJSONSource>()->setGeoJSONData(std::move(geoJSONData));
+                surfaceHolder->source.as<mbgl::style::GeoJSONSource>()->setGeoJSONData(std::move(geoJSONData));
 
                 // if there is an awaiting update, execute it, otherwise, release resources
-                if (awaitingUpdate) {
-                    update = std::move(awaitingUpdate);
-                    update->converterFn(update->callback->self());
+                if (updateHolder->awaitingUpdate) {
+                    updateHolder->update = std::move(updateHolder->awaitingUpdate);
+                    updateHolder->update->converterFn(updateHolder->update->callback->self());
                 } else {
-                    update.reset();
+                    updateHolder->update.reset();
                 }
             }));
 
     // If another update is running, wait
-    if (update) {
+    if (updateHolder->update) {
         return;
     }
 
     // no updates are being processed, execute this one
-    update = std::move(awaitingUpdate);
-    update->converterFn(update->callback->self());
+    updateHolder->update = std::move(updateHolder->awaitingUpdate);
+    updateHolder->update->converterFn(updateHolder->update->callback->self());
 }
 
 void GeoJSONSource::registerNative(jni::JNIEnv& env) {

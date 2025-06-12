@@ -70,18 +70,17 @@ Source::Source(jni::JNIEnv& env,
                mbgl::style::Source& coreSource,
                const jni::Object<Source>& obj,
                AndroidRendererFrontend* frontend)
-    : source(std::make_shared<std::reference_wrapper<mbgl::style::Source>>(coreSource)),
+    : holder(std::make_shared<CoreSourceHolder>(coreSource)),
+      source(holder->source),
       javaPeer(jni::NewGlobal(env, obj)),
       rendererFrontend(frontend) {}
 
 Source::Source(jni::JNIEnv&, std::unique_ptr<mbgl::style::Source> coreSource)
-    : ownedSource(std::move(coreSource)),
-      source(std::make_shared<std::reference_wrapper<mbgl::style::Source>>(*ownedSource)) {}
+    : holder(std::make_shared<CoreSourceHolder>(std::move(coreSource))), source(holder->source) {}
 
 Source::~Source() {
-    if (ownedSource) {
-        ownedSource.reset();
-        ownedSource.release();
+    if (holder) {
+        holder.reset();
     }
     // Before being added to a map, the Java peer owns this C++ peer and cleans
     //  up after itself correctly through the jni native peer bindings.
@@ -91,7 +90,7 @@ Source::~Source() {
     //  In this case, the core source initiates the destruction, which requires
     //  releasing the Java peer, while also resetting it's nativePtr to 0 to
     //  prevent the subsequent GC of the Java peer from re-entering this dtor.
-    if (ownedSource.get() == nullptr && javaPeer.get() != nullptr) {
+    if (holder == nullptr && javaPeer.get() != nullptr) {
         // Manually clear the java peer
         android::UniqueEnv env = android::AttachEnv();
         static auto& javaClass = jni::Class<Source>::Singleton(*env);
@@ -143,12 +142,12 @@ jni::Local<jni::Integer> Source::getMaxOverscaleFactorForParentTiles(jni::JNIEnv
 }
 
 void Source::addToStyle(JNIEnv& env, const jni::Object<Source>& obj, mbgl::style::Style& style) {
-    if (!ownedSource) {
+    if (!holder->ownedSource) {
         throw std::runtime_error("Cannot add source twice");
     }
 
     // Add source to style and release ownership
-    style.addSource(std::move(ownedSource));
+    style.addSource(std::move(holder->ownedSource));
 
     // Add peer to core source
     source->get().peer = std::unique_ptr<Source>(this);
@@ -159,12 +158,12 @@ void Source::addToStyle(JNIEnv& env, const jni::Object<Source>& obj, mbgl::style
 
 void Source::addToMap(JNIEnv& env, const jni::Object<Source>& obj, mbgl::Map& map, AndroidRendererFrontend& frontend) {
     // Check to see if we own the source first
-    if (!ownedSource) {
+    if (!holder->ownedSource) {
         throw std::runtime_error("Cannot add source twice");
     }
 
     // Add source to map and release ownership
-    map.getStyle().addSource(std::move(ownedSource));
+    map.getStyle().addSource(std::move(holder->ownedSource));
 
     // Add peer to core source
     source->get().peer = std::unique_ptr<Source>(this);
@@ -177,15 +176,15 @@ void Source::addToMap(JNIEnv& env, const jni::Object<Source>& obj, mbgl::Map& ma
 
 bool Source::removeFromMap(JNIEnv&, const jni::Object<Source>&, mbgl::Map& map) {
     // Cannot remove if not attached yet
-    if (ownedSource) {
+    if (holder->ownedSource) {
         throw std::runtime_error("Cannot remove detached source");
     }
 
     // Remove the source from the map and take ownership
-    ownedSource = map.getStyle().removeSource(source->get().getID());
+    holder->ownedSource = map.getStyle().removeSource(source.getID());
 
     // The source may not be removed if any layers still reference it
-    return ownedSource != nullptr;
+    return holder->ownedSource != nullptr;
 }
 
 jni::Local<jni::Boolean> Source::isVolatile(jni::JNIEnv& env) {
@@ -206,14 +205,14 @@ jni::Local<jni::Long> Source::getMinimumTileUpdateInterval(JNIEnv& env) {
 
 void Source::releaseJavaPeer() {
     // We can't release the peer if the source was not removed from the map
-    if (!ownedSource) {
+    if (!holder->ownedSource) {
         return;
     }
 
     // Release the peer relationships. These will be re-established when the source is added to a map
-    assert(ownedSource->peer.has_value());
-    ownedSource->peer.get<std::unique_ptr<Source>>().release();
-    ownedSource->peer = mapbox::base::TypeWrapper();
+    assert(holder->ownedSource->peer.has_value());
+    holder->ownedSource->peer.get<std::unique_ptr<Source>>().release();
+    holder->ownedSource->peer = mapbox::base::TypeWrapper();
 
     // Release the strong reference to the java peer
     assert(javaPeer);

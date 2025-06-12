@@ -64,11 +64,23 @@ public:
     jni::Local<jni::Long> getMinimumTileUpdateInterval(JNIEnv&);
 
 protected:
-    // Set on newly created sources until added to the map.
-    std::unique_ptr<mbgl::style::Source> ownedSource;
 
-    // Reference that is valid at all times.
-    std::shared_ptr<std::reference_wrapper<mbgl::style::Source>> source;
+    struct CoreSourceHolder {
+        // Set on newly created sources until added to the map.
+        std::unique_ptr<mbgl::style::Source> ownedSource;
+
+        // Raw pointer that is valid at all times.
+        mbgl::style::Source &source;
+
+        CoreSourceHolder(std::unique_ptr<mbgl::style::Source>&& ownedSource_) :
+            ownedSource(std::move(ownedSource_)), source(*ownedSource) {}
+
+        CoreSourceHolder(mbgl::style::Source& source_) :
+                ownedSource(nullptr), source(source_) {}
+    };
+
+    std::shared_ptr<CoreSourceHolder> holder;
+    mbgl::style::Source &source;
 
     // Set when the source is added to a map.
     jni::Global<jni::Object<Source>> javaPeer;
