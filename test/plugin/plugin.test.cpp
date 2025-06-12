@@ -110,7 +110,7 @@ TEST(Plugin, PluginLayerProperty) {
         p._propertyType = PluginLayerProperty::PropertyType::SingleFloat;
         p._singleFloatValue = 1.0;
         auto json = p.asJSON();
-        _singleFloatValid = json == "\"\":1.000000";
+        _singleFloatValid = json == R"JSON("":1.000000)JSON";
     }
 
     {
@@ -118,7 +118,7 @@ TEST(Plugin, PluginLayerProperty) {
         p._propertyType = PluginLayerProperty::PropertyType::Color;
         p._dataDrivenColorValue = Color(1, 1, 1, 1);
         auto json = p.asJSON();
-        _colorValid = json == "\"\":\"rgba(255,255,255,1)\"";
+        _colorValid = json == R"JSON("":"rgba(255,255,255,1))JSON";
     }
 
     ASSERT_TRUE(_colorValid);
@@ -141,7 +141,8 @@ TEST(Plugin, PluginLayerPropertyManager) {
 
     auto json = pm.propertiesAsJSON();
 
-    bool _jsonValid = (json == "{\"color\":\"rgba(255,255,255,1)\", \"float\":1.000000}");
+    auto expectedJSON = R"JSON({"color":"rgba(255,255,255,1)","float":1.000000})JSON";
+    bool _jsonValid = (json == expectedJSON);
     ASSERT_TRUE(_jsonValid);
 }
 
@@ -185,7 +186,8 @@ TEST(Plugin, PluginLayer) {
                     std::cout << "On Layer Update Properties\n";
                     std::cout << "  -> " << properties << "\n";
 
-                    if (properties == "{\"custom-property1\":\"custom-property-value1\"}") {
+                    auto propertiesCheck = R"({"custom-property1":"custom-property-value1"})";
+                    if (properties == propertiesCheck) {
                         _initialPropertiesFound = true;
                     }
                     if (properties.find("scale") > 0) {
