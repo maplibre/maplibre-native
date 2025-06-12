@@ -6363,13 +6363,12 @@ static void *windowScreenContext = &windowScreenContext;
         }
     }
 
-    [self didUpdateLocationWithUserTrackingAnimated:animated completionHandler:completion];
-
     NSTimeInterval duration = MLNAnimationDuration;
-    if (oldLocation && ! CGPointEqualToPoint(self.userLocationAnnotationView.center, CGPointZero))
+    if ((self.dynamicNavigationCameraAnimationDuration && oldLocation) || (!self.dynamicNavigationCameraAnimationDuration && (oldLocation && ! CGPointEqualToPoint(self.userLocationAnnotationView.center, CGPointZero))))
     {
         duration = MIN([newLocation.timestamp timeIntervalSinceDate:oldLocation.timestamp], MLNUserLocationAnimationDuration);
     }
+    [self didUpdateLocationWithUserTrackingDuration:self.dynamicNavigationCameraAnimationDuration ? duration : MLNUserLocationAnimationDuration completionHandler:completion];
     [self updateUserLocationAnnotationViewAnimatedWithDuration:duration];
 
     if (self.userTrackingMode == MLNUserTrackingModeNone &&
@@ -6386,7 +6385,18 @@ static void *windowScreenContext = &windowScreenContext;
     [self didUpdateLocationWithUserTrackingAnimated:animated completionHandler:completion cancelTransitions:cancel];
 }
 
-- (void)didUpdateLocationWithUserTrackingAnimated:(BOOL)animated completionHandler:(nullable void (^)(void))completion cancelTransitions:(BOOL)cancelTransitions
+- (void)didUpdateLocationWithUserTrackingAnimated:(BOOL)animated completionHandler:(nullable void (^)(void))completion cancelTransitions:(BOOL)cancel
+{
+    [self didUpdateLocationWithUserTrackingDuration:animated ? MLNUserLocationAnimationDuration : 0 completionHandler:completion cancelTransitions:cancel];
+}
+
+- (void)didUpdateLocationWithUserTrackingDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion
+{
+    BOOL cancel = self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone;
+    [self didUpdateLocationWithUserTrackingDuration:duration completionHandler:completion cancelTransitions:cancel];
+}
+
+- (void)didUpdateLocationWithUserTrackingDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion cancelTransitions:(BOOL)cancelTransitions
 {
     CLLocation *location = self.userLocation.location;
     if ( ! _showsUserLocation || ! location
@@ -6420,37 +6430,31 @@ static void *windowScreenContext = &windowScreenContext;
         if (self.userTrackingState != MLNUserTrackingStateBegan)
         {
             // Keep both the user and the destination in view.
-            [self didUpdateLocationWithTargetAnimated:animated completionHandler:completion];
+            [self didUpdateLocationWithTargetAnimated:duration != 0 completionHandler:completion];
         }
     }
     else if (self.userTrackingState == MLNUserTrackingStatePossible)
     {
         // The first location update is often a great distance away from the
         // current viewport, so fly there to provide additional context.
-        [self didUpdateLocationSignificantlyAnimated:animated completionHandler:completion];
+        [self didUpdateLocationSignificantlyAnimated:duration != 0 completionHandler:completion];
     }
     else if (self.userTrackingState == MLNUserTrackingStateChanged)
     {
         // Subsequent updates get a more subtle animation.
-        [self didUpdateLocationIncrementallyAnimated:animated completionHandler:completion cancelTransitions:cancelTransitions];
+        [self didUpdateLocationIncrementallyDuration:duration completionHandler:completion cancelTransitions:cancelTransitions];
     }
     [self unrotateIfNeededAnimated:YES];
 }
 
-- (void)didUpdateLocationIncrementallyAnimated:(BOOL)animated completionHandler:(nullable void (^)(void))completion
-{
-    BOOL cancel = self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone;
-    [self didUpdateLocationIncrementallyAnimated:animated completionHandler:completion cancelTransitions:cancel];
-}
-
 /// Changes the viewport based on an incremental location update.
-- (void)didUpdateLocationIncrementallyAnimated:(BOOL)animated completionHandler:(nullable void (^)(void))completion cancelTransitions:(BOOL)cancelTransitions
+- (void)didUpdateLocationIncrementallyDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion cancelTransitions:(BOOL)cancelTransitions
 {
     [self _setCenterCoordinate:self.userLocation.location.coordinate
                    edgePadding:self.edgePaddingForFollowing
                      zoomLevel:self.zoomLevel
                      direction:self.directionByFollowingWithCourse
-                      duration:animated ? MLNUserLocationAnimationDuration : 0
+                      duration:duration
        animationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear]
              completionHandler:completion
              cancelTransitions:cancelTransitions];

@@ -562,6 +562,12 @@ MLN_EXPORT
 @property (nonatomic, assign) BOOL concurrentAnimations;
 
 /**
+ A boolean value indicating whether camera animation duration is set based
+ on the time difference between the last location update and the current one.
+ */
+@property (nonatomic, assign) BOOL dynamicNavigationCameraAnimationDuration;
+
+/**
  A Boolean value indicating whether the map may request authorization to use location services.
 
  Setting this property to `YES` causes the map view to use the Core Location
