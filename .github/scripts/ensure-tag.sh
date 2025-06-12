@@ -23,9 +23,6 @@ if [ -z "$(git config user.email)" ]; then
   git config user.email "team@maplibre.org"
 fi
 
-# Ensure git uses GITHUB_TOKEN for authentication
-git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/HudHud-Maps/maplibre-native.git"
-
 if git rev-parse "$tag" >/dev/null 2>&1; then
   tag_sha=$(git rev-parse "$tag^{commit}")
   if [ "$tag_sha" = "$commit_sha" ]; then
