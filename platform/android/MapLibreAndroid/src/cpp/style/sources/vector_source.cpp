@@ -31,7 +31,7 @@ VectorSource::VectorSource(jni::JNIEnv& env, mbgl::style::Source& coreSource, An
 VectorSource::~VectorSource() = default;
 
 jni::Local<jni::String> VectorSource::getURL(jni::JNIEnv& env) {
-    std::optional<std::string> url = getSource<mbgl::style::VectorSource>().VectorSource::getURL();
+    std::optional<std::string> url = source->get().as<mbgl::style::VectorSource>()->VectorSource::getURL();
     return url ? jni::Make<jni::String>(env, *url) : jni::Local<jni::String>();
 }
 
@@ -42,7 +42,7 @@ jni::Local<jni::Array<jni::Object<geojson::Feature>>> VectorSource::querySourceF
 
     std::vector<mbgl::Feature> features;
     if (rendererFrontend) {
-        features = rendererFrontend->querySourceFeatures(getSource().getID(),
+        features = rendererFrontend->querySourceFeatures(source->get().getID(),
                                                          {toVector(env, jSourceLayerIds), toFilter(env, jfilter)});
     }
     return Feature::convert(env, features);
