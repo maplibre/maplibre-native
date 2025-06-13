@@ -1,9 +1,9 @@
 package org.maplibre.android.maps;
 
 public class RenderingStats {
-  /// Frame CPU encoding time (milliseconds)
+  /// Frame CPU encoding time (seconds)
   public double encodingTime = 0.0;
-  /// Frame CPU rendering time (milliseconds)
+  /// Frame CPU rendering time (seconds)
   public double renderingTime = 0.0;
 
   /// Number of frames rendered
