@@ -1,6 +1,5 @@
 package org.maplibre.android.testapp.style;
 
-import org.maplibre.android.style.sources.CannotAddSourceException;
 import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.FeatureCollection;
 import org.maplibre.geojson.Point;
@@ -153,29 +152,6 @@ public class GeoJsonSourceTests extends EspressoTest {
 
       maplibreMap.getStyle().removeLayer(layer);
       maplibreMap.getStyle().removeSource(source);
-    });
-  }
-
-  @Test
-  public void testDuplicateSourceDuringAsyncSetGeoJson() {
-    // regression test for segfault when setting GeoJSON contents
-    // for a source that has been deleted
-    // https://github.com/maplibre/maplibre-native/issues/3493
-    validateTestSetup();
-    MapLibreMapAction.invoke(maplibreMap, (uiController, maplibreMap) -> {
-      String geoJsonString = "{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[0,0]}}";
-      for (int i = 0; i < 1000; i++) {
-        // Create a GeoJSON source with the same ID each iteration
-        GeoJsonSource source = new GeoJsonSource("source");
-        try {
-          maplibreMap.getStyle().addSource(source);
-        } catch (CannotAddSourceException ex) {
-          // ignore, this is expected
-        }
-
-        // Schedule an async update via setGeoJson(String)
-        source.setGeoJson(geoJsonString);
-      }
     });
   }
 

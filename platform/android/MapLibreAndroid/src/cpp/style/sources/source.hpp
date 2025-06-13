@@ -8,7 +8,6 @@
 #include "../../android_renderer_frontend.hpp"
 
 #include <jni/jni.hpp>
-#include <functional>
 
 namespace mbgl {
 namespace android {
@@ -64,21 +63,12 @@ public:
     jni::Local<jni::Long> getMinimumTileUpdateInterval(JNIEnv&);
 
 protected:
-    template <typename T = style::Source>
-    T& getSource() {
-        return *ownedSource->as<T>();
-    }
-
-    std::weak_ptr<std::reference_wrapper<style::Source>> getWeakSource() const { return source; }
-
-private:
     // Set on newly created sources until added to the map.
     std::unique_ptr<mbgl::style::Source> ownedSource;
 
-    // Reference that is valid at all times.
-    std::shared_ptr<std::reference_wrapper<mbgl::style::Source>> source;
+    // Raw pointer that is valid at all times.
+    mbgl::style::Source& source;
 
-protected:
     // Set when the source is added to a map.
     jni::Global<jni::Object<Source>> javaPeer;
 
