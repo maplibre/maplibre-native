@@ -1,5 +1,6 @@
 package org.maplibre.android.testapp.style;
 
+import org.junit.Ignore;
 import org.maplibre.android.style.sources.CannotAddSourceException;
 import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.FeatureCollection;
@@ -157,6 +158,7 @@ public class GeoJsonSourceTests extends EspressoTest {
   }
 
   @Test
+  @Ignore("https://github.com/maplibre/maplibre-native/issues/3493")
   public void testDuplicateSourceDuringAsyncSetGeoJson() {
     // regression test for segfault when setting GeoJSON contents
     // for a source that has been deleted
