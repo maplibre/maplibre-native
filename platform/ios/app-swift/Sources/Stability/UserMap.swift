@@ -46,8 +46,6 @@ class UserMap: MLNMapView, MLNMapViewDelegate {
 
         let randomWeight = random(in: 0.0 ... cumulativeWeights.last!)
 
-        print("random weight \(randomWeight) \(cumulativeWeights.last ?? -1.0)")
-
         var low = 0
         var high = cumulativeWeights.count - 1
 
@@ -69,8 +67,9 @@ class UserMap: MLNMapView, MLNMapViewDelegate {
     func randomPlacePoints() -> Int { random(in: 10 ... 20) }
     func randomPlaceActions() -> Int { random(in: 10 ... 20) }
 
-    func randomLatLng(in bounds: MLNCoordinateBounds) -> CLLocationCoordinate2D {
-        CLLocationCoordinate2D(
+    func randomLatLng() -> CLLocationCoordinate2D {
+        let bounds = visibleCoordinateBounds
+        return CLLocationCoordinate2D(
             latitude: random(in: bounds.sw.latitude ... bounds.ne.latitude),
             longitude: random(in: bounds.sw.longitude ... bounds.ne.longitude)
         )
@@ -79,8 +78,7 @@ class UserMap: MLNMapView, MLNMapViewDelegate {
     func randomZoom() -> Double { random(in: 14.0 ... 20.0) }
 
     func randomAltitude() -> Double {
-        let camera = camera
-        return MLNAltitudeForZoomLevel(randomZoom(), camera.pitch, camera.centerCoordinate.latitude, frame.size)
+        MLNAltitudeForZoomLevel(randomZoom(), camera.pitch, camera.centerCoordinate.latitude, frame.size)
     }
 
     func randomTilt() -> Double { random(in: 0.0 ... 60.0) }
@@ -89,7 +87,9 @@ class UserMap: MLNMapView, MLNMapViewDelegate {
     func randomAnnotationRemove() -> Int { random(in: 4 ... 8) }
     func randomAnnotationAdd() -> Int { random(in: 2 ... 4) }
 
-    func randomPolyPoints(in bounds: MLNCoordinateBounds) -> [CLLocationCoordinate2D] {
+    func randomPolyPoints() -> [CLLocationCoordinate2D] {
+        let bounds = visibleCoordinateBounds
+
         let boundMultiplier = 0.25
         let lat = random(in: bounds.sw.latitude ... bounds.ne.latitude)
         let lng = random(in: bounds.sw.longitude ... bounds.ne.longitude)
@@ -134,7 +134,6 @@ class UserMap: MLNMapView, MLNMapViewDelegate {
         continuation = nil
     }
 
-    // TODO: fix point annotations
     func mapView(_ mapView: MLNMapView, viewFor annotation: MLNAnnotation) -> MLNAnnotationView? {
         guard annotation is MLNPointAnnotation else {
             return nil
@@ -170,7 +169,9 @@ class UserMap: MLNMapView, MLNMapViewDelegate {
             }
         }
 
-        return AnnotationView(map: self, reuseIdentifier: reuseIdentifier)
+        let annotation = AnnotationView(map: self, reuseIdentifier: reuseIdentifier)
+        annotation.bounds = CGRect(x: 0, y: 0, width: 20, height: 20)
+        return annotation
     }
 
     func mapView(_: MLNMapView, strokeColorForShapeAnnotation _: MLNShape) -> UIColor {
@@ -206,7 +207,7 @@ class UserMap: MLNMapView, MLNMapViewDelegate {
         // camera actions with different weights
         // position updates are more frequent
         let actions = [
-            ({ [weak self] () in let cam = self!.camera; cam.centerCoordinate = self!.randomLatLng(in: self!.visibleCoordinateBounds); return cam }, 2.0),
+            ({ [weak self] () in let cam = self!.camera; cam.centerCoordinate = self!.randomLatLng(); return cam }, 2.0),
             ({ [weak self] () in let cam = self!.camera; cam.altitude = self!.randomAltitude(); return cam }, 1.0),
             ({ [weak self] () in let cam = self!.camera; cam.pitch = self!.randomTilt(); return cam }, 1.0),
             ({ [weak self] () in let cam = self!.camera; cam.heading = self!.randomBearing(); return cam }, 1.0),
@@ -245,12 +246,11 @@ class UserMap: MLNMapView, MLNMapViewDelegate {
         }
 
         // add some annotations
-        let bounds = visibleCoordinateBounds
 
         // points
         randomAnnotationAdd().repeat {
             let annotation = MLNPointAnnotation()
-            annotation.coordinate = randomLatLng(in: bounds)
+            annotation.coordinate = randomLatLng()
             annotation.title = "(\(annotation.coordinate.latitude),\(annotation.coordinate.longitude))"
 
             self.addAnnotation(annotation)
@@ -258,7 +258,7 @@ class UserMap: MLNMapView, MLNMapViewDelegate {
 
         // polylines
         randomAnnotationAdd().repeat {
-            let coords = randomPolyPoints(in: bounds)
+            let coords = randomPolyPoints()
             let annotation = MLNPolyline(coordinates: coords, count: UInt(coords.count))
 
             // random color/width set via delegate
@@ -267,7 +267,7 @@ class UserMap: MLNMapView, MLNMapViewDelegate {
 
         // polygons
         randomAnnotationAdd().repeat {
-            let coords = randomPolyPoints(in: bounds)
+            let coords = randomPolyPoints()
             let annotation = MLNPolygon(coordinates: coords, count: UInt(coords.count))
 
             // random fill/stroke colors set via delegate
