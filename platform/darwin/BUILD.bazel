@@ -174,6 +174,7 @@ swift_library(
     data = [
         "test/amsterdam.geojson",
         "test/one-liner.json",
+        "app/PluginLayerTestStyle.json",
     ],
     visibility = [
         "//platform/ios/test:__pkg__",
@@ -297,6 +298,11 @@ objc_library(
 
 exports_files(
     [
+        "app/PluginLayerTestStyle.json",
+        "app/PluginLayerExample.h",
+        "app/PluginLayerExample.mm",
+        "app/PluginLayerExampleMetalRendering.h",
+        "app/PluginLayerExampleMetalRendering.mm",
         "test/amsterdam.geojson",
         "test/MLNSDKTestHelpers.swift",
         "app/CustomStyleLayerExample.h",
