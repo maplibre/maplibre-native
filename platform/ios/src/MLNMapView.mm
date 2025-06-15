@@ -15,6 +15,7 @@
 #include <mbgl/style/layers/custom_layer.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/math/wrap.hpp>
+#include <mbgl/util/action_journal.hpp>
 #include <mbgl/util/client_options.hpp>
 #include <mbgl/util/exception.hpp>
 #include <mbgl/util/geo.hpp>
@@ -67,7 +68,9 @@
 #import "MLNLoggingConfiguration_Private.h"
 #import "MLNNetworkConfiguration_Private.h"
 #import "MLNReachability.h"
+#import "MLNRenderingStats_Private.h"
 #import "MLNSettings_Private.h"
+#import "MLNActionJournalOptions_Private.h"
 #import "MLNMapProjection.h"
 
 #include <algorithm>
@@ -493,6 +496,8 @@ public:
     CFTimeInterval _frameCounterStartTime;
     NSInteger _frameCount;
     CFTimeInterval _frameDurations;
+
+    MLNRenderingStats* _renderingStats;
 }
 
 // MARK: - Setup & Teardown -
@@ -503,7 +508,7 @@ public:
     {
         MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
         MLNLogDebug(@"Initializing frame: %@", NSStringFromCGRect(frame));
-        [self commonInit];
+        [self commonInitWithOptions:nil];
         self.styleURL = nil;
         MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
     }
@@ -516,7 +521,7 @@ public:
     {
         MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
         MLNLogDebug(@"Initializing frame: %@ styleURL: %@", NSStringFromCGRect(frame), styleURL);
-        [self commonInit];
+        [self commonInitWithOptions:nil];
         self.styleURL = styleURL;
         MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
     }
@@ -529,9 +534,36 @@ public:
     {
         MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
         MLNLogDebug(@"Initializing frame: %@ styleJSON: %@", NSStringFromCGRect(frame), styleJSON);
-        [self commonInit];
+        [self commonInitWithOptions:nil];
         self.styleJSON = styleJSON;
         _initialStyleJSON = [styleJSON copy];
+        MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
+    }
+    return self;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame options:(MLNMapOptions *)options
+{
+    if (self = [super initWithFrame:frame])
+    {
+        MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
+        MLNLogDebug(@"Initializing frame: %@ with options", NSStringFromCGRect(frame));
+        [self commonInitWithOptions:options];
+
+        if (options)
+        {
+            if (options.styleURL) {
+                self.styleURL = options.styleURL;
+            } else if (options.styleJSON) {
+                self.styleJSON = options.styleJSON;
+                _initialStyleJSON = [options.styleJSON copy];
+            } else {
+                self.styleURL = nil;
+            }
+        } else {
+            self.styleURL = nil;
+        }
+
         MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
     }
     return self;
@@ -542,7 +574,7 @@ public:
     if (self = [super initWithCoder:decoder])
     {
         MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
-        [self commonInit];
+        [self commonInitWithOptions:nil];
         self.styleURL = nil;
         MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
     }
@@ -621,8 +653,13 @@ public:
     return _rendererFrontend->getRenderer();
 }
 
-- (void)commonInit
+- (void)commonInitWithOptions:(MLNMapOptions*)mlnMapoptions
 {
+    if (mlnMapoptions == nil)
+    {
+        mlnMapoptions = [[MLNMapOptions alloc] init];
+    }
+
     _opaque = NO;
 
     // setup accessibility
@@ -683,8 +720,11 @@ public:
         resourceOptions.withApiKey([apiKey UTF8String]);
     }
 
+    const mbgl::util::ActionJournalOptions& actionJournalOptions = [mlnMapoptions.actionJournalOptions getCoreOptions];
+
     NSAssert(!_mbglMap, @"_mbglMap should be NULL");
-    _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions, clientOptions);
+    _mbglMap = std::make_unique<mbgl::Map>(*_rendererFrontend, *_mbglView, mapOptions,
+                                           resourceOptions, clientOptions, actionJournalOptions);
 
     // start paused if launch into the background
     if (background) {
@@ -3189,6 +3229,46 @@ static void *windowScreenContext = &windowScreenContext;
 - (BOOL)tileCacheEnabled
 {
     return _rendererFrontend->getTileCacheEnabled();
+}
+
+- (void)setTileLodMinRadius:(double)tileLodMinRadius
+{
+    _mbglMap->setTileLodMinRadius(tileLodMinRadius);
+}
+
+- (double)tileLodMinRadius
+{
+    return _mbglMap->getTileLodMinRadius();
+}
+
+- (void)setTileLodScale:(double)tileLodScale
+{
+    _mbglMap->setTileLodScale(tileLodScale);
+}
+
+- (double)tileLodScale
+{
+    return _mbglMap->getTileLodScale();
+}
+
+-(void)setTileLodPitchThreshold:(double)tileLodPitchThreshold
+{
+    _mbglMap->setTileLodPitchThreshold(tileLodPitchThreshold);
+}
+
+-(double)tileLodPitchThreshold
+{
+    return _mbglMap->getTileLodPitchThreshold();
+}
+
+-(void)setTileLodZoomShift:(double)tileLodZoomShift
+{
+    _mbglMap->setTileLodZoomShift(tileLodZoomShift);
+}
+
+-(double)tileLodZoomShift
+{
+    return _mbglMap->getTileLodZoomShift();
 }
 
 // MARK: - Accessibility -
@@ -6876,8 +6956,7 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (void)mapViewDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered
-                                  frameEncodingTime:(double)frameEncodingTime
-                                 frameRenderingTime:(double)frameRenderingTime {
+                                     renderingStats:(const mbgl::gfx::RenderingStats &)stats {
     if (!_mbglMap)
     {
         return;
@@ -6889,9 +6968,21 @@ static void *windowScreenContext = &windowScreenContext;
         [self.style didChangeValueForKey:@"layers"];
     }
 
-    if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:frameEncodingTime:frameRenderingTime:)])
+    if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:renderingStats:)])
     {
-        [self.delegate mapViewDidFinishRenderingFrame:self fullyRendered:fullyRendered frameEncodingTime:frameEncodingTime frameRenderingTime:frameRenderingTime];
+        if (!_renderingStats) {
+            _renderingStats = [[MLNRenderingStats alloc] init];
+        }
+
+        [_renderingStats setCoreData:stats];
+        [self.delegate mapViewDidFinishRenderingFrame:self fullyRendered:fullyRendered renderingStats:_renderingStats];
+    }
+    else if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:frameEncodingTime:frameRenderingTime:)])
+    {
+        [self.delegate mapViewDidFinishRenderingFrame:self
+                                        fullyRendered:fullyRendered
+                                    frameEncodingTime:stats.encodingTime
+                                   frameRenderingTime:stats.renderingTime];
     }
     else if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:)])
     {
@@ -7520,9 +7611,61 @@ static void *windowScreenContext = &windowScreenContext;
     return _annotationViewReuseQueueByIdentifier[identifier];
 }
 
+- (BOOL)isRenderingStatsViewEnabled {
+    return _mbglMap->isRenderingStatsViewEnabled();
+}
+
+- (void)enableRenderingStatsView:(BOOL)value {
+    _mbglMap->enableRenderingStatsView(value);
+}
+
 - (void)triggerRepaint
 {
     _mbglMap->triggerRepaint();
+}
+
+- (NSArray<NSString*>*)getActionJournalLogFiles
+{
+    const auto& actionJournal = _mbglMap->getActionJournal();
+    if (!actionJournal) {
+        return nil;
+    }
+
+    const auto& files = actionJournal->getLogFiles();
+    NSMutableArray<NSString*>* objcFiles = [NSMutableArray new];
+
+    for (const auto& file : files) {
+        [objcFiles addObject:[NSString stringWithUTF8String:file.c_str()]];
+    }
+
+    return objcFiles;
+}
+
+- (NSArray<NSString*>*)getActionJournalLog
+{
+    const auto& actionJournal = _mbglMap->getActionJournal();
+    if (!actionJournal) {
+        return nil;
+    }
+
+    const auto& log = actionJournal->getLog();
+    NSMutableArray<NSString*>* objcLog = [NSMutableArray new];
+
+    for (const auto& event : log) {
+        [objcLog addObject:[NSString stringWithUTF8String:event.c_str()]];
+    }
+
+    return objcLog;
+}
+
+- (void)clearActionJournalLog
+{
+    const auto& actionJournal = _mbglMap->getActionJournal();
+    if (!actionJournal) {
+        return;
+    }
+
+    actionJournal->clearLog();
 }
 
 - (MLNBackendResource *)backendResource {

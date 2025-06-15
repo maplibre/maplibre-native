@@ -165,8 +165,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     }
 
     if (LayerManager::annotationsEnabled) {
-        auto guard = updateParameters->annotationManager.lock();
-        if (updateParameters->annotationManager) {
+        if (auto guard = updateParameters->annotationManager.lock(); updateParameters->annotationManager) {
             updateParameters->annotationManager->updateData();
         }
     }
@@ -195,6 +194,10 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                         .glyphManager = glyphManager,
                                         .prefetchZoomDelta = updateParameters->prefetchZoomDelta,
                                         .threadPool = threadPool,
+                                        .tileLodMinRadius = updateParameters->tileLodMinRadius,
+                                        .tileLodScale = updateParameters->tileLodScale,
+                                        .tileLodPitchThreshold = updateParameters->tileLodPitchThreshold,
+                                        .tileLodZoomShift = updateParameters->tileLodZoomShift,
                                         .dynamicTextureAtlas = dynamicTextureAtlas};
 
     glyphManager->setURL(updateParameters->glyphURL);

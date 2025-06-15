@@ -49,10 +49,15 @@ Powerful, free and open-source mapping toolkit with full control over data sourc
 - <doc:OfflinePackExample>
 - <doc:ManageOfflineRegionsExample>
 
-### Advanced
+### Observability
 
 - <doc:ObserverExample>
+- <doc:ActionJournalExample>
+
+### Advanced
+
 - <doc:CustomStyleLayerExample>
+- <doc:RenderingStatisticsHud>
 
 ### Other Articles
 

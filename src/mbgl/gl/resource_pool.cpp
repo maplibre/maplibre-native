@@ -74,6 +74,10 @@ Texture2DPool::Texture2DPool(Context* context_, size_t maxPoolStorage_)
 }
 
 Texture2DPool::~Texture2DPool() {
+    if (!context->getCleanupOnDestruction()) {
+        return;
+    }
+
     assert(usedStorage() == 0);
     assert(unusedStorage() == poolStorage);
     shrink();
