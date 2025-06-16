@@ -105,11 +105,14 @@ TEST(Plugin, PluginLayerProperty) {
     bool _singleFloatValid = false;
     bool _colorValid = false;
 
+    std::cout << "Test: Plugin.PluginLayerProperty\n";
+
     {
         PluginLayerProperty p;
         p._propertyType = PluginLayerProperty::PropertyType::SingleFloat;
         p._singleFloatValue = 1.0;
         auto json = p.asJSON();
+        std::cout <<"   _singleFloatValid: " << json << "\n";
         _singleFloatValid = json == R"JSON("":1.000000)JSON";
     }
 
@@ -118,6 +121,7 @@ TEST(Plugin, PluginLayerProperty) {
         p._propertyType = PluginLayerProperty::PropertyType::Color;
         p._dataDrivenColorValue = Color(1, 1, 1, 1);
         auto json = p.asJSON();
+        std::cout <<"   _colorValid: " << json << "\n";
         _colorValid = json == R"JSON("":"rgba(255,255,255,1))JSON";
     }
 
@@ -140,6 +144,9 @@ TEST(Plugin, PluginLayerPropertyManager) {
     pm.addProperty(p2);
 
     auto json = pm.propertiesAsJSON();
+
+    std::cout << "Test: Plugin.PluginLayerPropertyManager\n";
+    std::cout <<"   JSON: " << json << "\n";
 
     auto expectedJSON = R"JSON({"color":"rgba(255,255,255,1)","float":1.000000})JSON";
     bool _jsonValid = (json == expectedJSON);
