@@ -162,6 +162,8 @@ add_library(
     EXCLUDE_FROM_ALL
     "${CMAKE_CURRENT_LIST_DIR}/app/ExampleCustomDrawableStyleLayer.mm"
     "${CMAKE_CURRENT_LIST_DIR}/app/CustomStyleLayerExample.m"
+    "${CMAKE_CURRENT_LIST_DIR}/app/PluginLayerExample.mm"
+    "${CMAKE_CURRENT_LIST_DIR}/app/PluginLayerExampleMetalRendering.mm"
 )
 
 target_link_libraries(
