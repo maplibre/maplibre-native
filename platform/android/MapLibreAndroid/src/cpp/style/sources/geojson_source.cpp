@@ -69,6 +69,16 @@ void GeoJSONSource::setGeoJSONString(jni::JNIEnv& env, const jni::String& jStrin
     setAsync(converterFn);
 }
 
+void GeoJSONSource::setGeoJSONStringSync(jni::JNIEnv& env, const jni::String& jString) {
+    std::shared_ptr<std::string> json = std::make_shared<std::string>(jni::Make<std::string>(env, jString));
+
+    Update::Converter converterFn = [this, json](ActorRef<GeoJSONDataCallback> _callback) {
+        converter->self().ask(&FeatureConverter::convertJson, json, _callback).wait();
+    };
+
+    setAsync(converterFn);
+}
+
 void GeoJSONSource::setFeatureCollection(jni::JNIEnv& env, const jni::Object<geojson::FeatureCollection>& jFeatures) {
     setCollectionAsync(env, jFeatures);
 }
@@ -79,6 +89,18 @@ void GeoJSONSource::setFeature(jni::JNIEnv& env, const jni::Object<geojson::Feat
 
 void GeoJSONSource::setGeometry(jni::JNIEnv& env, const jni::Object<geojson::Geometry>& jGeometry) {
     setCollectionAsync(env, jGeometry);
+}
+
+void GeoJSONSource::setFeatureCollectionSync(jni::JNIEnv& env, const jni::Object<geojson::FeatureCollection>& jFeatures) {
+    setCollectionSync(env, jFeatures);
+}
+
+void GeoJSONSource::setFeatureSync(jni::JNIEnv& env, const jni::Object<geojson::Feature>& jFeature) {
+    setCollectionSync(env, jFeature);
+}
+
+void GeoJSONSource::setGeometrySync(jni::JNIEnv& env, const jni::Object<geojson::Geometry>& jGeometry) {
+    setCollectionSync(env, jGeometry);
 }
 
 void GeoJSONSource::setURL(jni::JNIEnv& env, const jni::String& url) {
@@ -207,6 +229,18 @@ void GeoJSONSource::setAsync(Update::Converter converterFn) {
     update->converterFn(update->callback->self());
 }
 
+template <class JNIType>
+void GeoJSONSource::setCollectionSync(jni::JNIEnv& env, const jni::Object<JNIType>& jObject) {
+    auto global = jni::NewGlobal<jni::EnvAttachingDeleter>(env, jObject);
+    auto object = std::make_shared<decltype(global)>(std::move(global));
+
+    Update::Converter converterFn = [this, object](ActorRef<GeoJSONDataCallback> _callback) {
+        converter->self().ask(&FeatureConverter::convertObject<JNIType>, object, _callback).wait();
+    };
+
+    setAsync(converterFn);
+}
+
 void GeoJSONSource::registerNative(jni::JNIEnv& env) {
     // Lookup the class
     static auto& javaClass = jni::Class<GeoJSONSource>::Singleton(env);
@@ -225,6 +259,10 @@ void GeoJSONSource::registerNative(jni::JNIEnv& env) {
         METHOD(&GeoJSONSource::setFeatureCollection, "nativeSetFeatureCollection"),
         METHOD(&GeoJSONSource::setFeature, "nativeSetFeature"),
         METHOD(&GeoJSONSource::setGeometry, "nativeSetGeometry"),
+        METHOD(&GeoJSONSource::setGeoJSONStringSync, "nativeSetGeoJsonStringSync"),
+        METHOD(&GeoJSONSource::setFeatureCollectionSync, "nativeSetFeatureCollectionSync"),
+        METHOD(&GeoJSONSource::setFeatureSync, "nativeSetFeatureSync"),
+        METHOD(&GeoJSONSource::setGeometrySync, "nativeSetGeometrySync"),
         METHOD(&GeoJSONSource::setURL, "nativeSetUrl"),
         METHOD(&GeoJSONSource::getURL, "nativeGetUrl"),
         METHOD(&GeoJSONSource::querySourceFeatures, "querySourceFeatures"),
