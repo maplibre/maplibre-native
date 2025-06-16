@@ -47,7 +47,6 @@ void LayerManagerDefault::addLayerTypeCoreOnly(std::unique_ptr<mbgl::LayerFactor
     addLayerType(layerFactory);
 }
 
-
 LayerManagerDefault::LayerManagerDefault() {
 #if !defined(MBGL_LAYER_FILL_DISABLE_ALL)
     addLayerType(std::make_unique<FillLayerFactory>());
