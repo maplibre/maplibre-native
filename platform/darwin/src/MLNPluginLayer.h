@@ -1,6 +1,11 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
+#if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
+#else
+#import <AppKit/AppKit.h>
+#endif
+
 #import "MLNFoundation.h"
 #import "MLNGeometry.h"
 
@@ -29,7 +34,11 @@ MLN_EXPORT
 @property float singleFloatDefaultValue;
 
 // Color default value
+#if TARGET_OS_IPHONE
 @property UIColor *colorDefaultValue;
+#else
+@property NSColor *colorDefaultValue;
+#endif
 
 @end
 

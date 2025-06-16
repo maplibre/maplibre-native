@@ -172,7 +172,7 @@ TEST(Plugin, PluginLayer) {
     pluginLayerFactory->setOnLayerCreatedEvent(
         [&_layerRendered, &_layerCreated, &_initialPropertiesFound, &_paintPropertiesFound](
             mbgl::style::PluginLayer* pluginLayer) {
-            std::cout << "On Layer Created\n";
+//            std::cout << "On Layer Created\n";
             _layerCreated = true;
 
             auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl*)pluginLayer->baseImpl.get();
@@ -182,16 +182,18 @@ TEST(Plugin, PluginLayer) {
             p->_propertyType = PluginLayerProperty::PropertyType::SingleFloat;
             p->_defaultSingleFloatValue = 1.0;
             pm.addProperty(p);
-            pluginLayerImpl->setRenderFunction([&_layerRendered](PaintParameters& paintParameters) {
-                std::cout << "On Layer Rendered\n";
-                std::cout << "  Paint Properties.currentLayer: " << paintParameters.currentLayer << "\n";
+            pluginLayerImpl->setRenderFunction([&_layerRendered]([[maybe_unused]] PaintParameters& paintParameters) {
+                
+//                std::cout << "On Layer Rendered\n";
+//                std::cout << "  Paint Properties.currentLayer: " << paintParameters.currentLayer << "\n";
                 _layerRendered = true;
             });
 
             pluginLayerImpl->setUpdatePropertiesFunction(
                 [&_initialPropertiesFound, &_paintPropertiesFound](const std::string& properties) {
-                    std::cout << "On Layer Update Properties\n";
-                    std::cout << "  -> " << properties << "\n";
+                    
+//                    std::cout << "On Layer Update Properties\n";
+//                    std::cout << "  -> " << properties << "\n";
 
                     auto propertiesCheck = R"({"custom-property1":"custom-property-value1"})";
                     if (properties == propertiesCheck) {
@@ -219,7 +221,9 @@ TEST(Plugin, PluginLayer) {
       }]
     })STYLE");
 
-    test.runLoop.run();
+    for (int i=0; i < 10; i++) {
+        test.runLoop.runOnce();
+    }
 
     ASSERT_TRUE(_layerCreated);
     ASSERT_TRUE(_initialPropertiesFound);

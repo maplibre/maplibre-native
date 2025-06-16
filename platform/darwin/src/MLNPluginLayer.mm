@@ -1,5 +1,5 @@
 #import "MLNPluginLayer.h"
-#import <UIKit/UIKit.h>
+
 @implementation MLNPluginLayerProperty
 
 +(MLNPluginLayerProperty *)propertyWithName:(NSString *)propertyName
@@ -14,7 +14,11 @@
             tempResult.singleFloatDefaultValue = [defaultValue floatValue];
         }
     } else if (propertyType == MLNPluginLayerPropertyTypeColor) {
+#if TARGET_OS_IPHONE
         if ([defaultValue isKindOfClass:[UIColor class]]) {
+#else
+        if ([defaultValue isKindOfClass:[NSColor class]]) {
+#endif
             tempResult.colorDefaultValue = defaultValue;
         }
     }
