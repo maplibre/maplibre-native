@@ -44,7 +44,7 @@ private:
 };
 
 void LayerManagerDefault::addLayerTypeCoreOnly(std::unique_ptr<mbgl::LayerFactory> layerFactory) {
-    addLayerType(layerFactory);
+    addLayerType(std::move(layerFactory));
 }
 
 
