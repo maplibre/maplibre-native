@@ -8,9 +8,16 @@ namespace mbgl {
 
 namespace style {
 
+struct RasterDEMOptions {
+    std::optional<Tileset::DEMEncoding> encoding = std::nullopt;
+};
+
 class RasterDEMSource : public RasterSource {
 public:
-    RasterDEMSource(std::string id, variant<std::string, Tileset> urlOrTileset, uint16_t tileSize);
+    RasterDEMSource(std::string id,
+                    variant<std::string, Tileset> urlOrTileset,
+                    uint16_t tileSize);
+    
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
 };
 
