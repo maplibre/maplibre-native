@@ -26,7 +26,7 @@ public:
     class Impl;
     const Impl& impl() const;
 
-    void loadDescription(FileSource&) final;
+    void loadDescription(FileSource&) override;
 
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
 
@@ -34,10 +34,10 @@ public:
 
 protected:
     Mutable<Source::Impl> createMutable() const noexcept final;
-
-private:
     const variant<std::string, Tileset> urlOrTileset;
     std::unique_ptr<AsyncRequest> req;
+
+private:
     mapbox::base::WeakPtrFactory<Source> weakFactory{this};
     // Do not add members here, see `WeakPtrFactory`
 };
