@@ -16,9 +16,15 @@ class RasterDEMSource : public RasterSource {
 public:
     RasterDEMSource(std::string id,
                     variant<std::string, Tileset> urlOrTileset,
-                    uint16_t tileSize);
-    
+                    uint16_t tileSize,
+                    std::optional<RasterDEMOptions> = std::nullopt);
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
+    
+protected:
+    void setTilesetOverrides(Tileset& tileset) override;
+
+private:
+    std::optional<RasterDEMOptions> options;
 };
 
 template <>
