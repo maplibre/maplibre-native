@@ -2,6 +2,7 @@
 #include <mbgl/style/conversion/coordinate.hpp>
 #include <mbgl/style/conversion/geojson.hpp>
 #include <mbgl/style/conversion/geojson_options.hpp>
+#include <mbgl/style/conversion/raster_dem_options.hpp>
 #include <mbgl/style/conversion/tileset.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/sources/geojson_source.hpp>
@@ -75,8 +76,10 @@ static std::optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::
         }
         tileSize = static_cast<uint16_t>(*size);
     }
-
-    return {std::make_unique<RasterDEMSource>(id, std::move(*urlOrTileset), tileSize)};
+    
+    std::optional<RasterDEMOptions> options = convert<RasterDEMOptions>(value, error);
+    
+    return {std::make_unique<RasterDEMSource>(id, std::move(*urlOrTileset), tileSize, options)};
 }
 
 static std::optional<std::unique_ptr<Source>> convertVectorSource(const std::string& id,
