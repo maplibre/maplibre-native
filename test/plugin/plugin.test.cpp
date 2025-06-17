@@ -122,7 +122,7 @@ TEST(Plugin, PluginLayerProperty) {
         p._propertyType = PluginLayerProperty::PropertyType::Color;
         p._dataDrivenColorValue = Color(1, 1, 1, 1);
         auto json = p.asJSON();
-        std::string testValue = R"JSON("":"rgba(255,255,255,1))JSON";
+        std::string testValue = R"JSON("":"rgba(255,255,255,1)")JSON";
         std::cout << "   _colorValid: |" << json << "|;|" << testValue << "|\n";
         _colorValid = json == testValue;
     }
