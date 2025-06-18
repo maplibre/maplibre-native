@@ -160,8 +160,11 @@ public class Style {
    */
   public boolean removeSource(@NonNull String sourceId) {
     validateState("removeSource");
-    sources.remove(sourceId);
-    return nativeMap.removeSource(sourceId);
+    boolean successful = nativeMap.removeSource(sourceId);
+    if (successful) {
+      sources.remove(sourceId);
+    }
+    return successful;
   }
 
   /**
@@ -172,8 +175,11 @@ public class Style {
    */
   public boolean removeSource(@NonNull Source source) {
     validateState("removeSource");
-    sources.remove(source.getId());
-    return nativeMap.removeSource(source);
+    boolean successful = nativeMap.removeSource(source);
+    if (successful) {
+      sources.remove(source.getId());
+    }
+    return successful;
   }
 
   //
