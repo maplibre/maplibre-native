@@ -16,11 +16,11 @@ public:
                     variant<std::string, Tileset> urlOrTileset,
                     uint16_t tileSize,
                     std::optional<Tileset::DEMEncoding> encoding = std::nullopt);
-    
+
     void loadDescription(FileSource& fileSource) override;
-    
+
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
-    
+
 private:
     std::optional<Tileset::DEMEncoding> encoding;
 };

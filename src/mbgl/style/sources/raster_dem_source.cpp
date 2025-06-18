@@ -18,7 +18,8 @@ RasterDEMSource::RasterDEMSource(std::string id,
                                  variant<std::string, Tileset> urlOrTileset_,
                                  uint16_t tileSize,
                                  std::optional<Tileset::DEMEncoding> encoding)
-    : RasterSource(std::move(id), std::move(urlOrTileset_), tileSize, SourceType::RasterDEM), encoding(encoding) {}
+    : RasterSource(std::move(id), std::move(urlOrTileset_), tileSize, SourceType::RasterDEM),
+      encoding(encoding) {}
 
 void RasterDEMSource::loadDescription(FileSource& fileSource) {
     if (urlOrTileset.is<Tileset>()) {
@@ -53,11 +54,11 @@ void RasterDEMSource::loadDescription(FileSource& fileSource) {
             if (tileServerOptions.uriSchemeAlias() == "mapbox") {
                 util::mapbox::canonicalizeTileset(tileServerOptions, *tileset, url, getType(), getTileSize());
             }
-            
+
             if (encoding) {
                 tileset->encoding = encoding.value();
             }
-                        
+
             bool changed = impl().tileset != *tileset;
 
             baseImpl = makeMutable<Impl>(impl(), *tileset);

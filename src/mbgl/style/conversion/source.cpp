@@ -75,7 +75,7 @@ static std::optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::
         }
         tileSize = static_cast<uint16_t>(*size);
     }
-    
+
     std::optional<Tileset::DEMEncoding> encoding = Tileset::DEMEncoding::Mapbox;
     auto encodingValue = objectMember(value, "encoding");
     if (encodingValue) {
@@ -87,12 +87,12 @@ static std::optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::
                 encoding = {Tileset::DEMEncoding::Mapbox};
             } else {
                 error.message =
-                "invalid raster-dem encoding type - valid types are 'mapbox' "
-                "and 'terrarium' ";
+                    "invalid raster-dem encoding type - valid types are 'mapbox' "
+                    "and 'terrarium' ";
             }
         }
     }
-    
+
     return {std::make_unique<RasterDEMSource>(id, std::move(*urlOrTileset), tileSize, encoding)};
 }
 
