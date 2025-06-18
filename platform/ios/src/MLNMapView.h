@@ -550,6 +550,15 @@ MLN_EXPORT
 @property (nonatomic, assign) BOOL showsUserLocation;
 
 /**
+ A boolean value indicating whether camera animation duration is set based
+ on the time difference between the last location update and the current one
+ or the default animation duration of 1 second.
+
+ The default value of this property is `NO`
+ */
+@property (nonatomic, assign) BOOL dynamicNavigationCameraAnimationDuration;
+
+/**
  A Boolean value indicating whether the map may request authorization to use location services.
 
  Setting this property to `YES` causes the map view to use the Core Location
