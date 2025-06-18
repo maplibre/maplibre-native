@@ -10,7 +10,7 @@ namespace conversion {
 
 std::optional<RasterDEMOptions> Converter<RasterDEMOptions>::operator()(const Convertible& value, Error& error) const {
     RasterDEMOptions options;
-    
+
     auto encodingValue = objectMember(value, "encoding");
     if (encodingValue) {
         std::optional<std::string> encoding = toString(*encodingValue);
