@@ -6,8 +6,6 @@
 
 namespace mbgl {
 
-class AsyncRequest;
-
 namespace style {
 
 class RasterDEMSource : public RasterSource {
