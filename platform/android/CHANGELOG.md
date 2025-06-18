@@ -1,11 +1,41 @@
 # Changelog MapLibre Native for Android
 
-## main
-
-### ✨ Features and improvements
+## 11.10.3
 
 ### 🐞 Bug fixes
 
+- Revert fix [#3536](https://github.com/maplibre/maplibre-native/pull/3536) due to `getSource` crashes.
+
+## 11.10.2
+
+### 🐞 Bug fixes
+
+- Fix segfault this-capture GeoJsonSource which may be deleted ([#3536](https://github.com/maplibre/maplibre-native/pull/3536)).
+- Add `MapRenderer` dangling reference check ([#3541](https://github.com/maplibre/maplibre-native/pull/3541)).
+- Fix incomplete feature state updates in GeometryTile and SourceFeatureState [Vector Tile Layer]. ([#3406](https://github.com/maplibre/maplibre-native/pull/3406)).
+
+### ✨ Features and improvements
+
+- Fix recycler view test ([#3537](https://github.com/maplibre/maplibre-native/pull/3537)).
+
+## 11.10.1
+
+### 🐞 Bug fixes
+
+- Add missing proguard rules ([#3529](https://github.com/maplibre/maplibre-native/pull/3529)).
+
+## 11.10.0
+
+### ✨ Features and improvements
+
+- Add action journal ([#3409](https://github.com/maplibre/maplibre-native/pull/3409)). Documentation: https://maplibre.org/maplibre-native/android/examples/observability/action-journal/
+- Pattern layout performance improvement ([#3495](https://github.com/maplibre/maplibre-native/pull/3495)).
+- Add Tile LOD controls ([#2958](https://github.com/maplibre/maplibre-native/pull/2958)).
+
+### 🐞 Bug fixes
+
+- Improve weak pointer use ([#3510](https://github.com/maplibre/maplibre-native/pull/3510)).
+- Make sure AndroidRendererFrontend exists when accessing it ([#3522](https://github.com/maplibre/maplibre-native/pull/3522))
 ## 11.9.0
 
 ### ✨ Features and improvements

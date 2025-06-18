@@ -9,16 +9,17 @@ import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.databinding.ActivityRecyclerviewBinding
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
- * TestActivity showcasing how to integrate multiple GLSurfaceView MapViews in a RecyclerView.
+ * TestActivity showcasing how to integrate multiple SurfaceView MapViews in a RecyclerView.
  * <p>
  * It requires calling the correct lifecycle methods when detaching and attaching the View to
  * the RecyclerView with onViewAttachedToWindow and onViewDetachedFromWindow.
  * </p>
  */
 @SuppressLint("ClickableViewAccessibility")
-open class GLSurfaceRecyclerViewActivity : AppCompatActivity() {
+open class SurfaceRecyclerViewActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityRecyclerviewBinding
 
@@ -46,12 +47,12 @@ open class GLSurfaceRecyclerViewActivity : AppCompatActivity() {
         return R.layout.item_map_gl
     }
 
-    class ItemAdapter(private val activity: GLSurfaceRecyclerViewActivity, private val inflater: LayoutInflater) : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
+    class ItemAdapter(private val activity: SurfaceRecyclerViewActivity, private val inflater: LayoutInflater) : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
 
         private val items: List<Any> = listOf(
-            "one", "two", "three", "four", "five", "seven", "eight", "nine", "ten",
+            "one", "two", "three", MapItem(TestStyles.DEMOTILES), "four", "five", MapItem(TestStyles.DEMOTILES), "seven", "eight", "nine", "ten",
             "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen",
-            "nineteen", "twenty", "twenty-one"
+            "nineteen", "twenty", "twenty-one",
         )
 
         private var mapHolders: MutableList<MapHolder> = mutableListOf()

@@ -302,6 +302,22 @@ public:
 
     jni::jboolean getTileCacheEnabled(JNIEnv&);
 
+    void setTileLodMinRadius(JNIEnv&, jni::jdouble);
+
+    jni::jdouble getTileLodMinRadius(JNIEnv&);
+
+    void setTileLodScale(JNIEnv&, jni::jdouble);
+
+    jni::jdouble getTileLodScale(JNIEnv&);
+
+    void setTileLodPitchThreshold(JNIEnv&, jni::jdouble);
+
+    jni::jdouble getTileLodPitchThreshold(JNIEnv&);
+
+    void setTileLodZoomShift(JNIEnv&, jni::jdouble);
+
+    jni::jdouble getTileLodZoomShift(JNIEnv&);
+
     mbgl::Map& getMap();
 
     void triggerRepaint(JNIEnv&);
@@ -329,7 +345,7 @@ public:
     void onSpriteRequested(const std::optional<mbgl::style::Sprite>&) override;
 
 private:
-    std::unique_ptr<AndroidRendererFrontend> rendererFrontend;
+    std::shared_ptr<AndroidRendererFrontend> rendererFrontend;
 
     JavaVM* vm = nullptr;
     jni::WeakReference<jni::Object<NativeMapView>> javaPeer;

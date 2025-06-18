@@ -138,6 +138,18 @@ void MapRenderer::requestRender() {
     }
 }
 
+void MapRenderer::requestRender(JNIEnv& env, jni::Local<jni::Object<MapRenderer>>& ref) {
+    try {
+        static auto& javaClass = jni::Class<MapRenderer>::Singleton(env);
+        static auto onInvalidate = javaClass.GetMethod<void()>(env, "requestRender");
+        if (ref) {
+            ref.Call(env, onInvalidate);
+        }
+    } catch (const std::exception& exception) {
+        Log::Error(Event::Android, std::string("MapRenderer::requestRender failed: ") + exception.what());
+    }
+}
+
 void MapRenderer::update(std::shared_ptr<UpdateParameters> params) {
     try {
         // Lock on the parameters
@@ -234,8 +246,14 @@ void MapRenderer::onSurfaceCreated(JNIEnv& env, const jni::Object<AndroidSurface
     // The android system will have already destroyed the underlying
     // GL resources if this is not the first initialization and an
     // attempt to clean them up will fail
-    if (backend) backend->markContextLost();
-    if (renderer) renderer->markContextLost();
+    if (backend) {
+        gfx::BackendScope backendGuard{backend->getImpl()};
+        backend->markContextLost();
+    }
+
+    if (renderer) {
+        renderer->markContextLost();
+    }
 
     // Reset in opposite order
     renderer.reset();
@@ -270,12 +288,14 @@ void MapRenderer::onSurfaceCreated(JNIEnv& env, const jni::Object<AndroidSurface
     }
 }
 
-void MapRenderer::onSurfaceChanged(JNIEnv& env, jint width, jint height) {
+void MapRenderer::onSurfaceChanged([[maybe_unused]] JNIEnv& env, jint width, jint height) {
+#if MLN_RENDER_BACKEND_OPENGL
     if (!renderer) {
         // In case the surface has been destroyed (due to app back-grounding)
         jni::jobject* nullObj = nullptr;
         onSurfaceCreated(env, jni::Object<AndroidSurface>(nullObj));
     }
+#endif
 
     backend->resizeFramebuffer(width, height);
     framebufferSizeChanged = true;
