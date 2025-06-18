@@ -27,10 +27,10 @@ std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>
             return std::make_unique<RenderVectorSource>(staticImmutableCast<VectorSource::Impl>(impl),
                                                         std::move(threadPool_));
         case SourceType::Raster:
-            return std::make_unique<RenderRasterSource>(staticImmutableCast<RasterSource::Impl>(impl),
+            return std::make_unique<RenderRasterSource>(staticImmutableCast<TileSource::Impl>(impl),
                                                         std::move(threadPool_));
         case SourceType::RasterDEM:
-            return std::make_unique<RenderRasterDEMSource>(staticImmutableCast<RasterSource::Impl>(impl),
+            return std::make_unique<RenderRasterDEMSource>(staticImmutableCast<TileSource::Impl>(impl),
                                                            std::move(threadPool_));
         case SourceType::GeoJSON:
             return std::make_unique<RenderGeoJSONSource>(staticImmutableCast<GeoJSONSource::Impl>(impl),

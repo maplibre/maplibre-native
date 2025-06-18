@@ -3,7 +3,7 @@
 #include <mbgl/style/layer.hpp>
 #include <mbgl/style/source_observer.hpp>
 #include <mbgl/style/sources/raster_dem_source.hpp>
-#include <mbgl/style/sources/raster_source_impl.hpp>
+#include <mbgl/style/sources/tile_source_impl.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/mapbox.hpp>
 #include <utility>
