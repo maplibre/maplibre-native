@@ -20,6 +20,7 @@ public:
     ~Scheduler() override;
 
     // mbgl::Scheduler implementation.
+    void schedule(const mbgl::util::SimpleIdentity, std::function<void()>&& function) final;
     void schedule(std::function<void()>&& function) final;
 
     void waitForEmpty(const mbgl::util::SimpleIdentity tag = mbgl::util::SimpleIdentity::Empty) override;

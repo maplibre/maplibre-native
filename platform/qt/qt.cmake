@@ -63,12 +63,18 @@ target_sources(
     mbgl-core
     PRIVATE
         ${PROJECT_SOURCE_DIR}/platform/$<IF:$<PLATFORM_ID:Linux>,default/src/mbgl/text/bidi.cpp,qt/src/mbgl/bidi.cpp>
-        ${PROJECT_SOURCE_DIR}/platform/default/include/mbgl/gfx/headless_backend.hpp
-        ${PROJECT_SOURCE_DIR}/platform/default/include/mbgl/gfx/headless_frontend.hpp
-        ${PROJECT_SOURCE_DIR}/platform/default/include/mbgl/gl/headless_backend.hpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
+        # Generic headless helpers are only relevant for OpenGL builds.
+        # Exclude them when building Metal-only to avoid pulling GL symbols.
+        $<$<BOOL:MLN_WITH_OPENGL>:
+            ${PROJECT_SOURCE_DIR}/platform/default/include/mbgl/gfx/headless_backend.hpp>
+        $<$<BOOL:MLN_WITH_OPENGL>:
+            ${PROJECT_SOURCE_DIR}/platform/default/include/mbgl/gfx/headless_frontend.hpp>
+        $<$<BOOL:MLN_WITH_OPENGL>:
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp>
+        $<$<BOOL:MLN_WITH_OPENGL>:
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp>
+        $<$<BOOL:MLN_WITH_OPENGL>:
+            ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/headless_backend_qt.cpp>
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/collator.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/layermanager/layer_manager.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/platform/time.cpp
@@ -92,7 +98,6 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/async_task.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/async_task_impl.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/gl_functions.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/headless_backend_qt.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_file_source.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_file_source.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_request.cpp
@@ -109,12 +114,62 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/timer_impl.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/utf.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_observer.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/scheduler.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/scheduler.hpp
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/metal_renderer_backend.hpp
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/metal_renderer_backend.mm
+        ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/buffer_resource.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/command_encoder.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/context.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_builder.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/index_buffer_resource.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/layer_group.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/mtl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/offscreen_texture.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/render_pass.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/renderer_backend.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/texture2d.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/tile_layer_group.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/uniform_buffer.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/upload_pass.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/vertex_attribute.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/vertex_buffer_resource.cpp
+
+        # Shader and style Metal
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/background.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/circle.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/clipping_mask.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/collision.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/custom_geometry.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/custom_symbol_icon.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/debug.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/fill.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/fill_extrusion.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/heatmap.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/heatmap_texture.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/hillshade.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/hillshade_prepare.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/line.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/location_indicator.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/raster.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/symbol.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/widevector.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/mtl/custom_layer_render_parameters.cpp
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/backend_flag.cpp
 )
+
+# Add Qt OpenGL renderer backend only when OpenGL backend is enabled
+if(MLN_WITH_OPENGL)
+    target_sources(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.hpp
+    )
+endif()
 
 target_compile_definitions(
     mbgl-core
@@ -125,6 +180,7 @@ target_compile_definitions(
 target_include_directories(
     mbgl-core
     PRIVATE ${PROJECT_SOURCE_DIR}/platform/default/include
+            ${PROJECT_SOURCE_DIR}/vendor/metal-cpp
 )
 
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
@@ -209,4 +265,31 @@ if(NOT MLN_QT_LIBRARY_ONLY)
     endif()
 
     add_test(NAME mbgl-test-runner COMMAND mbgl-test-runner WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+endif()
+
+# Metal backend sources (macOS only)
+if(APPLE)
+    target_link_libraries(
+        mbgl-core
+        PRIVATE
+            "-framework QuartzCore"
+            "-framework Metal"
+            "-framework CoreFoundation"
+    )
+
+    target_compile_definitions(
+        mbgl-core
+        PRIVATE MLN_RENDER_BACKEND_METAL=1
+    )
+endif()
+
+# ---------------------------------------------------------------------------
+# Exclude generic head-less helpers when we build Metal-only (no OpenGL)
+# ---------------------------------------------------------------------------
+if(NOT MLN_WITH_OPENGL)
+    set_source_files_properties(
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/headless_backend_qt.cpp
+        PROPERTIES HEADER_FILE_ONLY TRUE)
 endif()

@@ -1,3 +1,4 @@
+#if defined(MLN_RENDER_BACKEND_OPENGL)
 #include "renderer_backend.hpp"
 
 #include <mbgl/gfx/backend_scope.hpp>
@@ -11,7 +12,7 @@ namespace QMapLibre {
 
 class RenderableResource final : public mbgl::gl::RenderableResource {
 public:
-    explicit RenderableResource(RendererBackend &backend_)
+    explicit RenderableResource(OpenGLRendererBackend &backend_)
         : backend(backend_) {}
 
     void bind() override {
@@ -21,25 +22,25 @@ public:
     }
 
 private:
-    RendererBackend &backend;
+    OpenGLRendererBackend &backend;
 };
 
-RendererBackend::RendererBackend(const mbgl::gfx::ContextMode mode)
+OpenGLRendererBackend::OpenGLRendererBackend(const mbgl::gfx::ContextMode mode)
     : mbgl::gl::RendererBackend(mode),
       mbgl::gfx::Renderable({0, 0}, std::make_unique<RenderableResource>(*this)) {}
 
-RendererBackend::~RendererBackend() = default;
+OpenGLRendererBackend::~OpenGLRendererBackend() = default;
 
-void RendererBackend::updateAssumedState() {
+void OpenGLRendererBackend::updateAssumedState() {
     assumeFramebufferBinding(ImplicitFramebufferBinding);
     assumeViewport(0, 0, size);
 }
 
-void RendererBackend::restoreFramebufferBinding() {
+void OpenGLRendererBackend::restoreFramebufferBinding() {
     setFramebufferBinding(m_fbo);
 }
 
-void RendererBackend::updateFramebuffer(quint32 fbo, const mbgl::Size &newSize) {
+void OpenGLRendererBackend::updateFramebuffer(quint32 fbo, const mbgl::Size &newSize) {
     m_fbo = fbo;
     size = newSize;
 }
@@ -48,9 +49,10 @@ void RendererBackend::updateFramebuffer(quint32 fbo, const mbgl::Size &newSize) 
     Initializes an OpenGL extension function such as Vertex Array Objects (VAOs),
     required by MapLibre Native engine.
 */
-mbgl::gl::ProcAddress RendererBackend::getExtensionFunctionPointer(const char *name) {
+mbgl::gl::ProcAddress OpenGLRendererBackend::getExtensionFunctionPointer(const char *name) {
     QOpenGLContext *thisContext = QOpenGLContext::currentContext();
     return thisContext->getProcAddress(name);
 }
 
 } // namespace QMapLibre
+#endif // MLN_RENDER_BACKEND_OPENGL
