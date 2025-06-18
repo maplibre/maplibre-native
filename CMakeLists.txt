@@ -377,6 +377,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/geojson_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/image_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/raster_dem_source.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/tile_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/raster_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/vector_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sprite.hpp
@@ -814,9 +815,10 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/image_source_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/image_source_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_dem_source.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/tile_source.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_source.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_source_impl.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_source_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/tile_source_impl.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/tile_source_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/vector_source.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/vector_source_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/vector_source_impl.hpp
