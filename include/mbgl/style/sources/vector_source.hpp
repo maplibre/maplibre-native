@@ -16,7 +16,7 @@ public:
                  variant<std::string, Tileset> urlOrTileset,
                  std::optional<float> maxZoom = std::nullopt,
                  std::optional<float> minZoom = std::nullopt);
-    
+
     void setTilesetOverrides(Tileset& tileset) override;
 
     /// @brief Gets the tile urls for this vector source.
