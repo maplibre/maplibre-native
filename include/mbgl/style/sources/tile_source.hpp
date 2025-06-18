@@ -12,10 +12,7 @@ namespace style {
 
 class TileSource : public Source {
 public:
-    TileSource(std::string id,
-                 variant<std::string, Tileset> urlOrTileset,
-                 uint16_t tileSize,
-                 SourceType sourceType);
+    TileSource(std::string id, variant<std::string, Tileset> urlOrTileset, uint16_t tileSize, SourceType sourceType);
     ~TileSource() override;
 
     const variant<std::string, Tileset>& getURLOrTileset() const;

@@ -76,9 +76,9 @@ static std::optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::
         }
         tileSize = static_cast<uint16_t>(*size);
     }
-    
+
     std::optional<RasterDEMOptions> options = convert<RasterDEMOptions>(value, error);
-    
+
     return {std::make_unique<RasterDEMSource>(id, std::move(*urlOrTileset), tileSize, options)};
 }
 
