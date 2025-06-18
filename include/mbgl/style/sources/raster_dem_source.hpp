@@ -19,7 +19,7 @@ public:
                     uint16_t tileSize,
                     std::optional<RasterDEMOptions> = std::nullopt);
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
-    
+
 protected:
     void setTilesetOverrides(Tileset& tileset) override;
 

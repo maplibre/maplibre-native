@@ -14,9 +14,9 @@ namespace mbgl {
 namespace style {
 
 TileSource::TileSource(std::string id,
-                           variant<std::string, Tileset> urlOrTileset_,
-                           uint16_t tileSize,
-                           SourceType sourceType)
+                       variant<std::string, Tileset> urlOrTileset_,
+                       uint16_t tileSize,
+                       SourceType sourceType)
     : Source(makeMutable<Impl>(sourceType, std::move(id), tileSize)),
       urlOrTileset(std::move(urlOrTileset_)) {}
 
@@ -75,9 +75,9 @@ void TileSource::loadDescription(FileSource& fileSource) {
             if (tileServerOptions.uriSchemeAlias() == "mapbox") {
                 util::mapbox::canonicalizeTileset(tileServerOptions, *tileset, url, getType(), getTileSize());
             }
-            
+
             this->setTilesetOverrides(*tileset);
-            
+
             bool changed = impl().tileset != *tileset;
 
             baseImpl = makeMutable<Impl>(impl(), *tileset);

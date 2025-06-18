@@ -11,8 +11,12 @@
 namespace mbgl {
 namespace style {
 
-RasterDEMSource::RasterDEMSource(std::string id, variant<std::string, Tileset> urlOrTileset_, uint16_t tileSize, std::optional<RasterDEMOptions> options)
-    : RasterSource(std::move(id), std::move(urlOrTileset_), tileSize, SourceType::RasterDEM), options(std::move(options)) {}
+RasterDEMSource::RasterDEMSource(std::string id,
+                                 variant<std::string, Tileset> urlOrTileset_,
+                                 uint16_t tileSize,
+                                 std::optional<RasterDEMOptions> options)
+    : RasterSource(std::move(id), std::move(urlOrTileset_), tileSize, SourceType::RasterDEM),
+      options(std::move(options)) {}
 
 bool RasterDEMSource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) const {
     return mbgl::underlying_type(Tile::Kind::RasterDEM) == mbgl::underlying_type(info->tileKind);
