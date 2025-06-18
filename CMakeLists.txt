@@ -820,8 +820,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/tile_source_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/tile_source_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/vector_source.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/vector_source_impl.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/vector_source_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/style.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/style_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/style_impl.hpp

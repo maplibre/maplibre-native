@@ -455,8 +455,6 @@ MLN_CORE_SOURCE = [
     "src/mbgl/style/sources/tile_source_impl.cpp",
     "src/mbgl/style/sources/tile_source_impl.hpp",
     "src/mbgl/style/sources/vector_source.cpp",
-    "src/mbgl/style/sources/vector_source_impl.cpp",
-    "src/mbgl/style/sources/vector_source_impl.hpp",
     "src/mbgl/style/style.cpp",
     "src/mbgl/style/style_impl.cpp",
     "src/mbgl/style/style_impl.hpp",
