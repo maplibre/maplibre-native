@@ -3,7 +3,7 @@
 namespace mbgl {
 namespace style {
 
-TileSource::Impl::Impl(SourceType sourceType, std::string id_, uint16_t tileSize_)
+TileSource::Impl::Impl(SourceType sourceType, std::string id_, uint16_t tileSize_ = util::tileSize_I)
     : Source::Impl(sourceType, std::move(id_)),
       tileSize(tileSize_) {}
 
