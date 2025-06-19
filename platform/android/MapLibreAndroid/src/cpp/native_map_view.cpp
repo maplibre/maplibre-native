@@ -1321,6 +1321,11 @@ void NativeMapView::enableRenderingStatsView(JNIEnv&, jni::jboolean value) {
     map->enableRenderingStatsView(value);
 }
 
+void NativeMapView::toggleTransform(JNIEnv&) {
+    assert(map);
+    map->toggleTransform();
+}
+
 // Static methods //
 
 void NativeMapView::registerNative(jni::JNIEnv& env) {
@@ -1443,7 +1448,8 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::getTileLodPitchThreshold, "nativeGetTileLodPitchThreshold"),
         METHOD(&NativeMapView::setTileLodZoomShift, "nativeSetTileLodZoomShift"),
         METHOD(&NativeMapView::getTileLodZoomShift, "nativeGetTileLodZoomShift"),
-        METHOD(&NativeMapView::triggerRepaint, "nativeTriggerRepaint"));
+        METHOD(&NativeMapView::triggerRepaint, "nativeTriggerRepaint"),
+        METHOD(&NativeMapView::toggleTransform, "nativeToggleTransform"));
 }
 
 void NativeMapView::onRegisterShaders(gfx::ShaderRegistry&) {};
