@@ -70,8 +70,8 @@ private:
     jni::Local<jni::String> getURL(jni::JNIEnv&);
 
     jni::Local<jni::Object<Source>> createJavaPeer(jni::JNIEnv&);
-    std::shared_ptr<Update> awaitingUpdate;
-    std::shared_ptr<Update> update;
+    std::unique_ptr<Update> awaitingUpdate;
+    std::unique_ptr<Update> update;
     std::shared_ptr<ThreadPool> threadPool;
     std::unique_ptr<Actor<FeatureConverter>> converter;
 
