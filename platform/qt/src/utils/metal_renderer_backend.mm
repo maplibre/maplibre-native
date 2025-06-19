@@ -16,6 +16,7 @@
 #import <QuartzCore/CAMetalLayer.hpp>
 
 #include <cassert>
+#include <QDebug>
 
 namespace QMapLibre {
 
@@ -41,13 +42,38 @@ public:
 
     // — mbgl::mtl::RenderableResource -----------------------------------
     void bind() override {
-        surface = NS::TransferPtr(layer->nextDrawable());
+        // Qt Quick may supply us with the current swap-chain texture via
+        // MetalRendererBackend::_q_setCurrentDrawable().  Use that texture if
+        // present to avoid contending for a second drawable from the same
+        // CAMetalLayer.
+        MTL::Texture *externalTex = static_cast<MTL::Texture *>(backend.currentDrawable());
+
+        if (!externalTex) {
+            auto *tmpDrawable = layer->nextDrawable();
+            if (!tmpDrawable) {
+                qWarning() << "MapLibre Metal: nextDrawable() returned nil."
+                           << "drawableSize=" << layer->drawableSize().width << "x" << layer->drawableSize().height
+                           << ", device=" << (void *)layer->device()
+                           << ", pixelFormat=" << static_cast<int>(layer->pixelFormat());
+
+                // Still allocate a command buffer so subsequent frames continue
+                commandBuffer = NS::RetainPtr(commandQueue->commandBuffer());
+                // Leave renderPassDescriptor null; caller will treat this as
+                // an empty frame.
+                return;
+            }
+
+            surface = NS::RetainPtr(tmpDrawable);
+            externalTex = surface->texture();
+            backend._q_setCurrentDrawable(externalTex);
+        }
+
         auto texSize = mbgl::Size{ static_cast<uint32_t>(layer->drawableSize().width),
                                    static_cast<uint32_t>(layer->drawableSize().height) };
 
-        commandBuffer = NS::TransferPtr(commandQueue->commandBuffer());
-        renderPassDescriptor = NS::TransferPtr(MTL::RenderPassDescriptor::renderPassDescriptor());
-        renderPassDescriptor->colorAttachments()->object(0)->setTexture(surface->texture());
+        commandBuffer = NS::RetainPtr(commandQueue->commandBuffer());
+        renderPassDescriptor = NS::RetainPtr(MTL::RenderPassDescriptor::alloc()->init());
+        renderPassDescriptor->colorAttachments()->object(0)->setTexture(externalTex);
 
         if (buffersInvalid || !depthTexture || !stencilTexture) {
             buffersInvalid = false;
@@ -87,7 +113,9 @@ public:
     }
 
     void swap() override {
-        commandBuffer->presentDrawable(surface.get());
+        if (surface) {
+            commandBuffer->presentDrawable(surface.get());
+        }
         commandBuffer->commit();
         commandBuffer.reset();
         renderPassDescriptor.reset();
@@ -97,7 +125,7 @@ public:
 
     const MTLCommandBufferPtr& getCommandBuffer() const override { return commandBuffer; }
 
-    MTLBlitPassDescriptorPtr getUploadPassDescriptor() const override { return NS::TransferPtr(MTL::BlitPassDescriptor::alloc()->init()); }
+    MTLBlitPassDescriptorPtr getUploadPassDescriptor() const override { return NS::RetainPtr(MTL::BlitPassDescriptor::alloc()->init()); }
 
     const MTLRenderPassDescriptorPtr& getRenderPassDescriptor() const override { return renderPassDescriptor; }
 

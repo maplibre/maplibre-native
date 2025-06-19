@@ -44,14 +44,22 @@ public:
     void setSize(mbgl::Size size_);
     mbgl::Size getSize() const;
 
+    // Returns the color texture of the drawable rendered in the last frame.
+    void* currentDrawable() const { return m_currentDrawable; }
+
+    void _q_setCurrentDrawable(void* tex) { m_currentDrawable = tex; }
+
     // Qt Widgets path still expects this hook even though Metal does not use an
     // OpenGL FBO.  Provide a no-op so code that is agnostic of the backend can
     // compile unmodified.
     void updateFramebuffer(quint32 /*fbo*/, const mbgl::Size& /*size*/) {}
 
 private:
+    void* m_currentDrawable{nullptr}; // id<MTLTexture>
     MetalRendererBackend(const MetalRendererBackend&) = delete;
     MetalRendererBackend& operator=(const MetalRendererBackend&) = delete;
+
+    friend class QtMetalRenderableResource;
 };
 
 } // namespace QMapLibre
