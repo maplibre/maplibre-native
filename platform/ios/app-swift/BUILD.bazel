@@ -10,7 +10,6 @@ configure_device_profiles()
 
 swift_library(
     name = "Sources",
-    srcs = glob(["Sources/*.swift"]),
     srcs = glob(["Sources/**/*.swift"]),
     data = glob([
         "Data/*",
