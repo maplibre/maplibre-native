@@ -21,4 +21,4 @@
 #include <Metal/Metal.hpp>
 
 #endif // TARGET_OS_OSX
-#endif // __APPLE__ 
+#endif // __APPLE__

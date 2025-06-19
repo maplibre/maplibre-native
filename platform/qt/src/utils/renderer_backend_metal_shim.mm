@@ -20,4 +20,4 @@ RendererBackend::~RendererBackend() = default;
 
 void RendererBackend::updateFramebuffer(uint32_t /*fbo*/, const mbgl::Size& /*size*/) {}
 
-#endif // Metal-only shim 
+#endif // Metal-only shim

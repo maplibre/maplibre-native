@@ -26,8 +26,7 @@ namespace QMapLibre {
  *  Qt Quick + Metal can be enabled during the build.  Full swap-chain handling
  *  will be filled in step-by-step (similar to the existing GLFW backend).
  */
-class MetalRendererBackend final : public mbgl::mtl::RendererBackend,
-                                   public mbgl::gfx::Renderable {
+class MetalRendererBackend final : public mbgl::mtl::RendererBackend, public mbgl::gfx::Renderable {
 public:
     explicit MetalRendererBackend(CA::MetalLayer* layer);
     // Fallback ctor used by MapRenderer when only a ContextMode is provided.
@@ -65,4 +64,4 @@ private:
 } // namespace QMapLibre
 
 #endif // TARGET_OS_OSX
-#endif // __APPLE__ 
+#endif // __APPLE__

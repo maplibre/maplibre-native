@@ -166,4 +166,4 @@ mbgl::Size MetalRendererBackend::getSize() const {
 } // namespace QMapLibre
 
 #endif // TARGET_OS_OSX
-#endif // __APPLE__ 
+#endif // __APPLE__
