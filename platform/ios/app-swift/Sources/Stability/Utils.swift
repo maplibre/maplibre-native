@@ -1,5 +1,7 @@
 import MapLibre
 
+import MachO
+
 struct RandomNumberGeneratorWithSeed: RandomNumberGenerator {
     private var state1: UInt64
     private var state2: UInt64
@@ -44,4 +46,23 @@ extension MLNMapView {
             }
         }
     }
+}
+
+func getMemoryUsage() -> UInt64 {
+    var info = mach_task_basic_info()
+    var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size) / 4
+
+    let result: kern_return_t = withUnsafeMutablePointer(to: &info) {
+        $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) {
+            task_info(mach_task_self_, task_flavor_t(MACH_TASK_BASIC_INFO), $0, &count)
+        }
+    }
+
+    guard result == KERN_SUCCESS else { return 0 }
+    return UInt64(info.resident_size)
+}
+
+func printMemoryUsage() {
+    print("Total memory: \(Float(ProcessInfo.processInfo.physicalMemory) / 1024 / 1024) MB")
+    print("Used memory: \(getMemoryUsage() / 1024 / 1024) MB")
 }

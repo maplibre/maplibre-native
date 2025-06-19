@@ -34,9 +34,9 @@ struct SimpleNavigationMapView: UIViewRepresentable {
 
 struct LongRunningMapView: View {
     // view lifetime (seconds)
-    let DURATION = 10.0 * 60.0 * 60.0
+    let DURATION = 5.0 // 10.0 * 60.0 * 60.0
     // use the built-in navigation map UI provided by the plugin
-    let USE_STANDARD_NAVIGATION = true
+    let USE_STANDARD_NAVIGATION = false
 
     @Environment(\.dismiss) var dismiss
 
@@ -51,7 +51,7 @@ struct LongRunningMapView: View {
             }
         }
         .onReceive(Timer.publish(every: DURATION, on: .current, in: .default).autoconnect()) { _ in
-            // TODO: print memory usage
+            printMemoryUsage()
             dismiss()
         }
     }
