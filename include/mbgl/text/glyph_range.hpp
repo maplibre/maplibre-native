@@ -23,7 +23,7 @@ public:
 
     GlyphIDType type = GlyphIDType::FontPBF;
 
-    GlyphRange(uint32_t first_, uint32_t second_, GlyphIDType type_);
+    GlyphRange(uint32_t first_, uint32_t second_, GlyphIDType type_ = FontPBF);
 
     bool operator==(const GlyphRange &other) const;
     bool operator<(const GlyphRange &other) const;
