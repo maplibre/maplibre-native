@@ -25,7 +25,7 @@ RasterSource::RasterSource(jni::JNIEnv& env, mbgl::style::Source& coreSource, An
 RasterSource::~RasterSource() = default;
 
 jni::Local<jni::String> RasterSource::getURL(jni::JNIEnv& env) {
-    auto url = getSource<mbgl::style::RasterSource>().RasterSource::getURL();
+    std::optional<std::string> url = source.as<mbgl::style::RasterSource>()->RasterSource::getURL();
     return url ? jni::Make<jni::String>(env, *url) : jni::Local<jni::String>();
 }
 

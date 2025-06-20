@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## 11.10.3
+
+### 🐞 Bug fixes
+
+- Revert fix [#3536](https://github.com/maplibre/maplibre-native/pull/3536) due to `getSource` crashes.
+
 ## 11.10.2
 
 ### 🐞 Bug fixes
