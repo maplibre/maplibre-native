@@ -115,6 +115,7 @@ TEST(Plugin, PluginLayerProperty) {
         std::string testValue = R"("":1.000000)";
         std::cout << "   _singleFloatValid: " << json << ";|" << testValue << "|\n";
         _singleFloatValid = json == testValue;
+        EXPECT_STREQ(testValue.c_str(), json.c_str());
     }
 
     {
@@ -125,6 +126,8 @@ TEST(Plugin, PluginLayerProperty) {
         std::string testValue = R"JSON("":"rgba(255,255,255,1)")JSON";
         std::cout << "   _colorValid: |" << json << "|;|" << testValue << "|\n";
         _colorValid = json == testValue;
+        EXPECT_STREQ(testValue.c_str(), json.c_str());
+
     }
 
     ASSERT_TRUE(_colorValid);
@@ -150,6 +153,7 @@ TEST(Plugin, PluginLayerPropertyManager) {
     std::cout << "Test: Plugin.PluginLayerPropertyManager\n";
     std::string testValue = R"JSON({"color":"rgba(255,255,255,1)", "float":1.000000})JSON";
     std::cout << "   JSON: |" << json << "|;|" << testValue << "|\n";
+    EXPECT_STREQ(testValue.c_str(), json.c_str());
 
     bool _jsonValid = (json == testValue);
     ASSERT_TRUE(_jsonValid);
