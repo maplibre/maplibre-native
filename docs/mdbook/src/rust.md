@@ -25,7 +25,7 @@ See [Platform Support](https://doc.rust-lang.org/nightly/rustc/platform-support.
 You also need to have cxxbridge installed:
 
 ```shell
-cargo install cxxbridge-cmd
+cargo install cxxbridge-cmd@1.0.157 --locked
 ```
 
 Set `-DMLN_USE_RUST=ON` when generating a configuration with CMake.

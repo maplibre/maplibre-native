@@ -1,8 +1,121 @@
 # Changelog MapLibre Native for Android
 
+## 11.10.3
+
+### 🐞 Bug fixes
+
+- Revert fix [#3536](https://github.com/maplibre/maplibre-native/pull/3536) due to `getSource` crashes.
+
+## 11.10.2
+
+### 🐞 Bug fixes
+
+- Fix segfault this-capture GeoJsonSource which may be deleted ([#3536](https://github.com/maplibre/maplibre-native/pull/3536)).
+- Add `MapRenderer` dangling reference check ([#3541](https://github.com/maplibre/maplibre-native/pull/3541)).
+- Fix incomplete feature state updates in GeometryTile and SourceFeatureState [Vector Tile Layer]. ([#3406](https://github.com/maplibre/maplibre-native/pull/3406)).
+
+### ✨ Features and improvements
+
+- Fix recycler view test ([#3537](https://github.com/maplibre/maplibre-native/pull/3537)).
+
+## 11.10.1
+
+### 🐞 Bug fixes
+
+- Add missing proguard rules ([#3529](https://github.com/maplibre/maplibre-native/pull/3529)).
+
+## 11.10.0
+
+### ✨ Features and improvements
+
+- Add action journal ([#3409](https://github.com/maplibre/maplibre-native/pull/3409)). Documentation: https://maplibre.org/maplibre-native/android/examples/observability/action-journal/
+- Pattern layout performance improvement ([#3495](https://github.com/maplibre/maplibre-native/pull/3495)).
+- Add Tile LOD controls ([#2958](https://github.com/maplibre/maplibre-native/pull/2958)).
+
+### 🐞 Bug fixes
+
+- Improve weak pointer use ([#3510](https://github.com/maplibre/maplibre-native/pull/3510)).
+- Make sure AndroidRendererFrontend exists when accessing it ([#3522](https://github.com/maplibre/maplibre-native/pull/3522))
+## 11.9.0
+
+### ✨ Features and improvements
+
+- Add dynamic texture atlas ([#3198](https://github.com/maplibre/maplibre-native/pull/3198)).
+- Remove some of unused legacy uniforms ([#3481](https://github.com/maplibre/maplibre-native/pull/3481)).
+
+### 🐞 Bug fixes
+
+- Fix vulkan scaling issue ([#3489](https://github.com/maplibre/maplibre-native/pull/3489)).
+- Fix swapchain out of bounds ([#3486](https://github.com/maplibre/maplibre-native/pull/3486)).
+- Fix validation error reported by VulkanSDK 1.4.313.0 ([#3471](https://github.com/maplibre/maplibre-native/pull/3471)).P
+
+## 11.9.0-pre0
+
+Pre-release to test out the new [dynamic texture atlas](https://github.com/maplibre/maplibre-native/pull/3198). This should result in a memory reduction. Please [open an issue](https://github.com/maplibre/maplibre-native/issues) if you encounter any problems.
+
+## 11.8.8
+
+### ✨ Features and improvements
+
+- Update NDK to 28.1.13356709 ([#3450](https://github.com/maplibre/maplibre-native/pull/3450)).
+- Add support to range requests in AssetFileSource ([#3461](https://github.com/maplibre/maplibre-native/pull/3404)).
+- Force PMTiles metadata to always have XYZ tile scheme ([#3403](https://github.com/maplibre/maplibre-native/pull/3403)).
+
+### 🐞 Bug fixes
+
+- Make sure renderThread is alive before calling requestExitAndWait() ([#3461](https://github.com/maplibre/maplibre-native/pull/3461)).
+
+## 11.8.7
+
+We now make releases with debug builds to make it easier to report issues with relevant logs.
+
+They are available with a `-debug` postfix on Maven Central, for example `org.maplibre.gl:android-sdk-vulkan-debug`.
+
+## 11.8.6
+
+### ✨ Features and improvements
+
+- Change Java Transfrom class from final to normal ([#3332](https://github.com/maplibre/maplibre-native/pull/3332)).
+
+### 🐞 Bug fixes
+
+- Fix rare crash LatLngAnimator ([#3352](https://github.com/maplibre/maplibre-native/pull/3352)).
+- Sync surface destruction with main thread ([#3368](https://github.com/maplibre/maplibre-native/pull/3368)).
+- Prevent exception SymbolLocationLayerRenderer with new style ([#3369](https://github.com/maplibre/maplibre-native/pull/3369)).
+
+## 11.8.5
+
+### 🐞 Bug fixes
+
+- Add regression test for [#3323](https://github.com/maplibre/maplibre-native/pull/3323), bug in layer dependency tracking ([#3326](https://github.com/maplibre/maplibre-native/pull/3326))
+- Fix `ErrorSurfaceLostKHR` exception ([#3337](https://github.com/maplibre/maplibre-native/pull/3337)).
+
+## 11.8.4
+
+### 🐞 Bug fixes
+
+-  Add workaround for android emulator as crash on Android emulation is still presented ([#3310](https://github.com/maplibre/maplibre-native/pull/3310))
+
+## 11.8.3
+
+### 🐞 Bug fixes
+
+- Revert "Eliminate copies in deferred cleanup" ([#3035](https://github.com/maplibre/maplibre-native/pull/3035)) which was causing a memory growth issue.
+
+## 11.8.2
+
+### ✨ Features and improvements
+
+- Eliminate copies in deferred cleanup ([#3035](https://github.com/maplibre/maplibre-native/pull/3035)).
+- (Custom Layer Support) Reset depth stencil state for render pass ([#3230](https://github.com/maplibre/maplibre-native/pull/3230)).
+
+### 🐞 Bug fixes
+
+- Fix texture view cleanup ([#3254](https://github.com/maplibre/maplibre-native/pull/3254)). Possible fix for [issue](https://github.com/maplibre/maplibre-native/issues/3241) reported by Lyft.
+
 ## 11.8.1
 
-> [!NOTE]  
+> [!NOTE]
 > We are now releasing OpenGL ES and Vulkan variants of MapLibre Android. See the [11.7.0 release notes](https://github.com/maplibre/maplibre-native/releases/tag/android-v11.7.0) for details.
 
 ### ✨ Features and improvements
@@ -17,7 +130,7 @@
 
 ## 11.8.0
 
-> [!NOTE]  
+> [!NOTE]
 > We are now releasing OpenGL ES and Vulkan variants of MapLibre Android. See the [11.7.0 release notes](https://github.com/maplibre/maplibre-native/releases/tag/android-v11.7.0) for details.
 
 ### ✨ Features and improvements
@@ -33,7 +146,7 @@ We have a new feature in the C++ Core to constrain the screen (instead of the ce
 
 ## 11.7.1
 
-> [!NOTE]  
+> [!NOTE]
 > We are now releasing OpenGL ES and Vulkan variants of MapLibre Android. See the [11.7.0 release notes](https://github.com/maplibre/maplibre-native/releases/tag/android-v11.7.0) for details.
 
 ### ✨ Features and improvements
@@ -43,7 +156,7 @@ We have a new feature in the C++ Core to constrain the screen (instead of the ce
 
 ### 🐞 Bug fixes
 
-- Remove `Pass3D` ([#3077](https://github.com/maplibre/maplibre-native/pull/3077)).  
+- Remove `Pass3D` ([#3077](https://github.com/maplibre/maplibre-native/pull/3077)).
       Fixes issue where filters applied to fill extrusion layers are not rendered unless a manual zoom is applied to the map ([#3039](https://github.com/maplibre/maplibre-native/issues/3039)).
 
 ## 11.7.0
@@ -166,7 +279,7 @@ Thanks to everyone who helped test the pre-releases!
 
 ### ✨ Features and improvements
 
-- Toggle tile cache final API ([#2723](https://github.com/maplibre/maplibre-native/pull/2723)).  
+- Toggle tile cache final API ([#2723](https://github.com/maplibre/maplibre-native/pull/2723)).
     This is a new API on `MapLibreMap`: `setTileCacheEnabled()` and `getTileCacheEnabled()`. This tile cache is used to cache tiles on different zoom levels, disabling it will reduce memory usage.
 - Add `getOfflineRegion` Kotlin API ([#2516](https://github.com/maplibre/maplibre-native/pull/2516)). This is the first (code) contribution from [@JRWilding](https://github.com/JRWilding)! 🎉
 - Bump NDK version to 27.0.12077973, replace `ALooper_pollAll` with `ALooper_pollOnce` ([#2663](https://github.com/maplibre/maplibre-native/pull/2663)).
@@ -175,8 +288,8 @@ Thanks to everyone who helped test the pre-releases!
 - Reuse prefetched tiles to avoid empty screen ([#2668](https://github.com/maplibre/maplibre-native/pull/2668)).
 - Update Android Dependencies, use [maplibre-gestures-android](https://github.com/maplibre/maplibre-gestures-android) ([#2714](https://github.com/maplibre/maplibre-native/pull/2714)).
 - Update dependency gradle to v8.10 ([#2721](https://github.com/maplibre/maplibre-native/pull/2721)).
-- Cleanup `mbgl/actor/mailbox*` implementation for repetition in ensuring valid weakScheduler exists before usage ([#2733](https://github.com/maplibre/maplibre-native/pull/2733)). 
-- Use latest MapLibre Style Spec ([#2756](https://github.com/maplibre/maplibre-native/pull/2756)).  
+- Cleanup `mbgl/actor/mailbox*` implementation for repetition in ensuring valid weakScheduler exists before usage ([#2733](https://github.com/maplibre/maplibre-native/pull/2733)).
+- Use latest MapLibre Style Spec ([#2756](https://github.com/maplibre/maplibre-native/pull/2756)).
   This PR adds two new APIs to `TransitionOptions` of `LocationIndicatorLayer`: `getBearingTransition()` and `setBearingTransition()`.
 - Use timestamps for attribute updates ([#2629](https://github.com/maplibre/maplibre-native/pull/2629)).
 
@@ -185,7 +298,7 @@ Thanks to everyone who helped test the pre-releases!
 - Fix crash when feature contains invalid UTF-8 data ([#2693](https://github.com/maplibre/maplibre-native/pull/2693)).
 - Fix accidental regression conditional layer evaluation ([#2705](https://github.com/maplibre/maplibre-native/pull/2705)).
 - Ensure `ReentrantLock` is unlocked after being locked, and on same thread ([#2759](https://github.com/maplibre/maplibre-native/pull/2759)). This is the first (code) contributon from [@westnordost](https://github.com/westnordost)! 🎉
-- Add guard blocks and checks to `SymbolInstance` ([#2744](https://github.com/maplibre/maplibre-native/pull/2744)).  
+- Add guard blocks and checks to `SymbolInstance` ([#2744](https://github.com/maplibre/maplibre-native/pull/2744)).
   This fixes an exceedingly rare crash that a user is seeing in the field. The fix is not pretty, but we hope to better understand the problem in the future (see [this open issue](https://github.com/maplibre/maplibre-native/issues/2350)).
 
 ## 11.1.0
@@ -235,12 +348,12 @@ This release utilizes **OpenGL ES 3.0**. As a result, some older devices are no 
 
 - 💥 Breaking: Change package of all classes from `com.mapbox.mapboxsdk` to `org.maplibre.android` ([#1201](https://github.com/maplibre/maplibre-native/pull/1201)). This means you will need to fix your imports.
 
-  > To migrate:  
+  > To migrate:
   > In your imports in each of your project files, replace `com.mapbox.mapboxsdk.` with `org.maplibre.android.*`.
 
 - 💥 Breaking: Rename several classes to no longer contain the word "Mapbox". You will need to migrate by renaming references.
 
-  > To migrate:  
+  > To migrate:
   > Each affected occurrence will be marked as an error during compilation. Replace each occurrence of "Mapbox" with "MapLibre" and let your IDE do the import.
   >
   > These are the most important classes that have been renamed:
@@ -310,7 +423,7 @@ This version is identical to 10.0.2.
 
 - 💥 Breaking: Changed resourcePrefix to `maplibre_` from `mapbox_` ([#647](https://github.com/maplibre/maplibre-native/pull/647)) and renamed resources accordingly. Note that this is a breaking change since the names of public resources were renamed as well. Replaced Mapbox logo with MapLibre logo.
 
-  > To migrate:  
+  > To migrate:
   > If you use any of the public Android resources, you will get an error that they can not be found. Replace the prefix of each, e.g. `R.style.mapbox_LocationComponent` -> `R.style.maplibre_LocationComponent`.
 
 - 💥 Breaking: several deprecated overloads of `LocationComponent.activateLocationComponent` were removed. Use `LocationComponentActivationOptions.Builder` instead.
@@ -330,7 +443,7 @@ This version is identical to 10.0.2.
 
 - 💥 Breaking: the `LocationEngine` implemented with Google Location Services has been removed to make MapLibre Native for Android fully FLOSS ([#379](https://github.com/maplibre/maplibre-native/issues/379)).
 
-  > To migrate:  
+  > To migrate:
   > Include the source code of the removed [`GoogleLocationEngineImpl`](https://github.com/maplibre/maplibre-native/blob/4a34caab7593f4f1b6d8c09c06a5e25d7c6cfc43/platform/android/MapLibreAndroid/src/main/java/com/mapbox/mapboxsdk/location/engine/GoogleLocationEngineImpl.java) in your source tree.
   >
   > Pass an instance of `LocationEngine` based on `GoogleLocationEngineImpl` to `LocationComponentActivationOptions.Builder.locationEngine` (this was done in a now removed [`LocationEngineProvider`](https://github.com/maplibre/maplibre-native/blob/68d58d6f6f453d5c6cc0fa92fcc6c6cfe0cf967f/platform/android/MapLibreAndroid/src/main/java/com/mapbox/mapboxsdk/location/engine/LocationEngineProvider.java#L59) class):

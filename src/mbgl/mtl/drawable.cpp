@@ -14,7 +14,7 @@
 #include <mbgl/mtl/uniform_buffer.hpp>
 #include <mbgl/mtl/vertex_buffer_resource.hpp>
 #include <mbgl/mtl/vertex_attribute.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/variant.hpp>
@@ -252,7 +252,8 @@ void Drawable::draw(PaintParameters& parameters) const {
             const auto stencilMode = enableStencil ? parameters.stencilModeForClipping(tileID->toUnwrapped())
                                                    : gfx::StencilMode::disabled();
             impl->depthStencilState = context.makeDepthStencilState(depthMode, stencilMode, renderable);
-            impl->previousStencilMode = *newStencilMode;
+            // FIXME: https://github.com/maplibre/maplibre-native/issues/3248
+            if (newStencilMode) impl->previousStencilMode = *newStencilMode;
         }
         renderPass.setDepthStencilState(impl->depthStencilState);
         renderPass.setStencilReference(impl->previousStencilMode.ref);
@@ -315,7 +316,6 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
     }
 
-    impl->uniformBuffers.unbind(renderPass);
     unbindTextures(renderPass);
     unbindAttributes(renderPass);
 }
@@ -387,8 +387,6 @@ void Drawable::setVertexAttrId(const size_t id) {
 }
 
 void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
-    const auto& encoder = renderPass.getMetalEncoder();
-
     NS::UInteger attributeIndex = 0;
     for (const auto& binding : impl->attributeBindings) {
         const auto* buffer = static_cast<const mtl::VertexBufferResource*>(binding ? binding->vertexBufferResource
@@ -402,8 +400,6 @@ void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
 }
 
 void Drawable::bindInstanceAttributes(RenderPass& renderPass) const noexcept {
-    const auto& encoder = renderPass.getMetalEncoder();
-
     NS::UInteger attributeIndex = 0;
     for (const auto& binding : impl->instanceBindings) {
         if (binding.has_value()) {
@@ -520,7 +516,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         assert(false);
         return;
     }
-    const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
 
     auto& uploadPass = static_cast<UploadPass&>(uploadPass_);
     auto& contextBase = uploadPass.getContext();

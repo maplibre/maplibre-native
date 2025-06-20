@@ -17,7 +17,9 @@ public:
 #if MLN_RENDER_BACKEND_OPENGL
     static DepthMode disabled() { return DepthMode{DepthFunctionType::Always, DepthMaskType::ReadOnly, {0.0, 1.0}}; }
 #else
-    static DepthMode disabled() { return DepthMode{DepthFunctionType::Always, DepthMaskType::ReadOnly}; }
+    static DepthMode disabled() {
+        return DepthMode{.func = DepthFunctionType::Always, .mask = DepthMaskType::ReadOnly};
+    }
 #endif
 };
 

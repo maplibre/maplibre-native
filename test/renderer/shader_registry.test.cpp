@@ -21,7 +21,10 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/headless_frontend.hpp>
 #include <mbgl/test/map_adapter.hpp>
-#include <mbgl/programs/fill_program.hpp>
+
+#ifdef MLN_RENDER_BACKEND_OPENGL
+#include <mbgl/shaders/gl/legacy/clipping_mask_program.hpp>
+#endif
 
 using namespace mbgl;
 
@@ -206,19 +209,17 @@ TEST(ShaderRegistry, NamedReplace) {
     ASSERT_NE(progA, progB);
 }
 
+#ifdef MLN_RENDER_BACKEND_OPENGL
 // Test replacing an actual program instance with a similar instance
-#if MLN_LEGACY_RENDERER
-TEST(ShaderRegistry, GLSLReplacement_NoOp) {
-#else
 TEST(ShaderRegistry, DISABLED_GLSLReplacement_NoOp) {
-#endif
     MapInstance::ShaderAndStyleObserver observer;
     util::RunLoop runLoop;
     auto map = MapInstance(1.0f, observer);
 
     // Just replace with a default instance
     observer.registerShaders = [&](gfx::ShaderRegistry& registry) {
-        if (!registry.getLegacyGroup().replaceShader(std::make_shared<FillProgram>(ProgramParameters(1.0f, false)))) {
+        if (!registry.getLegacyGroup().replaceShader(
+                std::make_shared<ClippingMaskProgram>(ProgramParameters(1.0f, false)))) {
             throw std::runtime_error("Failed to register shader!");
         }
     };
@@ -237,18 +238,14 @@ TEST(ShaderRegistry, DISABLED_GLSLReplacement_NoOp) {
 
 // Test replacing an actual program with a similar instance using a different
 // fragment shader
-#if MLN_LEGACY_RENDERER
-TEST(ShaderRegistry, GLSLReplacement1) {
-#else
 TEST(ShaderRegistry, DISABLED_GLSLReplacement1) {
-#endif
     MapInstance::ShaderAndStyleObserver observer;
     util::RunLoop runLoop;
     auto map = MapInstance(1.0f, observer);
 
     // Replace with an instance that only renders blue
     observer.registerShaders = [&](gfx::ShaderRegistry& registry) {
-        if (!registry.getLegacyGroup().replaceShader(std::make_shared<FillProgram>(
+        if (!registry.getLegacyGroup().replaceShader(std::make_shared<ClippingMaskProgram>(
                 ProgramParameters(1.0f, false)
                     .withShaderSource(ProgramParameters::ProgramSource(gfx::Backend::Type::OpenGL,
                                                                        "",
@@ -275,18 +272,14 @@ void main() {
 
 // Test replacing an actual program with a similar instance using a different
 // fragment shader
-#if MLN_LEGACY_RENDERER
-TEST(ShaderRegistry, GLSLReplacement2) {
-#else
 TEST(ShaderRegistry, DISABLED_GLSLReplacement2) {
-#endif
     MapInstance::ShaderAndStyleObserver observer;
     util::RunLoop runLoop;
     auto map = MapInstance(1.0f, observer);
 
     // Replace with an instance that adds some red and green
     observer.registerShaders = [&](gfx::ShaderRegistry& registry) {
-        if (!registry.getLegacyGroup().replaceShader(std::make_shared<FillProgram>(
+        if (!registry.getLegacyGroup().replaceShader(std::make_shared<ClippingMaskProgram>(
                 ProgramParameters(1.0f, false)
                     .withShaderSource(ProgramParameters::ProgramSource(gfx::Backend::Type::OpenGL,
                                                                        "",
@@ -334,3 +327,4 @@ void main() {
     auto img = map.frontend.render(map.adapter).image;
     test::checkImage("test/fixtures/shader_registry/glsl_replace_2", img, 0.005, 0.1);
 }
+#endif // MLN_RENDER_BACKEND_OPENGL

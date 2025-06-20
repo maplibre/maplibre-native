@@ -6,14 +6,13 @@
 namespace mbgl {
 namespace shaders {
 
-#define SYMBOL_SHADER_COMMON \
-    R"(
+constexpr auto symbolShaderPrelude = R"(
 
 #define idSymbolDrawableUBO         idDrawableReservedVertexOnlyUBO
 #define idSymbolTilePropsUBO        idDrawableReservedFragmentOnlyUBO
 #define idSymbolEvaluatedPropsUBO   layerUBOStartId
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Vulkan> {
@@ -23,8 +22,9 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Vulkan> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto vertex = SYMBOL_SHADER_COMMON R"(
-        
+    static constexpr auto prelude = symbolShaderPrelude;
+    static constexpr auto vertex = R"(
+
 layout(location = 0) in ivec4 in_pos_offset;
 layout(location = 1) in uvec4 in_data;
 layout(location = 2) in ivec4 in_pixeloffset;
@@ -33,7 +33,7 @@ layout(location = 4) in float in_fade_opacity;
 
 #if !defined(HAS_UNIFORM_u_opacity)
 layout(location = 5) in vec2 in_opacity;
-#endif    
+#endif
 
 layout(push_constant) uniform Constants {
     int ubo_index;
@@ -129,7 +129,7 @@ void main() {
     const vec2 posOffset = a_offset * max(a_minFontScale, fontScale) / 32.0 + a_pxoffset / 16.0;
     gl_Position = drawable.coord_matrix * vec4(pos0 + rotation_matrix * posOffset, 0.0, 1.0);
     applySurfaceTransform();
-    
+
     const vec2 raw_fade_opacity = unpack_opacity(in_fade_opacity);
     const float fade_change = raw_fade_opacity[1] > 0.5 ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
     const float fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
@@ -144,7 +144,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = SYMBOL_SHADER_COMMON R"(
+    static constexpr auto fragment = R"(
 
 layout(location = 0) in mediump vec2 frag_tex;
 layout(location = 1) in mediump float frag_opacity;
@@ -203,15 +203,16 @@ void main() {
 };
 
 template <>
-struct ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Vulkan> {
-    static constexpr const char* name = "SymbolSDFIconShader";
+struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::Vulkan> {
+    static constexpr const char* name = "SymbolSDFShader";
 
     static const std::array<AttributeInfo, 10> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto vertex = SYMBOL_SHADER_COMMON R"(
-        
+    static constexpr auto prelude = symbolShaderPrelude;
+    static constexpr auto vertex = R"(
+
 layout(location = 0) in ivec4 in_pos_offset;
 layout(location = 1) in uvec4 in_data;
 layout(location = 2) in ivec4 in_pixeloffset;
@@ -236,7 +237,7 @@ layout(location = 8) in vec2 in_halo_width;
 
 #if !defined(HAS_UNIFORM_u_halo_blur)
 layout(location = 9) in vec2 in_halo_blur;
-#endif  
+#endif
 
 layout(push_constant) uniform Constants {
     int ubo_index;
@@ -386,7 +387,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = SYMBOL_SHADER_COMMON R"(
+    static constexpr auto fragment = R"(
 
 layout(location = 0) in mediump vec2 frag_tex;
 layout(location = 1) in mediump float frag_fade_opacity;
@@ -504,8 +505,9 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Vulkan
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
-    static constexpr auto vertex = SYMBOL_SHADER_COMMON R"(
-        
+    static constexpr auto prelude = symbolShaderPrelude;
+    static constexpr auto vertex = R"(
+
 #define SDF 1.0
 #define ICON 0.0
 
@@ -532,7 +534,7 @@ layout(location = 7) in vec2 in_halo_width;
 
 #if !defined(HAS_UNIFORM_u_halo_blur)
 layout(location = 8) in vec2 in_halo_blur;
-#endif  
+#endif
 
 layout(push_constant) uniform Constants {
     int ubo_index;
@@ -657,13 +659,13 @@ void main() {
     const vec2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     gl_Position = drawable.coord_matrix * vec4(pos0, 0.0, 1.0);
     applySurfaceTransform();
-    
+
     const vec2 raw_fade_opacity = unpack_opacity(in_fade_opacity);
     const float fade_change = raw_fade_opacity[1] > 0.5 ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
 
     const bool is_icon = (is_sdf == ICON);
 	frag_is_icon = int(is_icon);
-    
+
 	frag_tex = a_tex / (is_icon ? drawable.texsize_icon : drawable.texsize);
     frag_fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
     frag_font_scale = fontScale;
@@ -687,7 +689,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = SYMBOL_SHADER_COMMON R"(
+    static constexpr auto fragment = R"(
 
 layout(location = 0) in mediump vec2 frag_tex;
 layout(location = 1) in mediump float frag_fade_opacity;

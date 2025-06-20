@@ -583,6 +583,15 @@ class LocationAnimatorCoordinatorTest {
         assertFalse(locationAnimatorCoordinator.animatorArray[ANIMATOR_CAMERA_LATLNG].isStarted)
     }
 
+    // regression test for crash https://github.com/maplibre/maplibre-native/issues/3294
+    @Test
+    fun resetAllCameraAnimations_null_target() {
+        locationAnimatorCoordinator.feedNewLocation(Location(""), CameraPosition.DEFAULT, true)
+
+        val cameraPosition = CameraPosition.Builder().build()
+        locationAnimatorCoordinator.resetAllCameraAnimations(cameraPosition, false)
+    }
+
     @Test
     fun cancelZoomAnimators() {
         locationAnimatorCoordinator.feedNewZoomLevel(

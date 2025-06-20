@@ -56,7 +56,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 * Added the `-[MLNOfflinePack setContext:completionHandler:]` method for replacing the data associated with an offline pack, such as a name. ([#288](https://github.com/mapbox/mapbox-gl-native-ios/pull/288))
 * Added the `MLNOfflineStorage.databasePath` and `MLNOfflineStorage.databaseURL` properties to obtain the path of the database that contains offline packs and the ambient cache. To customize this path, set the `MLNOfflineStorageDatabasePath` in Info.plist. ([#298](https://github.com/mapbox/mapbox-gl-native-ios/pull/298))
-* Fixed an error that occurred if your implementation of the `-[MLNOfflineStorageDelegate offlineStorage:URLForResourceOfKind:]` method returned a local file URL. ([mapbox/mapbox-gl-native#16428](https://github.com/mapbox/mapbox-gl-native/pull/16428)) 
+* Fixed an error that occurred if your implementation of the `-[MLNOfflineStorageDelegate offlineStorage:URLForResourceOfKind:]` method returned a local file URL. ([mapbox/mapbox-gl-native#16428](https://github.com/mapbox/mapbox-gl-native/pull/16428))
 
 ### Other changes
 

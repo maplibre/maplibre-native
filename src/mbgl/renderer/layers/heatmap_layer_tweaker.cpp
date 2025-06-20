@@ -2,7 +2,6 @@
 
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/drawable.hpp>
-#include <mbgl/programs/heatmap_program.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
@@ -36,10 +35,10 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
 
     if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
         const HeatmapEvaluatedPropsUBO evaluatedPropsUBO = {
-            /* .weight = */ evaluated.get<HeatmapWeight>().constantOr(HeatmapWeight::defaultValue()),
-            /* .radius = */ evaluated.get<HeatmapRadius>().constantOr(HeatmapRadius::defaultValue()),
-            /* .intensity = */ evaluated.get<HeatmapIntensity>(),
-            /* .padding = */ 0};
+            .weight = evaluated.get<HeatmapWeight>().constantOr(HeatmapWeight::defaultValue()),
+            .radius = evaluated.get<HeatmapRadius>().constantOr(HeatmapRadius::defaultValue()),
+            .intensity = evaluated.get<HeatmapIntensity>(),
+            .padding = 0};
         parameters.context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
         propertiesUpdated = false;
     }
@@ -58,7 +57,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
-        auto* binders = static_cast<HeatmapProgram::Binders*>(drawable.getBinders());
+        auto* binders = static_cast<HeatmapBinders*>(drawable.getBinders());
         const auto* tile = drawable.getRenderTile();
         if (!binders || !tile) {
             assert(false);
@@ -75,12 +74,12 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
 #else
         const HeatmapDrawableUBO drawableUBO = {
 #endif
-            /* .matrix = */ util::cast<float>(matrix),
-            /* .extrude_scale = */ tileID.pixelsToTileUnits(1.0f, zoom),
+            .matrix = util::cast<float>(matrix),
+            .extrude_scale = tileID.pixelsToTileUnits(1.0f, zoom),
 
-            /* .weight_t = */ std::get<0>(binders->get<HeatmapWeight>()->interpolationFactor(zoom)),
-            /* .radius_t = */ std::get<0>(binders->get<HeatmapRadius>()->interpolationFactor(zoom)),
-            /* .pad1 = */ 0
+            .weight_t = std::get<0>(binders->get<HeatmapWeight>()->interpolationFactor(zoom)),
+            .radius_t = std::get<0>(binders->get<HeatmapRadius>()->interpolationFactor(zoom)),
+            .pad1 = 0
         };
 #if MLN_UBO_CONSOLIDATION
         drawable.setUBOIndex(i++);

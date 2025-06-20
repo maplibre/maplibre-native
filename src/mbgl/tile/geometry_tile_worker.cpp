@@ -38,7 +38,8 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
                                        const MapMode mode_,
                                        const float pixelRatio_,
                                        const bool showCollisionBoxes_,
-                                       std::shared_ptr<FontFaces> fontFaces_)
+                                       std::shared_ptr<FontFaces> fontFaces_,
+                                       gfx::DynamicTextureAtlasPtr dynamicTextureAtlas_)
     : self(std::move(self_)),
       parent(std::move(parent_)),
       scheduler(scheduler_),
@@ -48,7 +49,8 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
       mode(mode_),
       pixelRatio(pixelRatio_),
       fontFaces(fontFaces_),
-      showCollisionBoxes(showCollisionBoxes_) {}
+      showCollisionBoxes(showCollisionBoxes_),
+      dynamicTextureAtlas(dynamicTextureAtlas_) {}
 
 GeometryTileWorker::~GeometryTileWorker() {
     MLN_TRACE_FUNC();
@@ -361,7 +363,7 @@ void GeometryTileWorker::onImagesAvailable(ImageMap newIconMap,
     if (imageCorrelationID != imageCorrelationID_) {
         return; // Ignore outdated image request replies.
     }
-    imageMap = std::move(newIconMap);
+    iconMap = std::move(newIconMap);
     patternMap = std::move(newPatternMap);
     versionMap = std::move(newVersionMap);
     pendingImageDependencies.clear();
@@ -536,15 +538,21 @@ void GeometryTileWorker::finalizeLayout() {
         return;
     }
 
-    MBGL_TIMING_START(watch)
-    std::optional<AlphaImage> glyphAtlasImage;
-    ImageAtlas iconAtlas = makeImageAtlas(imageMap, patternMap, versionMap);
+    MBGL_TIMING_START(watch);
+    gfx::ImageAtlas imageAtlas;
+    gfx::GlyphAtlas glyphAtlas;
+    if (dynamicTextureAtlas) {
+        imageAtlas = dynamicTextureAtlas->uploadIconsAndPatterns(iconMap, patternMap, versionMap);
+    }
     if (!layouts.empty()) {
-        GlyphAtlas glyphAtlas = makeGlyphAtlas(glyphMap);
-        glyphAtlasImage = std::move(glyphAtlas.image);
+        if (dynamicTextureAtlas) {
+            glyphAtlas = dynamicTextureAtlas->uploadGlyphs(glyphMap);
+        }
 
         for (auto& layout : layouts) {
             if (obsolete) {
+                dynamicTextureAtlas->removeTextures(glyphAtlas.textureHandles, glyphAtlas.dynamicTexture);
+                dynamicTextureAtlas->removeTextures(imageAtlas.textureHandles, imageAtlas.dynamicTexture);
                 return;
             }
 
@@ -552,7 +560,7 @@ void GeometryTileWorker::finalizeLayout() {
                 continue;
             }
 
-            layout->prepareSymbols(glyphMap, glyphAtlas.positions, imageMap, iconAtlas.iconPositions);
+            layout->prepareSymbols(glyphMap, glyphAtlas.glyphPositions, iconMap, imageAtlas.iconPositions);
 
             if (!layout->hasSymbolInstances()) {
                 continue;
@@ -560,7 +568,7 @@ void GeometryTileWorker::finalizeLayout() {
 
             // layout adds the bucket to buckets
             layout->createBucket(
-                iconAtlas.patternPositions, featureIndex, renderData, firstLoad, showCollisionBoxes, id.canonical);
+                imageAtlas.patternPositions, featureIndex, renderData, firstLoad, showCollisionBoxes, id.canonical);
         }
     }
 
@@ -575,8 +583,11 @@ void GeometryTileWorker::finalizeLayout() {
                                    << id.canonical.y << " Time");
 
     parent.invoke(&GeometryTile::onLayout,
-                  std::make_shared<GeometryTile::LayoutResult>(
-                      std::move(renderData), std::move(featureIndex), std::move(glyphAtlasImage), std::move(iconAtlas)),
+                  std::make_shared<GeometryTile::LayoutResult>(std::move(renderData),
+                                                               std::move(featureIndex),
+                                                               std::move(glyphAtlas),
+                                                               std::move(imageAtlas),
+                                                               dynamicTextureAtlas),
                   correlationID);
 }
 

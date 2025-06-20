@@ -97,7 +97,7 @@ There are various ways you can create a `GeoJSONSource`. Some of the options are
 --8<-- "MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/style/HeatmapLayerActivity.kt:createEarthquakeSource"
 ```
 
-```kotlin 
+```kotlin
 --8<-- "MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/style/HeatmapLayerActivity.kt:constants"
 ```
 

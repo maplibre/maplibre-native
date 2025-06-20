@@ -1,8 +1,8 @@
 #pragma once
 
 #include <mbgl/gfx/shader_group.hpp>
-#include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/shaders/vulkan/shader_program.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/hash.hpp>
 #include <mbgl/util/containers.hpp>
@@ -47,6 +47,7 @@ public:
                                      std::string_view /*firstAttribName*/) override {
         using ShaderSource = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Vulkan>;
         constexpr auto& name = ShaderSource::name;
+        constexpr auto& prelude = ShaderSource::prelude;
         constexpr auto& vert = ShaderSource::vertex;
         constexpr auto& frag = ShaderSource::fragment;
 
@@ -60,8 +61,13 @@ public:
             DefinesMap additionalDefines;
             addAdditionalDefines(propertiesAsUniforms, additionalDefines);
 
+            const std::string preludeSource(prelude);
+            const std::string vertexSource = preludeSource + vert;
+            const std::string fragmentSource = preludeSource + frag;
+
             auto& context = static_cast<Context&>(gfxContext);
-            shader = context.createProgram(ShaderID, shaderName, vert, frag, programParameters, additionalDefines);
+            shader = context.createProgram(
+                ShaderID, shaderName, vertexSource, fragmentSource, programParameters, additionalDefines);
             assert(shader);
             if (!shader || !registerShader(shader, shaderName)) {
                 assert(false);

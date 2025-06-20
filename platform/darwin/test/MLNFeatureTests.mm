@@ -86,23 +86,23 @@
                           [NSValue valueWithMLNCoordinate:CLLocationCoordinate2DMake(3, 2)]);
 }
 
-- (void)testClusterGeometryConversion {    
+- (void)testClusterGeometryConversion {
     mbgl::Point<double> point = { -90.066667, 29.95 };
     mbgl::Feature pointFeature { point };
     pointFeature.id = { UINT64_MAX };
     pointFeature.properties["cluster"] = true;
     pointFeature.properties["cluster_id"] = 1ULL;
     pointFeature.properties["point_count"] = 5ULL;
-    
+
     id<MLNFeature> feature = MLNFeatureFromMBGLFeature(pointFeature);
-    
+
     XCTAssert([feature conformsToProtocol:@protocol(MLNFeature)]);
-    
+
     id<MLNCluster> cluster = MLN_OBJC_DYNAMIC_CAST_AS_PROTOCOL(feature, MLNCluster);
     XCTAssert(cluster);
     XCTAssert(cluster.clusterIdentifier == 1);
     XCTAssert(cluster.clusterPointCount == 5);
-    
+
     XCTAssert([cluster isMemberOfClass:[MLNPointFeatureCluster class]]);
 }
 

@@ -73,6 +73,8 @@ public class GLTextureViewRenderThread extends TextureViewRenderThread {
             if (destroySurface) {
               eglHolder.destroySurface();
               destroySurface = false;
+              this.hasNativeSurface = false;
+              lock.notifyAll();
               break;
             }
 
@@ -89,12 +91,14 @@ public class GLTextureViewRenderThread extends TextureViewRenderThread {
 
               // Initialize EGL if needed
               if (eglHolder.eglContext == EGL10.EGL_NO_CONTEXT) {
+                this.hasNativeSurface = true;
                 initializeEGL = true;
                 break;
               }
 
               // (re-)Initialize EGL Surface if needed
               if (eglHolder.eglSurface == EGL10.EGL_NO_SURFACE) {
+                this.hasNativeSurface = true;
                 recreateSurface = true;
                 break;
               }
@@ -195,6 +199,7 @@ public class GLTextureViewRenderThread extends TextureViewRenderThread {
 
       // Signal we're done
       synchronized (lock) {
+        this.hasNativeSurface = false;
         this.exited = true;
         lock.notifyAll();
       }

@@ -24,10 +24,10 @@
 
 - (void)setUp {
     [super setUp];
-    
+
     [MLNSettings useWellKnownTileServer:MLNMapTiler];
     [MLNSettings setApiKey:@"pk.feedcafedeadbeefbadebede"];
-    
+
     NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"one-liner" withExtension:@"json"];
     self.mapView = [[MLNMapView alloc] initWithFrame:CGRectMake(0, 0, 100, 100) styleURL:styleURL];
     self.mapView.delegate = self;
@@ -156,7 +156,7 @@
     // Add a raster tile source
     MLNVectorTileSource *vectorTileSource = [[MLNVectorTileSource alloc] initWithIdentifier:@"some-identifier" tileURLTemplates:@[] options:nil];
     [self.style addSource:vectorTileSource];
-    
+
     // Add a layer using it
     MLNFillStyleLayer *fillLayer = [[MLNFillStyleLayer alloc] initWithIdentifier:@"fillLayer" source:vectorTileSource];
     [self.style addLayer:fillLayer];
@@ -164,11 +164,11 @@
     // Attempt to remove the raster tile source
     NSError *error;
     BOOL result = [self.style removeSource:vectorTileSource error:&error];
-    
+
     XCTAssertFalse(result);
     XCTAssertEqualObjects(error.domain, MLNErrorDomain);
     XCTAssertEqual(error.code, MLNErrorCodeSourceIsInUseCannotRemove);
-    
+
     // Ensure it is still there
     XCTAssertTrue([[self.style sourceWithIdentifier:vectorTileSource.identifier] isMemberOfClass:[MLNVectorTileSource class]]);
 }
@@ -238,40 +238,40 @@
 - (void)testRemovingLayerBeforeAddingSameLayer {
     {
         MLNShapeSource *source = [[MLNShapeSource alloc] initWithIdentifier:@"shape-source-removing-before-adding" shape:nil options:nil];
-        
+
         // Attempting to find a layer with identifier will trigger an exception if the source associated with the layer is not added
         [self.style addSource:source];
-        
+
         MLNFillStyleLayer *fillLayer = [[MLNFillStyleLayer alloc] initWithIdentifier:@"fill-layer" source:source];
         [self.style removeLayer:fillLayer];
         [self.style addLayer:fillLayer];
         XCTAssertNotNil([self.style layerWithIdentifier:fillLayer.identifier]);
-        
+
         MLNSymbolStyleLayer *symbolLayer = [[MLNSymbolStyleLayer alloc] initWithIdentifier:@"symbol-layer" source:source];
         [self.style removeLayer:symbolLayer];
         [self.style addLayer:symbolLayer];
         XCTAssertNotNil([self.style layerWithIdentifier:symbolLayer.identifier]);
-        
+
         MLNLineStyleLayer *lineLayer = [[MLNLineStyleLayer alloc] initWithIdentifier:@"line-layer" source:source];
         [self.style removeLayer:lineLayer];
         [self.style addLayer:lineLayer];
         XCTAssertNotNil([self.style layerWithIdentifier:lineLayer.identifier]);
-        
+
         MLNCircleStyleLayer *circleLayer = [[MLNCircleStyleLayer alloc] initWithIdentifier:@"circle-layer" source:source];
         [self.style removeLayer:circleLayer];
         [self.style addLayer:circleLayer];
         XCTAssertNotNil([self.style layerWithIdentifier:circleLayer.identifier]);
-        
+
         MLNBackgroundStyleLayer *backgroundLayer = [[MLNBackgroundStyleLayer alloc] initWithIdentifier:@"background-layer"];
         [self.style removeLayer:backgroundLayer];
         [self.style addLayer:backgroundLayer];
         XCTAssertNotNil([self.style layerWithIdentifier:backgroundLayer.identifier]);
     }
-    
+
     {
         MLNRasterTileSource *rasterSource = [[MLNRasterTileSource alloc] initWithIdentifier:@"raster-tile-source" tileURLTemplates:@[] options:nil];
         [self.style addSource:rasterSource];
-        
+
         MLNRasterStyleLayer *rasterLayer = [[MLNRasterStyleLayer alloc] initWithIdentifier:@"raster-layer" source:rasterSource];
         [self.style removeLayer:rasterLayer];
         [self.style addLayer:rasterLayer];
@@ -282,15 +282,15 @@
 - (void)testAddingLayerOfTypeABeforeRemovingLayerOfTypeBWithSameIdentifier {
     MLNShapeSource *source = [[MLNShapeSource alloc] initWithIdentifier:@"shape-source-identifier" shape:nil options:nil];
     [self.style addSource:source];
-    
+
     // Add a fill layer
     MLNFillStyleLayer *fillLayer = [[MLNFillStyleLayer alloc] initWithIdentifier:@"some-identifier" source:source];
     [self.style addLayer:fillLayer];
-    
+
     // Attempt to remove a line layer with the same identifier as the fill layer
     MLNLineStyleLayer *lineLayer = [[MLNLineStyleLayer alloc] initWithIdentifier:fillLayer.identifier source:source];
     [self.style removeLayer:lineLayer];
-    
+
     XCTAssertTrue([[self.style layerWithIdentifier:fillLayer.identifier] isMemberOfClass:[MLNFillStyleLayer class]]);
 }
 
@@ -314,10 +314,10 @@
     MLNImage *image = [[NSBundle bundleForClass:[self class]] imageForResource:imageName];
 #endif
     XCTAssertNotNil(image);
-    
+
     [self.style setImage:image forName:imageName];
     MLNImage *styleImage = [self.style imageForName:imageName];
-    
+
     XCTAssertNotNil(styleImage);
     XCTAssertEqual(image.size.width, styleImage.size.width);
     XCTAssertEqual(image.size.height, styleImage.size.height);
@@ -407,9 +407,9 @@
 - (void)testTransition
 {
     MLNTransition transitionTest = MLNTransitionMake(5, 4);
-    
+
     self.style.transition = transitionTest;
-    
+
     XCTAssert(self.style.transition.delay == transitionTest.delay);
     XCTAssert(self.style.transition.duration == transitionTest.duration);
 }
@@ -417,9 +417,24 @@
 - (void)testPerformsPlacementTransitions
 {
     XCTAssertTrue(self.style.performsPlacementTransitions, @"The default value for enabling placement transitions should be YES.");
-    
+
     self.style.performsPlacementTransitions = NO;
     XCTAssertFalse(self.style.performsPlacementTransitions, @"Enabling placement transitions should be NO.");
+}
+
+- (void)testStyleJSON {
+    // Test getting style JSON
+    NSString *styleJSON = self.style.styleJSON;
+    XCTAssertNotNil(styleJSON, @"Style JSON should not be nil");
+
+    // Verify the JSON is valid
+    NSError *error = nil;
+    id jsonObject = [NSJSONSerialization JSONObjectWithData:[styleJSON dataUsingEncoding:NSUTF8StringEncoding]
+                                                   options:0
+                                                     error:&error];
+    XCTAssertNil(error, @"Style JSON should be valid JSON");
+    XCTAssertNotNil(jsonObject, @"Style JSON should parse to a valid object");
+    XCTAssertTrue([jsonObject isKindOfClass:[NSDictionary class]], @"Style JSON should represent a dictionary");
 }
 
 @end

@@ -1,6 +1,7 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary")
+load("@rules_cc//cc:defs.bzl", "cc_library", "objc_library")
 load(
-    "@build_bazel_rules_swift//swift:swift.bzl",
+    "@rules_swift//swift:swift.bzl",
     "swift_library",
 )
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
@@ -200,11 +201,10 @@ cc_library(
 objc_library(
     name = "darwin-objc",
     srcs = [
-        "src/native_apple_interface.m",
+        "core/native_apple_interface.m",
     ],
     hdrs = [
         "include/mbgl/interface/native_apple_interface.h",
-        "include/mbgl/storage/reachability.h",
         "include/mbgl/util/image+MLNAdditions.hpp",
     ],
     copts = WARNING_FLAGS["ios"] + MAPLIBRE_FLAGS + [
@@ -228,22 +228,21 @@ objc_library(
 objc_library(
     name = "darwin-objcpp",
     srcs = [
+        "core/collator.mm",
+        "core/http_file_source.mm",
+        "core/image.mm",
+        "core/local_glyph_rasterizer.mm",
+        "core/logging_nslog.mm",
+        "core/nsthread.mm",
+        "core/number_format.mm",
+        "core/string_nsstring.mm",
         "src/CFHandle.hpp",
-        "src/collator.mm",
-        "src/http_file_source.mm",
-        "src/image.mm",
-        "src/local_glyph_rasterizer.mm",
-        "src/logging_nslog.mm",
-        "src/nsthread.mm",
-        "src/number_format.mm",
-        "src/string_nsstring.mm",
     ] + select({
         "//:metal_renderer": [],
         "//conditions:default": ["src/headless_backend_eagl.mm"],
     }),
     hdrs = [
         "include/mbgl/interface/native_apple_interface.h",
-        "include/mbgl/storage/reachability.h",
         "include/mbgl/util/image+MLNAdditions.hpp",
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
@@ -254,6 +253,7 @@ objc_library(
     ],
     includes = [
         "include",
+        "src",
     ],
     sdk_frameworks = [
         "CoreText",
@@ -271,9 +271,9 @@ objc_library(
 objc_library(
     name = "darwin-loop",
     srcs = [
-        "src/async_task.cpp",
-        "src/run_loop.cpp",
-        "src/timer.cpp",
+        "core/async_task.cpp",
+        "core/run_loop.cpp",
+        "core/timer.cpp",
     ] + select({
         "//:metal_renderer": [],
         "//conditions:default": ["src/gl_functions.cpp"],
@@ -338,7 +338,6 @@ js_library(
         ":generated_style_hdrs",
         ":generated_style_srcs",
     ] + select({
-        "//:legacy_renderer": [],
         "//conditions:default": [
             ":darwin_objcpp_custom_drawable_srcs",
         ],

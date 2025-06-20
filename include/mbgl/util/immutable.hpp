@@ -84,7 +84,7 @@ public:
     Immutable(const Immutable&) = default;
 
     template <class S>
-    Immutable& operator=(Mutable<S>&& s) noexcept {
+    Immutable& operator=([[maybe_unused]] Mutable<S>&& s) noexcept {
         ptr = std::const_pointer_cast<const S>(std::move(s.ptr));
         return *this;
     }

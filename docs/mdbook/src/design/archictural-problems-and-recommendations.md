@@ -81,10 +81,10 @@ for future improvement. This document intends to address the first.
 This document proposes the following component architecture for MapLibre
 Native to address the architectural shortcomings.
 
-![](media/proposed-architecture-of-maplibre-gl.png)    
+![](media/proposed-architecture-of-maplibre-gl.png)
 *Figure 4: Proposed Architecture of MapLibre Native*
 
-Proposed architecture of MapLibre Native in Figure 4 addresses the 
+Proposed architecture of MapLibre Native in Figure 4 addresses the
 aforementioned problems by:
 
 #### Modular Rendering

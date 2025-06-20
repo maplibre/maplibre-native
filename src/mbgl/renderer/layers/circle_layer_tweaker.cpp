@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/drawable.hpp>
-#include <mbgl/programs/circle_program.hpp>
+#include <mbgl/renderer/buckets/circle_bucket.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_tree.hpp>
@@ -42,16 +42,16 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     // Updated only with evaluated properties
     if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
         const CircleEvaluatedPropsUBO evaluatedPropsUBO = {
-            /* .color = */ constOrDefault<CircleColor>(evaluated),
-            /* .stroke_color = */ constOrDefault<CircleStrokeColor>(evaluated),
-            /* .radius = */ constOrDefault<CircleRadius>(evaluated),
-            /* .blur = */ constOrDefault<CircleBlur>(evaluated),
-            /* .opacity = */ constOrDefault<CircleOpacity>(evaluated),
-            /* .stroke_width = */ constOrDefault<CircleStrokeWidth>(evaluated),
-            /* .stroke_opacity = */ constOrDefault<CircleStrokeOpacity>(evaluated),
-            /* .scale_with_map = */ scaleWithMap,
-            /* .pitch_with_map = */ pitchWithMap,
-            /* .pad1 = */ 0};
+            .color = constOrDefault<CircleColor>(evaluated),
+            .stroke_color = constOrDefault<CircleStrokeColor>(evaluated),
+            .radius = constOrDefault<CircleRadius>(evaluated),
+            .blur = constOrDefault<CircleBlur>(evaluated),
+            .opacity = constOrDefault<CircleOpacity>(evaluated),
+            .stroke_width = constOrDefault<CircleStrokeWidth>(evaluated),
+            .stroke_opacity = constOrDefault<CircleStrokeOpacity>(evaluated),
+            .scale_with_map = scaleWithMap,
+            .pitch_with_map = pitchWithMap,
+            .pad1 = 0};
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
         propertiesUpdated = false;
     }
@@ -70,7 +70,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         }
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
-        auto* binders = static_cast<CircleProgram::Binders*>(drawable.getBinders());
+        auto* binders = static_cast<CircleBinders*>(drawable.getBinders());
         if (!binders) {
             assert(false);
             return;
@@ -93,19 +93,19 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const CircleDrawableUBO drawableUBO = {
 #endif
 
-            /* .matrix = */ util::cast<float>(matrix),
-            /* .extrude_scale = */ extrudeScale,
+            .matrix = util::cast<float>(matrix),
+            .extrude_scale = extrudeScale,
 
-            /* .color_t = */ std::get<0>(binders->get<CircleColor>()->interpolationFactor(zoom)),
-            /* .radius_t = */ std::get<0>(binders->get<CircleRadius>()->interpolationFactor(zoom)),
-            /* .blur_t = */ std::get<0>(binders->get<CircleBlur>()->interpolationFactor(zoom)),
-            /* .opacity_t = */ std::get<0>(binders->get<CircleOpacity>()->interpolationFactor(zoom)),
-            /* .stroke_color_t = */ std::get<0>(binders->get<CircleStrokeColor>()->interpolationFactor(zoom)),
-            /* .stroke_width_t = */ std::get<0>(binders->get<CircleStrokeWidth>()->interpolationFactor(zoom)),
-            /* .stroke_opacity_t = */ std::get<0>(binders->get<CircleStrokeOpacity>()->interpolationFactor(zoom)),
-            /* .pad1 = */ 0,
-            /* .pad2 = */ 0,
-            /* .pad3 = */ 0
+            .color_t = std::get<0>(binders->get<CircleColor>()->interpolationFactor(zoom)),
+            .radius_t = std::get<0>(binders->get<CircleRadius>()->interpolationFactor(zoom)),
+            .blur_t = std::get<0>(binders->get<CircleBlur>()->interpolationFactor(zoom)),
+            .opacity_t = std::get<0>(binders->get<CircleOpacity>()->interpolationFactor(zoom)),
+            .stroke_color_t = std::get<0>(binders->get<CircleStrokeColor>()->interpolationFactor(zoom)),
+            .stroke_width_t = std::get<0>(binders->get<CircleStrokeWidth>()->interpolationFactor(zoom)),
+            .stroke_opacity_t = std::get<0>(binders->get<CircleStrokeOpacity>()->interpolationFactor(zoom)),
+            .pad1 = 0,
+            .pad2 = 0,
+            .pad3 = 0
         };
 #if MLN_UBO_CONSOLIDATION
         drawable.setUBOIndex(i++);

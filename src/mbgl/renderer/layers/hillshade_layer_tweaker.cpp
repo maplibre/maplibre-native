@@ -44,10 +44,9 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
 #endif
 
     if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
-        const HillshadeEvaluatedPropsUBO evaluatedPropsUBO = {
-            /* .highlight = */ evaluated.get<HillshadeHighlightColor>(),
-            /* .shadow = */ evaluated.get<HillshadeShadowColor>(),
-            /* .accent = */ evaluated.get<HillshadeAccentColor>()};
+        const HillshadeEvaluatedPropsUBO evaluatedPropsUBO = {.highlight = evaluated.get<HillshadeHighlightColor>(),
+                                                              .shadow = evaluated.get<HillshadeShadowColor>(),
+                                                              .accent = evaluated.get<HillshadeAccentColor>()};
         parameters.context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
         propertiesUpdated = false;
     }
@@ -83,8 +82,8 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
 #else
         const HillshadeTilePropsUBO tilePropsUBO = {
 #endif
-            /* .latrange = */ getLatRange(tileID),
-            /* .light = */ getLight(parameters, evaluated)
+            .latrange = getLatRange(tileID),
+            .light = getLight(parameters, evaluated)
         };
 
 #if MLN_UBO_CONSOLIDATION

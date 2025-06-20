@@ -42,7 +42,7 @@
     #else
     XCTAssertEqualObjects([longFormatter stringFromCoordinate:coordinate], @"38 degrees and 55 minutes north by 77 degrees and 2 minutes west");
     #endif
-    
+
 
     shortFormatter.allowsMinutes = NO;
     mediumFormatter.allowsMinutes = NO;
@@ -51,7 +51,7 @@
     coordinate = CLLocationCoordinate2DMake(38.9131982, -77.0325453144239);
     XCTAssertEqualObjects([shortFormatter stringFromCoordinate:coordinate], @"39°N, 77°W");
     XCTAssertEqualObjects([mediumFormatter stringFromCoordinate:coordinate], @"39° north, 77° west");
-    
+
     #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
     XCTAssertEqualObjects([longFormatter stringFromCoordinate:coordinate], @"39 degree(s) north by 77 degree(s) west");
     #else

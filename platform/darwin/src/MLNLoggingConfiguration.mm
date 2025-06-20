@@ -9,12 +9,12 @@
 #endif
 
 namespace mbgl {
-    
+
 class MLNCoreLoggingObserver : public Log :: Observer {
 public:
     //Return true not print messages at core level, and filter at platform level.
     bool onRecord(EventSeverity severity, Event event, int64_t code, const std::string& msg) override{
-        
+
         NSString *message = [NSString stringWithFormat:@"[event]:%s [code]:%lld [message]:%@", Enum<Event>::toString(event), code, [NSString stringWithCString:msg.c_str() encoding:NSUTF8StringEncoding]];
         switch (severity) {
             case EventSeverity::Debug:
@@ -60,7 +60,7 @@ public:
 }
 
 - (void)setHandler:(void (^)(MLNLoggingLevel, NSString *, NSUInteger, NSString *))handler {
-    
+
     if (!handler) {
         _handler = [self defaultBlockHandler];
     } else {
@@ -73,14 +73,14 @@ public:
     va_start(formatList, messageFormat);
     NSString *formattedMessage = [[NSString alloc] initWithFormat:messageFormat arguments:formatList];
     va_end(formatList);
-    
+
     _handler(type, @(callingFunction), functionLine, formattedMessage);
-    
+
 }
 
 - (MLNLoggingBlockHandler)defaultBlockHandler {
     MLNLoggingBlockHandler maplibreHandler = ^(MLNLoggingLevel level, NSString *fileName, NSUInteger line, NSString *message) {
-        
+
         if (@available(iOS 10.0, macOS 10.12.0, *)) {
             static dispatch_once_t once;
             static os_log_t info_log;
@@ -105,7 +105,7 @@ public:
                 error_log = os_log_create(subsystem, "ERROR");
                 fault_log = os_log_create(subsystem, "FAULT");
             });
-            
+
             os_log_t maplibre_log;
             switch (level) {
                 case MLNLoggingLevelInfo:
@@ -152,11 +152,11 @@ public:
                 default:
                     break;
             }
-            
+
             NSLog(@"[%@] %@ - %lu: %@", category, fileName, (unsigned long)line, message);
         }
     };
-    
+
     return maplibreHandler;
 }
 

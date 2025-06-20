@@ -31,7 +31,7 @@ For this phase we would like to just build our support for bitmaps. The idea bei
 
 ### Phase 2
 
-Once we have a system in place that can handle bitmaps we would like to take it one step further and support native platform views. The changes described here would likely be done inside the individual platforms. 
+Once we have a system in place that can handle bitmaps we would like to take it one step further and support native platform views. The changes described here would likely be done inside the individual platforms.
 
 For inspiration we can look at Flutter and their rendering engine (see https://github.com/flutter/flutter/wiki/Texture-Layer-Hybrid-Composition and https://github.com/flutter/flutter/wiki/Hybrid-Composition-iOS).
 

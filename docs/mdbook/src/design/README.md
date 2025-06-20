@@ -1,4 +1,4 @@
-> [!NOTE]  
+> [!NOTE]
 > These notes are partially outdated since the [renderer modularization](https://github.com/maplibre/maplibre-native/blob/main/design-proposals/2022-10-27-rendering-modularization.md).
 
 # Design

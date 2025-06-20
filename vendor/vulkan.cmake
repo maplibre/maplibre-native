@@ -78,6 +78,6 @@ export(TARGETS
     MachineIndependent
     OSDependent
     GenericCodeGen
-    
+
     APPEND FILE MapboxCoreTargets.cmake
 )

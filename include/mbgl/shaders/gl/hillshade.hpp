@@ -6,12 +6,14 @@ namespace mbgl {
 namespace shaders {
 
 template <>
-struct ShaderSource<BuiltIn::HillshadeProgram, gfx::Backend::Type::OpenGL> {
-    static constexpr const char* name = "HillshadeProgram";
-    static constexpr const char* vertex = R"(uniform mat4 u_matrix;
-
-layout (location = 0) in vec2 a_pos;
+struct ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* name = "HillshadeShader";
+    static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec2 a_texture_pos;
+
+layout (std140) uniform HillshadeDrawableUBO {
+    highp mat4 u_matrix;
+};
 
 out vec2 v_pos;
 
@@ -20,14 +22,19 @@ void main() {
     v_pos = a_texture_pos / 8192.0;
 }
 )";
-    static constexpr const char* fragment = R"(uniform sampler2D u_image;
-in vec2 v_pos;
+    static constexpr const char* fragment = R"(in vec2 v_pos;
+uniform sampler2D u_image;
 
-uniform vec2 u_latrange;
-uniform vec2 u_light;
-uniform vec4 u_shadow;
-uniform vec4 u_highlight;
-uniform vec4 u_accent;
+layout (std140) uniform HillshadeTilePropsUBO {
+    highp vec2 u_latrange;
+    highp vec2 u_light;
+};
+
+layout (std140) uniform HillshadeEvaluatedPropsUBO {
+    highp vec4 u_highlight;
+    highp vec4 u_shadow;
+    highp vec4 u_accent;
+};
 
 #define PI 3.141592653589793
 

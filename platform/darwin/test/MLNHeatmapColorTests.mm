@@ -16,7 +16,7 @@
     MLNHeatmapStyleLayer *layer = [[MLNHeatmapStyleLayer alloc] initWithIdentifier:@"layerID" source:source];
 
     auto rawLayer = static_cast<mbgl::style::HeatmapLayer*>(layer.rawLayer);
-    
+
     XCTAssertTrue(rawLayer->getHeatmapColor().isUndefined(),
                   @"heatmap-color should be unset initially.");
     NSExpression *defaultExpression = layer.heatmapColor;
@@ -24,7 +24,7 @@
     NSExpression *constantExpression = [NSExpression expressionWithFormat:@"%@", [MLNColor redColor]];
     layer.heatmapColor = constantExpression;
 
-    
+
     mbgl::style::PropertyValue<float> propertyValue = { 0xff };
     XCTAssertEqual(rawLayer->getHeatmapColor().evaluate(0.0), mbgl::Color::red(),
                    @"Setting heatmapColor to a constant value expression should update heatmap-color.");
@@ -38,7 +38,7 @@
 #endif
     NSExpression *functionExpression = [NSExpression expressionWithFormat:@"mgl_step:from:stops:($heatmapDensity, %@, %@)", constantExpression, @{@12: constantExpression2}];
     layer.heatmapColor = functionExpression;
-    
+
     XCTAssertEqual(rawLayer->getHeatmapColor().evaluate(11.0), mbgl::Color::red(),
                    @"Setting heatmapColor to an expression depending on $heatmapDensity should update heatmap-color.");
     XCTAssertEqual(rawLayer->getHeatmapColor().evaluate(12.0), mbgl::Color::blue(),

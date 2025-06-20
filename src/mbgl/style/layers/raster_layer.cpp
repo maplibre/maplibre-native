@@ -21,16 +21,15 @@ namespace style {
 
 // static
 const LayerTypeInfo* RasterLayer::Impl::staticTypeInfo() noexcept {
-    const static LayerTypeInfo typeInfo{"raster",
-                                        LayerTypeInfo::Source::Required,
-                                        LayerTypeInfo::Pass3D::NotRequired,
-                                        LayerTypeInfo::Layout::NotRequired,
-                                        LayerTypeInfo::FadingTiles::NotRequired,
-                                        LayerTypeInfo::CrossTileIndex::NotRequired,
-                                        LayerTypeInfo::TileKind::Raster};
+    const static LayerTypeInfo typeInfo{.type="raster",
+                                        .source=LayerTypeInfo::Source::Required,
+                                        .pass3d=LayerTypeInfo::Pass3D::NotRequired,
+                                        .layout=LayerTypeInfo::Layout::NotRequired,
+                                        .fadingTiles=LayerTypeInfo::FadingTiles::NotRequired,
+                                        .crossTileIndex=LayerTypeInfo::CrossTileIndex::NotRequired,
+                                        .tileKind=LayerTypeInfo::TileKind::Raster};
     return &typeInfo;
 }
-
 
 RasterLayer::RasterLayer(const std::string& layerID, const std::string& sourceID)
     : Layer(makeMutable<Impl>(layerID, sourceID)) {

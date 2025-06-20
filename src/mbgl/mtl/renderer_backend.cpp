@@ -15,6 +15,7 @@
 #include <mbgl/shaders/mtl/circle.hpp>
 #include <mbgl/shaders/mtl/clipping_mask.hpp>
 #include <mbgl/shaders/mtl/collision.hpp>
+#include <mbgl/shaders/mtl/custom_geometry.hpp>
 #include <mbgl/shaders/mtl/custom_symbol_icon.hpp>
 #include <mbgl/shaders/mtl/debug.hpp>
 #include <mbgl/shaders/mtl/fill.hpp>
@@ -24,6 +25,7 @@
 #include <mbgl/shaders/mtl/hillshade.hpp>
 #include <mbgl/shaders/mtl/hillshade_prepare.hpp>
 #include <mbgl/shaders/mtl/line.hpp>
+#include <mbgl/shaders/mtl/location_indicator.hpp>
 #include <mbgl/shaders/mtl/raster.hpp>
 #include <mbgl/shaders/mtl/symbol.hpp>
 #include <mbgl/shaders/mtl/widevector.hpp>
@@ -57,21 +59,21 @@ PremultipliedImage RendererBackend::readFramebuffer(const Size& size) {
     return PremultipliedImage(size);
 }
 
-void RendererBackend::assumeFramebufferBinding(const mtl::FramebufferID fbo) {}
+void RendererBackend::assumeFramebufferBinding(const mtl::FramebufferID) {}
 
-void RendererBackend::assumeViewport(int32_t x, int32_t y, const Size& size) {}
+void RendererBackend::assumeViewport(int32_t, int32_t, const Size&) {}
 
-void RendererBackend::assumeScissorTest(bool enabled) {}
+void RendererBackend::assumeScissorTest(bool) {}
 
 bool RendererBackend::implicitFramebufferBound() {
     return false;
 }
 
-void RendererBackend::setFramebufferBinding(const mtl::FramebufferID fbo) {}
+void RendererBackend::setFramebufferBinding(const mtl::FramebufferID) {}
 
-void RendererBackend::setViewport(int32_t x, int32_t y, const Size& size) {}
+void RendererBackend::setViewport(int32_t, int32_t, const Size&) {}
 
-void RendererBackend::setScissorTest(bool enabled) {}
+void RendererBackend::setScissorTest(bool) {}
 
 /// @brief Register a list of types with a shader registry instance
 /// @tparam ...ShaderID Pack of BuiltIn:: shader IDs
@@ -105,6 +107,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::ClippingMaskProgram,
                   shaders::BuiltIn::CollisionBoxShader,
                   shaders::BuiltIn::CollisionCircleShader,
+                  shaders::BuiltIn::CustomGeometryShader,
                   shaders::BuiltIn::CustomSymbolIconShader,
                   shaders::BuiltIn::DebugShader,
                   shaders::BuiltIn::FillShader,
@@ -122,9 +125,11 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::LineGradientShader,
                   shaders::BuiltIn::LineSDFShader,
                   shaders::BuiltIn::LinePatternShader,
+                  shaders::BuiltIn::LocationIndicatorShader,
+                  shaders::BuiltIn::LocationIndicatorTexturedShader,
                   shaders::BuiltIn::RasterShader,
                   shaders::BuiltIn::SymbolIconShader,
-                  shaders::BuiltIn::SymbolSDFIconShader,
+                  shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader,
                   shaders::BuiltIn::WideVectorShader>(shaders, programParameters);
 }

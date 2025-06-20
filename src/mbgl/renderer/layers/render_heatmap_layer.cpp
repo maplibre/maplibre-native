@@ -3,7 +3,6 @@
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
-#include <mbgl/programs/programs.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/style/layers/heatmap_layer_impl.hpp>
 #include <mbgl/geometry/feature_index.hpp>
@@ -13,7 +12,6 @@
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/intersection_tests.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/renderer/layers/heatmap_layer_tweaker.hpp>
 #include <mbgl/renderer/layers/heatmap_texture_layer_tweaker.hpp>
 #include <mbgl/renderer/layer_group.hpp>
@@ -24,7 +22,6 @@
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
-#endif
 
 namespace mbgl {
 
@@ -50,17 +47,16 @@ RenderHeatmapLayer::~RenderHeatmapLayer() = default;
 
 void RenderHeatmapLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
+    styleDependencies = unevaluated.getDependencies();
     updateColorRamp();
 }
 
-#if MLN_DRAWABLE_RENDERER
 void RenderHeatmapLayer::layerChanged(const TransitionParameters& parameters,
                                       const Immutable<style::Layer::Impl>& impl,
                                       UniqueChangeRequestVec& changes) {
     RenderLayer::layerChanged(parameters, impl, changes);
     textureTweaker.reset();
 }
-#endif
 
 void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     const auto previousProperties = staticImmutableCast<HeatmapLayerProperties>(evaluatedProperties);
@@ -73,14 +69,12 @@ void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 
-#if MLN_DRAWABLE_RENDERER
     if (layerTweaker) {
         layerTweaker->updateProperties(evaluatedProperties);
     }
     if (textureTweaker) {
         textureTweaker->updateProperties(evaluatedProperties);
     }
-#endif
 }
 
 bool RenderHeatmapLayer::hasTransition() const {
@@ -91,123 +85,6 @@ bool RenderHeatmapLayer::hasCrossfade() const {
     return false;
 }
 
-#if MLN_LEGACY_RENDERER
-void RenderHeatmapLayer::upload(gfx::UploadPass& uploadPass) {
-    if (!colorRampTexture) {
-        colorRampTexture = uploadPass.createTexture(*colorRamp, gfx::TextureChannelDataType::UnsignedByte);
-    }
-}
-
-void RenderHeatmapLayer::render(PaintParameters& parameters) {
-    assert(renderTiles);
-    if (parameters.pass == RenderPass::Opaque) {
-        return;
-    }
-
-    if (!parameters.shaders.getLegacyGroup().populate(heatmapProgram)) return;
-    if (!parameters.shaders.getLegacyGroup().populate(heatmapTextureProgram)) return;
-
-    if (parameters.pass == RenderPass::Pass3D) {
-        const auto& viewportSize = parameters.staticData.backendSize;
-        const auto size = Size{viewportSize.width / 4, viewportSize.height / 4};
-
-        assert(colorRampTexture);
-
-        if (!renderTexture || renderTexture->getSize() != size) {
-            renderTexture = parameters.context.createOffscreenTexture(size, gfx::TextureChannelDataType::HalfFloat);
-        }
-
-        auto renderPass = parameters.encoder->createRenderPass("heatmap texture",
-                                                               {*renderTexture, Color{0.0f, 0.0f, 0.0f, 1.0f}, {}, {}});
-
-        for (const RenderTile& tile : *renderTiles) {
-            const LayerRenderData* renderData = getRenderDataForPass(tile, parameters.pass);
-            if (!renderData) {
-                continue;
-            }
-            auto& bucket = static_cast<HeatmapBucket&>(*renderData->bucket);
-            const auto& evaluated = getEvaluated<HeatmapLayerProperties>(renderData->layerProperties);
-
-            const auto extrudeScale = tile.id.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));
-
-            auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
-
-            const auto allUniformValues = HeatmapProgram::computeAllUniformValues(
-                HeatmapProgram::LayoutUniformValues{
-                    uniforms::intensity::Value(evaluated.get<style::HeatmapIntensity>()),
-                    uniforms::matrix::Value(tile.matrix),
-                    uniforms::heatmap::extrude_scale::Value(extrudeScale)},
-                paintPropertyBinders,
-                evaluated,
-                static_cast<float>(parameters.state.getZoom()));
-            const auto allAttributeBindings = HeatmapProgram::computeAllAttributeBindings(
-                *bucket.vertexBuffer, paintPropertyBinders, evaluated);
-
-            checkRenderability(parameters, HeatmapProgram::activeBindingCount(allAttributeBindings));
-
-            heatmapProgram->draw(parameters.context,
-                                 *renderPass,
-                                 gfx::Triangles(),
-                                 gfx::DepthMode::disabled(),
-                                 gfx::StencilMode::disabled(),
-                                 gfx::ColorMode::additive(),
-                                 gfx::CullFaceMode::disabled(),
-                                 *bucket.indexBuffer,
-                                 bucket.segments,
-                                 allUniformValues,
-                                 allAttributeBindings,
-                                 HeatmapProgram::TextureBindings{},
-                                 getID());
-        }
-
-    } else if (parameters.pass == RenderPass::Translucent) {
-        const auto& size = parameters.staticData.backendSize;
-
-        mat4 viewportMat;
-        matrix::ortho(viewportMat, 0, size.width, size.height, 0, 0, 1);
-
-        const Properties<>::PossiblyEvaluated properties;
-        const HeatmapTextureProgram::Binders paintAttributeData{properties, 0};
-
-        const auto allUniformValues = HeatmapTextureProgram::computeAllUniformValues(
-            HeatmapTextureProgram::LayoutUniformValues{
-                uniforms::matrix::Value(viewportMat),
-                uniforms::world::Value(size),
-                uniforms::opacity::Value(
-                    getEvaluated<HeatmapLayerProperties>(evaluatedProperties).get<HeatmapOpacity>())},
-            paintAttributeData,
-            properties,
-            static_cast<float>(parameters.state.getZoom()));
-        const auto allAttributeBindings = HeatmapTextureProgram::computeAllAttributeBindings(
-            *parameters.staticData.heatmapTextureVertexBuffer, paintAttributeData, properties);
-
-        checkRenderability(parameters, HeatmapTextureProgram::activeBindingCount(allAttributeBindings));
-
-        if (segments.empty()) {
-            // Copy over the segments so that we can create our own DrawScopes.
-            segments = RenderStaticData::heatmapTextureSegments();
-        }
-        heatmapTextureProgram->draw(
-            parameters.context,
-            *parameters.renderPass,
-            gfx::Triangles(),
-            gfx::DepthMode::disabled(),
-            gfx::StencilMode::disabled(),
-            parameters.colorModeForRenderPass(),
-            gfx::CullFaceMode::disabled(),
-            *parameters.staticData.quadTriangleIndexBuffer,
-            segments,
-            allUniformValues,
-            allAttributeBindings,
-            HeatmapTextureProgram::TextureBindings{
-                textures::image::Value{renderTexture->getTexture().getResource(), gfx::TextureFilterType::Linear},
-                textures::color_ramp::Value{colorRampTexture->getResource(), gfx::TextureFilterType::Linear},
-            },
-            getID());
-    }
-}
-#endif // MLN_LEGACY_RENDERER
-
 void RenderHeatmapLayer::updateColorRamp() {
     if (colorRamp) {
         auto colorValue = unevaluated.get<HeatmapColor>().getValue();
@@ -215,9 +92,7 @@ void RenderHeatmapLayer::updateColorRamp() {
             colorValue = HeatmapLayer::getDefaultHeatmapColor();
         }
 
-        if (applyColorRamp(colorValue, *colorRamp)) {
-            colorRampTexture = std::nullopt;
-        }
+        applyColorRamp(colorValue, *colorRamp);
     }
 }
 
@@ -235,7 +110,6 @@ bool RenderHeatmapLayer::queryIntersectsFeature(const GeometryCoordinates& query
     return false;
 }
 
-#if MLN_DRAWABLE_RENDERER
 namespace {
 void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, UniqueChangeRequestVec& changes) {
     if (renderTarget_) {
@@ -504,8 +378,9 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
     std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
     texture->setImage(colorRamp);
-    texture->setSamplerConfiguration(
-        {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+    texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                      .wrapU = gfx::TextureWrapType::Clamp,
+                                      .wrapV = gfx::TextureWrapType::Clamp});
     heatmapTextureBuilder->setTexture(std::move(texture), idHeatmapColorRampTexture);
 
     heatmapTextureBuilder->flush(context);
@@ -516,6 +391,5 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         ++stats.drawablesAdded;
     }
 }
-#endif // MLN_DRAWABLE_RENDERER
 
 } // namespace mbgl

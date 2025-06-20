@@ -50,6 +50,7 @@ MLN_GENERATED_DARWIN_TEST_CODE = [
 ]
 
 MLN_DARWIN_OBJC_HEADERS = [
+    "src/MLNActionJournalOptions.h",
     "src/MLNAnnotation.h",
     "src/MLNAttributedExpression.h",
     "src/MLNAttributionInfo.h",
@@ -71,6 +72,7 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/MLNLocationManager.h",
     "src/MLNLoggingConfiguration.h",
     "src/MLNMapCamera.h",
+    "src/MLNMapOptions.h",
     "src/MLNMapSnapshotter.h",
     "src/MLNMultiPoint.h",
     "src/MLNNetworkConfiguration.h",
@@ -84,6 +86,7 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/MLNPolyline.h",
     "src/MLNRasterDEMSource.h",
     "src/MLNRasterTileSource.h",
+    "src/MLNRenderingStats.h",
     "src/MLNSettings.h",
     "src/MLNShape.h",
     "src/MLNShapeCollection.h",
@@ -93,6 +96,7 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/MLNStyle.h",
     "src/MLNStyleLayer.h",
     "src/MLNStyleValue.h",
+    "src/MLNTileOperation.h",
     "src/MLNTilePyramidOfflineRegion.h",
     "src/MLNTileServerOptions.h",
     "src/MLNTileSource.h",
@@ -125,6 +129,7 @@ MLN_DARWIN_OBJCPP_HEADERS = [
 ]
 
 MLN_DARWIN_PRIVATE_HEADERS = [
+    "src/MLNActionJournalOptions_Private.h",
     "src/MLNAttributionInfo_Private.h",
     "src/MLNComputedShapeSource_Private.h",
     "src/MLNCustomStyleLayer_Private.h",
@@ -144,6 +149,7 @@ MLN_DARWIN_PRIVATE_HEADERS = [
     "src/MLNPolygon_Private.h",
     "src/MLNPolyline_Private.h",
     "src/MLNRasterTileSource_Private.h",
+    "src/MLNRenderingStats_Private.h",
     "src/MLNSettings_Private.h",
     "src/MLNShapeOfflineRegion_Private.h",
     "src/MLNShapeSource_Private.h",
@@ -160,6 +166,7 @@ MLN_DARWIN_PRIVATE_HEADERS = [
 ]
 
 MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
+    "src/MLNActionJournalOptions.mm",
     "src/MLNAttributionInfo.mm",
     "src/MLNBackendResource.mm",
     "src/MLNComputedShapeSource.mm",
@@ -172,6 +179,7 @@ MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/MLNImageSource.mm",
     "src/MLNLoggingConfiguration.mm",
     "src/MLNMapCamera.mm",
+    "src/MLNMapOptions.mm",
     "src/MLNMapSnapshotter.mm",
     "src/MLNMultiPoint.mm",
     "src/MLNNetworkConfiguration.mm",
@@ -183,6 +191,7 @@ MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/MLNPolyline.mm",
     "src/MLNRasterDEMSource.mm",
     "src/MLNRasterTileSource.mm",
+    "src/MLNRenderingStats.mm",
     "src/MLNSettings.mm",
     "src/MLNShape.mm",
     "src/MLNShapeCollection.mm",

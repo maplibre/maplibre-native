@@ -12,6 +12,7 @@
 #include <mbgl/shaders/vulkan/circle.hpp>
 #include <mbgl/shaders/vulkan/clipping_mask.hpp>
 #include <mbgl/shaders/vulkan/collision.hpp>
+#include <mbgl/shaders/vulkan/custom_geometry.hpp>
 #include <mbgl/shaders/vulkan/custom_symbol_icon.hpp>
 #include <mbgl/shaders/vulkan/debug.hpp>
 #include <mbgl/shaders/vulkan/fill.hpp>
@@ -330,8 +331,7 @@ void RendererBackend::initDebug() {
         const vk::DebugUtilsMessageTypeFlagsEXT type = vk::DebugUtilsMessageTypeFlagsEXT() |
                                                        vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
                                                        vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
-                                                       vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
-                                                       vk::DebugUtilsMessageTypeFlagBitsEXT::eDeviceAddressBinding;
+                                                       vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance;
 
         const auto createInfo =
             vk::DebugUtilsMessengerCreateInfoEXT().setMessageSeverity(severity).setMessageType(type).setPfnUserCallback(
@@ -669,6 +669,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::ClippingMaskProgram,
                   shaders::BuiltIn::CollisionBoxShader,
                   shaders::BuiltIn::CollisionCircleShader,
+                  shaders::BuiltIn::CustomGeometryShader,
                   shaders::BuiltIn::CustomSymbolIconShader,
                   shaders::BuiltIn::DebugShader,
                   shaders::BuiltIn::FillShader,
@@ -690,7 +691,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::LocationIndicatorTexturedShader,
                   shaders::BuiltIn::RasterShader,
                   shaders::BuiltIn::SymbolIconShader,
-                  shaders::BuiltIn::SymbolSDFIconShader,
+                  shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader,
                   shaders::BuiltIn::WideVectorShader>(shaders, programParameters);
 }

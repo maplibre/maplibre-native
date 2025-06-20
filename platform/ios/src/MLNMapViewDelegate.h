@@ -1,6 +1,8 @@
 #import <UIKit/UIKit.h>
 
 #import "MLNCameraChangeReason.h"
+#import "MLNRenderingStats.h"
+#import "MLNTileOperation.h"
 #import "Mapbox.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -267,6 +269,23 @@ NS_ASSUME_NONNULL_BEGIN
                      frameEncodingTime:(double)frameEncodingTime
                     frameRenderingTime:(double)frameRenderingTime;
 /**
+ Tells the delegate that the map view has just redrawn.
+
+ This method is called any time the map view needs to redraw due to a change in
+ the viewpoint or style property transition. This method may be called very
+ frequently, even moreso than `-mapViewRegionIsChanging:`. Therefore, your
+ implementation of this method should be as lightweight as possible to avoid
+ affecting performance.
+
+ @param mapView The map view that has just redrawn.
+ @param fullyRendered A Boolean value indicating whether the map is fully rendered or not.
+ @param renderingStats A collection of rendering statistics
+ */
+- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView
+                         fullyRendered:(BOOL)fullyRendered
+                        renderingStats:(MLNRenderingStats *)renderingStats;
+
+/**
  Tells the delegate that the map view is entering an idle state, and no more
  drawing will be necessary until new data is loaded or there is some interaction
  with the map.
@@ -302,6 +321,14 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)mapView:(MLNMapView *)mapView didFinishLoadingStyle:(MLNStyle *)style;
 
 /**
+ Tells the delegate that the source changed.
+
+ @param mapView The map view that owns the source.
+ @param source The source that changed.
+ */
+- (void)mapView:(MLNMapView *)mapView sourceDidChange:(MLNSource *)source;
+
+/**
  Tells the delegate that the `mapView` is missing an image. The image should be added synchronously
  with ``MLNStyle/setImage:forName:`` to be rendered on the current zoom level. When loading icons
  asynchronously, you can load a placeholder image and replace it when your image has loaded.
@@ -324,6 +351,157 @@ NS_ASSUME_NONNULL_BEGIN
  the cached image.
  */
 - (BOOL)mapView:(MLNMapView *)mapView shouldRemoveStyleImage:(NSString *)imageName;
+
+// MARK: - Shader Compilation
+
+/**
+ Called when a shader is about to be compiled.
+
+ @param mapView The ``MLNMapView`` instance invoking this delegate method.
+ @param id The unique identifier for the shader being compiled.
+ @param backend An integer representing the backend type used for shader compilation.
+ @param defines A string containing the shader program configuration definitions.
+
+ > Warning: This method is not thread-safe.
+ */
+- (void)mapView:(MLNMapView *)mapView
+    shaderWillCompile:(NSInteger)id
+              backend:(NSInteger)backend
+              defines:(NSString *)defines;
+
+/**
+Called when a shader was successfully compiled.
+
+@param mapView The ``MLNMapView`` instance invoking this delegate method.
+@param id The unique identifier for the shader that was compiled.
+@param backend An integer representing the backend type used for shader compilation.
+@param defines A string containing the shader program configuration definitions.
+
+> Warning: This method is not thread-safe.
+*/
+- (void)mapView:(MLNMapView *)mapView
+    shaderDidCompile:(NSInteger)id
+             backend:(NSInteger)backend
+             defines:(NSString *)defines;
+
+/**
+Called when a shader failed to compile.
+
+@param mapView The ``MLNMapView`` instance invoking this delegate method.
+@param id The unique identifier for the shader that failed to compile.
+@param backend An integer representing the backend type used for shader compilation.
+@param defines A string containing the shader program configuration definitions.
+
+> Warning: This method is not thread-safe.
+*/
+- (void)mapView:(MLNMapView *)mapView
+    shaderDidFailCompile:(NSInteger)id
+                 backend:(NSInteger)backend
+                 defines:(NSString *)defines;
+
+// MARK: - Glyph Requests
+
+/**
+Called when glyphs for the specified font stack are about to be loaded.
+
+@param mapView The ``MLNMapView`` instance invoking this delegate method.
+@param fontStack An array of strings identifying the requested font stack.
+@param range The range of glyphs that are being requested.
+
+> Warning: This method is not thread-safe.
+*/
+- (void)mapView:(MLNMapView *)mapView
+    glyphsWillLoad:(NSArray<NSString *> *)fontStack
+             range:(NSRange)range;
+
+/**
+Called when glyphs for the specified font stack have been successfully loaded.
+
+@param mapView The ``MLNMapView`` instance invoking this delegate method.
+@param fontStack An array of strings identifying the requested font stack.
+@param range The range of glyphs that were successfully loaded.
+
+> Warning: This method is not thread-safe.
+*/
+- (void)mapView:(MLNMapView *)mapView
+    glyphsDidLoad:(NSArray<NSString *> *)fontStack
+            range:(NSRange)range;
+
+/**
+Called when an error occurred while loading glyphs for the specified font stack.
+
+@param mapView The ``MLNMapView`` instance invoking this delegate method.
+@param fontStack An array of strings identifying the requested font stack.
+@param range The range of glyphs for which loading failed.
+
+> Warning: This method is not thread-safe.
+*/
+- (void)mapView:(MLNMapView *)mapView
+    glyphsDidError:(NSArray<NSString *> *)fontStack
+             range:(NSRange)range;
+
+// MARK: - Tile Requests
+
+/**
+Called when a tile-related action is triggered.
+
+This method notifies the delegate of various stages of tile processing, such as requesting from
+cache or network, parsing, or encountering errors.
+
+@param mapView The ``MLNMapView`` instance invoking this delegate method.
+@param operation The type of tile operation triggered. See ``MLNTileOperation``.
+@param x The x-coordinate of the tile.
+@param y The y-coordinate of the tile.
+@param z The z (zoom) level of the tile.
+@param wrap The wrap value for the tile.
+@param overscaledZ The overscaled zoom level of the tile.
+@param sourceID A string identifier for the tile source.
+
+> Warning: This method is not thread-safe.
+*/
+- (void)mapView:(MLNMapView *)mapView
+    tileDidTriggerAction:(MLNTileOperation)operation
+                       x:(NSInteger)x
+                       y:(NSInteger)y
+                       z:(NSInteger)z
+                    wrap:(NSInteger)wrap
+             overscaledZ:(NSInteger)overscaledZ
+                sourceID:(NSString *)sourceID;
+
+// MARK: - Sprite Requests
+
+/**
+Called when a sprite is about to be loaded.
+
+@param mapView The ``MLNMapView`` instance invoking this delegate method.
+@param id The unique identifier for the sprite being loaded.
+@param url The URL from which the sprite is being requested.
+
+> Warning: This method is not thread-safe.
+*/
+- (void)mapView:(MLNMapView *)mapView spriteWillLoad:(NSString *)id url:(NSString *)url;
+
+/**
+Called when a sprite has been successfully loaded.
+
+@param mapView The ``MLNMapView`` instance invoking this delegate method.
+@param id The unique identifier for the sprite that was loaded.
+@param url The URL from which the sprite was loaded.
+
+> Warning: This method is not thread-safe.
+*/
+- (void)mapView:(MLNMapView *)mapView spriteDidLoad:(NSString *)id url:(NSString *)url;
+
+/**
+Called when an error occurs while loading a sprite.
+
+@param mapView The ``MLNMapView`` instance invoking this delegate method.
+@param id The unique identifier for the sprite for which loading failed.
+@param url The URL from which the sprite was being requested.
+
+> Warning: This method is not thread-safe.
+*/
+- (void)mapView:(MLNMapView *)mapView spriteDidError:(NSString *)id url:(NSString *)url;
 
 // MARK: Tracking User Location
 

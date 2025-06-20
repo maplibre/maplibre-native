@@ -6,13 +6,12 @@
 namespace mbgl {
 namespace shaders {
 
-#define COLLISION_SHADER_COMMON \
-    R"(
+constexpr auto collisionShaderPrelude = R"(
 
 #define idCollisionDrawableUBO      idDrawableReservedVertexOnlyUBO
 #define idCollisionTilePropsUBO     drawableReservedUBOCount
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Vulkan> {
@@ -22,7 +21,8 @@ struct ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Vulkan> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto vertex = COLLISION_SHADER_COMMON R"(
+    static constexpr auto prelude = collisionShaderPrelude;
+    static constexpr auto vertex = R"(
 
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec2 in_anchor_position;
@@ -61,7 +61,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = COLLISION_SHADER_COMMON R"(
+    static constexpr auto fragment = R"(
 
 layout(location = 0) in float frag_placed;
 layout(location = 1) in float frag_notUsed;
@@ -98,7 +98,8 @@ struct ShaderSource<BuiltIn::CollisionCircleShader, gfx::Backend::Type::Vulkan> 
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto vertex = COLLISION_SHADER_COMMON R"(
+    static constexpr auto prelude = collisionShaderPrelude;
+    static constexpr auto vertex = R"(
 
 layout(location = 0) in ivec2 in_position;
 layout(location = 1) in ivec2 in_anchor_position;
@@ -143,7 +144,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = COLLISION_SHADER_COMMON R"(
+    static constexpr auto fragment = R"(
 
 layout(location = 0) in float frag_placed;
 layout(location = 1) in float frag_notUsed;

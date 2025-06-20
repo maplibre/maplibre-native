@@ -72,6 +72,17 @@ void RenderPass::endEncoding() {
     }
 }
 
+void RenderPass::resetState() {
+    currentDepthStencilState.reset();
+    currentStencilReferenceValue = 0;
+    for (int i = 0; i < maxBinds; ++i) {
+        vertexBinds[i].reset();
+        fragmentBinds[i].reset();
+        fragmentTextureBindings[i].reset();
+        fragmentSamplerStates[i].reset();
+    }
+}
+
 namespace {
 constexpr auto missing = "<none>";
 NS::String* toNSString(const char* str) {

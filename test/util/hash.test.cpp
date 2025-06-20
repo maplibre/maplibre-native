@@ -14,6 +14,8 @@
 #include <mbgl/shaders/mtl/circle.hpp>
 #include <mbgl/shaders/mtl/clipping_mask.hpp>
 #include <mbgl/shaders/mtl/collision.hpp>
+#include <mbgl/shaders/mtl/custom_geometry.hpp>
+#include <mbgl/shaders/mtl/custom_symbol_icon.hpp>
 #include <mbgl/shaders/mtl/debug.hpp>
 #include <mbgl/shaders/mtl/fill.hpp>
 #include <mbgl/shaders/mtl/fill_extrusion.hpp>
@@ -22,6 +24,7 @@
 #include <mbgl/shaders/mtl/hillshade.hpp>
 #include <mbgl/shaders/mtl/hillshade_prepare.hpp>
 #include <mbgl/shaders/mtl/line.hpp>
+#include <mbgl/shaders/mtl/location_indicator.hpp>
 #include <mbgl/shaders/mtl/fill.hpp>
 #include <mbgl/shaders/mtl/raster.hpp>
 #include <mbgl/shaders/mtl/symbol.hpp>
@@ -128,6 +131,8 @@ TEST(OrderIndependentHash, Shaders) {
                       BuiltIn::CircleShader,
                       BuiltIn::CollisionBoxShader,
                       BuiltIn::CollisionCircleShader,
+                      BuiltIn::CustomGeometryShader,
+                      BuiltIn::CustomSymbolIconShader,
                       BuiltIn::DebugShader,
                       BuiltIn::FillShader,
                       BuiltIn::FillOutlineShader,
@@ -144,9 +149,11 @@ TEST(OrderIndependentHash, Shaders) {
                       BuiltIn::LineGradientShader,
                       BuiltIn::LinePatternShader,
                       BuiltIn::LineSDFShader,
+                      BuiltIn::LocationIndicatorShader,
+                      BuiltIn::LocationIndicatorTexturedShader,
                       BuiltIn::RasterShader,
                       BuiltIn::SymbolIconShader,
-                      BuiltIn::SymbolSDFIconShader,
+                      BuiltIn::SymbolSDFShader,
                       BuiltIn::SymbolTextAndIconShader>();
 }
 

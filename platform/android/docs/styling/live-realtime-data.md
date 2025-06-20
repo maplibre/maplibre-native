@@ -2,7 +2,7 @@
 
 {{ activity_source_note("RealTimeGeoJsonActivity.kt") }}
 
-In this example you will learn how to add a live GeoJSON source. We have set up a [lambda function](https://m6rgfvqjp34nnwqcdm4cmmy3cm0dtupu.lambda-url.us-east-1.on.aws/) that returns a new GeoJSON point every time it is called. 
+In this example you will learn how to add a live GeoJSON source. We have set up a [lambda function](https://m6rgfvqjp34nnwqcdm4cmmy3cm0dtupu.lambda-url.us-east-1.on.aws/) that returns a new GeoJSON point every time it is called.
 
 <figure markdown="span">
   <video controls width="250" poster="{{ s3_url("live_realtime_data_thumbnail.jpg") }}" >

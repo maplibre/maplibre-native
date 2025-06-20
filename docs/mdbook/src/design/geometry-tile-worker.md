@@ -1,6 +1,6 @@
 # Geometry Tile Worker
 
-![](media/geometry-tile-worker-state-machine.jpg)    
+![](media/geometry-tile-worker-state-machine.jpg)
 *Figure 8: Simplified Geometry Tile Worker State Machine*
 
 Going back to Geometry Tile Worker, it is

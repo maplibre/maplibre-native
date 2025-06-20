@@ -51,18 +51,18 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
 
     if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
         const RasterEvaluatedPropsUBO propsUBO = {
-            /* .spin_weigths = */ spinWeights(evaluated.get<RasterHueRotate>()),
-            /* .tl_parent = */ {{0.0f, 0.0f}},
-            /* .scale_parent = */ 1.0f,
-            /* .buffer_scale = */ 1.0f,
-            /* .fade_t = */ 1.0f,
-            /* .opacity = */ evaluated.get<RasterOpacity>(),
-            /* .brightness_low = */ evaluated.get<RasterBrightnessMin>(),
-            /* .brightness_high = */ evaluated.get<RasterBrightnessMax>(),
-            /* .saturation_factor = */ saturationFactor(evaluated.get<RasterSaturation>()),
-            /* .contrast_factor = */ contrastFactor(evaluated.get<RasterContrast>()),
-            /* .pad1 = */ 0,
-            /* .pad2 = */ 0};
+            .spin_weights = spinWeights(evaluated.get<RasterHueRotate>()),
+            .tl_parent = {{0.0f, 0.0f}},
+            .scale_parent = 1.0f,
+            .buffer_scale = 1.0f,
+            .fade_t = 1.0f,
+            .opacity = evaluated.get<RasterOpacity>(),
+            .brightness_low = evaluated.get<RasterBrightnessMin>(),
+            .brightness_high = evaluated.get<RasterBrightnessMax>(),
+            .saturation_factor = saturationFactor(evaluated.get<RasterSaturation>()),
+            .contrast_factor = contrastFactor(evaluated.get<RasterContrast>()),
+            .pad1 = 0,
+            .pad2 = 0};
         parameters.context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);
         propertiesUpdated = false;
     }

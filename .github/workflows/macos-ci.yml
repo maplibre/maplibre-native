@@ -69,14 +69,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
-            
+
       - name: Install dependencies
         run: |
           brew install bazelisk webp libuv webp icu4c jpeg-turbo glfw
           brew link icu4c --force
-      
+
       - name: Build AppKit app, GLFW app, cache tool, render tool for macOS
         run: bazel build //platform/macos/app:macos_app //platform/glfw:glfw_app //bin:cache_tool //bin:render_tool --//:renderer=metal
-      
+
       - name: Generate Xcode project for macOS
         run: bazel run //platform/macos:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
