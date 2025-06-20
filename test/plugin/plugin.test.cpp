@@ -127,7 +127,6 @@ TEST(Plugin, PluginLayerProperty) {
         std::cout << "   _colorValid: |" << json << "|;|" << testValue << "|\n";
         _colorValid = json == testValue;
         EXPECT_STREQ(testValue.c_str(), json.c_str());
-
     }
 
     ASSERT_TRUE(_colorValid);
