@@ -223,7 +223,7 @@ void Drawable::draw(PaintParameters& parameters) const {
             mbgl::util::hash(getColorMode().hash(), impl->vertexDescHash));
     }
     if (impl->pipelineState) {
-        encoder->setRenderPipelineState(impl->pipelineState.get());
+        renderPass.setRenderPipelineState(impl->pipelineState);
     } else {
         assert(!"Failed to create render pipeline state");
         return;

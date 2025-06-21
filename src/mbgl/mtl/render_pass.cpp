@@ -62,17 +62,11 @@ void RenderPass::endEncoding() {
         encoder.reset();
     }
 
-    currentDepthStencilState.reset();
-    currentStencilReferenceValue = 0;
-    for (int i = 0; i < maxBinds; ++i) {
-        vertexBinds[i].reset();
-        fragmentBinds[i].reset();
-        fragmentTextureBindings[i].reset();
-        fragmentSamplerStates[i].reset();
-    }
+    resetState();
 }
 
 void RenderPass::resetState() {
+    currentPipelineState.reset();
     currentDepthStencilState.reset();
     currentStencilReferenceValue = 0;
     for (int i = 0; i < maxBinds; ++i) {
@@ -196,6 +190,16 @@ void RenderPass::setFragmentSamplerState(const MTLSamplerStatePtr& state, int32_
         }
     }
 }
+
+/// Set the render pipeline state
+void RenderPass::setRenderPipelineState(const MTLRenderPipelineStatePtr &pipelineState) {
+    if (pipelineState != currentPipelineState) {
+        currentPipelineState = pipelineState;
+        encoder->setRenderPipelineState(currentPipelineState.get());
+    }
+
+}
+
 
 } // namespace mtl
 } // namespace mbgl
