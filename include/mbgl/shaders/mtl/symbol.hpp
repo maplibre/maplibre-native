@@ -130,7 +130,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
 )"
 #if MTL_SDF_SHADER_VERTEX_CULLING_ENABLED
-    R"(
+                                   R"(
     if (opacity_value == 0.0) {
         return {
             .position     = float4(-2.0, -2.0, -2.0, 1.0),
@@ -138,7 +138,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     }
     )"
 #endif
-    R"(
+                                   R"(
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -229,7 +229,6 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 )";
 };
 
-
 template <>
 struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "SymbolSDFShader";
@@ -311,7 +310,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #endif
 )"
 #if MTL_SDF_SHADER_VERTEX_CULLING_ENABLED
-    R"(
+                                   R"(
     if (fo == 0.0) {
         return {
             .position     = float4(-2.0, -2.0, -2.0, 1.0),
@@ -319,7 +318,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     }
     )"
 #endif
-    R"(
+                                   R"(
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
 
@@ -538,7 +537,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
 )"
 #if MTL_SDF_SHADER_VERTEX_CULLING_ENABLED
-    R"(
+                                   R"(
     if (fo == 0.0) {
         return {
             .position     = float4(-2.0, -2.0, -2.0, 1.0),
@@ -546,7 +545,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     }
     )"
 #endif
-    R"(
+                                   R"(
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
