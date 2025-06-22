@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## 11.10.4
+
+### ✨ Features and improvements
+
+- Concurrent camera animations
+
 ## 11.10.3
 
 ### 🐞 Bug fixes
