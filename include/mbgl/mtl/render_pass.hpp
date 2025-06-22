@@ -85,8 +85,8 @@ private:
     std::array<MTLTexturePtr, maxBinds> fragmentTextureBindings;
     std::array<MTLSamplerStatePtr, maxBinds> fragmentSamplerStates;
 
-    std::optional<MTL::CullMode> currentCullMode = std::nullopt;
-    std::optional<MTL::Winding> currentWinding = std::nullopt;
+    MTL::CullMode currentCullMode = MTL::CullModeNone;
+    MTL::Winding currentWinding = MTL::WindingClockwise;
 };
 
 } // namespace mtl

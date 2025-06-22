@@ -75,8 +75,8 @@ void RenderPass::resetState() {
         fragmentSamplerStates[i].reset();
     }
 
-    currentCullMode.reset();
-    currentWinding.reset();
+    currentCullMode = MTL::CullModeNone;
+    currentWinding = MTL::WindingClockwise;
 }
 
 namespace {
