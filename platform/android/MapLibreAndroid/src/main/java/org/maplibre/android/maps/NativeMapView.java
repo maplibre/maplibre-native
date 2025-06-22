@@ -1150,6 +1150,11 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void toggleTransform() {
+    nativeToggleTransform();
+  }
+
+  @Override
   public void setSwapBehaviorFlush(boolean flush) {
     mapRenderer.setSwapBehaviorFlush(flush);
   }
@@ -1745,6 +1750,9 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native void nativeEnableRenderingStatsView(boolean enabled);
+
+  @Keep
+  private native void nativeToggleTransform();
 
   //
   // Snapshot

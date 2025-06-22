@@ -1546,7 +1546,7 @@ public final class LocationComponent {
     new MapLibreMap.OnDeveloperAnimationListener() {
       @Override
       public void onDeveloperAnimationStarted() {
-        if (isComponentInitialized && isEnabled) {
+        if (isComponentInitialized && isEnabled && !options.concurrentCameraAnimation()) {
           setCameraMode(CameraMode.NONE);
         }
       }
