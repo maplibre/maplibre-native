@@ -130,7 +130,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
 )"
 #if MTL_SDF_SHADER_VERTEX_CULLING_ENABLED
-                                   R"(
+                                R"(
     if (opacity_value == 0.0) {
         return {
             .position     = float4(-2.0, -2.0, -2.0, 1.0),
