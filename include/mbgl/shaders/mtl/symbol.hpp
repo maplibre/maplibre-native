@@ -124,21 +124,21 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
 
 #if defined(HAS_UNIFORM_u_opacity)
-    const half fo = half(fade_opacity); 
+    const half fo = half(fade_opacity);
 #else
     const half fo = half(unpack_mix_float(vertx.opacity, drawable.opacity_t) * fade_opacity);
 #endif
     )"
-    #if MTL_SDF_SHADER_VERTEX_CULLING_ENABLED
-                                       R"(
+#if MTL_SDF_SHADER_VERTEX_CULLING_ENABLED
+                                   R"(
         if (fo == 0.0) {
             return {
                 .position     = float4(-2.0, -2.0, -2.0, 1.0),
             };
         }
         )"
-    #endif
-                                       R"(
+#endif
+                                   R"(
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
 
@@ -198,7 +198,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .position     = position,
         .tex          = half2(a_tex / drawable.texsize),
 #if defined(HAS_UNIFORM_u_opacity)
-        .fade_opacity = fo, 
+        .fade_opacity = fo,
 #else
         .opacity      = fo,
 #endif
