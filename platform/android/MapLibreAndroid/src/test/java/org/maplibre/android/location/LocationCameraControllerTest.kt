@@ -698,9 +698,7 @@ class LocationCameraControllerTest {
     @Test
     fun gesturesManagement_enabled() {
         val maplibreMap = Mockito.mock(MapLibreMap::class.java)
-        val initialGesturesManager = Mockito.mock(
-            AndroidGesturesManager::class.java
-        )
+        val initialGesturesManager = buildInitialGesturesManager()
         val internalGesturesManager = Mockito.mock(
             AndroidGesturesManager::class.java
         )
@@ -717,9 +715,7 @@ class LocationCameraControllerTest {
     @Test
     fun gesturesManagement_disabled() {
         val maplibreMap = Mockito.mock(MapLibreMap::class.java)
-        val initialGesturesManager = Mockito.mock(
-            AndroidGesturesManager::class.java
-        )
+        val initialGesturesManager = buildInitialGesturesManager()
         val internalGesturesManager = Mockito.mock(
             AndroidGesturesManager::class.java
         )
@@ -736,9 +732,7 @@ class LocationCameraControllerTest {
     @Test
     fun gesturesManagement_optionNotChangedInitial() {
         val maplibreMap = Mockito.mock(MapLibreMap::class.java)
-        val initialGesturesManager = Mockito.mock(
-            AndroidGesturesManager::class.java
-        )
+        val initialGesturesManager = buildInitialGesturesManager()
         val internalGesturesManager = Mockito.mock(
             AndroidGesturesManager::class.java
         )
@@ -756,9 +750,7 @@ class LocationCameraControllerTest {
     @Test
     fun gesturesManagement_optionNotChangedInternal() {
         val maplibreMap = Mockito.mock(MapLibreMap::class.java)
-        val initialGesturesManager = Mockito.mock(
-            AndroidGesturesManager::class.java
-        )
+        val initialGesturesManager = buildInitialGesturesManager()
         val internalGesturesManager = Mockito.mock(
             AndroidGesturesManager::class.java
         )
@@ -1911,9 +1903,6 @@ class LocationCameraControllerTest {
         val onCameraMoveInvalidateListener = Mockito.mock(
             OnCameraMoveInvalidateListener::class.java
         )
-        val initialGesturesManager = Mockito.mock(
-            AndroidGesturesManager::class.java
-        )
         val internalGesturesManager = Mockito.mock(
             AndroidGesturesManager::class.java
         )
@@ -1923,7 +1912,7 @@ class LocationCameraControllerTest {
             moveGestureDetector,
             onCameraTrackingChangedListener,
             onCameraMoveInvalidateListener,
-            initialGesturesManager,
+            buildInitialGesturesManager(),
             internalGesturesManager
         )
     }
@@ -1955,9 +1944,6 @@ class LocationCameraControllerTest {
         val onCameraMoveInvalidateListener = Mockito.mock(
             OnCameraMoveInvalidateListener::class.java
         )
-        val initialGesturesManager = Mockito.mock(
-            AndroidGesturesManager::class.java
-        )
         val internalGesturesManager = Mockito.mock(
             AndroidGesturesManager::class.java
         )
@@ -1967,7 +1953,7 @@ class LocationCameraControllerTest {
             moveGestureDetector,
             onCameraTrackingChangedListener,
             onCameraMoveInvalidateListener,
-            initialGesturesManager,
+            buildInitialGesturesManager(),
             internalGesturesManager
         )
     }
@@ -1985,9 +1971,6 @@ class LocationCameraControllerTest {
         val onCameraMoveInvalidateListener = Mockito.mock(
             OnCameraMoveInvalidateListener::class.java
         )
-        val initialGesturesManager = Mockito.mock(
-            AndroidGesturesManager::class.java
-        )
         val internalGesturesManager = Mockito.mock(
             AndroidGesturesManager::class.java
         )
@@ -1997,7 +1980,7 @@ class LocationCameraControllerTest {
             moveGestureDetector,
             onCameraTrackingChangedListener,
             onCameraMoveInvalidateListener,
-            initialGesturesManager,
+            buildInitialGesturesManager(),
             internalGesturesManager
         )
     }
@@ -2034,9 +2017,6 @@ class LocationCameraControllerTest {
         val onCameraMoveInvalidateListener = Mockito.mock(
             OnCameraMoveInvalidateListener::class.java
         )
-        val initialGesturesManager = Mockito.mock(
-            AndroidGesturesManager::class.java
-        )
         val internalGesturesManager = Mockito.mock(
             AndroidGesturesManager::class.java
         )
@@ -2046,7 +2026,7 @@ class LocationCameraControllerTest {
             moveGestureDetector,
             onCameraTrackingChangedListener,
             onCameraMoveInvalidateListener,
-            initialGesturesManager,
+            buildInitialGesturesManager(),
             internalGesturesManager
         )
     }
@@ -2066,9 +2046,6 @@ class LocationCameraControllerTest {
         val onCameraMoveInvalidateListener = Mockito.mock(
             OnCameraMoveInvalidateListener::class.java
         )
-        val initialGesturesManager = Mockito.mock(
-            AndroidGesturesManager::class.java
-        )
         val internalGesturesManager = Mockito.mock(
             AndroidGesturesManager::class.java
         )
@@ -2078,7 +2055,7 @@ class LocationCameraControllerTest {
             moveGestureDetector,
             onCameraTrackingChangedListener,
             onCameraMoveInvalidateListener,
-            initialGesturesManager,
+            buildInitialGesturesManager(),
             internalGesturesManager
         )
         locationCameraController.setEnabled(true)
@@ -2111,6 +2088,16 @@ class LocationCameraControllerTest {
             initialGesturesManager,
             internalGesturesManager
         )
+    }
+
+    private fun buildInitialGesturesManager(): AndroidGesturesManager {
+        val moveGestureDetector = Mockito.mock<MoveGestureDetector>()
+        // return just "some" value
+        Mockito.`when`(moveGestureDetector.moveThreshold).thenReturn(10f)
+
+        val manager = Mockito.mock<AndroidGesturesManager>()
+        Mockito.`when`(manager.moveGestureDetector).thenReturn(moveGestureDetector)
+        return manager
     }
 
     private fun <T> getAnimationListener(
