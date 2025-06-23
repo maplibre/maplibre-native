@@ -16,29 +16,6 @@
 
 namespace mbgl {
 
-template <class T>
-struct TransformProperty {
-    std::shared_ptr<PropertyAnimation> pa;
-    T current, target;
-    bool set = false;
-
-    std::function<LatLng(TimePoint)> frameLatLngFunc = nullptr;
-    std::function<double(TimePoint)> frameZoomFunc = nullptr;
-
-    // Anchor
-    std::optional<ScreenCoordinate> anchor = std::nullopt;
-    LatLng anchorLatLng = {};
-};
-
-struct PropertyAnimations {
-    TransformProperty<Point<double>> latlng;
-    TransformProperty<double> zoom, bearing, pitch;
-    TransformProperty<EdgeInsets> padding;
-
-    // Anchor
-    std::optional<ScreenCoordinate> anchor;
-    LatLng anchorLatLng;  
-
 class TransformObserver {
 public:
     virtual ~TransformObserver() = default;
@@ -155,7 +132,56 @@ public:
     FreeCameraOptions getFreeCameraOptions() const;
     void setFreeCameraOptions(const FreeCameraOptions& options);
 
+    struct PropertyAnimation {
+        TimePoint start;
+        Duration duration;
+        AnimationOptions animation;
+        bool ran = false, finished = false, done = false;
+        bool panning = false, scaling = false, rotating = false;
+
+        PropertyAnimation(TimePoint start_,
+                          Duration duration_,
+                          AnimationOptions animation_,
+                          bool panning_,
+                          bool scaling_,
+                          bool rotating_)
+            : start(start_),
+              duration(duration_),
+              animation(animation_),
+              panning(panning_),
+              scaling(scaling_),
+              rotating(rotating_) {}
+
+        double interpolant(TimePoint);
+
+        bool isAnimated() const { return duration != Duration::zero(); }
+    };
+
 private:
+    template <class T>
+    struct TransformProperty {
+        std::shared_ptr<PropertyAnimation> propertyAnimation;
+        T current, target;
+        bool set = false;
+
+        std::function<LatLng(TimePoint)> frameLatLngFunc = nullptr;
+        std::function<double(TimePoint)> frameZoomFunc = nullptr;
+
+        // Anchor
+        std::optional<ScreenCoordinate> anchor = std::nullopt;
+        LatLng anchorLatLng = {};
+    };
+
+    struct PropertyAnimations {
+        TransformProperty<Point<double>> latlng;
+        TransformProperty<double> zoom, bearing, pitch;
+        TransformProperty<EdgeInsets> padding;
+
+        // Anchor
+        std::optional<ScreenCoordinate> anchor;
+        LatLng anchorLatLng;
+    };
+    
     TransformObserver& observer;
     TransformState state;
 
@@ -163,18 +189,18 @@ private:
     bool animationTransitionFrame(std::shared_ptr<PropertyAnimation>&, double);
     void animationFinishFrame(std::shared_ptr<PropertyAnimation>&);
 
-    void visit_pas(const std::function<void(std::shared_ptr<PropertyAnimation>&)>& f) {
-        f(pas.latlng.pa);
-        f(pas.zoom.pa);
-        f(pas.bearing.pa);
-        f(pas.pitch.pa);
-        f(pas.padding.pa);
+    void visitPropertyAnimations(const std::function<void(std::shared_ptr<PropertyAnimation>&)>& f) {
+        f(propertyAnimations.latlng.propertyAnimation);
+        f(propertyAnimations.zoom.propertyAnimation);
+        f(propertyAnimations.bearing.propertyAnimation);
+        f(propertyAnimations.pitch.propertyAnimation);
+        f(propertyAnimations.padding.propertyAnimation);
     }
 
     // We don't want to show horizon: limit max pitch based on edge insets.
     double getMaxPitchForEdgeInsets(const EdgeInsets& insets) const;
 
-    PropertyAnimations pas;
+    PropertyAnimations propertyAnimations;
     bool activeAnimation = false;
 
     TimePoint transitionStart;
