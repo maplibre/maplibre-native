@@ -94,7 +94,7 @@ class LocationCameraControllerTest {
         camera.initializeOptions(options)
         camera.cameraMode = CameraMode.NONE
         Mockito.verify(moveGestureDetector, Mockito.times(2)).moveThreshold =
-            0f // one for initialization
+            MOVEMENT_THRESHOLD // one for initialization
         Mockito.verify(moveGestureDetector, Mockito.times(2)).moveThresholdRect =
             null // one for initialization
     }
