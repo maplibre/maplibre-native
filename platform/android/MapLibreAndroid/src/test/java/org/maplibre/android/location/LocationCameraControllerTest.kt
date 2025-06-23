@@ -784,7 +784,7 @@ class LocationCameraControllerTest {
         Mockito.`when`(options.trackingMultiFingerProtectedMoveArea()).thenReturn(multiFingerArea)
         camera.initializeOptions(options)
         camera.onMoveListener.onMoveBegin(moveGestureDetector)
-        Mockito.verify(moveGestureDetector, Mockito.times(2)).moveThreshold = 0f
+        Mockito.verify(moveGestureDetector, Mockito.times(2)).moveThreshold = MOVEMENT_THRESHOLD
         Mockito.verify(moveGestureDetector, Mockito.times(2)).moveThresholdRect = null
     }
 
@@ -868,12 +868,8 @@ class LocationCameraControllerTest {
         Mockito.verify(moveGestureDetector, Mockito.times(2)).interrupt()
 
         // verify that threshold are reset
-        val moveThresholdCaptor = ArgumentCaptor.forClass(
-            Float::class.java
-        )
         Mockito.verify(moveGestureDetector, Mockito.atLeastOnce()).moveThreshold =
-            moveThresholdCaptor.capture()
-        org.junit.Assert.assertEquals(java.lang.Float.valueOf(0f), moveThresholdCaptor.value)
+            MOVEMENT_THRESHOLD
     }
 
     @Test
@@ -965,18 +961,9 @@ class LocationCameraControllerTest {
         Mockito.verify(moveGestureDetector, Mockito.times(2)).interrupt()
 
         // verify that threshold are reset
-        val moveThresholdCaptor = ArgumentCaptor.forClass(
-            Float::class.java
-        )
         Mockito.verify(moveGestureDetector, Mockito.atLeastOnce()).moveThreshold =
-            moveThresholdCaptor.capture()
-        org.junit.Assert.assertEquals(java.lang.Float.valueOf(0f), moveThresholdCaptor.value)
-        val areaCaptor = ArgumentCaptor.forClass(
-            RectF::class.java
-        )
-        Mockito.verify(moveGestureDetector, Mockito.atLeastOnce()).moveThresholdRect =
-            areaCaptor.capture()
-        org.junit.Assert.assertNull(areaCaptor.value)
+            MOVEMENT_THRESHOLD
+        Mockito.verify(moveGestureDetector, Mockito.atLeastOnce()).moveThresholdRect = null
     }
 
     @Test
@@ -2093,12 +2080,14 @@ class LocationCameraControllerTest {
     private fun buildInitialGesturesManager(): AndroidGesturesManager {
         val moveGestureDetector = Mockito.mock<MoveGestureDetector>()
         // return just "some" value
-        Mockito.`when`(moveGestureDetector.moveThreshold).thenReturn(10f)
+        Mockito.`when`(moveGestureDetector.moveThreshold).thenReturn(MOVEMENT_THRESHOLD)
 
         val manager = Mockito.mock<AndroidGesturesManager>()
         Mockito.`when`(manager.moveGestureDetector).thenReturn(moveGestureDetector)
         return manager
     }
+
+    private val MOVEMENT_THRESHOLD = 10f
 
     private fun <T> getAnimationListener(
         @MapLibreAnimator.Type animatorType: Int,
