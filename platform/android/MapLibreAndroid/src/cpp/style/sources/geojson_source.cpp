@@ -91,7 +91,8 @@ void GeoJSONSource::setGeometry(jni::JNIEnv& env, const jni::Object<geojson::Geo
     setCollectionAsync(env, jGeometry);
 }
 
-void GeoJSONSource::setFeatureCollectionSync(jni::JNIEnv& env, const jni::Object<geojson::FeatureCollection>& jFeatures) {
+void GeoJSONSource::setFeatureCollectionSync(jni::JNIEnv& env,
+                                             const jni::Object<geojson::FeatureCollection>& jFeatures) {
     setCollectionSync(env, jFeatures);
 }
 
