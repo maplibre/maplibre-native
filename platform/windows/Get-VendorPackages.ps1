@@ -39,8 +39,8 @@ if(-not (Test-Path ('{0}\vcpkg.exe' -f $vcpkg_temp_dir)))
         ('--overlay-triplets={0}' -f [System.IO.Path]::Combine($PWD.Path, 'vendor', 'vcpkg-custom-triplets')),
         ('--triplet={0}' -f $Triplet),
         '--clean-after-build',
-        'install', 'curl', 'dlfcn-win32', 'glfw3', $(if(${With-ICU}) {'icu'} else {''}), 'libuv', 'libjpeg-turbo', 'libpng', 'libwebp'
-    ) + $renderer_packages
+        'install', 'curl', 'dlfcn-win32', 'glfw3', 'libuv', 'libjpeg-turbo', 'libpng', 'libwebp'
+    ) + $renderer_packages + $(if(${With-ICU}) {@('icu')} else {@()})
 )
 
 subst $vcpkg_temp_dir /D

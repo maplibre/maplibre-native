@@ -201,7 +201,6 @@ target_link_libraries(
         PNG::PNG
         mbgl-vendor-nunicode
         mbgl-vendor-sqlite
-        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
 )
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
@@ -244,6 +243,7 @@ target_link_libraries(
     PRIVATE
         mbgl-compiler-options
         $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
+        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
 )
 
 add_executable(
@@ -256,6 +256,7 @@ target_link_libraries(
     PRIVATE
         mbgl-compiler-options
         $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-benchmark>
+        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
 )
 
 add_executable(
@@ -268,6 +269,12 @@ target_link_libraries(
     PRIVATE
         mbgl-compiler-options
         mbgl-render-test
+        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
+)
+
+target_link_libraries(
+    mbgl-expression-test
+    PRIVATE
         $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
 )
 
