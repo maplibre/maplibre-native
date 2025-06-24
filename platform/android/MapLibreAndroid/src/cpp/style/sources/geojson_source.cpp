@@ -50,12 +50,12 @@ GeoJSONSource::GeoJSONSource(jni::JNIEnv& env, const jni::String& sourceId, cons
              std::make_unique<mbgl::style::GeoJSONSource>(jni::Make<std::string>(env, sourceId),
                                                           convertGeoJSONOptions(env, options))),
       converter(std::make_unique<Actor<FeatureConverter>>(Scheduler::GetBackground(),
-                                                          getSource<style::GeoJSONSource>().impl().getOptions())) {}
+                                                          source.as<style::GeoJSONSource>()->impl().getOptions())) {}
 
 GeoJSONSource::GeoJSONSource(jni::JNIEnv& env, mbgl::style::Source& coreSource, AndroidRendererFrontend* frontend)
     : Source(env, coreSource, createJavaPeer(env), frontend),
       converter(std::make_unique<Actor<FeatureConverter>>(Scheduler::GetBackground(),
-                                                          getSource<style::GeoJSONSource>().impl().getOptions())) {}
+                                                          source.as<style::GeoJSONSource>()->impl().getOptions())) {}
 
 GeoJSONSource::~GeoJSONSource() = default;
 
@@ -64,6 +64,16 @@ void GeoJSONSource::setGeoJSONString(jni::JNIEnv& env, const jni::String& jStrin
 
     Update::Converter converterFn = [this, json](ActorRef<GeoJSONDataCallback> _callback) {
         converter->self().invoke(&FeatureConverter::convertJson, json, _callback);
+    };
+
+    setAsync(converterFn);
+}
+
+void GeoJSONSource::setGeoJSONStringSync(jni::JNIEnv& env, const jni::String& jString) {
+    std::shared_ptr<std::string> json = std::make_shared<std::string>(jni::Make<std::string>(env, jString));
+
+    Update::Converter converterFn = [this, json](ActorRef<GeoJSONDataCallback> _callback) {
+        converter->self().ask(&FeatureConverter::convertJson, json, _callback).wait();
     };
 
     setAsync(converterFn);
@@ -81,13 +91,26 @@ void GeoJSONSource::setGeometry(jni::JNIEnv& env, const jni::Object<geojson::Geo
     setCollectionAsync(env, jGeometry);
 }
 
+void GeoJSONSource::setFeatureCollectionSync(jni::JNIEnv& env,
+                                             const jni::Object<geojson::FeatureCollection>& jFeatures) {
+    setCollectionSync(env, jFeatures);
+}
+
+void GeoJSONSource::setFeatureSync(jni::JNIEnv& env, const jni::Object<geojson::Feature>& jFeature) {
+    setCollectionSync(env, jFeature);
+}
+
+void GeoJSONSource::setGeometrySync(jni::JNIEnv& env, const jni::Object<geojson::Geometry>& jGeometry) {
+    setCollectionSync(env, jGeometry);
+}
+
 void GeoJSONSource::setURL(jni::JNIEnv& env, const jni::String& url) {
     // Update the core source
-    getSource<style::GeoJSONSource>().setURL(jni::Make<std::string>(env, url));
+    source.as<style::GeoJSONSource>()->setURL(jni::Make<std::string>(env, url));
 }
 
 jni::Local<jni::String> GeoJSONSource::getURL(jni::JNIEnv& env) {
-    std::optional<std::string> url = getSource<style::GeoJSONSource>().getURL();
+    std::optional<std::string> url = source.as<style::GeoJSONSource>()->getURL();
     return url ? jni::Make<jni::String>(env, *url) : jni::Local<jni::String>();
 }
 
@@ -98,7 +121,7 @@ jni::Local<jni::Array<jni::Object<geojson::Feature>>> GeoJSONSource::querySource
 
     std::vector<mbgl::Feature> features;
     if (rendererFrontend) {
-        features = rendererFrontend->querySourceFeatures(getSource().getID(), {{}, toFilter(env, jfilter)});
+        features = rendererFrontend->querySourceFeatures(source.getID(), {{}, toFilter(env, jfilter)});
     }
     return Feature::convert(env, features);
 }
@@ -112,7 +135,7 @@ jni::Local<jni::Array<jni::Object<geojson::Feature>>> GeoJSONSource::getClusterC
         mbgl::Feature _feature = Feature::convert(env, feature);
         _feature.properties["cluster_id"] = static_cast<uint64_t>(_feature.properties["cluster_id"].get<double>());
         const auto featureExtension = rendererFrontend->queryFeatureExtensions(
-            getSource().getID(), _feature, "supercluster", "children", {});
+            source.getID(), _feature, "supercluster", "children", {});
         if (featureExtension.is<mbgl::FeatureCollection>()) {
             return Feature::convert(env, featureExtension.get<mbgl::FeatureCollection>());
         }
@@ -131,7 +154,7 @@ jni::Local<jni::Array<jni::Object<geojson::Feature>>> GeoJSONSource::getClusterL
         const std::map<std::string, mbgl::Value> options = {{"limit", static_cast<uint64_t>(limit)},
                                                             {"offset", static_cast<uint64_t>(offset)}};
         auto featureExtension = rendererFrontend->queryFeatureExtensions(
-            getSource().getID(), _feature, "supercluster", "leaves", options);
+            source.getID(), _feature, "supercluster", "leaves", options);
         if (featureExtension.is<mbgl::FeatureCollection>()) {
             return Feature::convert(env, featureExtension.get<mbgl::FeatureCollection>());
         }
@@ -148,7 +171,7 @@ jint GeoJSONSource::getClusterExpansionZoom(jni::JNIEnv& env, const jni::Object<
         mbgl::Feature _feature = Feature::convert(env, feature);
         _feature.properties["cluster_id"] = static_cast<uint64_t>(_feature.properties["cluster_id"].get<double>());
         auto featureExtension = rendererFrontend->queryFeatureExtensions(
-            getSource().getID(), _feature, "supercluster", "expansion-zoom", {});
+            source.getID(), _feature, "supercluster", "expansion-zoom", {});
         if (featureExtension.is<mbgl::Value>()) {
             auto value = featureExtension.get<mbgl::Value>();
             if (value.is<uint64_t>()) {
@@ -181,20 +204,12 @@ void GeoJSONSource::setAsync(Update::Converter converterFn) {
     awaitingUpdate = std::make_unique<Update>(
         std::move(converterFn),
         std::make_unique<Actor<GeoJSONDataCallback>>(
-            *Scheduler::GetCurrent(),
-            [awaitingUpdateWeak = std::weak_ptr(awaitingUpdate),
-             sourceWeak = getWeakSource(),
-             updateWeak = std::weak_ptr(update)](std::shared_ptr<style::GeoJSONData> geoJSONData) {
-                auto awaitingUpdate = awaitingUpdateWeak.lock();
-                auto source = sourceWeak.lock();
-                auto update = updateWeak.lock();
-                if (!awaitingUpdate || !source || !update) return;
-
+            *Scheduler::GetCurrent(), [this](std::shared_ptr<style::GeoJSONData> geoJSONData) {
                 // conversion from Java features to core ones finished
                 android::UniqueEnv _env = android::AttachEnv();
 
                 // Update the core source
-                source->get().as<style::GeoJSONSource>()->setGeoJSONData(std::move(geoJSONData));
+                source.as<mbgl::style::GeoJSONSource>()->setGeoJSONData(std::move(geoJSONData));
 
                 // if there is an awaiting update, execute it, otherwise, release resources
                 if (awaitingUpdate) {
@@ -215,6 +230,18 @@ void GeoJSONSource::setAsync(Update::Converter converterFn) {
     update->converterFn(update->callback->self());
 }
 
+template <class JNIType>
+void GeoJSONSource::setCollectionSync(jni::JNIEnv& env, const jni::Object<JNIType>& jObject) {
+    auto global = jni::NewGlobal<jni::EnvAttachingDeleter>(env, jObject);
+    auto object = std::make_shared<decltype(global)>(std::move(global));
+
+    Update::Converter converterFn = [this, object](ActorRef<GeoJSONDataCallback> _callback) {
+        converter->self().ask(&FeatureConverter::convertObject<JNIType>, object, _callback).wait();
+    };
+
+    setAsync(converterFn);
+}
+
 void GeoJSONSource::registerNative(jni::JNIEnv& env) {
     // Lookup the class
     static auto& javaClass = jni::Class<GeoJSONSource>::Singleton(env);
@@ -233,6 +260,10 @@ void GeoJSONSource::registerNative(jni::JNIEnv& env) {
         METHOD(&GeoJSONSource::setFeatureCollection, "nativeSetFeatureCollection"),
         METHOD(&GeoJSONSource::setFeature, "nativeSetFeature"),
         METHOD(&GeoJSONSource::setGeometry, "nativeSetGeometry"),
+        METHOD(&GeoJSONSource::setGeoJSONStringSync, "nativeSetGeoJsonStringSync"),
+        METHOD(&GeoJSONSource::setFeatureCollectionSync, "nativeSetFeatureCollectionSync"),
+        METHOD(&GeoJSONSource::setFeatureSync, "nativeSetFeatureSync"),
+        METHOD(&GeoJSONSource::setGeometrySync, "nativeSetGeometrySync"),
         METHOD(&GeoJSONSource::setURL, "nativeSetUrl"),
         METHOD(&GeoJSONSource::getURL, "nativeGetUrl"),
         METHOD(&GeoJSONSource::querySourceFeatures, "querySourceFeatures"),

@@ -62,14 +62,7 @@ void RenderPass::endEncoding() {
         encoder.reset();
     }
 
-    currentDepthStencilState.reset();
-    currentStencilReferenceValue = 0;
-    for (int i = 0; i < maxBinds; ++i) {
-        vertexBinds[i].reset();
-        fragmentBinds[i].reset();
-        fragmentTextureBindings[i].reset();
-        fragmentSamplerStates[i].reset();
-    }
+    resetState();
 }
 
 void RenderPass::resetState() {
@@ -81,6 +74,9 @@ void RenderPass::resetState() {
         fragmentTextureBindings[i].reset();
         fragmentSamplerStates[i].reset();
     }
+
+    currentCullMode = MTL::CullModeNone;
+    currentWinding = MTL::WindingClockwise;
 }
 
 namespace {
@@ -194,6 +190,20 @@ void RenderPass::setFragmentSamplerState(const MTLSamplerStatePtr& state, int32_
             fragmentSamplerStates[location] = state;
             encoder->setFragmentSamplerState(state.get(), location);
         }
+    }
+}
+
+void RenderPass::setCullMode(const MTL::CullMode mode) {
+    if (mode != currentCullMode) {
+        encoder->setCullMode(mode);
+        currentCullMode = mode;
+    }
+}
+
+void RenderPass::setFrontFacingWinding(const MTL::Winding winding) {
+    if (winding != currentWinding) {
+        encoder->setFrontFacingWinding(winding);
+        currentWinding = winding;
     }
 }
 
