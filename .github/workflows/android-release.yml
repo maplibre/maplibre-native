@@ -79,6 +79,7 @@ jobs:
           - opengl
         BUILDTYPE:
           - Release
+          - Debug
     steps:
       - uses: actions/checkout@v4
         with:
@@ -134,4 +135,10 @@ jobs:
       - name: Publish to Github
         env:
           GITHUB_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
-        run: make run-android-publish
+        run: |
+            renderer=${{ matrix.RENDERER }}
+            if [ "$renderer" = "opengl" ]; then
+              ./gradlew :MapLibreAndroid:publishDefault${{ env.buildtype }}PublicationToGithubPackagesRepository
+            else
+              ./gradlew :MapLibreAndroid:publishVulkan${{ env.buildtype }}PublicationToGithubPackagesRepository
+            fi
