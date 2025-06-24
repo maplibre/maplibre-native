@@ -6,7 +6,11 @@ else()
     set(_RENDERER OpenGL)
 endif()
 
-execute_process(COMMAND powershell -ExecutionPolicy Bypass -File ${CMAKE_CURRENT_LIST_DIR}/Get-VendorPackages.ps1 -Triplet ${VCPKG_TARGET_TRIPLET} -Renderer ${_RENDERER})
+if(NOT MLN_USE_BUILTIN_ICU)
+    set(WITH_ICU -With-ICU)
+endif()
+
+execute_process(COMMAND powershell -ExecutionPolicy Bypass -File ${CMAKE_CURRENT_LIST_DIR}/Get-VendorPackages.ps1 -Triplet ${VCPKG_TARGET_TRIPLET} -Renderer ${_RENDERER} ${WITH_ICU})
 unset(_RENDERER)
 
 add_compile_definitions(NOMINMAX GHC_WIN_DISABLE_WSTRING_STORAGE_TYPE)
@@ -130,6 +134,15 @@ else()
     )
 endif()
 
+if (DEFINED ENV{CI})
+    message("Building for CI")
+    target_compile_definitions(
+        mbgl-core
+        PRIVATE
+            CI_BUILD=1
+    )
+endif()
+
 # FIXME: Should not be needed, but now needed by node because of the headless frontend.
 target_include_directories(
     mbgl-core
@@ -146,8 +159,8 @@ target_include_directories(
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
 
-if(NOT ${ICU_FOUND} OR "${ICU_VERSION}" VERSION_LESS 62.0)
-    message(STATUS "ICU not found or too old, using builtin.")
+if(NOT ${ICU_FOUND} OR "${ICU_VERSION}" VERSION_LESS 62.0 OR MLN_USE_BUILTIN_ICU)
+    message(STATUS "ICU not found, too old or MLN_USE_BUILTIN_ICU requestd, using builtin.")
 
     set(MLN_USE_BUILTIN_ICU TRUE)
     include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
@@ -157,6 +170,19 @@ if(NOT ${ICU_FOUND} OR "${ICU_VERSION}" VERSION_LESS 62.0)
         PROPERTIES
         COMPILE_DEFINITIONS
         MBGL_USE_BUILTIN_ICU
+    )
+
+    target_compile_definitions(
+        mbgl-vendor-icu
+        PRIVATE
+            U_STATIC_IMPLEMENTATION
+    )
+
+    target_include_directories(
+        mbgl-core
+        BEFORE
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/vendor/icu/include
     )
 endif()
 
@@ -168,18 +194,21 @@ target_link_libraries(
         ${LIBUV_LIBRARIES}
         ${WEBP_LIBRARIES}
 		dlfcn-win32::dl
-        $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::data>
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::i18n>
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::uc>
-        $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:mbgl-vendor-icu>
+        $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::data>
+        $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:$<IF:$<BOOL:${MLN_CORE_INCLUDE_DEPS}>,$<TARGET_OBJECTS:mbgl-vendor-icu>,mbgl-vendor-icu>>
         PNG::PNG
         mbgl-vendor-nunicode
         mbgl-vendor-sqlite
+        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
 )
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
-add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
+if(MLN_WITH_GLFW)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
+endif()
 if(MLN_WITH_NODE)
     add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
 endif()
@@ -191,8 +220,18 @@ add_executable(
 
 target_compile_definitions(
     mbgl-test-runner
-    PRIVATE MBGL_BUILDING_LIB WORK_DIRECTORY=${PROJECT_SOURCE_DIR}
+    PRIVATE
+        MBGL_BUILDING_LIB
+        WORK_DIRECTORY=${PROJECT_SOURCE_DIR}
 )
+
+if (DEFINED ENV{CI})
+    target_compile_definitions(
+        mbgl-test-runner
+        PRIVATE
+            CI_BUILD=1
+    )
+endif()
 
 target_include_directories(
     mbgl-test-runner
@@ -205,7 +244,6 @@ target_link_libraries(
     PRIVATE
         mbgl-compiler-options
         $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
-        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
 )
 
 add_executable(
@@ -218,8 +256,6 @@ target_link_libraries(
     PRIVATE
         mbgl-compiler-options
         $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-benchmark>
-        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
-        shlwapi
 )
 
 add_executable(
@@ -227,22 +263,11 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/render-test/main.cpp
 )
 
-target_compile_definitions(
-    mbgl-render-test-runner
-    PRIVATE MBGL_BUILDING_LIB
-)
-
 target_link_libraries(
     mbgl-render-test-runner
     PRIVATE
         mbgl-compiler-options
         mbgl-render-test
-        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
-)
-
-target_link_libraries(
-    mbgl-expression-test
-    PRIVATE
         $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
 )
 

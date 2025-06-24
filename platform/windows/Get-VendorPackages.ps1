@@ -1,11 +1,10 @@
 param(
 	[Parameter(Mandatory=$true)][string]$Triplet,
-	[Parameter(Mandatory=$true)][string]$Renderer
+	[Parameter(Mandatory=$true)][string]$Renderer,
+    [Parameter(Mandatory=$false)][switch]${With-ICU}
 )
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path -Parent)
-
-Copy-Item ('{0}\*' -f [System.IO.Path]::Combine($PWD.Path, 'vendor', 'vcpkg-custom-ports')) -Force -Recurse -Destination ('{0}\ports\' -f [System.IO.Path]::Combine($PWD.Path, 'vendor', 'vcpkg'))
 
 $vcpkg_temp_dir = '***'
 
@@ -40,7 +39,7 @@ if(-not (Test-Path ('{0}\vcpkg.exe' -f $vcpkg_temp_dir)))
         ('--overlay-triplets={0}' -f [System.IO.Path]::Combine($PWD.Path, 'vendor', 'vcpkg-custom-triplets')),
         ('--triplet={0}' -f $Triplet),
         '--clean-after-build',
-        'install', 'curl', 'dlfcn-win32', 'glfw3', 'icu', 'libuv', 'libjpeg-turbo', 'libpng', 'libwebp'
+        'install', 'curl', 'dlfcn-win32', 'glfw3', $(if(${With-ICU}) {'icu'} else {''}), 'libuv', 'libjpeg-turbo', 'libpng', 'libwebp'
     ) + $renderer_packages
 )
 
