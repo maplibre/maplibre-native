@@ -42,6 +42,9 @@
         },
         "background": {
           "doc": "An ``MLNBackgroundStyleLayer`` is a style layer that covers the entire map. Use a background style layer to configure a color or pattern to show below all other map content. If the style’s other layers use the Mapbox Streets source, the background style layer is responsible for drawing land, whereas the oceans and other bodies of water are drawn by ``MLNBackgroundStyleLayer`` objects.\n\nA background style layer is typically the bottommost layer in a style, because it covers the entire map and can occlude any layers below it. You can therefore access it by getting the last item in the ``MLNStyle/layers`` array.\n\nIf the background style layer is transparent or omitted from the style, any portion of the map view that does not show another style layer is transparent."
+        },
+        "location-indicator": {
+          "doc": "An ``MLNLocationIndicatorStyleLayer`` is a style layer that renders a visual representation of the device's current location on the map.\n\nUse a location-indicator style layer to display a puck-like indicator that shows the user’s position, heading, and accuracy radius. This layer is typically used in conjunction with the device’s location services to track and highlight the user’s movement in real time. The appearance of the indicator can be customized using style properties such as image, color, and bearing.\n\nUnlike other style layers that render geographic features from vector or raster sources, a location-indicator layer displays dynamic, device-driven data provided by the location manager. This layer does not rely on source data and is updated automatically as the device location changes."
         }
       }
     }

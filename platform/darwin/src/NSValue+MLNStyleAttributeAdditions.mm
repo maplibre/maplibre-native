@@ -32,6 +32,12 @@
     return [NSValue value:&insets withObjCType:@encode(MLNEdgeInsets)];
 }
 
++ (instancetype)mgl_valueWithLocationArray:(std::array<double, 3>)locationArray
+{
+    CLLocation* location = [[CLLocation alloc] initWithLatitude:locationArray[0] longitude:locationArray[1]];
+    return [NSValue value:&location withObjCType:@encode(CLLocation)];
+}
+
 - (std::array<float, 2>)mgl_offsetArrayValue
 {
     MLNAssert(strcmp(self.objCType, @encode(CGVector)) == 0, @"Value does not represent a CGVector");
@@ -57,6 +63,18 @@
         static_cast<float>(insets.right),
         static_cast<float>(insets.bottom),
         static_cast<float>(insets.left),
+    };
+}
+
+- (std::array<double, 3>)mgl_locationArrayValue
+{
+    MLNAssert(strcmp(self.objCType, @encode(CLLocation)) == 0, @"Value does not represent an CLLocation");
+    CLLocation* location;
+    [self getValue:&location];
+    return {
+        static_cast<double>(location.coordinate.latitude),
+        static_cast<double>(location.coordinate.longitude),
+        static_cast<double>(location.altitude),
     };
 }
 

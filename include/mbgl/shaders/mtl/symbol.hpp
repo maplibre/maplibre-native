@@ -29,19 +29,20 @@ struct alignas(16) SymbolDrawableUBO {
     /* 216 */ /*bool*/ int pitch_with_map;
     /* 220 */ /*bool*/ int is_size_zoom_constant;
     /* 224 */ /*bool*/ int is_size_feature_constant;
+    /* 228 */ /*bool*/ int is_offset;
 
-    /* 228 */ float size_t;
-    /* 232 */ float size;
+    /* 232 */ float size_t;
+    /* 236 */ float size;
 
     // Interpolations
-    /* 236 */ float fill_color_t;
-    /* 240 */ float halo_color_t;
-    /* 244 */ float opacity_t;
-    /* 248 */ float halo_width_t;
-    /* 252 */ float halo_blur_t;
-    /* 256 */
+    /* 240 */ float fill_color_t;
+    /* 244 */ float halo_color_t;
+    /* 248 */ float opacity_t;
+    /* 252 */ float halo_width_t;
+    /* 256 */ float halo_blur_t;
+    /* 260 */
 };
-static_assert(sizeof(SymbolDrawableUBO) == 16 * 16, "wrong size");
+static_assert(sizeof(SymbolDrawableUBO) == 17 * 16, "wrong size");
 
 struct alignas(16) SymbolTilePropsUBO {
     /*  0 */ /*bool*/ int is_text;
@@ -149,7 +150,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
             0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
             4.0);
 
-    size *= perspective_ratio;
+    if (!drawable.is_offset) {
+        size *= perspective_ratio;
+    }
 
     const float fontScale = drawable.is_text_prop ? size / 24.0 : size;
 
@@ -316,7 +319,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
         4.0);
 
-    size *= perspective_ratio;
+    if (!drawable.is_offset) {
+        size *= perspective_ratio;
+    }
 
     const float fontScale = drawable.is_text_prop ? size / 24.0 : size;
 
@@ -529,7 +534,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
         4.0);
 
-    size *= perspective_ratio;
+    if (!drawable.is_offset) {
+        size *= perspective_ratio;
+    }
 
     const float fontScale = size / 24.0;
 

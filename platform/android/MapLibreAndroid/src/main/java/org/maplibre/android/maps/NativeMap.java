@@ -270,6 +270,8 @@ interface NativeMap {
 
   void enableRenderingStatsView(boolean value);
 
+  void toggleTransform();
+
   void setSwapBehaviorFlush(boolean flush);
 
   //
