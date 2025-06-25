@@ -88,3 +88,29 @@ jobs:
         run: gh release upload core-${{ github.sha }} libmaplibre-native-core-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
         env:
           GH_TOKEN: ${{ github.token }}
+
+  build-windows:
+    needs: [create-release]
+    runs-on: windows-2022
+    strategy:
+      matrix:
+        renderer: [opengl, egl, vulkan]
+    steps:
+      - run: |
+          git config --system core.longpaths true
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Build mbgl-core for Windows
+        run: |
+          cmake --preset windows-${{ matrix.renderer }}-core -DCMAKE_CXX_COMPILER_LAUNCHER=""
+          cmake --build --preset windows-${{ matrix.renderer }}-core
+
+      - name: Rename artifact
+        run: Copy-Item build-windows-${{ matrix.renderer }}/mbgl-core.lib maplibre-native-core-windows-x64-${{ matrix.renderer }}.lib
+
+      - name: Upload Windows artifact
+        run: gh release upload core-${{ github.sha }} maplibre-native-core-windows-x64-${{ matrix.renderer }}.lib
+        env:
+          GH_TOKEN: ${{ github.token }}
