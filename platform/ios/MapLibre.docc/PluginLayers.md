@@ -1,16 +1,24 @@
-# Create a Plugin Layer
+# Plugin Layers
 
-Define and add custom plugin layers at runtime
+Plugin Layers are a way to add layer types that render themselves into the style parsing engine at runtime.  It is a way to dynamically link new layer types to the MapLibre core -- and styling language -- without having to compile them into the library itself.
 
-Implement a ``MLNPluginLayer`` and add it to a ``MLNMapView`` with ``MLNMapView/addPluginLayerType:``. It is also possible to register a plugin layer at initialization using ``MLNMapOptions`` with ``MLNMapOptions/pluginLayers``.
+Because the layers are bound at runtime, one or more different types of specialized layers can be added and different versions of layer types can be added.
 
-Implement ``MLNPluginLayer/layerCapabilities`` to describe the structure of the style layer (see example below).
+Currently Plugin Layers are only available on iOS/Darwin using the Metal Rendering pipeline.
 
-## Example 1: Triangles
 
-This `PluginLayerExampleMetalRendering` can be found in the Objective-C based development app in the MapLibre Native repository.
+## Creating a Plugin Layer
 
-Here we see the implementation of ``MLNPluginLayer/layerCapabilities``:
+Plugin Layers can be created by creating a descendant from MLNPluginLayer and add the class type to an instance of MLNMapView.  The layer is self describing (e.g. the layer type, what properties are available, etc) and that information will be registered with the MapLibre core.  When the plugin layer type is found in the style, the core will automatically instantiate it, pass along initial properties and manage the rendering of the layer.
+
+### Defining a layer's capabilities
+The newly created layer class should override the layerCapabilites class method.  Please note that this is a class method and not an instance method, so make sure it's prefaced with a + and not a -. 
+
+The object that is returned from this method defines the layer type and the propeties that the layer expects.
+
+The triangle example (platform/darwin/app/PluginLayerExampleMetalRendering.mm) defines it's layer type "plugin-layer-metal-rendering" and two paint properties (scale and fill-color).  These properties can be expression based.  It's important to define the type of property (single float or color) and a default value.  The properties returned by layerCapabilities will correspond to any properties in the "paint": part of the style.  
+
+Initialization properties can also be added to the "properties": section of the layer style.
 
 ```objc
 +(MLNPluginLayerCapabilities *)layerCapabilities {
@@ -39,14 +47,14 @@ Here we see the implementation of ``MLNPluginLayer/layerCapabilities``:
 }
 ```
 
-Here we see the layers that can now be added to the style to render triangles.
+For the triangle example, there are two initialization properties (offset-x and offset-y) for positioning and two paint properties, scale and fill-color.  Here are three different instances of the plugin layer being added to the style.  One that has a static scale (and uses the default color), one that has an expression based scale (and uses the default scale) and one that has an expression based scale and fill color.
+
 
 ```json
 {
   "id": "metal-rendering-layer-1",
   "type": "plugin-layer-metal-rendering",
   "properties": {
-    "color1": "#FFAADD",
     "offset-x": -300,
     "offset-y": -300
   },
@@ -58,7 +66,6 @@ Here we see the layers that can now be added to the style to render triangles.
   "id": "metal-rendering-layer-2",
   "type": "plugin-layer-metal-rendering",
   "properties": {
-    "color1": "#FFAADD",
     "offset-x": -300
   },
   "paint": {

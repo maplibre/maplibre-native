@@ -25,7 +25,7 @@ MLN_EXPORT
                                 defaultValue:(id)defaultValue;
 
 // The name of the property
-@property NSString *propertyName;
+@property (copy) NSString *propertyName;
 
 // The type of property
 @property MLNPluginLayerPropertyType propertyType;
@@ -35,7 +35,7 @@ MLN_EXPORT
 
 // Color default value
 #if TARGET_OS_IPHONE
-@property UIColor *colorDefaultValue;
+@property (copy) UIColor *colorDefaultValue;
 #else
 @property NSColor *colorDefaultValue;
 #endif
@@ -52,11 +52,11 @@ typedef enum {
 MLN_EXPORT
 @interface MLNPluginLayerCapabilities : NSObject
 
-@property NSString *layerID;
+@property (copy) NSString *layerID;
 @property BOOL requiresPass3D;
 
 //! This is a list of layer properties that this layer supports.
-@property NSArray<MLNPluginLayerProperty *> *layerProperties;
+@property (copy) NSArray<MLNPluginLayerProperty *> *layerProperties;
 
 @end
 
