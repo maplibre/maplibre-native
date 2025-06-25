@@ -218,6 +218,7 @@
             android:description="@string/description_long_running_maps"
             android:exported="true"
             android:label="@string/activity_long_running_maps"
+            android:screenOrientation="portrait"
             android:launchMode="singleInstance">
             <meta-data
                 android:name="@string/category"

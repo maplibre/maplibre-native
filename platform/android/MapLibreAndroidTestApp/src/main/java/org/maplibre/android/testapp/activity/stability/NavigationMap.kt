@@ -27,6 +27,9 @@ import org.maplibre.android.testapp.utils.GeoParseUtil
 import org.maplibre.android.testapp.utils.setStyleSuspend
 import org.maplibre.geojson.Point
 import org.maplibre.navigation.android.navigation.v5.location.replay.ReplayRouteLocationEngine
+import org.maplibre.navigation.android.navigation.v5.milestone.BannerInstructionMilestone
+import org.maplibre.navigation.android.navigation.v5.milestone.Milestone
+import org.maplibre.navigation.android.navigation.v5.milestone.MilestoneEventListener
 import org.maplibre.navigation.android.navigation.v5.models.DirectionsResponse
 import org.maplibre.navigation.android.navigation.v5.models.DirectionsRoute
 import org.maplibre.navigation.android.navigation.v5.models.RouteOptions
@@ -39,7 +42,7 @@ import java.util.Locale
 import java.util.logging.Logger
 import kotlin.random.Random
 
-class NavigationMap : SupportMapFragment(), ProgressChangeListener {
+class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEventListener {
     private lateinit var map: MapLibreMap
     private lateinit var mapView: MapView
 
@@ -112,6 +115,7 @@ class NavigationMap : SupportMapFragment(), ProgressChangeListener {
         ).apply {
             snapEngine
             addProgressChangeListener(this@NavigationMap)
+            addMilestoneEventListener(this@NavigationMap)
         }
 
         navigation.locationEngine = replayRouteLocationEngine
@@ -332,8 +336,14 @@ class NavigationMap : SupportMapFragment(), ProgressChangeListener {
 
             LOG.info("Navigation - remaining duration ${progress.durationRemaining()}")
         }
+    }
 
-        if (progress.fractionTraveled() > 0.99) {
+    override fun onMilestoneEvent(routeProgress: RouteProgress, instruction: String, milestone: Milestone) {
+        if (milestone !is BannerInstructionMilestone) {
+            return
+        }
+
+        if (milestone.bannerInstructions.primary().type() == "arrive") {
             startNewRoute()
         }
     }
