@@ -6,7 +6,7 @@
 
 - Improve the logic to let source peers be consistent with C++ peers ([#3561](https://github.com/maplibre/maplibre-native/pull/3561)).
 - set default move gesture threshold to a small non-zero value ([#3573](https://github.com/maplibre/maplibre-native/pull/3573)).
-- Bump version of MapLibre Gestures Android to 0.0.4.
+- Bump version of MapLibre Gestures Android to 0.0.4 ([#3583](https://github.com/maplibre/maplibre-native/pull/3583)).
 - Expose sync methods in GeoJsonSource  ([#3560](https://github.com/maplibre/maplibre-native/pull/3560)).
 
 ### 🐞 Bug fixes
