@@ -213,7 +213,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     const auto& cullMode = getCullFaceMode();
     renderPass.setCullMode(cullMode.enabled ? mapCullMode(cullMode.side) : MTL::CullModeNone);
-    renderPass.setFrontFaceWinding(mapWindingMode(cullMode.winding));
+    renderPass.setFrontFacingWinding(mapWindingMode(cullMode.winding));
 
     if (!impl->pipelineState) {
         impl->pipelineState = shaderMTL.getRenderPipelineState(

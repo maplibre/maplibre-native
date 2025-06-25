@@ -58,7 +58,7 @@ public:
     void unbindFragment(std::size_t index);
 
     void setCullMode(const MTL::CullMode);
-    void setFrontFaceWinding(const MTL::Winding);
+    void setFrontFacingWinding(const MTL::Winding);
 
 private:
     void pushDebugGroup(const char* name) override;
@@ -85,8 +85,8 @@ private:
     std::array<MTLTexturePtr, maxBinds> fragmentTextureBindings;
     std::array<MTLSamplerStatePtr, maxBinds> fragmentSamplerStates;
 
-    MTL::CullMode currentCullMode = MTL::CullModeFront;
-    MTL::Winding currentWinding = MTL::Winding::WindingClockwise;
+    MTL::CullMode currentCullMode = MTL::CullModeNone;
+    MTL::Winding currentWinding = MTL::WindingClockwise;
 };
 
 } // namespace mtl

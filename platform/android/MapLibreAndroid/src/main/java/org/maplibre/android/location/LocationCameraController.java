@@ -324,7 +324,8 @@ final class LocationCameraController {
       if (isLocationTracking()) {
         moveGestureDetector.setMoveThreshold(options.trackingInitialMoveThreshold());
       } else {
-        moveGestureDetector.setMoveThreshold(0f);
+        float initialMoveThreshold = initialGesturesManager.getMoveGestureDetector().getMoveThreshold();
+        moveGestureDetector.setMoveThreshold(initialMoveThreshold);
         moveGestureDetector.setMoveThresholdRect(null);
       }
     }
