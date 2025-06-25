@@ -1,0 +1,62 @@
+diff --git a/MapboxNavigation/Bundle.swift b/MapboxNavigation/Bundle.swift
+index 9160fd69..4ab465d8 100644
+--- a/MapboxNavigation/Bundle.swift
++++ b/MapboxNavigation/Bundle.swift
+@@ -1,4 +1,35 @@
+ import UIKit
++import class Foundation.Bundle
++
++private class BundleFinder {}
++
++extension Foundation.Bundle {
++    /// Returns the resource bundle associated with the current
++    /// Swift module.
++    static var module: Bundle = {
++        let bundleName = "MapboxNavigation"
++        let candidates = [
++            // Bundle should be present here when the package is
++            // linked into an App.
++            Bundle.main.resourceURL,
++            // Bundle should be present here when the package is
++            // linked into a framework.
++            Bundle(for: BundleFinder.self).resourceURL,
++            // For command-line tools.
++            Bundle.main.bundleURL,
++        ]
++        for candidate in candidates {
++            let bundlePath = candidate?
++                    .appendingPathComponent(bundleName + ".bundle")
++            if let bundle = bundlePath.flatMap(Bundle.init(url:)) {
++                return bundle
++            }
++        }
++        fatalError(
++         "unable to find bundle MapboxNavigation"
++        )
++    }()
++}
+
+ extension Bundle {
+     class var mapboxNavigation: Bundle { .module }
+@@ -12,4 +43,4 @@ extension Bundle {
+         let key = "Privacy - Microphone Usage Description"
+         return object(forInfoDictionaryKey: para) as? String ?? object(forInfoDictionaryKey: key) as? String
+     }
+-}
++}
+\ No newline at end of file
+diff --git a/MapboxNavigation/NavigationMapView.swift b/MapboxNavigation/NavigationMapView.swift
+index 2f7dea7d..c969c534 100644
+--- a/MapboxNavigation/NavigationMapView.swift
++++ b/MapboxNavigation/NavigationMapView.swift
+@@ -191,6 +191,10 @@ open class NavigationMapView: MLNMapView, UIGestureRecognizerDelegate {
+
+     // MARK: - Initalizers
+
++    public convenience init() {
++        self.init(frame: CGRect.zero)
++    }
++
+     override public init(frame: CGRect) {
+         self.altitude = self.defaultAltitude
+         super.init(frame: frame)
