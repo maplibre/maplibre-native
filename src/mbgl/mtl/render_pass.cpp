@@ -216,5 +216,5 @@ void RenderPass::setFrontFacingWinding(const MTL::Winding winding) {
     }
 }
 
-    } // namespace mtl
+} // namespace mtl
 } // namespace mbgl
