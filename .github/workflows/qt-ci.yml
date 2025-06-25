@@ -59,18 +59,18 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: Linux
+          - name: Linux_GCC11
             os: ubuntu-24.04
             build_type: RelWithDebInfo
             qt_version: 6.8.1
             qt_target: desktop
             compiler: ""
-          - name: Linux_GCC13
+          - name: Linux_GCC14
             os: ubuntu-24.04
             build_type: RelWithDebInfo
             qt_version: 6.8.1
             qt_target: desktop
-            compiler: "gcc-13"
+            compiler: "gcc-14"
           - name: macOS
             os: macos-14
             build_type: RelWithDebInfo
@@ -128,7 +128,7 @@ jobs:
             libegl1 \
             fonts-noto-cjk
 
-      - name: Install compiler
+      - name: Install compiler (Linux)
         id: install_compiler
         if: runner.os == 'Linux' && matrix.compiler != ''
         uses: rlalik/setup-cpp-compiler@master
