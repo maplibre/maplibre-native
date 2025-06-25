@@ -199,20 +199,22 @@ void RenderPass::setRenderPipelineState(const MTLRenderPipelineStatePtr& pipelin
     if (pipelineState != currentPipelineState) {
         currentPipelineState = pipelineState;
         encoder->setRenderPipelineState(currentPipelineState.get());
+    }
+}
 
-        void RenderPass::setCullMode(const MTL::CullMode mode) {
-            if (mode != currentCullMode) {
-                encoder->setCullMode(mode);
-                currentCullMode = mode;
-            }
-        }
+void RenderPass::setCullMode(const MTL::CullMode mode) {
+    if (mode != currentCullMode) {
+        encoder->setCullMode(mode);
+        currentCullMode = mode;
+    }
+}
 
-        void RenderPass::setFrontFacingWinding(const MTL::Winding winding) {
-            if (winding != currentWinding) {
-                encoder->setFrontFacingWinding(winding);
-                currentWinding = winding;
-            }
-        }
+void RenderPass::setFrontFacingWinding(const MTL::Winding winding) {
+    if (winding != currentWinding) {
+        encoder->setFrontFacingWinding(winding);
+        currentWinding = winding;
+    }
+}
 
     } // namespace mtl
 } // namespace mbgl
