@@ -128,7 +128,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #else
     const half fo = half(unpack_mix_float(vertx.opacity, drawable.opacity_t) * fade_opacity);
 #endif
-    
+
     // This will check to see if the opacity is zero and push the triangle offscreen if it is
     // so the GPU will cull the vertex and never send it to the fragment shader
     if (fo == 0.0) {
@@ -138,7 +138,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                                    c_offscreen_degenerate_triangle_location, 1.0),
             };
         }
-    
+
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
 
