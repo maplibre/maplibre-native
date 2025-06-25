@@ -4,8 +4,6 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 
-#define MTL_SDF_SHADER_VERTEX_CULLING_ENABLED 1
-
 namespace mbgl {
 namespace shaders {
 
@@ -130,19 +128,17 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #else
     const half fo = half(unpack_mix_float(vertx.opacity, drawable.opacity_t) * fade_opacity);
 #endif
-    )"
-#if MTL_SDF_SHADER_VERTEX_CULLING_ENABLED
-                                   R"(
-        if (fo == 0.0) {
+    
+    // This will check to see if the opacity is zero and push the triangle offscreen if it is
+    // so the GPU will cull the vertex and never send it to the fragment shader
+    if (fo == 0.0) {
             return {
                 .position     = float4(c_offscreen_degenerate_triangle_location, 
                                                    c_offscreen_degenerate_triangle_location, 
                                                    c_offscreen_degenerate_triangle_location, 1.0),
             };
         }
-        )"
-#endif
-                                   R"(
+    
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
 
@@ -305,9 +301,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 fade_opacity = unpack_opacity(vertx.fade_opacity);
     const float fade_change = (fade_opacity[1] > 0.5) ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
     const half fo = half(max(0.0, min(1.0, fade_opacity[0] + fade_change)));
-)"
-#if MTL_SDF_SHADER_VERTEX_CULLING_ENABLED
-                                   R"(
+
+    // This will check to see if the opacity is zero and push the triangle offscreen if it is
+    // so the GPU will cull the vertex and never send it to the fragment shader
     if (fo == 0.0) {
         return {
             .position     = float4(c_offscreen_degenerate_triangle_location, 
@@ -315,9 +311,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                                c_offscreen_degenerate_triangle_location, 1.0),
         };
     }
-    )"
-#endif
-                                   R"(
+
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
 
@@ -533,9 +527,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float fade_change = (fade_opacity[1] > 0.5) ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
     const half fo = half(max(0.0, min(1.0, fade_opacity[0] + fade_change)));
 
-)"
-#if MTL_SDF_SHADER_VERTEX_CULLING_ENABLED
-                                   R"(
+    // This will check to see if the opacity is zero and push the triangle offscreen if it is
+    // so the GPU will cull the vertex and never send it to the fragment shader
     if (fo == 0.0) {
         return {
             .position     = float4(c_offscreen_degenerate_triangle_location, 
@@ -543,9 +536,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                                 c_offscreen_degenerate_triangle_location, 1.0),
         };
     }
-    )"
-#endif
-                                   R"(
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
