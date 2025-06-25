@@ -75,6 +75,9 @@ void RenderPass::resetState() {
         fragmentTextureBindings[i].reset();
         fragmentSamplerStates[i].reset();
     }
+
+    currentCullMode = MTL::CullModeNone;
+    currentWinding = MTL::WindingClockwise;
 }
 
 namespace {
@@ -196,6 +199,18 @@ void RenderPass::setRenderPipelineState(const MTLRenderPipelineStatePtr& pipelin
     if (pipelineState != currentPipelineState) {
         currentPipelineState = pipelineState;
         encoder->setRenderPipelineState(currentPipelineState.get());
+
+void RenderPass::setCullMode(const MTL::CullMode mode) {
+    if (mode != currentCullMode) {
+        encoder->setCullMode(mode);
+        currentCullMode = mode;
+    }
+}
+
+void RenderPass::setFrontFacingWinding(const MTL::Winding winding) {
+    if (winding != currentWinding) {
+        encoder->setFrontFacingWinding(winding);
+        currentWinding = winding;
     }
 }
 

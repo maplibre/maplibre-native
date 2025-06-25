@@ -5,6 +5,7 @@
 
 #include <Foundation/NSSharedPtr.hpp>
 #include <Metal/MTLCommandEncoder.hpp>
+#include <Metal/Metal.hpp>
 
 #include <memory>
 #include <optional>
@@ -59,6 +60,9 @@ public:
     void bindFragment(const BufferResource&, std::size_t offset, std::size_t index, std::size_t size = 0);
     void unbindFragment(std::size_t index);
 
+    void setCullMode(const MTL::CullMode);
+    void setFrontFacingWinding(const MTL::Winding);
+
 private:
     void pushDebugGroup(const char* name) override;
     void popDebugGroup() override;
@@ -85,6 +89,9 @@ private:
 
     std::array<MTLTexturePtr, maxBinds> fragmentTextureBindings;
     std::array<MTLSamplerStatePtr, maxBinds> fragmentSamplerStates;
+
+    MTL::CullMode currentCullMode = MTL::CullModeNone;
+    MTL::Winding currentWinding = MTL::WindingClockwise;
 };
 
 } // namespace mtl
