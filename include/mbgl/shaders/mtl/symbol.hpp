@@ -135,8 +135,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                    R"(
         if (fo == 0.0) {
             return {
-                .position     = float4(c_offscreen_degenerate_triangle_location, 
-                                                   c_offscreen_degenerate_triangle_location, 
+                .position     = float4(c_offscreen_degenerate_triangle_location,
+                                                   c_offscreen_degenerate_triangle_location,
                                                    c_offscreen_degenerate_triangle_location, 1.0),
             };
         }
@@ -310,8 +310,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                    R"(
     if (fo == 0.0) {
         return {
-            .position     = float4(c_offscreen_degenerate_triangle_location, 
-                                               c_offscreen_degenerate_triangle_location, 
+            .position     = float4(c_offscreen_degenerate_triangle_location,
+                                               c_offscreen_degenerate_triangle_location,
                                                c_offscreen_degenerate_triangle_location, 1.0),
         };
     }
@@ -538,7 +538,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                    R"(
     if (fo == 0.0) {
         return {
-            .position     = float4(c_offscreen_degenerate_triangle_location, 
+            .position     = float4(c_offscreen_degenerate_triangle_location,
                                                 c_offscreen_degenerate_triangle_location,
                                                 c_offscreen_degenerate_triangle_location, 1.0),
         };
