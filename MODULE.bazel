@@ -67,11 +67,12 @@ new_git_repository(
 
 new_git_repository(
     name = "maplibre-navigation-ios",
-    build_file = "platform/ios/app-swift/maplibre-navigation-ios/navigation.BUILD",
+    build_file = "platform/ios/vendor/maplibre-navigation-ios/maplibre-navigation-ios.BUILD",
+    #tag = "4.0.0",
+    commit = "f91faffa1aa03be16fc588dc5076b7811d1c5166",
     patch_args = ["-p1"],
-    patches = ["platform/ios/app-swift/maplibre-navigation-ios/navigation.patch"],
+    patches = ["platform/ios/vendor/maplibre-navigation-ios/maplibre-navigation-ios.patch"],
     remote = "https://github.com/maplibre/maplibre-navigation-ios.git",
-    tag = "4.0.0",
 )
 
 local_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:local.bzl", "local_repository")
