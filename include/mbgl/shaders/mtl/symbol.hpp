@@ -72,6 +72,8 @@ struct alignas(16) SymbolEvaluatedPropsUBO {
 };
 static_assert(sizeof(SymbolEvaluatedPropsUBO) == 6 * 16, "wrong size");
 
+#define c_offscreen_degenerate_triangle_location -2.0
+
 )";
 
 template <>
@@ -133,7 +135,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                    R"(
         if (fo == 0.0) {
             return {
-                .position     = float4(-2.0, -2.0, -2.0, 1.0),
+                .position     = float4(c_offscreen_degenerate_triangle_location, 
+                                                   c_offscreen_degenerate_triangle_location, 
+                                                   c_offscreen_degenerate_triangle_location, 1.0),
             };
         }
         )"
@@ -306,7 +310,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                    R"(
     if (fo == 0.0) {
         return {
-            .position     = float4(-2.0, -2.0, -2.0, 1.0),
+            .position     = float4(c_offscreen_degenerate_triangle_location, 
+                                               c_offscreen_degenerate_triangle_location, 
+                                               c_offscreen_degenerate_triangle_location, 1.0),
         };
     }
     )"
@@ -532,7 +538,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                    R"(
     if (fo == 0.0) {
         return {
-            .position     = float4(-2.0, -2.0, -2.0, 1.0),
+            .position     = float4(c_offscreen_degenerate_triangle_location, 
+                                                c_offscreen_degenerate_triangle_location,
+                                                c_offscreen_degenerate_triangle_location, 1.0),
         };
     }
     )"
