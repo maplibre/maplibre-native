@@ -2,118 +2,118 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/configuration/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/geojson-guide/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/getting-started/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/location-component/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/snapshotter/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/annotations/add-markers/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/annotations/marker-annotations/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/camera/animation-types/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/camera/animator-animation/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/camera/cameraposition/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/camera/gesture-detector/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/camera/lat-lng-bounds/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/camera/max-min-zoom/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/camera/move-map-pixels/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/camera/zoom-methods/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/data/MVT/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/data/PMTiles/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/observability/action-journal/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/observability/observe-map-events/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/styling/animated-image-source/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/styling/animated-symbol-layer/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/styling/building-layer/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/styling/circle-layer/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/styling/custom-sprite/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/styling/data-driven-style/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/styling/distance-expression/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/styling/draggable-marker/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
     <url>
          <loc>https://www.maplibre.org/maplibre-native/android/examples/styling/live-realtime-data/</loc>
-         <lastmod>2025-06-24</lastmod>
+         <lastmod>2025-06-25</lastmod>
     </url>
 </urlset>
