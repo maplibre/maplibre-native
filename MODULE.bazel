@@ -10,6 +10,7 @@ bazel_dep(name = "rules_nodejs", version = "6.3.4")
 bazel_dep(name = "libuv", version = "1.48.0")
 bazel_dep(name = "apple_support", version = "1.21.1", repo_name = "build_bazel_apple_support")
 bazel_dep(name = "rules_cc", version = "0.1.1")
+bazel_dep(name = "rules_swift_package_manager", version = "1.0.0-rc3")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node", dev_dependency = True)
 node.toolchain(node_version = "20.14.0")
@@ -60,8 +61,38 @@ new_git_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:git.bzl"
 
 new_git_repository(
     name = "tinyobjloader",
-    branch = "release",
     remote = "https://github.com/tinyobjloader/tinyobjloader.git",
+    tag = "release",
+)
+
+new_git_repository(
+    name = "maplibre-navigation-ios",
+    build_file = "platform/ios/app-swift/maplibre-navigation-ios/navigation.BUILD",
+    patch_args = ["-p1"],
+    patches = ["platform/ios/app-swift/maplibre-navigation-ios/navigation.patch"],
+    remote = "https://github.com/maplibre/maplibre-navigation-ios.git",
+    tag = "4.0.0",
+)
+
+local_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:local.bzl", "local_repository")
+
+local_repository(
+    name = "maplibre-native",
+    path = "./",
+)
+
+swift_deps = use_extension("@rules_swift_package_manager//:extensions.bzl", "swift_deps")
+swift_deps.from_package(
+    resolved = "platform/ios/app-swift/Package.resolved",
+    swift = "platform/ios/app-swift/Package.swift",
+)
+use_repo(
+    swift_deps,
+    "swift_package",
+    "swiftpkg_mapbox_directions_swift",
+    "swiftpkg_solar",
+    "swiftpkg_swiftformat",
+    "swiftpkg_turf_swift",
 )
 
 darwin_config = use_repo_rule("//platform/darwin:bazel/darwin_config_repository_rule.bzl", "darwin_config")
@@ -72,12 +103,13 @@ darwin_config(
 
 bazel_dep(name = "rules_rust", version = "0.59.2")
 bazel_dep(name = "cxx.rs", version = "1.0.157")
+
 # The registry is not always up to date
 # See https://registry.bazel.build/modules/cxx.rs
 git_override(
     module_name = "cxx.rs",
-    tag = "1.0.157",
     remote = "https://github.com/dtolnay/cxx.git",
+    tag = "1.0.157",
 )
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
