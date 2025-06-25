@@ -54,6 +54,12 @@ private:
     void setFeatureCollection(jni::JNIEnv&, const jni::Object<geojson::FeatureCollection>&);
     void setFeature(jni::JNIEnv&, const jni::Object<geojson::Feature>&);
     void setGeometry(jni::JNIEnv&, const jni::Object<geojson::Geometry>&);
+
+    void setGeoJSONStringSync(jni::JNIEnv&, const jni::String&);
+    void setFeatureCollectionSync(jni::JNIEnv&, const jni::Object<geojson::FeatureCollection>&);
+    void setFeatureSync(jni::JNIEnv&, const jni::Object<geojson::Feature>&);
+    void setGeometrySync(jni::JNIEnv&, const jni::Object<geojson::Geometry>&);
+
     void setURL(jni::JNIEnv&, const jni::String&);
 
     jni::Local<jni::Array<jni::Object<geojson::Feature>>> querySourceFeatures(jni::JNIEnv&,
@@ -79,6 +85,9 @@ private:
     void setCollectionAsync(jni::JNIEnv&, const jni::Object<JNIType>&);
 
     void setAsync(Update::Converter);
+
+    template <class JNIType>
+    void setCollectionSync(jni::JNIEnv&, const jni::Object<JNIType>&);
 
 }; // class GeoJSONSource
 

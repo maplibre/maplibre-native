@@ -209,27 +209,26 @@ jobs:
             -DCMAKE_C_COMPILER=gcc-12 \
             -DMLN_WITH_NODE=ON
 
-      - name: "Create directory '${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache' (Windows)"
+      - name: Get vcpkg commit id
         if: runner.os == 'Windows'
-        run: mkdir -p ${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache
-        shell: bash
+        shell: pwsh
+        run: |
+          $vcpkg_commit_id = ($(git submodule status .\platform\windows\vendor\vcpkg).Trim() -split ' ')[0]
+          Add-Content -Path $env:GITHUB_ENV -Value "VCPKG_COMMIT_ID=${vcpkg_commit_id}"
 
-      - name: Restore vcpkg cache (Windows)
+      - name: Restore vcpkg binary cache
         if: runner.os == 'Windows'
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
-          path: |
-            ${{ github.workspace }}/platform/windows/vendor/vcpkg
-            !${{ github.workspace }}/platform/windows/vendor/vcpkg/buildtrees
-            !${{ github.workspace }}/platform/windows/vendor/vcpkg/packages
-            !${{ github.workspace }}/platform/windows/vendor/vcpkg/downloads
-            !${{ github.workspace }}/platform/windows/vendor/vcpkg/installed
-          key: |
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ hashFiles( '.git/modules/platform/windows/vendor/vcpkg/HEAD' ) }}-${{ hashFiles( 'platform/windows/Get-VendorPackages.ps1' ) }}
+          path: ${{ github.workspace }}\platform\windows\vendor\vcpkg\archives
+          key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
 
       - name: Configure maplibre-native (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
+        env:
+          VCPKG_INSTALL_OPTIONS: "--debug"
+          VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}\\platform\\windows\\vendor\\vcpkg\\archives,readwrite"
         run: |
           cmake . -B build `
             -G Ninja `
@@ -279,7 +278,7 @@ jobs:
           LIBGL_ALWAYS_SOFTWARE: true
           GALLIUM_DRIVER: llvmpipe
         run: |
-          (Invoke-WebRequest https://api.github.com/repos/pal1000/mesa-dist-win/releases -Headers @{ Authorization = ('Bearer {0}' -f '${{ secrets.GITHUB_TOKEN }}') } | ConvertFrom-Json)[0].assets | Where-Object name -match 'mesa3d-.+-(release|devel)-msvc\.7z' | foreach { Invoke-WebRequest $_.browser_download_url -OutFile mesa3d.7z }
+          (Invoke-WebRequest https://api.github.com/repos/pal1000/mesa-dist-win/releases -Headers @{ Authorization = ('Bearer {0}' -f '${{ secrets.GITHUB_TOKEN }}') } | ConvertFrom-Json)[0].assets | Where-Object name -match 'mesa3d-.+-release-msvc\.7z' | foreach { Invoke-WebRequest $_.browser_download_url -OutFile mesa3d.7z }
           & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v131 .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll
           npm test
 

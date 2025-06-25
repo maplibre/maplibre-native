@@ -129,6 +129,71 @@
         "MLN_CORE_INCLUDE_DEPS": "ON",
         "MLN_USE_BUILTIN_ICU": "ON"
       }
+    },
+    {
+      "name": "windows",
+      "hidden": true,
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "Windows",
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_WITH_EGL": "OFF",
+        "MLN_WITH_VULKAN": "OFF",
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
+      "name": "windows-opengl",
+      "binaryDir": "${sourceDir}/build-windows-opengl",
+      "generator": "Ninja",
+      "inherits": "windows",
+      "cacheVariables": {
+        "MLN_WITH_OPENGL": "ON"
+      }
+    },
+    {
+      "name": "windows-opengl-core",
+      "inherits": "windows-opengl",
+      "cacheVariables": {
+        "MLN_CORE_INCLUDE_DEPS": "ON",
+        "MLN_USE_BUILTIN_ICU": "ON"
+      }
+    },
+    {
+      "name": "windows-egl",
+      "binaryDir": "${sourceDir}/build-windows-egl",
+      "generator": "Ninja",
+      "inherits": "windows",
+      "cacheVariables": {
+        "MLN_WITH_OPENGL": "ON",
+        "MLN_WITH_EGL": "ON"
+      }
+    },
+    {
+      "name": "windows-egl-core",
+      "inherits": "windows-egl",
+      "cacheVariables": {
+        "MLN_CORE_INCLUDE_DEPS": "ON",
+        "MLN_USE_BUILTIN_ICU": "ON"
+      }
+    },
+    {
+      "name": "windows-vulkan",
+      "binaryDir": "${sourceDir}/build-windows-vulkan",
+      "inherits": "windows",
+      "cacheVariables": {
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_WITH_EGL": "OFF",
+        "MLN_WITH_VULKAN": "ON"
+      }
+    },
+    {
+      "name": "windows-vulkan-core",
+      "inherits": "windows-vulkan",
+      "cacheVariables": {
+        "MLN_CORE_INCLUDE_DEPS": "ON",
+        "MLN_USE_BUILTIN_ICU": "ON"
+      }
     }
   ],
   "buildPresets": [
@@ -145,6 +210,21 @@
     {
       "name": "linux-vulkan-core",
       "configurePreset": "linux-vulkan",
+      "targets": ["mbgl-core"]
+    },
+    {
+      "name": "windows-opengl-core",
+      "configurePreset": "windows-opengl",
+      "targets": ["mbgl-core"]
+    },
+    {
+      "name": "windows-egl-core",
+      "configurePreset": "windows-egl",
+      "targets": ["mbgl-core"]
+    },
+    {
+      "name": "windows-vulkan-core",
+      "configurePreset": "windows-vulkan",
       "targets": ["mbgl-core"]
     }
   ]
