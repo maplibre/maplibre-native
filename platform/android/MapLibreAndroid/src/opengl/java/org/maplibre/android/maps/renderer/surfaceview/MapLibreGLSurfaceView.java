@@ -19,6 +19,7 @@ import javax.microedition.khronos.opengles.GL;
 import javax.microedition.khronos.opengles.GL10;
 
 public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
+  public static boolean WAIT_COMMANDS_ON_CLEANUP = false;
 
   protected final WeakReference<MapLibreGLSurfaceView> viewWeakReference = new WeakReference<>(this);
 
@@ -272,6 +273,11 @@ public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
 
     private void destroySurfaceImp() {
       if (mEglSurface != null && mEglSurface != EGL10.EGL_NO_SURFACE) {
+
+        if (WAIT_COMMANDS_ON_CLEANUP) {
+          mEgl.eglWaitNative(EGL10.EGL_CORE_NATIVE_ENGINE, null);
+        }
+
         mEgl.eglMakeCurrent(mEglDisplay, EGL10.EGL_NO_SURFACE,
           EGL10.EGL_NO_SURFACE,
           EGL10.EGL_NO_CONTEXT);

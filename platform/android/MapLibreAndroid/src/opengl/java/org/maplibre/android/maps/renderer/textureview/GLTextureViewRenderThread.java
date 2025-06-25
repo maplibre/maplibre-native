@@ -310,6 +310,8 @@ public class GLTextureViewRenderThread extends TextureViewRenderThread {
         return;
       }
 
+      egl.eglMakeCurrent(eglDisplay, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
+
       if (!egl.eglDestroySurface(eglDisplay, eglSurface)) {
         Logger.w(TAG, String.format("Could not destroy egl surface. Display %s, Surface %s", eglDisplay, eglSurface));
       }
