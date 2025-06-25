@@ -103,15 +103,22 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
         // Until we can be sure that the buffer is not still in use to render the
         // previous frame, replace it with a new buffer instead of updating it.
 
-        auto& device = context.getBackend().getDevice();
         const uint8_t* newBufferSource = nullptr;
         std::unique_ptr<uint8_t[]> tempBuffer;
+        const bool updateIsEntireBuffer = (offset == 0 && updateSize == size);
 
+        // If the entire buffer is being updated, make sure it's changed
+        if (updateIsEntireBuffer) {
+            if (memcmp(buffer->contents(), newData, updateSize) == 0) {
+                return;
+            }
+        }
+
+        auto& device = context.getBackend().getDevice();
         // `[MTLBuffer contents]` may involve memory mapping and/or synchronization.  If the entire
         // buffer is being replaced, avoid accessing the old one by creating the new buffer directly
         // from the given data. If it's just being updated, apply the update to a local buffer to
         // avoid needing to access the new buffer.
-        const bool updateIsEntireBuffer = (offset == 0 && updateSize == size);
         if (updateIsEntireBuffer) {
             newBufferSource = static_cast<const uint8_t*>(newData);
         } else {
