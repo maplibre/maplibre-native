@@ -12,11 +12,11 @@ Currently Plugin Layers are only available on iOS/Darwin using the Metal Renderi
 Plugin Layers can be created by creating a descendant from MLNPluginLayer and add the class type to an instance of MLNMapView.  The layer is self describing (e.g. the layer type, what properties are available, etc) and that information will be registered with the MapLibre core.  When the plugin layer type is found in the style, the core will automatically instantiate it, pass along initial properties and manage the rendering of the layer.
 
 ### Defining a layer's capabilities
-The newly created layer class should override the layerCapabilites class method.  Please note that this is a class method and not an instance method, so make sure it's prefaced with a + and not a -. 
+The newly created layer class should override the layerCapabilites class method.  Please note that this is a class method and not an instance method, so make sure it's prefaced with a + and not a -.
 
 The object that is returned from this method defines the layer type and the propeties that the layer expects.
 
-The triangle example (platform/darwin/app/PluginLayerExampleMetalRendering.mm) defines it's layer type "plugin-layer-metal-rendering" and two paint properties (scale and fill-color).  These properties can be expression based.  It's important to define the type of property (single float or color) and a default value.  The properties returned by layerCapabilities will correspond to any properties in the "paint": part of the style.  
+The triangle example (platform/darwin/app/PluginLayerExampleMetalRendering.mm) defines it's layer type "plugin-layer-metal-rendering" and two paint properties (scale and fill-color).  These properties can be expression based.  It's important to define the type of property (single float or color) and a default value.  The properties returned by layerCapabilities will correspond to any properties in the "paint": part of the style.
 
 Initialization properties can also be added to the "properties": section of the layer style.
 
