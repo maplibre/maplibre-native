@@ -67,6 +67,15 @@ public:
      */
     static const bool annotationsEnabled;
 
+    /**
+     * Enables a layer type for JSON style only.
+     *
+     * We might not want to expose runtime API for some layer types
+     * in order to save binary size (the corresponding SDK layer wrappers
+     * should be excluded from the project build).
+     */
+    virtual void addLayerTypeCoreOnly(std::unique_ptr<mbgl::LayerFactory>);
+
 protected:
     virtual ~LayerManager() = default;
     virtual LayerFactory* getFactory(const std::string& type) noexcept = 0;

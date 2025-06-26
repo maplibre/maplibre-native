@@ -966,6 +966,19 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/version.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/work_request.cpp
 )
+list(APPEND SRC_FILES
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_render.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_properties.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_factory.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_render.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_properties.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_impl.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_factory.cpp
+)
+
 
 if(MLN_WITH_OPENGL)
     message(STATUS "Configuring GL-Native with OpenGL renderer backend")
