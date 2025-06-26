@@ -51,4 +51,4 @@ private:
 
 } // namespace QMapLibre
 
-#endif // MLN_RENDER_BACKEND_VULKAN 
+#endif // MLN_RENDER_BACKEND_VULKAN

@@ -28,7 +28,8 @@ void QtVulkanRenderableResource::createPlatformSurface() {
 
     QVulkanInstance* inst = qtBackend.getQtVulkanInstance();
     if (!inst) {
-        throw std::runtime_error("Qt Vulkan instance not available. Make sure QVulkanInstance is initialised before creating the map view.");
+        throw std::runtime_error(
+            "Qt Vulkan instance not available. Make sure QVulkanInstance is initialised before creating the map view.");
     }
 
     VkSurfaceKHR surfaceKHR = VK_NULL_HANDLE;
@@ -97,4 +98,4 @@ std::vector<const char*> VulkanRendererBackend::getInstanceExtensions() {
 
 } // namespace QMapLibre
 
-#endif // MLN_RENDER_BACKEND_VULKAN 
+#endif // MLN_RENDER_BACKEND_VULKAN

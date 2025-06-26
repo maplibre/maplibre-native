@@ -40,4 +40,4 @@ private:
 
 } // namespace QMapLibre
 
-#endif // MLN_RENDER_BACKEND_OPENGL 
+#endif // MLN_RENDER_BACKEND_OPENGL
