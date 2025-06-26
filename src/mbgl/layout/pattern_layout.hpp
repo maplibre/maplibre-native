@@ -40,11 +40,6 @@ public:
 
     friend bool operator<(const PatternFeature& lhs, const PatternFeature& rhs) { return lhs.sortKey < rhs.sortKey; }
 
-    PatternFeature(const PatternFeature&) = delete;
-    PatternFeature(PatternFeature&&) = default;
-    PatternFeature& operator=(const PatternFeature&) = delete;
-    PatternFeature& operator=(PatternFeature&&) = default;
-
     std::size_t i;
     std::unique_ptr<GeometryTileFeature> feature;
     float sortKey;
