@@ -7,7 +7,7 @@
 #include "opengl_renderer_backend.hpp"
 #elif defined(MLN_RENDER_BACKEND_VULKAN)
 #include "vulkan_renderer_backend.hpp"
-#else // default to Metal
+#elif defined(MLN_RENDER_BACKEND_METAL)
 #include "metal_renderer_backend.hpp"
 #endif
 
@@ -17,7 +17,7 @@ namespace QMapLibre {
 using RendererBackend = OpenGLRendererBackend;
 #elif defined(MLN_RENDER_BACKEND_VULKAN)
 using RendererBackend = VulkanRendererBackend;
-#else
+#elif defined(MLN_RENDER_BACKEND_METAL)
 using RendererBackend = MetalRendererBackend;
 #endif
 
