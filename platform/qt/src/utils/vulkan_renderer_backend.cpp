@@ -33,13 +33,9 @@ void QtVulkanRenderableResource::createPlatformSurface() {
     }
 
     VkSurfaceKHR surfaceKHR = VK_NULL_HANDLE;
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     if (!inst->createSurface(qtBackend.getWindow(), &surfaceKHR)) {
         throw std::runtime_error("Failed to create Vulkan surface for Qt window");
     }
-#else
-    throw std::runtime_error("Qt below version 6 isn't supported");
-#endif
     surface = vk::UniqueSurfaceKHR(surfaceKHR,
                                    vk::ObjectDestroy<vk::Instance, vk::DispatchLoaderDynamic>(qtBackend.getInstance()));
 }
