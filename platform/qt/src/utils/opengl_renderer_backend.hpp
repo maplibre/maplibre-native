@@ -25,6 +25,8 @@ public:
 
     // mbgl::gl::RendererBackend --------------------------------------------------
     void updateAssumedState() override;
+    void activate() override;
+    void deactivate() override;
 
 protected:
     mbgl::gl::ProcAddress getExtensionFunctionPointer(const char*) override;

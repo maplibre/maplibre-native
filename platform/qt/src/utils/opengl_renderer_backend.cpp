@@ -51,6 +51,16 @@ mbgl::gl::ProcAddress OpenGLRendererBackend::getExtensionFunctionPointer(const c
     return thisContext->getProcAddress(name);
 }
 
+void OpenGLRendererBackend::activate() {
+    // Qt has already made the context current for us (QOpenGLWidget / QSG).
+    // Nothing to do here.
+}
+
+void OpenGLRendererBackend::deactivate() {
+    // No explicit teardown necessary. If desired we could call makeCurrent on
+    // nullptr to release the context, but Qt typically handles that.
+}
+
 } // namespace QMapLibre
 
 #endif // MLN_RENDER_BACKEND_OPENGL
