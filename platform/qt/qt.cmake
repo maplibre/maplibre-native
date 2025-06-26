@@ -166,14 +166,11 @@ if(MLN_WITH_OPENGL)
     target_sources(
         mbgl-core
         PRIVATE
-
-        # Generic headless helpers are only relevant for OpenGL builds.
-        # Exclude them when building Metal/Vulkan-only to avoid pulling GL symbols.
-            ${PROJECT_SOURCE_DIR}/platform/default/include/mbgl/gfx/headless_backend.hpp>
-            ${PROJECT_SOURCE_DIR}/platform/default/include/mbgl/gfx/headless_frontend.hpp>
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp>
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp>
-            ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/headless_backend_qt.cpp>
+            ${PROJECT_SOURCE_DIR}/platform/default/include/mbgl/gfx/headless_backend.hpp
+            ${PROJECT_SOURCE_DIR}/platform/default/include/mbgl/gfx/headless_frontend.hpp
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
+            ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/headless_backend_qt.cpp
 
             ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/opengl_renderer_backend.cpp
             ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/opengl_renderer_backend.hpp
