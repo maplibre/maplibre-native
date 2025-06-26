@@ -136,7 +136,9 @@ public:
         TimePoint start;
         Duration duration;
         AnimationOptions animation;
-        bool ran = false, finished = false, done = false;
+        bool ran = false;      // Did this property animation run this frame
+        bool finished = false; // Did we execute the finish frame for this property animation this frame
+        bool done = false;     // Did this property animation reach the end of the frame
         bool panning = false, scaling = false, rotating = false;
 
         PropertyAnimation(TimePoint start_,
@@ -181,7 +183,7 @@ private:
         std::optional<ScreenCoordinate> anchor;
         LatLng anchorLatLng;
     };
-    
+
     TransformObserver& observer;
     TransformState state;
 

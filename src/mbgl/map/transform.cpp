@@ -650,7 +650,7 @@ void Transform::updateTransitions(const TimePoint& now) {
 
         bool panning = false, scaling = false, rotating = false;
         visitPropertyAnimations([&](std::shared_ptr<PropertyAnimation>& propertyAnimation) {
-            if (propertyAnimation) {
+            if (propertyAnimation && !propertyAnimation->done) {
                 panning |= propertyAnimation->panning;
                 scaling |= propertyAnimation->scaling;
                 rotating |= propertyAnimation->rotating;
@@ -721,12 +721,26 @@ void Transform::updateTransitions(const TimePoint& now) {
             state.moveLatLng(propertyAnimations.anchorLatLng, *propertyAnimations.anchor);
         }
 
+        panning = false;
+        scaling = false;
+        rotating = false;
         visitPropertyAnimations([&](std::shared_ptr<PropertyAnimation>& propertyAnimation) {
             if (propertyAnimation) {
-                if (propertyAnimation->done) animationFinishFrame(propertyAnimation);
+                if (propertyAnimation->done) {
+                    animationFinishFrame(propertyAnimation);
+                } else {
+                    panning |= propertyAnimation->panning;
+                    scaling |= propertyAnimation->scaling;
+                    rotating |= propertyAnimation->rotating;
+                }
                 propertyAnimation->ran = false;
             }
         });
+
+        state.setProperties(TransformStateProperties()
+                                .withPanningInProgress(panning)
+                                .withScalingInProgress(scaling)
+                                .withRotatingInProgress(rotating));
 
         activeAnimation = false;
     }
