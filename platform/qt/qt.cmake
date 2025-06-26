@@ -155,7 +155,7 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/widevector.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/mtl/custom_layer_render_parameters.cpp
 
-            ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/metal_renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/metal_renderer_backend.mm
             ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/metal_renderer_backend.hpp
             ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.hpp
     )
