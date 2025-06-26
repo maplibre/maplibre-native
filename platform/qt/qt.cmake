@@ -181,15 +181,26 @@ if(MLN_WITH_OPENGL)
     )
 endif()
 
-# Add Qt Vulkan renderer backend only when Vulkan backend is enabled
+# ---------------------------------------------------------------------------
+# Qt Vulkan renderer backend: only when MLN_WITH_VULKAN and qvulkaninstance.h present
+# ---------------------------------------------------------------------------
 if(MLN_WITH_VULKAN)
-    target_sources(
-        mbgl-core
-        PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/vulkan_renderer_backend.cpp
-            ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/vulkan_renderer_backend.hpp
-            ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.hpp
-    )
+    find_path(QT_VULKAN_HEADER qvulkaninstance.h
+        PATHS ${Qt${QT_VERSION_MAJOR}Gui_INCLUDE_DIRS}
+        NO_DEFAULT_PATH)
+
+    if(QT_VULKAN_HEADER)
+        target_sources(
+            mbgl-core
+            PRIVATE
+                ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/vulkan_renderer_backend.cpp
+                ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/vulkan_renderer_backend.hpp
+                ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.hpp
+        )
+    else()
+        message(STATUS "Qt build has no Vulkan headers; skipping Qt Vulkan backend")
+        set(MLN_WITH_VULKAN OFF CACHE BOOL "Disable Vulkan backend due to missing Qt Vulkan support" FORCE)
+    endif()
 endif()
 
 target_compile_definitions(
@@ -310,20 +321,6 @@ if(APPLE AND MLN_WITH_METAL)
     target_compile_definitions(
         mbgl-core
         PRIVATE MLN_RENDER_BACKEND_METAL=1
-    )
-endif()
-
-# Vulkan backend sources (macOS only)
-if(APPLE AND MLN_WITH_VULKAN)
-    target_link_libraries(
-        mbgl-core
-        PRIVATE
-            "-framework QuartzCore"
-            "-framework CoreFoundation"
-    )
-    target_compile_definitions(
-        mbgl-core
-        PRIVATE MLN_RENDER_BACKEND_VULKAN=1
     )
 endif()
 
