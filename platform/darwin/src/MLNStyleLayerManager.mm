@@ -115,7 +115,7 @@ void LayerManagerDarwin::registerCoreFactory(LayerFactory* factory) {
 
 LayerPeerFactory* LayerManagerDarwin::getPeerFactory(const mbgl::style::LayerTypeInfo* typeInfo) {
     for (const auto& factory: peerFactories) {
-        if (factory->getCoreLayerFactory()->getTypeInfo() == typeInfo) {
+        if (layerTypeInfoEquals(factory->getCoreLayerFactory()->getTypeInfo(), typeInfo)) {
             return factory.get();
         }
     }
@@ -133,7 +133,8 @@ LayerFactory* LayerManagerDarwin::getFactory(const mbgl::style::LayerTypeInfo* i
     }
 
     for (const auto& factory: coreFactories) {
-        if (factory->getTypeInfo() == info) {
+        if (layerTypeInfoEquals(factory->getTypeInfo(), info)) {
+      //  if (factory->getTypeInfo() == info) {
             return factory.get();
         }
     }

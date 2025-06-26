@@ -7,8 +7,6 @@ load(
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
 load(
     "bazel/files.bzl",
-    "MLN_GLTF_HEADERS",
-    "MLN_GLTF_SOURCE",
     "MLN_DARWIN_OBJCPP_HEADERS",
     "MLN_DARWIN_OBJC_HEADERS",
     "MLN_DARWIN_PRIVATE_HEADERS",
@@ -19,6 +17,8 @@ load(
     "MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS",
     "MLN_GENERATED_DARWIN_STYLE_SOURCE",
     "MLN_GENERATED_DARWIN_TEST_CODE",
+    "MLN_GLTF_HEADERS",
+    "MLN_GLTF_SOURCE",
 )
 
 filegroup(
@@ -186,6 +186,7 @@ swift_library(
     testonly = True,
     srcs = glob(["test/*.swift"]),
     data = [
+        "app/PluginLayerTestStyle.json",
         "test/amsterdam.geojson",
         "test/one-liner.json",
     ],
@@ -311,6 +312,11 @@ objc_library(
 
 exports_files(
     [
+        "app/PluginLayerTestStyle.json",
+        "app/PluginLayerExample.h",
+        "app/PluginLayerExample.mm",
+        "app/PluginLayerExampleMetalRendering.h",
+        "app/PluginLayerExampleMetalRendering.mm",
         "test/amsterdam.geojson",
         "test/MLNSDKTestHelpers.swift",
         "app/CustomStyleLayerExample.h",
@@ -321,7 +327,7 @@ exports_files(
     ] + MLN_DARWIN_PUBLIC_OBJC_SOURCE +
     MLN_DARWIN_PUBLIC_OBJCPP_SOURCE +
     MLN_GLTF_HEADERS +
-    MLN_GLTF_SOURCE + 
+    MLN_GLTF_SOURCE +
     MLN_DARWIN_PUBLIC_OBJCPP_CUSTOM_DRAWABLE_SOURCE +
     MLN_DARWIN_PRIVATE_HEADERS +
     MLN_DARWIN_OBJC_HEADERS +
@@ -345,10 +351,10 @@ js_binary(
 js_library(
     name = "symbols-to-check",
     srcs = [
-        ":darwin_objc_hdrs",
-        ":darwin_objc_srcs",
         ":darwin_gltf_hdrs",
         ":darwin_gltf_srcs",
+        ":darwin_objc_hdrs",
+        ":darwin_objc_srcs",
         ":darwin_objcpp_hdrs",
         ":darwin_objcpp_srcs",
         ":darwin_private_hdrs",
