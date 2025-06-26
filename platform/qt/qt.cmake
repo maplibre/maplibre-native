@@ -63,7 +63,7 @@ target_sources(
     mbgl-core
     PRIVATE
         ${PROJECT_SOURCE_DIR}/platform/$<IF:$<PLATFORM_ID:Linux>,default/src/mbgl/text/bidi.cpp,qt/src/mbgl/bidi.cpp>
-        
+
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/collator.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/layermanager/layer_manager.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/platform/time.cpp
