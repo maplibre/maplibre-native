@@ -2,11 +2,23 @@
 #pragma once
 
 #include <mbgl/gfx/renderable.hpp>
+
+#if defined(MLN_RENDER_BACKEND_OPENGL)
+#include "opengl_renderer_backend.hpp"
+#elif defined(MLN_RENDER_BACKEND_VULKAN)
+#include "vulkan_renderer_backend.hpp"
+#else // default to Metal
 #include "metal_renderer_backend.hpp"
+#endif
 
 namespace QMapLibre {
 
-// Alias expected by the rest of the Qt wrapper
+#if defined(MLN_RENDER_BACKEND_OPENGL)
+using RendererBackend = OpenGLRendererBackend;
+#elif defined(MLN_RENDER_BACKEND_VULKAN)
+using RendererBackend = VulkanRendererBackend;
+#else
 using RendererBackend = MetalRendererBackend;
+#endif
 
 } // namespace QMapLibre

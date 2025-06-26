@@ -166,7 +166,19 @@ if(MLN_WITH_OPENGL)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/opengl_renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/opengl_renderer_backend.hpp
+            ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.hpp
+    )
+endif()
+
+# Add Qt Vulkan renderer backend only when Vulkan backend is enabled
+if(MLN_WITH_VULKAN)
+    target_sources(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/vulkan_renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/vulkan_renderer_backend.hpp
             ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.hpp
     )
 endif()
