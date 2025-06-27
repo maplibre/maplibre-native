@@ -4,6 +4,18 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+## 6.16.0
+
+- Add run-time plug-in layer support to iOS ([#3430](https://github.com/maplibre/maplibre-native/pull/3430)).
+  Documentation: https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre-native-for-ios/pluginlayers
+
+- Fix nullability of attributionHtmlString ([#3551](https://github.com/maplibre/maplibre-native/pull/3551)).
+- Fix the symbol blink issue by only placing the symbol in current level ([#3534](https://github.com/maplibre/maplibre-native/pull/3534)).
+- add functionality to metal render pass to cache winding order and cull mode ([#3566](https://github.com/maplibre/maplibre-native/pull/3566)).
+- Add polylines with geographic coordinates for custom drawables ([#3547](https://github.com/maplibre/maplibre-native/pull/3547)).
+- Reduce duplicate GPU buffer uploads ([#3577](https://github.com/maplibre/maplibre-native/pull/3577)).
+- Symbol Shader Performance Improvments ([#3576](https://github.com/maplibre/maplibre-native/pull/3576)).
+
 ## 6.15.0
 
 - Add action journal ([#3409](https://github.com/maplibre/maplibre-native/pull/3409)). Documentation: https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre-native-for-ios/actionjournalexample
