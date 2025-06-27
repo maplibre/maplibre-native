@@ -15,6 +15,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 - Add polylines with geographic coordinates for custom drawables ([#3547](https://github.com/maplibre/maplibre-native/pull/3547)).
 - Reduce duplicate GPU buffer uploads ([#3577](https://github.com/maplibre/maplibre-native/pull/3577)).
 - Symbol Shader Performance Improvments ([#3576](https://github.com/maplibre/maplibre-native/pull/3576)).
+- Add an option to reverse the direction of the quick zoom gesture ([#3587](https://github.com/maplibre/maplibre-native/pull/3587)).
 
 ## 6.15.0
 
