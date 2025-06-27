@@ -432,7 +432,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         if (renderSource->isEnabled()) {
             renderSource->prepare({.transform = renderTreeParameters->transformParams,
                                    .debugOptions = updateParameters->debugOptions,
-                                   .imageManager = *imageManager});
+                                   .imageManager = *imageManager,
+                                   .sourceName = name});
         }
     }
 
