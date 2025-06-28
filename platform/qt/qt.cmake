@@ -106,7 +106,8 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_observer.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/scheduler.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/scheduler.hpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/backend_flag.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
 )
 
 
@@ -158,6 +159,13 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/metal_renderer_backend.mm
             ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/metal_renderer_backend.hpp
             ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.hpp
+
+            # Metal head-less backend (core implementation)
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/mtl/headless_backend.cpp
+    )
+    target_compile_definitions(
+        mbgl-core
+        PRIVATE MLN_RENDER_BACKEND_METAL=1
     )
 endif()
 
@@ -166,15 +174,18 @@ if(MLN_WITH_OPENGL)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/include/mbgl/gfx/headless_backend.hpp
-            ${PROJECT_SOURCE_DIR}/platform/default/include/mbgl/gfx/headless_frontend.hpp
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
             ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/headless_backend_qt.cpp
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
 
             ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/opengl_renderer_backend.cpp
             ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/opengl_renderer_backend.hpp
             ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.hpp
+    )
+
+    # Define backend selector macro when OpenGL is enabled (and Metal/Vulkan not preferred)
+    target_compile_definitions(
+        mbgl-core
+        PRIVATE MLN_RENDER_BACKEND_OPENGL=1
     )
 endif()
 
@@ -193,6 +204,16 @@ if(MLN_WITH_VULKAN)
                 ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/vulkan_renderer_backend.cpp
                 ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/vulkan_renderer_backend.hpp
                 ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.hpp
+
+                # Vulkan head-less backend (core implementation)
+                ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/vulkan/headless_backend.cpp
+        )
+
+        # Define selector macro unless another backend already took precedence
+        target_compile_definitions(
+            mbgl-core
+            PRIVATE
+                $<$<AND:$<BOOL:${MLN_WITH_VULKAN}>,$<NOT:$<BOOL:${MLN_WITH_METAL}>>,$<NOT:$<BOOL:${MLN_WITH_OPENGL}>>>:MLN_RENDER_BACKEND_VULKAN=1>
         )
     else()
         message(STATUS "Qt build has no Vulkan headers; skipping Qt Vulkan backend")
@@ -319,15 +340,4 @@ if(APPLE AND MLN_WITH_METAL)
         mbgl-core
         PRIVATE MLN_RENDER_BACKEND_METAL=1
     )
-endif()
-
-# ---------------------------------------------------------------------------
-# Exclude generic head-less helpers when we build Metal-only (no OpenGL)
-# ---------------------------------------------------------------------------
-if(NOT MLN_WITH_OPENGL)
-    set_source_files_properties(
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/headless_backend_qt.cpp
-        PROPERTIES HEADER_FILE_ONLY TRUE)
 endif()
