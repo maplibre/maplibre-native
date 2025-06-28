@@ -5,7 +5,7 @@
 
 #ifdef __APPLE__
 #include <TargetConditionals.h>
-#if TARGET_OS_OSX
+#if TARGET_OS_OSX || TARGET_OS_IPHONE
 
 #include <mbgl/mtl/renderer_backend.hpp>
 #include <mbgl/gfx/renderable.hpp>
@@ -63,5 +63,5 @@ private:
 
 } // namespace QMapLibre
 
-#endif // TARGET_OS_OSX
+#endif // TARGET_OS_OSX || TARGET_OS_IPHONE
 #endif // __APPLE__

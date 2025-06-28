@@ -10,7 +10,7 @@
 
 #ifdef __APPLE__
 #include <TargetConditionals.h>
-#if TARGET_OS_OSX
+#if TARGET_OS_OSX || TARGET_OS_IPHONE
 
 #define NS_PRIVATE_IMPLEMENTATION
 #define CA_PRIVATE_IMPLEMENTATION
@@ -20,5 +20,5 @@
 #include <QuartzCore/QuartzCore.hpp>
 #include <Metal/Metal.hpp>
 
-#endif // TARGET_OS_OSX
+#endif // TARGET_OS_OSX || TARGET_OS_IPHONE
 #endif // __APPLE__

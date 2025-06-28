@@ -3,7 +3,7 @@
 
 #ifdef __APPLE__
 #include <TargetConditionals.h>
-#if TARGET_OS_OSX
+#if TARGET_OS_OSX || TARGET_OS_IPHONE
 
 #include "metal_renderer_backend.hpp"
 
@@ -165,5 +165,5 @@ mbgl::Size MetalRendererBackend::getSize() const {
 
 } // namespace QMapLibre
 
-#endif // TARGET_OS_OSX
+#endif // TARGET_OS_OSX || TARGET_OS_IPHONE
 #endif // __APPLE__
