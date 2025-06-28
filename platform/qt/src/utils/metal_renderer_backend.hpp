@@ -12,17 +12,6 @@
 
 namespace QMapLibre {
 
-/*! \brief Metal renderer backend for the Qt platform (macOS desktop).
- *
- *  This class adapts MapLibre Native's generic Metal backend to the Metal
- *  objects supplied by Qt Quick on macOS.  It mirrors the GLFW variant in
- *  `platform/glfw/metal_backend.{h,mm}` but receives a \c CAMetalLayer from
- *  Qt instead of a raw NSWindow.
- *
- *  The implementation currently focuses on getting the code to compile so that
- *  Qt Quick + Metal can be enabled during the build.  Full swap-chain handling
- *  will be filled in step-by-step (similar to the existing GLFW backend).
- */
 class MetalRendererBackend final : public mbgl::mtl::RendererBackend, public mbgl::gfx::Renderable {
 public:
     explicit MetalRendererBackend(CA::MetalLayer* layer);
