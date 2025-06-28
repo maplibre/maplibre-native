@@ -8,13 +8,6 @@
 
 namespace QMapLibre {
 
-/*!
-    \brief Qt specific OpenGL backend implementation.
-
-    This class provides the glue between Qt's OpenGL context and
-    MapLibre Native's generic OpenGL renderer backend.
-
-*/
 class OpenGLRendererBackend : public mbgl::gl::RendererBackend, public mbgl::gfx::Renderable {
 public:
     explicit OpenGLRendererBackend(const mbgl::gfx::ContextMode mode = mbgl::gfx::ContextMode::Unique);
