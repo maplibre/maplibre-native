@@ -13,13 +13,17 @@ Scheduler::~Scheduler() {
     MBGL_VERIFY_THREAD(tid);
 }
 
-void Scheduler::schedule(std::function<void()>&& function) {
+void Scheduler::schedule(const mbgl::util::SimpleIdentity /*id*/, std::function<void()>&& function) {
     const std::lock_guard<std::mutex> lock(m_taskQueueMutex);
     m_taskQueue.push(std::move(function));
 
     // Need to force the main thread to wake
     // up this thread and process the events.
     emit needsProcessing();
+}
+
+void Scheduler::schedule(std::function<void()>&& function) {
+    schedule(mbgl::util::SimpleIdentity::Empty, std::move(function));
 }
 
 void Scheduler::processEvents() {

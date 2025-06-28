@@ -1,38 +1,24 @@
+// Simplified backend selection: we only support Metal in this Qt build
 #pragma once
 
 #include <mbgl/gfx/renderable.hpp>
-#include <mbgl/gl/renderer_backend.hpp>
 
-#include <QtGlobal>
+#if defined(MLN_RENDER_BACKEND_OPENGL)
+#include "opengl_renderer_backend.hpp"
+#elif defined(MLN_RENDER_BACKEND_VULKAN)
+#include "vulkan_renderer_backend.hpp"
+#elif defined(MLN_RENDER_BACKEND_METAL)
+#include "metal_renderer_backend.hpp"
+#endif
 
 namespace QMapLibre {
 
-class RendererBackend final : public mbgl::gl::RendererBackend, public mbgl::gfx::Renderable {
-public:
-    explicit RendererBackend(mbgl::gfx::ContextMode mode);
-    ~RendererBackend() override;
-
-    void updateFramebuffer(quint32 fbo, const mbgl::Size &newSize);
-    void restoreFramebufferBinding();
-
-    // mbgl::gfx::RendererBackend implementation
-public:
-    mbgl::gfx::Renderable &getDefaultRenderable() override { return *this; }
-
-protected:
-    // No-op, implicit mode.
-    void activate() override {}
-    void deactivate() override {}
-
-    // mbgl::gl::RendererBackend implementation
-protected:
-    mbgl::gl::ProcAddress getExtensionFunctionPointer(const char *name) override;
-    void updateAssumedState() override;
-
-private:
-    quint32 m_fbo{};
-
-    Q_DISABLE_COPY(RendererBackend)
-};
+#if defined(MLN_RENDER_BACKEND_OPENGL)
+using RendererBackend = OpenGLRendererBackend;
+#elif defined(MLN_RENDER_BACKEND_VULKAN)
+using RendererBackend = VulkanRendererBackend;
+#elif defined(MLN_RENDER_BACKEND_METAL)
+using RendererBackend = MetalRendererBackend;
+#endif
 
 } // namespace QMapLibre
