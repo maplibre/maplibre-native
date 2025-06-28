@@ -1,6 +1,3 @@
-// Copyright (C) 2024 MapLibre contributors
-// SPDX-License-Identifier: BSD-2-Clause
-
 #pragma once
 
 #ifdef __APPLE__

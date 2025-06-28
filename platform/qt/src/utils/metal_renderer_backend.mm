@@ -1,6 +1,3 @@
-// Copyright (C) 2024 MapLibre contributors
-// SPDX-License-Identifier: BSD-2-Clause
-
 #ifdef __APPLE__
 #include <TargetConditionals.h>
 #if TARGET_OS_OSX || TARGET_OS_IPHONE
