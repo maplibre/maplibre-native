@@ -123,6 +123,7 @@ cc_library(
         "//vendor:earcut.hpp",
         "//vendor:eternal",
         "//vendor:maplibre-native-base",
+        "//vendor:maplibre-tile-spec",
         "//vendor:parsedate",
         "//vendor:pmtiles",
         "//vendor:polylabel",
