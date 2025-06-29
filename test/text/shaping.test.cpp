@@ -24,7 +24,7 @@ TEST(Shaping, ZWSP) {
     BiDi bidi;
     auto immutableGlyph = Immutable<Glyph>(makeMutable<Glyph>(std::move(glyph)));
     const std::vector<std::string> fontStack{{"font-stack"}};
-    const SectionOptions sectionOptions(1.0f, fontStack);
+    const SectionOptions sectionOptions(1.0f, fontStack, GlyphIDType::FontPBF, 0);
     const float layoutTextSize = 16.0f;
     const float layoutTextSizeAtBucketZoomLevel = 16.0f;
     GlyphMap glyphs = {{FontStackHasher()(fontStack), {{u'中', std::move(immutableGlyph)}}}};
