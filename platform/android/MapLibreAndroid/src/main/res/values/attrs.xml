@@ -16,6 +16,7 @@
         <attr name="maplibre_actionJournalEnabled" format="boolean"/>
         <attr name="maplibre_actionJournalLogFileSize" format="integer"/>
         <attr name="maplibre_actionJournalLogFileCount" format="integer"/>
+        <attr name="maplibre_actionJournalRenderingReportInterval" format="integer"/>
 
         <!--Camera-->
         <attr name="maplibre_cameraTargetLat" format="float"/>

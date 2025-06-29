@@ -98,6 +98,7 @@ public class MapLibreMapOptions implements Parcelable {
   private String actionJournalPath = "";
   private long actionJournalLogFileSize = 1024 * 1024;
   private long actionJournalLogFileCount = 5;
+  private int actionJournalRenderingReportInterval = 60;
 
   /**
    * Creates a new MapLibreMapOptions object.
@@ -161,6 +162,7 @@ public class MapLibreMapOptions implements Parcelable {
     actionJournalPath = in.readString();
     actionJournalLogFileSize = in.readLong();
     actionJournalLogFileCount = in.readLong();
+    actionJournalRenderingReportInterval = in.readInt();
   }
 
   /**
@@ -326,6 +328,9 @@ public class MapLibreMapOptions implements Parcelable {
       );
       maplibreMapOptions.actionJournalLogFileCount(
         typedArray.getInteger(R.styleable.maplibre_MapView_maplibre_actionJournalLogFileCount, 5)
+      );
+      maplibreMapOptions.actionJournalRenderingReportInterval(
+              typedArray.getInteger(R.styleable.maplibre_MapView_maplibre_actionJournalRenderingReportInterval, 60)
       );
     } finally {
       typedArray.recycle();
@@ -812,6 +817,18 @@ public class MapLibreMapOptions implements Parcelable {
   }
 
   /**
+   * Set the number of seconds to wait between rendering stats reports.
+   *
+   * @param actionJournalRenderingReportInterval time interval in seconds
+   * @return This
+   */
+  @NonNull
+  public MapLibreMapOptions actionJournalRenderingReportInterval(int actionJournalRenderingReportInterval) {
+    this.actionJournalRenderingReportInterval = actionJournalRenderingReportInterval;
+    return this;
+  }
+
+  /**
    * Enable local ideograph font family, defaults to true.
    *
    * @param enabled true to enable, false to disable
@@ -938,6 +955,15 @@ public class MapLibreMapOptions implements Parcelable {
    */
   public long getActionJournalLogFileCount() {
     return actionJournalLogFileCount;
+  }
+
+  /**
+   * Get the current configured action journal rendering stats report time interval.
+   *
+   * @return time interval in seconds
+   */
+  public int getActionJournalRenderingReportInterval() {
+    return actionJournalRenderingReportInterval;
   }
 
   /**
@@ -1329,6 +1355,7 @@ public class MapLibreMapOptions implements Parcelable {
     dest.writeString(actionJournalPath);
     dest.writeLong(actionJournalLogFileSize);
     dest.writeLong(actionJournalLogFileCount);
+    dest.writeInt(actionJournalRenderingReportInterval);
   }
 
   @Override
@@ -1465,6 +1492,10 @@ public class MapLibreMapOptions implements Parcelable {
       return false;
     }
 
+    if (actionJournalRenderingReportInterval != options.actionJournalRenderingReportInterval) {
+      return false;
+    }
+
     return false;
   }
 
@@ -1516,6 +1547,7 @@ public class MapLibreMapOptions implements Parcelable {
     result = 31 * result + (actionJournalPath != null ? actionJournalPath.hashCode() : 0);
     result = 31 * result + (int) actionJournalLogFileSize;
     result = 31 * result + (int) actionJournalLogFileCount;
+    result = 31 * result + (int) actionJournalRenderingReportInterval;
     return result;
   }
 }
