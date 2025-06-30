@@ -34,6 +34,9 @@ jobs:
         with:
           submodules: recursive
 
+      - name: manual submodules
+        run: git submodule update --init --recursive
+
       - name: Get all Linux files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files
@@ -204,6 +207,9 @@ jobs:
         run: |
           npm install
           node test/storage/server.js &
+
+      - name: Compiler Info
+        run: bazel build //:compile_info
 
       - name: Generate coverage report
         run: |
