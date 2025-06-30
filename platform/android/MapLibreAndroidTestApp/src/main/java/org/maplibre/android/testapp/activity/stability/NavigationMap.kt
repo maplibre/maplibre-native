@@ -108,20 +108,25 @@ class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEve
     }
 
     private fun run() {
-        navigation = MapLibreNavigation(requireContext(), MapLibreNavigationOptions
-            .builder()
-            .snapToRoute(true)
-            .build()
-        ).apply {
-            snapEngine
-            addProgressChangeListener(this@NavigationMap)
-            addMilestoneEventListener(this@NavigationMap)
+        lifecycleScope.launch {
+            mapView.setStyleSuspend(STYLES.random(RANDOM))
+            enableLocation()
+
+            navigation = MapLibreNavigation(requireContext(), MapLibreNavigationOptions
+                .builder()
+                .snapToRoute(true)
+                .build()
+            ).apply {
+                snapEngine
+                addProgressChangeListener(this@NavigationMap)
+                addMilestoneEventListener(this@NavigationMap)
+            }
+
+            navigationMapRoute = NavigationMapRoute(navigation, mapView, map)
+            navigation.locationEngine = replayRouteLocationEngine
+
+            startNewRoute()
         }
-
-        navigation.locationEngine = replayRouteLocationEngine
-        navigationMapRoute = NavigationMapRoute(navigation, mapView, map)
-
-        startNewRoute()
     }
 
     private fun startNewRoute() {
@@ -132,11 +137,11 @@ class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEve
             navigationMapRoute.removeRoute()
 
             mapView.setStyleSuspend(STYLES.random(RANDOM))
-            enableLocation()
 
             val route = getRoute() ?: return@launch
 
             // display route
+            navigationMapRoute = NavigationMapRoute(navigation, mapView, map)
             navigationMapRoute.addRoute(route)
 
             // force tile load at starting position
