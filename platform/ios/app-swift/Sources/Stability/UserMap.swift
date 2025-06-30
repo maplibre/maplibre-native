@@ -220,7 +220,7 @@ class UserMap: MLNMapView, MLNMapViewDelegate {
                 lookingAtCenter: placeCenter,
                 altitude: randomAltitude(),
                 pitch: randomTilt(),
-                heading: randomBearing(),
+                heading: randomBearing()
             )
 
             await animate(camera: camera, withDuration: randomSlowDuration())
