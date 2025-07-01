@@ -20,22 +20,12 @@ class SequentialActivityTest(private val activity: Class<out Activity>) {
         private val ignoredActivities = listOf(
             FeatureOverviewActivity::class.java,
             org.maplibre.android.testapp.activity.benchmark.BenchmarkActivity::class.java,
-
             org.maplibre.android.testapp.activity.telemetry.PerformanceMeasurementActivity::class.java,
 
-            org.maplibre.android.testapp.activity.style.AnimatedImageSourceActivity::class.java,
+            // need style updates
             org.maplibre.android.testapp.activity.turf.MapSnapshotterWithinExpression::class.java,
             org.maplibre.android.testapp.activity.turf.WithinExpressionActivity::class.java,
             org.maplibre.android.testapp.activity.style.HeatmapLayerActivity::class.java,
-            org.maplibre.android.testapp.activity.style.RealTimeGeoJsonActivity::class.java,
-            org.maplibre.android.testapp.activity.style.GridSourceActivity::class.java,
-
-            // vulkan specific
-            //org.maplibre.android.testapp.activity.snapshot.MapSnapshotterActivity::class.java,
-            //org.maplibre.android.testapp.activity.snapshot.MapSnapshotterReuseActivity::class.java,
-            //org.maplibre.android.testapp.activity.snapshot.MapSnapshotterBitMapOverlayActivity::class.java,
-            //org.maplibre.android.testapp.activity.snapshot.MapSnapshotterHeatMapActivity::class.java,
-            //org.maplibre.android.testapp.activity.snapshot.MapSnapshotterLocalStyleActivity::class.java,
         )
 
         // activity list used when USE_ALL_ACTIVITIES is disabled
