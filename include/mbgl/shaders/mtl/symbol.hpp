@@ -70,6 +70,8 @@ struct alignas(16) SymbolEvaluatedPropsUBO {
 };
 static_assert(sizeof(SymbolEvaluatedPropsUBO) == 6 * 16, "wrong size");
 
+#define c_offscreen_degenerate_triangle_location -2.0
+
 )";
 
 template <>
@@ -116,6 +118,26 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const SymbolDrawableUBO* drawableVector [[buffer(idSymbolDrawableUBO)]]) {
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
+
+    const float2 raw_fade_opacity = unpack_opacity(vertx.fade_opacity);
+    const float fade_change = raw_fade_opacity[1] > 0.5 ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
+    const float fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
+
+#if defined(HAS_UNIFORM_u_opacity)
+    const half fo = half(fade_opacity);
+#else
+    const half fo = half(unpack_mix_float(vertx.opacity, drawable.opacity_t) * fade_opacity);
+#endif
+
+    // This will check to see if the opacity is zero and push the triangle offscreen if it is
+    // so the GPU will cull the vertex and never send it to the fragment shader
+    if (fo == 0.0) {
+            return {
+                .position     = float4(c_offscreen_degenerate_triangle_location,
+                                                   c_offscreen_degenerate_triangle_location,
+                                                   c_offscreen_degenerate_triangle_location, 1.0),
+            };
+        }
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -172,17 +194,13 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 posOffset = a_offset * max(a_minFontScale, fontScale) / 32.0 + a_pxoffset / 16.0;
     const float4 position = drawable.coord_matrix * float4(pos0 + rotation_matrix * posOffset, 0.0, 1.0);
 
-    const float2 raw_fade_opacity = unpack_opacity(vertx.fade_opacity);
-    const float fade_change = raw_fade_opacity[1] > 0.5 ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
-    const float fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
-
     return {
         .position     = position,
         .tex          = half2(a_tex / drawable.texsize),
 #if defined(HAS_UNIFORM_u_opacity)
-        .fade_opacity = half(fade_opacity),
+        .fade_opacity = fo,
 #else
-        .opacity      = half(unpack_mix_float(vertx.opacity, drawable.opacity_t) * fade_opacity),
+        .opacity      = fo,
 #endif
     };
 }
@@ -280,6 +298,20 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
 
+    const float2 fade_opacity = unpack_opacity(vertx.fade_opacity);
+    const float fade_change = (fade_opacity[1] > 0.5) ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
+    const half fo = half(max(0.0, min(1.0, fade_opacity[0] + fade_change)));
+
+    // This will check to see if the opacity is zero and push the triangle offscreen if it is
+    // so the GPU will cull the vertex and never send it to the fragment shader
+    if (fo == 0.0) {
+        return {
+            .position     = float4(c_offscreen_degenerate_triangle_location,
+                                               c_offscreen_degenerate_triangle_location,
+                                               c_offscreen_degenerate_triangle_location, 1.0),
+        };
+    }
+
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
 
@@ -340,8 +372,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 pos_rot = a_offset / 32.0 * fontScale + a_pxoffset;
     const float2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     const float4 position = drawable.coord_matrix * float4(pos0, 0.0, 1.0);
-    const float2 fade_opacity = unpack_opacity(vertx.fade_opacity);
-    const float fade_change = (fade_opacity[1] > 0.5) ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
 
     return {
         .position     = position,
@@ -363,7 +393,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .tex          = half2(a_tex / drawable.texsize),
         .gamma_scale  = half(position.w),
         .fontScale    = half(fontScale),
-        .fade_opacity = half(max(0.0, min(1.0, fade_opacity[0] + fade_change))),
+        .fade_opacity = fo,
     };
 }
 
@@ -493,6 +523,20 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
 
+    const float2 fade_opacity = unpack_opacity(vertx.fade_opacity);
+    const float fade_change = (fade_opacity[1] > 0.5) ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
+    const half fo = half(max(0.0, min(1.0, fade_opacity[0] + fade_change)));
+
+    // This will check to see if the opacity is zero and push the triangle offscreen if it is
+    // so the GPU will cull the vertex and never send it to the fragment shader
+    if (fo == 0.0) {
+        return {
+            .position     = float4(c_offscreen_degenerate_triangle_location,
+                                                c_offscreen_degenerate_triangle_location,
+                                                c_offscreen_degenerate_triangle_location, 1.0),
+        };
+    }
+
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
 
@@ -555,9 +599,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     const float4 position = drawable.coord_matrix * float4(pos0, 0.0, 1.0);
     const float gamma_scale = position.w;
-
-    const float2 fade_opacity = unpack_opacity(vertx.fade_opacity);
-    const float fade_change = (fade_opacity[1] > 0.5) ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
     const bool is_icon = (is_sdf == ICON);
 
     return {
@@ -565,7 +606,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .tex          = half2(a_tex / (is_icon ? drawable.texsize_icon : drawable.texsize)),
         .gamma_scale  = half(gamma_scale),
         .fontScale    = half(fontScale),
-        .fade_opacity = half(max(0.0, min(1.0, fade_opacity[0] + fade_change))),
+        .fade_opacity = fo,
         .is_icon      = is_icon,
 
 #if !defined(HAS_UNIFORM_u_fill_color)

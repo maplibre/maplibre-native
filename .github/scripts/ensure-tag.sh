@@ -36,6 +36,6 @@ if git rev-parse "$tag" >/dev/null 2>&1; then
   fi
 else
   git tag -a "$tag" -m "Publish $tag" "$commit_sha"
-  # git push origin "$tag"
+  git push origin "$tag"
   echo "✅ Created tag $tag for commit $commit_sha."
 fi
