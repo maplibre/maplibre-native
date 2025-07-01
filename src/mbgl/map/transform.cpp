@@ -103,13 +103,13 @@ void Transform::jumpTo(const CameraOptions& camera) {
  * smooth animation between old and new values. The map will retain the current
  * values for any options not included in `options`.
  */
-void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions& animation) {
+void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions& options) {
     CameraOptions camera = inputCamera;
 
-    Duration duration = animation.duration.value_or(Duration::zero());
+    Duration duration = options.duration.value_or(Duration::zero());
     if (state.getLatLngBounds() == LatLngBounds() && !isGestureInProgress() && duration != Duration::zero()) {
         // reuse flyTo, without exaggerated animation, to achieve constant ground speed.
-        return flyTo(camera, animation, true);
+        return flyTo(camera, options, true);
     }
 
     double zoom = camera.zoom.value_or(getZoom());
@@ -124,8 +124,8 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
 
     if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch)) {
-        if (animation.transitionFinishFn) {
-            animation.transitionFinishFn();
+        if (options.transitionFinishFn) {
+            options.transitionFinishFn();
         }
         return;
     }
@@ -160,68 +160,67 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
     const double startPitch = state.getPitch();
     const EdgeInsets startEdgeInsets = state.getEdgeInsets();
 
-    auto propertyAnimation = std::make_shared<PropertyAnimation>(
-        Clock::now(), duration, animation, unwrappedLatLng != startLatLng, zoom != startZoom, bearing != startBearing);
+    auto animation = std::make_shared<Animation>(
+        Clock::now(), duration, options, unwrappedLatLng != startLatLng, zoom != startZoom, bearing != startBearing);
 
     // NOTE: For tests only
-    transitionStart = propertyAnimation->start;
-    transitionDuration = propertyAnimation->duration;
+    transitionStart = animation->start;
+    transitionDuration = animation->duration;
 
-    if (!propertyAnimations.zoom.set || startZoom != zoom) {
-        animationFinishFrame(propertyAnimations.zoom.propertyAnimation);
-        propertyAnimations.zoom = {
-            .propertyAnimation = propertyAnimation,
+    if (!properties.zoom.set || startZoom != zoom) {
+        animationFinishFrame(properties.zoom.animation);
+        properties.zoom = {
+            .animation = animation,
             .current = startZoom,
             .target = zoom,
             .set = true,
             .frameZoomFunc =
-                [=](TimePoint now) { return util::interpolate(startZoom, zoom, propertyAnimation->interpolant(now)); },
+                [=](TimePoint now) { return util::interpolate(startZoom, zoom, animation->interpolant(now)); },
         };
     }
-    if (!propertyAnimations.latlng.set || startPoint != endPoint) {
-        animationFinishFrame(propertyAnimations.latlng.propertyAnimation);
-        propertyAnimations.latlng = {
-            .propertyAnimation = propertyAnimation,
+    if (!properties.latlng.set || startPoint != endPoint) {
+        animationFinishFrame(properties.latlng.animation);
+        properties.latlng = {
+            .animation = animation,
             .current = startPoint,
             .target = endPoint,
             .set = true,
             .frameLatLngFunc =
                 [=, this](TimePoint now) {
-                    Point<double> framePoint = util::interpolate(
-                        startPoint, endPoint, propertyAnimation->interpolant(now));
+                    Point<double> framePoint = util::interpolate(startPoint, endPoint, animation->interpolant(now));
                     return Projection::unproject(framePoint, state.zoomScale(startZoom));
                 },
         };
     }
-    if (!propertyAnimations.bearing.set || bearing != startBearing) {
-        animationFinishFrame(propertyAnimations.bearing.propertyAnimation);
-        propertyAnimations.bearing = {
-            .propertyAnimation = propertyAnimation,
+    if (!properties.bearing.set || bearing != startBearing) {
+        animationFinishFrame(properties.bearing.animation);
+        properties.bearing = {
+            .animation = animation,
             .current = startBearing,
             .target = bearing,
             .set = true,
         };
     }
-    if (!propertyAnimations.padding.set || padding != startEdgeInsets) {
-        animationFinishFrame(propertyAnimations.padding.propertyAnimation);
-        propertyAnimations.padding = {
-            .propertyAnimation = propertyAnimation,
+    if (!properties.padding.set || padding != startEdgeInsets) {
+        animationFinishFrame(properties.padding.animation);
+        properties.padding = {
+            .animation = animation,
             .current = startEdgeInsets,
             .target = padding,
             .set = true,
         };
     }
-    if (!propertyAnimations.pitch.set || pitch != startPitch) {
-        animationFinishFrame(propertyAnimations.pitch.propertyAnimation);
-        propertyAnimations.pitch = {
-            .propertyAnimation = propertyAnimation,
+    if (!properties.pitch.set || pitch != startPitch) {
+        animationFinishFrame(properties.pitch.animation);
+        properties.pitch = {
+            .animation = animation,
             .current = startPitch,
             .target = pitch,
             .set = true,
         };
     }
 
-    startTransition(camera, duration);
+    startTransition(camera, duration, animation);
 }
 
 /** This method implements an “optimal path” animation, as detailed in:
@@ -232,9 +231,7 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
 
     Where applicable, local variable documentation begins with the associated
     variable or function in van Wijk (2003). */
-void Transform::flyTo(const CameraOptions& inputCamera,
-                      const AnimationOptions& animation,
-                      bool linearZoomInterpolation) {
+void Transform::flyTo(const CameraOptions& inputCamera, const AnimationOptions& options, bool linearZoomInterpolation) {
     CameraOptions camera = inputCamera;
 
     double zoom = camera.zoom.value_or(getZoom());
@@ -247,8 +244,8 @@ void Transform::flyTo(const CameraOptions& inputCamera,
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
 
     if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch) || state.getSize().isEmpty()) {
-        if (animation.transitionFinishFn) {
-            animation.transitionFinishFn();
+        if (options.transitionFinishFn) {
+            options.transitionFinishFn();
         }
         return;
     }
@@ -292,8 +289,8 @@ void Transform::flyTo(const CameraOptions& inputCamera,
         root mean squared average velocity, V<sub>RMS</sub>. A value of 1
         produces a circular motion. */
     double rho = 1.42;
-    if (animation.minZoom || linearZoomInterpolation) {
-        double minZoom = util::min(animation.minZoom.value_or(startZoom), startZoom, zoom);
+    if (options.minZoom || linearZoomInterpolation) {
+        double minZoom = util::min(options.minZoom.value_or(startZoom), startZoom, zoom);
         minZoom = util::clamp(minZoom, state.getMinZoom(), state.getMaxZoom());
         /// w<sub>m</sub>: Maximum visible span, measured in pixels with respect
         /// to the initial scale.
@@ -336,21 +333,21 @@ void Transform::flyTo(const CameraOptions& inputCamera,
     double S = (isClose ? (std::abs(std::log(w1 / w0)) / rho) : ((r1 - r0) / rho));
 
     Duration duration;
-    if (animation.duration) {
-        duration = *animation.duration;
+    if (options.duration) {
+        duration = *options.duration;
     } else {
         /// V: Average velocity, measured in ρ-screenfuls per second.
         double velocity = 1.2;
-        if (animation.velocity) {
-            velocity = *animation.velocity / rho;
+        if (options.velocity) {
+            velocity = *options.velocity / rho;
         }
         duration = std::chrono::duration_cast<Duration>(std::chrono::duration<double>(S / velocity));
     }
     if (duration == Duration::zero()) {
         // Perform an instantaneous transition.
         jumpTo(camera);
-        if (animation.transitionFinishFn) {
-            animation.transitionFinishFn();
+        if (options.transitionFinishFn) {
+            options.transitionFinishFn();
         }
         return;
     }
@@ -358,101 +355,97 @@ void Transform::flyTo(const CameraOptions& inputCamera,
     const double startScale = state.getScale();
     const EdgeInsets startEdgeInsets = state.getEdgeInsets();
 
-    auto propertyAnimation = std::make_shared<PropertyAnimation>(
-        Clock::now(), duration, animation, true, true, bearing != startBearing);
+    auto animation = std::make_shared<Animation>(Clock::now(), duration, options, true, true, bearing != startBearing);
 
     // NOTE: For tests only
-    transitionStart = propertyAnimation->start;
-    transitionDuration = propertyAnimation->duration;
+    transitionStart = animation->start;
+    transitionDuration = animation->duration;
 
-    if (!propertyAnimations.zoom.set || startZoom != zoom) {
-        animationFinishFrame(propertyAnimations.zoom.propertyAnimation);
-        propertyAnimations.zoom = {
-            .propertyAnimation = propertyAnimation,
+    if (!properties.zoom.set || startZoom != zoom) {
+        animationFinishFrame(properties.zoom.animation);
+        properties.zoom = {
+            .animation = animation,
             .current = startZoom,
             .target = zoom,
             .set = true,
             .frameZoomFunc =
                 [=, this](TimePoint now) {
-                    double t = propertyAnimations.zoom.propertyAnimation->interpolant(now);
+                    double t = properties.zoom.animation->interpolant(now);
                     double s = t * S;
-                    double frameZoom = linearZoomInterpolation
-                                           ? util::interpolate(
-                                                 propertyAnimations.zoom.current, propertyAnimations.zoom.target, t)
-                                           : propertyAnimations.zoom.current + state.scaleZoom(1 / w(s));
+                    double frameZoom = linearZoomInterpolation ? util::interpolate(startZoom, zoom, t)
+                                                               : startZoom + state.scaleZoom(1 / w(s));
 
                     if (std::isnan(frameZoom)) {
-                        frameZoom = propertyAnimations.zoom.target;
+                        frameZoom = zoom;
                     }
 
                     return frameZoom;
                 },
         };
     }
-    if (!propertyAnimations.latlng.set || startPoint != endPoint) {
-        animationFinishFrame(propertyAnimations.latlng.propertyAnimation);
-        propertyAnimations.latlng = {
-            .propertyAnimation = propertyAnimation,
+    if (!properties.latlng.set || startPoint != endPoint) {
+        animationFinishFrame(properties.latlng.animation);
+        properties.latlng = {
+            .animation = animation,
             .current = startPoint,
             .target = endPoint,
             .set = true,
             .frameLatLngFunc =
                 [=, this](TimePoint now) {
-                    double t = propertyAnimations.latlng.propertyAnimation->interpolant(now);
+                    double t = properties.latlng.animation->interpolant(now);
                     double s = t * S;
                     double us = t == 1.0 ? 1.0 : u(s);
 
                     Point<double> framePoint = util::interpolate(
-                        propertyAnimations.latlng.current, propertyAnimations.latlng.target, us);
+                        properties.latlng.current, properties.latlng.target, us);
                     return Projection::unproject(framePoint, startScale);
                 },
         };
     }
-    if (!propertyAnimations.bearing.set || bearing != startBearing) {
-        animationFinishFrame(propertyAnimations.bearing.propertyAnimation);
-        propertyAnimations.bearing = {
-            .propertyAnimation = propertyAnimation,
+    if (!properties.bearing.set || bearing != startBearing) {
+        animationFinishFrame(properties.bearing.animation);
+        properties.bearing = {
+            .animation = animation,
             .current = startBearing,
             .target = bearing,
             .set = true,
         };
     }
-    if (!propertyAnimations.padding.set || padding != startEdgeInsets) {
-        animationFinishFrame(propertyAnimations.padding.propertyAnimation);
-        propertyAnimations.padding = {
-            .propertyAnimation = propertyAnimation, .current = startEdgeInsets, .target = padding, .set = true};
+    if (!properties.padding.set || padding != startEdgeInsets) {
+        animationFinishFrame(properties.padding.animation);
+        properties.padding = {.animation = animation, .current = startEdgeInsets, .target = padding, .set = true};
     }
-    if (!propertyAnimations.pitch.set || pitch != startPitch) {
-        animationFinishFrame(propertyAnimations.pitch.propertyAnimation);
-        propertyAnimations.pitch = {
-            .propertyAnimation = propertyAnimation,
+    if (!properties.pitch.set || pitch != startPitch) {
+        animationFinishFrame(properties.pitch.animation);
+        properties.pitch = {
+            .animation = animation,
             .current = startPitch,
             .target = pitch,
             .set = true,
         };
     }
 
-    startTransition(camera, duration);
+    startTransition(camera, duration, animation);
 }
 
-bool Transform::animationTransitionFrame(std::shared_ptr<PropertyAnimation>& propertyAnimation, double t) {
-    if (propertyAnimation->ran) {
-        return propertyAnimation->done;
+bool Transform::animationTransitionFrame(std::shared_ptr<Animation>& animation, double t) {
+    if (animation->ran) {
+        return animation->done;
     }
 
-    propertyAnimation->ran = true;
+    animation->ran = true;
     if (t < 1.0) {
-        if (propertyAnimation->animation.transitionFrameFn) {
-            propertyAnimation->animation.transitionFrameFn(t);
+        if (animation->options.transitionFrameFn) {
+            animation->options.transitionFrameFn(t);
         }
 
         observer.onCameraIsChanging();
-        propertyAnimation->done = false;
+        animation->done = false;
     } else {
-        propertyAnimation->done = true;
+        animation->done = true;
     }
 
-    return propertyAnimation->done;
+    return animation->done;
 }
 
 // MARK: - Position
@@ -604,22 +597,26 @@ ProjectionMode Transform::getProjectionMode() const {
 
 // MARK: - Transition
 
-void Transform::animationFinishFrame(std::shared_ptr<PropertyAnimation>& pa) {
-    if (!pa || pa->finished) {
+void Transform::animationFinishFrame(std::shared_ptr<Animation>& animation) {
+    if (!animation || animation->finished) {
         return;
     }
 
-    if (pa->animation.transitionFinishFn) {
-        pa->animation.transitionFinishFn();
+    if (animation->options.transitionFinishFn) {
+        animation->options.transitionFinishFn();
     }
 
-    pa->finished = true;
+    animation->finished = true;
 
-    observer.onCameraDidChange(pa->isAnimated() ? MapObserver::CameraChangeMode::Animated
-                                                : MapObserver::CameraChangeMode::Immediate);
+    if (animation->anchor) animation->anchor = std::nullopt;
+
+    observer.onCameraDidChange(animation->isAnimated() ? MapObserver::CameraChangeMode::Animated
+                                                       : MapObserver::CameraChangeMode::Immediate);
 }
 
-void Transform::startTransition(const CameraOptions& camera, const Duration& duration) {
+void Transform::startTransition(const CameraOptions& camera,
+                                const Duration& duration,
+                                std::shared_ptr<Animation>& animation) {
     bool isAnimated = duration != Duration::zero();
     observer.onCameraWillChange(isAnimated ? MapObserver::CameraChangeMode::Animated
                                            : MapObserver::CameraChangeMode::Immediate);
@@ -627,10 +624,10 @@ void Transform::startTransition(const CameraOptions& camera, const Duration& dur
     // Associate the anchor, if given, with a coordinate.
     // Anchor and center points are mutually exclusive, with preference for the
     // center point when both are set.
-    propertyAnimations.anchor = camera.center ? std::nullopt : camera.anchor;
-    if (propertyAnimations.anchor) {
-        propertyAnimations.anchor->y = state.getSize().height - propertyAnimations.anchor->y;
-        propertyAnimations.anchorLatLng = state.screenCoordinateToLatLng(*propertyAnimations.anchor);
+    if (!camera.center && camera.anchor) {
+        animation->anchor = camera.anchor;
+        animation->anchor->y = state.getSize().height - animation->anchor->y;
+        animation->anchorLatLng = state.screenCoordinateToLatLng(*animation->anchor);
     }
 
     if (!isAnimated) {
@@ -640,8 +637,8 @@ void Transform::startTransition(const CameraOptions& camera, const Duration& dur
 }
 
 bool Transform::inTransition() const {
-    return propertyAnimations.latlng.set || propertyAnimations.zoom.set || propertyAnimations.bearing.set ||
-           propertyAnimations.padding.set || propertyAnimations.pitch.set;
+    return properties.latlng.set || properties.zoom.set || properties.bearing.set || properties.padding.set ||
+           properties.pitch.set;
 }
 
 void Transform::updateTransitions(const TimePoint& now) {
@@ -649,11 +646,11 @@ void Transform::updateTransitions(const TimePoint& now) {
         activeAnimation = true;
 
         bool panning = false, scaling = false, rotating = false;
-        visitPropertyAnimations([&](std::shared_ptr<PropertyAnimation>& propertyAnimation) {
-            if (propertyAnimation && !propertyAnimation->done) {
-                panning |= propertyAnimation->panning;
-                scaling |= propertyAnimation->scaling;
-                rotating |= propertyAnimation->rotating;
+        visitProperties([&](std::shared_ptr<Animation>& animation) {
+            if (animation && !animation->done) {
+                panning |= animation->panning;
+                scaling |= animation->scaling;
+                rotating |= animation->rotating;
             }
         });
 
@@ -662,78 +659,71 @@ void Transform::updateTransitions(const TimePoint& now) {
                                 .withScalingInProgress(scaling)
                                 .withRotatingInProgress(rotating));
 
-        if (propertyAnimations.latlng.frameLatLngFunc && propertyAnimations.zoom.frameZoomFunc) {
-            if (propertyAnimations.latlng.set || propertyAnimations.zoom.set) {
-                state.setLatLngZoom(propertyAnimations.latlng.frameLatLngFunc(now),
-                                    propertyAnimations.zoom.frameZoomFunc(now));
-                if (animationTransitionFrame(propertyAnimations.latlng.propertyAnimation,
-                                             propertyAnimations.latlng.propertyAnimation->interpolant(now))) {
-                    propertyAnimations.latlng.set = false;
-                }
-                if (animationTransitionFrame(propertyAnimations.zoom.propertyAnimation,
-                                             propertyAnimations.zoom.propertyAnimation->interpolant(now))) {
-                    propertyAnimations.zoom.set = false;
-                }
+        bool zoomSet = properties.zoom.set && properties.zoom.animation;
+        if ((properties.latlng.set && properties.latlng.animation) || zoomSet) {
+            state.setLatLngZoom(
+                properties.latlng.frameLatLngFunc ? properties.latlng.frameLatLngFunc(now) : state.getLatLng(),
+                properties.zoom.frameZoomFunc ? properties.zoom.frameZoomFunc(now) : state.getZoom());
+            if (properties.latlng.animation &&
+                animationTransitionFrame(properties.latlng.animation, properties.latlng.animation->interpolant(now))) {
+                properties.latlng.set = false;
+            }
+            if (properties.zoom.animation &&
+                animationTransitionFrame(properties.zoom.animation, properties.zoom.animation->interpolant(now))) {
+                properties.zoom.set = false;
+            }
+
+            if (zoomSet && properties.zoom.animation->anchor) {
+                state.moveLatLng(properties.zoom.animation->anchorLatLng, *properties.zoom.animation->anchor);
             }
         }
-
-        if (propertyAnimations.bearing.set) {
-            double bearing_t = propertyAnimations.bearing.propertyAnimation->interpolant(now);
+        if (properties.bearing.set && properties.bearing.animation) {
+            double bearing_t = properties.bearing.animation->interpolant(now);
             state.setBearing(util::wrap(
-                util::interpolate(propertyAnimations.bearing.current, propertyAnimations.bearing.target, bearing_t),
-                -pi,
-                pi));
-            if (animationTransitionFrame(propertyAnimations.bearing.propertyAnimation, bearing_t)) {
-                propertyAnimations.bearing.set = false;
+                util::interpolate(properties.bearing.current, properties.bearing.target, bearing_t), -pi, pi));
+            if (animationTransitionFrame(properties.bearing.animation, bearing_t)) {
+                properties.bearing.set = false;
             }
         }
 
-        if (propertyAnimations.padding.set) {
-            double padding_t = propertyAnimations.padding.propertyAnimation->interpolant(now);
+        if (properties.padding.set && properties.padding.animation) {
+            double padding_t = properties.padding.animation->interpolant(now);
             state.setEdgeInsets(
-                {util::interpolate(
-                     propertyAnimations.padding.current.top(), propertyAnimations.padding.target.top(), padding_t),
-                 util::interpolate(
-                     propertyAnimations.padding.current.left(), propertyAnimations.padding.target.left(), padding_t),
-                 util::interpolate(propertyAnimations.padding.current.bottom(),
-                                   propertyAnimations.padding.target.bottom(),
-                                   padding_t),
-                 util::interpolate(propertyAnimations.padding.current.right(),
-                                   propertyAnimations.padding.target.right(),
-                                   padding_t)});
-            if (animationTransitionFrame(propertyAnimations.padding.propertyAnimation, padding_t)) {
-                propertyAnimations.padding.set = false;
+                {util::interpolate(properties.padding.current.top(), properties.padding.target.top(), padding_t),
+                 util::interpolate(properties.padding.current.left(), properties.padding.target.left(), padding_t),
+                 util::interpolate(properties.padding.current.bottom(), properties.padding.target.bottom(), padding_t),
+                 util::interpolate(properties.padding.current.right(), properties.padding.target.right(), padding_t)});
+            if (animationTransitionFrame(properties.padding.animation, padding_t)) {
+                properties.padding.set = false;
             }
         }
 
         double maxPitch = getMaxPitchForEdgeInsets(state.getEdgeInsets());
-        if (propertyAnimations.pitch.set || maxPitch < propertyAnimations.pitch.current) {
-            double pitch_t = propertyAnimations.pitch.propertyAnimation->interpolant(now);
-            state.setPitch(std::min(
-                maxPitch,
-                util::interpolate(propertyAnimations.pitch.current, propertyAnimations.pitch.target, pitch_t)));
-            if (animationTransitionFrame(propertyAnimations.pitch.propertyAnimation, pitch_t)) {
-                propertyAnimations.pitch.set = false;
+        bool pitchSet = properties.pitch.set && properties.pitch.animation;
+        if (pitchSet || maxPitch < properties.pitch.current) {
+            double pitch_t = properties.pitch.animation->interpolant(now);
+            state.setPitch(
+                std::min(maxPitch, util::interpolate(properties.pitch.current, properties.pitch.target, pitch_t)));
+            if (animationTransitionFrame(properties.pitch.animation, pitch_t)) {
+                properties.pitch.set = false;
+            }
+
+            if (pitchSet && properties.pitch.animation->anchor) {
+                state.moveLatLng(properties.pitch.animation->anchorLatLng, *properties.pitch.animation->anchor);
             }
         }
 
-        if (propertyAnimations.anchor) {
-            state.moveLatLng(propertyAnimations.anchorLatLng, *propertyAnimations.anchor);
-        }
-
-        panning = false;
-        scaling = false;
-        rotating = false;
-        visitPropertyAnimations([&](std::shared_ptr<PropertyAnimation>& propertyAnimation) {
-            if (propertyAnimation) {
-                if (propertyAnimation->done) {
-                    animationFinishFrame(propertyAnimation);
+        panning = scaling = rotating = false;
+        visitProperties([&](std::shared_ptr<Animation>& animation) {
+            if (animation) {
+                if (animation->done) {
+                    animationFinishFrame(animation);
                 } else {
-                    panning |= propertyAnimation->panning;
-                    scaling |= propertyAnimation->scaling;
-                    rotating |= propertyAnimation->rotating;
+                    panning |= animation->panning;
+                    scaling |= animation->scaling;
+                    rotating |= animation->rotating;
                 }
-                propertyAnimation->ran = false;
+                animation->ran = false;
             }
         });
 
@@ -747,10 +737,9 @@ void Transform::updateTransitions(const TimePoint& now) {
 }
 
 void Transform::cancelTransitions() {
-    visitPropertyAnimations(
-        [this](std::shared_ptr<PropertyAnimation>& propertyAnimation) { animationFinishFrame(propertyAnimation); });
+    visitProperties([this](std::shared_ptr<Animation>& animation) { animationFinishFrame(animation); });
 
-    propertyAnimations = {};
+    properties = {};
     activeAnimation = false;
 }
 
@@ -801,14 +790,14 @@ void Transform::setFreeCameraOptions(const FreeCameraOptions& options) {
     state.setFreeCameraOptions(options);
 }
 
-double Transform::PropertyAnimation::interpolant(TimePoint now) {
+double Transform::Animation::interpolant(TimePoint now) {
     bool isAnimated = duration != Duration::zero();
     double t = isAnimated ? (std::chrono::duration<double>(now - start) / duration) : 1.0f;
     if (t >= 1.0) {
         return 1.0;
     }
 
-    util::UnitBezier ease = animation.easing ? *animation.easing : util::DEFAULT_TRANSITION_EASE;
+    util::UnitBezier ease = options.easing ? *options.easing : util::DEFAULT_TRANSITION_EASE;
     return ease.solve(t, 0.001);
 }
 
