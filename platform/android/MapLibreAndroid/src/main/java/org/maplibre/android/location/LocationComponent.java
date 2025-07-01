@@ -1387,6 +1387,10 @@ public final class LocationComponent {
     locationAnimatorCoordinator.resetAllLayerAnimations();
   }
 
+  public boolean isLocationTracking() {
+    return locationCameraController.isLocationTracking();
+  }
+
   @NonNull
   private OnCameraMoveListener onCameraMoveListener = new OnCameraMoveListener() {
     @Override
@@ -1546,7 +1550,7 @@ public final class LocationComponent {
     new MapLibreMap.OnDeveloperAnimationListener() {
       @Override
       public void onDeveloperAnimationStarted() {
-        if (isComponentInitialized && isEnabled) {
+        if (isComponentInitialized && isEnabled && !options.concurrentCameraAnimationsEnabled()) {
           setCameraMode(CameraMode.NONE);
         }
       }
