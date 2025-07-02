@@ -60,6 +60,13 @@ jobs:
   test_sse:
       runs-on: ubuntu-latest
       steps:
+      - name: temp1
+        run: ls -l vendor
+      - name: temp2
+        run: ls -l vendor/maplibre-tile-spec
+      - name: temp3
+        working-directory: vendor/maplibre-tile-spec
+        run: git status
       - name: Test SSE
         continue-on-error: true
         working-directory: vendor/maplibre-tile-spec/cpp/bazel/check
