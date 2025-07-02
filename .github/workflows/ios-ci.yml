@@ -40,9 +40,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: manual submodules
-        run: git submodule update --init --recursive
-
       - name: Get all iOS files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files-yaml
@@ -62,7 +59,9 @@ jobs:
       steps:
       - name: temp0
         working-directory: .
-        run: ls -l
+        run: |
+          pwd
+          ls -l
       - name: temp1
         working-directory: .
         run: ls -l vendor
