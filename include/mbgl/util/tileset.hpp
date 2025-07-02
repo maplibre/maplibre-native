@@ -30,6 +30,7 @@ public:
     // DEMEncoding is not supported by the TileJSON spec
     DEMEncoding encoding;
     std::optional<LatLngBounds> bounds;
+    std::string format;
 
     Tileset(std::vector<std::string> tiles_ = std::vector<std::string>(),
             Range<uint8_t> zoomRange_ = {0, util::DEFAULT_MAX_ZOOM},

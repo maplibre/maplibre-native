@@ -20,9 +20,9 @@
 
 namespace mbgl {
 
-class VectorTileFeature : public GeometryTileFeature {
+class VectorMVTTileFeature : public GeometryTileFeature {
 public:
-    VectorTileFeature(const mapbox::vector_tile::layer&, const protozero::data_view&);
+    VectorMVTTileFeature(const mapbox::vector_tile::layer&, const protozero::data_view&);
 
     FeatureType getType() const override;
     std::optional<Value> getValue(const std::string& key) const override;
@@ -36,9 +36,9 @@ private:
     mutable std::optional<PropertyMap> properties;
 };
 
-class VectorTileLayer : public GeometryTileLayer {
+class VectorMVTTileLayer : public GeometryTileLayer {
 public:
-    VectorTileLayer(std::shared_ptr<const std::string> data, const protozero::data_view&);
+    VectorMVTTileLayer(std::shared_ptr<const std::string> data, const protozero::data_view&);
 
     std::size_t featureCount() const override;
     std::unique_ptr<GeometryTileFeature> getFeature(std::size_t i) const override;
@@ -49,9 +49,9 @@ private:
     mapbox::vector_tile::layer layer;
 };
 
-class VectorTileData : public GeometryTileData {
+class VectorMVTTileData : public GeometryTileData {
 public:
-    VectorTileData(std::shared_ptr<const std::string> data);
+    VectorMVTTileData(std::shared_ptr<const std::string> data);
 
     std::unique_ptr<GeometryTileData> clone() const override;
     std::unique_ptr<GeometryTileLayer> getLayer(const std::string& name) const override;
