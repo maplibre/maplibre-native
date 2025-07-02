@@ -60,9 +60,14 @@ jobs:
   test_sse:
       runs-on: ubuntu-latest
       steps:
+      - name: temp0
+        working-directory: .
+        run: ls -l
       - name: temp1
+        working-directory: .
         run: ls -l vendor
       - name: temp2
+        working-directory: .
         run: ls -l vendor/maplibre-tile-spec
       - name: temp3
         working-directory: vendor/maplibre-tile-spec
