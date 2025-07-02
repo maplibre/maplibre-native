@@ -183,16 +183,26 @@ private:
     TransformObserver& observer;
     TransformState state;
 
-    void startTransition(const CameraOptions&, const Duration&, std::shared_ptr<Animation>&);
-    bool animationTransitionFrame(std::shared_ptr<Animation>&, double);
-    void animationFinishFrame(std::shared_ptr<Animation>&);
+    void startTransition(const CameraOptions&, const Duration&, Animation&);
+    bool animationTransitionFrame(Animation&, double);
+    void animationFinishFrame(Animation&);
 
-    void visitProperties(const std::function<void(std::shared_ptr<Animation>&)>& f) {
-        f(properties.latlng.animation);
-        f(properties.zoom.animation);
-        f(properties.bearing.animation);
-        f(properties.pitch.animation);
-        f(properties.padding.animation);
+    void visitProperties(const std::function<void(Animation&)>& f) {
+        if (properties.zoom.animation) {
+            f(*properties.zoom.animation);
+        }
+        if (properties.latlng.animation) {
+            f(*properties.latlng.animation);
+        }
+        if (properties.bearing.animation) {
+            f(*properties.bearing.animation);
+        }
+        if (properties.padding.animation) {
+            f(*properties.padding.animation);
+        }
+        if (properties.pitch.animation) {
+            f(*properties.pitch.animation);
+        }
     }
 
     // We don't want to show horizon: limit max pitch based on edge insets.
