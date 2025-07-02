@@ -66,7 +66,6 @@ void RenderPass::endEncoding() {
 }
 
 void RenderPass::resetState() {
-    currentPipelineState.reset();
     currentDepthStencilState.reset();
     currentStencilReferenceValue = 0;
     for (int i = 0; i < maxBinds; ++i) {
@@ -191,14 +190,6 @@ void RenderPass::setFragmentSamplerState(const MTLSamplerStatePtr& state, int32_
             fragmentSamplerStates[location] = state;
             encoder->setFragmentSamplerState(state.get(), location);
         }
-    }
-}
-
-/// Set the render pipeline state
-void RenderPass::setRenderPipelineState(const MTLRenderPipelineStatePtr& pipelineState) {
-    if (pipelineState != currentPipelineState) {
-        currentPipelineState = pipelineState;
-        encoder->setRenderPipelineState(currentPipelineState.get());
     }
 }
 

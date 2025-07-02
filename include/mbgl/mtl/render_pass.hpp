@@ -41,9 +41,6 @@ public:
     /// Set the sampler for a texture binding
     void setFragmentSamplerState(const MTLSamplerStatePtr&, int32_t location);
 
-    /// Set the render pipeline state
-    void setRenderPipelineState(const MTLRenderPipelineStatePtr&);
-
     void endEncoding();
 
     /// Resets the states and bindings of the render pass to deal
@@ -72,8 +69,6 @@ private:
     mtl::CommandEncoder& commandEncoder;
     MTLRenderCommandEncoderPtr encoder;
     MTLDepthStencilStatePtr currentDepthStencilState;
-    MTLRenderPipelineStatePtr currentPipelineState;
-
     int32_t currentStencilReferenceValue = 0;
     std::vector<gfx::DebugGroup<gfx::RenderPass>> debugGroups;
 
