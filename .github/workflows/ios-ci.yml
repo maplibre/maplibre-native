@@ -53,8 +53,21 @@ jobs:
           echo "One or more iOS file(s) has changed."
           echo "List of changes: ${{ steps.changed-files-yaml.outputs.ios_all_changed_files }}"
 
+  test_sse:
+      runs-on: ubuntu-latest
+      steps:
+      - name: Test SSE
+        continue-on-error: true
+        working-directory: vendor/maplibre-tile-spec/cpp/bazel/check
+        run: |
+          echo "SUPPORT_SSE42=0" >> "$GITHUB_ENV"
+          bazel build //:sse42
+      - name: Check SSE
+        if:  success()
+        run: echo "SUPPORT_SSE42=1" >> "$GITHUB_ENV"
+
   ios-build:
-    needs: pre_job
+    needs: [pre_job, test_sse]
     if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: [self-hosted, macOS, ARM64]
     concurrency:
@@ -88,6 +101,9 @@ jobs:
 
       - name: Xcode Build Tools version
         run: xcodebuild -version
+
+      - name: Status
+        run: echo "SUPPORT_SSE42=$SUPPORT_SSE42"
 
       - name: Build Example (Swift) App
         run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal
