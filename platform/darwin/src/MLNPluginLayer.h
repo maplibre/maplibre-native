@@ -80,6 +80,7 @@ typedef struct MLNPluginLayerDrawingContext {
   CGFloat fieldOfView;
   /// A 4×4 matrix representing the map view’s current projection state.
   MLNMatrix4 projectionMatrix;
+  MLNMatrix4 nearClippedProjMatrix;
 } MLNPluginLayerDrawingContext;
 
 MLN_EXPORT

@@ -7831,9 +7831,14 @@ static void *windowScreenContext = &windowScreenContext;
             drawingContext.direction = mbgl::util::rad2deg(-state.getBearing());
             drawingContext.pitch = state.getPitch();
             drawingContext.fieldOfView = state.getFieldOfView();
-            mbgl::mat4 projMatrix;
-            state.getProjMatrix(projMatrix);
-            drawingContext.projectionMatrix = MLNMatrix4Make(projMatrix);
+//            mbgl::mat4 projMatrix;
+//            state.getProjMatrix(projMatrix);
+//            drawingContext.projectionMatrix = MLNMatrix4Make(projMatrix);
+            drawingContext.projectionMatrix = MLNMatrix4Make(paintParameters.transformParams.projMatrix);
+            
+//            mbgl::mat4 nearClippedProjMatrix;
+//            state.getProjMatrix(nearClippedProjMatrix, static_cast<uint16_t>(0.1 * state.getCameraToCenterDistance()));
+            drawingContext.nearClippedProjMatrix = MLNMatrix4Make(paintParameters.transformParams.nearClippedProjMatrix);
 
             //NSLog(@"Rendering");
 
