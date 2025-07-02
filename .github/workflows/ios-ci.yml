@@ -56,9 +56,9 @@ jobs:
           echo "One or more iOS file(s) has changed."
           echo "List of changes: ${{ steps.changed-files-yaml.outputs.ios_all_changed_files }}"
 
-
   test_sse:
       runs-on: ubuntu-latest
+      needs: [pre_job]
       steps:
       - name: temp0
         working-directory: .
