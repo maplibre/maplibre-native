@@ -679,6 +679,12 @@ MLN_EXPORT
 - (void)updateUserLocationAnnotationViewAnimatedWithDuration:(NSTimeInterval)duration;
 
 /**
+ Creates or updates the user location annotation view. This method calls the `mapView:viewForAnnotation:`
+ delegate method to obtain a custom view. If no custom view is provided, it defaults to a native one.
+ */
+- (void)createUserLocationAnnotationView;
+
+/**
  A Boolean value indicating whether the user location annotation may display a
  permanent heading indicator.
 

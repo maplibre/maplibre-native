@@ -192,18 +192,19 @@ const CGFloat MLNUserLocationApproximateZoomThreshold = 7.0;
 
 - (void)drawPuck
 {
-    if ( ! _puckModeActivated)
-    {
-        self.layer.sublayers = nil;
+    self.layer.sublayers = nil;
 
-        _headingIndicatorLayer = nil;
-        _accuracyRingLayer = nil;
-        _haloLayer = nil;
-        _dotBorderLayer = nil;
-        _dotLayer = nil;
+    _headingIndicatorLayer = nil;
+    _accuracyRingLayer = nil;
+    _haloLayer = nil;
+    _dotBorderLayer = nil;
+    _dotLayer = nil;
+    _puckDot = nil;
+    _puckArrow = nil;
+    _approximateLayer = nil;
+    _approximateModeActivated = NO;
 
-        [self updateFrameWithSize:MLNUserLocationAnnotationPuckSize];
-    }
+    [self updateFrameWithSize:MLNUserLocationAnnotationPuckSize];
 
     UIColor *arrowColor = self.mapView.tintColor;
     UIColor *puckShadowColor = UIColor.blackColor;
@@ -289,15 +290,20 @@ const CGFloat MLNUserLocationApproximateZoomThreshold = 7.0;
 
 - (void)drawDot
 {
-    if (_puckModeActivated)
-    {
-        self.layer.sublayers = nil;
+    self.layer.sublayers = nil;
 
-        _puckDot = nil;
-        _puckArrow = nil;
+    _puckDot = nil;
+    _puckArrow = nil;
+    _headingIndicatorLayer = nil;
+    _accuracyRingLayer = nil;
+    _haloLayer = nil;
+    _dotBorderLayer = nil;
+    _dotLayer = nil;
+    _approximateLayer = nil;
+    _puckModeActivated = NO;
+    _approximateModeActivated = NO;
 
-        [self updateFrameWithSize:MLNUserLocationAnnotationDotSize];
-    }
+    [self updateFrameWithSize:MLNUserLocationAnnotationDotSize];
 
     UIColor *haloColor = self.mapView.tintColor;
     UIColor *puckBackgroundColor = self.mapView.tintColor;
@@ -526,20 +532,18 @@ const CGFloat MLNUserLocationApproximateZoomThreshold = 7.0;
 - (void)drawApproximate
 {
 
-    if ( ! _approximateModeActivated)
-    {
-        self.layer.sublayers = nil;
+    self.layer.sublayers = nil;
 
-        _headingIndicatorLayer = nil;
-        _dotBorderLayer = nil;
-        _dotLayer = nil;
-        _accuracyRingLayer = nil;
-        _haloLayer = nil;
-        _puckDot = nil;
-        _puckArrow = nil;
+    _headingIndicatorLayer = nil;
+    _dotBorderLayer = nil;
+    _dotLayer = nil;
+    _accuracyRingLayer = nil;
+    _haloLayer = nil;
+    _puckDot = nil;
+    _puckArrow = nil;
+    _puckModeActivated = NO;
 
-        _approximateModeActivated = YES;
-    }
+    _approximateModeActivated = YES;
 
     UIColor *backgroundColor = self.mapView.tintColor;
     UIColor *strokeColor = UIColor.blackColor;

@@ -6109,6 +6109,31 @@ static void *windowScreenContext = &windowScreenContext;
     return dictionary[@"MLNAccuracyAuthorizationDescription"];
 }
 
+- (void)createUserLocationAnnotationView {
+    MLNUserLocationAnnotationView *userLocationAnnotationView;
+
+    if ([self.delegate respondsToSelector:@selector(mapView:viewForAnnotation:)])
+    {
+        userLocationAnnotationView = (MLNUserLocationAnnotationView *)[self.delegate mapView:self viewForAnnotation:self.userLocation];
+        if (userLocationAnnotationView && ! [userLocationAnnotationView isKindOfClass:MLNUserLocationAnnotationView.class])
+        {
+            [NSException raise:MLNUserLocationAnnotationTypeException
+                        format:@"User location annotation view must be a kind of MLNUserLocationAnnotationView. %@", userLocationAnnotationView.debugDescription];
+        }
+    }
+
+    if (self.userLocationAnnotationView) {
+        [self.userLocationAnnotationView removeFromSuperview];
+    }
+    self.userLocationAnnotationView = userLocationAnnotationView ?: self.useLocationIndicatorLayer ? [[MLNLocationIndicatorUserLocationAnnotationView alloc] init] : [[MLNFaux3DUserLocationAnnotationView alloc] init];
+    self.userLocationAnnotationView.mapView = self;
+    self.userLocationAnnotationView.userLocation = self.userLocation;
+
+    self.userLocationAnnotationView.autoresizingMask = (UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin |
+                                                        UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin);
+    [self.userLocationAnnotationView update];
+}
+
 - (void)setShowsUserLocation:(BOOL)showsUserLocation
 {
     MLNLogDebug(@"Setting showsUserLocation: %@", MLNStringFromBOOL(showsUserLocation));
@@ -6124,25 +6149,7 @@ static void *windowScreenContext = &windowScreenContext;
         }
 
         self.userLocation = [[MLNUserLocation alloc] initWithMapView:self];
-
-        MLNUserLocationAnnotationView *userLocationAnnotationView;
-
-        if ([self.delegate respondsToSelector:@selector(mapView:viewForAnnotation:)])
-        {
-            userLocationAnnotationView = (MLNUserLocationAnnotationView *)[self.delegate mapView:self viewForAnnotation:self.userLocation];
-            if (userLocationAnnotationView && ! [userLocationAnnotationView isKindOfClass:MLNUserLocationAnnotationView.class])
-            {
-                [NSException raise:MLNUserLocationAnnotationTypeException
-                            format:@"User location annotation view must be a kind of MLNUserLocationAnnotationView. %@", userLocationAnnotationView.debugDescription];
-            }
-        }
-
-        self.userLocationAnnotationView = userLocationAnnotationView ?: self.useLocationIndicatorLayer ? [[MLNLocationIndicatorUserLocationAnnotationView alloc] init] : [[MLNFaux3DUserLocationAnnotationView alloc] init];
-        self.userLocationAnnotationView.mapView = self;
-        self.userLocationAnnotationView.userLocation = self.userLocation;
-
-        self.userLocationAnnotationView.autoresizingMask = (UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin |
-                                                            UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin);
+        [self createUserLocationAnnotationView];
 
         [self validateLocationServices];
     }
