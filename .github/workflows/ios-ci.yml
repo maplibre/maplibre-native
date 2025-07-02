@@ -40,6 +40,9 @@ jobs:
         with:
           submodules: recursive
 
+      - name: manual submodules
+        run: git submodule update --init --recursive
+
       - name: Get all iOS files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files-yaml
@@ -53,29 +56,9 @@ jobs:
           echo "One or more iOS file(s) has changed."
           echo "List of changes: ${{ steps.changed-files-yaml.outputs.ios_all_changed_files }}"
 
-  checkout:
-    needs: [pre_job]
-    if: needs.pre_job.outputs.should_skip != 'true'
-    runs-on: [self-hosted, macOS, ARM64]
-    concurrency:
-      # cancel jobs on PRs only
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
-    defaults:
-      run:
-        working-directory: platform/ios
-        shell: bash
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-      - name: manual submodules
-        run: git submodule update --init --recursive
 
   test_sse:
       runs-on: ubuntu-latest
-      needs: [checkout]
       steps:
       - name: Test SSE
         continue-on-error: true
@@ -88,7 +71,7 @@ jobs:
         run: echo "SUPPORT_SSE42=1" >> "$GITHUB_ENV"
 
   ios-build:
-    needs: [pre_job, checkout, test_sse]
+    needs: [pre_job, test_sse]
     if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: [self-hosted, macOS, ARM64]
     concurrency:
@@ -104,6 +87,11 @@ jobs:
         working-directory: platform/ios
         shell: bash
     steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
       - name: Cache Bazel
         uses: actions/cache@v4
         with:
