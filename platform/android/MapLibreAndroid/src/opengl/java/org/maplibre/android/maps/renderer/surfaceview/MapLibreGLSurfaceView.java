@@ -562,14 +562,17 @@ public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
             sizeChanged = false;
           }
 
-          MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
-          if (view != null) {
-            view.renderer.onDrawFrame();
-            if (finishDrawingRunnable != null) {
-              finishDrawingRunnable.run();
-              finishDrawingRunnable = null;
+          {
+            MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
+            if (view != null) {
+              view.renderer.onDrawFrame();
+              if (finishDrawingRunnable != null) {
+                finishDrawingRunnable.run();
+                finishDrawingRunnable = null;
+              }
             }
           }
+
           int swapError = eglHelper.swap();
           switch (swapError) {
             case EGL10.EGL_SUCCESS:
