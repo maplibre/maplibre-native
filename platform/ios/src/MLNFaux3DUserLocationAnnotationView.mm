@@ -259,6 +259,11 @@ const CGFloat MLNUserLocationApproximateZoomThreshold = 7.0;
 
         [self.layer addSublayer:_puckArrow];
     }
+    else if (!CGColorEqualToColor(_puckArrow.fillColor, [arrowColor CGColor]))
+    {
+        _puckArrow.fillColor = [arrowColor CGColor];
+        _puckArrow.strokeColor = [arrowColor CGColor];
+    }
     if (self.userLocation.location.course >= 0)
     {
         _puckArrow.affineTransform = CGAffineTransformRotate(CGAffineTransformIdentity, -MLNRadiansFromDegrees(self.mapView.direction - self.userLocation.location.course));
@@ -461,6 +466,10 @@ const CGFloat MLNUserLocationApproximateZoomThreshold = 7.0;
 
         [self.layer addSublayer:_haloLayer];
     }
+    else if (!CGColorEqualToColor(_haloLayer.backgroundColor, [haloColor CGColor]))
+    {
+        _haloLayer.backgroundColor = [haloColor CGColor];
+    }
 
     // background dot (white with black shadow)
     //
@@ -512,6 +521,10 @@ const CGFloat MLNUserLocationApproximateZoomThreshold = 7.0;
         [_dotLayer addAnimation:animationGroup forKey:@"animateTransformAndOpacity"];
 
         [self.layer addSublayer:_dotLayer];
+    }
+    else if (!CGColorEqualToColor(_dotLayer.backgroundColor, [puckBackgroundColor CGColor]))
+    {
+        _dotLayer.backgroundColor = [puckBackgroundColor CGColor];
     }
 
     if (_puckModeActivated)
