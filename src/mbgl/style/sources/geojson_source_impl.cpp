@@ -101,7 +101,7 @@ std::shared_ptr<GeoJSONData> GeoJSONData::create(const GeoJSON& geoJSON,
         clusterOptions.radius = static_cast<uint16_t>(::round(scale * options->clusterRadius));
         clusterOptions.minPoints = options->clusterMinPoints
 
-        auto feature = std::make_shared<Feature>();
+                                   auto feature = std::make_shared<Feature>();
         clusterOptions.map = [feature, options](const PropertyMap& properties) -> PropertyMap {
             PropertyMap ret{};
             if (properties.empty()) return ret;
