@@ -61,8 +61,8 @@ new_git_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:git.bzl"
 
 new_git_repository(
     name = "tinyobjloader",
+    commit = "3bb554cf74428d7db13418b4aca1b9752a1d2be8",
     remote = "https://github.com/tinyobjloader/tinyobjloader.git",
-    tag = "release",
 )
 
 new_git_repository(

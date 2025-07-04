@@ -212,7 +212,7 @@ jobs:
             --test_output=errors --local_test_jobs=1 \
             --repo_env=GCOV="$PWD/.github/scripts/gcov_wrapper" \
             --test_env=DISPLAY --test_env=XAUTHORITY --copt="-DCI_BUILD" \
-            //test:core //render-test:render-test //expression-test:test
+            //test:core //render-test:render-test //expression-test:test --//:renderer=drawable
           echo coverage_report="$(bazel info output_path)"/_coverage/_coverage_report.dat >> "$GITHUB_ENV"
 
       - name: Upload coverage report
