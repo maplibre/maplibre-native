@@ -32,7 +32,7 @@ class RenderTestActivity : AppCompatActivity() {
     private val renderResultMap: MutableMap<RenderTestDefinition, Bitmap> = HashMap()
     private var renderTestDefinitions: List<RenderTestDefinition>? = null
     private var onRenderTestCompletionListener: OnRenderTestCompletionListener? = null
-    private lateinit var mapSnapshotter: MapSnapshotter
+    private var mapSnapshotter: MapSnapshotter? = null
     private var imageView: ImageView? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,7 +46,7 @@ class RenderTestActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        mapSnapshotter.cancel()
+        mapSnapshotter?.cancel()
     }
 
     //
@@ -119,7 +119,7 @@ class RenderTestActivity : AppCompatActivity() {
     private fun render(renderTestDefinition: RenderTestDefinition, testSize: Int) {
         Timber.d("Render test %s,%s", renderTestDefinition.name, renderTestDefinition.category)
         mapSnapshotter = RenderTestSnapshotter(this, renderTestDefinition.toOptions())
-        mapSnapshotter.start(
+        mapSnapshotter?.start(
             object : MapSnapshotter.SnapshotReadyCallback {
                 override fun onSnapshotReady(snapshot: MapSnapshot) {
                     imageView!!.setImageBitmap(snapshot.bitmap)
