@@ -84,7 +84,7 @@ std::optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Conver
     const auto clusterMinPointsValue = objectMember(value, "clusterMinPoints");
     if (clusterMinPointsValue) {
         if (toNumber(*clusterMinPointsValue)) {
-            options.clusterRadius = static_cast<size_t>(*toNumber(*clusterMinPointsValue));
+            options.clusterMinPoints = static_cast<size_t>(*toNumber(*clusterMinPointsValue));
         } else {
             error.message = "GeoJSON source clusterMinPoints value must be a number";
             return std::nullopt;
