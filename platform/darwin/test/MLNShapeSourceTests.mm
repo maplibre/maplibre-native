@@ -30,7 +30,7 @@
     XCTAssertTrue(mbglOptions->cluster);
     XCTAssertEqual(mbglOptions->clusterRadius, 42);
     XCTAssertEqual(mbglOptions->clusterMaxZoom, 98);
-    XCTAssertEqual(mbglOptions->clusterMinPoints, 3);
+    XCTAssertEqual(mbglOptions->clusterMinPoints, 3UL);
     XCTAssertEqual(mbglOptions->maxzoom, 99);
     XCTAssertEqual(mbglOptions->buffer, 1976);
     XCTAssertEqual(mbglOptions->tolerance, 0.42);
