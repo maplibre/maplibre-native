@@ -19,6 +19,7 @@
 
 const MLNShapeSourceOption MLNShapeSourceOptionBuffer = @"MLNShapeSourceOptionBuffer";
 const MLNShapeSourceOption MLNShapeSourceOptionClusterRadius = @"MLNShapeSourceOptionClusterRadius";
+const MLNShapeSourceOption MLNShapeSourceOptionClusterMinPoints = @"MLNShapeSourceOptionClusterMinPoints";
 const MLNShapeSourceOption MLNShapeSourceOptionClustered = @"MLNShapeSourceOptionClustered";
 const MLNShapeSourceOption MLNShapeSourceOptionClusterProperties = @"MLNShapeSourceOptionClusterProperties";
 const MLNShapeSourceOption MLNShapeSourceOptionMaximumZoomLevel = @"MLNShapeSourceOptionMaximumZoomLevel";
@@ -68,6 +69,14 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(NSD
                         format:@"MLNShapeSourceOptionClusterRadius must be an NSNumber."];
         }
         geoJSONOptions->clusterRadius = value.integerValue;
+    }
+
+    if (NSNumber *value = options[MLNShapeSourceOptionClusterMinPoints]) {
+        if (![value isKindOfClass:[NSNumber class]]) {
+            [NSException raise:NSInvalidArgumentException
+                        format:@"MLNShapeSourceOptionClusterMinPoints must be an NSNumber."];
+        }
+        geoJSONOptions->clusterMinPoints = value.integerValue;
     }
 
     if (NSNumber *value = options[MLNShapeSourceOptionMaximumZoomLevelForClustering]) {

@@ -29,6 +29,7 @@ struct GeoJSONOptions {
     bool cluster = false;
     uint16_t clusterRadius = 50;
     uint8_t clusterMaxZoom = 17;
+    size_t clusterMinPoints = 2;
     using ClusterExpression = std::pair<std::shared_ptr<mbgl::style::expression::Expression>,
                                         std::shared_ptr<mbgl::style::expression::Expression>>;
     using ClusterProperties = std::map<std::string, ClusterExpression>;

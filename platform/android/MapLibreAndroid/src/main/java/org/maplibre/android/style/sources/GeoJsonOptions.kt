@@ -100,6 +100,17 @@ class GeoJsonOptions : HashMap<String?, Any?>() {
         return this
     }
 
+     /**
+     * Minimum number of points to form a cluster
+     *
+     * @param clusterMinPoints minimum number of points to form a cluster - Defaults to 2
+     * @return the current instance for chaining
+     */
+    fun withClusterMinPoints(clusterMinPoints: Int): GeoJsonOptions {
+        this["clusterMinPoints"] = clusterMinPoints
+        return this
+    }
+
     /**
      * An object defining custom properties on the generated clusters if clustering is enabled,
      * aggregating values from clustered points. Has the form {"property_name": [operator, [map_expression]]} or

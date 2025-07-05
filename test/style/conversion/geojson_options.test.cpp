@@ -40,6 +40,7 @@ TEST(GeoJSONOptions, RetainsDefaults) {
     ASSERT_EQ(converted.cluster, defaults.cluster);
     ASSERT_EQ(converted.clusterRadius, defaults.clusterRadius);
     ASSERT_EQ(converted.clusterMaxZoom, defaults.clusterMaxZoom);
+    ASSERT_EQ(converted.clusterMinPoints, defaults.clusterMinPoints);
     ASSERT_TRUE(converted.clusterProperties.empty());
 }
 
@@ -53,6 +54,7 @@ TEST(GeoJSONOptions, FullConversion) {
         "cluster": true,
         "clusterRadius": 4,
         "clusterMaxZoom": 5,
+        "clusterMinPoints": 6,
         "lineMetrics": true,
         "clusterProperties": {
             "max": ["max", ["get", "scalerank"]],
@@ -73,6 +75,7 @@ TEST(GeoJSONOptions, FullConversion) {
     ASSERT_EQ(converted.cluster, true);
     ASSERT_EQ(converted.clusterRadius, 4);
     ASSERT_EQ(converted.clusterMaxZoom, 5);
+    ASSERT_EQ(converted.clusterMinPoints, 6);
     ASSERT_EQ(converted.clusterProperties.size(), 3);
     ASSERT_EQ(converted.clusterProperties.count("max"), 1);
     ASSERT_EQ(converted.clusterProperties.count("sum"), 1);
