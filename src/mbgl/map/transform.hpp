@@ -132,22 +132,87 @@ public:
     FreeCameraOptions getFreeCameraOptions() const;
     void setFreeCameraOptions(const FreeCameraOptions& options);
 
+    struct Animation {
+        TimePoint start;
+        Duration duration;
+        AnimationOptions options;
+        bool ran = false;      // Did this property animation run this frame
+        bool finished = false; // Did we execute the finish frame for this property animation this frame
+        bool done = false;     // Did this property animation reach the end of the frame
+        bool panning = false, scaling = false, rotating = false;
+
+        // Anchor
+        std::optional<ScreenCoordinate> anchor;
+        LatLng anchorLatLng;
+
+        Animation(TimePoint start_,
+                  Duration duration_,
+                  AnimationOptions options_,
+                  bool panning_,
+                  bool scaling_,
+                  bool rotating_)
+            : start(start_),
+              duration(duration_),
+              options(options_),
+              panning(panning_),
+              scaling(scaling_),
+              rotating(rotating_) {}
+
+        double interpolant(TimePoint);
+
+        bool isAnimated() const { return duration != Duration::zero(); }
+    };
+
 private:
+    template <class T>
+    struct Property {
+        std::shared_ptr<Animation> animation;
+        T current, target;
+        bool set = false;
+
+        std::function<LatLng(TimePoint)> frameLatLngFunc = nullptr;
+        std::function<double(TimePoint)> frameZoomFunc = nullptr;
+    };
+
+    struct Properties {
+        Property<Point<double>> latlng;
+        Property<double> zoom, bearing, pitch;
+        Property<EdgeInsets> padding;
+    };
+
     TransformObserver& observer;
     TransformState state;
 
-    void startTransition(const CameraOptions&,
-                         const AnimationOptions&,
-                         const std::function<void(double)>&,
-                         const Duration&);
+    void startTransition(const CameraOptions&, const Duration&, Animation&);
+    bool animationTransitionFrame(Animation&, double);
+    void animationFinishFrame(Animation&);
+
+    void visitProperties(const std::function<void(Animation&)>& f) {
+        if (properties.zoom.animation) {
+            f(*properties.zoom.animation);
+        }
+        if (properties.latlng.animation) {
+            f(*properties.latlng.animation);
+        }
+        if (properties.bearing.animation) {
+            f(*properties.bearing.animation);
+        }
+        if (properties.padding.animation) {
+            f(*properties.padding.animation);
+        }
+        if (properties.pitch.animation) {
+            f(*properties.pitch.animation);
+        }
+    }
 
     // We don't want to show horizon: limit max pitch based on edge insets.
     double getMaxPitchForEdgeInsets(const EdgeInsets& insets) const;
 
+    Properties properties;
+    bool activeAnimation = false;
+
     TimePoint transitionStart;
     Duration transitionDuration;
-    std::function<bool(const TimePoint)> transitionFrameFn;
-    std::function<void()> transitionFinishFn;
 };
 
 } // namespace mbgl
