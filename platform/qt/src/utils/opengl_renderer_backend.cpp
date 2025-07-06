@@ -32,11 +32,9 @@ OpenGLRendererBackend::OpenGLRendererBackend(const mbgl::gfx::ContextMode mode)
 
 OpenGLRendererBackend::~OpenGLRendererBackend() = default;
 
-void OpenGLRendererBackend::activate() {
-}
+void OpenGLRendererBackend::activate() {}
 
-void OpenGLRendererBackend::deactivate() {
-}
+void OpenGLRendererBackend::deactivate() {}
 
 void OpenGLRendererBackend::updateAssumedState() {
     assumeFramebufferBinding(ImplicitFramebufferBinding);
