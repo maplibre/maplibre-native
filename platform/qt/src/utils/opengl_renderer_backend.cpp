@@ -32,9 +32,15 @@ OpenGLRendererBackend::OpenGLRendererBackend(const mbgl::gfx::ContextMode mode)
 
 OpenGLRendererBackend::~OpenGLRendererBackend() = default;
 
-void OpenGLRendererBackend::activate() {}
+void OpenGLRendererBackend::activate() {
+    // Qt has already made the context current for us (QOpenGLWidget / QSG).
+    // Nothing to do here.
+}
 
-void OpenGLRendererBackend::deactivate() {}
+void OpenGLRendererBackend::deactivate() {
+    // No explicit teardown necessary. If desired we could call makeCurrent on
+    // nullptr to release the context, but Qt typically handles that.
+}
 
 void OpenGLRendererBackend::updateAssumedState() {
     assumeFramebufferBinding(ImplicitFramebufferBinding);
@@ -53,16 +59,6 @@ void OpenGLRendererBackend::updateFramebuffer(uint32_t fbo, const mbgl::Size& ne
 mbgl::gl::ProcAddress OpenGLRendererBackend::getExtensionFunctionPointer(const char* name) {
     QOpenGLContext* thisContext = QOpenGLContext::currentContext();
     return thisContext->getProcAddress(name);
-}
-
-void OpenGLRendererBackend::activate() {
-    // Qt has already made the context current for us (QOpenGLWidget / QSG).
-    // Nothing to do here.
-}
-
-void OpenGLRendererBackend::deactivate() {
-    // No explicit teardown necessary. If desired we could call makeCurrent on
-    // nullptr to release the context, but Qt typically handles that.
 }
 
 } // namespace QMapLibre
