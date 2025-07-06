@@ -551,6 +551,24 @@ MLN_EXPORT
 @property (nonatomic, assign) BOOL showsUserLocation;
 
 /**
+ A boolean value indicating whether the location indicator is drawn using the location
+ indicator layer or the location indication annotation.
+ */
+@property (nonatomic, assign) BOOL useLocationIndicatorLayer;
+
+/**
+ A boolean value indicating whether the camera allows for concurrent animations. This is
+ a temporary feature flag to avoid breaking existing functionality.
+ */
+@property (nonatomic, assign) BOOL concurrentAnimations;
+
+/**
+ A boolean value indicating whether camera animation duration is set based
+ on the time difference between the last location update and the current one.
+ */
+@property (nonatomic, assign) BOOL dynamicNavigationCameraAnimationDuration;
+
+/**
  A Boolean value indicating whether the map may request authorization to use location services.
 
  Setting this property to `YES` causes the map view to use the Core Location
@@ -659,6 +677,13 @@ MLN_EXPORT
  @param duration The duration to animate the change in seconds.
 */
 - (void)updateUserLocationAnnotationViewAnimatedWithDuration:(NSTimeInterval)duration;
+
+/**
+ Creates or updates the user location annotation view. This method calls the
+ `mapView:viewForAnnotation:` delegate method to obtain a custom view. If no custom view is
+ provided, it defaults to a native one.
+ */
+- (void)createUserLocationAnnotationView;
 
 /**
  A Boolean value indicating whether the user location annotation may display a
@@ -1623,6 +1648,16 @@ vertically on the map.
 - (void)setContentInset:(UIEdgeInsets)contentInset
                animated:(BOOL)animated
       completionHandler:(nullable void (^)(void))completion;
+
+/**
+ Toggling between the Transform and the TransformActive implementation.
+
+ It allows us to switch between the two implementations at runtime.
+
+ It also resets the current transform state so be careful when using it
+ in the middle of a transformation.
+ */
+- (void)toggleTransform;
 
 // MARK: Converting Geographic Coordinates
 

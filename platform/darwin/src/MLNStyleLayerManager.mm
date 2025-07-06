@@ -10,6 +10,7 @@
 #import "MLNRasterStyleLayer_Private.h"
 #import "MLNSymbolStyleLayer_Private.h"
 #import "MLNCustomStyleLayer_Private.h"
+#import "MLNLocationIndicatorStyleLayer_Private.h"
 
 #import "MLNCustomDrawableStyleLayer_Private.h"
 
@@ -67,6 +68,11 @@ LayerManagerDarwin::LayerManagerDarwin() {
     addLayerTypeCoreOnly(std::make_unique<CustomLayerFactory>());
 #elif !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
     addLayerType(std::make_unique<CustomStyleLayerPeerFactory>());
+#endif
+#if !defined(MBGL_LAYER_LOCATION_INDICATOR_DISABLE_ALL)
+    addLayerTypeCoreOnly(std::make_unique<LocationIndicatorLayerFactory>());
+#elif !defined(MBGL_LAYER_HEATMAP_DISABLE_ALL)
+    addLayerType(std::make_unique<LocationIndicatorLayerPeerFactory>());
 #endif
 
 #if defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_RUNTIME)

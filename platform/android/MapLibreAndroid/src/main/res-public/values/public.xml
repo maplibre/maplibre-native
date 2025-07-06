@@ -173,4 +173,7 @@
     <public name="maplibre_pulsingLocationCircleAlpha" format="float" type="attr" />
     <public name="maplibre_pulsingLocationCircleInterpolator" format="string" type="attr" />
 
+    <!-- Camera Animation -->
+    <public name="maplibre_concurrentCameraAnimation" format="boolean" type="attr" />
+
 </resources>

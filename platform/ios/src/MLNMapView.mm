@@ -82,6 +82,7 @@
 #import "MLNPluginLayer.h"
 #import "MLNStyleLayerManager.h"
 #include "MLNPluginStyleLayer_Private.h"
+#import "MLNLocationIndicatorUserLocationAnnotationView.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -636,6 +637,7 @@ public:
     }
     MLNLogDebug(@"Setting styleURL: %@", styleURL);
     styleURL = styleURL.mgl_URLByStandardizingScheme;
+    [self removeLocationIndicatorLayer];
     self.style = nil;
     self.mbglMap.getStyle().loadURL([[styleURL absoluteString] UTF8String]);
 }
@@ -653,8 +655,15 @@ public:
 - (IBAction)reloadStyle:(__unused id)sender {
     MLNLogInfo(@"Reloading style.");
     NSURL *styleURL = self.styleURL;
+    [self removeLocationIndicatorLayer];
     self.mbglMap.getStyle().loadURL("");
     self.styleURL = styleURL;
+}
+
+- (void)removeLocationIndicatorLayer {
+    if (self.userLocationAnnotationView && [self.userLocationAnnotationView isKindOfClass:[MLNLocationIndicatorUserLocationAnnotationView class]]) {
+        [(MLNLocationIndicatorUserLocationAnnotationView*)self.userLocationAnnotationView removeLayer];
+    }
 }
 
 - (mbgl::Map &)mbglMap
@@ -1440,6 +1449,11 @@ public:
     [self installConstraints];
 }
 
+- (void)toggleTransform
+{
+    self.mbglMap.toggleTransform();
+}
+
 /// Returns the frame of inset content within the map view.
 - (CGRect)contentFrame
 {
@@ -2134,7 +2148,9 @@ public:
         [self setUserTrackingMode:MLNUserTrackingModeNone animated:NO completionHandler:nil];
     }
 
-    [self cancelTransitions];
+    if (!(self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone)) {
+        [self cancelTransitions];
+    }
 }
 
 - (void)notifyGestureDidBegin {
@@ -2184,7 +2200,9 @@ public:
 {
     if ( ! self.isScrollEnabled) return;
 
-    [self cancelTransitions];
+    if (!(self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone)) {
+        [self cancelTransitions];
+    }
 
     MLNMapCamera *oldCamera = self.camera;
 
@@ -2247,18 +2265,23 @@ public:
                       self.mbglMap.moveBy({ offset.x, offset.y }, MLNDurationFromTimeInterval(self.decelerationRate));
                 }
             }
+
+            if (self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone) {
+                [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+            }
         }
 
         [self notifyGestureDidEndWithDrift:drift];
     }
-
 }
 
 - (void)handlePinchGesture:(UIPinchGestureRecognizer *)pinch
 {
     if ( ! self.isZoomEnabled) return;
 
-    [self cancelTransitions];
+    if (!(self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone)) {
+        [self cancelTransitions];
+    }
 
     CGPoint centerPoint = [self anchorPointForGesture:pinch];
     if (self.anchorRotateOrZoomGesturesToCenterCoordinate) {
@@ -2304,6 +2327,9 @@ public:
             }
         }
         [self cameraIsChanging];
+        if (self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone) {
+            [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+        }
     }
     else if (pinch.state == UIGestureRecognizerStateEnded || pinch.state == UIGestureRecognizerStateCancelled)
     {
@@ -2370,7 +2396,9 @@ public:
 {
     if ( ! self.isRotateEnabled) return;
 
-    [self cancelTransitions];
+    if (!(self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone)) {
+        [self cancelTransitions];
+    }
 
     CGPoint centerPoint = [self anchorPointForGesture:rotate];
     if (self.anchorRotateOrZoomGesturesToCenterCoordinate) {
@@ -2428,7 +2456,9 @@ public:
         }
 
         [self cameraIsChanging];
-
+        if (self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone) {
+            [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+        }
         // Trigger a light haptic feedback event when the user rotates to due north.
         if (@available(iOS 10.0, *))
         {
@@ -2578,7 +2608,9 @@ public:
 
     if ( ! self.isZoomEnabled) return;
 
-    [self cancelTransitions];
+    if (!(self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone)) {
+        [self cancelTransitions];
+    }
 
     self.cameraChangeReasonBitmask |= MLNCameraChangeReasonGestureZoomIn;
 
@@ -2604,6 +2636,10 @@ public:
          {
              [weakSelf unrotateIfNeededForGesture];
          }];
+
+        if (self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone) {
+            [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+        }
     }
     else
     {
@@ -2619,7 +2655,9 @@ public:
 
     if ([self zoomLevel] == *self.mbglMap.getBounds().minZoom) return;
 
-    [self cancelTransitions];
+    if (!(self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone)) {
+        [self cancelTransitions];
+    }
 
     self.cameraChangeReasonBitmask |= MLNCameraChangeReasonGestureZoomOut;
 
@@ -2645,6 +2683,10 @@ public:
          {
              [weakSelf unrotateIfNeededForGesture];
          }];
+
+        if (self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone) {
+            [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+        }
     }
 }
 
@@ -2652,7 +2694,9 @@ public:
 {
     if ( ! self.isZoomEnabled) return;
 
-    [self cancelTransitions];
+    if (!(self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone)) {
+        [self cancelTransitions];
+    }
 
     self.cameraChangeReasonBitmask |= MLNCameraChangeReasonGestureOneFingerZoom;
 
@@ -2687,6 +2731,9 @@ public:
         }
 
         [self cameraIsChanging];
+        if (self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone) {
+            [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+        }
     }
     else if (quickZoom.state == UIGestureRecognizerStateEnded || quickZoom.state == UIGestureRecognizerStateCancelled)
     {
@@ -2699,7 +2746,9 @@ public:
 {
     if ( ! self.isPitchEnabled) return;
 
-    [self cancelTransitions];
+    if (!(self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone)) {
+        [self cancelTransitions];
+    }
 
     self.cameraChangeReasonBitmask |= MLNCameraChangeReasonGestureTilt;
     static CGFloat initialPitch;
@@ -2754,6 +2803,9 @@ public:
             }
 
             [self cameraIsChanging];
+            if (self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone) {
+                [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+            }
 
         }
 
@@ -3891,6 +3943,12 @@ static void *windowScreenContext = &windowScreenContext;
 
 - (void)_setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate edgePadding:(UIEdgeInsets)insets zoomLevel:(double)zoomLevel direction:(CLLocationDirection)direction duration:(NSTimeInterval)duration animationTimingFunction:(nullable CAMediaTimingFunction *)function completionHandler:(nullable void (^)(void))completion
 {
+    BOOL cancel = self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone;
+    [self _setCenterCoordinate:centerCoordinate edgePadding:insets zoomLevel:zoomLevel direction:direction duration:duration animationTimingFunction:function completionHandler:completion cancelTransitions:cancel];
+}
+
+- (void)_setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate edgePadding:(UIEdgeInsets)insets zoomLevel:(double)zoomLevel direction:(CLLocationDirection)direction duration:(NSTimeInterval)duration animationTimingFunction:(nullable CAMediaTimingFunction *)function completionHandler:(nullable void (^)(void))completion cancelTransitions:(BOOL)cancelOtherTransitions
+{
     if (!_mbglMap)
     {
         if (completion)
@@ -3948,7 +4006,9 @@ static void *windowScreenContext = &windowScreenContext;
         return;
     }
 
-    [self cancelTransitions];
+    if (cancelOtherTransitions) {
+        [self cancelTransitions];
+    }
 
     self.cameraChangeReasonBitmask |= MLNCameraChangeReasonProgrammatic;
 
@@ -3975,7 +4035,9 @@ static void *windowScreenContext = &windowScreenContext;
 {
     MLNLogDebug(@"Setting zoomLevel: %f animated: %@", zoomLevel, MLNStringFromBOOL(animated));
     if (zoomLevel == self.zoomLevel) return;
-    [self cancelTransitions];
+    if (!(self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone)) {
+        [self cancelTransitions];
+    }
 
     self.cameraChangeReasonBitmask |= MLNCameraChangeReasonProgrammatic;
 
@@ -3983,6 +4045,10 @@ static void *windowScreenContext = &windowScreenContext;
 
     self.mbglMap.easeTo(mbgl::CameraOptions()
                             .withZoom(zoomLevel), MLNDurationFromTimeInterval(duration));
+
+    if (self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone) {
+        [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+    }
 }
 
 - (void)setMinimumZoomLevel:(double)minimumZoomLevel
@@ -4217,7 +4283,9 @@ static void *windowScreenContext = &windowScreenContext;
     }
 
     if (direction == self.direction) return;
-    [self cancelTransitions];
+    if (!(self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone)) {
+        [self cancelTransitions];
+    }
 
     CGFloat duration = animated ? MLNAnimationDuration : 0;
 
@@ -4311,6 +4379,11 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (void)setCamera:(MLNMapCamera *)camera withDuration:(NSTimeInterval)duration animationTimingFunction:(nullable CAMediaTimingFunction *)function edgePadding:(UIEdgeInsets)edgePadding completionHandler:(nullable void (^)(void))completion {
+    MLNLogDebug(@"Setting camera: %@ duration: %f animationTimingFunction: %@ edgePadding: %@ completionHandler: %@", camera, duration, function, edgePadding, completion);
+    [self setCamera:camera withDuration:duration animationTimingFunction:function edgePadding:edgePadding cancelTransitions:false completionHandler:completion];
+}
+
+- (void)setCamera:(MLNMapCamera *)camera withDuration:(NSTimeInterval)duration animationTimingFunction:(nullable CAMediaTimingFunction *)function edgePadding:(UIEdgeInsets)edgePadding cancelTransitions:(BOOL)cancelOtherTransitions completionHandler:(nullable void (^)(void))completion {
     if (!_mbglMap)
     {
         if (completion)
@@ -4320,7 +4393,7 @@ static void *windowScreenContext = &windowScreenContext;
         return;
     }
 
-    MLNLogDebug(@"Setting camera: %@ duration: %f animationTimingFunction: %@ edgePadding: %@ completionHandler: %@", camera, duration, function, NSStringFromUIEdgeInsets(edgePadding), completion);
+    MLNLogDebug(@"Setting camera: %@ duration: %f animationTimingFunction: %@ edgePadding: %@ cancelTransitions: %@ completionHandler: %@", camera, duration, function, NSStringFromUIEdgeInsets(edgePadding), cancelOtherTransitions, completion);
 
     edgePadding = MLNEdgeInsetsInsetEdgeInset(edgePadding, self.contentInset);
 
@@ -4359,7 +4432,9 @@ static void *windowScreenContext = &windowScreenContext;
     }
 
     [self willChangeValueForKey:@"camera"];
-    [self cancelTransitions];
+    if (cancelOtherTransitions) {
+        [self cancelTransitions];
+    }
 
     self.cameraChangeReasonBitmask |= MLNCameraChangeReasonProgrammatic;
 
@@ -6043,6 +6118,32 @@ static void *windowScreenContext = &windowScreenContext;
     return dictionary[@"MLNAccuracyAuthorizationDescription"];
 }
 
+- (void)createUserLocationAnnotationView {
+    MLNUserLocationAnnotationView *userLocationAnnotationView;
+
+    if ([self.delegate respondsToSelector:@selector(mapView:viewForAnnotation:)])
+    {
+        userLocationAnnotationView = (MLNUserLocationAnnotationView *)[self.delegate mapView:self viewForAnnotation:self.userLocation];
+        if (userLocationAnnotationView && ! [userLocationAnnotationView isKindOfClass:MLNUserLocationAnnotationView.class])
+        {
+            [NSException raise:MLNUserLocationAnnotationTypeException
+                        format:@"User location annotation view must be a kind of MLNUserLocationAnnotationView. %@", userLocationAnnotationView.debugDescription];
+        }
+    }
+
+    if (self.userLocationAnnotationView) {
+        [self.userLocationAnnotationView removeFromSuperview];
+    }
+    self.userLocationAnnotationView = userLocationAnnotationView ?: self.useLocationIndicatorLayer ? [[MLNLocationIndicatorUserLocationAnnotationView alloc] init] : [[MLNFaux3DUserLocationAnnotationView alloc] init];
+    self.userLocationAnnotationView.mapView = self;
+    self.userLocationAnnotationView.userLocation = self.userLocation;
+
+    self.userLocationAnnotationView.autoresizingMask = (UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin |
+                                                        UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin);
+
+    [self.userLocationAnnotationView update];
+}
+
 - (void)setShowsUserLocation:(BOOL)showsUserLocation
 {
     MLNLogDebug(@"Setting showsUserLocation: %@", MLNStringFromBOOL(showsUserLocation));
@@ -6058,25 +6159,7 @@ static void *windowScreenContext = &windowScreenContext;
         }
 
         self.userLocation = [[MLNUserLocation alloc] initWithMapView:self];
-
-        MLNUserLocationAnnotationView *userLocationAnnotationView;
-
-        if ([self.delegate respondsToSelector:@selector(mapView:viewForAnnotation:)])
-        {
-            userLocationAnnotationView = (MLNUserLocationAnnotationView *)[self.delegate mapView:self viewForAnnotation:self.userLocation];
-            if (userLocationAnnotationView && ! [userLocationAnnotationView isKindOfClass:MLNUserLocationAnnotationView.class])
-            {
-                [NSException raise:MLNUserLocationAnnotationTypeException
-                            format:@"User location annotation view must be a kind of MLNUserLocationAnnotationView. %@", userLocationAnnotationView.debugDescription];
-            }
-        }
-
-        self.userLocationAnnotationView = userLocationAnnotationView ?: [[MLNFaux3DUserLocationAnnotationView alloc] init];
-        self.userLocationAnnotationView.mapView = self;
-        self.userLocationAnnotationView.userLocation = self.userLocation;
-
-        self.userLocationAnnotationView.autoresizingMask = (UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin |
-                                                            UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin);
+        [self createUserLocationAnnotationView];
 
         [self validateLocationServices];
     }
@@ -6317,13 +6400,12 @@ static void *windowScreenContext = &windowScreenContext;
         }
     }
 
-    [self didUpdateLocationWithUserTrackingAnimated:animated completionHandler:completion];
-
     NSTimeInterval duration = MLNAnimationDuration;
-    if (oldLocation && ! CGPointEqualToPoint(self.userLocationAnnotationView.center, CGPointZero))
+    if ((self.dynamicNavigationCameraAnimationDuration && oldLocation) || (!self.dynamicNavigationCameraAnimationDuration && (oldLocation && ! CGPointEqualToPoint(self.userLocationAnnotationView.center, CGPointZero))))
     {
         duration = MIN([newLocation.timestamp timeIntervalSinceDate:oldLocation.timestamp], MLNUserLocationAnimationDuration);
     }
+    [self didUpdateLocationWithUserTrackingDuration:self.dynamicNavigationCameraAnimationDuration ? duration : MLNUserLocationAnimationDuration completionHandler:completion];
     [self updateUserLocationAnnotationViewAnimatedWithDuration:duration];
 
     if (self.userTrackingMode == MLNUserTrackingModeNone &&
@@ -6335,6 +6417,23 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (void)didUpdateLocationWithUserTrackingAnimated:(BOOL)animated completionHandler:(nullable void (^)(void))completion
+{
+    BOOL cancel = self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone;
+    [self didUpdateLocationWithUserTrackingAnimated:animated completionHandler:completion cancelTransitions:cancel];
+}
+
+- (void)didUpdateLocationWithUserTrackingAnimated:(BOOL)animated completionHandler:(nullable void (^)(void))completion cancelTransitions:(BOOL)cancel
+{
+    [self didUpdateLocationWithUserTrackingDuration:animated ? MLNUserLocationAnimationDuration : 0 completionHandler:completion cancelTransitions:cancel];
+}
+
+- (void)didUpdateLocationWithUserTrackingDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion
+{
+    BOOL cancel = self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone;
+    [self didUpdateLocationWithUserTrackingDuration:duration completionHandler:completion cancelTransitions:cancel];
+}
+
+- (void)didUpdateLocationWithUserTrackingDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion cancelTransitions:(BOOL)cancelTransitions
 {
     CLLocation *location = self.userLocation.location;
     if ( ! _showsUserLocation || ! location
@@ -6368,33 +6467,34 @@ static void *windowScreenContext = &windowScreenContext;
         if (self.userTrackingState != MLNUserTrackingStateBegan)
         {
             // Keep both the user and the destination in view.
-            [self didUpdateLocationWithTargetAnimated:animated completionHandler:completion];
+            [self didUpdateLocationWithTargetAnimated:duration != 0 completionHandler:completion];
         }
     }
     else if (self.userTrackingState == MLNUserTrackingStatePossible)
     {
         // The first location update is often a great distance away from the
         // current viewport, so fly there to provide additional context.
-        [self didUpdateLocationSignificantlyAnimated:animated completionHandler:completion];
+        [self didUpdateLocationSignificantlyAnimated:duration != 0 completionHandler:completion];
     }
     else if (self.userTrackingState == MLNUserTrackingStateChanged)
     {
         // Subsequent updates get a more subtle animation.
-        [self didUpdateLocationIncrementallyAnimated:animated completionHandler:completion];
+        [self didUpdateLocationIncrementallyDuration:duration completionHandler:completion cancelTransitions:cancelTransitions];
     }
     [self unrotateIfNeededAnimated:YES];
 }
 
 /// Changes the viewport based on an incremental location update.
-- (void)didUpdateLocationIncrementallyAnimated:(BOOL)animated completionHandler:(nullable void (^)(void))completion
+- (void)didUpdateLocationIncrementallyDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion cancelTransitions:(BOOL)cancelTransitions
 {
     [self _setCenterCoordinate:self.userLocation.location.coordinate
                    edgePadding:self.edgePaddingForFollowing
                      zoomLevel:self.zoomLevel
                      direction:self.directionByFollowingWithCourse
-                      duration:animated ? MLNUserLocationAnimationDuration : 0
+                      duration:duration
        animationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear]
-             completionHandler:completion];
+             completionHandler:completion
+             cancelTransitions:cancelTransitions];
 }
 
 /// Changes the viewport based on a significant location update, such as the

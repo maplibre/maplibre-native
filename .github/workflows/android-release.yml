@@ -3,6 +3,9 @@ name: android-release
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   android-create-release:
     runs-on: ubuntu-24.04
@@ -52,7 +55,7 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
         with:
           tag_name: ${{ steps.prepare_release.outputs.version_tag }}
           release_name: ${{steps.prepare_release.outputs.version_tag }}
@@ -62,7 +65,7 @@ jobs:
 
   android-build-and-upload-release:
     needs: android-create-release
-    runs-on: MapLibre_Native_Ubuntu_24_04_x84_16_core
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: platform/android
@@ -129,25 +132,13 @@ jobs:
           asset_name: debug-symbols-maplibre-android-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.tar.gz
           asset_content_type: application/gzip
 
-      - name: Prepare MavenCentral release
+      - name: Publish to Github
         env:
-          GPG_KEY_CONTENTS: ${{ secrets.GPG_KEY_CONTENTS }}
+          GITHUB_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
         run: |
-          echo "${GPG_KEY_CONTENTS}" | base64 -d > signing-key.gpg
-        shell: bash
-
-      - name: Publish to MavenCentral
-        run: |
-          renderer=${{ matrix.RENDERER }}
-          if [ "$renderer" = "opengl" ]; then
-            ./gradlew :MapLibreAndroid:publishOpengl${{ env.buildtype }}PublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
-            ./gradlew :MapLibreAndroid:publishDefault${{ env.buildtype }}PublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
-          else
-            ./gradlew :MapLibreAndroid:publishVulkan${{ env.buildtype }}PublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
-          fi
-        env:
-          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
-          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
-          SONATYPE_STAGING_PROFILE_ID: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}
+            renderer=${{ matrix.RENDERER }}
+            if [ "$renderer" = "opengl" ]; then
+              ./gradlew :MapLibreAndroid:publishDefault${{ env.buildtype }}PublicationToGithubPackagesRepository
+            else
+              ./gradlew :MapLibreAndroid:publishVulkan${{ env.buildtype }}PublicationToGithubPackagesRepository
+            fi

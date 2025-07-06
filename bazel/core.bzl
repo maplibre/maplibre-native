@@ -197,6 +197,8 @@ MLN_CORE_SOURCE = [
     "src/mbgl/map/map_projection.cpp",
     "src/mbgl/map/transform.cpp",
     "src/mbgl/map/transform.hpp",
+    "src/mbgl/map/transform_active.cpp",
+    "src/mbgl/map/transform_active.hpp",
     "src/mbgl/map/transform_state.cpp",
     "src/mbgl/map/transform_state.hpp",
     "src/mbgl/map/zoom_history.hpp",
