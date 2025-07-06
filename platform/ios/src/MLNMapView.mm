@@ -870,6 +870,7 @@ public:
     _pinch.delegate = self;
     [self addGestureRecognizer:_pinch];
     _zoomEnabled = YES;
+    _quickZoomReversed = NO;
 
 #if TARGET_IPHONE_SIMULATOR & (TARGET_CPU_X86 | TARGET_CPU_X86_64)
     if (isM1Simulator) {
@@ -2711,6 +2712,8 @@ public:
     {
         CGFloat distance = [quickZoom locationInView:quickZoom.view].y - self.quickZoomStart;
 
+        if (self.isQuickZoomReversed) distance = - distance;
+
         CGFloat newZoom = MAX(log2f(self.scale) + (distance / 75), *self.mbglMap.getBounds().minZoom);
 
         if ([self zoomLevel] == newZoom) return;
@@ -3233,6 +3236,12 @@ static void *windowScreenContext = &windowScreenContext;
     self.doubleTap.enabled = zoomEnabled;
     self.quickZoom.enabled = zoomEnabled;
     self.twoFingerTap.enabled = zoomEnabled;
+}
+
+- (void)setQuickZoomReversed:(BOOL)quickZoomReversed
+{
+    MLNLogDebug(@"Setting quickZoomReversed: %@", MLNStringFromBOOL(quickZoomReversed));
+    _quickZoomReversed = quickZoomReversed;
 }
 
 - (void)setScrollEnabled:(BOOL)scrollEnabled
@@ -6131,7 +6140,7 @@ static void *windowScreenContext = &windowScreenContext;
 
     self.userLocationAnnotationView.autoresizingMask = (UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin |
                                                         UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin);
-                                                        
+
     [self.userLocationAnnotationView update];
 }
 
@@ -7839,11 +7848,8 @@ static void *windowScreenContext = &windowScreenContext;
             drawingContext.direction = mbgl::util::rad2deg(-state.getBearing());
             drawingContext.pitch = state.getPitch();
             drawingContext.fieldOfView = state.getFieldOfView();
-            mbgl::mat4 projMatrix;
-            state.getProjMatrix(projMatrix);
-            drawingContext.projectionMatrix = MLNMatrix4Make(projMatrix);
-
-            //NSLog(@"Rendering");
+            drawingContext.projectionMatrix = MLNMatrix4Make(paintParameters.transformParams.projMatrix);
+            drawingContext.nearClippedProjMatrix = MLNMatrix4Make(paintParameters.transformParams.nearClippedProjMatrix);
 
             // Call update with the scene state variables
             [weakPlugInLayer onUpdateLayer:drawingContext];

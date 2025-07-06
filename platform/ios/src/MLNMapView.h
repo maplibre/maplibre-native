@@ -679,8 +679,9 @@ MLN_EXPORT
 - (void)updateUserLocationAnnotationViewAnimatedWithDuration:(NSTimeInterval)duration;
 
 /**
- Creates or updates the user location annotation view. This method calls the `mapView:viewForAnnotation:`
- delegate method to obtain a custom view. If no custom view is provided, it defaults to a native one.
+ Creates or updates the user location annotation view. This method calls the
+ `mapView:viewForAnnotation:` delegate method to obtain a custom view. If no custom view is
+ provided, it defaults to a native one.
  */
 - (void)createUserLocationAnnotationView;
 
@@ -791,6 +792,15 @@ MLN_EXPORT
  programmatically.
  */
 @property (nonatomic, getter=isZoomEnabled) BOOL zoomEnabled;
+
+/**
+ A boolean value that reverses the direction of the quick zoom gesture.
+
+ When this property is set, the zoom-in and zoom-out behavior during the quick
+ zoom gesture (also called one-finger zoom) is reversed, aligning with the
+ behavior in Apple Maps. The default value is `NO`.
+ */
+@property (nonatomic, getter=isQuickZoomReversed) BOOL quickZoomReversed;
 
 /**
  A Boolean value that determines whether the user may scroll around the map,
