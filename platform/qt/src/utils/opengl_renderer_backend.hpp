@@ -15,6 +15,8 @@ public:
 
     // mbgl::gfx::RendererBackend -------------------------------------------------
     mbgl::gfx::Renderable& getDefaultRenderable() override { return *this; }
+    void activate() override;
+    void deactivate() override;
 
     // mbgl::gl::RendererBackend --------------------------------------------------
     void updateAssumedState() override;
