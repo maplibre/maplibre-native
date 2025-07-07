@@ -2,6 +2,7 @@
 #include <mbgl/plugin/plugin_layer.hpp>
 #include <mbgl/plugin/plugin_layer_impl.hpp>
 #include <mbgl/plugin/plugin_layer_render.hpp>
+#include <mbgl/plugin/raw_bucket.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/renderer/bucket.hpp>
 
@@ -66,7 +67,7 @@ PluginLayerFactory::PluginLayerFactory(std::string& layerType,
                                        mbgl::style::LayerTypeInfo::TileKind tileKind)
     : _layerTypeInfo(getDefaultInfo()),
       _layerType(layerType) {
-    _layerTypeInfo.type = layerType.c_str();
+    _layerTypeInfo.type = _layerType.c_str();
     plugins::NonConstLayerTypeInfo* lti = (plugins::NonConstLayerTypeInfo*)&_layerTypeInfo;
     lti->source = (plugins::NonConstLayerTypeInfo::Source)((int)source);
     lti->pass3d = (plugins::NonConstLayerTypeInfo::Pass3D)((int)pass3D);
@@ -149,10 +150,11 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
         }
     }
 
-    std::string source = "source";
+    auto source = getSource(value);
+    std::string sourceStr = source.has_value() ? source.value() : "source";
 
     auto tempResult = std::unique_ptr<style::Layer>(new (std::nothrow)
-                                                        style::PluginLayer(id, source, _layerTypeInfo, layerProperties
+                                                        style::PluginLayer(id, sourceStr, _layerTypeInfo, layerProperties
                                                                            //,*customProperties
                                                                            ));
 
@@ -172,8 +174,10 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
 std::unique_ptr<Bucket> PluginLayerFactory::createBucket(
     [[maybe_unused]] const BucketParameters& parameters,
     [[maybe_unused]] const std::vector<Immutable<style::LayerProperties>>& layers) noexcept {
-    // Returning null for now.  Not using buckets in plug-ins yet.
-    return nullptr;
+        if (_supportsRawBuckets) {
+            return std::make_unique<RawBucket>(parameters, layers);
+        }
+        return nullptr;
 }
 
 std::unique_ptr<RenderLayer> PluginLayerFactory::createRenderLayer(Immutable<style::Layer::Impl> impl) noexcept {

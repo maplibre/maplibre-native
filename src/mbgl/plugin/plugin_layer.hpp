@@ -6,7 +6,10 @@
 
 namespace mbgl {
 
+class RawBucketFeature;
+
 namespace style {
+
 
 class PluginLayer final : public Layer {
 public:
@@ -28,7 +31,8 @@ public:
     using OnRenderLayer = std::function<void(PaintParameters&)>;
     using OnUpdateLayer = std::function<void(const LayerPrepareParameters&)>;
     using OnUpdateLayerProperties = std::function<void(const std::string& properties)>;
-
+    using OnFeatureLoaded = std::function<void(const std::shared_ptr<RawBucketFeature> feature)>;
+    
     void* _platformReference = nullptr;
 
 protected:

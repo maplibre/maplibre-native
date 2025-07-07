@@ -99,6 +99,10 @@ public:
         _updateLayerPropertiesFunction = updateLayerPropertiesFunction;
     }
 
+    void setFeatureLoadedFunction(OnFeatureLoaded featureLoadedFunction) {
+        _featureLoadedFunction = featureLoadedFunction;
+    }
+
     //! The property manager handles all of the custom properties for this layer type / instance
     PluginLayerPropertyManager _propertyManager;
 
@@ -113,6 +117,9 @@ public:
     //! Optional: Called when the layer properties change.  The properties are passed as JSON for now
     OnUpdateLayerProperties _updateLayerPropertiesFunction;
 
+    //! Optional: Called when feature is loaded
+    OnFeatureLoaded _featureLoadedFunction;
+    
 private:
     LayerTypeInfo _layerTypeInfo;
     std::string _layerProperties;

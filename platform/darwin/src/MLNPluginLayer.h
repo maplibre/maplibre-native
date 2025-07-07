@@ -42,6 +42,13 @@ MLN_EXPORT
 
 @end
 
+@interface MLNPluginLayerTileFeature : NSObject
+
+@property NSDictionary *featureProperties;
+@property NSArray *featureCoordinates;
+
+@end
+
 typedef enum {
   MLNPluginLayerTileKindGeometry,
   MLNPluginLayerTileKindRaster,
@@ -54,6 +61,9 @@ MLN_EXPORT
 
 @property (copy) NSString *layerID;
 @property BOOL requiresPass3D;
+
+//! Set this to true if this layer can support reading features from the tiles
+@property BOOL supportsReadingTileFeatures;
 
 //! This is a list of layer properties that this layer supports.
 @property (copy) NSArray<MLNPluginLayerProperty *> *layerProperties;
@@ -100,6 +110,9 @@ MLN_EXPORT
 /// Called when the layer properties are updated.  Can be on initial load from the JSON or when
 /// dynamic properties are updated
 - (void)onUpdateLayerProperties:(NSDictionary *)layerProperties;
+
+/// Called when a feature is loaded from the tile
+- (void)onFeatureLoaded:(MLNPluginLayerTileFeature *)tileFeature;
 
 /// Added to a map view
 - (void)didMoveToMapView:(MLNMapView *)mapView;

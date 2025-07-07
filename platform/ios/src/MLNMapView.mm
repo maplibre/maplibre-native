@@ -30,6 +30,7 @@
 #include <mbgl/plugin/plugin_layer_factory.hpp>
 #include <mbgl/plugin/plugin_layer.hpp>
 #include <mbgl/plugin/plugin_layer_impl.hpp>
+#include <mbgl/plugin/raw_bucket.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/render_pass.hpp>
@@ -7675,6 +7676,10 @@ static void *windowScreenContext = &windowScreenContext;
     if (capabilities.requiresPass3D) {
         pass3D = mbgl::style::LayerTypeInfo::Pass3D::Required;
     }
+    
+    
+    tileKind = mbgl::style::LayerTypeInfo::TileKind::Geometry;
+    source = mbgl::style::LayerTypeInfo::Source::Required;
 
     auto factory = std::make_unique<mbgl::PluginLayerPeerFactory>(layerType,
                                                source,
@@ -7687,6 +7692,7 @@ static void *windowScreenContext = &windowScreenContext;
     __weak MLNMapView *weakMapView = self;
 
     Class layerClass = pluginLayerClass;
+    factory->_supportsRawBuckets = capabilities.supportsReadingTileFeatures;
     factory->setOnLayerCreatedEvent([layerClass, weakMapView, pluginLayerClass](mbgl::style::PluginLayer *pluginLayer) {
 
         //NSLog(@"Creating Plugin Layer: %@", layerClass);
@@ -7782,6 +7788,45 @@ static void *windowScreenContext = &windowScreenContext;
                 [weakPlugInLayer onUpdateLayerProperties:properties];
             }
         });
+        
+        // If this layer can read tile features, then setup that lambda
+        if (capabilities.supportsReadingTileFeatures) {
+            pluginLayerImpl->setFeatureLoadedFunction([weakPlugInLayer](const std::shared_ptr<mbgl::RawBucketFeature> feature) {
+                
+                @autoreleasepool {
+                    MLNPluginLayerTileFeature *tileFeature = [[MLNPluginLayerTileFeature alloc] init];
+                    
+                    NSMutableDictionary *tileProperties = [NSMutableDictionary dictionary];
+                    for (auto p: feature->_featureProperties) {
+                        NSString *key = [NSString stringWithUTF8String:p.first.c_str()];
+                        NSString *value = [NSString stringWithUTF8String:p.second.c_str()];
+                        [tileProperties setObject:value forKey:key];
+                    }
+                    
+                    tileFeature.featureProperties = [NSDictionary dictionaryWithDictionary:tileProperties];
+                    
+                    NSMutableArray *featureCoordinates = [NSMutableArray array];
+                    for (auto & coordinateCollection: feature->_featureCoordinates) {
+                        
+                        for (auto & coordinate: coordinateCollection._coordinates) {
+                            CLLocationCoordinate2D c = CLLocationCoordinate2DMake(coordinate._lat, coordinate._lon);
+                            NSValue *value = [NSValue valueWithBytes:&c objCType:@encode(CLLocationCoordinate2D)];
+                            [featureCoordinates addObject:value];
+                        }
+                        
+                    }
+                    // TODO: Need to figure out how we're going to handle multiple coordinate groups/etc
+                    if ([featureCoordinates count] > 0) {
+                        tileFeature.featureCoordinates = [NSArray arrayWithArray:featureCoordinates];
+                    }
+                    
+                    
+                    [weakPlugInLayer onFeatureLoaded:tileFeature];
+
+                }
+                
+            });
+        }
 
     });
 
