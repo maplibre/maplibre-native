@@ -90,12 +90,13 @@ jobs:
         continue-on-error: true
         working-directory: vendor/maplibre-tile-spec/cpp/bazel/check
         run: |
-          echo "SUPPORT_SSE42=0" >> "$GITHUB_ENV"
-          bazel build //:sse42
-
-      - name: Check SSE
-        if:  success()
-        run: echo "SUPPORT_SSE42=1" >> "$GITHUB_ENV"
+          bazel build :sse42
+          if [ $? -eq 0 ]; then 
+            echo SSE 4.2 Supported
+            echo "SUPPORT_SSE42=1" >> "$GITHUB_ENV"
+          else
+            echo SSE 4.2 Not Supported
+          fi
 
       - name: Status
         run: echo "SUPPORT_SSE42=$SUPPORT_SSE42"
