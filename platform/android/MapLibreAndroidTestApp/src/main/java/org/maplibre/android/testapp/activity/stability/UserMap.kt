@@ -3,6 +3,8 @@ package org.maplibre.android.testapp.activity.stability
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.lifecycleScope
@@ -265,5 +267,17 @@ class UserMap : SupportMapFragment() {
                     .addAll(randomPolyPoints(bounds)),
             )
         }
+    }
+}
+
+class UserMapActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        supportFragmentManager
+            .beginTransaction()
+            .replace(android.R.id.content, UserMap())
+            .commit()
     }
 }

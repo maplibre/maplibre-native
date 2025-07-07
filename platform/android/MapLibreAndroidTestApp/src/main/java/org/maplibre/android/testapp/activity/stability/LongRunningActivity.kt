@@ -2,6 +2,10 @@ package org.maplibre.android.testapp.activity.stability
 
 import android.annotation.SuppressLint
 import android.app.ActivityManager
+import android.app.ActivityOptions
+import android.content.Intent
+import android.hardware.display.DisplayManager
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -18,11 +22,32 @@ class LongRunningActivity : AppCompatActivity() {
 
         // activity lifetime (seconds)
         private const val DURATION = 10 * 60 * 60
+        // start one activity/view per display if available
+        private const val USE_SECONDARY_DISPLAY = true
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_long_running_maps)
+
+        if (USE_SECONDARY_DISPLAY && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val displayManager = getSystemService(DISPLAY_SERVICE) as DisplayManager
+            val displays = displayManager.displays
+
+            if (displays.size > 1) {
+                // remove navigation map from layout
+                supportFragmentManager
+                    .beginTransaction()
+                    .remove(supportFragmentManager.findFragmentById(R.id.navigation_map)!!)
+                    .commit()
+
+                // and move it to it's own activity
+                val activityOptions = ActivityOptions.makeBasic()
+                activityOptions.launchDisplayId = displays[1].displayId
+
+                startActivity(Intent(this, NavigationMapActivity::class.java), activityOptions.toBundle())
+            }
+        }
 
         LOG.info("Activity running for $DURATION seconds")
 

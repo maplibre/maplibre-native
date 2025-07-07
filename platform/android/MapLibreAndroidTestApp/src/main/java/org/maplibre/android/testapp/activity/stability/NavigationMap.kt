@@ -2,6 +2,9 @@ package org.maplibre.android.testapp.activity.stability
 
 import android.annotation.SuppressLint
 import android.location.Location
+import android.os.Bundle
+import android.os.PersistableBundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
 import kotlinx.coroutines.delay
@@ -351,5 +354,17 @@ class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEve
         if (milestone.bannerInstructions.primary().type() == "arrive") {
             startNewRoute()
         }
+    }
+}
+
+class NavigationMapActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        supportFragmentManager
+            .beginTransaction()
+            .replace(android.R.id.content, NavigationMap())
+            .commit()
     }
 }

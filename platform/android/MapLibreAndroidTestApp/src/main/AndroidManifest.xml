@@ -228,6 +228,17 @@
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
+            android:name=".activity.stability.UserMapActivity"
+            android:exported="false"
+            android:launchMode="singleInstance">
+        </activity>
+        <activity
+            android:name=".activity.stability.NavigationMapActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:launchMode="singleInstance">
+        </activity>
+        <activity
             android:name=".activity.fragment.MultiMapActivity"
             android:description="@string/description_multimap"
             android:exported="true"
