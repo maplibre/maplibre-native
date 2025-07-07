@@ -223,7 +223,8 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
                 PropertyFactory.textSize(12f),
                 PropertyFactory.textColor(Color.WHITE),
                 PropertyFactory.textIgnorePlacement(true),
-                PropertyFactory.textAllowOverlap(true)
+                PropertyFactory.textAllowOverlap(true),
+                PropertyFactory.textFont(arrayOf("Noto Sans Regular"))
             )
     }
 
