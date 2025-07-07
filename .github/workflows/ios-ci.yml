@@ -53,36 +53,8 @@ jobs:
           echo "One or more iOS file(s) has changed."
           echo "List of changes: ${{ steps.changed-files-yaml.outputs.ios_all_changed_files }}"
 
-  test_sse:
-      runs-on: ubuntu-latest
-      needs: [pre_job]
-      steps:
-      - name: temp0
-        working-directory: .
-        run: |
-          pwd
-          ls -l
-      - name: temp1
-        working-directory: .
-        run: ls -l vendor
-      - name: temp2
-        working-directory: .
-        run: ls -l vendor/maplibre-tile-spec
-      - name: temp3
-        working-directory: vendor/maplibre-tile-spec
-        run: git status
-      - name: Test SSE
-        continue-on-error: true
-        working-directory: vendor/maplibre-tile-spec/cpp/bazel/check
-        run: |
-          echo "SUPPORT_SSE42=0" >> "$GITHUB_ENV"
-          bazel build //:sse42
-      - name: Check SSE
-        if:  success()
-        run: echo "SUPPORT_SSE42=1" >> "$GITHUB_ENV"
-
   ios-build:
-    needs: [pre_job, test_sse]
+    needs: [pre_job]
     if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: [self-hosted, macOS, ARM64]
     concurrency:
@@ -113,6 +85,17 @@ jobs:
 
       - name: Xcode Build Tools version
         run: xcodebuild -version
+
+      - name: Test SSE
+        continue-on-error: true
+        working-directory: vendor/maplibre-tile-spec/cpp/bazel/check
+        run: |
+          echo "SUPPORT_SSE42=0" >> "$GITHUB_ENV"
+          bazel build //:sse42
+
+      - name: Check SSE
+        if:  success()
+        run: echo "SUPPORT_SSE42=1" >> "$GITHUB_ENV"
 
       - name: Status
         run: echo "SUPPORT_SSE42=$SUPPORT_SSE42"

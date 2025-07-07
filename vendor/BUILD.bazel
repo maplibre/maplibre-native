@@ -162,7 +162,10 @@ cc_library(
     ]),
     hdrs = glob(["maplibre-tile-spec/vendor/fastpfor/headers/*.h"]),
     includes = ["maplibre-tile-spec/vendor/fastpfor/headers"],
-    cxxopts = CPP_FLAGS,
+    cxxopts = CPP_FLAGS + select({
+        "@platforms//cpu:arm": ["-DSUPPORT_NEON"],
+        "//conditions:default": [],
+    }),
     copts = ["-DSIMDE_ENABLE_NATIVE_ALIASES"],
     visibility = ["//visibility:public"],
 )

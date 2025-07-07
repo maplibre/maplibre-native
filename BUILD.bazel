@@ -25,12 +25,6 @@ load(
 )
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
-genrule(
-    name = "compile_info",
-    outs = ["clang-info.txt"],
-    cmd = "clang -x c /dev/null -dM -E |tee $@",
-)
-
 # Generate code required by the core
 
 js_run_binary(
