@@ -93,7 +93,6 @@ protected:
     void destroyResources();
 
 protected:
-    vk::DynamicLoader dynamicLoader;
     vk::UniqueInstance instance;
     vk::UniqueDebugUtilsMessengerEXT debugUtilsCallback;
     vk::UniqueDebugReportCallbackEXT debugReportCallback;

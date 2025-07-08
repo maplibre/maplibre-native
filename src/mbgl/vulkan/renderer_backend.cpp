@@ -372,8 +372,14 @@ void RendererBackend::init() {
 }
 
 void RendererBackend::initInstance() {
+    // VULKAN_HPP_DEFAULT_DISPATCHER is global and can lead to race conditions in multi-map environments
+    static std::mutex vkDefaultDispatchLoaderMutex;
+    std::lock_guard<std::mutex> lock(vkDefaultDispatchLoaderMutex);
+
     // initialize minimal set of function pointers
-    VULKAN_HPP_DEFAULT_DISPATCHER.init(dynamicLoader);
+    if (!VULKAN_HPP_DEFAULT_DISPATCHER.vkGetInstanceProcAddr) {
+        VULKAN_HPP_DEFAULT_DISPATCHER.init();
+    }
 
     // Vulkan 1.1 on Android is supported on 71% of devices (compared to 1.3 with 6%) as of April 23 2024
     // https://vulkan.gpuinfo.org/
@@ -430,7 +436,9 @@ void RendererBackend::initInstance() {
     instance = vk::createInstanceUnique(createInfo);
 
     // initialize function pointers for instance
-    VULKAN_HPP_DEFAULT_DISPATCHER.init(instance.get());
+    if (!VULKAN_HPP_DEFAULT_DISPATCHER.vkDestroyInstance) {
+        VULKAN_HPP_DEFAULT_DISPATCHER.init(instance.get());
+    }
 
 #ifdef ENABLE_VULKAN_VALIDATION
     // enable validation layer callback
@@ -589,9 +597,6 @@ void RendererBackend::initDevice() {
     createInfo.setPEnabledLayerNames(layers);
 
     device = physicalDevice.createDeviceUnique(createInfo);
-
-    // optional function pointer specialization for device
-    VULKAN_HPP_DEFAULT_DISPATCHER.init(device.get());
 
     graphicsQueue = device->getQueue(graphicsQueueIndex, 0);
     if (presentQueueIndex != -1) presentQueue = device->getQueue(presentQueueIndex, 0);
