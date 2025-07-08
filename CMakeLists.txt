@@ -306,6 +306,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/light.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/position.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/property_value.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/raster_dem_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/rotation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/tileset.hpp
@@ -373,6 +374,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/geojson_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/image_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/raster_dem_source.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/tile_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/raster_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/vector_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sprite.hpp
@@ -685,6 +687,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/light.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/position.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/property_value.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/raster_dem_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/rotation.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/source.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/stringify.hpp
@@ -810,12 +813,11 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/image_source_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/image_source_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_dem_source.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/tile_source.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_source.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_source_impl.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_source_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/tile_source_impl.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/tile_source_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/vector_source.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/vector_source_impl.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/vector_source_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/style.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/style_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/style_impl.hpp
