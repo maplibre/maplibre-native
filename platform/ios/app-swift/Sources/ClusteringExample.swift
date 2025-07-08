@@ -14,10 +14,11 @@ class ClusteringExampleUIKit: UIViewController, MLNMapViewDelegate {
         view.addSubview(mapView)
     }
 
-    func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
+    func mapView(_: MLNMapView, didFinishLoading style: MLNStyle) {
         guard let earthquakesJson = Bundle.main.url(forResource: "earthquakes", withExtension: "geojson"),
-            let data = try? Data(contentsOf: earthquakesJson),
-            let shape = try? MLNShape(data: data, encoding: String.Encoding.utf8.rawValue) else {
+              let data = try? Data(contentsOf: earthquakesJson),
+              let shape = try? MLNShape(data: data, encoding: String.Encoding.utf8.rawValue)
+        else {
             preconditionFailure("Failed to load local GeoJSON file earthquakes.json")
         }
 
@@ -28,7 +29,7 @@ class ClusteringExampleUIKit: UIViewController, MLNMapViewDelegate {
                 .clustered: true,
                 .clusterRadius: 50,
                 .clusterMinPoints: 10,
-                .maximumZoomLevelForClustering: 14
+                .maximumZoomLevelForClustering: 14,
             ]
         )
 
