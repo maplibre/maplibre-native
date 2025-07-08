@@ -139,6 +139,7 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
                 .withCluster(true)
                 .withClusterMaxZoom(14)
                 .withClusterRadius(50)
+                .withClusterMinPoints(3)
                 .withClusterProperty(
                     "max",
                     Expression.max(Expression.accumulated(), Expression.get("max")),
