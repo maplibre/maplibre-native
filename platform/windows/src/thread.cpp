@@ -1,5 +1,3 @@
-#pragma once
-
 #include <mbgl/util/platform.hpp>
 #include <mbgl/platform/thread.hpp>
 #include <mbgl/util/logging.hpp>
@@ -11,6 +9,7 @@
 DWORD selfThreadKey;
 DummyClassThread dummyClassThread;
 
+#ifdef _MSC_VER
 // https://learn.microsoft.com/en-us/visualstudio/debugger/how-to-set-a-thread-name-in-native-code?view=vs-2022
 void SetThreadName(DWORD dwThreadID, const char* threadName) {
     THREADNAME_INFO info;
@@ -27,6 +26,7 @@ void SetThreadName(DWORD dwThreadID, const char* threadName) {
     }
 #pragma warning(pop)
 }
+#endif
 
 THREAD_INFO* GetCurrentThreadInfo() {
     THREAD_INFO* info = (THREAD_INFO*)TlsGetValue(selfThreadKey);
@@ -57,6 +57,7 @@ std::string getCurrentThreadName() {
 }
 
 void setCurrentThreadName(const std::string& name) {
+#ifdef _MSC_VER
     THREAD_INFO* info = GetCurrentThreadInfo();
 
     if (info && info->name) {
@@ -66,6 +67,7 @@ void setCurrentThreadName(const std::string& name) {
     }
 
     SetThreadName(-1, name.c_str());
+#endif
 }
 
 void makeThreadLowPriority() {
