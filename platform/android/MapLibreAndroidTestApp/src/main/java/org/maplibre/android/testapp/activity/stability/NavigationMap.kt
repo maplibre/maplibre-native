@@ -25,6 +25,7 @@ import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.SupportMapFragment
+import org.maplibre.android.testapp.activity.stability.LongRunningActivity.Companion.printStats
 import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.GeoParseUtil
 import org.maplibre.android.testapp.utils.setStyleSuspend
@@ -135,6 +136,8 @@ class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEve
     private fun startNewRoute() {
         lifecycleScope.launch {
             delay(randomWaitTime())
+
+            printStats(requireContext())
 
             navigation.stopNavigation()
             navigationMapRoute.removeRoute()

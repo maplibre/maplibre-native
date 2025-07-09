@@ -3,6 +3,7 @@ package org.maplibre.android.testapp.activity.stability
 import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.app.ActivityOptions
+import android.content.Context
 import android.content.Intent
 import android.hardware.display.DisplayManager
 import android.os.Build
@@ -24,6 +25,26 @@ class LongRunningActivity : AppCompatActivity() {
         private const val DURATION = 10 * 60 * 60
         // start one activity/view per display if available
         private const val USE_SECONDARY_DISPLAY = true
+
+        @SuppressLint("NewApi")
+        fun printStats(context: Context) {
+            val activityManager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager
+            val sysMemInfo = ActivityManager.MemoryInfo()
+            activityManager.getMemoryInfo(sysMemInfo)
+
+            LOG.info("System: \n" +
+                    "\tavailable memory - ${sysMemInfo.availMem / 1048576} MB\n" +
+                    "\ttotal memory - ${sysMemInfo.totalMem / 1048576} MB\n" +
+                    "\tlow memory threshold - ${sysMemInfo.threshold / 1048576} MB\n" +
+                    "\tlow memory - ${sysMemInfo.lowMemory}\n"
+            )
+
+            val appMemInfo = activityManager.getProcessMemoryInfo(intArrayOf(android.os.Process.myPid())).first()
+
+            LOG.info("Application memory: \n" +
+                    appMemInfo.memoryStats.map { "\t${it.key} - ${it.value} KB" }.joinToString("\n")
+            )
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,31 +72,13 @@ class LongRunningActivity : AppCompatActivity() {
 
         LOG.info("Activity running for $DURATION seconds")
 
+        val context = this
+
         lifecycleScope.launch {
             delay(DURATION * 1000L)
 
-            printStats()
+            printStats(context)
             finish()
         }
-    }
-
-    @SuppressLint("NewApi")
-    private fun printStats() {
-        val activityManager = this.getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        val sysMemInfo = ActivityManager.MemoryInfo()
-        activityManager.getMemoryInfo(sysMemInfo)
-
-        LOG.info("System: \n" +
-            "\tavailable memory - ${sysMemInfo.availMem / 1048576} MB\n" +
-            "\ttotal memory - ${sysMemInfo.totalMem / 1048576} MB\n" +
-            "\tlow memory threshold - ${sysMemInfo.threshold / 1048576} MB\n" +
-            "\tlow memory - ${sysMemInfo.lowMemory}\n"
-        )
-
-        val appMemInfo = activityManager.getProcessMemoryInfo(intArrayOf(android.os.Process.myPid())).first()
-
-        LOG.info("Application memory: \n" +
-            appMemInfo.memoryStats.map { "\t${it.key} - ${it.value} KB" }.joinToString("\n")
-        )
     }
 }
