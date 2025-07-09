@@ -4,6 +4,10 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+## 6.16.1
+
+- Revert "Fix the symbol blink issue by only placing the symbol in current level", as this was causing regressions ([#3610](https://github.com/maplibre/maplibre-native/pull/3610)).
+
 ## 6.16.0
 
 - Add run-time plug-in layer support to iOS ([#3430](https://github.com/maplibre/maplibre-native/pull/3430)).
