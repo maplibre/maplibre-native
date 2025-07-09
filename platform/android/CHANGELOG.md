@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## 11.12.0
+
+### ✨ Features and improvements
+
+- feat: add clusterMinPoints option Android and iOS ([#3601](https://github.com/maplibre/maplibre-native/pull/3601)).
+
 ## 11.11.0
 
 ### ✨ Features and improvements
