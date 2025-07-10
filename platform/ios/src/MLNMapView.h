@@ -19,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class MLNPolygon;
 @class MLNScaleBar;
 @class MLNShape;
+@class MLNPluginLayer;
 
 @protocol MLNMapViewDelegate;
 @protocol MLNAnnotation;
@@ -775,6 +776,15 @@ MLN_EXPORT
  programmatically.
  */
 @property (nonatomic, getter=isZoomEnabled) BOOL zoomEnabled;
+
+/**
+ A boolean value that reverses the direction of the quick zoom gesture.
+
+ When this property is set, the zoom-in and zoom-out behavior during the quick
+ zoom gesture (also called one-finger zoom) is reversed, aligning with the
+ behavior in Apple Maps. The default value is `NO`.
+ */
+@property (nonatomic, getter=isQuickZoomReversed) BOOL quickZoomReversed;
 
 /**
  A Boolean value that determines whether the user may scroll around the map,
@@ -2260,6 +2270,11 @@ vertically on the map.
  Triggers a repaint of the map.
 */
 - (void)triggerRepaint;
+
+/**
+ Adds a plug-in layer that is external to this library
+ */
+- (void)addPluginLayerType:(Class)pluginLayerClass;
 
 @end
 

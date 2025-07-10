@@ -382,7 +382,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         }
     }
     if (clipMaskPipelineState) {
-        encoder->setRenderPipelineState(clipMaskPipelineState.get());
+        mtlRenderPass.setRenderPipelineState(clipMaskPipelineState);
     } else {
         assert(!"Failed to create render pipeline state for clip masking");
         return false;
@@ -408,7 +408,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         uboBuffer->update(tileUBOs.data(), bufferSize, /*offset=*/0);
     }
 
-    encoder->setCullMode(MTL::CullModeNone);
+    mtlRenderPass.setCullMode(MTL::CullModeNone);
 
     mtlRenderPass.bindVertex(vertexRes, /*offset=*/0, ShaderClass::attributes[0].index);
 
