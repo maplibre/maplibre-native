@@ -1,5 +1,17 @@
 # Changelog MapLibre Native for Android
 
+## 11.12.1
+
+### 🐞 Bug fixes
+
+- Revert "Fix the symbol blink issue by only placing the symbol in current level", as this was causing regressions ([#3610](https://github.com/maplibre/maplibre-native/pull/3610)).
+
+## 11.12.0
+
+### ✨ Features and improvements
+
+- feat: add clusterMinPoints option Android and iOS ([#3601](https://github.com/maplibre/maplibre-native/pull/3601)).
+
 ## 11.11.0
 
 ### ✨ Features and improvements
