@@ -20,32 +20,31 @@
   },
   "sprite": "local://sprites/sprite",
   "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
-  "font-faces": [
-    {
-        "text-font": ["Noto Sans Regular"],
-        "font-files": [
-            {
-                "url": "local://glyphs/Noto%20Sans%20Regular/khmer.ttf",
-                "unicode-range": [
-                    "U+1780-17FF"
-                ]
-            },
-            {
-                "url":"local://glyphs/Noto%20Sans%20Regular/myanmar.ttf",
-                "unicode-range": [
-                    "U+1000-109F", "U+A9E0-0xA9FF", "U+AA60-0xAA7F"
-                ]
-            },
-            {
-                "url":"local://glyphs/Noto%20Sans%20Regular/devanagari.ttf",
-                "unicode-range": [
-                    "U+0900-097F", "U+A8E0-0xA8FF"
-                ]
-            }
-
+  "font-faces": {
+    "Noto Sans Regular": [
+      {
+        "url": "local://glyphs/Noto%20Sans%20Regular/khmer.ttf",
+        "unicode-range": [
+          "U+1780-17FF"
         ]
-    }
-  ],
+      },
+      {
+        "url": "local://glyphs/Noto%20Sans%20Regular/myanmar.ttf",
+        "unicode-range": [
+          "U+1000-109F",
+          "U+A9E0-0xA9FF",
+          "U+AA60-0xAA7F"
+        ]
+      },
+      {
+        "url": "local://glyphs/Noto%20Sans%20Regular/devanagari.ttf",
+        "unicode-range": [
+          "U+0900-097F",
+          "U+A8E0-0xA8FF"
+        ]
+      }
+    ]
+  },
   "layers": [
     {
       "id": "background",
