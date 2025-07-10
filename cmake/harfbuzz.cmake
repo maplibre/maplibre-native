@@ -1,10 +1,10 @@
 set(SHAPE_TARGETS, "")
-if (MLN_TEXT_SHAPING_HARFBUZZ) 
+if (MLN_TEXT_SHAPING_HARFBUZZ)
     target_compile_definitions(
         mbgl-core
         PRIVATE MLN_TEXT_SHAPING_HARFBUZZ=1
     )
-    list(APPEND 
+    list(APPEND
         SRC_FILES
         ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz.hpp
@@ -17,7 +17,7 @@ if (MLN_TEXT_SHAPING_HARFBUZZ)
     set(SHAPE_TARGETS
         freetype
         harfbuzz
-    ) 
+    )
 
     set(FT_DISABLE_BROTLI ON CACHE BOOL "freetype option")
     set(FT_REQUIRE_BROTLI OFF CACHE BOOL "freetype option")
