@@ -211,7 +211,7 @@ MLN_EXPORT
  configuration URL, this is nil until the configuration JSON file
  is loaded.
  */
-@property (nonatomic, copy, readonly) NSString *attributionHTMLString;
+@property (nonatomic, copy, nullable, readonly) NSString *attributionHTMLString;
 
 @end
 
