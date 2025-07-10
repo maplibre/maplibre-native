@@ -95,10 +95,12 @@ GlyphIDType getCharGlyphIDType(char16_t ch,
         return lastCharType;
     }
 
-    for (auto& face : *faces) {
-        if (face.fontStack == stack) {
-            for (auto& range : face.ranges) {
-                if (ch >= range.first && ch <= range.second) return face.type;
+    for (const auto& name : stack) {
+        for (auto& face : *faces) {
+            if (face.name == name) {
+                for (auto& range : face.ranges) {
+                    if (ch >= range.first && ch <= range.second) return face.type;
+                }
             }
         }
     }
