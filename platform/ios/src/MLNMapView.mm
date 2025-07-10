@@ -2267,7 +2267,7 @@ public:
             }
 
             if (self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone) {
-                [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+                [self didUpdateLocationWithUserTrackingAnimated:true cancelTransitions:false completionHandler:nil];
             }
         }
 
@@ -2328,7 +2328,7 @@ public:
         }
         [self cameraIsChanging];
         if (self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone) {
-            [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+            [self didUpdateLocationWithUserTrackingAnimated:true  cancelTransitions:false completionHandler:nil];
         }
     }
     else if (pinch.state == UIGestureRecognizerStateEnded || pinch.state == UIGestureRecognizerStateCancelled)
@@ -2457,7 +2457,7 @@ public:
 
         [self cameraIsChanging];
         if (self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone) {
-            [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+            [self didUpdateLocationWithUserTrackingAnimated:true  cancelTransitions:false completionHandler:nil];
         }
         // Trigger a light haptic feedback event when the user rotates to due north.
         if (@available(iOS 10.0, *))
@@ -2638,7 +2638,7 @@ public:
          }];
 
         if (self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone) {
-            [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+            [self didUpdateLocationWithUserTrackingAnimated:true cancelTransitions:false completionHandler:nil];
         }
     }
     else
@@ -2685,7 +2685,7 @@ public:
          }];
 
         if (self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone) {
-            [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+            [self didUpdateLocationWithUserTrackingAnimated:true cancelTransitions:false completionHandler:nil];
         }
     }
 }
@@ -2732,7 +2732,7 @@ public:
 
         [self cameraIsChanging];
         if (self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone) {
-            [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+            [self didUpdateLocationWithUserTrackingAnimated:true cancelTransitions:false completionHandler:nil];
         }
     }
     else if (quickZoom.state == UIGestureRecognizerStateEnded || quickZoom.state == UIGestureRecognizerStateCancelled)
@@ -2804,7 +2804,7 @@ public:
 
             [self cameraIsChanging];
             if (self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone) {
-                [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+                [self didUpdateLocationWithUserTrackingAnimated:true cancelTransitions:false completionHandler:nil];
             }
 
         }
@@ -4047,7 +4047,7 @@ static void *windowScreenContext = &windowScreenContext;
                             .withZoom(zoomLevel), MLNDurationFromTimeInterval(duration));
 
     if (self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone) {
-        [self didUpdateLocationWithUserTrackingAnimated:true completionHandler:nil cancelTransitions:false];
+        [self didUpdateLocationWithUserTrackingAnimated:true cancelTransitions:false completionHandler:nil];
     }
 }
 
@@ -6419,10 +6419,10 @@ static void *windowScreenContext = &windowScreenContext;
 - (void)didUpdateLocationWithUserTrackingAnimated:(BOOL)animated completionHandler:(nullable void (^)(void))completion
 {
     BOOL cancel = self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone;
-    [self didUpdateLocationWithUserTrackingAnimated:animated completionHandler:completion cancelTransitions:cancel];
+    [self didUpdateLocationWithUserTrackingAnimated:animated cancelTransitions:cancel completionHandler:completion];
 }
 
-- (void)didUpdateLocationWithUserTrackingAnimated:(BOOL)animated completionHandler:(nullable void (^)(void))completion cancelTransitions:(BOOL)cancel
+- (void)didUpdateLocationWithUserTrackingAnimated:(BOOL)animated cancelTransitions:(BOOL)cancel completionHandler:(nullable void (^)(void))completion
 {
     [self didUpdateLocationWithUserTrackingDuration:animated ? MLNUserLocationAnimationDuration : 0 completionHandler:completion cancelTransitions:cancel];
 }
