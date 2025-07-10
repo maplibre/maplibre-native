@@ -116,6 +116,72 @@ StyleParseResult Parser::parse(const std::string& json) {
         }
     }
 
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
+    // Ignore font-faces if no harfbuzz
+    if (document.HasMember("font-faces")) {
+        const JSValue& faces = document["font-faces"];
+        if (faces.IsObject()) {
+            fontFaces = std::make_shared<FontFaces>();
+            for (auto it = faces.MemberBegin(); it != faces.MemberEnd(); ++it) {
+                const std::string& faceName = it->name.GetString();
+                const JSValue& faceValue = it->value;
+
+                FontFace fontFace;
+                fontFace.name = faceName;
+
+                if (faceValue.IsArray()) {
+                    // If the face is an array, we assume it is a list of font file objects.
+                    for (auto& fontFile : faceValue.GetArray()) {
+                        if (fontFile.IsObject()) {
+                            // url
+                            if (fontFile.HasMember("url")) {
+                                const JSValue& url = fontFile["url"];
+                                if (url.IsString()) fontFace.url = url.GetString();
+                            }
+                            // unicode-range
+                            if (fontFile.HasMember("unicode-range")) {
+                                const JSValue& unicodeRange = fontFile["unicode-range"];
+                                if (unicodeRange.IsArray()) {
+                                    for (auto& range : unicodeRange.GetArray()) {
+                                        if (range.IsString()) {
+                                            std::string rangeString = range.GetString();
+                                            if (rangeString.length() > 2) {
+                                                rangeString = rangeString.substr(2);
+                                                std::string::size_type pos = rangeString.find('-');
+                                                if (pos != std::string::npos) {
+                                                    std::string start = rangeString.substr(0, pos);
+                                                    std::string end = rangeString.substr(pos + 1);
+                                                    if (!start.empty() && !end.empty()) {
+                                                        int startInt = std::stoi(start, nullptr, 16);
+                                                        int endInt = std::stoi(end, nullptr, 16);
+                                                        fontFace.ranges.emplace_back(startInt, endInt);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else if (faceValue.IsString()) {
+                    // If the face is a string, we assume it is the font file url.
+                    fontFace.url = faceValue.GetString();
+
+                    // Add a default range for the entire Unicode range.
+                    fontFace.ranges.emplace_back(0, 0x10FFFF);
+                }
+
+                if (fontFace.valid()) {
+                    // If valid, generate a unique glyph ID type for this font face and add it to the font faces list.
+                    fontFace.type = genNewGlyphIDType(fontFace.url, FontStack{fontFace.name}, fontFace.ranges);
+                    fontFaces->emplace_back(std::move(fontFace));
+                }
+            }
+        };
+    }
+#endif
+
     // Call for side effect of logging warnings for invalid values.
     fontStacks();
 

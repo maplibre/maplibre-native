@@ -120,6 +120,7 @@ void Map::Impl::onUpdate() {
                                timePoint,
                                transform.getState(),
                                style->impl->getGlyphURL(),
+                               style->impl->getFontFaces(),
                                style->impl->areSpritesLoaded(),
                                style->impl->getTransitionOptions(),
                                style->impl->getLight()->impl,
