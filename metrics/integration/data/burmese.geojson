@@ -1,0 +1,6414 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73270889049581,
+                    43.41627085800398
+                ]
+            },
+            "properties": {
+                "name": "လူတိုင်းတွေရဲ့အခြေအနေ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76298169713937,
+                    43.44261374841698
+                ]
+            },
+            "properties": {
+                "name": "အဲဒီလူတွေရဲ့အကြံပေးနေတယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73750788686539,
+                    43.42129081598136
+                ]
+            },
+            "properties": {
+                "name": "ဤဒီလူတိုင်းမှာမဟုတ်ရင်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68983653183295,
+                    43.36893537983959
+                ]
+            },
+            "properties": {
+                "name": "အထက်ပိုပေါင်းနှင့်တို့နိုင်တယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78480371728801,
+                    43.385713038402734
+                ]
+            },
+            "properties": {
+                "name": "တစ်ခါအနက်တန်းရဲ့ပြတာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82444442057749,
+                    43.3981364143174
+                ]
+            },
+            "properties": {
+                "name": "လိုအပ်သွားမယ်ကြောင့်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73178458119855,
+                    43.42150465372435
+                ]
+            },
+            "properties": {
+                "name": "သင့်နှင့်ဆက်သွယ်နေသည်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81785610131647,
+                    43.36772142802819
+                ]
+            },
+            "properties": {
+                "name": "အနိုင်ရှင်တို့ကိုတစ်နိုင်ငံတွေ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71407211903534,
+                    43.396000025590936
+                ]
+            },
+            "properties": {
+                "name": "အောက်ရှိအောင်စီနိုင်မယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79407351218833,
+                    43.41860722639433
+                ]
+            },
+            "properties": {
+                "name": "ကြားနေပြီအနီး"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67633907003255,
+                    43.4171921149322
+                ]
+            },
+            "properties": {
+                "name": "သုံးရေသည်နိုင်မယ့်ခန့်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77300637827193,
+                    43.39388127052078
+                ]
+            },
+            "properties": {
+                "name": "အိမ်မှာသမျှစွာဖြစ်သည်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81926263607329,
+                    43.339585481875
+                ]
+            },
+            "properties": {
+                "name": "အပြင်သွားနှင့်ဘဏ်များသား"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76701252093699,
+                    43.35773661014847
+                ]
+            },
+            "properties": {
+                "name": "ပြည်သူတိုင်းများတွေသည်တွေနှင့်ဆွေးနွေသည်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7737515090821,
+                    43.44366259492489
+                ]
+            },
+            "properties": {
+                "name": "အားမရှိပြီကြောင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73829309937992,
+                    43.34378736524005
+                ]
+            },
+            "properties": {
+                "name": "ကျွန်မတိုင်းတွေကြီး"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71836466571312,
+                    43.33057012451926
+                ]
+            },
+            "properties": {
+                "name": "အရမ်းကြီးပိုင်းတယ်တိုင်းများ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8115615374345,
+                    43.43176089412675
+                ]
+            },
+            "properties": {
+                "name": "အုပ်ရွက်ကိုကြောင့်သွယ်နေသည်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72375031275442,
+                    43.427220939712534
+                ]
+            },
+            "properties": {
+                "name": "အကြံပေးနိုင်သည်ကြောင့်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70314387005055,
+                    43.389688637563765
+                ]
+            },
+            "properties": {
+                "name": "ဘယ်သူမျှန်ကြစိတ်နှင့်ရာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76039207819576,
+                    43.36975807892726
+                ]
+            },
+            "properties": {
+                "name": "ရက်စ်တီတိုင်းနိုင်တယ်မမောင်မှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78682420394216,
+                    43.365202354108135
+                ]
+            },
+            "properties": {
+                "name": "အောက်ထိုင်ပြန်အချင်းအနက်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78460575433382,
+                    43.430490774626286
+                ]
+            },
+            "properties": {
+                "name": "ယခုမြို့ကိုလူ့အဖွဲ့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7823602114513,
+                    43.35546405309943
+                ]
+            },
+            "properties": {
+                "name": "ဤဒီအကြံပေးခဲ့သည်မှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69186049292512,
+                    43.422688902696564
+                ]
+            },
+            "properties": {
+                "name": "မြန်စိုးတိုင်းကိုသက်သေခဲ့သည်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80768244315095,
+                    43.43381601437478
+                ]
+            },
+            "properties": {
+                "name": "ထိုးနှင့်အချက်အလက်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72756567031774,
+                    43.400333914786785
+                ]
+            },
+            "properties": {
+                "name": "မြောက်နန်းနှင့်နှစ်သက်သား"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69534099799966,
+                    43.422190395818994
+                ]
+            },
+            "properties": {
+                "name": "အမြင့်မှတ်မြင်သည်မှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83581194006001,
+                    43.41564978584469
+                ]
+            },
+            "properties": {
+                "name": "နှင့်ဆွေးတူလှပင်အဆင့်ဖြင့်သား"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74950948614969,
+                    43.43062747741384
+                ]
+            },
+            "properties": {
+                "name": "ခရီးအပ်သန့်နှင့်ပြင်ဆင်မှု"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72733267952117,
+                    43.39116317525604
+                ]
+            },
+            "properties": {
+                "name": "အနိုင်ခိုင်းနှင့်ပလက်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72085520401288,
+                    43.43205067390052
+                ]
+            },
+            "properties": {
+                "name": "အင်္ဂလိပ်မှုသို့သင့်မှတို့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74851416375623,
+                    43.44382863716304
+                ]
+            },
+            "properties": {
+                "name": "နယူမှူသိမ်းနှင့်ဆက်သွယ်နေသည်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8394813306677,
+                    43.37578833067203
+                ]
+            },
+            "properties": {
+                "name": "ကယ်စိစစမြတ်အရား"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77187743426293,
+                    43.359984149537226
+                ]
+            },
+            "properties": {
+                "name": "အစီအစဉ်နှင့်ပြန်ရွှေပြန်သည်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69004478877105,
+                    43.32857475596884
+                ]
+            },
+            "properties": {
+                "name": "သုံးသောမြန်မာနှင့်ရေကာတွင့်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7543304983983,
+                    43.45029457922705
+                ]
+            },
+            "properties": {
+                "name": "ကျွန်တာသည်အမှတ်တံဆိပ်ခြင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74270392666222,
+                    43.436224623306195
+                ]
+            },
+            "properties": {
+                "name": "ရွှေမျက်များရဲ့အဆိုပါကြီး"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70207094875059,
+                    43.39809173301537
+                ]
+            },
+            "properties": {
+                "name": "ကျေးမယ်သမီးတွေရဲ့သမီး"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75571436014798,
+                    43.3468089398027
+                ]
+            },
+            "properties": {
+                "name": "ကြံ့ခိုးနှင့်တစ်သက်တံဆိပ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8233978214821,
+                    43.42514681243842
+                ]
+            },
+            "properties": {
+                "name": "ရေသီးနှင့်အမည်နှင့်လျှပ်စစ်လွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68193517172404,
+                    43.43279789478497
+                ]
+            },
+            "properties": {
+                "name": "ကြာစွန်ရဲ့ငွေတို့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80028992255848,
+                    43.33690838162077
+                ]
+            },
+            "properties": {
+                "name": "ပိုပြီအကွေ့တို့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71507317067244,
+                    43.401143748258455
+                ]
+            },
+            "properties": {
+                "name": "သင့်အကြံဖွယ်ကြပါတယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78889469900332,
+                    43.45182031313233
+                ]
+            },
+            "properties": {
+                "name": "မြန်မာကိုသားနှင့်သူးသည့်သမီး"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6791223720029,
+                    43.38861188362641
+                ]
+            },
+            "properties": {
+                "name": "လွန်လွန်ပါတယ်မြတ်ဆက်မှု"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72988047792478,
+                    43.33359777731984
+                ]
+            },
+            "properties": {
+                "name": "ကိုယ်နှစ်အနည်းအားအစီရင့်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76988704019641,
+                    43.365757148416336
+                ]
+            },
+            "properties": {
+                "name": "ကြိုက်နေရာမှာကန်တကယ်လား"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75657912670522,
+                    43.39062671107417
+                ]
+            },
+            "properties": {
+                "name": "တစ်ခုကိုလာခြင်းကြောင့်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71694934526477,
+                    43.376825304235226
+                ]
+            },
+            "properties": {
+                "name": "လွန်ချက်အထိပြုပြင်တယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67458813089615,
+                    43.36108038884236
+                ]
+            },
+            "properties": {
+                "name": "အရည်အသွေးအောင်းခြင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73092396663014,
+                    43.451194179973356
+                ]
+            },
+            "properties": {
+                "name": "ဓခဲမှာပျော့နှင့်တူနေသည်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71805769966886,
+                    43.441661018342145
+                ]
+            },
+            "properties": {
+                "name": "စွန်ကီးတွေကိုစုတွေကြည့်ရင်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81861278781616,
+                    43.426572973941695
+                ]
+            },
+            "properties": {
+                "name": "လွန်ကြစေရင်တစ်ခုကိုစွမ်းသားကြောင့်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78874389125303,
+                    43.383000090716834
+                ]
+            },
+            "properties": {
+                "name": "လူ့အကွာအကဲမြင်တယ်စစ်ဆင်ခြင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77038527017976,
+                    43.357431603981965
+                ]
+            },
+            "properties": {
+                "name": "မကိုခြင်းနှင့်ကိုရိုးရာရန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76028190008401,
+                    43.396620706760984
+                ]
+            },
+            "properties": {
+                "name": "ကြားသရက်မမှာသားကြီးကိုခြင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72120167890262,
+                    43.33581886107876
+                ]
+            },
+            "properties": {
+                "name": "ကျေးဇူးလှုပ်ရုံအထိရှာနှောကြပါတယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83215351153285,
+                    43.42486709690492
+                ]
+            },
+            "properties": {
+                "name": "လွန်လွန်ကြောင့်စွန်းကျင့်သမီး"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74438919600198,
+                    43.33050804734877
+                ]
+            },
+            "properties": {
+                "name": "အင်္ဂလိပ်မှုအမှတ်တံဆိပ်ခြင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78421479421195,
+                    43.40712629232671
+                ]
+            },
+            "properties": {
+                "name": "ကျွန်တော့လေ့လာကြတယ်ပြောလာပါမည်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7497489802472,
+                    43.33114312974759
+                ]
+            },
+            "properties": {
+                "name": "မြန်မာအမှတ်တံဆိပ်ကြားမှု"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66478914990057,
+                    43.38347958366816
+                ]
+            },
+            "properties": {
+                "name": "အမေးအေးခွင့်ခြင်းမှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79279423940079,
+                    43.444583002746775
+                ]
+            },
+            "properties": {
+                "name": "သင့်သားအစီအစဉ်တွေနှင့်ရေကာလာနေသည်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76906741636776,
+                    43.419984311312625
+                ]
+            },
+            "properties": {
+                "name": "ကွဲလွဲကြောင့်ရောက်လိုကြမည်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75612128325247,
+                    43.37612751347973
+                ]
+            },
+            "properties": {
+                "name": "အမြဲဆုံသုံးလိုကြားတယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77176654843697,
+                    43.43095760221496
+                ]
+            },
+            "properties": {
+                "name": "သတင်းမီးအတိုင်းအတာကြားပြတာရှိသည်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7705171135467,
+                    43.42031530315453
+                ]
+            },
+            "properties": {
+                "name": "အင်္ဂလိပ်စီမကျည့်နှင့်မောင်းလျာရောက်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79700244767992,
+                    43.370796588876516
+                ]
+            },
+            "properties": {
+                "name": "အဆိုတိုရဲ့လက်သမားရဲ့ပြဿာကာကို"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68495501730467,
+                    43.44587605391778
+                ]
+            },
+            "properties": {
+                "name": "စတင်ရက်ရဲ့မစ်ကုန်မှု"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66875438862098,
+                    43.428265013064504
+                ]
+            },
+            "properties": {
+                "name": "ကြီးရဲ့ထိုင်းအခေါင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78255633374283,
+                    43.344190485138526
+                ]
+            },
+            "properties": {
+                "name": "ရတနာစားအောင်းကို"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73950662616426,
+                    43.39914435521945
+                ]
+            },
+            "properties": {
+                "name": "လှူးစမ်းသမီးကြီးများ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66711705844682,
+                    43.42765258781692
+                ]
+            },
+            "properties": {
+                "name": "အနောက်စမ်းနှင့်သက်ကြီးများ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67424805301926,
+                    43.367364311972324
+                ]
+            },
+            "properties": {
+                "name": "အကြာအရာများနှင့်ကြောကျန်များ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73542075892419,
+                    43.405725847481825
+                ]
+            },
+            "properties": {
+                "name": "ပစ္စည်းတော်ခမ်းသည့်တူရွု့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83006410836333,
+                    43.35664000828751
+                ]
+            },
+            "properties": {
+                "name": "ချုပ်ပြည့်မှာလွန်ခြင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72345388556187,
+                    43.34752030391647
+                ]
+            },
+            "properties": {
+                "name": "ကျွန်ပျော့တွေအစီစစ်ကြောင့်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74116502544712,
+                    43.39729245583676
+                ]
+            },
+            "properties": {
+                "name": "ရှက်ရက်ချက်တယ်ပြစ်ခြင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73088213630854,
+                    43.349605386889884
+                ]
+            },
+            "properties": {
+                "name": "ကောင်းကိုနှစ်စဉ်စွာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67745194820873,
+                    43.41123711240646
+                ]
+            },
+            "properties": {
+                "name": "ရေရပ်အကြံပြင်သွားရာအကြံပြင်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6817792850643,
+                    43.42344437828406
+                ]
+            },
+            "properties": {
+                "name": "ကျွန်းကိုချိုးအောင်းအောင်းကြောင့်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67395214801763,
+                    43.39977158479005
+                ]
+            },
+            "properties": {
+                "name": "စွမ်းစွမ်းဆုံးရေးခြင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72161818475706,
+                    43.382293003810005
+                ]
+            },
+            "properties": {
+                "name": "ဘယ်ကြီးကိုသွားမည်မြေသွားရွေ့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72855664275721,
+                    43.41261360254286
+                ]
+            },
+            "properties": {
+                "name": "သီးပဲစီလက်ရှိရှားမည်အရွယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83086291556356,
+                    43.36050725709127
+                ]
+            },
+            "properties": {
+                "name": "ဘော်ဘော်ခြားနံပါတ်မှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75354201321716,
+                    43.4442740937665
+                ]
+            },
+            "properties": {
+                "name": "ကြီးကိုသွားလွန်ပြားရွေ့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7131699827778,
+                    43.345394151190725
+                ]
+            },
+            "properties": {
+                "name": "အာလီဘားကိုဖြေစက်လိုကြမည်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7649695364853,
+                    43.44088050766551
+                ]
+            },
+            "properties": {
+                "name": "တွေ့နံနံ့အမှတ်စာမမှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71225333661914,
+                    43.35591317841684
+                ]
+            },
+            "properties": {
+                "name": "အရှေ့မဲ့လွှတ်သုံးလိုကြမည်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79971900833698,
+                    43.392362357661604
+                ]
+            },
+            "properties": {
+                "name": "ဖမ်းစရာအမိုက်အနေ့ခြင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70626144043672,
+                    43.42036951093048
+                ]
+            },
+            "properties": {
+                "name": "သွားမည်နှင့်ရှောက်သုံးခြင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7040667445608,
+                    43.433803705173396
+                ]
+            },
+            "properties": {
+                "name": "ကြောကျော်သောချစ်မည်နှင့်ရွှေ့သွားခြင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.813440070051,
+                    43.385923123380685
+                ]
+            },
+            "properties": {
+                "name": "သက်လုံရေးအသက်ကြောင့်ခြင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7070736167725,
+                    43.37259236901997
+                ]
+            },
+            "properties": {
+                "name": "အကြောစားပါကြီးများ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76888123702702,
+                    43.39800691496971
+                ]
+            },
+            "properties": {
+                "name": "အစာအိမ်အစားတွေကြောင့်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74421053508104,
+                    43.34325732766496
+                ]
+            },
+            "properties": {
+                "name": "စစ်ချက်တရားရှိခြင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69038090599406,
+                    43.366814529767844
+                ]
+            },
+            "properties": {
+                "name": "ဂျက်ခြစ်အရွှေ့တွေကြောင့်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66650853289048,
+                    43.34867037886478
+                ]
+            },
+            "properties": {
+                "name": "လှည်းတွေအသိုက်ပြတာအရွယ်ခြင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66952516027868,
+                    43.40685068681997
+                ]
+            },
+            "properties": {
+                "name": "ဖြန့်ဖြန့်စွမ်းရမယ်စောက်ခြင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68151887308431,
+                    43.3821590323556
+                ]
+            },
+            "properties": {
+                "name": "လွှာစစ်ခြင်းအသီးကြီးအသီးကြီး"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71453679914157,
+                    43.41655508237566
+                ]
+            },
+            "properties": {
+                "name": "သိုးမဲ့ရဲ့အချစ်အချစ်နှင့်အရှြင်အတိုကြမည်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7286383345945,
+                    43.389659720807465
+                ]
+            },
+            "properties": {
+                "name": "ဘားလှယ်အကြံပြုအမွှားအမွှားကြောင့်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78968425737912,
+                    43.42832250510841
+                ]
+            },
+            "properties": {
+                "name": "လှပ်စွာရှိသေးတဲ့ဘက်ကိုပြောပြပြောသွားရင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77126855272127,
+                    43.432091911546834
+                ]
+            },
+            "properties": {
+                "name": "မိန်းသက်ကျန်စစ်ကြမ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80150644673267,
+                    43.384293717872744
+                ]
+            },
+            "properties": {
+                "name": "အိမ်ဂျ်ယတ်သာမုသ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70325368034901,
+                    43.342142138944126
+                ]
+            },
+            "properties": {
+                "name": "ကြားသွားချက်ယွန်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74350685450099,
+                    43.33815688393118
+                ]
+            },
+            "properties": {
+                "name": "နှစ်နှစ်မြေလေ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68640694219539,
+                    43.32988121926636
+                ]
+            },
+            "properties": {
+                "name": "ကျန်စက်လှည့်ထွန်းလှည့်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82314765576484,
+                    43.36757657335591
+                ]
+            },
+            "properties": {
+                "name": "မူးဒရိုကျွေးရေ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77855847885985,
+                    43.44537272495857
+                ]
+            },
+            "properties": {
+                "name": "ကြီးကျွေလှည့်သေ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69097776744456,
+                    43.38523317400271
+                ]
+            },
+            "properties": {
+                "name": "လိုင်းဆယ်ယားတုံး"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7421211758674,
+                    43.3800236955169
+                ]
+            },
+            "properties": {
+                "name": "စိုက်ဖျာလှည့်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7755043980751,
+                    43.36667122483581
+                ]
+            },
+            "properties": {
+                "name": "ကျားငြိမ်သီးကြွယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75295729292066,
+                    43.44281164137731
+                ]
+            },
+            "properties": {
+                "name": "လက်တိုက်ဖလူပြသည်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77224286592354,
+                    43.3253127146371
+                ]
+            },
+            "properties": {
+                "name": "ဘုရားလှည့်ထွန်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8242325149331,
+                    43.347561311210455
+                ]
+            },
+            "properties": {
+                "name": "အလှူကြော်လှည့်ဆမ်ပျု"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80801165451248,
+                    43.43367913152873
+                ]
+            },
+            "properties": {
+                "name": "ဂန်းမှုလေးပုံ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77302849618263,
+                    43.372749462523885
+                ]
+            },
+            "properties": {
+                "name": "ဆယ်ရွတ်ကြမ်းပူလမ်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73703546176603,
+                    43.328032643768076
+                ]
+            },
+            "properties": {
+                "name": "ကျားထွန်းစကျတော့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67624744048317,
+                    43.344889116256184
+                ]
+            },
+            "properties": {
+                "name": "ဂျွန်လှည့်ထွန်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79964252293848,
+                    43.38656670136357
+                ]
+            },
+            "properties": {
+                "name": "ညန်းလေအားရှိသည်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74049655553154,
+                    43.344659220383505
+                ]
+            },
+            "properties": {
+                "name": "အိမ်သားဖွဲ့ရှားရန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72304384605104,
+                    43.35607154684429
+                ]
+            },
+            "properties": {
+                "name": "မိန်းမှကျွန်သက်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7526981722367,
+                    43.39981729891517
+                ]
+            },
+            "properties": {
+                "name": "ပစ်စရိတ်လှည့်ထွန်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68568625772969,
+                    43.34763712888965
+                ]
+            },
+            "properties": {
+                "name": "အမြွှဲစျိုးများ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81743986333095,
+                    43.429533375195334
+                ]
+            },
+            "properties": {
+                "name": "ပြင်ကုလားကျွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80579718643094,
+                    43.35988688107485
+                ]
+            },
+            "properties": {
+                "name": "အစ်ကျင်းဒေသ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83223099273255,
+                    43.43425284429113
+                ]
+            },
+            "properties": {
+                "name": "ရွှေမွှ်ပူရမှ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80006585484625,
+                    43.35132639892201
+                ]
+            },
+            "properties": {
+                "name": "ရှေမှ်ရှေးသမှု"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70924590877894,
+                    43.383011511165705
+                ]
+            },
+            "properties": {
+                "name": "မဟာမြန့်ဖွက်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68249560431013,
+                    43.35743306628053
+                ]
+            },
+            "properties": {
+                "name": "အမြဲမှတော်ယဉ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68774304395902,
+                    43.33419609182944
+                ]
+            },
+            "properties": {
+                "name": "လှုပ်ကြီးအသံဖြစ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67733078337824,
+                    43.327826458540464
+                ]
+            },
+            "properties": {
+                "name": "အိန်ဂွပတ်လှည့်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68834955622151,
+                    43.431281245921824
+                ]
+            },
+            "properties": {
+                "name": "မကြာဖျာနည့်အပျကြွန်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8091257333308,
+                    43.43459785012007
+                ]
+            },
+            "properties": {
+                "name": "အန်ဟာကားအာရှကြယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67144809840102,
+                    43.397513621281995
+                ]
+            },
+            "properties": {
+                "name": "စာကြမ်းအစ်ပန့်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82363606504714,
+                    43.37710068801484
+                ]
+            },
+            "properties": {
+                "name": "ဒူးနေးလှည့်အရှေ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74061761816665,
+                    43.4212255093278
+                ]
+            },
+            "properties": {
+                "name": "သင်္ကြန်စုမှား"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7045488688891,
+                    43.36750358756782
+                ]
+            },
+            "properties": {
+                "name": "ကြင်နန့်ဖရှား"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82580595102172,
+                    43.42392475722188
+                ]
+            },
+            "properties": {
+                "name": "ချိုန်ပျွှန့်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77008645152546,
+                    43.34480018782685
+                ]
+            },
+            "properties": {
+                "name": "ပီးထွားတိုရှင်က"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71651166319498,
+                    43.34427801604752
+                ]
+            },
+            "properties": {
+                "name": "စပ်မွှင်ကျံမကမာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83028376706352,
+                    43.39600333853026
+                ]
+            },
+            "properties": {
+                "name": "လီယုဒ္တကျောမြ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72932534685151,
+                    43.32911672353392
+                ]
+            },
+            "properties": {
+                "name": "ယောင်မေ့ရှင်က"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68036932940231,
+                    43.36393499520703
+                ]
+            },
+            "properties": {
+                "name": "အီးမှိကျောန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77298183161474,
+                    43.44003908109747
+                ]
+            },
+            "properties": {
+                "name": "ကောင်ဖန်စွန်မင်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81552785528402,
+                    43.34735681961522
+                ]
+            },
+            "properties": {
+                "name": "ဗုဓသြင်ကျောချေ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78578499835658,
+                    43.41906317070564
+                ]
+            },
+            "properties": {
+                "name": "ဟန်လျာသယ်ကွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78354709597988,
+                    43.368113417254776
+                ]
+            },
+            "properties": {
+                "name": "အခြေဆေးရှင်ပန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82797590542668,
+                    43.35143064769927
+                ]
+            },
+            "properties": {
+                "name": "ရှာဘေးစွာစ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79055192707074,
+                    43.43537476712199
+                ]
+            },
+            "properties": {
+                "name": "အပြစ်အစ်ထွန်က"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70654512079273,
+                    43.41147087462913
+                ]
+            },
+            "properties": {
+                "name": "ရေပြစ်တိုကျွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68733618863007,
+                    43.41836228588271
+                ]
+            },
+            "properties": {
+                "name": "ဟူးလှင်ကျော်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7154416231333,
+                    43.33529886942282
+                ]
+            },
+            "properties": {
+                "name": "ဟူကျွန်ကြမ်ပ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73493527274877,
+                    43.370844496181796
+                ]
+            },
+            "properties": {
+                "name": "အော်စမှိကွဲ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73770378945937,
+                    43.39088303970504
+                ]
+            },
+            "properties": {
+                "name": "တင်ဒင်ဟူးက"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83211159305392,
+                    43.32846502905939
+                ]
+            },
+            "properties": {
+                "name": "ဘိုအုန်ဝန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68908894596007,
+                    43.44014380512324
+                ]
+            },
+            "properties": {
+                "name": "အိုက်မှန်က"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6902922126892,
+                    43.403538514368456
+                ]
+            },
+            "properties": {
+                "name": "ကျော်ဘေးသောင်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76141611184084,
+                    43.36152240176037
+                ]
+            },
+            "properties": {
+                "name": "အဏ်စ်မှိန်လျှ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67547588081197,
+                    43.34877423379756
+                ]
+            },
+            "properties": {
+                "name": "ရွေဟှိုမျက်ရု"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74561868818364,
+                    43.40177322844116
+                ]
+            },
+            "properties": {
+                "name": "ကွက်အရိပ်ကွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82147468187486,
+                    43.345501872146336
+                ]
+            },
+            "properties": {
+                "name": "မှန်ကြှကွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72331018618115,
+                    43.41869149001808
+                ]
+            },
+            "properties": {
+                "name": "ချစ်ကြန်ရှင်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81418024432423,
+                    43.39045046575978
+                ]
+            },
+            "properties": {
+                "name": "စာအိတ်အိမ်တိုပေါ့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69068592136318,
+                    43.3685438560169
+                ]
+            },
+            "properties": {
+                "name": "ဖော့ကွန်ဂေး"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83747349864097,
+                    43.32783583160479
+                ]
+            },
+            "properties": {
+                "name": "မီးတိမ်ကွဲ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66638697581311,
+                    43.38651479270904
+                ]
+            },
+            "properties": {
+                "name": "လောင်းရွှေစိမ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73073327718703,
+                    43.39856744262681
+                ]
+            },
+            "properties": {
+                "name": "နိုင်သွန်စ်ဖုန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74104845728016,
+                    43.38961856762863
+                ]
+            },
+            "properties": {
+                "name": "ရှင်အဲအင်္ကျိ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7539775992791,
+                    43.37962584070818
+                ]
+            },
+            "properties": {
+                "name": "ကွတ်ဆားလကွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67308167308965,
+                    43.440433177549636
+                ]
+            },
+            "properties": {
+                "name": "မိုက်ဖျက်အိုန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68724650885542,
+                    43.3438023389739
+                ]
+            },
+            "properties": {
+                "name": "ဒုတူသွင်ထွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6690021588247,
+                    43.3604969931925
+                ]
+            },
+            "properties": {
+                "name": "သင့်ဂရှိပ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77503168804014,
+                    43.415001819151854
+                ]
+            },
+            "properties": {
+                "name": "လော်ကွကျမ်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79229079700326,
+                    43.41771721089227
+                ]
+            },
+            "properties": {
+                "name": "ဒါန်းကျွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75545867980964,
+                    43.404726107598385
+                ]
+            },
+            "properties": {
+                "name": "ဦးချွန်းခွန်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68343503303822,
+                    43.32628692794371
+                ]
+            },
+            "properties": {
+                "name": "လေးကန်းရေကြွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7017168198081,
+                    43.408124296254805
+                ]
+            },
+            "properties": {
+                "name": "မျှီကမြေစင်ဆန်ဖန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75177113079917,
+                    43.40327950333013
+                ]
+            },
+            "properties": {
+                "name": "အဲစံဥန်ဆွန်ယော်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70633448491662,
+                    43.33353916165031
+                ]
+            },
+            "properties": {
+                "name": "ဆိုဟွန်ကြောစ်ဝေ့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80796698838185,
+                    43.38855809467828
+                ]
+            },
+            "properties": {
+                "name": "ထုဒ္ဓရွတ်လွှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71316371386729,
+                    43.40035203701606
+                ]
+            },
+            "properties": {
+                "name": "ဇက်မယ်မောက်မို"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73512074699465,
+                    43.39091219011503
+                ]
+            },
+            "properties": {
+                "name": "ဘီးဝေကြစ်စင်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8091237096005,
+                    43.33089437793854
+                ]
+            },
+            "properties": {
+                "name": "ကျွန်ကော်စပ်ဘော"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71888919977027,
+                    43.37203728663009
+                ]
+            },
+            "properties": {
+                "name": "လောက်ဖီးသူနု"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6680803788322,
+                    43.4500067687054
+                ]
+            },
+            "properties": {
+                "name": "အန်က္တော်ကျော်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66925720953805,
+                    43.372341602453425
+                ]
+            },
+            "properties": {
+                "name": "ကြာရွင်လိုကျော်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66882286164855,
+                    43.423630694619916
+                ]
+            },
+            "properties": {
+                "name": "ပေါင်ကုန်ချူ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77390029854541,
+                    43.445009580661186
+                ]
+            },
+            "properties": {
+                "name": "မင်္ဂလာကြီးမော်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71985438791216,
+                    43.398099248509034
+                ]
+            },
+            "properties": {
+                "name": "ဗျာစာဂူဘေးဆွမ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74294883903804,
+                    43.4173240632121
+                ]
+            },
+            "properties": {
+                "name": "မီးကျွှန်ထွေး"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66689798156858,
+                    43.34124127734229
+                ]
+            },
+            "properties": {
+                "name": "ရပ်ဇရှကြန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75171381658947,
+                    43.39159204675984
+                ]
+            },
+            "properties": {
+                "name": "ပြက်ရေရိပ်လွှက်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81096888891352,
+                    43.42308178495851
+                ]
+            },
+            "properties": {
+                "name": "ဂွမ်းဘိုမျက်မိုက်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73965294263871,
+                    43.40406594519991
+                ]
+            },
+            "properties": {
+                "name": "အွန်န္ဒိုးဇှီ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72554678621145,
+                    43.37774074563721
+                ]
+            },
+            "properties": {
+                "name": "ဇွေကွန်စ်ဘီ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67178856070768,
+                    43.389572230853304
+                ]
+            },
+            "properties": {
+                "name": "သီဖုမှပ်ဆန်တာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66509793278783,
+                    43.41061135866706
+                ]
+            },
+            "properties": {
+                "name": "မံဝ္အုတ္အာရှင်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73326538252331,
+                    43.44230808801419
+                ]
+            },
+            "properties": {
+                "name": "ဂေါ်ဖမ်းမိမှင်ကောက်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.763294657595,
+                    43.42569076002226
+                ]
+            },
+            "properties": {
+                "name": "ဒိုမ်စကြွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70805275051043,
+                    43.33022223454242
+                ]
+            },
+            "properties": {
+                "name": "စပ်တောင်ဘန်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80356155228401,
+                    43.35448684283324
+                ]
+            },
+            "properties": {
+                "name": "ခေါပေမှင်သွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71671550436804,
+                    43.358590543375485
+                ]
+            },
+            "properties": {
+                "name": "ဘောအစ်နွှာမု"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79930692168546,
+                    43.44009080139547
+                ]
+            },
+            "properties": {
+                "name": "မေတြသောကျွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79587187411107,
+                    43.353732548898144
+                ]
+            },
+            "properties": {
+                "name": "ကွုးတော်မြင်ကျွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79719578990535,
+                    43.37696041213408
+                ]
+            },
+            "properties": {
+                "name": "ဖိုးဝံကျွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69965497394605,
+                    43.36639187084689
+                ]
+            },
+            "properties": {
+                "name": "မိုမျောကုတ်ဆန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7921343910175,
+                    43.39881694771324
+                ]
+            },
+            "properties": {
+                "name": "နုလူဇယ်န်ထွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72017632396182,
+                    43.38361317683319
+                ]
+            },
+            "properties": {
+                "name": "ချင်းထက်ဂလ်စမ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68359785932444,
+                    43.34831766076865
+                ]
+            },
+            "properties": {
+                "name": "သေးမှူဘူမျက်မှု"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81414767105343,
+                    43.40958963502256
+                ]
+            },
+            "properties": {
+                "name": "ရန်ကုန်ဂျက်မုဒ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80253128177446,
+                    43.36605742276838
+                ]
+            },
+            "properties": {
+                "name": "လျှပေးရှင်ထွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70089574338908,
+                    43.44275792279891
+                ]
+            },
+            "properties": {
+                "name": "အက်္လကွန်မြင့်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83317739247832,
+                    43.442243183384164
+                ]
+            },
+            "properties": {
+                "name": "ဝက်ဒွန်ရွှေထွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67721696102126,
+                    43.42843016937564
+                ]
+            },
+            "properties": {
+                "name": "ဆွဲဇောရှဲလော့က်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71723432403815,
+                    43.36649527257002
+                ]
+            },
+            "properties": {
+                "name": "အိပ်ဘော့ကျွန်ကြွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69481568423726,
+                    43.40301142667125
+                ]
+            },
+            "properties": {
+                "name": "ချက်ဖြန်ရယ်ကြွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68468959578695,
+                    43.35720648266311
+                ]
+            },
+            "properties": {
+                "name": "ချေဇြချယ်နွှဲဘေ့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72149391956373,
+                    43.361699359813706
+                ]
+            },
+            "properties": {
+                "name": "သျှေအန်းရှြှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70660354920619,
+                    43.38448871648363
+                ]
+            },
+            "properties": {
+                "name": "ရန်စှဲရွှန်စွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76299651747377,
+                    43.35074913433199
+                ]
+            },
+            "properties": {
+                "name": "ကော်ခေါ်ကြေးပစ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77539316698676,
+                    43.39435306815789
+                ]
+            },
+            "properties": {
+                "name": "ဆုကျေပဲမိဖျမွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71830531729574,
+                    43.35119394975593
+                ]
+            },
+            "properties": {
+                "name": "အုတ်မြင်ပျကျွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81118685367528,
+                    43.37563814779732
+                ]
+            },
+            "properties": {
+                "name": "လှှတ်မုန်အမိပွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79642660311492,
+                    43.377657505705734
+                ]
+            },
+            "properties": {
+                "name": "သြေပေတြွန်ယောင်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7888253988358,
+                    43.337163828964385
+                ]
+            },
+            "properties": {
+                "name": "မကြီမွှခြေရေယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70485407817159,
+                    43.42571907384735
+                ]
+            },
+            "properties": {
+                "name": "ထျုမရေတကျွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66969568481909,
+                    43.35045513475347
+                ]
+            },
+            "properties": {
+                "name": "နန်လှှန်မဲကျြွမ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66930716449406,
+                    43.44367042306718
+                ]
+            },
+            "properties": {
+                "name": "လေမြှန်ဖုန်လေမဲ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69189873670894,
+                    43.43076512052666
+                ]
+            },
+            "properties": {
+                "name": "ပြုရှှမယ်လျားဝဲ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79353235204508,
+                    43.37368059280777
+                ]
+            },
+            "properties": {
+                "name": "လေယှေဖု်ဒေးချင်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70219104390617,
+                    43.33231431216638
+                ]
+            },
+            "properties": {
+                "name": "ဆောင်ဖြန်ပြင်ဖူ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76689379197433,
+                    43.36916089976166
+                ]
+            },
+            "properties": {
+                "name": "အကြုပ်ခြှန်ချုန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82121823517355,
+                    43.3890494143254
+                ]
+            },
+            "properties": {
+                "name": "ဆွမ်ခြေးရွှန်ဖါဖေွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83471876958811,
+                    43.40298009860645
+                ]
+            },
+            "properties": {
+                "name": "ဆွဲထင်ကြောကြွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79381721196569,
+                    43.43790173544968
+                ]
+            },
+            "properties": {
+                "name": "ဟန်မော်ဖျမြန်ရု"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78649372015207,
+                    43.36341720491033
+                ]
+            },
+            "properties": {
+                "name": "ဂုဏှသှှင်ဟော်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78560735030351,
+                    43.44361961433385
+                ]
+            },
+            "properties": {
+                "name": "ဂှုငှန်ကျုန်ဟိုယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75079314695358,
+                    43.33861416363164
+                ]
+            },
+            "properties": {
+                "name": "နော်လှှမာစ်ယှှမြှတှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74953762736641,
+                    43.40607632034917
+                ]
+            },
+            "properties": {
+                "name": "ကျမ်းရှြမိတှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74238703575702,
+                    43.35555088566464
+                ]
+            },
+            "properties": {
+                "name": "သွေးသွှန်မိမယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83816796506198,
+                    43.41942390467601
+                ]
+            },
+            "properties": {
+                "name": "ခြိုသွှန်ခြွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81616133746593,
+                    43.350962266236195
+                ]
+            },
+            "properties": {
+                "name": "ဘီဗှှ်ဖေင်ရှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79219311701308,
+                    43.387858965559424
+                ]
+            },
+            "properties": {
+                "name": "အြာအန်မှူခွင်အရှှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66780267369268,
+                    43.36965922024568
+                ]
+            },
+            "properties": {
+                "name": "ဂေါ့ဗှှန်ဖျဲခြှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76678459362029,
+                    43.41517258008821
+                ]
+            },
+            "properties": {
+                "name": "လေဂျာဖုန်ကြွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80142993141635,
+                    43.341730907669636
+                ]
+            },
+            "properties": {
+                "name": "အမြေဒူန်မြှန်ဒန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77921260855874,
+                    43.421873232284376
+                ]
+            },
+            "properties": {
+                "name": "ဂေုဝှှန်ခဲန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83144706066832,
+                    43.36621272347986
+                ]
+            },
+            "properties": {
+                "name": "အယ်ဗှှန်ကုန်ရွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70722008394114,
+                    43.35038684779588
+                ]
+            },
+            "properties": {
+                "name": "အိုချ်ပွှန်ဟုံး"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79020734973255,
+                    43.33479279298051
+                ]
+            },
+            "properties": {
+                "name": "ရမှေးအာန်လှန်ထွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67291568124347,
+                    43.43540548255966
+                ]
+            },
+            "properties": {
+                "name": "ဆွဲကျိုလှှာလ်စွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82768299138934,
+                    43.36836454991645
+                ]
+            },
+            "properties": {
+                "name": "လှှင်းချိုလှှာထွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75399246803045,
+                    43.418397519140655
+                ]
+            },
+            "properties": {
+                "name": "သန်လှှုဖန်လှှာမွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74220063622761,
+                    43.35676855353936
+                ]
+            },
+            "properties": {
+                "name": "ပြုပြောလှှှလှာစွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67156749173591,
+                    43.32753321179319
+                ]
+            },
+            "properties": {
+                "name": "သာန်လှှာစွမ်လှှာမွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7337656762229,
+                    43.362393286271406
+                ]
+            },
+            "properties": {
+                "name": "လှှူဖန်လှာလှှာမ်ွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72030044521398,
+                    43.382476256772236
+                ]
+            },
+            "properties": {
+                "name": "အှုဖြေလှှှလှာအွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7526464325656,
+                    43.436104808005915
+                ]
+            },
+            "properties": {
+                "name": "သွှှရွန်လှှှလှာဟှှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71485882023808,
+                    43.429619924972954
+                ]
+            },
+            "properties": {
+                "name": "စေ်ဘှာလှှာပျာမွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75909970307748,
+                    43.330400132266675
+                ]
+            },
+            "properties": {
+                "name": "သီးဘာလှှှလှာမွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81135682893091,
+                    43.42006743640997
+                ]
+            },
+            "properties": {
+                "name": "ကျူဘာလှှာစုတ်သွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67022303291196,
+                    43.35877085029656
+                ]
+            },
+            "properties": {
+                "name": "ကျေးဖြူလှှာပှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73190488058117,
+                    43.36210649884719
+                ]
+            },
+            "properties": {
+                "name": "အြုကျဲလှာလှာခြှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79749258159609,
+                    43.43829648566227
+                ]
+            },
+            "properties": {
+                "name": "ငှှမှာယောအ်စှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81412739294592,
+                    43.42486673759098
+                ]
+            },
+            "properties": {
+                "name": "ကျေးတင်စှန်ကြှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73942862821696,
+                    43.41857560346666
+                ]
+            },
+            "properties": {
+                "name": "ဖှေကျှာအှှာဖှာန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73194496367705,
+                    43.36236970705654
+                ]
+            },
+            "properties": {
+                "name": "အုန်မ်းစှှာခြှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77277965716348,
+                    43.42795996100599
+                ]
+            },
+            "properties": {
+                "name": "တေးဖြန်လှာစွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79677774850097,
+                    43.386918730187254
+                ]
+            },
+            "properties": {
+                "name": "ကြာစ်မ်မှာပွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7755677565865,
+                    43.41930911043181
+                ]
+            },
+            "properties": {
+                "name": "ဘေးစှှ်လှှာလှာအုံး"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83969235862696,
+                    43.40300089042435
+                ]
+            },
+            "properties": {
+                "name": "ဖျှန်နူအာ်အွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79056823232804,
+                    43.36644340374012
+                ]
+            },
+            "properties": {
+                "name": "လှှာပုးအာျှာမ်ွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79024794978068,
+                    43.450759361929514
+                ]
+            },
+            "properties": {
+                "name": "ရှှာဆန်အ်အှှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7960531583467,
+                    43.42912547125532
+                ]
+            },
+            "properties": {
+                "name": "လျှှ်ဟန်ဖီမှာအျှှှာန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71188677769896,
+                    43.40578991754939
+                ]
+            },
+            "properties": {
+                "name": "အိုပြိှှှာလှာမြွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80973210979664,
+                    43.405074830026
+                ]
+            },
+            "properties": {
+                "name": "ဘြှာရှှာအှှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83094842280389,
+                    43.383506992650275
+                ]
+            },
+            "properties": {
+                "name": "ယှှာမာမြာစှှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68880786616319,
+                    43.4408736919135
+                ]
+            },
+            "properties": {
+                "name": "လှှှှှာအြောအှှာန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83637982623713,
+                    43.37932687230065
+                ]
+            },
+            "properties": {
+                "name": "လှှောမှှာမှွှာအှှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7120551129583,
+                    43.38478419358865
+                ]
+            },
+            "properties": {
+                "name": "ရှှှာကာအှှှှာန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79655496709165,
+                    43.353914671185876
+                ]
+            },
+            "properties": {
+                "name": "လှှှျာအှုံးလှာမ်န်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82183396335495,
+                    43.34951148058995
+                ]
+            },
+            "properties": {
+                "name": "သာှာရှှာအှိုသှှာမ်ွှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7386077853289,
+                    43.42153859100138
+                ]
+            },
+            "properties": {
+                "name": "လှှာငှှာအွှှာပျာမွှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70073597694773,
+                    43.3950412068982
+                ]
+            },
+            "properties": {
+                "name": "အှှှွာဖျာလှှာကြှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67738562238901,
+                    43.37299568230138
+                ]
+            },
+            "properties": {
+                "name": "လှှာချှှာကွြှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76967766127837,
+                    43.43523403455177
+                ]
+            },
+            "properties": {
+                "name": "လှှာချှှာအိုန်မှှာလှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66711217868942,
+                    43.34498516856536
+                ]
+            },
+            "properties": {
+                "name": "ကြောင်ကွေးအိန်လှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71263407544393,
+                    43.44878125927471
+                ]
+            },
+            "properties": {
+                "name": "တူစိယ်လှှာကြှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81736193811139,
+                    43.3268554930083
+                ]
+            },
+            "properties": {
+                "name": "အိမ်ကျောကှှှာချာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72823672941468,
+                    43.39913772571227
+                ]
+            },
+            "properties": {
+                "name": "အာရှှှင်နှှာပန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80909585278732,
+                    43.42911070681641
+                ]
+            },
+            "properties": {
+                "name": "ပန်ဘလှှှလှာသွှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75079532407926,
+                    43.42721943663759
+                ]
+            },
+            "properties": {
+                "name": "မယှှလှှာပျာလှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71058457033814,
+                    43.367755763373076
+                ]
+            },
+            "properties": {
+                "name": "အွှှှာအှှာနှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69298119807172,
+                    43.42626514840551
+                ]
+            },
+            "properties": {
+                "name": "လှှ်အှှှာရှှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83650346598006,
+                    43.41933636859189
+                ]
+            },
+            "properties": {
+                "name": "အာကျှှာစွှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7067569578021,
+                    43.4410164115811
+                ]
+            },
+            "properties": {
+                "name": "တော်အွှှာမွှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8266463758855,
+                    43.429931233602844
+                ]
+            },
+            "properties": {
+                "name": "သောင်းဘြှာမှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78659303223958,
+                    43.338321981323276
+                ]
+            },
+            "properties": {
+                "name": "သှှှှှာလှှှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80639026067729,
+                    43.36026255177993
+                ]
+            },
+            "properties": {
+                "name": "ပလှှှာအွှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68785430058597,
+                    43.391834351083176
+                ]
+            },
+            "properties": {
+                "name": "ဂနှှာလှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77329479710443,
+                    43.331029684633386
+                ]
+            },
+            "properties": {
+                "name": "ကြှာလှှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83944140776111,
+                    43.36094548943541
+                ]
+            },
+            "properties": {
+                "name": "နှာအွှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77328811212737,
+                    43.39281904629793
+                ]
+            },
+            "properties": {
+                "name": "မှာအွှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80847732751408,
+                    43.37011711911654
+                ]
+            },
+            "properties": {
+                "name": "အိုအှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69083308544123,
+                    43.34616816533698
+                ]
+            },
+            "properties": {
+                "name": "အာစှှာမှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71997028929218,
+                    43.39262356330771
+                ]
+            },
+            "properties": {
+                "name": "အိပှှှာအွှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70795456797441,
+                    43.43662706130826
+                ]
+            },
+            "properties": {
+                "name": "လွှှာကြှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74983541518577,
+                    43.36433290673387
+                ]
+            },
+            "properties": {
+                "name": "ဖနှာလှှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72199664814889,
+                    43.399196067397874
+                ]
+            },
+            "properties": {
+                "name": "မြှှာလှှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76282152809654,
+                    43.33979211362029
+                ]
+            },
+            "properties": {
+                "name": "ကြှှာအွှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72295717357065,
+                    43.32965718674516
+                ]
+            },
+            "properties": {
+                "name": "ထရှှာမှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76962927584191,
+                    43.417191219398504
+                ]
+            },
+            "properties": {
+                "name": "အာဆွှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79867291448863,
+                    43.44693460246704
+                ]
+            },
+            "properties": {
+                "name": "အွှှာလှှှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80762496150783,
+                    43.447198828628444
+                ]
+            },
+            "properties": {
+                "name": "သှှာလှှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73700170958546,
+                    43.42215816219742
+                ]
+            },
+            "properties": {
+                "name": "ပွှာလှှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79048870955376,
+                    43.368949995240996
+                ]
+            },
+            "properties": {
+                "name": "အွှာကျှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8255365161358,
+                    43.39707569876099
+                ]
+            },
+            "properties": {
+                "name": "ရှှှာသိန်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67286163429799,
+                    43.38896639656718
+                ]
+            },
+            "properties": {
+                "name": "အိုမှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76401826500387,
+                    43.37508033645364
+                ]
+            },
+            "properties": {
+                "name": "အာစှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77611649584469,
+                    43.400255751529066
+                ]
+            },
+            "properties": {
+                "name": "အာကျှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70951490545667,
+                    43.33112009433672
+                ]
+            },
+            "properties": {
+                "name": "အိုအှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7066983545883,
+                    43.42345908175173
+                ]
+            },
+            "properties": {
+                "name": "အွှှှာအှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82127073113952,
+                    43.339820786610595
+                ]
+            },
+            "properties": {
+                "name": "တင်ဆှာအျှှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71675786236483,
+                    43.43096503945724
+                ]
+            },
+            "properties": {
+                "name": "အုက်သရေကန်ရာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78950346431157,
+                    43.40237228555073
+                ]
+            },
+            "properties": {
+                "name": "လွှာအနှှာမွှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75258281784954,
+                    43.390836247816566
+                ]
+            },
+            "properties": {
+                "name": "သင်္ကေတှာလှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76638218213247,
+                    43.32741343188597
+                ]
+            },
+            "properties": {
+                "name": "ဆန့်မြှာစတာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72154484965267,
+                    43.45222086361347
+                ]
+            },
+            "properties": {
+                "name": "လိမ်းဖွှာကိုမွှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76627772335996,
+                    43.437491216616706
+                ]
+            },
+            "properties": {
+                "name": "မီးလှာနှာဂို"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73925198284087,
+                    43.44218709248913
+                ]
+            },
+            "properties": {
+                "name": "စှုကြှာလှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77499563521542,
+                    43.418523278482645
+                ]
+            },
+            "properties": {
+                "name": "ဆွှှှာမှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8169860967655,
+                    43.384473967748534
+                ]
+            },
+            "properties": {
+                "name": "သမှှာအှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78032431371867,
+                    43.446660440194194
+                ]
+            },
+            "properties": {
+                "name": "အံဆှှာအြှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71753936465939,
+                    43.45285380044917
+                ]
+            },
+            "properties": {
+                "name": "လှှှှာနှာပုံ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69263196333395,
+                    43.419665985695886
+                ]
+            },
+            "properties": {
+                "name": "နှာနှာအွှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70765474537438,
+                    43.42017682128563
+                ]
+            },
+            "properties": {
+                "name": "ကွှှှာသှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69765841770732,
+                    43.33820610443803
+                ]
+            },
+            "properties": {
+                "name": "အာလှှာအှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82267605236211,
+                    43.42357169093535
+                ]
+            },
+            "properties": {
+                "name": "သကှှှှာအှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73336307802492,
+                    43.42297002833131
+                ]
+            },
+            "properties": {
+                "name": "လျှှှှာနှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83811908518328,
+                    43.33925460912034
+                ]
+            },
+            "properties": {
+                "name": "သှှာအှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73171881207145,
+                    43.354563903522724
+                ]
+            },
+            "properties": {
+                "name": "အာအှှာလှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6961362492757,
+                    43.35411874665983
+                ]
+            },
+            "properties": {
+                "name": "အော်တိုှာလှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68661836305637,
+                    43.36823198552959
+                ]
+            },
+            "properties": {
+                "name": "စှှာလှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83961700277996,
+                    43.3510427803368
+                ]
+            },
+            "properties": {
+                "name": "ကွှှာလှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74947187088583,
+                    43.39389891860199
+                ]
+            },
+            "properties": {
+                "name": "လှှာလှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72910695071641,
+                    43.36486528376062
+                ]
+            },
+            "properties": {
+                "name": "အှာလှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69754557797296,
+                    43.39387045930845
+                ]
+            },
+            "properties": {
+                "name": "အာလှာလှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73710033565021,
+                    43.384584096889725
+                ]
+            },
+            "properties": {
+                "name": "အာလှာလှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68689162255396,
+                    43.36871487059363
+                ]
+            },
+            "properties": {
+                "name": "အာလှာလှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7994804315831,
+                    43.33013942649552
+                ]
+            },
+            "properties": {
+                "name": "အာလှာလှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7988314518434,
+                    43.39336940273254
+                ]
+            },
+            "properties": {
+                "name": "အှာလှာလှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71307712205453,
+                    43.41174462631271
+                ]
+            },
+            "properties": {
+                "name": "အှာလှာလှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72580987651236,
+                    43.38478891558823
+                ]
+            },
+            "properties": {
+                "name": "လှာလှာအွာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7036186715095,
+                    43.41690955477799
+                ]
+            },
+            "properties": {
+                "name": "အာသာှာအွာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76149458704094,
+                    43.367965367570484
+                ]
+            },
+            "properties": {
+                "name": "အွာလှာကွှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8058814547212,
+                    43.403167911414506
+                ]
+            },
+            "properties": {
+                "name": "အာအှှာလှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71361559233537,
+                    43.376334729032095
+                ]
+            },
+            "properties": {
+                "name": "သှာအှာအှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73154162252649,
+                    43.38490610787597
+                ]
+            },
+            "properties": {
+                "name": "စှာလှာအှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79186204272446,
+                    43.376665125080876
+                ]
+            },
+            "properties": {
+                "name": "ကွာအှာအှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6661296359971,
+                    43.452468442692734
+                ]
+            },
+            "properties": {
+                "name": "အွာလှာအှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7616259928136,
+                    43.44408598398389
+                ]
+            },
+            "properties": {
+                "name": "သွားတဲ့အိမ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78766358344183,
+                    43.37143374956189
+                ]
+            },
+            "properties": {
+                "name": "တွေ့စစ်အိပ်လိမ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68890499690951,
+                    43.44979275747692
+                ]
+            },
+            "properties": {
+                "name": "လှောဆွေးသုံး"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67281208362147,
+                    43.3973497257669
+                ]
+            },
+            "properties": {
+                "name": "ခုံသွားအောင်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71588028401948,
+                    43.442055130438646
+                ]
+            },
+            "properties": {
+                "name": "ဆီမွတဲ့လှမ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71721666322901,
+                    43.32562249083662
+                ]
+            },
+            "properties": {
+                "name": "ဝံတွေ့လိမ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67841066689653,
+                    43.34185192725603
+                ]
+            },
+            "properties": {
+                "name": "ဟန်ဆုံးမယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73531620540507,
+                    43.36415708253743
+                ]
+            },
+            "properties": {
+                "name": "ကြိုကျယ်လှယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72425220806053,
+                    43.351560221312894
+                ]
+            },
+            "properties": {
+                "name": "ကျွန်ဆီရှွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68594161715737,
+                    43.409583613235085
+                ]
+            },
+            "properties": {
+                "name": "ရှှေသိုလှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73655883818446,
+                    43.33441638119229
+                ]
+            },
+            "properties": {
+                "name": "အဆွတ်မယ့်အို"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6752721298426,
+                    43.32966752267923
+                ]
+            },
+            "properties": {
+                "name": "ကြွတ်ရွက်ချပ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6904923700813,
+                    43.327341256271836
+                ]
+            },
+            "properties": {
+                "name": "အစ်ကောကှေး"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78054278610125,
+                    43.394614279098086
+                ]
+            },
+            "properties": {
+                "name": "ကွှယုံကလှော"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74335729998438,
+                    43.40451717893259
+                ]
+            },
+            "properties": {
+                "name": "ဆွေပေမယ့်အို"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7569937171229,
+                    43.44689633183004
+                ]
+            },
+            "properties": {
+                "name": "ပြင်ယုံလှဲအို"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8360965058364,
+                    43.40171500153021
+                ]
+            },
+            "properties": {
+                "name": "စလှယုံအို"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71513986618811,
+                    43.43457019529001
+                ]
+            },
+            "properties": {
+                "name": "ခေးကွှနှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7952919780746,
+                    43.44165282752506
+                ]
+            },
+            "properties": {
+                "name": "ပြင်ရှူကလှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68173948092863,
+                    43.44800154193802
+                ]
+            },
+            "properties": {
+                "name": "မယ်တော်ယှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81701665551464,
+                    43.389228319829925
+                ]
+            },
+            "properties": {
+                "name": "မြင်းအုံးကှော"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77895341666135,
+                    43.394861202037575
+                ]
+            },
+            "properties": {
+                "name": "ရြယ်ဖျောကှော"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75351540071551,
+                    43.4219368264491
+                ]
+            },
+            "properties": {
+                "name": "တြိုက်သိုလှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81052088748493,
+                    43.424322611524985
+                ]
+            },
+            "properties": {
+                "name": "ဟိုပင်လှှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69578376327627,
+                    43.37844309252077
+                ]
+            },
+            "properties": {
+                "name": "ပွဲကျတ်နှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78368098309056,
+                    43.388133327996385
+                ]
+            },
+            "properties": {
+                "name": "ချွက်စတ်အို"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70213684589817,
+                    43.400458123228596
+                ]
+            },
+            "properties": {
+                "name": "စွနှယုံရွယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75735508441994,
+                    43.33521557571769
+                ]
+            },
+            "properties": {
+                "name": "မွတ်မယ့်မို"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7165813035499,
+                    43.449836563440115
+                ]
+            },
+            "properties": {
+                "name": "ဟွှုသမ့်ယှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67118947948529,
+                    43.32648454903178
+                ]
+            },
+            "properties": {
+                "name": "အိုအိုအို"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73583864324974,
+                    43.40494189377406
+                ]
+            },
+            "properties": {
+                "name": "စိုက်ဆီသော်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7592708719767,
+                    43.37376037403405
+                ]
+            },
+            "properties": {
+                "name": "ရူသွှန်းစယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81937170824858,
+                    43.42605432516992
+                ]
+            },
+            "properties": {
+                "name": "ဂါးအယီးအိမ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82074352007112,
+                    43.36580652869758
+                ]
+            },
+            "properties": {
+                "name": "သြို့ဆုံးအို"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7436711727496,
+                    43.372504265635634
+                ]
+            },
+            "properties": {
+                "name": "ဖရှယှောနှို"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67000504535372,
+                    43.38201541721379
+                ]
+            },
+            "properties": {
+                "name": "စားကျစားနှှ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77440106794256,
+                    43.37650136295896
+                ]
+            },
+            "properties": {
+                "name": "ရှန်ဖီတ်ရှှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68061636193306,
+                    43.33728440664312
+                ]
+            },
+            "properties": {
+                "name": "ခွေးဒွေးနှင့်ကြယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66503257911336,
+                    43.38062935022041
+                ]
+            },
+            "properties": {
+                "name": "ပျဉ်းအုပ်အန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70403178494416,
+                    43.36877483548238
+                ]
+            },
+            "properties": {
+                "name": "အိနိ္ဒုန့်ရယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75963805364609,
+                    43.40329643349728
+                ]
+            },
+            "properties": {
+                "name": "ဂျာလှဲသေား"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67318084901217,
+                    43.42404258860719
+                ]
+            },
+            "properties": {
+                "name": "ကိုယ်ပူးသော"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7664044443527,
+                    43.43862549454096
+                ]
+            },
+            "properties": {
+                "name": "စိုင်ယန်မှုကြာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76699292336798,
+                    43.37550577167776
+                ]
+            },
+            "properties": {
+                "name": "လေးကြီးအို"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73291945020628,
+                    43.3674976351091
+                ]
+            },
+            "properties": {
+                "name": "အိုင်းစားလှင်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80291150700305,
+                    43.3459863032626
+                ]
+            },
+            "properties": {
+                "name": "ထွန်တုန်းဖိုင်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67799156621277,
+                    43.336989953022176
+                ]
+            },
+            "properties": {
+                "name": "ဒေါ်ဆားကျစ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75967314468016,
+                    43.44864855947221
+                ]
+            },
+            "properties": {
+                "name": "ယယွနှင်းကွတ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77895542262922,
+                    43.37606635807544
+                ]
+            },
+            "properties": {
+                "name": "အပိုပကောင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74354294751629,
+                    43.401586326632675
+                ]
+            },
+            "properties": {
+                "name": "မံမောကျရှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71739241962405,
+                    43.32949392714524
+                ]
+            },
+            "properties": {
+                "name": "လန်ထောကြတယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78738846011674,
+                    43.347806614069704
+                ]
+            },
+            "properties": {
+                "name": "လှပ်ကြပွား"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68105058004221,
+                    43.384474385118985
+                ]
+            },
+            "properties": {
+                "name": "သွားကွကြယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74292700712704,
+                    43.43924277428903
+                ]
+            },
+            "properties": {
+                "name": "မကွဲနှင်းစာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72330992960815,
+                    43.44448236676838
+                ]
+            },
+            "properties": {
+                "name": "အနှစ်ကိုကွေ့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80374649087389,
+                    43.423236258780996
+                ]
+            },
+            "properties": {
+                "name": "နှတ်စမှား"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7843960910941,
+                    43.37735348316894
+                ]
+            },
+            "properties": {
+                "name": "ပေါ်စီလယ်အတာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77111562727168,
+                    43.377397868656345
+                ]
+            },
+            "properties": {
+                "name": "ဆယ်မြေးရင်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75822663806775,
+                    43.403893701294244
+                ]
+            },
+            "properties": {
+                "name": "ရွှန်စားကွေ့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76760909818859,
+                    43.365752206325446
+                ]
+            },
+            "properties": {
+                "name": "ဟင်းကဉ်းကျန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67688920728415,
+                    43.35171094097246
+                ]
+            },
+            "properties": {
+                "name": "ထွာသဲကောင်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81636243364756,
+                    43.37912531315445
+                ]
+            },
+            "properties": {
+                "name": "ရှင်ဆယ်လိမ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76577508596074,
+                    43.34670065336113
+                ]
+            },
+            "properties": {
+                "name": "ဆယ်ပဲခွာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6734781883506,
+                    43.339763982233066
+                ]
+            },
+            "properties": {
+                "name": "ပိုနှူးလှူနှှင့်ကြ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67229678701096,
+                    43.37951866037416
+                ]
+            },
+            "properties": {
+                "name": "ဒစ်ကြီးမှုကွေ့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67370422785643,
+                    43.33477495020771
+                ]
+            },
+            "properties": {
+                "name": "ငြိမ်သစ်တယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72454219260635,
+                    43.38020083184419
+                ]
+            },
+            "properties": {
+                "name": "နှှဲကျင်းချင်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8127777939444,
+                    43.33011026808491
+                ]
+            },
+            "properties": {
+                "name": "ကြိုလိုကွဲမှု"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82476845378096,
+                    43.345917052691725
+                ]
+            },
+            "properties": {
+                "name": "သောနှင့်စွမ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79458199273176,
+                    43.37007854115475
+                ]
+            },
+            "properties": {
+                "name": "ကျောင်းအတွက်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77530815590762,
+                    43.3745956095525
+                ]
+            },
+            "properties": {
+                "name": "ကျွန်ပိုးတယ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81943466645043,
+                    43.38442804867082
+                ]
+            },
+            "properties": {
+                "name": "အံရှင်ကွေ့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7111729135977,
+                    43.41659485703934
+                ]
+            },
+            "properties": {
+                "name": "နှွာ့တွင်းအန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81519536270207,
+                    43.35551688679179
+                ]
+            },
+            "properties": {
+                "name": "လားခံတိုက်ကွေ့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80141816757077,
+                    43.373296346452975
+                ]
+            },
+            "properties": {
+                "name": "အိန်ဒေါကြီးလှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73913970139529,
+                    43.36766474919193
+                ]
+            },
+            "properties": {
+                "name": "အိနိတော်နှင့်ရောက်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68861229532558,
+                    43.447177904904464
+                ]
+            },
+            "properties": {
+                "name": "တောကြီးမှာလောင်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70887924537146,
+                    43.36989440125427
+                ]
+            },
+            "properties": {
+                "name": "မိုးရွှန်ကြော်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72727783404389,
+                    43.43862238253905
+                ]
+            },
+            "properties": {
+                "name": "လွန်ချက်မိုး"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80459063938179,
+                    43.337120260313164
+                ]
+            },
+            "properties": {
+                "name": "တပြန်ရှင်ကြ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76679035695634,
+                    43.335932458145194
+                ]
+            },
+            "properties": {
+                "name": "အိမ်လျင်ကျွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6765199485153,
+                    43.33916485424814
+                ]
+            },
+            "properties": {
+                "name": "အွန်ကျမ်းချက်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80245708208167,
+                    43.40137212585799
+                ]
+            },
+            "properties": {
+                "name": "ဖုန်းကြွေ့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77978667389289,
+                    43.32653195985271
+                ]
+            },
+            "properties": {
+                "name": "ဟန်းဒြန်မေး"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83554141642708,
+                    43.36208645578587
+                ]
+            },
+            "properties": {
+                "name": "ခြောကြာယှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78226428764992,
+                    43.45214674512842
+                ]
+            },
+            "properties": {
+                "name": "မင်္ဂါရို"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68707804799033,
+                    43.389474442588785
+                ]
+            },
+            "properties": {
+                "name": "ကွမ်တာဒု"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80216082023526,
+                    43.35618116364861
+                ]
+            },
+            "properties": {
+                "name": "များကြောင်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70300949696957,
+                    43.338949270378016
+                ]
+            },
+            "properties": {
+                "name": "မယ်စုံဖျက်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68015060855032,
+                    43.40296808063941
+                ]
+            },
+            "properties": {
+                "name": "ပြိသိုက်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68989328476619,
+                    43.39232508258088
+                ]
+            },
+            "properties": {
+                "name": "ကွဲကျွေ့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71598403078042,
+                    43.38262581866229
+                ]
+            },
+            "properties": {
+                "name": "ဆယ်သို့ယာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71912615539532,
+                    43.452016174114505
+                ]
+            },
+            "properties": {
+                "name": "တော်တယ်ပုံ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74577920821866,
+                    43.36541829164119
+                ]
+            },
+            "properties": {
+                "name": "ကျွဲလို့မြ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72712613526619,
+                    43.39671896203547
+                ]
+            },
+            "properties": {
+                "name": "ရုနှင့်ကြ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70664604422745,
+                    43.34278992771991
+                ]
+            },
+            "properties": {
+                "name": "အရှန်ရြှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68493815003421,
+                    43.39354964761166
+                ]
+            },
+            "properties": {
+                "name": "လွှ်သွှားကျွေ့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75455462754235,
+                    43.36155500394566
+                ]
+            },
+            "properties": {
+                "name": "အဲကွကွေ့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77873016450667,
+                    43.366122899933224
+                ]
+            },
+            "properties": {
+                "name": "ကြမ်းသုန်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80791232048796,
+                    43.33394744370124
+                ]
+            },
+            "properties": {
+                "name": "သန်စ်ဖုန်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6997965679875,
+                    43.40806371864969
+                ]
+            },
+            "properties": {
+                "name": "တွေနှွေ့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66838019631632,
+                    43.35606605074788
+                ]
+            },
+            "properties": {
+                "name": "ပြုနိုင်စေချော"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7069571753982,
+                    43.34266177851345
+                ]
+            },
+            "properties": {
+                "name": "တူးနှန့်ဖြု"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71273809195645,
+                    43.35495186858789
+                ]
+            },
+            "properties": {
+                "name": "ကြီးကျားနှင့်မွဲ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73519729235159,
+                    43.4163297000404
+                ]
+            },
+            "properties": {
+                "name": "အာဆောမြကျော်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71910739744908,
+                    43.45181104214278
+                ]
+            },
+            "properties": {
+                "name": "အရွန်ပီလောက်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72594206510075,
+                    43.33440744203501
+                ]
+            },
+            "properties": {
+                "name": "လွှ်ချီနှင့်သွား"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69001132062567,
+                    43.36003830098169
+                ]
+            },
+            "properties": {
+                "name": "မွှတ်ထားကျွေ့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76804370175068,
+                    43.37362703079163
+                ]
+            },
+            "properties": {
+                "name": "အိန်ဒေါမိုး"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77043742133355,
+                    43.325828830544545
+                ]
+            },
+            "properties": {
+                "name": "ကြယ်လျနှင့်လိမ်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66452596219278,
+                    43.377082454312294
+                ]
+            },
+            "properties": {
+                "name": "အဲတိတူစွာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78052164197288,
+                    43.39882235229331
+                ]
+            },
+            "properties": {
+                "name": "ငွေချင်းထုံ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74768201610368,
+                    43.34347333416988
+                ]
+            },
+            "properties": {
+                "name": "သုပ်ရင်လို့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77257029502562,
+                    43.353659062164375
+                ]
+            },
+            "properties": {
+                "name": "မိတ်ကွာရာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82229997433387,
+                    43.36602478810474
+                ]
+            },
+            "properties": {
+                "name": "ချတ်တာကြောင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77697418935259,
+                    43.39302377957722
+                ]
+            },
+            "properties": {
+                "name": "ကုလှာကျောင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82932283412902,
+                    43.344460090153106
+                ]
+            },
+            "properties": {
+                "name": "လမ်းကွားစှန်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75834764860247,
+                    43.43886099129135
+                ]
+            },
+            "properties": {
+                "name": "ကျွဲဖေမွန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71397262576284,
+                    43.43847474002368
+                ]
+            },
+            "properties": {
+                "name": "ပိုနွဲနှန်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78490097957456,
+                    43.41708495277058
+                ]
+            },
+            "properties": {
+                "name": "ခံလွှားလျှ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82596603943784,
+                    43.37280499147228
+                ]
+            },
+            "properties": {
+                "name": "အိမ်မိုးကွေ့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80376452461223,
+                    43.41299359444341
+                ]
+            },
+            "properties": {
+                "name": "မွန်စွာကျော်"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73771479115749,
+                    43.38964563062126
+                ]
+            },
+            "properties": {
+                "name": "အိမ်ကျွေ့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77914081236031,
+                    43.36200438697811
+                ]
+            },
+            "properties": {
+                "name": "ဖုန်းစောကြောင်း"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6885010122187,
+                    43.3536150480067
+                ]
+            },
+            "properties": {
+                "name": "ဖြင့်နာ့ပင်လို"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6809883295955,
+                    43.4279302964151
+                ]
+            },
+            "properties": {
+                "name": "စမ်အော်ဖင်မှ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66638088219406,
+                    43.356600228775875
+                ]
+            },
+            "properties": {
+                "name": "အဲကျွန့်မှာ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81508020435649,
+                    43.44503598067335
+                ]
+            },
+            "properties": {
+                "name": "တက်ခွန့်ကျျ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80562566482058,
+                    43.441746093418764
+                ]
+            },
+            "properties": {
+                "name": "အဲလေးကြွေ့"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69680728921867,
+                    43.37119072206014
+                ]
+            },
+            "properties": {
+                "name": "အိပ်နှွေ့"
+            }
+        }
+    ]
+}

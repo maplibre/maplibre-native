@@ -1,0 +1,6505 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73270889049581,
+                    43.41627085800398
+                ]
+            },
+            "properties": {
+                "name": "यदि न जानामि"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76298169713937,
+                    43.44261374841698
+                ]
+            },
+            "properties": {
+                "name": "अहमस्मि मनुष्यः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73750788686539,
+                    43.42129081598136
+                ]
+            },
+            "properties": {
+                "name": "एतत् मानवाः आगच्छन्ति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68983653183295,
+                    43.36893537983959
+                ]
+            },
+            "properties": {
+                "name": "पूर्वं महान् राष्ट्रं"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78480371728801,
+                    43.385713038402734
+                ]
+            },
+            "properties": {
+                "name": "भूमौ प्रतिपत्तौ समये"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82444442057749,
+                    43.3981364143174
+                ]
+            },
+            "properties": {
+                "name": "यदि संग्रहणं सक्नोमि"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73178458119855,
+                    43.42150465372435
+                ]
+            },
+            "properties": {
+                "name": "त्वं तु जीवनं शक्नोषि"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81785610131647,
+                    43.36772142802819
+                ]
+            },
+            "properties": {
+                "name": "किमर्थं तु तव उपरि"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71407211903534,
+                    43.396000025590936
+                ]
+            },
+            "properties": {
+                "name": "नीचे स्वतः वर्षे"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79407351218833,
+                    43.41860722639433
+                ]
+            },
+            "properties": {
+                "name": "परे पश्चात् कृतिः अस्ति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67633907003255,
+                    43.4171921149322
+                ]
+            },
+            "properties": {
+                "name": "उपयोगः मार्गः एव"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77300637827193,
+                    43.39388127052078
+                ]
+            },
+            "properties": {
+                "name": "कुटुम्बः क्रिया सिद्धिः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81926263607329,
+                    43.339585481875
+                ]
+            },
+            "properties": {
+                "name": "बहुधा यात्रा धर्मः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76701252093699,
+                    43.35773661014847
+                ]
+            },
+            "properties": {
+                "name": "शिक्षा यथास्थिति अब्भविष्यति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7737515090821,
+                    43.44366259492489
+                ]
+            },
+            "properties": {
+                "name": "कदापि न मुहूर्ते उत्पन्नः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73829309937992,
+                    43.34378736524005
+                ]
+            },
+            "properties": {
+                "name": "दर्शनं निश्चितं भविष्यति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71836466571312,
+                    43.33057012451926
+                ]
+            },
+            "properties": {
+                "name": "आगमनं हितं अपि"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8115615374345,
+                    43.43176089412675
+                ]
+            },
+            "properties": {
+                "name": "कुछित् मुख्यं लक्षणं मनः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72375031275442,
+                    43.427220939712534
+                ]
+            },
+            "properties": {
+                "name": "तस्या आदिः प्रारम्भः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70314387005055,
+                    43.389688637563765
+                ]
+            },
+            "properties": {
+                "name": "केवलं चिन्तनं योग्यं"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76039207819576,
+                    43.36975807892726
+                ]
+            },
+            "properties": {
+                "name": "दिनस्य योद्धा इच्छति न"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78682420394216,
+                    43.365202354108135
+                ]
+            },
+            "properties": {
+                "name": "बलं तस्य दीर्घं ग्रहणं"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78460575433382,
+                    43.430490774626286
+                ]
+            },
+            "properties": {
+                "name": "यन्त्रं दश मानवा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7823602114513,
+                    43.35546405309943
+                ]
+            },
+            "properties": {
+                "name": "इदं यदि कार्यं स्वाभाविकम्"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69186049292512,
+                    43.422688902696564
+                ]
+            },
+            "properties": {
+                "name": "ज्ञानं लोके सर्वं त्रयः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80768244315095,
+                    43.43381601437478
+                ]
+            },
+            "properties": {
+                "name": "पुनर्निरीक्षणं समयं कृत्वा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72756567031774,
+                    43.400333914786785
+                ]
+            },
+            "properties": {
+                "name": "बाह्यं साधन्ति द्वे अन्तरः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69534099799966,
+                    43.422190395818994
+                ]
+            },
+            "properties": {
+                "name": "कस्मै प्रश्नं यत्र तुल्यं"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83581194006001,
+                    43.41564978584469
+                ]
+            },
+            "properties": {
+                "name": "एकत्र वस्त्राणि आवश्यकम्"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74950948614969,
+                    43.43062747741384
+                ]
+            },
+            "properties": {
+                "name": "मुखम् शिरस्या शासनम्"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72733267952117,
+                    43.39116317525604
+                ]
+            },
+            "properties": {
+                "name": "सुन्दरं समागम्य लाभः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72085520401288,
+                    43.43205067390052
+                ]
+            },
+            "properties": {
+                "name": "किं द्वितीयं प्राप्नोति अथ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74851416375623,
+                    43.44382863716304
+                ]
+            },
+            "properties": {
+                "name": "नवं अत्मनं निर्मिति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8394813306677,
+                    43.37578833067203
+                ]
+            },
+            "properties": {
+                "name": "योगक्षेमं मन्ये कथं"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77187743426293,
+                    43.359984149537226
+                ]
+            },
+            "properties": {
+                "name": "सह स्वगति दत्ति अन्तरं"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69004478877105,
+                    43.32857475596884
+                ]
+            },
+            "properties": {
+                "name": "श्रद्धा भाषा वृद्धिः ददाति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7543304983983,
+                    43.45029457922705
+                ]
+            },
+            "properties": {
+                "name": "लोके स्थितिः द्वारम्"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74270392666222,
+                    43.436224623306195
+                ]
+            },
+            "properties": {
+                "name": "सर्वदा स्थितिः समुद्रः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70207094875059,
+                    43.39809173301537
+                ]
+            },
+            "properties": {
+                "name": "शिक्षया पुत्रं जनयति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75571436014798,
+                    43.3468089398027
+                ]
+            },
+            "properties": {
+                "name": "उद्धारयति च परं योजकः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8233978214821,
+                    43.42514681243842
+                ]
+            },
+            "properties": {
+                "name": "विवेकः जलनिरूपणी अपि"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68193517172404,
+                    43.43279789478497
+                ]
+            },
+            "properties": {
+                "name": "स्थानं चर यत्र सब"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80028992255848,
+                    43.33690838162077
+                ]
+            },
+            "properties": {
+                "name": "किञ्चित् खादन्ति स्त्रियः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71507317067244,
+                    43.401143748258455
+                ]
+            },
+            "properties": {
+                "name": "सम्बन्धः वायुस्तेऽर्थः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78889469900332,
+                    43.45182031313233
+                ]
+            },
+            "properties": {
+                "name": "अधिकं बहिः प्रहारयन्ति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6791223720029,
+                    43.38861188362641
+                ]
+            },
+            "properties": {
+                "name": "चत्वारः देवाः किम् विद्यन्ति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72988047792478,
+                    43.33359777731984
+                ]
+            },
+            "properties": {
+                "name": "गणनं आनन्दं प्राप्नोति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76988704019641,
+                    43.365757148416336
+                ]
+            },
+            "properties": {
+                "name": "योगः प्रतिप्राप्य मनो भवति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75657912670522,
+                    43.39062671107417
+                ]
+            },
+            "properties": {
+                "name": "मात्रं पुनः गणयन्ति कार्याः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71694934526477,
+                    43.376825304235226
+                ]
+            },
+            "properties": {
+                "name": "कर्म कुर्वन्ति आवश्यकानि"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67458813089615,
+                    43.36108038884236
+                ]
+            },
+            "properties": {
+                "name": "गणना प्रबन्धे समीक्षा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73092396663014,
+                    43.451194179973356
+                ]
+            },
+            "properties": {
+                "name": "धर्मं जीवनं महत्त्वम्"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71805769966886,
+                    43.441661018342145
+                ]
+            },
+            "properties": {
+                "name": "सूचिता कर्मणि आलयः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81861278781616,
+                    43.426572973941695
+                ]
+            },
+            "properties": {
+                "name": "रक्षा सम्प्राप्तिः संघः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78874389125303,
+                    43.383000090716834
+                ]
+            },
+            "properties": {
+                "name": "सामग्री शून्ये नियंत्रणम्"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77038527017976,
+                    43.357431603981965
+                ]
+            },
+            "properties": {
+                "name": "अश्वः कोटिः सिद्धिः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76028190008401,
+                    43.396620706760984
+                ]
+            },
+            "properties": {
+                "name": "नेत्रं शास्त्रं अपि श्रणोति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72120167890262,
+                    43.33581886107876
+                ]
+            },
+            "properties": {
+                "name": "श्वेतं किमपि अगमत्"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83215351153285,
+                    43.42486709690492
+                ]
+            },
+            "properties": {
+                "name": "अवबोधनं कुशलं यथा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74438919600198,
+                    43.33050804734877
+                ]
+            },
+            "properties": {
+                "name": "यदि अधिकारं चिन्तयामि"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78421479421195,
+                    43.40712629232671
+                ]
+            },
+            "properties": {
+                "name": "पूर्णम् स्थापनं सम्प्रयोगः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7497489802472,
+                    43.33114312974759
+                ]
+            },
+            "properties": {
+                "name": "स्मरणं दक्षिणे बस्तयामि"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66478914990057,
+                    43.38347958366816
+                ]
+            },
+            "properties": {
+                "name": "श्रेणी प्राप्य ज्ञानं तत्र"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79279423940079,
+                    43.444583002746775
+                ]
+            },
+            "properties": {
+                "name": "पर्यापतनं मृत्युः याति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76906741636776,
+                    43.419984311312625
+                ]
+            },
+            "properties": {
+                "name": "नियमः लभ्यते लब्धः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75612128325247,
+                    43.37612751347973
+                ]
+            },
+            "properties": {
+                "name": "आकांक्षा प्राप्य कार्याणि"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77176654843697,
+                    43.43095760221496
+                ]
+            },
+            "properties": {
+                "name": "सत्यं प्राप्तिः श्रोतव्यम्"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77393503776875,
+                    43.373380874335005
+                ]
+            },
+            "properties": {
+                "name": "अद्य क्षणे योग्यं जानाति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71310318142423,
+                    43.43803340638478
+                ]
+            },
+            "properties": {
+                "name": "प्रतीक्षायां सहाययोगं प्राप्नुयात्"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81563594692398,
+                    43.346211434247635
+                ]
+            },
+            "properties": {
+                "name": "हस्तेन गच्छति पदम् विकल्पः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69670553324158,
+                    43.4029553787535
+                ]
+            },
+            "properties": {
+                "name": "संग्रहणं अधिकं तर्कं ददाति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68140692646466,
+                    43.45196741095145
+                ]
+            },
+            "properties": {
+                "name": "योगः धारणं सर्वे जनयन्ति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71393977312255,
+                    43.352840358239604
+                ]
+            },
+            "properties": {
+                "name": "यानं परियाप्तं युद्धे करोति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77520183044271,
+                    43.370446718107615
+                ]
+            },
+            "properties": {
+                "name": "ख्याति व्यवस्था उद्यानं निर्मायति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7705171135467,
+                    43.42031530315453
+                ]
+            },
+            "properties": {
+                "name": "इंग्लैंड के सबसे पास छात्र कर रहे हैं"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79700244767992,
+                    43.370796588876516
+                ]
+            },
+            "properties": {
+                "name": "पुनः योग्यता आवश्यक है"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68495501730467,
+                    43.44587605391778
+                ]
+            },
+            "properties": {
+                "name": "शुरू कैसे करें और क्या न करें"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66875438862098,
+                    43.428265013064504
+                ]
+            },
+            "properties": {
+                "name": "दूर से बुलाने का प्रभाव"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78255633374283,
+                    43.344190485138526
+                ]
+            },
+            "properties": {
+                "name": "लाभकारी अक्षर प्यार से मारें"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73950662616426,
+                    43.39914435521945
+                ]
+            },
+            "properties": {
+                "name": "प्रवृत्ति की योग्यता बढ़ाते सैन्य"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66711705844682,
+                    43.42765258781692
+                ]
+            },
+            "properties": {
+                "name": "गहरे व्यापारी मानक समूह"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67424805301926,
+                    43.367364311972324
+                ]
+            },
+            "properties": {
+                "name": "संग्रहण केवल मूल्य फूलों"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73542075892419,
+                    43.405725847481825
+                ]
+            },
+            "properties": {
+                "name": "पार्टी नगर स्टोन पाथ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83006410836333,
+                    43.35664000828751
+                ]
+            },
+            "properties": {
+                "name": "सुझाव दूरी तत्व एशिया"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72345388556187,
+                    43.34752030391647
+                ]
+            },
+            "properties": {
+                "name": "कृपया तकनीक से मिलें"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74116502544712,
+                    43.39729245583676
+                ]
+            },
+            "properties": {
+                "name": "रोग आराम से अध्ययन समाप्त होता है"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73088213630854,
+                    43.349605386889884
+                ]
+            },
+            "properties": {
+                "name": "लगता है कार्यशीलता कम हो रही है"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67745194820873,
+                    43.41123711240646
+                ]
+            },
+            "properties": {
+                "name": "पूर्ण समर्थन वाणिज्य आणिव"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6817792850643,
+                    43.42344437828406
+                ]
+            },
+            "properties": {
+                "name": "उपकरण आदर्श अवश्यक है"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67395214801763,
+                    43.39977158479005
+                ]
+            },
+            "properties": {
+                "name": "वृद्धि अनुसंधान स्वागत है"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72161818475706,
+                    43.382293003810005
+                ]
+            },
+            "properties": {
+                "name": "आठ गुण सुरक्षा स्थिति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72855664275721,
+                    43.41261360254286
+                ]
+            },
+            "properties": {
+                "name": "इतिहास का पहला शिक्षक हल्का"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83086291556356,
+                    43.36050725709127
+                ]
+            },
+            "properties": {
+                "name": "सुलभ बजट सम्पूर्ण व्यवस्था"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75354201321716,
+                    43.4442740937665
+                ]
+            },
+            "properties": {
+                "name": "खोज उपकरण व्यापारिक बनाना है"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7131699827778,
+                    43.345394151190725
+                ]
+            },
+            "properties": {
+                "name": "आलीसा पूरी बात करती है"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7649695364853,
+                    43.44088050766551
+                ]
+            },
+            "properties": {
+                "name": "चित्र याददास्त इतिहास"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71225333661914,
+                    43.35591317841684
+                ]
+            },
+            "properties": {
+                "name": "मुख्य चिकित्सा अवस्था सुधारक"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79971900833698,
+                    43.392362357661604
+                ]
+            },
+            "properties": {
+                "name": "शुल्क संख्या अन्यथा सप्ताह"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70626144043672,
+                    43.42036951093048
+                ]
+            },
+            "properties": {
+                "name": "तुलना भाषा केवल अध्ययन के लिए"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7040667445608,
+                    43.433803705173396
+                ]
+            },
+            "properties": {
+                "name": "गिरावट लाइव चयन करें"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.813440070051,
+                    43.385923123380685
+                ]
+            },
+            "properties": {
+                "name": "सैन्य के बिना देश छोड़ दें"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7070736167725,
+                    43.37259236901997
+                ]
+            },
+            "properties": {
+                "name": "प्रभाव उपस्थिति पुरातात्विक"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76888123702702,
+                    43.39800691496971
+                ]
+            },
+            "properties": {
+                "name": "संरचना आधे विश्व खेत"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74421053508104,
+                    43.34325732766496
+                ]
+            },
+            "properties": {
+                "name": "निवेश किसी मामले में वर्णन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69038090599406,
+                    43.366814529767844
+                ]
+            },
+            "properties": {
+                "name": "परिवर्तन नेता शक्ति विचारणा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66650853289048,
+                    43.34867037886478
+                ]
+            },
+            "properties": {
+                "name": "विधायिका आत्मा संरक्षित है"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66952516027868,
+                    43.40685068681997
+                ]
+            },
+            "properties": {
+                "name": "विकास बच्चे का परीक्षण जिम्मेदार है"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68151887308431,
+                    43.3821590323556
+                ]
+            },
+            "properties": {
+                "name": "संचालन सितारे की आवश्यकता है"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71453679914157,
+                    43.41655508237566
+                ]
+            },
+            "properties": {
+                "name": "प्रयास निर्देश स्थिर हो गया"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7286383345945,
+                    43.389659720807465
+                ]
+            },
+            "properties": {
+                "name": "बार्सलोना उदाहरण समर्थन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78968425737912,
+                    43.42832250510841
+                ]
+            },
+            "properties": {
+                "name": "प्रभाव जारी रखना व्याख्या करना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77126855272127,
+                    43.432091911546834
+                ]
+            },
+            "properties": {
+                "name": "प्रकृति अंत उत्तर तंत्री"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80150644673267,
+                    43.384293717872744
+                ]
+            },
+            "properties": {
+                "name": "पीला अद्भुत विचारिक माता"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70325368034901,
+                    43.342142138944126
+                ]
+            },
+            "properties": {
+                "name": "दिल्ली अनुसार लॉट ग्रुप"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74350685450099,
+                    43.33815688393118
+                ]
+            },
+            "properties": {
+                "name": "आइटम इतिहास की अवश्यकता है"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68640694219539,
+                    43.32988121926636
+                ]
+            },
+            "properties": {
+                "name": "नदी किसान जन्म संघर्ष करते हैं"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82314765576484,
+                    43.36757657335591
+                ]
+            },
+            "properties": {
+                "name": "दोहरा सीमा यात्री जीवन लेते हैं"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77855847885985,
+                    43.44537272495857
+                ]
+            },
+            "properties": {
+                "name": "मारना बाप का समर्थन करना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69097776744456,
+                    43.38523317400271
+                ]
+            },
+            "properties": {
+                "name": "गोपनीय निम्न आत्मा उसे कहें"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7421211758674,
+                    43.3800236955169
+                ]
+            },
+            "properties": {
+                "name": "रुको छोटे इच्छा हजार वैल्यू"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7755043980751,
+                    43.36667122483581
+                ]
+            },
+            "properties": {
+                "name": "फिर लड़के पैसा वेब ब्रेक"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75295729292066,
+                    43.44281164137731
+                ]
+            },
+            "properties": {
+                "name": "गर्मी मदद जान्य।"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77224286592354,
+                    43.3253127146371
+                ]
+            },
+            "properties": {
+                "name": "बैठो इम्पीरियल कर्ण चेहरा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8242325149331,
+                    43.347561311210455
+                ]
+            },
+            "properties": {
+                "name": "नौकरी गति की है"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80801165451248,
+                    43.43367913152873
+                ]
+            },
+            "properties": {
+                "name": "अभी बाल दर्शक दर है"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77302849618263,
+                    43.372749462523885
+                ]
+            },
+            "properties": {
+                "name": "बहुत एकल गेंद सामान्य"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73703546176603,
+                    43.328032643768076
+                ]
+            },
+            "properties": {
+                "name": "डरते हैं गोल टीम बनाने स्कूल"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67624744048317,
+                    43.344889116256184
+                ]
+            },
+            "properties": {
+                "name": "महान दीर्घ गलत स्वीकार"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79964252293848,
+                    43.38656670136357
+                ]
+            },
+            "properties": {
+                "name": "रात्रि ऑडिशन सही जीत"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74049655553154,
+                    43.344659220383505
+                ]
+            },
+            "properties": {
+                "name": "मस्तिष्क सुझाव कौन प्राप्त करता है"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72304384605104,
+                    43.35607154684429
+                ]
+            },
+            "properties": {
+                "name": "यदि कौन समीचीन मानक"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7526981722367,
+                    43.39981729891517
+                ]
+            },
+            "properties": {
+                "name": "उच्च ब्लड की तरह शादी"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68568625772969,
+                    43.34763712888965
+                ]
+            },
+            "properties": {
+                "name": "सादगी औषध उपयुक्त रात्रि"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81743986333095,
+                    43.429533375195334
+                ]
+            },
+            "properties": {
+                "name": "राज्य प्रारंभ खुश योग्यता"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80579718643094,
+                    43.35988688107485
+                ]
+            },
+            "properties": {
+                "name": "खाना जोखिम बचाने बयान करना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83223099273255,
+                    43.43425284429113
+                ]
+            },
+            "properties": {
+                "name": "प्रैक्टिस नियोक्ता को समझ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80006585484625,
+                    43.35132639892201
+                ]
+            },
+            "properties": {
+                "name": "माल क्रम भाग्य खुशियाँ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70924590877894,
+                    43.383011511165705
+                ]
+            },
+            "properties": {
+                "name": "आवाज जीत मॉडल बढ़ाना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68249560431013,
+                    43.35743306628053
+                ]
+            },
+            "properties": {
+                "name": "ऋण बादल रुको यात्रा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68774304395902,
+                    43.33419609182944
+                ]
+            },
+            "properties": {
+                "name": "नगर वृक्ष संदेह शीत"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67733078337824,
+                    43.327826458540464
+                ]
+            },
+            "properties": {
+                "name": "द्वीप छल लौट विस्तार"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68834955622151,
+                    43.431281245921824
+                ]
+            },
+            "properties": {
+                "name": "प्रतियोगिता कक्षा विचारी उत्कृष्ट"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8091257333308,
+                    43.43459785012007
+                ]
+            },
+            "properties": {
+                "name": "हन है क्या अभिनय करना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67144809840102,
+                    43.397513621281995
+                ]
+            },
+            "properties": {
+                "name": "संक्षिप्त कार्ड दोष लेना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82363606504714,
+                    43.37710068801484
+                ]
+            },
+            "properties": {
+                "name": "राज्य शांति वापस पहनना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74061761816665,
+                    43.4212255093278
+                ]
+            },
+            "properties": {
+                "name": "तुम्हारा समय यत्रा दर्द"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7045488688891,
+                    43.36750358756782
+                ]
+            },
+            "properties": {
+                "name": "जाँच अंतरात्मा संघ करें"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82580595102172,
+                    43.42392475722188
+                ]
+            },
+            "properties": {
+                "name": "कोण जिम्मा जीवन मिलना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77008645152546,
+                    43.34480018782685
+                ]
+            },
+            "properties": {
+                "name": "चर्म प्रबादित सीढ़ियाँ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71651166319498,
+                    43.34427801604752
+                ]
+            },
+            "properties": {
+                "name": "निरीक्षण निम्न सशक्त माता"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83028376706352,
+                    43.39600333853026
+                ]
+            },
+            "properties": {
+                "name": "लियु वाचा अहा उपयुक्त"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72932534685151,
+                    43.32911672353392
+                ]
+            },
+            "properties": {
+                "name": "दबाव चांदी खरीद राजा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68036932940231,
+                    43.36393499520703
+                ]
+            },
+            "properties": {
+                "name": "ईरान ध्यान कार्यपालक बिगड़"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77298183161474,
+                    43.44003908109747
+                ]
+            },
+            "properties": {
+                "name": "संघर्ष अपराधी अनुष्ठान"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81552785528402,
+                    43.34735681961522
+                ]
+            },
+            "properties": {
+                "name": "बुद्ध वर्षा वायु अद्भुत"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78578499835658,
+                    43.41906317070564
+                ]
+            },
+            "properties": {
+                "name": "सुगंधित खेत लोहा नियंत्रण"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78354709597988,
+                    43.368113417254776
+                ]
+            },
+            "properties": {
+                "name": "कर दाएँ भाग पहनना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82797590542668,
+                    43.35143064769927
+                ]
+            },
+            "properties": {
+                "name": "कला पीठ घास पैर"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79055192707074,
+                    43.43537476712199
+                ]
+            },
+            "properties": {
+                "name": "सार्वजनिक बुराई ब्लॉक साहसी"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70654512079273,
+                    43.41147087462913
+                ]
+            },
+            "properties": {
+                "name": "प्राप्त शराब द्वीप संरक्षित"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68733618863007,
+                    43.41836228588271
+                ]
+            },
+            "properties": {
+                "name": "आवास शक्तिशाली बंदर शीतल"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7154416231333,
+                    43.33529886942282
+                ]
+            },
+            "properties": {
+                "name": "हृदय धन प्रमाण प्रिंट"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73493527274877,
+                    43.370844496181796
+                ]
+            },
+            "properties": {
+                "name": "सिंहासन मंजिल दृश्य दर्शन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73770378945937,
+                    43.39088303970504
+                ]
+            },
+            "properties": {
+                "name": "छोटे भाई वस्त्र और भुगतान"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83211159305392,
+                    43.32846502905939
+                ]
+            },
+            "properties": {
+                "name": "बर्गर धीमा यूरो सुनने"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68908894596007,
+                    43.44014380512324
+                ]
+            },
+            "properties": {
+                "name": "खतरनाक व्यवस्था अंधकार बहन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6902922126892,
+                    43.403538514368456
+                ]
+            },
+            "properties": {
+                "name": "परिचय बिगड़ आराध्य योग्य"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76141611184084,
+                    43.36152240176037
+                ]
+            },
+            "properties": {
+                "name": "क्रम संवाद अवलोकन प्रकाश"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67547588081197,
+                    43.34877423379756
+                ]
+            },
+            "properties": {
+                "name": "प्रकट शाश्वत रस वन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74561868818364,
+                    43.40177322844116
+                ]
+            },
+            "properties": {
+                "name": "संरचना क्षेत्र रेल नियंत्रण"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82147468187486,
+                    43.345501872146336
+                ]
+            },
+            "properties": {
+                "name": "नौका मछली विभाजन समुंद्र"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72331018618115,
+                    43.41869149001808
+                ]
+            },
+            "properties": {
+                "name": "शुभ घटना गठन केनेडी"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81418024432423,
+                    43.39045046575978
+                ]
+            },
+            "properties": {
+                "name": "मापन हार घर भाग्य"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69068592136318,
+                    43.3685438560169
+                ]
+            },
+            "properties": {
+                "name": "विघटन ताप किला स्त्री"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83747349864097,
+                    43.32783583160479
+                ]
+            },
+            "properties": {
+                "name": "प्रतिष्ठा उद्धारण बंदूक अभाव"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66638697581311,
+                    43.38651479270904
+                ]
+            },
+            "properties": {
+                "name": "मल्टीकलर मौजूदा यात्रा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73073327718703,
+                    43.39856744262681
+                ]
+            },
+            "properties": {
+                "name": "मां के दोस्त मानक"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74104845728016,
+                    43.38961856762863
+                ]
+            },
+            "properties": {
+                "name": "भी गुस्सा डेट छाया"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7539775992791,
+                    43.37962584070818
+                ]
+            },
+            "properties": {
+                "name": "डर बाकी जगह छोड़ना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67308167308965,
+                    43.440433177549636
+                ]
+            },
+            "properties": {
+                "name": "रहस्य धन्यवाद मिलने"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68724650885542,
+                    43.3438023389739
+                ]
+            },
+            "properties": {
+                "name": "चिंता सौभाग्य वितरण घंटी"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6690021588247,
+                    43.3604969931925
+                ]
+            },
+            "properties": {
+                "name": "कविता गुफा नृत्य टिकट"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77503168804014,
+                    43.415001819151854
+                ]
+            },
+            "properties": {
+                "name": "नुकसान ध्यान बड़ा जुदा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79229079700326,
+                    43.41771721089227
+                ]
+            },
+            "properties": {
+                "name": "पोर्ट परीक्षण हूड लिखा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75545867980964,
+                    43.404726107598385
+                ]
+            },
+            "properties": {
+                "name": "वसंत गांव आकर्षण प्रदान"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68343503303822,
+                    43.32628692794371
+                ]
+            },
+            "properties": {
+                "name": "पूजा बंदर वर्षा उपयोग"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7017168198081,
+                    43.408124296254805
+                ]
+            },
+            "properties": {
+                "name": "सभा पति लौटना भोजन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75177113079917,
+                    43.40327950333013
+                ]
+            },
+            "properties": {
+                "name": "अतिरिक्त समानता हार देना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70633448491662,
+                    43.33353916165031
+                ]
+            },
+            "properties": {
+                "name": "प्रेम विवाह सहायक अर्थवाद"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80796698838185,
+                    43.38855809467828
+                ]
+            },
+            "properties": {
+                "name": "निर्देशक विष और उपचार"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71316371386729,
+                    43.40035203701606
+                ]
+            },
+            "properties": {
+                "name": "अद्वितीय सामग्री नष्ट करना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73512074699465,
+                    43.39091219011503
+                ]
+            },
+            "properties": {
+                "name": "लेख गुम शब्द सुरक्षा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8091237096005,
+                    43.33089437793854
+                ]
+            },
+            "properties": {
+                "name": "चयन खोज प्लांट बोर्ड"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71888919977027,
+                    43.37203728663009
+                ]
+            },
+            "properties": {
+                "name": "लेवी सिगरेट समझ नाराज"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6680803788322,
+                    43.4500067687054
+                ]
+            },
+            "properties": {
+                "name": "टापू अलेक्जेंडर बेचना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66925720953805,
+                    43.372341602453425
+                ]
+            },
+            "properties": {
+                "name": "बम लुक्समी आराम गढ़ी"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66882286164855,
+                    43.423630694619916
+                ]
+            },
+            "properties": {
+                "name": "बगीचा माशरफ उधार राजा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77390029854541,
+                    43.445009580661186
+                ]
+            },
+            "properties": {
+                "name": "निषेध अंधकार बागी गीत"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71985438791216,
+                    43.398099248509034
+                ]
+            },
+            "properties": {
+                "name": "बचना बढ़त बुआई ननंद"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74294883903804,
+                    43.4173240632121
+                ]
+            },
+            "properties": {
+                "name": "बचाने दाँत पट्टी शीर्षक"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66689798156858,
+                    43.34124127734229
+                ]
+            },
+            "properties": {
+                "name": "गोला गाँव बजाना व्यायाम"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75171381658947,
+                    43.39159204675984
+                ]
+            },
+            "properties": {
+                "name": "दबाव दादी लेख मुंह"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81096888891352,
+                    43.42308178495851
+                ]
+            },
+            "properties": {
+                "name": "गैलरी बदलना आधार गुफा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73965294263871,
+                    43.40406594519991
+                ]
+            },
+            "properties": {
+                "name": "मोड़ टैंक निर्देशिका कागज़"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72554678621145,
+                    43.37774074563721
+                ]
+            },
+            "properties": {
+                "name": "सभी प्रशिक्षण आदर्श जगह"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67178856070768,
+                    43.389572230853304
+                ]
+            },
+            "properties": {
+                "name": "सिल्क फ्लिप बांधने किला"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66509793278783,
+                    43.41061135866706
+                ]
+            },
+            "properties": {
+                "name": "मौन पकड़ नाटक विशेषज्ञ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73326538252331,
+                    43.44230808801419
+                ]
+            },
+            "properties": {
+                "name": "हड्डी आगंतुक गिटार गाना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.763294657595,
+                    43.42569076002226
+                ]
+            },
+            "properties": {
+                "name": "स्टोर भूत अध्ययन इच्छा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70805275051043,
+                    43.33022223454242
+                ]
+            },
+            "properties": {
+                "name": "साड़ी खतरा जाल पापा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80356155228401,
+                    43.35448684283324
+                ]
+            },
+            "properties": {
+                "name": "विस्तार कवर खिलाड़ी स्थिर"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71671550436804,
+                    43.358590543375485
+                ]
+            },
+            "properties": {
+                "name": "भूल अरब छुट्टी चेला"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79930692168546,
+                    43.44009080139547
+                ]
+            },
+            "properties": {
+                "name": "मांग मार्ग जीतना मज़ा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79587187411107,
+                    43.353732548898144
+                ]
+            },
+            "properties": {
+                "name": "गोला चाकू आगंतुक बर्फबारी"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79719578990535,
+                    43.37696041213408
+                ]
+            },
+            "properties": {
+                "name": "खोखले खेल खिड़की जाग्रत"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69965497394605,
+                    43.36639187084689
+                ]
+            },
+            "properties": {
+                "name": "पत्नी पार खरीद बंदूक"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7921343910175,
+                    43.39881694771324
+                ]
+            },
+            "properties": {
+                "name": "मेहनत आराम बाघ मार्ग"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72017632396182,
+                    43.38361317683319
+                ]
+            },
+            "properties": {
+                "name": "उत्पीड़न स्वच्छ भाई त्वरित"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68359785932444,
+                    43.34831766076865
+                ]
+            },
+            "properties": {
+                "name": "सेट व्यापार मेस घाट"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81414767105343,
+                    43.40958963502256
+                ]
+            },
+            "properties": {
+                "name": "पुलिंदा रिकॉर्ड अधिकार खेल"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80253128177446,
+                    43.36605742276838
+                ]
+            },
+            "properties": {
+                "name": "मुद्दा उत्तेजना दिलाने छोड़ना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70089574338908,
+                    43.44275792279891
+                ]
+            },
+            "properties": {
+                "name": "काम कुमारी मिलते स्वाद"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83317739247832,
+                    43.442243183384164
+                ]
+            },
+            "properties": {
+                "name": "धीरे गुफा फिरकने दीपक"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67721696102126,
+                    43.42843016937564
+                ]
+            },
+            "properties": {
+                "name": "सूजी ज्ञान संदर्भ लाल"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71723432403815,
+                    43.36649527257002
+                ]
+            },
+            "properties": {
+                "name": "एजेंसी गोद वनस्पति शुद्ध"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69481568423726,
+                    43.40301142667125
+                ]
+            },
+            "properties": {
+                "name": "गर्मी सहिष्णु पृष्ठ निर्माण"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68468959578695,
+                    43.35720648266311
+                ]
+            },
+            "properties": {
+                "name": "कट ज़ेंदाब प्रिय वू"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72149391956373,
+                    43.361699359813706
+                ]
+            },
+            "properties": {
+                "name": "उद्घाटन भरपूर दास रौशनी"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70660354920619,
+                    43.38448871648363
+                ]
+            },
+            "properties": {
+                "name": "रंग बढ़ावा क्रोध नृत्य गोल"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76299651747377,
+                    43.35074913433199
+                ]
+            },
+            "properties": {
+                "name": "पागलता क़दम परिवार बचा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77539316698676,
+                    43.39435306815789
+                ]
+            },
+            "properties": {
+                "name": "शरद कृषि भट्ट विश्वास"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71830531729574,
+                    43.35119394975593
+                ]
+            },
+            "properties": {
+                "name": "यूनिवर्सिटी महाजन बेंद नष्ट"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81118685367528,
+                    43.37563814779732
+                ]
+            },
+            "properties": {
+                "name": "बढ़ाने मसाज बंधु मो"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79642660311492,
+                    43.377657505705734
+                ]
+            },
+            "properties": {
+                "name": "दुख थप्पड़ मालिक हार्डवेयर"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7888253988358,
+                    43.337163828964385
+                ]
+            },
+            "properties": {
+                "name": "मेजबान कीटनाशक पाश रोक"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70485407817159,
+                    43.42571907384735
+                ]
+            },
+            "properties": {
+                "name": "आदेश रंग आयोजन राक्षस"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66969568481909,
+                    43.35045513475347
+                ]
+            },
+            "properties": {
+                "name": "संघर्ष यातायात विरोध बहन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66930716449406,
+                    43.44367042306718
+                ]
+            },
+            "properties": {
+                "name": "लहर मुद्रा आवाज़ नीला"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69189873670894,
+                    43.43076512052666
+                ]
+            },
+            "properties": {
+                "name": "विशिष्ट यजमान टेबल लाल"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79353235204508,
+                    43.37368059280777
+                ]
+            },
+            "properties": {
+                "name": "लेई यात्रा अनुवाद कार"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70219104390617,
+                    43.33231431216638
+                ]
+            },
+            "properties": {
+                "name": "दही दूरी अभिनय संकेत"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76689379197433,
+                    43.36916089976166
+                ]
+            },
+            "properties": {
+                "name": "उत्साह स्पर्श पाठशाला रोना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82121823517355,
+                    43.3890494143254
+                ]
+            },
+            "properties": {
+                "name": "समझें दीवार हमला दंड"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83471876958811,
+                    43.40298009860645
+                ]
+            },
+            "properties": {
+                "name": "योद्धा बिल जुगाड़ बाएं"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79381721196569,
+                    43.43790173544968
+                ]
+            },
+            "properties": {
+                "name": "हानिकारक अद्भुत मैन फ़्लो"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78649372015207,
+                    43.36341720491033
+                ]
+            },
+            "properties": {
+                "name": "आदत हर मुला छोड़ा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78560735030351,
+                    43.44361961433385
+                ]
+            },
+            "properties": {
+                "name": "सवारी प्रशंसा वर्ण मोटा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75079314695358,
+                    43.33861416363164
+                ]
+            },
+            "properties": {
+                "name": "समुद्र अवरोध संदेश चेतावनी"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74953762736641,
+                    43.40607632034917
+                ]
+            },
+            "properties": {
+                "name": "प्रकट ईश्वर वायु युद्ध"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74238703575702,
+                    43.35555088566464
+                ]
+            },
+            "properties": {
+                "name": "चित्र धोना मारा रहस्य"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83816796506198,
+                    43.41942390467601
+                ]
+            },
+            "properties": {
+                "name": "दर्पण गायन तंत्रिक स्वर्ग"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81616133746593,
+                    43.350962266236195
+                ]
+            },
+            "properties": {
+                "name": "वह रोग नकल झुकाव"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79219311701308,
+                    43.387858965559424
+                ]
+            },
+            "properties": {
+                "name": "कार्ड उलझन चिड़ी फिराक"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66780267369268,
+                    43.36965922024568
+                ]
+            },
+            "properties": {
+                "name": "सब्जी बंद कार्यों वापसी"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76678459362029,
+                    43.41517258008821
+                ]
+            },
+            "properties": {
+                "name": "आँसू चाय दोस्त प्रसारण"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80142993141635,
+                    43.341730907669636
+                ]
+            },
+            "properties": {
+                "name": "उद्घाटन मोर मौसम जादू"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77921260855874,
+                    43.421873232284376
+                ]
+            },
+            "properties": {
+                "name": "कुत्ते की बींबीआई चुराना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83144706066832,
+                    43.36621272347986
+                ]
+            },
+            "properties": {
+                "name": "मोती कीट ठहराने योग्य"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70722008394114,
+                    43.35038684779588
+                ]
+            },
+            "properties": {
+                "name": "ऐ ब्रिज झिलमिलाना नफरत"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79020734973255,
+                    43.33479279298051
+                ]
+            },
+            "properties": {
+                "name": "प्रस्तावना शीतल भाई बहुत"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67291568124347,
+                    43.43540548255966
+                ]
+            },
+            "properties": {
+                "name": "अधिक लुभ खाद्य संकुचित"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82768299138934,
+                    43.36836454991645
+                ]
+            },
+            "properties": {
+                "name": "समूह व्यास सुसंवाद बैग"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75399246803045,
+                    43.418397519140655
+                ]
+            },
+            "properties": {
+                "name": "बूढ़ा जाल वरलाम्ब नृत्य"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74220063622761,
+                    43.35676855353936
+                ]
+            },
+            "properties": {
+                "name": "प्रतिबिम्ब विभाजित तैत अलग"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67156749173591,
+                    43.32753321179319
+                ]
+            },
+            "properties": {
+                "name": "तीक्ष्ण भक्त संघर्ष अस्त"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7337656762229,
+                    43.362393286271406
+                ]
+            },
+            "properties": {
+                "name": "मूल्यांकन असम संवाद सम्पूर्ण"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72030044521398,
+                    43.382476256772236
+                ]
+            },
+            "properties": {
+                "name": "मना रुपिया याद नाक"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7526464325656,
+                    43.436104808005915
+                ]
+            },
+            "properties": {
+                "name": "उल्लास बकरी मौन तौल"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71485882023808,
+                    43.429619924972954
+                ]
+            },
+            "properties": {
+                "name": "गर्भ शून्य अधिवास डिजिट"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75909970307748,
+                    43.330400132266675
+                ]
+            },
+            "properties": {
+                "name": "हेरफेर मानसिकता आपदा बवंडर"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81135682893091,
+                    43.42006743640997
+                ]
+            },
+            "properties": {
+                "name": "टांग दिल जिन्दगी वादा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67022303291196,
+                    43.35877085029656
+                ]
+            },
+            "properties": {
+                "name": "मन उद्घाटन शक्ति भगवान"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73190488058117,
+                    43.36210649884719
+                ]
+            },
+            "properties": {
+                "name": "क्रम जाम प्रियतम देखो"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79749258159609,
+                    43.43829648566227
+                ]
+            },
+            "properties": {
+                "name": "वृत्ति स्पर्श असर ढेर"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81412739294592,
+                    43.42486673759098
+                ]
+            },
+            "properties": {
+                "name": "स्पर्श जहाज धीमा वाहन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73942862821696,
+                    43.41857560346666
+                ]
+            },
+            "properties": {
+                "name": "अवसर जारी उद्घाटन दीवार"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73194496367705,
+                    43.36236970705654
+                ]
+            },
+            "properties": {
+                "name": "राजकुमार घूमने कोयल"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77277965716348,
+                    43.42795996100599
+                ]
+            },
+            "properties": {
+                "name": "उठा अंडा प्रातः आवाज़"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79677774850097,
+                    43.386918730187254
+                ]
+            },
+            "properties": {
+                "name": "मुर्गा दोगुना कद्दू डिफ़ेंस"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7755677565865,
+                    43.41930911043181
+                ]
+            },
+            "properties": {
+                "name": "कप दिलाना रोड लॉन्च"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83969235862696,
+                    43.40300089042435
+                ]
+            },
+            "properties": {
+                "name": "डॉक्टर गुलाम अस्पष्ट कंधे"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79056823232804,
+                    43.36644340374012
+                ]
+            },
+            "properties": {
+                "name": "संकेत झंडा गण स्थिर"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79024794978068,
+                    43.450759361929514
+                ]
+            },
+            "properties": {
+                "name": "कट्टा लूटना गैर उम्र"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7960531583467,
+                    43.42912547125532
+                ]
+            },
+            "properties": {
+                "name": "बीम आवाज़ अध्ययन सुताना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71188677769896,
+                    43.40578991754939
+                ]
+            },
+            "properties": {
+                "name": "आकाश चाचा पत्थर संकेत"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80973210979664,
+                    43.405074830026
+                ]
+            },
+            "properties": {
+                "name": "फिसलना हाथ सूखना लौटना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83094842280389,
+                    43.383506992650275
+                ]
+            },
+            "properties": {
+                "name": "कुआँ पौरा नमकीन पोंप"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68880786616319,
+                    43.4408736919135
+                ]
+            },
+            "properties": {
+                "name": "शांति विघ्न उपस्थित विस्तार"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83637982623713,
+                    43.37932687230065
+                ]
+            },
+            "properties": {
+                "name": "मुकाबला हर चौड़ा बोन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7120551129583,
+                    43.38478419358865
+                ]
+            },
+            "properties": {
+                "name": "शेष खजूर गाली सजा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79655496709165,
+                    43.353914671185876
+                ]
+            },
+            "properties": {
+                "name": "द्रावण संख्या बॉक्स मनोरम"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82183396335495,
+                    43.34951148058995
+                ]
+            },
+            "properties": {
+                "name": "अम्ल राजा कमर सिर"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7386077853289,
+                    43.42153859100138
+                ]
+            },
+            "properties": {
+                "name": "चिंता तैरता प्रेम मेल"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70073597694773,
+                    43.3950412068982
+                ]
+            },
+            "properties": {
+                "name": "डराना सही बचाने किस्सा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67738562238901,
+                    43.37299568230138
+                ]
+            },
+            "properties": {
+                "name": "कुंजी पाँच शिखर कल"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76967766127837,
+                    43.43523403455177
+                ]
+            },
+            "properties": {
+                "name": "लिव बेटी जांच ग्लाइडिंग"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66711217868942,
+                    43.34498516856536
+                ]
+            },
+            "properties": {
+                "name": "कूपन संत अविन्यास"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71263407544393,
+                    43.44878125927471
+                ]
+            },
+            "properties": {
+                "name": "तेजः सर्वोद्यमिनी आत्मा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81736193811139,
+                    43.3268554930083
+                ]
+            },
+            "properties": {
+                "name": "वृक्ष पर अंधकार घुसा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72823672941468,
+                    43.39913772571227
+                ]
+            },
+            "properties": {
+                "name": "तीर ध्वज सिक्थ निःसंस्पर्शः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80909585278732,
+                    43.42911070681641
+                ]
+            },
+            "properties": {
+                "name": "पैसे में बारिश के बाद खुशी"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75079532407926,
+                    43.42721943663759
+                ]
+            },
+            "properties": {
+                "name": "संचारक सोना बहुत होता है"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71058457033814,
+                    43.367755763373076
+                ]
+            },
+            "properties": {
+                "name": "मार्ग पर मौसम बदलता है"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69298119807172,
+                    43.42626514840551
+                ]
+            },
+            "properties": {
+                "name": "भूतों में साक्षर रेगिस्टर"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83650346598006,
+                    43.41933636859189
+                ]
+            },
+            "properties": {
+                "name": "किला पहुँचा आसन करना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7067569578021,
+                    43.4410164115811
+                ]
+            },
+            "properties": {
+                "name": "भंडार सुनसान खुला दरवाजा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8266463758855,
+                    43.429931233602844
+                ]
+            },
+            "properties": {
+                "name": "साफ निशाना बिना गोली"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78659303223958,
+                    43.338321981323276
+                ]
+            },
+            "properties": {
+                "name": "शत्रु संप्रेरणा दुर्बलता"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80639026067729,
+                    43.36026255177993
+                ]
+            },
+            "properties": {
+                "name": "नकली गर्मागर्म बग़"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68785430058597,
+                    43.391834351083176
+                ]
+            },
+            "properties": {
+                "name": "काम नकल सनक खजाना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77329479710443,
+                    43.331029684633386
+                ]
+            },
+            "properties": {
+                "name": "देखने जोकर खगोलशास्त्र"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83944140776111,
+                    43.36094548943541
+                ]
+            },
+            "properties": {
+                "name": "प्रेम नकल मात्र आवश्यक"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77328811212737,
+                    43.39281904629793
+                ]
+            },
+            "properties": {
+                "name": "संकेत सेवक अनुरागी"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80847732751408,
+                    43.37011711911654
+                ]
+            },
+            "properties": {
+                "name": "निष्क्रियता अधिवादन सुनाना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69083308544123,
+                    43.34616816533698
+                ]
+            },
+            "properties": {
+                "name": "फूल अविवाद मौजूद नहीं"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71997028929218,
+                    43.39262356330771
+                ]
+            },
+            "properties": {
+                "name": "बादशाह पैसे जमीन पर"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70795456797441,
+                    43.43662706130826
+                ]
+            },
+            "properties": {
+                "name": "ठंड भूत वानी जलती"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74983541518577,
+                    43.36433290673387
+                ]
+            },
+            "properties": {
+                "name": "सुंदर दस्तावेज़ गिरा दिया"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72199664814889,
+                    43.399196067397874
+                ]
+            },
+            "properties": {
+                "name": "खुशी तोफ़ा लेने जा रहा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76282152809654,
+                    43.33979211362029
+                ]
+            },
+            "properties": {
+                "name": "बर्बादी उठा किसी भी हलात"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72295717357065,
+                    43.32965718674516
+                ]
+            },
+            "properties": {
+                "name": "करोड़पति जमीन बाध्य है"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76962927584191,
+                    43.417191219398504
+                ]
+            },
+            "properties": {
+                "name": "जीत तुआने इस बॉक्स"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79867291448863,
+                    43.44693460246704
+                ]
+            },
+            "properties": {
+                "name": "भव्य तलवार संकेत स्थान"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80762496150783,
+                    43.447198828628444
+                ]
+            },
+            "properties": {
+                "name": "जलवायु बॉक्स मैन कम"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73700170958546,
+                    43.42215816219742
+                ]
+            },
+            "properties": {
+                "name": "दौड़ने स्थिति सीता चोर"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79048870955376,
+                    43.368949995240996
+                ]
+            },
+            "properties": {
+                "name": "समझ में नहीं आ रहा है"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8255365161358,
+                    43.39707569876099
+                ]
+            },
+            "properties": {
+                "name": "पासवर्ड साझा नहीं हो सकता"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67286163429799,
+                    43.38896639656718
+                ]
+            },
+            "properties": {
+                "name": "यात्रा मुम्बई तरीका सीधी"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76401826500387,
+                    43.37508033645364
+                ]
+            },
+            "properties": {
+                "name": "खगोलशास्त्र खेलता है सिखाने"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77611649584469,
+                    43.400255751529066
+                ]
+            },
+            "properties": {
+                "name": "जानकारी कर्ज साथ समय"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70951490545667,
+                    43.33112009433672
+                ]
+            },
+            "properties": {
+                "name": "कैमरा तस्वीर नक्शा स्थान"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7066983545883,
+                    43.42345908175173
+                ]
+            },
+            "properties": {
+                "name": "महसूस किताब साहित्य लिखा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82127073113952,
+                    43.339820786610595
+                ]
+            },
+            "properties": {
+                "name": "खुदाई साहित्य स्वर्ग निर्देश"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71675786236483,
+                    43.43096503945724
+                ]
+            },
+            "properties": {
+                "name": "ट्रेन बाइक नकली निर्देश"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78950346431157,
+                    43.40237228555073
+                ]
+            },
+            "properties": {
+                "name": "रेडियो चैनल समाचार ब्रोडकास्ट"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75258281784954,
+                    43.390836247816566
+                ]
+            },
+            "properties": {
+                "name": "अपना बच्चा खुशी खेलता है"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76638218213247,
+                    43.32741343188597
+                ]
+            },
+            "properties": {
+                "name": "समय क्रिकेट मैच देखता है"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72154484965267,
+                    43.45222086361347
+                ]
+            },
+            "properties": {
+                "name": "बच्चा अध्यापक शिक्षिका पाठयक्रम"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76627772335996,
+                    43.437491216616706
+                ]
+            },
+            "properties": {
+                "name": "स्थिति जानकारी जनसंख्या बच्चा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73925198284087,
+                    43.44218709248913
+                ]
+            },
+            "properties": {
+                "name": "पुलिस आपत्कालीन आपदा आपत्कालीन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77499563521542,
+                    43.418523278482645
+                ]
+            },
+            "properties": {
+                "name": "जीवन स्टाइल जीवन जीवन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8169860967655,
+                    43.384473967748534
+                ]
+            },
+            "properties": {
+                "name": "मित्रता मित्र साथी जन्मदिन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78032431371867,
+                    43.446660440194194
+                ]
+            },
+            "properties": {
+                "name": "मान्यता पर्व खरीदारी दिन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71753936465939,
+                    43.45285380044917
+                ]
+            },
+            "properties": {
+                "name": "रोज़गार नौकरी कार्य नियोक्ता"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69263196333395,
+                    43.419665985695886
+                ]
+            },
+            "properties": {
+                "name": "अपवाद अवधि समय बच्चा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70765474537438,
+                    43.42017682128563
+                ]
+            },
+            "properties": {
+                "name": "मौके स्थान ब्रेक आवश्यक"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69765841770732,
+                    43.33820610443803
+                ]
+            },
+            "properties": {
+                "name": "सामर्थ्य परीक्षा डॉक्टर आदेश"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82267605236211,
+                    43.42357169093535
+                ]
+            },
+            "properties": {
+                "name": "सुझाव सुझाव लिखित संकेत"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73336307802492,
+                    43.42297002833131
+                ]
+            },
+            "properties": {
+                "name": "प्रक्रिया संपूर्ण संगठन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83811908518328,
+                    43.33925460912034
+                ]
+            },
+            "properties": {
+                "name": "संग्रह संगठन कला रूप"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73171881207145,
+                    43.354563903522724
+                ]
+            },
+            "properties": {
+                "name": "पुराना दस्तावेज़ डिज़ाइन संगठन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6961362492757,
+                    43.35411874665983
+                ]
+            },
+            "properties": {
+                "name": "निगम काम नगर मुख्य"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68661836305637,
+                    43.36823198552959
+                ]
+            },
+            "properties": {
+                "name": "कार्य क्रिया काम आदेश"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83961700277996,
+                    43.3510427803368
+                ]
+            },
+            "properties": {
+                "name": "समय खेलना अधिकार कानून"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74947187088583,
+                    43.39389891860199
+                ]
+            },
+            "properties": {
+                "name": "समर्थन समर्थक संगठन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72910695071641,
+                    43.36486528376062
+                ]
+            },
+            "properties": {
+                "name": "समाज अच्छा अधिक"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69754557797296,
+                    43.39387045930845
+                ]
+            },
+            "properties": {
+                "name": "भूमि विश्वास क्रम अच्छा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73710033565021,
+                    43.384584096889725
+                ]
+            },
+            "properties": {
+                "name": "खरीदने किताब खरीदार संगठन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68689162255396,
+                    43.36871487059363
+                ]
+            },
+            "properties": {
+                "name": "सहायक शाखा समर्थक संगठन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7994804315831,
+                    43.33013942649552
+                ]
+            },
+            "properties": {
+                "name": "समाचार संगठन प्रेस विज्ञापन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7988314518434,
+                    43.39336940273254
+                ]
+            },
+            "properties": {
+                "name": "सदस्य संगठन प्रमुख अधिकारी"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71307712205453,
+                    43.41174462631271
+                ]
+            },
+            "properties": {
+                "name": "संस्थान संसाधन विचार करना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72580987651236,
+                    43.38478891558823
+                ]
+            },
+            "properties": {
+                "name": "मॉडल मौखिक तस्वीर खूबी"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7036186715095,
+                    43.41690955477799
+                ]
+            },
+            "properties": {
+                "name": "व्यक्ति व्यक्तिगत जन्म दिन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76149458704094,
+                    43.367965367570484
+                ]
+            },
+            "properties": {
+                "name": "सुनाने दिखाने उपहार स्थान"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8058814547212,
+                    43.403167911414506
+                ]
+            },
+            "properties": {
+                "name": "परिपत्र सिखाने प्राथमिकता खुदाई"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71361559233537,
+                    43.376334729032095
+                ]
+            },
+            "properties": {
+                "name": "साथी सहायक सहयोगी पाठयक्रम"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73154162252649,
+                    43.38490610787597
+                ]
+            },
+            "properties": {
+                "name": "ज्यों चाहें खुदाई समय"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79186204272446,
+                    43.376665125080876
+                ]
+            },
+            "properties": {
+                "name": "पूर्वाग्रह यात्रा लड़का जुगाड़"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6661296359971,
+                    43.452468442692734
+                ]
+            },
+            "properties": {
+                "name": "महत्वपूर्ण प्रवृत्ति साक्षरता"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7616259928136,
+                    43.44408598398389
+                ]
+            },
+            "properties": {
+                "name": "तवायफ़ रिश्ता आमंत्रण लिखित"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78766358344183,
+                    43.37143374956189
+                ]
+            },
+            "properties": {
+                "name": "बदल बदलने के लिए किताब"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68890499690951,
+                    43.44979275747692
+                ]
+            },
+            "properties": {
+                "name": "नफ़रत अर्थ निवासी जगह"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67281208362147,
+                    43.3973497257669
+                ]
+            },
+            "properties": {
+                "name": "विद्यां शीलं दृढ़तमाना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71588028401948,
+                    43.442055130438646
+                ]
+            },
+            "properties": {
+                "name": "समुद्र की लहरें"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71721666322901,
+                    43.32562249083662
+                ]
+            },
+            "properties": {
+                "name": "सूर्य की किरणें"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67841066689653,
+                    43.34185192725603
+                ]
+            },
+            "properties": {
+                "name": "प्रेम और सौंदर्य"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73531620540507,
+                    43.36415708253743
+                ]
+            },
+            "properties": {
+                "name": "ध्यान और शांति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72425220806053,
+                    43.351560221312894
+                ]
+            },
+            "properties": {
+                "name": "स्वास्थ्य और खुशी"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68594161715737,
+                    43.409583613235085
+                ]
+            },
+            "properties": {
+                "name": "सृजनात्मकता और आलस्य"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73655883818446,
+                    43.33441638119229
+                ]
+            },
+            "properties": {
+                "name": "संगीत और संवाद"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6752721298426,
+                    43.32966752267923
+                ]
+            },
+            "properties": {
+                "name": "मनोबल और साहस"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6904923700813,
+                    43.327341256271836
+                ]
+            },
+            "properties": {
+                "name": "अनुशासन और समर्पण"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78054278610125,
+                    43.394614279098086
+                ]
+            },
+            "properties": {
+                "name": "समृद्धि और सफलता"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74335729998438,
+                    43.40451717893259
+                ]
+            },
+            "properties": {
+                "name": "समाज सेवा और समर्थन"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7569937171229,
+                    43.44689633183004
+                ]
+            },
+            "properties": {
+                "name": "धर्म और नैतिकता"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8360965058364,
+                    43.40171500153021
+                ]
+            },
+            "properties": {
+                "name": "स्वतंत्रता और समर्पण"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71513986618811,
+                    43.43457019529001
+                ]
+            },
+            "properties": {
+                "name": "कल्पना और विचार"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7952919780746,
+                    43.44165282752506
+                ]
+            },
+            "properties": {
+                "name": "समृद्धि और सुख"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68173948092863,
+                    43.44800154193802
+                ]
+            },
+            "properties": {
+                "name": "ज्ञान और सद्गुण"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81701665551464,
+                    43.389228319829925
+                ]
+            },
+            "properties": {
+                "name": "स्वयंशक्ति और स्वीकृति"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77895341666135,
+                    43.394861202037575
+                ]
+            },
+            "properties": {
+                "name": "अभिमान और उत्कृष्टता"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75351540071551,
+                    43.4219368264491
+                ]
+            },
+            "properties": {
+                "name": "साझा और सहयोग"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81052088748493,
+                    43.424322611524985
+                ]
+            },
+            "properties": {
+                "name": "साहस और सफलता"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69578376327627,
+                    43.37844309252077
+                ]
+            },
+            "properties": {
+                "name": "आत्म-संतोष और परिश्रम"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78368098309056,
+                    43.388133327996385
+                ]
+            },
+            "properties": {
+                "name": "आत्म-विश्वास और साहस"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70213684589817,
+                    43.400458123228596
+                ]
+            },
+            "properties": {
+                "name": "साहस और संवाद"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75735508441994,
+                    43.33521557571769
+                ]
+            },
+            "properties": {
+                "name": "स्नान और शुद्धता"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7165813035499,
+                    43.449836563440115
+                ]
+            },
+            "properties": {
+                "name": "मनोबल और उत्कृष्टता"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67118947948529,
+                    43.32648454903178
+                ]
+            },
+            "properties": {
+                "name": "समर्पण और प्रेम"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73583864324974,
+                    43.40494189377406
+                ]
+            },
+            "properties": {
+                "name": "शांति और आनंद"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7592708719767,
+                    43.37376037403405
+                ]
+            },
+            "properties": {
+                "name": "समृद्धि और सफलता"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81937170824858,
+                    43.42605432516992
+                ]
+            },
+            "properties": {
+                "name": "स्वतंत्रता और समर्पण"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82074352007112,
+                    43.36580652869758
+                ]
+            },
+            "properties": {
+                "name": "समर्थन और साझा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7436711727496,
+                    43.372504265635634
+                ]
+            },
+            "properties": {
+                "name": "सान्त्वना और प्यार"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67000504535372,
+                    43.38201541721379
+                ]
+            },
+            "properties": {
+                "name": "आत्म-प्रेम और साहस"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77440106794256,
+                    43.37650136295896
+                ]
+            },
+            "properties": {
+                "name": "संगीत और खुशी"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68061636193306,
+                    43.33728440664312
+                ]
+            },
+            "properties": {
+                "name": "समृद्धि और सफलता"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66503257911336,
+                    43.38062935022041
+                ]
+            },
+            "properties": {
+                "name": "समर्थन और साझा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70403178494416,
+                    43.36877483548238
+                ]
+            },
+            "properties": {
+                "name": "सान्त्वना और प्यार"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75963805364609,
+                    43.40329643349728
+                ]
+            },
+            "properties": {
+                "name": "जयालवी शक्तिः यत्रा"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67318084901217,
+                    43.42404258860719
+                ]
+            },
+            "properties": {
+                "name": "मृगाधारिता ग्रामस्थिता"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7664044443527,
+                    43.43862549454096
+                ]
+            },
+            "properties": {
+                "name": "स्मृतितटामर्जन्ययोः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76699292336798,
+                    43.37550577167776
+                ]
+            },
+            "properties": {
+                "name": "पङ्कोपस्थानवालः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73291945020628,
+                    43.3674976351091
+                ]
+            },
+            "properties": {
+                "name": "विविधदत्तसम्भाषण"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80291150700305,
+                    43.3459863032626
+                ]
+            },
+            "properties": {
+                "name": "अपहरणादिभिः पाणिभिः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67799156621277,
+                    43.336989953022176
+                ]
+            },
+            "properties": {
+                "name": "जडान्तद्विच्छायिनः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75967314468016,
+                    43.44864855947221
+                ]
+            },
+            "properties": {
+                "name": "लिप्साबंधनचेलः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77895542262922,
+                    43.37606635807544
+                ]
+            },
+            "properties": {
+                "name": "आह्वानपरितापत"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74354294751629,
+                    43.401586326632675
+                ]
+            },
+            "properties": {
+                "name": "कण्ठगतजलेच्छया"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71739241962405,
+                    43.32949392714524
+                ]
+            },
+            "properties": {
+                "name": "व्यवस्थानवायुधाः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78738846011674,
+                    43.347806614069704
+                ]
+            },
+            "properties": {
+                "name": "तनुमातृकृपालुकः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68105058004221,
+                    43.384474385118985
+                ]
+            },
+            "properties": {
+                "name": "लक्ष्यविच्छिन्नमनाः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74292700712704,
+                    43.43924277428903
+                ]
+            },
+            "properties": {
+                "name": "प्रियजनयात्रयः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72330992960815,
+                    43.44448236676838
+                ]
+            },
+            "properties": {
+                "name": "रचितवरदण्डपाः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80374649087389,
+                    43.423236258780996
+                ]
+            },
+            "properties": {
+                "name": "यूथःक्षोभयांकितः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7843960910941,
+                    43.37735348316894
+                ]
+            },
+            "properties": {
+                "name": "पर्यवस्यत्सरोगभृत्"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77111562727168,
+                    43.377397868656345
+                ]
+            },
+            "properties": {
+                "name": "यतिप्राणमृतोरगः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75822663806775,
+                    43.403893701294244
+                ]
+            },
+            "properties": {
+                "name": "क्षीणसाधूतपण्डितः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76760909818859,
+                    43.365752206325446
+                ]
+            },
+            "properties": {
+                "name": "हंसच्चित्ताभिप्लुतः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67688920728415,
+                    43.35171094097246
+                ]
+            },
+            "properties": {
+                "name": "वक्ष्याम्यर्थदर्शनः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81636243364756,
+                    43.37912531315445
+                ]
+            },
+            "properties": {
+                "name": "मणिप्रस्थानमव्ययः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76577508596074,
+                    43.34670065336113
+                ]
+            },
+            "properties": {
+                "name": "पुर्यायुषा वदत्यश्वः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6734781883506,
+                    43.339763982233066
+                ]
+            },
+            "properties": {
+                "name": "चुरुकूटकर्णध्वनिः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67229678701096,
+                    43.37951866037416
+                ]
+            },
+            "properties": {
+                "name": "अङ्कदर्पणादिशोऽस्मि"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.67370422785643,
+                    43.33477495020771
+                ]
+            },
+            "properties": {
+                "name": "रूपाणितादिव्यञ्जनैः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72454219260635,
+                    43.38020083184419
+                ]
+            },
+            "properties": {
+                "name": "आचार्यस्य प्रियाणि"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.8127777939444,
+                    43.33011026808491
+                ]
+            },
+            "properties": {
+                "name": "मुञ्चन्मुक्तवाससः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82476845378096,
+                    43.345917052691725
+                ]
+            },
+            "properties": {
+                "name": "धान्याद्धूमधुपाः खलः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.79458199273176,
+                    43.37007854115475
+                ]
+            },
+            "properties": {
+                "name": "सर्पदुःखमहाकुली"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77530815590762,
+                    43.3745956095525
+                ]
+            },
+            "properties": {
+                "name": "अवल्गुष्टप्रमाणभृत्"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81943466645043,
+                    43.38442804867082
+                ]
+            },
+            "properties": {
+                "name": "योगिस्तव सतां गतिः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7111729135977,
+                    43.41659485703934
+                ]
+            },
+            "properties": {
+                "name": "सिंहस्योत्पादकल्पिता"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81519536270207,
+                    43.35551688679179
+                ]
+            },
+            "properties": {
+                "name": "आदिकवचनोद्धृतः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80141816757077,
+                    43.373296346452975
+                ]
+            },
+            "properties": {
+                "name": "भाग्यप्राप्ताः सर्वेऽपि"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73913970139529,
+                    43.36766474919193
+                ]
+            },
+            "properties": {
+                "name": "शूराणाम्बूविशोधकः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68861229532558,
+                    43.447177904904464
+                ]
+            },
+            "properties": {
+                "name": "चरण्याचरणापहारी"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70887924537146,
+                    43.36989440125427
+                ]
+            },
+            "properties": {
+                "name": "ज्येष्ठाद्यापकः सौभाग्यः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72727783404389,
+                    43.43862238253905
+                ]
+            },
+            "properties": {
+                "name": "बण्डकदूषकस्थले"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80459063938179,
+                    43.337120260313164
+                ]
+            },
+            "properties": {
+                "name": "अज्ञानेनाम्बुजेत्रयात्"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76679035695634,
+                    43.335932458145194
+                ]
+            },
+            "properties": {
+                "name": "क्षिप्तसिन्धुपरिणामयः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6765199485153,
+                    43.33916485424814
+                ]
+            },
+            "properties": {
+                "name": "होडयन्तीतरचञ्चुपः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80245708208167,
+                    43.40137212585799
+                ]
+            },
+            "properties": {
+                "name": "उद्वेलत्कर्णविद्रुमैः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77978667389289,
+                    43.32653195985271
+                ]
+            },
+            "properties": {
+                "name": "रोषदष्ट्युन्मारणोत्सुकः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.83554141642708,
+                    43.36208645578587
+                ]
+            },
+            "properties": {
+                "name": "सन्देहपितृसंस्मरणः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78226428764992,
+                    43.45214674512842
+                ]
+            },
+            "properties": {
+                "name": "प्रज्ञाविशेषातिनीतः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68707804799033,
+                    43.389474442588785
+                ]
+            },
+            "properties": {
+                "name": "आपन्नासंशयो दुःखान्तः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80216082023526,
+                    43.35618116364861
+                ]
+            },
+            "properties": {
+                "name": "मन्येत महतां यया"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70300949696957,
+                    43.338949270378016
+                ]
+            },
+            "properties": {
+                "name": "मोहयति अपि नीतिम्"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68015060855032,
+                    43.40296808063941
+                ]
+            },
+            "properties": {
+                "name": "लक्ष्मीतटस्थिता श्रीः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68989328476619,
+                    43.39232508258088
+                ]
+            },
+            "properties": {
+                "name": "अलिकरक्तयोः शृङ्गाराः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71598403078042,
+                    43.38262581866229
+                ]
+            },
+            "properties": {
+                "name": "फितोऽन्तर्गतमार्गाः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71912615539532,
+                    43.452016174114505
+                ]
+            },
+            "properties": {
+                "name": "लक्ष्मणोत्तरयोः पुत्रः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74577920821866,
+                    43.36541829164119
+                ]
+            },
+            "properties": {
+                "name": "यज्ञशान्तिहेतवे"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72712613526619,
+                    43.39671896203547
+                ]
+            },
+            "properties": {
+                "name": "हर्षभर्तृस्वपितृकृद्धाः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.70664604422745,
+                    43.34278992771991
+                ]
+            },
+            "properties": {
+                "name": "मृगप्रायाः सुते विना"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.68493815003421,
+                    43.39354964761166
+                ]
+            },
+            "properties": {
+                "name": "सुकुमारकलाहंसनिष्ठाः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75455462754235,
+                    43.36155500394566
+                ]
+            },
+            "properties": {
+                "name": "सद्गुणान्विताः प्रमुञ्च"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77873016450667,
+                    43.366122899933224
+                ]
+            },
+            "properties": {
+                "name": "चातकाः कालकोटिकाः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80791232048796,
+                    43.33394744370124
+                ]
+            },
+            "properties": {
+                "name": "सगोचरबहिरप्लुताः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6997965679875,
+                    43.40806371864969
+                ]
+            },
+            "properties": {
+                "name": "आकर्षयितुकामोऽयं"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66838019631632,
+                    43.35606605074788
+                ]
+            },
+            "properties": {
+                "name": "दिनद्वयमुदाहरेत्"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.7069571753982,
+                    43.34266177851345
+                ]
+            },
+            "properties": {
+                "name": "सज्जनानां मुदास्तु नः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71273809195645,
+                    43.35495186858789
+                ]
+            },
+            "properties": {
+                "name": "कल्याणगणगन्धर्वणः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73519729235159,
+                    43.4163297000404
+                ]
+            },
+            "properties": {
+                "name": "स्निग्धवेणुमृदुद्विगुः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71910739744908,
+                    43.45181104214278
+                ]
+            },
+            "properties": {
+                "name": "मूढमूर्खकुलब्रह्मण्याः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.72594206510075,
+                    43.33440744203501
+                ]
+            },
+            "properties": {
+                "name": "लाक्षासर्पकिशोरिकाः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69001132062567,
+                    43.36003830098169
+                ]
+            },
+            "properties": {
+                "name": "चापरिकास्पष्टचापलाः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.76804370175068,
+                    43.37362703079163
+                ]
+            },
+            "properties": {
+                "name": "ब्राह्मणास्तेषु च नाप्यम्"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77043742133355,
+                    43.325828830544545
+                ]
+            },
+            "properties": {
+                "name": "आज्यद्रव्यसंस्थितः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66452596219278,
+                    43.377082454312294
+                ]
+            },
+            "properties": {
+                "name": "अक्षिप्तप्रायः स निध्यात्"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78052164197288,
+                    43.39882235229331
+                ]
+            },
+            "properties": {
+                "name": "श्रुतिप्रमाणनिष्प्रमाः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.74768201610368,
+                    43.34347333416988
+                ]
+            },
+            "properties": {
+                "name": "यदीयः सुतनामयः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77257029502562,
+                    43.353659062164375
+                ]
+            },
+            "properties": {
+                "name": "सर्वगुणसंपद्यैव"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82229997433387,
+                    43.36602478810474
+                ]
+            },
+            "properties": {
+                "name": "युष्मादर्शितवैदिकः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77697418935259,
+                    43.39302377957722
+                ]
+            },
+            "properties": {
+                "name": "मूर्ध्नि चापबाणमाला"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82932283412902,
+                    43.344460090153106
+                ]
+            },
+            "properties": {
+                "name": "आत्मा ब्रह्म च सर्वतः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.75834764860247,
+                    43.43886099129135
+                ]
+            },
+            "properties": {
+                "name": "असन्मादाविशेषोऽप्यहः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.71397262576284,
+                    43.43847474002368
+                ]
+            },
+            "properties": {
+                "name": "अस्योत्कृष्टगुणोपेतः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.78490097957456,
+                    43.41708495277058
+                ]
+            },
+            "properties": {
+                "name": "कुसुमक्रियासर्वाणि"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.82596603943784,
+                    43.37280499147228
+                ]
+            },
+            "properties": {
+                "name": "मानिनो मनुनो मन्त्राः"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80376452461223,
+                    43.41299359444341
+                ]
+            },
+            "properties": {
+                "name": "क्रोशतु क्षितिकोणे।"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.73771479115749,
+                    43.38964563062126
+                ]
+            },
+            "properties": {
+                "name": "अश्मानं स्पृशतु वारिः।"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.77914081236031,
+                    43.36200438697811
+                ]
+            },
+            "properties": {
+                "name": "पङ्क्तिस्पर्शनं ददातु।"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6885010122187,
+                    43.3536150480067
+                ]
+            },
+            "properties": {
+                "name": "संशयात्मनं निगच्छति।"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.6809883295955,
+                    43.4279302964151
+                ]
+            },
+            "properties": {
+                "name": "अनावरणात्मकः स्वप्नः।"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.66638088219406,
+                    43.356600228775875
+                ]
+            },
+            "properties": {
+                "name": "प्रेमं प्रेषयते क्षिप्रम्।"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.81508020435649,
+                    43.44503598067335
+                ]
+            },
+            "properties": {
+                "name": "सर्वं सर्पति सर्वत्र।"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.80562566482058,
+                    43.441746093418764
+                ]
+            },
+            "properties": {
+                "name": "वायुं निरीक्ष्य चिन्तयेत्।"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -70.69680728921867,
+                    43.37119072206014
+                ]
+            },
+            "properties": {
+                "name": "पर्वन्यायात्प्रमद्यते।"
+            }
+        }
+    ]
+}
