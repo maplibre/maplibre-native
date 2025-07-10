@@ -91,6 +91,7 @@ kotlin {
 }
 
 dependencies {
+    implementation(libs.anrwatchdog)
     implementation(project(":MapLibreAndroid"))
     implementation(libs.maplibreJavaTurf)
 

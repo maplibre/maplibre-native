@@ -1,4 +1,5 @@
 [versions]
+anrwatchdog = "1.4.0"
 mapLibreServices = "6.0.1"
 appCompat = "1.7.0"
 constraintLayout = "2.1.4"
@@ -35,6 +36,7 @@ kotlinxCoroutines = { strictly = "[1.0, 2.0[" }
 androidGradlePlugin = "8.6.0"
 
 [libraries]
+anrwatchdog = { module = "com.github.anrwatchdog:anrwatchdog", version.ref = "anrwatchdog" }
 kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinxCoroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 kotlinxCoroutinesAndroid = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }

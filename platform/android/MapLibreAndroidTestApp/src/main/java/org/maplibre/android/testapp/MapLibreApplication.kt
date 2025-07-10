@@ -5,8 +5,9 @@ import android.os.StrictMode.ThreadPolicy
 import android.os.StrictMode.VmPolicy
 import android.text.TextUtils
 import androidx.multidex.MultiDexApplication
-import org.maplibre.android.MapStrictMode
+import com.github.anrwatchdog.ANRWatchDog
 import org.maplibre.android.MapLibre
+import org.maplibre.android.MapStrictMode
 import org.maplibre.android.WellKnownTileServer
 import org.maplibre.android.log.Logger
 import org.maplibre.android.testapp.utils.ApiKeyUtils
@@ -14,6 +15,7 @@ import org.maplibre.android.testapp.utils.TileLoadingMeasurementUtils
 import org.maplibre.android.testapp.utils.TimberLogger
 import timber.log.Timber
 import timber.log.Timber.DebugTree
+
 
 /**
  * Application class of the test application.
@@ -25,6 +27,7 @@ import timber.log.Timber.DebugTree
 open class MapLibreApplication : MultiDexApplication() {
     override fun onCreate() {
         super.onCreate()
+        ANRWatchDog().setIgnoreDebugger(false).start()
         initializeLogger()
         initializeStrictMode()
         initializeMapbox()
