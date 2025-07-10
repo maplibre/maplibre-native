@@ -166,8 +166,7 @@ StyleParseResult Parser::parse(const std::string& json) {
                     }
                 } else if (faceValue.IsString()) {
                     // If the face is a string, we assume it is the font file url.
-                    std::string urlString = faceValue.GetString();
-                    fontFace.url = urlString;
+                    fontFace.url = faceValue.GetString();;
                     // Add a default range for the entire Unicode range.
                     fontFace.ranges.emplace_back(0, 0x10FFFF);
                 }
