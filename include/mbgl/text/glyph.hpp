@@ -169,9 +169,7 @@ struct FontFace {
     std::string url;                                   // font file url
     std::vector<std::pair<uint32_t, uint32_t>> ranges; // unicode ranges
 
-    auto valid() const {
-        return !name.empty() && !url.empty() && !ranges.empty();
-    }
+    auto valid() const { return !name.empty() && !url.empty() && !ranges.empty(); }
 };
 
 using FontFaces = std::vector<FontFace>;
