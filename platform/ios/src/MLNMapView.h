@@ -575,6 +575,12 @@ MLN_EXPORT
 @property (nonatomic, readonly, nullable) MLNUserLocation *userLocation;
 
 /**
+ * A Boolean value indicating whether independent camera animations
+ * can be applied at the same time or not.
+ */
+@property (nonatomic, assign) BOOL enableConcurrentCameraAnimation;
+
+/**
  The mode used to track the user location. The default value is
  ``MLNUserTrackingMode/MLNUserTrackingModeNone``.
 
