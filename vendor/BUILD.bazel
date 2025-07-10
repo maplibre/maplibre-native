@@ -153,25 +153,30 @@ cc_library(
     includes = ["maplibre-tile-spec/vendor/simde"],
     visibility = ["//visibility:public"],
 )
+
 cc_library(
     name = "FastPFOR",
-    deps = [":simde"],
     srcs = glob([
         "maplibre-tile-spec/vendor/fastpfor/src/*.c",
         "maplibre-tile-spec/vendor/fastpfor/src/*.cpp",
     ]),
     hdrs = glob(["maplibre-tile-spec/vendor/fastpfor/headers/*.h"]),
-    includes = ["maplibre-tile-spec/vendor/fastpfor/headers"],
+    copts = ["-DSIMDE_ENABLE_NATIVE_ALIASES"] + select({
+        "@platforms//cpu:x86_64": ["-msse4.1"],
+        "@platforms//cpu:i386": ["-msse4.1"],
+        "//conditions:default": ["-DSIMDE_DISABLE_NATIVE_SSE4_1"],
+    }),
     cxxopts = CPP_FLAGS + select({
         "@platforms//cpu:arm": ["-DSUPPORT_NEON"],
         "//conditions:default": [],
     }),
-    copts = ["-DSIMDE_ENABLE_NATIVE_ALIASES"],
+    includes = ["maplibre-tile-spec/vendor/fastpfor/headers"],
     visibility = ["//visibility:public"],
+    deps = [":simde"],
 )
+
 cc_library(
     name = "maplibre-tile-spec",
-    deps = [":FastPFOR"],
     srcs = glob([
         "maplibre-tile-spec/cpp/src/**/*.cpp",
         "maplibre-tile-spec/cpp/src/**/*.hpp",
@@ -179,15 +184,16 @@ cc_library(
     hdrs = glob([
         "maplibre-tile-spec/cpp/include/**/*.hpp",
     ]),
+    copts = CPP_FLAGS,
     defines = [
         "MLT_WITH_JSON=0",
     ],
-    copts = CPP_FLAGS,
     includes = [
         "maplibre-tile-spec/cpp/include",
         "maplibre-tile-spec/cpp/src",
     ],
     visibility = ["//visibility:public"],
+    deps = [":FastPFOR"],
 )
 
 # vendor/metal-cpp.json
