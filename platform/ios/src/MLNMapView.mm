@@ -951,6 +951,8 @@ public:
     _targetCoordinate = kCLLocationCoordinate2DInvalid;
 
     _shouldRequestAuthorizationToUseLocationServices = YES;
+
+    _dynamicNavigationCameraAnimationDuration = NO;
 }
 
 - (mbgl::Size)size
