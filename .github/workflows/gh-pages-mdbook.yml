@@ -1,7 +1,10 @@
-name: Build & Deploy mdBook documentation
+name: gh-pages-mdbook
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'docs/mdbook/**'
   push:
     branches:
       - main
@@ -14,14 +17,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: extractions/setup-just@v2
+      - uses: extractions/setup-just@v3
       - name: Setup mdBook
         uses: peaceiris/actions-mdbook@v2
       - name: Install Dependencies
         shell: bash
         run: sudo apt-get install -y libwayland-dev libxkbcommon-dev # Required for winit
-      - name: Install mdbook-alerts
-        run: cargo install mdbook-alerts
+      - name: Install mdbook-alerts, mdbook-mermaid
+        run: cargo install mdbook-alerts mdbook-mermaid
       - name: Build
         working-directory: docs/mdbook
         shell: bash
@@ -33,6 +36,7 @@ jobs:
 
   gh-pages-mdbook-deploy:
     needs: gh-pages-mdbook-build
+    if: github.event_name != 'pull_request'
     name: Deploy
     runs-on: ubuntu-latest
     steps:
@@ -42,8 +46,9 @@ jobs:
         with:
           name: book
           path: artifacts/book
+
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4.7.2
+        uses: JamesIves/github-pages-deploy-action@v4.7.3
         with:
           branch: gh-pages
           folder: artifacts/book

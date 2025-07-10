@@ -204,6 +204,15 @@ MLN_EXPORT
  */
 @property (nonatomic, copy, readonly) NSArray<MLNAttributionInfo *> *attributionInfos;
 
+/**
+ The attribution HTML string associated with this source.
+
+ By default, this is nil. If the source is initialized with a
+ configuration URL, this is nil until the configuration JSON file
+ is loaded.
+ */
+@property (nonatomic, copy, nullable, readonly) NSString *attributionHTMLString;
+
 @end
 
 NS_ASSUME_NONNULL_END

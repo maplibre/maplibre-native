@@ -10,7 +10,7 @@ This example showcases how to listen to camera change events.
   </video>
 </figure>
 
-The camera animation is kicked off with this code: 
+The camera animation is kicked off with this code:
 
 ```kotlin
 --8<-- "MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/camera/CameraPositionActivity.kt:cameraPosition"

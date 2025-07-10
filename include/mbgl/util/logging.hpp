@@ -67,7 +67,7 @@ public:
     template <typename... Args>
     static void Record(EventSeverity severity, Event event, Args&&... args) noexcept {
         if (!includes(severity, disabledEventSeverities) && !includes(event, disabledEvents) &&
-            !includes({severity, event}, disabledEventPermutations)) {
+            !includes({.severity = severity, .event = event}, disabledEventPermutations)) {
             record(severity, event, ::std::forward<Args>(args)...);
         }
     }

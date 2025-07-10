@@ -53,23 +53,23 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
 
     if (hasPattern) {
-        const BackgroundPatternPropsUBO propsUBO = {/* .pattern_tl_a = */ util::cast<float>(imagePosA->tl()),
-                                                    /* .pattern_br_a = */ util::cast<float>(imagePosA->br()),
-                                                    /* .pattern_tl_b = */ util::cast<float>(imagePosB->tl()),
-                                                    /* .pattern_br_b = */ util::cast<float>(imagePosB->br()),
-                                                    /* .pattern_size_a = */ imagePosA->displaySize(),
-                                                    /* .pattern_size_b = */ imagePosB->displaySize(),
-                                                    /* .scale_a = */ crossfade.fromScale,
-                                                    /* .scale_b = */ crossfade.toScale,
-                                                    /* .mix = */ crossfade.t,
-                                                    /* .opacity = */ evaluated.get<BackgroundOpacity>()};
+        const BackgroundPatternPropsUBO propsUBO = {.pattern_tl_a = util::cast<float>(imagePosA->tl()),
+                                                    .pattern_br_a = util::cast<float>(imagePosA->br()),
+                                                    .pattern_tl_b = util::cast<float>(imagePosB->tl()),
+                                                    .pattern_br_b = util::cast<float>(imagePosB->br()),
+                                                    .pattern_size_a = imagePosA->displaySize(),
+                                                    .pattern_size_b = imagePosB->displaySize(),
+                                                    .scale_a = crossfade.fromScale,
+                                                    .scale_b = crossfade.toScale,
+                                                    .mix = crossfade.t,
+                                                    .opacity = evaluated.get<BackgroundOpacity>()};
         layerUniforms.createOrUpdate(idBackgroundPropsUBO, &propsUBO, context);
     } else {
-        const BackgroundPropsUBO propsUBO = {/* .color = */ evaluated.get<BackgroundColor>(),
-                                             /* .opacity = */ evaluated.get<BackgroundOpacity>(),
-                                             /* .pad1 = */ 0,
-                                             /* .pad2 = */ 0,
-                                             /* .pad3 = */ 0};
+        const BackgroundPropsUBO propsUBO = {.color = evaluated.get<BackgroundColor>(),
+                                             .opacity = evaluated.get<BackgroundOpacity>(),
+                                             .pad1 = 0,
+                                             .pad2 = 0,
+                                             .pad3 = 0};
         layerUniforms.createOrUpdate(idBackgroundPropsUBO, &propsUBO, context);
     }
 
@@ -98,8 +98,9 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
 
         if (hasPattern) {
             if (const auto& tex = parameters.patternAtlas.texture()) {
-                tex->setSamplerConfiguration(
-                    {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+                tex->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                              .wrapU = gfx::TextureWrapType::Clamp,
+                                              .wrapV = gfx::TextureWrapType::Clamp});
                 drawable.setTexture(tex, idBackgroundImageTexture);
             }
 
@@ -115,13 +116,13 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
 #else
             const BackgroundPatternDrawableUBO drawableUBO = {
 #endif
-                /* .matrix = */ util::cast<float>(matrix),
-                /* .pixel_coord_upper = */ {static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
-                /* .pixel_coord_lower = */ {static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
-                /* .tile_units_to_pixels = */ (pixToTile != 0) ? 1.0f / pixToTile : 0.0f,
-                /* .pad1 = */ 0,
-                /* .pad2 = */ 0,
-                /* .pad3 = */ 0
+                .matrix = util::cast<float>(matrix),
+                .pixel_coord_upper = {static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
+                .pixel_coord_lower = {static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
+                .tile_units_to_pixels = (pixToTile != 0) ? 1.0f / pixToTile : 0.0f,
+                .pad1 = 0,
+                .pad2 = 0,
+                .pad3 = 0
             };
 #if !MLN_UBO_CONSOLIDATION
             drawableUniforms.createOrUpdate(idBackgroundDrawableUBO, &drawableUBO, context);
@@ -133,7 +134,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
 #else
             const BackgroundDrawableUBO drawableUBO = {
 #endif
-                /* .matrix = */ util::cast<float>(matrix)
+                util::cast<float>(matrix)
             };
 #if !MLN_UBO_CONSOLIDATION
             drawableUniforms.createOrUpdate(idBackgroundDrawableUBO, &drawableUBO, context);

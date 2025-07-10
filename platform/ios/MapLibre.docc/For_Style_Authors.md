@@ -150,6 +150,7 @@ In style JSON    | In the SDK
 `tolerance`      | `MLNShapeSourceOptionSimplificationTolerance`
 `cluster`        | `MLNShapeSourceOptionClustered`
 `clusterRadius`  | `MLNShapeSourceOptionClusterRadius`
+`clusterMinPoints`  | `MLNShapeSourceOptionClusterMinPoints`
 `clusterMaxZoom` | `MLNShapeSourceOptionMaximumZoomLevelForClustering`
 `lineMetrics`    | `MLNShapeSourceOptionLineDistanceMetrics`
 
@@ -160,8 +161,8 @@ then use the `-[MLNShapeSource initWithIdentifier:shape:options:]` method.
 ### Image sources
 
 Image sources accept a non-axis aligned quadrilateral as their geographic coordinates.
-These coordinates, in `MLNCoordinateQuad`, are described in counterclockwise order, 
-in contrast to the clockwise order defined in the style specification. 
+These coordinates, in `MLNCoordinateQuad`, are described in counterclockwise order,
+in contrast to the clockwise order defined in the style specification.
 
 ## Configuring the map content’s appearance
 

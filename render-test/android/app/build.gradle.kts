@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    ndkVersion = "27.0.12077973"
+    ndkVersion = "28.1.13356709"
 
     sourceSets {
         getByName("test") {
@@ -35,7 +35,6 @@ android {
         externalNativeBuild {
             cmake {
                 arguments("-DANDROID_STL=c++_static")
-                arguments("-DMLN_LEGACY_RENDERER=OFF", "-DMLN_DRAWABLE_RENDERER=ON")
                 targets.add("mbgl-render-test-runner")
             }
         }

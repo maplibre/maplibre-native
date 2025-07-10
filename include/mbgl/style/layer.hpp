@@ -90,6 +90,10 @@ struct LayerTypeInfo {
     } tileKind;
 };
 
+// Added this to support plugins and that their LayerTypeInfo isn't the same point
+// across the board
+bool layerTypeInfoEquals(const mbgl::style::LayerTypeInfo* one, const mbgl::style::LayerTypeInfo* other);
+
 /**
  * The runtime representation of a [layer](https://maplibre.org/maplibre-style-spec/#layers)
  * from the MapLibre Style Spec.

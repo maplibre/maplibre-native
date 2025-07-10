@@ -8,14 +8,11 @@
 #include <mbgl/gl/command_encoder.hpp>
 #include <mbgl/gl/vertex_buffer_resource.hpp>
 #include <mbgl/gl/index_buffer_resource.hpp>
-#include <mbgl/gl/texture_resource.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gl/vertex_attribute_gl.hpp>
 #include <mbgl/gl/texture2d.hpp>
-#endif
 
 #include <algorithm>
 
@@ -34,8 +31,7 @@ std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResourc
                                                                                   bool /*persistent*/) {
     BufferID id = 0;
     MBGL_CHECK_ERROR(glGenBuffers(1, &id));
-    commandEncoder.context.renderingStats().numBuffers++;
-    commandEncoder.context.renderingStats().memVertexBuffers += static_cast<int>(size);
+
     // NOLINTNEXTLINE(performance-move-const-arg)
     UniqueBuffer result{std::move(id), {commandEncoder.context}};
     commandEncoder.context.vertexBuffer = result;
@@ -46,6 +42,11 @@ std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResourc
 void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource, const void* data, std::size_t size) {
     commandEncoder.context.vertexBuffer = static_cast<gl::VertexBufferResource&>(resource).getBuffer();
     MBGL_CHECK_ERROR(glBufferSubData(GL_ARRAY_BUFFER, 0, size, data));
+
+    commandEncoder.context.renderingStats().vertexUpdateBytes += size;
+    commandEncoder.context.renderingStats().bufferUpdateBytes += size;
+    commandEncoder.context.renderingStats().bufferUpdates++;
+    commandEncoder.context.renderingStats().bufferObjUpdates++;
 }
 
 std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(const void* data,
@@ -54,8 +55,7 @@ std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(
                                                                                 bool /*persistent*/) {
     BufferID id = 0;
     MBGL_CHECK_ERROR(glGenBuffers(1, &id));
-    commandEncoder.context.renderingStats().numBuffers++;
-    commandEncoder.context.renderingStats().memIndexBuffers += static_cast<int>(size);
+
     // NOLINTNEXTLINE(performance-move-const-arg)
     UniqueBuffer result{std::move(id), {commandEncoder.context}};
     commandEncoder.context.bindVertexArray = 0;
@@ -70,68 +70,11 @@ void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource, c
     commandEncoder.context.bindVertexArray = 0;
     commandEncoder.context.globalVertexArrayState.indexBuffer = static_cast<gl::IndexBufferResource&>(resource).buffer;
     MBGL_CHECK_ERROR(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, size, data));
-}
 
-std::unique_ptr<gfx::TextureResource> UploadPass::createTextureResource(const Size size,
-                                                                        const void* data,
-                                                                        gfx::TexturePixelType format,
-                                                                        gfx::TextureChannelDataType type) {
-    MLN_TRACE_FUNC();
-
-    auto obj = commandEncoder.context.createUniqueTexture(size, format, type);
-    auto resource = std::make_unique<gl::TextureResource>(std::move(obj));
-    commandEncoder.context.pixelStoreUnpack = {1};
-    updateTextureResourceSub(*resource, 0, 0, size, data, format, type);
-    // We are using clamp to edge here since OpenGL ES doesn't allow GL_REPEAT
-    // on NPOT textures. We use those when the pixelRatio isn't a power of two,
-    // e.g. on iPhone 6 Plus.
-    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-    return resource;
-}
-
-void UploadPass::updateTextureResource(gfx::TextureResource& resource,
-                                       const Size size,
-                                       const void* data,
-                                       gfx::TexturePixelType format,
-                                       gfx::TextureChannelDataType type) {
-    MLN_TRACE_FUNC();
-
-    updateTextureResourceSub(resource, 0, 0, size, data, format, type);
-}
-
-void UploadPass::updateTextureResourceSub(gfx::TextureResource& resource,
-                                          const uint16_t xOffset,
-                                          const uint16_t yOffset,
-                                          const Size size,
-                                          const void* data,
-                                          gfx::TexturePixelType format,
-                                          gfx::TextureChannelDataType type) {
-    MLN_TRACE_FUNC();
-
-    auto& ctx = commandEncoder.context;
-    assert(ctx.getTexturePool().isUsed(static_cast<gl::TextureResource&>(resource).texture));
-    assert(ctx.getTexturePool().desc(static_cast<gl::TextureResource&>(resource).texture).channelType == type);
-    assert(ctx.getTexturePool().desc(static_cast<gl::TextureResource&>(resource).texture).pixelFormat == format);
-    assert(ctx.getTexturePool().desc(static_cast<gl::TextureResource&>(resource).texture).size.width >=
-           xOffset + size.width);
-    assert(ctx.getTexturePool().desc(static_cast<gl::TextureResource&>(resource).texture).size.height >=
-           yOffset + size.height);
-
-    // Always use texture unit 0 for manipulating it.
-    ctx.activeTextureUnit = 0;
-    ctx.texture[0] = static_cast<const gl::TextureResource&>(resource).texture;
-    MBGL_CHECK_ERROR(glTexSubImage2D(GL_TEXTURE_2D,
-                                     0,
-                                     xOffset,
-                                     yOffset,
-                                     size.width,
-                                     size.height,
-                                     Enum<gfx::TexturePixelType>::to(format),
-                                     Enum<gfx::TextureChannelDataType>::to(type),
-                                     data));
+    commandEncoder.context.renderingStats().indexUpdateBytes += size;
+    commandEncoder.context.renderingStats().bufferUpdateBytes += size;
+    commandEncoder.context.renderingStats().bufferUpdates++;
+    commandEncoder.context.renderingStats().bufferObjUpdates++;
 }
 
 struct VertexBufferGL : public gfx::VertexBufferBase {
@@ -140,7 +83,6 @@ struct VertexBufferGL : public gfx::VertexBufferBase {
     std::unique_ptr<gfx::VertexBufferResource> resource;
 };
 
-#if MLN_DRAWABLE_RENDERER
 namespace {
 const std::unique_ptr<gfx::VertexBufferResource> noBuffer;
 }
@@ -315,7 +257,6 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
 
     return bindings;
 }
-#endif
 
 void UploadPass::pushDebugGroup(const char* name) {
     commandEncoder.pushDebugGroup(name);
@@ -325,7 +266,6 @@ void UploadPass::popDebugGroup() {
     commandEncoder.popDebugGroup();
 }
 
-#if MLN_DRAWABLE_RENDERER
 gfx::Context& UploadPass::getContext() {
     return commandEncoder.context;
 }
@@ -333,7 +273,6 @@ gfx::Context& UploadPass::getContext() {
 const gfx::Context& UploadPass::getContext() const {
     return commandEncoder.context;
 }
-#endif
 
 } // namespace gl
 } // namespace mbgl

@@ -48,16 +48,24 @@ public:
 
     Mask mask;
 
-    static ColorMode disabled() { return {Replace{}, {}, {false, false, false, false}}; }
+    static ColorMode disabled() {
+        return {.blendFunction = Replace{}, .blendColor = {}, .mask = {.r = false, .g = false, .b = false, .a = false}};
+    }
 
-    static ColorMode unblended() { return {Replace{}, {}, {true, true, true, true}}; }
+    static ColorMode unblended() {
+        return {.blendFunction = Replace{}, .blendColor = {}, .mask = {.r = true, .g = true, .b = true, .a = true}};
+    }
 
     static ColorMode alphaBlended() {
-        return {Add{ColorBlendFactorType::One, ColorBlendFactorType::OneMinusSrcAlpha}, {}, {true, true, true, true}};
+        return {.blendFunction = Add{ColorBlendFactorType::One, ColorBlendFactorType::OneMinusSrcAlpha},
+                .blendColor = {},
+                .mask = {.r = true, .g = true, .b = true, .a = true}};
     }
 
     static ColorMode additive() {
-        return {Add{ColorBlendFactorType::One, ColorBlendFactorType::One}, {}, {true, true, true, true}};
+        return {.blendFunction = Add{ColorBlendFactorType::One, ColorBlendFactorType::One},
+                .blendColor = {},
+                .mask = {.r = true, .g = true, .b = true, .a = true}};
     }
 
     std::size_t hash() const {

@@ -118,12 +118,12 @@ struct alignas(16) GPUExpression {
     uint16_t stopCount;
     GPUOptions options;
     GPUInterpType interpolation;
-    
+
     union InterpOptions {
         struct Exponential {
             float base;
         } exponential;
-        
+
         struct Bezier {
             float x1;
             float y1;
@@ -131,14 +131,14 @@ struct alignas(16) GPUExpression {
             float y2;
         } bezier;
     } interpOptions;
-    
+
     float inputs[maxExprStops];
-    
+
     union Stops {
         float floats[maxExprStops];
         float2 colors[maxExprStops];
     } stops;
-    
+
     float eval(float zoom) device const {
         const auto effectiveZoom = (options & GPUOptions::IntegerZoom) ? floor(zoom) : zoom;
         const auto index = find(effectiveZoom);

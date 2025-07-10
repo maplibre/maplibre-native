@@ -1,12 +1,16 @@
 #import "MLNAnnotationContainerView.h"
 #import "MLNMapView.h"
+#import "MLNTileOperation.h"
 #import "MLNUserLocationAnnotationView.h"
-
-#include <mbgl/util/size.hpp>
 
 namespace mbgl {
 class Map;
 class Renderer;
+
+namespace gfx {
+struct RenderingStats;
+}
+
 }  // namespace mbgl
 
 class MLNMapViewImpl;
@@ -38,8 +42,7 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const _Nonnull MLNUnderlyingMapUna
 - (void)mapViewDidFailLoadingMapWithError:(nonnull NSError *)error;
 - (void)mapViewWillStartRenderingFrame;
 - (void)mapViewDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered
-                                  frameEncodingTime:(double)frameEncodingTime
-                                 frameRenderingTime:(double)frameRenderingTime;
+                                     renderingStats:(const mbgl::gfx::RenderingStats &)stats;
 - (void)mapViewWillStartRenderingMap;
 - (void)mapViewDidFinishRenderingMapFullyRendered:(BOOL)fullyRendered;
 - (void)mapViewDidBecomeIdle;
@@ -47,6 +50,29 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const _Nonnull MLNUnderlyingMapUna
 - (void)sourceDidChange:(nonnull MLNSource *)source;
 - (void)didFailToLoadImage:(nonnull NSString *)imageName;
 - (BOOL)shouldRemoveStyleImage:(nonnull NSString *)imageName;
+
+- (void)shaderWillCompile:(NSInteger)id
+                  backend:(NSInteger)backend
+                  defines:(nonnull NSString *)defines;
+- (void)shaderDidCompile:(NSInteger)id
+                 backend:(NSInteger)backend
+                 defines:(nonnull NSString *)defines;
+- (void)shaderDidFailCompile:(NSInteger)id
+                     backend:(NSInteger)backend
+                     defines:(nonnull NSString *)defines;
+- (void)glyphsWillLoad:(nonnull NSArray<NSString *> *)fontStack range:(NSRange)range;
+- (void)glyphsDidLoad:(nonnull NSArray<NSString *> *)fontStack range:(NSRange)range;
+- (void)glyphsDidError:(nonnull NSArray<NSString *> *)fontStack range:(NSRange)range;
+- (void)tileDidTriggerAction:(MLNTileOperation)operation
+                           x:(NSInteger)x
+                           y:(NSInteger)y
+                           z:(NSInteger)z
+                        wrap:(NSInteger)wrap
+                 overscaledZ:(NSInteger)overscaledZ
+                    sourceID:(nonnull NSString *)sourceID;
+- (void)spriteWillLoad:(nullable NSString *)id url:(nullable NSString *)url;
+- (void)spriteDidLoad:(nullable NSString *)id url:(nullable NSString *)url;
+- (void)spriteDidError:(nullable NSString *)id url:(nullable NSString *)url;
 
 - (CLLocationDistance)metersPerPointAtLatitude:(CLLocationDegrees)latitude
                                      zoomLevel:(double)zoomLevel;

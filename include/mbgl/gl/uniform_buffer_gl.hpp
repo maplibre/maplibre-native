@@ -11,7 +11,7 @@ class UniformBufferGL final : public gfx::UniformBuffer {
     UniformBufferGL(const UniformBufferGL&);
 
 public:
-    UniformBufferGL(const void* data, std::size_t size_, IBufferAllocator& allocator);
+    UniformBufferGL(Context& context, const void* data, std::size_t size_, IBufferAllocator& allocator);
     ~UniformBufferGL() override;
 
     UniformBufferGL(UniformBufferGL&& rhs) noexcept;
@@ -27,6 +27,8 @@ public:
     void update(const void* data, std::size_t dataSize) override;
 
 private:
+    Context& context;
+
     // unique id used for debugging and profiling purposes
     // localID should not be used as unique id because a const buffer pool is managed using IBufferAllocator
 // Currently unique IDs for constant buffers are only used when Tracy profiling is enabled
@@ -61,6 +63,8 @@ public:
 
     void bind() const;
     void unbind() const;
+
+    void bind(gfx::RenderPass&) override { bind(); }
 
 private:
     std::unique_ptr<gfx::UniformBuffer> copy(const gfx::UniformBuffer& uniformBuffers) override {

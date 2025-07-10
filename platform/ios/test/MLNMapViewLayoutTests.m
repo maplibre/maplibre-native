@@ -103,7 +103,7 @@
     if (@available(iOS 11.0, *)) {
         bottomSafeAreaInset = self.mapView.safeAreaInsets.bottom;
     }
-    
+
     //compass
     UIImageView *compassView = self.mapView.compassView;
 

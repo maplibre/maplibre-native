@@ -34,6 +34,12 @@ struct MapLibreNavigationView: View {
                 NavigationLink("AddMarkerExample") {
                     AddMarkerSymbolExampleUIViewControllerRepresentable()
                 }
+                NavigationLink("ClusteringExample") {
+                    ClusteringExampleUIViewControllerRepresentable()
+                }
+                NavigationLink("ObserverExample") {
+                    ObserverExampleViewUIViewControllerRepresentable()
+                }
                 Group {
                     NavigationLink("AnimatedLineExample") {
                         AnimatedLineExampleUIViewControllerRepresentable()

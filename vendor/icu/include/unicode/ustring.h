@@ -24,7 +24,7 @@
 
 /**
  * \def UBRK_TYPEDEF_UBREAK_ITERATOR
- * @internal 
+ * @internal
  */
 
 #ifndef UBRK_TYPEDEF_UBREAK_ITERATOR
@@ -141,11 +141,11 @@ u_strHasMoreChar32Than(const UChar *s, int32_t length, int32_t number);
  * @stable ICU 2.0
  */
 U_STABLE UChar* U_EXPORT2
-u_strcat(UChar     *dst, 
+u_strcat(UChar     *dst,
     const UChar     *src);
 
 /**
- * Concatenate two ustrings.  
+ * Concatenate two ustrings.
  * Appends at most <code>n</code> characters from <code>src</code> to <code>dst</code>.
  * Adds a terminating NUL.
  * If src is too long, then only <code>n-1</code> characters will be copied
@@ -159,8 +159,8 @@ u_strcat(UChar     *dst,
  * @stable ICU 2.0
  */
 U_STABLE UChar* U_EXPORT2
-u_strncat(UChar     *dst, 
-     const UChar     *src, 
+u_strncat(UChar     *dst,
+     const UChar     *src,
      int32_t     n);
 
 /**
@@ -410,7 +410,7 @@ u_strspn(const UChar *string, const UChar *matchSet);
  * @stable ICU 2.0
  */
 U_STABLE UChar * U_EXPORT2
-u_strtok_r(UChar    *src, 
+u_strtok_r(UChar    *src,
      const UChar    *delim,
            UChar   **saveState);
 
@@ -425,7 +425,7 @@ u_strtok_r(UChar    *src,
  * @stable ICU 2.0
  */
 U_STABLE int32_t  U_EXPORT2
-u_strcmp(const UChar     *s1, 
+u_strcmp(const UChar     *s1,
          const UChar     *s2);
 
 /**
@@ -544,7 +544,7 @@ u_strCaseCompare(const UChar *s1, int32_t length1,
                  UErrorCode *pErrorCode);
 
 /**
- * Compare two ustrings for bitwise equality. 
+ * Compare two ustrings for bitwise equality.
  * Compares at most <code>n</code> characters.
  *
  * @param ucs1 A string to compare (can be NULL/invalid if n<=0).
@@ -556,8 +556,8 @@ u_strCaseCompare(const UChar *s1, int32_t length1,
  * @stable ICU 2.0
  */
 U_STABLE int32_t U_EXPORT2
-u_strncmp(const UChar     *ucs1, 
-     const UChar     *ucs2, 
+u_strncmp(const UChar     *ucs1,
+     const UChar     *ucs2,
      int32_t     n);
 
 /**
@@ -655,7 +655,7 @@ u_memcasecmp(const UChar *s1, const UChar *s2, int32_t length, uint32_t options)
  * @stable ICU 2.0
  */
 U_STABLE UChar* U_EXPORT2
-u_strcpy(UChar     *dst, 
+u_strcpy(UChar     *dst,
     const UChar     *src);
 
 /**
@@ -670,8 +670,8 @@ u_strcpy(UChar     *dst,
  * @stable ICU 2.0
  */
 U_STABLE UChar* U_EXPORT2
-u_strncpy(UChar     *dst, 
-     const UChar     *src, 
+u_strncpy(UChar     *dst,
+     const UChar     *src,
      int32_t     n);
 
 #if !UCONFIG_NO_CONVERSION
@@ -904,7 +904,7 @@ u_memrchr32(const UChar *s, UChar32 c, int32_t count);
  *    U_STRING_DECL(ustringVar1, "Quick-Fox 2", 11);
  *    U_STRING_DECL(ustringVar2, "jumps 5%", 8);
  *    static UBool didInit=FALSE;
- * 
+ *
  *    int32_t function() {
  *        if(!didInit) {
  *            U_STRING_INIT(ustringVar1, "Quick-Fox 2", 11);
@@ -914,16 +914,16 @@ u_memrchr32(const UChar *s, UChar32 c, int32_t count);
  *        return u_strcmp(ustringVar1, ustringVar2);
  *    }
  * </pre>
- * 
- * Note that the macros will NOT consistently work if their argument is another <code>#define</code>. 
+ *
+ * Note that the macros will NOT consistently work if their argument is another <code>#define</code>.
  *  The following will not work on all platforms, don't use it.
- * 
+ *
  * <pre>
  *     #define GLUCK "Mr. Gluck"
  *     U_STRING_DECL(var, GLUCK, 9)
  *     U_STRING_INIT(var, GLUCK, 9)
  * </pre>
- * 
+ *
  * Instead, use the string literal "Mr. Gluck"  as the argument to both macro
  * calls.
  *
@@ -1190,11 +1190,11 @@ u_strFoldCase(UChar *dest, int32_t destCapacity,
  * @param dest          A buffer for the result string. The result will be zero-terminated if
  *                      the buffer is large enough.
  * @param destCapacity  The size of the buffer (number of wchar_t's). If it is 0, then
- *                      dest may be NULL and the function will only return the length of the 
+ *                      dest may be NULL and the function will only return the length of the
  *                      result without writing any of the result string (pre-flighting).
- * @param pDestLength   A pointer to receive the number of units written to the destination. If 
- *                      pDestLength!=NULL then *pDestLength is always set to the 
- *                      number of output units corresponding to the transformation of 
+ * @param pDestLength   A pointer to receive the number of units written to the destination. If
+ *                      pDestLength!=NULL then *pDestLength is always set to the
+ *                      number of output units corresponding to the transformation of
  *                      all the input units, even in case of a buffer overflow.
  * @param src           The original source string
  * @param srcLength     The length of the original string. If -1, then src must be zero-terminated.
@@ -1204,10 +1204,10 @@ u_strFoldCase(UChar *dest, int32_t destCapacity,
  * @stable ICU 2.0
  */
 U_STABLE wchar_t* U_EXPORT2
-u_strToWCS(wchar_t *dest, 
+u_strToWCS(wchar_t *dest,
            int32_t destCapacity,
            int32_t *pDestLength,
-           const UChar *src, 
+           const UChar *src,
            int32_t srcLength,
            UErrorCode *pErrorCode);
 /**
@@ -1219,11 +1219,11 @@ u_strToWCS(wchar_t *dest,
  * @param dest          A buffer for the result string. The result will be zero-terminated if
  *                      the buffer is large enough.
  * @param destCapacity  The size of the buffer (number of UChars). If it is 0, then
- *                      dest may be NULL and the function will only return the length of the 
+ *                      dest may be NULL and the function will only return the length of the
  *                      result without writing any of the result string (pre-flighting).
- * @param pDestLength   A pointer to receive the number of units written to the destination. If 
- *                      pDestLength!=NULL then *pDestLength is always set to the 
- *                      number of output units corresponding to the transformation of 
+ * @param pDestLength   A pointer to receive the number of units written to the destination. If
+ *                      pDestLength!=NULL then *pDestLength is always set to the
+ *                      number of output units corresponding to the transformation of
  *                      all the input units, even in case of a buffer overflow.
  * @param src           The original source string
  * @param srcLength     The length of the original string. If -1, then src must be zero-terminated.
@@ -1234,7 +1234,7 @@ u_strToWCS(wchar_t *dest,
  */
 U_STABLE UChar* U_EXPORT2
 u_strFromWCS(UChar   *dest,
-             int32_t destCapacity, 
+             int32_t destCapacity,
              int32_t *pDestLength,
              const wchar_t *src,
              int32_t srcLength,
@@ -1248,11 +1248,11 @@ u_strFromWCS(UChar   *dest,
  * @param dest          A buffer for the result string. The result will be zero-terminated if
  *                      the buffer is large enough.
  * @param destCapacity  The size of the buffer (number of chars). If it is 0, then
- *                      dest may be NULL and the function will only return the length of the 
+ *                      dest may be NULL and the function will only return the length of the
  *                      result without writing any of the result string (pre-flighting).
- * @param pDestLength   A pointer to receive the number of units written to the destination. If 
- *                      pDestLength!=NULL then *pDestLength is always set to the 
- *                      number of output units corresponding to the transformation of 
+ * @param pDestLength   A pointer to receive the number of units written to the destination. If
+ *                      pDestLength!=NULL then *pDestLength is always set to the
+ *                      number of output units corresponding to the transformation of
  *                      all the input units, even in case of a buffer overflow.
  * @param src           The original source string
  * @param srcLength     The length of the original string. If -1, then src must be zero-terminated.
@@ -1263,11 +1263,11 @@ u_strFromWCS(UChar   *dest,
  * @see u_strToUTF8WithSub
  * @see u_strFromUTF8
  */
-U_STABLE char* U_EXPORT2 
-u_strToUTF8(char *dest,           
+U_STABLE char* U_EXPORT2
+u_strToUTF8(char *dest,
             int32_t destCapacity,
             int32_t *pDestLength,
-            const UChar *src, 
+            const UChar *src,
             int32_t srcLength,
             UErrorCode *pErrorCode);
 
@@ -1278,11 +1278,11 @@ u_strToUTF8(char *dest,
  * @param dest          A buffer for the result string. The result will be zero-terminated if
  *                      the buffer is large enough.
  * @param destCapacity  The size of the buffer (number of UChars). If it is 0, then
- *                      dest may be NULL and the function will only return the length of the 
+ *                      dest may be NULL and the function will only return the length of the
  *                      result without writing any of the result string (pre-flighting).
- * @param pDestLength   A pointer to receive the number of units written to the destination. If 
- *                      pDestLength!=NULL then *pDestLength is always set to the 
- *                      number of output units corresponding to the transformation of 
+ * @param pDestLength   A pointer to receive the number of units written to the destination. If
+ *                      pDestLength!=NULL then *pDestLength is always set to the
+ *                      number of output units corresponding to the transformation of
  *                      all the input units, even in case of a buffer overflow.
  * @param src           The original source string
  * @param srcLength     The length of the original string. If -1, then src must be zero-terminated.
@@ -1294,10 +1294,10 @@ u_strToUTF8(char *dest,
  * @see u_strFromUTF8Lenient
  */
 U_STABLE UChar* U_EXPORT2
-u_strFromUTF8(UChar *dest,             
+u_strFromUTF8(UChar *dest,
               int32_t destCapacity,
               int32_t *pDestLength,
-              const char *src, 
+              const char *src,
               int32_t srcLength,
               UErrorCode *pErrorCode);
 
@@ -1311,11 +1311,11 @@ u_strFromUTF8(UChar *dest,
  * @param dest          A buffer for the result string. The result will be zero-terminated if
  *                      the buffer is large enough.
  * @param destCapacity  The size of the buffer (number of chars). If it is 0, then
- *                      dest may be NULL and the function will only return the length of the 
+ *                      dest may be NULL and the function will only return the length of the
  *                      result without writing any of the result string (pre-flighting).
- * @param pDestLength   A pointer to receive the number of units written to the destination. If 
- *                      pDestLength!=NULL then *pDestLength is always set to the 
- *                      number of output units corresponding to the transformation of 
+ * @param pDestLength   A pointer to receive the number of units written to the destination. If
+ *                      pDestLength!=NULL then *pDestLength is always set to the
+ *                      number of output units corresponding to the transformation of
  *                      all the input units, even in case of a buffer overflow.
  * @param src           The original source string
  * @param srcLength     The length of the original string. If -1, then src must be zero-terminated.
@@ -1355,11 +1355,11 @@ u_strToUTF8WithSub(char *dest,
  * @param dest          A buffer for the result string. The result will be zero-terminated if
  *                      the buffer is large enough.
  * @param destCapacity  The size of the buffer (number of UChars). If it is 0, then
- *                      dest may be NULL and the function will only return the length of the 
+ *                      dest may be NULL and the function will only return the length of the
  *                      result without writing any of the result string (pre-flighting).
- * @param pDestLength   A pointer to receive the number of units written to the destination. If 
- *                      pDestLength!=NULL then *pDestLength is always set to the 
- *                      number of output units corresponding to the transformation of 
+ * @param pDestLength   A pointer to receive the number of units written to the destination. If
+ *                      pDestLength!=NULL then *pDestLength is always set to the
+ *                      number of output units corresponding to the transformation of
  *                      all the input units, even in case of a buffer overflow.
  * @param src           The original source string
  * @param srcLength     The length of the original string. If -1, then src must be zero-terminated.
@@ -1417,13 +1417,13 @@ u_strFromUTF8WithSub(UChar *dest,
  * @param dest          A buffer for the result string. The result will be zero-terminated if
  *                      the buffer is large enough.
  * @param destCapacity  The size of the buffer (number of UChars). If it is 0, then
- *                      dest may be NULL and the function will only return the length of the 
+ *                      dest may be NULL and the function will only return the length of the
  *                      result without writing any of the result string (pre-flighting).
  *                      Unlike for other ICU functions, if srcLength>=0 then it
  *                      must be destCapacity>=srcLength.
- * @param pDestLength   A pointer to receive the number of units written to the destination. If 
- *                      pDestLength!=NULL then *pDestLength is always set to the 
- *                      number of output units corresponding to the transformation of 
+ * @param pDestLength   A pointer to receive the number of units written to the destination. If
+ *                      pDestLength!=NULL then *pDestLength is always set to the
+ *                      number of output units corresponding to the transformation of
  *                      all the input units, even in case of a buffer overflow.
  *                      Unlike for other ICU functions, if srcLength>=0 but
  *                      destCapacity<srcLength, then *pDestLength will be set to srcLength
@@ -1456,11 +1456,11 @@ u_strFromUTF8Lenient(UChar *dest,
  * @param dest          A buffer for the result string. The result will be zero-terminated if
  *                      the buffer is large enough.
  * @param destCapacity  The size of the buffer (number of UChar32s). If it is 0, then
- *                      dest may be NULL and the function will only return the length of the 
+ *                      dest may be NULL and the function will only return the length of the
  *                      result without writing any of the result string (pre-flighting).
- * @param pDestLength   A pointer to receive the number of units written to the destination. If 
- *                      pDestLength!=NULL then *pDestLength is always set to the 
- *                      number of output units corresponding to the transformation of 
+ * @param pDestLength   A pointer to receive the number of units written to the destination. If
+ *                      pDestLength!=NULL then *pDestLength is always set to the
+ *                      number of output units corresponding to the transformation of
  *                      all the input units, even in case of a buffer overflow.
  * @param src           The original source string
  * @param srcLength     The length of the original string. If -1, then src must be zero-terminated.
@@ -1471,11 +1471,11 @@ u_strFromUTF8Lenient(UChar *dest,
  * @see u_strFromUTF32
  * @stable ICU 2.0
  */
-U_STABLE UChar32* U_EXPORT2 
-u_strToUTF32(UChar32 *dest, 
+U_STABLE UChar32* U_EXPORT2
+u_strToUTF32(UChar32 *dest,
              int32_t  destCapacity,
              int32_t  *pDestLength,
-             const UChar *src, 
+             const UChar *src,
              int32_t  srcLength,
              UErrorCode *pErrorCode);
 
@@ -1486,11 +1486,11 @@ u_strToUTF32(UChar32 *dest,
  * @param dest          A buffer for the result string. The result will be zero-terminated if
  *                      the buffer is large enough.
  * @param destCapacity  The size of the buffer (number of UChars). If it is 0, then
- *                      dest may be NULL and the function will only return the length of the 
+ *                      dest may be NULL and the function will only return the length of the
  *                      result without writing any of the result string (pre-flighting).
- * @param pDestLength   A pointer to receive the number of units written to the destination. If 
- *                      pDestLength!=NULL then *pDestLength is always set to the 
- *                      number of output units corresponding to the transformation of 
+ * @param pDestLength   A pointer to receive the number of units written to the destination. If
+ *                      pDestLength!=NULL then *pDestLength is always set to the
+ *                      number of output units corresponding to the transformation of
  *                      all the input units, even in case of a buffer overflow.
  * @param src           The original source string
  * @param srcLength     The length of the original string. If -1, then src must be zero-terminated.
@@ -1501,9 +1501,9 @@ u_strToUTF32(UChar32 *dest,
  * @see u_strToUTF32
  * @stable ICU 2.0
  */
-U_STABLE UChar* U_EXPORT2 
+U_STABLE UChar* U_EXPORT2
 u_strFromUTF32(UChar   *dest,
-               int32_t destCapacity, 
+               int32_t destCapacity,
                int32_t *pDestLength,
                const UChar32 *src,
                int32_t srcLength,
@@ -1612,11 +1612,11 @@ u_strFromUTF32WithSub(UChar *dest,
  * @param dest          A buffer for the result string. The result will be zero-terminated if
  *                      the buffer is large enough.
  * @param destCapacity  The size of the buffer (number of chars). If it is 0, then
- *                      dest may be NULL and the function will only return the length of the 
+ *                      dest may be NULL and the function will only return the length of the
  *                      result without writing any of the result string (pre-flighting).
- * @param pDestLength   A pointer to receive the number of units written to the destination. If 
- *                      pDestLength!=NULL then *pDestLength is always set to the 
- *                      number of output units corresponding to the transformation of 
+ * @param pDestLength   A pointer to receive the number of units written to the destination. If
+ *                      pDestLength!=NULL then *pDestLength is always set to the
+ *                      number of output units corresponding to the transformation of
  *                      all the input units, even in case of a buffer overflow.
  * @param src           The original source string
  * @param srcLength     The length of the original string. If -1, then src must be zero-terminated.
@@ -1629,18 +1629,18 @@ u_strFromUTF32WithSub(UChar *dest,
  * @see u_strToUTF8WithSub
  * @see u_strFromJavaModifiedUTF8WithSub
  */
-U_STABLE char* U_EXPORT2 
+U_STABLE char* U_EXPORT2
 u_strToJavaModifiedUTF8(
         char *dest,
         int32_t destCapacity,
         int32_t *pDestLength,
-        const UChar *src, 
+        const UChar *src,
         int32_t srcLength,
         UErrorCode *pErrorCode);
 
 /**
  * Convert a Java Modified UTF-8 string to a 16-bit Unicode string.
- * If the input string is not well-formed and no substitution char is specified, 
+ * If the input string is not well-formed and no substitution char is specified,
  * then the U_INVALID_CHAR_FOUND error code is set.
  *
  * This function behaves according to the documentation for Java DataInput.readUTF()
@@ -1653,11 +1653,11 @@ u_strToJavaModifiedUTF8(
  * @param dest          A buffer for the result string. The result will be zero-terminated if
  *                      the buffer is large enough.
  * @param destCapacity  The size of the buffer (number of UChars). If it is 0, then
- *                      dest may be NULL and the function will only return the length of the 
+ *                      dest may be NULL and the function will only return the length of the
  *                      result without writing any of the result string (pre-flighting).
- * @param pDestLength   A pointer to receive the number of units written to the destination. If 
- *                      pDestLength!=NULL then *pDestLength is always set to the 
- *                      number of output units corresponding to the transformation of 
+ * @param pDestLength   A pointer to receive the number of units written to the destination. If
+ *                      pDestLength!=NULL then *pDestLength is always set to the
+ *                      number of output units corresponding to the transformation of
  *                      all the input units, even in case of a buffer overflow.
  * @param src           The original source string
  * @param srcLength     The length of the original string. If -1, then src must be zero-terminated.

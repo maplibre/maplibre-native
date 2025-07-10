@@ -2,8 +2,9 @@
 startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
 
 common --enable_platform_specific_config
-# TODO: remove once bazel flips this flag
-common --incompatible_disallow_empty_glob
+
+# TODO: remove once issues with yanked versions are resolved
+common --allow_yanked_versions=rules_cc@0.1.0
 
 coverage --experimental_ui_max_stdouterr_bytes=10485760
 

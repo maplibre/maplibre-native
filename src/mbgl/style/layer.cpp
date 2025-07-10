@@ -12,6 +12,14 @@
 namespace mbgl {
 namespace style {
 
+// Added this to support plugins and that their LayerTypeInfo isn't the same point
+// across the board
+bool layerTypeInfoEquals(const mbgl::style::LayerTypeInfo* one, const mbgl::style::LayerTypeInfo* other) {
+    return ((strcmp(one->type, other->type) == 0) && (one->source == other->source) && (one->pass3d == other->pass3d) &&
+            (one->layout == other->layout) && (one->fadingTiles == other->fadingTiles) &&
+            (one->crossTileIndex == other->crossTileIndex) && (one->tileKind == other->tileKind));
+};
+
 static_assert(mbgl::underlying_type(Tile::Kind::Geometry) == mbgl::underlying_type(LayerTypeInfo::TileKind::Geometry),
               "tile kind error");
 static_assert(mbgl::underlying_type(Tile::Kind::Raster) == mbgl::underlying_type(LayerTypeInfo::TileKind::Raster),

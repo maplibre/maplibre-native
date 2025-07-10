@@ -116,7 +116,7 @@ setTarget() {
     local targetBinaryPath=$2
     local targetUrl=$3
     local checksum=$(swift package compute-checksum ${targetBinaryPath})
-    
+
     echo "token=[${token}]"
     echo "url=[$targetUrl]"
     echo "cheksum=[$checksum]"

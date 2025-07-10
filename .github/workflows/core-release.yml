@@ -1,0 +1,116 @@
+
+name: core-release
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Create maplibre-native-headers.tar.gz
+        run: |
+          tar czf maplibre-native-headers.tar.gz \
+            include \
+            vendor/maplibre-native-base/include \
+            vendor/maplibre-native-base/deps/variant/include \
+            vendor/maplibre-native-base/deps/geometry.hpp/include
+      - name: Create Release
+        run: |
+          gh release create core-${{ github.sha }} \
+            --draft=false \
+            --prerelease=false \
+            --latest=false \
+            --title "core-${{ github.sha }}" \
+            maplibre-native-headers.tar.gz LICENSES.core.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-macos:
+    needs: [create-release]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build mbgl-core for macOS
+        run: |
+          cmake --preset macos-core -DCMAKE_CXX_COMPILER_LAUNCHER=""
+          cmake --build --preset macos-core
+
+      - name: Rename artifact
+        run: cp build-macos/libmbgl-core.a libmaplibre-native-core-macos-arm64-metal.a
+
+      - name: Upload macOS artifact
+        run: gh release upload core-${{ github.sha }} libmaplibre-native-core-macos-arm64-metal.a
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  build-linux:
+    needs: [create-release]
+    runs-on: ${{ matrix.runner.os }}
+    strategy:
+      matrix:
+        include:
+          - renderer: opengl
+            runner: { os: ubuntu-latest, arch: x64 }
+          - renderer: vulkan
+            runner: { os: ubuntu-latest, arch: x64 }
+          - renderer: opengl
+            runner: { os: ubuntu-24.04-arm, arch: arm64 }
+          - renderer: vulkan
+            runner: { os: ubuntu-24.04-arm, arch: arm64 }
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: .github/scripts/install-linux-deps
+
+      - name: Build mbgl-core for Linux
+        run: |
+          cmake --preset linux-${{ matrix.renderer }}-core -DCMAKE_CXX_COMPILER_LAUNCHER=""
+          cmake --build --preset linux-${{ matrix.renderer }}-core
+
+      - name: Rename artifact
+        run: cp build-linux-${{ matrix.renderer }}/libmbgl-core.a libmaplibre-native-core-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
+
+      - name: Upload Linux artifact
+        run: gh release upload core-${{ github.sha }} libmaplibre-native-core-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  build-windows:
+    needs: [create-release]
+    runs-on: windows-2022
+    strategy:
+      matrix:
+        renderer: [opengl, egl, vulkan]
+    steps:
+      - run: |
+          git config --system core.longpaths true
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Build mbgl-core for Windows
+        run: |
+          cmake --preset windows-${{ matrix.renderer }}-core -DCMAKE_CXX_COMPILER_LAUNCHER=""
+          cmake --build --preset windows-${{ matrix.renderer }}-core
+
+      - name: Rename artifact
+        run: Copy-Item build-windows-${{ matrix.renderer }}/mbgl-core.lib maplibre-native-core-windows-x64-${{ matrix.renderer }}.lib
+
+      - name: Upload Windows artifact
+        run: gh release upload core-${{ github.sha }} maplibre-native-core-windows-x64-${{ matrix.renderer }}.lib
+        env:
+          GH_TOKEN: ${{ github.token }}

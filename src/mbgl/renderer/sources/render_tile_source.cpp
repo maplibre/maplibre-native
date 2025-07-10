@@ -10,7 +10,6 @@
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/math.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
@@ -27,14 +26,10 @@
 #include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/renderer/layer_tweaker.hpp>
 
-#include <unordered_set>
-
 #if MLN_RENDER_BACKEND_METAL || (MLN_RENDER_BACKEND_VULKAN && defined(__ANDROID__))
 #define MLN_ENABLE_POLYLINE_DRAWABLES 1
 #else
 #define MLN_ENABLE_POLYLINE_DRAWABLES 0
-#endif
-
 #endif
 
 namespace mbgl {
@@ -48,14 +43,6 @@ void TileSourceRenderItem::upload(gfx::UploadPass& parameters) const {
     }
 }
 
-void TileSourceRenderItem::render(PaintParameters& parameters) const {
-    for (auto& tile : *renderTiles) {
-        tile.finishRender(parameters);
-    }
-}
-
-#if MLN_DRAWABLE_RENDERER
-
 #if MLN_ENABLE_POLYLINE_DRAWABLES
 class PolylineLayerImpl : public Layer::Impl {
 public:
@@ -66,13 +53,13 @@ public:
 
     const LayerTypeInfo* getTypeInfo() const noexcept final { return staticTypeInfo(); }
     static const LayerTypeInfo* staticTypeInfo() noexcept {
-        const static LayerTypeInfo typeInfo{"debugPolyline",
-                                            LayerTypeInfo::Source::NotRequired,
-                                            LayerTypeInfo::Pass3D::NotRequired,
-                                            LayerTypeInfo::Layout::NotRequired,
-                                            LayerTypeInfo::FadingTiles::NotRequired,
-                                            LayerTypeInfo::CrossTileIndex::NotRequired,
-                                            LayerTypeInfo::TileKind::NotRequired};
+        const static LayerTypeInfo typeInfo{.type = "debugPolyline",
+                                            .source = LayerTypeInfo::Source::NotRequired,
+                                            .pass3d = LayerTypeInfo::Pass3D::NotRequired,
+                                            .layout = LayerTypeInfo::Layout::NotRequired,
+                                            .fadingTiles = LayerTypeInfo::FadingTiles::NotRequired,
+                                            .crossTileIndex = LayerTypeInfo::CrossTileIndex::NotRequired,
+                                            .tileKind = LayerTypeInfo::TileKind::NotRequired};
         return &typeInfo;
     }
 };
@@ -457,7 +444,6 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         debugLayerGroups.erase(DebugType::Border);
     }
 }
-#endif
 
 RenderTileSource::RenderTileSource(Immutable<style::Source::Impl> impl_, const TaggedScheduler& threadPool_)
     : RenderSource(std::move(impl_)),

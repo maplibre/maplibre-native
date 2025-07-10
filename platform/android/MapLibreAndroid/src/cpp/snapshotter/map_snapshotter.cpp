@@ -66,14 +66,9 @@ MapSnapshotter::MapSnapshotter(jni::JNIEnv& _env,
 }
 
 MapSnapshotter::~MapSnapshotter() {
-    auto guard = weakScheduler.lock();
-    if (weakScheduler && weakScheduler.get() != mbgl::Scheduler::GetCurrent()) {
+    if (auto guard = weakScheduler.lock(); weakScheduler && weakScheduler.get() != Scheduler::GetCurrent()) {
         snapshotter->cancel();
-        weakScheduler->schedule([ptr = snapshotter.release()]() mutable {
-            if (ptr) {
-                delete ptr;
-            }
-        });
+        weakScheduler->schedule([ptr = snapshotter.release()]() { delete ptr; });
     }
 }
 

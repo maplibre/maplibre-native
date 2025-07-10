@@ -63,7 +63,7 @@ double MLNZoomLevelForAltitude(CLLocationDistance altitude, CGFloat pitch, CLLoc
 MLNRadianDistance MLNDistanceBetweenRadianCoordinates(MLNRadianCoordinate2D from, MLNRadianCoordinate2D to) {
     double a = pow(sin((to.latitude - from.latitude) / 2), 2)
         + pow(sin((to.longitude - from.longitude) / 2), 2) * cos(from.latitude) * cos(to.latitude);
-    
+
     return 2 * atan2(sqrt(a), sqrt(1 - a));
 }
 
@@ -88,7 +88,7 @@ CLLocationDirection MLNDirectionBetweenCoordinates(CLLocationCoordinate2D firstC
     // Ported from https://github.com/mapbox/turf-swift/blob/857e2e8060678ef4a7a9169d4971b0788fdffc37/Turf/Turf.swift#L23-L31
     MLNRadianCoordinate2D firstRadianCoordinate = MLNRadianCoordinateFromLocationCoordinate(firstCoordinate);
     MLNRadianCoordinate2D secondRadianCoordinate = MLNRadianCoordinateFromLocationCoordinate(secondCoordinate);
-    
+
     CGFloat a = sin(secondRadianCoordinate.longitude - firstRadianCoordinate.longitude) * cos(secondRadianCoordinate.latitude);
     CGFloat b = (cos(firstRadianCoordinate.latitude) * sin(secondRadianCoordinate.latitude)
                  - sin(firstRadianCoordinate.latitude) * cos(secondRadianCoordinate.latitude) * cos(secondRadianCoordinate.longitude - firstRadianCoordinate.longitude));

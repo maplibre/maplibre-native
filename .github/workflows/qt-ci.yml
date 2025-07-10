@@ -59,18 +59,18 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: Linux
+          - name: Linux_GCC11
             os: ubuntu-24.04
             build_type: RelWithDebInfo
             qt_version: 6.8.1
             qt_target: desktop
             compiler: ""
-          - name: Linux_GCC13
+          - name: Linux_GCC14
             os: ubuntu-24.04
             build_type: RelWithDebInfo
             qt_version: 6.8.1
             qt_target: desktop
-            compiler: "gcc-13"
+            compiler: "gcc-14"
           - name: macOS
             os: macos-14
             build_type: RelWithDebInfo
@@ -109,14 +109,7 @@ jobs:
         with:
           path: source
           fetch-depth: 0
-
-      - name: Setup submodules
-        shell: bash
-        run: |
-          cd source
-          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
-          git submodule sync --recursive
-          git -c core.longpaths=true -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1 || true
+          submodules: true
 
       - name: Install test dependencies
         if: runner.os == 'Linux' && matrix.compiler != ''
@@ -135,7 +128,7 @@ jobs:
             libegl1 \
             fonts-noto-cjk
 
-      - name: Install compiler
+      - name: Install compiler (Linux)
         id: install_compiler
         if: runner.os == 'Linux' && matrix.compiler != ''
         uses: rlalik/setup-cpp-compiler@master
@@ -182,7 +175,7 @@ jobs:
           arch: ${{ matrix.compiler_type }}
 
       - name: Setup ninja
-        uses: seanmiddleditch/gha-setup-ninja@v5
+        uses: seanmiddleditch/gha-setup-ninja@v6
 
       - name: Download Qt
         uses: jurplel/install-qt-action@v4

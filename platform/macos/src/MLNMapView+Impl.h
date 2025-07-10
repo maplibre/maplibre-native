@@ -31,13 +31,28 @@ class MLNMapViewImpl : public mbgl::MapObserver {
   void onDidFinishLoadingMap() override;
   void onDidFailLoadingMap(mbgl::MapLoadError mapError, const std::string& what) override;
   void onWillStartRenderingFrame() override;
-  void onDidFinishRenderingFrame(mbgl::MapObserver::RenderFrameStatus) override;
+  void onDidFinishRenderingFrame(const mbgl::MapObserver::RenderFrameStatus&) override;
   void onWillStartRenderingMap() override;
   void onDidFinishRenderingMap(mbgl::MapObserver::RenderMode) override;
   void onDidFinishLoadingStyle() override;
   void onSourceChanged(mbgl::style::Source& source) override;
   void onDidBecomeIdle() override;
   bool onCanRemoveUnusedStyleImage(const std::string& imageIdentifier) override;
+  void onRegisterShaders(mbgl::gfx::ShaderRegistry&) override;
+  void onPreCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type,
+                          const std::string&) override;
+  void onPostCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type,
+                           const std::string&) override;
+  void onShaderCompileFailed(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type,
+                             const std::string&) override;
+  void onGlyphsLoaded(const mbgl::FontStack&, const mbgl::GlyphRange&) override;
+  void onGlyphsError(const mbgl::FontStack&, const mbgl::GlyphRange&, std::exception_ptr) override;
+  void onGlyphsRequested(const mbgl::FontStack&, const mbgl::GlyphRange&) override;
+  void onTileAction(mbgl::TileOperation, const mbgl::OverscaledTileID&,
+                    const std::string&) override;
+  void onSpriteLoaded(const std::optional<mbgl::style::Sprite>&) override;
+  void onSpriteError(const std::optional<mbgl::style::Sprite>&, std::exception_ptr) override;
+  void onSpriteRequested(const std::optional<mbgl::style::Sprite>&) override;
 
  protected:
   /// Cocoa map view that this adapter bridges to.

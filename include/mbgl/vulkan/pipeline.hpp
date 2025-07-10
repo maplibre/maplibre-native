@@ -3,6 +3,7 @@
 #include <mbgl/vulkan/renderer_backend.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/gfx/color_mode.hpp>
+#include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
 

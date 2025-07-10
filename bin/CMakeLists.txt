@@ -6,8 +6,8 @@ add_executable(
 target_link_libraries(
     mbgl-cache
     PRIVATE
-        Mapbox::Base
-        Mapbox::Base::Extras::args
+        MapLibreNative::Base
+        MapLibreNative::Base::Extras::args
         mbgl-compiler-options
         mbgl-core
 )
@@ -19,7 +19,7 @@ add_executable(
 
 target_link_libraries(
     mbgl-offline
-    PRIVATE Mapbox::Base::Extras::args mbgl-compiler-options mbgl-core
+    PRIVATE MapLibreNative::Base::Extras::args mbgl-compiler-options mbgl-core
 )
 
 add_executable(
@@ -29,7 +29,7 @@ add_executable(
 
 target_link_libraries(
     mbgl-render
-    PRIVATE Mapbox::Base::Extras::args mbgl-compiler-options mbgl-core
+    PRIVATE MapLibreNative::Base::Extras::args mbgl-compiler-options mbgl-core
 )
 
 if(WIN32)

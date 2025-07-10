@@ -15,7 +15,7 @@ id MLNJSONObjectFromMBGLValue(const mbgl::Value &value) {
     }, [](const int64_t value) {
         return @(value);
     }, [](const uint64_t value) {
-        return @(value);        
+        return @(value);
     }, [](const double value) {
         return @(value);
     }, [](const std::string &value) {

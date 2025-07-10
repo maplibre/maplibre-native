@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
@@ -43,6 +42,7 @@ class Texture2D;
 
 using UniqueShaderProgram = std::unique_ptr<ShaderProgram>;
 using UniqueVertexBufferResource = std::unique_ptr<VertexBufferResource>;
+using UniqueUniformBufferArray = std::unique_ptr<gfx::UniformBufferArray>;
 
 class Context final : public gfx::Context {
 public:
@@ -70,7 +70,7 @@ public:
                                       const mbgl::unordered_map<std::string, std::string>& additionalDefines);
 
     /// Called at the end of a frame.
-    void performCleanup() override {}
+    void performCleanup() override;
     void reduceMemoryUsage() override {}
 
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
@@ -78,6 +78,8 @@ public:
                                               std::size_t size,
                                               bool persistent,
                                               bool ssbo = false) override;
+
+    UniqueUniformBufferArray createLayerUniformBufferArray() override;
 
     gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
 
@@ -101,10 +103,6 @@ public:
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType, bool, bool);
 
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
-
-    std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
-                                                                gfx::TexturePixelType,
-                                                                gfx::TextureChannelDataType) override;
 
     std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType,
                                                                           Size size) override;
@@ -154,19 +152,14 @@ private:
     struct FrameResources {
         vk::UniqueCommandBuffer commandBuffer;
 
-        vk::UniqueSemaphore surfaceSemaphore;
-        vk::UniqueSemaphore frameSemaphore;
+        vk::UniqueSemaphore acquireSurfaceSemaphore;
         vk::UniqueFence flightFrameFence;
 
         std::vector<std::function<void(Context&)>> deletionQueue;
 
-        FrameResources(vk::UniqueCommandBuffer& cb,
-                       vk::UniqueSemaphore&& surf,
-                       vk::UniqueSemaphore&& frame,
-                       vk::UniqueFence&& flight)
+        FrameResources(vk::UniqueCommandBuffer& cb, vk::UniqueSemaphore&& surf, vk::UniqueFence&& flight)
             : commandBuffer(std::move(cb)),
-              surfaceSemaphore(std::move(surf)),
-              frameSemaphore(std::move(frame)),
+              acquireSurfaceSemaphore(std::move(surf)),
               flightFrameFence(std::move(flight)) {}
 
         void runDeletionQueue(Context&);

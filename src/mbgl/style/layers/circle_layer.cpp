@@ -21,16 +21,15 @@ namespace style {
 
 // static
 const LayerTypeInfo* CircleLayer::Impl::staticTypeInfo() noexcept {
-    const static LayerTypeInfo typeInfo{"circle",
-                                        LayerTypeInfo::Source::Required,
-                                        LayerTypeInfo::Pass3D::NotRequired,
-                                        LayerTypeInfo::Layout::Required,
-                                        LayerTypeInfo::FadingTiles::NotRequired,
-                                        LayerTypeInfo::CrossTileIndex::NotRequired,
-                                        LayerTypeInfo::TileKind::Geometry};
+    const static LayerTypeInfo typeInfo{.type="circle",
+                                        .source=LayerTypeInfo::Source::Required,
+                                        .pass3d=LayerTypeInfo::Pass3D::NotRequired,
+                                        .layout=LayerTypeInfo::Layout::Required,
+                                        .fadingTiles=LayerTypeInfo::FadingTiles::NotRequired,
+                                        .crossTileIndex=LayerTypeInfo::CrossTileIndex::NotRequired,
+                                        .tileKind=LayerTypeInfo::TileKind::Geometry};
     return &typeInfo;
 }
-
 
 CircleLayer::CircleLayer(const std::string& layerID, const std::string& sourceID)
     : Layer(makeMutable<Impl>(layerID, sourceID)) {

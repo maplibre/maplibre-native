@@ -27,10 +27,10 @@
     cacheDirectoryURL = [cacheDirectoryURL URLByAppendingPathComponent:bundleIdentifier];
     cacheDirectoryURL = [cacheDirectoryURL URLByAppendingPathComponent:@".mapbox"];
     XCTAssertTrue([[NSFileManager defaultManager] fileExistsAtPath:cacheDirectoryURL.path], @"Directory containing database should exist.");
-    
+
     NSURL *cacheURL = [cacheDirectoryURL URLByAppendingPathComponent:@"cache.db"];
     XCTAssertEqualObjects(cacheURL, MLNOfflineStorage.sharedOfflineStorage.databaseURL);
-    
+
     [[NSFileManager defaultManager] removeItemAtURL:cacheURL error:nil];
     XCTAssertFalse([[NSFileManager defaultManager] fileExistsAtPath:cacheURL.path], @"Database should not exist.");
 }
@@ -38,7 +38,7 @@
 - (void)setUp {
     [super setUp];
     [MLNSettings useWellKnownTileServer:MLNMapTiler];
-    
+
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         XCTestExpectation *expectation = [self keyValueObservingExpectationForObject:[MLNOfflineStorage sharedOfflineStorage] keyPath:@"packs" handler:^BOOL(id _Nonnull observedObject, NSDictionary * _Nonnull change) {
@@ -141,13 +141,13 @@
     }];
     [pack requestProgress];
     [self waitForExpectationsWithTimeout:5 handler:nil];
-    
+
     XCTAssertEqualObjects(pack.context, context, @"Offline pack context should match the context specified by the application.");
     NSString *newName = @"🍑 Peach Grove";
     NSData *newContext = [NSKeyedArchiver archivedDataWithRootObject:@{
         nameKey: newName,
     }];
-    
+
     XCTestExpectation *contextCompletionHandlerExpectation = [self expectationWithDescription:@"set pack completion context handler"];
     __weak MLNOfflinePack *weakPack = pack;
     [pack setContext:newContext completionHandler:^(NSError * _Nullable error) {

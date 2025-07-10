@@ -81,34 +81,6 @@ void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource, c
     static_cast<IndexBufferResource&>(resource).get().update(data, size, /*offset=*/0);
 }
 
-std::unique_ptr<gfx::TextureResource> UploadPass::createTextureResource(const Size size,
-                                                                        const void* data,
-                                                                        gfx::TexturePixelType format,
-                                                                        gfx::TextureChannelDataType type) {
-    assert(false);
-    throw std::runtime_error("UploadPass::createTextureResource not implemented on Metal!");
-}
-
-void UploadPass::updateTextureResource(gfx::TextureResource& resource,
-                                       const Size size,
-                                       const void* data,
-                                       gfx::TexturePixelType format,
-                                       gfx::TextureChannelDataType type) {
-    assert(false);
-    throw std::runtime_error("UploadPass::updateTextureResource not implemented on Metal!");
-}
-
-void UploadPass::updateTextureResourceSub(gfx::TextureResource& resource,
-                                          const uint16_t xOffset,
-                                          const uint16_t yOffset,
-                                          const Size size,
-                                          const void* data,
-                                          gfx::TexturePixelType format,
-                                          gfx::TextureChannelDataType type) {
-    assert(false);
-    throw std::runtime_error("UploadPass::updateTextureResourceSub not implemented on Metal!");
-}
-
 struct VertexBuffer : public gfx::VertexBufferBase {
     ~VertexBuffer() override = default;
 
@@ -151,10 +123,10 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
 }
 
 gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
-    const std::size_t vertexCount,
-    const gfx::AttributeDataType vertexType,
-    const std::size_t vertexAttributeIndex,
-    const std::vector<std::uint8_t>& vertexData,
+    [[maybe_unused]] const std::size_t vertexCount,
+    [[maybe_unused]] const gfx::AttributeDataType vertexType,
+    [[maybe_unused]] const std::size_t vertexAttributeIndex,
+    [[maybe_unused]] const std::vector<std::uint8_t>& vertexData,
     const gfx::VertexAttributeArray& defaults,
     const gfx::VertexAttributeArray& overrides,
     const gfx::BufferUsageType usage,
@@ -165,13 +137,8 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     gfx::AttributeBindingArray bindings;
     bindings.resize(defaults.allocatedSize());
 
-    constexpr std::size_t align = 16;
-    constexpr std::uint8_t padding = 0;
-
-    uint32_t vertexStride = 0;
-
     // For each attribute in the program, with the corresponding default and optional override...
-    const auto resolveAttr = [&](const size_t id, auto& default_, auto& override_) -> void {
+    const auto resolveAttr = [&]([[maybe_unused]] const size_t id, auto& default_, auto& override_) -> void {
         auto& effectiveAttr = override_ ? *override_ : default_;
         const auto& defaultAttr = static_cast<const VertexAttribute&>(default_);
         const auto index = static_cast<std::size_t>(defaultAttr.getIndex());

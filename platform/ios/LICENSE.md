@@ -838,7 +838,7 @@ freely, subject to the following restrictions:
 
 MapLibre Native iOS uses portions of SMCalloutView.
 
-Copyright 2016 Nick Farina. 
+Copyright 2016 Nick Farina.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License:
@@ -1239,7 +1239,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ### [wagyu](https://github.com/mapbox/wagyu.git) by Angus Johnson and Mapbox
 
 ```
-Parts of the code in the Wagyu Library are derived from the version of the 
+Parts of the code in the Wagyu Library are derived from the version of the
 Clipper Library by Angus Johnson listed below.
 
 Author    :  Angus Johnson
@@ -1247,8 +1247,8 @@ Version   :  6.4.0
 Date      :  2 July 2015
 Website   :  http://www.angusj.com
 
-Copyright for portions of the derived code in the Wagyu library are held 
-by Angus Johnson, 2010-2015. All other copyright for the Wagyu Library are held by 
+Copyright for portions of the derived code in the Wagyu library are held
+by Angus Johnson, 2010-2015. All other copyright for the Wagyu Library are held by
 Mapbox, 2016. This code is published in accordance with, and retains the same license
 as the Clipper Library by Angus Johnson.
 
@@ -1347,8 +1347,8 @@ DEALINGS IN THE SOFTWARE.
 ### [RapidJSON](https://rapidjson.org) by THL A29 Limited, a Tencent company, and Milo Yip
 
 ```
-Tencent is pleased to support the open source community by making RapidJSON available. 
- 
+Tencent is pleased to support the open source community by making RapidJSON available.
+
 Copyright (C) 2015 THL A29 Limited, a Tencent company, and Milo Yip.  All rights reserved.
 
 If you have downloaded a copy of the RapidJSON binary from Tencent, please note that the RapidJSON binary is licensed under the MIT License.
@@ -1360,13 +1360,13 @@ Other dependencies and licenses:
 Open Source Software Licensed Under the BSD License:
 --------------------------------------------------------------------
 
-The msinttypes r29 
-Copyright (c) 2006-2013 Alexander Chemeris 
+The msinttypes r29
+Copyright (c) 2006-2013 Alexander Chemeris
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
-* Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
+* Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
 * Neither the name of  copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
@@ -1375,7 +1375,7 @@ THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY EXPR
 Open Source Software Licensed Under the JSON License:
 --------------------------------------------------------------------
 
-json.org 
+json.org
 Copyright (c) 2002 JSON.org
 All Rights Reserved.
 
@@ -1383,7 +1383,7 @@ JSON_checker
 Copyright (c) 2002 JSON.org
 All Rights Reserved.
 
-	
+
 Terms of the JSON License:
 ---------------------------------------------------
 

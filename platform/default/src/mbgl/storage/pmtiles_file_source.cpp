@@ -119,7 +119,7 @@ public:
                 req,
                 tileID,
                 header.root_dir_offset,
-                header.root_dir_bytes,
+                static_cast<uint32_t>(header.root_dir_bytes),
                 0,
                 [=, this](std::pair<uint64_t, uint32_t> tileAddress, std::unique_ptr<Response::Error> tileError) {
                     if (tileError) {
@@ -291,8 +291,10 @@ private:
                 doc.AddMember("tilejson", "3.0.0", allocator);
 
                 if (!doc.HasMember("scheme")) {
-                    doc.AddMember("scheme", rapidjson::Value().SetString("xyz"), allocator);
+                    doc.AddMember("scheme", rapidjson::Value(), allocator);
                 }
+
+                doc["scheme"] = rapidjson::Value().SetString("xyz");
 
                 if (!doc.HasMember("tiles")) {
                     doc.AddMember("tiles", rapidjson::Value(), allocator);

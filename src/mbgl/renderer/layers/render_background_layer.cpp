@@ -2,7 +2,6 @@
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/map/transform_state.hpp>
-#include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/pattern_atlas.hpp>
@@ -15,16 +14,12 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/logging.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/renderer/layers/background_layer_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
-#endif
-
-#include <unordered_set>
 
 namespace mbgl {
 
@@ -50,6 +45,7 @@ RenderBackgroundLayer::~RenderBackgroundLayer() = default;
 
 void RenderBackgroundLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
+    styleDependencies = unevaluated.getDependencies();
 }
 
 void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters& parameters) {
@@ -69,11 +65,9 @@ void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters& paramet
 
     evaluatedProperties = std::move(properties);
 
-#if MLN_DRAWABLE_RENDERER
     if (layerTweaker) {
         layerTweaker->updateProperties(evaluatedProperties);
     }
-#endif
 }
 
 bool RenderBackgroundLayer::hasTransition() const {
@@ -83,102 +77,6 @@ bool RenderBackgroundLayer::hasTransition() const {
 bool RenderBackgroundLayer::hasCrossfade() const {
     return getCrossfade<BackgroundLayerProperties>(evaluatedProperties).t != 1;
 }
-
-#if MLN_LEGACY_RENDERER
-void RenderBackgroundLayer::render(PaintParameters& parameters) {
-    // Note that for bottommost layers without a pattern, the background color
-    // is drawn with glClear rather than this method.
-
-    // Ensure programs are available
-    if (!parameters.shaders.getLegacyGroup().populate(backgroundProgram)) return;
-    if (!parameters.shaders.getLegacyGroup().populate(backgroundPatternProgram)) return;
-
-    const Properties<>::PossiblyEvaluated properties;
-    const BackgroundProgram::Binders paintAttributeData(properties, 0);
-
-    auto draw = [&](auto& program, auto&& uniformValues, const auto& textureBindings, const uint32_t id) {
-        const auto allUniformValues = program.computeAllUniformValues(
-            std::forward<decltype(uniformValues)>(uniformValues),
-            paintAttributeData,
-            properties,
-            static_cast<float>(parameters.state.getZoom()));
-        const auto allAttributeBindings = program.computeAllAttributeBindings(
-            *parameters.staticData.tileVertexBuffer, paintAttributeData, properties);
-
-        checkRenderability(parameters, program.activeBindingCount(allAttributeBindings));
-
-        program.draw(
-            parameters.context,
-            *parameters.renderPass,
-            gfx::Triangles(),
-            parameters.depthModeForSublayer(
-                0,
-                parameters.pass == RenderPass::Opaque ? gfx::DepthMaskType::ReadWrite : gfx::DepthMaskType::ReadOnly),
-            gfx::StencilMode::disabled(),
-            parameters.colorModeForRenderPass(),
-            gfx::CullFaceMode::disabled(),
-            *parameters.staticData.quadTriangleIndexBuffer,
-            segments,
-            allUniformValues,
-            allAttributeBindings,
-            textureBindings,
-            util::toString(id));
-    };
-
-    if (segments.empty()) {
-        segments = RenderStaticData::tileTriangleSegments();
-    }
-
-    const auto& evaluated = static_cast<const BackgroundLayerProperties&>(*evaluatedProperties).evaluated;
-    const auto& crossfade = static_cast<const BackgroundLayerProperties&>(*evaluatedProperties).crossfade;
-    if (!evaluated.get<BackgroundPattern>().to.empty()) {
-        std::optional<ImagePosition> imagePosA = parameters.patternAtlas.getPattern(
-            evaluated.get<BackgroundPattern>().from.id());
-        std::optional<ImagePosition> imagePosB = parameters.patternAtlas.getPattern(
-            evaluated.get<BackgroundPattern>().to.id());
-
-        if (!imagePosA || !imagePosB) return;
-
-        uint32_t i = 0;
-        for (const auto& tileID : util::tileCover(parameters.state, parameters.state.getIntegerZoom())) {
-            const UnwrappedTileID unwrappedTileID = tileID.toUnwrapped();
-            draw(*backgroundPatternProgram,
-                 BackgroundPatternProgram::layoutUniformValues(parameters.matrixForTile(unwrappedTileID),
-                                                               evaluated.get<BackgroundOpacity>(),
-                                                               parameters.patternAtlas.getPixelSize(),
-                                                               *imagePosA,
-                                                               *imagePosB,
-                                                               crossfade,
-                                                               unwrappedTileID,
-                                                               parameters.state),
-                 BackgroundPatternProgram::TextureBindings{
-                     textures::image::Value{parameters.patternAtlas.textureBinding()},
-                 },
-                 i++);
-        }
-    } else {
-        auto backgroundRenderPass = (evaluated.get<BackgroundColor>().a >= 1.0f &&
-                                     evaluated.get<BackgroundOpacity>() >= 1.0f &&
-                                     parameters.currentLayer >= parameters.opaquePassCutoff)
-                                        ? RenderPass::Opaque
-                                        : RenderPass::Translucent;
-        if (parameters.pass != backgroundRenderPass) {
-            return;
-        }
-        uint32_t i = 0;
-        for (const auto& tileID : util::tileCover(parameters.state, parameters.state.getIntegerZoom())) {
-            draw(*backgroundProgram,
-                 BackgroundProgram::LayoutUniformValues{
-                     uniforms::matrix::Value(parameters.matrixForTile(tileID.toUnwrapped())),
-                     uniforms::color::Value(evaluated.get<BackgroundColor>()),
-                     uniforms::opacity::Value(evaluated.get<BackgroundOpacity>()),
-                 },
-                 BackgroundProgram::TextureBindings{},
-                 i++);
-        }
-    }
-}
-#endif // MLN_LEGACY_RENDERER
 
 std::optional<Color> RenderBackgroundLayer::getSolidBackground() const {
     const auto& evaluated = getEvaluated<BackgroundLayerProperties>(evaluatedProperties);
@@ -209,18 +107,22 @@ void RenderBackgroundLayer::prepare(const LayerPrepareParameters& params) {
     }
 }
 
-#if MLN_DRAWABLE_RENDERER
 static constexpr std::string_view BackgroundPlainShaderName = "BackgroundShader";
 static constexpr std::string_view BackgroundPatternShaderName = "BackgroundPatternShader";
 
 void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::Context& context,
                                    const TransformState& state,
-                                   const std::shared_ptr<UpdateParameters>&,
+                                   const std::shared_ptr<UpdateParameters>& updateParameters,
                                    [[maybe_unused]] const RenderTree& renderTree,
                                    [[maybe_unused]] UniqueChangeRequestVec& changes) {
+    assert(updateParameters);
     const auto zoom = state.getIntegerZoom();
-    const auto tileCover = util::tileCover(state, zoom);
+    const auto tileCover = util::tileCover({state,
+                                            updateParameters->tileLodMinRadius,
+                                            updateParameters->tileLodScale,
+                                            updateParameters->tileLodPitchThreshold},
+                                           zoom);
 
     // renderTiles is always empty, we use tileCover instead
     if (tileCover.empty()) {
@@ -325,6 +227,5 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
 }
-#endif
 
 } // namespace mbgl

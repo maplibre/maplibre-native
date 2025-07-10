@@ -6,14 +6,13 @@
 namespace mbgl {
 namespace shaders {
 
-#define LINE_SHADER_COMMON \
-    R"(
+constexpr auto lineShadePrelude = R"(
 
 #define idLineDrawableUBO           idDrawableReservedVertexOnlyUBO
 #define idLineTilePropsUBO          idDrawableReservedFragmentOnlyUBO
 #define idLineEvaluatedPropsUBO     layerUBOStartId
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Vulkan> {
@@ -23,7 +22,8 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Vulkan> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto vertex = LINE_SHADER_COMMON R"(
+    static constexpr auto prelude = lineShadePrelude;
+    static constexpr auto vertex = R"(
 
 layout(location = 0) in ivec2 in_pos_normal;
 layout(location = 1) in uvec4 in_data;
@@ -129,7 +129,7 @@ void main() {
 #else
     const lowp float offset = props.offset * -1.0;
 #endif
-        
+
 #ifndef HAS_UNIFORM_u_width
     mediump float width = unpack_mix_float(in_width, drawable.width_t);
 #else
@@ -182,7 +182,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = LINE_SHADER_COMMON R"(
+    static constexpr auto fragment = R"(
 
 layout(location = 0) in lowp vec2 frag_normal;
 layout(location = 1) in lowp vec2 frag_width2;
@@ -232,7 +232,7 @@ void main() {
 #else
     lowp float blur = frag_blur;
 #endif
-        
+
 #ifdef HAS_UNIFORM_u_opacity
     lowp float opacity = props.opacity;
 #else
@@ -261,7 +261,8 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Vulkan> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto vertex = LINE_SHADER_COMMON R"(
+    static constexpr auto prelude = lineShadePrelude;
+    static constexpr auto vertex = R"(
 
 layout(location = 0) in ivec2 in_pos_normal;
 layout(location = 1) in uvec4 in_data;
@@ -356,7 +357,7 @@ void main() {
 #else
     const lowp float offset = props.offset * -1.0;
 #endif
-        
+
 #ifndef HAS_UNIFORM_u_width
     mediump float width = unpack_mix_float(in_width, drawable.width_t);
 #else
@@ -410,7 +411,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = LINE_SHADER_COMMON R"(
+    static constexpr auto fragment = R"(
 
 layout(location = 0) in lowp vec2 frag_normal;
 layout(location = 1) in lowp vec2 frag_width2;
@@ -453,7 +454,7 @@ void main() {
 #else
     lowp float blur = frag_blur;
 #endif
-        
+
 #ifdef HAS_UNIFORM_u_opacity
     lowp float opacity = props.opacity;
 #else
@@ -486,7 +487,8 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Vulkan> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto vertex = LINE_SHADER_COMMON R"(
+    static constexpr auto prelude = lineShadePrelude;
+    static constexpr auto vertex = R"(
 
 layout(location = 0) in ivec2 in_pos_normal;
 layout(location = 1) in uvec4 in_data;
@@ -597,7 +599,7 @@ void main() {
 #else
     const lowp float offset = props.offset * -1.0;
 #endif
-        
+
 #ifndef HAS_UNIFORM_u_width
     mediump float width = unpack_mix_float(in_width, drawable.width_t);
 #else
@@ -660,7 +662,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = LINE_SHADER_COMMON R"(
+    static constexpr auto fragment = R"(
 
 layout(location = 0) in lowp vec2 frag_normal;
 layout(location = 1) in lowp vec2 frag_width2;
@@ -723,14 +725,14 @@ void main() {
     return;
 #endif
 
-    const LinePatternTilePropertiesUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index]; 
+    const LinePatternTilePropertiesUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
 #ifdef HAS_UNIFORM_u_blur
     const lowp float blur = props.blur;
 #else
     const lowp float blur = frag_blur;
 #endif
-        
+
 #ifdef HAS_UNIFORM_u_opacity
     const lowp float opacity = props.opacity;
 #else
@@ -802,7 +804,8 @@ struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Vulkan> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto vertex = LINE_SHADER_COMMON R"(
+    static constexpr auto prelude = lineShadePrelude;
+    static constexpr auto vertex = R"(
 
 layout(location = 0) in ivec2 in_pos_normal;
 layout(location = 1) in uvec4 in_data;
@@ -987,7 +990,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = LINE_SHADER_COMMON R"(
+    static constexpr auto fragment = R"(
 
 layout(location = 0) in lowp vec2 frag_normal;
 layout(location = 1) in lowp vec2 frag_width2;
@@ -1065,7 +1068,7 @@ void main() {
 #else
     const lowp float blur = frag_blur;
 #endif
-        
+
 #ifdef HAS_UNIFORM_u_opacity
     const lowp float opacity = props.opacity;
 #else

@@ -38,7 +38,6 @@ class MLNMapSnapshotterSwiftTests: MLNMapViewIntegrationTest {
                 let snapshotter = MLNMapSnapshotter(options: options)
 
                 snapshotter.start(completionHandler: { snapshot, error in
-
 //                    // Without capturing snapshotter:
 //                    XCTAssertNil(snapshot)
 //                    XCTAssertNotNil(error)

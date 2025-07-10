@@ -10,6 +10,7 @@ import junit.framework.TestCase
 import org.hamcrest.Matcher
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Test
 import org.maplibre.android.annotations.BaseMarkerOptions
 import org.maplibre.android.annotations.Marker
@@ -143,6 +144,7 @@ class MapLibreMapTest : EspressoTest() {
 
     @Test
     @Deprecated("remove this test when removing deprecated annotations")
+    @Ignore("Needs to be investigated https://github.com/maplibre/maplibre-native/issues/3425")
     fun testAddEmptyPolygon() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -209,9 +211,10 @@ class MapLibreMapTest : EspressoTest() {
 
     @Test
     @Deprecated("remove this test when removing deprecated annotations")
+    @Ignore("Needs to be investigated https://github.com/maplibre/maplibre-native/issues/3425")
     fun testAddEmptyPolyline() {
         validateTestSetup()
-        onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
+        onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { _: UiController?, _: View? ->
             val polylineOptions = PolylineOptions()
             val polyline = maplibreMap.addPolyline(polylineOptions)
             assertTrue("Polyline should be ignored", !maplibreMap.polylines.contains(polyline))

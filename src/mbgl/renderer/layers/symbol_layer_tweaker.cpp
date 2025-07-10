@@ -6,7 +6,6 @@
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gfx/symbol_drawable_data.hpp>
 #include <mbgl/layout/symbol_projection.hpp>
-#include <mbgl/programs/symbol_program.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
@@ -59,7 +58,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
     auto& context = parameters.context;
     const auto& state = parameters.state;
-    const auto& evaluated = static_cast<const SymbolLayerProperties&>(*evaluatedProperties).evaluated;
+    const auto& symbolLayerProperties = static_cast<const SymbolLayerProperties&>(*evaluatedProperties);
+    const auto& evaluated = symbolLayerProperties.evaluated;
 
 #if !defined(NDEBUG)
     const auto label = layerGroup.getName() + "-update-uniforms";
@@ -69,19 +69,19 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     const auto zoom = static_cast<float>(state.getZoom());
 
     if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
-        const SymbolEvaluatedPropsUBO propsUBO = {/* .text_fill_color = */ constOrDefault<TextColor>(evaluated),
-                                                  /* .text_halo_color = */ constOrDefault<TextHaloColor>(evaluated),
-                                                  /* .text_opacity = */ constOrDefault<TextOpacity>(evaluated),
-                                                  /* .text_halo_width = */ constOrDefault<TextHaloWidth>(evaluated),
-                                                  /* .text_halo_blur = */ constOrDefault<TextHaloBlur>(evaluated),
-                                                  /* .pad1 */ 0,
+        const SymbolEvaluatedPropsUBO propsUBO = {.text_fill_color = constOrDefault<TextColor>(evaluated),
+                                                  .text_halo_color = constOrDefault<TextHaloColor>(evaluated),
+                                                  .text_opacity = constOrDefault<TextOpacity>(evaluated),
+                                                  .text_halo_width = constOrDefault<TextHaloWidth>(evaluated),
+                                                  .text_halo_blur = constOrDefault<TextHaloBlur>(evaluated),
+                                                  .pad1 = 0,
 
-                                                  /* .icon_fill_color = */ constOrDefault<IconColor>(evaluated),
-                                                  /* .icon_halo_color = */ constOrDefault<IconHaloColor>(evaluated),
-                                                  /* .icon_opacity = */ constOrDefault<IconOpacity>(evaluated),
-                                                  /* .icon_halo_width = */ constOrDefault<IconHaloWidth>(evaluated),
-                                                  /* .icon_halo_blur = */ constOrDefault<IconHaloBlur>(evaluated),
-                                                  /* .pad2 */ 0};
+                                                  .icon_fill_color = constOrDefault<IconColor>(evaluated),
+                                                  .icon_halo_color = constOrDefault<IconHaloColor>(evaluated),
+                                                  .icon_opacity = constOrDefault<IconOpacity>(evaluated),
+                                                  .icon_halo_width = constOrDefault<IconHaloWidth>(evaluated),
+                                                  .icon_halo_blur = constOrDefault<IconHaloBlur>(evaluated),
+                                                  .pad2 = 0};
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);
         propertiesUpdated = false;
     }
@@ -95,6 +95,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 #endif
 
     const auto camDist = state.getCameraToCenterDistance();
+    const auto screenSpaceProp = symbolLayerProperties.layerImpl().layout.get<SymbolScreenSpace>();
+    const auto isScreenSpace = screenSpaceProp.isConstant() ? screenSpaceProp.asConstant()
+                                                            : SymbolScreenSpace::defaultValue();
+
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
             return;
@@ -104,8 +108,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const auto& symbolData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
         const auto isText = (symbolData.symbolType == SymbolType::Text);
 
-        const auto* textBinders = isText ? static_cast<SymbolSDFTextProgram::Binders*>(drawable.getBinders()) : nullptr;
-        const auto* iconBinders = isText ? nullptr : static_cast<SymbolIconProgram::Binders*>(drawable.getBinders());
+        const auto* textBinders = isText ? static_cast<SymbolTextBinders*>(drawable.getBinders()) : nullptr;
+        const auto* iconBinders = isText ? nullptr : static_cast<SymbolIconBinders*>(drawable.getBinders());
 
         const auto bucket = std::static_pointer_cast<SymbolBucket>(drawable.getBucket());
         const auto* tile = drawable.getRenderTile();
@@ -118,12 +122,20 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
         // from RenderTile::translatedMatrix
         const auto translate = isText ? evaluated.get<style::TextTranslate>() : evaluated.get<style::IconTranslate>();
-        const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()
-                                   : evaluated.get<style::IconTranslateAnchor>();
-        constexpr bool nearClipped = false;
-        constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(
-            tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
+
+        mat4 matrix;
+
+        if (isScreenSpace) {
+            matrix::ortho(matrix, 0, util::EXTENT, -util::EXTENT, 0, 0, 1);
+            matrix::translate(matrix, matrix, 0, -util::EXTENT, 0);
+            matrix::translate(matrix, matrix, translate[0], translate[1], 0);
+        } else {
+            constexpr bool nearClipped = false;
+            constexpr bool inViewportPixelUnits = false;
+            const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()
+                                       : evaluated.get<style::IconTranslateAnchor>();
+            matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
+        }
 
         // from symbol_program, makeValues
         const auto currentZoom = static_cast<float>(parameters.state.getZoom());
@@ -157,27 +169,27 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 #else
         const SymbolDrawableUBO drawableUBO = {
 #endif
-            /* .matrix = */ util::cast<float>(matrix),
-            /* .label_plane_matrix = */ util::cast<float>(labelPlaneMatrix),
-            /* .coord_matrix = */ util::cast<float>(glCoordMatrix),
+            .matrix = util::cast<float>(matrix),
+            .label_plane_matrix = util::cast<float>(labelPlaneMatrix),
+            .coord_matrix = util::cast<float>(glCoordMatrix),
 
-            /* .texsize = */ toArray(getTexSize(drawable, idSymbolImageTexture)),
-            /* .texsize_icon = */ toArray(getTexSize(drawable, idSymbolImageIconTexture)),
+            .texsize = toArray(getTexSize(drawable, idSymbolImageTexture)),
+            .texsize_icon = toArray(getTexSize(drawable, idSymbolImageIconTexture)),
 
-            /* .is_text_prop = */ isText,
-            /* .rotate_symbol = */ rotateInShader,
-            /* .pitch_with_map = */ (symbolData.pitchAlignment == style::AlignmentType::Map),
-            /* .is_size_zoom_constant = */ size.isZoomConstant,
-            /* .is_size_feature_constant = */ size.isFeatureConstant,
+            .is_text_prop = isText,
+            .rotate_symbol = rotateInShader,
+            .pitch_with_map = (symbolData.pitchAlignment == style::AlignmentType::Map),
+            .is_size_zoom_constant = size.isZoomConstant,
+            .is_size_feature_constant = size.isFeatureConstant,
 
-            /* .size_t = */ size.sizeT,
-            /* .size = */ size.size,
+            .size_t = size.sizeT,
+            .size = size.size,
 
-            /* .fill_color_t = */ getInterpFactor<TextColor, IconColor, 0>(paintProperties, isText, zoom),
-            /* .halo_color_t = */ getInterpFactor<TextHaloColor, IconHaloColor, 0>(paintProperties, isText, zoom),
-            /* .opacity_t = */ getInterpFactor<TextOpacity, IconOpacity, 0>(paintProperties, isText, zoom),
-            /* .halo_width_t = */ getInterpFactor<TextHaloWidth, IconHaloWidth, 0>(paintProperties, isText, zoom),
-            /* .halo_blur_t = */ getInterpFactor<TextHaloBlur, IconHaloBlur, 0>(paintProperties, isText, zoom),
+            .fill_color_t = getInterpFactor<TextColor, IconColor, 0>(paintProperties, isText, zoom),
+            .halo_color_t = getInterpFactor<TextHaloColor, IconHaloColor, 0>(paintProperties, isText, zoom),
+            .opacity_t = getInterpFactor<TextOpacity, IconOpacity, 0>(paintProperties, isText, zoom),
+            .halo_width_t = getInterpFactor<TextHaloWidth, IconHaloWidth, 0>(paintProperties, isText, zoom),
+            .halo_blur_t = getInterpFactor<TextHaloBlur, IconHaloBlur, 0>(paintProperties, isText, zoom),
         };
 
 #if MLN_UBO_CONSOLIDATION
@@ -185,10 +197,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 #else
         const SymbolTilePropsUBO tilePropsUBO = {
 #endif
-            /* .is_text = */ isText,
-            /* .is_halo = */ symbolData.isHalo,
-            /* .gamma_scale= */ gammaScale,
-            /* .pad1 = */ 0,
+            .is_text = isText,
+            .is_halo = symbolData.isHalo,
+            .gamma_scale = gammaScale,
+            .pad1 = 0,
         };
 
 #if MLN_UBO_CONSOLIDATION

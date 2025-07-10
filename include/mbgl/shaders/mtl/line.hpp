@@ -23,7 +23,7 @@ enum {
 struct alignas(16) LineDrawableUBO {
     /*  0 */ float4x4 matrix;
     /* 64 */ float ratio;
-    
+
     // Interpolations
     /* 68 */ float color_t;
     /* 72 */ float blur_t;
@@ -42,7 +42,7 @@ static_assert(sizeof(LineDrawableUBO) == 6 * 16, "wrong size");
 struct alignas(16) LineGradientDrawableUBO {
     /*  0 */ float4x4 matrix;
     /* 64 */ float ratio;
-    
+
     // Interpolations
     /* 68 */ float blur_t;
     /* 72 */ float opacity_t;
@@ -61,7 +61,7 @@ static_assert(sizeof(LineGradientDrawableUBO) == 6 * 16, "wrong size");
 struct alignas(16) LinePatternDrawableUBO {
     /*  0 */ float4x4 matrix;
     /* 64 */ float ratio;
-    
+
     // Interpolations
     /* 68 */ float blur_t;
     /* 72 */ float opacity_t;
@@ -95,7 +95,7 @@ struct alignas(16) LineSDFDrawableUBO {
     /*  80 */ float tex_y_a;
     /*  84 */ float tex_y_b;
     /*  88 */ float ratio;
-    
+
     // Interpolations
     /*  92 */ float color_t;
     /*  96 */ float blur_t;

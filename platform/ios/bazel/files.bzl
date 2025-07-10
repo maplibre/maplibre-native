@@ -11,7 +11,7 @@ MLN_IOS_SDK_HEADERS = [
     "src/MLNUserLocation.h",
     "src/MLNUserLocationAnnotationView.h",
     "src/MLNUserLocationAnnotationViewStyle.h",
-    "src/MLNScaleBar.h",
+    "src/MLNScaleBar.h"
 ]
 
 MLN_IOS_PUBLIC_HEADERS = [
@@ -78,7 +78,7 @@ MLN_IOS_PUBLIC_OBJCPP_METAL_SOURCE = [
     "src/MLNMapView+Metal.mm",
 ]
 
-MLN_PUBLIC_IOS_APP_SOPURCE = [
+MLN_PUBLIC_IOS_APP_SOURCE = [
     "app/MBXAnnotationView.m",
     "app/MBXAppDelegate.m",
     "app/MBXCustomCalloutView.h",

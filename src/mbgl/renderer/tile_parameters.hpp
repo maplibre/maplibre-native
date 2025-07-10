@@ -4,6 +4,7 @@
 #include <mbgl/actor/scheduler.hpp>
 
 #include <memory>
+#include <numbers>
 
 #include <mapbox/std/weak.hpp>
 
@@ -14,6 +15,11 @@ class FileSource;
 class AnnotationManager;
 class ImageManager;
 class GlyphManager;
+
+namespace gfx {
+class DynamicTextureAtlas;
+using DynamicTextureAtlasPtr = std::shared_ptr<gfx::DynamicTextureAtlas>;
+} // namespace gfx
 
 class TileParameters {
 public:
@@ -27,6 +33,11 @@ public:
     std::shared_ptr<GlyphManager> glyphManager;
     const uint8_t prefetchZoomDelta;
     TaggedScheduler threadPool;
+    double tileLodMinRadius = 3;
+    double tileLodScale = 1;
+    double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;
+    double tileLodZoomShift = 0;
+    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
 };
 
 } // namespace mbgl

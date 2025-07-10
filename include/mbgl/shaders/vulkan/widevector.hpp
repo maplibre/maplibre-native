@@ -6,13 +6,12 @@
 namespace mbgl {
 namespace shaders {
 
-#define WIDEVECTOR_SHADER_PRELUDE \
-    R"(
+constexpr auto wideVectorShaderPrelude = R"(
 
 #define idWideVectorUniformsUBO         idDrawableReservedVertexOnlyUBO
 #define idWideVectorUniformWideVecUBO   drawableReservedUBOCount
 
-)"
+)";
 
 template <>
 struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Vulkan> {
@@ -22,11 +21,12 @@ struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Vulkan> {
     static const std::array<AttributeInfo, 4> instanceAttributes;
     static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto vertex = WIDEVECTOR_SHADER_PRELUDE R"(
+    static constexpr auto prelude = wideVectorShaderPrelude;
+    static constexpr auto vertex = R"(
 
 /** Expressions are used to change values like width and opacity over zoom levels. **/
 #define WKSExpStops 8
-    
+
 // Line Joins
 // These are assumed to match WideVectorLineJoinType
 #define WKSVertexLineJoinMiter          0
@@ -58,13 +58,24 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = idWideVectorUniformWideVecUBO) un
     float offset;
     float edge;
     float texRepeat;
-    vec4 texOffset;
+    vec2 texOffset;
     float miterLimit;
     int join;
     int cap;
     int hasExp;
     float interClipLimit;
 } wideVec;
+
+// Instance info for the wide vector (new) vertex shader
+typedef struct
+{
+    // Center of the point on the line
+    vec3 center;
+    // Color
+    vec4 color;
+    // Used to track loops and such
+    int prev,next; // set to -1 for non-loops
+} VertexTriWideVecInstance;
 
 struct IntersectInfo {
     bool valid;
@@ -110,16 +121,28 @@ IntersectInfo intersectWideLines(vec2 p0,vec2 p1,vec2 p2, vec2 n0,vec2 n1)
     return intersectLines(p0 + n0, p1 + n0, p1 + n1, p2 + n1);
 }
 
+// Used to track what info we have about a center point
+struct CenterInfo {
+    /// Screen coordinates of the line segment endpoint
+    vec2 screenPos;
+    /// Length of the segment (in screen coordinates)
+    float len;
+    /// Normalized direction of the segment
+    vec2 nDir;
+    /// Normalized plane normal, perpendicular to the segment
+    vec2 norm;
+};
+
 vec3 viewPos(const mat4 &mat, vec3 vec) {
     const vec4 p = mat * vec4(vec, 1.0);
     return p.xyz;   // / p.w; ?
 }
 
-float2 screenPos_MVP(const Uniforms &u, float3 viewPos) {
-    const float4 p4 = float4(viewPos, 1.0);
-    
+vec2 screenPos_MVP(const Uniforms &u, vec3 viewPos) {
+    const vec4 p4 = vec4(viewPos, 1.0);
+
     // Use the MVP matrix
-    const float4 s = u.mvpMatrix * p4;
+    const vec4 s = u.mvpMatrix * p4;
 
     return s.xy / s.w;
 }
@@ -156,7 +179,7 @@ void main() {
 }
 )";
 
-    static constexpr auto fragment = WIDEVECTOR_SHADER_PRELUDE R"(
+    static constexpr auto fragment = R"(
     // TODO
 )";
 };

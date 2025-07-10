@@ -61,7 +61,7 @@
 - (void)testForRaisingExceptionsOnStaleStyleObjects {
     self.mapView.centerCoordinate = CLLocationCoordinate2DMake(38.897,-77.039);
     self.mapView.zoomLevel = 10.5;
-    
+
     MLNVectorTileSource *source = [[MLNVectorTileSource alloc] initWithIdentifier:@"trees" configurationURL:[NSURL URLWithString:@"mapbox://examples.2uf7qges"]];
     [self.mapView.style addSource:source];
 
@@ -76,21 +76,21 @@
 - (void)testForRaisingExceptionsOnStaleLayerObject {
     self.mapView.centerCoordinate = CLLocationCoordinate2DMake(38.897,-77.039);
     self.mapView.zoomLevel = 10.5;
-    
+
     MLNPointFeature *feature = [[MLNPointFeature alloc] init];
     MLNShapeSource *source = [[MLNShapeSource alloc] initWithIdentifier:@"sourceID" shape:feature options:nil];
-    
+
     // Testing generated layers
     MLNLineStyleLayer *lineLayer = [[MLNLineStyleLayer alloc] initWithIdentifier:@"lineLayerID" source:source];
     MLNCircleStyleLayer *circleLayer = [[MLNCircleStyleLayer alloc] initWithIdentifier:@"circleLayerID" source:source];
-    
+
     [self.mapView.style addSource:source];
     [self.mapView.style addLayer:lineLayer];
     [self.mapView.style addLayer:circleLayer];
 
     XCTAssertNoThrow(lineLayer.isVisible);
     XCTAssertNoThrow(circleLayer.isVisible);
-    
+
     XCTAssert(![source.description containsString:@"<unknown>"]);
     XCTAssert(![lineLayer.description containsString:@"<unknown>"]);
     XCTAssert(![circleLayer.description containsString:@"<unknown>"]);
@@ -105,7 +105,7 @@
 
     XCTAssertThrowsSpecificNamed(lineLayer.isVisible, NSException, MLNInvalidStyleLayerException, @"Layer should raise an exception if its core peer got invalidated");
     XCTAssertThrowsSpecificNamed(circleLayer.isVisible, NSException, MLNInvalidStyleLayerException, @"Layer should raise an exception if its core peer got invalidated");
-    
+
     XCTAssertThrowsSpecificNamed([self.mapView.style removeLayer:lineLayer], NSException, NSInvalidArgumentException, @"Style should raise an exception when attempting to remove an invalid layer (e.g. if its core peer got invalidated)");
     XCTAssertThrowsSpecificNamed([self.mapView.style removeLayer:circleLayer], NSException, NSInvalidArgumentException, @"Style should raise an exception when attempting to remove an invalid layer (e.g. if its core peer got invalidated)");
 }

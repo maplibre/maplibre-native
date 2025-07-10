@@ -73,7 +73,7 @@
 
 - (void)didMoveToMapView:(MLNMapView *)mapView {
     MLNBackendResource* resource = [mapView backendResource];
-    
+
     NSString *shaderSource = @
 "    #include <metal_stdlib>\n"
 "    using namespace metal;\n"
@@ -105,7 +105,7 @@
 "        return in.color;\n"
 "    }\n";
 
-    
+
     NSError *error = nil;
     id<MTLDevice> _device = resource.device;
     id<MTLLibrary> library = [_device newLibraryWithSource:shaderSource options:nil error:&error];
@@ -121,7 +121,7 @@
     pipelineStateDescriptor.colorAttachments[0].pixelFormat = resource.mtkView.colorPixelFormat;
     pipelineStateDescriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
     pipelineStateDescriptor.stencilAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
-    
+
     _pipelineState = [_device newRenderPipelineStateWithDescriptor:pipelineStateDescriptor
                                                              error:&error];
     NSAssert(_pipelineState, @"Failed to create pipeline state: %@", error);
@@ -141,11 +141,11 @@
     if(renderEncoder != nil)
     {
         MLNBackendResource* resource = [mapView backendResource];
-        
+
         vector_uint2 _viewportSize;
         _viewportSize.x = resource.mtkView.drawableSize.width;
         _viewportSize.y = resource.mtkView.drawableSize.height;
-        
+
         typedef struct
         {
             vector_float2 position;
@@ -167,11 +167,11 @@
         [renderEncoder setVertexBytes:triangleVertices
                                length:sizeof(triangleVertices)
                                atIndex:0];
-        
+
         [renderEncoder setVertexBytes:&_viewportSize
                                length:sizeof(_viewportSize)
                                atIndex:1];
-        
+
         // Draw the triangle.
         [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle
                           vertexStart:0

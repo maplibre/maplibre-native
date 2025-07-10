@@ -7,6 +7,7 @@
     <application
         android:name=".MapLibreApplication"
         android:allowBackup="true"
+        android:debuggable="true"
         android:exported="true"
         android:fullBackupContent="true"
         android:icon="@drawable/icon"
@@ -14,7 +15,6 @@
         android:roundIcon="@drawable/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:debuggable="true"
         tools:ignore="HardcodedDebugMode">
         <activity
             android:name=".activity.FeatureOverviewActivity"
@@ -719,6 +719,18 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.sources.VectorTileActivity"
+            android:description="@string/description_vector_tile"
+            android:exported="true"
+            android:label="@string/activity_vector_tile">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_data" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
         </activity> <!-- Features -->
         <activity
             android:name=".activity.feature.QueryRenderedFeaturesPropertiesActivity"
@@ -878,10 +890,10 @@
                 android:value=".activity.FeatureOverviewActivity" />
         </activity> <!-- Events -->
         <activity
-            android:name="org.maplibre.android.testapp.activity.events.ObserverActivity"
+            android:name=".activity.events.ObserverActivity"
             android:description="@string/description_observer_activity"
             android:exported="true"
-            android:label="@string/activity_observer_activity" >
+            android:label="@string/activity_observer_activity">
             <meta-data
                 android:name="@string/category"
                 android:value="@string/category_events" />
@@ -1117,10 +1129,10 @@
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
-            android:name=".activity.maplayout.GLSurfaceRecyclerViewActivity"
-            android:description="@string/description_recyclerview_glsurfaceview"
+            android:name=".activity.maplayout.SurfaceRecyclerViewActivity"
+            android:description="@string/description_recyclerview_surfaceview"
             android:exported="true"
-            android:label="@string/activity_recyclerview_glsurfaceview">
+            android:label="@string/activity_recyclerview_surfaceview">
             <meta-data
                 android:name="@string/category"
                 android:value="@string/category_integration" />
@@ -1259,13 +1271,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
-
         <activity
             android:name=".activity.options.MapOptionsXmlActivity"
-            android:exported="true"
             android:description="@string/description_map_options_xml"
-            android:label="@string/activity_map_options_xml"
-            >
+            android:exported="true"
+            android:label="@string/activity_map_options_xml">
             <meta-data
                 android:name="@string/category"
                 android:value="@string/category_map_options" />
@@ -1273,7 +1283,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
-
     </application>
 
 </manifest>

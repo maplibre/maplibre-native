@@ -36,13 +36,12 @@
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/renderable_resource.hpp>
 #include <mbgl/gl/defines.hpp>
-#include <mbgl/gl/texture.hpp>
-#include <mbgl/gl/texture_resource.hpp>
+#include <mbgl/gl/uniform.hpp>
 #include <mbgl/gl/types.hpp>
 
 #endif
 
-#if !MLN_RENDER_BACKEND_OPENGL
+#ifdef MLN_DRAWABLE_LOCATION_INDICATOR
 
 #include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
@@ -145,7 +144,7 @@ public:
         friend vec2 operator-(const vec2& v1, const vec2& v2) { return {v1.x - v2.x, v1.y - v2.y}; }
     };
 
-#if MLN_RENDER_BACKEND_OPENGL
+#ifndef MLN_DRAWABLE_LOCATION_INDICATOR
     struct Shader {
         virtual ~Shader() { release(); }
         void release() {
@@ -420,7 +419,7 @@ public:
 
 #endif
 
-#if !MLN_RENDER_BACKEND_OPENGL
+#ifdef MLN_DRAWABLE_LOCATION_INDICATOR
     struct TextureInfo {
         std::shared_ptr<gfx::Texture2D> texture;
         std::optional<Immutable<style::Image::Impl>> image;
@@ -485,7 +484,7 @@ public:
     }
 
     void release() {
-#if MLN_RENDER_BACKEND_OPENGL
+#ifndef MLN_DRAWABLE_LOCATION_INDICATOR
         if (!simpleShader.program) return;
         for (const auto& t : textures) t.second->release();
         buffer.release();
@@ -515,7 +514,7 @@ public:
                    params.puckShadowScale != oldParams.puckShadowScale)
             bearingChanged = true; // changes puck geometry but not necessarily the location
         if (params.errorRadiusMeters != oldParams.errorRadiusMeters) radiusChanged = true;
-#if MLN_RENDER_BACKEND_OPENGL
+#ifndef MLN_DRAWABLE_LOCATION_INDICATOR
         bearingChanged |= setTextureFromImageID(params.puckImagePath, texPuck, params);
         bearingChanged |= setTextureFromImageID(params.puckShadowImagePath, texShadow, params);
         bearingChanged |= setTextureFromImageID(params.puckHatImagePath, texPuckHat, params);
@@ -551,7 +550,7 @@ public:
         if (!dirtyFeature) return;
         dirtyFeature = false;
         featureEnvelope->clear();
-#if MLN_RENDER_BACKEND_OPENGL
+#ifndef MLN_DRAWABLE_LOCATION_INDICATOR
         if (!texPuck || !texPuck->isValid()) return;
 #else
         if (!puckDrawableInfo.textureInfo.texture) return;
@@ -593,7 +592,7 @@ protected:
     }
 
     void updateRadius(const mbgl::LocationIndicatorRenderParameters& params) {
-#if !MLN_RENDER_BACKEND_OPENGL
+#ifdef MLN_DRAWABLE_LOCATION_INDICATOR
         auto& circle = circleDrawableInfo.geometry;
         circleDrawableInfo.dirty = true;
 #endif
@@ -711,7 +710,7 @@ protected:
                 params.perspectiveCompensation; // Compensation factor for the perspective deformation
         //     ^ clamping this to 0.8 to avoid growing the puck too much close to the camera.
 
-#if MLN_RENDER_BACKEND_OPENGL
+#ifndef MLN_DRAWABLE_LOCATION_INDICATOR
         const double shadowRadius = ((texShadow) ? texShadow->width / texShadow->pixelRatio : 0.0) *
                                     params.puckShadowScale * M_SQRT2 * 0.5 *
                                     horizontalScaleFactor; // Technically it's not the radius, but
@@ -756,7 +755,7 @@ protected:
         }
     }
 
-#if MLN_RENDER_BACKEND_OPENGL
+#ifndef MLN_DRAWABLE_LOCATION_INDICATOR
     void drawRadius(const mbgl::LocationIndicatorRenderParameters& params) {
         if (!(params.errorRadiusMeters > 0.0) ||
             (params.errorRadiusColor.a == 0.0 && params.errorRadiusBorderColor.a == 0.0))
@@ -818,7 +817,7 @@ protected:
         return s.screenCoordinateToLatLng(flippedPoint, wrapMode);
     }
 
-#if MLN_RENDER_BACKEND_OPENGL
+#ifndef MLN_DRAWABLE_LOCATION_INDICATOR
     bool setTextureFromImageID(const std::string& imagePath,
                                std::shared_ptr<Texture>& texture,
                                const mbgl::LocationIndicatorRenderParameters& params) {
@@ -879,7 +878,7 @@ protected:
     bool initialized = false;
     bool dirtyFeature = true;
 
-#if !MLN_RENDER_BACKEND_OPENGL
+#ifdef MLN_DRAWABLE_LOCATION_INDICATOR
 
 public:
     struct QuadDrawableInfo {
@@ -944,6 +943,7 @@ RenderLocationIndicatorLayer::~RenderLocationIndicatorLayer() {
 
 void RenderLocationIndicatorLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
+    styleDependencies = unevaluated.getDependencies();
 }
 
 void RenderLocationIndicatorLayer::evaluate(const PropertyEvaluationParameters& parameters) {
@@ -1015,7 +1015,7 @@ void RenderLocationIndicatorLayer::populateDynamicRenderFeatureIndex(DynamicFeat
     if (!renderImpl->featureEnvelope->empty()) index.insert(renderImpl->feature, renderImpl->featureEnvelope);
 }
 
-#if MLN_RENDER_BACKEND_OPENGL
+#ifndef MLN_DRAWABLE_LOCATION_INDICATOR
 void RenderLocationIndicatorLayer::render(PaintParameters& paintParameters) {
     auto& glContext = static_cast<gl::Context&>(paintParameters.context);
 
@@ -1035,7 +1035,7 @@ void RenderLocationIndicatorLayer::render(PaintParameters& paintParameters) {
 }
 #endif
 
-#if !MLN_RENDER_BACKEND_OPENGL
+#ifdef MLN_DRAWABLE_LOCATION_INDICATOR
 
 void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
                                           gfx::Context& context,
@@ -1092,8 +1092,11 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
         const auto createQuadGeometry = [&](gfx::Drawable& drawable, const auto& geometry) {
             auto vertexAttrs = context.createVertexAttributeArray();
 
+            drawable.setVertices({}, 4, gfx::AttributeDataType::Float2);
+            vertexAttrs->set(shaders::idLocationIndicatorPosVertexAttribute, 0, gfx::AttributeDataType::Float2, 4);
+
             if (const auto& attr = vertexAttrs->set(
-                    shaders::idCommonTexVertexAttribute, 0, gfx::AttributeDataType::Float2)) {
+                    shaders::idLocationIndicatorTexVertexAttribute, 0, gfx::AttributeDataType::Float2, 4)) {
                 const std::array<RenderLocationIndicatorImpl::vec2, 4> texCoords = {
                     {{0.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f}, {1.0f, 1.0f}}};
 
@@ -1125,7 +1128,9 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
 
             drawable->setName(name);
             drawable->setRenderPass(drawPasses);
-            drawable->setDepthType(gfx::DepthMaskType::ReadWrite);
+            drawable->setDepthType(gfx::DepthMaskType::ReadOnly);
+            drawable->setEnableDepth(false);
+            drawable->setEnableStencil(false);
             drawable->setColorMode(drawPasses == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
                                                                          : gfx::ColorMode::unblended());
 
@@ -1146,7 +1151,9 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
 
             drawable->setName(name);
             drawable->setRenderPass(drawPasses);
-            drawable->setDepthType(gfx::DepthMaskType::ReadWrite);
+            drawable->setDepthType(gfx::DepthMaskType::ReadOnly);
+            drawable->setEnableDepth(false);
+            drawable->setEnableStencil(false);
             drawable->setColorMode(drawPasses == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
                                                                          : gfx::ColorMode::unblended());
 
@@ -1240,7 +1247,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             auto& circleVertexAttrs = circleDrawable.getVertexAttributes();
-            if (const auto& attr = circleVertexAttrs->set(shaders::idCommonPosVertexAttribute)) {
+            if (const auto& attr = circleVertexAttrs->set(shaders::idLocationIndicatorPosVertexAttribute)) {
                 attr->setSharedRawData(
                     verts, 0, 0, sizeof(RenderLocationIndicatorImpl::vec2), gfx::AttributeDataType::Float2);
             }
@@ -1254,7 +1261,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
             auto vertexAttrs = drawable.getVertexAttributes();
 
             if (const auto& attr = vertexAttrs->set(
-                    shaders::idCommonPosVertexAttribute, 0, gfx::AttributeDataType::Float2)) {
+                    shaders::idLocationIndicatorPosVertexAttribute, 0, gfx::AttributeDataType::Float2)) {
                 auto geoDataPtr = reinterpret_cast<const uint8_t*>(info.geometry.data());
                 auto geoDataSize = info.geometry.size() * sizeof(RenderLocationIndicatorImpl::vec2);
 
@@ -1281,7 +1288,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
                 info.textureInfo.image.reset();
             }
 
-            drawable.setTexture(info.textureInfo.texture, shaders::idCommonTexture);
+            drawable.setTexture(info.textureInfo.texture, shaders::idLocationIndicatorTexture);
             info.textureInfo.dirty = false;
         }
     };

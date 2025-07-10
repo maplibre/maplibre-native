@@ -61,7 +61,7 @@
 - (CLLocationCoordinate2D)coordinate {
     // pole of inaccessibility
     auto poi = mapbox::polylabel([self polygon]);
-    
+
     return MLNLocationCoordinate2DFromPoint(poi);
 }
 
@@ -192,7 +192,7 @@
 
 - (CLLocationCoordinate2D)coordinate {
     MLNPolygon *firstPolygon = self.polygons.firstObject;
-    
+
     return firstPolygon.coordinate;
 }
 

@@ -52,10 +52,10 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup, const Pai
 
         const HillshadePrepareDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix)};
         const HillshadePrepareTilePropsUBO tilePropsUBO = {
-            /* .unpack = */ getUnpackVector(drawableData.encoding),
-            /* .dimension = */ {static_cast<float>(drawableData.stride), static_cast<float>(drawableData.stride)},
-            /* .zoom = */ static_cast<float>(tileID.canonical.z),
-            /* .maxzoom = */ static_cast<float>(drawableData.maxzoom)};
+            .unpack = getUnpackVector(drawableData.encoding),
+            .dimension = {static_cast<float>(drawableData.stride), static_cast<float>(drawableData.stride)},
+            .zoom = static_cast<float>(tileID.canonical.z),
+            .maxzoom = static_cast<float>(drawableData.maxzoom)};
 
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idHillshadePrepareDrawableUBO, &drawableUBO, parameters.context);

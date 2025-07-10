@@ -9,7 +9,7 @@
 #include <mbgl/vulkan/upload_pass.hpp>
 #include <mbgl/vulkan/pipeline.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/util/mat4.hpp>
 
 #include <cstdint>
@@ -44,8 +44,8 @@ public:
 
     std::optional<gfx::RenderPassDescriptor> renderPassDescriptor;
 
-    gfx::DepthMode depthFor3D = gfx::DepthMode::disabled();
-    gfx::StencilMode stencilFor3D = gfx::StencilMode::disabled();
+    std::optional<gfx::DepthMode> depthFor3D;
+    std::optional<gfx::StencilMode> stencilFor3D;
 
     PipelineInfo pipelineInfo;
 

@@ -66,13 +66,13 @@ struct FragmentStage {
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const HillshadeDrawableUBO* drawableVector [[buffer(idHillshadeDrawableUBO)]]) {
-    
+
     device const HillshadeDrawableUBO& drawable = drawableVector[uboIndex];
 
     const float4 position = drawable.matrix * float4(float2(vertx.pos), 0, 1);
     float2 pos = float2(vertx.texture_pos) / 8192.0;
     pos.y = 1.0 - pos.y;
-    
+
     return {
         .position    = position,
         .pos         = pos,

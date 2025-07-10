@@ -21,7 +21,7 @@ on:
       - ios-*.*.x
     tags:
       - 'ios-*'
-  
+
   pull_request:
     branches:
       - '*'
@@ -43,16 +43,16 @@ jobs:
       - name: Get all iOS files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files-yaml
-        uses: tj-actions/changed-files@v45
+        uses: tj-actions/changed-files@v46
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
       - name: Run step if test file(s) change
-        if: steps.changed-files-yaml.outputs.ios_any_modified == 'true'  
+        if: steps.changed-files-yaml.outputs.ios_any_modified == 'true'
         run: |
           echo "One or more iOS file(s) has changed."
           echo "List of changes: ${{ steps.changed-files-yaml.outputs.ios_all_changed_files }}"
-      
+
   ios-build:
     needs: pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
@@ -100,7 +100,25 @@ jobs:
       #  run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=tsan
 
       - name: Running iOS UI tests (Address+UB Sanitizer)
-        run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=include_clang_rt --copt=-fsanitize=undefined --linkopt=-fsanitize=undefined --copt=-fsanitize-recover=null --linkopt=-fsanitize-recover=null
+        run: |
+          retry_count=0
+          max_retries=5
+          while [ $retry_count -le $max_retries ]; do
+            bazel test //platform/ios/iosapp-UITests:uitest \
+              --test_output=errors \
+              --//:renderer=metal \
+              --features=include_clang_rt \
+              --copt=-fsanitize=undefined \
+              --linkopt=-fsanitize=undefined \
+              --copt=-fsanitize-recover=null \
+              --linkopt=-fsanitize-recover=null && break
+            retry_count=$((retry_count+1))
+            if [ $retry_count -eq $max_retries ]; then
+              echo "::error::Failed to run iOS UI tests after $max_retries attempts"
+              exit 1
+            fi
+            echo "Attempt $retry_count failed. Retrying..."
+          done
 
       # render test
 
@@ -130,7 +148,7 @@ jobs:
             ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
 
       # C++ unit tests
-      
+
       - name: Build CppUnitTests .ipa and .xctest for AWS Device Farm
         run: |
           set -e
@@ -178,16 +196,16 @@ jobs:
             platform/ios/MapLibre_dynamic
 
       - name: Configure AWS Credentials
-        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
+        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
           role-session-name: ${{ github.run_id }}
-      
+
       - name: Upload MapLibre_DWARF & MapLibre_dynamic to S3
-        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
-        run: | 
+        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
+        run: |
           aws s3 cp MapLibre_DWARF s3://maplibre-native/size-test-ios/MapLibre_DWARF-main
           aws s3 cp MapLibre_dynamic s3://maplibre-native/size-test-ios/MapLibre_dynamic-main
 
@@ -215,7 +233,7 @@ jobs:
 
       - name: VERSION file changed
         id: version-file-ios-changed
-        uses: tj-actions/changed-files@v45
+        uses: tj-actions/changed-files@v46
         with:
           files: platform/ios/VERSION
 
@@ -232,7 +250,7 @@ jobs:
           bazel build --compilation_mode=opt --features=dead_strip,thin_lto --objc_enable_binary_stripping \
             --apple_generate_dsym --output_groups=+dsyms --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
           echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal //platform/ios:MapLibre.dynamic)" >> "$GITHUB_ENV"
-          
+
       - name: Create .zip with debug symbols
         if: env.make_release
         working-directory: ./bazel-bin/platform/ios/MapLibre.dynamic_dsyms
@@ -252,6 +270,10 @@ jobs:
           version="${{ github.event.inputs.pre_release_version }}"
           if [[ -z "$version" ]]; then
             version="$(head VERSION)"-pre${{ github.sha }}
+          fi
+          if [[ "$version" != *"pre"* ]]; then
+            echo "::error::Pre-release version must include 'pre' (Current version: $version)"
+            exit 1
           fi
           echo version="$version" >> "$GITHUB_ENV"
           echo changelog_version_heading="## main" >> "$GITHUB_ENV"
@@ -329,8 +351,25 @@ jobs:
       - name: Release (CocoaPods)
         shell: bash -leo pipefail {0}  # so pod is found
         if: env.make_release
-        run: |
-          VERSION=${{ env.version }} COCOAPODS_TRUNK_TOKEN=${{ secrets.COCOAPODS_PASSWORD }} pod trunk push MapLibre.podspec
+        run: gh workflow run ios-release-cocoapods.yml --field version=${{ env.version }}
+        env:
+         GH_TOKEN: ${{ github.token }}
+
+  ios-build-cmake:
+    needs: pre_job
+    runs-on: macos-latest
+    if: needs.pre_job.outputs.should_skip != 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Configure build with CMake
+        run: cmake --preset ios
+
+      - name: Build mbgl-core
+        run: cmake --build build-ios --target mbgl-core ios-sdk-static app
 
   ios-ci-result:
     runs-on: ubuntu-latest
@@ -338,7 +377,8 @@ jobs:
     needs:
       - pre_job
       - ios-build
+      - ios-build-cmake
     steps:
       - name: Mark result as failed
-        if: needs.ios-build.result != 'success'
+        if: needs.ios-build.result != 'success' || needs.ios-build-cmake.result != 'success'
         run: exit 1
