@@ -22,7 +22,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
   public static boolean WAIT_COMMANDS_ON_CLEANUP = false;
-  public static boolean DEFER_CONTEXT_DESTRUCTION = true;
+  public static boolean DEFER_CONTEXT_DESTRUCTION = false;
 
   protected final WeakReference<MapLibreGLSurfaceView> viewWeakReference = new WeakReference<>(this);
 
@@ -295,9 +295,7 @@ public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
             final EGLDisplay display = mEglDisplay;
             final EGLSurface surface = mEglSurface;
 
-            cleanupExecutor.submit(() -> {
-              factory.destroySurface(mEgl, display, surface);
-            });
+            cleanupExecutor.submit(() -> factory.destroySurface(mEgl, display, surface));
           } else {
             view.eglWindowSurfaceFactory.destroySurface(mEgl, mEglDisplay, mEglSurface);
           }
@@ -315,7 +313,7 @@ public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
           final EGLDisplay display = mEglDisplay;
           final EGLContext context = mEglContext;
 
-            cleanupExecutor.submit(() -> {
+          cleanupExecutor.submit(() -> {
             if (context != null) {
               factory.destroyContext(mEgl, display, context);
             }
