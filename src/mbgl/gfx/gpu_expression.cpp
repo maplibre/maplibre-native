@@ -107,7 +107,7 @@ UniqueGPUExpression GPUExpression::create(const Expression& expression, const Zo
 }
 
 float GPUExpression::evaluateFloat(const float zoom) const {
-    auto index = static_cast<decltype(stopCount)>(
+    const auto index = static_cast<std::uint16_t>(
         std::distance(&inputs[0], std::upper_bound(&inputs[0], &inputs[stopCount], zoom)));
     if (index == 0) {
         return stops.floats[0];
