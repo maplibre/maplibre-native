@@ -86,21 +86,6 @@ jobs:
       - name: Xcode Build Tools version
         run: xcodebuild -version
 
-      - name: Test SSE
-        continue-on-error: true
-        working-directory: vendor/maplibre-tile-spec/cpp/bazel/check
-        run: |
-          bazel build :sse42
-          if [ $? -eq 0 ]; then 
-            echo SSE 4.2 Supported
-            echo "SUPPORT_SSE42=1" >> "$GITHUB_ENV"
-          else
-            echo SSE 4.2 Not Supported
-          fi
-
-      - name: Status
-        run: echo "SUPPORT_SSE42=$SUPPORT_SSE42"
-
       - name: Build Example (Swift) App
         run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal
 
