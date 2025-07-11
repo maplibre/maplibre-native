@@ -97,17 +97,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: recursive
           fetch-depth: 1
-
-      - name: Submodules
-        if: runner.os == 'MacOS' || runner.os == 'Linux'
-        run: |
-          git submodule update --recursive
-          ls -l vendor/maplibre-tile-spec/vendor
-          ls -l vendor/maplibre-tile-spec/vendor/fastpfor
-          (cd vendor/maplibre-tile-spec && git submodule update --init --recursive)
-          ls -l vendor/maplibre-tile-spec/vendor/fastpfor
 
       - name: Get OS Architecture
         if: runner.os == 'MacOS' || runner.os == 'Linux'
