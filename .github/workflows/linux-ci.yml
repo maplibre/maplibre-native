@@ -208,9 +208,6 @@ jobs:
           npm install
           node test/storage/server.js &
 
-      - name: Compiler Info
-        run: bazel build //:compile_info
-
       - name: Generate coverage report
         run: |
           xvfb-run -a \
