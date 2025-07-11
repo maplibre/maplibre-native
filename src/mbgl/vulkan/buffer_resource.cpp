@@ -171,6 +171,11 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
     }
 
     uint8_t* data = static_cast<uint8_t*>(bufferAllocation->mappedBuffer) + getVulkanBufferOffset() + offset;
+
+    if (memcmp(data, newData, updateSize) == 0) {
+        return;
+    }
+
     std::memcpy(data, newData, updateSize);
 
     auto& stats = context.renderingStats();
