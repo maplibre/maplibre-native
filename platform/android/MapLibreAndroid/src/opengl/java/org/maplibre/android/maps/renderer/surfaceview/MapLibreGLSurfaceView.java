@@ -137,7 +137,10 @@ public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
     public void start() {
       try {
         if (DEFER_CONTEXT_DESTRUCTION) {
+          String renderThreadName = Thread.currentThread().getName();
+
           cleanupExecutor = Executors.newSingleThreadExecutor();
+          cleanupExecutor.submit(() -> Thread.currentThread().setName(renderThreadName + "-cleanup"));
         }
 
         /*
