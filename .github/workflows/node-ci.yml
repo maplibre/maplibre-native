@@ -94,6 +94,9 @@ jobs:
         shell: bash
 
     steps:
+      - if: runner.os == 'Windows'
+        run: git config --global core.longpaths true
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
