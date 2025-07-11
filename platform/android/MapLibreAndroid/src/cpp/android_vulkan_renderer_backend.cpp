@@ -68,6 +68,11 @@ void AndroidVulkanRendererBackend::resizeFramebuffer(int width, int height) {
     }
 }
 
+PremultipliedImage AndroidVulkanRendererBackend::readFramebuffer() {
+    // TODO not implemented
+    return PremultipliedImage(Size(2, 2));
+}
+
 } // namespace android
 } // namespace mbgl
 

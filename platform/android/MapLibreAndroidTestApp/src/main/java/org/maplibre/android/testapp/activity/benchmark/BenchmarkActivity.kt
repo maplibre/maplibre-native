@@ -27,6 +27,7 @@ import org.maplibre.android.log.Logger.INFO
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.CancelableCallback
 import org.maplibre.android.maps.MapView
+import org.maplibre.android.maps.RenderingStats
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.BenchmarkInputData
@@ -211,9 +212,9 @@ class BenchmarkActivity : AppCompatActivity() {
 
         maplibreMap.setSwapBehaviorFlush(benchmarkRun.syncRendering)
 
-        val listener = MapView.OnDidFinishRenderingFrameListener { _: Boolean, frameEncodingTime: Double, frameRenderingTime: Double ->
-            encodingTimeStore.add(frameEncodingTime * 1e3)
-            renderingTimeStore.add(frameRenderingTime * 1e3)
+        val listener = MapView.OnDidFinishRenderingFrameWithStatsListener { _: Boolean, stats: RenderingStats ->
+            encodingTimeStore.add(stats.encodingTime * 1e3)
+            renderingTimeStore.add(stats.renderingTime * 1e3)
             numFrames++;
         }
         mapView.addOnDidFinishRenderingFrameListener(listener)

@@ -1,5 +1,7 @@
 package org.maplibre.android.testapp.style;
 
+import org.junit.Ignore;
+import org.maplibre.android.style.sources.CannotAddSourceException;
 import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.FeatureCollection;
 import org.maplibre.geojson.Point;
@@ -90,6 +92,26 @@ public class GeoJsonSourceTests extends EspressoTest {
   }
 
   @Test
+  public void testUpdateCoalescingSync() {
+    validateTestSetup();
+    MapLibreMapAction.invoke(maplibreMap, (uiController, maplibreMap) -> {
+      GeoJsonSource source = new GeoJsonSource("source");
+      maplibreMap.getStyle().addSource(source);
+      maplibreMap.getStyle().addLayer(new CircleLayer("layer", source.getId()));
+
+      source.setGeoJsonSync(Point.fromLngLat(0, 0));
+      source.setGeoJsonSync(Point.fromLngLat(-25, -25));
+      source.setGeoJsonSync(ResourceUtils.readRawResource(rule.getActivity(), R.raw.test_feature_properties));
+
+      source.setGeoJsonSync(Point.fromLngLat(20, 55));
+      TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
+      assertEquals(1, maplibreMap.queryRenderedFeatures(
+              maplibreMap.getProjection().toScreenLocation(
+                      new LatLng(55, 20)), "layer").size());
+    });
+  }
+
+  @Test
   public void testClearCollectionDuringConversion() {
     // https://github.com/mapbox/mapbox-gl-native/issues/14565
     validateTestSetup();
@@ -152,6 +174,104 @@ public class GeoJsonSourceTests extends EspressoTest {
 
       maplibreMap.getStyle().removeLayer(layer);
       maplibreMap.getStyle().removeSource(source);
+    });
+  }
+
+  @Test
+  public void testPointFeatureSync() {
+    testFeatureFromResourceSync(R.raw.test_point_feature);
+  }
+
+  @Test
+  public void testLineStringFeatureSync() {
+    testFeatureFromResourceSync(R.raw.test_line_string_feature);
+  }
+
+  @Test
+  public void testPolygonFeatureSync() {
+    testFeatureFromResourceSync(R.raw.test_polygon_feature);
+  }
+
+  @Test
+  public void testPolygonWithHoleFeatureSync() {
+    testFeatureFromResourceSync(R.raw.test_polygon_with_hole_feature);
+  }
+
+  @Test
+  public void testMultiPointFeatureSync() {
+    testFeatureFromResourceSync(R.raw.test_multi_point_feature);
+  }
+
+  @Test
+  public void testMultiLineStringFeatureSync() {
+    testFeatureFromResourceSync(R.raw.test_multi_line_string_feature);
+  }
+
+  @Test
+  public void testMultiPolygonFeatureSync() {
+    testFeatureFromResourceSync(R.raw.test_multi_polygon_feature);
+  }
+
+  protected void testFeatureFromResourceSync(final @RawRes int resource) {
+    validateTestSetup();
+    MapLibreMapAction.invoke(maplibreMap, (uiController, maplibreMap) -> {
+      GeoJsonSource source = new GeoJsonSource("source");
+      maplibreMap.getStyle().addSource(source);
+      Layer layer = new CircleLayer("layer", source.getId());
+      maplibreMap.getStyle().addLayer(layer);
+
+      source.setGeoJsonSync(Feature.fromJson(ResourceUtils.readRawResource(rule.getActivity(), resource)));
+
+      maplibreMap.getStyle().removeLayer(layer);
+      maplibreMap.getStyle().removeSource(source);
+    });
+  }
+
+  @Test
+  @Ignore("https://github.com/maplibre/maplibre-native/issues/3493")
+  public void testDuplicateSourceDuringAsyncSetGeoJson() {
+    // regression test for segfault when setting GeoJSON contents
+    // for a source that has been deleted
+    // https://github.com/maplibre/maplibre-native/issues/3493
+    validateTestSetup();
+    MapLibreMapAction.invoke(maplibreMap, (uiController, maplibreMap) -> {
+      String geoJsonString = "{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[0,0]}}";
+      for (int i = 0; i < 1000; i++) {
+        // Create a GeoJSON source with the same ID each iteration
+        GeoJsonSource source = new GeoJsonSource("source");
+        try {
+          maplibreMap.getStyle().addSource(source);
+        } catch (CannotAddSourceException ex) {
+          // ignore, this is expected
+        }
+
+        // Schedule an async update via setGeoJson(String)
+        source.setGeoJson(geoJsonString);
+      }
+    });
+  }
+
+  @Test
+  @Ignore("https://github.com/maplibre/maplibre-native/issues/3493")
+  public void testDuplicateSourceDuringSyncSetGeoJson() {
+    // regression test for segfault when setting GeoJSON contents
+    // for a source that has been deleted
+    // https://github.com/maplibre/maplibre-native/issues/3493
+    validateTestSetup();
+    MapLibreMapAction.invoke(maplibreMap, (uiController, maplibreMap) -> {
+      String geoJsonString = "{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[0,0]}}";
+      for (int i = 0; i < 1000; i++) {
+        // Create a GeoJSON source with the same ID each iteration
+        GeoJsonSource source = new GeoJsonSource("source");
+        try {
+          maplibreMap.getStyle().addSource(source);
+        } catch (CannotAddSourceException ex) {
+          // ignore, this is expected
+        }
+
+        // Schedule a sync update via setGeoJson(String)
+        source.setGeoJsonSync(geoJsonString);
+      }
     });
   }
 

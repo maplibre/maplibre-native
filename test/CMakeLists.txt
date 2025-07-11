@@ -18,6 +18,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/math/minmax.test.cpp
     ${PROJECT_SOURCE_DIR}/test/math/wrap.test.cpp
     ${PROJECT_SOURCE_DIR}/test/platform/settings.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/plugin/plugin.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/image_manager.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/pattern_atlas.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/shader_registry.test.cpp
@@ -84,7 +85,9 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/tile/tile_cache.test.cpp
     ${PROJECT_SOURCE_DIR}/test/tile/tile_coordinate.test.cpp
     ${PROJECT_SOURCE_DIR}/test/tile/tile_id.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/tile/tile_lod.test.cpp
     ${PROJECT_SOURCE_DIR}/test/tile/vector_tile.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/action_journal.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/async_task.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/bounding_volumes.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/camera.test.cpp

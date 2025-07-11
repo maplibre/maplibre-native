@@ -23,6 +23,11 @@
 #import "MLNMapView_Experimental.h"
 #import <objc/runtime.h>
 
+// Plug In Examples
+#import "PluginLayerExample.h"
+#import "PluginLayerExampleMetalRendering.h"
+#import "MLNPluginStyleLayer.h"
+
 static const CLLocationCoordinate2D WorldTourDestinations[] = {
     { .latitude = 38.8999418, .longitude = -77.033996 },
     { .latitude = 37.7884307, .longitude = -122.3998631 },
@@ -54,7 +59,8 @@ typedef NS_ENUM(NSInteger, MBXSettingsDebugToolsRows) {
     MBXSettingsDebugToolsOverdrawVisualization,
     MBXSettingsDebugToolsShowZoomLevel,
     MBXSettingsDebugToolsShowFrameTimeGraph,
-    MBXSettingsDebugToolsShowReuseQueueStats
+    MBXSettingsDebugToolsShowReuseQueueStats,
+    MBXSettingsDebugToolsShowRenderingStats
 };
 
 typedef NS_ENUM(NSInteger, MBXSettingsAnnotationsRows) {
@@ -120,8 +126,17 @@ typedef NS_ENUM(NSInteger, MBXSettingsMiscellaneousRows) {
     MBXSettingsMiscellaneousShowCustomLocationManager,
     MBXSettingsMiscellaneousOrnamentsPlacement,
     MBXSettingsMiscellaneousLatLngBoundsWithPadding,
+    MBXSettingsMiscellaneousCycleTileLOD,
     MBXSettingsMiscellaneousPrintLogFile,
     MBXSettingsMiscellaneousDeleteLogFile
+};
+
+typedef NS_ENUM(NSInteger, MBXTileLodMode) {
+    MBXTileLodModeNoLod = 0,
+    MBXTileLodModeDefault,
+    MBXTileLodModeReduced,
+    MBXTileLodModeAggressive,
+    MBXTileLodModeCount
 };
 
 // Utility methods
@@ -220,6 +235,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 @property (nonatomic, getter=isLocalizingLabels) BOOL localizingLabels;
 @property (nonatomic) BOOL reuseQueueStatsEnabled;
 @property (nonatomic) BOOL frameTimeGraphEnabled;
+@property (nonatomic) BOOL renderingStatsEnabled;
 @property (nonatomic) BOOL shouldLimitCameraChanges;
 @property (nonatomic) BOOL randomWalk;
 @property (nonatomic) BOOL zoomLevelOrnamentEnabled;
@@ -243,6 +259,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
     NSDictionary* _pointFeatures;
     NSLock* _loadLock;
+
+    MBXTileLodMode _tileLodMode;
 }
 
 // MARK: - Setup & Teardown
@@ -257,9 +275,20 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     return self;
 }
 
+// This will add the plug-in layers.  This is a demo of how
+// extensible layers for the style can be added to the map view
+-(void)addPluginLayers {
+
+    [self.mapView addPluginLayerType:[PluginLayerExample class]];
+    [self.mapView addPluginLayerType:[PluginLayerExampleMetalRendering class]];
+
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+
+    [self addPluginLayers];
 
     // Keep track of current map state and debug preferences,
     // saving and restoring when the application's state changes.
@@ -399,7 +428,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                     (debugMask & MLNMapDebugOverdrawVisualizationMask ? @"Hide" :@"Show")],
                 [NSString stringWithFormat:@"%@ zoom level ornament", (self.zoomLevelOrnamentEnabled ? @"Hide" :@"Show")],
                 [NSString stringWithFormat:@"%@ frame time graph", (self.frameTimeGraphEnabled ? @"Hide" :@"Show")],
-                [NSString stringWithFormat:@"%@ reuse queue stats", (self.reuseQueueStatsEnabled ? @"Hide" :@"Show")]
+                [NSString stringWithFormat:@"%@ reuse queue stats", (self.reuseQueueStatsEnabled ? @"Hide" :@"Show")],
+                [NSString stringWithFormat:@"%@ rendering stats", (self.renderingStatsEnabled ? @"Hide" :@"Show")]
             ]];
             break;
         case MBXSettingsAnnotations:
@@ -471,7 +501,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 [NSString stringWithFormat:@"Turn %@ Content Insets", (_contentInsetsEnabled ? @"Off" : @"On")],
                 @"View Route Simulation",
                 @"Ornaments Placement",
-                @"Lat Long bounds with padding"
+                @"Lat Long bounds with padding",
+                [NSString stringWithFormat:@"Cycle tile LOD mode: %@", [self getTileLodModeName]]
             ]];
 
             break;
@@ -531,6 +562,12 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                     self.hudLabel.hidden = !self.currentState.reuseQueueStatsEnabled;
                     self.zoomLevelOrnamentEnabled = NO;
                     [self updateHUD];
+                    break;
+                }
+                case MBXSettingsDebugToolsShowRenderingStats:
+                {
+                    self.renderingStatsEnabled = !self.renderingStatsEnabled;
+                    [self.mapView enableRenderingStatsView:self.renderingStatsEnabled];
                     break;
                 }
                 default:
@@ -797,6 +834,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 }
                 case MBXSettingsMiscellaneousLatLngBoundsWithPadding:
                     [self flyToWithLatLngBoundsAndPadding];
+                    break;
+                case MBXSettingsMiscellaneousCycleTileLOD:
+                    [self cycleTileLodMode];
                     break;
                 default:
                     NSAssert(NO, @"All miscellaneous setting rows should be implemented");
@@ -1983,6 +2023,114 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     }];
 }
 
+-(void)cycleTileLodMode
+{
+    // TileLodMode::Default parameters
+    static const double defaultRadius = self.mapView.tileLodMinRadius;
+    static const double defaultScale = self.mapView.tileLodScale;
+    static const double defaultPitchThreshold = self.mapView.tileLodPitchThreshold;
+
+    _tileLodMode = static_cast<MBXTileLodMode>((static_cast<int>(_tileLodMode) + 1) % static_cast<int>(MBXTileLodModeCount));
+
+    switch (_tileLodMode) {
+        case MBXTileLodModeDefault:
+            self.mapView.tileLodMinRadius = defaultRadius;
+            self.mapView.tileLodScale = defaultScale;
+            self.mapView.tileLodPitchThreshold = defaultPitchThreshold;
+            break;
+        case MBXTileLodModeNoLod:
+            // When LOD is off we set a maximum PitchThreshold
+            self.mapView.tileLodPitchThreshold = M_PI;
+            break;
+        case MBXTileLodModeReduced:
+            self.mapView.tileLodMinRadius = 2;
+            self.mapView.tileLodScale = 1.5;
+            self.mapView.tileLodPitchThreshold = M_PI / 4;
+            break;
+        case MBXTileLodModeAggressive:
+            self.mapView.tileLodMinRadius = 1;
+            self.mapView.tileLodScale = 2;
+            self.mapView.tileLodPitchThreshold = 0;
+            break;
+        default:
+            break;
+    }
+
+    // update UI
+    static UISlider* zoomSlider = nil;
+    if (zoomSlider && _tileLodMode == MBXTileLodModeNoLod) {
+        [zoomSlider removeFromSuperview];
+        zoomSlider = nil;
+    }
+
+    if (!zoomSlider && _tileLodMode != MBXTileLodModeNoLod) {
+        const float zoomShiftRange = 5.0f;
+        zoomSlider = [[UISlider alloc] init];
+        zoomSlider.minimumValue = -zoomShiftRange / 2.0f;
+        zoomSlider.maximumValue = zoomShiftRange / 2.0f;
+        zoomSlider.value = self.mapView.tileLodZoomShift;
+        zoomSlider.continuous = NO;
+
+        [zoomSlider addTarget:self action:@selector(updateTileLodZoom:) forControlEvents:UIControlEventValueChanged];
+        [self.view addSubview:zoomSlider];
+
+        zoomSlider.translatesAutoresizingMaskIntoConstraints = NO;
+        zoomSlider.frame = CGRectMake(0, 0, 100, 100);
+
+        NSArray<NSLayoutConstraint*>* layout = @[
+                [NSLayoutConstraint constraintWithItem:zoomSlider
+                                             attribute:NSLayoutAttributeCenterX
+                                             relatedBy:NSLayoutRelationEqual
+                                                toItem:self.view
+                                             attribute:NSLayoutAttributeCenterX
+                                            multiplier:1
+                                              constant:0],
+                [NSLayoutConstraint constraintWithItem:zoomSlider
+                                             attribute:NSLayoutAttributeWidth
+                                             relatedBy:NSLayoutRelationEqual
+                                                toItem:self.view
+                                             attribute:NSLayoutAttributeWidth
+                                            multiplier:0.5
+                                              constant:0],
+                [NSLayoutConstraint constraintWithItem:zoomSlider
+                                             attribute:NSLayoutAttributeTop
+                                             relatedBy:NSLayoutRelationEqual
+                                                toItem:self.view
+                                             attribute:NSLayoutAttributeCenterY
+                                            multiplier:1
+                                              constant:0],
+                [zoomSlider.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor]];
+
+        [self.view addConstraints:layout];
+    }
+
+    [self.mapView triggerRepaint];
+}
+
+-(void)updateTileLodZoom:(id)sender {
+    UISlider* slider = (UISlider*)sender;
+
+    self.mapView.tileLodZoomShift = slider.value;
+    [self.mapView triggerRepaint];
+
+    NSLog(@"Tile LOD zoom shift: %f", self.mapView.tileLodZoomShift);
+}
+
+-(NSString*)getTileLodModeName {
+    switch (_tileLodMode) {
+        case MBXTileLodModeDefault:
+            return @"Default";
+        case MBXTileLodModeNoLod:
+            return @"Disabled";
+        case MBXTileLodModeReduced:
+            return @"Reduced";
+        case MBXTileLodModeAggressive:
+            return @"Aggressive";
+        default:
+            return @"";
+    }
+}
+
 // MARK: - Random World Tour
 
 - (void)addAnnotations:(NSInteger)numAnnotations aroundCoordinate:(CLLocationCoordinate2D)coordinate radius:(CLLocationDistance)radius {
@@ -2182,9 +2330,18 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     self.styleNames = [NSMutableArray array];
     self.styleURLs = [NSMutableArray array];
 
+
+
+
     /// Style that does not require an `apiKey` nor any further configuration
     [self.styleNames addObject:@"MapLibre Basic"];
     [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
+
+    /// This is hte same style as above but copied locally and the three instances of the metal plug-in layer added to the style
+    /// Look for "type": "plugin-layer-metal-rendering" in the PluginLayerTestStyle.json for an example of how the layer is defined
+    [self.styleNames addObject:@"MapLibre Basic - Local With Plugin"];
+    NSURL *url = [[NSBundle mainBundle] URLForResource:@"PluginLayerTestStyle.json" withExtension:nil];
+    [self.styleURLs addObject:url];
 
     /// Add MapLibre Styles if an `apiKey` exists
     NSString* apiKey = [MLNSettings apiKey];
@@ -2691,9 +2848,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     return features;
 }
 
-- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView fullyRendered:(BOOL)fullyRendered frameEncodingTime:(double)frameEncodingTime frameRenderingTime:(double)frameRenderingTime {
+- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView
+                         fullyRendered:(BOOL)fullyRendered
+                        renderingStats:(nonnull MLNRenderingStats *)renderingStats {
     if (self.frameTimeGraphEnabled) {
-        [self.frameTimeGraphView updatePathWithFrameDuration:frameEncodingTime];
+        [self.frameTimeGraphView updatePathWithFrameDuration:renderingStats.encodingTime];
     }
 }
 

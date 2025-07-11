@@ -26,14 +26,14 @@ public:
     BenchMapObserver(id<BenchMapDelegate> mapDelegate_) : mapDelegate(mapDelegate_) {}
     virtual ~BenchMapObserver() = default;
 
-    void onDidFinishRenderingFrame(RenderFrameStatus status) override final {
-        //NSLog(@"Frame encoding time: %4.1f ms", status.frameEncodingTime * 1e3);
-        //NSLog(@"Frame rendering time: %4.1f ms", status.frameRenderingTime * 1e3);
+    void onDidFinishRenderingFrame(const RenderFrameStatus& status) override final {
+        //NSLog(@"Frame encoding time: %4.1f ms", status.renderingStats.encodingTime * 1e3);
+        //NSLog(@"Frame rendering time: %4.1f ms", status.renderingStats.renderingTime * 1e3);
 
         bool fullyRendered = status.mode == mbgl::MapObserver::RenderMode::Full;
         [mapDelegate mapDidFinishRenderingFrameFullyRendered:fullyRendered
-                                           frameEncodingTime:status.frameEncodingTime
-                                          frameRenderingTime:status.frameRenderingTime];
+                                           frameEncodingTime:status.renderingStats.encodingTime
+                                          frameRenderingTime:status.renderingStats.renderingTime];
     }
 
 protected:

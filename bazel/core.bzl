@@ -1,3 +1,19 @@
+MLN_LAYER_PLUGIN_HEADERS = [
+    "src/mbgl/plugin/plugin_layer.hpp",
+    "src/mbgl/plugin/plugin_layer_factory.hpp",
+    "src/mbgl/plugin/plugin_layer_impl.hpp",
+    "src/mbgl/plugin/plugin_layer_render.hpp",
+    "src/mbgl/plugin/plugin_layer_properties.hpp",
+]
+
+MLN_LAYER_PLUGIN_SOURCE = [
+    "src/mbgl/plugin/plugin_layer.cpp",
+    "src/mbgl/plugin/plugin_layer_factory.cpp",
+    "src/mbgl/plugin/plugin_layer_impl.cpp",
+    "src/mbgl/plugin/plugin_layer_render.cpp",
+    "src/mbgl/plugin/plugin_layer_properties.cpp",
+]
+
 MLN_PUBLIC_GENERATED_STYLE_HEADERS = [
     "include/mbgl/style/layers/circle_layer.hpp",
     "include/mbgl/style/layers/fill_layer.hpp",
@@ -52,6 +68,10 @@ MLN_GENERATED_STYLE_SOURCE = [
 MLN_GENERATED_SHADER_HEADERS = [
     "include/mbgl/shaders/shader_source.hpp",
     "include/mbgl/shaders/shader_manifest.hpp",
+]
+
+MLN_GENERATED_SHADER_SOURCE = [
+    "src/mbgl/shaders/shader_source.cpp",
 ]
 
 MLN_GENERATED_OPENGL_SHADER_HEADERS = [
@@ -498,10 +518,14 @@ MLN_CORE_SOURCE = [
     "src/mbgl/tile/tile_loader_impl.hpp",
     "src/mbgl/tile/tile_loader_observer.hpp",
     "src/mbgl/tile/tile_observer.hpp",
+    "src/mbgl/tile/tile_operation.cpp",
     "src/mbgl/tile/vector_tile.cpp",
     "src/mbgl/tile/vector_tile.hpp",
     "src/mbgl/tile/vector_tile_data.cpp",
     "src/mbgl/tile/vector_tile_data.hpp",
+    "src/mbgl/util/action_journal.cpp",
+    "src/mbgl/util/action_journal_impl.hpp",
+    "src/mbgl/util/action_journal_impl.cpp",
     "src/mbgl/util/camera.cpp",
     "src/mbgl/util/camera.hpp",
     "src/mbgl/util/bounding_volumes.hpp",
@@ -743,6 +767,8 @@ MLN_CORE_HEADERS = [
     "include/mbgl/tile/tile_id.hpp",
     "include/mbgl/tile/tile_operation.hpp",
     "include/mbgl/tile/tile_necessity.hpp",
+    "include/mbgl/util/action_journal.hpp",
+    "include/mbgl/util/action_journal_options.hpp",
     "include/mbgl/util/async_request.hpp",
     "include/mbgl/util/async_task.hpp",
     "include/mbgl/util/bitmask_operations.hpp",

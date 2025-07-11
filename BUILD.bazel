@@ -4,6 +4,8 @@ load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load(
     "//bazel:core.bzl",
+    "MLN_LAYER_PLUGIN_HEADERS",
+    "MLN_LAYER_PLUGIN_SOURCE",
     "MLN_CORE_HEADERS",
     "MLN_CORE_SOURCE",
     "MLN_DRAWABLES_GL_HEADERS",
@@ -14,6 +16,7 @@ load(
     "MLN_DRAWABLES_SOURCE",
     "MLN_GENERATED_OPENGL_SHADER_HEADERS",
     "MLN_GENERATED_SHADER_HEADERS",
+    "MLN_GENERATED_SHADER_SOURCE",
     "MLN_GENERATED_STYLE_SOURCE",
     "MLN_OPENGL_HEADERS",
     "MLN_OPENGL_SOURCE",
@@ -43,6 +46,7 @@ js_run_binary(
         allow_empty = False,
     ),
     outs = MLN_GENERATED_SHADER_HEADERS +
+           MLN_GENERATED_SHADER_SOURCE +
            MLN_GENERATED_OPENGL_SHADER_HEADERS,
     tool = ":generate-shader-code-script",
 )
@@ -74,13 +78,15 @@ cc_library(
 # the prefix from the path.
 cc_library(
     name = "mbgl-core",
-    srcs = MLN_CORE_SOURCE +
+    srcs = MLN_LAYER_PLUGIN_SOURCE +
+           MLN_CORE_SOURCE +
+           MLN_GENERATED_SHADER_SOURCE +
            MLN_GENERATED_STYLE_SOURCE + select({
         ":drawable_renderer": MLN_OPENGL_SOURCE + MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_GL_SOURCE,
         ":metal_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_MTL_SOURCE,
         "//conditions:default": [],
     }),
-    hdrs = MLN_CORE_HEADERS + select({
+    hdrs = MLN_LAYER_PLUGIN_HEADERS + MLN_CORE_HEADERS + select({
         ":drawable_renderer": MLN_OPENGL_HEADERS + MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_GL_HEADERS,
         ":metal_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_MTL_HEADERS,
         "//conditions:default": [],

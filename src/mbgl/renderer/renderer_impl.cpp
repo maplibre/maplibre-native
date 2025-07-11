@@ -13,6 +13,7 @@
 #include <mbgl/renderer/renderer_observer.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_tree.hpp>
+#include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/string.hpp>
@@ -84,11 +85,12 @@ void Renderer::Impl::setObserver(RendererObserver* observer_) {
     observer = observer_ ? observer_ : &nullObserver();
 }
 
-void Renderer::Impl::render(const RenderTree& renderTree,
-                            [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters) {
+void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<UpdateParameters>& updateParameters) {
     MLN_TRACE_FUNC();
     auto& context = backend.getContext();
     context.setObserver(this);
+
+    assert(updateParameters);
 
 #if MLN_RENDER_BACKEND_METAL
     if constexpr (EnableMetalCapture) {
@@ -189,7 +191,10 @@ void Renderer::Impl::render(const RenderTree& renderTree,
                                *staticData,
                                renderTree.getLineAtlas(),
                                renderTree.getPatternAtlas(),
-                               frameCount};
+                               frameCount,
+                               updateParameters->tileLodMinRadius,
+                               updateParameters->tileLodScale,
+                               updateParameters->tileLodPitchThreshold};
 
     parameters.symbolFadeChange = renderTreeParameters.symbolFadeChange;
     parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
@@ -417,7 +422,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     const auto startRendering = util::MonotonicTimer::now().count();
     // present submits render commands
     parameters.encoder->present(parameters.backend.getDefaultRenderable());
-    const auto renderingTime = util::MonotonicTimer::now().count() - startRendering;
+    context.renderingStats().renderingTime = util::MonotonicTimer::now().count() - startRendering;
 
     parameters.encoder.reset();
     context.endFrame();
@@ -435,14 +440,13 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     }
 #endif // MLN_RENDER_BACKEND_METAL
 
-    const auto encodingTime = renderTree.getElapsedTime() - renderingTime;
+    context.renderingStats().encodingTime = renderTree.getElapsedTime() - context.renderingStats().renderingTime;
 
     observer->onDidFinishRenderingFrame(
         renderTreeParameters.loaded ? RendererObserver::RenderMode::Full : RendererObserver::RenderMode::Partial,
         renderTreeParameters.needsRepaint,
         renderTreeParameters.placementChanged,
-        encodingTime,
-        renderingTime);
+        context.renderingStats());
 
     if (!renderTreeParameters.loaded) {
         renderState = RenderState::Partial;

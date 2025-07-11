@@ -31,8 +31,7 @@ std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResourc
                                                                                   bool /*persistent*/) {
     BufferID id = 0;
     MBGL_CHECK_ERROR(glGenBuffers(1, &id));
-    commandEncoder.context.renderingStats().numBuffers++;
-    commandEncoder.context.renderingStats().memVertexBuffers += static_cast<int>(size);
+
     // NOLINTNEXTLINE(performance-move-const-arg)
     UniqueBuffer result{std::move(id), {commandEncoder.context}};
     commandEncoder.context.vertexBuffer = result;
@@ -43,6 +42,11 @@ std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResourc
 void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource, const void* data, std::size_t size) {
     commandEncoder.context.vertexBuffer = static_cast<gl::VertexBufferResource&>(resource).getBuffer();
     MBGL_CHECK_ERROR(glBufferSubData(GL_ARRAY_BUFFER, 0, size, data));
+
+    commandEncoder.context.renderingStats().vertexUpdateBytes += size;
+    commandEncoder.context.renderingStats().bufferUpdateBytes += size;
+    commandEncoder.context.renderingStats().bufferUpdates++;
+    commandEncoder.context.renderingStats().bufferObjUpdates++;
 }
 
 std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(const void* data,
@@ -51,8 +55,7 @@ std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(
                                                                                 bool /*persistent*/) {
     BufferID id = 0;
     MBGL_CHECK_ERROR(glGenBuffers(1, &id));
-    commandEncoder.context.renderingStats().numBuffers++;
-    commandEncoder.context.renderingStats().memIndexBuffers += static_cast<int>(size);
+
     // NOLINTNEXTLINE(performance-move-const-arg)
     UniqueBuffer result{std::move(id), {commandEncoder.context}};
     commandEncoder.context.bindVertexArray = 0;
@@ -67,6 +70,11 @@ void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource, c
     commandEncoder.context.bindVertexArray = 0;
     commandEncoder.context.globalVertexArrayState.indexBuffer = static_cast<gl::IndexBufferResource&>(resource).buffer;
     MBGL_CHECK_ERROR(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, size, data));
+
+    commandEncoder.context.renderingStats().indexUpdateBytes += size;
+    commandEncoder.context.renderingStats().bufferUpdateBytes += size;
+    commandEncoder.context.renderingStats().bufferUpdates++;
+    commandEncoder.context.renderingStats().bufferObjUpdates++;
 }
 
 struct VertexBufferGL : public gfx::VertexBufferBase {

@@ -974,6 +974,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
     const bool rotateWithMap = bucket.layout->get<style::TextRotationAlignment>() == style::AlignmentType::Map;
     const bool pitchWithMap = bucket.layout->get<style::TextPitchAlignment>() == style::AlignmentType::Map;
     const bool hasIconTextFit = bucket.layout->get<style::IconTextFit>() != style::IconTextFitType::None;
+    const bool screenSpace = bucket.layout->get<style::SymbolScreenSpace>();
 
     // If allow-overlap is true, we can show symbols before placement runs on them
     // But we have to wait for placement if we potentially depend on a paired icon/text
@@ -981,10 +982,10 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
     // See https://github.com/mapbox/mapbox-gl-native/issues/12483
     // Prevent a flickering issue when showing a symbol allowing overlap.
     const JointOpacityState defaultOpacityState(
-        bucket.justReloaded && textAllowOverlap &&
+        (screenSpace || bucket.justReloaded) && textAllowOverlap &&
             (iconAllowOverlap || !(bucket.hasIconData() || bucket.hasSdfIconData()) ||
              bucket.layout->get<style::IconOptional>()),
-        bucket.justReloaded && iconAllowOverlap &&
+        (screenSpace || bucket.justReloaded) && iconAllowOverlap &&
             (textAllowOverlap || !bucket.hasTextData() || bucket.layout->get<style::TextOptional>()),
         true);
 

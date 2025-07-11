@@ -62,11 +62,13 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          sparse-checkout: |
+            platform/windows/vendor
+            platform/windows/Get-VendorPackages.ps1
 
       - name: Get vcpkg commit id
         run: |
-          $vcpkg_commit_id = ($(git submodule status .\platform\windows\vendor\vcpkg).Trim() -split ' ')[0]
+          $vcpkg_commit_id = (Invoke-WebRequest ${{ github.api_url }}/repos/${{ github.repository }}/contents/platform/windows/vendor/vcpkg?ref=${{ github.ref }} -Headers @{ Authorization = ('Bearer {0}' -f '${{ secrets.GITHUB_TOKEN }}') } | ConvertFrom-Json).sha
           Add-Content -Path $env:GITHUB_ENV -Value "VCPKG_COMMIT_ID=${vcpkg_commit_id}"
 
       - name: Restore vcpkg binary cache
@@ -77,6 +79,12 @@ jobs:
           key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
           lookup-only: true
 
+      - name: Initialize vcpkg submodule
+        if: steps.vcpkg-cache.outputs.cache-hit != 'true'
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --force --depth=1 --recursive platform/windows/vendor/vcpkg
+
       - uses: ilammy/msvc-dev-cmd@v1
         if: steps.vcpkg-cache.outputs.cache-hit != 'true'
 
@@ -84,11 +92,10 @@ jobs:
         if: steps.vcpkg-cache.outputs.cache-hit != 'true'
         env:
           CI: 1,
-#          VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
           VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}\\platform\\windows\\vendor\\vcpkg\\archives,readwrite"
         timeout-minutes: 60
         run: |
-          & ${{ github.workspace }}\platform\windows\Get-VendorPackages.ps1 -Triplet ${{ env.VSCMD_ARG_TGT_ARCH }}-windows -Renderer All
+          & ${{ github.workspace }}\platform\windows\Get-VendorPackages.ps1 -Triplet ${{ env.VSCMD_ARG_TGT_ARCH }}-windows -Renderer All -With-ICU
 
       - name: Save vcpkg binary cache
         if: steps.vcpkg-cache.outputs.cache-hit != 'true'
@@ -99,7 +106,6 @@ jobs:
 
 
   windows-build-and-test:
-#    if: needs.pre-job.outputs.should_skip != 'true'
     needs: windows-get-or-build-dependencies
     strategy:
       matrix:
@@ -142,19 +148,17 @@ jobs:
         env:
           CI: 1
           VCPKG_INSTALL_OPTIONS: "--debug"
-#          VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
           VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}\\platform\\windows\\vendor\\vcpkg\\archives,readwrite"
           CMAKE_C_COMPILER_LAUNCHER: "${{ env.SCCACHE_PATH }}"
           CMAKE_CXX_COMPILER_LAUNCHER: "${{ env.SCCACHE_PATH }}"
-          RENDERER: "${{ matrix.renderer }}"
         timeout-minutes: 60
         run: |
           cmake --version
-          & ${{ github.workspace }}\.github\scripts\windows-ci_configure_wrapper.ps1
+          cmake --preset windows-${{ matrix.renderer }} -DCMAKE_POLICY_DEFAULT_CMP0141=NEW -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded -DCMAKE_BUILD_TYPE=RelWithDebInfo
 
       - name: Build MapLibre Native Core
         run: |
-          cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
+          cmake --build build-windows-${{ matrix.renderer }} --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
 
       # CodeQL
 
@@ -165,41 +169,42 @@ jobs:
 
       - name: Download Mesa3D
         run: |
-          (Invoke-WebRequest https://api.github.com/repos/pal1000/mesa-dist-win/releases -Headers @{ Authorization = ('Bearer {0}' -f '${{ secrets.GITHUB_TOKEN }}') } | ConvertFrom-Json)[0].assets | Where-Object name -match 'mesa3d-.+-(release|devel)-msvc\.7z' | foreach { Invoke-WebRequest $_.browser_download_url -OutFile mesa3d.7z }
+          (Invoke-WebRequest https://api.github.com/repos/pal1000/mesa-dist-win/releases -Headers @{ Authorization = ('Bearer {0}' -f '${{ secrets.GITHUB_TOKEN }}') } | ConvertFrom-Json)[0].assets | Where-Object name -match 'mesa3d-.+-release-msvc\.7z' | foreach { Invoke-WebRequest $_.browser_download_url -OutFile mesa3d.7z }
 
       - name: Extract Mesa3D files for OpenGL
         if: matrix.renderer != 'vulkan'
         run: |
-          & 'C:\Program Files\7-Zip\7z.exe' e -bb3 -obuild .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll
-
-      - name: Extract Mesa3D files for EGL
-        if: matrix.renderer == 'egl'
-        run: |
-          & 'C:\Program Files\7-Zip\7z.exe' e -bb3 -obuild .\mesa3d.7z x64\d3d10warp.dll
+          & 'C:\Program Files\7-Zip\7z.exe' e -obuild-windows-${{ matrix.renderer }} .\mesa3d.7z x64\libgallium_wgl.dll x64\libGLESv2.dll
 
       - name: Extract Mesa3D files for Vulkan
         if: matrix.renderer == 'vulkan'
         run: |
-          & 'C:\Program Files\7-Zip\7z.exe' e -bb3 -obuild .\mesa3d.7z x64\lvp_icd.x86_64.json x64\vulkan_lvp.dll
+          & 'C:\Program Files\7-Zip\7z.exe' e -obuild-windows-${{ matrix.renderer }} .\mesa3d.7z x64\lvp_icd.x86_64.json x64\vulkan_lvp.dll
 
       # unit tests
 
       - name: Configure Mesa3D drivers (OpenGL)
         if: matrix.renderer != 'vulkan'
         run: |
+          reg add 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\OpenGLDrivers\MSOGL' /v DLL /t REG_SZ /d ('{0}\build-windows-${{ matrix.renderer }}\libgallium_wgl.dll' -f $PWD.Path) /f
+          reg add 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\OpenGLDrivers\MSOGL' /v DriverVersion /t REG_DWORD /d 1 /f
+          reg add 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\OpenGLDrivers\MSOGL' /v Flags /t REG_DWORD /d 1 /f
+          reg add 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\OpenGLDrivers\MSOGL' /v Version /t REG_DWORD /d 2 /f
           Add-Content -Path $env:GITHUB_ENV -Value 'GALLIUM_DRIVER=llvmpipe'
 
       - name: Configure Mesa3D drivers (Vulkan)
         if: matrix.renderer == 'vulkan'
         run: |
-          reg add 'HKLM\Software\Khronos\Vulkan\Drivers' /f /v '${{ github.workspace }}\build\lvp_icd.x86_64.json' /t REG_DWORD /d 0
+          reg add 'HKLM\Software\Khronos\Vulkan\Drivers' /f /v '${{ github.workspace }}\build-windows-${{ matrix.renderer }}\lvp_icd.x86_64.json' /t REG_DWORD /d 0
 
       - name: Download and configure Vulkan
         if: matrix.renderer == 'vulkan'
         run: |
-          $version = (Invoke-WebRequest -Uri "https://vulkan.lunarg.com/sdk/latest.json" | ConvertFrom-Json).windows
+          # 1.4.313.1 doesn't have runtime components?
+          # $version = (Invoke-WebRequest -Uri "https://vulkan.lunarg.com/sdk/latest.json" | ConvertFrom-Json).windows
+          $version = '1.4.313.0'
           Invoke-WebRequest https://sdk.lunarg.com/sdk/download/$version/windows/VulkanRT-X64-$version-Components.zip -OutFile VulkanRT.zip
-          & 'C:\Program Files\7-Zip\7z.exe' e -bb3 -obuild -r .\VulkanRT.zip *x64\vulkan-1.*
+          & 'C:\Program Files\7-Zip\7z.exe' e -obuild-windows-${{ matrix.renderer }} -r .\VulkanRT.zip *x64\vulkan-1.*
 
       - name: Run C++ tests
         continue-on-error: ${{ matrix.renderer == 'vulkan' }}
@@ -207,7 +212,7 @@ jobs:
           ANGLE_DEFAULT_PLATFORM: 'gl'
           GALLIUM_DRIVER: llvmpipe
           LIBGL_ALWAYS_SOFTWARE: true
-        run: build/mbgl-test-runner.exe
+        run: build-windows-${{ matrix.renderer }}/mbgl-test-runner.exe
 
       # render tests
 
@@ -218,7 +223,7 @@ jobs:
           ANGLE_DEFAULT_PLATFORM: 'gl'
           GALLIUM_DRIVER: llvmpipe
           LIBGL_ALWAYS_SOFTWARE: true
-        run: build/mbgl-render-test-runner.exe "--manifestPath=metrics/windows-${env:manifest_file}.json"
+        run: build-windows-${{ matrix.renderer }}/mbgl-render-test-runner.exe "--manifestPath=metrics/windows-${env:manifest_file}.json"
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure'
@@ -231,7 +236,7 @@ jobs:
       # expression tests
 
       - name: Run expression test
-        run: build/expression-test/mbgl-expression-test.exe
+        run: build-windows-${{ matrix.renderer }}/expression-test/mbgl-expression-test.exe
 
   windows-ci-result:
     name: Windows CI Result
