@@ -77,7 +77,7 @@ jobs:
 
       - id: parent_workflow
         run: |
-          conclusion=$(curl --retry 5 ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "android-build").conclusion')
+          conclusion=$(curl --retry 12 --retry-all-errors ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "android-build").conclusion')
           was_skipped=$([[ "$conclusion" = "skipped" || "$conclusion" = "cancelled" ]] && echo "true" || echo "false")
           echo "was_skipped=$was_skipped" >> "$GITHUB_OUTPUT"
 
