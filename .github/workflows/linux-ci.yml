@@ -66,10 +66,6 @@ jobs:
         with:
           languages: cpp
 
-      - uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ github.job }}
-
       - name: Get latest CMake and Ninja
         uses: lukka/get-cmake@latest
         with:
@@ -130,6 +126,9 @@ jobs:
           cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
 
       # mbgl-render (used for size test) & mbgl-benchmark-runner
+
+      - name: Show sccache stats
+        run: sccache --show-stats
 
       - name: Upload mbgl-render as artifact
         if: matrix.renderer == 'drawable' && github.event_name == 'pull_request'
