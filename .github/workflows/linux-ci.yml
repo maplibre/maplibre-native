@@ -91,12 +91,42 @@ jobs:
       - if: matrix.renderer == 'vulkan'
         run: echo renderer_flag_cmake="-DMLN_WITH_VULKAN=ON -DMLN_WITH_OPENGL=OFF" >> "$GITHUB_ENV"
 
+      - name: Install sccache
+        run: |
+          curl -LO https://github.com/mozilla/sccache/releases/download/v0.10.0/sccache-v0.10.0-x86_64-unknown-linux-musl.tar.gz
+          tar -xzf sccache-v0.10.0-x86_64-unknown-linux-musl.tar.gz
+          sudo mv sccache-v0.10.0-x86_64-unknown-linux-musl/sccache /usr/bin/sccache
+          sudo chmod +x /usr/bin/sccache
+          rm -rf sccache-v0.10.0-x86_64-unknown-linux-musl
+
+      - name: Configure AWS Credentials
+        if: vars.OIDC_AWS_ROLE_TO_ASSUME
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
       - name: Build MapLibre Native Core
         env:
           CI: 1
         run: |
           cmake --version
-          cmake -B build -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON ${{ env.renderer_flag_cmake }}
+
+          # sccache configuration
+          export SCCACHE_BUCKET=maplibre-native-sccache
+          export SCCACHE_REGION=eu-central-1
+
+          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
+            export SCCACHE_S3_NO_CREDENTIALS=1
+          fi
+
+          cmake -B build -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -DMLN_WITH_CLANG_TIDY=ON \
+            -DCMAKE_C_COMPILER_LAUNCHER=sccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
+            -DMLN_WITH_COVERAGE=ON \
+            ${{ env.renderer_flag_cmake }}
           cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
 
       # mbgl-render (used for size test) & mbgl-benchmark-runner
@@ -116,14 +146,6 @@ jobs:
           name: mbgl-benchmark-runner
           path: |
             build/mbgl-benchmark-runner
-
-      - name: Configure AWS Credentials
-        if: matrix.renderer == 'drawable' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: us-west-2
-          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
-          role-session-name: ${{ github.run_id }}
 
       - name: Upload mbgl-render & mbgl-benchmark-runner to S3
         if: matrix.renderer == 'drawable' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
