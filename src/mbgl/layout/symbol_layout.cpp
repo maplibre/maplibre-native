@@ -185,59 +185,73 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                 const auto& section = formatted.sections[sectionIndex];
 
                 if (!section.image) {
-                    std::string u8string = section.text;
-                    if (textTransform == TextTransformType::Uppercase) {
-                        u8string = platform::uppercase(u8string);
-                    } else if (textTransform == TextTransformType::Lowercase) {
-                        u8string = platform::lowercase(u8string);
-                    }
+                    try {
+                        std::string u8string = section.text;
+                        if (textTransform == TextTransformType::Uppercase) {
+                            u8string = platform::uppercase(u8string);
+                        } else if (textTransform == TextTransformType::Lowercase) {
+                            u8string = platform::lowercase(u8string);
+                        }
 
-                    auto u16String = applyArabicShaping(util::convertUTF8ToUTF16(u8string));
-                    const char16_t* u16Char = u16String.data();
-                    std::u16string subString;
-                    auto sectionScale = section.fontScale ? *section.fontScale : 1.0;
-                    auto sectionFontStack = section.fontStack ? *section.fontStack : baseFontStack;
+                        auto u16String = applyArabicShaping(util::convertUTF8ToUTF16(u8string));
+                        const char16_t* u16Char = u16String.data();
+                        std::u16string subString;
+                        auto sectionScale = section.fontScale ? *section.fontScale : 1.0;
+                        auto sectionFontStack = section.fontStack ? *section.fontStack : baseFontStack;
 
-                    GlyphIDType subStringtype = getCharGlyphIDType(
-                        *u16Char, sectionFontStack, layoutParameters.fontFaces, GlyphIDType::FontPBF);
+                        GlyphIDType subStringtype = getCharGlyphIDType(
+                            *u16Char, sectionFontStack, layoutParameters.fontFaces, GlyphIDType::FontPBF);
 
-                    while (*u16Char) {
-                        const auto chType = getCharGlyphIDType(
-                            *u16Char, sectionFontStack, layoutParameters.fontFaces, subStringtype);
-                        if (chType != subStringtype) {
-                            if (subString.length()) {
-                                ft.formattedText->addTextSection(
-                                    subString, sectionScale, sectionFontStack, subStringtype, false, section.textColor);
-                                sectionTable[ft.formattedText->getSections().size() - 1] = sectionIndex;
-                                if (subStringtype != GlyphIDType::FontPBF) {
-                                    layoutParameters.glyphDependencies
-                                        .shapes[section.fontStack ? *section.fontStack : baseFontStack][subStringtype]
-                                        .insert(subString);
+                        while (*u16Char) {
+                            const auto chType = getCharGlyphIDType(
+                                *u16Char, sectionFontStack, layoutParameters.fontFaces, subStringtype);
+                            if (chType != subStringtype) {
+                                if (subString.length()) {
+                                    ft.formattedText->addTextSection(subString,
+                                                                     sectionScale,
+                                                                     sectionFontStack,
+                                                                     subStringtype,
+                                                                     false,
+                                                                     section.textColor);
+                                    sectionTable[ft.formattedText->getSections().size() - 1] = sectionIndex;
+                                    if (subStringtype != GlyphIDType::FontPBF) {
+                                        layoutParameters.glyphDependencies
+                                            .shapes[section.fontStack ? *section.fontStack : baseFontStack]
+                                                   [subStringtype]
+                                            .insert(subString);
+                                    }
                                 }
+
+                                subString.clear();
+                                subStringtype = chType;
                             }
 
-                            subString.clear();
-                            subStringtype = chType;
+                            subString += *u16Char;
+
+                            ++u16Char;
                         }
 
-                        subString += *u16Char;
-
-                        ++u16Char;
-                    }
-
-                    if (subString.length()) {
-                        ft.formattedText->addTextSection(subString,
-                                                         section.fontScale ? *section.fontScale : 1.0,
-                                                         section.fontStack ? *section.fontStack : baseFontStack,
-                                                         subStringtype,
-                                                         true,
-                                                         section.textColor);
-                        sectionTable[ft.formattedText->getSections().size() - 1] = sectionIndex;
-                        if (subStringtype != GlyphIDType::FontPBF) {
-                            layoutParameters.glyphDependencies
-                                .shapes[section.fontStack ? *section.fontStack : baseFontStack][subStringtype]
-                                .insert(subString);
+                        if (subString.length()) {
+                            ft.formattedText->addTextSection(subString,
+                                                             section.fontScale ? *section.fontScale : 1.0,
+                                                             section.fontStack ? *section.fontStack : baseFontStack,
+                                                             subStringtype,
+                                                             true,
+                                                             section.textColor);
+                            sectionTable[ft.formattedText->getSections().size() - 1] = sectionIndex;
+                            if (subStringtype != GlyphIDType::FontPBF) {
+                                layoutParameters.glyphDependencies
+                                    .shapes[section.fontStack ? *section.fontStack : baseFontStack][subStringtype]
+                                    .insert(subString);
+                            }
                         }
+                    } catch (...) {
+                        mbgl::Log::Error(
+                            mbgl::Event::ParseTile,
+                            "Encountered section with invalid UTF-8 in tile, source: " + sourceLayer->getName() +
+                                " z: " + std::to_string(canonicalID.z) + " x: " + std::to_string(canonicalID.x) +
+                                " y: " + std::to_string(canonicalID.y));
+                        continue; // skip section
                     }
                 } else {
                     layoutParameters.imageDependencies.emplace(section.image->id(), ImageType::Icon);
