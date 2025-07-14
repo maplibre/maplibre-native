@@ -147,31 +147,31 @@ cc_library(
 
 # vendor/maplibre-tile-spec
 
-cc_library(
-    name = "simde",
-    hdrs = glob(["maplibre-tile-spec/vendor/simde/simde/**/*.h"]),
-    includes = ["maplibre-tile-spec/vendor/simde"],
-    visibility = ["//visibility:public"],
-)
-
-cc_library(
-    name = "FastPFOR",
-    deps = [":simde"],
-    srcs = glob([
-        "maplibre-tile-spec/vendor/fastpfor/src/*.c",
-        "maplibre-tile-spec/vendor/fastpfor/src/*.cpp",
-    ]),
-    hdrs = glob(["maplibre-tile-spec/vendor/fastpfor/headers/*.h"]),
-    includes = ["maplibre-tile-spec/vendor/fastpfor/headers"],
-    copts = ["-DSIMDE_ENABLE_NATIVE_ALIASES"] + select({
-        "@platforms//cpu:x86_64": ["-msse4.1"], # TODO: enable AVX2 if available
-        "@platforms//cpu:i386": ["-msse4.1"],
-        "@platforms//cpu:arm": ["-DSUPPORT_NEON"],
-        "//conditions:default": [],
-    }),
-    cxxopts = CPP_FLAGS,
-    visibility = ["//visibility:public"],
-)
+# FastPFOR and SIMDE are disabled for lack of support for ARMv7 in SIMDE and requirement for SSE on x86
+#cc_library(
+#    name = "simde",
+#    hdrs = glob(["maplibre-tile-spec/vendor/simde/simde/**/*.h"]),
+#    includes = ["maplibre-tile-spec/vendor/simde"],
+#    visibility = ["//visibility:public"],
+#)
+#cc_library(
+#    name = "FastPFOR",
+#    deps = [":simde"],
+#    srcs = glob([
+#        "maplibre-tile-spec/vendor/fastpfor/src/*.c",
+#        "maplibre-tile-spec/vendor/fastpfor/src/*.cpp",
+#    ]),
+#    hdrs = glob(["maplibre-tile-spec/vendor/fastpfor/headers/*.h"]),
+#    includes = ["maplibre-tile-spec/vendor/fastpfor/headers"],
+#    copts = ["-DSIMDE_ENABLE_NATIVE_ALIASES"] + select({
+#        "@platforms//cpu:x86_64": ["-msse4.1"], # TODO: enable AVX2 if available
+#        "@platforms//cpu:i386": ["-msse4.1"],
+#        "@platforms//cpu:arm": ["-DSUPPORT_NEON"],
+#        "//conditions:default": [],
+#    }),
+#    cxxopts = CPP_FLAGS,
+#    visibility = ["//visibility:public"],
+#)
 cc_library(
     name = "maplibre-tile-spec",
     srcs = glob([
@@ -190,7 +190,7 @@ cc_library(
         "maplibre-tile-spec/cpp/src",
     ],
     visibility = ["//visibility:public"],
-    deps = [":FastPFOR"],
+    deps = [], #[":FastPFOR"],
 )
 
 # vendor/metal-cpp.json
