@@ -6339,7 +6339,8 @@ static void *windowScreenContext = &windowScreenContext;
     CLLocation *location = self.userLocation.location;
     if ( ! _showsUserLocation || ! location
         || ! CLLocationCoordinate2DIsValid(location.coordinate)
-        || self.userTrackingMode == MLNUserTrackingModeNone)
+        || self.userTrackingMode == MLNUserTrackingModeNone
+        || self.userTrackingState == MLNUserTrackingStateBegan)
     {
         if (completion)
         {
