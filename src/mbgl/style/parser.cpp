@@ -126,19 +126,20 @@ StyleParseResult Parser::parse(const std::string& json) {
                 const std::string& faceName = it->name.GetString();
                 const JSValue& faceValue = it->value;
 
-                FontFace fontFace;
-                fontFace.name = faceName;
-
                 if (faceValue.IsArray()) {
                     // If the face is an array, we assume it is a list of font file objects.
-                    for (auto& fontFile : faceValue.GetArray()) {
+                    for (const auto& fontFile : faceValue.GetArray()) {
                         if (fontFile.IsObject()) {
-                            // url
+                            FontFace fontFace;
+                            fontFace.name = faceName;
+
+                            // Parse url
                             if (fontFile.HasMember("url")) {
                                 const JSValue& url = fontFile["url"];
                                 if (url.IsString()) fontFace.url = url.GetString();
                             }
-                            // unicode-range
+
+                            // Parse unicode-range
                             if (fontFile.HasMember("unicode-range")) {
                                 const JSValue& unicodeRange = fontFile["unicode-range"];
                                 if (unicodeRange.IsArray()) {
@@ -162,18 +163,18 @@ StyleParseResult Parser::parse(const std::string& json) {
                                     }
                                 }
                             }
+
+                            // If valid, generate a unique glyph ID type for this font face
+                            // and add it to the font faces list.
+                            if (fontFace.valid()) {
+                                fontFace.type = genNewGlyphIDType(
+                                    fontFace.url, FontStack{fontFace.name}, fontFace.ranges);
+                                fontFaces->emplace_back(std::move(fontFace));
+                            }
                         }
                     }
                 } else if (faceValue.IsString()) {
-                    // If the face is a string, we assume it is the font file url.
-                    fontFace.url = faceValue.GetString();
-
-                    // Add a default range for the entire Unicode range.
-                    fontFace.ranges.emplace_back(0, 0x10FFFF);
-                }
-
-                if (fontFace.valid()) {
-                    // If valid, generate a unique glyph ID type for this font face and add it to the font faces list.
+                    FontFace fontFace{.name = faceName, .url = faceValue.GetString(), .ranges = {{0, 0x10FFFF}}};
                     fontFace.type = genNewGlyphIDType(fontFace.url, FontStack{fontFace.name}, fontFace.ranges);
                     fontFaces->emplace_back(std::move(fontFace));
                 }
