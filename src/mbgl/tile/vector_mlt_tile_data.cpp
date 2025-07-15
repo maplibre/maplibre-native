@@ -160,11 +160,10 @@ const GeometryCollection& VectorMLTTileFeature::getGeometries() const {
                 std::ranges::transform(polygon, std::back_inserter(*lines), convert);
 #else
                 using RingVec = mlt::geometry::MultiPolygon::RingVec;
-                lines.emplace(std::reduce(
-                    /*std::execution::par_unseq,*/ polygons.begin(),
-                    polygons.end(),
-                    static_cast<std::size_t>(0),
-                    [](const std::size_t a, const RingVec& b) { return a + b.size(); }));
+                lines.emplace(std::accumulate(
+                    polygons.begin(), polygons.end(), static_cast<std::size_t>(0), [](std::size_t a, const RingVec& b) {
+                        return a + b.size();
+                    }));
                 for (const auto& poly : polygons) {
                     std::ranges::transform(poly, std::back_inserter(*lines), convert);
                 }
