@@ -1,4 +1,7 @@
-[![MapLibre Logo](https://maplibre.org/img/maplibre-logo-big.svg)](https://maplibre.org/)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/7ff2cda8-f564-4e70-a971-d34152f969f0#gh-light-mode-only" alt="MapLibre Logo" width="200">
+  <img src="https://github.com/user-attachments/assets/cee8376b-9812-40ff-91c6-2d53f9581b83#gh-dark-mode-only" alt="MapLibre Logo" width="200">
+</p>
 
 # MapLibre Native
 
@@ -21,7 +24,7 @@ Add [the latest version](https://central.sonatype.com/artifact/org.maplibre.gl/a
 ```gradle
     dependencies {
         ...
-        implementation 'org.maplibre.gl:android-sdk:11.8.5'
+        implementation 'org.maplibre.gl:android-sdk:11.11.0'
         ...
     }
 ```

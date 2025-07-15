@@ -6339,7 +6339,8 @@ static void *windowScreenContext = &windowScreenContext;
     CLLocation *location = self.userLocation.location;
     if ( ! _showsUserLocation || ! location
         || ! CLLocationCoordinate2DIsValid(location.coordinate)
-        || self.userTrackingMode == MLNUserTrackingModeNone)
+        || self.userTrackingMode == MLNUserTrackingModeNone
+        || self.userTrackingState == MLNUserTrackingStateBegan)
     {
         if (completion)
         {
@@ -7748,11 +7749,8 @@ static void *windowScreenContext = &windowScreenContext;
             drawingContext.direction = mbgl::util::rad2deg(-state.getBearing());
             drawingContext.pitch = state.getPitch();
             drawingContext.fieldOfView = state.getFieldOfView();
-            mbgl::mat4 projMatrix;
-            state.getProjMatrix(projMatrix);
-            drawingContext.projectionMatrix = MLNMatrix4Make(projMatrix);
-
-            //NSLog(@"Rendering");
+            drawingContext.projectionMatrix = MLNMatrix4Make(paintParameters.transformParams.projMatrix);
+            drawingContext.nearClippedProjMatrix = MLNMatrix4Make(paintParameters.transformParams.nearClippedProjMatrix);
 
             // Call update with the scene state variables
             [weakPlugInLayer onUpdateLayer:drawingContext];
