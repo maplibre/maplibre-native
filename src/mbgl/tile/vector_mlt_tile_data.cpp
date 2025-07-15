@@ -50,7 +50,7 @@ FeatureType VectorMLTTileFeature::getType() const {
 
 namespace {
 struct PropertyVisitor {
-    Value operator()(std::nullptr_t) const { return nullptr; }
+    Value operator()(std::nullptr_t) const { return mapbox::feature::null_value; }
     Value operator()(bool value) const { return value; }
     Value operator()(std::uint32_t value) const { return value; }
     Value operator()(std::uint64_t value) const { return value; }
