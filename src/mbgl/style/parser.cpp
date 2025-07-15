@@ -174,7 +174,8 @@ StyleParseResult Parser::parse(const std::string& json) {
                         }
                     }
                 } else if (faceValue.IsString()) {
-                    FontFace fontFace{.type = FontPBF, .name = faceName, .url = faceValue.GetString(), .ranges = {{0, 0x10FFFF}}};
+                    FontFace fontFace{
+                        .type = FontPBF, .name = faceName, .url = faceValue.GetString(), .ranges = {{0, 0x10FFFF}}};
                     fontFace.type = genNewGlyphIDType(fontFace.url, FontStack{fontFace.name}, fontFace.ranges);
                     fontFaces->emplace_back(std::move(fontFace));
                 }
