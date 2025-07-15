@@ -43,7 +43,8 @@ public:
                        MapMode,
                        float pixelRatio,
                        bool showCollisionBoxes_,
-                       gfx::DynamicTextureAtlasPtr);
+                       gfx::DynamicTextureAtlasPtr,
+                       std::shared_ptr<FontFaces> fontFaces);
     ~GeometryTileWorker();
 
     void setLayers(std::vector<Immutable<style::LayerProperties>>,
@@ -90,7 +91,6 @@ private:
 
     std::unique_ptr<FeatureIndex> featureIndex;
     mbgl::unordered_map<std::string, LayerRenderData> renderData;
-    std::shared_ptr<FontFaces> fontFaces;
 
     enum State {
         Idle,
@@ -121,6 +121,8 @@ private:
     bool firstLoad = true;
 
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
+
+    std::shared_ptr<FontFaces> fontFaces;
 };
 
 } // namespace mbgl

@@ -38,7 +38,8 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
                                        const MapMode mode_,
                                        const float pixelRatio_,
                                        const bool showCollisionBoxes_,
-                                       gfx::DynamicTextureAtlasPtr dynamicTextureAtlas_)
+                                       gfx::DynamicTextureAtlasPtr dynamicTextureAtlas_,
+                                       std::shared_ptr<FontFaces> fontFaces_)
     : self(std::move(self_)),
       parent(std::move(parent_)),
       scheduler(scheduler_),
@@ -48,7 +49,8 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
       mode(mode_),
       pixelRatio(pixelRatio_),
       showCollisionBoxes(showCollisionBoxes_),
-      dynamicTextureAtlas(dynamicTextureAtlas_) {}
+      dynamicTextureAtlas(dynamicTextureAtlas_),
+      fontFaces(fontFaces_) {}
 
 GeometryTileWorker::~GeometryTileWorker() {
     MLN_TRACE_FUNC();
