@@ -35,7 +35,10 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
                              gfx::ContextObserver& observer)
     : ShaderProgramBase(),
       shaderName(name),
-      backend(backend_) {
+      backend(backend_),
+      context(static_cast<Context&>(backend.getContext())) {
+    pipelines = std::make_shared<std::unordered_map<std::size_t, vk::UniquePipeline>>();
+
     std::string defineStr = programParameters.getDefinesString() + "\n\n";
     for (const auto& define : additionalDefines) {
         defineStr += "#define " + define.first + " " + define.second + "\n";
@@ -114,10 +117,16 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
     observer.onPostCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
 }
 
-ShaderProgram::~ShaderProgram() noexcept = default;
+ShaderProgram::~ShaderProgram() noexcept {
+    if (pipelines->empty()) {
+        return;
+    }
+
+    context.enqueueDeletion([pipelines = std::move(pipelines)](auto&) mutable { pipelines.reset(); });
+}
 
 const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelineInfo) {
-    auto& pipeline = pipelines[pipelineInfo.hash()];
+    auto& pipeline = pipelines->operator[](pipelineInfo.hash());
     if (pipeline) return pipeline;
 
     const auto vertexInputState = vk::PipelineVertexInputStateCreateInfo()
@@ -194,7 +203,6 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
     const vk::PipelineDynamicStateCreateInfo dynamicState({}, dynamicValues);
 
     const auto& device = backend.getDevice();
-    auto& context = static_cast<Context&>(backend.getContext());
     const auto& pipelineLayout = pipelineInfo.usePushConstants ? context.getPushConstantPipelineLayout()
                                                                : context.getGeneralPipelineLayout();
 

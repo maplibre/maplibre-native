@@ -18,6 +18,8 @@ static bool hasMemoryType(const vk::PhysicalDevice& physicalDevice, const vk::Me
 }
 
 SurfaceRenderableResource::~SurfaceRenderableResource() {
+    backend.getDevice()->waitIdle();
+
     // specific order
     swapchainFramebuffers.clear();
     renderPass.reset();
