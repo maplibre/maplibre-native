@@ -1,5 +1,13 @@
 # Changelog MapLibre Native for Android
 
+## 11.13.0-pre0
+
+This pre-release contains possible workarounds for some obscure Android ANRs during surface/context destruction (more info https://github.com/maplibre/maplibre-native/issues/3618).
+
+`MapLibreGLSurfaceView.WAIT_COMMANDS_ON_CLEANUP = true` tries to wait the GPU commands since the opengl/egl implementation seems to hang on cleanup, so we're trying to enforce the order. When enabled it adds some wait time since it forces GPU task completion.
+
+`MapLibreGLSurfaceView.DEFER_CONTEXT_DESTRUCTION = true` moves the blocking calls to a different thread. The main thread still needs to pause the render thread (and wait for it).
+
 ## 11.12.1
 
 ### 🐞 Bug fixes
