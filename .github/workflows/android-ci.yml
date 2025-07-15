@@ -189,20 +189,35 @@ jobs:
       - if: github.event_name == 'pull_request'
         uses: ./.github/actions/save-pr-number
 
-      - name: Build Instrumentation Tests, copy to platform/android
+      - name: Build Instrumentation Tests (OpenGL), copy to platform/android
         run: |
           ./gradlew assembleOpenglDebug assembleOpenglDebugAndroidTest -PtestBuildType=debug
-          cp MapLibreAndroidTestApp/build/outputs/apk/opengl/debug/MapLibreAndroidTestApp-opengl-debug.apk InstrumentationTestApp.apk
-          cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/opengl/debug/MapLibreAndroidTestApp-opengl-debug-androidTest.apk InstrumentationTests.apk
+          cp MapLibreAndroidTestApp/build/outputs/apk/opengl/debug/MapLibreAndroidTestApp-opengl-debug.apk InstrumentationTestAppOpenGL.apk
+          cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/opengl/debug/MapLibreAndroidTestApp-opengl-debug-androidTest.apk InstrumentationTestsOpenGL.apk
 
-      - name: Upload android-ui-test
+      - name: Upload android-ui-test-opengl
         uses: actions/upload-artifact@v4
         with:
           if-no-files-found: error
-          name: android-ui-test
+          name: android-ui-test-opengl
           path: |
-            platform/android/InstrumentationTestApp.apk
-            platform/android/InstrumentationTests.apk
+            platform/android/InstrumentationTestAppOpenGL.apk
+            platform/android/InstrumentationTestsOpenGL.apk
+
+      - name: Build Instrumentation Tests, copy to platform/android
+        run: |
+          ./gradlew assembleVulkanDebug assembleVulkanDebugAndroidTest -PtestBuildType=debug
+          cp MapLibreAndroidTestApp/build/outputs/apk/vulkan/debug/MapLibreAndroidTestApp-vulkan-debug.apk InstrumentationTestAppVulkan.apk
+          cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/vulkan/debug/MapLibreAndroidTestApp-vulkan-debug-androidTest.apk InstrumentationTestsVulkan.apk
+
+      - name: Upload android-ui-test-vulkan
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: android-ui-test-vulkan
+          path: |
+            platform/android/InstrumentationTestAppVulkan.apk
+            platform/android/InstrumentationTestsVulkan.apk
 
   android-build-cpp-test:
     runs-on: ubuntu-24.04
