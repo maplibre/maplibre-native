@@ -154,7 +154,7 @@ Color GPUExpression::getColor(std::size_t index) const {
 }
 
 Color GPUExpression::evaluateColor(const float zoom) const {
-    const auto index = static_cast<decltype(stopCount)>(
+    const auto index = static_cast<std::uint16_t>(
         std::distance(&inputs[0], std::upper_bound(&inputs[0], &inputs[stopCount], zoom)));
     if (index == 0) {
         return getColor(0);
