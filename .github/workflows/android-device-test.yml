@@ -84,6 +84,8 @@ jobs:
         with:
           node-version-file: '.nvmrc'
 
+      - run: npm install
+
       - name: Check if android-build was skipped
         id: parent_workflow
         run: node .github/scripts/check-job-skipped.ts
