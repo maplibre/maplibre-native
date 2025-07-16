@@ -61,7 +61,8 @@ void DescriptorSet::createDescriptorPool(DescriptorPoolGrowable& growablePool) {
 
     const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo(poolFlags).setPoolSizes(sizes).setMaxSets(maxSets);
 
-    growablePool.pools.emplace_back(device->createDescriptorPoolUnique(descriptorPoolInfo, nullptr, backend.getDispatcher()), maxSets);
+    growablePool.pools.emplace_back(
+        device->createDescriptorPoolUnique(descriptorPoolInfo, nullptr, backend.getDispatcher()), maxSets);
     growablePool.currentPoolIndex = static_cast<int32_t>(growablePool.pools.size() - 1);
 };
 

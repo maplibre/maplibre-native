@@ -101,7 +101,8 @@ public:
                                               .setSubpasses(subpass)
                                               .setDependencies(subpassDependency);
 
-        renderPass = backend.getDevice()->createRenderPassUnique(renderPassCreateInfo, nullptr, backend.getDispatcher());
+        renderPass = backend.getDevice()->createRenderPassUnique(
+            renderPassCreateInfo, nullptr, backend.getDispatcher());
 
         const auto framebufferCreateInfo = vk::FramebufferCreateInfo()
                                                .setRenderPass(renderPass.get())

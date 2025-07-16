@@ -646,7 +646,8 @@ void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& lay
     }
 
     const auto descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo().setBindings(bindings);
-    layout = backend.getDevice()->createDescriptorSetLayoutUnique(descriptorSetLayoutCreateInfo, nullptr, backend.getDispatcher());
+    layout = backend.getDevice()->createDescriptorSetLayoutUnique(
+        descriptorSetLayoutCreateInfo, nullptr, backend.getDispatcher());
     backend.setDebugName(layout.get(), name);
 }
 

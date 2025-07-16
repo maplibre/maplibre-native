@@ -423,7 +423,8 @@ bool Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
     if (impl->indexes) {
         if (const auto* indexBuffer = static_cast<const IndexBuffer*>(impl->indexes->getBuffer())) {
             const auto& indexBufferResource = indexBuffer->buffer->getResource<IndexBufferResource>().get();
-            commandBuffer->bindIndexBuffer(indexBufferResource.getVulkanBuffer(), 0, vk::IndexType::eUint16, dispatcher);
+            commandBuffer->bindIndexBuffer(
+                indexBufferResource.getVulkanBuffer(), 0, vk::IndexType::eUint16, dispatcher);
         }
     }
 

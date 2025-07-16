@@ -193,7 +193,8 @@ void Texture2D::uploadSubRegion(const void* pixelData,
                                 .setImageOffset(vk::Offset3D(xOffset, yOffset))
                                 .setImageExtent(vk::Extent3D(size_.width, size_.height, 1));
 
-        buffer->copyBufferToImage(bufferAllocation->buffer, imageAllocation->image, imageLayout, region, backend.getDispatcher());
+        buffer->copyBufferToImage(
+            bufferAllocation->buffer, imageAllocation->image, imageLayout, region, backend.getDispatcher());
 
         if (samplerState.mipmapped && textureUsage == Texture2DUsage::ShaderInput) {
             generateMips(buffer);
@@ -347,7 +348,8 @@ void Texture2D::createTexture() {
                                        .setSubresourceRange(
                                            {vk::ImageAspectFlagBits::eColor, 0, imageCreateInfo.mipLevels, 0, 1});
 
-        imageAllocation->imageView = backend.getDevice()->createImageViewUnique(imageViewCreateInfo, nullptr, backend.getDispatcher());
+        imageAllocation->imageView = backend.getDevice()->createImageViewUnique(
+            imageViewCreateInfo, nullptr, backend.getDispatcher());
     }
 
     // if the image is used as an attachment
