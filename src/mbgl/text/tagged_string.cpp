@@ -84,7 +84,7 @@ void TaggedString::trim() {
         styledText.first.clear();
         styledText.second.clear();
     } else {
-        std::size_t trailingWhitespace = styledText.first.find_last_not_of(u" \t\n\v\f\r") + 1;
+        int trailingWhitespace = static_cast<int>(styledText.first.find_last_not_of(u" \t\n\v\f\r") + 1);
 
         if (beginningWhitespace) {
             for (auto &section : sections) {
@@ -92,7 +92,7 @@ void TaggedString::trim() {
             }
         }
 
-        for (size_t i = styledText.first.length() - 1; i >= trailingWhitespace; --i) {
+        for (int i = static_cast<int>(styledText.first.length()) - 1; i >= trailingWhitespace; --i) {
             auto &sec = getSection(i);
             if (sec.type != FontPBF) {
                 trailingWhitespace = i + 1;
