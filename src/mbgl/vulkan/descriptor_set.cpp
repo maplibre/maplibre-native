@@ -33,7 +33,8 @@ DescriptorSet::~DescriptorSet() {
 }
 
 void DescriptorSet::createDescriptorPool(DescriptorPoolGrowable& growablePool) {
-    const auto& device = context.getBackend().getDevice();
+    const auto& backend = context.getBackend();
+    const auto& device = backend.getDevice();
 
     const uint32_t maxSets = static_cast<uint32_t>(growablePool.maxSets *
                                                    std::pow(growablePool.growFactor, growablePool.pools.size()));
@@ -60,7 +61,7 @@ void DescriptorSet::createDescriptorPool(DescriptorPoolGrowable& growablePool) {
 
     const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo(poolFlags).setPoolSizes(sizes).setMaxSets(maxSets);
 
-    growablePool.pools.emplace_back(device->createDescriptorPoolUnique(descriptorPoolInfo), maxSets);
+    growablePool.pools.emplace_back(device->createDescriptorPoolUnique(descriptorPoolInfo, nullptr, backend.getDispatcher()), maxSets);
     growablePool.currentPoolIndex = static_cast<int32_t>(growablePool.pools.size() - 1);
 };
 
@@ -71,10 +72,11 @@ void DescriptorSet::allocate() {
         return;
     }
 
-    const auto& device = context.getBackend().getDevice();
+    const auto& backend = context.getBackend();
+    const auto& device = backend.getDevice();
     const auto& descriptorSetLayout = context.getDescriptorSetLayout(type);
     auto& growablePool = context.getDescriptorPool(type);
-    const std::vector<vk::DescriptorSetLayout> layouts(context.getBackend().getMaxFrames(), descriptorSetLayout);
+    const std::vector<vk::DescriptorSetLayout> layouts(backend.getMaxFrames(), descriptorSetLayout);
 
     if (growablePool.currentPoolIndex == -1 ||
         (growablePool.current().unusedSets.empty() && growablePool.current().remainingSets < layouts.size())) {
@@ -112,9 +114,9 @@ void DescriptorSet::allocate() {
     } else
 #endif
     {
-        descriptorSets = device->allocateDescriptorSets(vk::DescriptorSetAllocateInfo()
-                                                            .setDescriptorPool(growablePool.current().pool.get())
-                                                            .setSetLayouts(layouts));
+        descriptorSets = device->allocateDescriptorSets(
+            vk::DescriptorSetAllocateInfo().setDescriptorPool(growablePool.current().pool.get()).setSetLayouts(layouts),
+            backend.getDispatcher());
         growablePool.current().remainingSets -= descriptorSets.size();
     }
 
@@ -127,6 +129,7 @@ void DescriptorSet::markDirty() {
 
 void DescriptorSet::bind(CommandEncoder& encoder) {
     MLN_TRACE_FUNC();
+    const auto& backend = encoder.getContext().getBackend();
     auto& commandBuffer = encoder.getCommandBuffer();
 
     const uint8_t index = context.getCurrentFrameResourceIndex();
@@ -135,7 +138,8 @@ void DescriptorSet::bind(CommandEncoder& encoder) {
                                       context.getGeneralPipelineLayout().get(),
                                       static_cast<uint32_t>(type),
                                       descriptorSets[index],
-                                      nullptr);
+                                      nullptr,
+                                      backend.getDispatcher());
 }
 
 UniformDescriptorSet::UniformDescriptorSet(Context& context_, DescriptorSetType type_)
@@ -154,7 +158,8 @@ void UniformDescriptorSet::update(const gfx::UniformBufferArray& uniforms,
         return;
     }
 
-    const auto& device = context.getBackend().getDevice();
+    const auto& backend = context.getBackend();
+    const auto& device = backend.getDevice();
 
     for (size_t index = 0; index < descriptorStorageCount + descriptorUniformCount; ++index) {
         vk::DescriptorBufferInfo descriptorBufferInfo;
@@ -180,7 +185,7 @@ void UniformDescriptorSet::update(const gfx::UniformBufferArray& uniforms,
                                             .setDstBinding(static_cast<uint32_t>(index))
                                             .setDstSet(descriptorSets[frameIndex]);
 
-        device->updateDescriptorSets(writeDescriptorSet, nullptr);
+        device->updateDescriptorSets(writeDescriptorSet, nullptr, backend.getDispatcher());
     }
 
     dirty[frameIndex] = false;
@@ -205,7 +210,8 @@ void ImageDescriptorSet::update(const std::array<gfx::Texture2DPtr, shaders::max
         return;
     }
 
-    const auto& device = context.getBackend().getDevice();
+    const auto& backend = context.getBackend();
+    const auto& device = backend.getDevice();
 
     for (size_t id = 0; id < shaders::maxTextureCountPerShader; ++id) {
         const auto& texture = id < textures.size() ? textures[id] : nullptr;
@@ -223,7 +229,7 @@ void ImageDescriptorSet::update(const std::array<gfx::Texture2DPtr, shaders::max
                                             .setDstBinding(static_cast<uint32_t>(id))
                                             .setDstSet(descriptorSets[frameIndex]);
 
-        device->updateDescriptorSets(writeDescriptorSet, nullptr);
+        device->updateDescriptorSets(writeDescriptorSet, nullptr, backend.getDispatcher());
     }
 
     dirty[frameIndex] = false;

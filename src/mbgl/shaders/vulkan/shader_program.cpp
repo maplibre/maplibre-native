@@ -102,11 +102,12 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
     if (vertexSpirv.empty() || fragmentSpirv.empty()) return;
 
     const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
 
     vertexShader = device->createShaderModuleUnique(
-        vk::ShaderModuleCreateInfo(vk::ShaderModuleCreateFlags(), vertexSpirv));
+        vk::ShaderModuleCreateInfo(vk::ShaderModuleCreateFlags(), vertexSpirv), nullptr, dispatcher);
     fragmentShader = device->createShaderModuleUnique(
-        vk::ShaderModuleCreateInfo(vk::ShaderModuleCreateFlags(), fragmentSpirv));
+        vk::ShaderModuleCreateInfo(vk::ShaderModuleCreateFlags(), fragmentSpirv), nullptr, dispatcher);
 
     backend.setDebugName(vertexShader.get(), shaderName + ".vert");
     backend.setDebugName(fragmentShader.get(), shaderName + ".frag");
@@ -194,6 +195,7 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
     const vk::PipelineDynamicStateCreateInfo dynamicState({}, dynamicValues);
 
     const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
     auto& context = static_cast<Context&>(backend.getContext());
     const auto& pipelineLayout = pipelineInfo.usePushConstants ? context.getPushConstantPipelineLayout()
                                                                : context.getGeneralPipelineLayout();
@@ -222,7 +224,7 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
                                         .setLayout(pipelineLayout.get())
                                         .setRenderPass(pipelineInfo.renderPass);
 
-    pipeline = std::move(device->createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value);
+    pipeline = std::move(device->createGraphicsPipelineUnique(nullptr, pipelineCreateInfo, nullptr, dispatcher).value);
     backend.setDebugName(pipeline.get(), shaderName + "_pipeline");
 
     return pipeline;

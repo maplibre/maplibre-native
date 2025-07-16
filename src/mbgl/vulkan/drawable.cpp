@@ -244,6 +244,7 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
 
     auto& context = static_cast<Context&>(parameters.context);
+    auto& dispatcher = context.getBackend().getDispatcher();
     auto& renderPass_ = static_cast<RenderPass&>(*parameters.renderPass);
     auto& encoder = renderPass_.getEncoder();
     auto& commandBuffer = encoder.getCommandBuffer();
@@ -258,7 +259,8 @@ void Drawable::draw(PaintParameters& parameters) const {
         vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
         0,
         sizeof(uboIndex),
-        &uboIndex);
+        &uboIndex,
+        dispatcher);
 
     if (enableDepth) {
         if (impl->depthFor3D.has_value()) {
@@ -299,19 +301,21 @@ void Drawable::draw(PaintParameters& parameters) const {
         impl->pipelineInfo.setDynamicValues(context.getBackend(), commandBuffer);
 
         const auto& pipeline = shaderImpl.getPipeline(impl->pipelineInfo);
-        commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get());
+        commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get(), dispatcher);
 
         if (segment.indexLength) {
             commandBuffer->drawIndexed(static_cast<uint32_t>(segment.indexLength),
                                        static_cast<uint32_t>(instances),
                                        static_cast<uint32_t>(segment.indexOffset),
                                        static_cast<int32_t>(segment.vertexOffset),
-                                       0);
+                                       0,
+                                       dispatcher);
         } else {
             commandBuffer->draw(static_cast<uint32_t>(segment.vertexLength),
                                 static_cast<uint32_t>(instances),
                                 static_cast<uint32_t>(segment.vertexOffset),
-                                0);
+                                0,
+                                dispatcher);
         }
 
         context.renderingStats().numDrawCalls++;
@@ -411,14 +415,15 @@ bool Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
 
     if (impl->vulkanVertexBuffers.empty()) return false;
 
+    const auto& dispatcher = encoder.getContext().getBackend().getDispatcher();
     const auto& commandBuffer = encoder.getCommandBuffer();
 
-    commandBuffer->bindVertexBuffers(0, impl->vulkanVertexBuffers, impl->vulkanVertexOffsets);
+    commandBuffer->bindVertexBuffers(0, impl->vulkanVertexBuffers, impl->vulkanVertexOffsets, dispatcher);
 
     if (impl->indexes) {
         if (const auto* indexBuffer = static_cast<const IndexBuffer*>(impl->indexes->getBuffer())) {
             const auto& indexBufferResource = indexBuffer->buffer->getResource<IndexBufferResource>().get();
-            commandBuffer->bindIndexBuffer(indexBufferResource.getVulkanBuffer(), 0, vk::IndexType::eUint16);
+            commandBuffer->bindIndexBuffer(indexBufferResource.getVulkanBuffer(), 0, vk::IndexType::eUint16, dispatcher);
         }
     }
 
