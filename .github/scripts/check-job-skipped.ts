@@ -16,7 +16,7 @@ async function run() {
   const jobName = process.env.JOB_NAME;
   if (!jobName) throw new Error("JOB_NAME not set");
 
-  const job = data.jobs.find(({name}) => name === jobName);
+  const job = data.jobs.find(({name}) => name.startsWith(jobName));
   if (!job) throw new Error(`job with name ${jobName} not found in workflow run with id ${run_id}`);
 
   core.setOutput('was_skipped', job.conclusion === 'skipped');
