@@ -91,7 +91,7 @@ jobs:
         run: node .github/scripts/check-job-skipped.ts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TEST_RUN_ID: ${{ github.event.workflow_run.jobs_url }}
+          TEST_RUN_ID: ${{ github.event.workflow_run.id }}
           JOB_NAME: android-build
 
       # get comment from PR
