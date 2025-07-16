@@ -6,8 +6,10 @@
 namespace mbgl {
 namespace vulkan {
 
-static bool hasMemoryType(const vk::PhysicalDevice& physicalDevice, const vk::MemoryPropertyFlagBits& type) {
-    const auto& memoryProps = physicalDevice.getMemoryProperties();
+static bool hasMemoryType(const vk::PhysicalDevice& physicalDevice,
+                          const vk::MemoryPropertyFlagBits& type,
+                          const vk::DispatchLoaderDynamic& dispatch) {
+    const auto& memoryProps = physicalDevice.getMemoryProperties(dispatch);
     for (uint32_t i = 0; i < memoryProps.memoryTypeCount; ++i) {
         if (memoryProps.memoryTypes[i].propertyFlags & type) {
             return true;
@@ -18,7 +20,7 @@ static bool hasMemoryType(const vk::PhysicalDevice& physicalDevice, const vk::Me
 }
 
 SurfaceRenderableResource::~SurfaceRenderableResource() {
-    backend.getDevice()->waitIdle();
+    backend.getDevice()->waitIdle(backend.getDispatcher());
 
     // specific order
     swapchainFramebuffers.clear();
@@ -76,8 +78,9 @@ void SurfaceRenderableResource::initColor(uint32_t w, uint32_t h) {
 void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
     const auto& physicalDevice = backend.getPhysicalDevice();
     const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
 
-    const std::vector<vk::SurfaceFormatKHR>& formats = physicalDevice.getSurfaceFormatsKHR(surface.get());
+    const std::vector<vk::SurfaceFormatKHR>& formats = physicalDevice.getSurfaceFormatsKHR(surface.get(), dispatcher);
     const auto& formatIt = std::find_if(formats.begin(), formats.end(), [](const vk::SurfaceFormatKHR& format) {
         return (format.format == vk::Format::eB8G8R8A8Unorm || format.format == vk::Format::eR8G8B8A8Unorm) &&
                format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear;
@@ -87,7 +90,8 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
 
     // only vk::PresentModeKHR::eFifo (vsync on) is guaranteed
     if (presentMode != vk::PresentModeKHR::eFifo) {
-        const std::vector<vk::PresentModeKHR>& presentModes = physicalDevice.getSurfacePresentModesKHR(surface.get());
+        const auto& presentModes = physicalDevice.getSurfacePresentModesKHR(surface.get(), dispatcher);
+
         if (std::find(presentModes.begin(), presentModes.end(), presentMode) == presentModes.end()) {
             mbgl::Log::Error(
                 mbgl::Event::Render,
@@ -98,7 +102,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
     }
 
     // pick surface size
-    capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface.get());
+    capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface.get(), dispatcher);
 
     if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
         extent = capabilities.currentExtent;
@@ -156,15 +160,15 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
     // update this when recreating
     swapchainCreateInfo.setOldSwapchain(swapchain.get());
 
-    swapchain = device->createSwapchainKHRUnique(swapchainCreateInfo);
-    swapchainImages = device->getSwapchainImagesKHR(swapchain.get());
+    swapchain = device->createSwapchainKHRUnique(swapchainCreateInfo, nullptr, dispatcher);
+    swapchainImages = device->getSwapchainImagesKHR(swapchain.get(), dispatcher);
 
     colorFormat = swapchainCreateInfo.imageFormat;
     extent = swapchainCreateInfo.imageExtent;
 
     swapchainSemaphores.reserve(swapchainImages.size());
     for (uint32_t index = 0; index < swapchainImages.size(); ++index) {
-        swapchainSemaphores.emplace_back(device->createSemaphoreUnique({}));
+        swapchainSemaphores.emplace_back(device->createSemaphoreUnique({}, nullptr, dispatcher));
         backend.setDebugName(swapchainSemaphores.back().get(), "SurfaceSemaphore_" + std::to_string(index));
     }
 }
@@ -172,6 +176,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
 void SurfaceRenderableResource::initDepthStencil() {
     const auto& physicalDevice = backend.getPhysicalDevice();
     const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
 
     // check for depth format support
     const std::vector<vk::Format> formats = {
@@ -181,7 +186,7 @@ void SurfaceRenderableResource::initDepthStencil() {
     };
 
     const auto& formatIt = std::find_if(formats.begin(), formats.end(), [&](const auto& format) {
-        const auto& formatProps = physicalDevice.getFormatProperties(format);
+        const auto& formatProps = physicalDevice.getFormatProperties(format, dispatcher);
         return formatProps.optimalTilingFeatures & vk::FormatFeatureFlagBits::eDepthStencilAttachment;
     });
 
@@ -192,7 +197,7 @@ void SurfaceRenderableResource::initDepthStencil() {
 
     depthFormat = *formatIt;
 
-    const bool hasLazyMemory = hasMemoryType(physicalDevice, vk::MemoryPropertyFlagBits::eLazilyAllocated);
+    const bool hasLazyMemory = hasMemoryType(physicalDevice, vk::MemoryPropertyFlagBits::eLazilyAllocated, dispatcher);
     const auto memoryUsage = hasLazyMemory ? VMA_MEMORY_USAGE_GPU_LAZILY_ALLOCATED
                                            : VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
 
@@ -230,7 +235,7 @@ void SurfaceRenderableResource::initDepthStencil() {
             .setSubresourceRange(vk::ImageSubresourceRange(
                 vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil, 0, 1, 0, 1));
 
-    depthAllocation->imageView = device->createImageViewUnique(imageViewCreateInfo);
+    depthAllocation->imageView = device->createImageViewUnique(imageViewCreateInfo, nullptr, dispatcher);
 
     backend.setDebugName(depthAllocation->image, "SwapchainDepthImage");
     backend.setDebugName(depthAllocation->imageView.get(), "SwapchainDepthImageView");
@@ -263,7 +268,7 @@ bool SurfaceRenderableResource::hasSurfaceTransformSupport() const {
 
 bool SurfaceRenderableResource::didSurfaceTransformUpdate() const {
     const auto& physicalDevice = backend.getPhysicalDevice();
-    const auto& updatedCapabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface.get());
+    const auto& updatedCapabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface.get(), backend.getDispatcher());
 
     return capabilities.currentTransform != updatedCapabilities.currentTransform;
 }
@@ -296,6 +301,7 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
     }
 
     const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
 
     // create swapchain image views
     swapchainImageViews.reserve(swapchainImages.size());
@@ -308,7 +314,7 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
 
     for (const auto& image : swapchainImages) {
         imageViewCreateInfo.setImage(image);
-        swapchainImageViews.push_back(device->createImageViewUnique(imageViewCreateInfo));
+        swapchainImageViews.push_back(device->createImageViewUnique(imageViewCreateInfo, nullptr, dispatcher));
 
         const size_t index = swapchainImageViews.size() - 1;
         backend.setDebugName(image, "SwapchainImage_" + std::to_string(index));
@@ -374,7 +380,7 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
     const auto renderPassCreateInfo =
         vk::RenderPassCreateInfo().setAttachments(attachments).setSubpasses(subpass).setDependencies(dependencies);
 
-    renderPass = device->createRenderPassUnique(renderPassCreateInfo);
+    renderPass = device->createRenderPassUnique(renderPassCreateInfo, nullptr, dispatcher);
 
     // create swapchain framebuffers
     swapchainFramebuffers.reserve(swapchainImageViews.size());
@@ -390,14 +396,14 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
         const std::array<vk::ImageView, 2> imageViews = {imageView.get(), depthAllocation->imageView.get()};
 
         framebufferCreateInfo.setAttachments(imageViews);
-        swapchainFramebuffers.push_back(device->createFramebufferUnique(framebufferCreateInfo));
+        swapchainFramebuffers.push_back(device->createFramebufferUnique(framebufferCreateInfo, nullptr, dispatcher));
     }
 }
 
 void SurfaceRenderableResource::recreateSwapchain() {
     if (!surface) return;
 
-    backend.getDevice()->waitIdle();
+    backend.getDevice()->waitIdle(backend.getDispatcher());
 
     swapchainFramebuffers.clear();
     renderPass.reset();
