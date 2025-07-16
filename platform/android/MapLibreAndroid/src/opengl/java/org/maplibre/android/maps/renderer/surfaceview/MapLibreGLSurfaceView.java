@@ -21,7 +21,16 @@ import javax.microedition.khronos.opengles.GL;
 import javax.microedition.khronos.opengles.GL10;
 
 public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
+  /**
+   * Experimental - https://github.com/maplibre/maplibre-native/issues/3618
+   * When enabled waits for the submitted GPU commands to finish before cleaning up resources.
+   * This adds 1-2 frames of wait time on the main thread during cleanup.
+   */
   public static boolean WAIT_COMMANDS_ON_CLEANUP = false;
+  /**
+   * Experimental - https://github.com/maplibre/maplibre-native/issues/3618
+   * When enabled moves context destruction off the render thread
+   */
   public static boolean DEFER_CONTEXT_DESTRUCTION = false;
 
   protected final WeakReference<MapLibreGLSurfaceView> viewWeakReference = new WeakReference<>(this);
