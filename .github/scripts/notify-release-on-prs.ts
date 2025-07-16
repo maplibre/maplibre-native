@@ -1,3 +1,10 @@
+/**
+ * This script should be run as node notify-release-on-prs.ts --tag <release_tag>.
+ * It will post a comment on each of the PRs included in the changelog of the specified release.
+ * The script can be ran multiple times for the same release_tag, it will not post a
+ * new comment but instead update the existing comment.
+ */
+
 import { Octokit } from '@octokit/rest';
 import { parseArgs } from 'node:util';
 import * as core from "@actions/core";
