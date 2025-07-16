@@ -116,7 +116,8 @@ Checks: [
     -readability-avoid-nested-conditional-operator,
     -readability-math-missing-parentheses,
     -readability-enum-initial-value,
-    -boost-use-ranges
+    -boost-use-ranges,
+    -portability-template-virtual-member-function,
 ]
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
