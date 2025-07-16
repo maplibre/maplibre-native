@@ -951,6 +951,8 @@ public:
     _targetCoordinate = kCLLocationCoordinate2DInvalid;
 
     _shouldRequestAuthorizationToUseLocationServices = YES;
+
+    _dynamicNavigationCameraAnimationDuration = NO;
 }
 
 - (mbgl::Size)size
@@ -6317,14 +6319,18 @@ static void *windowScreenContext = &windowScreenContext;
         }
     }
 
-    [self didUpdateLocationWithUserTrackingAnimated:animated completionHandler:completion];
-
-    NSTimeInterval duration = MLNAnimationDuration;
+    NSTimeInterval userLocationDuration = MLNAnimationDuration;
     if (oldLocation && ! CGPointEqualToPoint(self.userLocationAnnotationView.center, CGPointZero))
     {
-        duration = MIN([newLocation.timestamp timeIntervalSinceDate:oldLocation.timestamp], MLNUserLocationAnimationDuration);
+        userLocationDuration = MIN([newLocation.timestamp timeIntervalSinceDate:oldLocation.timestamp], MLNUserLocationAnimationDuration);
     }
-    [self updateUserLocationAnnotationViewAnimatedWithDuration:duration];
+    [self updateUserLocationAnnotationViewAnimatedWithDuration:userLocationDuration];
+
+    NSTimeInterval cameraDuration = MLNUserLocationAnimationDuration;
+    if (self.dynamicNavigationCameraAnimationDuration && oldLocation) {
+        cameraDuration = MIN([newLocation.timestamp timeIntervalSinceDate:oldLocation.timestamp], MLNUserLocationAnimationDuration);
+    }
+    [self didUpdateLocationWithUserTrackingDuration:cameraDuration completionHandler:completion];
 
     if (self.userTrackingMode == MLNUserTrackingModeNone &&
         self.userLocationAnnotationView.accessibilityElementIsFocused &&
@@ -6335,6 +6341,11 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (void)didUpdateLocationWithUserTrackingAnimated:(BOOL)animated completionHandler:(nullable void (^)(void))completion
+{
+    [self didUpdateLocationWithUserTrackingDuration:animated ? MLNUserLocationAnimationDuration : 0 completionHandler:completion];
+}
+
+- (void)didUpdateLocationWithUserTrackingDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion
 {
     CLLocation *location = self.userLocation.location;
     if ( ! _showsUserLocation || ! location
@@ -6369,31 +6380,31 @@ static void *windowScreenContext = &windowScreenContext;
         if (self.userTrackingState != MLNUserTrackingStateBegan)
         {
             // Keep both the user and the destination in view.
-            [self didUpdateLocationWithTargetAnimated:animated completionHandler:completion];
+            [self didUpdateLocationWithTargetAnimated:duration != 0 completionHandler:completion];
         }
     }
     else if (self.userTrackingState == MLNUserTrackingStatePossible)
     {
         // The first location update is often a great distance away from the
         // current viewport, so fly there to provide additional context.
-        [self didUpdateLocationSignificantlyAnimated:animated completionHandler:completion];
+        [self didUpdateLocationSignificantlyAnimated:duration != 0 completionHandler:completion];
     }
     else if (self.userTrackingState == MLNUserTrackingStateChanged)
     {
         // Subsequent updates get a more subtle animation.
-        [self didUpdateLocationIncrementallyAnimated:animated completionHandler:completion];
+        [self didUpdateLocationIncrementallyDuration:duration completionHandler:completion];
     }
     [self unrotateIfNeededAnimated:YES];
 }
 
 /// Changes the viewport based on an incremental location update.
-- (void)didUpdateLocationIncrementallyAnimated:(BOOL)animated completionHandler:(nullable void (^)(void))completion
+- (void)didUpdateLocationIncrementallyDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion
 {
     [self _setCenterCoordinate:self.userLocation.location.coordinate
                    edgePadding:self.edgePaddingForFollowing
                      zoomLevel:self.zoomLevel
                      direction:self.directionByFollowingWithCourse
-                      duration:animated ? MLNUserLocationAnimationDuration : 0
+                      duration:duration
        animationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear]
              completionHandler:completion];
 }

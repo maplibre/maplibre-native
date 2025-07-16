@@ -84,11 +84,15 @@ jobs:
         with:
           node-version-file: '.nvmrc'
 
-      - id: parent_workflow
-        run: |
-          conclusion=$(curl --retry 12 --retry-all-errors ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "android-build").conclusion')
-          was_skipped=$([[ "$conclusion" = "skipped" || "$conclusion" = "cancelled" ]] && echo "true" || echo "false")
-          echo "was_skipped=$was_skipped" >> "$GITHUB_OUTPUT"
+      - run: npm install
+
+      - name: Check if android-build was skipped
+        id: parent_workflow
+        run: node .github/scripts/check-job-skipped.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TEST_RUN_ID: ${{ github.event.workflow_run.jobs_url }}
+          JOB_NAME: android-build
 
       # get comment from PR
 
