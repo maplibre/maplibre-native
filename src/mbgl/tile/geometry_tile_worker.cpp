@@ -345,7 +345,7 @@ void GeometryTileWorker::onGlyphsAvailable(GlyphMap newGlyphMap, HBShapeResults 
         }
 
         for (auto& layout : layouts) {
-            if (layout && layout->needfinalizeSymbols()) {
+            if (layout && layout->needFinalizeSymbols()) {
                 layout->finalizeSymbols(results);
             }
         }

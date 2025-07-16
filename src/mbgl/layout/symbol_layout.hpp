@@ -33,7 +33,7 @@ public:
 
     ~SymbolLayout() final = default;
 
-    bool needfinalizeSymbols() override { return needfinalizeSymbolsVal; }
+    bool needFinalizeSymbols() override { return needFinalizeSymbolsVal; }
 
     void finalizeSymbols(HBShapeResults&) override;
 
@@ -151,7 +151,7 @@ private:
                // reinstantiation costs; use of BiDi/ubiditransform object must
                // be constrained to one thread
 
-    bool needfinalizeSymbolsVal = false;
+    bool needFinalizeSymbolsVal = false;
 };
 
 } // namespace mbgl

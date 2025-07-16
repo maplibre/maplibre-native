@@ -273,7 +273,7 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                     layoutParameters.glyphDependencies.glyphs[sectionFontStack ? *sectionFontStack : baseFontStack];
                 if (section.type != FontPBF) {
                     dependencies.insert(GlyphID(0, section.type));
-                    needfinalizeSymbolsVal = true;
+                    needFinalizeSymbolsVal = true;
                 } else {
                     char16_t codePoint = ft.formattedText->getCharCodeAt(j);
                     dependencies.insert(codePoint);
@@ -373,7 +373,7 @@ void SymbolLayout::finalizeSymbols(HBShapeResults& results) {
         } // feature.formattedText
     } // for (auto & feature : features ..
 
-    needfinalizeSymbolsVal = false;
+    needFinalizeSymbolsVal = false;
 } // SymbolLayout::finalizeSymbols
 
 bool SymbolLayout::hasDependencies() const {

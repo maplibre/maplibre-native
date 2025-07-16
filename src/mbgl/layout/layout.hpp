@@ -31,7 +31,7 @@ public:
 
     virtual void finalizeSymbols(HBShapeResults&) {}
 
-    virtual bool needfinalizeSymbols() { return false; }
+    virtual bool needFinalizeSymbols() { return false; }
 
     virtual bool hasSymbolInstances() const { return true; }
 
