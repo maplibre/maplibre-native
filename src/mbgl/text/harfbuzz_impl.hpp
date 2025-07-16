@@ -18,7 +18,7 @@ public:
     ~Impl();
 
     void createComplexGlyphIDs(const std::u16string &text,
-                               std::vector<GlyphID> &glyphIndexs,
+                               std::vector<GlyphID> &glyphIDs,
                                std::vector<HBShapeAdjust> &adjusts);
 
     Glyph rasterizeGlyph(const GlyphID &glyph) { return face.rasterizeGlyph(glyph); }
