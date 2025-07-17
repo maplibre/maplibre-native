@@ -365,6 +365,7 @@ jobs:
          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Write release notifications
+        if: env.make_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node .github/scripts/notify-release-on-prs.ts --tag ios-v${{ env.version }}
