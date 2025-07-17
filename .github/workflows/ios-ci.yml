@@ -29,6 +29,7 @@ on:
 permissions:
   id-token: write         # needed for AWS
   contents: write         # allow making a release
+  actions: write          # for triggering ios-release-cocoapods.yml
 
 jobs:
   pre_job:
@@ -244,6 +245,11 @@ jobs:
           (github.event_name == 'push' && steps.version-file-ios-changed.outputs.any_changed == 'true')
         run: echo make_release=true >> "$GITHUB_ENV"
 
+      - uses: actions/setup-node@v4
+        if: env.make_release
+        with:
+          node-version-file: ".nvmrc"
+
       - name: Build XCFramework
         if: env.make_release
         run: |
@@ -348,12 +354,22 @@ jobs:
               "version":"${{ env.version }}",
               "download_url":"${{ fromJSON(steps.github_release.outputs.assets)[0].browser_download_url }}"}}'
 
+      - run: npm install
+        working-directory: .
+
       - name: Release (CocoaPods)
         shell: bash -leo pipefail {0}  # so pod is found
         if: env.make_release
         run: gh workflow run ios-release-cocoapods.yml --field version=${{ env.version }}
         env:
-         GH_TOKEN: ${{ github.token }}
+         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Write release notifications
+        if: env.make_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node .github/scripts/notify-release-on-prs.ts --tag ios-v${{ env.version }}
+        working-directory: .
 
   ios-build-cmake:
     needs: pre_job

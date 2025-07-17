@@ -39,6 +39,10 @@ jobs:
     needs:
       - pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        renderer: [opengl, vulkan]
     defaults:
       run:
         working-directory: platform/android
@@ -80,18 +84,6 @@ jobs:
         with:
           cmakeVersion: 3.24.1
           ninjaVersion: latest
-
-      - name: Cache node modules
-        uses: actions/cache@v4
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
 
       - uses: actions/setup-node@v4
         with:
@@ -141,18 +133,21 @@ jobs:
             - ${{ env.cache-name }}
 
       - name: Check code style
+        if: matrix.renderer == 'opengl'
         run: make android-check
 
       - name: Run Android unit tests
-        run: make run-android-unit-test
+        run: RENDERER=${{ matrix.renderer }} make run-android-unit-test
 
       - name: Build libmaplibre.so for arm-v8
-        run: make android-lib-arm-v8
+        run: RENDERER=${{ matrix.renderer }} make android-lib-arm-v8
 
       - name: Build API documentation
+        if: matrix.renderer == 'opengl'
         run: ./gradlew dokkaGenerate
 
       - name: Build Examples documentation
+        if: matrix.renderer == 'opengl'
         run: make mkdocs-build
 
       - name: Copy developer config with API key for UI tests
@@ -167,42 +162,52 @@ jobs:
 
       - name: Build Benchmark, copy to platform/android
         run: |
-          ./gradlew assembleOpenglRelease assembleOpenglReleaseAndroidTest -PtestBuildType=release
-          cp MapLibreAndroidTestApp/build/outputs/apk/opengl/release/MapLibreAndroidTestApp-opengl-release.apk .
-          cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/opengl/release/MapLibreAndroidTestApp-opengl-release-androidTest.apk .
+          ./gradlew assemble${{ matrix.renderer }}Release assemble${{ matrix.renderer }}ReleaseAndroidTest -PtestBuildType=release
+          cp MapLibreAndroidTestApp/build/outputs/apk/${{ matrix.renderer }}/release/MapLibreAndroidTestApp-${{ matrix.renderer }}-release.apk .
+          cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/${{ matrix.renderer }}/release/MapLibreAndroidTestApp-${{ matrix.renderer }}-release-androidTest.apk .
 
       # https://developer.android.com/guide/practices/page-sizes
       - name: Check alignment of .apk
         run: |
-          unzip -o MapLibreAndroidTestApp/build/outputs/apk/opengl/release/MapLibreAndroidTestApp-opengl-release.apk -d /tmp/my_apk_out
+          unzip -o MapLibreAndroidTestApp/build/outputs/apk/${{ matrix.renderer }}/release/MapLibreAndroidTestApp-${{ matrix.renderer }}-release.apk -d /tmp/my_apk_out
           scripts/check-alignment.sh /tmp/my_apk_out
 
       - name: Create artifact for benchmark APKs
+        if: matrix.renderer == 'opengl'
         uses: actions/upload-artifact@v4
         with:
           if-no-files-found: error
           name: benchmarkAPKs
           path: |
-            platform/android/MapLibreAndroidTestApp-opengl-release.apk
-            platform/android/MapLibreAndroidTestApp-opengl-release-androidTest.apk
+            platform/android/MapLibreAndroidTestApp-${{ matrix.renderer }}-release.apk
+            platform/android/MapLibreAndroidTestApp-${{ matrix.renderer }}-release-androidTest.apk
 
-      - if: github.event_name == 'pull_request'
+      - if: github.event_name == 'pull_request' && matrix.renderer == 'opengl'
         uses: ./.github/actions/save-pr-number
 
-      - name: Build Instrumentation Tests, copy to platform/android
+      - name: Set renderer env var (OpenGL or Vulkan)
+        shell: bash
         run: |
-          ./gradlew assembleOpenglDebug assembleOpenglDebugAndroidTest -PtestBuildType=debug
-          cp MapLibreAndroidTestApp/build/outputs/apk/opengl/debug/MapLibreAndroidTestApp-opengl-debug.apk InstrumentationTestApp.apk
-          cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/opengl/debug/MapLibreAndroidTestApp-opengl-debug-androidTest.apk InstrumentationTests.apk
+          case "${{ matrix.renderer }}" in
+            opengl) echo "renderer=OpenGL" >> "$GITHUB_ENV" ;;
+            vulkan) echo "renderer=Vulkan" >> "$GITHUB_ENV" ;;
+            *) echo "::error ::Unknown renderer '${{ matrix.renderer }}'"; exit 1 ;;
+          esac
 
-      - name: Upload android-ui-test
+      - name: Build Instrumentation Tests (${{ matrix.renderer }}), copy to platform/android
+        run: |
+          ./gradlew assemble${{ matrix.renderer }}Debug assemble${{ matrix.renderer }}DebugAndroidTest -PtestBuildType=debug
+          cp MapLibreAndroidTestApp/build/outputs/apk/${{ matrix.renderer }}/debug/MapLibreAndroidTestApp-${{ matrix.renderer }}-debug.apk InstrumentationTestApp${{ env.renderer }}.apk
+          cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/${{ matrix.renderer }}/debug/MapLibreAndroidTestApp-${{ matrix.renderer }}-debug-androidTest.apk InstrumentationTests${{ env.renderer }}.apk
+
+      - name: Upload android-ui-test-${{ matrix.renderer }}
         uses: actions/upload-artifact@v4
         with:
           if-no-files-found: error
-          name: android-ui-test
+          name: android-ui-test-${{ matrix.renderer }}
           path: |
-            platform/android/InstrumentationTestApp.apk
-            platform/android/InstrumentationTests.apk
+            platform/android/InstrumentationTestApp${{ env.renderer }}.apk
+            platform/android/InstrumentationTests${{ env.renderer }}.apk
 
   android-build-cpp-test:
     runs-on: ubuntu-24.04
