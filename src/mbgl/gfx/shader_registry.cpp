@@ -13,7 +13,7 @@ ShaderGroup& ShaderRegistry::getLegacyGroup() noexcept {
 
 bool ShaderRegistry::isShaderGroup(const std::string& shaderGroupName) const noexcept {
     std::shared_lock<std::shared_mutex> readerLock(shaderGroupLock);
-    return shaderGroups.find(shaderGroupName) != shaderGroups.end();
+    return shaderGroups.contains(shaderGroupName);
 }
 
 const ShaderGroupPtr ShaderRegistry::getShaderGroup(const std::string& shaderGroupName) const noexcept {
@@ -28,7 +28,7 @@ const ShaderGroupPtr ShaderRegistry::getShaderGroup(const std::string& shaderGro
 
 bool ShaderRegistry::replaceShader(ShaderGroupPtr&& shader, const std::string& shaderGroupName) noexcept {
     std::unique_lock<std::shared_mutex> writerLock(shaderGroupLock);
-    if (shaderGroups.find(shaderGroupName) == shaderGroups.end()) {
+    if (!shaderGroups.contains(shaderGroupName)) {
         return false;
     }
 
@@ -38,7 +38,7 @@ bool ShaderRegistry::replaceShader(ShaderGroupPtr&& shader, const std::string& s
 
 bool ShaderRegistry::registerShaderGroup(ShaderGroupPtr&& shader, const std::string& shaderGroupName) noexcept {
     std::unique_lock<std::shared_mutex> writerLock(shaderGroupLock);
-    if (shaderGroups.find(shaderGroupName) != shaderGroups.end()) {
+    if (shaderGroups.contains(shaderGroupName)) {
         return false;
     }
 
