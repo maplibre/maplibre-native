@@ -38,7 +38,8 @@ if(WIN32)
 
     target_link_libraries(
         mbgl-vendor-benchmark
-        PRIVATE shlwapi
+        PRIVATE
+        $<IF:$<BOOL:${MSVC}>,shlwapi,-lShlwapi>
     )
 endif()
 

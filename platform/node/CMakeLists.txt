@@ -1,6 +1,10 @@
 set(NODE_MODULE_MINIMUM_ABI 83) # Minimum supported Node.js version: 14
 set(NODE_MODULE_CACHE_DIR ${CMAKE_BINARY_DIR}/headers)
 
+if(DEFINED ENV{MSYSTEM})
+    message(FATAL "MSYS2 is not supported, Node.js in Windows only has binary compatibility with Microsoft Visual C++.")
+endif()
+
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/module.cmake)
 
 add_node_module(

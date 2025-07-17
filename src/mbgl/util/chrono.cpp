@@ -45,7 +45,8 @@ std::string iso8601(Timestamp timestamp) {
     std::tm info;
     _gmtime(&time, &info);
     char buffer[30];
-    std::strftime(buffer, sizeof(buffer), "%F %T", &info);
+    // %F and %T are not supported in MinGW (https://sourceforge.net/p/mingw-w64/bugs/793/)
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &info);
     return buffer;
 }
 
@@ -59,7 +60,8 @@ std::string iso8601(std::chrono::time_point<std::chrono::system_clock, Milliseco
         1000;
 
     char buffer[sizeof("yyyy-mm-ddThh:mm:ss.000Z")];
-    const std::size_t offset = std::strftime(buffer, sizeof(buffer), "%FT%T", &info);
+    // %F and %T are not supported in MinGW (https://sourceforge.net/p/mingw-w64/bugs/793/)
+    const std::size_t offset = std::strftime(buffer, sizeof(buffer), "%Y-%m-%dT%H:%M:%S", &info);
     snprintf(buffer + offset, sizeof(buffer) - offset, ".%03lldZ", ms);
 
     return buffer;
