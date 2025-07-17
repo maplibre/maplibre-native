@@ -24,7 +24,8 @@ public:
     void createPlatformSurface() override {
         auto& backendImpl = static_cast<AndroidVulkanRendererBackend&>(backend);
         const vk::AndroidSurfaceCreateInfoKHR createInfo({}, backendImpl.getWindow());
-        surface = backendImpl.getInstance()->createAndroidSurfaceKHRUnique(createInfo);
+        surface = backendImpl.getInstance()->createAndroidSurfaceKHRUnique(
+            createInfo, nullptr, backendImpl.getDispatcher());
 
         const int apiLevel = android_get_device_api_level();
         if (apiLevel < __ANDROID_API_Q__) {
