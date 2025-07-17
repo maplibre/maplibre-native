@@ -509,7 +509,7 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
     if (textureUsage == Texture2DUsage::Attachment) {
         // For optimal tiling, we need to copy to a staging buffer first
         const auto& allocator = context.getBackend().getAllocator();
-        
+
         // Create staging buffer
         const auto bufferInfo = vk::BufferCreateInfo()
                                     .setSize(imageSize)
@@ -519,7 +519,8 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
         VmaAllocationCreateInfo allocationInfo = {};
         allocationInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
         allocationInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-        allocationInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
+        allocationInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT |
+                               VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
         SharedBufferAllocation bufferAllocation = std::make_shared<BufferAllocation>(allocator);
         if (!bufferAllocation->create(allocationInfo, bufferInfo)) {
@@ -540,22 +541,25 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
                                      .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                                      .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
 
-            commandBuffer->pipelineBarrier(
-                vk::PipelineStageFlagBits::eColorAttachmentOutput,
-                vk::PipelineStageFlagBits::eTransfer,
-                {}, nullptr, nullptr, barrier);
+            commandBuffer->pipelineBarrier(vk::PipelineStageFlagBits::eColorAttachmentOutput,
+                                           vk::PipelineStageFlagBits::eTransfer,
+                                           {},
+                                           nullptr,
+                                           nullptr,
+                                           barrier);
 
             // Copy image to buffer
             const auto region = vk::BufferImageCopy()
                                     .setBufferOffset(0)
                                     .setBufferRowLength(0)
                                     .setBufferImageHeight(0)
-                                    .setImageSubresource(vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1))
+                                    .setImageSubresource(
+                                        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1))
                                     .setImageOffset({0, 0, 0})
                                     .setImageExtent({size.width, size.height, 1});
 
-            commandBuffer->copyImageToBuffer(imageAllocation->image, vk::ImageLayout::eTransferSrcOptimal, 
-                                           bufferAllocation->buffer, region);
+            commandBuffer->copyImageToBuffer(
+                imageAllocation->image, vk::ImageLayout::eTransferSrcOptimal, bufferAllocation->buffer, region);
         });
 
         // Map staging buffer and copy to image data
@@ -568,8 +572,8 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
     } else {
         // For linear tiling, use direct memory mapping (original code)
         const auto& device = context.getBackend().getDevice();
-        const auto& layout = device->getImageSubresourceLayout(imageAllocation->image,
-                                                               vk::ImageSubresource(vk::ImageAspectFlagBits::eColor, 0, 0));
+        const auto& layout = device->getImageSubresourceLayout(
+            imageAllocation->image, vk::ImageSubresource(vk::ImageAspectFlagBits::eColor, 0, 0));
 
         void* mappedData_ = nullptr;
         vmaMapMemory(context.getBackend().getAllocator(), imageAllocation->allocation, &mappedData_);
