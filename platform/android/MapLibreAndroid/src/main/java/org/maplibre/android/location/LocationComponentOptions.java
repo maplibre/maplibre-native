@@ -905,7 +905,7 @@ public class LocationComponentOptions implements Parcelable {
    * @return whether concurrent camera animations are enabled or disabled during navigation
    */
   public Boolean concurrentCameraAnimationsEnabled() {
-      return concurrentCameraAnimationsEnabled;
+    return concurrentCameraAnimationsEnabled;
   }
 
   @NonNull
@@ -1099,7 +1099,7 @@ public class LocationComponentOptions implements Parcelable {
     }
 
     if (concurrentCameraAnimationsEnabled != options.concurrentCameraAnimationsEnabled) {
-        return false;
+      return false;
     }
 
     return layerBelow != null ? layerBelow.equals(options.layerBelow) : options.layerBelow == null;
@@ -2004,9 +2004,10 @@ public class LocationComponentOptions implements Parcelable {
      *
      * @return whether concurrent camera animations are enabled or disabled
      */
-    public LocationComponentOptions.Builder concurrentCameraAnimationsEnabled(Boolean concurrentCameraAnimationsEnabled) {
-        this.concurrentCameraAnimationsEnabled = concurrentCameraAnimationsEnabled;
-        return this;
+    public LocationComponentOptions.Builder concurrentCameraAnimationsEnabled(
+        Boolean concurrentCameraAnimationsEnabled) {
+      this.concurrentCameraAnimationsEnabled = concurrentCameraAnimationsEnabled;
+      return this;
     }
 
     @Nullable

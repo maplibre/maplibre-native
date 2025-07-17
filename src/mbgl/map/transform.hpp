@@ -132,14 +132,20 @@ public:
     FreeCameraOptions getFreeCameraOptions() const;
     void setFreeCameraOptions(const FreeCameraOptions& options);
 
+private:
     struct Animation {
-        TimePoint start;
-        Duration duration;
-        AnimationOptions options;
+        const TimePoint start;
+        const Duration duration;
+        const AnimationOptions options;
         bool ran = false;      // Did this property animation run this frame
         bool finished = false; // Did we execute the finish frame for this property animation this frame
         bool done = false;     // Did this property animation reach the end of the frame
-        bool panning = false, scaling = false, rotating = false;
+        // The below variables keep track of the panning, scaling, and rotating transform state
+        // so we can correctly set it at the end of the `updateTransitions` if more
+        // than one `Animation` is running at the same time.
+        const bool panning;
+        const bool scaling;
+        const bool rotating;
 
         // Anchor
         std::optional<ScreenCoordinate> anchor;
@@ -158,20 +164,20 @@ public:
               scaling(scaling_),
               rotating(rotating_) {}
 
-        double interpolant(TimePoint);
+        double interpolant(const TimePoint&) const;
 
         bool isAnimated() const { return duration != Duration::zero(); }
     };
 
-private:
     template <class T>
     struct Property {
         std::shared_ptr<Animation> animation;
-        T current, target;
+        T current;
+        T target;
         bool set = false;
 
-        std::function<LatLng(TimePoint)> frameLatLngFunc = nullptr;
-        std::function<double(TimePoint)> frameZoomFunc = nullptr;
+        std::function<const LatLng(const TimePoint&)> frameLatLngFunc = nullptr;
+        std::function<double(const TimePoint&)> frameZoomFunc = nullptr;
     };
 
     struct Properties {
@@ -184,7 +190,7 @@ private:
     TransformState state;
 
     void startTransition(const CameraOptions&, const Duration&, Animation&);
-    bool animationTransitionFrame(Animation&, double);
+    bool animationTransitionFrame(Animation&, const double);
     void animationFinishFrame(Animation&);
 
     void visitProperties(const std::function<void(Animation&)>& f) {

@@ -103,13 +103,13 @@ void Transform::jumpTo(const CameraOptions& camera) {
  * smooth animation between old and new values. The map will retain the current
  * values for any options not included in `options`.
  */
-void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions& options) {
+void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions& animationOptions) {
     CameraOptions camera = inputCamera;
 
-    Duration duration = options.duration.value_or(Duration::zero());
+    Duration duration = animationOptions.duration.value_or(Duration::zero());
     if (state.getLatLngBounds() == LatLngBounds() && !isGestureInProgress() && duration != Duration::zero()) {
         // reuse flyTo, without exaggerated animation, to achieve constant ground speed.
-        return flyTo(camera, options, true);
+        return flyTo(camera, animationOptions, true);
     }
 
     double zoom = camera.zoom.value_or(getZoom());
@@ -124,8 +124,8 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
 
     if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch)) {
-        if (options.transitionFinishFn) {
-            options.transitionFinishFn();
+        if (animationOptions.transitionFinishFn) {
+            animationOptions.transitionFinishFn();
         }
         return;
     }
@@ -160,8 +160,12 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
     const double startPitch = state.getPitch();
     const EdgeInsets startEdgeInsets = state.getEdgeInsets();
 
-    auto animation = std::make_shared<Animation>(
-        Clock::now(), duration, options, unwrappedLatLng != startLatLng, zoom != startZoom, bearing != startBearing);
+    auto animation = std::make_shared<Animation>(Clock::now(),
+                                                 duration,
+                                                 animationOptions,
+                                                 unwrappedLatLng != startLatLng,
+                                                 zoom != startZoom,
+                                                 bearing != startBearing);
 
     // NOTE: For tests only
     transitionStart = animation->start;
@@ -177,7 +181,9 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
             .target = zoom,
             .set = true,
             .frameZoomFunc =
-                [=](TimePoint now) { return util::interpolate(startZoom, zoom, animation->interpolant(now)); },
+                [startZoom, zoom, animation](TimePoint now) {
+                    return util::interpolate(startZoom, zoom, animation->interpolant(now));
+                },
         };
     }
     if (!properties.latlng.set || startPoint != endPoint) {
@@ -190,7 +196,7 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
             .target = endPoint,
             .set = true,
             .frameLatLngFunc =
-                [=, this](TimePoint now) {
+                [startPoint, endPoint, startZoom, animation, this](TimePoint now) {
                     Point<double> framePoint = util::interpolate(startPoint, endPoint, animation->interpolant(now));
                     return Projection::unproject(framePoint, state.zoomScale(startZoom));
                 },
@@ -241,7 +247,9 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
 
     Where applicable, local variable documentation begins with the associated
     variable or function in van Wijk (2003). */
-void Transform::flyTo(const CameraOptions& inputCamera, const AnimationOptions& options, bool linearZoomInterpolation) {
+void Transform::flyTo(const CameraOptions& inputCamera,
+                      const AnimationOptions& animationOptions,
+                      bool linearZoomInterpolation) {
     CameraOptions camera = inputCamera;
 
     double zoom = camera.zoom.value_or(getZoom());
@@ -254,8 +262,8 @@ void Transform::flyTo(const CameraOptions& inputCamera, const AnimationOptions& 
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
 
     if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch) || state.getSize().isEmpty()) {
-        if (options.transitionFinishFn) {
-            options.transitionFinishFn();
+        if (animationOptions.transitionFinishFn) {
+            animationOptions.transitionFinishFn();
         }
         return;
     }
@@ -299,8 +307,8 @@ void Transform::flyTo(const CameraOptions& inputCamera, const AnimationOptions& 
         root mean squared average velocity, V<sub>RMS</sub>. A value of 1
         produces a circular motion. */
     double rho = 1.42;
-    if (options.minZoom || linearZoomInterpolation) {
-        double minZoom = util::min(options.minZoom.value_or(startZoom), startZoom, zoom);
+    if (animationOptions.minZoom || linearZoomInterpolation) {
+        double minZoom = util::min(animationOptions.minZoom.value_or(startZoom), startZoom, zoom);
         minZoom = util::clamp(minZoom, state.getMinZoom(), state.getMaxZoom());
         /// w<sub>m</sub>: Maximum visible span, measured in pixels with respect
         /// to the initial scale.
@@ -343,21 +351,21 @@ void Transform::flyTo(const CameraOptions& inputCamera, const AnimationOptions& 
     double S = (isClose ? (std::abs(std::log(w1 / w0)) / rho) : ((r1 - r0) / rho));
 
     Duration duration;
-    if (options.duration) {
-        duration = *options.duration;
+    if (animationOptions.duration) {
+        duration = *animationOptions.duration;
     } else {
         /// V: Average velocity, measured in ρ-screenfuls per second.
         double velocity = 1.2;
-        if (options.velocity) {
-            velocity = *options.velocity / rho;
+        if (animationOptions.velocity) {
+            velocity = *animationOptions.velocity / rho;
         }
         duration = std::chrono::duration_cast<Duration>(std::chrono::duration<double>(S / velocity));
     }
     if (duration == Duration::zero()) {
         // Perform an instantaneous transition.
         jumpTo(camera);
-        if (options.transitionFinishFn) {
-            options.transitionFinishFn();
+        if (animationOptions.transitionFinishFn) {
+            animationOptions.transitionFinishFn();
         }
         return;
     }
@@ -365,7 +373,8 @@ void Transform::flyTo(const CameraOptions& inputCamera, const AnimationOptions& 
     const double startScale = state.getScale();
     const EdgeInsets startEdgeInsets = state.getEdgeInsets();
 
-    auto animation = std::make_shared<Animation>(Clock::now(), duration, options, true, true, bearing != startBearing);
+    auto animation = std::make_shared<Animation>(
+        Clock::now(), duration, animationOptions, true, true, bearing != startBearing);
 
     // NOTE: For tests only
     transitionStart = animation->start;
@@ -381,7 +390,7 @@ void Transform::flyTo(const CameraOptions& inputCamera, const AnimationOptions& 
             .target = zoom,
             .set = true,
             .frameZoomFunc =
-                [=, this](TimePoint now) {
+                [linearZoomInterpolation, startZoom, zoom, S, w, this](TimePoint now) {
                     double t = properties.zoom.animation->interpolant(now);
                     double s = t * S;
                     double frameZoom = linearZoomInterpolation ? util::interpolate(startZoom, zoom, t)
@@ -405,7 +414,7 @@ void Transform::flyTo(const CameraOptions& inputCamera, const AnimationOptions& 
             .target = endPoint,
             .set = true,
             .frameLatLngFunc =
-                [=, this](TimePoint now) {
+                [startScale, S, u, this](TimePoint now) {
                     double t = properties.latlng.animation->interpolant(now);
                     double s = t * S;
                     double us = t == 1.0 ? 1.0 : u(s);
@@ -635,7 +644,7 @@ void Transform::animationFinishFrame(Animation& animation) {
 }
 
 void Transform::startTransition(const CameraOptions& camera, const Duration& duration, Animation& animation) {
-    bool isAnimated = duration != Duration::zero();
+    const bool isAnimated = duration != Duration::zero();
     observer.onCameraWillChange(isAnimated ? MapObserver::CameraChangeMode::Animated
                                            : MapObserver::CameraChangeMode::Immediate);
 
@@ -663,7 +672,9 @@ void Transform::updateTransitions(const TimePoint& now) {
     if (!activeAnimation) {
         activeAnimation = true;
 
-        bool panning = false, scaling = false, rotating = false;
+        bool panning = false;
+        bool scaling = false;
+        bool rotating = false;
         visitProperties([&](Animation& animation) {
             if (!animation.done) {
                 panning |= animation.panning;
@@ -677,7 +688,7 @@ void Transform::updateTransitions(const TimePoint& now) {
                                 .withScalingInProgress(scaling)
                                 .withRotatingInProgress(rotating));
 
-        bool zoomSet = properties.zoom.set && properties.zoom.animation;
+        const bool zoomSet = properties.zoom.set && properties.zoom.animation;
         if ((properties.latlng.set && properties.latlng.animation) || zoomSet) {
             state.setLatLngZoom(
                 properties.latlng.frameLatLngFunc ? properties.latlng.frameLatLngFunc(now) : state.getLatLng(),
@@ -696,7 +707,7 @@ void Transform::updateTransitions(const TimePoint& now) {
             }
         }
         if (properties.bearing.set && properties.bearing.animation) {
-            double bearing_t = properties.bearing.animation->interpolant(now);
+            const double bearing_t = properties.bearing.animation->interpolant(now);
             state.setBearing(util::wrap(
                 util::interpolate(properties.bearing.current, properties.bearing.target, bearing_t), -pi, pi));
             if (animationTransitionFrame(*properties.bearing.animation, bearing_t)) {
@@ -705,7 +716,7 @@ void Transform::updateTransitions(const TimePoint& now) {
         }
 
         if (properties.padding.set && properties.padding.animation) {
-            double padding_t = properties.padding.animation->interpolant(now);
+            const double padding_t = properties.padding.animation->interpolant(now);
             state.setEdgeInsets(
                 {util::interpolate(properties.padding.current.top(), properties.padding.target.top(), padding_t),
                  util::interpolate(properties.padding.current.left(), properties.padding.target.left(), padding_t),
@@ -716,9 +727,8 @@ void Transform::updateTransitions(const TimePoint& now) {
             }
         }
 
-        double maxPitch = getMaxPitchForEdgeInsets(state.getEdgeInsets());
-        bool pitchSet = properties.pitch.set && properties.pitch.animation;
-        if (pitchSet || maxPitch < properties.pitch.current) {
+        const double maxPitch = getMaxPitchForEdgeInsets(state.getEdgeInsets());
+        if ((properties.pitch.set || maxPitch < properties.pitch.current) && properties.pitch.animation) {
             double pitch_t = properties.pitch.animation->interpolant(now);
             state.setPitch(
                 std::min(maxPitch, util::interpolate(properties.pitch.current, properties.pitch.target, pitch_t)));
@@ -726,12 +736,14 @@ void Transform::updateTransitions(const TimePoint& now) {
                 properties.pitch.set = false;
             }
 
-            if (pitchSet && properties.pitch.animation->anchor) {
+            if (properties.pitch.set && properties.pitch.animation && properties.pitch.animation->anchor) {
                 state.moveLatLng(properties.pitch.animation->anchorLatLng, *properties.pitch.animation->anchor);
             }
         }
 
-        panning = scaling = rotating = false;
+        panning = false;
+        scaling = false;
+        rotating = false;
         visitProperties([&](Animation& animation) {
             if (animation.done) {
                 animationFinishFrame(animation);
@@ -806,9 +818,8 @@ void Transform::setFreeCameraOptions(const FreeCameraOptions& options) {
     state.setFreeCameraOptions(options);
 }
 
-double Transform::Animation::interpolant(TimePoint now) {
-    bool isAnimated = duration != Duration::zero();
-    double t = isAnimated ? (std::chrono::duration<double>(now - start) / duration) : 1.0f;
+double Transform::Animation::interpolant(const TimePoint& now) const {
+    double t = isAnimated() ? (std::chrono::duration<double>(now - start) / duration) : 1.0f;
     if (t >= 1.0) {
         return 1.0;
     }
