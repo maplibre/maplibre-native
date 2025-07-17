@@ -1,12 +1,12 @@
 #pragma once
 
-#include <mbgl/style/sources/raster_source.hpp>
+#include <mbgl/style/sources/tile_source.hpp>
 #include <mbgl/style/source_impl.hpp>
 
 namespace mbgl {
 namespace style {
 
-class RasterSource::Impl : public Source::Impl {
+class TileSource::Impl : public Source::Impl {
 public:
     Impl(SourceType sourceType, std::string id, uint16_t tileSize);
     Impl(const Impl&, Tileset);
