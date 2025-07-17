@@ -225,6 +225,8 @@ void Context::waitFrame() const {
 void Context::beginFrame() {
     MLN_TRACE_FUNC();
 
+    frameResourceIndex = (frameResourceIndex + 1) % frameResources.size();
+
     const auto& device = backend.getDevice();
     const auto& dispatcher = backend.getDispatcher();
     auto& renderableResource = backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
@@ -308,9 +310,7 @@ void Context::beginFrame() {
     backend.getThreadPool().runRenderJobs();
 }
 
-void Context::endFrame() {
-    frameResourceIndex = (frameResourceIndex + 1) % frameResources.size();
-}
+void Context::endFrame() {}
 
 void Context::submitFrame() {
     MLN_TRACE_FUNC();
