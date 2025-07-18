@@ -1612,6 +1612,82 @@ TEST(Map, ObserveShaderRegistration) {
     EXPECT_EQ(observedRegistry, false);
 }
 
+TEST(Map, ResourceError) {
+    MapTest<> test;
+    test.fileSource->glyphsResponse = [&](const Resource&) {
+        Response response;
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::Server, "Font file Server failed");
+        return response;
+    };
+
+    test.map.getStyle().loadJSON(
+        R"(
+{
+  "version": 8,
+  "zoom": 0,
+  "center": [-14.41400, 39.09187],
+  "sources": {
+    "mapbox": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "name": "ជនជាប់សង្ស័យ"
+            },
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -14.4195556640625,
+                  39.091699613104595
+                ],
+                [
+                  102.3046875,
+                  39.36827914916014
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "fonts": "local://glyphs/{fontstack}/{language}.pbf",
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "lines-symbol",
+      "type": "symbol",
+      "source": "mapbox",
+      "layout": {
+        "text-field": "{name}",
+        "symbol-placement": "point",
+        "symbol-spacing": 150,
+        "text-allow-overlap": true,
+        "text-font": [ "abc" ],
+        "text-size": 24
+      }
+    }
+  ]
+})");
+    try {
+        test.frontend.render(test.map);
+    } catch (...) {
+        auto error = std::current_exception(); // captur
+        EXPECT_EQ(mbgl::util::toString(error), "Font file Server failed");
+    }
+}
+
 TEST(Map, StencilOverflow) {
     MapTest<> test;
 
