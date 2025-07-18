@@ -1330,7 +1330,29 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer.cpp
 )
 
-include(${PROJECT_SOURCE_DIR}/cmake/harfbuzz.cmake)
+set(SHAPE_TARGETS, "")
+if (MLN_TEXT_SHAPING_HARFBUZZ)
+    message(STATUS "Configuring with HarfBuzz text shaping")
+    list(APPEND
+        SRC_FILES
+        ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz_impl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz_impl.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/text/freetype.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/text/freetype.hpp
+    )    
+    target_compile_definitions(
+        mbgl-core
+        PRIVATE MLN_TEXT_SHAPING_HARFBUZZ=1
+    )
+    include(${PROJECT_SOURCE_DIR}/vendor/freetype.cmake)
+    include(${PROJECT_SOURCE_DIR}/vendor/harfbuzz.cmake)
+    set(SHAPE_TARGETS
+        freetype
+        harfbuzz
+    )
+endif()
 
 target_sources(
     mbgl-core PRIVATE
