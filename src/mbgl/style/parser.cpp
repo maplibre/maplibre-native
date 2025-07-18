@@ -130,8 +130,7 @@ StyleParseResult Parser::parse(const std::string& json) {
                     // If the face is an array, we assume it is a list of font file objects.
                     for (const auto& fontFile : faceValue.GetArray()) {
                         if (fontFile.IsObject()) {
-                            FontFace fontFace;
-                            fontFace.name = faceName;
+                            FontFace fontFace(faceName, "", {{0, 0x10FFFF}});
 
                             // Parse url
                             if (fontFile.HasMember("url")) {
@@ -142,6 +141,7 @@ StyleParseResult Parser::parse(const std::string& json) {
                             // Parse unicode-range
                             if (fontFile.HasMember("unicode-range")) {
                                 const JSValue& unicodeRange = fontFile["unicode-range"];
+                                fontFace.ranges.clear();
                                 if (unicodeRange.IsArray()) {
                                     for (auto& range : unicodeRange.GetArray()) {
                                         if (range.IsString()) {
@@ -174,8 +174,7 @@ StyleParseResult Parser::parse(const std::string& json) {
                         }
                     }
                 } else if (faceValue.IsString()) {
-                    FontFace fontFace{
-                        .type = FontPBF, .name = faceName, .url = faceValue.GetString(), .ranges = {{0, 0x10FFFF}}};
+                    FontFace fontFace(faceName, faceValue.GetString(), {{0, 0x10FFFF}});
                     fontFace.type = genNewGlyphIDType(fontFace.url, FontStack{fontFace.name}, fontFace.ranges);
                     fontFaces->emplace_back(std::move(fontFace));
                 }

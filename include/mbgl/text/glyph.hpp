@@ -163,13 +163,21 @@ enum class WritingModeType : uint8_t {
 
 // style defined faces
 struct FontFace {
-    GlyphIDType type; // a unique glyph id
-
+    GlyphIDType type;                                  // an unique glyph id
     std::string name;                                  // font face name
     std::string url;                                   // font file url
     std::vector<std::pair<uint32_t, uint32_t>> ranges; // unicode ranges
 
-    auto valid() const { return !name.empty() && !url.empty() && !ranges.empty(); }
+    FontFace() = default;
+    FontFace(const std::string &name_,
+             const std::string &url_,
+             const std::vector<std::pair<uint32_t, uint32_t>> &ranges_)
+        : type(FontPBF),
+          name(name_),
+          url(url_),
+          ranges(ranges_) {}
+
+    auto valid() const -> bool { return !name.empty() && !url.empty() && !ranges.empty(); }
 };
 
 using FontFaces = std::vector<FontFace>;
