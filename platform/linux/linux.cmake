@@ -175,7 +175,8 @@ target_link_libraries(
 )
 
 # Bundle system provided libraries
-if(MLN_CORE_INCLUDE_DEPS AND NOT MLN_USE_BUILTIN_ICU AND NOT "${ARMERGE}" STREQUAL "")
+if(MLN_CORE_INCLUDE_DEPS AND NOT MLN_USE_BUILTIN_ICU AND NOT "${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
+    message(STATUS "Found armerge: ${ARMERGE}")
     add_custom_command(
         TARGET mbgl-core
         POST_BUILD
