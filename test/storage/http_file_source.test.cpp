@@ -62,13 +62,10 @@ TEST(HTTPFileSource, TEST_REQUIRES_SERVER(HTTP404)) {
     util::RunLoop loop;
     HTTPFileSource fs(ResourceOptions::Default(), ClientOptions());
 
-    std::string stringResourceURL = "http://127.0.0.1:3000/doesnotexist";
-    std::string resourceURLInterpolation = " - Resource URL: " + stringResourceURL;
-
-    auto req = fs.request({Resource::Unknown, stringResourceURL}, [&](Response res) {
+    auto req = fs.request({Resource::Unknown, "http://127.0.0.1:3000/doesnotexist"}, [&](Response res) {
         ASSERT_NE(nullptr, res.error);
         EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
-        EXPECT_EQ("HTTP status code 404" + resourceURLInterpolation, res.error->message + resourceURLInterpolation);
+        EXPECT_EQ("HTTP status code 404", res.error->message);
         EXPECT_FALSE(bool(res.data));
         EXPECT_FALSE(bool(res.expires));
         EXPECT_FALSE(res.mustRevalidate);
@@ -138,13 +135,10 @@ TEST(HTTPFileSource, TEST_REQUIRES_SERVER(HTTP500)) {
     util::RunLoop loop;
     HTTPFileSource fs(ResourceOptions::Default(), ClientOptions());
 
-    std::string stringResourceURL = "http://127.0.0.1:3000/permanent-error";
-    std::string resourceURLInterpolation = " - Resource URL: " + stringResourceURL;
-
-    auto req = fs.request({Resource::Unknown, stringResourceURL}, [&](Response res) {
+    auto req = fs.request({Resource::Unknown, "http://127.0.0.1:3000/permanent-error"}, [&](Response res) {
         ASSERT_NE(nullptr, res.error);
         EXPECT_EQ(Response::Error::Reason::Server, res.error->reason);
-        EXPECT_EQ("HTTP status code 500" + resourceURLInterpolation, res.error->message + resourceURLInterpolation);
+        EXPECT_EQ("HTTP status code 500", res.error->message);
         EXPECT_FALSE(bool(res.data));
         EXPECT_FALSE(bool(res.expires));
         EXPECT_FALSE(res.mustRevalidate);
