@@ -1341,7 +1341,7 @@ if (MLN_TEXT_SHAPING_HARFBUZZ)
         ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz_impl.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/text/freetype.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/text/freetype.hpp
-    )    
+    )
     target_compile_definitions(
         mbgl-core
         PRIVATE MLN_TEXT_SHAPING_HARFBUZZ=1
