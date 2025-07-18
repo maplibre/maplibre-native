@@ -8,6 +8,8 @@ import android.util.Log;
 import org.maplibre.android.maps.renderer.egl.EGLLogWrapper;
 
 import java.lang.ref.WeakReference;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGL11;
@@ -19,6 +21,17 @@ import javax.microedition.khronos.opengles.GL;
 import javax.microedition.khronos.opengles.GL10;
 
 public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
+  /**
+   * Experimental - https://github.com/maplibre/maplibre-native/issues/3618
+   * When enabled waits for the submitted GPU commands to finish before cleaning up resources.
+   * This adds 1-2 frames of wait time on the main thread during cleanup.
+   */
+  public static boolean WAIT_COMMANDS_ON_CLEANUP = false;
+  /**
+   * Experimental - https://github.com/maplibre/maplibre-native/issues/3618
+   * When enabled moves context destruction off the render thread
+   */
+  public static boolean DEFER_CONTEXT_DESTRUCTION = false;
 
   protected final WeakReference<MapLibreGLSurfaceView> viewWeakReference = new WeakReference<>(this);
 
@@ -132,6 +145,13 @@ public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
      */
     public void start() {
       try {
+        if (DEFER_CONTEXT_DESTRUCTION) {
+          String renderThreadName = Thread.currentThread().getName();
+
+          cleanupExecutor = Executors.newSingleThreadExecutor();
+          cleanupExecutor.submit(() -> Thread.currentThread().setName(renderThreadName + "-cleanup"));
+        }
+
         /*
          * Get an EGL instance
          */
@@ -272,18 +292,55 @@ public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
 
     private void destroySurfaceImp() {
       if (mEglSurface != null && mEglSurface != EGL10.EGL_NO_SURFACE) {
+
+        if (WAIT_COMMANDS_ON_CLEANUP && !DEFER_CONTEXT_DESTRUCTION) {
+          mEgl.eglWaitNative(EGL10.EGL_CORE_NATIVE_ENGINE, null);
+        }
+
         mEgl.eglMakeCurrent(mEglDisplay, EGL10.EGL_NO_SURFACE,
-          EGL10.EGL_NO_SURFACE,
-          EGL10.EGL_NO_CONTEXT);
+                EGL10.EGL_NO_SURFACE,
+                EGL10.EGL_NO_CONTEXT);
         MapLibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
         if (view != null) {
-          view.eglWindowSurfaceFactory.destroySurface(mEgl, mEglDisplay, mEglSurface);
+          if (DEFER_CONTEXT_DESTRUCTION) {
+            final GLSurfaceView.EGLWindowSurfaceFactory factory = view.eglWindowSurfaceFactory;
+            final EGLDisplay display = mEglDisplay;
+            final EGLSurface surface = mEglSurface;
+
+            cleanupExecutor.submit(() -> factory.destroySurface(mEgl, display, surface));
+          } else {
+            view.eglWindowSurfaceFactory.destroySurface(mEgl, mEglDisplay, mEglSurface);
+          }
         }
+
         mEglSurface = null;
       }
     }
 
     public void finish() {
+      if (DEFER_CONTEXT_DESTRUCTION) {
+        MapLibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
+        if (view != null && (mEglContext != null || mEglDisplay != null)) {
+          final GLSurfaceView.EGLContextFactory factory = view.eglContextFactory;
+          final EGLDisplay display = mEglDisplay;
+          final EGLContext context = mEglContext;
+
+          cleanupExecutor.submit(() -> {
+            if (context != null) {
+              factory.destroyContext(mEgl, display, context);
+            }
+
+            if (display != null) {
+              mEgl.eglTerminate(display);
+            }
+          });
+        }
+
+        mEglContext = null;
+        mEglDisplay = null;
+        return;
+      }
+
       if (mEglContext != null) {
         MapLibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
         if (view != null) {
@@ -312,6 +369,7 @@ public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
     EGLConfig mEglConfig;
     EGLContext mEglContext;
 
+    private ExecutorService cleanupExecutor = null;
   }
 
   /**
@@ -556,14 +614,17 @@ public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
             sizeChanged = false;
           }
 
-          MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
-          if (view != null) {
-            view.renderer.onDrawFrame();
-            if (finishDrawingRunnable != null) {
-              finishDrawingRunnable.run();
-              finishDrawingRunnable = null;
+          {
+            MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
+            if (view != null) {
+              view.renderer.onDrawFrame();
+              if (finishDrawingRunnable != null) {
+                finishDrawingRunnable.run();
+                finishDrawingRunnable = null;
+              }
             }
           }
+
           int swapError = eglHelper.swap();
           switch (swapError) {
             case EGL10.EGL_SUCCESS:
