@@ -177,6 +177,12 @@ struct FontFace {
           url(url_),
           ranges(ranges_) {}
 
+    FontFace(const std::string &name_, const std::string &url_, std::vector<std::pair<uint32_t, uint32_t>> &&ranges_)
+        : type(FontPBF),
+          name(name_),
+          url(url_),
+          ranges(std::move(ranges_)) {}
+
     auto valid() const -> bool { return !name.empty() && !url.empty() && !ranges.empty(); }
 };
 
