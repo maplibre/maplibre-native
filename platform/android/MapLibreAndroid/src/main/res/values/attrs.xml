@@ -202,5 +202,8 @@
         <attr name="maplibre_pulsingLocationCircleAlpha" format="float" />
         <attr name="maplibre_pulsingLocationCircleInterpolator" format="string" />
 
+        <!-- Concurrent Camera Animations -->
+        <attr name="maplibre_concurrentCameraAnimationsEnabled" format="boolean" />
+
     </declare-styleable>
 </resources>
