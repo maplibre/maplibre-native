@@ -138,6 +138,9 @@ cc_library(
         "@platforms//os:osx": [
             "//vendor:icu",
         ],
+        "@platforms//os:linux": [
+            "//vendor:sqlite",
+        ],
         "//conditions:default": [],
     }) + select({
         ":metal_renderer": [
