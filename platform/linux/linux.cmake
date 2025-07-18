@@ -172,7 +172,6 @@ target_link_libraries(
         PNG::PNG
         mbgl-vendor-nunicode
         mbgl-vendor-sqlite
-        mbgl-vendor-parsedate
 )
 
 # Bundle system provided libraries
