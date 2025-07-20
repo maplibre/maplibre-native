@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Introduction - MapLibre Native Developer Documentation</title>
+        <title>Building with MSYS2 - MapLibre Native Developer Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -49,35 +49,35 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="favicon.svg">
-        <link rel="shortcut icon" href="favicon.png">
-        <link rel="stylesheet" href="css/variables.css">
-        <link rel="stylesheet" href="css/general.css">
-        <link rel="stylesheet" href="css/chrome.css">
-        <link rel="stylesheet" href="css/print.css" media="print">
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="fonts/fonts.css">
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="highlight-css" href="highlight.css">
-        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
-        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
-        <link rel="stylesheet" href="diff.css">
+        <link rel="stylesheet" href="../../diff.css">
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "";
+            const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex.js";
+            window.path_to_searchindex_js = "../../searchindex.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc.js"></script>
+        <script src="../../toc.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -144,7 +144,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
             </noscript>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -179,7 +179,7 @@
                     <h1 class="menu-title">MapLibre Native Developer Documentation</h1>
 
                     <div class="right-buttons">
-                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
 
@@ -280,18 +280,141 @@
 }
 
 </style>
-<h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p><em><a href="https://github.com/maplibre/maplibre-native">MapLibre Native</a></em> is a community led fork of <em>Mapbox GL Native</em>. It's a C++ library that powers
-vector maps in native applications on multiple platforms by taking stylesheets that conform to the <em><a href="https://maplibre.org/maplibre-style-spec/">MapLibre Style Specification</a></em>, a fork of the
-Mapbox Style Spec. Since it is derived from Mapbox's original work it also uses <em>Mapbox Vector Tile Specification</em> as its choice of vector tile format.</p>
-<p>This documentation is intended for developers of MapLibre Native. If you are interested in <em>using</em> MapLibre Native, check out the <a href="https://github.com/maplibre/maplibre-native?tab=readme-ov-file#maplibre-native">main <code>README.md</code></a> on GitHub.</p>
+<h1 id="building-with-msys2"><a class="header" href="#building-with-msys2">Building with MSYS2</a></h1>
+<h2 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h2>
+<p>You must have <a href="https://www.msys2.org/"><code>MSYS2</code></a> installed. Then launch an  window, which can be <code>UCRT64</code>, <code>CLANG64</code>, <code>CLANGARM64</code> or <code>MINGW64</code>.</p>
+<p>You need to install the required packages:</p>
+<pre><code class="language-sh">pacman -S --needed \
+    git \
+    ${MINGW_PACKAGE_PREFIX}-toolchain \
+    ${MINGW_PACKAGE_PREFIX}-clang \
+    ${MINGW_PACKAGE_PREFIX}-cmake \
+    ${MINGW_PACKAGE_PREFIX}-angleproject \
+    ${MINGW_PACKAGE_PREFIX}-curl-winssl \
+    ${MINGW_PACKAGE_PREFIX}-dlfcn \
+    ${MINGW_PACKAGE_PREFIX}-glfw \
+    ${MINGW_PACKAGE_PREFIX}-icu \
+    ${MINGW_PACKAGE_PREFIX}-libjpeg-turbo \
+    ${MINGW_PACKAGE_PREFIX}-libpng \
+    ${MINGW_PACKAGE_PREFIX}-libwebp \
+    ${MINGW_PACKAGE_PREFIX}-libuv
+</code></pre>
+<p>Then everything is ready to start.</p>
+<h2 id="downloading-sources"><a class="header" href="#downloading-sources">Downloading sources</a></h2>
+<p>Just clone the repository:</p>
+<pre><code class="language-sh">git clone --depth 1 --recurse-submodules -j8 https://github.com/maplibre/maplibre-native.git
+cd maplibre-native
+</code></pre>
+<h2 id="configuring"><a class="header" href="#configuring">Configuring</a></h2>
+<p>Configure the build with the following command, replacing <code>&lt;preset&gt;</code> with <code>opengl</code>, <code>egl</code> or <code>vulkan</code>, which are the rendering engines you can use. If you don't know which one to choose, just use <code>opengl</code>:</p>
+<pre><code class="language-sh">cmake --preset windows-&lt;preset&gt; -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+</code></pre>
+<h2 id="building"><a class="header" href="#building">Building</a></h2>
+<p>Finally, build the project with the following command, again replacing <code>&lt;preset&gt;</code> with the value you choose in the configure step:</p>
+<pre><code class="language-sh">cmake --build build-windows-&lt;preset&gt;
+</code></pre>
+<h2 id="testing"><a class="header" href="#testing">Testing</a></h2>
+<p>If all went well and target <code>mbgl-render</code> or <code>ALL_BUILD</code> was chosen, there should now be a <code>build-windows-&lt;preset&gt;/bin/mbgl-render.exe</code> binary that you can run to generate map tile images. To test that it is working properly, run the following command.</p>
+<pre><code class="language-sh">./build-windows-&lt;preset&gt;/bin/mbgl-render.exe --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --output out.png
+</code></pre>
+<p>This should produce an <code>out.png</code> map tile image with the default MapLibre styling from <a href="https://maplibre.org/maplibre-gl-js/docs/examples/display-a-map/">the MapLibre demo</a>.</p>
+<p><img src="images/sample-maplibre-style-mbgl-render-out.png" alt="Sample image of world from mbgl-render command" /></p>
+<h3 id="using-your-own-styletiles"><a class="header" href="#using-your-own-styletiles">Using your own style/tiles</a></h3>
+<p>You can also use the <code>mbgl-render</code> command to render images from your own style or tile set. To do so, you will need a data source and a style JSON file.</p>
+<p>For the purposes of this exercise, you can use the <code>zurich_switzerland.mbtiles</code> from <a href="https://github.com/acalcutt/tileserver-gl/releases/download/test_data/zurich_switzerland.mbtiles">here</a>, and the following <code>style.json</code> file.</p>
+<pre><code class="language-json">{
+  "version": 8,
+  "name": "Test style",
+  "center": [
+    8.54806714892635,
+    47.37180823552663
+  ],
+  "sources": {
+    "test": {
+      "type": "vector",
+      "url": "mbtiles:///path/to/zurich_switzerland.mbtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "hsl(47, 26%, 88%)"
+      }
+    },
+    {
+      "id": "water",
+      "type": "fill",
+      "source": "test",
+      "source-layer": "water",
+      "filter": [
+        "==",
+        "$type",
+        "Polygon"
+      ],
+      "paint": {
+        "fill-color": "hsl(205, 56%, 73%)"
+      }
+    },
+    {
+      "id": "admin_country",
+      "type": "line",
+      "source": "test",
+      "source-layer": "boundary",
+      "filter": [
+        "all",
+        [
+          "&lt;=",
+          "admin_level",
+          2
+        ],
+        [
+          "==",
+          "$type",
+          "LineString"
+        ]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "hsla(0, 8%, 22%, 0.51)",
+        "line-width": {
+          "base": 1.3,
+          "stops": [
+            [
+              3,
+              0.5
+            ],
+            [
+              22,
+              15
+            ]
+          ]
+        }
+      }
+    }
+  ]
+}
+</code></pre>
+<p>Note that this style is totally inadequate for any real use beyond testing your custom setup. Don't forget to replace the source URL <code>"mbtiles:///path/to/zurich_switzerland.mbtiles"</code> with the actual path to your mbtiles file.</p>
+<p>From your <code>maplibre-native/</code> dir, run the following command.</p>
+<pre><code class="language-sh">./build-windows-&lt;preset&gt;/bin/mbgl-render.exe --style path/to/style.json --output out.png
+</code></pre>
+<p>This should produce an <code>out.png</code> image in your current directory with a barebones image of the world.</p>
+<p><img src="images/sample-barebones-mbgl-render-out.png" alt="Sample image of world from mbgl-render command" /></p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../platforms/windows/build-msvc.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
 
-                            <a rel="next prefetch" href="platforms/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../release-policy.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -301,8 +424,11 @@ Mapbox Style Spec. Since it is derived from Mapbox's original work it also uses 
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../platforms/windows/build-msvc.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
 
-                    <a rel="next prefetch" href="platforms/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../release-policy.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
@@ -317,13 +443,13 @@ Mapbox Style Spec. Since it is derived from Mapbox's original work it also uses 
         </script>
 
 
-        <script src="elasticlunr.min.js"></script>
-        <script src="mark.min.js"></script>
-        <script src="searcher.js"></script>
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
 
-        <script src="clipboard.min.js"></script>
-        <script src="highlight.js"></script>
-        <script src="book.js"></script>
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
 
         <!-- Custom JS scripts -->
 
