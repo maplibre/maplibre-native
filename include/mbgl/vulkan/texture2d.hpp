@@ -40,6 +40,7 @@ using SharedImageAllocation = std::shared_ptr<ImageAllocation>;
 enum class Texture2DUsage {
     ShaderInput,
     Attachment,
+    AttachmentReadable,
     Read,
 };
 
