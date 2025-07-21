@@ -23,7 +23,8 @@ TEST(RasterDEMOptions, ErrorHandling) {
         "encoding": "this isn't a valid encoding"
     })JSON",
         error);
-    ASSERT_FALSE((bool)converted);
+    ASSERT_FALSE(converted);
+    ASSERT_EQ(error.message, "invalid raster-dem encoding type - valid types are 'mapbox' and 'terrarium'");
 }
 
 TEST(RasterDEMOptions, TerrariumEncodingParsed) {

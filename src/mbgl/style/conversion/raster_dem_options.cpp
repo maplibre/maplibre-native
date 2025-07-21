@@ -21,7 +21,7 @@ std::optional<RasterDEMOptions> Converter<RasterDEMOptions>::operator()(const Co
         } else {
             error.message =
                 "invalid raster-dem encoding type - valid types are 'mapbox' "
-                "and 'terrarium' ";
+                "and 'terrarium'";
             return std::nullopt;
         }
     }
