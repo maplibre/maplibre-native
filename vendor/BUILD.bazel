@@ -235,3 +235,12 @@ cc_library(
     strip_include_prefix = "unordered_dense/include/ankerl",
     visibility = ["//visibility:public"],
 )
+
+cc_library(
+    name = "sqlite",
+    srcs = ["sqlite/src/sqlite3.c"],
+    hdrs = ["sqlite/include/sqlite3.h"],
+    include_prefix = "",
+    strip_include_prefix = "sqlite/include",
+    visibility = ["//visibility:public"],
+)
