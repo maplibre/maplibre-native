@@ -8,7 +8,7 @@
 #include <sstream>
 #include <fstream>
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(WIN32)
 #define MBGL_FOPEN_MODE_WBE "wbe"
 #else
 #define MBGL_FOPEN_MODE_WBE "wb"
