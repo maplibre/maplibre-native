@@ -548,6 +548,8 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
                                            nullptr,
                                            barrier);
 
+            imageLayout = barrier.newLayout;
+
             // Copy image to buffer
             const auto region = vk::BufferImageCopy()
                                     .setBufferOffset(0)
