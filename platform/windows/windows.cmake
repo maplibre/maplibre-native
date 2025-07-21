@@ -1,35 +1,55 @@
-if(MLN_WITH_EGL)
-    set(_RENDERER EGL)
-elseif(MLN_WITH_VULKAN)
-    set(_RENDERER Vulkan)
+if(MSVC)
+    if(MLN_WITH_EGL)
+        set(_RENDERER EGL)
+    elseif(MLN_WITH_VULKAN)
+        set(_RENDERER Vulkan)
+    else()
+        set(_RENDERER OpenGL)
+    endif()
+
+    if(NOT MLN_USE_BUILTIN_ICU)
+        set(WITH_ICU -With-ICU)
+    endif()
+
+    execute_process(COMMAND powershell -ExecutionPolicy Bypass -File ${CMAKE_CURRENT_LIST_DIR}/Get-VendorPackages.ps1 -Triplet ${VCPKG_TARGET_TRIPLET} -Renderer ${_RENDERER} ${WITH_ICU})
+    unset(_RENDERER)
+
+    add_compile_definitions(NOMINMAX GHC_WIN_DISABLE_WSTRING_STORAGE_TYPE)
+
+    target_compile_options(
+        mbgl-compiler-options
+        INTERFACE
+            /MP
+    )
+
+    find_package(CURL REQUIRED)
+    find_package(dlfcn-win32 REQUIRED)
+    find_package(ICU OPTIONAL_COMPONENTS i18n uc)
+    find_package(JPEG REQUIRED)
+    find_package(libuv REQUIRED)
+    find_package(PNG REQUIRED)
+    find_package(WebP REQUIRED)
+    find_path(DLFCN_INCLUDE_DIRS dlfcn.h)
+    find_path(LIBUV_INCLUDE_DIRS uv.h)
+elseif(DEFINED ENV{MSYSTEM})
+    set(MSYS 1)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+    set(BUILD_SHARED_LIBS OFF)
+    set(CMAKE_EXE_LINKER_FLAGS "-static")
+
+    add_compile_definitions(WIN32 GHC_WIN_DISABLE_WSTRING_STORAGE_TYPE)
+
+    find_package(ICU OPTIONAL_COMPONENTS i18n uc data)
+    find_package(JPEG REQUIRED)
+    find_package(PNG REQUIRED)
+    find_package(PkgConfig REQUIRED)
+
+    pkg_search_module(WEBP libwebp REQUIRED)
+    pkg_search_module(LIBUV libuv REQUIRED)
+    pkg_search_module(CURL libcurl REQUIRED)
 else()
-    set(_RENDERER OpenGL)
+    message(FATAL_ERROR "Unsupported build system: " ${CMAKE_SYSTEM_NAME})
 endif()
-
-if(NOT MLN_USE_BUILTIN_ICU)
-    set(WITH_ICU -With-ICU)
-endif()
-
-execute_process(COMMAND powershell -ExecutionPolicy Bypass -File ${CMAKE_CURRENT_LIST_DIR}/Get-VendorPackages.ps1 -Triplet ${VCPKG_TARGET_TRIPLET} -Renderer ${_RENDERER} ${WITH_ICU})
-unset(_RENDERER)
-
-add_compile_definitions(NOMINMAX GHC_WIN_DISABLE_WSTRING_STORAGE_TYPE)
-
-target_compile_options(
-    mbgl-compiler-options
-    INTERFACE
-        $<$<CXX_COMPILER_ID:MSVC>:/MP>
-)
-
-find_package(CURL REQUIRED)
-find_package(dlfcn-win32 REQUIRED)
-find_package(ICU OPTIONAL_COMPONENTS i18n uc)
-find_package(JPEG REQUIRED)
-find_package(libuv REQUIRED)
-find_package(PNG REQUIRED)
-find_package(WebP REQUIRED)
-find_path(DLFCN_INCLUDE_DIRS dlfcn.h)
-find_path(LIBUV_INCLUDE_DIRS uv.h)
 
 target_sources(
     mbgl-core
@@ -91,7 +111,25 @@ if(MLN_WITH_OPENGL)
 endif()
 
 if(MLN_WITH_EGL)
-    find_package(unofficial-angle CONFIG REQUIRED)
+    if(MSVC)
+        find_package(unofficial-angle CONFIG REQUIRED)
+
+        target_link_libraries(
+            mbgl-core
+            PRIVATE
+                unofficial::angle::libEGL
+                unofficial::angle::libGLESv2
+        )
+    elseif(MSYS)
+        pkg_search_module(EGL angleproject REQUIRED)
+
+        target_link_libraries(
+            mbgl-core
+            PRIVATE
+                ${EGL_LIBRARIES}
+        )
+    endif()
+
     target_sources(
         mbgl-core
         PRIVATE
@@ -103,13 +141,12 @@ if(MLN_WITH_EGL)
         PRIVATE
             KHRONOS_STATIC
     )
-    target_link_libraries(
-        mbgl-core
-        PRIVATE
-            unofficial::angle::libEGL
-            unofficial::angle::libGLESv2
-    )
 elseif(MLN_WITH_VULKAN)
+    target_include_directories(
+         mbgl-core
+         PRIVATE
+            ${PROJECT_SOURCE_DIR}/vendor/Vulkan-Headers/include
+    )
     target_sources(
         mbgl-core
         PRIVATE
@@ -184,16 +221,34 @@ if(NOT ${ICU_FOUND} OR "${ICU_VERSION}" VERSION_LESS 62.0 OR MLN_USE_BUILTIN_ICU
         PRIVATE
             ${PROJECT_SOURCE_DIR}/vendor/icu/include
     )
+elseif(MSYS)
+    target_compile_definitions(
+        mbgl-core
+        PRIVATE
+            U_STATIC_IMPLEMENTATION
+    )
+endif()
+
+if(MSVC)
+    target_link_libraries(
+        mbgl-core
+        PRIVATE
+            ${CURL_LIBRARIES}
+    		dlfcn-win32::dl
+    )
+elseif(MSYS)
+    target_link_libraries(
+        mbgl-core
+        PRIVATE
+            ${CURL_STATIC_LIBRARIES}
+    )
 endif()
 
 target_link_libraries(
     mbgl-core
     PRIVATE
-        ${CURL_LIBRARIES}
         ${JPEG_LIBRARIES}
-        ${LIBUV_LIBRARIES}
         ${WEBP_LIBRARIES}
-		dlfcn-win32::dl
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::i18n>
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::uc>
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::data>
@@ -210,6 +265,18 @@ if(MLN_WITH_GLFW)
 endif()
 if(MLN_WITH_NODE)
     add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
+elseif(MSVC)
+    target_link_libraries(
+        mbgl-core
+        PRIVATE
+            $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
+    )
+elseif(MSYS)
+    target_link_libraries(
+        mbgl-core
+        PRIVATE
+            ${LIBUV_LIBRARIES}
+    )
 endif()
 
 add_executable(
@@ -243,8 +310,15 @@ target_link_libraries(
     PRIVATE
         mbgl-compiler-options
         $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
-        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
 )
+
+if(MSVC)
+    target_link_libraries(
+        mbgl-test-runner
+        PRIVATE
+            $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
+    )
+endif()
 
 add_executable(
     mbgl-benchmark-runner
@@ -256,8 +330,15 @@ target_link_libraries(
     PRIVATE
         mbgl-compiler-options
         $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-benchmark>
-        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
 )
+
+if(MSVC)
+    target_link_libraries(
+        mbgl-benchmark-runner
+        PRIVATE
+            $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
+    )
+endif()
 
 add_executable(
     mbgl-render-test-runner
@@ -269,14 +350,23 @@ target_link_libraries(
     PRIVATE
         mbgl-compiler-options
         mbgl-render-test
-        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
 )
 
-target_link_libraries(
-    mbgl-expression-test
-    PRIVATE
-        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
-)
+if(MSVC)
+    target_link_libraries(
+        mbgl-render-test-runner
+        PRIVATE
+            $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
+    )
+endif()
+
+if(MSVC)
+    target_link_libraries(
+        mbgl-expression-test
+        PRIVATE
+            $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
+    )
+endif()
 
 # Disable benchmarks in CI as they run in VM environment
 if(NOT DEFINED ENV{CI})

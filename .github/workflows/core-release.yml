@@ -82,10 +82,14 @@ jobs:
           cmake --build --preset linux-${{ matrix.renderer }}-core
 
       - name: Rename artifact
-        run: cp build-linux-${{ matrix.renderer }}/libmbgl-core.a libmaplibre-native-core-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
+        run: |
+          cp build-linux-${{ matrix.renderer }}/libmbgl-core.a libmaplibre-native-core-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
+          cp build-linux-${{ matrix.renderer }}/libmbgl-core-amalgam.a libmaplibre-native-core-amalgam-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
 
       - name: Upload Linux artifact
-        run: gh release upload core-${{ github.sha }} libmaplibre-native-core-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
+        run: |
+          gh release upload core-${{ github.sha }} libmaplibre-native-core-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
+          gh release upload core-${{ github.sha }} libmaplibre-native-core-amalgam-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
         env:
           GH_TOKEN: ${{ github.token }}
 

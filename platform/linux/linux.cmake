@@ -2,8 +2,6 @@ option(MLN_WITH_X11 "Build with X11 Support" ON)
 option(MLN_WITH_WAYLAND "Build with Wayland Support" OFF)
 
 find_package(CURL REQUIRED)
-find_package(ICU OPTIONAL_COMPONENTS i18n)
-find_package(ICU OPTIONAL_COMPONENTS uc)
 find_package(JPEG REQUIRED)
 find_package(PNG REQUIRED)
 find_package(PkgConfig REQUIRED)
@@ -14,6 +12,9 @@ find_package(Threads REQUIRED)
 
 pkg_search_module(WEBP libwebp REQUIRED)
 pkg_search_module(LIBUV libuv REQUIRED)
+pkg_search_module(ICUUC icu-uc)
+pkg_search_module(ICUI18N icu-i18n)
+find_program(ARMERGE NAMES armerge)
 
 if(MLN_WITH_WAYLAND)
     # See https://github.com/maplibre/maplibre-native/pull/2022
@@ -142,7 +143,7 @@ target_include_directories(
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
 
-if(NOT ${ICU_FOUND} OR "${ICU_VERSION}" VERSION_LESS 62.0 OR MLN_USE_BUILTIN_ICU)
+if(NOT ${ICUUC_FOUND} OR "${ICUUC_VERSION}" VERSION_LESS 62.0 OR MLN_USE_BUILTIN_ICU)
     message(STATUS "ICU not found, too old or MLN_USE_BUILTIN_ICU requestd, using builtin.")
 
     set(MLN_USE_BUILTIN_ICU TRUE)
@@ -165,13 +166,27 @@ target_link_libraries(
         ${X11_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
         ${WEBP_LIBRARIES}
-        $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::i18n>
-        $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::uc>
+        $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:${ICUUC_LIBRARIES}>
+        $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:${ICUI18N_LIBRARIES}>
         $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:$<IF:$<BOOL:${MLN_CORE_INCLUDE_DEPS}>,$<TARGET_OBJECTS:mbgl-vendor-icu>,mbgl-vendor-icu>>
         PNG::PNG
         mbgl-vendor-nunicode
         mbgl-vendor-sqlite
 )
+
+# Bundle system provided libraries
+if(MLN_CORE_INCLUDE_DEPS AND NOT MLN_USE_BUILTIN_ICU AND NOT "${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
+    message(STATUS "Found armerge: ${ARMERGE}")
+    add_custom_command(
+        TARGET mbgl-core
+        POST_BUILD
+        COMMAND armerge --keep-symbols '.*' --output libmbgl-core-amalgam.a
+            $<TARGET_FILE:mbgl-core>
+            ${ICUUC_LIBRARY_DIRS}/libicuuc.a
+            ${ICUUC_LIBRARY_DIRS}/libicudata.a
+            ${ICUI18N_LIBRARY_DIRS}/libicui18n.a
+    )
+endif()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
