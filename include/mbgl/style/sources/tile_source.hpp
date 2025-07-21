@@ -25,8 +25,6 @@ public:
 
     void loadDescription(FileSource&) final;
 
-    bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
-
     mapbox::base::WeakPtr<Source> makeWeakPtr() final { return weakFactory.makeWeakPtr(); }
 
 protected:

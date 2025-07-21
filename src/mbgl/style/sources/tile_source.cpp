@@ -96,10 +96,6 @@ void TileSource::setTilesetOverrides(Tileset&) {
     // Default empty implementation, subclasses can override
 }
 
-bool TileSource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) const {
-    return mbgl::underlying_type(Tile::Kind::Raster) == mbgl::underlying_type(info->tileKind);
-}
-
 Mutable<Source::Impl> TileSource::createMutable() const noexcept {
     return staticMutableCast<Source::Impl>(makeMutable<Impl>(impl()));
 }
