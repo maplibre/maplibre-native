@@ -107,13 +107,11 @@ void Context::initFrameResources() {
     for (uint32_t index = 0; index < frameCount; ++index) {
         frameResources.emplace_back(
             commandBuffers[index],
-            device->createSemaphoreUnique({}, nullptr, dispatcher),
             device->createFenceUnique(vk::FenceCreateInfo(vk::FenceCreateFlagBits::eSignaled), nullptr, dispatcher));
 
         const auto& frame = frameResources.back();
 
         backend.setDebugName(frame.commandBuffer.get(), "FrameCommandBuffer_" + std::to_string(index));
-        backend.setDebugName(frame.acquireSurfaceSemaphore.get(), "AcquireSurfaceSemaphore_" + std::to_string(index));
         backend.setDebugName(frame.flightFrameFence.get(), "FrameFence_" + std::to_string(index));
     }
 
@@ -222,6 +220,7 @@ void Context::waitFrame() const {
         mbgl::Log::Error(mbgl::Event::Render, "Wait fence failed");
     }
 }
+
 void Context::beginFrame() {
     MLN_TRACE_FUNC();
 
@@ -283,7 +282,7 @@ void Context::beginFrame() {
             const vk::ResultValue acquireImageResult = device->acquireNextImageKHR(
                 renderableResource.getSwapchain().get(),
                 timeout,
-                frame.acquireSurfaceSemaphore.get(),
+                renderableResource.getAcquireSemaphore(),
                 nullptr,
                 dispatcher);
 
@@ -328,8 +327,8 @@ void Context::submitFrame() {
     auto submitInfo = vk::SubmitInfo().setCommandBuffers(frame.commandBuffer.get());
 
     if (platformSurface) {
-        submitInfo.setSignalSemaphores(renderableResource.getAcquiredSemaphore())
-            .setWaitSemaphores(frame.acquireSurfaceSemaphore.get())
+        submitInfo.setSignalSemaphores(renderableResource.getPresentSemaphore())
+            .setWaitSemaphores(renderableResource.getAcquireSemaphore())
             .setWaitDstStageMask(waitStageMask);
     }
 
@@ -345,7 +344,7 @@ void Context::submitFrame() {
         const auto acquiredImage = renderableResource.getAcquiredImageIndex();
         const auto presentInfo = vk::PresentInfoKHR()
                                      .setSwapchains(renderableResource.getSwapchain().get())
-                                     .setWaitSemaphores(renderableResource.getAcquiredSemaphore())
+                                     .setWaitSemaphores(renderableResource.getPresentSemaphore())
                                      .setImageIndices(acquiredImage);
 
         try {

@@ -6,19 +6,6 @@
 namespace mbgl {
 namespace vulkan {
 
-static bool hasMemoryType(const vk::PhysicalDevice& physicalDevice,
-                          const vk::MemoryPropertyFlagBits& type,
-                          const vk::DispatchLoaderDynamic& dispatch) {
-    const auto& memoryProps = physicalDevice.getMemoryProperties(dispatch);
-    for (uint32_t i = 0; i < memoryProps.memoryTypeCount; ++i) {
-        if (memoryProps.memoryTypes[i].propertyFlags & type) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 SurfaceRenderableResource::~SurfaceRenderableResource() {
     backend.getDevice()->waitIdle(backend.getDispatcher());
 
@@ -166,10 +153,15 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
     colorFormat = swapchainCreateInfo.imageFormat;
     extent = swapchainCreateInfo.imageExtent;
 
-    swapchainSemaphores.reserve(swapchainImages.size());
+    acquireSemaphores.reserve(swapchainImages.size());
+    presentSemaphores.reserve(swapchainImages.size());
     for (uint32_t index = 0; index < swapchainImages.size(); ++index) {
-        swapchainSemaphores.emplace_back(device->createSemaphoreUnique({}, nullptr, dispatcher));
-        backend.setDebugName(swapchainSemaphores.back().get(), "SurfaceSemaphore_" + std::to_string(index));
+        acquireSemaphores.emplace_back(device->createSemaphoreUnique({}, nullptr, dispatcher));
+        presentSemaphores.emplace_back(device->createSemaphoreUnique({}, nullptr, dispatcher));
+
+        const auto indexStr = std::to_string(index);
+        backend.setDebugName(acquireSemaphores.back().get(), "PresentSemaphore_" + indexStr);
+        backend.setDebugName(presentSemaphores.back().get(), "AcquireSemaphore_" + indexStr);
     }
 }
 
@@ -197,10 +189,6 @@ void SurfaceRenderableResource::initDepthStencil() {
 
     depthFormat = *formatIt;
 
-    const bool hasLazyMemory = hasMemoryType(physicalDevice, vk::MemoryPropertyFlagBits::eLazilyAllocated, dispatcher);
-    const auto memoryUsage = hasLazyMemory ? VMA_MEMORY_USAGE_GPU_LAZILY_ALLOCATED
-                                           : VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
-
     const auto imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eDepthStencilAttachment |
                             vk::ImageUsageFlagBits::eTransientAttachment;
 
@@ -217,8 +205,15 @@ void SurfaceRenderableResource::initDepthStencil() {
                                      .setInitialLayout(vk::ImageLayout::eUndefined);
 
     VmaAllocationCreateInfo allocCreateInfo = {};
-    allocCreateInfo.usage = memoryUsage;
+    allocCreateInfo.usage = VMA_MEMORY_USAGE_GPU_LAZILY_ALLOCATED;
     allocCreateInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
+
+    uint32_t lazyMemoryIndex = 0;
+    uint32_t memoryTypeBits = std::numeric_limits<uint32_t>::max();
+    if (vmaFindMemoryTypeIndex(backend.getAllocator(), memoryTypeBits, &allocCreateInfo, &lazyMemoryIndex) !=
+        VK_SUCCESS) {
+        allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+    }
 
     depthAllocation = std::make_unique<ImageAllocation>(backend.getAllocator());
     if (!depthAllocation->create(allocCreateInfo, imageCreateInfo)) {
@@ -254,8 +249,13 @@ const vk::Image SurfaceRenderableResource::getAcquiredImage() const {
     return colorAllocations[acquiredImageIndex]->image;
 }
 
-const vk::Semaphore& SurfaceRenderableResource::getAcquiredSemaphore() const {
-    return swapchainSemaphores[acquiredImageIndex].get();
+const vk::Semaphore& SurfaceRenderableResource::getAcquireSemaphore() const {
+    const auto& context = static_cast<const Context&>(backend.getContext());
+    return acquireSemaphores[context.getCurrentFrameResourceIndex()].get();
+}
+
+const vk::Semaphore& SurfaceRenderableResource::getPresentSemaphore() const {
+    return presentSemaphores[acquiredImageIndex].get();
 }
 
 bool SurfaceRenderableResource::hasSurfaceTransformSupport() const {
@@ -409,7 +409,8 @@ void SurfaceRenderableResource::recreateSwapchain() {
     renderPass.reset();
     swapchainImageViews.clear();
     swapchainImages.clear();
-    swapchainSemaphores.clear();
+    acquireSemaphores.clear();
+    presentSemaphores.clear();
 
     init(extent.width, extent.height);
 }
