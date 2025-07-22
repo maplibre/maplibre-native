@@ -171,7 +171,7 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
     transitionStart = animation->start;
     transitionDuration = animation->duration;
 
-    if (startZoom != zoom) {
+    if (!properties.zoom.set || startZoom != zoom) {
         if (properties.zoom.set && properties.zoom.current != properties.zoom.target && properties.zoom.animation) {
             animationFinishFrame(*properties.zoom.animation);
         }
@@ -186,7 +186,7 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
                 },
         };
     }
-    if (startPoint != endPoint) {
+    if (!properties.latlng.set || startPoint != endPoint) {
         if (properties.latlng.set && properties.latlng.current != properties.latlng.target &&
             properties.latlng.animation) {
             animationFinishFrame(*properties.latlng.animation);
@@ -203,7 +203,7 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
                 },
         };
     }
-    if (bearing != startBearing) {
+    if (!properties.bearing.set || bearing != startBearing) {
         if (properties.bearing.set && properties.bearing.current != properties.bearing.target &&
             properties.bearing.animation) {
             animationFinishFrame(*properties.bearing.animation);
@@ -215,7 +215,7 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
             .set = true,
         };
     }
-    if (padding != startEdgeInsets) {
+    if (!properties.padding.set || padding != startEdgeInsets) {
         if (properties.padding.set && properties.padding.current != properties.padding.target &&
             properties.padding.animation) {
             animationFinishFrame(*properties.padding.animation);
@@ -227,7 +227,7 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
             .set = true,
         };
     }
-    if (pitch != startPitch) {
+    if (!properties.pitch.set || pitch != startPitch) {
         if (properties.pitch.set && properties.pitch.current != properties.pitch.target && properties.pitch.animation) {
             animationFinishFrame(*properties.pitch.animation);
         }
@@ -383,7 +383,7 @@ void Transform::flyTo(const CameraOptions& inputCamera,
     transitionStart = animation->start;
     transitionDuration = animation->duration;
 
-    if (startZoom != zoom) {
+    if (!properties.zoom.set || startZoom != zoom) {
         if (properties.zoom.set && properties.zoom.current != properties.zoom.target && properties.zoom.animation) {
             animationFinishFrame(*properties.zoom.animation);
         }
@@ -407,7 +407,7 @@ void Transform::flyTo(const CameraOptions& inputCamera,
                 },
         };
     }
-    if (startPoint != endPoint) {
+    if (!properties.latlng.set || startPoint != endPoint) {
         if (properties.latlng.set && properties.latlng.current != properties.latlng.target &&
             properties.latlng.animation) {
             animationFinishFrame(*properties.latlng.animation);
@@ -429,7 +429,7 @@ void Transform::flyTo(const CameraOptions& inputCamera,
                 },
         };
     }
-    if (bearing != startBearing) {
+    if (!properties.bearing.set || bearing != startBearing) {
         if (properties.bearing.set && properties.bearing.current != properties.bearing.target &&
             properties.bearing.animation) {
             animationFinishFrame(*properties.bearing.animation);
@@ -441,14 +441,14 @@ void Transform::flyTo(const CameraOptions& inputCamera,
             .set = true,
         };
     }
-    if (padding != startEdgeInsets) {
+    if (!properties.padding.set || padding != startEdgeInsets) {
         if (properties.padding.set && properties.padding.current != properties.padding.target &&
             properties.padding.animation) {
             animationFinishFrame(*properties.padding.animation);
         }
         properties.padding = {.animation = animation, .current = startEdgeInsets, .target = padding, .set = true};
     }
-    if (pitch != startPitch) {
+    if (!properties.pitch.set || pitch != startPitch) {
         if (properties.pitch.set && properties.pitch.current != properties.pitch.target && properties.pitch.animation) {
             animationFinishFrame(*properties.pitch.animation);
         }
