@@ -1206,6 +1206,122 @@ TEST_P(TransfromParametrized, FreeCameraOptionsStateSynchronization) {
     EXPECT_THAT(forward, Vec3NearEquals1E5(vec3{{0, -0.866025, -0.5}}));
 }
 
+TEST(Transform, ConcurrentAnimation) {
+    TransformActive transform;
+    transform.resize({1, 1});
+
+    const LatLng defaultLatLng{0, 0};
+    CameraOptions defaultCameraOptions =
+        CameraOptions().withCenter(defaultLatLng).withZoom(0).withPitch(0).withBearing(0);
+    transform.jumpTo(defaultCameraOptions);
+    ASSERT_DOUBLE_EQ(transform.getLatLng().latitude(), 0);
+    ASSERT_DOUBLE_EQ(transform.getLatLng().longitude(), 0);
+    ASSERT_DOUBLE_EQ(0, transform.getZoom());
+    ASSERT_DOUBLE_EQ(0, transform.getPitch());
+    ASSERT_DOUBLE_EQ(0, transform.getBearing());
+
+    const LatLng latLng{45, 135};
+    const double zoom = 10;
+    CameraOptions zoomLatLngCameraOptions = CameraOptions().withCenter(latLng).withZoom(zoom);
+    AnimationOptions zoomLatLngOptions(Seconds(1));
+    int zoomLatLngFrameCallbackCount = 0;
+    zoomLatLngOptions.transitionFrameFn = [&](double t) {
+        zoomLatLngFrameCallbackCount++;
+
+        ASSERT_TRUE(t >= 0 && t <= 1);
+        ASSERT_GE(latLng.latitude(), transform.getLatLng().latitude());
+        ASSERT_GE(latLng.longitude(), transform.getLatLng().longitude());
+        ASSERT_GE(zoom, transform.getZoom());
+    };
+    int zoomLatLngFinishCallbackCount = 0;
+    zoomLatLngOptions.transitionFinishFn = [&]() {
+        zoomLatLngFinishCallbackCount++;
+
+        ASSERT_DOUBLE_EQ(latLng.latitude(), transform.getLatLng().latitude());
+        ASSERT_DOUBLE_EQ(latLng.longitude(), transform.getLatLng().longitude());
+        ASSERT_DOUBLE_EQ(zoom, transform.getZoom());
+    };
+    transform.easeTo(zoomLatLngCameraOptions, zoomLatLngOptions);
+
+    ASSERT_TRUE(transform.inTransition());
+
+    TimePoint transitionStart = transform.getTransitionStart();
+
+    const double pitch = 60;
+    const double bearing = 45;
+    CameraOptions pitchBearingCameraOptions = CameraOptions().withPitch(pitch).withBearing(bearing);
+    AnimationOptions pitchBearingOptions(Seconds(2));
+    int pitchBearingFrameCallbackCount = 0;
+    pitchBearingOptions.transitionFrameFn = [&](double t) {
+        pitchBearingFrameCallbackCount++;
+
+        ASSERT_TRUE(t >= 0 && t <= 1);
+        ASSERT_GE(util::deg2rad(pitch), transform.getPitch());
+        ASSERT_LE(-util::deg2rad(bearing), transform.getBearing());
+    };
+    int pitchBearingFinishCallbackCount = 0;
+    pitchBearingOptions.transitionFinishFn = [&]() {
+        pitchBearingFinishCallbackCount++;
+
+        ASSERT_DOUBLE_EQ(util::deg2rad(pitch), transform.getPitch());
+        ASSERT_DOUBLE_EQ(-util::deg2rad(bearing), transform.getBearing());
+    };
+    transform.easeTo(pitchBearingCameraOptions, pitchBearingOptions);
+
+    ASSERT_TRUE(transform.inTransition());
+    transform.updateTransitions(transitionStart + Milliseconds(500));
+    transform.updateTransitions(transitionStart + Milliseconds(900));
+    ASSERT_TRUE(transform.inTransition()); // Second Transition is still running
+    transform.updateTransitions(transform.getTransitionStart() + Seconds(2));
+    ASSERT_FALSE(transform.inTransition());
+
+    ASSERT_EQ(zoomLatLngFrameCallbackCount, 2);
+    ASSERT_EQ(zoomLatLngFinishCallbackCount, 1);
+    ASSERT_EQ(pitchBearingFrameCallbackCount, 2);
+    ASSERT_EQ(pitchBearingFinishCallbackCount, 1);
+
+    // Test cancelTransitions with concurrent animations
+    const LatLng latLng2{0, 0};
+    const double zoom2 = 0;
+    CameraOptions zoomLatLngCameraOptions2 = CameraOptions().withCenter(latLng2).withZoom(zoom2);
+    AnimationOptions zoomLatLngOptions2(Seconds(1));
+    transform.easeTo(zoomLatLngCameraOptions2, zoomLatLngOptions2);
+
+    const double pitch2 = 0;
+    const double bearing2 = 0;
+    CameraOptions pitchBearingCameraOptions2 = CameraOptions().withPitch(pitch2).withBearing(bearing2);
+    AnimationOptions pitchBearingOptions2(Seconds(2));
+    transform.easeTo(pitchBearingCameraOptions2, pitchBearingOptions2);
+
+    ASSERT_TRUE(transform.inTransition());
+    transform.cancelTransitions();
+    ASSERT_FALSE(transform.inTransition());
+
+    // Reset State
+    transform.jumpTo(defaultCameraOptions);
+
+    zoomLatLngFrameCallbackCount = 0;
+    zoomLatLngFinishCallbackCount = 0;
+    transform.easeTo(zoomLatLngCameraOptions, zoomLatLngOptions);
+
+    transitionStart = transform.getTransitionStart();
+
+    pitchBearingFrameCallbackCount = 0;
+    pitchBearingFinishCallbackCount = 0;
+    pitchBearingOptions.duration = Seconds(0);
+    transform.easeTo(pitchBearingCameraOptions, pitchBearingOptions);
+
+    ASSERT_TRUE(transform.inTransition());
+    transform.updateTransitions(transitionStart + Milliseconds(500));
+    transform.updateTransitions(transitionStart + Seconds(1));
+    ASSERT_FALSE(transform.inTransition());
+
+    ASSERT_EQ(zoomLatLngFrameCallbackCount, 2);
+    ASSERT_EQ(zoomLatLngFinishCallbackCount, 1);
+    ASSERT_EQ(pitchBearingFrameCallbackCount, 0);
+    ASSERT_EQ(pitchBearingFinishCallbackCount, 1);
+}
+
 INSTANTIATE_TEST_SUITE_P(Transform,
                          TransfromParametrized,
                          ::testing::Values(std::make_shared<Transform>(TransformObserver::nullObserver()),
