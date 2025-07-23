@@ -145,6 +145,7 @@ cc_library(
         ],
         "@platforms//os:linux": [
             "default-collator",
+            "//vendor:sqlite",
         ],
         "@platforms//os:osx": [
             ":default-collator",
