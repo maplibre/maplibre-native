@@ -1,5 +1,3 @@
-#pragma once
-
 #include <mbgl/util/logging.hpp>
 
 #include <cassert>

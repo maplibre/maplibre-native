@@ -159,7 +159,8 @@ void Texture2D::uploadSubRegion(const void* pixelData,
 
     if (!imageAllocation) return;
 
-    const auto& allocator = context.getBackend().getAllocator();
+    const auto& backend = context.getBackend();
+    const auto& allocator = backend.getAllocator();
 
     const auto bufferInfo = vk::BufferCreateInfo()
                                 .setSize(static_cast<vk::DeviceSize>(size_.width) * size_.height * getPixelStride())
@@ -192,7 +193,8 @@ void Texture2D::uploadSubRegion(const void* pixelData,
                                 .setImageOffset(vk::Offset3D(xOffset, yOffset))
                                 .setImageExtent(vk::Extent3D(size_.width, size_.height, 1));
 
-        buffer->copyBufferToImage(bufferAllocation->buffer, imageAllocation->image, imageLayout, region);
+        buffer->copyBufferToImage(
+            bufferAllocation->buffer, imageAllocation->image, imageLayout, region, backend.getDispatcher());
 
         if (samplerState.mipmapped && textureUsage == Texture2DUsage::ShaderInput) {
             generateMips(buffer);
@@ -346,7 +348,8 @@ void Texture2D::createTexture() {
                                        .setSubresourceRange(
                                            {vk::ImageAspectFlagBits::eColor, 0, imageCreateInfo.mipLevels, 0, 1});
 
-        imageAllocation->imageView = backend.getDevice()->createImageViewUnique(imageViewCreateInfo);
+        imageAllocation->imageView = backend.getDevice()->createImageViewUnique(
+            imageViewCreateInfo, nullptr, backend.getDispatcher());
     }
 
     // if the image is used as an attachment
@@ -368,6 +371,8 @@ void Texture2D::createTexture() {
 void Texture2D::createSampler() {
     destroySampler();
 
+    const auto& backend = context.getBackend();
+
     const auto filter = vulkanFilter(samplerState.filter);
     const auto addressModeU = vulkanAddressMode(samplerState.wrapU);
     const auto addressModeV = vulkanAddressMode(samplerState.wrapV);
@@ -385,11 +390,11 @@ void Texture2D::createSampler() {
         samplerCreateInfo.setMipmapMode(vk::SamplerMipmapMode::eLinear);
     }
 
-    if (samplerState.maxAnisotropy != 1 && context.getBackend().getDeviceFeatures().samplerAnisotropy) {
+    if (samplerState.maxAnisotropy != 1 && backend.getDeviceFeatures().samplerAnisotropy) {
         samplerCreateInfo.setAnisotropyEnable(true).setMaxAnisotropy(samplerState.maxAnisotropy);
     }
 
-    sampler = context.getBackend().getDevice()->createSampler(samplerCreateInfo);
+    sampler = backend.getDevice()->createSampler(samplerCreateInfo, nullptr, backend.getDispatcher());
 
     samplerStateDirty = false;
     lastModified = util::MonotonicTimer::now();
@@ -409,7 +414,7 @@ void Texture2D::destroyTexture() {
 void Texture2D::destroySampler() {
     if (sampler) {
         context.enqueueDeletion([sampler_ = std::move(sampler)](auto& context_) mutable {
-            context_.getBackend().getDevice()->destroySampler(sampler_);
+            context_.getBackend().getDevice()->destroySampler(sampler_, nullptr, context_.getBackend().getDispatcher());
         });
 
         sampler = nullptr;
@@ -427,8 +432,13 @@ void Texture2D::transitionToTransferLayout(const vk::UniqueCommandBuffer& buffer
                              .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                              .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, getMipLevels(), 0, 1});
 
-    buffer->pipelineBarrier(
-        vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eTransfer, {}, nullptr, nullptr, barrier);
+    buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
+                            vk::PipelineStageFlagBits::eTransfer,
+                            {},
+                            nullptr,
+                            nullptr,
+                            barrier,
+                            context.getBackend().getDispatcher());
 
     imageLayout = barrier.newLayout;
 }
@@ -449,7 +459,8 @@ void Texture2D::transitionToShaderReadLayout(const vk::UniqueCommandBuffer& buff
                             {},
                             nullptr,
                             nullptr,
-                            barrier);
+                            barrier,
+                            context.getBackend().getDispatcher());
 
     imageLayout = barrier.newLayout;
 }
@@ -465,8 +476,13 @@ void Texture2D::transitionToGeneralLayout(const vk::UniqueCommandBuffer& buffer)
                              .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                              .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
 
-    buffer->pipelineBarrier(
-        vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eTransfer, {}, nullptr, nullptr, barrier);
+    buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
+                            vk::PipelineStageFlagBits::eTransfer,
+                            {},
+                            nullptr,
+                            nullptr,
+                            barrier,
+                            context.getBackend().getDispatcher());
 
     imageLayout = barrier.newLayout;
 }
@@ -491,8 +507,12 @@ void Texture2D::copyImage(vk::Image image) {
                                   .setExtent({size.width, size.height, 1});
 
         transitionToTransferLayout(commandBuffer);
-        commandBuffer->copyImage(
-            image, vk::ImageLayout::eTransferSrcOptimal, imageAllocation->image, imageLayout, copyInfo);
+        commandBuffer->copyImage(image,
+                                 vk::ImageLayout::eTransferSrcOptimal,
+                                 imageAllocation->image,
+                                 imageLayout,
+                                 copyInfo,
+                                 context.getBackend().getDispatcher());
         transitionToGeneralLayout(commandBuffer);
     });
 }
@@ -505,7 +525,8 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
     // check for offset/padding
     const auto& device = context.getBackend().getDevice();
     const auto& layout = device->getImageSubresourceLayout(imageAllocation->image,
-                                                           vk::ImageSubresource(vk::ImageAspectFlagBits::eColor, 0, 0));
+                                                           vk::ImageSubresource(vk::ImageAspectFlagBits::eColor, 0, 0),
+                                                           context.getBackend().getDispatcher());
 
     imageData->resize(size);
     const auto& imageSize = getDataSize();
@@ -544,6 +565,8 @@ void Texture2D::generateMips(const vk::UniqueCommandBuffer& buffer) {
         return;
     }
 
+    const auto& dispatcher = context.getBackend().getDispatcher();
+
     int32_t mipWidth = size.width;
     int32_t mipHeight = size.height;
 
@@ -562,8 +585,13 @@ void Texture2D::generateMips(const vk::UniqueCommandBuffer& buffer) {
             .setSrcAccessMask(vk::AccessFlagBits::eTransferWrite)
             .setDstAccessMask(vk::AccessFlagBits::eTransferRead);
 
-        buffer->pipelineBarrier(
-            vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eTransfer, {}, nullptr, nullptr, barrier);
+        buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
+                                vk::PipelineStageFlagBits::eTransfer,
+                                {},
+                                nullptr,
+                                nullptr,
+                                barrier,
+                                dispatcher);
 
         const auto blit = vk::ImageBlit()
                               .setSrcOffsets({vk::Offset3D{0, 0, 0}, {mipWidth, mipHeight, 1}})
@@ -576,7 +604,8 @@ void Texture2D::generateMips(const vk::UniqueCommandBuffer& buffer) {
                           imageAllocation->image,
                           barrier.oldLayout,
                           blit,
-                          vk::Filter::eLinear);
+                          vk::Filter::eLinear,
+                          dispatcher);
 
         barrier.setOldLayout(vk::ImageLayout::eTransferSrcOptimal)
             .setNewLayout(vk::ImageLayout::eShaderReadOnlyOptimal)
@@ -588,7 +617,8 @@ void Texture2D::generateMips(const vk::UniqueCommandBuffer& buffer) {
                                 {},
                                 nullptr,
                                 nullptr,
-                                barrier);
+                                barrier,
+                                dispatcher);
 
         mipWidth = std::max(1, mipWidth / 2);
         mipHeight = std::max(1, mipHeight / 2);
@@ -607,7 +637,8 @@ void Texture2D::generateMips(const vk::UniqueCommandBuffer& buffer) {
                             {},
                             nullptr,
                             nullptr,
-                            barrier);
+                            barrier,
+                            dispatcher);
 
     imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 }
