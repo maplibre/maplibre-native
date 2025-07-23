@@ -288,12 +288,6 @@ void Texture2D::createTexture() {
 
         case Texture2DUsage::Attachment:
             imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eColorAttachment |
-                         vk::ImageUsageFlagBits::eSampled;
-            imageTiling = vk::ImageTiling::eOptimal;
-            break;
-
-        case Texture2DUsage::AttachmentReadable:
-            imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eColorAttachment |
                          vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferSrc;
             imageTiling = vk::ImageTiling::eOptimal;
             break;
@@ -360,7 +354,7 @@ void Texture2D::createTexture() {
 
     // if the image is used as an attachment
     // it's layout is managed by the render pass
-    if (textureUsage == Texture2DUsage::Attachment || textureUsage == Texture2DUsage::AttachmentReadable) {
+    if (textureUsage == Texture2DUsage::Attachment) {
         imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
     } else {
         imageLayout = imageCreateInfo.initialLayout;
@@ -530,15 +524,13 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
 
     // check for offset/padding
     const auto& device = context.getBackend().getDevice();
-    const auto& layout = device->getImageSubresourceLayout(imageAllocation->image,
-                                                           vk::ImageSubresource(vk::ImageAspectFlagBits::eColor, 0, 0),
-                                                           context.getBackend().getDispatcher());
+    const auto& dispatcher = context.getBackend().getDispatcher();
 
     imageData->resize(size);
     const auto& imageSize = getDataSize();
 
     // Check if this is an attachment texture that needs staging buffer
-    if (textureUsage == Texture2DUsage::Attachment || textureUsage == Texture2DUsage::AttachmentReadable) {
+    if (textureUsage == Texture2DUsage::Attachment) {
         // For optimal tiling, we need to copy to a staging buffer first
         const auto& allocator = context.getBackend().getAllocator();
 
@@ -578,7 +570,8 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
                                            {},
                                            nullptr,
                                            nullptr,
-                                           barrier);
+                                           barrier,
+                                           dispatcher);
 
             imageLayout = barrier.newLayout;
 
@@ -593,21 +586,19 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
                                     .setImageExtent({size.width, size.height, 1});
 
             commandBuffer->copyImageToBuffer(
-                imageAllocation->image, vk::ImageLayout::eTransferSrcOptimal, bufferAllocation->buffer, region);
+                imageAllocation->image, vk::ImageLayout::eTransferSrcOptimal, bufferAllocation->buffer, region, dispatcher);
         });
 
         // Map staging buffer and copy to image data
-        void* mappedData;
-        vmaMapMemory(allocator, bufferAllocation->allocation, &mappedData);
-        memcpy(imageData->data.get(), mappedData, imageSize);
+        vmaMapMemory(allocator, bufferAllocation->allocation, &bufferAllocation->mappedBuffer);
+        memcpy(imageData->data.get(), bufferAllocation->mappedBuffer, imageSize);
         vmaUnmapMemory(allocator, bufferAllocation->allocation);
 
         return imageData;
-    } else {
+    } else if (textureUsage == Texture2DUsage::Read) {
         // For linear tiling (Read usage), use direct memory mapping
-        const auto& device = context.getBackend().getDevice();
         const auto& layout = device->getImageSubresourceLayout(
-            imageAllocation->image, vk::ImageSubresource(vk::ImageAspectFlagBits::eColor, 0, 0));
+            imageAllocation->image, vk::ImageSubresource(vk::ImageAspectFlagBits::eColor, 0, 0), dispatcher);
 
         void* mappedData_ = nullptr;
         vmaMapMemory(context.getBackend().getAllocator(), imageAllocation->allocation, &mappedData_);
@@ -625,6 +616,10 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
 
         vmaUnmapMemory(context.getBackend().getAllocator(), imageAllocation->allocation);
 
+        return imageData;
+    } else {
+        // not readable
+        assert(false);
         return imageData;
     }
 }
