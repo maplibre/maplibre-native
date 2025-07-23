@@ -46,8 +46,12 @@ public:
     const vk::UniqueFramebuffer& getFramebuffer() const override { return framebuffer; };
 
     PremultipliedImage readStillImage() {
-        assert(false);
-        return {};
+        if (!colorTexture) {
+            return {};
+        }
+
+        const auto& image = static_cast<Texture2D&>(*colorTexture).readImage();
+        return image ? image->clone() : PremultipliedImage();
     }
 
     gfx::Texture2DPtr& getTexture() {
