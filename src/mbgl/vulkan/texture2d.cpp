@@ -585,8 +585,11 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
                                     .setImageOffset({0, 0, 0})
                                     .setImageExtent({size.width, size.height, 1});
 
-            commandBuffer->copyImageToBuffer(
-                imageAllocation->image, vk::ImageLayout::eTransferSrcOptimal, bufferAllocation->buffer, region, dispatcher);
+            commandBuffer->copyImageToBuffer(imageAllocation->image,
+                                             vk::ImageLayout::eTransferSrcOptimal,
+                                             bufferAllocation->buffer,
+                                             region,
+                                             dispatcher);
         });
 
         // Map staging buffer and copy to image data
