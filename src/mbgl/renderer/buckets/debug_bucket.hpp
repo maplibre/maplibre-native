@@ -22,7 +22,8 @@ public:
                 bool complete,
                 std::optional<Timestamp> modified,
                 std::optional<Timestamp> expires,
-                MapDebugOptions);
+                MapDebugOptions,
+                std::string sourceName);
 
     void upload(gfx::UploadPass&);
 
@@ -31,6 +32,7 @@ public:
     const std::optional<Timestamp> modified;
     const std::optional<Timestamp> expires;
     const MapDebugOptions debugMode;
+    const std::string sourceName;
 
     gfx::VertexVector<FillLayoutVertex> vertices;
     gfx::IndexVector<gfx::Lines> indices;

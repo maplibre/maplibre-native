@@ -120,8 +120,13 @@ void RenderTile::prepare(const SourcePrepareParameters& parameters) {
         (!debugBucket || debugBucket->renderable != tile.isRenderable() || debugBucket->complete != tile.isComplete() ||
          !(debugBucket->modified == tile.modified) || !(debugBucket->expires == tile.expires) ||
          debugBucket->debugMode != parameters.debugOptions)) {
-        debugBucket = std::make_unique<DebugBucket>(
-            tile.id, tile.isRenderable(), tile.isComplete(), tile.modified, tile.expires, parameters.debugOptions);
+        debugBucket = std::make_unique<DebugBucket>(tile.id,
+                                                    tile.isRenderable(),
+                                                    tile.isComplete(),
+                                                    tile.modified,
+                                                    tile.expires,
+                                                    parameters.debugOptions,
+                                                    parameters.sourceName);
     } else if (parameters.debugOptions == MapDebugOptions::NoDebug) {
         debugBucket.reset();
     }

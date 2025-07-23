@@ -43,6 +43,7 @@ public:
     const TransformParameters& transform;
     const MapDebugOptions& debugOptions;
     const ImageManager& imageManager;
+    const std::string sourceName;
 };
 
 using RenderTiles = std::shared_ptr<const std::vector<std::reference_wrapper<const RenderTile>>>;

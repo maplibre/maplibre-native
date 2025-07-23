@@ -8,6 +8,7 @@ namespace mbgl {
 template <typename Enum>
 constexpr Enum operator|(Enum a, Enum b) {
     static_assert(std::is_enum_v<Enum>, "Enum must be an enum type");
+    // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
     return Enum(mbgl::underlying_type(a) | mbgl::underlying_type(b));
 }
 
