@@ -11,6 +11,113 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#ifdef USE_SHARED_VK_CONTEXT
+
+// An example of an external vkInstance/vkDevice provider.
+// It uses the first available device and queue
+class VkContext {
+public:
+    VkContext() = default;
+    ~VkContext() {
+        device.reset();
+        instance.reset();
+    }
+
+    static VkContext& shared() {
+        static std::unique_ptr<VkContext> context;
+        if (!context) {
+            context = std::make_unique<VkContext>();
+        }
+
+        return *context;
+    }
+
+    vk::Instance getInstance() {
+        if (instance) {
+            return instance.get();
+        }
+
+        dispatcher.init(dynamicLoader);
+
+#ifdef __APPLE__
+        vk::InstanceCreateFlags instanceFlags = vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
+#else
+        vk::InstanceCreateFlags instanceFlags = {};
+#endif
+
+        const std::vector<const char*> layers = {"VK_LAYER_KHRONOS_validation"};
+        std::vector<const char*> extensions = {
+            VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
+#ifdef __APPLE__
+            "VK_KHR_portability_enumeration",
+#endif
+        };
+
+        uint32_t glfwExtensionCount = 0;
+        const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+        std::copy(glfwExtensions, glfwExtensions + glfwExtensionCount, std::back_inserter(extensions));
+
+        vk::ApplicationInfo appInfo("maplibre-native", 1, "maplibre-native", 1, VK_API_VERSION_1_0);
+        const auto createInfo = vk::InstanceCreateInfo(instanceFlags)
+                                    .setPApplicationInfo(&appInfo)
+                                    .setPEnabledExtensionNames(extensions)
+                                    .setPEnabledLayerNames(layers);
+
+        instance = vk::createInstanceUnique(createInfo, nullptr, dispatcher);
+        dispatcher.init(instance.get());
+
+        return instance.get();
+    }
+
+    vk::PhysicalDevice getPhysicalDevice() {
+        if (!physicalDevice) {
+            physicalDevice = instance->enumeratePhysicalDevices(dispatcher)[0];
+        }
+
+        return physicalDevice;
+    }
+
+    vk::Device getDevice() {
+        if (device) {
+            return device.get();
+        }
+
+        const std::vector<const char*> layers = {"VK_LAYER_KHRONOS_validation"};
+        const std::vector<const char*> extensions = {
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+#ifdef __APPLE__
+            "VK_KHR_portability_subset",
+#endif
+        };
+
+        float queuePriority = 1.0f;
+        vk::DeviceQueueCreateInfo queueCreateInfo(vk::DeviceQueueCreateFlags(), getQueueIndex(), 1, &queuePriority);
+
+        auto createInfo = vk::DeviceCreateInfo()
+                              .setQueueCreateInfos(queueCreateInfo)
+                              .setPEnabledExtensionNames(extensions)
+                              .setPEnabledLayerNames(layers);
+
+        device = physicalDevice.createDeviceUnique(createInfo, nullptr, dispatcher);
+        dispatcher.init(device.get());
+
+        return device.get();
+    }
+
+    uint32_t getQueueIndex() { return graphicsQueueIndex; }
+
+private:
+    vk::DynamicLoader dynamicLoader;
+    vk::DispatchLoaderDynamic dispatcher;
+
+    vk::UniqueInstance instance;
+    vk::PhysicalDevice physicalDevice;
+    vk::UniqueDevice device;
+    uint32_t graphicsQueueIndex = 0;
+};
+
+#endif
+
 class GLFWVulkanRenderableResource final : public mbgl::vulkan::SurfaceRenderableResource {
 public:
     explicit GLFWVulkanRenderableResource(GLFWVulkanBackend& backend_, bool capFrameRate)
@@ -74,6 +181,39 @@ std::vector<const char*> GLFWVulkanBackend::getInstanceExtensions() {
     std::copy(glfwExtensions, glfwExtensions + glfwExtensionCount, std::back_inserter(extensions));
     return extensions;
 }
+
+#ifdef USE_SHARED_VK_CONTEXT
+
+void GLFWVulkanBackend::initInstance() {
+    // tell the backend to keep the objects alive
+    usingSharedContext = true;
+
+    // this method is required to set `instance` to a valid vkInstance
+    instance = vk::UniqueInstance(VkContext::shared().getInstance(),
+                                  vk::ObjectDestroy<vk::NoParent, vk::DispatchLoaderDynamic>(nullptr, dispatcher));
+
+    // debug builds also require:
+    // - enabling either `VK_EXT_debug_utils` (and updating `debugUtilsEnabled`) or `VK_EXT_debug_report` extension
+    // - or passing the values returned by `getDebugExtensions()` as enabled extensions during instance creation
+    debugUtilsEnabled = true;
+}
+
+void GLFWVulkanBackend::initDevice() {
+    // this method is required to populate:
+    // `physicalDevice`
+    // `device`
+    // `graphicsQueueIndex`/`presentQueueIndex`
+    // `physicalDeviceFeatures` - enabled features (optional)
+
+    physicalDevice = VkContext::shared().getPhysicalDevice();
+    device = vk::UniqueDevice(VkContext::shared().getDevice(),
+                              vk::ObjectDestroy<vk::NoParent, vk::DispatchLoaderDynamic>(nullptr, dispatcher));
+
+    graphicsQueueIndex = presentQueueIndex = VkContext::shared().getQueueIndex();
+    physicalDeviceFeatures = vk::PhysicalDeviceFeatures();
+}
+
+#endif
 
 namespace mbgl {
 namespace gfx {
