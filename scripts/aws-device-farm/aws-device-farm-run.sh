@@ -86,7 +86,7 @@ for attempt in $(seq 1 $max_retries); do
     --app-arn "$app_arn" \
     --device-pool-arn "$AWS_DEVICE_FARM_DEVICE_POOL_ARN" \
     --test type=$testType,testPackageArn=$test_package_arn${testFilter:+,filter=$testFilter}${testSpecArn:+,testSpecArn=$testSpecArn} \
-    --execution-configuration videoCapture=false \
+    --execution-configuration '{"videoCapture": false}' \
     --output text --query run.arn)
 
   echo "ARN: $arn" >&2
