@@ -374,10 +374,11 @@ void GeometryTile::onError(std::exception_ptr err, const uint64_t resultCorrelat
     observer->onTileError(*this, std::move(err));
 }
 
-void GeometryTile::onGlyphsAvailable(GlyphMap glyphMap, HBShapeRequests requests) {
+void GeometryTile::onGlyphsAvailable(GlyphMap glyphMap, [[maybe_unused]] HBShapeRequests requests) {
     MLN_TRACE_FUNC();
 
     HBShapeResults results;
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     for (auto& fontStackIT : requests) {
         auto fontStack = fontStackIT.first;
         auto& fontTypes = fontStackIT.second;
@@ -413,7 +414,7 @@ void GeometryTile::onGlyphsAvailable(GlyphMap glyphMap, HBShapeRequests requests
             }
         }
     }
-
+#endif // MLN_TEXT_SHAPING_HARFBUZZ
     worker.self().invoke(&GeometryTileWorker::onGlyphsAvailable, std::move(glyphMap), std::move(results));
 }
 

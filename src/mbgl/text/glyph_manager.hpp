@@ -67,6 +67,7 @@ public:
 
     void setFontFaces(std::shared_ptr<FontFaces> faces) { fontFaces = faces; }
 
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     std::shared_ptr<HBShaper> getHBShaper(FontStack, GlyphIDType);
 
     void hbShaping(const std::u16string &text,
@@ -75,6 +76,7 @@ public:
                    std::vector<GlyphID> &glyphIDs,
                    std::vector<HBShapeAdjust> &adjusts);
 
+#endif // MLN_TEXT_SHAPING_HARFBUZZ
     std::shared_ptr<FontFaces> getFontFaces() { return fontFaces; }
 
     std::string getFontFaceURL(GlyphIDType type);
@@ -105,9 +107,12 @@ private:
     // Shaping objects
     std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer;
     std::shared_ptr<FontFaces> fontFaces;
+
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     FreeTypeLibrary ftLibrary;
     std::map<FontStack, std::map<GlyphIDType, std::shared_ptr<HBShaper>>> hbShapers;
     bool loadHBShaper(const FontStack &fontStack, GlyphIDType type, const std::string &data);
+#endif // MLN_TEXT_SHAPING_HARFBUZZ
 
     std::recursive_mutex rwLock;
 };
