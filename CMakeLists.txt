@@ -1512,7 +1512,7 @@ if(MLN_WITH_METAL AND MLN_CREATE_AUTORELEASEPOOL)
     # Platforms such as iOS and GLFW use ARC with @autoreleasepool blocks, for these platforms
     # creating an AutoreleasePool is not neccesary (and in fact will not work).
     # When using MapLibre Native with Metal on other platforms such as Node.js, you can pass
-    # this configuration command to ensure an AutoReleasePool is created in the render loop.
+    # this variable to ensure an AutoReleasePool is created in the render loop.
     # See also:
     # https://developer.apple.com/documentation/foundation/nsautoreleasepool
     # https://github.com/maplibre/maplibre-native/issues/2928
