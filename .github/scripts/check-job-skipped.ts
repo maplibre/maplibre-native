@@ -20,6 +20,7 @@ async function run() {
   if (!job) throw new Error(`job with name ${jobName} not found in workflow run with id ${run_id}`);
 
   core.setOutput('was_skipped', job.conclusion === 'skipped');
+  core.setOutput('was_skipped_or_cancelled', job.conclusion === 'skipped' || job.conclusion === 'cancelled');
 }
 
 try {
