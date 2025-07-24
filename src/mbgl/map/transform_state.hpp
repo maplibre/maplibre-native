@@ -118,6 +118,9 @@ public:
     Size getSize() const;
     void setSize(const Size& size_);
 
+    EdgeInsets getFrustumOffset() const;
+    void setFrustumOffset(const EdgeInsets& frustumOffset_);
+
     // North Orientation
     NorthOrientation getNorthOrientation() const;
     double getNorthOrientationAngle() const;
@@ -246,6 +249,7 @@ private:
 
     // logical dimensions
     Size size;
+    EdgeInsets frustumOffset;
 
     mat4 coordinatePointMatrix(const mat4& projMatrix) const;
     mat4 getPixelMatrix() const;

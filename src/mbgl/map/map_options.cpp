@@ -1,4 +1,5 @@
 #include <mbgl/map/map_options.hpp>
+#include <mbgl/util/geo.hpp>
 
 namespace mbgl {
 
@@ -10,6 +11,7 @@ public:
     NorthOrientation orientation = NorthOrientation::Upwards;
     bool crossSourceCollisions = true;
     Size size = {64, 64};
+    EdgeInsets frustumOffset = {0.f, 0.f, 0.f, 0.f};
     float pixelRatio = 1.0;
 };
 
@@ -66,6 +68,11 @@ NorthOrientation MapOptions::northOrientation() const {
 
 MapOptions& MapOptions::withSize(Size size_) {
     impl_->size = size_;
+    return *this;
+}
+
+MapOptions& MapOptions::withFrustumOffset(const EdgeInsets& frustumOffset_) {
+    impl_->frustumOffset = frustumOffset_;
     return *this;
 }
 

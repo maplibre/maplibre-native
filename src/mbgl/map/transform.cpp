@@ -1,6 +1,7 @@
 #include <mbgl/map/camera.hpp>
 #include <mbgl/map/transform.hpp>
 #include <mbgl/util/constants.hpp>
+#include <mbgl/util/geo.hpp>
 #include <mbgl/util/mat4.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/unitbezier.hpp>
@@ -427,6 +428,14 @@ void Transform::setMaxPitch(const double maxPitch) {
                          " degrees), the value will be clamped.");
     }
     state.setMaxPitch(util::deg2rad(maxPitch));
+}
+
+void Transform::setFrustumOffset(const EdgeInsets& frustumOffset) {
+    state.setFrustumOffset(frustumOffset);
+}
+
+EdgeInsets Transform::getFrustumOffset() {
+    return state.getFrustumOffset();
 }
 
 // MARK: - Bearing
