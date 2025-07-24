@@ -23,7 +23,7 @@ GlyphManager::GlyphManager(std::unique_ptr<LocalGlyphRasterizer> localGlyphRaste
 GlyphManager::~GlyphManager() {
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
     hbShapers.clear(); // clear harfbuzz + freetype face before library;
-#endif // MLN_TEXT_SHAPING_HARFBUZZ
+#endif                 // MLN_TEXT_SHAPING_HARFBUZZ
 }
 
 void GlyphManager::getGlyphs(GlyphRequestor& requestor, GlyphDependencies glyphDependencies, FileSource& fileSource) {
