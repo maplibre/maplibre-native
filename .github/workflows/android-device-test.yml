@@ -100,12 +100,12 @@ jobs:
         id: get-pr-number
 
       - name: Generate token
+        uses: actions/create-github-app-token@v2
         id: generate_token
-        uses: tibdex/github-app-token@v2
         with:
-          revoke: false  # revoking will fail for long running workflows, because the token will already have expired
-          app_id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
-          private_key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
+          skip-token-revoke: true  # revoking will fail for long running workflows, because the token will already have expired
+          app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
+          private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
       - name: Check if comment on PR contains '!benchmark android'
         if: matrix.test.name == 'Android Benchmark' && steps.get-pr-number.outputs.pr-number
@@ -203,11 +203,11 @@ jobs:
 
       - name: Generate another token (previous one could have expired)
         if: always()
+        uses: actions/create-github-app-token@v2
         id: generate_token_2
-        uses: tibdex/github-app-token@v2
         with:
-          app_id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
-          private_key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
+          app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
+          private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
       - uses: LouisBrunner/checks-action@v2.0.0
         if: always()
