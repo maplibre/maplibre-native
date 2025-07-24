@@ -86,9 +86,6 @@ public:
     void setFrustumOffset(const EdgeInsets&);
     EdgeInsets getFrustumOffset();
 
-    void setFrustumOffset(const EdgeInsets&);
-    EdgeInsets getFrustumOffset();
-
     // Zoom
 
     /** Returns the zoom level. */
