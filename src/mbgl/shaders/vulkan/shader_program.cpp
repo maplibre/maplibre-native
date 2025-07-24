@@ -129,7 +129,9 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
     const auto renderableExtent = pipelineInfo.viewExtent;
 
     const vk::Viewport viewportExtent(0.0f, 0.0f, renderableExtent.width, renderableExtent.height, 0.0f, 1.0f);
-    const vk::Rect2D scissorRect({}, {renderableExtent.width, renderableExtent.height});
+    const vk::Rect2D scissorRect({pipeline.scissorRect.offset.x, pipeline.scissorRect.offset.y},
+                                 {renderableExtent.width + pipelineInfo.scissorRect.extent.width,
+                                  renderableExtent.height + pipelineInfo.scissorRect.extent.height});
 
     const auto viewportState = vk::PipelineViewportStateCreateInfo()
                                    .setViewportCount(1)

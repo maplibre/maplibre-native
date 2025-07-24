@@ -101,6 +101,11 @@ void Drawable::setCullFaceMode(const gfx::CullFaceMode& mode) {
     impl->pipelineInfo.setCullMode(mode);
 }
 
+void Drawable::setScissorRect(const gfx::ScissorRect& rect) {
+    gfx::Drawable::setScissorRect(rect);
+    impl->pipelineInfo.setScissorRect(rect);
+}
+
 void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
                                       std::size_t vertexCount,
                                       gfx::DrawMode mode,

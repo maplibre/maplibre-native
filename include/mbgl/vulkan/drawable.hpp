@@ -3,6 +3,7 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
 
+#include <mbgl/gfx/scissor_rect.hpp>
 #include <memory>
 
 namespace mbgl {
@@ -43,6 +44,7 @@ public:
 
     void setLineWidth(int32_t value) override;
     void setCullFaceMode(const gfx::CullFaceMode&) override;
+    void setScissorRect(const gfx::ScissorRect&) override;
 
     void updateVertexAttributes(gfx::VertexAttributeArrayPtr,
                                 std::size_t vertexCount,

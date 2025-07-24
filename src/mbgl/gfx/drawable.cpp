@@ -4,6 +4,7 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/drawable_impl.hpp>
 #include <mbgl/gfx/index_vector.hpp>
+#include <mbgl/gfx/scissor_rect.hpp>
 #include <mbgl/gfx/types.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/render_pass.hpp>
@@ -14,6 +15,7 @@ namespace gfx {
 struct Drawable::Impl {
     gfx::ColorMode colorMode = gfx::ColorMode::disabled();
     gfx::CullFaceMode cullFaceMode = gfx::CullFaceMode::disabled();
+    gfx::ScissorRect scissorRect = {0.f, 0.f, 0.f, 0.f};
 
     std::shared_ptr<Bucket> bucket;
     PaintPropertyBindersBase* binders = nullptr; // owned by `bucket`
@@ -44,6 +46,14 @@ const gfx::CullFaceMode& Drawable::getCullFaceMode() const {
 
 void Drawable::setCullFaceMode(const gfx::CullFaceMode& value) {
     impl->cullFaceMode = value;
+}
+
+const gfx::ScissorRect& Drawable::getScissorRect() const {
+    return impl->scissorRect;
+}
+
+void Drawable::setScissorRect(const gfx::ScissorRect& value) {
+    impl->scissorRect = value;
 }
 
 void Drawable::setIndexData(std::vector<std::uint16_t> indexes, std::vector<UniqueDrawSegment> segments) {
