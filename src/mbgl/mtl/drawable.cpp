@@ -214,6 +214,14 @@ void Drawable::draw(PaintParameters& parameters) const {
     const auto& cullMode = getCullFaceMode();
     renderPass.setCullMode(cullMode.enabled ? mapCullMode(cullMode.side) : MTL::CullModeNone);
     renderPass.setFrontFacingWinding(mapWindingMode(cullMode.winding));
+    EdgeInsets offset = parameters.state.getFrustumOffset();
+    Size size = parameters.state.getSize();
+    double pixelRatio = parameters.pixelRatio;
+    MTL::ScissorRect rect = {static_cast<unsigned long>(offset.left() * pixelRatio),
+                             static_cast<unsigned long>(offset.top() * pixelRatio),
+                             static_cast<unsigned long>((size.width - (offset.left() + offset.right())) * pixelRatio),
+                             static_cast<unsigned long>((size.height - (offset.top() + offset.bottom())) * pixelRatio)};
+    renderPass.setScissorRect(rect);
 
     if (!impl->pipelineState) {
         impl->pipelineState = shaderMTL.getRenderPipelineState(
