@@ -101,7 +101,8 @@ public:
                                               .setSubpasses(subpass)
                                               .setDependencies(subpassDependency);
 
-        renderPass = backend.getDevice()->createRenderPassUnique(renderPassCreateInfo);
+        renderPass = backend.getDevice()->createRenderPassUnique(
+            renderPassCreateInfo, nullptr, backend.getDispatcher());
 
         const auto framebufferCreateInfo = vk::FramebufferCreateInfo()
                                                .setRenderPass(renderPass.get())
@@ -111,7 +112,8 @@ public:
                                                .setHeight(extent.height)
                                                .setLayers(1);
 
-        framebuffer = backend.getDevice()->createFramebufferUnique(framebufferCreateInfo);
+        framebuffer = backend.getDevice()->createFramebufferUnique(
+            framebufferCreateInfo, nullptr, backend.getDispatcher());
     }
 
 private:

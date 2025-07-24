@@ -16,6 +16,7 @@ import org.maplibre.android.style.layers.*
 import org.maplibre.android.style.sources.CustomGeometrySource
 import org.maplibre.android.style.sources.GeometryTileProvider
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import java.util.*
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -102,7 +103,7 @@ class GridSourceActivity : AppCompatActivity(), OnMapReadyCallback {
         )
         map.setStyle(
             Style.Builder()
-                .fromUri(Style.getPredefinedStyles()[0].url)
+                .fromUri(TestStyles.DEMOTILES)
                 .withLayer(layer!!)
                 .withSource(source!!)
         )
