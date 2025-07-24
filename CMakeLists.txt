@@ -17,6 +17,7 @@ option(MLN_USE_UNORDERED_DENSE "Use ankerl dense containers for performance" ON)
 option(MLN_USE_TRACY "Enable Tracy instrumentation" OFF)
 option(MLN_USE_RUST "Use components in Rust" OFF)
 option(MLN_CORE_INCLUDE_DEPS "Include depdendencies in static build of core" OFF)
+option(MLN_CREATE_AUTORELEASEPOOL "Create autoreleasepool in render loop" OFF)
 
 if (MLN_LEGACY_RENDERER)
     message(FATAL "The legacy renderer is no longer supported")
@@ -25,7 +26,6 @@ endif()
 if (MLN_DRAWABLE_RENDERER)
     message(FATAL "Do not pass MLN_DRAWABLE_RENDERER, the drawable renderer is now the default")
 endif()
-
 
 if (MLN_WITH_CLANG_TIDY)
     find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
