@@ -1,3 +1,4 @@
+#include <mbgl/gfx/scissor_rect.hpp>
 #include <mbgl/gl/context.hpp>
 
 #include <mbgl/gfx/shader_registry.hpp>
@@ -460,6 +461,7 @@ void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
     setStencilMode(gfx::StencilMode::disabled());
     setColorMode(colorMode);
     setCullFaceMode(gfx::CullFaceMode::disabled());
+    setScissorRect({0.f, 0.f, 0.f, 0.f});
 }
 
 bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
@@ -515,6 +517,7 @@ void Context::setDirtyState() {
     cullFace.setDirty();
     cullFaceSide.setDirty();
     cullFaceWinding.setDirty();
+    scissorRect.setDirt();
     program.setDirty();
     lineWidth.setDirty();
     activeTextureUnit.setDirty();
@@ -637,6 +640,10 @@ void Context::setCullFaceMode(const gfx::CullFaceMode& mode) {
     // Context::setDepthMode.
     cullFaceSide = mode.side;
     cullFaceWinding = mode.winding;
+}
+
+void Context::setScissorRect(const gfx::ScissorRect& rect) {
+    scissorRect = rect;
 }
 
 void Context::setDepthMode(const gfx::DepthMode& depth) {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/gfx/scissor_rect.hpp>
 #include <mbgl/gl/types.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
@@ -234,6 +235,13 @@ struct CullFaceSide {
 struct CullFaceWinding {
     using Type = gfx::CullFaceWindingType;
     static const constexpr Type Default = gfx::CullFaceWindingType::CounterClockwise;
+    static void Set(const Type&);
+    static Type Get();
+};
+
+struct ScissorRect {
+    using Type = gfx::ScissorRect;
+    static const constexpr Type Default = {0.f, 0.f, 0.f, 0.f};
     static void Set(const Type&);
     static Type Get();
 };

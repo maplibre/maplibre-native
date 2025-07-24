@@ -59,6 +59,7 @@ void DrawableGL::draw(PaintParameters& parameters) const {
 
     context.setColorMode(getColorMode());
     context.setCullFaceMode(getCullFaceMode());
+    context.setScissorRect(getScissorRect());
 
     impl->uniformBuffers.bind();
     bindTextures();
