@@ -241,7 +241,7 @@ struct CullFaceWinding {
 
 struct ScissorRect {
     using Type = gfx::ScissorRect;
-    static const constexpr Type Default = {0.f, 0.f, 0.f, 0.f};
+    static const constexpr Type Default = {0, 0, 0, 0};
     static void Set(const Type&);
     static Type Get();
 };

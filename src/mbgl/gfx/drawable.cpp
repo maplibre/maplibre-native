@@ -15,7 +15,7 @@ namespace gfx {
 struct Drawable::Impl {
     gfx::ColorMode colorMode = gfx::ColorMode::disabled();
     gfx::CullFaceMode cullFaceMode = gfx::CullFaceMode::disabled();
-    gfx::ScissorRect scissorRect = {0.f, 0.f, 0.f, 0.f};
+    gfx::ScissorRect scissorRect = {0, 0, 0, 0};
 
     std::shared_ptr<Bucket> bucket;
     PaintPropertyBindersBase* binders = nullptr; // owned by `bucket`
