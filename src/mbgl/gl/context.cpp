@@ -1,7 +1,7 @@
-#include <mbgl/gfx/scissor_rect.hpp>
 #include <mbgl/gl/context.hpp>
 
 #include <mbgl/gfx/shader_registry.hpp>
+#include <mbgl/gfx/scissor_rect.hpp>
 #include <mbgl/gl/command_encoder.hpp>
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/draw_scope_resource.hpp>
@@ -461,7 +461,7 @@ void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
     setStencilMode(gfx::StencilMode::disabled());
     setColorMode(colorMode);
     setCullFaceMode(gfx::CullFaceMode::disabled());
-    setScissorRect({0.f, 0.f, 0.f, 0.f});
+    setScissorTest({0, 0, 0, 0});
 }
 
 bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
@@ -494,7 +494,7 @@ void Context::unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept {
 void Context::setDirtyState() {
     MLN_TRACE_FUNC();
 
-    // Note: does not set viewport/scissorTest/bindFramebuffer to dirty
+    // Note: does not set viewport/bindFramebuffer to dirty
     // since they are handled separately in the view object.
     stencilFunc.setDirty();
     stencilMask.setDirty();
@@ -517,7 +517,7 @@ void Context::setDirtyState() {
     cullFace.setDirty();
     cullFaceSide.setDirty();
     cullFaceWinding.setDirty();
-    scissorRect.setDirt();
+    scissorTest.setDirty();
     program.setDirty();
     lineWidth.setDirty();
     activeTextureUnit.setDirty();
@@ -642,8 +642,8 @@ void Context::setCullFaceMode(const gfx::CullFaceMode& mode) {
     cullFaceWinding = mode.winding;
 }
 
-void Context::setScissorRect(const gfx::ScissorRect& rect) {
-    scissorRect = rect;
+void Context::setScissorTest(const gfx::ScissorRect& rect) {
+    scissorTest = rect;
 }
 
 void Context::setDepthMode(const gfx::DepthMode& depth) {

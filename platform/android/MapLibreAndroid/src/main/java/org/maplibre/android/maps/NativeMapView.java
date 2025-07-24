@@ -1155,6 +1155,11 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void setFrustumOffset(RectF offset) {
+    nativeSetFrustumOffset(offset);
+  }
+
+  @Override
   public void setSwapBehaviorFlush(boolean flush) {
     mapRenderer.setSwapBehaviorFlush(flush);
   }
@@ -1753,6 +1758,9 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native void nativeToggleTransform();
+
+  @Keep
+  private native void nativeSetFrustumOffset(RectF offsset);
 
   //
   // Snapshot

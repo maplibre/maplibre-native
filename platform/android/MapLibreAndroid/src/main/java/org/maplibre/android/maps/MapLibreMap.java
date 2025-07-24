@@ -121,6 +121,10 @@ public final class MapLibreMap {
     nativeMapView.toggleTransform();
   }
 
+  public void setFrustumOffset(@NonNull RectF offset) {
+    nativeMapView.setFrustumOffset(offset);
+  }
+
   public void setSwapBehaviorFlush(boolean flush) {
     nativeMapView.setSwapBehaviorFlush(flush);
   }

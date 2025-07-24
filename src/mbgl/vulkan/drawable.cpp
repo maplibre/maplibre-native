@@ -301,6 +301,15 @@ void Drawable::draw(PaintParameters& parameters) const {
         // update pipeline info with per segment modifiers
         impl->pipelineInfo.setDrawMode(seg->getMode());
 
+        EdgeInsets offset = parameters.state.getFrustumOffset();
+        Size size = parameters.state.getSize();
+        double pixelRatio = parameters.pixelRatio;
+        gfx::ScissorRect rect = {static_cast<int32_t>(offset.left() * pixelRatio),
+                                 static_cast<int32_t>(offset.top() * pixelRatio),
+                                 static_cast<uint32_t>((size.width - (offset.left() + offset.right())) * pixelRatio),
+                                 static_cast<uint32_t>((size.height - (offset.top() + offset.bottom())) * pixelRatio)};
+        impl->pipelineInfo.setScissorRect(rect);
+
         impl->pipelineInfo.setDynamicValues(context.getBackend(), commandBuffer);
 
         const auto& pipeline = shaderImpl.getPipeline(impl->pipelineInfo);

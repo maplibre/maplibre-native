@@ -85,6 +85,10 @@ struct TransformStateProperties {
         viewPortMode = val;
         return *this;
     }
+    TransformStateProperties withFrustumOffset(const std::optional<EdgeInsets>& val) {
+        frustumOffset = val;
+        return *this;
+    }
 
     std::optional<double> x;
     std::optional<double> y;
@@ -102,6 +106,7 @@ struct TransformStateProperties {
     std::optional<ConstrainMode> constrain;
     std::optional<NorthOrientation> northOrientation;
     std::optional<ViewportMode> viewPortMode;
+    std::optional<EdgeInsets> frustumOffset;
 };
 
 class TransformState {

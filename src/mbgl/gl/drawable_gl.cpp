@@ -59,7 +59,15 @@ void DrawableGL::draw(PaintParameters& parameters) const {
 
     context.setColorMode(getColorMode());
     context.setCullFaceMode(getCullFaceMode());
-    context.setScissorRect(getScissorRect());
+
+    EdgeInsets offset = parameters.state.getFrustumOffset();
+    Size size = parameters.state.getSize();
+    double pixelRatio = parameters.pixelRatio;
+    gfx::ScissorRect rect = {static_cast<int32_t>(offset.left() * pixelRatio),
+                             static_cast<int32_t>(offset.top() * pixelRatio),
+                             static_cast<uint32_t>((size.width - (offset.left() + offset.right())) * pixelRatio),
+                             static_cast<uint32_t>((size.height - (offset.top() + offset.bottom())) * pixelRatio)};
+    context.setScissorTest(rect);
 
     impl->uniformBuffers.bind();
     bindTextures();
