@@ -7811,15 +7811,15 @@ static void *windowScreenContext = &windowScreenContext;
  Adds a style filter to the map view
  */
 -(void)addStyleFilter:(MLNStyleFilter *)styleFilter {
-    
+
     if (!self.styleFilters) {
         self.styleFilters = [NSMutableArray array];
     }
     [self.styleFilters addObject:styleFilter];
-    
+
     auto coreStyleFilter = std::make_shared<mbgl::style::PluginStyleFilter>();
     coreStyleFilter->_filterStyleFunction = [styleFilter](const mbgl::Response &response) -> const mbgl::Response {
-        
+
         mbgl::Response tempResult;
 
         @autoreleasepool {
@@ -7847,12 +7847,12 @@ static void *windowScreenContext = &windowScreenContext;
         }
         return tempResult;
     };
-    
+
     // Set the ivar
     [styleFilter setFilter:coreStyleFilter];
-    
+
     _mbglMap->getStyle().addStyleFilter(coreStyleFilter);
-    
+
 }
 
 
