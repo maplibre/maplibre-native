@@ -2280,7 +2280,7 @@ vertically on the map.
 /**
  Adds a style filter to the map view
  */
--(void)addStyleFilter:(MLNStyleFilter *)styleFilter;
+- (void)addStyleFilter:(MLNStyleFilter *)styleFilter;
 
 @end
 

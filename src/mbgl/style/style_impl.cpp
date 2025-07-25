@@ -255,7 +255,6 @@ void Style::Impl::addStyleFilter(std::shared_ptr<mbgl::style::PluginStyleFilter>
     _styleFilters.push_back(filter);
 }
 
-
 void Style::Impl::setLight(std::unique_ptr<Light> light_) {
     light = std::move(light_);
     light->setObserver(this);
