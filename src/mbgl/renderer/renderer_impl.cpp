@@ -93,6 +93,10 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     assert(updateParameters);
 
 #if MLN_RENDER_BACKEND_METAL
+#if MLN_CREATE_AUTORELEASEPOOL
+    NS::SharedPtr pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
+#endif
+
     if constexpr (EnableMetalCapture) {
         const auto& mtlBackend = static_cast<mtl::RendererBackend&>(backend);
 
