@@ -81,19 +81,17 @@ void Style::Impl::loadURL(const std::string& url_) {
 }
 
 void Style::Impl::filterThenParse(const Response& res) {
-    
     if (_styleFilters.size() == 0) {
         parse(*res.data);
         return;
     }
-    
+
     // Otherwise, go through the chain of filters
     Response tempResult = res;
-    for (auto filter: _styleFilters) {
+    for (auto filter : _styleFilters) {
         tempResult = filter->FilterResponse(tempResult);
     }
     parse(*tempResult.data);
-    
 }
 
 void Style::Impl::parse(const std::string& json_) {
