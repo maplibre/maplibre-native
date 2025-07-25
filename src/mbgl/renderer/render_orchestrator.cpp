@@ -29,8 +29,6 @@
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/logging.hpp>
 
-#include <iostream>
-
 namespace mbgl {
 
 using namespace style;
