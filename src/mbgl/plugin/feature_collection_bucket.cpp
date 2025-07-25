@@ -134,9 +134,9 @@ void FeatureCollectionBucket::addFeature(const GeometryTileFeature& tileFeature,
         } else if (auto b = value.getBool()) {
             //  std::cout << "Found Bool: " << name << ": " << *b << "\n";
             tempFeature->_featureProperties[name] = std::to_string(*b);
-        } else if (auto a = value.getArray()) {
-            //   std::cout << "Found Array: " << name << ": " << *b << "\n";
-            tempFeature->_featureProperties[name] = std::to_string(*b);
+//        } else if (auto a = value.getArray()) {
+//            //   std::cout << "Found Array: " << name << ": " << *b << "\n";
+//            tempFeature->_featureProperties[name] = std::to_string(*b);
         }
 
         //        DECLARE_VALUE_TYPE_ACCESOR(Array, array_type)
