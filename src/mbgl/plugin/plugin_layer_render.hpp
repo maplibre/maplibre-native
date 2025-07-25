@@ -5,6 +5,7 @@
 #include <mbgl/plugin/plugin_layer_impl.hpp>
 #include <mbgl/plugin/plugin_layer_properties.hpp>
 
+#include <map>
 #include <optional>
 
 namespace mbgl {
@@ -67,6 +68,9 @@ private:
     style::PluginLayer::OnUpdateLayer _updateFunction = nullptr;
 
     style::PluginLayer::OnUpdateLayerProperties _updateLayerPropertiesFunction = nullptr;
+    
+    std::map<OverscaledTileID, std::shared_ptr<mbgl::plugin::FeatureCollection>> _featureCollectionByTile;
+    
 };
 
 } // namespace mbgl

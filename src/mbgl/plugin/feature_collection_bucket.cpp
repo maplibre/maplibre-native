@@ -8,20 +8,21 @@
 #include <mbgl/util/geo.hpp>
 #include <mbgl/plugin/plugin_layer.hpp>
 #include <mbgl/plugin/plugin_layer_impl.hpp>
-
-#include "raw_bucket.hpp"
+#include <mbgl/plugin/feature_collection_bucket.hpp>
 
 #include <iostream>
 
 using namespace mbgl;
 
-RawBucket::~RawBucket() {
+FeatureCollectionBucket::~FeatureCollectionBucket() {
     
 }
 
-RawBucket::RawBucket(const BucketParameters& bucketParameters,
-                     const std::vector<Immutable<style::LayerProperties>>& layers) {
+FeatureCollectionBucket::FeatureCollectionBucket(const BucketParameters& bucketParameters,
+                     const std::vector<Immutable<style::LayerProperties>>& layers):
+_tileID(bucketParameters.tileID) {
     _layers = layers;
+    _featureCollection = std::make_shared<plugin::FeatureCollection>(bucketParameters.tileID);
 }
 
 void geometryToLatLon(
@@ -46,30 +47,72 @@ void geometryToLatLon(
   lat = 180.0 / M_PI * (2.0 * atan(exp(mercY * M_PI)) - M_PI / 2.0);
 }
 
-void RawBucket::addFeature(const GeometryTileFeature& tileFeature,
+std::string toString(FeatureIdentifier & v) {
+   // auto v = toValue(value);
+    
+    // null_value_t, uint64_t, int64_t, double, std::string>
+    
+    std::string tempResult = "";
+    auto ti = v.which();
+    if (ti == 0) {
+        return tempResult;
+    } else if (ti == 1) {
+        tempResult = std::to_string(v.get<uint64_t>());
+    } else if (ti == 2) {
+        tempResult = std::to_string(v.get<int64_t>());
+    } else if (ti == 3) {
+        tempResult = v.get<std::string>();
+    }
+    return tempResult;
+    /*
+    if (auto iVal = v.value().getInt()) {
+        std::string tempResult = std::to_string(*iVal);
+        output.append(tempResult);
+    } else if (auto uIVal = v.value().getUint()) {
+        std::string tempResult = std::to_string(*uIVal);
+        output.append(tempResult);
+
+    } else if (auto s = v.value().getString()) {
+        output.append("\"");
+        output.append(s->c_str());
+        output.append("\"");
+
+    } else if (auto d = v.value().getDouble()) {
+        output.append(std::to_string(*d));
+    }
+     */
+
+}
+
+void FeatureCollectionBucket::addFeature(const GeometryTileFeature& tileFeature,
                     const GeometryCollection& geometeryCollection,
                     const mbgl::ImagePositions& imagePositions,
                     const PatternLayerMap& patternLayerMap,
                     std::size_t size,
                     const CanonicalTileID& tileID) {
     
-    std::shared_ptr<RawBucketFeature> tempFeature = std::make_shared<RawBucketFeature>();
+    std::shared_ptr<plugin::Feature> tempFeature = std::make_shared<plugin::Feature>();
+    
+    auto featureID = tileFeature.getID();
+    auto featureIDString = toString(featureID);
+    tempFeature->_featureID = featureIDString;
+    
     
     switch (tileFeature.getType()) {
         case FeatureType::Point:
-            std::cout << "Adding Point" << "\n";
-            tempFeature->_featureType = RawBucketFeature::FeatureType::FeatureTypePoint;
+            //std::cout << "Adding Point" << "\n";
+            tempFeature->_featureType = plugin::Feature::FeatureType::FeatureTypePoint;
             break;
         case FeatureType::Unknown:
-            std::cout << "Unknown Type Found\n";
+            //std::cout << "Unknown Type Found\n";
             break;
         case FeatureType::LineString:
-            std::cout << "LineString Type Found\n";
-            tempFeature->_featureType = RawBucketFeature::FeatureType::FeatureTypeLine;
+            //std::cout << "LineString Type Found\n";
+            tempFeature->_featureType = plugin::Feature::FeatureType::FeatureTypeLine;
             break;
         case FeatureType::Polygon:
-            std::cout << "Polygon Type Found\n";
-            tempFeature->_featureType = RawBucketFeature::FeatureType::FeatureTypePolygon;
+            //std::cout << "Polygon Type Found\n";
+            tempFeature->_featureType = plugin::Feature::FeatureType::FeatureTypePolygon;
             break;
 
             
@@ -90,17 +133,17 @@ void RawBucket::addFeature(const GeometryTileFeature& tileFeature,
 
         } else if (auto s = value.getString()) {
             
-            std::cout << "Found String: " << name << ": " << *s << "\n";
+          //  std::cout << "Found String: " << name << ": " << *s << "\n";
             tempFeature->_featureProperties[name] = *s;
 
         } else if (auto d = value.getDouble()) {
-            std::cout << "Found Double: " << name << ": " << *d << "\n";
+          //  std::cout << "Found Double: " << name << ": " << *d << "\n";
             tempFeature->_featureProperties[name] = std::to_string(*d);
         } else if (auto b = value.getBool()) {
-            std::cout << "Found Bool: " << name << ": " << *b << "\n";
+          //  std::cout << "Found Bool: " << name << ": " << *b << "\n";
             tempFeature->_featureProperties[name] = std::to_string(*b);
         } else if (auto a = value.getArray()) {
-            std::cout << "Found Array: " << name << ": " << *b << "\n";
+         //   std::cout << "Found Array: " << name << ": " << *b << "\n";
             tempFeature->_featureProperties[name] = std::to_string(*b);
         }
         
@@ -116,7 +159,7 @@ void RawBucket::addFeature(const GeometryTileFeature& tileFeature,
     
     for (const auto& g : geometeryCollection) {
         // g is GeometryCoordinates
-        RawBucketFeatureCoordinateCollection c;
+        plugin::FeatureCoordinateCollection c;
         for (std::size_t i = 0, len = g.size(); i < len; i++) {
             const GeometryCoordinate& p1 = g[i];
             
@@ -135,7 +178,7 @@ void RawBucket::addFeature(const GeometryTileFeature& tileFeature,
             double lon = 0;
             geometryToLatLon(p1, tileID.x, tileID.y, tileID.z, lat, lon);
             
-            c._coordinates.push_back(RawBucketFeatureCoordinate(lat, lon));
+            c._coordinates.push_back(plugin::FeatureCoordinate(lat, lon));
         }
         tempFeature->_featureCoordinates.push_back(c);
         
@@ -161,25 +204,29 @@ void RawBucket::addFeature(const GeometryTileFeature& tileFeature,
 //        }
     }
     
-    _features.push_back(tempFeature);
+    
+    _featureCollection->_features.push_back(tempFeature);
+ //   _features.push_back(tempFeature);
     
 //    std::cout << "Adding Feature Type: " << tileFeature.getType() << "\n";
     
 }
 
-bool RawBucket::hasData() const {
-    return true;
+bool FeatureCollectionBucket::hasData() const {
+    return _featureCollection->_features.size() > 0;
 }
 
-void RawBucket::upload(gfx::UploadPass&) {
-    
+void FeatureCollectionBucket::upload(gfx::UploadPass&) {
+    std::cout << "FeatureCollectionBucket::upload\n";
+    uploaded = true;
 }
 
-float RawBucket::getQueryRadius(const RenderLayer&) const {
+float FeatureCollectionBucket::getQueryRadius(const RenderLayer&) const {
     return 0;
 }
 
-void RawBucket::update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) {
-    
+void FeatureCollectionBucket::update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) {
+    std::cout << "FeatureCollectionBucket::update\n";
+
 }
 

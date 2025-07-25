@@ -373,11 +373,6 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         for (std::size_t index = 0; index < orderedLayers.size(); ++index) {
             RenderLayer& layer = orderedLayers[index];
             const auto* layerInfo = layer.baseImpl->getTypeInfo();
-            std::string s1(layerInfo->type);
-            //std::cout << " -> " << s1 << "\n";
-//            if (s1 == "hudhud::gltf-model-layer") {
-//                std::cout << "Found plugin\n";
-//            }
             const bool layerIsVisible = layer.baseImpl->visibility != style::VisibilityType::None;
             const bool zoomFitsLayer = layer.supportsZoom(zoomHistory.lastZoom);
             renderTreeParameters->has3D |= (layerInfo->pass3d == LayerTypeInfo::Pass3D::Required);

@@ -44,8 +44,17 @@ MLN_EXPORT
 
 @interface MLNPluginLayerTileFeature : NSObject
 
+// This is the unique feature ID in the tile source if applicable.  Can be empty
+@property NSString *featureID;
 @property NSDictionary *featureProperties;
 @property NSArray *featureCoordinates;
+
+@end
+
+@interface MLNPluginLayerTileFeatureCollection : NSObject
+
+@property NSArray *features;
+@property NSString *tileID; // z,x,y
 
 @end
 
@@ -116,6 +125,16 @@ MLN_EXPORT
 
 /// Called when a feature is loaded from the tile
 - (void)onFeatureLoaded:(MLNPluginLayerTileFeature *)tileFeature;
+
+/// Called when a set of features are loaded from the tile
+/*
+ TODO: Think about returning that this layer doesn't care about this feature collection via a bool/etc and then
+ the underlying layer won't have to track this collection.
+ */
+- (void)onFeatureCollectionLoaded:(MLNPluginLayerTileFeatureCollection *)tileFeatureCollection;
+
+/// Called when a set of features are unloaded because the tile goes out of scene/etc
+- (void)onFeatureCollectionUnloaded:(MLNPluginLayerTileFeatureCollection *)tileFeatureCollection;
 
 /// Added to a map view
 - (void)didMoveToMapView:(MLNMapView *)mapView;

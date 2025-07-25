@@ -35,7 +35,7 @@ LayerRenderData* GeometryTile::LayoutResult::getLayerRenderData(const style::Lay
         return nullptr;
     }
     LayerRenderData& result = it->second;
-    if (result.layerProperties->baseImpl->getTypeInfo() != layerImpl.getTypeInfo()) {
+    if (!layerTypeInfoEquals(result.layerProperties->baseImpl->getTypeInfo(), layerImpl.getTypeInfo())) {
         // Layer data might be outdated, see issue #12432.
         return nullptr;
     }

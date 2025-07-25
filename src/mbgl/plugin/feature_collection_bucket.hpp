@@ -7,53 +7,48 @@
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/shaders/segment.hpp>
 #include <mbgl/style/layers/fill_layer_properties.hpp>
+#include <mbgl/plugin/feature_collection.hpp>
 
 #include <map>
+
+/*
+ 
+ Open Questions
+ 
+ 
+ * Should we load up a vector of these RawFeatures by tile?
+ * How does that interop with the render layer's update flow
+ * Should the call back from render layer be more of a batch thing at that update stage?
+ * Should there be a callback when a tile or collection of these features go out of scope?
+ * Should the concept of managing arrays of features be something done by the core or just
+   hand off the features to the plug-in layer and let it do it's thing or have the option for both?
+ 
+ * How do we get to the osm id of features in the stream?  Is that tileFeature.getID()?
+ * Is there already a set of classes or a paradigm out there that could be used to represent the
+   feature / feature geometry?
+ * What are the "binders"?
+ 
+ 
+ Thoughts
+ * Possibly have ability to keep tile coordinates using some kind flag
+ 
+ 
+ 
+ */
+
+
 
 namespace mbgl {
 
 class BucketParameters;
 class RenderFillLayer;
 
-//using FillBinders = PaintPropertyBinders<style::FillPaintProperties::DataDrivenProperties>;
-//using FillLayoutVertex = gfx::Vertex<TypeList<attributes::pos>>;
-
-class RawBucketFeatureCoordinate {
+class FeatureCollectionBucket final : public Bucket {
 public:
-    RawBucketFeatureCoordinate(double lat, double lon) : _lat(lat), _lon(lon) {
-        
-    }
-    double _lat = 0;
-    double _lon = 0;
-};
-
-// This is a list of coordinates.  Broken out into it's own class because
-// a raw bucket feature can have an array of these
-class RawBucketFeatureCoordinateCollection {
-public:
-    std::vector<RawBucketFeatureCoordinate> _coordinates;
-};
-
-class RawBucketFeature {
-public:
-    RawBucketFeature() {};
-    enum class FeatureType {
-        FeatureTypeUnknown,
-        FeatureTypePoint,
-        FeatureTypeLine,
-        FeatureTypePolygon
-    };
-    FeatureType _featureType = FeatureType::FeatureTypeUnknown;
-    std::map<std::string, std::string> _featureProperties;
-    std::vector<RawBucketFeatureCoordinateCollection> _featureCoordinates;
-};
-
-class RawBucket final : public Bucket {
-public:
-    ~RawBucket() override;
+    ~FeatureCollectionBucket() override;
     //using PossiblyEvaluatedLayoutProperties = style::FillLayoutProperties::PossiblyEvaluated;
 
-    RawBucket(const BucketParameters&, const std::vector<Immutable<style::LayerProperties>>&);
+    FeatureCollectionBucket(const BucketParameters&, const std::vector<Immutable<style::LayerProperties>>&);
 
     void addFeature(const GeometryTileFeature&,
                     const GeometryCollection&,
@@ -70,8 +65,12 @@ public:
 
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
 
+    // The tile ID
+    OverscaledTileID _tileID;
+
     // Array of features
-    std::vector<std::shared_ptr<RawBucketFeature>> _features;
+    std::shared_ptr<mbgl::plugin::FeatureCollection> _featureCollection = nullptr;
+    //std::vector<std::shared_ptr<mbgl::plugin::Feature>> _features;
     
     std::vector<Immutable<style::LayerProperties>> _layers;
     
