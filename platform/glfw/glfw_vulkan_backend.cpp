@@ -20,16 +20,17 @@ public:
     std::vector<const char*> getDeviceExtensions() override { return {VK_KHR_SWAPCHAIN_EXTENSION_NAME}; }
 
     void createPlatformSurface() override {
-        auto& glfwBackend = static_cast<GLFWVulkanBackend&>(backend);
+        auto& backendImpl = static_cast<GLFWVulkanBackend&>(backend);
 
         VkSurfaceKHR surface_;
 
         VkResult result = glfwCreateWindowSurface(
-            glfwBackend.getInstance().get(), glfwBackend.getWindow(), nullptr, &surface_);
+            backendImpl.getInstance().get(), backendImpl.getWindow(), nullptr, &surface_);
         if (result != VK_SUCCESS) throw std::runtime_error("Failed to create glfw window surface");
 
-        surface = vk::UniqueSurfaceKHR(
-            surface_, vk::ObjectDestroy<vk::Instance, vk::DispatchLoaderDynamic>(glfwBackend.getInstance().get()));
+        surface = vk::UniqueSurfaceKHR(surface_,
+                                       vk::ObjectDestroy<vk::Instance, vk::DispatchLoaderDynamic>(
+                                           backendImpl.getInstance().get(), nullptr, backendImpl.getDispatcher()));
     }
 
     void bind() override {}

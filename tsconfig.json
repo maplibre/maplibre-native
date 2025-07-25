@@ -6,11 +6,13 @@
     "module": "NodeNext",
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "maxNodeModuleJsDepth": 0
+    "maxNodeModuleJsDepth": 0,
+    "noEmit": true
   },
   "include": [
-    "./**/*.mjs",
-    "**/*.d.ts"
+    ".github/scripts/**/*.ts",
+    "scripts/**/*.mjs",
+    "scripts/**/*.d.ts"
   ],
   "exclude": [
     "node_modules"

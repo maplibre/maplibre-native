@@ -16,6 +16,9 @@
   - [macOS](./platforms/macos/README.md)
   - [Linux](./platforms/linux/README.md)
     - [Using Docker](./platforms/linux/using-docker.md)
+  - [Windows](./platforms/windows/README.md)
+    - [Building with Microsoft Visual Studio](./platforms/windows/build-msvc.md)
+    - [Building with MSYS2](./platforms/windows/build-msys2.md)
 
 - [Release Policy](./release-policy.md)
 
