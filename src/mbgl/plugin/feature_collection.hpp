@@ -19,14 +19,14 @@ namespace mbgl {
 
 namespace plugin {
 
-//using FillBinders = PaintPropertyBinders<style::FillPaintProperties::DataDrivenProperties>;
-//using FillLayoutVertex = gfx::Vertex<TypeList<attributes::pos>>;
+// using FillBinders = PaintPropertyBinders<style::FillPaintProperties::DataDrivenProperties>;
+// using FillLayoutVertex = gfx::Vertex<TypeList<attributes::pos>>;
 
 class FeatureCoordinate {
 public:
-    FeatureCoordinate(double lat, double lon) : _lat(lat), _lon(lon) {
-        
-    }
+    FeatureCoordinate(double lat, double lon)
+        : _lat(lat),
+          _lon(lon) {}
     double _lat = 0;
     double _lon = 0;
     double _tileX = 0; // Tile coord
@@ -53,22 +53,21 @@ public:
     std::map<std::string, std::string> _featureProperties;
     std::vector<FeatureCoordinateCollection> _featureCoordinates;
     std::string _featureID; // Unique id from the data source for this
-    
 };
 
 class FeatureCollection {
 public:
-    FeatureCollection(OverscaledTileID tileID): _featureCollectionTileID(tileID) {};
+    FeatureCollection(OverscaledTileID tileID)
+        : _featureCollectionTileID(tileID) {};
     std::vector<std::shared_ptr<Feature>> _features;
-    
+
     // TODO: Open question about this.. should feature collections be tied to tile id?
     // TODO: Question: Is overscaled the right thing or just canonical?
     OverscaledTileID _featureCollectionTileID;
 };
 
+} // namespace plugin
 
-}
-
-}
+} // namespace mbgl
 
 #endif /* feature_collection_hpp */

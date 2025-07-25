@@ -7654,35 +7654,35 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 -(MLNPluginLayerTileFeature *)featureFromCore:(std::shared_ptr<mbgl::plugin::Feature>)feature {
-    
+
     MLNPluginLayerTileFeature *tempResult = [[MLNPluginLayerTileFeature alloc] init];
-    
+
     NSMutableDictionary *tileProperties = [NSMutableDictionary dictionary];
     for (auto p: feature->_featureProperties) {
         NSString *key = [NSString stringWithUTF8String:p.first.c_str()];
         NSString *value = [NSString stringWithUTF8String:p.second.c_str()];
         [tileProperties setObject:value forKey:key];
     }
-    
+
     tempResult.featureProperties = [NSDictionary dictionaryWithDictionary:tileProperties];
-    
+
     NSMutableArray *featureCoordinates = [NSMutableArray array];
     for (auto & coordinateCollection: feature->_featureCoordinates) {
-        
+
         for (auto & coordinate: coordinateCollection._coordinates) {
             CLLocationCoordinate2D c = CLLocationCoordinate2DMake(coordinate._lat, coordinate._lon);
             NSValue *value = [NSValue valueWithBytes:&c objCType:@encode(CLLocationCoordinate2D)];
             [featureCoordinates addObject:value];
         }
-        
+
     }
     // TODO: Need to figure out how we're going to handle multiple coordinate groups/etc
     if ([featureCoordinates count] > 0) {
         tempResult.featureCoordinates = [NSArray arrayWithArray:featureCoordinates];
     }
-    
+
     tempResult.featureID = [NSString stringWithUTF8String:feature->_featureID.c_str()];
-    
+
     return tempResult;
 }
 
@@ -7714,8 +7714,8 @@ static void *windowScreenContext = &windowScreenContext;
     if (capabilities.requiresPass3D) {
         pass3D = mbgl::style::LayerTypeInfo::Pass3D::Required;
     }
-    
-    
+
+
     // If we read tile features, then we need to set these things
     if (capabilities.supportsReadingTileFeatures) {
         tileKind = mbgl::style::LayerTypeInfo::TileKind::Geometry;
@@ -7826,27 +7826,27 @@ static void *windowScreenContext = &windowScreenContext;
                 [weakPlugInLayer onUpdateLayerProperties:properties];
             }
         });
-        
+
         // If this layer can read tile features, then setup that lambda
         if (capabilities.supportsReadingTileFeatures) {
             pluginLayerImpl->setFeatureLoadedFunction([weakPlugInLayer, weakMapView](const std::shared_ptr<mbgl::plugin::Feature> feature) {
-                
+
                 @autoreleasepool {
                     MLNPluginLayerTileFeature *tileFeature = [weakMapView featureFromCore:feature];
-                    
+
                     [weakPlugInLayer onFeatureLoaded:tileFeature];
 
                 }
-                
+
             });
-            
-            
+
+
             pluginLayerImpl->setFeatureCollectionLoadedFunction([weakPlugInLayer, weakMapView](const std::shared_ptr<mbgl::plugin::FeatureCollection> featureCollection) {
-                
+
                 @autoreleasepool {
-                    
+
                     MLNPluginLayerTileFeatureCollection *collection = [[MLNPluginLayerTileFeatureCollection alloc] init];
-                    
+
                     // Add the features
                     NSMutableArray *featureList = [NSMutableArray arrayWithCapacity:featureCollection->_features.size()];
                     for (auto f: featureCollection->_features) {
@@ -7855,21 +7855,21 @@ static void *windowScreenContext = &windowScreenContext;
                     collection.features = [NSArray arrayWithArray:featureList];
                     collection.tileID = [weakMapView tileIDToString:featureCollection->_featureCollectionTileID];
 
-                    
+
                     [weakPlugInLayer onFeatureCollectionLoaded:collection];
 
                 }
-                
+
             });
-            
+
             pluginLayerImpl->setFeatureCollectionUnloadedFunction([weakPlugInLayer, weakMapView](const std::shared_ptr<mbgl::plugin::FeatureCollection> featureCollection) {
-                
+
                 @autoreleasepool {
-                    
+
                     // TODO: Map these collections to local vars and maybe don't keep recreating it
-                    
+
                     MLNPluginLayerTileFeatureCollection *collection = [[MLNPluginLayerTileFeatureCollection alloc] init];
-                    
+
                     // Add the features
                     NSMutableArray *featureList = [NSMutableArray arrayWithCapacity:featureCollection->_features.size()];
                     for (auto f: featureCollection->_features) {
@@ -7877,17 +7877,17 @@ static void *windowScreenContext = &windowScreenContext;
                     }
                     collection.features = [NSArray arrayWithArray:featureList];
                     collection.tileID = [weakMapView tileIDToString:featureCollection->_featureCollectionTileID];
-                    
+
                     [weakPlugInLayer onFeatureCollectionUnloaded:collection];
 
                 }
-                
+
             });
 
 
 
-            
-            
+
+
         }
 
     });

@@ -102,7 +102,7 @@ public:
     void setFeatureLoadedFunction(OnFeatureLoaded featureLoadedFunction) {
         _featureLoadedFunction = featureLoadedFunction;
     }
-    
+
     void setFeatureCollectionLoadedFunction(OnFeatureCollectionLoaded featureCollectionLoadedFunction) {
         _featureCollectionLoadedFunction = featureCollectionLoadedFunction;
     }
@@ -127,13 +127,13 @@ public:
 
     //! Optional: Called when feature is loaded
     OnFeatureLoaded _featureLoadedFunction;
-    
+
     //! Optional: Called when a feature collection is loaded
     OnFeatureCollectionLoaded _featureCollectionLoadedFunction;
-    
+
     //! Optional: Called when a feature colleciton is unloaded from the scene (tile goes out of scene/etc)
     OnFeatureCollectionUnloaded _featureCollectionUnloadedFunction;
-    
+
 private:
     LayerTypeInfo _layerTypeInfo;
     std::string _layerProperties;

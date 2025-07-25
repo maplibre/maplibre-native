@@ -157,12 +157,11 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
             sourceStr = source.value();
         }
     }
-    
 
-    auto tempResult = std::unique_ptr<style::Layer>(new (std::nothrow)
-                                                        style::PluginLayer(id, sourceStr, _layerTypeInfo, layerProperties
-                                                                           //,*customProperties
-                                                                           ));
+    auto tempResult = std::unique_ptr<style::Layer>(new (std::nothrow) style::PluginLayer(
+        id, sourceStr, _layerTypeInfo, layerProperties
+        //,*customProperties
+        ));
 
     if (_onLayerCreated != nullptr) {
         auto layerRaw = tempResult.get();
@@ -180,10 +179,10 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
 std::unique_ptr<Bucket> PluginLayerFactory::createBucket(
     [[maybe_unused]] const BucketParameters& parameters,
     [[maybe_unused]] const std::vector<Immutable<style::LayerProperties>>& layers) noexcept {
-        if (_supportsFeatureCollectionBuckets) {
-            return std::make_unique<FeatureCollectionBucket>(parameters, layers);
-        }
-        return nullptr;
+    if (_supportsFeatureCollectionBuckets) {
+        return std::make_unique<FeatureCollectionBucket>(parameters, layers);
+    }
+    return nullptr;
 }
 
 std::unique_ptr<RenderLayer> PluginLayerFactory::createRenderLayer(Immutable<style::Layer::Impl> impl) noexcept {

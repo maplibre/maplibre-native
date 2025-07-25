@@ -2338,7 +2338,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     NSURL *url = [[NSBundle mainBundle] URLForResource:@"PluginLayerTestStyle.json" withExtension:nil];
     [self.styleURLs addObject:url];
 
-    
+
     /// Style that does not require an `apiKey` nor any further configuration
     [self.styleNames addObject:@"MapLibre Basic"];
     [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];

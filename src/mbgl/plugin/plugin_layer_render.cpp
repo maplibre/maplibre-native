@@ -90,12 +90,11 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
                                [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters,
                                [[maybe_unused]] const RenderTree& renderTree,
                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
-    
-    auto pluginLayer = static_cast<const mbgl::style::PluginLayer::Impl &>(*baseImpl);
+    auto pluginLayer = static_cast<const mbgl::style::PluginLayer::Impl&>(*baseImpl);
 
     std::vector<OverscaledTileID> removedTiles;
     bool removeAllTiles = ((renderTiles == nullptr) || (renderTiles->empty()));
-    
+
     // TODO: Remove
 #ifdef C_LOG_TILES
     static int passCount = 0;
@@ -104,33 +103,32 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
         std::cout << passCount << ": Remove All Tiles\n";
     }
 #endif
-    
+
     // Get list of tiles to remove and then remove them
-    for (auto currentCollection: _featureCollectionByTile) {
+    for (auto currentCollection : _featureCollectionByTile) {
         if (removeAllTiles || !hasRenderTile(currentCollection.first)) {
             removedTiles.push_back(currentCollection.first);
         }
     }
     if (removedTiles.size() > 0) {
-        for (auto tileID: removedTiles) {
+        for (auto tileID : removedTiles) {
             auto featureCollection = _featureCollectionByTile[tileID];
             if (pluginLayer._featureCollectionUnloadedFunction) {
                 pluginLayer._featureCollectionUnloadedFunction(featureCollection);
             }
 #ifdef C_LOG_TILES
             // TODO: Remove this logging
-            std::cout << passCount << ": Removing Feature Collection for Tile: " << (int)tileID.canonical.z << "," << tileID.canonical.x << "," << tileID.canonical.y << "\n";
+            std::cout << passCount << ": Removing Feature Collection for Tile: " << (int)tileID.canonical.z << ","
+                      << tileID.canonical.x << "," << tileID.canonical.y << "\n";
 #endif
             _featureCollectionByTile.erase(tileID);
         }
     }
-    
 
     if (renderTiles) {
         if (!renderTiles->empty()) {
-            
             auto drawPass = RenderPass::Pass3D;
-            
+
             // If we're reading feature collections, go through
             // and notify the plugin of any new feature collections
             for (const RenderTile& tile : *renderTiles) {
@@ -141,12 +139,12 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
                     std::cout << passCount << ": Tile was there and not anymore\n";
 #endif
                 }
-                
+
                 // TODO: Remove
-//                if ((tileID.canonical.x == 1289) && (tileID.canonical.y == 879)) {
-//                    std::cout << "Found tile\n";
-//                }
-                
+                //                if ((tileID.canonical.x == 1289) && (tileID.canonical.y == 879)) {
+                //                    std::cout << "Found tile\n";
+                //                }
+
                 const auto* optRenderData = getRenderDataForPass(tile, drawPass);
                 if (!optRenderData || !optRenderData->bucket || !optRenderData->bucket->hasData()) {
                     removeTile(drawPass, tileID);
@@ -155,34 +153,35 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
                 const auto& renderData = *optRenderData;
                 auto& bucket = static_cast<FeatureCollectionBucket&>(*renderData.bucket);
                 // TODO: Remove
-                //std::cout << "Found Bucket\n";
+                // std::cout << "Found Bucket\n";
                 auto featureCollection = bucket._featureCollection;
                 if (featureCollection == nullptr) {
                     continue;
                 }
-                
+
                 // See if we already have this tile'a feature collection
                 if (_featureCollectionByTile.contains(tileID)) {
                     continue;
                 }
-                
+
                 _featureCollectionByTile[tileID] = featureCollection;
 
-//                static_cast<const Impl&>(*baseImpl);
-//                auto layer = static_cast<const mbgl::style::PluginLayer::Impl &>(*renderData.layerProperties->baseImpl);
+                //                static_cast<const Impl&>(*baseImpl);
+                //                auto layer = static_cast<const mbgl::style::PluginLayer::Impl
+                //                &>(*renderData.layerProperties->baseImpl);
                 if (pluginLayer._featureCollectionLoadedFunction) {
                     if (featureCollection != nullptr) {
                         pluginLayer._featureCollectionLoadedFunction(featureCollection);
 #ifdef C_LOG_TILES
                         // TODO: Remove logging
-                        std::cout << passCount << ": Adding Feature Collection for Tile: " << (int)tileID.canonical.z << "," << tileID.canonical.x << "," << tileID.canonical.y << "\n";
+                        std::cout << passCount << ": Adding Feature Collection for Tile: " << (int)tileID.canonical.z
+                                  << "," << tileID.canonical.x << "," << tileID.canonical.y << "\n";
 #endif
-
                     }
                 }
-                
+
                 /*
-                 
+
                  const auto prevBucketID = getRenderTileBucketID(tileID);
                  if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
                  // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
@@ -190,11 +189,8 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
                  }
                  setRenderTileBucketID(tileID, bucket.getID());
                  */
-                
             }
-            
         }
-            
     }
 
     /*
@@ -222,16 +218,16 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
 
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
-        
+
         const auto* optRenderData = getRenderDataForPass(tile, drawPass);
         if (!optRenderData || !optRenderData->bucket || !optRenderData->bucket->hasData()) {
             removeTile(drawPass, tileID);
             continue;
         }
-        
+
         const auto& renderData = *optRenderData;
         auto& bucket = static_cast<RawBucket&>(*renderData.bucket);
-        
+
         const auto prevBucketID = getRenderTileBucketID(tileID);
         if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
             // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
@@ -241,22 +237,7 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
     }
 
     */
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     // create layer group
     if (!layerGroup) {
         if (auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID())) {
@@ -300,14 +281,12 @@ void RenderPluginLayer::render(PaintParameters& paintParameters) {
 }
 
 void RenderPluginLayer::prepare(const LayerPrepareParameters& layerParameters) {
-
     // This check is here because base prepare will assert on these and crash
     if (layerParameters.source != nullptr) {
         if (layerParameters.source->isEnabled()) {
             RenderLayer::prepare(layerParameters);
         }
     }
-
 
     if (_updateFunction) {
         _updateFunction(layerParameters);
@@ -344,20 +323,17 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
     std::string jsonProperties = pm.propertiesAsJSON();
 
     i->_updateLayerPropertiesFunction(jsonProperties);
-    
-    
-    auto properties = makeMutable<style::PluginLayerProperties>(staticImmutableCast<style::PluginLayer::Impl>(baseImpl));
+
+    auto properties = makeMutable<style::PluginLayerProperties>(
+        staticImmutableCast<style::PluginLayer::Impl>(baseImpl));
     passes = RenderPass::Pass3D;
-//    passes = RenderPass::Pass3D;  (evaluated.get<style::LineOpacity>().constantOr(1.0) > 0 &&
-//              evaluated.get<style::LineColor>().constantOr(Color::black()).a > 0 &&
-//              evaluated.get<style::LineWidth>().constantOr(1.0) > 0)
-//                 ? RenderPass::Translucent
-//                 : RenderPass::None;
+    //    passes = RenderPass::Pass3D;  (evaluated.get<style::LineOpacity>().constantOr(1.0) > 0 &&
+    //              evaluated.get<style::LineColor>().constantOr(Color::black()).a > 0 &&
+    //              evaluated.get<style::LineWidth>().constantOr(1.0) > 0)
+    //                 ? RenderPass::Translucent
+    //                 : RenderPass::None;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
-
-    
-    
 }
 
 bool RenderPluginLayer::hasTransition() const {
