@@ -11,7 +11,6 @@ class RawBucketFeature;
 
 namespace style {
 
-
 class PluginLayer final : public Layer {
 public:
     PluginLayer(const std::string& layerID,
@@ -33,8 +32,10 @@ public:
     using OnUpdateLayer = std::function<void(const LayerPrepareParameters&)>;
     using OnUpdateLayerProperties = std::function<void(const std::string& properties)>;
     using OnFeatureLoaded = std::function<void(const std::shared_ptr<plugin::Feature> feature)>;
-    using OnFeatureCollectionLoaded = std::function<void(const std::shared_ptr<plugin::FeatureCollection> featureCollection)>;
-    using OnFeatureCollectionUnloaded = std::function<void(const std::shared_ptr<plugin::FeatureCollection> featureCollection)>;
+    using OnFeatureCollectionLoaded =
+        std::function<void(const std::shared_ptr<plugin::FeatureCollection> featureCollection)>;
+    using OnFeatureCollectionUnloaded =
+        std::function<void(const std::shared_ptr<plugin::FeatureCollection> featureCollection)>;
 
     void* _platformReference = nullptr;
 

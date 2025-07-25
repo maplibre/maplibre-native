@@ -54,7 +54,7 @@ MLN_EXPORT
 @interface MLNPluginLayerTileFeatureCollection : NSObject
 
 @property NSArray *features;
-@property NSString *tileID; // z,x,y
+@property NSString *tileID;  // z,x,y
 
 @end
 
@@ -128,8 +128,8 @@ MLN_EXPORT
 
 /// Called when a set of features are loaded from the tile
 /*
- TODO: Think about returning that this layer doesn't care about this feature collection via a bool/etc and then
- the underlying layer won't have to track this collection.
+ TODO: Think about returning that this layer doesn't care about this feature collection via a
+ bool/etc and then the underlying layer won't have to track this collection.
  */
 - (void)onFeatureCollectionLoaded:(MLNPluginLayerTileFeatureCollection *)tileFeatureCollection;
 

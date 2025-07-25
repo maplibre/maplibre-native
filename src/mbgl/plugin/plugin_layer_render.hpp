@@ -68,9 +68,8 @@ private:
     style::PluginLayer::OnUpdateLayer _updateFunction = nullptr;
 
     style::PluginLayer::OnUpdateLayerProperties _updateLayerPropertiesFunction = nullptr;
-    
+
     std::map<OverscaledTileID, std::shared_ptr<mbgl::plugin::FeatureCollection>> _featureCollectionByTile;
-    
 };
 
 } // namespace mbgl

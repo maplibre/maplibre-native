@@ -26,7 +26,7 @@
 }
 
 //-(void)onBucketLoaded:(MLNRawBucket *)bucket {
-//    
+//
 //}
 
 -(void)onUpdateLayerProperties:(NSDictionary *)layerProperties {
@@ -35,29 +35,29 @@
 
 -(void)featureLoaded:(MLNPluginLayerTileFeature *)tileFeature {
     NSLog(@"Tile Feature (id:%@) Properties: %@", tileFeature.featureID, tileFeature.featureProperties);
-    
+
     for (NSValue *v in tileFeature.featureCoordinates) {
 
-        
+
 //        NSValue *value = [NSValue valueWithBytes:&c objCType:@encode(CLLocationCoordinate2D)];
 //        [featureCoordinates addObject:value];
 
         CLLocationCoordinate2D coord;
         [v getValue:&coord];
-        
+
     }
 }
 
 -(void)featureUnloaded:(MLNPluginLayerTileFeature *)tileFeature {
    // NSLog(@"Tile Features Unloaded: %@", tileFeature.featureProperties);
-    
+
 }
 
 
 - (void)onFeatureLoaded:(MLNPluginLayerTileFeature *)tileFeature {
-    
+
     [self featureLoaded:tileFeature];
-    
+
 }
 
 /// Called when a set of features are loaded from the tile
@@ -66,7 +66,7 @@
     for (MLNPluginLayerTileFeature *feature in tileFeatureCollection.features) {
         [self featureLoaded:feature];
     }
-    
+
 }
 
 /// Called when a set of features are unloaded because the tile goes out of scene/etc
