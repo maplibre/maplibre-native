@@ -7,7 +7,7 @@
 +(MLNPluginLayerCapabilities *)layerCapabilities {
 
     MLNPluginLayerCapabilities *tempResult = [[MLNPluginLayerCapabilities alloc] init];
-    tempResult.layerID = @"hudhud::gltf-model-layer";
+    tempResult.layerID = @"maplibre::filter_features";
     tempResult.requiresPass3D = YES;
     tempResult.supportsReadingTileFeatures = YES;
     return tempResult;
@@ -17,7 +17,7 @@
 // The overrides
 -(void)onRenderLayer:(MLNMapView *)mapView
        renderEncoder:(id<MTLRenderCommandEncoder>)renderEncoder {
-   // NSLog(@"PluginLayerExample: On Render Layer");
+   //NSLog(@"PluginLayerExample: On Render Layer");
 
 }
 
@@ -34,7 +34,7 @@
 }
 
 -(void)featureLoaded:(MLNPluginLayerTileFeature *)tileFeature {
-   // NSLog(@"Tile Feature Properties: %@", tileFeature.featureProperties);
+    NSLog(@"Tile Feature (id:%@) Properties: %@", tileFeature.featureID, tileFeature.featureProperties);
     
     for (NSValue *v in tileFeature.featureCoordinates) {
 

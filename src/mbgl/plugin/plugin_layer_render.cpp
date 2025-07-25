@@ -16,7 +16,7 @@
 
 // TODO: Remove
 #include <iostream>
-
+// #define C_LOG_TILES 1
 
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/plugin/feature_collection_bucket.hpp>
@@ -97,12 +97,14 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
     bool removeAllTiles = ((renderTiles == nullptr) || (renderTiles->empty()));
     
     // TODO: Remove
+#ifdef C_LOG_TILES
     static int passCount = 0;
     passCount++;
     if (removeAllTiles) {
         std::cout << passCount << ": Remove All Tiles\n";
     }
-
+#endif
+    
     // Get list of tiles to remove and then remove them
     for (auto currentCollection: _featureCollectionByTile) {
         if (removeAllTiles || !hasRenderTile(currentCollection.first)) {
@@ -115,8 +117,10 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
             if (pluginLayer._featureCollectionUnloadedFunction) {
                 pluginLayer._featureCollectionUnloadedFunction(featureCollection);
             }
+#ifdef C_LOG_TILES
             // TODO: Remove this logging
             std::cout << passCount << ": Removing Feature Collection for Tile: " << (int)tileID.canonical.z << "," << tileID.canonical.x << "," << tileID.canonical.y << "\n";
+#endif
             _featureCollectionByTile.erase(tileID);
         }
     }
@@ -133,7 +137,9 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
                 const auto& tileID = tile.getOverscaledTileID();
 
                 if (!hasRenderTile(tileID)) {
+#ifdef C_LOG_TILES
                     std::cout << passCount << ": Tile was there and not anymore\n";
+#endif
                 }
                 
                 // TODO: Remove
@@ -167,9 +173,10 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
                 if (pluginLayer._featureCollectionLoadedFunction) {
                     if (featureCollection != nullptr) {
                         pluginLayer._featureCollectionLoadedFunction(featureCollection);
-                        
+#ifdef C_LOG_TILES
                         // TODO: Remove logging
                         std::cout << passCount << ": Adding Feature Collection for Tile: " << (int)tileID.canonical.z << "," << tileID.canonical.x << "," << tileID.canonical.y << "\n";
+#endif
 
                     }
                 }
