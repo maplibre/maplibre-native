@@ -397,14 +397,7 @@ void GeometryTileWorker::parse() {
     groupMap.reserve(layers->size());
 
     for (auto layer : *layers) {
-        auto lk = layoutKey(*layer->baseImpl);
-        //std::cout << "LK: " << lk << "\n";
-        if (lk.find("parking_space1") != std::string::npos) {
-        //    std::cout << "  Found PLugin\n";
-        } else {
-           // continue;
-        }
-        groupMap[lk].push_back(std::move(layer));
+        groupMap[layoutKey(*layer->baseImpl)].push_back(std::move(layer));
     }
 
     for (auto& pair : groupMap) {
