@@ -4,6 +4,7 @@
 #include <mbgl/gfx/context.hpp>
 
 #define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
+#define VULKAN_HPP_NO_DEFAULT_DISPATCHER
 
 #ifdef _WIN32
 #define VK_USE_PLATFORM_WIN32_KHR
@@ -39,6 +40,7 @@ public:
     void initShaders(gfx::ShaderRegistry&, const ProgramParameters& programParameters) override;
     void init();
 
+    const vk::DispatchLoaderDynamic& getDispatcher() const { return dispatcher; }
     const vk::UniqueInstance& getInstance() const { return instance; }
     const vk::PhysicalDevice& getPhysicalDevice() const { return physicalDevice; }
     const vk::UniqueDevice& getDevice() const { return device; }
@@ -60,7 +62,8 @@ public:
         device->setDebugUtilsObjectNameEXT(vk::DebugUtilsObjectNameInfoEXT()
                                                .setObjectType(object.objectType)
                                                .setObjectHandle(handle)
-                                               .setPObjectName(name.c_str()));
+                                               .setPObjectName(name.c_str()),
+                                           dispatcher);
 #endif
     }
 
@@ -94,6 +97,8 @@ protected:
 
 protected:
     vk::DynamicLoader dynamicLoader;
+    vk::DispatchLoaderDynamic dispatcher;
+
     vk::UniqueInstance instance;
     vk::UniqueDebugUtilsMessengerEXT debugUtilsCallback;
     vk::UniqueDebugReportCallbackEXT debugReportCallback;
