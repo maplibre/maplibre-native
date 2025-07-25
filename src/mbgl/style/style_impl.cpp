@@ -23,6 +23,7 @@
 #include <mbgl/util/exception.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/string.hpp>
+#include <mbgl/plugin/plugin_style_filter.hpp>
 #include <sstream>
 
 namespace mbgl {
@@ -74,9 +75,22 @@ void Style::Impl::loadURL(const std::string& url_) {
         } else if (res.notModified || res.noContent) {
             return;
         } else {
-            parse(*res.data);
+            filterThenParse(res);
         }
     });
+}
+
+void Style::Impl::filterThenParse(const Response& res) {
+    
+    Response tempResult = res;
+    if (_styleFilters.size() > 0) {
+        for (auto filter: _styleFilters) {
+            tempResult = filter->FilterResponse(tempResult);
+        }
+    }
+    parse(*tempResult.data);
+//    parse(*res.data);
+
 }
 
 void Style::Impl::parse(const std::string& json_) {
@@ -232,6 +246,12 @@ std::unique_ptr<Layer> Style::Impl::removeLayer(const std::string& id) {
 
     return layer;
 }
+
+// Add style parsing filter
+void Style::Impl::addStyleFilter(std::shared_ptr<mbgl::style::PluginStyleFilter> filter) {
+    _styleFilters.push_back(filter);
+}
+
 
 void Style::Impl::setLight(std::unique_ptr<Light> light_) {
     light = std::move(light_);

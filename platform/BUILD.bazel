@@ -268,6 +268,8 @@ objc_library(
     srcs = [
         "//platform/darwin:app/PluginLayerExample.h",
         "//platform/darwin:app/PluginLayerExample.mm",
+        "//platform/darwin:app/StyleFilterExample.h",
+        "//platform/darwin:app/StyleFilterExample.mm",
         "//platform/darwin:app/PluginLayerExampleMetalRendering.h",
         "//platform/darwin:app/PluginLayerExampleMetalRendering.mm",
         "//platform/darwin:app/CustomStyleLayerExample.h",

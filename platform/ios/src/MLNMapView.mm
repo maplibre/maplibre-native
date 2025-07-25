@@ -30,6 +30,7 @@
 #include <mbgl/plugin/plugin_layer_factory.hpp>
 #include <mbgl/plugin/plugin_layer.hpp>
 #include <mbgl/plugin/plugin_layer_impl.hpp>
+#include <mbgl/plugin/plugin_style_filter.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/render_pass.hpp>
@@ -82,6 +83,8 @@
 #import "MLNPluginLayer.h"
 #import "MLNStyleLayerManager.h"
 #include "MLNPluginStyleLayer_Private.h"
+#include "MLNStyleFilter.h"
+#include "MLNStyleFilter_Private.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -454,6 +457,9 @@ public:
 
 // Plugin Layers
 @property NSMutableArray *pluginLayers;
+
+// Style Filters
+@property NSMutableArray *styleFilters;
 
 @end
 
@@ -7800,6 +7806,55 @@ static void *windowScreenContext = &windowScreenContext;
     //darwinLayerManager->addLayerTypeCoreOnly(std::move(factory));
 
 }
+
+/**
+ Adds a style filter to the map view
+ */
+-(void)addStyleFilter:(MLNStyleFilter *)styleFilter {
+    
+    if (!self.styleFilters) {
+        self.styleFilters = [NSMutableArray array];
+    }
+    [self.styleFilters addObject:styleFilter];
+    
+    auto coreStyleFilter = std::make_shared<mbgl::style::PluginStyleFilter>();
+    coreStyleFilter->_filterStyleFunction = [styleFilter](const mbgl::Response &response) -> const mbgl::Response {
+        
+        mbgl::Response tempResult;
+
+        @autoreleasepool {
+            NSData *sourceData = [NSData dataWithBytesNoCopy:(void *)response.data->data()
+                                                      length:response.data->size()
+                                                freeWhenDone:NO];
+            NSData *filteredData = [styleFilter filterData:sourceData];
+            if (response.error) {
+                tempResult.error = std::make_unique<mbgl::Response::Error>(response.error->reason,
+                                                           response.error->message,
+                                                           response.error->retryAfter);
+            }
+            tempResult.noContent = response.noContent;
+            tempResult.notModified = response.notModified;
+            tempResult.mustRevalidate = response.mustRevalidate;
+            tempResult.modified = response.modified;
+            tempResult.expires = response.expires;
+            tempResult.etag = response.etag;
+
+            // Set the response data
+            tempResult.data =
+                std::make_shared<std::string>((const char*)[filteredData bytes], [filteredData length]);
+
+
+        }
+        return tempResult;
+    };
+    
+    // Set the ivar
+    [styleFilter setFilter:coreStyleFilter];
+    
+    _mbglMap->getStyle().addStyleFilter(coreStyleFilter);
+    
+}
+
 
 - (NSArray<NSString*>*)getActionJournalLogFiles
 {
