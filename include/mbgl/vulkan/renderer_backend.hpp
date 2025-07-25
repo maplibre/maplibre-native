@@ -38,7 +38,7 @@ public:
 
     /// One-time shader initialization
     void initShaders(gfx::ShaderRegistry&, const ProgramParameters& programParameters) override;
-    void init();
+    virtual void init();
 
     const vk::DispatchLoaderDynamic& getDispatcher() const { return dispatcher; }
     const vk::UniqueInstance& getInstance() const { return instance; }

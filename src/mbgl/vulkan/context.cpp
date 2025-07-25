@@ -228,25 +228,42 @@ void Context::beginFrame() {
 
     const auto& device = backend.getDevice();
     const auto& dispatcher = backend.getDispatcher();
-    auto& renderableResource = backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
-    const auto& platformSurface = renderableResource.getPlatformSurface();
+    
+    // Check if this is surface-based or offscreen rendering
+    // For offscreen rendering, we use RenderableResource directly, not SurfaceRenderableResource
+    bool isSurfaceRendering = false;
+    SurfaceRenderableResource* surfaceResource = nullptr;
+    
+    try {
+        // Try to get as SurfaceRenderableResource - will throw if it's not one
+        surfaceResource = &backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
+        // Check if it has a valid surface (offscreen resources shouldn't get here)
+        if (surfaceResource && surfaceResource->getPlatformSurface()) {
+            isSurfaceRendering = true;
+        }
+    } catch (const std::bad_cast&) {
+        // Not a surface resource, which is fine for offscreen rendering
+        isSurfaceRendering = false;
+    }
 
-    // poll for surface transform updates if enabled
-    const int32_t surfaceTransformPollingInterval = renderableResource.getSurfaceTransformPollingInterval();
-    if (surfaceTransformPollingInterval >= 0 && !surfaceUpdateRequested) {
-        if (currentFrameCount > surfaceTransformPollingInterval) {
-            if (renderableResource.didSurfaceTransformUpdate()) {
-                requestSurfaceUpdate();
+    // poll for surface transform updates if enabled (only for surface rendering)
+    if (isSurfaceRendering && surfaceResource) {
+        const int32_t surfaceTransformPollingInterval = surfaceResource->getSurfaceTransformPollingInterval();
+        if (surfaceTransformPollingInterval >= 0 && !surfaceUpdateRequested) {
+            if (currentFrameCount > surfaceTransformPollingInterval) {
+                if (surfaceResource->didSurfaceTransformUpdate()) {
+                    requestSurfaceUpdate();
+                }
+
+                currentFrameCount = 0;
+            } else {
+                ++currentFrameCount;
             }
-
-            currentFrameCount = 0;
-        } else {
-            ++currentFrameCount;
         }
     }
 
-    if (platformSurface && surfaceUpdateRequested && --surfaceUpdateLatency <= 0) {
-        renderableResource.recreateSwapchain();
+    if (isSurfaceRendering && surfaceResource && surfaceResource->getPlatformSurface() && surfaceUpdateRequested && --surfaceUpdateLatency <= 0) {
+        surfaceResource->recreateSwapchain();
 
         // we wait for an idle device to recreate the swapchain
         // so it's a good opportunity to delete all queued items
@@ -259,11 +276,11 @@ void Context::beginFrame() {
         surfaceUpdateRequested = false;
 
         // update renderable size
-        if (renderableResource.hasSurfaceTransformSupport()) {
-            const auto& extent = renderableResource.getExtent();
+        if (surfaceResource->hasSurfaceTransformSupport()) {
+            const auto& extent = surfaceResource->getExtent();
 
             auto& renderable = static_cast<Renderable&>(backend.getDefaultRenderable());
-            renderable.setSize({extent.width, extent.height});
+            renderable.setSize(Size{extent.width, extent.height});
         }
     }
 
@@ -276,20 +293,20 @@ void Context::beginFrame() {
 
     frame.runDeletionQueue(*this);
 
-    if (platformSurface) {
+    if (isSurfaceRendering && surfaceResource && surfaceResource->getPlatformSurface()) {
         MLN_TRACE_ZONE(acquireNextImageKHR);
         try {
             const vk::ResultValue acquireImageResult = device->acquireNextImageKHR(
-                renderableResource.getSwapchain().get(),
+                surfaceResource->getSwapchain().get(),
                 timeout,
-                renderableResource.getAcquireSemaphore(),
+                surfaceResource->getAcquireSemaphore(),
                 nullptr,
                 dispatcher);
 
             if (acquireImageResult.result == vk::Result::eSuccess) {
-                renderableResource.setAcquiredImageIndex(acquireImageResult.value);
+                surfaceResource->setAcquiredImageIndex(acquireImageResult.value);
             } else if (acquireImageResult.result == vk::Result::eSuboptimalKHR) {
-                renderableResource.setAcquiredImageIndex(acquireImageResult.value);
+                surfaceResource->setAcquiredImageIndex(acquireImageResult.value);
                 requestSurfaceUpdate();
             }
 
@@ -300,7 +317,9 @@ void Context::beginFrame() {
             return;
         }
     } else {
-        renderableResource.setAcquiredImageIndex(frameResourceIndex);
+        // For offscreen rendering, we don't have a swapchain
+        // Just use the frame index
+        // Note: We don't call setAcquiredImageIndex because that's a surface-specific method
     }
 
     frame.commandBuffer->reset(vk::CommandBufferResetFlagBits::eReleaseResources, dispatcher);
@@ -319,16 +338,26 @@ void Context::submitFrame() {
 
     const auto& device = backend.getDevice();
     const auto& graphicsQueue = backend.getGraphicsQueue();
-    auto& renderableResource = backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
-    const auto& platformSurface = renderableResource.getPlatformSurface();
+    
+    bool isSurfaceRendering = false;
+    SurfaceRenderableResource* surfaceResource = nullptr;
+    
+    try {
+        surfaceResource = &backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
+        if (surfaceResource && surfaceResource->getPlatformSurface()) {
+            isSurfaceRendering = true;
+        }
+    } catch (const std::bad_cast&) {
+        isSurfaceRendering = false;
+    }
 
     // submit frame commands
     const vk::PipelineStageFlags waitStageMask[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
     auto submitInfo = vk::SubmitInfo().setCommandBuffers(frame.commandBuffer.get());
 
-    if (platformSurface) {
-        submitInfo.setSignalSemaphores(renderableResource.getPresentSemaphore())
-            .setWaitSemaphores(renderableResource.getAcquireSemaphore())
+    if (isSurfaceRendering && surfaceResource) {
+        submitInfo.setSignalSemaphores(surfaceResource->getPresentSemaphore())
+            .setWaitSemaphores(surfaceResource->getAcquireSemaphore())
             .setWaitDstStageMask(waitStageMask);
     }
 
@@ -339,12 +368,12 @@ void Context::submitFrame() {
 
     graphicsQueue.submit(submitInfo, frame.flightFrameFence.get(), dispatcher);
 
-    // present rendered frame
-    if (platformSurface) {
-        const auto acquiredImage = renderableResource.getAcquiredImageIndex();
+    // present rendered frame (only for surface rendering)
+    if (isSurfaceRendering && surfaceResource) {
+        const auto acquiredImage = surfaceResource->getAcquiredImageIndex();
         const auto presentInfo = vk::PresentInfoKHR()
-                                     .setSwapchains(renderableResource.getSwapchain().get())
-                                     .setWaitSemaphores(renderableResource.getPresentSemaphore())
+                                     .setSwapchains(surfaceResource->getSwapchain().get())
+                                     .setWaitSemaphores(surfaceResource->getPresentSemaphore())
                                      .setImageIndices(acquiredImage);
 
         try {
@@ -474,15 +503,19 @@ void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexce
     auto& renderPassImpl = static_cast<RenderPass&>(renderPass);
     auto& context = const_cast<Context&>(*this);
 
-    auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();
-    if (renderableResource.hasSurfaceTransformSupport()) {
-        float surfaceRotation = renderableResource.getRotation();
+    try {
+        auto& surfaceResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();
+        if (surfaceResource.hasSurfaceTransformSupport()) {
+            float surfaceRotation = surfaceResource.getRotation();
 
-        const shaders::GlobalPlatformParamsUBO platformUBO = {
-            /* .rotation0 = */ {cosf(surfaceRotation), -sinf(surfaceRotation)},
-            /* .rotation1 = */ {sinf(surfaceRotation), cosf(surfaceRotation)}};
-        context.globalUniformBuffers.createOrUpdate(
-            shaders::idGlobalPlatformParamsUBO, &platformUBO, sizeof(platformUBO), context);
+            const shaders::GlobalPlatformParamsUBO platformUBO = {
+                /* .rotation0 = */ {cosf(surfaceRotation), -sinf(surfaceRotation)},
+                /* .rotation1 = */ {sinf(surfaceRotation), cosf(surfaceRotation)}};
+            context.globalUniformBuffers.createOrUpdate(
+                shaders::idGlobalPlatformParamsUBO, &platformUBO, sizeof(platformUBO), context);
+        }
+    } catch (const std::bad_cast&) {
+        // Not a surface resource, which is fine for offscreen rendering
     }
 
     context.globalUniformBuffers.bindDescriptorSets(renderPassImpl.getEncoder());
@@ -566,8 +599,15 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     commandBuffer->bindVertexBuffers(0, vertexBuffers, offset, dispatcher);
     commandBuffer->bindIndexBuffer(clipping.indexBuffer->getVulkanBuffer(), 0, vk::IndexType::eUint16, dispatcher);
 
-    auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();
-    const float rad = renderableResource.getRotation();
+    float rad = 0.0f;
+    try {
+        auto& surfaceResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();
+        rad = surfaceResource.getRotation();
+    } catch (const std::bad_cast&) {
+        // Not a surface resource, no rotation needed
+        rad = 0.0f;
+    }
+    
     const mat4 rotationMat = {cos(rad), -sin(rad), 0, 0, sin(rad), cos(rad), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 
     for (const auto& tileInfo : tileUBOs) {
