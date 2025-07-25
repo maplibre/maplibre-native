@@ -228,12 +228,12 @@ void Context::beginFrame() {
 
     const auto& device = backend.getDevice();
     const auto& dispatcher = backend.getDispatcher();
-    
+
     // Check if this is surface-based or offscreen rendering
     // For offscreen rendering, we use RenderableResource directly, not SurfaceRenderableResource
     bool isSurfaceRendering = false;
     SurfaceRenderableResource* surfaceResource = nullptr;
-    
+
     try {
         // Try to get as SurfaceRenderableResource - will throw if it's not one
         surfaceResource = &backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
@@ -262,7 +262,8 @@ void Context::beginFrame() {
         }
     }
 
-    if (isSurfaceRendering && surfaceResource && surfaceResource->getPlatformSurface() && surfaceUpdateRequested && --surfaceUpdateLatency <= 0) {
+    if (isSurfaceRendering && surfaceResource && surfaceResource->getPlatformSurface() && surfaceUpdateRequested &&
+        --surfaceUpdateLatency <= 0) {
         surfaceResource->recreateSwapchain();
 
         // we wait for an idle device to recreate the swapchain
@@ -338,10 +339,10 @@ void Context::submitFrame() {
 
     const auto& device = backend.getDevice();
     const auto& graphicsQueue = backend.getGraphicsQueue();
-    
+
     bool isSurfaceRendering = false;
     SurfaceRenderableResource* surfaceResource = nullptr;
-    
+
     try {
         surfaceResource = &backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
         if (surfaceResource && surfaceResource->getPlatformSurface()) {
@@ -607,7 +608,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         // Not a surface resource, no rotation needed
         rad = 0.0f;
     }
-    
+
     const mat4 rotationMat = {cos(rad), -sin(rad), 0, 0, sin(rad), cos(rad), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 
     for (const auto& tileInfo : tileUBOs) {
