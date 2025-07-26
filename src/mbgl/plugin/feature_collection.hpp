@@ -49,9 +49,6 @@ public:
     FeatureCollection(OverscaledTileID tileID)
         : _featureCollectionTileID(tileID) {};
     std::vector<std::shared_ptr<Feature>> _features;
-
-    // TODO: Open question about this.. should feature collections be tied to tile id?
-    // TODO: Question: Is overscaled the right thing or just canonical?
     OverscaledTileID _featureCollectionTileID;
 };
 

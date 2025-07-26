@@ -13,11 +13,6 @@
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/style/properties.hpp>
-
-// TODO: Remove
-#include <iostream>
-// #define C_LOG_TILES 1
-
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/plugin/feature_collection_bucket.hpp>
 
@@ -95,15 +90,6 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
     std::vector<OverscaledTileID> removedTiles;
     bool removeAllTiles = ((renderTiles == nullptr) || (renderTiles->empty()));
 
-    // TODO: Remove
-#ifdef C_LOG_TILES
-    static int passCount = 0;
-    passCount++;
-    if (removeAllTiles) {
-        std::cout << passCount << ": Remove All Tiles\n";
-    }
-#endif
-
     // Get list of tiles to remove and then remove them
     for (auto currentCollection : _featureCollectionByTile) {
         if (removeAllTiles || !hasRenderTile(currentCollection.first)) {
@@ -116,11 +102,6 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
             if (pluginLayer._featureCollectionUnloadedFunction) {
                 pluginLayer._featureCollectionUnloadedFunction(featureCollection);
             }
-#ifdef C_LOG_TILES
-            // TODO: Remove this logging
-            std::cout << passCount << ": Removing Feature Collection for Tile: " << (int)tileID.canonical.z << ","
-                      << tileID.canonical.x << "," << tileID.canonical.y << "\n";
-#endif
             _featureCollectionByTile.erase(tileID);
         }
     }
@@ -135,15 +116,7 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
                 const auto& tileID = tile.getOverscaledTileID();
 
                 if (!hasRenderTile(tileID)) {
-#ifdef C_LOG_TILES
-                    std::cout << passCount << ": Tile was there and not anymore\n";
-#endif
                 }
-
-                // TODO: Remove
-                //                if ((tileID.canonical.x == 1289) && (tileID.canonical.y == 879)) {
-                //                    std::cout << "Found tile\n";
-                //                }
 
                 const auto* optRenderData = getRenderDataForPass(tile, drawPass);
                 if (!optRenderData || !optRenderData->bucket || !optRenderData->bucket->hasData()) {
@@ -152,8 +125,6 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
                 }
                 const auto& renderData = *optRenderData;
                 auto& bucket = static_cast<FeatureCollectionBucket&>(*renderData.bucket);
-                // TODO: Remove
-                // std::cout << "Found Bucket\n";
                 auto featureCollection = bucket._featureCollection;
                 if (featureCollection == nullptr) {
                     continue;
@@ -172,71 +143,11 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
                 if (pluginLayer._featureCollectionLoadedFunction) {
                     if (featureCollection != nullptr) {
                         pluginLayer._featureCollectionLoadedFunction(featureCollection);
-#ifdef C_LOG_TILES
-                        // TODO: Remove logging
-                        std::cout << passCount << ": Adding Feature Collection for Tile: " << (int)tileID.canonical.z
-                                  << "," << tileID.canonical.x << "," << tileID.canonical.y << "\n";
-#endif
                     }
                 }
-
-                /*
-
-                 const auto prevBucketID = getRenderTileBucketID(tileID);
-                 if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
-                 // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
-                 removeTile(drawPass, tileID);
-                 }
-                 setRenderTileBucketID(tileID, bucket.getID());
-                 */
             }
         }
     }
-
-    /*
-    if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
-//        removeAllDrawables();
-        return;
-    }
-
-    // Set up a layer group
-    if (!layerGroup) {
-        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex,
-                                                            64, // initialCapacity=
-                                                            getID())) {
-            setLayerGroup(std::move(layerGroup_), changes);
-        } else {
-            return;
-        }
-    }
-
-    auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
-
-//    const auto& evaluated = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties).evaluated;
-
-    constexpr auto drawPass = RenderPass::Translucent;
-
-    for (const RenderTile& tile : *renderTiles) {
-        const auto& tileID = tile.getOverscaledTileID();
-
-        const auto* optRenderData = getRenderDataForPass(tile, drawPass);
-        if (!optRenderData || !optRenderData->bucket || !optRenderData->bucket->hasData()) {
-            removeTile(drawPass, tileID);
-            continue;
-        }
-
-        const auto& renderData = *optRenderData;
-        auto& bucket = static_cast<RawBucket&>(*renderData.bucket);
-
-        const auto prevBucketID = getRenderTileBucketID(tileID);
-        if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
-            // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
-            removeTile(drawPass, tileID);
-        }
-        setRenderTileBucketID(tileID, bucket.getID());
-    }
-
-    */
 
     // create layer group
     if (!layerGroup) {
@@ -321,17 +232,11 @@ void RenderPluginLayer::evaluate(const PropertyEvaluationParameters& parameters)
     }
 
     std::string jsonProperties = pm.propertiesAsJSON();
-
     i->_updateLayerPropertiesFunction(jsonProperties);
 
     auto properties = makeMutable<style::PluginLayerProperties>(
         staticImmutableCast<style::PluginLayer::Impl>(baseImpl));
     passes = RenderPass::Pass3D;
-    //    passes = RenderPass::Pass3D;  (evaluated.get<style::LineOpacity>().constantOr(1.0) > 0 &&
-    //              evaluated.get<style::LineColor>().constantOr(Color::black()).a > 0 &&
-    //              evaluated.get<style::LineWidth>().constantOr(1.0) > 0)
-    //                 ? RenderPass::Translucent
-    //                 : RenderPass::None;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 }
