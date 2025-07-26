@@ -586,7 +586,7 @@
         {   "id": "centroid-features",
             "type": "maplibre::filter_features",
             "source": "maplibre",
-            "source-layer": "centroids",
+            "source-layer": "countries",
             "maxzoom": 24,
             "minzoom": 1
         },

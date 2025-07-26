@@ -1,12 +1,4 @@
-//
-//  feature_collection.hpp
-//  App
-//
-//  Created by Malcolm Toon on 7/15/25.
-//
-
-#ifndef feature_collection_hpp
-#define feature_collection_hpp
+#pragma once
 
 #include <mbgl/tile/tile_id.hpp>
 
@@ -18,9 +10,6 @@
 namespace mbgl {
 
 namespace plugin {
-
-// using FillBinders = PaintPropertyBinders<style::FillPaintProperties::DataDrivenProperties>;
-// using FillLayoutVertex = gfx::Vertex<TypeList<attributes::pos>>;
 
 class FeatureCoordinate {
 public:
@@ -70,4 +59,3 @@ public:
 
 } // namespace mbgl
 
-#endif /* feature_collection_hpp */

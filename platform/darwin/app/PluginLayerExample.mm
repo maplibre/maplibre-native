@@ -1,5 +1,14 @@
 #import "PluginLayerExample.h"
 
+@interface PluginLayerExample () {
+    
+}
+
+@property BOOL logFeatures;
+
+@end
+
+
 @implementation PluginLayerExample
 
 
@@ -14,6 +23,13 @@
 
 }
 
+-(id)init {
+    if (self = [super init]) {
+        self.logFeatures = NO;
+    }
+    return self;
+}
+
 // The overrides
 -(void)onRenderLayer:(MLNMapView *)mapView
        renderEncoder:(id<MTLRenderCommandEncoder>)renderEncoder {
@@ -25,27 +41,26 @@
 
 }
 
-//-(void)onBucketLoaded:(MLNRawBucket *)bucket {
-//
-//}
-
 -(void)onUpdateLayerProperties:(NSDictionary *)layerProperties {
   //  NSLog(@"Layer Properties: %@", layerProperties);
 }
 
 -(void)featureLoaded:(MLNPluginLayerTileFeature *)tileFeature {
-    NSLog(@"Tile Feature (id:%@) Properties: %@", tileFeature.featureID, tileFeature.featureProperties);
+    
+    // Writing a single string since the tile loading is multithreaded and the output can get interwoven
+    NSMutableString *outputStr = [NSMutableString string];
+    [outputStr appendFormat:@"Tile Feature (id:%@) Properties: %@\n", tileFeature.featureID, tileFeature.featureProperties];
 
     for (NSValue *v in tileFeature.featureCoordinates) {
 
-
-//        NSValue *value = [NSValue valueWithBytes:&c objCType:@encode(CLLocationCoordinate2D)];
-//        [featureCoordinates addObject:value];
-
         CLLocationCoordinate2D coord;
         [v getValue:&coord];
+        
+        [outputStr appendFormat:@"  -> (%f, %f) \n", coord.latitude, coord.longitude];
 
     }
+    
+    NSLog(@"Feature: %@", outputStr);
 }
 
 -(void)featureUnloaded:(MLNPluginLayerTileFeature *)tileFeature {
