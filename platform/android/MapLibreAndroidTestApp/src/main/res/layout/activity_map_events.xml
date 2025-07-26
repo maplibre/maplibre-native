@@ -14,7 +14,8 @@
         android:layout_height="match_parent"
         app:maplibre_actionJournalEnabled="true"
         app:maplibre_actionJournalLogFileSize="1024"
-        app:maplibre_actionJournalLogFileCount="2"/>
+        app:maplibre_actionJournalLogFileCount="2"
+        app:maplibre_actionJournalRenderingReportInterval="10"/>
     <!-- -8<- [end:MapView] -->
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

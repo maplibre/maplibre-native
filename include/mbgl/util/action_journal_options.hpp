@@ -87,6 +87,23 @@ public:
      */
     uint32_t logFileCount() const { return logFileCount_; }
 
+    /**
+     * @brief Set the number of seconds to wait between rendering stats reports.
+     *
+     * @param interval time interval in seconds.
+     * @return ActionJournalOptions for chaining options together.
+     */
+    ActionJournalOptions& withRenderingStatsReportInterval(const uint32_t interval) {
+        renderingStatsReportInterval_ = interval;
+        return *this;
+    }
+
+    /**
+     * @brief Gets the previously set (or default) time interval.
+     * @return Returns report time interval in seconds
+     */
+    uint32_t renderingStatsReportInterval() const { return renderingStatsReportInterval_; }
+
 protected:
     bool enable_ = false;
     // path of the log
@@ -95,6 +112,8 @@ protected:
     uint32_t logFileSize_ = 1024 * 1024;
     // number of log files (each of `logFileSize` size)
     uint32_t logFileCount_ = 5;
+    // the wait time (seconds) between rendering reports
+    uint32_t renderingStatsReportInterval_ = 60;
 };
 
 } // namespace util
