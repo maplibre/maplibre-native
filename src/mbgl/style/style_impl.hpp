@@ -28,7 +28,6 @@ namespace mbgl {
 class FileSource;
 class AsyncRequest;
 class SpriteLoader;
-class Response;
 
 namespace style {
 
@@ -69,7 +68,6 @@ public:
 
     // Add style parsing filter
     void addStyleFilter(std::shared_ptr<mbgl::style::PluginStyleFilter>);
-    void filterThenParse(const std::string& styleData);
 
     std::string getName() const;
     CameraOptions getDefaultCamera() const;
@@ -98,6 +96,7 @@ public:
     bool loaded = false;
 
 private:
+    void filterThenParse(const std::string& styleData);
     void parse(const std::string&);
 
     std::vector<std::shared_ptr<PluginStyleFilter>> _styleFilters;
