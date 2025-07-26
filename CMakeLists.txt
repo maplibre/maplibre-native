@@ -977,6 +977,10 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_properties.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_factory.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/feature_collection.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/feature_collection.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/feature_collection_bucket.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/feature_collection_bucket.cpp
 )
 
 

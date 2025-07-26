@@ -2332,16 +2332,17 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
 
 
-
-    /// Style that does not require an `apiKey` nor any further configuration
-    [self.styleNames addObject:@"MapLibre Basic"];
-    [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
-
     /// This is hte same style as above but copied locally and the three instances of the metal plug-in layer added to the style
     /// Look for "type": "plugin-layer-metal-rendering" in the PluginLayerTestStyle.json for an example of how the layer is defined
     [self.styleNames addObject:@"MapLibre Basic - Local With Plugin"];
     NSURL *url = [[NSBundle mainBundle] URLForResource:@"PluginLayerTestStyle.json" withExtension:nil];
     [self.styleURLs addObject:url];
+
+
+    /// Style that does not require an `apiKey` nor any further configuration
+    [self.styleNames addObject:@"MapLibre Basic"];
+    [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
+
 
     /// Add MapLibre Styles if an `apiKey` exists
     NSString* apiKey = [MLNSettings apiKey];
