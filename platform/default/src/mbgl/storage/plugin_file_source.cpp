@@ -15,54 +15,46 @@
 
 namespace mbgl {
 
-void PluginFileSource::setProtocolPrefix(const std::string &protocolPrefix) {
-    
-}
-
-
+void PluginFileSource::setProtocolPrefix(const std::string& protocolPrefix) {}
 
 class PluginFileSource::Impl {
 public:
     explicit Impl(const ActorRef<Impl>&, const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
         : resourceOptions(resourceOptions_.clone()),
           clientOptions(clientOptions_.clone()) {}
-    
+
     OnRequestResource _requestFunction;
-    void setOnRequestResourceFunction(OnRequestResource requestFunction) {
-        _requestFunction = requestFunction;
-    }
-    
+    void setOnRequestResourceFunction(OnRequestResource requestFunction) { _requestFunction = requestFunction; }
+
     void request(const Resource& resource, const ActorRef<FileSourceRequest>& req) {
-        
-//        if (_onCanRequestResourceFunction) {
-//            if (!_onCanRequestResourceFunction(resource)) {
-//                Response response;
-//                response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, "This plugin protocol handler cannot service this resource");
-//                req.invoke(&FileSourceRequest::setResponse, response);
-//                return;
-//            }
-//        }
-        
-//        if (!acceptsURL(resource.url)) {
-//            Response response;
-//            response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, "Invalid file URL");
-//            req.invoke(&FileSourceRequest::setResponse, response);
-//            return;
-//        }
+        //        if (_onCanRequestResourceFunction) {
+        //            if (!_onCanRequestResourceFunction(resource)) {
+        //                Response response;
+        //                response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, "This
+        //                plugin protocol handler cannot service this resource");
+        //                req.invoke(&FileSourceRequest::setResponse, response);
+        //                return;
+        //            }
+        //        }
 
-//        void requestLocalFile(const std::string& path,
-//                              const ActorRef<FileSourceRequest>& req,
-//                              const std::optional<std::pair<uint64_t, uint64_t>>& dataRange) {
+        //        if (!acceptsURL(resource.url)) {
+        //            Response response;
+        //            response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, "Invalid file
+        //            URL"); req.invoke(&FileSourceRequest::setResponse, response); return;
+        //        }
 
-            Response response;
-            if (_requestFunction) {
-                response = _requestFunction(resource);
-            } else {
-                response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,
-                                                                   std::string("Custom Protocol Handler Not Configured Correctly"));
-            }
-            req.invoke(&FileSourceRequest::setResponse, response);
+        //        void requestLocalFile(const std::string& path,
+        //                              const ActorRef<FileSourceRequest>& req,
+        //                              const std::optional<std::pair<uint64_t, uint64_t>>& dataRange) {
 
+        Response response;
+        if (_requestFunction) {
+            response = _requestFunction(resource);
+        } else {
+            response.error = std::make_unique<Response::Error>(
+                Response::Error::Reason::Other, std::string("Custom Protocol Handler Not Configured Correctly"));
+        }
+        req.invoke(&FileSourceRequest::setResponse, response);
     }
 
     void setResourceOptions(ResourceOptions options) {
@@ -94,13 +86,12 @@ private:
 
 void PluginFileSource::setOnCanRequestFunction(OnCanRequestResource requestFunction) {
     _onCanRequestResourceFunction = requestFunction;
-//    impl.get()->actor().invoke(&Impl::setOnCanRequestFunction, requestFunction);
+    //    impl.get()->actor().invoke(&Impl::setOnCanRequestFunction, requestFunction);
 }
 
 void PluginFileSource::setOnRequestResourceFunction(OnRequestResource requestFunction) {
     impl.get()->actor().invoke(&Impl::setOnRequestResourceFunction, requestFunction);
 }
-
 
 PluginFileSource::PluginFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
     : impl(std::make_unique<util::Thread<Impl>>(

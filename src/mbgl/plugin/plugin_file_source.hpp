@@ -11,32 +11,28 @@ template <typename T>
 class Thread;
 } // namespace util
 
-class PluginFileSourceRequest {
-    
-};
+class PluginFileSourceRequest {};
 
-class PluginFileSourceResponse {
-    
-};
+class PluginFileSourceResponse {};
 
 class PluginFileSource : public FileSource {
 public:
-    PluginFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions);
+    PluginFileSource(const ResourceOptions &resourceOptions, const ClientOptions &clientOptions);
     ~PluginFileSource() override;
 
     using OnCanRequestResource = std::function<bool(const Resource &)>;
-    using OnRequestResource = std::function<Response (const Resource &)>;
+    using OnRequestResource = std::function<Response(const Resource &)>;
 
     void setOnCanRequestFunction(OnCanRequestResource requestFunction);
     void setOnRequestResourceFunction(OnRequestResource requestFunction);
 
-    std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
-    bool canRequest(const Resource&) const override;
+    std::unique_ptr<AsyncRequest> request(const Resource &, Callback) override;
+    bool canRequest(const Resource &) const override;
     void pause() override;
     void resume() override;
 
     void setProtocolPrefix(const std::string &);
-    
+
     void setResourceOptions(ResourceOptions) override;
     ResourceOptions getResourceOptions() override;
 

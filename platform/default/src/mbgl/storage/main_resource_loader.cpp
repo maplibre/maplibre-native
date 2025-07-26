@@ -68,7 +68,7 @@ public:
         // Go through custom handlers
         bool requestHandledByCustomHandler = false;
         auto fm = FileSourceManager::get();
-        for (auto customFileSource: fm->getCustomFileSources()) {
+        for (auto customFileSource : fm->getCustomFileSources()) {
             if (customFileSource->canRequest(resource)) {
                 tasks[req] = customFileSource->request(resource, callback);
                 requestHandledByCustomHandler = true;
@@ -98,7 +98,7 @@ public:
                     // Cache request with fallback to network with cache control
                     tasks[req] = databaseFileSource->request(resource, [=, this](const Response& response) {
                         Resource res = resource;
-                        
+
                         // Resource is in the cache
                         if (!response.noContent) {
                             if (response.isUsable()) {
@@ -112,13 +112,13 @@ public:
                                 // requester.
                                 res.priorData = response.data;
                             }
-                            
+
                             // Copy response fields for cache control request
                             res.priorModified = response.modified;
                             res.priorExpires = response.expires;
                             res.priorEtag = response.etag;
                         }
-                        
+
                         tasks[req] = requestFromNetwork(res, std::move(tasks[req]));
                     });
                 }
@@ -193,15 +193,14 @@ public:
     }
 
     bool canRequest(const Resource& resource) const {
-        
         // Check the custom file sources
         auto fm = FileSourceManager::get();
-        for (auto customFileSource: fm->getCustomFileSources()) {
+        for (auto customFileSource : fm->getCustomFileSources()) {
             if (customFileSource->canRequest(resource)) {
                 return true;
             }
         }
-        
+
         return (assetFileSource && assetFileSource->canRequest(resource)) ||
                (localFileSource && localFileSource->canRequest(resource)) ||
                (databaseFileSource && databaseFileSource->canRequest(resource)) ||

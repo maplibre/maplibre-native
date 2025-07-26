@@ -7806,16 +7806,16 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (MLNPluginProtocolHandlerResource *)resourceFromCoreResource:(const mbgl::Resource &)resource {
-    
+
     MLNPluginProtocolHandlerResource *tempResult = [[MLNPluginProtocolHandlerResource alloc] init];
     tempResult.resourceURL = [NSString stringWithUTF8String:resource.url.c_str()];
     return tempResult;
-    
+
 }
 
 - (void)addPluginProtocolHandler:(Class)pluginProtocolHandlerClass {
-    
-    
+
+
     MLNPluginProtocolHandler *handler = [[pluginProtocolHandlerClass alloc] init];
     if (!self.pluginProtocols) {
         self.pluginProtocols = [NSMutableArray array];
@@ -7824,18 +7824,18 @@ static void *windowScreenContext = &windowScreenContext;
 
     mbgl::ResourceOptions resourceOptions;
     mbgl::ClientOptions clientOptions;
-    
+
     // Use weak here so there isn't a retain cycle
     __weak MLNPluginProtocolHandler *weakHandler = handler;
     __weak MLNMapView *weakSelf = self;
-    
+
     std::shared_ptr<mbgl::PluginFileSource> pluginSource = std::make_shared<mbgl::PluginFileSource>(resourceOptions, clientOptions);
     pluginSource->setOnRequestResourceFunction([weakHandler, weakSelf](const mbgl::Resource &resource) -> mbgl::Response {
         mbgl::Response tempResult;
-        
+
         __strong MLNPluginProtocolHandler *strongHandler = weakHandler;
         if (strongHandler) {
-            
+
             MLNPluginProtocolHandlerResource *res = [weakSelf resourceFromCoreResource:resource];
             MLNPluginProtocolHandlerResponse *response = [strongHandler requestResource:res];
             if (response.data) {
@@ -7843,29 +7843,29 @@ static void *windowScreenContext = &windowScreenContext;
                                                                 [response.data length]);
             }
         }
-        
+
         return tempResult;
-        
+
     });
-    
+
     pluginSource->setOnCanRequestFunction([weakHandler, weakSelf](const mbgl::Resource &resource) -> bool{
         @autoreleasepool {
             __strong MLNPluginProtocolHandler *strongHandler = weakHandler;
             if (!strongHandler) {
                 return false;
             }
-            
+
             MLNPluginProtocolHandlerResource *res = [weakSelf resourceFromCoreResource:resource];
             BOOL tempResult = [strongHandler canRequestResource:res];
 
             return tempResult;
-            
+
         }
     });
-    
+
     auto fileSourceManager = mbgl::FileSourceManager::get();
     fileSourceManager->registerCustomFileSource(pluginSource);
-    
+
 }
 
 

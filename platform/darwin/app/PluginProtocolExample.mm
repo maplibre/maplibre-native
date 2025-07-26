@@ -10,13 +10,13 @@
 }
 
 -(MLNPluginProtocolHandlerResponse *)requestResource:(MLNPluginProtocolHandlerResource *)resource {
-    
+
     NSData *data = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"PluginLayerTestStyle.json" ofType:nil]];
-    
+
     MLNPluginProtocolHandlerResponse *response = [[MLNPluginProtocolHandlerResponse alloc] init];
     response.data = data;
     return response;
-    
+
 }
 
 

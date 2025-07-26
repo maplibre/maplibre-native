@@ -48,7 +48,7 @@ public:
 
     // Returns an array of custom file sources
     virtual std::vector<std::shared_ptr<FileSource>> getCustomFileSources() noexcept;
-    
+
 protected:
     FileSourceManager();
     class Impl;

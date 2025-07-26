@@ -16,9 +16,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MLNPluginProtocolHandler : NSObject
 
--(BOOL)canRequestResource:(MLNPluginProtocolHandlerResource *)resource;
+- (BOOL)canRequestResource:(MLNPluginProtocolHandlerResource *)resource;
 
--(MLNPluginProtocolHandlerResponse *)requestResource:(MLNPluginProtocolHandlerResource *)resource;
+- (MLNPluginProtocolHandlerResponse *)requestResource:(MLNPluginProtocolHandlerResource *)resource;
 
 @end
 
