@@ -80,7 +80,6 @@ void Style::Impl::loadURL(const std::string& url_) {
     });
 }
 
-
 void Style::Impl::filterThenParse(const std::string& styleData) {
     if (_styleFilters.size() == 0) {
         parse(styleData);
@@ -94,7 +93,6 @@ void Style::Impl::filterThenParse(const std::string& styleData) {
     }
     parse(filteredStyle);
 }
-
 
 void Style::Impl::parse(const std::string& json_) {
     Parser parser;
