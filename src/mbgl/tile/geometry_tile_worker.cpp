@@ -38,7 +38,8 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
                                        const MapMode mode_,
                                        const float pixelRatio_,
                                        const bool showCollisionBoxes_,
-                                       gfx::DynamicTextureAtlasPtr dynamicTextureAtlas_)
+                                       gfx::DynamicTextureAtlasPtr dynamicTextureAtlas_,
+                                       std::shared_ptr<FontFaces> fontFaces_)
     : self(std::move(self_)),
       parent(std::move(parent_)),
       scheduler(scheduler_),
@@ -48,7 +49,8 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
       mode(mode_),
       pixelRatio(pixelRatio_),
       showCollisionBoxes(showCollisionBoxes_),
-      dynamicTextureAtlas(dynamicTextureAtlas_) {}
+      dynamicTextureAtlas(dynamicTextureAtlas_),
+      fontFaces(fontFaces_) {}
 
 GeometryTileWorker::~GeometryTileWorker() {
     MLN_TRACE_FUNC();
@@ -297,7 +299,7 @@ void GeometryTileWorker::coalesce() {
     self.invoke(&GeometryTileWorker::coalesced);
 }
 
-void GeometryTileWorker::onGlyphsAvailable(GlyphMap newGlyphMap) {
+void GeometryTileWorker::onGlyphsAvailable(GlyphMap newGlyphMap, HBShapeResults results) {
     MLN_TRACE_FUNC();
 
     for (auto& newFontGlyphs : newGlyphMap) {
@@ -305,7 +307,7 @@ void GeometryTileWorker::onGlyphsAvailable(GlyphMap newGlyphMap) {
         Glyphs& newGlyphs = newFontGlyphs.second;
 
         Glyphs& glyphs = glyphMap[fontStack];
-        for (auto& pendingGlyphDependency : pendingGlyphDependencies) {
+        for (auto& pendingGlyphDependency : pendingGlyphDependencies.glyphs) {
             // Linear lookup here to handle reverse of FontStackHash -> FontStack,
             // since dependencies need the full font stack name to make a request
             // There should not be many fontstacks to look through
@@ -316,12 +318,39 @@ void GeometryTileWorker::onGlyphsAvailable(GlyphMap newGlyphMap) {
                     std::optional<Immutable<Glyph>>& glyph = newGlyph.second;
 
                     if (pendingGlyphIDs.erase(glyphID)) {
-                        glyphs.emplace(glyphID, std::move(glyph));
+                        if (!(glyphID.complex.code == 0 && glyphID.complex.type != GlyphIDType::FontPBF)) {
+                            glyphs.emplace(glyphID, std::move(glyph));
+                        }
                     }
                 }
             }
         }
     }
+
+    if (!results.empty()) {
+        pendingGlyphDependencies.shapes.clear();
+
+        for (auto& newFontGlyphs : newGlyphMap) {
+            FontStackHash fontStack = newFontGlyphs.first;
+            Glyphs& newGlyphs = newFontGlyphs.second;
+
+            Glyphs& glyphs = glyphMap[fontStack];
+            for (auto& newGlyph : newGlyphs) {
+                const GlyphID& glyphID = newGlyph.first;
+                std::optional<Immutable<Glyph>>& glyph = newGlyph.second;
+
+                if (!(glyphID.complex.code == 0 && glyphID.complex.type != GlyphIDType::FontPBF))
+                    glyphs.emplace(glyphID, std::move(glyph));
+            }
+        }
+
+        for (auto& layout : layouts) {
+            if (layout && layout->needFinalizeSymbols()) {
+                layout->finalizeSymbols(results);
+            }
+        }
+    }
+
     symbolDependenciesChanged();
 }
 
@@ -344,15 +373,25 @@ void GeometryTileWorker::onImagesAvailable(ImageMap newIconMap,
 void GeometryTileWorker::requestNewGlyphs(const GlyphDependencies& glyphDependencies) {
     MLN_TRACE_FUNC();
 
-    for (auto& fontDependencies : glyphDependencies) {
+    for (auto& fontDependencies : glyphDependencies.glyphs) {
         auto fontGlyphs = glyphMap.find(FontStackHasher()(fontDependencies.first));
         for (auto glyphID : fontDependencies.second) {
             if (fontGlyphs == glyphMap.end() || fontGlyphs->second.find(glyphID) == fontGlyphs->second.end()) {
-                pendingGlyphDependencies[fontDependencies.first].insert(glyphID);
+                pendingGlyphDependencies.glyphs[fontDependencies.first].insert(glyphID);
             }
         }
     }
-    if (!pendingGlyphDependencies.empty()) {
+    for (auto& fontDependencies : glyphDependencies.shapes) {
+        auto& fontStack = fontDependencies.first;
+        for (const auto& typeDependencies : fontDependencies.second) {
+            auto& type = typeDependencies.first;
+            auto& strs = typeDependencies.second;
+            for (auto& str : strs) {
+                pendingGlyphDependencies.shapes[fontStack][type].insert(str);
+            }
+        }
+    }
+    if (!pendingGlyphDependencies.glyphs.empty()) {
         parent.invoke(&GeometryTile::getGlyphs, pendingGlyphDependencies);
     }
 }
@@ -433,7 +472,9 @@ void GeometryTileWorker::parse() {
         // images/glyphs are available to add the features to the buckets.
         if (leaderImpl.getTypeInfo()->layout == LayerTypeInfo::Layout::Required) {
             std::unique_ptr<Layout> layout = LayerManager::get()->createLayout(
-                {parameters, glyphDependencies, imageDependencies, availableImages}, std::move(geometryLayer), group);
+                {parameters, fontFaces, glyphDependencies, imageDependencies, availableImages},
+                std::move(geometryLayer),
+                group);
             if (layout->hasDependencies()) {
                 layouts.push_back(std::move(layout));
             } else {
@@ -478,7 +519,7 @@ void GeometryTileWorker::parse() {
 }
 
 bool GeometryTileWorker::hasPendingDependencies() const {
-    for (auto& glyphDependency : pendingGlyphDependencies) {
+    for (auto& glyphDependency : pendingGlyphDependencies.glyphs) {
         if (!glyphDependency.second.empty()) {
             return true;
         }

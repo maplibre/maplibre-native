@@ -3,6 +3,7 @@
 #include <mbgl/style/image_impl.hpp>
 #include <mbgl/text/glyph.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
+#include <mbgl/text/glyph_manager.hpp>
 #include <mbgl/util/containers.hpp>
 #include <memory>
 
@@ -13,6 +14,7 @@ class BucketParameters;
 class RenderLayer;
 class FeatureIndex;
 class LayerRenderData;
+class GlyphManager;
 
 class Layout {
 public:
@@ -27,6 +29,10 @@ public:
 
     virtual void prepareSymbols(const GlyphMap&, const GlyphPositions&, const ImageMap&, const ImagePositions&) {}
 
+    virtual void finalizeSymbols(HBShapeResults&) {}
+
+    virtual bool needFinalizeSymbols() { return false; }
+
     virtual bool hasSymbolInstances() const { return true; }
 
     virtual bool hasDependencies() const = 0;
@@ -35,6 +41,7 @@ public:
 class LayoutParameters {
 public:
     const BucketParameters& bucketParameters;
+    std::shared_ptr<FontFaces> fontFaces;
     GlyphDependencies& glyphDependencies;
     ImageDependencies& imageDependencies;
     std::set<std::string>& availableImages;
