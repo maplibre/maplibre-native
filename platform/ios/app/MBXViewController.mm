@@ -27,6 +27,7 @@
 #import "PluginLayerExample.h"
 #import "PluginLayerExampleMetalRendering.h"
 #import "MLNPluginStyleLayer.h"
+#import "StyleFilterExample.h"
 
 static const CLLocationCoordinate2D WorldTourDestinations[] = {
     { .latitude = 38.8999418, .longitude = -77.033996 },
@@ -281,6 +282,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
     [self.mapView addPluginLayerType:[PluginLayerExample class]];
     [self.mapView addPluginLayerType:[PluginLayerExampleMetalRendering class]];
+    [self.mapView addStyleFilter:[[StyleFilterExample alloc] init]];
 
 }
 
