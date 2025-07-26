@@ -93,11 +93,10 @@ void FeatureCollectionBucket::addFeature(const GeometryTileFeature& tileFeature,
             tempFeature->_featureProperties[name] = std::to_string(*d);
         } else if (auto b = value.getBool()) {
             tempFeature->_featureProperties[name] = std::to_string(*b);
-        // TODO: Add array type
+            // TODO: Add array type
             //        } else if (auto a = value.getArray()) {
             //            tempFeature->_featureProperties[name] = std::to_string(*b);
         }
-
     }
 
     LatLngBounds b(tileID);
@@ -145,5 +144,4 @@ float FeatureCollectionBucket::getQueryRadius(const RenderLayer&) const {
 void FeatureCollectionBucket::update(const FeatureStates&,
                                      const GeometryTileLayer&,
                                      const std::string&,
-                                     const ImagePositions&) {
-}
+                                     const ImagePositions&) {}

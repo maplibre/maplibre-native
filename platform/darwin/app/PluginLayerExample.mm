@@ -1,7 +1,7 @@
 #import "PluginLayerExample.h"
 
 @interface PluginLayerExample () {
-    
+
 }
 
 @property BOOL logFeatures;
@@ -46,7 +46,7 @@
 }
 
 -(void)featureLoaded:(MLNPluginLayerTileFeature *)tileFeature {
-    
+
     // Writing a single string since the tile loading is multithreaded and the output can get interwoven
     NSMutableString *outputStr = [NSMutableString string];
     [outputStr appendFormat:@"Tile Feature (id:%@) Properties: %@\n", tileFeature.featureID, tileFeature.featureProperties];
@@ -55,11 +55,11 @@
 
         CLLocationCoordinate2D coord;
         [v getValue:&coord];
-        
+
         [outputStr appendFormat:@"  -> (%f, %f) \n", coord.latitude, coord.longitude];
 
     }
-    
+
     NSLog(@"Feature: %@", outputStr);
 }
 

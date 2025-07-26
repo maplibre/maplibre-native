@@ -44,7 +44,6 @@ public:
     // Feature collection is an list of features
     std::shared_ptr<mbgl::plugin::FeatureCollection> _featureCollection = nullptr;
     std::vector<Immutable<style::LayerProperties>> _layers;
-
 };
 
 } // namespace mbgl
