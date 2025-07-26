@@ -30,9 +30,11 @@
 #include <mbgl/plugin/plugin_layer_factory.hpp>
 #include <mbgl/plugin/plugin_layer.hpp>
 #include <mbgl/plugin/plugin_layer_impl.hpp>
+#include <mbgl/plugin/plugin_file_source.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/render_pass.hpp>
+#include <mbgl/storage/file_source_manager.hpp>
 
 #import "Mapbox.h"
 #import "MLNShape_Private.h"
@@ -80,6 +82,7 @@
 #import "MLNActionJournalOptions_Private.h"
 #import "MLNMapProjection.h"
 #import "MLNPluginLayer.h"
+#import "MLNPluginProtocolHandler.h"
 #import "MLNStyleLayerManager.h"
 #include "MLNPluginStyleLayer_Private.h"
 
@@ -452,8 +455,9 @@ public:
 @property (nonatomic) CADisplayLink *displayLink;
 @property (nonatomic, assign) BOOL needsDisplayRefresh;
 
-// Plugin Layers
+// Plugin Objects
 @property NSMutableArray *pluginLayers;
+@property NSMutableArray *pluginProtocols;
 
 @end
 
@@ -7800,6 +7804,71 @@ static void *windowScreenContext = &windowScreenContext;
     //darwinLayerManager->addLayerTypeCoreOnly(std::move(factory));
 
 }
+
+- (MLNPluginProtocolHandlerResource *)resourceFromCoreResource:(const mbgl::Resource &)resource {
+    
+    MLNPluginProtocolHandlerResource *tempResult = [[MLNPluginProtocolHandlerResource alloc] init];
+    tempResult.resourceURL = [NSString stringWithUTF8String:resource.url.c_str()];
+    return tempResult;
+    
+}
+
+- (void)addPluginProtocolHandler:(Class)pluginProtocolHandlerClass {
+    
+    
+    MLNPluginProtocolHandler *handler = [[pluginProtocolHandlerClass alloc] init];
+    if (!self.pluginProtocols) {
+        self.pluginProtocols = [NSMutableArray array];
+    }
+    [self.pluginProtocols addObject:handler];
+
+    mbgl::ResourceOptions resourceOptions;
+    mbgl::ClientOptions clientOptions;
+    
+    // Use weak here so there isn't a retain cycle
+    __weak MLNPluginProtocolHandler *weakHandler = handler;
+    __weak MLNMapView *weakSelf = self;
+    
+    std::shared_ptr<mbgl::PluginFileSource> pluginSource = std::make_shared<mbgl::PluginFileSource>(resourceOptions, clientOptions);
+    pluginSource->setOnRequestResourceFunction([weakHandler, weakSelf](const mbgl::Resource &resource) -> mbgl::Response {
+        mbgl::Response tempResult;
+        
+        __strong MLNPluginProtocolHandler *strongHandler = weakHandler;
+        if (strongHandler) {
+            
+            MLNPluginProtocolHandlerResource *res = [weakSelf resourceFromCoreResource:resource];
+            MLNPluginProtocolHandlerResponse *response = [strongHandler requestResource:res];
+            if (response.data) {
+                tempResult.data = std::make_shared<std::string>((const char*)[response.data bytes],
+                                                                [response.data length]);
+            }
+        }
+        
+        return tempResult;
+        
+    });
+    
+    pluginSource->setOnCanRequestFunction([weakHandler, weakSelf](const mbgl::Resource &resource) -> bool{
+        @autoreleasepool {
+            __strong MLNPluginProtocolHandler *strongHandler = weakHandler;
+            if (!strongHandler) {
+                return false;
+            }
+            
+            MLNPluginProtocolHandlerResource *res = [weakSelf resourceFromCoreResource:resource];
+            BOOL tempResult = [strongHandler canRequestResource:res];
+
+            return tempResult;
+            
+        }
+    });
+    
+    auto fileSourceManager = mbgl::FileSourceManager::get();
+    fileSourceManager->registerCustomFileSource(pluginSource);
+    
+}
+
+
 
 - (NSArray<NSString*>*)getActionJournalLogFiles
 {
