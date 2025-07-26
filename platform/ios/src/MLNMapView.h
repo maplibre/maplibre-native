@@ -2276,6 +2276,11 @@ vertically on the map.
  */
 - (void)addPluginLayerType:(Class)pluginLayerClass;
 
+/**
+ Adds a plug-in protocol handler that is external to this library
+ */
+- (void)addPluginProtocolHandler:(Class)pluginProtocolHandlerClass;
+
 @end
 
 NS_ASSUME_NONNULL_END
