@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/storage/response.hpp>
+#include <functional>
 
 namespace mbgl {
 
