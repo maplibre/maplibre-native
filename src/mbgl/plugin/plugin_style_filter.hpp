@@ -8,12 +8,12 @@ namespace style {
 
 class PluginStyleFilter {
 public:
-    using OnFilterStyle = std::function<const Response(const Response&)>;
+    using OnFilterStyle = std::function<const std::string(const std::string&)>;
 
     OnFilterStyle _filterStyleFunction;
 
     // This method
-    const Response FilterResponse(const Response& res);
+    const std::string filterResponse(const std::string& styleData);
 };
 
 } // namespace style

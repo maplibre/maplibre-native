@@ -45,7 +45,7 @@ void Style::Impl::loadJSON(const std::string& json_) {
     observer->onStyleLoading();
 
     url.clear();
-    parse(json_);
+    filterThenParse(json_);
 }
 
 void Style::Impl::loadURL(const std::string& url_) {
@@ -75,24 +75,26 @@ void Style::Impl::loadURL(const std::string& url_) {
         } else if (res.notModified || res.noContent) {
             return;
         } else {
-            filterThenParse(res);
+            filterThenParse(*res.data);
         }
     });
 }
 
-void Style::Impl::filterThenParse(const Response& res) {
+
+void Style::Impl::filterThenParse(const std::string& styleData) {
     if (_styleFilters.size() == 0) {
-        parse(*res.data);
+        parse(styleData);
         return;
     }
 
     // Otherwise, go through the chain of filters
-    Response tempResult = res;
+    std::string filteredStyle = styleData;
     for (auto filter : _styleFilters) {
-        tempResult = filter->FilterResponse(tempResult);
+        filteredStyle = filter->filterResponse(filteredStyle);
     }
-    parse(*tempResult.data);
+    parse(filteredStyle);
 }
+
 
 void Style::Impl::parse(const std::string& json_) {
     Parser parser;

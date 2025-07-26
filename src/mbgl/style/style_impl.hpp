@@ -69,7 +69,7 @@ public:
 
     // Add style parsing filter
     void addStyleFilter(std::shared_ptr<mbgl::style::PluginStyleFilter>);
-    void filterThenParse(const Response& res);
+    void filterThenParse(const std::string& styleData);
 
     std::string getName() const;
     CameraOptions getDefaultCamera() const;

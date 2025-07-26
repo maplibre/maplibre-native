@@ -2,8 +2,8 @@
 
 using namespace mbgl::style;
 
-// This method
-const mbgl::Response PluginStyleFilter::FilterResponse(const Response& res) {
+// This method will call the lambda if it exists
+const std::string PluginStyleFilter::filterResponse(const std::string& res) {
     if (_filterStyleFunction) {
         auto tempResult = _filterStyleFunction(res);
         return tempResult;

@@ -7818,31 +7818,16 @@ static void *windowScreenContext = &windowScreenContext;
     [self.styleFilters addObject:styleFilter];
 
     auto coreStyleFilter = std::make_shared<mbgl::style::PluginStyleFilter>();
-    coreStyleFilter->_filterStyleFunction = [styleFilter](const mbgl::Response &response) -> const mbgl::Response {
+    coreStyleFilter->_filterStyleFunction = [styleFilter](const std::string &filterData) -> const std::string {
 
-        mbgl::Response tempResult;
+        std::string tempResult;
 
         @autoreleasepool {
-            NSData *sourceData = [NSData dataWithBytesNoCopy:(void *)response.data->data()
-                                                      length:response.data->size()
+            NSData *sourceData = [NSData dataWithBytesNoCopy:(void *)filterData.data()
+                                                      length:filterData.size()
                                                 freeWhenDone:NO];
             NSData *filteredData = [styleFilter filterData:sourceData];
-            if (response.error) {
-                tempResult.error = std::make_unique<mbgl::Response::Error>(response.error->reason,
-                                                           response.error->message,
-                                                           response.error->retryAfter);
-            }
-            tempResult.noContent = response.noContent;
-            tempResult.notModified = response.notModified;
-            tempResult.mustRevalidate = response.mustRevalidate;
-            tempResult.modified = response.modified;
-            tempResult.expires = response.expires;
-            tempResult.etag = response.etag;
-
-            // Set the response data
-            tempResult.data =
-                std::make_shared<std::string>((const char*)[filteredData bytes], [filteredData length]);
-
+            tempResult = std::string((const char*)[filteredData bytes], [filteredData length]);
 
         }
         return tempResult;
