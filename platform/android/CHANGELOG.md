@@ -1,5 +1,12 @@
 # Changelog MapLibre Native for Android
 
+## 11.12.1
+
+### ✨ Features and improvements
+
+- Concurrent Camera Animations
+- Ability to set out of bounds region to improve rendering
+
 ## 11.12.0
 
 ### ✨ Features and improvements
