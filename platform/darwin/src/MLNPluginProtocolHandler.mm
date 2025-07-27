@@ -21,3 +21,6 @@
 
 @implementation MLNPluginProtocolHandlerResponse
 @end
+
+@implementation MLNTileData
+@end
