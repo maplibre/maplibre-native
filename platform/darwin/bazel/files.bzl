@@ -108,8 +108,7 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/NSValue+MLNAdditions.h",
     "src/MLNPluginLayer.h",
     "src/MLNPluginStyleLayer.h",
-    "src/MLNStyleFilter.h",
-    "src/MLNStyleFilter_Private.h",
+    "src/MLNStyleFilter.h"
 ]
 
 MLN_DARWIN_OBJCPP_HEADERS = [
