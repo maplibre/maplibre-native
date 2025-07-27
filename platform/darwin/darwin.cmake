@@ -164,6 +164,7 @@ add_library(
     "${CMAKE_CURRENT_LIST_DIR}/app/CustomStyleLayerExample.m"
     "${CMAKE_CURRENT_LIST_DIR}/app/PluginLayerExample.mm"
     "${CMAKE_CURRENT_LIST_DIR}/app/PluginLayerExampleMetalRendering.mm"
+    "${CMAKE_CURRENT_LIST_DIR}/app/StyleFilterExample.mm"
 )
 
 target_link_libraries(
