@@ -360,23 +360,31 @@ void RendererBackend::initDebug() {
 }
 
 void RendererBackend::init() {
+    // initialize minimal set of function pointers
+    dispatcher.init(dynamicLoader);
+
     initFrameCapture();
     initInstance();
+
+    // initialize function pointers for instance
+    dispatcher.init(instance.get());
+
+    initDebug();
     initSurface();
     initDevice();
+
+    // optional function pointer specialization for device
+    dispatcher.init(device.get());
+    physicalDeviceProperties = physicalDevice.getProperties(dispatcher);
+    if (graphicsQueueIndex != -1) graphicsQueue = device->getQueue(graphicsQueueIndex, 0, dispatcher);
+    if (presentQueueIndex != -1) presentQueue = device->getQueue(presentQueueIndex, 0, dispatcher);
+
     initAllocator();
     initSwapchain();
     initCommandPool();
 }
 
 void RendererBackend::initInstance() {
-    // VULKAN_HPP_DEFAULT_DISPATCHER is global and can lead to race conditions in multi-map environments
-    static std::mutex vkDefaultDispatchLoaderMutex;
-    std::lock_guard<std::mutex> lock(vkDefaultDispatchLoaderMutex);
-
-    // initialize minimal set of function pointers
-    dispatcher.init(dynamicLoader);
-
     // Vulkan 1.1 on Android is supported on 71% of devices (compared to 1.3 with 6%) as of April 23 2024
     // https://vulkan.gpuinfo.org/
 #ifdef __APPLE__
@@ -430,14 +438,6 @@ void RendererBackend::initInstance() {
     }
 
     instance = vk::createInstanceUnique(createInfo, nullptr, dispatcher);
-
-    // initialize function pointers for instance
-    dispatcher.init(instance.get());
-
-#ifdef ENABLE_VULKAN_VALIDATION
-    // enable validation layer callback
-    initDebug();
-#endif
 }
 
 void RendererBackend::initSurface() {
@@ -541,8 +541,6 @@ void RendererBackend::initDevice() {
         }
 
         if (!physicalDevice) throw std::runtime_error("No suitable GPU found");
-
-        physicalDeviceProperties = physicalDevice.getProperties(dispatcher);
     };
 
     pickPhysicalDevice();
@@ -582,20 +580,13 @@ void RendererBackend::initDevice() {
 
     auto createInfo = vk::DeviceCreateInfo()
                           .setQueueCreateInfos(queueCreateInfos)
-                          .setEnabledExtensionCount(static_cast<uint32_t>(extensions.size()))
-                          .setPpEnabledExtensionNames(extensions.data())
+                          .setPEnabledExtensionNames(extensions)
                           .setPEnabledFeatures(&physicalDeviceFeatures);
 
     // this is not needed for newer implementations
     createInfo.setPEnabledLayerNames(layers);
 
     device = physicalDevice.createDeviceUnique(createInfo, nullptr, dispatcher);
-
-    // optional function pointer specialization for device
-    dispatcher.init(device.get());
-
-    graphicsQueue = device->getQueue(graphicsQueueIndex, 0, dispatcher);
-    if (presentQueueIndex != -1) presentQueue = device->getQueue(presentQueueIndex, 0, dispatcher);
 }
 
 void RendererBackend::initSwapchain() {
@@ -630,12 +621,13 @@ void RendererBackend::destroyResources() {
 
     vmaDestroyAllocator(allocator);
 
-    device.reset();
+    usingSharedContext ? void(device.release()) : device.reset();
 
     // destroy this last so we have cleanup validation
     debugUtilsCallback.reset();
     debugReportCallback.reset();
-    instance.reset();
+
+    usingSharedContext ? void(instance.release()) : instance.reset();
 }
 
 /// @brief Register a list of types with a shader registry instance
