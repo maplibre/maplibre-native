@@ -121,6 +121,10 @@ MTL::Winding mapWindingMode(const gfx::CullFaceWindingType mode) noexcept {
     }
 }
 
+MTL::ScissorRect getMetalScissorRect(gfx::ScissorRect rect) noexcept {
+    return {static_cast<uint32_t>(rect.x), static_cast<uint32_t>(rect.y), rect.width, rect.height};
+}
+
 } // namespace
 
 void Drawable::setColorMode(const gfx::ColorMode& value) {
@@ -214,14 +218,7 @@ void Drawable::draw(PaintParameters& parameters) const {
     const auto& cullMode = getCullFaceMode();
     renderPass.setCullMode(cullMode.enabled ? mapCullMode(cullMode.side) : MTL::CullModeNone);
     renderPass.setFrontFacingWinding(mapWindingMode(cullMode.winding));
-    EdgeInsets offset = parameters.state.getFrustumOffset();
-    Size size = parameters.state.getSize();
-    double pixelRatio = parameters.pixelRatio;
-    MTL::ScissorRect rect = {static_cast<unsigned long>(offset.left() * pixelRatio),
-                             static_cast<unsigned long>(offset.top() * pixelRatio),
-                             static_cast<unsigned long>((size.width - (offset.left() + offset.right())) * pixelRatio),
-                             static_cast<unsigned long>((size.height - (offset.top() + offset.bottom())) * pixelRatio)};
-    renderPass.setScissorRect(rect);
+    renderPass.setScissorRect(getMetalScissorRect(parameters.scissorRect));
 
     if (!impl->pipelineState) {
         impl->pipelineState = shaderMTL.getRenderPipelineState(

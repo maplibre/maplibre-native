@@ -101,11 +101,6 @@ void Drawable::setCullFaceMode(const gfx::CullFaceMode& mode) {
     impl->pipelineInfo.setCullMode(mode);
 }
 
-void Drawable::setScissorRect(const gfx::ScissorRect& rect) {
-    gfx::Drawable::setScissorRect(rect);
-    impl->pipelineInfo.setScissorRect(rect);
-}
-
 void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
                                       std::size_t vertexCount,
                                       gfx::DrawMode mode,
@@ -301,14 +296,7 @@ void Drawable::draw(PaintParameters& parameters) const {
         // update pipeline info with per segment modifiers
         impl->pipelineInfo.setDrawMode(seg->getMode());
 
-        EdgeInsets offset = parameters.state.getFrustumOffset();
-        Size size = parameters.state.getSize();
-        double pixelRatio = parameters.pixelRatio;
-        gfx::ScissorRect rect = {static_cast<int32_t>(offset.left() * pixelRatio),
-                                 static_cast<int32_t>(offset.top() * pixelRatio),
-                                 static_cast<uint32_t>((size.width - (offset.left() + offset.right())) * pixelRatio),
-                                 static_cast<uint32_t>((size.height - (offset.top() + offset.bottom())) * pixelRatio)};
-        impl->pipelineInfo.setScissorRect(rect);
+        impl->pipelineInfo.setScissorRect(parameters.scissorRect);
 
         impl->pipelineInfo.setDynamicValues(context.getBackend(), commandBuffer);
 

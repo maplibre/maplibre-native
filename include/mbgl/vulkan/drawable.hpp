@@ -44,7 +44,6 @@ public:
 
     void setLineWidth(int32_t value) override;
     void setCullFaceMode(const gfx::CullFaceMode&) override;
-    void setScissorRect(const gfx::ScissorRect&) override;
 
     void updateVertexAttributes(gfx::VertexAttributeArrayPtr,
                                 std::size_t vertexCount,

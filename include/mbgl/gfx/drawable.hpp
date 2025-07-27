@@ -188,12 +188,6 @@ public:
     /// Set color mode
     virtual void setColorMode(const gfx::ColorMode&);
 
-    /// Get scissor rect
-    const gfx::ScissorRect& getScissorRect() const;
-
-    /// Sset scissor rect
-    virtual void setScissorRect(const gfx::ScissorRect&);
-
     /// Get the vertex attributes that override default values in the shader program
     const gfx::VertexAttributeArrayPtr& getVertexAttributes() const noexcept { return vertexAttributes; }
 
