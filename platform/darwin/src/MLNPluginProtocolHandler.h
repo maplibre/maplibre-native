@@ -3,21 +3,21 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef enum {
-    MLNPluginProtocolHandlerResourceKindUnknown,
-    MLNPluginProtocolHandlerResourceKindStyle,
-    MLNPluginProtocolHandlerResourceKindSource,
-    MLNPluginProtocolHandlerResourceKindTile,
-    MLNPluginProtocolHandlerResourceKindGlyphs,
-    MLNPluginProtocolHandlerResourceKindSpriteImage,
-    MLNPluginProtocolHandlerResourceKindSpriteJSON,
-    MLNPluginProtocolHandlerResourceKindImage
+  MLNPluginProtocolHandlerResourceKindUnknown,
+  MLNPluginProtocolHandlerResourceKindStyle,
+  MLNPluginProtocolHandlerResourceKindSource,
+  MLNPluginProtocolHandlerResourceKindTile,
+  MLNPluginProtocolHandlerResourceKindGlyphs,
+  MLNPluginProtocolHandlerResourceKindSpriteImage,
+  MLNPluginProtocolHandlerResourceKindSpriteJSON,
+  MLNPluginProtocolHandlerResourceKindImage
 } MLNPluginProtocolHandlerResourceKind;
 
 typedef enum {
-    MLNPluginProtocolHandlerResourceLoadingMethodUnknown,
-    MLNPluginProtocolHandlerResourceLoadingMethodCacheOnly,
-    MLNPluginProtocolHandlerResourceLoadingMethodNetworkOnly,
-    MLNPluginProtocolHandlerResourceLoadingMethodAll
+  MLNPluginProtocolHandlerResourceLoadingMethodUnknown,
+  MLNPluginProtocolHandlerResourceLoadingMethodCacheOnly,
+  MLNPluginProtocolHandlerResourceLoadingMethodNetworkOnly,
+  MLNPluginProtocolHandlerResourceLoadingMethodAll
 } MLNPluginProtocolHandlerResourceLoadingMethod;
 
 // TODO: Might make sense to add this to it's own file
@@ -41,7 +41,7 @@ typedef enum {
 @property NSString *resourceURL;
 
 // This is optional
-@property MLNTileData * __nullable tileData;
+@property MLNTileData *__nullable tileData;
 
 @end
 

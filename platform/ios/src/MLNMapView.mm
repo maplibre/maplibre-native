@@ -7808,10 +7808,10 @@ static void *windowScreenContext = &windowScreenContext;
 - (MLNPluginProtocolHandlerResource *)resourceFromCoreResource:(const mbgl::Resource &)resource {
 
     MLNPluginProtocolHandlerResource *tempResult = [[MLNPluginProtocolHandlerResource alloc] init];
-    
+
     // The URL of the request
     tempResult.resourceURL = [NSString stringWithUTF8String:resource.url.c_str()];
-    
+
     // The kind of request
     switch (resource.kind) {
         case mbgl::Resource::Kind::Style:
@@ -7839,7 +7839,7 @@ static void *windowScreenContext = &windowScreenContext;
             tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindUnknown;
             break;
     }
-    
+
     // The loading method
     if (resource.loadingMethod == mbgl::Resource::LoadingMethod::CacheOnly) {
         tempResult.loadingMethod = MLNPluginProtocolHandlerResourceLoadingMethodCacheOnly;
@@ -7848,7 +7848,7 @@ static void *windowScreenContext = &windowScreenContext;
     } else if (resource.loadingMethod == mbgl::Resource::LoadingMethod::All) {
         tempResult.loadingMethod = MLNPluginProtocolHandlerResourceLoadingMethodAll;
     }
-    
+
     if (resource.tileData) {
         auto td = *resource.tileData;
         MLNTileData *tileData = [[MLNTileData alloc] init];
@@ -7859,7 +7859,7 @@ static void *windowScreenContext = &windowScreenContext;
         tileData.tileZoom = td.z;
         tempResult.tileData = tileData;
     }
-    
+
     // TODO: Figure out which other properties from resource should be passed along here
 /*
     Usage usage{Usage::Online};
@@ -7872,7 +7872,7 @@ static void *windowScreenContext = &windowScreenContext;
     Duration minimumUpdateInterval{Duration::zero()};
     StoragePolicy storagePolicy{StoragePolicy::Permanent};
     */
-    
+
     return tempResult;
 
 }
@@ -7888,7 +7888,7 @@ static void *windowScreenContext = &windowScreenContext;
 
     // TODO: Unclear if any of these options are needed for plugins
     mbgl::ResourceOptions resourceOptions;
-    
+
     // TODO: Unclear if any of the properties on clientOptions need to be set
     mbgl::ClientOptions clientOptions;
 
@@ -7904,7 +7904,7 @@ static void *windowScreenContext = &windowScreenContext;
         if (strongHandler) {
 
             MLNPluginProtocolHandlerResource *res = [weakSelf resourceFromCoreResource:resource];
-            
+
             // TODO: Figure out what other fields in response need to be passed back from requestResource
             MLNPluginProtocolHandlerResponse *response = [strongHandler requestResource:res];
             if (response.data) {
