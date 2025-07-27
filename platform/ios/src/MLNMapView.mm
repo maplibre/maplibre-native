@@ -7822,7 +7822,10 @@ static void *windowScreenContext = &windowScreenContext;
     }
     [self.pluginProtocols addObject:handler];
 
+    // TODO: Unclear if any of these options are needed for plugins
     mbgl::ResourceOptions resourceOptions;
+    
+    // TODO: Unclear if any of the properties on clientOptions need to be set
     mbgl::ClientOptions clientOptions;
 
     // Use weak here so there isn't a retain cycle

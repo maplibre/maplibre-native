@@ -27,26 +27,6 @@ public:
     void setOnRequestResourceFunction(OnRequestResource requestFunction) { _requestFunction = requestFunction; }
 
     void request(const Resource& resource, const ActorRef<FileSourceRequest>& req) {
-        //        if (_onCanRequestResourceFunction) {
-        //            if (!_onCanRequestResourceFunction(resource)) {
-        //                Response response;
-        //                response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, "This
-        //                plugin protocol handler cannot service this resource");
-        //                req.invoke(&FileSourceRequest::setResponse, response);
-        //                return;
-        //            }
-        //        }
-
-        //        if (!acceptsURL(resource.url)) {
-        //            Response response;
-        //            response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, "Invalid file
-        //            URL"); req.invoke(&FileSourceRequest::setResponse, response); return;
-        //        }
-
-        //        void requestLocalFile(const std::string& path,
-        //                              const ActorRef<FileSourceRequest>& req,
-        //                              const std::optional<std::pair<uint64_t, uint64_t>>& dataRange) {
-
         Response response;
         if (_requestFunction) {
             response = _requestFunction(resource);
@@ -86,7 +66,6 @@ private:
 
 void PluginFileSource::setOnCanRequestFunction(OnCanRequestResource requestFunction) {
     _onCanRequestResourceFunction = requestFunction;
-    //    impl.get()->actor().invoke(&Impl::setOnCanRequestFunction, requestFunction);
 }
 
 void PluginFileSource::setOnRequestResourceFunction(OnRequestResource requestFunction) {
