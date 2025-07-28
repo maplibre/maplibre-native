@@ -1330,13 +1330,18 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer.cpp
 )
 
+# Harfbuzz text shaping
 set(SHAPE_TARGETS, "")
+list(APPEND
+    SRC_FILES
+        # Base text shaping files, which are always included. They don't depend on HarfBuzz if MLN_TEXT_SHAPING_HARFBUZZ is OFF.
+        ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz.hpp
+)
 if (MLN_TEXT_SHAPING_HARFBUZZ)
     message(STATUS "Configuring with HarfBuzz text shaping")
     list(APPEND
         SRC_FILES
-        ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz_impl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz_impl.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/text/freetype.cpp

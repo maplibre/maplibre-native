@@ -21,9 +21,7 @@ GlyphManager::GlyphManager(std::unique_ptr<LocalGlyphRasterizer> localGlyphRaste
       localGlyphRasterizer(std::move(localGlyphRasterizer_)) {}
 
 GlyphManager::~GlyphManager() {
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     hbShapers.clear(); // clear harfbuzz + freetype face before library;
-#endif                 // MLN_TEXT_SHAPING_HARFBUZZ
 }
 
 void GlyphManager::getGlyphs(GlyphRequestor& requestor, GlyphDependencies glyphDependencies, FileSource& fileSource) {
@@ -87,7 +85,6 @@ void GlyphManager::requestRange(GlyphRequest& request,
         case GlyphIDType::FontPBF:
             res = Resource::glyphs(glyphURL, fontStack, std::pair<uint16_t, uint16_t>{range.first, range.second});
             break;
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
         default: {
             std::string url = getFontFaceURL(range.type);
             if (url.size()) {
@@ -97,7 +94,6 @@ void GlyphManager::requestRange(GlyphRequest& request,
             }
 
         } break;
-#endif // MLN_TEXT_SHAPING_HARFBUZZ
     }
 
     observer->onGlyphsRequested(fontStack, range);
@@ -129,7 +125,6 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
                 if (range.type == GlyphIDType::FontPBF) {
                     glyphs = parseGlyphPBF(range, *res.data);
                 }
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
                 else {
                     if (loadHBShaper(fontStack, range.type, *res.data)) {
                         Glyph temp;
@@ -137,7 +132,6 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
                         glyphs.emplace_back(std::move(temp));
                     }
                 }
-#endif // MLN_TEXT_SHAPING_HARFBUZZ
             } catch (...) {
                 observer->onGlyphsError(fontStack, range, std::current_exception());
                 return;
@@ -209,7 +203,6 @@ void GlyphManager::evict(const std::set<FontStack>& keep) {
     util::erase_if(entries, [&](const auto& entry) { return keep.count(entry.first) == 0; });
 }
 
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
 std::shared_ptr<HBShaper> GlyphManager::getHBShaper(FontStack fontStack, GlyphIDType type) {
     if (hbShapers.find(fontStack) != hbShapers.end()) {
         auto& glyphs = hbShapers[fontStack];
@@ -258,7 +251,6 @@ void GlyphManager::hbShaping(const std::u16string& text,
         shaper->createComplexGlyphIDs(text, glyphIDs, adjusts);
     }
 }
-#endif // MLN_TEXT_SHAPING_HARFBUZZ
 
 std::string GlyphManager::getFontFaceURL(GlyphIDType type) {
     std::string url;
