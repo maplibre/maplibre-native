@@ -2,11 +2,10 @@
 
 #include <mbgl/tile/tile_id.hpp>
 
-#include <stdio.h>
-#include <vector>
-#include <string>
 #include <map>
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace mbgl {
 

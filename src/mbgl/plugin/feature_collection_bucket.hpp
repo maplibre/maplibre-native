@@ -1,13 +1,13 @@
 #pragma once
 
-#include <mbgl/renderer/bucket.hpp>
-#include <mbgl/renderer/paint_property_binder.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/gfx/index_buffer.hpp>
+#include <mbgl/plugin/feature_collection.hpp>
+#include <mbgl/renderer/bucket.hpp>
+#include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/shaders/segment.hpp>
 #include <mbgl/style/layers/fill_layer_properties.hpp>
-#include <mbgl/plugin/feature_collection.hpp>
+#include <mbgl/tile/geometry_tile_data.hpp>
 
 #include <map>
 

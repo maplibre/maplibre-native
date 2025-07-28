@@ -1,7 +1,7 @@
-#include <mbgl/util/geo.hpp>
+#include <mbgl/plugin/feature_collection_bucket.hpp>
 #include <mbgl/plugin/plugin_layer.hpp>
 #include <mbgl/plugin/plugin_layer_impl.hpp>
-#include <mbgl/plugin/feature_collection_bucket.hpp>
+#include <mbgl/util/geo.hpp>
 
 using namespace mbgl;
 
