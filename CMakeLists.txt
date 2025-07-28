@@ -44,7 +44,7 @@ if (MLN_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
     set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
 endif()
 
-if(WIN32 AND NOT MLN_WITH_QT AND NOT CMAKE_SYSTEM_NAME STREQUAL Android)
+if(WIN32 AND NOT DEFINED ENV{MSYSTEM} AND NOT MLN_WITH_QT AND NOT CMAKE_SYSTEM_NAME STREQUAL Android)
     set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/platform/windows/custom-toolchain.cmake)
 endif()
 
@@ -966,6 +966,19 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/version.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/work_request.cpp
 )
+list(APPEND SRC_FILES
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_render.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_properties.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_factory.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_render.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_properties.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_impl.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_factory.cpp
+)
+
 
 if(MLN_WITH_OPENGL)
     message(STATUS "Configuring GL-Native with OpenGL renderer backend")

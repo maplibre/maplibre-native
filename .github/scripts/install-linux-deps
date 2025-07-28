@@ -9,4 +9,6 @@ DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
   libglfw3-dev \
   libwebp-dev \
   libopengl0 \
-  mesa-vulkan-drivers
+  mesa-vulkan-drivers \
+  llvm
+cargo install armerge@2.2.0

@@ -14,8 +14,8 @@
 #include <fstream>
 #include <set>
 
-#if defined(WIN32) && !defined(__clang__)
-#include <Windows.h>
+#if defined(WIN32)
+#include <windows.h>
 #ifdef GetObject
 #undef GetObject
 #endif
@@ -100,7 +100,7 @@ static void populateNames(std::vector<std::string>& names) {
         }
     };
 
-#if defined(WIN32) && !defined(__clang__)
+#if defined(WIN32)
     style_directory += "/*";
     WIN32_FIND_DATAA ffd;
     HANDLE hFind = FindFirstFileA(style_directory.c_str(), &ffd);

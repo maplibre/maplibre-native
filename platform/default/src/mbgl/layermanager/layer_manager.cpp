@@ -24,6 +24,15 @@ class LayerManagerDefault final : public LayerManager {
 public:
     LayerManagerDefault();
 
+    /**
+     * Enables a layer type for JSON style only.
+     *
+     * We might not want to expose runtime API for some layer types
+     * in order to save binary size (the corresponding SDK layer wrappers
+     * should be excluded from the project build).
+     */
+    void addLayerTypeCoreOnly(std::unique_ptr<mbgl::LayerFactory>) override;
+
 private:
     void addLayerType(std::unique_ptr<LayerFactory>);
     // LayerManager overrides.
@@ -33,6 +42,10 @@ private:
     std::vector<std::unique_ptr<LayerFactory>> factories;
     std::map<std::string, LayerFactory*> typeToFactory;
 };
+
+void LayerManagerDefault::addLayerTypeCoreOnly(std::unique_ptr<mbgl::LayerFactory> layerFactory) {
+    addLayerType(std::move(layerFactory));
+}
 
 LayerManagerDefault::LayerManagerDefault() {
 #if !defined(MBGL_LAYER_FILL_DISABLE_ALL)
@@ -90,7 +103,7 @@ void LayerManagerDefault::addLayerType(std::unique_ptr<LayerFactory> factory) {
 LayerFactory* LayerManagerDefault::getFactory(const mbgl::style::LayerTypeInfo* typeInfo) noexcept {
     assert(typeInfo);
     for (const auto& factory : factories) {
-        if (factory->getTypeInfo() == typeInfo) {
+        if (layerTypeInfoEquals(factory->getTypeInfo(), typeInfo)) {
             return factory.get();
         }
     }

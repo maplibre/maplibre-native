@@ -25,7 +25,7 @@ git clone --recurse-submodules git@github.com:maplibre/maplibre-native.git
 Make sure the following Homebrew packages are installed:
 
 ```sh
-brew install bazelisk webp libuv webp icu4c jpeg-turbo glfw
+brew install bazelisk webp libuv webp icu4c jpeg-turbo glfw libuv
 brew link icu4c --force
 ```
 
