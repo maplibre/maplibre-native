@@ -124,8 +124,7 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
             try {
                 if (range.type == GlyphIDType::FontPBF) {
                     glyphs = parseGlyphPBF(range, *res.data);
-                }
-                else {
+                } else {
                     if (loadHBShaper(fontStack, range.type, *res.data)) {
                         Glyph temp;
                         temp.id = GlyphID(0, range.type);
