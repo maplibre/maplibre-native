@@ -40,8 +40,7 @@ inline constexpr auto to_array(std::tuple<Ts...>&& tuple) {
 }
 
 template <typename T = int>
-std::enable_if_t<std::is_integral_v<T>, std::optional<T>>
-str_to_int(const std::string& str, int base = 10) noexcept {
+std::enable_if_t<std::is_integral_v<T>, std::optional<T>> str_to_int(const std::string& str, int base = 10) noexcept {
     T result;
     auto first = str.data();
     auto last = str.data() + str.size();
