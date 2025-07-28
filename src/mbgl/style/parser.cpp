@@ -11,6 +11,7 @@
 
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/string.hpp>
+#include <mbgl/util/convert.hpp>
 
 #include <mapbox/geojsonvt.hpp>
 
@@ -153,9 +154,15 @@ StyleParseResult Parser::parse(const std::string& json) {
                                                     std::string start = rangeString.substr(0, pos);
                                                     std::string end = rangeString.substr(pos + 1);
                                                     if (!start.empty() && !end.empty()) {
-                                                        int startInt = std::stoi(start, nullptr, 16);
-                                                        int endInt = std::stoi(end, nullptr, 16);
-                                                        fontFace.ranges.emplace_back(startInt, endInt);
+                                                        auto startInt = util::str_to_int(start, 16);
+                                                        auto endInt = util::str_to_int(end, 16);
+                                                        if (startInt && endInt) {
+                                                            fontFace.ranges.emplace_back(*startInt, *endInt);
+                                                        } else {
+                                                            Log::Warning(
+                                                                Event::ParseStyle,
+                                                                "Invalid unicode-range in font-face: " + rangeString);
+                                                        }
                                                     }
                                                 }
                                             }
@@ -170,6 +177,8 @@ StyleParseResult Parser::parse(const std::string& json) {
                                 fontFace.type = genNewGlyphIDType(
                                     fontFace.url, FontStack{fontFace.name}, fontFace.ranges);
                                 fontFaces->emplace_back(std::move(fontFace));
+                            } else {
+                                Log::Warning(Event::ParseStyle, "Invalid font-face definition for: " + faceName);
                             }
                         }
                     }
@@ -177,6 +186,8 @@ StyleParseResult Parser::parse(const std::string& json) {
                     FontFace fontFace(faceName, faceValue.GetString(), {{0, 0x10FFFF}});
                     fontFace.type = genNewGlyphIDType(fontFace.url, FontStack{fontFace.name}, fontFace.ranges);
                     fontFaces->emplace_back(std::move(fontFace));
+                } else {
+                    Log::Warning(Event::ParseStyle, "font-face must be an object or array");
                 }
             }
         };
