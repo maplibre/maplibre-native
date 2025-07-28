@@ -6,7 +6,7 @@ option(MLN_WITH_COVERAGE "Enable code coverage collection" OFF)
 option(MLN_WITH_QT "Build MapLibre Native Qt bindings" OFF)
 option(MLN_WITH_NODE "Build MapLibre Native Node.js bindings" OFF)
 option(MLN_WITH_GLFW "Set up targets for GLFW platform" ON)
-option(MLN_WITH_SANITIZER "Use [address|thread|undefined] here" OFF)
+set(MLN_WITH_SANITIZER "" CACHE STRING "Use empty or [address|thread|undefined] here")
 option(MLN_WITH_RTTI "Compile with runtime type information" OFF)
 option(MLN_WITH_OPENGL "Build with OpenGL renderer" ON)
 option(MLN_WITH_EGL "Build with EGL renderer" OFF)
@@ -69,6 +69,10 @@ add_library(
 )
 
 set(UBSAN_BLACKLIST ${PROJECT_SOURCE_DIR}/scripts/ubsan.blacklist)
+
+if (MLN_WITH_SANITIZER)
+    message(STATUS "MLN_WITH_SANITIZER is enabled, using \"${MLN_WITH_SANITIZER}\" sanitizer")
+endif()
 
 target_compile_options(
     mbgl-compiler-options
