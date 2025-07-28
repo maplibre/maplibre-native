@@ -54,9 +54,9 @@ std::string toString(FeatureIdentifier& v) {
 
 void FeatureCollectionBucket::addFeature(const GeometryTileFeature& tileFeature,
                                          const GeometryCollection& geometeryCollection,
-                                         const mbgl::ImagePositions& imagePositions,
-                                         const PatternLayerMap& patternLayerMap,
-                                         std::size_t size,
+                                         [[maybe_unused]] const mbgl::ImagePositions& imagePositions,
+                                         [[maybe_unused]] const PatternLayerMap& patternLayerMap,
+                                         [[maybe_unused]] std::size_t size,
                                          const CanonicalTileID& tileID) {
     std::shared_ptr<plugin::Feature> tempFeature = std::make_shared<plugin::Feature>();
 
@@ -106,7 +106,6 @@ void FeatureCollectionBucket::addFeature(const GeometryTileFeature& tileFeature,
         plugin::FeatureCoordinateCollection c;
         for (std::size_t i = 0, len = g.size(); i < len; i++) {
             const GeometryCoordinate& p1 = g[i];
-            auto d = b.west();
             double lat = 0;
             double lon = 0;
             geometryToLatLon(p1, tileID.x, tileID.y, tileID.z, lat, lon);
