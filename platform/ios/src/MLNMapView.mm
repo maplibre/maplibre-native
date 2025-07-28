@@ -6354,7 +6354,7 @@ static void *windowScreenContext = &windowScreenContext;
 
 - (void)didUpdateLocationWithUserTrackingAnimated:(BOOL)animated completionHandler:(nullable void (^)(void))completion
 {
-    [self didUpdateLocationWithUserTrackingAnimated:animated completionHandler:completion];
+    [self didUpdateLocationWithUserTrackingDuration:animated ? MLNUserLocationAnimationDuration : 0 completionHandler:completion];
 }
 
 - (void)didUpdateLocationWithUserTrackingDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion
