@@ -366,12 +366,12 @@ TEST(Thread, PoolWaitAdd) {
     auto seq = Scheduler::GetSequenced();
 
     // add new tasks every few milliseconds
-    struct State_ {
+    struct State {
         std::atomic<bool> addActive{true};
         std::atomic<int> added{0};
         std::atomic<int> executed{0};
     };
-    auto state = std::make_shared<State_>();
+    auto state = std::make_shared<State>();
     seq->schedule([pool, state] {
         while (state->addActive) {
             pool->schedule([state] { state->executed++; });
