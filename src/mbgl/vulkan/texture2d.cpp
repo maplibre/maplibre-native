@@ -160,7 +160,8 @@ void Texture2D::uploadSubRegion(const void* pixelData,
 
     if (!imageAllocation) return;
 
-    const auto& allocator = context.getBackend().getAllocator();
+    const auto& backend = context.getBackend();
+    const auto& allocator = backend.getAllocator();
 
     const auto bufferInfo = vk::BufferCreateInfo()
                                 .setSize(static_cast<vk::DeviceSize>(size_.width) * size_.height * getPixelStride())
@@ -193,7 +194,8 @@ void Texture2D::uploadSubRegion(const void* pixelData,
                                 .setImageOffset(vk::Offset3D(xOffset, yOffset))
                                 .setImageExtent(vk::Extent3D(size_.width, size_.height, 1));
 
-        buffer->copyBufferToImage(bufferAllocation->buffer, imageAllocation->image, imageLayout, region);
+        buffer->copyBufferToImage(
+            bufferAllocation->buffer, imageAllocation->image, imageLayout, region, backend.getDispatcher());
 
         if (samplerState.mipmapped && textureUsage == Texture2DUsage::ShaderInput) {
             generateMips(buffer);
@@ -297,7 +299,7 @@ void Texture2D::createTexture() {
 
         case Texture2DUsage::Attachment:
             imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eColorAttachment |
-                         vk::ImageUsageFlagBits::eSampled;
+                         vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferSrc;
             imageTiling = vk::ImageTiling::eOptimal;
             break;
 
@@ -357,7 +359,8 @@ void Texture2D::createTexture() {
                                        .setSubresourceRange(
                                            {vk::ImageAspectFlagBits::eColor, 0, imageCreateInfo.mipLevels, 0, 1});
 
-        imageAllocation->imageView = backend.getDevice()->createImageViewUnique(imageViewCreateInfo);
+        imageAllocation->imageView = backend.getDevice()->createImageViewUnique(
+            imageViewCreateInfo, nullptr, backend.getDispatcher());
     }
 
     // if the image is used as an attachment
@@ -379,6 +382,8 @@ void Texture2D::createTexture() {
 void Texture2D::createSampler() {
     destroySampler();
 
+    const auto& backend = context.getBackend();
+
     const auto filter = vulkanFilter(samplerState.filter);
     const auto addressModeU = vulkanAddressMode(samplerState.wrapU);
     const auto addressModeV = vulkanAddressMode(samplerState.wrapV);
@@ -396,11 +401,11 @@ void Texture2D::createSampler() {
         samplerCreateInfo.setMipmapMode(vk::SamplerMipmapMode::eLinear);
     }
 
-    if (samplerState.maxAnisotropy != 1 && context.getBackend().getDeviceFeatures().samplerAnisotropy) {
+    if (samplerState.maxAnisotropy != 1 && backend.getDeviceFeatures().samplerAnisotropy) {
         samplerCreateInfo.setAnisotropyEnable(true).setMaxAnisotropy(samplerState.maxAnisotropy);
     }
 
-    sampler = context.getBackend().getDevice()->createSampler(samplerCreateInfo);
+    sampler = backend.getDevice()->createSampler(samplerCreateInfo, nullptr, backend.getDispatcher());
 
     samplerStateDirty = false;
     lastModified = util::MonotonicTimer::now();
@@ -420,7 +425,7 @@ void Texture2D::destroyTexture() {
 void Texture2D::destroySampler() {
     if (sampler) {
         context.enqueueDeletion([sampler_ = std::move(sampler)](auto& context_) mutable {
-            context_.getBackend().getDevice()->destroySampler(sampler_);
+            context_.getBackend().getDevice()->destroySampler(sampler_, nullptr, context_.getBackend().getDispatcher());
         });
 
         sampler = nullptr;
@@ -438,8 +443,13 @@ void Texture2D::transitionToTransferLayout(const vk::UniqueCommandBuffer& buffer
                              .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                              .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, getMipLevels(), 0, 1});
 
-    buffer->pipelineBarrier(
-        vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eTransfer, {}, nullptr, nullptr, barrier);
+    buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
+                            vk::PipelineStageFlagBits::eTransfer,
+                            {},
+                            nullptr,
+                            nullptr,
+                            barrier,
+                            context.getBackend().getDispatcher());
 
     imageLayout = barrier.newLayout;
 }
@@ -460,7 +470,8 @@ void Texture2D::transitionToShaderReadLayout(const vk::UniqueCommandBuffer& buff
                             {},
                             nullptr,
                             nullptr,
-                            barrier);
+                            barrier,
+                            context.getBackend().getDispatcher());
 
     imageLayout = barrier.newLayout;
 }
@@ -476,8 +487,13 @@ void Texture2D::transitionToGeneralLayout(const vk::UniqueCommandBuffer& buffer)
                              .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                              .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
 
-    buffer->pipelineBarrier(
-        vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eTransfer, {}, nullptr, nullptr, barrier);
+    buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
+                            vk::PipelineStageFlagBits::eTransfer,
+                            {},
+                            nullptr,
+                            nullptr,
+                            barrier,
+                            context.getBackend().getDispatcher());
 
     imageLayout = barrier.newLayout;
 }
@@ -502,8 +518,12 @@ void Texture2D::copyImage(vk::Image image) {
                                   .setExtent({size.width, size.height, 1});
 
         transitionToTransferLayout(commandBuffer);
-        commandBuffer->copyImage(
-            image, vk::ImageLayout::eTransferSrcOptimal, imageAllocation->image, imageLayout, copyInfo);
+        commandBuffer->copyImage(image,
+                                 vk::ImageLayout::eTransferSrcOptimal,
+                                 imageAllocation->image,
+                                 imageLayout,
+                                 copyInfo,
+                                 context.getBackend().getDispatcher());
         transitionToGeneralLayout(commandBuffer);
     });
 }
@@ -515,29 +535,107 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
 
     // check for offset/padding
     const auto& device = context.getBackend().getDevice();
-    const auto& layout = device->getImageSubresourceLayout(imageAllocation->image,
-                                                           vk::ImageSubresource(vk::ImageAspectFlagBits::eColor, 0, 0));
+    const auto& dispatcher = context.getBackend().getDispatcher();
 
     imageData->resize(size);
     const auto& imageSize = getDataSize();
 
-    void* mappedData_ = nullptr;
-    vmaMapMemory(context.getBackend().getAllocator(), imageAllocation->allocation, &mappedData_);
+    // Check if this is an attachment texture that needs staging buffer
+    if (textureUsage == Texture2DUsage::Attachment) {
+        // For optimal tiling, we need to copy to a staging buffer first
+        const auto& allocator = context.getBackend().getAllocator();
 
-    uint8_t* mappedData = reinterpret_cast<uint8_t*>(mappedData_) + layout.offset;
+        // Create staging buffer
+        const auto bufferInfo = vk::BufferCreateInfo()
+                                    .setSize(imageSize)
+                                    .setUsage(vk::BufferUsageFlagBits::eTransferDst)
+                                    .setSharingMode(vk::SharingMode::eExclusive);
 
-    if (imageSize == layout.arrayPitch) {
-        memcpy(imageData->data.get(), mappedData, imageSize);
-    } else {
-        auto rowSize = static_cast<uint32_t>(size.width * getPixelStride());
-        for (uint32_t i = 0; i < size.height; ++i) {
-            memcpy(imageData->data.get() + rowSize * i, mappedData + layout.rowPitch * i, rowSize);
+        VmaAllocationCreateInfo allocationInfo = {};
+        allocationInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
+        allocationInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+        allocationInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT |
+                               VMA_ALLOCATION_CREATE_MAPPED_BIT;
+
+        SharedBufferAllocation bufferAllocation = std::make_shared<BufferAllocation>(allocator);
+        if (!bufferAllocation->create(allocationInfo, bufferInfo)) {
+            mbgl::Log::Error(mbgl::Event::Render, "Vulkan readImage staging buffer allocation failed");
+            return nullptr;
         }
+
+        // Copy image to staging buffer
+        context.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) {
+            // Transition image layout for reading
+            const auto barrier = vk::ImageMemoryBarrier()
+                                     .setImage(imageAllocation->image)
+                                     .setOldLayout(imageLayout)
+                                     .setNewLayout(vk::ImageLayout::eTransferSrcOptimal)
+                                     .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
+                                     .setDstAccessMask(vk::AccessFlagBits::eTransferRead)
+                                     .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                     .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                     .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
+
+            commandBuffer->pipelineBarrier(vk::PipelineStageFlagBits::eColorAttachmentOutput,
+                                           vk::PipelineStageFlagBits::eTransfer,
+                                           {},
+                                           nullptr,
+                                           nullptr,
+                                           barrier,
+                                           dispatcher);
+
+            imageLayout = barrier.newLayout;
+
+            // Copy image to buffer
+            const auto region = vk::BufferImageCopy()
+                                    .setBufferOffset(0)
+                                    .setBufferRowLength(0)
+                                    .setBufferImageHeight(0)
+                                    .setImageSubresource(
+                                        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1))
+                                    .setImageOffset({0, 0, 0})
+                                    .setImageExtent({size.width, size.height, 1});
+
+            commandBuffer->copyImageToBuffer(imageAllocation->image,
+                                             vk::ImageLayout::eTransferSrcOptimal,
+                                             bufferAllocation->buffer,
+                                             region,
+                                             dispatcher);
+        });
+
+        // Map staging buffer and copy to image data
+        vmaMapMemory(allocator, bufferAllocation->allocation, &bufferAllocation->mappedBuffer);
+        memcpy(imageData->data.get(), bufferAllocation->mappedBuffer, imageSize);
+        vmaUnmapMemory(allocator, bufferAllocation->allocation);
+
+        return imageData;
+    } else if (textureUsage == Texture2DUsage::Read) {
+        // For linear tiling (Read usage), use direct memory mapping
+        const auto& layout = device->getImageSubresourceLayout(
+            imageAllocation->image, vk::ImageSubresource(vk::ImageAspectFlagBits::eColor, 0, 0), dispatcher);
+
+        void* mappedData_ = nullptr;
+        vmaMapMemory(context.getBackend().getAllocator(), imageAllocation->allocation, &mappedData_);
+
+        uint8_t* mappedData = reinterpret_cast<uint8_t*>(mappedData_) + layout.offset;
+
+        if (imageSize == layout.arrayPitch) {
+            memcpy(imageData->data.get(), mappedData, imageSize);
+        } else {
+            auto rowSize = static_cast<uint32_t>(size.width * getPixelStride());
+            for (uint32_t i = 0; i < size.height; ++i) {
+                memcpy(imageData->data.get() + rowSize * i, mappedData + layout.rowPitch * i, rowSize);
+            }
+        }
+
+        vmaUnmapMemory(context.getBackend().getAllocator(), imageAllocation->allocation);
+
+        return imageData;
+    } else {
+        // not readable
+        assert(false);
+        return imageData;
     }
-
-    vmaUnmapMemory(context.getBackend().getAllocator(), imageAllocation->allocation);
-
-    return imageData;
 }
 
 uint32_t Texture2D::getMipLevels() const {
@@ -554,6 +652,8 @@ void Texture2D::generateMips(const vk::UniqueCommandBuffer& buffer) {
     if (mipLevels <= 1) {
         return;
     }
+
+    const auto& dispatcher = context.getBackend().getDispatcher();
 
     int32_t mipWidth = size.width;
     int32_t mipHeight = size.height;
@@ -573,8 +673,13 @@ void Texture2D::generateMips(const vk::UniqueCommandBuffer& buffer) {
             .setSrcAccessMask(vk::AccessFlagBits::eTransferWrite)
             .setDstAccessMask(vk::AccessFlagBits::eTransferRead);
 
-        buffer->pipelineBarrier(
-            vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eTransfer, {}, nullptr, nullptr, barrier);
+        buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
+                                vk::PipelineStageFlagBits::eTransfer,
+                                {},
+                                nullptr,
+                                nullptr,
+                                barrier,
+                                dispatcher);
 
         const auto blit = vk::ImageBlit()
                               .setSrcOffsets({vk::Offset3D{0, 0, 0}, {mipWidth, mipHeight, 1}})
@@ -587,7 +692,8 @@ void Texture2D::generateMips(const vk::UniqueCommandBuffer& buffer) {
                           imageAllocation->image,
                           barrier.oldLayout,
                           blit,
-                          vk::Filter::eLinear);
+                          vk::Filter::eLinear,
+                          dispatcher);
 
         barrier.setOldLayout(vk::ImageLayout::eTransferSrcOptimal)
             .setNewLayout(vk::ImageLayout::eShaderReadOnlyOptimal)
@@ -599,7 +705,8 @@ void Texture2D::generateMips(const vk::UniqueCommandBuffer& buffer) {
                                 {},
                                 nullptr,
                                 nullptr,
-                                barrier);
+                                barrier,
+                                dispatcher);
 
         mipWidth = std::max(1, mipWidth / 2);
         mipHeight = std::max(1, mipHeight / 2);
@@ -618,7 +725,8 @@ void Texture2D::generateMips(const vk::UniqueCommandBuffer& buffer) {
                             {},
                             nullptr,
                             nullptr,
-                            barrier);
+                            barrier,
+                            dispatcher);
 
     imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 }

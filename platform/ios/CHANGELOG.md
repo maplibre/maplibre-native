@@ -4,6 +4,10 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+## 6.17.1
+
+- Revert "Fix the symbol blink issue by only placing the symbol in current level", as this was causing regressions ([#3610](https://github.com/maplibre/maplibre-native/pull/3610)).
+
 ## 6.17.0
 
 - Fix render pipeline state bug ([#3598](https://github.com/maplibre/maplibre-native/pull/3598)).

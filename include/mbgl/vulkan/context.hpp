@@ -152,15 +152,12 @@ public:
 private:
     struct FrameResources {
         vk::UniqueCommandBuffer commandBuffer;
-
-        vk::UniqueSemaphore acquireSurfaceSemaphore;
         vk::UniqueFence flightFrameFence;
 
         std::vector<std::function<void(Context&)>> deletionQueue;
 
-        FrameResources(vk::UniqueCommandBuffer& cb, vk::UniqueSemaphore&& surf, vk::UniqueFence&& flight)
+        FrameResources(vk::UniqueCommandBuffer& cb, vk::UniqueFence&& flight)
             : commandBuffer(std::move(cb)),
-              acquireSurfaceSemaphore(std::move(surf)),
               flightFrameFence(std::move(flight)) {}
 
         void runDeletionQueue(Context&);

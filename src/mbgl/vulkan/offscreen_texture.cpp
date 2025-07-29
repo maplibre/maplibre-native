@@ -46,8 +46,12 @@ public:
     const vk::UniqueFramebuffer& getFramebuffer() const override { return framebuffer; };
 
     PremultipliedImage readStillImage() {
-        assert(false);
-        return {};
+        if (!colorTexture) {
+            return {};
+        }
+
+        const auto& image = static_cast<Texture2D&>(*colorTexture).readImage();
+        return image ? image->clone() : PremultipliedImage();
     }
 
     gfx::Texture2DPtr& getTexture() {
@@ -101,7 +105,8 @@ public:
                                               .setSubpasses(subpass)
                                               .setDependencies(subpassDependency);
 
-        renderPass = backend.getDevice()->createRenderPassUnique(renderPassCreateInfo);
+        renderPass = backend.getDevice()->createRenderPassUnique(
+            renderPassCreateInfo, nullptr, backend.getDispatcher());
 
         const auto framebufferCreateInfo = vk::FramebufferCreateInfo()
                                                .setRenderPass(renderPass.get())
@@ -111,7 +116,8 @@ public:
                                                .setHeight(extent.height)
                                                .setLayers(1);
 
-        framebuffer = backend.getDevice()->createFramebufferUnique(framebufferCreateInfo);
+        framebuffer = backend.getDevice()->createFramebufferUnique(
+            framebufferCreateInfo, nullptr, backend.getDispatcher());
     }
 
 private:

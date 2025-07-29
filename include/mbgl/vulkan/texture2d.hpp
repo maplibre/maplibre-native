@@ -81,6 +81,7 @@ public:
 
     const vk::ImageLayout& getVulkanImageLayout() const { return imageLayout; }
     const vk::UniqueImageView& getVulkanImageView() const { return imageAllocation->imageView; }
+    const vk::Image& getVulkanImage() const { return imageAllocation->image; }
     const vk::Sampler& getVulkanSampler();
 
     void copyImage(vk::Image image);
