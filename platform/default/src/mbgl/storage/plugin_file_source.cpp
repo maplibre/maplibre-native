@@ -15,7 +15,7 @@
 
 namespace mbgl {
 
-void PluginFileSource::setProtocolPrefix(const std::string& protocolPrefix) {}
+void PluginFileSource::setProtocolPrefix([[maybe_unused]] const std::string& protocolPrefix) {}
 
 class PluginFileSource::Impl {
 public:
