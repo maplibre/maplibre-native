@@ -22,7 +22,7 @@ public:
     double _tileY = 0; // Tile coord
 };
 
-// This is a list of coordinates.  Broken out into it's own class because
+// This is a list of coordinates.  Broken out into its own class because
 // a raw bucket feature can have an array of these
 class FeatureCoordinateCollection {
 public:

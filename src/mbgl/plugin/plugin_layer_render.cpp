@@ -127,7 +127,7 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
                     continue;
                 }
 
-                // See if we already have this tile'a feature collection
+                // See if we already have this tile's feature collection
                 if (_featureCollectionByTile.contains(tileID)) {
                     continue;
                 }
