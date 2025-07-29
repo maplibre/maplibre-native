@@ -110,6 +110,7 @@ void registerNatives(JavaVM* vm) {
 
     // Plugins
     PluginProtocolHandlerResource::registerNative(env);
+    PluginProtocolHandlerResponse::registerNative(env);
     PluginFileSource::registerNative(env);
 
     // Map

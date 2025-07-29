@@ -28,7 +28,9 @@ class PluginProtocolExample : PluginProtocolHandler() {
 
     override fun requestResource(resource: PluginProtocolHandlerResource?): PluginProtocolHandlerResponse? {
         // Return some data here
-        return null;
+        var tempResult = PluginProtocolHandlerResponse();
+        tempResult.generateBuffer();
+        return tempResult;
     }
 
 }

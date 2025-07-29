@@ -15,6 +15,18 @@ namespace mbgl {
             static void Update(jni::JNIEnv&, jni::Object<PluginProtocolHandlerResource>&, const mbgl::Resource &);
         };
 
+        class PluginProtocolHandlerResponse {
+        public:
+            static constexpr auto Name() { return "org/maplibre/android/plugin/PluginProtocolHandlerResponse"; };
+            static void registerNative(jni::JNIEnv&);
+
+            static jni::Local<jni::Object<PluginProtocolHandlerResponse>> Create(jni::JNIEnv&);
+            static void Update(jni::JNIEnv&,
+                               jni::Object<PluginProtocolHandlerResponse>&,
+                               mbgl::Response &);
+
+        };
+
         class PluginFileSource {
         public:
             static constexpr auto Name() { return "org/maplibre/android/plugin/PluginFileSource"; };

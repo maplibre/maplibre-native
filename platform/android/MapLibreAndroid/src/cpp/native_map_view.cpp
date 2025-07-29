@@ -1342,9 +1342,18 @@ void NativeMapView::addPluginFileSource(JNIEnv &jniEnv,
 
     std::shared_ptr<mbgl::PluginFileSource> pluginSource = std::make_shared<mbgl::PluginFileSource>(resourceOptions, clientOptions);
     pluginSource->setOnRequestResourceFunction([fileSourceContainer](const mbgl::Resource &resource) -> mbgl::Response {
-        mbgl::Response tempResult;
+        mbgl::Response tempResponse;
 
-        return tempResult;
+        android::UniqueEnv env = android::AttachEnv();
+        static auto& javaClass = jni::Class<PluginFileSource>::Singleton(*env);
+        static auto requestResource = javaClass.GetMethod<jni::Object<PluginProtocolHandlerResponse>(jni::Object<PluginProtocolHandlerResource>)>(*env, "requestResource");
+        auto javaResource = PluginFileSource::createJavaResource(*env, resource);
+        auto tempResult = fileSourceContainer->_fileSource.Call(*env, requestResource, javaResource);
+        PluginProtocolHandlerResponse::Update(*env,
+                                              tempResult,
+                                              tempResponse);
+
+        return tempResponse;
     });
     pluginSource->setOnCanRequestFunction([fileSourceContainer](const mbgl::Resource &resource) -> bool {
         android::UniqueEnv env = android::AttachEnv();
