@@ -49,7 +49,7 @@ std::enable_if_t<std::is_integral_v<T>, std::optional<T>> parse(std::string_view
     errno = 0;
 
     if constexpr (std::is_same_v<T, int32_t>) {
-        int val = std::strtol(str.data(), &end, base);
+        long val = std::strtol(str.data(), &end, base);
         if (errno == 0 && end == str.data() + str.size()) return static_cast<T>(val);
     } else if constexpr (std::is_same_v<T, uint32_t>) {
         unsigned long val = std::strtoul(str.data(), &end, base);
