@@ -8,6 +8,7 @@ import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.maplibre.android.plugin.PluginProtocolHandler;
 import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.Geometry;
 import org.maplibre.android.annotations.Marker;
@@ -269,6 +270,8 @@ interface NativeMap {
   boolean isRenderingStatsViewEnabled();
 
   void enableRenderingStatsView(boolean value);
+
+  void addPluginProtocolHandler(PluginProtocolHandler protocolHandler);
 
   void setSwapBehaviorFlush(boolean flush);
 

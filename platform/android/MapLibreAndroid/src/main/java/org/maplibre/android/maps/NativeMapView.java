@@ -13,6 +13,9 @@ import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.maplibre.android.plugin.PluginFileSource;
+import org.maplibre.android.plugin.PluginProtocolHandler;
+import org.maplibre.android.plugin.PluginProtocolHandlerResource;
 import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.Geometry;
 import org.maplibre.android.LibraryLoader;
@@ -38,6 +41,7 @@ import org.maplibre.android.style.sources.CannotAddSourceException;
 import org.maplibre.android.style.sources.Source;
 import org.maplibre.android.utils.BitmapUtils;
 import org.maplibre.android.tile.TileOperation;
+import org.maplibre.android.plugin.PluginFileSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1150,6 +1154,13 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void addPluginProtocolHandler(PluginProtocolHandler protocolHandler) {
+    PluginFileSource pluginFileSource = new PluginFileSource();
+    pluginFileSource.protocolHandler = protocolHandler;
+    nativeAddPluginFileSource(pluginFileSource);
+  }
+
+  @Override
   public void setSwapBehaviorFlush(boolean flush) {
     mapRenderer.setSwapBehaviorFlush(flush);
   }
@@ -1745,6 +1756,11 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native void nativeEnableRenderingStatsView(boolean enabled);
+
+  @Keep
+  private native void nativeAddPluginFileSource(PluginFileSource fileSource);
+
+
 
   //
   // Snapshot
