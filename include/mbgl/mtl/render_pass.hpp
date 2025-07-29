@@ -62,6 +62,7 @@ public:
 
     void setCullMode(const MTL::CullMode);
     void setFrontFacingWinding(const MTL::Winding);
+    void setScissorRect(const MTL::ScissorRect);
 
 private:
     void pushDebugGroup(const char* name) override;
@@ -92,6 +93,7 @@ private:
 
     MTL::CullMode currentCullMode = MTL::CullModeNone;
     MTL::Winding currentWinding = MTL::WindingClockwise;
+    MTL::ScissorRect currentScissorRect;
 };
 
 } // namespace mtl
