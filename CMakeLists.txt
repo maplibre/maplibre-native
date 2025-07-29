@@ -17,6 +17,7 @@ option(MLN_USE_UNORDERED_DENSE "Use ankerl dense containers for performance" ON)
 option(MLN_USE_TRACY "Enable Tracy instrumentation" OFF)
 option(MLN_USE_RUST "Use components in Rust" OFF)
 option(MLN_CORE_INCLUDE_DEPS "Include depdendencies in static build of core" OFF)
+option(MLN_CREATE_AUTORELEASEPOOL "Create autoreleasepool in render loop" OFF)
 
 if (MLN_LEGACY_RENDERER)
     message(FATAL "The legacy renderer is no longer supported")
@@ -25,7 +26,6 @@ endif()
 if (MLN_DRAWABLE_RENDERER)
     message(FATAL "Do not pass MLN_DRAWABLE_RENDERER, the drawable renderer is now the default")
 endif()
-
 
 if (MLN_WITH_CLANG_TIDY)
     find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
@@ -1508,6 +1508,24 @@ set_target_properties(
         INTERFACE_MAPLIBRE_AUTHOR "MapLibre"
         INTERFACE_MAPLIBRE_LICENSE ${PROJECT_SOURCE_DIR}/LICENSE.md
 )
+
+if(MLN_WITH_METAL AND MLN_CREATE_AUTORELEASEPOOL)
+    # When using the Metal backend, if there is is no AutoreleasePool, it will result
+    # in memory leaks when autoreleased objects are created.
+
+    # Platforms such as iOS and GLFW use ARC with @autoreleasepool blocks, for these platforms
+    # creating an AutoreleasePool is not neccesary (and in fact will not work).
+    # When using MapLibre Native with Metal on other platforms such as Node.js, you can pass
+    # this variable to ensure an AutoReleasePool is created in the render loop.
+    # See also:
+    # https://developer.apple.com/documentation/foundation/nsautoreleasepool
+    # https://github.com/maplibre/maplibre-native/issues/2928
+    # vendor/metal-cpp/README.md 'AutoreleasePools and Objects'
+    target_compile_definitions(
+        mbgl-core
+            PRIVATE MLN_CREATE_AUTORELEASEPOOL=1
+    )
+endif()
 
 set_property(TARGET mbgl-core PROPERTY FOLDER MapLibre)
 
