@@ -54,7 +54,8 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
     const auto& contextVK = static_cast<vulkan::Context&>(dynamicTextureAtlas->context);
     const vk::CommandPoolCreateInfo createInfo(vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
                                                contextVK.getBackend().getGraphicsQueueIndex());
-    commandPool = contextVK.getBackend().getDevice()->createCommandPoolUnique(createInfo, nullptr, contextVK.getBackend().getDispatcher());
+    commandPool = contextVK.getBackend().getDevice()->createCommandPoolUnique(
+        createInfo, nullptr, contextVK.getBackend().getDispatcher());
 }
 
 GeometryTileWorker::~GeometryTileWorker() {
