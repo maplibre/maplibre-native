@@ -1323,9 +1323,7 @@ void NativeMapView::enableRenderingStatsView(JNIEnv&, jni::jboolean value) {
 }
 
 // Plugins
-void NativeMapView::addPluginFileSource(JNIEnv &jniEnv,
-                                        const jni::Object<PluginFileSource>& pluginFileSource) {
-
+void NativeMapView::addPluginFileSource(JNIEnv& jniEnv, const jni::Object<PluginFileSource>& pluginFileSource) {
     // TODO: Unclear if any of these options are needed for plugins
     mbgl::ResourceOptions resourceOptions;
 
@@ -1340,29 +1338,30 @@ void NativeMapView::addPluginFileSource(JNIEnv &jniEnv,
     fileSourceContainer->_fileSource = std::move(pluginPeer);
     _pluginFileSources.push_back(fileSourceContainer);
 
-    std::shared_ptr<mbgl::PluginFileSource> pluginSource = std::make_shared<mbgl::PluginFileSource>(resourceOptions, clientOptions);
-    pluginSource->setOnRequestResourceFunction([fileSourceContainer](const mbgl::Resource &resource) -> mbgl::Response {
+    std::shared_ptr<mbgl::PluginFileSource> pluginSource = std::make_shared<mbgl::PluginFileSource>(resourceOptions,
+                                                                                                    clientOptions);
+    pluginSource->setOnRequestResourceFunction([fileSourceContainer](const mbgl::Resource& resource) -> mbgl::Response {
         mbgl::Response tempResponse;
 
         android::UniqueEnv env = android::AttachEnv();
         static auto& javaClass = jni::Class<PluginFileSource>::Singleton(*env);
-        static auto requestResource = javaClass.GetMethod<jni::Object<PluginProtocolHandlerResponse>(jni::Object<PluginProtocolHandlerResource>)>(*env, "requestResource");
+        static auto requestResource =
+            javaClass.GetMethod<jni::Object<PluginProtocolHandlerResponse>(jni::Object<PluginProtocolHandlerResource>)>(
+                *env, "requestResource");
         auto javaResource = PluginFileSource::createJavaResource(*env, resource);
         auto tempResult = fileSourceContainer->_fileSource.Call(*env, requestResource, javaResource);
-        PluginProtocolHandlerResponse::Update(*env,
-                                              tempResult,
-                                              tempResponse);
+        PluginProtocolHandlerResponse::Update(*env, tempResult, tempResponse);
 
         return tempResponse;
     });
-    pluginSource->setOnCanRequestFunction([fileSourceContainer](const mbgl::Resource &resource) -> bool {
+    pluginSource->setOnCanRequestFunction([fileSourceContainer](const mbgl::Resource& resource) -> bool {
         android::UniqueEnv env = android::AttachEnv();
         static auto& javaClass = jni::Class<PluginFileSource>::Singleton(*env);
-        static auto canRequestResource = javaClass.GetMethod<jboolean(jni::Object<PluginProtocolHandlerResource>)>(*env, "canRequestResource");
+        static auto canRequestResource = javaClass.GetMethod<jboolean(jni::Object<PluginProtocolHandlerResource>)>(
+            *env, "canRequestResource");
         auto javaResource = PluginFileSource::createJavaResource(*env, resource);
         auto tempResult = fileSourceContainer->_fileSource.Call(*env, canRequestResource, javaResource);
         return tempResult;
-
 
         /*
         if (!renderingStats) {
@@ -1376,48 +1375,39 @@ void NativeMapView::addPluginFileSource(JNIEnv &jniEnv,
                            (jboolean)(status.mode != MapObserver::RenderMode::Partial),
                            renderingStats);
         */
-/*
-        static auto resourceURLField = javaClass.GetField<jni::Object<PluginProtocolHandlerResource>>(env, "resource");
-        auto str = jni::Make<jni::String>(env, resource.url); // wrap the jstring
-        javaObject.Set(env, resourceURLField, str);
+        /*
+                static auto resourceURLField = javaClass.GetField<jni::Object<PluginProtocolHandlerResource>>(env,
+           "resource"); auto str = jni::Make<jni::String>(env, resource.url); // wrap the jstring javaObject.Set(env,
+           resourceURLField, str);
 
-        fileSourceContainer->_fileSource.Set(env, )
-*/
-
-
-
-
+                fileSourceContainer->_fileSource.Set(env, )
+        */
     });
     auto fileSourceManager = mbgl::FileSourceManager::get();
     fileSourceManager->registerCustomFileSource(pluginSource);
 
+    /*
+                android::UniqueEnv _env = android::AttachEnv();
+                static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
+                static auto onDidFinishRenderingFrame = javaClass.GetMethod<void(jboolean,
+       jni::Object<RenderingStats>)>(
+                        *_env, "onDidFinishRenderingFrame");
+                auto weakReference = javaPeer.get(*_env);
+                if (weakReference) {
+                    if (!renderingStats) {
+                        renderingStats = jni::NewGlobal(*_env, RenderingStats::Create(*_env));
+                    }
 
-/*
-            android::UniqueEnv _env = android::AttachEnv();
-            static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-            static auto onDidFinishRenderingFrame = javaClass.GetMethod<void(jboolean, jni::Object<RenderingStats>)>(
-                    *_env, "onDidFinishRenderingFrame");
-            auto weakReference = javaPeer.get(*_env);
-            if (weakReference) {
-                if (!renderingStats) {
-                    renderingStats = jni::NewGlobal(*_env, RenderingStats::Create(*_env));
+                    RenderingStats::Update(*_env, renderingStats, status.renderingStats);
+
+                    weakReference.Call(*_env,
+                                       onDidFinishRenderingFrame,
+                                       (jboolean)(status.mode != MapObserver::RenderMode::Partial),
+                                       renderingStats);
                 }
 
-                RenderingStats::Update(*_env, renderingStats, status.renderingStats);
-
-                weakReference.Call(*_env,
-                                   onDidFinishRenderingFrame,
-                                   (jboolean)(status.mode != MapObserver::RenderMode::Partial),
-                                   renderingStats);
-            }
-
-    */
-
-
-
+        */
 }
-
-
 
 // Static methods //
 
@@ -1543,7 +1533,6 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::isRenderingStatsViewEnabled, "nativeIsRenderingStatsViewEnabled"),
         METHOD(&NativeMapView::enableRenderingStatsView, "nativeEnableRenderingStatsView"),
         METHOD(&NativeMapView::addPluginFileSource, "nativeAddPluginFileSource"));
-
 }
 
 void NativeMapView::onRegisterShaders(gfx::ShaderRegistry&) {};
