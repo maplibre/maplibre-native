@@ -10,6 +10,7 @@ public:
     NorthOrientation orientation = NorthOrientation::Upwards;
     bool crossSourceCollisions = true;
     Size size = {64, 64};
+    EdgeInsets frustumOffset = {0.f, 0.f, 0.f, 0.f};
     float pixelRatio = 1.0;
 };
 
@@ -71,6 +72,15 @@ MapOptions& MapOptions::withSize(Size size_) {
 
 Size MapOptions::size() const {
     return impl_->size;
+}
+
+MapOptions& MapOptions::withFrustumOffset(const EdgeInsets& offset_) {
+    impl_->frustumOffset = offset_;
+    return *this;
+}
+
+EdgeInsets MapOptions::frustumOffset() const {
+    return impl_->frustumOffset;
 }
 
 MapOptions& MapOptions::withPixelRatio(float ratio) {
