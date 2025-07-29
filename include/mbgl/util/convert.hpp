@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <tuple>
 #include <type_traits>
-#include <charconv>
+#include <string_view>
 #include <optional>
 #include <string>
 
@@ -39,15 +39,43 @@ inline constexpr auto to_array(std::tuple<Ts...>&& tuple) {
                       std::forward<std::tuple<Ts...>>(tuple));
 }
 
-template <typename T = int>
-std::enable_if_t<std::is_integral_v<T>, std::optional<T>> str_to_int(const std::string& str, int base = 10) noexcept {
-    T result;
-    auto first = str.data();
-    auto last = str.data() + str.size();
-    auto [ptr, ec] = std::from_chars(first, last, result, base);
-    if (ec == std::errc{}) {
-        return result;
+/// Convert string to integral types
+template <typename T>
+std::enable_if_t<std::is_integral_v<T>, std::optional<T>> parse(std::string_view str, int base = 10) noexcept {
+    char* end = nullptr;
+    errno = 0;
+
+    if constexpr (std::is_same_v<T, int>) {
+        long val = std::strtol(str.data(), &end, base);
+        if (errno == 0 && end == str.data() + str.size()) return static_cast<T>(val);
+    } else if constexpr (std::is_same_v<T, int64_t>) {
+        long long val = std::strtoll(str.data(), &end, base);
+        if (errno == 0 && end == str.data() + str.size()) return static_cast<T>(val);
+    } else {
+        static_assert(std::is_same_v<T, int> || std::is_same_v<T, int64_t>,
+                      "Unsupported integral type in mbgl::util::parse<T>.");
     }
+
+    return std::nullopt;
+}
+
+/// Convert string to floating point types
+template <typename T>
+std::enable_if_t<std::is_floating_point_v<T>, std::optional<T>> parse(std::string_view str) noexcept {
+    char* end = nullptr;
+    errno = 0;
+
+    if constexpr (std::is_same_v<T, float>) {
+        float val = std::strtof(str.data(), &end);
+        if (errno == 0 && end == str.data() + str.size()) return val;
+    } else if constexpr (std::is_same_v<T, double>) {
+        double val = std::strtod(str.data(), &end);
+        if (errno == 0 && end == str.data() + str.size()) return val;
+    } else {
+        static_assert(std::is_same_v<T, float> || std::is_same_v<T, double>,
+                      "Unsupported floating point type in mbgl::util::parse<T>.");
+    }
+
     return std::nullopt;
 }
 

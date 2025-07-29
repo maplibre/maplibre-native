@@ -154,8 +154,8 @@ StyleParseResult Parser::parse(const std::string& json) {
                                                     std::string start = rangeString.substr(0, pos);
                                                     std::string end = rangeString.substr(pos + 1);
                                                     if (!start.empty() && !end.empty()) {
-                                                        auto startInt = util::str_to_int(start, 16);
-                                                        auto endInt = util::str_to_int(end, 16);
+                                                        auto startInt = util::parse<int>(start, 16);
+                                                        auto endInt = util::parse<int>(end, 16);
                                                         if (startInt && endInt) {
                                                             fontFace.ranges.emplace_back(*startInt, *endInt);
                                                         } else {
