@@ -210,8 +210,9 @@ void DashPatternTexture::upload(gfx::UploadPass& uploadPass) {
     if (std::holds_alternative<AlphaImage>(texture)) {
         auto tempTexture = uploadPass.getContext().createTexture2D();
         tempTexture->upload(std::get<AlphaImage>(texture));
-        tempTexture->setSamplerConfiguration(
-            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Repeat, gfx::TextureWrapType::Clamp});
+        tempTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                              .wrapU = gfx::TextureWrapType::Repeat,
+                                              .wrapV = gfx::TextureWrapType::Clamp});
         texture = std::move(tempTexture);
     }
 }

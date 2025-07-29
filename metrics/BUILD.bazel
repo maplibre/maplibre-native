@@ -20,9 +20,9 @@ filegroup(
         "ios-metal-render-test-runner-style.json",  # iOS Metal only
         "ios-render-test-runner-metrics.json",  # iOS only
         "ios-render-test-runner-style.json",  # iOS only
+        "linux-drawable.json",
         "linux-gcc8-release-metrics.json",
         "linux-gcc8-release-style.json",
-        "linux-drawable.json",
     ],
     visibility = [
         "//platform/ios/test/common:__pkg__",

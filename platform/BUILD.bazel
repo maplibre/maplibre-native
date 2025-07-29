@@ -266,12 +266,12 @@ objc_library(
 objc_library(
     name = "iosapp",
     srcs = [
+        "//platform/darwin:app/CustomStyleLayerExample.h",
+        "//platform/darwin:app/CustomStyleLayerExample.m",
         "//platform/darwin:app/PluginLayerExample.h",
         "//platform/darwin:app/PluginLayerExample.mm",
         "//platform/darwin:app/PluginLayerExampleMetalRendering.h",
         "//platform/darwin:app/PluginLayerExampleMetalRendering.mm",
-        "//platform/darwin:app/CustomStyleLayerExample.h",
-        "//platform/darwin:app/CustomStyleLayerExample.m",
         "//platform/ios:ios_app_srcs",
     ],
     defines = ["GLES_SILENCE_DEPRECATION"],
