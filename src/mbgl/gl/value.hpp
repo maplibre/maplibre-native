@@ -5,6 +5,7 @@
 #include <mbgl/gfx/stencil_mode.hpp>
 #include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
+#include <mbgl/gfx/scissor_rect.hpp>
 #include <mbgl/gl/attribute.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/util/color.hpp>
@@ -189,8 +190,8 @@ struct Viewport {
 };
 
 struct ScissorTest {
-    using Type = bool;
-    static const constexpr Type Default = false;
+    using Type = gfx::ScissorRect;
+    static const constexpr Type Default = {0, 0, 0, 0};
     static void Set(const Type&);
     static Type Get();
 };
