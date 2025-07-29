@@ -61,7 +61,7 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs) {
                 const auto& glyph = glyphEntry.second;
 
                 if (glyph.has_value() && glyph.value()->bitmap.valid()) {
-                    int32_t uniqueId = static_cast<int32_t>(sqrt(fontStack) / 2 + glyph.value()->id);
+                    int32_t uniqueId = static_cast<int32_t>(sqrt(fontStack) / 2 + glyph.value()->id.hash);
                     const auto size = Size(glyph.value()->bitmap.size.width + 2 * padding,
                                            glyph.value()->bitmap.size.height + 2 * padding);
                     const auto& texHandle = glyphAtlas.dynamicTexture->reserveSize(size, uniqueId);

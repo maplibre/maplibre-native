@@ -1,0 +1,69 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 512,
+      "height": 512,
+      "allowed": 0.0003
+    }
+  },
+  "center": [
+    -70.752954126,
+    43.39004898677380
+  ],
+  "zoom": 11,
+  "sources": {
+    "geojson": {
+      "type": "geojson",
+      "data": "local://data/burmese.geojson"
+    }
+  },
+  "sprite": "local://sprites/sprite",
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "font-faces": {
+    "Noto Sans Regular": [
+      {
+        "url": "local://glyphs/Noto%20Sans%20Regular/khmer.ttf",
+        "unicode-range": [
+          "U+1780-17FF"
+        ]
+      },
+      {
+        "url": "local://glyphs/Noto%20Sans%20Regular/myanmar.ttf",
+        "unicode-range": [
+          "U+1000-109F",
+          "U+A9E0-0xA9FF",
+          "U+AA60-0xAA7F"
+        ]
+      },
+      {
+        "url": "local://glyphs/Noto%20Sans%20Regular/devanagari.ttf",
+        "unicode-range": [
+          "U+0900-097F",
+          "U+A8E0-0xA8FF"
+        ]
+      }
+    ]
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "icon",
+      "type": "symbol",
+      "source": "geojson",
+      "layout": {
+        "text-field": "{name}",
+        "text-font": [
+          "Noto Sans Regular"
+        ],
+        "symbol-placement": "point"
+      }
+    }
+  ]
+}
