@@ -1,5 +1,17 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+## 11.12.2
+
+### ✨ Features and improvements
+
+- texture2d - getVulkanImage and support for Texture2DUsage::Attachment ([#3632](https://github.com/maplibre/maplibre-native/pull/3632)).
+
+### 🐞 Bug fixes
+
+- Fix dashed line issue when style change ([#3675](https://github.com/maplibre/maplibre-native/pull/3675)).
+
 ## 11.12.1
 
 ### 🐞 Bug fixes
