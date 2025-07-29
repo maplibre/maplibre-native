@@ -1,5 +1,8 @@
 ## main
 
+## 6.1.1-pre.0
+* Fix freezing in macos/metal after ~32 renders ([#2948](https://github.com/maplibre/maplibre-native/pull/2948))
+
 ## 6.1.0
 * Add `textFitWidth` and `textFitHeight` properties to sprites ([#2780](https://github.com/maplibre/maplibre-native/pull/2780)).
   More information can be found in the [MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/sprite/#text-fit-properties).
