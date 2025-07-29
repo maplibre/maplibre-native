@@ -564,7 +564,7 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
         }
 
         // Copy image to staging buffer
-        context.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) {
+        context.submitOneTimeCommand(nullptr, [&](const vk::UniqueCommandBuffer& commandBuffer) {
             // Transition image layout for reading
             const auto barrier = vk::ImageMemoryBarrier()
                                      .setImage(imageAllocation->image)

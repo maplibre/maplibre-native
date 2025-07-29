@@ -175,7 +175,7 @@ void Context::submitOneTimeCommand(vk::UniqueCommandPool* commandPool,
     if (commandPool) {
         const vk::CommandPoolCreateInfo createInfo(vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
                                                    backend.getGraphicsQueueIndex());
-        commandPoolLocal = backend.getDevice()->createCommandPoolUnique(createInfo);
+        commandPoolLocal = backend.getDevice()->createCommandPoolUnique(createInfo, nullptr, backend.getDispatcher());
     }
 
     const vk::CommandBufferAllocateInfo allocateInfo(

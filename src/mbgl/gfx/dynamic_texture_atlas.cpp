@@ -30,7 +30,7 @@ GlyphAtlas DynamicTextureAtlas::uploadGlyphs(const GlyphMap& glyphs,
             dummyImage.fill(0);
             glyphAtlas.dynamicTexture = std::make_shared<gfx::DynamicTexture>(
                 context, dummySize, TexturePixelType::Alpha);
-            glyphAtlas.dynamicTexture->addImage(dummyImage.data.get(), dummySize);
+            glyphAtlas.dynamicTexture->addImage(dummyImage.data.get(), dummySize, deletionQueue, commandBuffer);
             dummyDynamicTexture[TexturePixelType::Alpha] = glyphAtlas.dynamicTexture;
         }
         return glyphAtlas;
@@ -121,7 +121,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
             dummyImage.fill(0);
             imageAtlas.dynamicTexture = std::make_shared<gfx::DynamicTexture>(
                 context, dummySize, TexturePixelType::RGBA);
-            imageAtlas.dynamicTexture->addImage(dummyImage.data.get(), dummySize);
+            imageAtlas.dynamicTexture->addImage(dummyImage.data.get(), dummySize, deletionQueue, commandBuffer);
             dummyDynamicTexture[TexturePixelType::RGBA] = imageAtlas.dynamicTexture;
         }
         return imageAtlas;
