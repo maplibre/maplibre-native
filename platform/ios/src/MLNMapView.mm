@@ -7745,7 +7745,7 @@ static void *windowScreenContext = &windowScreenContext;
     __weak MLNMapView *weakMapView = self;
 
     Class layerClass = pluginLayerClass;
-    factory->_supportsFeatureCollectionBuckets = capabilities.supportsReadingTileFeatures;
+    factory->supportsFeatureCollectionBuckets = capabilities.supportsReadingTileFeatures;
     factory->setOnLayerCreatedEvent([layerClass, weakMapView, pluginLayerClass](mbgl::style::PluginLayer *pluginLayer) {
 
         //NSLog(@"Creating Plugin Layer: %@", layerClass);

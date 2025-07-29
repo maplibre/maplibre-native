@@ -151,7 +151,7 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
     }
 
     std::string sourceStr = "pluginLayerNoSource";
-    if (_supportsFeatureCollectionBuckets) {
+    if (supportsFeatureCollectionBuckets) {
         auto source = getSource(value);
         if (source.has_value()) {
             sourceStr = source.value();
@@ -179,7 +179,7 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
 std::unique_ptr<Bucket> PluginLayerFactory::createBucket(
     [[maybe_unused]] const BucketParameters& parameters,
     [[maybe_unused]] const std::vector<Immutable<style::LayerProperties>>& layers) noexcept {
-    if (_supportsFeatureCollectionBuckets) {
+    if (supportsFeatureCollectionBuckets) {
         return std::make_unique<FeatureCollectionBucket>(parameters, layers);
     }
     return nullptr;

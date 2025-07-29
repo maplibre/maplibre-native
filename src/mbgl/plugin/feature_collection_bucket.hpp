@@ -19,7 +19,6 @@ class RenderFillLayer;
 class FeatureCollectionBucket final : public Bucket {
 public:
     ~FeatureCollectionBucket() override;
-    // using PossiblyEvaluatedLayoutProperties = style::FillLayoutProperties::PossiblyEvaluated;
 
     FeatureCollectionBucket(const BucketParameters&, const std::vector<Immutable<style::LayerProperties>>&);
 

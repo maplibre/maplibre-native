@@ -38,18 +38,15 @@ void geometryToLatLon(const GeometryCoordinate& coord,
 }
 
 std::string toString(FeatureIdentifier& v) {
-    std::string tempResult = "";
     auto ti = v.which();
-    if (ti == 0) {
-        return tempResult;
-    } else if (ti == 1) {
-        tempResult = std::to_string(v.get<uint64_t>());
+    if (ti == 1) {
+        return std::to_string(v.get<uint64_t>());
     } else if (ti == 2) {
-        tempResult = std::to_string(v.get<int64_t>());
+        return std::to_string(v.get<int64_t>());
     } else if (ti == 3) {
-        tempResult = v.get<std::string>();
+        return v.get<std::string>();
     }
-    return tempResult;
+    return "";
 }
 
 void FeatureCollectionBucket::addFeature(const GeometryTileFeature& tileFeature,

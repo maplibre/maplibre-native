@@ -115,9 +115,6 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
             for (const RenderTile& tile : *renderTiles) {
                 const auto& tileID = tile.getOverscaledTileID();
 
-                if (!hasRenderTile(tileID)) {
-                }
-
                 const auto* optRenderData = getRenderDataForPass(tile, drawPass);
                 if (!optRenderData || !optRenderData->bucket || !optRenderData->bucket->hasData()) {
                     removeTile(drawPass, tileID);
