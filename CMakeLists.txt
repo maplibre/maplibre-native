@@ -71,6 +71,10 @@ add_library(
 
 set(UBSAN_BLACKLIST ${PROJECT_SOURCE_DIR}/scripts/ubsan.blacklist)
 
+if (MLN_WITH_SANITIZER)
+    message(STATUS "MLN_WITH_SANITIZER is enabled, using \"${MLN_WITH_SANITIZER}\" sanitizer")
+endif()
+
 target_compile_options(
     mbgl-compiler-options
     INTERFACE
