@@ -11,7 +11,7 @@ MLN_IOS_SDK_HEADERS = [
     "src/MLNUserLocation.h",
     "src/MLNUserLocationAnnotationView.h",
     "src/MLNUserLocationAnnotationViewStyle.h",
-    "src/MLNScaleBar.h"
+    "src/MLNScaleBar.h",
 ]
 
 MLN_IOS_PUBLIC_HEADERS = [
@@ -42,6 +42,7 @@ MLN_IOS_PRIVATE_HEADERS = [
     "src/MLNMapView+Impl.h",
     "src/MLNMapView+Metal.h",
     "src/MLNMapView+OpenGL.h",
+    "src/MLNLocationIndicatorUserLocationAnnotationView.h",
 ]
 
 MLN_IOS_PUBLIC_OBJC_SOURCE = [
@@ -63,6 +64,7 @@ MLN_IOS_PUBLIC_OBJCPP_SOURCE = [
     "src/MLNAnnotationView.mm",
     "src/MLNCompassButton.mm",
     "src/MLNFaux3DUserLocationAnnotationView.mm",
+    "src/MLNLocationIndicatorUserLocationAnnotationView.mm",
     "src/MLNMapAccessibilityElement.mm",
     "src/MLNMapProjection.mm",
     "src/MLNMapView.mm",

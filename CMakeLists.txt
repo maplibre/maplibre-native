@@ -545,6 +545,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/map_projection.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/transform.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/transform.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/map/transform_active.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/map/transform_active.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/transform_state.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/transform_state.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/map/zoom_history.hpp

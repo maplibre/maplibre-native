@@ -194,7 +194,6 @@ void RenderPass::setFragmentSamplerState(const MTLSamplerStatePtr& state, int32_
     }
 }
 
-/// Set the render pipeline state
 void RenderPass::setRenderPipelineState(const MTLRenderPipelineStatePtr& pipelineState) {
     if (pipelineState != currentPipelineState) {
         currentPipelineState = pipelineState;

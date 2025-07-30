@@ -1,3 +1,85 @@
+MLN_GLTF_HEADERS = [
+    "src/gltf/GLTFModelLayer.h",
+]
+
+MLN_GLTF_SOURCE = [
+    "src/gltf/Camera.hpp",
+    "src/gltf/Camera.cpp",
+    "src/gltf/GLTFMath.cpp",
+    "src/gltf/GLTFMath.hpp",
+    "src/gltf/GLTFManager.hpp",
+    "src/gltf/GLTFManager.mm",
+    "src/gltf/GLTFManagerRenderingEnvironment.hpp",
+    "src/gltf/GLTFManagerRenderingEnvironment.mm",
+    "src/gltf/GLTFManagerRenderingEnvironmentMetal.hpp",
+    "src/gltf/GLTFManagerRenderingEnvironmentMetal.mm",
+    "src/gltf/GLTFModel.hpp",
+    "src/gltf/GLTFModel.cpp",
+    "src/gltf/MetalRenderer.hpp",
+    "src/gltf/MetalRenderer.mm",
+    "src/gltf/GLTFModelLayer.h",
+    "src/gltf/GLTFModelLayer.mm",
+    "src/gltf/GLTFModelLoader.h",
+    "src/gltf/GLTFModelLoader.mm",
+    "src/gltf/GLTFMTLRenderItem.h",
+    "src/gltf/GLTFMTLRenderItem.mm",
+    "src/gltf/GLTFRenderer.hpp",
+    "src/gltf/GLTFRenderer.cpp",
+    "src/gltf/MetalRenderer+GLTFAsset.mm",
+    "src/gltf/gltfkit/GLTFAsset.h",
+    "src/gltf/gltfkit/GLTFAsset.mm",
+    "src/gltf/gltfkit/GLTFAccessor.h",
+    "src/gltf/gltfkit/GLTFAccessor.mm",
+    "src/gltf/gltfkit/GLTFAnimation.h",
+    "src/gltf/gltfkit/GLTFAnimation.mm",
+    "src/gltf/gltfkit/GLTFBinaryChunk.h",
+    "src/gltf/gltfkit/GLTFBinaryChunk.mm",
+    "src/gltf/gltfkit/GLTFBuffer.h",
+    "src/gltf/gltfkit/GLTFBufferAllocator.h",
+    "src/gltf/gltfkit/GLTFBufferView.h",
+    "src/gltf/gltfkit/GLTFBufferView.mm",
+    "src/gltf/gltfkit/GLTFCamera.h",
+    "src/gltf/gltfkit/GLTFCamera.mm",
+    "src/gltf/gltfkit/GLTFDefaultBufferAllocator.h",
+    "src/gltf/gltfkit/GLTFDefaultBufferAllocator.mm",
+    "src/gltf/gltfkit/GLTFEnums.h",
+    "src/gltf/gltfkit/GLTFExtensionNames.h",
+    "src/gltf/gltfkit/GLTFExtensionNames.mm",
+    "src/gltf/gltfkit/GLTFImage.h",
+    "src/gltf/gltfkit/GLTFImage.mm",
+    "src/gltf/gltfkit/GLTFKHRLight.h",
+    "src/gltf/gltfkit/GLTFKHRLight.mm",
+    "src/gltf/gltfkit/GLTFMaterial.h",
+    "src/gltf/gltfkit/GLTFMaterial.mm",
+    "src/gltf/gltfkit/GLTFMesh.h",
+    "src/gltf/gltfkit/GLTFMesh.mm",
+    "src/gltf/gltfkit/GLTFMTLBufferAllocator.h",
+    "src/gltf/gltfkit/GLTFMTLBufferAllocator.mm",
+    "src/gltf/gltfkit/GLTFMTLShaderBuilder.h",
+    "src/gltf/gltfkit/GLTFMTLShaderBuilder.mm",
+    "src/gltf/gltfkit/GLTFMTLTextureLoader.h",
+    "src/gltf/gltfkit/GLTFMTLTextureLoader.mm",
+    "src/gltf/gltfkit/GLTFMTLUtilities.h",
+    "src/gltf/gltfkit/GLTFMTLUtilities.mm",
+    "src/gltf/gltfkit/GLTFNode.h",
+    "src/gltf/gltfkit/GLTFNode.mm",
+    "src/gltf/gltfkit/GLTFNodeVisitor.h",
+    "src/gltf/gltfkit/GLTFObject.h",
+    "src/gltf/gltfkit/GLTFObject.mm",
+    "src/gltf/gltfkit/GLTFScene.h",
+    "src/gltf/gltfkit/GLTFScene.mm",
+    "src/gltf/gltfkit/GLTFSkin.h",
+    "src/gltf/gltfkit/GLTFSkin.mm",
+    "src/gltf/gltfkit/GLTFTexture.h",
+    "src/gltf/gltfkit/GLTFTexture.mm",
+    "src/gltf/gltfkit/GLTFTextureSampler.h",
+    "src/gltf/gltfkit/GLTFTextureSampler.mm",
+    "src/gltf/gltfkit/GLTFUtilities.h",
+    "src/gltf/gltfkit/GLTFUtilities.mm",
+    "src/gltf/gltfkit/GLTFVertexDescriptor.h",
+    "src/gltf/gltfkit/GLTFVertexDescriptor.mm",
+]
+
 MLN_GENERATED_DARWIN_STYLE_SOURCE = [
     "src/MLNLight.mm",
     "src/MLNBackgroundStyleLayer.mm",
@@ -9,6 +91,7 @@ MLN_GENERATED_DARWIN_STYLE_SOURCE = [
     "src/MLNLineStyleLayer.mm",
     "src/MLNRasterStyleLayer.mm",
     "src/MLNSymbolStyleLayer.mm",
+    "src/MLNLocationIndicatorStyleLayer.mm",
 ]
 
 MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS = [
@@ -22,6 +105,7 @@ MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS = [
     "src/MLNFillStyleLayer.h",
     "src/MLNHillshadeStyleLayer.h",
     "src/MLNRasterStyleLayer.h",
+    "src/MLNLocationIndicatorStyleLayer.h",
 ]
 
 MLN_GENERATED_DARWIN_STYLE_HEADERS = [
@@ -34,6 +118,7 @@ MLN_GENERATED_DARWIN_STYLE_HEADERS = [
     "src/MLNCircleStyleLayer_Private.h",
     "src/MLNFillStyleLayer_Private.h",
     "src/MLNHillshadeStyleLayer_Private.h",
+    "src/MLNLocationIndicatorStyleLayer_Private.h",
 ] + MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS
 
 MLN_GENERATED_DARWIN_TEST_CODE = [
@@ -47,6 +132,7 @@ MLN_GENERATED_DARWIN_TEST_CODE = [
     "test/MLNHillshadeStyleLayerTests.mm",
     "test/MLNLineStyleLayerTests.mm",
     "test/MLNSymbolStyleLayerTests.mm",
+    "test/MLNLocationIndicatorStyleLayerTests.mm",
 ]
 
 MLN_DARWIN_OBJC_HEADERS = [
@@ -165,8 +251,7 @@ MLN_DARWIN_PRIVATE_HEADERS = [
     "src/MLNVectorTileSource_Private.h",
     "src/NSExpression+MLNPrivateAdditions.h",
     "src/NSPredicate+MLNPrivateAdditions.h",
-     "src/MLNPluginStyleLayer_Private.h"
-
+    "src/MLNPluginStyleLayer_Private.h",
 ]
 
 MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
@@ -222,8 +307,7 @@ MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/NSPredicate+MLNAdditions.mm",
     "src/NSValue+MLNStyleAttributeAdditions.mm",
     "src/MLNPluginLayer.mm",
-    "src/MLNPluginStyleLayer.mm"
-
+    "src/MLNPluginStyleLayer.mm",
 ]
 MLN_DARWIN_PUBLIC_OBJCPP_CUSTOM_DRAWABLE_SOURCE = [
     "src/MLNCustomDrawableStyleLayer_Private.h",
