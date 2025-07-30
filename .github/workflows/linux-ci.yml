@@ -24,6 +24,9 @@ permissions:
   contents: read          # needed for CodeQL
   security-events: write  # needed for CodeQL
 
+env:
+  EGL_PLATFORM: surfaceless
+
 jobs:
   pre_job:
     runs-on: ubuntu-22.04
@@ -165,7 +168,7 @@ jobs:
 
       - name: Run C++ tests
         continue-on-error: ${{ matrix.renderer == 'vulkan' }}
-        run: xvfb-run -a build/mbgl-test-runner
+        run: build/mbgl-test-runner
 
       # render tests
 
@@ -178,7 +181,7 @@ jobs:
           if [[ "$renderer" == *-rust ]]; then
             renderer=${renderer%-rust}
           fi
-          xvfb-run -a build/mbgl-render-test-runner --manifestPath=metrics/linux-"$renderer".json
+          build/mbgl-render-test-runner --manifestPath=metrics/linux-"$renderer".json
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure'
@@ -228,8 +231,7 @@ jobs:
 
       - name: Generate coverage report
         run: |
-          xvfb-run -a \
-            bazel coverage --combined_report=lcov  --instrumentation_filter="//:mbgl-core" \
+          bazel coverage --combined_report=lcov  --instrumentation_filter="//:mbgl-core" \
             --test_output=errors --local_test_jobs=1 \
             --repo_env=GCOV="$PWD/.github/scripts/gcov_wrapper" \
             --test_env=DISPLAY --test_env=XAUTHORITY --copt="-DCI_BUILD" \
