@@ -54,6 +54,7 @@ class ObserverActivity : AppCompatActivity(),
         mapView.addOnDidFinishRenderingFrameListener(this)
         // # --8<-- [end:addListeners]
 
+        // # --8<-- [start:renderStatsTracker]
         renderStatsTracker.setReportFields(listOf(
             "encodingTime",
             "renderingTime",
@@ -64,15 +65,11 @@ class ObserverActivity : AppCompatActivity(),
             "memBuffers"
         ))
 
-        renderStatsTracker.setReportListener { min, max, avg ->
-            Logger.i(TAG, "RenderStatsReport - min - ${min.nonZeroValuesString()}")
-            Logger.i(TAG, "RenderStatsReport - max - ${max.nonZeroValuesString()}")
+        renderStatsTracker.setReportListener { _, _, avg ->
             Logger.i(TAG, "RenderStatsReport - avg - ${avg.nonZeroValuesString()}")
         }
 
         renderStatsTracker.setThresholds(hashMapOf(
-            "encodingTime" to 0.016,
-            "renderingTime" to 0.016,
             "numDrawCalls" to 1000,
             "totalBuffers" to 1000L
         ))
@@ -82,6 +79,7 @@ class ObserverActivity : AppCompatActivity(),
         }
 
         renderStatsTracker.startReports(10L)
+        // # --8<-- [end:renderStatsTracker]
 
         mapView.getMapAsync {
             it.setStyle(
