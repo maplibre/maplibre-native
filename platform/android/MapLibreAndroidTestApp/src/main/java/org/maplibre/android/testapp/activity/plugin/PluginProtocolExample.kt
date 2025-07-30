@@ -7,10 +7,14 @@ import java.net.URI
 
 
 class PluginProtocolExample : PluginProtocolHandler() {
+    var styleLoaded: Boolean = false;
 
     override fun canRequestResource(resource: PluginProtocolHandlerResource?): Boolean {
-
-        return true;
+        if (!styleLoaded) {
+            styleLoaded = true;
+            return true;
+        }
+        return false;
 
     }
 
@@ -43,9 +47,55 @@ class PluginProtocolExample : PluginProtocolHandler() {
                         "                \"visibility\": \"visible\"\n" +
                         "            },\n" +
                         "            \"maxzoom\": 24\n" +
-                        "        }\n"
-                        "       ]\n"
-                       " } \n"
+                        "        },\n"+
+                "        {\n" +
+                "            \"id\": \"coastline\",\n" +
+                "            \"type\": \"line\",\n" +
+                "            \"paint\": {\n" +
+                "                \"line-blur\": 0.5,\n" +
+                "                \"line-color\": \"#198EC8\",\n" +
+                "                \"line-width\": {\n" +
+                "                    \"stops\": [\n" +
+                "                        [\n" +
+                "                            0,\n" +
+                "                            2\n" +
+                "                        ],\n" +
+                "                        [\n" +
+                "                            6,\n" +
+                "                            6\n" +
+                "                        ],\n" +
+                "                        [\n" +
+                "                            14,\n" +
+                "                            9\n" +
+                "                        ],\n" +
+                "                        [\n" +
+                "                            22,\n" +
+                "                            18\n" +
+                "                        ]\n" +
+                "                    ]\n" +
+                "                }\n" +
+                "            },\n" +
+                "            \"filter\": [\n" +
+                "                \"all\"\n" +
+                "            ],\n" +
+                "            \"layout\": {\n" +
+                "                \"line-cap\": \"round\",\n" +
+                "                \"line-join\": \"round\",\n" +
+                "                \"visibility\": \"visible\"\n" +
+                "            },\n" +
+                "            \"source\": \"maplibre\",\n" +
+                "            \"maxzoom\": 24,\n" +
+                "            \"minzoom\": 0,\n" +
+                "            \"source-layer\": \"countries\"\n" +
+                "        }"+
+                        "       ],\n"+
+        " \"sources\": {\n" +
+                "        \"maplibre\": {\n" +
+                "            \"url\": \"https://demotiles.maplibre.org/tiles/tiles.json\",\n" +
+                "            \"type\": \"vector\"\n" +
+                "        },"+
+        "    \"version\": 8\n"+
+                       " } }\n";
 
         tempResult.generateBuffer(tempStyle);
         return tempResult;
