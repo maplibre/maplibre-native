@@ -109,28 +109,11 @@ jobs:
     needs: windows-get-or-build-dependencies
     strategy:
       matrix:
-        include:
-          - renderer: opengl
-            runner: windows-2022
-          - renderer: egl
-            runner: windows-2022
-          - renderer: vulkan
-            runner: windows-2022
-          - renderer: opengl
-            runner: windows-11-arm64
-            arch: arm64
-          - renderer: vulkan
-            runner: windows-11-arm64
-            arch: arm64
-    runs-on: ${{ matrix.runner }}
+        renderer: [opengl, egl, vulkan]
+    runs-on: windows-2022
     steps:
       - run: |
           git config --system core.longpaths true
-
-      - name: Set build directory
-        run: |
-          $buildDir = if ("${{ matrix.arch }}" -eq "arm64") { "build-windows-arm64-${{ matrix.renderer }}" } else { "build-windows-${{ matrix.renderer }}" }
-          Add-Content -Path $env:GITHUB_ENV -Value "BUILD_DIR=$buildDir"
 
       - uses: actions/checkout@v4
         with:
@@ -171,12 +154,11 @@ jobs:
         timeout-minutes: 60
         run: |
           cmake --version
-          $preset = if ("${{ matrix.arch }}" -eq "arm64") { "windows-arm64-${{ matrix.renderer }}" } else { "windows-${{ matrix.renderer }}" }
-          cmake --preset $preset -DCMAKE_POLICY_DEFAULT_CMP0141=NEW -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.arch == 'arm64' && '-DCMAKE_PREFIX_PATH="${{ github.workspace }}\\platform\\windows\\vendor\\vcpkg\\installed\\arm64-windows"' || '' }}
+          cmake --preset windows-${{ matrix.renderer }} -DCMAKE_POLICY_DEFAULT_CMP0141=NEW -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded -DCMAKE_BUILD_TYPE=RelWithDebInfo
 
       - name: Build MapLibre Native Core
         run: |
-          cmake --build $env:BUILD_DIR --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
+          cmake --build build-windows-${{ matrix.renderer }} --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
 
       # CodeQL
 
@@ -192,19 +174,19 @@ jobs:
       - name: Extract Mesa3D files for OpenGL
         if: matrix.renderer != 'vulkan'
         run: |
-          & 'C:\Program Files\7-Zip\7z.exe' e -o$env:BUILD_DIR .\mesa3d.7z x64\libgallium_wgl.dll x64\libGLESv2.dll
+          & 'C:\Program Files\7-Zip\7z.exe' e -obuild-windows-${{ matrix.renderer }} .\mesa3d.7z x64\libgallium_wgl.dll x64\libGLESv2.dll
 
       - name: Extract Mesa3D files for Vulkan
         if: matrix.renderer == 'vulkan'
         run: |
-          & 'C:\Program Files\7-Zip\7z.exe' e -o$env:BUILD_DIR .\mesa3d.7z x64\lvp_icd.x86_64.json x64\vulkan_lvp.dll
+          & 'C:\Program Files\7-Zip\7z.exe' e -obuild-windows-${{ matrix.renderer }} .\mesa3d.7z x64\lvp_icd.x86_64.json x64\vulkan_lvp.dll
 
       # unit tests
 
       - name: Configure Mesa3D drivers (OpenGL)
         if: matrix.renderer != 'vulkan'
         run: |
-          reg add 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\OpenGLDrivers\MSOGL' /v DLL /t REG_SZ /d ('{0}\{1}\libgallium_wgl.dll' -f $PWD.Path, $env:BUILD_DIR) /f
+          reg add 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\OpenGLDrivers\MSOGL' /v DLL /t REG_SZ /d ('{0}\build-windows-${{ matrix.renderer }}\libgallium_wgl.dll' -f $PWD.Path) /f
           reg add 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\OpenGLDrivers\MSOGL' /v DriverVersion /t REG_DWORD /d 1 /f
           reg add 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\OpenGLDrivers\MSOGL' /v Flags /t REG_DWORD /d 1 /f
           reg add 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\OpenGLDrivers\MSOGL' /v Version /t REG_DWORD /d 2 /f
@@ -213,7 +195,7 @@ jobs:
       - name: Configure Mesa3D drivers (Vulkan)
         if: matrix.renderer == 'vulkan'
         run: |
-          reg add 'HKLM\Software\Khronos\Vulkan\Drivers' /f /v "${{ github.workspace }}\$($env:BUILD_DIR)\lvp_icd.x86_64.json" /t REG_DWORD /d 0
+          reg add 'HKLM\Software\Khronos\Vulkan\Drivers' /f /v '${{ github.workspace }}\build-windows-${{ matrix.renderer }}\lvp_icd.x86_64.json' /t REG_DWORD /d 0
 
       - name: Download and configure Vulkan
         if: matrix.renderer == 'vulkan'
@@ -222,7 +204,7 @@ jobs:
           # $version = (Invoke-WebRequest -Uri "https://vulkan.lunarg.com/sdk/latest.json" | ConvertFrom-Json).windows
           $version = '1.4.313.0'
           Invoke-WebRequest https://sdk.lunarg.com/sdk/download/$version/windows/VulkanRT-X64-$version-Components.zip -OutFile VulkanRT.zip
-          & 'C:\Program Files\7-Zip\7z.exe' e -o$env:BUILD_DIR -r .\VulkanRT.zip *x64\vulkan-1.*
+          & 'C:\Program Files\7-Zip\7z.exe' e -obuild-windows-${{ matrix.renderer }} -r .\VulkanRT.zip *x64\vulkan-1.*
 
       - name: Run C++ tests
         continue-on-error: ${{ matrix.renderer == 'vulkan' }}
@@ -230,7 +212,7 @@ jobs:
           ANGLE_DEFAULT_PLATFORM: 'gl'
           GALLIUM_DRIVER: llvmpipe
           LIBGL_ALWAYS_SOFTWARE: true
-        run: $env:BUILD_DIR/mbgl-test-runner.exe
+        run: build-windows-${{ matrix.renderer }}/mbgl-test-runner.exe
 
       # render tests
 
@@ -241,7 +223,7 @@ jobs:
           ANGLE_DEFAULT_PLATFORM: 'gl'
           GALLIUM_DRIVER: llvmpipe
           LIBGL_ALWAYS_SOFTWARE: true
-        run: $env:BUILD_DIR/mbgl-render-test-runner.exe "--manifestPath=metrics/windows-${env:manifest_file}.json"
+        run: build-windows-${{ matrix.renderer }}/mbgl-render-test-runner.exe "--manifestPath=metrics/windows-${env:manifest_file}.json"
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure'
@@ -254,7 +236,7 @@ jobs:
       # expression tests
 
       - name: Run expression test
-        run: $env:BUILD_DIR/expression-test/mbgl-expression-test.exe
+        run: build-windows-${{ matrix.renderer }}/expression-test/mbgl-expression-test.exe
 
   windows-build-and-test-msys2:
     if: needs.pre-job.outputs.should_skip != 'true'
