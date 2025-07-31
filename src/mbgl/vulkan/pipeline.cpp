@@ -406,8 +406,6 @@ std::size_t PipelineInfo::hash() const {
                       stencilDepthFail,
                       wideLines,
                       VkRenderPass(renderPass),
-                      viewExtent.width,
-                      viewExtent.height,
                       vertexInputHash);
 }
 

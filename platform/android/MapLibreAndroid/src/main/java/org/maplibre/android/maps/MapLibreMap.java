@@ -121,7 +121,7 @@ public final class MapLibreMap {
    * Set frustum offset to disable rendering for edges of the screen
    */
   public void setFrustumOffset(@NonNull RectF offset) {
-      nativeMapView.setFrustumOffset(offset);
+    nativeMapView.setFrustumOffset(offset);
   }
 
   public void setSwapBehaviorFlush(boolean flush) {

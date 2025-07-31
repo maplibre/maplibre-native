@@ -133,22 +133,6 @@ public:
      */
     float pixelRatio() const;
 
-    /**
-     * @brief Sets the frustum offset. Used to avoid rendering edges of the screen
-     * which might be behind UI elements.
-     *
-     * @param offset_ A set of edge insets in logical pixels.
-     * @return reference to MapOptions for chaining options together.
-     */
-    MapOptions& withFrustumOffset(const EdgeInsets& offset_);
-
-    /**
-     * @brief gets the previousl set (or default) frustum offset.
-     *
-     * @return frustum offset value
-     */
-    EdgeInsets frustumOffset() const;
-
 private:
     class Impl;
     std::unique_ptr<Impl> impl_;
