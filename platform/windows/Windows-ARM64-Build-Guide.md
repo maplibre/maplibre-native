@@ -267,6 +267,6 @@ Copy-Item -Path platform\windows\vendor\vcpkg\installed\arm64-windows\bin\*.dll 
 - 4 tests fail out of 1001 (TileLOD-related)
 - These failures don't affect normal usage
 
-### Vulkan Build  
+### Vulkan Build
 - Only 1 test fails out of 966 (Map.SetStyleInvalidJSON)
 - "Vulkan layers not found" warnings can be ignored (validation layers)
