@@ -34,6 +34,17 @@
         "MLN_WITH_GLFW": "ON"
     }
 },
+{
+    "name": "windows-arm64-vulkan",
+    "hidden": false,
+    "inherits": "windows-arm64",
+    "displayName": "Windows ARM64 Vulkan",
+    "description": "Windows ARM64 build (Vulkan renderer)",
+    "cacheVariables": {
+        "MLN_WITH_VULKAN": "ON",
+        "MLN_WITH_GLFW": "ON"
+    }
+},
     {
       "name": "ios",
       "displayName": "iOS",
