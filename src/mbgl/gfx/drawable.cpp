@@ -4,7 +4,6 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/drawable_impl.hpp>
 #include <mbgl/gfx/index_vector.hpp>
-#include <mbgl/gfx/scissor_rect.hpp>
 #include <mbgl/gfx/types.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/render_pass.hpp>

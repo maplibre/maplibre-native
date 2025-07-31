@@ -111,8 +111,6 @@ public:
      */
     MapOptions& withSize(Size size_);
 
-    MapOptions& withFrustumOffset(const EdgeInsets& frustuOffset_);
-
     /**
      * @brief Gets the previously set size.
      *

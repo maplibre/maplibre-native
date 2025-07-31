@@ -3,7 +3,6 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
 
-#include <mbgl/gfx/scissor_rect.hpp>
 #include <memory>
 
 namespace mbgl {

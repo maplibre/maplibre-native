@@ -35,7 +35,6 @@ namespace gfx {
 
 class ColorMode;
 class CullFaceMode;
-class ScissorRect;
 enum class DepthMaskType : bool;
 class DrawableTweaker;
 class DrawMode;

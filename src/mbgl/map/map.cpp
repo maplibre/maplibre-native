@@ -410,7 +410,6 @@ MapOptions Map::getMapOptions() const {
                          .withCrossSourceCollisions(impl->crossSourceCollisions)
                          .withNorthOrientation(impl->transform->getNorthOrientation())
                          .withSize(impl->transform->getState().getSize())
-                         .withFrustumOffset(impl->transform->getState().getFrustumOffset())
                          .withPixelRatio(impl->pixelRatio));
 }
 
