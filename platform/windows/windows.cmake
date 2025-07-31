@@ -11,7 +11,8 @@ if(MSVC)
         set(WITH_ICU -With-ICU)
     endif()
 
-    # Skip vcpkg for ARM64 builds as we have manually built dependencies
+    # Skip Get-VendorPackages.ps1 for ARM64 due to vcpkg compiler detection issues
+    # The required packages should already be installed
     if(NOT (CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64" OR CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64"))
         execute_process(COMMAND powershell -ExecutionPolicy Bypass -File ${CMAKE_CURRENT_LIST_DIR}/Get-VendorPackages.ps1 -Triplet ${VCPKG_TARGET_TRIPLET} -Renderer ${_RENDERER} ${WITH_ICU})
     endif()
