@@ -19,7 +19,7 @@
         "MLN_WITH_OPENGL": "OFF",
         "MLN_WITH_EGL": "OFF",
         "MLN_WITH_VULKAN": "OFF",
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake-arm64-config.cmake",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/platform/windows/arm64-windows-toolchain.cmake",
         "MLN_WITH_GLFW": "OFF"
     }
 },
