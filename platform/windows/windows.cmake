@@ -34,11 +34,27 @@ if(MSVC)
     find_package(PNG REQUIRED)
     find_package(WebP REQUIRED)
     
-    # ARM64 specific: Use x86 OpenGL headers if ARM64 headers are missing
-    if((CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64" OR CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64") AND 
-       EXISTS "${CMAKE_CURRENT_LIST_DIR}/vendor/vcpkg/installed/x86-windows/include/GLES3")
-        include_directories("${CMAKE_CURRENT_LIST_DIR}/vendor/vcpkg/installed/x86-windows/include")
-        message(STATUS "Using x86 OpenGL headers for ARM64 build")
+    # ARM64 specific fixes
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64" OR CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
+        # Simplify library variables to avoid complex generator expressions
+        if(TARGET JPEG::JPEG)
+            set(JPEG_LIBRARIES JPEG::JPEG)
+        endif()
+        
+        if(TARGET PNG::PNG)
+            set(PNG_LIBRARIES PNG::PNG)
+        endif()
+        
+        # Fix ICU::data target which might not exist for ARM64
+        if(NOT TARGET ICU::data AND TARGET ICU::uc)
+            add_library(ICU::data INTERFACE IMPORTED)
+        endif()
+        
+        # Use x86 OpenGL headers if ARM64 headers are missing
+        if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/vendor/vcpkg/installed/x86-windows/include/GLES3")
+            include_directories("${CMAKE_CURRENT_LIST_DIR}/vendor/vcpkg/installed/x86-windows/include")
+            message(STATUS "Using x86 OpenGL headers for ARM64 build")
+        endif()
     endif()
     
     find_path(DLFCN_INCLUDE_DIRS dlfcn.h)
