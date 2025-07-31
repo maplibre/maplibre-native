@@ -11,7 +11,10 @@ if(MSVC)
         set(WITH_ICU -With-ICU)
     endif()
 
-    execute_process(COMMAND powershell -ExecutionPolicy Bypass -File ${CMAKE_CURRENT_LIST_DIR}/Get-VendorPackages.ps1 -Triplet ${VCPKG_TARGET_TRIPLET} -Renderer ${_RENDERER} ${WITH_ICU})
+    # Skip vcpkg for ARM64 builds as we have manually built dependencies
+    if(NOT (CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64" OR CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64"))
+        execute_process(COMMAND powershell -ExecutionPolicy Bypass -File ${CMAKE_CURRENT_LIST_DIR}/Get-VendorPackages.ps1 -Triplet ${VCPKG_TARGET_TRIPLET} -Renderer ${_RENDERER} ${WITH_ICU})
+    endif()
     unset(_RENDERER)
 
     add_compile_definitions(NOMINMAX GHC_WIN_DISABLE_WSTRING_STORAGE_TYPE)
@@ -25,10 +28,21 @@ if(MSVC)
     find_package(CURL REQUIRED)
     find_package(dlfcn-win32 REQUIRED)
     find_package(ICU OPTIONAL_COMPONENTS i18n uc)
-    find_package(JPEG REQUIRED)
-    find_package(libuv REQUIRED)
-    find_package(PNG REQUIRED)
-    find_package(WebP REQUIRED)
+    
+    # For ARM64, all packages are now available
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64" OR CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
+        find_package(JPEG REQUIRED)
+        find_package(libuv REQUIRED)
+        find_package(PNG REQUIRED)
+        find_package(WebP REQUIRED)
+        include(${CMAKE_CURRENT_LIST_DIR}/windows-arm64-fixup.cmake)
+    else()
+        find_package(JPEG REQUIRED)
+        find_package(libuv REQUIRED)
+        find_package(PNG REQUIRED)
+        find_package(WebP REQUIRED)
+    endif()
+    
     find_path(DLFCN_INCLUDE_DIRS dlfcn.h)
     find_path(LIBUV_INCLUDE_DIRS uv.h)
 elseif(DEFINED ENV{MSYSTEM})
@@ -51,48 +65,59 @@ else()
     message(FATAL_ERROR "Unsupported build system: " ${CMAKE_SYSTEM_NAME})
 endif()
 
+set(MBGL_CORE_SOURCES
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/collator.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/number_format.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/layermanager/layer_manager.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/platform/time.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/asset_file_source.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/database_file_source.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/file_source_manager.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/file_source_request.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/http_file_source.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/local_file_request.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/local_file_source.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/mbtiles_file_source.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/main_resource_loader.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_database.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_download.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/online_file_source.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/$<IF:$<BOOL:${MLN_WITH_PMTILES}>,pmtiles_file_source.cpp,pmtiles_file_source_stub.cpp>
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/sqlite3.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/bidi.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/local_glyph_rasterizer.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/async_task.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/compression.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/filesystem.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/image.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/jpeg_reader.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/webp_reader.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/logging_stderr.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/monotonic_timer.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/png_reader.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/png_writer.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/run_loop.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/string_stdlib.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/timer.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/utf.cpp
+    ${PROJECT_SOURCE_DIR}/platform/windows/src/thread.cpp
+    ${PROJECT_SOURCE_DIR}/platform/windows/src/thread_local.cpp
+)
+
+# Remove sources that depend on unavailable libraries for ARM64
+if(DEFINED MBGL_ARM64_SOURCES_TO_REMOVE)
+    foreach(src ${MBGL_ARM64_SOURCES_TO_REMOVE})
+        list(REMOVE_ITEM MBGL_CORE_SOURCES ${src})
+    endforeach()
+endif()
+
 target_sources(
     mbgl-core
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/collator.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/number_format.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/layermanager/layer_manager.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/platform/time.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/asset_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/database_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/file_source_manager.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/file_source_request.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/http_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/local_file_request.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/local_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/mbtiles_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/main_resource_loader.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_database.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_download.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/online_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/$<IF:$<BOOL:${MLN_WITH_PMTILES}>,pmtiles_file_source.cpp,pmtiles_file_source_stub.cpp>
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/sqlite3.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/bidi.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/local_glyph_rasterizer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/async_task.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/compression.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/filesystem.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/image.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/jpeg_reader.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/webp_reader.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/logging_stderr.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/monotonic_timer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/png_reader.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/png_writer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/run_loop.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/string_stdlib.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/timer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/utf.cpp
-        ${PROJECT_SOURCE_DIR}/platform/windows/src/thread.cpp
-        ${PROJECT_SOURCE_DIR}/platform/windows/src/thread_local.cpp
+        ${MBGL_CORE_SOURCES}
 )
 
 target_compile_definitions(
@@ -253,7 +278,8 @@ target_link_libraries(
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::uc>
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::data>
         $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:$<IF:$<BOOL:${MLN_CORE_INCLUDE_DEPS}>,$<TARGET_OBJECTS:mbgl-vendor-icu>,mbgl-vendor-icu>>
-        PNG::PNG
+        $<$<TARGET_EXISTS:PNG::PNG>:PNG::PNG>
+        $<$<AND:$<NOT:$<TARGET_EXISTS:PNG::PNG>>,$<BOOL:${PNG_LIBRARIES}>>:${PNG_LIBRARIES}>
         mbgl-vendor-nunicode
         mbgl-vendor-sqlite
 )
@@ -266,11 +292,19 @@ endif()
 if(MLN_WITH_NODE)
     add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
 elseif(MSVC)
-    target_link_libraries(
-        mbgl-core
-        PRIVATE
-            $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
-    )
+    if(TARGET libuv::uv_a OR TARGET libuv::uv)
+        target_link_libraries(
+            mbgl-core
+            PRIVATE
+                $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
+        )
+    elseif(LIBUV_LIBRARIES)
+        target_link_libraries(
+            mbgl-core
+            PRIVATE
+                ${LIBUV_LIBRARIES}
+        )
+    endif()
 elseif(MSYS)
     target_link_libraries(
         mbgl-core
@@ -313,11 +347,19 @@ target_link_libraries(
 )
 
 if(MSVC)
-    target_link_libraries(
-        mbgl-test-runner
-        PRIVATE
-            $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
-    )
+    if(TARGET libuv::uv_a OR TARGET libuv::uv)
+        target_link_libraries(
+            mbgl-test-runner
+            PRIVATE
+                $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
+        )
+    elseif(LIBUV_LIBRARIES)
+        target_link_libraries(
+            mbgl-test-runner
+            PRIVATE
+                ${LIBUV_LIBRARIES}
+        )
+    endif()
 endif()
 
 add_executable(
@@ -333,11 +375,19 @@ target_link_libraries(
 )
 
 if(MSVC)
-    target_link_libraries(
-        mbgl-benchmark-runner
-        PRIVATE
-            $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
-    )
+    if(TARGET libuv::uv_a OR TARGET libuv::uv)
+        target_link_libraries(
+            mbgl-benchmark-runner
+            PRIVATE
+                $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
+        )
+    elseif(LIBUV_LIBRARIES)
+        target_link_libraries(
+            mbgl-benchmark-runner
+            PRIVATE
+                ${LIBUV_LIBRARIES}
+        )
+    endif()
 endif()
 
 add_executable(
@@ -353,19 +403,35 @@ target_link_libraries(
 )
 
 if(MSVC)
-    target_link_libraries(
-        mbgl-render-test-runner
-        PRIVATE
-            $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
-    )
+    if(TARGET libuv::uv_a OR TARGET libuv::uv)
+        target_link_libraries(
+            mbgl-render-test-runner
+            PRIVATE
+                $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
+        )
+    elseif(LIBUV_LIBRARIES)
+        target_link_libraries(
+            mbgl-render-test-runner
+            PRIVATE
+                ${LIBUV_LIBRARIES}
+        )
+    endif()
 endif()
 
 if(MSVC)
-    target_link_libraries(
-        mbgl-expression-test
-        PRIVATE
-            $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
-    )
+    if(TARGET libuv::uv_a OR TARGET libuv::uv)
+        target_link_libraries(
+            mbgl-expression-test
+            PRIVATE
+                $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
+        )
+    elseif(LIBUV_LIBRARIES)
+        target_link_libraries(
+            mbgl-expression-test
+            PRIVATE
+                ${LIBUV_LIBRARIES}
+        )
+    endif()
 endif()
 
 # Disable benchmarks in CI as they run in VM environment

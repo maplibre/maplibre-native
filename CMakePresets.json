@@ -7,6 +7,34 @@
   },
   "configurePresets": [
     {
+    "name": "windows-arm64",
+    "hidden": true,
+    "generator": "Visual Studio 17 2022",
+    "architecture": {
+        "value": "ARM64",
+        "strategy": "set"
+    },
+    "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "Windows",
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_WITH_EGL": "OFF",
+        "MLN_WITH_VULKAN": "OFF",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake-arm64-config.cmake",
+        "MLN_WITH_GLFW": "OFF"
+    }
+},
+{
+    "name": "windows-arm64-opengl",
+    "hidden": false,
+    "inherits": "windows-arm64",
+    "displayName": "Windows ARM64 OpenGL",
+    "description": "Windows ARM64 build (OpenGL renderer)",
+    "cacheVariables": {
+        "MLN_WITH_OPENGL": "ON",
+        "MLN_WITH_GLFW": "ON"
+    }
+},
+    {
       "name": "ios",
       "displayName": "iOS",
       "generator": "Xcode",
