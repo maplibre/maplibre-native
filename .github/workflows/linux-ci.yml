@@ -234,7 +234,7 @@ jobs:
           bazel coverage --combined_report=lcov  --instrumentation_filter="//:mbgl-core" \
             --test_output=errors --local_test_jobs=1 \
             --repo_env=GCOV="$PWD/.github/scripts/gcov_wrapper" \
-            --test_env=DISPLAY --test_env=XAUTHORITY --copt="-DCI_BUILD" \
+            --test_env=EGL_PLATFORM --copt="-DCI_BUILD" \
             //test:core //render-test:render-test //expression-test:test
           echo coverage_report="$(bazel info output_path)"/_coverage/_coverage_report.dat >> "$GITHUB_ENV"
 
