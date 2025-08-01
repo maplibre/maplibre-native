@@ -7921,7 +7921,6 @@ static void *windowScreenContext = &windowScreenContext;
 
 }
 
-<<<<<<< HEAD
 - (MLNPluginProtocolHandlerResource *)resourceFromCoreResource:(const mbgl::Resource &)resource {
 
     MLNPluginProtocolHandlerResource *tempResult = [[MLNPluginProtocolHandlerResource alloc] init];
