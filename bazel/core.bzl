@@ -4,6 +4,7 @@ MLN_LAYER_PLUGIN_HEADERS = [
     "src/mbgl/plugin/plugin_layer_impl.hpp",
     "src/mbgl/plugin/plugin_layer_render.hpp",
     "src/mbgl/plugin/plugin_layer_properties.hpp",
+    "src/mbgl/plugin/plugin_file_source.hpp",
     "src/mbgl/plugin/plugin_style_filter.hpp",
     "src/mbgl/plugin/feature_collection_bucket.hpp",
     "src/mbgl/plugin/feature_collection.hpp",

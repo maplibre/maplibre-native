@@ -58,6 +58,7 @@ cc_library(
         "src/mbgl/storage/offline_database.cpp",
         "src/mbgl/storage/offline_download.cpp",
         "src/mbgl/storage/online_file_source.cpp",
+        "src/mbgl/storage/plugin_file_source.cpp",
         "src/mbgl/storage/pmtiles_file_source.cpp",
         "src/mbgl/storage/sqlite3.cpp",
         "src/mbgl/text/bidi.cpp",
