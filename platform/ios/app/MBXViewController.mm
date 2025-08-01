@@ -28,6 +28,7 @@
 #import "PluginLayerExampleMetalRendering.h"
 #import "MLNPluginStyleLayer.h"
 #import "PluginProtocolExample.h"
+#import "StyleFilterExample.h"
 
 static const CLLocationCoordinate2D WorldTourDestinations[] = {
     { .latitude = 38.8999418, .longitude = -77.033996 },
@@ -283,6 +284,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.mapView addPluginLayerType:[PluginLayerExample class]];
     [self.mapView addPluginLayerType:[PluginLayerExampleMetalRendering class]];
     [self.mapView addPluginProtocolHandler:[PluginProtocolExample class]];
+    [self.mapView addStyleFilter:[[StyleFilterExample alloc] init]];
 
 }
 
@@ -2346,6 +2348,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.styleNames addObject:@"MapLibre Basic - Local With Plugin Loader"];
     NSURL *pluginstyleurl = [NSURL URLWithString:@"pluginProtocol://PluginLayerTestStyle.json"];
     [self.styleURLs addObject:pluginstyleurl];
+
 
     /// Add MapLibre Styles if an `apiKey` exists
     NSString* apiKey = [MLNSettings apiKey];

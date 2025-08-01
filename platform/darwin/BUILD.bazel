@@ -301,6 +301,8 @@ exports_files(
         "app/PluginLayerTestStyle.json",
         "app/PluginLayerExample.h",
         "app/PluginLayerExample.mm",
+        "app/StyleFilterExample.h",
+        "app/StyleFilterExample.mm",
         "app/PluginLayerExampleMetalRendering.h",
         "app/PluginLayerExampleMetalRendering.mm",
         "app/PluginProtocolExample.h",

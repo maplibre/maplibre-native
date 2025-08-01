@@ -31,6 +31,8 @@
 #include <mbgl/plugin/plugin_layer.hpp>
 #include <mbgl/plugin/plugin_layer_impl.hpp>
 #include <mbgl/plugin/plugin_file_source.hpp>
+#include <mbgl/plugin/plugin_style_filter.hpp>
+#include <mbgl/plugin/feature_collection.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/render_pass.hpp>
@@ -85,6 +87,8 @@
 #import "MLNPluginProtocolHandler.h"
 #import "MLNStyleLayerManager.h"
 #include "MLNPluginStyleLayer_Private.h"
+#include "MLNStyleFilter.h"
+#include "MLNStyleFilter_Private.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -458,6 +462,9 @@ public:
 // Plugin Objects
 @property NSMutableArray *pluginLayers;
 @property NSMutableArray *pluginProtocols;
+
+// Style Filters
+@property NSMutableArray *styleFilters;
 
 @end
 
@@ -7668,6 +7675,44 @@ static void *windowScreenContext = &windowScreenContext;
     _mbglMap->triggerRepaint();
 }
 
+-(MLNPluginLayerTileFeature *)featureFromCore:(std::shared_ptr<mbgl::plugin::Feature>)feature {
+
+    MLNPluginLayerTileFeature *tempResult = [[MLNPluginLayerTileFeature alloc] init];
+
+    NSMutableDictionary *tileProperties = [NSMutableDictionary dictionary];
+    for (auto p: feature->_featureProperties) {
+        NSString *key = [NSString stringWithUTF8String:p.first.c_str()];
+        NSString *value = [NSString stringWithUTF8String:p.second.c_str()];
+        [tileProperties setObject:value forKey:key];
+    }
+
+    tempResult.featureProperties = [NSDictionary dictionaryWithDictionary:tileProperties];
+
+    NSMutableArray *featureCoordinates = [NSMutableArray array];
+    for (auto & coordinateCollection: feature->_featureCoordinates) {
+
+        for (auto & coordinate: coordinateCollection._coordinates) {
+            CLLocationCoordinate2D c = CLLocationCoordinate2DMake(coordinate._lat, coordinate._lon);
+            NSValue *value = [NSValue valueWithBytes:&c objCType:@encode(CLLocationCoordinate2D)];
+            [featureCoordinates addObject:value];
+        }
+
+    }
+    // TODO: Need to figure out how we're going to handle multiple coordinate groups/etc
+    if ([featureCoordinates count] > 0) {
+        tempResult.featureCoordinates = [NSArray arrayWithArray:featureCoordinates];
+    }
+
+    tempResult.featureID = [NSString stringWithUTF8String:feature->_featureID.c_str()];
+
+    return tempResult;
+}
+
+-(NSString *)tileIDToString:(mbgl::OverscaledTileID &)tileID {
+    NSString *tempResult = [NSString stringWithFormat:@"%i,%i,%i", tileID.canonical.z, tileID.canonical.x, tileID.canonical.y];
+    return tempResult;
+}
+
 /**
  Adds a plug-in layer that is external to this library
  */
@@ -7692,6 +7737,13 @@ static void *windowScreenContext = &windowScreenContext;
         pass3D = mbgl::style::LayerTypeInfo::Pass3D::Required;
     }
 
+
+    // If we read tile features, then we need to set these things
+    if (capabilities.supportsReadingTileFeatures) {
+        tileKind = mbgl::style::LayerTypeInfo::TileKind::Geometry;
+        source = mbgl::style::LayerTypeInfo::Source::Required;
+    }
+
     auto factory = std::make_unique<mbgl::PluginLayerPeerFactory>(layerType,
                                                source,
                                                pass3D,
@@ -7703,6 +7755,7 @@ static void *windowScreenContext = &windowScreenContext;
     __weak MLNMapView *weakMapView = self;
 
     Class layerClass = pluginLayerClass;
+    factory->supportsFeatureCollectionBuckets = capabilities.supportsReadingTileFeatures;
     factory->setOnLayerCreatedEvent([layerClass, weakMapView, pluginLayerClass](mbgl::style::PluginLayer *pluginLayer) {
 
         //NSLog(@"Creating Plugin Layer: %@", layerClass);
@@ -7796,6 +7849,69 @@ static void *windowScreenContext = &windowScreenContext;
             }
         });
 
+        // If this layer can read tile features, then setup that lambda
+        if (capabilities.supportsReadingTileFeatures) {
+            pluginLayerImpl->setFeatureLoadedFunction([weakPlugInLayer, weakMapView](const std::shared_ptr<mbgl::plugin::Feature> feature) {
+
+                @autoreleasepool {
+                    MLNPluginLayerTileFeature *tileFeature = [weakMapView featureFromCore:feature];
+
+                    [weakPlugInLayer onFeatureLoaded:tileFeature];
+
+                }
+
+            });
+
+
+            pluginLayerImpl->setFeatureCollectionLoadedFunction([weakPlugInLayer, weakMapView](const std::shared_ptr<mbgl::plugin::FeatureCollection> featureCollection) {
+
+                @autoreleasepool {
+
+                    MLNPluginLayerTileFeatureCollection *collection = [[MLNPluginLayerTileFeatureCollection alloc] init];
+
+                    // Add the features
+                    NSMutableArray *featureList = [NSMutableArray arrayWithCapacity:featureCollection->_features.size()];
+                    for (auto f: featureCollection->_features) {
+                        [featureList addObject:[weakMapView featureFromCore:f]];
+                    }
+                    collection.features = [NSArray arrayWithArray:featureList];
+                    collection.tileID = [weakMapView tileIDToString:featureCollection->_featureCollectionTileID];
+
+
+                    [weakPlugInLayer onFeatureCollectionLoaded:collection];
+
+                }
+
+            });
+
+            pluginLayerImpl->setFeatureCollectionUnloadedFunction([weakPlugInLayer, weakMapView](const std::shared_ptr<mbgl::plugin::FeatureCollection> featureCollection) {
+
+                @autoreleasepool {
+
+                    // TODO: Map these collections to local vars and maybe don't keep recreating it
+
+                    MLNPluginLayerTileFeatureCollection *collection = [[MLNPluginLayerTileFeatureCollection alloc] init];
+
+                    // Add the features
+                    NSMutableArray *featureList = [NSMutableArray arrayWithCapacity:featureCollection->_features.size()];
+                    for (auto f: featureCollection->_features) {
+                        [featureList addObject:[weakMapView featureFromCore:f]];
+                    }
+                    collection.features = [NSArray arrayWithArray:featureList];
+                    collection.tileID = [weakMapView tileIDToString:featureCollection->_featureCollectionTileID];
+
+                    [weakPlugInLayer onFeatureCollectionUnloaded:collection];
+
+                }
+
+            });
+
+
+
+
+
+        }
+
     });
 
     // TODO: Same question as above.  Do we ever want to have a core only layer type?
@@ -7805,6 +7921,7 @@ static void *windowScreenContext = &windowScreenContext;
 
 }
 
+<<<<<<< HEAD
 - (MLNPluginProtocolHandlerResource *)resourceFromCoreResource:(const mbgl::Resource &)resource {
 
     MLNPluginProtocolHandlerResource *tempResult = [[MLNPluginProtocolHandlerResource alloc] init];
@@ -7937,6 +8054,35 @@ static void *windowScreenContext = &windowScreenContext;
 
 }
 
+-(void)addStyleFilter:(MLNStyleFilter *)styleFilter {
+
+    if (!self.styleFilters) {
+        self.styleFilters = [NSMutableArray array];
+    }
+    [self.styleFilters addObject:styleFilter];
+
+    auto coreStyleFilter = std::make_shared<mbgl::style::PluginStyleFilter>();
+    coreStyleFilter->_filterStyleFunction = [styleFilter](const std::string &filterData) -> const std::string {
+
+        std::string tempResult;
+
+        @autoreleasepool {
+            NSData *sourceData = [NSData dataWithBytesNoCopy:(void *)filterData.data()
+                                                      length:filterData.size()
+                                                freeWhenDone:NO];
+            NSData *filteredData = [styleFilter filterData:sourceData];
+            tempResult = std::string((const char*)[filteredData bytes], [filteredData length]);
+
+        }
+        return tempResult;
+    };
+
+    // Set the ivar
+    [styleFilter setFilter:coreStyleFilter];
+
+    _mbglMap->getStyle().addStyleFilter(coreStyleFilter);
+
+}
 
 
 - (NSArray<NSString*>*)getActionJournalLogFiles
