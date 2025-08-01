@@ -2282,7 +2282,7 @@ vertically on the map.
  */
 - (void)addPluginProtocolHandler:(Class)pluginProtocolHandlerClass;
 
-/** 
+/**
  Adds a style filter to the map view
  */
 - (void)addStyleFilter:(MLNStyleFilter *)styleFilter;
