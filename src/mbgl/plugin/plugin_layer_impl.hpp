@@ -99,6 +99,18 @@ public:
         _updateLayerPropertiesFunction = updateLayerPropertiesFunction;
     }
 
+    void setFeatureLoadedFunction(OnFeatureLoaded featureLoadedFunction) {
+        _featureLoadedFunction = featureLoadedFunction;
+    }
+
+    void setFeatureCollectionLoadedFunction(OnFeatureCollectionLoaded featureCollectionLoadedFunction) {
+        _featureCollectionLoadedFunction = featureCollectionLoadedFunction;
+    }
+
+    void setFeatureCollectionUnloadedFunction(OnFeatureCollectionUnloaded featureCollectionUnloadedFunction) {
+        _featureCollectionUnloadedFunction = featureCollectionUnloadedFunction;
+    }
+
     //! The property manager handles all of the custom properties for this layer type / instance
     PluginLayerPropertyManager _propertyManager;
 
@@ -112,6 +124,15 @@ public:
 
     //! Optional: Called when the layer properties change.  The properties are passed as JSON for now
     OnUpdateLayerProperties _updateLayerPropertiesFunction;
+
+    //! Optional: Called when feature is loaded
+    OnFeatureLoaded _featureLoadedFunction;
+
+    //! Optional: Called when a feature collection is loaded
+    OnFeatureCollectionLoaded _featureCollectionLoadedFunction;
+
+    //! Optional: Called when a feature colleciton is unloaded from the scene (tile goes out of scene/etc)
+    OnFeatureCollectionUnloaded _featureCollectionUnloadedFunction;
 
 private:
     LayerTypeInfo _layerTypeInfo;
