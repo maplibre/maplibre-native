@@ -9,16 +9,25 @@ function(find_static_library result_var)
         message(FATAL_ERROR "find_static_library: NAMES argument required")
     endif()
 
-    # Save current suffixes
+    # Clear any previous cached result for this variable
+    unset(${result_var} CACHE)
+
+    # Temporarily force CMake to look only for .a
     set(_old_suffixes ${CMAKE_FIND_LIBRARY_SUFFIXES})
     set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
-    find_library(_found_static_lib NAMES ${FSL_NAMES})
+
+    # Invoke find_library using the caller's var name
+    find_library(${result_var} NAMES ${FSL_NAMES})
+
+    # Restore original suffix list
     set(CMAKE_FIND_LIBRARY_SUFFIXES ${_old_suffixes})
 
-    if(_found_static_lib)
-        set(${result_var} "${_found_static_lib}" PARENT_SCOPE)
-        message(STATUS "Found static library for ${FSL_NAMES}: ${_found_static_lib}")
-    else()
-        message(FATAL_ERROR "Static library (${FSL_NAMES}) not found")
+    # Check result
+    if(NOT ${result_var})
+        message(FATAL_ERROR
+            "find_static_library: could not find any of [${FSL_NAMES}] as a .a")
     endif()
+
+    message(STATUS
+        "find_static_library: Found static [${FSL_NAMES}] -> ${${result_var}}")
 endfunction()
