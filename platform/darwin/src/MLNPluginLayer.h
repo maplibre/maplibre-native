@@ -42,6 +42,22 @@ MLN_EXPORT
 
 @end
 
+@interface MLNPluginLayerTileFeature : NSObject
+
+// This is the unique feature ID in the tile source if applicable.  Can be empty
+@property NSString *featureID;
+@property NSDictionary *featureProperties;
+@property NSArray *featureCoordinates;
+
+@end
+
+@interface MLNPluginLayerTileFeatureCollection : NSObject
+
+@property NSArray *features;
+@property NSString *tileID;  // z,x,y
+
+@end
+
 typedef enum {
   MLNPluginLayerTileKindGeometry,
   MLNPluginLayerTileKindRaster,
@@ -54,6 +70,9 @@ MLN_EXPORT
 
 @property (copy) NSString *layerID;
 @property BOOL requiresPass3D;
+
+//! Set this to true if this layer can support reading features from the tiles
+@property BOOL supportsReadingTileFeatures;
 
 //! This is a list of layer properties that this layer supports.
 @property (copy) NSArray<MLNPluginLayerProperty *> *layerProperties;
@@ -103,6 +122,19 @@ MLN_EXPORT
 /// Called when the layer properties are updated.  Can be on initial load from the JSON or when
 /// dynamic properties are updated
 - (void)onUpdateLayerProperties:(NSDictionary *)layerProperties;
+
+/// Called when a feature is loaded from the tile
+- (void)onFeatureLoaded:(MLNPluginLayerTileFeature *)tileFeature;
+
+/// Called when a set of features are loaded from the tile
+/*
+ TODO: Think about returning that this layer doesn't care about this feature collection via a
+ bool/etc and then the underlying layer won't have to track this collection.
+ */
+- (void)onFeatureCollectionLoaded:(MLNPluginLayerTileFeatureCollection *)tileFeatureCollection;
+
+/// Called when a set of features are unloaded because the tile goes out of scene/etc
+- (void)onFeatureCollectionUnloaded:(MLNPluginLayerTileFeatureCollection *)tileFeatureCollection;
 
 /// Added to a map view
 - (void)didMoveToMapView:(MLNMapView *)mapView;
