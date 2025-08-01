@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include <type_traits>
 #include <utility>
 
@@ -25,3 +24,12 @@ void erase_if(Container& container, Predicate pred) {
 
 } // namespace util
 } // namespace mbgl
+
+namespace std {
+#if !__has_cpp_attribute(__cpp_lib_to_underlying)
+template <typename E>
+constexpr auto to_underlying(E e) noexcept {
+    return static_cast<std::underlying_type_t<E>>(e);
+}
+#endif
+} // namespace std
