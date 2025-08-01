@@ -1,5 +1,6 @@
 #include <mbgl/util/action_journal_impl.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
 #include <mbgl/style/style.hpp>
 #include <mbgl/map/map.hpp>
 
@@ -137,10 +138,13 @@ public:
 ActionJournal::Impl::Impl(const Map& map_, const ActionJournalOptions& options_)
     : map(map_),
       options(options_),
-      scheduler(Scheduler::GetSequenced()) {
+      scheduler(Scheduler::GetSequenced()),
+      renderingInfoReportTime(options.renderingStatsReportInterval()) {
     assert(!options.path().empty());
     assert(options.logFileSize() > 0);
     assert(options.logFileCount() > 1);
+
+    previousFrameTime = util::MonotonicTimer::now().count();
 
     options.withPath((mbgl::filesystem::canonical(options.path()) / ACTION_JOURNAL_DIRECTORY_NAME).generic_string());
 
@@ -264,6 +268,58 @@ void ActionJournal::Impl::onDidFailLoadingMap(MapLoadError error, const std::str
                 .addEvent("error", errorStr)
                 .addEvent("code", static_cast<int>(error)));
     });
+}
+
+void ActionJournal::Impl::onDidFinishRenderingFrame(const RenderFrameStatus& frame) {
+    // update report time
+    double currentFrameTime = util::MonotonicTimer::now().count();
+    double elapsedTime = currentFrameTime - previousFrameTime;
+    previousFrameTime = currentFrameTime;
+
+    // update rendering stats
+    if (renderingStats.encodingMin > frame.renderingStats.encodingTime) {
+        renderingStats.encodingMin = frame.renderingStats.encodingTime;
+    }
+
+    if (renderingStats.encodingMax < frame.renderingStats.encodingTime) {
+        renderingStats.encodingMax = frame.renderingStats.encodingTime;
+    }
+
+    if (renderingStats.renderingMin > frame.renderingStats.renderingTime) {
+        renderingStats.renderingMin = frame.renderingStats.renderingTime;
+    }
+
+    if (renderingStats.renderingMax < frame.renderingStats.renderingTime) {
+        renderingStats.renderingMax = frame.renderingStats.renderingTime;
+    }
+
+    renderingStats.encodingTotal += frame.renderingStats.encodingTime;
+    renderingStats.renderingTotal += frame.renderingStats.renderingTime;
+    ++renderingStats.frameCount;
+
+    renderingInfoReportTime -= elapsedTime;
+    if (renderingInfoReportTime > 1e-9) {
+        return;
+    }
+
+    renderingInfoReportTime = options.renderingStatsReportInterval();
+
+    // skip if the full interval had an idle map
+    if (renderingStats.frameCount == 0) {
+        return;
+    }
+
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this), stats = std::move(renderingStats)]() {
+        log(ActionJournalEvent("renderingStats", env)
+                .addEvent("encodingMin", stats.encodingMin)
+                .addEvent("encodingMax", stats.encodingMax)
+                .addEvent("encodingAvg", stats.encodingTotal / stats.frameCount)
+                .addEvent("renderingMin", stats.renderingMin)
+                .addEvent("renderingMax", stats.renderingMax)
+                .addEvent("renderingAvg", stats.renderingTotal / stats.frameCount));
+    });
+
+    renderingStats = {};
 }
 
 void ActionJournal::Impl::onWillStartRenderingMap() {

@@ -366,18 +366,21 @@ TEST(Thread, PoolWaitAdd) {
     auto seq = Scheduler::GetSequenced();
 
     // add new tasks every few milliseconds
-    std::atomic<bool> addActive{true};
-    std::atomic<int> added{0};
-    std::atomic<int> executed{0};
-    seq->schedule([&] {
-        while (addActive) {
-            pool->schedule([&] { executed++; });
-            added++;
+    struct State {
+        std::atomic<bool> addActive{true};
+        std::atomic<int> added{0};
+        std::atomic<int> executed{0};
+    };
+    auto state = std::make_shared<State>();
+    seq->schedule([pool, state] {
+        while (state->addActive) {
+            pool->schedule([state] { state->executed++; });
+            state->added++;
         }
     });
 
     // Wait be sure some are added
-    while (added < 1) {
+    while (state->added < 1) {
         std::this_thread::sleep_for(Milliseconds(10));
     }
 
@@ -387,8 +390,10 @@ TEST(Thread, PoolWaitAdd) {
 
     pool->waitForEmpty();
 
-    addActive = false;
+    state->addActive = false;
     pool->waitForEmpty();
+
+    ASSERT_GE(state->added.load(), 1);
 }
 
 TEST(Thread, PoolWaitException) {
