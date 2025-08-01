@@ -20,6 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class MLNScaleBar;
 @class MLNShape;
 @class MLNPluginLayer;
+@class MLNStyleFilter;
 
 @protocol MLNMapViewDelegate;
 @protocol MLNAnnotation;
@@ -2275,6 +2276,11 @@ vertically on the map.
  Adds a plug-in layer that is external to this library
  */
 - (void)addPluginLayerType:(Class)pluginLayerClass;
+
+/**
+ Adds a style filter to the map view
+ */
+- (void)addStyleFilter:(MLNStyleFilter *)styleFilter;
 
 @end
 
