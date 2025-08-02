@@ -192,7 +192,6 @@ if(MLN_CORE_INCLUDE_DEPS AND NOT MLN_USE_BUILTIN_ICU AND NOT "${ARMERGE}" STREQU
     find_static_library(CURL_STATIC_LIB NAMES curl)
     find_static_library(UV_STATIC_LIB NAMES uv)
     find_static_library(OPENSSL_STATIC_LIB NAMES ssl)
-    find_static_library(SQLITE_STATIC_LIB NAMES sqlite3)
 
     add_custom_command(
         TARGET mbgl-core
@@ -209,7 +208,6 @@ if(MLN_CORE_INCLUDE_DEPS AND NOT MLN_USE_BUILTIN_ICU AND NOT "${ARMERGE}" STREQU
             ${CURL_STATIC_LIB}
             ${UV_STATIC_LIB}
             ${OPENSSL_STATIC_LIB}
-            ${SQLITE_STATIC_LIB}
     )
 endif()
 
