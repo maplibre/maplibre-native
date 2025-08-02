@@ -90,6 +90,11 @@ document.getElementById('toggle-ignored').addEventListener('click', function (e)
         row.classList.toggle('hide');
     }
 });
+document.getElementById('toggle-ignored-failed').addEventListener('click', function (e) {
+    for (const row of document.querySelectorAll('.test.ignored, .test.failed')) {
+        row.classList.toggle('hide');
+    }
+});
 document.getElementById('toggle-sequence').addEventListener('click', function (e) {
     document.getElementById('test-sequence').classList.toggle('hide');
 });
@@ -100,6 +105,7 @@ const char* resultsHeaderButtons = R"HTML(
     <button id='toggle-sequence'>Toggle test sequence</button>
     <button id='toggle-passed'>Toggle passed tests</button>
     <button id='toggle-ignored'>Toggle ignored tests</button>
+    <button id='toggle-ignored-failed'>Toggle failed ignored testes</button>
 </h1>
 )HTML";
 
