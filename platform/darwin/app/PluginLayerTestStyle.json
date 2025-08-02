@@ -583,6 +583,13 @@
                 ]
             }
         },
+        {   "id": "centroid-features",
+            "type": "maplibre::filter_features",
+            "source": "maplibre",
+            "source-layer": "countries",
+            "maxzoom": 24,
+            "minzoom": 1
+        },
         {
             "id": "crimea-fill",
             "type": "fill",

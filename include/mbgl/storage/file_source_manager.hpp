@@ -43,6 +43,12 @@ public:
     // a FileSourceType invocation has no effect.
     virtual FileSourceFactory unRegisterFileSourceFactory(FileSourceType) noexcept;
 
+    // Registers a custom file source
+    virtual void registerCustomFileSource(std::shared_ptr<FileSource>) noexcept;
+
+    // Returns an array of custom file sources
+    virtual std::vector<std::shared_ptr<FileSource>> getCustomFileSources() noexcept;
+
 protected:
     FileSourceManager();
     class Impl;
