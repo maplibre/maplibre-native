@@ -72,8 +72,6 @@ public:
 
     std::string db_path(const std::string &path) { return path.substr(0, path.find('?')); }
 
-    bool is_compressed(const std::string &v) { return (((uint8_t)v[0]) == 0x1f) && (((uint8_t)v[1]) == 0x8b); }
-
     // Generate a tilejson resource from .mbtiles file
     void request_tilejson(const Resource &resource, ActorRef<FileSourceRequest> req) {
         auto path = url_to_path(resource.url);
@@ -211,7 +209,7 @@ public:
                 response.expires = Timestamp::max();
                 response.etag = resource.url;
 
-                if (is_compressed(*response.data)) {
+                if (util::is_compressed(*response.data)) {
                     response.data = std::make_shared<std::string>(util::decompress(*response.data));
                 }
             }

@@ -36,7 +36,8 @@ void RenderVectorSource::updateInternal(const Tileset& tileset,
                 auto impl = staticImmutableCast<style::VectorSource::Impl>(baseImpl);
                 assert(impl->tileset); // we should have one by now
                 if (impl->tileset) {
-                    isMLT = (impl->tileset->format == "mlt");
+                    isMLT = (impl->tileset->format == "mlt" ||
+                             impl->tileset->format == "application/vnd.maplibre-tile-pbf");
                 }
             }
             if (isMLT && *isMLT) {

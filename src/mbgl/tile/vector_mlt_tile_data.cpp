@@ -268,18 +268,19 @@ std::unique_ptr<GeometryTileLayer> VectorMLTTileData::getLayer(const std::string
     // We're parsing this lazily so that we can construct VectorTileData objects
     // on the main thread without incurring the overhead of parsing immediately.
     if (data && !tile) {
-        if (data->size() > 4) {
+        constexpr auto headerSize = sizeof(std::uint16_t);
+        if (data->size() > headerSize) {
             // Tile blobs are:
-            // - metadata size as a 4-byte int
+            // - metadata size as a 2-byte int
             // - metadata
             // - tile data
-            const auto metadataSize = *reinterpret_cast<const std::uint32_t*>(data->data());
-            if (metadataSize + 4 < data->size()) {
+            const auto metadataSize = *reinterpret_cast<const std::uint16_t*>(data->data());
+            if (metadataSize + headerSize < data->size()) {
                 try {
-                    const auto metadata = mlt::metadata::tileset::read({data->data() + 4, metadataSize});
+                    const auto metadata = mlt::metadata::tileset::read({data->data() + headerSize, metadataSize});
                     if (metadata) {
                         tile = std::make_shared<MapLibreTile>(mlt::Decoder().decode(
-                            {data->data() + 4 + metadataSize, data->size() - metadataSize - 4}, *metadata));
+                            {data->data() + headerSize + metadataSize, data->size() - metadataSize - headerSize}, *metadata));
                     } else {
                         Log::Warning(Event::ParseTile, "MLT parse failed");
                     }
