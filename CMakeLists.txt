@@ -16,6 +16,7 @@ option(MLN_WITH_WERROR "Make all compilation warnings errors" ON)
 option(MLN_USE_UNORDERED_DENSE "Use ankerl dense containers for performance" ON)
 option(MLN_USE_TRACY "Enable Tracy instrumentation" OFF)
 option(MLN_USE_RUST "Use components in Rust" OFF)
+option(MLN_TEXT_SHAPING_HARFBUZZ "Use haffbuzz to shape complex text" ON)
 option(MLN_CORE_INCLUDE_DEPS "Include depdendencies in static build of core" OFF)
 option(MLN_CREATE_AUTORELEASEPOOL "Create autoreleasepool in render loop" OFF)
 
@@ -310,6 +311,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/light.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/position.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/property_value.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/raster_dem_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/rotation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/tileset.hpp
@@ -377,6 +379,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/geojson_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/image_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/raster_dem_source.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/tile_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/raster_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/vector_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sprite.hpp
@@ -689,6 +692,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/light.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/position.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/property_value.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/raster_dem_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/rotation.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/source.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/stringify.hpp
@@ -814,12 +818,11 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/image_source_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/image_source_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_dem_source.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/tile_source.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_source.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_source_impl.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/raster_source_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/tile_source_impl.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/tile_source_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/vector_source.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/vector_source_impl.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/vector_source_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/style.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/style_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/style_impl.hpp
@@ -1333,6 +1336,35 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer.cpp
 )
 
+# Harfbuzz text shaping
+set(SHAPE_TARGETS, "")
+list(APPEND
+    SRC_FILES
+        # Base text shaping files, which are always included. They don't depend on HarfBuzz if MLN_TEXT_SHAPING_HARFBUZZ is OFF.
+        ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz.hpp
+)
+if (MLN_TEXT_SHAPING_HARFBUZZ)
+    message(STATUS "Configuring with HarfBuzz text shaping")
+    list(APPEND
+        SRC_FILES
+        ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz_impl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz_impl.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/text/freetype.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/text/freetype.hpp
+    )
+    target_compile_definitions(
+        mbgl-core
+        PRIVATE MLN_TEXT_SHAPING_HARFBUZZ=1
+    )
+    include(${PROJECT_SOURCE_DIR}/vendor/freetype.cmake)
+    include(${PROJECT_SOURCE_DIR}/vendor/harfbuzz.cmake)
+    set(SHAPE_TARGETS
+        freetype
+        harfbuzz
+    )
+endif()
+
 target_sources(
     mbgl-core PRIVATE
     ${INCLUDE_FILES}
@@ -1436,6 +1468,7 @@ target_link_libraries(
         mbgl-vendor-wagyu
         $<$<BOOL:${MLN_WITH_METAL}>:mbgl-vendor-metal-cpp>
         $<IF:$<BOOL:${MLN_USE_RUST}>,mbgl-rustutils,mbgl-vendor-csscolorparser>
+        ${SHAPE_TARGETS} # from harfbuzz.cmake
     PUBLIC
         MapLibreNative::Base
         MapLibreNative::Base::Extras::expected-lite
@@ -1476,6 +1509,7 @@ set(EXPORT_TARGETS
     mbgl-vendor-wagyu
     mbgl-vendor-metal-cpp
     unordered_dense
+    ${SHAPE_TARGETS} # from harfbuzz.cmake
 )
 
 if(MLN_USE_RUST)

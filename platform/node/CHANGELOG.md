@@ -1,7 +1,9 @@
 ## main
 
-## 6.1.1-pre.0
-* Fix freezing in macos/metal after ~32 renders ([#2948](https://github.com/maplibre/maplibre-native/pull/2948))
+## 6.2.0-pre.0
+* Fix freezing in macos/metal after ~32 renders ([Issue](https://github.com/maplibre/maplibre-native/issues/2928), [PR](https://github.com/maplibre/maplibre-native/pull/3673)).
+* Add HarfBuzz Text Shaping and Font Fallback Support ([#3611](https://github.com/maplibre/maplibre-native/pull/3611)).
+  This implements the [`font-faces` property of the MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/font-faces/).
 
 ## 6.1.0
 * Add `textFitWidth` and `textFitHeight` properties to sprites ([#2780](https://github.com/maplibre/maplibre-native/pull/2780)).
