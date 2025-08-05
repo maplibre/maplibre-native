@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
+#include <mbgl/gfx/scissor_rect.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
 #include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/gfx/context.hpp>
@@ -77,6 +78,7 @@ public:
     void setStencilMode(const gfx::StencilMode&);
     void setColorMode(const gfx::ColorMode&);
     void setCullFaceMode(const gfx::CullFaceMode&);
+    void setScissorTest(const gfx::ScissorRect&);
 
     void draw(const gfx::DrawMode&, std::size_t indexOffset, std::size_t indexLength);
 

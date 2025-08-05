@@ -17,6 +17,7 @@
 #include <mbgl/style/style_impl.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/exception.hpp>
+#include <mbgl/util/geo.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/mapbox.hpp>
 #include <mbgl/util/math.hpp>
@@ -375,6 +376,15 @@ BoundOptions Map::getBounds() const {
 void Map::setSize(const Size size) {
     impl->transform->resize(size);
     impl->onUpdate();
+}
+
+void Map::setFrustumOffset(const EdgeInsets& frustumOffset) {
+    impl->transform->setFrustumOffset(frustumOffset);
+    impl->onUpdate();
+}
+
+EdgeInsets Map::getFrustumOffset() {
+    return impl->transform->getFrustumOffset();
 }
 
 void Map::setNorthOrientation(NorthOrientation orientation) {

@@ -272,6 +272,8 @@ interface NativeMap {
 
   void toggleTransform();
 
+  void setFrustumOffset(RectF offset);
+
   void setSwapBehaviorFlush(boolean flush);
 
   //
