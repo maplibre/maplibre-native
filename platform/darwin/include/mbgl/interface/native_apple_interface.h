@@ -10,9 +10,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSURLSession *)sessionForNetworkManager:(MLNNativeNetworkManager *)networkManager;
 
--(NSMutableURLRequest *)willSendRequest:(NSMutableURLRequest *)request;
+- (NSMutableURLRequest *)willSendRequest:(NSMutableURLRequest *)request;
 
--(void)didReceiveResponse:(NSURLResponse *)response data:(NSData *)data error:(NSError *)error;
+- (void)didReceiveResponse:(NSURLResponse *)response data:(NSData *)data error:(NSError *)error;
 
 @required
 
