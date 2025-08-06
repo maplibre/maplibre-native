@@ -184,6 +184,16 @@ target_link_libraries(
 # Bundle system provided libraries
 if(MLN_CORE_INCLUDE_DEPS AND NOT MLN_USE_BUILTIN_ICU AND NOT "${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
     message(STATUS "Found armerge: ${ARMERGE}")
+    include(${CMAKE_CURRENT_LIST_DIR}/cmake/find_static_library.cmake)
+    find_static_library(PNG_STATIC_LIB NAMES png)
+    find_static_library(ZLIB_STATIC_LIB NAMES z)
+    find_static_library(JPEG_STATIC_LIB NAMES jpeg)
+    find_static_library(WEBP_STATIC_LIB NAMES webp)
+    find_static_library(CURL_STATIC_LIB NAMES curl)
+    find_static_library(UV_STATIC_LIB NAMES uv)
+    find_static_library(OPENSSL_STATIC_LIB NAMES ssl)
+    find_static_library(SQLITE_STATIC_LIB NAMES sqlite3)
+
     add_custom_command(
         TARGET mbgl-core
         POST_BUILD
@@ -192,6 +202,14 @@ if(MLN_CORE_INCLUDE_DEPS AND NOT MLN_USE_BUILTIN_ICU AND NOT "${ARMERGE}" STREQU
             ${ICUUC_LIBRARY_DIRS}/libicuuc.a
             ${ICUUC_LIBRARY_DIRS}/libicudata.a
             ${ICUI18N_LIBRARY_DIRS}/libicui18n.a
+            ${PNG_STATIC_LIB}
+            ${ZLIB_STATIC_LIB}
+            ${JPEG_STATIC_LIB}
+            ${WEBP_STATIC_LIB}
+            ${CURL_STATIC_LIB}
+            ${UV_STATIC_LIB}
+            ${OPENSSL_STATIC_LIB}
+            ${SQLITE_STATIC_LIB}
     )
 endif()
 
