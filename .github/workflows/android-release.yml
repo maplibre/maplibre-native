@@ -160,6 +160,7 @@ jobs:
         working-directory: .
 
       - name: Write release notifications
+        if: github.repository_owner == 'maplibre'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node .github/scripts/notify-release-on-prs.ts --tag ${{ needs.android-create-release.outputs.version_tag }}
