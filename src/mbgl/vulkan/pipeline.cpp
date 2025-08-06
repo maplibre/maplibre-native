@@ -431,7 +431,6 @@ void PipelineInfo::setDynamicValues(const RendererBackend& backend, const vk::Un
 
     buffer->setViewport(0, viewport, dispatcher);
     buffer->setScissor(0, scissorRect, dispatcher);
-#endif
 }
 
 std::vector<vk::DynamicState> PipelineInfo::getDynamicStates(const RendererBackend& backend) const {
