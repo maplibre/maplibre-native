@@ -65,54 +65,67 @@ public:
         // the sources were able to request a resource.
         const std::size_t tasksSize = tasks.size();
 
-        // Waterfall resource request processing and return early once resource was requested.
-        if (assetFileSource && assetFileSource->canRequest(resource)) {
-            // Asset request
-            tasks[req] = assetFileSource->request(resource, callback);
-        } else if (mbtilesFileSource && mbtilesFileSource->canRequest(resource)) {
-            // Local file request
-            tasks[req] = mbtilesFileSource->request(resource, callback);
-        } else if (pmtilesFileSource && pmtilesFileSource->canRequest(resource)) {
-            // Local file request
-            tasks[req] = pmtilesFileSource->request(resource, callback);
-        } else if (localFileSource && localFileSource->canRequest(resource)) {
-            // Local file request
-            tasks[req] = localFileSource->request(resource, callback);
-        } else if (databaseFileSource && databaseFileSource->canRequest(resource)) {
-            // Try cache only request if needed.
-            if (resource.loadingMethod == Resource::LoadingMethod::CacheOnly) {
-                tasks[req] = databaseFileSource->request(resource, callback);
-            } else {
-                // Cache request with fallback to network with cache control
-                tasks[req] = databaseFileSource->request(resource, [=, this](const Response& response) {
-                    Resource res = resource;
+        // Go through custom handlers
+        bool requestHandledByCustomHandler = false;
+        auto fm = FileSourceManager::get();
+        for (auto customFileSource : fm->getCustomFileSources()) {
+            if (customFileSource->canRequest(resource)) {
+                tasks[req] = customFileSource->request(resource, callback);
+                requestHandledByCustomHandler = true;
+                break;
+            }
+        }
 
-                    // Resource is in the cache
-                    if (!response.noContent) {
-                        if (response.isUsable()) {
-                            callback(response);
-                            // Set the priority of existing resource to low if it's expired but usable.
-                            res.setPriority(Resource::Priority::Low);
-                        } else {
-                            // Set prior data only if it was not returned to
-                            // the requester. Once we get 304 response from
-                            // the network, we will forward response to the
-                            // requester.
-                            res.priorData = response.data;
+        if (!requestHandledByCustomHandler) {
+            // Waterfall resource request processing and return early once resource was requested.
+            if (assetFileSource && assetFileSource->canRequest(resource)) {
+                // Asset request
+                tasks[req] = assetFileSource->request(resource, callback);
+            } else if (mbtilesFileSource && mbtilesFileSource->canRequest(resource)) {
+                // Local file request
+                tasks[req] = mbtilesFileSource->request(resource, callback);
+            } else if (pmtilesFileSource && pmtilesFileSource->canRequest(resource)) {
+                // Local file request
+                tasks[req] = pmtilesFileSource->request(resource, callback);
+            } else if (localFileSource && localFileSource->canRequest(resource)) {
+                // Local file request
+                tasks[req] = localFileSource->request(resource, callback);
+            } else if (databaseFileSource && databaseFileSource->canRequest(resource)) {
+                // Try cache only request if needed.
+                if (resource.loadingMethod == Resource::LoadingMethod::CacheOnly) {
+                    tasks[req] = databaseFileSource->request(resource, callback);
+                } else {
+                    // Cache request with fallback to network with cache control
+                    tasks[req] = databaseFileSource->request(resource, [=, this](const Response& response) {
+                        Resource res = resource;
+
+                        // Resource is in the cache
+                        if (!response.noContent) {
+                            if (response.isUsable()) {
+                                callback(response);
+                                // Set the priority of existing resource to low if it's expired but usable.
+                                res.setPriority(Resource::Priority::Low);
+                            } else {
+                                // Set prior data only if it was not returned to
+                                // the requester. Once we get 304 response from
+                                // the network, we will forward response to the
+                                // requester.
+                                res.priorData = response.data;
+                            }
+
+                            // Copy response fields for cache control request
+                            res.priorModified = response.modified;
+                            res.priorExpires = response.expires;
+                            res.priorEtag = response.etag;
                         }
 
-                        // Copy response fields for cache control request
-                        res.priorModified = response.modified;
-                        res.priorExpires = response.expires;
-                        res.priorEtag = response.etag;
-                    }
-
-                    tasks[req] = requestFromNetwork(res, std::move(tasks[req]));
-                });
+                        tasks[req] = requestFromNetwork(res, std::move(tasks[req]));
+                    });
+                }
+            } else if (auto networkReq = requestFromNetwork(resource, nullptr)) {
+                // Get from the online file source
+                tasks[req] = std::move(networkReq);
             }
-        } else if (auto networkReq = requestFromNetwork(resource, nullptr)) {
-            // Get from the online file source
-            tasks[req] = std::move(networkReq);
         }
 
         // If no new tasks were added, notify client that request cannot be processed.
@@ -180,6 +193,14 @@ public:
     }
 
     bool canRequest(const Resource& resource) const {
+        // Check the custom file sources
+        auto fm = FileSourceManager::get();
+        for (auto customFileSource : fm->getCustomFileSources()) {
+            if (customFileSource->canRequest(resource)) {
+                return true;
+            }
+        }
+
         return (assetFileSource && assetFileSource->canRequest(resource)) ||
                (localFileSource && localFileSource->canRequest(resource)) ||
                (databaseFileSource && databaseFileSource->canRequest(resource)) ||

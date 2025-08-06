@@ -20,6 +20,7 @@ import org.maplibre.android.gestures.MoveGestureDetector;
 import org.maplibre.android.gestures.RotateGestureDetector;
 import org.maplibre.android.gestures.ShoveGestureDetector;
 import org.maplibre.android.gestures.StandardScaleGestureDetector;
+import org.maplibre.android.plugin.PluginProtocolHandler;
 import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.Geometry;
 import org.maplibre.android.MapStrictMode;
@@ -2721,4 +2722,19 @@ public final class MapLibreMap {
       listener.onDeveloperAnimationStarted();
     }
   }
+
+
+
+  /**
+   * Adds a custom protocol handler to the map view
+   */
+  ArrayList<PluginProtocolHandler> pluginProtocolHandlers = new ArrayList<PluginProtocolHandler>();
+  public void addPluginProtocolHandler(PluginProtocolHandler protocolHandler) {
+    pluginProtocolHandlers.add(protocolHandler);
+    nativeMapView.addPluginProtocolHandler(protocolHandler);
+
+    // nativeMapView.addPolygon()
+  }
+
+
 }
