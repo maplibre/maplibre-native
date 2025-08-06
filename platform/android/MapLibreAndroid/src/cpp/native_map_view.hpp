@@ -327,6 +327,8 @@ public:
 
     void toggleTransform(JNIEnv&);
 
+    void setFrustumOffset(JNIEnv&, const jni::Object<RectF>&);
+
     // Shader compilation
     void onRegisterShaders(mbgl::gfx::ShaderRegistry&) override;
     void onPreCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type, const std::string&) override;

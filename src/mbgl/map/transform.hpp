@@ -83,6 +83,9 @@ public:
     void setMinPitch(double);
     void setMaxPitch(double);
 
+    void setFrustumOffset(const EdgeInsets&);
+    EdgeInsets getFrustumOffset();
+
     // Zoom
 
     /** Returns the zoom level. */

@@ -3312,6 +3312,16 @@ static void *windowScreenContext = &windowScreenContext;
     return _mbglMap->getTileLodZoomShift();
 }
 
+-(void)setFrustumOffset:(UIEdgeInsets)frustomOffset
+{
+    _mbglMap->setFrustumOffset(MLNEdgeInsetsFromNSEdgeInsets(frustomOffset));
+}
+
+-(UIEdgeInsets)frustumOffset
+{
+    return NSEdgeInsetsFromMLNEdgeInsets(_mbglMap->getFrustumOffset());
+}
+
 // MARK: - Accessibility -
 
 - (NSString *)accessibilityValue
@@ -4468,7 +4478,7 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (void)cancelTransitions {
-    if (!_mbglMap || (self.concurrentAnimations && self.userTrackingMode != MLNUserTrackingModeNone && self.userTrackingMode != MLNUserTrackingModeFollow))
+    if (!_mbglMap || self.concurrentAnimations)
     {
         return;
     }

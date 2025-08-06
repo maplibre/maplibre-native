@@ -21,6 +21,11 @@
 
 ## 11.12.1
 
+### ✨ Features and improvements
+
+- Concurrent Camera Animations
+- Ability to set out of bounds region to improve rendering
+
 ### 🐞 Bug fixes
 
 - Revert "Fix the symbol blink issue by only placing the symbol in current level", as this was causing regressions ([#3610](https://github.com/maplibre/maplibre-native/pull/3610)).

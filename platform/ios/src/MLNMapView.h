@@ -508,6 +508,8 @@ MLN_EXPORT
  */
 @property (nonatomic, assign) double tileLodZoomShift;
 
+@property (nonatomic, assign) UIEdgeInsets frustumOffset;
+
 // MARK: Displaying the User’s Location
 
 /**
