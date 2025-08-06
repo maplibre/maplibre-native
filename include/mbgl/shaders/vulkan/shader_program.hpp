@@ -45,6 +45,7 @@ struct TextureInfo {
 namespace vulkan {
 class RenderableResource;
 class RendererBackend;
+class Context;
 class ShaderProgram;
 using UniqueShaderProgram = std::unique_ptr<ShaderProgram>;
 
@@ -78,10 +79,11 @@ public:
 protected:
     std::string shaderName;
     RendererBackend& backend;
+    Context& context;
 
     vk::UniqueShaderModule vertexShader;
     vk::UniqueShaderModule fragmentShader;
-    std::unordered_map<std::size_t, vk::UniquePipeline> pipelines;
+    std::shared_ptr<std::unordered_map<std::size_t, vk::UniquePipeline>> pipelines;
 
     VertexAttributeArray vertexAttributes;
     VertexAttributeArray instanceAttributes;

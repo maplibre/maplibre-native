@@ -960,6 +960,8 @@ public:
     _targetCoordinate = kCLLocationCoordinate2DInvalid;
 
     _shouldRequestAuthorizationToUseLocationServices = YES;
+
+    _dynamicNavigationCameraAnimationDuration = NO;
 }
 
 - (mbgl::Size)size
@@ -6346,13 +6348,18 @@ static void *windowScreenContext = &windowScreenContext;
         }
     }
 
-    NSTimeInterval duration = MLNAnimationDuration;
-    if ((self.dynamicNavigationCameraAnimationDuration && oldLocation) || (!self.dynamicNavigationCameraAnimationDuration && (oldLocation && ! CGPointEqualToPoint(self.userLocationAnnotationView.center, CGPointZero))))
+    NSTimeInterval userLocationDuration = MLNAnimationDuration;
+    if (oldLocation && ! CGPointEqualToPoint(self.userLocationAnnotationView.center, CGPointZero))
     {
-        duration = MIN([newLocation.timestamp timeIntervalSinceDate:oldLocation.timestamp], MLNUserLocationAnimationDuration);
+        userLocationDuration = MIN([newLocation.timestamp timeIntervalSinceDate:oldLocation.timestamp], MLNUserLocationAnimationDuration);
     }
-    [self didUpdateLocationWithUserTrackingDuration:self.dynamicNavigationCameraAnimationDuration ? duration : MLNUserLocationAnimationDuration completionHandler:completion];
-    [self updateUserLocationAnnotationViewAnimatedWithDuration:duration];
+    [self updateUserLocationAnnotationViewAnimatedWithDuration:userLocationDuration];
+
+    NSTimeInterval cameraDuration = MLNUserLocationAnimationDuration;
+    if (self.dynamicNavigationCameraAnimationDuration && oldLocation) {
+        cameraDuration = MIN([newLocation.timestamp timeIntervalSinceDate:oldLocation.timestamp], MLNUserLocationAnimationDuration);
+    }
+    [self didUpdateLocationWithUserTrackingDuration:cameraDuration completionHandler:completion];
 
     if (self.userTrackingMode == MLNUserTrackingModeNone &&
         self.userLocationAnnotationView.accessibilityElementIsFocused &&
@@ -6372,7 +6379,8 @@ static void *windowScreenContext = &windowScreenContext;
     CLLocation *location = self.userLocation.location;
     if ( ! _showsUserLocation || ! location
         || ! CLLocationCoordinate2DIsValid(location.coordinate)
-        || self.userTrackingMode == MLNUserTrackingModeNone)
+        || self.userTrackingMode == MLNUserTrackingModeNone
+        || self.userTrackingState == MLNUserTrackingStateBegan)
     {
         if (completion)
         {

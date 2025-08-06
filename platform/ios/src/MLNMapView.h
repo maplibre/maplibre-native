@@ -565,8 +565,11 @@ MLN_EXPORT
 @property (nonatomic, assign) BOOL concurrentAnimations;
 
 /**
- A boolean value indicating whether camera animation duration is set based
- on the time difference between the last location update and the current one.
+A boolean value indicating whether camera animation duration is set based
+on the time difference between the last location update and the current one
+or the default animation duration of 1 second.
+
+The default value of this property is `NO`
  */
 @property (nonatomic, assign) BOOL dynamicNavigationCameraAnimationDuration;
 

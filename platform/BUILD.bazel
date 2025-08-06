@@ -213,6 +213,7 @@ objc_library(
         "libz",
         "libsqlite3",
         "libc++",
+        "libbz2",
     ],
     sdk_frameworks = [
         "MobileCoreServices",

@@ -46,10 +46,19 @@ jobs:
             testSpecArn: "arn:aws:devicefarm:us-west-2:373521797162:upload:20687d72-0e46-403e-8f03-0941850665bc/14862afb-cf88-44aa-9f1e-5131cbb22f01"
           },
           {
-            artifactName: android-ui-test,
-            testFile: InstrumentationTests.apk,
-            appFile: InstrumentationTestApp.apk,
-            name: "Android Instrumentation Tests",
+            artifactName: android-ui-test-opengl,
+            testFile: InstrumentationTestsOpenGL.apk,
+            appFile: InstrumentationTestAppOpenGL.apk,
+            name: "Android Instrumentation Tests (OpenGL)",
+            # Google Pixel 7 Pro
+            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/9692fe7f-86a9-4ecc-908f-175600968564",
+            testSpecArn: "arn:aws:devicefarm:us-west-2:373521797162:upload:20687d72-0e46-403e-8f03-0941850665bc/09e0738e-c91e-4c5f-81e6-06a06cc340d8"
+          },
+          {
+            artifactName: android-ui-test-vulkan,
+            testFile: InstrumentationTestsVulkan.apk,
+            appFile: InstrumentationTestAppVulkan.apk,
+            name: "Android Instrumentation Tests (Vulkan)",
             # Google Pixel 7 Pro
             devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/9692fe7f-86a9-4ecc-908f-175600968564",
             testSpecArn: "arn:aws:devicefarm:us-west-2:373521797162:upload:20687d72-0e46-403e-8f03-0941850665bc/09e0738e-c91e-4c5f-81e6-06a06cc340d8"
@@ -72,11 +81,15 @@ jobs:
         with:
           node-version-file: '.nvmrc'
 
-      - id: parent_workflow
-        run: |
-          conclusion=$(curl --retry 5 ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "android-build").conclusion')
-          was_skipped=$([[ "$conclusion" = "skipped" || "$conclusion" = "cancelled" ]] && echo "true" || echo "false")
-          echo "was_skipped=$was_skipped" >> "$GITHUB_OUTPUT"
+      - run: npm install
+
+      - name: Check if android-build was skipped
+        id: parent_workflow
+        run: node .github/scripts/check-job-skipped.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TEST_RUN_ID: ${{ github.event.workflow_run.id }}
+          JOB_NAME: android-build
 
       # get comment from PR
 
@@ -84,12 +97,12 @@ jobs:
         id: get-pr-number
 
       - name: Generate token
+        uses: actions/create-github-app-token@v2
         id: generate_token
-        uses: tibdex/github-app-token@v2
         with:
-          revoke: false  # revoking will fail for long running workflows, because the token will already have expired
-          app_id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
-          private_key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
+          skip-token-revoke: true  # revoking will fail for long running workflows, because the token will already have expired
+          app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
+          private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
       - name: Check if comment on PR contains '!benchmark android'
         if: matrix.test.name == 'Android Benchmark' && steps.get-pr-number.outputs.pr-number
@@ -187,11 +200,11 @@ jobs:
 
       - name: Generate another token (previous one could have expired)
         if: always()
+        uses: actions/create-github-app-token@v2
         id: generate_token_2
-        uses: tibdex/github-app-token@v2
         with:
-          app_id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
-          private_key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
+          app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
+          private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
       - uses: LouisBrunner/checks-action@v2.0.0
         if: always()

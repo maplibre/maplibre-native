@@ -77,6 +77,7 @@ Context::~Context() noexcept {
 
 void Context::initFrameResources() {
     const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
     const auto frameCount = backend.getMaxFrames();
 
     descriptorPoolMap.emplace(DescriptorSetType::Global,
@@ -99,19 +100,18 @@ void Context::initFrameResources() {
     const vk::CommandBufferAllocateInfo allocateInfo(
         backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, frameCount);
 
-    auto commandBuffers = backend.getDevice()->allocateCommandBuffersUnique(allocateInfo);
+    auto commandBuffers = device->allocateCommandBuffersUnique(allocateInfo, dispatcher);
 
     frameResources.reserve(frameCount);
 
     for (uint32_t index = 0; index < frameCount; ++index) {
-        frameResources.emplace_back(commandBuffers[index],
-                                    device->createSemaphoreUnique({}),
-                                    device->createFenceUnique(vk::FenceCreateInfo(vk::FenceCreateFlagBits::eSignaled)));
+        frameResources.emplace_back(
+            commandBuffers[index],
+            device->createFenceUnique(vk::FenceCreateInfo(vk::FenceCreateFlagBits::eSignaled), nullptr, dispatcher));
 
         const auto& frame = frameResources.back();
 
         backend.setDebugName(frame.commandBuffer.get(), "FrameCommandBuffer_" + std::to_string(index));
-        backend.setDebugName(frame.acquireSurfaceSemaphore.get(), "AcquireSurfaceSemaphore_" + std::to_string(index));
         backend.setDebugName(frame.flightFrameFence.get(), "FrameFence_" + std::to_string(index));
     }
 
@@ -134,7 +134,7 @@ void Context::initFrameResources() {
 }
 
 void Context::destroyResources() {
-    backend.getDevice()->waitIdle();
+    backend.getDevice()->waitIdle(backend.getDispatcher());
 
     for (auto& frame : frameResources) {
         frame.runDeletionQueue(*this);
@@ -172,22 +172,23 @@ void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueComm
         backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, 1);
 
     const auto& device = backend.getDevice();
-    const auto& commandBuffers = device->allocateCommandBuffersUnique(allocateInfo);
+    const auto& dispatcher = backend.getDispatcher();
+    const auto& commandBuffers = device->allocateCommandBuffersUnique(allocateInfo, dispatcher);
     auto& commandBuffer = commandBuffers.front();
 
     backend.setDebugName(commandBuffer.get(), "OneTimeSubmitCommandBuffer");
 
-    commandBuffer->begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit));
+    commandBuffer->begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit), dispatcher);
     function(commandBuffer);
-    commandBuffer->end();
+    commandBuffer->end(dispatcher);
 
     const auto submitInfo = vk::SubmitInfo().setCommandBuffers(commandBuffer.get());
 
-    const auto& fence = device->createFenceUnique(vk::FenceCreateInfo(vk::FenceCreateFlags()));
-    backend.getGraphicsQueue().submit(submitInfo, fence.get());
+    const auto& fence = device->createFenceUnique(vk::FenceCreateInfo(vk::FenceCreateFlags()), nullptr, dispatcher);
+    backend.getGraphicsQueue().submit(submitInfo, fence.get(), dispatcher);
 
     constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
-    const vk::Result waitFenceResult = device->waitForFences(1, &fence.get(), VK_TRUE, timeout);
+    const vk::Result waitFenceResult = device->waitForFences(1, &fence.get(), VK_TRUE, timeout, dispatcher);
     if (waitFenceResult != vk::Result::eSuccess) {
         mbgl::Log::Error(mbgl::Event::Render, "OneTimeCommand - Wait fence failed");
     }
@@ -209,18 +210,24 @@ void Context::requestSurfaceUpdate(bool useDelay) {
 void Context::waitFrame() const {
     MLN_TRACE_FUNC();
     const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
     auto& frame = frameResources[frameResourceIndex];
     constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
 
-    const vk::Result waitFenceResult = device->waitForFences(1, &frame.flightFrameFence.get(), VK_TRUE, timeout);
+    const vk::Result waitFenceResult = device->waitForFences(
+        1, &frame.flightFrameFence.get(), VK_TRUE, timeout, dispatcher);
     if (waitFenceResult != vk::Result::eSuccess) {
         mbgl::Log::Error(mbgl::Event::Render, "Wait fence failed");
     }
 }
+
 void Context::beginFrame() {
     MLN_TRACE_FUNC();
 
+    frameResourceIndex = (frameResourceIndex + 1) % frameResources.size();
+
     const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
     auto& renderableResource = backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
     const auto& platformSurface = renderableResource.getPlatformSurface();
 
@@ -273,7 +280,11 @@ void Context::beginFrame() {
         MLN_TRACE_ZONE(acquireNextImageKHR);
         try {
             const vk::ResultValue acquireImageResult = device->acquireNextImageKHR(
-                renderableResource.getSwapchain().get(), timeout, frame.acquireSurfaceSemaphore.get(), nullptr);
+                renderableResource.getSwapchain().get(),
+                timeout,
+                renderableResource.getAcquireSemaphore(),
+                nullptr,
+                dispatcher);
 
             if (acquireImageResult.result == vk::Result::eSuccess) {
                 renderableResource.setAcquiredImageIndex(acquireImageResult.value);
@@ -292,20 +303,19 @@ void Context::beginFrame() {
         renderableResource.setAcquiredImageIndex(frameResourceIndex);
     }
 
-    frame.commandBuffer->reset(vk::CommandBufferResetFlagBits::eReleaseResources);
-    frame.commandBuffer->begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit));
+    frame.commandBuffer->reset(vk::CommandBufferResetFlagBits::eReleaseResources, dispatcher);
+    frame.commandBuffer->begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit), dispatcher);
 
     backend.getThreadPool().runRenderJobs();
 }
 
-void Context::endFrame() {
-    frameResourceIndex = (frameResourceIndex + 1) % frameResources.size();
-}
+void Context::endFrame() {}
 
 void Context::submitFrame() {
     MLN_TRACE_FUNC();
+    const auto& dispatcher = backend.getDispatcher();
     const auto& frame = frameResources[frameResourceIndex];
-    frame.commandBuffer->end();
+    frame.commandBuffer->end(dispatcher);
 
     const auto& device = backend.getDevice();
     const auto& graphicsQueue = backend.getGraphicsQueue();
@@ -317,29 +327,29 @@ void Context::submitFrame() {
     auto submitInfo = vk::SubmitInfo().setCommandBuffers(frame.commandBuffer.get());
 
     if (platformSurface) {
-        submitInfo.setSignalSemaphores(renderableResource.getAcquiredSemaphore())
-            .setWaitSemaphores(frame.acquireSurfaceSemaphore.get())
+        submitInfo.setSignalSemaphores(renderableResource.getPresentSemaphore())
+            .setWaitSemaphores(renderableResource.getAcquireSemaphore())
             .setWaitDstStageMask(waitStageMask);
     }
 
-    const vk::Result resetFenceResult = device->resetFences(1, &frame.flightFrameFence.get());
+    const vk::Result resetFenceResult = device->resetFences(1, &frame.flightFrameFence.get(), dispatcher);
     if (resetFenceResult != vk::Result::eSuccess) {
         mbgl::Log::Error(mbgl::Event::Render, "Reset fence failed");
     }
 
-    graphicsQueue.submit(submitInfo, frame.flightFrameFence.get());
+    graphicsQueue.submit(submitInfo, frame.flightFrameFence.get(), dispatcher);
 
     // present rendered frame
     if (platformSurface) {
         const auto acquiredImage = renderableResource.getAcquiredImageIndex();
         const auto presentInfo = vk::PresentInfoKHR()
                                      .setSwapchains(renderableResource.getSwapchain().get())
-                                     .setWaitSemaphores(renderableResource.getAcquiredSemaphore())
+                                     .setWaitSemaphores(renderableResource.getPresentSemaphore())
                                      .setImageIndices(acquiredImage);
 
         try {
             const auto& presentQueue = backend.getPresentQueue();
-            const vk::Result presentResult = presentQueue.presentKHR(presentInfo);
+            const vk::Result presentResult = presentQueue.presentKHR(presentInfo, dispatcher);
             if (presentResult == vk::Result::eSuboptimalKHR) {
                 requestSurfaceUpdate();
             }
@@ -538,6 +548,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                 .setFormat(PipelineInfo::vulkanFormat(ShaderClass::attributes[0].dataType)));
     }
 
+    const auto& dispatcher = backend.getDispatcher();
     auto& shaderImpl = static_cast<ShaderProgram&>(*clipping.shader);
     auto& renderPassImpl = static_cast<RenderPass&>(renderPass);
     auto& commandBuffer = renderPassImpl.getEncoder().getCommandBuffer();
@@ -546,7 +557,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 
     const auto& pipeline = shaderImpl.getPipeline(clipping.pipelineInfo);
 
-    commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get());
+    commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get(), dispatcher);
     clipping.pipelineInfo.setScissorRect(
         {0, 0, clipping.pipelineInfo.viewExtent.width, clipping.pipelineInfo.viewExtent.height});
     clipping.pipelineInfo.setDynamicValues(backend, commandBuffer);
@@ -554,15 +565,15 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     const std::array<vk::Buffer, 1> vertexBuffers = {clipping.vertexBuffer->getVulkanBuffer()};
     const std::array<vk::DeviceSize, 1> offset = {0};
 
-    commandBuffer->bindVertexBuffers(0, vertexBuffers, offset);
-    commandBuffer->bindIndexBuffer(clipping.indexBuffer->getVulkanBuffer(), 0, vk::IndexType::eUint16);
+    commandBuffer->bindVertexBuffers(0, vertexBuffers, offset, dispatcher);
+    commandBuffer->bindIndexBuffer(clipping.indexBuffer->getVulkanBuffer(), 0, vk::IndexType::eUint16, dispatcher);
 
     auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();
     const float rad = renderableResource.getRotation();
     const mat4 rotationMat = {cos(rad), -sin(rad), 0, 0, sin(rad), cos(rad), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 
     for (const auto& tileInfo : tileUBOs) {
-        commandBuffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, tileInfo.stencil_ref);
+        commandBuffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, tileInfo.stencil_ref, dispatcher);
 
         mat4 matrix;
         matrix::multiply(matrix, rotationMat, tileInfo.matrix);
@@ -573,8 +584,9 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
             vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
             0,
             sizeof(matrixf),
-            &matrixf);
-        commandBuffer->drawIndexed(clipping.indexCount, 1, 0, 0, 0);
+            &matrixf,
+            dispatcher);
+        commandBuffer->drawIndexed(clipping.indexCount, 1, 0, 0, 0, dispatcher);
     }
 
     stats.numDrawCalls++;
@@ -635,7 +647,8 @@ void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& lay
     }
 
     const auto descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo().setBindings(bindings);
-    layout = backend.getDevice()->createDescriptorSetLayoutUnique(descriptorSetLayoutCreateInfo);
+    layout = backend.getDevice()->createDescriptorSetLayoutUnique(
+        descriptorSetLayoutCreateInfo, nullptr, backend.getDispatcher());
     backend.setDebugName(layout.get(), name);
 }
 
@@ -652,7 +665,7 @@ void Context::buildImageDescriptorSetLayout() {
 
     const auto descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo().setBindings(bindings);
     drawableImageDescriptorSetLayout = backend.getDevice()->createDescriptorSetLayoutUnique(
-        descriptorSetLayoutCreateInfo);
+        descriptorSetLayoutCreateInfo, nullptr, backend.getDispatcher());
     backend.setDebugName(drawableImageDescriptorSetLayout.get(), "ImageDescriptorSetLayout");
 }
 
@@ -696,7 +709,9 @@ const vk::UniquePipelineLayout& Context::getGeneralPipelineLayout() {
     };
 
     generalPipelineLayout = backend.getDevice()->createPipelineLayoutUnique(
-        vk::PipelineLayoutCreateInfo().setPushConstantRanges(pushConstant).setSetLayouts(layouts));
+        vk::PipelineLayoutCreateInfo().setPushConstantRanges(pushConstant).setSetLayouts(layouts),
+        nullptr,
+        backend.getDispatcher());
 
     backend.setDebugName(generalPipelineLayout.get(), "PipelineLayout_general");
 
@@ -710,7 +725,7 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
     const auto pushConstant = vk::PushConstantRange().setSize(sizeof(matf4)).setStageFlags(stages);
 
     pushConstantPipelineLayout = backend.getDevice()->createPipelineLayoutUnique(
-        vk::PipelineLayoutCreateInfo().setPushConstantRanges(pushConstant));
+        vk::PipelineLayoutCreateInfo().setPushConstantRanges(pushConstant), nullptr, backend.getDispatcher());
 
     backend.setDebugName(pushConstantPipelineLayout.get(), "PipelineLayout_pushConstants");
 

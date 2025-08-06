@@ -411,24 +411,26 @@ std::size_t PipelineInfo::hash() const {
 }
 
 void PipelineInfo::setDynamicValues(const RendererBackend& backend, const vk::UniqueCommandBuffer& buffer) const {
+    const auto& dispatcher = backend.getDispatcher();
     if (dynamicValues.blendConstants.has_value()) {
-        buffer->setBlendConstants(dynamicValues.blendConstants.value().data());
+        buffer->setBlendConstants(dynamicValues.blendConstants.value().data(), dispatcher);
     }
 
     if (stencilTest) {
-        buffer->setStencilWriteMask(vk::StencilFaceFlagBits::eFrontAndBack, dynamicValues.stencilWriteMask);
-        buffer->setStencilCompareMask(vk::StencilFaceFlagBits::eFrontAndBack, dynamicValues.stencilCompareMask);
-        buffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, dynamicValues.stencilRef);
+        buffer->setStencilWriteMask(vk::StencilFaceFlagBits::eFrontAndBack, dynamicValues.stencilWriteMask, dispatcher);
+        buffer->setStencilCompareMask(
+            vk::StencilFaceFlagBits::eFrontAndBack, dynamicValues.stencilCompareMask, dispatcher);
+        buffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, dynamicValues.stencilRef, dispatcher);
     }
 
     if (backend.getDeviceFeatures().wideLines && wideLines) {
-        buffer->setLineWidth(dynamicValues.lineWidth);
+        buffer->setLineWidth(dynamicValues.lineWidth, dispatcher);
     }
 
     const vk::Viewport viewport(0.0f, 0.0f, viewExtent.width, viewExtent.height, 0.0f, 1.0f);
 
-    buffer->setViewport(0, viewport);
-    buffer->setScissor(0, scissorRect);
+    buffer->setViewport(0, viewport, dispatcher);
+    buffer->setScissor(0, scissorRect, dispatcher);
 }
 
 std::vector<vk::DynamicState> PipelineInfo::getDynamicStates(const RendererBackend& backend) const {

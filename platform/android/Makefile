@@ -218,9 +218,9 @@ run-android-ui-test-%: run-android-ui-test-arm-v7-%
 # Run Java Unit tests on the JVM of the development machine executing this
 .PHONY: run-android-unit-test
 run-android-unit-test:
-	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:testOpenglDebugUnitTest --info
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:test$(RENDERER)DebugUnitTest --info
 run-android-unit-test-%:
-	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:testOpenglDebugUnitTest --info --tests "$*"
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:test$(RENDERER)DebugUnitTest --info --tests "$*"
 
 DEBUG_TAR_FILE_NAME := $(if $(findstring opengl,$(RENDERER)),debug-symbols-opengl-$(MLN_ANDROID_APK_SUFFIX).tar.gz,debug-symbols-$(RENDERER)-$(MLN_ANDROID_APK_SUFFIX).tar.gz)
 

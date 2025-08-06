@@ -30,6 +30,11 @@ MLN_EXPORT
  */
 @property (nonatomic) NSInteger logFileCount;
 
+/**
+ * The wait time (seconds) between rendering reports
+ */
+@property (nonatomic) NSInteger renderingStatsReportInterval;
+
 @end
 
 NS_ASSUME_NONNULL_END

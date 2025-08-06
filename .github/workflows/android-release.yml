@@ -86,6 +86,10 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
       - uses: actions/setup-java@v4
         with:
           distribution: "temurin"
@@ -142,3 +146,12 @@ jobs:
             else
               ./gradlew :MapLibreAndroid:publishVulkan${{ env.buildtype }}PublicationToGithubPackagesRepository
             fi
+
+      - run: npm install
+        working-directory: .
+
+      - name: Write release notifications
+        env:
+          GITHUB_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
+        run: node .github/scripts/notify-release-on-prs.ts --tag ${{ needs.android-create-release.outputs.version_tag }}
+        working-directory: .

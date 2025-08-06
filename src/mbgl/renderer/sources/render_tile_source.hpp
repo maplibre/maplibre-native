@@ -3,7 +3,7 @@
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/source_state.hpp>
 #include <mbgl/renderer/tile_pyramid.hpp>
-#include <mbgl/style/sources/vector_source_impl.hpp>
+#include <mbgl/style/sources/tile_source_impl.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 
 #include <mbgl/gfx/context.hpp>

@@ -13,4 +13,4 @@ jobs:
 
       - run: |
           npm install
-          npx tsc -p scripts/jsconfig.json
+          npx tsc -p tsconfig.json
