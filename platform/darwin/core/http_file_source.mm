@@ -292,11 +292,20 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, 
 
         assert(session);
 
+        if ([networkManager.delegate respondsToSelector:@selector(willSendRequest:)]) {
+            req = [networkManager.delegate willSendRequest:req];
+        }
+        
         request->task = [session
             dataTaskWithRequest:req
               completionHandler:^(NSData* data, NSURLResponse* res, NSError* error) {
                 session = nil;
 
+                if ([networkManager.delegate respondsToSelector:@selector(didReceiveResponse:data:error:)]) {
+                    [networkManager.delegate didReceiveResponse:res data:data error:error];
+                }
+            
+            
                 if (error && [error code] == NSURLErrorCancelled) {
                     [MLNNativeNetworkManager.sharedManager cancelDownloadEventForResponse:res];
                     return;
