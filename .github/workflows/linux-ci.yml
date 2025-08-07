@@ -52,14 +52,14 @@ jobs:
     needs: pre_job
     strategy:
       fail-fast: true
-    matrix:
-      variant:
-        - renderer: vulkan
-          rust: false
-        - renderer: opengl
-          rust: true
-        - renderer: opengl
-          rust: true
+      matrix:
+        variant:
+          - renderer: vulkan
+            rust: false
+          - renderer: opengl
+            rust: true
+          - renderer: opengl
+            rust: true
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
