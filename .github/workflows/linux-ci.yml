@@ -57,7 +57,7 @@ jobs:
           - renderer: vulkan
             rust: false
           - renderer: opengl
-            rust: true
+            rust: false
           - renderer: opengl
             rust: true
     runs-on: ubuntu-22.04
