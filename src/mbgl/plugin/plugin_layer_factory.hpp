@@ -23,6 +23,9 @@ public:
                        mbgl::style::LayerTypeInfo::CrossTileIndex crossTileIndex,
                        mbgl::style::LayerTypeInfo::TileKind tileKind);
 
+    // Set to false, but if the caller wants to support on features loaded, then set this to true
+    bool supportsFeatureCollectionBuckets = false;
+
     using OnLayerCreatedEvent = std::function<void(mbgl::style::PluginLayer* pluginLayer)>;
     void setOnLayerCreatedEvent(OnLayerCreatedEvent onLayerCreated) { _onLayerCreated = onLayerCreated; }
 
