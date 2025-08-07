@@ -16,14 +16,17 @@ function(find_static_library result_list_var)
     foreach(lib_name IN LISTS FSL_NAMES)
         unset(_found_lib CACHE)
         find_library(_found_lib NAMES ${lib_name})
-        if(NOT _found_lib)
-            message(FATAL_ERROR "find_static_library: could not find static library: ${lib_name}")
+        if(_found_lib)
+            message(STATUS "find_static_library: Found static [${lib_name}] -> ${_found_lib}")
+            # Append to result list and return early
+            set(${result_list_var} "${${result_list_var}};${_found_lib}" PARENT_SCOPE)
+            set(CMAKE_FIND_LIBRARY_SUFFIXES ${_old_suffixes})
+            return()
         endif()
-        message(STATUS "find_static_library: Found static [${lib_name}] -> ${_found_lib}")
-        # Append to list
-        set(${result_list_var} "${${result_list_var}};${_found_lib}" PARENT_SCOPE)
     endforeach()
 
     # Restore original suffix list
     set(CMAKE_FIND_LIBRARY_SUFFIXES ${_old_suffixes})
+
+    message(FATAL_ERROR "find_static_library: could not find any of the specified static libraries: ${FSL_NAMES}")
 endfunction()
