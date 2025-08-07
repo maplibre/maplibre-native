@@ -36,6 +36,7 @@ kotlinxCoroutinesAndroid = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-
 maplibreJavaGeoJSON = { group = "org.maplibre.gl", name = "android-sdk-geojson", version.ref = "mapLibreServices" }
 maplibreGestures = { group = "org.maplibre.gl", name = "maplibre-android-gestures", version = "0.0.4" }
 maplibreJavaTurf = { group = "org.maplibre.gl", name = "android-sdk-turf", version.ref = "mapLibreServices" }
+maplibreNavigation = { group = "com.github.maplibre.maplibre-navigation-android", name = "libandroid-navigation", version = "4.0.0" }
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 mockito = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
