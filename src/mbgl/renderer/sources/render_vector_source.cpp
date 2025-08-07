@@ -37,7 +37,7 @@ void RenderVectorSource::updateInternal(const Tileset& tileset,
                 assert(impl->tileset); // we should have one by now
                 if (impl->tileset) {
                     isMLT = (impl->tileset->format == "mlt" ||
-                             impl->tileset->format == "application/vnd.maplibre-tile-pbf");
+                             impl->tileset->format == "application/vnd.maplibre-vector-tile");
                 }
             }
             if (isMLT && *isMLT) {

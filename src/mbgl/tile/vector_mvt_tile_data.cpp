@@ -6,7 +6,6 @@
 
 #if ANDROID
 #include <mlt/decoder.hpp>
-#include <mlt/metadata/tileset_protozero.hpp>
 #endif
 
 namespace mbgl {

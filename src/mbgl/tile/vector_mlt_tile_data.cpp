@@ -7,8 +7,6 @@
 
 #include <mlt/decoder.hpp>
 #include <mlt/layer.hpp>
-#include <mlt/metadata/tileset_protozero.hpp>
-#include <mlt/metadata/tileset.hpp>
 
 namespace mbgl {
 
@@ -268,26 +266,11 @@ std::unique_ptr<GeometryTileLayer> VectorMLTTileData::getLayer(const std::string
     // We're parsing this lazily so that we can construct VectorTileData objects
     // on the main thread without incurring the overhead of parsing immediately.
     if (data && !tile) {
-        constexpr auto headerSize = sizeof(std::uint16_t);
-        if (data->size() > headerSize) {
-            // Tile blobs are:
-            // - metadata size as a 2-byte int
-            // - metadata
-            // - tile data
-            const auto metadataSize = *reinterpret_cast<const std::uint16_t*>(data->data());
-            if (metadataSize + headerSize < data->size()) {
-                try {
-                    const auto metadata = mlt::metadata::tileset::read({data->data() + headerSize, metadataSize});
-                    if (metadata) {
-                        tile = std::make_shared<MapLibreTile>(mlt::Decoder().decode(
-                            {data->data() + headerSize + metadataSize, data->size() - metadataSize - headerSize}, *metadata));
-                    } else {
-                        Log::Warning(Event::ParseTile, "MLT parse failed");
-                    }
-                } catch (const std::exception& ex) {
-                    Log::Warning(Event::ParseTile, "MLT Metadata parse failed: " + std::string(ex.what()));
-                }
-            }
+        try {
+            mlt::DataView tileData{data->data(), data->size()};
+            tile = std::make_shared<MapLibreTile>(mlt::Decoder().decodeTile(tileData));
+        } catch (const std::exception& ex) {
+            Log::Warning(Event::ParseTile, "MLT parse failed: " + std::string(ex.what()));
         }
         // We don't need the raw data anymore
         data.reset();
