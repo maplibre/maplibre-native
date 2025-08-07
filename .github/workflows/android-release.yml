@@ -150,8 +150,8 @@ jobs:
       - run: npm install
         working-directory: .
 
-      - name: Write release notifications
-        env:
-          GITHUB_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
-        run: node .github/scripts/notify-release-on-prs.ts --tag ${{ needs.android-create-release.outputs.version_tag }}
-        working-directory: .
+      # - name: Write release notifications
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
+      #   run: node .github/scripts/notify-release-on-prs.ts --tag ${{ needs.android-create-release.outputs.version_tag }}
+      #   working-directory: .
