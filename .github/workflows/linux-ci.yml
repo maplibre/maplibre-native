@@ -103,7 +103,7 @@ jobs:
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
           role-session-name: ${{ github.run_id }}
 
-      - name: Build MapLibre Native Core
+      - name: Build MapLibre Native
         env:
           CI: 1
         run: |
@@ -118,12 +118,12 @@ jobs:
             export SCCACHE_S3_NO_CREDENTIALS=1
           fi
 
-          cmake -B build -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -DMLN_WITH_CLANG_TIDY=ON \
+          cmake --preset linux-${{ matrix.renderer }} \
+            -DMLN_WITH_CLANG_TIDY=ON \
             -DCMAKE_C_COMPILER_LAUNCHER=sccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
-            -DMLN_WITH_COVERAGE=ON \
-            ${{ env.renderer_flag_cmake }}
-          cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
+            -DMLN_WITH_COVERAGE=ON
+          cmake --build build-linux-${{ matrix.renderer }} --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
 
       # mbgl-render (used for size test) & mbgl-benchmark-runner
 
@@ -136,7 +136,7 @@ jobs:
         with:
           name: mbgl-render
           path: |
-            build/bin/mbgl-render
+            build-linux-${{ matrix.renderer }}/bin/mbgl-render
 
       - name: Upload mbgl-benchmark-runner as artifact
         if: matrix.renderer == 'drawable' && github.event_name == 'pull_request'
@@ -144,13 +144,13 @@ jobs:
         with:
           name: mbgl-benchmark-runner
           path: |
-            build/mbgl-benchmark-runner
+            build-linux-${{ matrix.renderer }}/mbgl-benchmark-runner
 
       - name: Upload mbgl-render & mbgl-benchmark-runner to S3
         if: matrix.renderer == 'drawable' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
         run: |
-          aws s3 cp build/bin/mbgl-render s3://maplibre-native/mbgl-render-main
-          aws s3 cp build/mbgl-benchmark-runner s3://maplibre-native/mbgl-benchmark-runner-main
+          aws s3 cp build-linux-${{ matrix.renderer }}/bin/mbgl-render s3://maplibre-native/mbgl-render-main
+          aws s3 cp build-linux-${{ matrix.renderer }}/mbgl-benchmark-runner s3://maplibre-native/mbgl-benchmark-runner-main
 
       # CodeQL
 
@@ -161,15 +161,15 @@ jobs:
 
       # unit tests
 
-      - run: chmod +x build/mbgl-test-runner
+      - run: chmod +x build-linux-${{ matrix.renderer }}/mbgl-test-runner
 
       - name: Run C++ tests
         continue-on-error: ${{ matrix.renderer == 'vulkan' }}
-        run: xvfb-run -a build/mbgl-test-runner
+        run: xvfb-run -a build-linux-${{ matrix.renderer }}/mbgl-test-runner
 
       # render tests
 
-      - run: chmod +x build/mbgl-render-test-runner
+      - run: chmod +x build-linux-${{ matrix.renderer }}/mbgl-render-test-runner
 
       - name: Run render test
         id: render_test
@@ -178,7 +178,7 @@ jobs:
           if [[ "$renderer" == *-rust ]]; then
             renderer=${renderer%-rust}
           fi
-          xvfb-run -a build/mbgl-render-test-runner --manifestPath=metrics/linux-"$renderer".json
+          xvfb-run -a build-linux-${{ matrix.renderer }}/mbgl-render-test-runner --manifestPath=metrics/linux-"$renderer".json
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure'
@@ -190,10 +190,10 @@ jobs:
 
       # expression tests
 
-      - run: chmod +x build/expression-test/mbgl-expression-test
+      - run: chmod +x build-linux-${{ matrix.renderer }}/expression-test/mbgl-expression-test
 
       - name: Run expression test
-        run: build/expression-test/mbgl-expression-test
+        run: build-linux-${{ matrix.renderer }}/expression-test/mbgl-expression-test
 
       - if: github.event_name == 'pull_request'
         uses: ./.github/actions/save-pr-number
