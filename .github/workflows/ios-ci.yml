@@ -364,12 +364,12 @@ jobs:
       #   env:
       #    GH_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
 
-      - name: Write release notifications
-        if: env.make_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
-        run: node .github/scripts/notify-release-on-prs.ts --tag ios-v${{ env.version }}
-        working-directory: .
+      # - name: Write release notifications
+      #   if: env.make_release
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}
+      #   run: node .github/scripts/notify-release-on-prs.ts --tag ios-v${{ env.version }}
+      #   working-directory: .
 
   ios-build-cmake:
     needs: pre_job
