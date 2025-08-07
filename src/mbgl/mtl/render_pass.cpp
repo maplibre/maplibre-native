@@ -78,6 +78,7 @@ void RenderPass::resetState() {
 
     currentCullMode = MTL::CullModeNone;
     currentWinding = MTL::WindingClockwise;
+    currentScissorRect = {0, 0, 0, 0};
 }
 
 namespace {
@@ -213,6 +214,14 @@ void RenderPass::setFrontFacingWinding(const MTL::Winding winding) {
     if (winding != currentWinding) {
         encoder->setFrontFacingWinding(winding);
         currentWinding = winding;
+    }
+}
+
+void RenderPass::setScissorRect(const MTL::ScissorRect rect) {
+    if (rect.x != currentScissorRect.x || rect.y != currentScissorRect.y || rect.width != currentScissorRect.width ||
+        rect.height != currentScissorRect.height) {
+        encoder->setScissorRect(rect);
+        currentScissorRect = rect;
     }
 }
 
