@@ -19,7 +19,7 @@ public:
 
     std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
 
-    // Custom method to respond to pending requests
+    // Custom method to respond to pending request
     void respondToRequest(const std::string& data);
 
 private:
