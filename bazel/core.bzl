@@ -141,9 +141,7 @@ MLN_CORE_SOURCE = [
     "src/mbgl/gfx/attribute.cpp",
     "src/mbgl/gfx/attribute.hpp",
     "src/mbgl/gfx/color_mode.hpp",
-    "src/mbgl/gfx/command_encoder.hpp",
     "src/mbgl/gfx/cull_face_mode.hpp",
-    "src/mbgl/gfx/debug_group.hpp",
     "src/mbgl/gfx/depth_mode.hpp",
     "src/mbgl/gfx/draw_mode.hpp",
     "src/mbgl/gfx/draw_scope.hpp",
@@ -611,6 +609,8 @@ MLN_CORE_SOURCE = [
 })
 
 MLN_CORE_HEADERS = [
+    "include/mbgl/gfx/command_encoder.hpp",
+    "include/mbgl/gfx/debug_group.hpp",
     "include/mbgl/gfx/context.hpp",
     "include/mbgl/gfx/context_observer.hpp",
     "include/mbgl/actor/actor.hpp",
