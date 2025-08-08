@@ -17,7 +17,6 @@ public:
     DelayedFileSource();
     ~DelayedFileSource() override = default;
 
-    // Override from FileSource
     std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
 
     // Custom method to respond to pending requests
