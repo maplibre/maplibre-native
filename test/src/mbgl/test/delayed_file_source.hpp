@@ -10,7 +10,7 @@
 namespace mbgl {
 
 /*
-  This is a file source that allows control when a request is responded to.
+  This is a file source that allows control of when a request is responded to.
 */
 class DelayedFileSource : public StubFileSource {
 public:
