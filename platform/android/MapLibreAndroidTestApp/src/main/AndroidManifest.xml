@@ -1288,7 +1288,7 @@
         <!-- Required: set your sentry.io project identifier (DSN) -->
         <meta-data
             android:name="io.sentry.dsn"
-            android:value="https://35c63d5a3accc26e12355a7f9e752548@o4509785471909888.ingest.de.sentry.io/4509785483706448"
+            android:value="${SENTRY_DSN}"
             />
 
         <!-- Add data like request headers, user ip address and device name, see https://docs.sentry.io/platforms/android/data-management/data-collected/ for more info -->

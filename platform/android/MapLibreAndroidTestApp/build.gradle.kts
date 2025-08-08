@@ -48,6 +48,13 @@ android {
             isMinifyEnabled = false
             isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+
+            buildConfigField("String", "SENTRY_DSN", "")
+            packaging {
+                jniLibs {
+                    keepDebugSymbols += "**/*.so"
+                }
+            }
         }
         getByName("release") {
             isMinifyEnabled = true
@@ -55,6 +62,8 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
             testProguardFiles("test-proguard-rules.pro")
             signingConfig = signingConfigs.getByName("debug")
+
+            buildConfigField("String", "SENTRY_DSN", System.getenv("SENTRY_DSN") ?: "")
         }
     }
 
@@ -124,7 +133,7 @@ dependencies {
 sentry {
     // Disables or enables debug log output, e.g. for for sentry-cli.
     // Default is disabled.
-    debug.set(false)
+    debug.set(true)
 
     // The slug of the Sentry organization to use for uploading proguard mappings/source contexts.
     org.set(System.getenv("SENTRY_ORG"))
@@ -163,7 +172,11 @@ sentry {
     // for Sentry. This executes sentry-cli automatically so
     // you don't need to do it manually.
     // Default is disabled.
-    uploadNativeSymbols.set(false)
+    uploadNativeSymbols.set(true)
+
+    // manual upload using one of the following:
+    // sentry-cli debug-files upload maplibre-native/platform/android/MapLibreAndroidTestApp
+    // sentry-cli debug-files upload maplibre-native/platform/android/MapLibreAndroidTestApp/build/intermediates/merged_native_libs/<variant>/merge<variant>NativeLibs/out/lib/<abi>/libmaplibre.so
 
     // Whether the plugin should attempt to auto-upload the native debug symbols to Sentry or not.
     // If disabled the plugin will run a dry-run.
@@ -219,10 +232,4 @@ sentry {
     // This is auto disabled if running against a self hosted instance of Sentry.
     // Default is enabled.
     telemetry.set(true)
-
-    if (System.getenv("USE_MAPLIBRE_SENTRY")?.toBoolean() == true) {
-        ignoredBuildTypes.set(setOf("debug"))
-    } else {
-        ignoredBuildTypes.set(setOf("debug", "release"))
-    }
 }
