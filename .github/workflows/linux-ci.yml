@@ -24,6 +24,9 @@ permissions:
   contents: read          # needed for CodeQL
   security-events: write  # needed for CodeQL
 
+env:
+  EGL_PLATFORM: surfaceless
+
 jobs:
   pre_job:
     runs-on: ubuntu-22.04
