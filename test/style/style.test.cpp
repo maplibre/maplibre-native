@@ -12,7 +12,6 @@
 #include <mbgl/test/delayed_file_source.hpp>
 
 #include <memory>
-#include <optional>
 
 #ifdef WIN32
 #include <Windows.h>
