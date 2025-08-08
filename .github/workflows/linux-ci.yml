@@ -128,7 +128,7 @@ jobs:
         run: sccache --show-stats
 
       - name: Upload mbgl-render as artifact
-        if: matrix.variant.renderer == 'opengl' && github.event_name == 'pull_request'
+        if: matrix.variant.renderer == 'opengl' && !matrix.variant.rust && github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: mbgl-render
@@ -136,7 +136,7 @@ jobs:
             build-linux-${{ matrix.variant.renderer }}/bin/mbgl-render
 
       - name: Upload mbgl-benchmark-runner as artifact
-        if: matrix.variant.renderer == 'opengl' && github.event_name == 'pull_request'
+        if: matrix.variant.renderer == 'opengl' && !matrix.variant.rust && github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: mbgl-benchmark-runner
@@ -144,7 +144,7 @@ jobs:
             build-linux-${{ matrix.variant.renderer }}/mbgl-benchmark-runner
 
       - name: Upload mbgl-render & mbgl-benchmark-runner to S3
-        if: matrix.variant.renderer == 'opengl' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
+        if: matrix.variant.renderer == 'opengl' && !matrix.variant.rust && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME
         run: |
           aws s3 cp build-linux-${{ matrix.variant.renderer }}/bin/mbgl-render s3://maplibre-native/mbgl-render-main
           aws s3 cp build-linux-${{ matrix.variant.renderer }}/mbgl-benchmark-runner s3://maplibre-native/mbgl-benchmark-runner-main
