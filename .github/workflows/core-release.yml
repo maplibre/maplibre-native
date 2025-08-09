@@ -21,7 +21,10 @@ jobs:
             include \
             vendor/maplibre-native-base/include \
             vendor/maplibre-native-base/deps/variant/include \
-            vendor/maplibre-native-base/deps/geometry.hpp/include
+            vendor/maplibre-native-base/deps/geometry.hpp/include \
+            vendor/maplibre-native-base/deps/geojson.hpp/include \
+            vendor/metal-cpp \
+            vendor/maplibre-native-base/extras/expected-lite/include
       - name: Create Release
         run: |
           gh release create core-${{ github.sha }} \
