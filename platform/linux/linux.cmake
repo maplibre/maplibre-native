@@ -195,7 +195,6 @@ if(NOT MLN_USE_BUILTIN_ICU AND NOT "${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
     find_static_library(STATIC_LIBS NAMES uv uv_a)
     find_static_library(STATIC_LIBS NAMES ssl)
     find_static_library(STATIC_LIBS NAMES crypto)
-    find_static_library(STATIC_LIBS NAMES sqlite3)
 
     add_custom_command(
         TARGET mbgl-core
@@ -205,6 +204,7 @@ if(NOT MLN_USE_BUILTIN_ICU AND NOT "${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
             $<TARGET_FILE:freetype>
             $<TARGET_FILE:mbgl-vendor-csscolorparser>
             $<TARGET_FILE:harfbuzz>
+            $<TARGET_FILE:mbgl-vendor-sqlite>
             ${ICUUC_LIBRARY_DIRS}/libicuuc.a
             ${ICUUC_LIBRARY_DIRS}/libicudata.a
             ${ICUI18N_LIBRARY_DIRS}/libicui18n.a
