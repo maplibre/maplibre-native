@@ -81,8 +81,8 @@ jobs:
 
       - name: Build mbgl-core for Linux
         run: |
-          cmake --preset linux-${{ matrix.renderer }}-core -DCMAKE_CXX_COMPILER_LAUNCHER=""
-          cmake --build --preset linux-${{ matrix.renderer }}-core
+          cmake --preset linux-${{ matrix.renderer }} -DCMAKE_CXX_COMPILER_LAUNCHER=""
+          cmake --build build-linux-${{ matrix.renderer }} --target mbgl-core
 
       - name: Rename artifact
         run: |
