@@ -111,17 +111,6 @@ void FeatureCollectionBucket::addFeature(const GeometryTileFeature& tileFeature,
         tempFeature->_featureCoordinates.push_back(c);
     }
 
-    for (auto l : _layers) {
-        auto bi = l->baseImpl;
-        auto bip = bi.get();
-        auto pluginLayer = static_cast<const mbgl::style::PluginLayer::Impl*>(bip);
-        if (pluginLayer != nullptr) {
-            if (pluginLayer->_featureLoadedFunction != nullptr) {
-                pluginLayer->_featureLoadedFunction(tempFeature);
-            }
-        }
-    }
-
     _featureCollection->_features.push_back(tempFeature);
 }
 

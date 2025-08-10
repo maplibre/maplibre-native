@@ -69,12 +69,6 @@
 }
 
 
-- (void)onFeatureLoaded:(MLNPluginLayerTileFeature *)tileFeature {
-
-    [self featureLoaded:tileFeature];
-
-}
-
 /// Called when a set of features are loaded from the tile
 - (void)onFeatureCollectionLoaded:(MLNPluginLayerTileFeatureCollection *)tileFeatureCollection {
     //NSLog(@"Feature Collection Loaded for tile: %@", tileFeatureCollection.tileID);

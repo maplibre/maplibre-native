@@ -123,14 +123,7 @@ MLN_EXPORT
 /// dynamic properties are updated
 - (void)onUpdateLayerProperties:(NSDictionary *)layerProperties;
 
-/// Called when a feature is loaded from the tile
-- (void)onFeatureLoaded:(MLNPluginLayerTileFeature *)tileFeature;
-
 /// Called when a set of features are loaded from the tile
-/*
- TODO: Think about returning that this layer doesn't care about this feature collection via a
- bool/etc and then the underlying layer won't have to track this collection.
- */
 - (void)onFeatureCollectionLoaded:(MLNPluginLayerTileFeatureCollection *)tileFeatureCollection;
 
 /// Called when a set of features are unloaded because the tile goes out of scene/etc
