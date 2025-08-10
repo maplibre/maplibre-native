@@ -45,7 +45,7 @@ cc_test(
     timeout = "long",
     args = [
         "--manifestPath",
-        "metrics/linux-drawable.json",
+        "metrics/linux-opengl.json",
     ],
     data = [
         "//metrics:render-test-files",
