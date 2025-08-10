@@ -1546,14 +1546,11 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::setTileLodZoomShift, "nativeSetTileLodZoomShift"),
         METHOD(&NativeMapView::getTileLodZoomShift, "nativeGetTileLodZoomShift"),
         METHOD(&NativeMapView::triggerRepaint, "nativeTriggerRepaint"),
-<<<<<<< HEAD
         METHOD(&NativeMapView::toggleTransform, "nativeToggleTransform"),
         METHOD(&NativeMapView::setFrustumOffset, "nativeSetFrustumOffset"));
-=======
         METHOD(&NativeMapView::isRenderingStatsViewEnabled, "nativeIsRenderingStatsViewEnabled"),
         METHOD(&NativeMapView::enableRenderingStatsView, "nativeEnableRenderingStatsView"),
         METHOD(&NativeMapView::addPluginFileSource, "nativeAddPluginFileSource"));
->>>>>>> maplibre/feature/2025-08-plugins
 }
 
 void NativeMapView::onRegisterShaders(gfx::ShaderRegistry&) {};
