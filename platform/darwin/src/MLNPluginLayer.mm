@@ -76,12 +76,6 @@
 
 // If the layer properties indicate that this layer has a the ability to intercept
 // features, then this method will be called when a feature is loaded
-- (void)onFeatureLoaded:(MLNPluginLayerTileFeature *)tileFeature {
-    // Base class does nothing
-}
-
-// If the layer properties indicate that this layer has a the ability to intercept
-// features, then this method will be called when a feature is loaded
 - (void)onFeatureCollectionLoaded:(MLNPluginLayerTileFeatureCollection *)tileFeatureCollection {
     // Base class does nothing
 }

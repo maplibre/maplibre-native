@@ -99,10 +99,6 @@ public:
         _updateLayerPropertiesFunction = updateLayerPropertiesFunction;
     }
 
-    void setFeatureLoadedFunction(OnFeatureLoaded featureLoadedFunction) {
-        _featureLoadedFunction = featureLoadedFunction;
-    }
-
     void setFeatureCollectionLoadedFunction(OnFeatureCollectionLoaded featureCollectionLoadedFunction) {
         _featureCollectionLoadedFunction = featureCollectionLoadedFunction;
     }
@@ -124,9 +120,6 @@ public:
 
     //! Optional: Called when the layer properties change.  The properties are passed as JSON for now
     OnUpdateLayerProperties _updateLayerPropertiesFunction;
-
-    //! Optional: Called when feature is loaded
-    OnFeatureLoaded _featureLoadedFunction;
 
     //! Optional: Called when a feature collection is loaded
     OnFeatureCollectionLoaded _featureCollectionLoadedFunction;

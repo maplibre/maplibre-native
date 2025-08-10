@@ -7880,17 +7880,6 @@ static void *windowScreenContext = &windowScreenContext;
 
         // If this layer can read tile features, then setup that lambda
         if (capabilities.supportsReadingTileFeatures) {
-            pluginLayerImpl->setFeatureLoadedFunction([weakPlugInLayer, weakMapView](const std::shared_ptr<mbgl::plugin::Feature> feature) {
-
-                @autoreleasepool {
-                    MLNPluginLayerTileFeature *tileFeature = [weakMapView featureFromCore:feature];
-
-                    [weakPlugInLayer onFeatureLoaded:tileFeature];
-
-                }
-
-            });
-
 
             pluginLayerImpl->setFeatureCollectionLoadedFunction([weakPlugInLayer, weakMapView](const std::shared_ptr<mbgl::plugin::FeatureCollection> featureCollection) {
 
