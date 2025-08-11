@@ -101,7 +101,6 @@ typedef struct MLNPluginLayerDrawingContext {
   MLNMatrix4 projectionMatrix;
   /// A 4×4 matrix representing the map view’s current near clip projection state.
   MLNMatrix4 nearClippedProjMatrix;
-
 } MLNPluginLayerDrawingContext;
 
 MLN_EXPORT
