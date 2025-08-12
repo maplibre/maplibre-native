@@ -157,7 +157,8 @@ jobs:
           "PATH=$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Setup cmake
-        if: ${{contains(runner.name, 'GitHub Actions')}}
+        # linux arm not supported https://github.com/jwlawson/actions-setup-cmake/issues/79
+        if: ${{contains(runner.name, 'GitHub Actions') && matrix.runs-on != 'ubuntu-22.04-arm' }}
         uses: jwlawson/actions-setup-cmake@v2
         with:
           cmake-version: '3.31'
