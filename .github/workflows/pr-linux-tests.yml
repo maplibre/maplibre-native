@@ -20,13 +20,27 @@ jobs:
     if: github.event.workflow_run.event == 'pull_request'
     runs-on: ubuntu-latest
     outputs:
-      should_skip: ${{ steps.check_skip.outputs.should_skip }}
+      should_skip: ${{ steps.parent_workflow.outputs.was_skipped_or_cancelled }}
     steps:
-      - id: check_skip
-        run: |
-          conclusion=$(curl --retry 12 --retry-all-errors ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "linux-build-and-test").conclusion')
-          should_skip=$([[ "$conclusion" = "skipped" || "$conclusion" = "cancelled" ]] && echo "true" || echo "false")
-          echo "should_skip=$should_skip" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github
+            .nvmrc
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - run: npm install
+
+      - name: Get parent workflow result
+        id: parent_workflow
+        run: node .github/scripts/check-job-skipped.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TEST_RUN_ID: ${{ github.event.workflow_run.id }}
+          JOB_NAME: linux-build-and-test
 
   pr-bloaty:
     needs: pre_job

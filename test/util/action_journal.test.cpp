@@ -428,3 +428,88 @@ TEST(ActionJournal, ValidateEvents) {
                   false,
                   gfx::RenderingStats());
 }
+
+TEST(ActionJournal, RenderingStats) {
+    ActionJournalTest test(ActionJournalOptions()
+                               .enable()
+                               .withPath(".")
+                               .withLogFileCount(2)
+                               .withLogFileSize(1024 * 1024 * 5)
+                               .withRenderingStatsReportInterval(2),
+                           MapMode::Continuous);
+
+    test.map->getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
+    test.map->getActionJournal()->impl->flush();
+    test.map->getActionJournal()->impl->clearLog();
+
+    const auto onDidFinishRenderingFrame =
+        static_cast<void (RendererObserver::*)(RendererObserver::RenderMode, bool, bool, const gfx::RenderingStats&)>(
+            &RendererObserver::onDidFinishRenderingFrame);
+
+    const std::vector<gfx::RenderingStats> testStats = {
+        {.encodingTime = 0.00273499998729676, .renderingTime = 0.0000957687443587929},
+        {.encodingTime = 0.010939366680880388, .renderingTime = 0.0001340633297028641},
+        {.encodingTime = 0.023845999967306852, .renderingTime = 0.00011808499693870545},
+        {.encodingTime = 0.018161798150416603, .renderingTime = 0.00011148519331106433},
+    };
+
+    const auto encodingMin = std::ranges::min_element(
+        testStats, [](const auto& a, const auto& b) { return a.encodingTime < b.encodingTime; });
+    const auto encodingMax = std::ranges::min_element(
+        testStats, [](const auto& a, const auto& b) { return a.encodingTime > b.encodingTime; });
+    const auto renderingMin = std::ranges::min_element(
+        testStats, [](const auto& a, const auto& b) { return a.renderingTime < b.renderingTime; });
+    const auto renderingMax = std::ranges::min_element(
+        testStats, [](const auto& a, const auto& b) { return a.renderingTime > b.renderingTime; });
+
+    const auto encodingAvg = std::accumulate(testStats.begin(),
+                                             testStats.end(),
+                                             0.0,
+                                             [](const auto& a, const auto& b) { return a + b.encodingTime; }) /
+                             testStats.size();
+
+    const auto renderingAvg = std::accumulate(testStats.begin(),
+                                              testStats.end(),
+                                              0.0,
+                                              [](const auto& a, const auto& b) { return a + b.renderingTime; }) /
+                              testStats.size();
+
+    const auto validateDouble = [](const mbgl::JSValue& json, const auto name, const double value) {
+        EXPECT_TRUE(json.HasMember(name));
+        EXPECT_TRUE(json[name].IsDouble());
+        EXPECT_DOUBLE_EQ(json[name].GetDouble(), value);
+    };
+
+    const auto validateStats = [&](const mbgl::JSValue& json) {
+        ;
+        validateDouble(json, "encodingMin", encodingMin->encodingTime);
+        validateDouble(json, "encodingMax", encodingMax->encodingTime);
+        validateDouble(json, "encodingAvg", encodingAvg);
+        validateDouble(json, "renderingMin", renderingMin->renderingTime);
+        validateDouble(json, "renderingMax", renderingMax->renderingTime);
+        validateDouble(json, "renderingAvg", renderingAvg);
+    };
+
+    // accumulate frames in the journal
+    for (const auto& frameStats : testStats) {
+        std::this_thread::sleep_for(
+            std::chrono::milliseconds(test.options.renderingStatsReportInterval() * 1000 / 2 / testStats.size()));
+        test.map->getImpl().onDidFinishRenderingFrame(RendererObserver::RenderMode::Partial, false, false, frameStats);
+
+        test.map->getActionJournal()->impl->flush();
+        const auto& log = test.map->getActionJournal()->getLog();
+        EXPECT_EQ(log.size(), 0);
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(test.options.renderingStatsReportInterval() * 1000 / 2));
+
+    // trigger the journal event using a frame with average times to keep the state unchanged
+    validateEvent(test,
+                  "renderingStats",
+                  validateStats,
+                  onDidFinishRenderingFrame,
+                  RendererObserver::RenderMode::Partial,
+                  false,
+                  false,
+                  gfx::RenderingStats{.encodingTime = encodingAvg, .renderingTime = renderingAvg});
+}

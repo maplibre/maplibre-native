@@ -30,6 +30,7 @@ permissions:
   id-token: write         # needed for AWS
   contents: write         # allow making a release
   actions: write          # for triggering ios-release-cocoapods.yml
+  issues: write           # for notify-release-on-prs.ts
 
 jobs:
   pre_job:
@@ -100,26 +101,27 @@ jobs:
       #- name: Running iOS UI tests (Thread Sanitizer)
       #  run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=tsan
 
-      - name: Running iOS UI tests (Address+UB Sanitizer)
-        run: |
-          retry_count=0
-          max_retries=5
-          while [ $retry_count -le $max_retries ]; do
-            bazel test //platform/ios/iosapp-UITests:uitest \
-              --test_output=errors \
-              --//:renderer=metal \
-              --features=include_clang_rt \
-              --copt=-fsanitize=undefined \
-              --linkopt=-fsanitize=undefined \
-              --copt=-fsanitize-recover=null \
-              --linkopt=-fsanitize-recover=null && break
-            retry_count=$((retry_count+1))
-            if [ $retry_count -eq $max_retries ]; then
-              echo "::error::Failed to run iOS UI tests after $max_retries attempts"
-              exit 1
-            fi
-            echo "Attempt $retry_count failed. Retrying..."
-          done
+      # https://github.com/maplibre/maplibre-native/issues/3642
+      # - name: Running iOS UI tests (Address+UB Sanitizer)
+      #   run: |
+      #     retry_count=0
+      #     max_retries=5
+      #     while [ $retry_count -le $max_retries ]; do
+      #       bazel test //platform/ios/iosapp-UITests:uitest \
+      #         --test_output=errors \
+      #         --//:renderer=metal \
+      #         --features=include_clang_rt \
+      #         --copt=-fsanitize=undefined \
+      #         --linkopt=-fsanitize=undefined \
+      #         --copt=-fsanitize-recover=null \
+      #         --linkopt=-fsanitize-recover=null && break
+      #       retry_count=$((retry_count+1))
+      #       if [ $retry_count -eq $max_retries ]; then
+      #         echo "::error::Failed to run iOS UI tests after $max_retries attempts"
+      #         exit 1
+      #       fi
+      #       echo "Attempt $retry_count failed. Retrying..."
+      #     done
 
       # render test
 
@@ -332,11 +334,11 @@ jobs:
       # needed to trigger workflow for Swift Package Index release
       - name: Generate token
         if: env.make_release
+        uses: actions/create-github-app-token@v2
         id: generate_token
-        uses: tibdex/github-app-token@v2
         with:
-          app_id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
-          private_key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
+          app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
+          private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
       - name: Release (Swift Package Index)
         if: env.make_release
@@ -365,7 +367,7 @@ jobs:
          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Write release notifications
-        if: env.make_release
+        if: env.make_release && github.repository_owner == 'maplibre'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node .github/scripts/notify-release-on-prs.ts --tag ios-v${{ env.version }}
