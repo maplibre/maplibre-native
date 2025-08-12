@@ -1240,6 +1240,9 @@
 
 <h1 id="pmtiles">PMTiles</h1>
 <p>Starting MapLibre Android 11.7.0, using <a href="https://docs.protomaps.com/pmtiles/">PMTiles</a> as a data source is supported. You can prefix your vector tile source with <code>pmtiles://</code> to load a PMTiles file. The rest of the URL continue with be <code>https://</code> to load a remote PMTiles file, <code>asset://</code> to load an asset or <code>file://</code> to load a local PMTiles file.</p>
+<blockquote>
+<p>Note: PMTiles sources currently do not support caching or offline pack downloads.</p>
+</blockquote>
 <p>Oliver Wipfli has made a style available that combines a <a href="">Protomaps</a> basemap togehter with Foursquare's POI dataset. It is available in the <a href="https://github.com/wipfli/foursquare-os-places-pmtiles">wipfli/foursquare-os-places-pmtiles</a> repository on GitHub. The style to use is</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>https://raw.githubusercontent.com/wipfli/foursquare-os-places-pmtiles/refs/heads/main/style.json
 </span></code></pre></div>
