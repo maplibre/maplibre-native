@@ -18,7 +18,7 @@ env_info_plist(
     name = "info_swift_plist",
     input = "Info.plist",
     output = "Info-swift.plist",
-    var = "SENTRY_DSN",
+    vars = ["SENTRY_DSN"],
 )
 
 swift_library(

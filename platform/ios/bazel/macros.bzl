@@ -19,23 +19,35 @@ def info_plist(name, base_info_plist, out, **kwargs):
     )
 
 def _env_info_plist_impl(ctx):
-    in_file = ctx.file.input
-    out_file = ctx.outputs.output
+    args = ctx.actions.args()
+    args.add(ctx.file.input)
+    args.add(ctx.outputs.output)
+    args.add_all(ctx.attr.vars)
 
     ctx.actions.run_shell(
-        inputs = [in_file],
-        outputs = [out_file],
-        arguments = [in_file.path, out_file.path, ctx.attr.var],
+        inputs = [ctx.file.input],
+        outputs = [ctx.outputs.output],
+        arguments = [args],
         use_default_shell_env = True,
         command = """
-            cp $1 $2
+            in=$1
+            out=$2
+            shift 2
+            vars=(${@})
 
-            if plutil -p $2 | grep -q "<key>$3<key>"; then
-                # skip if there is a key present (let the user manually set a value)
-                #plutil -replace $3 -string ${!3} $2
-            else
-                plutil -insert $3 -string ${!3} $2
-            fi
+            cp $in $out
+
+            for var in "${vars[@]}"; do
+                if [ -n "${!var}" ]; then
+                    if plutil -p $out | grep -q "<key>$var<key>"; then
+                        # skip if there is a key present (let the user manually override)
+                        #plutil -replace $var -string ${!var} $out
+                        echo "User $var key detected. Update ignored"
+                    else
+                        plutil -insert $var -string ${!var} $out
+                    fi
+                fi
+            done
         """,
     )
 
@@ -47,6 +59,6 @@ env_info_plist = rule(
             allow_single_file = True,
         ),
         "output": attr.output(mandatory = True),
-        "var": attr.string(mandatory = True),
+        "vars": attr.string_list(mandatory = True),
     },
 )
