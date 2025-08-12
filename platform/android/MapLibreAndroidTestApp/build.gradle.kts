@@ -32,7 +32,7 @@ android {
         versionName = "6.0.1"
         testInstrumentationRunner = "org.maplibre.android.InstrumentationRunner"
         multiDexEnabled = true
-        manifestPlaceholders["SENTRY_DSN"] = ""
+        manifestPlaceholders["SENTRY_DSN"] = "invalid"
     }
 
     nativeBuild(listOf("example-custom-layer"))
@@ -63,7 +63,7 @@ android {
             testProguardFiles("test-proguard-rules.pro")
             signingConfig = signingConfigs.getByName("debug")
 
-            buildConfigField("String", "SENTRY_DSN", System.getenv("SENTRY_DSN") ?: "")
+            buildConfigField("String", "SENTRY_DSN", System.getenv("SENTRY_DSN") ?: "invalid")
         }
     }
 
