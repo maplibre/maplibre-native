@@ -32,6 +32,7 @@ android {
         versionName = "6.0.1"
         testInstrumentationRunner = "org.maplibre.android.InstrumentationRunner"
         multiDexEnabled = true
+        manifestPlaceholders["SENTRY_DSN"] = ""
     }
 
     nativeBuild(listOf("example-custom-layer"))
@@ -49,7 +50,6 @@ android {
             isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
 
-            buildConfigField("String", "SENTRY_DSN", "")
             packaging {
                 jniLibs {
                     keepDebugSymbols += "**/*.so"
