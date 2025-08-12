@@ -76,11 +76,11 @@ jobs:
         include:
           - runs-on: ubuntu-22.04
             arch: x86_64
-          - runs-on: MapLibre_Native_Ubuntu_22_04_ARM_8_core
+          - runs-on: ubuntu-22.04-arm
             arch: arm64
           - runs-on: macos-14
             arch: arm64
-          - runs-on: macos-14-large
+          - runs-on: macos-13
             arch: x86_64
           - runs-on: windows-2022
             arch: x86_64
