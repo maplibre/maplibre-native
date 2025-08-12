@@ -17,6 +17,8 @@
 #include <atomic>
 #include <memory>
 
+#include <mbgl/vulkan/context.hpp>
+
 namespace mbgl {
 
 class GeometryTile;
@@ -121,6 +123,7 @@ private:
     bool firstLoad = true;
 
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
+    vk::UniqueCommandPool commandPool;
 
     std::shared_ptr<FontFaces> fontFaces;
 };
