@@ -2,6 +2,7 @@ load("@darwin_config//:config.bzl", "BUNDLE_ID_PREFIX")
 load("@rules_apple//apple:ios.bzl", "ios_application")
 load("@rules_apple//apple:resources.bzl", "apple_resource_group")
 load("@rules_swift//swift:swift.bzl", "swift_library")
+load("//platform/ios/bazel:macros.bzl", "env_info_plist")
 load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
 
 configure_device_profiles()
@@ -11,6 +12,13 @@ apple_resource_group(
     strip_structured_resources_prefixes = ["Data"],
     structured_resources = ["Data/Routes"],
     visibility = ["//visibility:public"],
+)
+
+env_info_plist(
+    name = "info_swift_plist",
+    input = "Info.plist",
+    output = "Info-swift.plist",
+    var = "SENTRY_DSN",
 )
 
 swift_library(
@@ -26,6 +34,7 @@ swift_library(
     deps = [
         #"//platform:ios-sdk",
         "@maplibre-navigation-ios",
+        "@swiftpkg_sentry_cocoa//:Sentry",
     ],
 )
 
@@ -36,7 +45,7 @@ ios_application(
         "iphone",
         "ipad",
     ],
-    infoplists = [":Info.plist"],
+    infoplists = [":Info-swift.plist"],
     minimum_os_version = "16.0",
     provisioning_profile = "xcode_profile",
     resources = [

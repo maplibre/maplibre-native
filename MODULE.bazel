@@ -91,6 +91,7 @@ use_repo(
     swift_deps,
     "swift_package",
     "swiftpkg_mapbox_directions_swift",
+    "swiftpkg_sentry_cocoa",
     "swiftpkg_solar",
     "swiftpkg_swiftformat",
     "swiftpkg_turf_swift",

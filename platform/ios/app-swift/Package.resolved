@@ -10,21 +10,21 @@
       }
     },
     {
-      "identity" : "maplibre-gl-native-distribution",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/maplibre/maplibre-gl-native-distribution.git",
-      "state" : {
-        "revision" : "3df876f8f2c6c591b0f66a29b3e216020afc885c",
-        "version" : "6.0.0"
-      }
-    },
-    {
       "identity" : "polyline",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/raphaelmor/Polyline",
       "state" : {
         "revision" : "353f80378dcd8f17eefe8550090c6b1ae3c9da23",
         "version" : "5.1.0"
+      }
+    },
+    {
+      "identity" : "sentry-cocoa",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/getsentry/sentry-cocoa",
+      "state" : {
+        "revision" : "156495496cb101e2f0a6b059f12dafcff1912197",
+        "version" : "8.54.0"
       }
     },
     {
@@ -39,10 +39,10 @@
     {
       "identity" : "swiftformat",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/nicklockwood/SwiftFormat",
+      "location" : "https://github.com/nicklockwood/SwiftFormat.git",
       "state" : {
-        "revision" : "9df3b01f477163b33d5e63c5e2e5b9f946a49c56",
-        "version" : "0.53.6"
+        "revision" : "b83a8f132ff5430f3b6ff7d912baa407caea9e29",
+        "version" : "0.57.2"
       }
     },
     {
