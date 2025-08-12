@@ -16,7 +16,7 @@ repos:
         exclude: 'gradlew\.bat$'
       - id: trailing-whitespace
         # FIXME: these autogenerate files contain trailing whitespace. Need to fix generator.
-        exclude: '(platform/android/MapLibreAndroid/src/main/java/org/maplibre/android/(location/LocationIndicatorLayer|style/layers/PropertyFactory)\.java$)|(platform/windows/vendor/.*)'
+        exclude: '(platform/android/MapLibreAndroid/src/main/java/org/maplibre/android/(location/LocationIndicatorLayer|style/layers/PropertyFactory)\.java$)|(platform/windows/vendor/.*)|(platform/ios/vendor/.*)'
 
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v20.1.8
