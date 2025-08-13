@@ -10,7 +10,6 @@ plugins {
     alias(libs.plugins.sentry)
 }
 
-
 fun obtainTestBuildType(): String {
     return if (project.hasProperty("testBuildType")) {
         project.properties["testBuildType"] as String
@@ -134,6 +133,8 @@ dependencies {
 }
 
 if (System.getenv("SENTRY_PROJECT") != null) {
+    apply(plugin = libs.plugins.sentry.get().pluginId)
+
     sentry {
         // Disables or enables debug log output, e.g. for for sentry-cli.
         // Default is disabled.
