@@ -7,7 +7,6 @@ plugins {
     id("maplibre.gradle-config")
     id("maplibre.gradle-checkstyle")
     id("maplibre.gradle-lint")
-    alias(libs.plugins.sentry)
 }
 
 fun obtainTestBuildType(): String {
