@@ -18,8 +18,10 @@ runs:
     - name: Validate VERSION
       run: .github/scripts/validate-version.sh platform/android/VERSION
       working-directory: .
+      shell: bash
 
     - run: echo "cmake.dir=$(dirname "$(dirname "$(command -v cmake)")")" >> local.properties
+      shell: bash
 
     - uses: actions/setup-java@v4
       with:
@@ -39,25 +41,30 @@ runs:
     - name: npm install
       run: npm install --ignore-scripts
       working-directory: .
+      shell: bash
 
     - name: run platform/android/scripts/generate-style-code.mjs
       run: node platform/android/scripts/generate-style-code.mjs
       working-directory: .
+      shell: bash
 
     - run: |
         python3 -m venv venv
         source venv/bin/activate
         pip3 install pre-commit
+      shell: bash
 
     - run: |
         source venv/bin/activate
         pre-commit run clang-format --all-files
       continue-on-error: true # this can mean files are modified, which is not an error
+      shell: bash
 
     - run: |
         source venv/bin/activate
         pre-commit run clang-format --all-files
         rm -rf venv
+      shell: bash
 
     - uses: infotroph/tree-is-clean@v1
       with:

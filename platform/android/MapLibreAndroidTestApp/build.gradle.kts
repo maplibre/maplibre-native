@@ -184,13 +184,13 @@ sentry {
     // Whether the plugin should attempt to auto-upload the native debug symbols to Sentry or not.
     // If disabled the plugin will run a dry-run.
     // Default is enabled.
-    autoUploadNativeSymbols.set(true)
+    autoUploadNativeSymbols.set(false)
 
     // Does or doesn't include the source code of native code for Sentry.
     // This executes sentry-cli with the --include-sources param. automatically so
     // you don't need to do it manually.
     // Default is disabled.
-    includeNativeSources.set(false)
+    includeNativeSources.set(true)
 
     // Generates a JVM (Java, Kotlin, etc.) source bundle and uploads your source code to Sentry.
     // This enables source context, allowing you to see your source
@@ -234,5 +234,5 @@ sentry {
     // If disabled the plugin won't send telemetry data.
     // This is auto disabled if running against a self hosted instance of Sentry.
     // Default is enabled.
-    telemetry.set(true)
+    telemetry.set(false)
 }
