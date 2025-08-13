@@ -55,6 +55,8 @@ android {
                     keepDebugSymbols += "**/*.so"
                 }
             }
+            buildConfigField("String", "SENTRY_DSN", "\"" + (System.getenv("SENTRY_DSN") ?: "") + "\"")
+            manifestPlaceholders["SENTRY_DSN"] = System.getenv("SENTRY_DSN") ?: ""
         }
         getByName("release") {
             isMinifyEnabled = true
@@ -64,6 +66,7 @@ android {
             signingConfig = signingConfigs.getByName("debug")
 
             buildConfigField("String", "SENTRY_DSN", "\"" + (System.getenv("SENTRY_DSN") ?: "") + "\"")
+            manifestPlaceholders["SENTRY_DSN"] = System.getenv("SENTRY_DSN") ?: ""
         }
     }
 
