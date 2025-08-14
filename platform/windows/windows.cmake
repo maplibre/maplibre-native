@@ -11,7 +11,11 @@ if(MSVC)
         set(WITH_ICU -With-ICU)
     endif()
 
-    execute_process(COMMAND powershell -ExecutionPolicy Bypass -File ${CMAKE_CURRENT_LIST_DIR}/Get-VendorPackages.ps1 -Triplet ${VCPKG_TARGET_TRIPLET} -Renderer ${_RENDERER} ${WITH_ICU})
+    # Skip Get-VendorPackages.ps1 for ARM64 due to vcpkg compiler detection issues
+    # The required packages should already be installed
+    if(NOT (CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64" OR CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64"))
+        execute_process(COMMAND powershell -ExecutionPolicy Bypass -File ${CMAKE_CURRENT_LIST_DIR}/Get-VendorPackages.ps1 -Triplet ${VCPKG_TARGET_TRIPLET} -Renderer ${_RENDERER} ${WITH_ICU})
+    endif()
     unset(_RENDERER)
 
     add_compile_definitions(NOMINMAX GHC_WIN_DISABLE_WSTRING_STORAGE_TYPE)
@@ -29,6 +33,30 @@ if(MSVC)
     find_package(libuv REQUIRED)
     find_package(PNG REQUIRED)
     find_package(WebP REQUIRED)
+
+    # ARM64 specific fixes
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64" OR CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
+        # Simplify library variables to avoid complex generator expressions
+        if(TARGET JPEG::JPEG)
+            set(JPEG_LIBRARIES JPEG::JPEG)
+        endif()
+
+        if(TARGET PNG::PNG)
+            set(PNG_LIBRARIES PNG::PNG)
+        endif()
+
+        # Fix ICU::data target which might not exist for ARM64
+        if(NOT TARGET ICU::data AND TARGET ICU::uc)
+            add_library(ICU::data INTERFACE IMPORTED)
+        endif()
+
+        # Use x86 OpenGL headers if ARM64 headers are missing
+        if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/vendor/vcpkg/installed/x86-windows/include/GLES3")
+            include_directories("${CMAKE_CURRENT_LIST_DIR}/vendor/vcpkg/installed/x86-windows/include")
+            message(STATUS "Using x86 OpenGL headers for ARM64 build")
+        endif()
+    endif()
+
     find_path(DLFCN_INCLUDE_DIRS dlfcn.h)
     find_path(LIBUV_INCLUDE_DIRS uv.h)
 elseif(DEFINED ENV{MSYSTEM})
@@ -187,7 +215,7 @@ target_include_directories(
     PRIVATE
         ${PROJECT_SOURCE_DIR}/platform/windows/include
         ${CURL_INCLUDE_DIRS}
-		${DLFCN_INCLUDE_DIRS}
+        ${DLFCN_INCLUDE_DIRS}
         ${JPEG_INCLUDE_DIRS}
         ${LIBUV_INCLUDE_DIRS}
         ${WEBP_INCLUDE_DIRS}
@@ -234,7 +262,7 @@ if(MSVC)
         mbgl-core
         PRIVATE
             ${CURL_LIBRARIES}
-    		dlfcn-win32::dl
+            dlfcn-win32::dl
     )
 elseif(MSYS)
     target_link_libraries(
