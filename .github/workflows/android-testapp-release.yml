@@ -10,6 +10,8 @@ jobs:
   create-android-testapp-release:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - name: Create Release
         run: |
           gh release create android-testapp-${{ github.sha }} \
