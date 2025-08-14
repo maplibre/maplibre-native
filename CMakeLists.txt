@@ -991,8 +991,8 @@ if(MLN_WITH_OPENGL)
     message(STATUS "Configuring GL-Native with OpenGL renderer backend")
     target_compile_definitions(
         mbgl-core
-        PRIVATE MLN_RENDER_BACKEND_OPENGL=1
         PUBLIC
+            MLN_RENDER_BACKEND_OPENGL=1
             "MLN_USE_UNORDERED_DENSE=$<BOOL:${MLN_USE_UNORDERED_DENSE}>"
     )
     list(APPEND
@@ -1136,8 +1136,8 @@ if(MLN_WITH_METAL)
     message(STATUS "Configuring Metal renderer backend")
     target_compile_definitions(
         mbgl-core
-        PRIVATE MLN_RENDER_BACKEND_METAL=1
         PUBLIC
+            MLN_RENDER_BACKEND_METAL=1
             "MLN_USE_UNORDERED_DENSE=$<BOOL:${MLN_USE_UNORDERED_DENSE}>"
     )
     list(APPEND
@@ -1235,7 +1235,7 @@ if(MLN_WITH_VULKAN)
 
     target_compile_definitions(
         mbgl-core
-        PRIVATE
+        PUBLIC
             MLN_RENDER_BACKEND_VULKAN=1
     )
 
