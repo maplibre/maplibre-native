@@ -6,7 +6,7 @@ namespace mbgl {
 
 using namespace style;
 
-HillshadeBucket::HillshadeBucket(PremultipliedImage&& image_, Tileset::DEMEncoding encoding)
+HillshadeBucket::HillshadeBucket(PremultipliedImage&& image_, Tileset::Encoding encoding)
     : demdata(image_, encoding) {}
 
 HillshadeBucket::HillshadeBucket(DEMData&& demdata_)

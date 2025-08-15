@@ -34,7 +34,7 @@ TEST(RasterDEMOptions, TerrariumEncodingParsed) {
         "encoding": "terrarium"
     })JSON",
         error);
-    ASSERT_EQ(converted.value().encoding, Tileset::DEMEncoding::Terrarium);
+    ASSERT_EQ(converted.value().encoding, Tileset::Encoding::Terrarium);
 }
 
 TEST(RasterDEMOptions, MapboxEncodingParsed) {
@@ -44,5 +44,25 @@ TEST(RasterDEMOptions, MapboxEncodingParsed) {
         "encoding": "mapbox"
     })JSON",
         error);
-    ASSERT_EQ(converted.value().encoding, Tileset::DEMEncoding::Mapbox);
+    ASSERT_EQ(converted.value().encoding, Tileset::Encoding::Mapbox);
+}
+
+TEST(RasterDEMOptions, MVTEncodingParsed) {
+    Error error;
+    std::optional<RasterDEMOptions> converted = convertJSON<RasterDEMOptions>(
+        R"JSON({
+        "encoding": "mvt"
+    })JSON",
+        error);
+    ASSERT_EQ(converted.value().encoding, Tileset::Encoding::Mapbox);
+}
+
+TEST(RasterDEMOptions, MLTEncodingParsed) {
+    Error error;
+    std::optional<RasterDEMOptions> converted = convertJSON<RasterDEMOptions>(
+        R"JSON({
+        "encoding": "mlt"
+    })JSON",
+        error);
+    ASSERT_EQ(converted.value().encoding, Tileset::Encoding::MLT);
 }

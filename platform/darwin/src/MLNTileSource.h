@@ -146,19 +146,27 @@ typedef NS_ENUM(NSUInteger, MLNTileCoordinateSystem) {
  The encoding formula used to generate the raster-dem tileset
 */
 
-typedef NS_ENUM(NSUInteger, MLNDEMEncoding) {
+typedef NS_ENUM(NSUInteger, MLNEncoding) {
 
   /**
-   Raster tiles generated with the [Mapbox encoding
-   formula](https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb).
+   For raster sources:
+     Raster tiles generated with the [Mapbox encodingg
+     formula](https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb)
+    For vector sources:
+     Vector tiles in [MVT format](https://github.com/mapbox/vector-tile-spec).
   */
-  MLNDEMEncodingMapbox = 0,
+  MLNEncodingMapbox = 0,
 
   /**
-   Raster tiles generated with the [Mapzen Terrarium encoding
+   Raster tiles generated with the [Mapzen Terrarium encodingg
    formula](https://aws.amazon.com/public-datasets/terrain/).
   */
-  MLNDEMEncodingTerrarium
+  MLNEncodingTerrarium = 1,
+
+  /**
+   Vector tiles in [MLT format](https://github.com/maplibre/maplibre-tile-spec).
+  */
+  MLNEncodingMLT = 2,
 };
 
 /**

@@ -9,7 +9,7 @@ namespace mbgl {
 namespace style {
 
 struct RasterDEMOptions {
-    std::optional<Tileset::DEMEncoding> encoding = std::nullopt;
+    std::optional<Tileset::Encoding> encoding = std::nullopt;
 };
 
 class RasterDEMSource : public RasterSource {

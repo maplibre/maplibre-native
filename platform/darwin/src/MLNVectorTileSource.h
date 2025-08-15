@@ -5,6 +5,14 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
+ An `NSNumber` object containing an unsigned integer that specifies the encoding
+ formula for vector tilesets. The integer corresponds to one of the constants in ``MLNEncoding``.
+
+ The default value for this option is ``MLNDEMEncoding/MLNEncodingMapbox``.
+ */
+FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionEncoding;
+
+/**
  ``MLNVectorTileSource`` is a map content source that supplies tiled vector data
  in <a href="https://www.mapbox.com/vector-tiles/">Mapbox Vector Tile</a> format
  to be shown on the map. The location of and metadata about the tiles are

@@ -41,7 +41,7 @@ std::optional<Tileset> Converter<Tileset>::operator()(const Convertible& value, 
 
     auto rasterDEMOptions = convert<RasterDEMOptions>(value, error);
     if (rasterDEMOptions) {
-        if (std::optional<Tileset::DEMEncoding> encoding = rasterDEMOptions.value().encoding) {
+        if (std::optional<Tileset::Encoding> encoding = rasterDEMOptions.value().encoding) {
             result.encoding = encoding.value();
         }
     }

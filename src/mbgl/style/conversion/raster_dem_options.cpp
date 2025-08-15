@@ -15,13 +15,15 @@ std::optional<RasterDEMOptions> Converter<RasterDEMOptions>::operator()(const Co
     if (encodingValue) {
         std::optional<std::string> encoding = toString(*encodingValue);
         if (encoding && *encoding == "terrarium") {
-            options.encoding = {Tileset::DEMEncoding::Terrarium};
-        } else if (encoding && *encoding == "mapbox") {
-            options.encoding = {Tileset::DEMEncoding::Mapbox};
+            options.encoding = {Tileset::Encoding::Terrarium};
+        } else if (encoding && (*encoding == "mapbox" || *encoding == "mvt")) {
+            options.encoding = {Tileset::Encoding::Mapbox};
+        } else if (encoding && *encoding == "mlt") {
+            options.encoding = {Tileset::Encoding::MLT};
         } else {
             error.message =
-                "invalid raster-dem encoding type - valid types are 'mapbox' "
-                "and 'terrarium'";
+                "invalid encoding - valid types are 'mapbox' and 'terrarium' for raster sources, 'mvt' and 'mlt' for "
+                "vector sources";
             return std::nullopt;
         }
     }

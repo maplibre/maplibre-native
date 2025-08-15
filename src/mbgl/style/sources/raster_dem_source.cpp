@@ -24,7 +24,7 @@ bool RasterDEMSource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) 
 
 void RasterDEMSource::setTilesetOverrides(Tileset& tileset) {
     if (options) {
-        if (std::optional<Tileset::DEMEncoding> encoding = options.value().encoding) {
+        if (std::optional<Tileset::Encoding> encoding = options.value().encoding) {
             tileset.encoding = encoding.value();
         }
     }

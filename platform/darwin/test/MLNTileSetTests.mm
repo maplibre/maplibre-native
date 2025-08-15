@@ -123,20 +123,28 @@
 
     // when the dem encoding is changed using an NSNumber
     tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, @{
-        MLNTileSourceOptionDEMEncoding: @(MLNDEMEncodingTerrarium),
+        MLNTileSourceOptionEncoding: @(MLNEncodingTerrarium),
     });
 
     // the encoding is reflected by the mbgl tileset
-    XCTAssertEqual(tileSet.encoding, mbgl::Tileset::DEMEncoding::Terrarium);
+    XCTAssertEqual(tileSet.encoding, mbgl::Tileset::Encoding::Terrarium);
+
+    // when the dem encoding is changed using an NSNumber
+    tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, @{
+        MLNTileSourceOptionDEMEncoding: @(MLNEncodingTerrarium),
+    });
+
+    // the encoding is reflected by the mbgl tileset
+    XCTAssertEqual(tileSet.encoding, mbgl::Tileset::Encoding::Terrarium);
 
     // when the dem encoding is changed using an NSValue
-    MLNDEMEncoding terrarium = MLNDEMEncodingTerrarium;
+    MLNEncoding terrarium = MLNEncodingTerrarium;
     tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, @{
-        MLNTileSourceOptionDEMEncoding: [NSValue value:&terrarium withObjCType:@encode(MLNDEMEncoding)],
+        MLNTileSourceOptionEncoding: [NSValue value:&terrarium withObjCType:@encode(MLNEncoding)],
     });
 
     // the encoding is reflected by the mbgl tileset
-    XCTAssertEqual(tileSet.encoding, mbgl::Tileset::DEMEncoding::Terrarium);
+    XCTAssertEqual(tileSet.encoding, mbgl::Tileset::Encoding::Terrarium);
 }
 
 - (void)testInvalidTileSet {

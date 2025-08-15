@@ -5,13 +5,18 @@
 /**
  An `NSNumber` object containing an unsigned integer that specifies the encoding
  formula for raster-dem tilesets. The integer corresponds to one of
- the constants described in ``MLNDEMEncoding``.
+ the constants described in ``MLNEncoding``.
 
- The default value for this option is ``MLNDEMEncoding/MLNDEMEncodingMapbox``.
+ The default value for this option is ``MLNDEMEncoding/MLNEncodingMapbox``.
 
  This option cannot be represented in a TileJSON or style JSON file. It is used
  with the ``MLNRasterDEMSource`` class and is ignored when creating an
  ``MLNRasterTileSource`` or ``MLNRasterTileSource`` object.
+ */
+FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionEncoding;
+
+/**
+ Deprecated.  Use ``MLNTileSourceOptionEncoding``.
  */
 FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionDEMEncoding;
 

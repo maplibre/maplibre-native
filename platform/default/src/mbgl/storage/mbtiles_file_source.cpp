@@ -74,7 +74,7 @@ public:
 
     // Generate a tilejson resource from .mbtiles file
     void request_tilejson(const Resource &resource, ActorRef<FileSourceRequest> req) {
-        auto path = url_to_path(resource.url);
+        const auto path = url_to_path(resource.url);
 
         Response response;
 
@@ -86,12 +86,12 @@ public:
 
         mapbox::sqlite::Statement meta(db, "SELECT * from metadata");
         for (mapbox::sqlite::Query q(meta); q.run();) {
-            auto name = q.get<std::string>(0);
+            const auto name = q.get<std::string>(0);
             auto val = q.get<std::string>(1);
             if (name == "json") {
                 doc.Parse(val.c_str());
             } else {
-                values[name] = val;
+                values[name] = std::move(val);
             }
         }
 
@@ -102,25 +102,30 @@ public:
         values["tilejson"] = "2.0.0";
         values["scheme"] = "xyz";
 
-        auto format_ptr = values.find("format");
-        std::string format = format_ptr == values.end() ? "png" : format_ptr->second;
+        const auto format_ptr = values.find("format");
+        const std::string format = (format_ptr == values.end()) ? "png" : format_ptr->second;
 
-        if (format != "pbf" && values.count("scale") == 0) {
+        // Translate MIME type field to source encoding.
+        if (format == "mlt" || format == "application/vnd.maplibre-vector-tile") {
+            doc.AddMember("encoding", "mlt", allocator);
+        }
+
+        if (format != "pbf" && !values.contains("scale")) {
             values["scale"] = "1";
         }
 
         // We use file location with appended parameter query parameter as URL for actual tile data
         std::string tile_url = std::string(resource.url + "?file={x}/{y}/{z}." + format);
         rapidjson::Value arr(kArrayType);
-        rapidjson::Value tile_url_val(tile_url, allocator);
+        rapidjson::Value tile_url_val(std::move(tile_url), allocator);
         arr.PushBack(tile_url_val, allocator);
         doc.AddMember("tiles", arr, allocator);
 
         std::string minz;
         std::string maxz;
 
-        auto minzoom_ptr = values.find("minzoom");
-        auto maxzoom_ptr = values.find("maxzoom");
+        const auto minzoom_ptr = values.find("minzoom");
+        const auto maxzoom_ptr = values.find("maxzoom");
 
         if (minzoom_ptr == values.end() || maxzoom_ptr == values.end()) {
             mapbox::sqlite::Statement zoom_stmt(db, "SELECT MIN(zoom_level),MAX(zoom_level) from tiles");
@@ -137,43 +142,43 @@ public:
             maxz = maxzoom_ptr->second;
         }
 
-        auto minZoom = minz.empty() ? 0 : std::stoi(minz);
-        auto maxZoom = maxz.empty() ? 0 : std::stoi(maxz);
+        const auto minZoom = minz.empty() ? 0 : std::stoi(minz);
+        const auto maxZoom = maxz.empty() ? 0 : std::stoi(maxz);
 
         for (auto const &entry : values) {
             if (entry.first == "scale") {
                 doc.AddMember("scale", std::stod(entry.second), allocator);
             } else if (entry.first == "minzoom" || entry.first == "maxzoom") {
                 auto name = rapidjson::Value(entry.first, allocator);
-                const auto value = entry.second.empty() ? 0 : std::stoi(entry.second);
-                doc.AddMember(name, value, allocator);
+                Document::ValueType value{entry.second.empty() ? 0 : std::stoi(entry.second)};
+                doc.AddMember(std::move(name), std::move(value), allocator);
             } else if (entry.first == "bounds") {
-                std::vector<double> x = split(entry.second, ',');
-                if (x.size() != 4) {
+                const std::vector<double> bounds_values = split(entry.second, ',');
+                if (bounds_values.size() != 4) {
                     response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other);
                     req.invoke(&FileSourceRequest::setResponse, response);
                     return;
                 }
-                double cLon = (x[0] + x[2]) / 2;
-                double cLat = (x[1] + x[3]) / 2;
-                int cZoom = (minZoom + maxZoom) / 2;
-                rapidjson::Value bounds_arr(kArrayType);
-                for (auto vv : x) {
-                    bounds_arr.PushBack(vv, allocator);
-                }
+                const double cLon = (bounds_values[0] + bounds_values[2]) / 2;
+                const double cLat = (bounds_values[1] + bounds_values[3]) / 2;
+                const int cZoom = (minZoom + maxZoom) / 2;
 
                 if (format != "pbf") {
-                    doc.AddMember("bounds", bounds_arr, allocator);
+                    rapidjson::Value bounds_arr(kArrayType);
+                    for (auto vv : bounds_values) {
+                        bounds_arr.PushBack(vv, allocator);
+                    }
+                    doc.AddMember("bounds", std::move(bounds_arr), allocator);
                 }
 
                 rapidjson::Value center_arr(kArrayType);
                 center_arr.PushBack(cLon, allocator);
                 center_arr.PushBack(cLat, allocator);
                 center_arr.PushBack(cZoom, allocator);
-                doc.AddMember("center", center_arr, allocator);
+                doc.AddMember("center", std::move(center_arr), allocator);
             } else {
                 rapidjson::Value name = rapidjson::Value(entry.first, allocator);
-                doc.AddMember(name, rapidjson::Value(entry.second, allocator), allocator);
+                doc.AddMember(std::move(name), rapidjson::Value(entry.second, allocator), allocator);
             }
         }
 

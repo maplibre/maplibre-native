@@ -33,11 +33,10 @@ void RenderVectorSource::updateInternal(const Tileset& tileset,
         tileset.bounds,
         [&](const OverscaledTileID& tileID, TileObserver* observer_) -> std::unique_ptr<VectorTile> {
             if (!isMLT.has_value()) {
-                auto impl = staticImmutableCast<style::VectorSource::Impl>(baseImpl);
+                auto impl = staticImmutableCast<style::TileSource::Impl>(baseImpl);
                 assert(impl->tileset); // we should have one by now
                 if (impl->tileset) {
-                    isMLT = (impl->tileset->format == "mlt" ||
-                             impl->tileset->format == "application/vnd.maplibre-vector-tile");
+                    isMLT = (impl->tileset->encoding == Tileset::Encoding::MLT);
                 }
             }
             if (isMLT && *isMLT) {

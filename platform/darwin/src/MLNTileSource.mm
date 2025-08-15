@@ -20,6 +20,7 @@ const MLNTileSourceOption MLNTileSourceOptionCoordinateBounds = @"MLNTileSourceO
 const MLNTileSourceOption MLNTileSourceOptionAttributionHTMLString = @"MLNTileSourceOptionAttributionHTMLString";
 const MLNTileSourceOption MLNTileSourceOptionAttributionInfos = @"MLNTileSourceOptionAttributionInfos";
 const MLNTileSourceOption MLNTileSourceOptionTileCoordinateSystem = @"MLNTileSourceOptionTileCoordinateSystem";
+const MLNTileSourceOption MLNTileSourceOptionEncoding = @"MLNTileSourceOptionEncoding";
 const MLNTileSourceOption MLNTileSourceOptionDEMEncoding = @"MLNTileSourceOptionDEMEncoding";
 
 @implementation MLNTileSource
@@ -131,19 +132,27 @@ mbgl::Tileset MLNTileSetFromTileURLTemplates(NSArray<NSString *> *tileURLTemplat
         }
     }
 
-    if (NSNumber *demEncodingNumber = options[MLNTileSourceOptionDEMEncoding]) {
-        if (![demEncodingNumber isKindOfClass:[NSValue class]]) {
+    NSNumber *encodingNumber = options[MLNTileSourceOptionEncoding];
+    if (!encodingNumber) {
+        // Accept deprecated value if the replacement is not present
+        encodingNumber = options[MLNTileSourceOptionDEMEncoding];
+    }
+    if (encodingNumber) {
+        if (![encodingNumber isKindOfClass:[NSValue class]]) {
             [NSException raise:NSInvalidArgumentException
-                        format:@"MLNTileSourceOptionDEMEncoding must be set to an NSValue or NSNumber."];
+                        format:@"MLNTileSourceOptionEncoding must be set to an NSValue or NSNumber."];
         }
-        MLNDEMEncoding demEncoding;
-        [demEncodingNumber getValue:&demEncoding];
-        switch (demEncoding) {
-            case MLNDEMEncodingMapbox:
-                tileSet.encoding = mbgl::Tileset::DEMEncoding::Mapbox;
+        MLNEncoding encoding;
+        [encodingNumber getValue:&encoding];
+        switch (encoding) {
+            case MLNEncodingMapbox:
+                tileSet.encoding = mbgl::Tileset::Encoding::Mapbox;
                 break;
-            case MLNDEMEncodingTerrarium:
-                tileSet.encoding = mbgl::Tileset::DEMEncoding::Terrarium;
+            case MLNEncodingTerrarium:
+                tileSet.encoding = mbgl::Tileset::Encoding::Terrarium;
+                break;
+            case MLNEncodingMLT:
+                tileSet.encoding = mbgl::Tileset::Encoding::MLT;
                 break;
         }
     }
