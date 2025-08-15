@@ -18,6 +18,7 @@ public:
                     variant<std::string, Tileset> urlOrTileset,
                     uint16_t tileSize,
                     std::optional<RasterDEMOptions> options = std::nullopt);
+    ~RasterDEMSource() override;
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
 
 protected:
