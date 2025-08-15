@@ -179,8 +179,8 @@ TEST(LocalFileSource, URLLimit) {
     std::unique_ptr<AsyncRequest> req = fs.request({Resource::Unknown, toAbsoluteURL(url)}, [&](Response res) {
         req.reset();
         ASSERT_NE(nullptr, res.error);
-#if defined(_MSC_VER) && !defined(__clang__)
-        // Microsoft Visual Studio defines PATH_MAX as 260, less than the
+#if defined(WIN32)
+        // MSYS2 and Microsoft Visual Studio defines PATH_MAX as 260, less than the
         // limit to trigger an error with reason "Other"
         EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
 #else

@@ -1,22 +1,22 @@
-#include <mbgl/style/sources/raster_source_impl.hpp>
+#include <mbgl/style/sources/tile_source_impl.hpp>
 
 namespace mbgl {
 namespace style {
 
-RasterSource::Impl::Impl(SourceType sourceType, std::string id_, uint16_t tileSize_)
+TileSource::Impl::Impl(SourceType sourceType, std::string id_, uint16_t tileSize_ = util::tileSize_I)
     : Source::Impl(sourceType, std::move(id_)),
       tileSize(tileSize_) {}
 
-RasterSource::Impl::Impl(const Impl& other, Tileset tileset_)
+TileSource::Impl::Impl(const Impl& other, Tileset tileset_)
     : Source::Impl(other),
       tileset(std::move(tileset_)),
       tileSize(other.tileSize) {}
 
-uint16_t RasterSource::Impl::getTileSize() const {
+uint16_t TileSource::Impl::getTileSize() const {
     return tileSize;
 }
 
-std::optional<std::string> RasterSource::Impl::getAttribution() const {
+std::optional<std::string> TileSource::Impl::getAttribution() const {
     if (!tileset) {
         return {};
     }

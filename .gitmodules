@@ -37,6 +37,12 @@
 [submodule "platform/windows/vendor/vcpkg"]
 	path = platform/windows/vendor/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
+[submodule "vendor/harfbuzzFreetype/freetype"]
+	path = vendor/freetype
+  url=https://github.com/freetype/freetype.git
+[submodule "vendor/harfbuzzFreetype/harfbuzz"]
+	path = vendor/harfbuzz
+  url=https://github.com/harfbuzz/harfbuzz
 [submodule "vendor/boost"]
 	path = vendor/boost
 	url = https://github.com/maplibre/maplibre-gl-native-boost.git

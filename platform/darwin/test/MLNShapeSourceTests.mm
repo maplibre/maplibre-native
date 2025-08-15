@@ -18,6 +18,7 @@
     NSArray *clusterPropertyArray = @[reduceExpression, mapExpression];
     NSDictionary *options = @{MLNShapeSourceOptionClustered: @YES,
                               MLNShapeSourceOptionClusterRadius: @42,
+                              MLNShapeSourceOptionClusterMinPoints: @3,
                               MLNShapeSourceOptionClusterProperties: @{@"sumValue": clusterPropertyArray},
                               MLNShapeSourceOptionMaximumZoomLevelForClustering: @98,
                               MLNShapeSourceOptionMaximumZoomLevel: @99,
@@ -29,6 +30,7 @@
     XCTAssertTrue(mbglOptions->cluster);
     XCTAssertEqual(mbglOptions->clusterRadius, 42);
     XCTAssertEqual(mbglOptions->clusterMaxZoom, 98);
+    XCTAssertEqual(mbglOptions->clusterMinPoints, 3UL);
     XCTAssertEqual(mbglOptions->maxzoom, 99);
     XCTAssertEqual(mbglOptions->buffer, 1976);
     XCTAssertEqual(mbglOptions->tolerance, 0.42);

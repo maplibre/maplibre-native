@@ -18,7 +18,40 @@
 
 namespace mbgl {
 
-using GlyphID = char16_t;
+union GlyphID {
+    char32_t hash;
+    struct {
+        char16_t code;
+        GlyphIDType type;
+    } complex;
+
+    GlyphID(int codepoint) {
+        complex.type = FontPBF;
+        complex.code = codepoint;
+    }
+    GlyphID(uint32_t codepoint) {
+        complex.type = FontPBF;
+        complex.code = codepoint;
+    }
+    GlyphID(char16_t codepoint) {
+        complex.type = FontPBF;
+        complex.code = codepoint;
+    }
+
+    GlyphID(char16_t index, GlyphIDType t) {
+        complex.type = t;
+        complex.code = index;
+    }
+
+    operator char16_t() { return complex.code; }
+    operator char32_t() { return hash; }
+    bool operator<(const GlyphID &other) const { return hash < other.hash; }
+    bool operator>(const GlyphID &other) const { return hash > other.hash; }
+
+    bool operator<(const uint16_t &other) const { return hash < other; }
+    bool operator>(const uint16_t &other) const { return hash > other; }
+};
+
 using GlyphIDs = std::set<GlyphID>;
 
 // Note: this only works for the BMP
@@ -32,7 +65,7 @@ struct GlyphMetrics {
     uint32_t advance = 0;
 };
 
-inline bool operator==(const GlyphMetrics& lhs, const GlyphMetrics& rhs) {
+inline bool operator==(const GlyphMetrics &lhs, const GlyphMetrics &rhs) {
     return lhs.width == rhs.width && lhs.height == rhs.height && lhs.left == rhs.left && lhs.top == rhs.top &&
            lhs.advance == rhs.advance;
 }
@@ -114,7 +147,7 @@ public:
     float right = 0;
     WritingModeType writingMode;
     explicit operator bool() const {
-        return std::ranges::any_of(positionedLines, [](const auto& line) { return !line.positionedGlyphs.empty(); });
+        return std::ranges::any_of(positionedLines, [](const auto &line) { return !line.positionedGlyphs.empty(); });
     }
     // The y offset *should* be part of the font metadata.
     static constexpr int32_t yOffset = -17;
@@ -128,7 +161,50 @@ enum class WritingModeType : uint8_t {
     Vertical = 1 << 1,
 };
 
-using GlyphDependencies = std::map<FontStack, GlyphIDs>;
+// style defined faces
+struct FontFace {
+    using Range = std::pair<uint32_t, uint32_t>;
+    GlyphIDType type;          // an unique glyph id
+    std::string name;          // font face name
+    std::string url;           // font file url
+    std::vector<Range> ranges; // unicode ranges
+
+    FontFace() = default;
+    FontFace(const std::string &name_, const std::string &url_, const std::vector<Range> &ranges_)
+        : type(FontPBF),
+          name(name_),
+          url(url_),
+          ranges(ranges_) {}
+
+    FontFace(const std::string &name_, const std::string &url_, std::vector<Range> &&ranges_)
+        : type(FontPBF),
+          name(name_),
+          url(url_),
+          ranges(std::move(ranges_)) {}
+
+    auto valid() const -> bool { return !name.empty() && !url.empty() && !ranges.empty(); }
+};
+
+using FontFaces = std::vector<FontFace>;
+
+struct HBShapeRequest {
+    std::u16string str;
+    FontStack fontStack;
+    GlyphIDType type;
+
+    HBShapeRequest(const std::u16string &str_, const FontStack &fontStack_, GlyphIDType type_)
+        : str(str_),
+          fontStack(fontStack_),
+          type(type_) {}
+};
+
+using HBShapeRequests = std::map<FontStack, std::map<GlyphIDType, std::set<std::u16string>>>;
+
+struct GlyphDependencies {
+    std::map<FontStack, GlyphIDs> glyphs;
+    HBShapeRequests shapes;
+};
+
 using GlyphRangeDependencies = std::map<FontStack, std::unordered_set<GlyphRange>>;
 
 struct GlyphPosition {

@@ -139,6 +139,7 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
                 .withCluster(true)
                 .withClusterMaxZoom(14)
                 .withClusterRadius(50)
+                .withClusterMinPoints(3)
                 .withClusterProperty(
                     "max",
                     Expression.max(Expression.accumulated(), Expression.get("max")),
@@ -222,7 +223,8 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
                 PropertyFactory.textSize(12f),
                 PropertyFactory.textColor(Color.WHITE),
                 PropertyFactory.textIgnorePlacement(true),
-                PropertyFactory.textAllowOverlap(true)
+                PropertyFactory.textAllowOverlap(true),
+                PropertyFactory.textFont(arrayOf("Noto Sans Regular"))
             )
     }
 

@@ -21,7 +21,10 @@ jobs:
             include \
             vendor/maplibre-native-base/include \
             vendor/maplibre-native-base/deps/variant/include \
-            vendor/maplibre-native-base/deps/geometry.hpp/include
+            vendor/maplibre-native-base/deps/geometry.hpp/include \
+            vendor/maplibre-native-base/deps/geojson.hpp/include \
+            vendor/metal-cpp \
+            vendor/maplibre-native-base/extras/expected-lite/include
       - name: Create Release
         run: |
           gh release create core-${{ github.sha }} \
@@ -78,14 +81,18 @@ jobs:
 
       - name: Build mbgl-core for Linux
         run: |
-          cmake --preset linux-${{ matrix.renderer }}-core -DCMAKE_CXX_COMPILER_LAUNCHER=""
-          cmake --build --preset linux-${{ matrix.renderer }}-core
+          cmake --preset linux-${{ matrix.renderer }} -DCMAKE_CXX_COMPILER_LAUNCHER=""
+          cmake --build build-linux-${{ matrix.renderer }} --target mbgl-core
 
       - name: Rename artifact
-        run: cp build-linux-${{ matrix.renderer }}/libmbgl-core.a libmaplibre-native-core-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
+        run: |
+          cp build-linux-${{ matrix.renderer }}/libmbgl-core.a libmaplibre-native-core-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
+          cp build-linux-${{ matrix.renderer }}/libmbgl-core-amalgam.a libmaplibre-native-core-amalgam-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
 
       - name: Upload Linux artifact
-        run: gh release upload core-${{ github.sha }} libmaplibre-native-core-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
+        run: |
+          gh release upload core-${{ github.sha }} libmaplibre-native-core-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
+          gh release upload core-${{ github.sha }} libmaplibre-native-core-amalgam-linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}.a
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -102,6 +109,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
       - name: Build mbgl-core for Windows
         run: |
           cmake --preset windows-${{ matrix.renderer }}-core -DCMAKE_CXX_COMPILER_LAUNCHER=""
