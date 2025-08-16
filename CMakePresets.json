@@ -38,6 +38,7 @@
     },
     {
       "name": "macos-xcode",
+      "displayName": "macOS (Xcode)",
       "generator": "Xcode",
       "binaryDir": "${sourceDir}/build-macos-xcode",
       "inherits": "macos"

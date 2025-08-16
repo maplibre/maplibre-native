@@ -1472,9 +1472,10 @@ target_link_libraries(
         mbgl-vendor-unique_resource
         mbgl-vendor-vector-tile
         mbgl-vendor-wagyu
-	mlt-cpp
+	    mlt-cpp
         $<$<BOOL:${MLN_WITH_METAL}>:mbgl-vendor-metal-cpp>
         $<IF:$<BOOL:${MLN_USE_RUST}>,mbgl-rustutils,mbgl-vendor-csscolorparser>
+        ${SHAPE_TARGETS} # from harfbuzz.cmake
     PUBLIC
         MapLibreNative::Base
         MapLibreNative::Base::Extras::expected-lite
