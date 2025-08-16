@@ -46,6 +46,8 @@ public:
             static_cast<Texture2D*>(stencilTexture.get())
                 ->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
         }
+#else
+        (void)stencil;
 #endif
 
         context.renderingStats().numFrameBuffers++;
