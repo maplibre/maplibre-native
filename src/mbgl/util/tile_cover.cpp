@@ -49,9 +49,9 @@ void scanSpans(edge e0, edge e1, int32_t ymin, int32_t ymax, ScanLine& scanLine)
     // scan lines!
     const double m0 = e0.dx / e0.dy;
     const double m1 = e1.dx / e1.dy;
-    const double d0 = e0.dx > 0; // use y + 1 to compute x0
-    const double d1 = e1.dx < 0; // use y + 1 to compute x1
-    for (double y = y0; y < y1; y++) {
+    const double d0 = e0.dx > 0;       // use y + 1 to compute x0
+    const double d1 = e1.dx < 0;       // use y + 1 to compute x1
+    for (double y = y0; y < y1; y++) { // NOLINT(clang-analyzer-security.FloatLoopCounter)
         double x0 = m0 * ::fmax(0, ::fmin(e0.dy, y + d0 - e0.y0)) + e0.x0;
         double x1 = m1 * ::fmax(0, ::fmin(e1.dy, y + d1 - e1.y0)) + e1.x0;
         scanLine(static_cast<int32_t>(std::floor(x1)), static_cast<int32_t>(std::ceil(x0)), static_cast<int32_t>(y));
