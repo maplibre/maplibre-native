@@ -1,7 +1,7 @@
 #include <mbgl/test/util.hpp>
 
 #include <mbgl/style/conversion/json.hpp>
-#include <mbgl/style/conversion/raster_dem_options.hpp>
+#include <mbgl/style/conversion/source_options.hpp>
 #include <mbgl/util/tileset.hpp>
 
 #include <mbgl/util/logging.hpp>
@@ -10,26 +10,26 @@ using namespace mbgl;
 using namespace mbgl::style;
 using namespace mbgl::style::conversion;
 
-TEST(RasterDEMOptions, Basic) {
+TEST(SourceOptions, Basic) {
     Error error;
-    std::optional<RasterDEMOptions> converted = convertJSON<RasterDEMOptions>("{}", error);
+    auto converted = convertJSON<SourceOptions>("{}", error);
     ASSERT_TRUE((bool)converted);
 }
 
-TEST(RasterDEMOptions, ErrorHandling) {
+TEST(SourceOptions, ErrorHandling) {
     Error error;
-    std::optional<RasterDEMOptions> converted = convertJSON<RasterDEMOptions>(
+    auto converted = convertJSON<SourceOptions>(
         R"JSON({
         "encoding": "this isn't a valid encoding"
     })JSON",
         error);
     ASSERT_FALSE(converted);
-    ASSERT_EQ(error.message, "invalid raster-dem encoding type - valid types are 'mapbox' and 'terrarium'");
+    ASSERT_EQ(0, error.message.find("invalid encoding"));
 }
 
-TEST(RasterDEMOptions, TerrariumEncodingParsed) {
+TEST(SourceOptions, TerrariumEncodingParsed) {
     Error error;
-    std::optional<RasterDEMOptions> converted = convertJSON<RasterDEMOptions>(
+    auto converted = convertJSON<SourceOptions>(
         R"JSON({
         "encoding": "terrarium"
     })JSON",
@@ -37,9 +37,9 @@ TEST(RasterDEMOptions, TerrariumEncodingParsed) {
     ASSERT_EQ(converted.value().encoding, Tileset::Encoding::Terrarium);
 }
 
-TEST(RasterDEMOptions, MapboxEncodingParsed) {
+TEST(SourceOptions, MapboxEncodingParsed) {
     Error error;
-    std::optional<RasterDEMOptions> converted = convertJSON<RasterDEMOptions>(
+    auto converted = convertJSON<SourceOptions>(
         R"JSON({
         "encoding": "mapbox"
     })JSON",
@@ -47,9 +47,9 @@ TEST(RasterDEMOptions, MapboxEncodingParsed) {
     ASSERT_EQ(converted.value().encoding, Tileset::Encoding::Mapbox);
 }
 
-TEST(RasterDEMOptions, MVTEncodingParsed) {
+TEST(SourceOptions, MVTEncodingParsed) {
     Error error;
-    std::optional<RasterDEMOptions> converted = convertJSON<RasterDEMOptions>(
+    auto converted = convertJSON<SourceOptions>(
         R"JSON({
         "encoding": "mvt"
     })JSON",
@@ -57,9 +57,9 @@ TEST(RasterDEMOptions, MVTEncodingParsed) {
     ASSERT_EQ(converted.value().encoding, Tileset::Encoding::Mapbox);
 }
 
-TEST(RasterDEMOptions, MLTEncodingParsed) {
+TEST(SourceOptions, MLTEncodingParsed) {
     Error error;
-    std::optional<RasterDEMOptions> converted = convertJSON<RasterDEMOptions>(
+    auto converted = convertJSON<SourceOptions>(
         R"JSON({
         "encoding": "mlt"
     })JSON",

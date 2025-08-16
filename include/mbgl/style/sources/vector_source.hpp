@@ -30,6 +30,8 @@ public:
 
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
 
+    Tileset::Encoding getEncoding() const noexcept { return encoding; }
+
 private:
     std::optional<float> maxZoom;
     std::optional<float> minZoom;

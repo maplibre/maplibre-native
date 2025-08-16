@@ -2,7 +2,7 @@
 #include <mbgl/style/conversion/coordinate.hpp>
 #include <mbgl/style/conversion/geojson.hpp>
 #include <mbgl/style/conversion/geojson_options.hpp>
-#include <mbgl/style/conversion/raster_dem_options.hpp>
+#include <mbgl/style/conversion/source_options.hpp>
 #include <mbgl/style/conversion/tileset.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/sources/geojson_source.hpp>
@@ -83,7 +83,7 @@ std::optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::string&
            parameters. Since style.json can contain TileJSON parameter overrides or non-TileJSON spec parameters, a
            separate mechanism is needed. Ideally these two pathways share parsing logic.
     */
-    std::optional<RasterDEMOptions> options = convert<RasterDEMOptions>(value, error);
+    auto options = convert<SourceOptions>(value, error);
 
     return {std::make_unique<RasterDEMSource>(id, std::move(*urlOrTileset), tileSize, options)};
 }

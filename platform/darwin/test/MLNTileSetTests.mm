@@ -123,7 +123,7 @@
 
     // when the dem encoding is changed using an NSNumber
     tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, @{
-        MLNTileSourceOptionEncoding: @(MLNEncodingTerrarium),
+        MLNTileSourceOptionEncoding: @(MLNSourceEncodingTerrarium),
     });
 
     // the encoding is reflected by the mbgl tileset
@@ -131,16 +131,16 @@
 
     // when the dem encoding is changed using an NSNumber
     tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, @{
-        MLNTileSourceOptionDEMEncoding: @(MLNEncodingTerrarium),
+        MLNTileSourceOptionDEMEncoding: @(MLNSourceEncodingTerrarium),
     });
 
     // the encoding is reflected by the mbgl tileset
     XCTAssertEqual(tileSet.encoding, mbgl::Tileset::Encoding::Terrarium);
 
     // when the dem encoding is changed using an NSValue
-    MLNEncoding terrarium = MLNEncodingTerrarium;
+    MLNSourceEncoding terrarium = MLNSourceEncodingTerrarium;
     tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, @{
-        MLNTileSourceOptionEncoding: [NSValue value:&terrarium withObjCType:@encode(MLNEncoding)],
+        MLNTileSourceOptionEncoding: [NSValue value:&terrarium withObjCType:@encode(MLNSourceEncoding)],
     });
 
     // the encoding is reflected by the mbgl tileset

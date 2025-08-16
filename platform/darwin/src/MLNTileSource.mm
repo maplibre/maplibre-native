@@ -142,16 +142,16 @@ mbgl::Tileset MLNTileSetFromTileURLTemplates(NSArray<NSString *> *tileURLTemplat
             [NSException raise:NSInvalidArgumentException
                         format:@"MLNTileSourceOptionEncoding must be set to an NSValue or NSNumber."];
         }
-        MLNEncoding encoding;
+        MLNSourceEncoding encoding;
         [encodingNumber getValue:&encoding];
         switch (encoding) {
-            case MLNEncodingMapbox:
+            case MLNSourceEncodingMapbox:
                 tileSet.encoding = mbgl::Tileset::Encoding::Mapbox;
                 break;
-            case MLNEncodingTerrarium:
+            case MLNSourceEncodingTerrarium:
                 tileSet.encoding = mbgl::Tileset::Encoding::Terrarium;
                 break;
-            case MLNEncodingMLT:
+            case MLNSourceEncodingMLT:
                 tileSet.encoding = mbgl::Tileset::Encoding::MLT;
                 break;
         }

@@ -6,9 +6,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  An `NSNumber` object containing an unsigned integer that specifies the encoding
- formula for vector tilesets. The integer corresponds to one of the constants in ``MLNEncoding``.
+ formula for vector tilesets. The integer corresponds to one of the constants in
+ ``MLNSourceEncoding``.
 
- The default value for this option is ``MLNDEMEncoding/MLNEncodingMapbox``.
+ The default value for this option is ``MLNSourceEncoding/MLNSourceEncodingMapbox``.
  */
 FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionEncoding;
 

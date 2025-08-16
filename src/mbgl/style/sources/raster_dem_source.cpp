@@ -14,7 +14,7 @@ namespace style {
 RasterDEMSource::RasterDEMSource(std::string id,
                                  variant<std::string, Tileset> urlOrTileset_,
                                  uint16_t tileSize,
-                                 std::optional<RasterDEMOptions> options_)
+                                 std::optional<SourceOptions> options_)
     : RasterSource(std::move(id), std::move(urlOrTileset_), tileSize, SourceType::RasterDEM),
       options(std::move(options_)) {}
 

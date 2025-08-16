@@ -5,9 +5,9 @@
 /**
  An `NSNumber` object containing an unsigned integer that specifies the encoding
  formula for raster-dem tilesets. The integer corresponds to one of
- the constants described in ``MLNEncoding``.
+ the constants described in ``MLNSourceEncoding``.
 
- The default value for this option is ``MLNDEMEncoding/MLNEncodingMapbox``.
+ The default value for this option is ``MLNSourceEncoding/MLNSourceEncodingMapbox``.
 
  This option cannot be represented in a TileJSON or style JSON file. It is used
  with the ``MLNRasterDEMSource`` class and is ignored when creating an

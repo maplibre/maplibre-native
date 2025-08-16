@@ -146,7 +146,7 @@ typedef NS_ENUM(NSUInteger, MLNTileCoordinateSystem) {
  The encoding formula used to generate the raster-dem tileset
 */
 
-typedef NS_ENUM(NSUInteger, MLNEncoding) {
+typedef NS_ENUM(NSUInteger, MLNSourceEncoding) {
 
   /**
    For raster sources:
@@ -155,18 +155,18 @@ typedef NS_ENUM(NSUInteger, MLNEncoding) {
     For vector sources:
      Vector tiles in [MVT format](https://github.com/mapbox/vector-tile-spec).
   */
-  MLNEncodingMapbox = 0,
+  MLNSourceEncodingMapbox = 0,
 
   /**
    Raster tiles generated with the [Mapzen Terrarium encodingg
    formula](https://aws.amazon.com/public-datasets/terrain/).
   */
-  MLNEncodingTerrarium = 1,
+  MLNSourceEncodingTerrarium = 1,
 
   /**
    Vector tiles in [MLT format](https://github.com/maplibre/maplibre-tile-spec).
   */
-  MLNEncodingMLT = 2,
+  MLNSourceEncodingMLT = 2,
 };
 
 /**
