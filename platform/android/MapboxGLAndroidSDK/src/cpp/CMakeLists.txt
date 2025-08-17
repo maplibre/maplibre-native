@@ -216,4 +216,7 @@ target_link_libraries(mapbox-gl
                               mbgl-core
                               mbgl-vendor-unique_resource)
 
+target_link_options(mapbox-gl
+                    PRIVATE "-Wl,-z,max-page-size=16384")
+
 install(TARGETS mapbox-gl LIBRARY DESTINATION lib)
