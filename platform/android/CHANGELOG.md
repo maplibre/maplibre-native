@@ -4,6 +4,10 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+### ✨ Features and improvements
+
+- Compile for Android with support for 16 KB page sizes ([#3728](https://github.com/maplibre/maplibre-native/pull/3728)).
+
 ## 10.3.4
 
 ### ⛵ Dependencies
