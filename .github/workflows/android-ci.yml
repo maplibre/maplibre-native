@@ -169,12 +169,6 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
-      - name: Get CMake and Ninja
-        uses: lukka/get-cmake@latest
-        with:
-          cmakeVersion: 3.24.1
-          ninjaVersion: latest
-
       - uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ${{ github.job }}
@@ -236,12 +230,6 @@ jobs:
           key: ${{ github.job }}
           append-timestamp: false
           max-size: 5G
-
-      - name: Get CMake and Ninja
-        uses: lukka/get-cmake@latest
-        with:
-          cmakeVersion: 3.24.1
-          ninjaVersion: latest
 
       - uses: actions/setup-java@v4
         with:
