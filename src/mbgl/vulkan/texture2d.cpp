@@ -288,7 +288,7 @@ void Texture2D::createTexture() {
 
         case Texture2DUsage::Attachment:
             imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eColorAttachment |
-                         vk::ImageUsageFlagBits::eSampled;
+                         vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferSrc;
             imageTiling = vk::ImageTiling::eOptimal;
             break;
 
@@ -524,30 +524,107 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
 
     // check for offset/padding
     const auto& device = context.getBackend().getDevice();
-    const auto& layout = device->getImageSubresourceLayout(imageAllocation->image,
-                                                           vk::ImageSubresource(vk::ImageAspectFlagBits::eColor, 0, 0),
-                                                           context.getBackend().getDispatcher());
+    const auto& dispatcher = context.getBackend().getDispatcher();
 
     imageData->resize(size);
     const auto& imageSize = getDataSize();
 
-    void* mappedData_ = nullptr;
-    vmaMapMemory(context.getBackend().getAllocator(), imageAllocation->allocation, &mappedData_);
+    // Check if this is an attachment texture that needs staging buffer
+    if (textureUsage == Texture2DUsage::Attachment) {
+        // For optimal tiling, we need to copy to a staging buffer first
+        const auto& allocator = context.getBackend().getAllocator();
 
-    uint8_t* mappedData = reinterpret_cast<uint8_t*>(mappedData_) + layout.offset;
+        // Create staging buffer
+        const auto bufferInfo = vk::BufferCreateInfo()
+                                    .setSize(imageSize)
+                                    .setUsage(vk::BufferUsageFlagBits::eTransferDst)
+                                    .setSharingMode(vk::SharingMode::eExclusive);
 
-    if (imageSize == layout.arrayPitch) {
-        memcpy(imageData->data.get(), mappedData, imageSize);
-    } else {
-        auto rowSize = static_cast<uint32_t>(size.width * getPixelStride());
-        for (uint32_t i = 0; i < size.height; ++i) {
-            memcpy(imageData->data.get() + rowSize * i, mappedData + layout.rowPitch * i, rowSize);
+        VmaAllocationCreateInfo allocationInfo = {};
+        allocationInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
+        allocationInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+        allocationInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT |
+                               VMA_ALLOCATION_CREATE_MAPPED_BIT;
+
+        SharedBufferAllocation bufferAllocation = std::make_shared<BufferAllocation>(allocator);
+        if (!bufferAllocation->create(allocationInfo, bufferInfo)) {
+            mbgl::Log::Error(mbgl::Event::Render, "Vulkan readImage staging buffer allocation failed");
+            return nullptr;
         }
+
+        // Copy image to staging buffer
+        context.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) {
+            // Transition image layout for reading
+            const auto barrier = vk::ImageMemoryBarrier()
+                                     .setImage(imageAllocation->image)
+                                     .setOldLayout(imageLayout)
+                                     .setNewLayout(vk::ImageLayout::eTransferSrcOptimal)
+                                     .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
+                                     .setDstAccessMask(vk::AccessFlagBits::eTransferRead)
+                                     .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                     .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                                     .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
+
+            commandBuffer->pipelineBarrier(vk::PipelineStageFlagBits::eColorAttachmentOutput,
+                                           vk::PipelineStageFlagBits::eTransfer,
+                                           {},
+                                           nullptr,
+                                           nullptr,
+                                           barrier,
+                                           dispatcher);
+
+            imageLayout = barrier.newLayout;
+
+            // Copy image to buffer
+            const auto region = vk::BufferImageCopy()
+                                    .setBufferOffset(0)
+                                    .setBufferRowLength(0)
+                                    .setBufferImageHeight(0)
+                                    .setImageSubresource(
+                                        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1))
+                                    .setImageOffset({0, 0, 0})
+                                    .setImageExtent({size.width, size.height, 1});
+
+            commandBuffer->copyImageToBuffer(imageAllocation->image,
+                                             vk::ImageLayout::eTransferSrcOptimal,
+                                             bufferAllocation->buffer,
+                                             region,
+                                             dispatcher);
+        });
+
+        // Map staging buffer and copy to image data
+        vmaMapMemory(allocator, bufferAllocation->allocation, &bufferAllocation->mappedBuffer);
+        memcpy(imageData->data.get(), bufferAllocation->mappedBuffer, imageSize);
+        vmaUnmapMemory(allocator, bufferAllocation->allocation);
+
+        return imageData;
+    } else if (textureUsage == Texture2DUsage::Read) {
+        // For linear tiling (Read usage), use direct memory mapping
+        const auto& layout = device->getImageSubresourceLayout(
+            imageAllocation->image, vk::ImageSubresource(vk::ImageAspectFlagBits::eColor, 0, 0), dispatcher);
+
+        void* mappedData_ = nullptr;
+        vmaMapMemory(context.getBackend().getAllocator(), imageAllocation->allocation, &mappedData_);
+
+        uint8_t* mappedData = reinterpret_cast<uint8_t*>(mappedData_) + layout.offset;
+
+        if (imageSize == layout.arrayPitch) {
+            memcpy(imageData->data.get(), mappedData, imageSize);
+        } else {
+            auto rowSize = static_cast<uint32_t>(size.width * getPixelStride());
+            for (uint32_t i = 0; i < size.height; ++i) {
+                memcpy(imageData->data.get() + rowSize * i, mappedData + layout.rowPitch * i, rowSize);
+            }
+        }
+
+        vmaUnmapMemory(context.getBackend().getAllocator(), imageAllocation->allocation);
+
+        return imageData;
+    } else {
+        // not readable
+        assert(false);
+        return imageData;
     }
-
-    vmaUnmapMemory(context.getBackend().getAllocator(), imageAllocation->allocation);
-
-    return imageData;
 }
 
 uint32_t Texture2D::getMipLevels() const {

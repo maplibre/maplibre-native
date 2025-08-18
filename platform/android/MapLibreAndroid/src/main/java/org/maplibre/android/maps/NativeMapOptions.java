@@ -9,6 +9,7 @@ public class NativeMapOptions {
   private final String actionJournalPath;
   private final long actionJournalLogFileSize;
   private final long actionJournalLogFileCount;
+  private final int actionJournalRenderingReportInterval;
 
   public NativeMapOptions(MapLibreMapOptions options) {
     pixelRatio = options.getPixelRatio();
@@ -18,6 +19,7 @@ public class NativeMapOptions {
     actionJournalPath = options.getActionJournalPath();
     actionJournalLogFileSize = options.getActionJournalLogFileSize();
     actionJournalLogFileCount = options.getActionJournalLogFileCount();
+    actionJournalRenderingReportInterval = options.getActionJournalRenderingReportInterval();
   }
 
   public NativeMapOptions(float pixelRatio, boolean crossSourceCollisions) {
@@ -28,6 +30,7 @@ public class NativeMapOptions {
     actionJournalPath = "";
     actionJournalLogFileSize = 0;
     actionJournalLogFileCount = 0;
+    actionJournalRenderingReportInterval = 0;
   }
 
   public float pixelRatio() {
@@ -52,5 +55,9 @@ public class NativeMapOptions {
 
   public long actionJournalLogFileCount() {
     return actionJournalLogFileCount;
+  }
+
+  public int actionJournalRenderingReportInterval() {
+    return actionJournalRenderingReportInterval;
   }
 }

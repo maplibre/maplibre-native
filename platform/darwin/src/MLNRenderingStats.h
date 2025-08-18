@@ -6,9 +6,9 @@ NS_ASSUME_NONNULL_BEGIN
 MLN_EXPORT
 @interface MLNRenderingStats : NSObject
 
-/// Frame CPU encoding time (milliseconds)
+/// Frame CPU encoding time (seconds)
 @property (readonly) double encodingTime;
-/// Frame CPU rendering time (milliseconds)
+/// Frame CPU rendering time (seconds)
 @property (readonly) double renderingTime;
 
 /// Number of frames rendered

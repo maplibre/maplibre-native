@@ -37,10 +37,6 @@ if(MLN_WITH_OPENGL)
         mbgl-glfw
         PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_gl_backend.cpp
     )
-    target_compile_definitions(
-        mbgl-glfw
-        PRIVATE MLN_RENDER_BACKEND_OPENGL=1
-    )
 endif()
 
 if(MLN_WITH_EGL)
@@ -55,11 +51,6 @@ if(MLN_WITH_VULKAN)
         mbgl-glfw
         PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_vulkan_backend.cpp
     )
-
-    target_compile_definitions(
-        mbgl-glfw
-        PRIVATE MLN_RENDER_BACKEND_VULKAN=1
-    )
 endif()
 
 if(MLN_WITH_METAL)
@@ -70,10 +61,6 @@ if(MLN_WITH_METAL)
         ${PROJECT_SOURCE_DIR}/platform/glfw/metal_backend.mm
         ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_metal_backend.h
         ${PROJECT_SOURCE_DIR}/platform/glfw/metal_backend.h
-    )
-    target_compile_definitions(
-        mbgl-glfw
-        PRIVATE MLN_RENDER_BACKEND_METAL=1
     )
     target_link_libraries(
         mbgl-glfw

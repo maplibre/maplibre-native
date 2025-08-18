@@ -84,16 +84,16 @@ protected:
     virtual std::vector<const char*> getDeviceExtensions();
     std::vector<const char*> getDebugExtensions();
 
-    void initInstance();
-    void initDebug();
-    void initSurface();
-    void initDevice();
-    void initAllocator();
-    void initSwapchain();
-    void initCommandPool();
-    void initFrameCapture();
+    virtual void initInstance();
+    virtual void initDebug();
+    virtual void initSurface();
+    virtual void initDevice();
+    virtual void initAllocator();
+    virtual void initSwapchain();
+    virtual void initCommandPool();
+    virtual void initFrameCapture();
 
-    void destroyResources();
+    virtual void destroyResources();
 
 protected:
     vk::DynamicLoader dynamicLoader;
@@ -120,6 +120,7 @@ protected:
     VmaAllocator allocator;
 
     bool debugUtilsEnabled{false};
+    bool usingSharedContext{false};
 };
 
 } // namespace vulkan
