@@ -375,7 +375,7 @@ jobs:
 
   ios-build-cmake:
     needs: pre_job
-    runs-on: macos-latest
+    runs-on: macos-14
     if: needs.pre_job.outputs.should_skip != 'true'
     steps:
       - uses: actions/checkout@v4
