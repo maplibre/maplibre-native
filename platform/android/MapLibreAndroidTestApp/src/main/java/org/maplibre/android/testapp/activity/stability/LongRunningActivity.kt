@@ -22,7 +22,7 @@ class LongRunningActivity : AppCompatActivity() {
         private val LOG = Logger.getLogger(LongRunningActivity::class.java.name)
 
         // activity lifetime (seconds)
-        private const val DURATION = 10 * 60 * 60
+        private const val DURATION = 72 * 60 * 60
         // start one activity/view per display if available
         private const val USE_SECONDARY_DISPLAY = true
 
