@@ -6,8 +6,8 @@ ext["ossrhPassword"] = ''
 ext["sonatypeStagingProfileId"] = ''
 
 // Use system environment variables
-ext["ossrhUsername"] = System.getenv('OSSRH_USERNAME')
-ext["ossrhPassword"] = System.getenv('OSSRH_PASSWORD')
+ext["mavenCentralUsername"] = System.getenv("MAVEN_CENTRAL_USERNAME")
+ext["mavenCentralPassword"] = System.getenv("MAVEN_CENTRAL_PASSWORD")
 ext["sonatypeStagingProfileId"] = System.getenv('SONATYPE_STAGING_PROFILE_ID')
 ext["signing.keyId"] = System.getenv('SIGNING_KEY_ID')
 ext["signing.password"] = System.getenv('SIGNING_PASSWORD')
