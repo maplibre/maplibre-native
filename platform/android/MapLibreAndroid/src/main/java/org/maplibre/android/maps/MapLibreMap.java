@@ -843,6 +843,32 @@ public final class MapLibreMap {
     notifyDeveloperAnimationListeners();
     transform.animateCamera(MapLibreMap.this, update, durationMs, callback);
   }
+  /**
+   * Handles a single tap event on the map.
+   * <p>
+   * If the tap is not handled by the annotation manager, and the UI settings specify to deselect markers on tap,
+   * this method will deselect any selected markers. It then notifies all threads waiting on the gestures manager.
+   * </p>
+   *
+   * Note: Refer to MapGestureDetector.StandardGestureListener#onSingleTapConfirmed (around line 359)
+   * for the gesture-side handling that triggers map click listeners.
+   *
+   * @param x The x coordinate of the tap event.
+   * @param y The y coordinate of the tap event.
+   */
+  public void onSingleTap(float x, float y) {
+    PointF tapPoint = new PointF(x,y);
+    boolean tapHandled = annotationManager.onTap(tapPoint);
+    if (!tapHandled) {
+      if (uiSettings.isDeselectMarkersOnTap()) {
+        // deselect any selected marker
+        annotationManager.deselectMarkers();
+      }
+      synchronized(onGesturesManagerInteractionListener.getGesturesManager()){
+        onGesturesManagerInteractionListener.getGesturesManager().notifyAll();
+      }
+    }
+  }
 
   /**
    * Scrolls the camera over the map, shifting the center of view by the specified number of pixels in the x and y
@@ -1249,7 +1275,7 @@ public final class MapLibreMap {
    * Adds a polyline to this map.
    *
    * @param polylineOptions A polyline options object that defines how to render the polyline
-   * @return The {@code Polyine} that was added to the map
+   * @return The {@code Polyline} that was added to the map
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
    * MapLibre Annotation Plugin</a> instead
