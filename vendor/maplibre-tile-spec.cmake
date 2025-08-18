@@ -6,8 +6,4 @@ set(MLT_WITH_FASTPFOR OFF CACHE BOOL "disabled for lack of support for ARMv7 in 
 set(CMAKE_OSX_DEPLOYMENT_TARGET 14.3)
 set(MLT_OSX_DEPLOYMENT_TARGET ${CMAKE_OSX_DEPLOYMENT_TARGET} CACHE STRING "Inherited MacOS/iOS target" FORCE)
 
-if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.25")
-    add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/maplibre-tile-spec/cpp SYSTEM)
-else()
-    add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/maplibre-tile-spec/cpp)
-endif()
+add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/maplibre-tile-spec/cpp SYSTEM)
