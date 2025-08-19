@@ -85,6 +85,7 @@ jobs:
           brew list pkg-config || brew install pkg-config
           brew list glfw || brew install glfw
           brew list libuv || brew install libuv
+          brew list molten-vk || brew install molten-vk
 
       - name: Install dependencies (Linux)
         if: runner.os == 'Linux'
