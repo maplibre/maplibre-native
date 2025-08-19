@@ -92,12 +92,6 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
-      - name: Get CMake and Ninja
-        uses: lukka/get-cmake@latest
-        with:
-          cmakeVersion: 3.24.1
-          ninjaVersion: latest
-
       - name: npm install
         run: npm install --ignore-scripts
 
