@@ -59,7 +59,6 @@ import java.util.List;
 public final class MapLibreMap {
 
     private static final String TAG = "Mbgl-MapLibreMap";
-
     private final NativeMap nativeMapView;
     private final UiSettings uiSettings;
     private final Projection projection;
