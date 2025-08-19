@@ -75,12 +75,6 @@ jobs:
         with:
           languages: cpp
 
-      - name: Get latest CMake and Ninja
-        uses: lukka/get-cmake@latest
-        with:
-          cmakeVersion: 3.24.1
-          ninjaVersion: latest
-
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
