@@ -852,7 +852,7 @@ public final class MapLibreMap {
    * this method will deselect any selected markers. It then notifies all threads waiting on the gestures manager.
    * </p>
    * <p>
-   * Note: Refer to MapGestureDetector.StandardGestureListener#onSingleTapConfirmed (around line 359)
+   * Note: Refer to MapGestureDetector.StandardGestureListener#onSingleTapConfirmed
    * for the gesture-side handling that triggers map click listeners.
    *
    * @param x The x coordinate of the tap event.
