@@ -88,7 +88,15 @@ class MapLibreMapTest {
         val expected = CameraPosition.Builder().target(target).build()
         val update = CameraUpdateFactory.newCameraPosition(expected)
         maplibreMap.easeCamera(update, callback)
-        verify { transform.easeCamera(maplibreMap, update, MapLibreConstants.ANIMATION_DURATION, true, callback) }
+        verify {
+            transform.easeCamera(
+                maplibreMap,
+                update,
+                MapLibreConstants.ANIMATION_DURATION,
+                true,
+                callback
+            )
+        }
         verify { developerAnimationListener.onDeveloperAnimationStarted() }
     }
 
@@ -99,10 +107,16 @@ class MapLibreMapTest {
         val expected = CameraPosition.Builder().target(target).build()
         val update = CameraUpdateFactory.newCameraPosition(expected)
         maplibreMap.animateCamera(update, callback)
-        verify { transform.animateCamera(maplibreMap, update, MapLibreConstants.ANIMATION_DURATION, callback) }
+        verify {
+            transform.animateCamera(
+                maplibreMap,
+                update,
+                MapLibreConstants.ANIMATION_DURATION,
+                callback
+            )
+        }
         verify { developerAnimationListener.onDeveloperAnimationStarted() }
     }
-
 
 
     @Test
@@ -285,7 +299,8 @@ class MapLibreMapTest {
         every { ui.isDeselectMarkersOnTap() } returns true
         val projection = mockk<Projection>(relaxed = true)
         val gesturesMgr = mockk<AndroidGesturesManager>(relaxed = true)
-        val gesturesListener = mockk<MapLibreMap.OnGesturesManagerInteractionListener>(relaxed = true)
+        val gesturesListener =
+            mockk<MapLibreMap.OnGesturesManagerInteractionListener>(relaxed = true)
         every { gesturesListener.gesturesManager } returns gesturesMgr
 
         val localMap = MapLibreMap(
