@@ -38,7 +38,7 @@ jobs:
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files-yaml.outputs.ios_any_modified != 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
 
@@ -72,7 +72,7 @@ jobs:
         working-directory: platform/ios
         shell: bash
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0
@@ -229,7 +229,7 @@ jobs:
         working-directory: platform/ios
         shell: bash
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0
@@ -378,7 +378,7 @@ jobs:
     runs-on: macos-14
     if: needs.pre_job.outputs.should_skip != 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0

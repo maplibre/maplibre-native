@@ -13,7 +13,7 @@ jobs:
       run:
         working-directory: platform/android
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Validate and set version
         working-directory: .
@@ -78,7 +78,7 @@ jobs:
           - Release
           - Debug
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0

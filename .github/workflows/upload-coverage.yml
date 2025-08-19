@@ -12,7 +12,7 @@ jobs:
     outputs:
       should_run: ${{ !steps.parent_workflow.outputs.was_skipped_or_cancelled }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           sparse-checkout: |
             .github
@@ -37,7 +37,7 @@ jobs:
     if: needs.pre_job.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: ./.github/actions/download-workflow-run-artifact
         with:

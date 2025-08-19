@@ -23,7 +23,7 @@ jobs:
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.android_any_modified != 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
 
@@ -51,7 +51,7 @@ jobs:
       IS_LOCAL_DEVELOPMENT: false
       MLN_ANDROID_STL: c++_static
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0
@@ -159,7 +159,7 @@ jobs:
           docker-images: true
           swap-storage: false
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0
@@ -220,7 +220,7 @@ jobs:
           docker-images: true
           swap-storage: false
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0
@@ -260,7 +260,7 @@ jobs:
 
       # automatically trigger android-release when code is pushed to main
       # and the platform/android/VERSION file has changed
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
       - name: VERSION file changed

@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-22.04
     if: github.repository_owner == 'maplibre' && github.event.workflow_run.conclusion == 'success'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Generate token
         uses: actions/create-github-app-token@v2
