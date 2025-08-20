@@ -89,6 +89,14 @@ jobs:
           sudo chmod +x /usr/bin/sccache
           rm -rf sccache-v0.10.0-x86_64-unknown-linux-musl
 
+      - name: Install ctcache
+        run: |
+          # pending open PR https://github.com/matus-chochlik/ctcache/pull/94
+          git clone https://github.com/louwers/ctcache.git
+          cd ctcache
+          cd ..
+          mv ctcache /usr/local/bin
+
       - name: Configure AWS Credentials
         if: vars.OIDC_AWS_ROLE_TO_ASSUME
         uses: aws-actions/configure-aws-credentials@v4
@@ -112,8 +120,22 @@ jobs:
             export SCCACHE_S3_NO_CREDENTIALS=1
           fi
 
+          # ctcache configuration
+          export CTCACHE_HOST=34.229.50.221
+          export CTCACHE_PORT=5000
+          export CTCACHE_PROTO=http
+
+          if [ -n "${{ secrets.CTCACHE_AUTH_KEY }}" ]; then
+            echo "setting CTCACHE_AUTH_KEY"
+            export CTCACHE_AUTH_KEY=${{ secrets.CTCACHE_AUTH_KEY }}
+          else
+            # do not write to cache if CTCACHE_AUTH_KEY not set
+            export CTCACHE_HOST_READ_ONLY=1
+          fi
+
           cmake --preset linux-${{ matrix.variant.renderer }} \
             -DMLN_WITH_CLANG_TIDY=ON \
+            -DCLANG_TIDY_COMMAND=/usr/local/bin/ctcache/clang-tidy \
             -DCMAKE_C_COMPILER_LAUNCHER=sccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
             -DMLN_WITH_COVERAGE=ON
