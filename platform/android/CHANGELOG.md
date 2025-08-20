@@ -2,6 +2,12 @@
 
 ## main
 
+## 11.13.1
+
+### Bug fixes
+
+- Fixed frustum offset in opengl
+
 ## 11.13.0
 
 ### ✨ Features and improvements
