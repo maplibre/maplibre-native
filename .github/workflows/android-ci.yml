@@ -1,5 +1,8 @@
 name: android-ci
 
+permissions:
+  id-token: write         # needed for AWS
+
 on:
   push:
     branches:
