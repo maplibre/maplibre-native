@@ -28,6 +28,8 @@ if (MLN_DRAWABLE_RENDERER)
     message(FATAL "Do not pass MLN_DRAWABLE_RENDERER, the drawable renderer is now the default")
 endif()
 
+include(cmake/clang-tidy.cmake)
+
 if (MLN_WITH_CLANG_TIDY)
     find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
     if(NOT CLANG_TIDY_COMMAND)
