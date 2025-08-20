@@ -91,9 +91,9 @@ jobs:
 
       - name: Install ctcache
         run: |
-          git clone https://github.com/matus-chochlik/ctcache.git
+          # pending open PR https://github.com/matus-chochlik/ctcache/pull/94
+          git clone https://github.com/louwers/ctcache.git
           cd ctcache
-          git checkout b54f74807fc02c8897247fda6229aabbac78a560
           cd ..
           mv ctcache /usr/local/bin
 
@@ -124,6 +124,11 @@ jobs:
           export CTCACHE_HOST=34.229.50.221
           export CTCACHE_PORT=5000
           export CTCACHE_PROTO=http
+
+          if [ -n "${{ secrets.CTCACHE_AUTH_KEY }}" ]; then
+            echo "setting CTCACHE_AUTH_KEY" 
+            export CTCACHE_AUTH_KEY=${{ secrets.CTCACHE_AUTH_KEY }}
+          fi
 
           cmake --preset linux-${{ matrix.variant.renderer }} \
             -DMLN_WITH_CLANG_TIDY=ON \
