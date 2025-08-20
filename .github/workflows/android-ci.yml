@@ -161,6 +161,9 @@ jobs:
             platform/android/InstrumentationTestApp${{ env.renderer }}.apk
             platform/android/InstrumentationTests${{ env.renderer }}.apk
 
+      - name: Show sccache stats
+        run: sccache --show-stats
+
   android-build-cpp-test:
     runs-on: ubuntu-24.04
 
@@ -219,9 +222,6 @@ jobs:
           path: |
             ./test/android/app-debug.apk
             ./test/android/app-release-androidTest.apk
-
-      - name: Show sccache stats
-        run: sccache --show-stats
 
   android-build-render-test:
     strategy:
