@@ -57,7 +57,7 @@ jobs:
   ios-build:
     needs: pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
-    runs-on: [macos-latest]
+    runs-on: [macos-14]
     concurrency:
       # cancel jobs on PRs only
       group: ${{ github.workflow }}-${{ github.ref }}
@@ -220,7 +220,7 @@ jobs:
           HOSTING_BASE_PATH="maplibre-native/ios/latest" platform/ios/scripts/docc.sh
 
   ios-release:
-    runs-on: macos-latest
+    runs-on: macos-14
     needs: ios-build
     if: github.ref == 'refs/heads/main' || github.event.inputs.release == 'pre'
     defaults:
@@ -373,7 +373,7 @@ jobs:
 
   ios-build-cmake:
     needs: pre_job
-    runs-on: macos-latest
+    runs-on: macos-14
     if: needs.pre_job.outputs.should_skip != 'true'
     steps:
       - uses: actions/checkout@v4
