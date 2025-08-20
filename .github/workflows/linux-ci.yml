@@ -126,7 +126,7 @@ jobs:
           export CTCACHE_PROTO=http
 
           if [ -n "${{ secrets.CTCACHE_AUTH_KEY }}" ]; then
-            echo "setting CTCACHE_AUTH_KEY" 
+            echo "setting CTCACHE_AUTH_KEY"
             export CTCACHE_AUTH_KEY=${{ secrets.CTCACHE_AUTH_KEY }}
           else
             # do not write to cache if CTCACHE_AUTH_KEY not set
