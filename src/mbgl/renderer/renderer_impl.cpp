@@ -190,7 +190,11 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     const EdgeInsets& frustumOffset = state.getFrustumOffset();
     const gfx::ScissorRect scissorRect = {
         static_cast<int32_t>(frustumOffset.left() * pixelRatio),
+#if MLN_RENDER_BACKEND_OPENGL
+        static_cast<int32_t>(frustumOffset.bottom() * pixelRatio),
+#else
         static_cast<int32_t>(frustumOffset.top() * pixelRatio),
+#endif
         static_cast<uint32_t>((size.width - (frustumOffset.left() + frustumOffset.right())) * pixelRatio),
         static_cast<uint32_t>((size.height - (frustumOffset.top() + frustumOffset.bottom())) * pixelRatio),
     };
