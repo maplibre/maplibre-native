@@ -75,7 +75,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-          fetch-depth: 0
 
       - name: Cache Bazel
         uses: actions/cache@v4
@@ -232,7 +231,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-          fetch-depth: 0
 
       - name: VERSION file changed
         id: version-file-ios-changed
@@ -381,7 +379,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-          fetch-depth: 0
 
       - name: Configure build with CMake
         run: cmake --preset ios
