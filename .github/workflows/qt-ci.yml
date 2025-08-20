@@ -59,22 +59,16 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: Linux_GCC11
-            os: ubuntu-24.04
-            build_type: RelWithDebInfo
-            qt_version: 6.8.1
-            qt_target: desktop
-            compiler: ""
           - name: Linux_GCC14
             os: ubuntu-24.04
             build_type: RelWithDebInfo
-            qt_version: 6.8.1
+            qt_version: 6.9.1
             qt_target: desktop
             compiler: "gcc-14"
           - name: macOS
             os: macos-14
             build_type: RelWithDebInfo
-            qt_version: 6.8.1
+            qt_version: 6.9.1
             qt_target: desktop
             deployment_target: 12.0
             deployment_arch: "x86_64;arm64"
@@ -82,7 +76,7 @@ jobs:
           - name: macOS_LLVM
             os: macos-14
             build_type: RelWithDebInfo
-            qt_version: 6.8.1
+            qt_version: 6.9.1
             qt_target: desktop
             deployment_target: 12.0
             deployment_arch: "arm64"
@@ -91,7 +85,7 @@ jobs:
             os: windows-2022
             build_type: "RelWithDebInfo"
             compiler_type: x64
-            qt_version: 6.8.1
+            qt_version: 6.9.1
             qt_target: desktop
             qt_arch: win64_msvc2022_64
             qt_tools: ""
@@ -115,7 +109,7 @@ jobs:
           submodules: recursive
 
       - name: Install test dependencies
-        if: runner.os == 'Linux' && matrix.compiler != ''
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install \
@@ -133,13 +127,13 @@ jobs:
 
       - name: Install compiler (Linux)
         id: install_compiler
-        if: runner.os == 'Linux' && matrix.compiler != ''
+        if: runner.os == 'Linux'
         uses: rlalik/setup-cpp-compiler@master
         with:
           compiler: ${{ matrix.compiler }}
 
       - name: Setup compiler (Linux)
-        if: runner.os == 'Linux' && matrix.compiler != ''
+        if: runner.os == 'Linux'
         env:
           CC: ${{ steps.install_compiler.outputs.cc }}
           CXX: ${{ steps.install_compiler.outputs.cxx }}
@@ -212,11 +206,7 @@ jobs:
           ninja
 
       - name: Build maplibre-native (Linux, Qt6)
-        if: runner.os == 'Linux' && matrix.compiler == ''
-        uses: ./source/.github/actions/qt6-build
-
-      - name: Build maplibre-native (Linux, Qt6, custom compiler)
-        if: runner.os == 'Linux' && matrix.compiler != ''
+        if: runner.os == 'Linux'
         run: |
           mkdir build && cd build
           qt-cmake ../source/ \
@@ -227,8 +217,8 @@ jobs:
             -DMLN_WITH_QT=ON
           ninja
 
-      - name: Build maplibre-native (Linux, Qt6, custom compiler, internal libraries)
-        if: runner.os == 'Linux' && matrix.compiler != ''
+      - name: Build maplibre-native (Linux, Qt6, internal libraries)
+        if: runner.os == 'Linux'
         run: |
           mkdir build-internal && cd build-internal
           qt-cmake ../source/ \
@@ -242,7 +232,7 @@ jobs:
           ninja
 
       - name: Run tests (Linux)
-        if: runner.os == 'Linux' && matrix.compiler != ''
+        if: runner.os == 'Linux'
         uses: coactions/setup-xvfb@v1
         with:
           run: ctest --output-on-failure

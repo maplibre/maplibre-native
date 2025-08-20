@@ -103,6 +103,11 @@ kotlin {
 
 dependencies {
     implementation(project(":MapLibreAndroid"))
+
+    implementation(libs.maplibreNavigation) {
+        exclude(group = "org.maplibre.gl", module = "android-sdk")
+    }
+
     implementation(libs.maplibreJavaTurf)
 
     implementation(libs.supportRecyclerView)
