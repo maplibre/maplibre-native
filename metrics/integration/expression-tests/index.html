@@ -1,0 +1,2455 @@
+
+<style>
+    body { font: 18px/1.2 -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif; padding: 10px; }
+    h1 { font-size: 32px; margin-bottom: 0; }
+    button { vertical-align: middle; }
+    h2 { font-size: 24px; font-weight: normal; margin: 10px 0 10px; line-height: 1; }
+    .test { border-bottom: 1px dotted #bbb; padding-bottom: 5px; }
+    .tests { border-top: 1px dotted #bbb; margin-top: 10px; }
+    .test p, .test pre { margin: 0 0 10px; }
+    .test pre { font-size: 14px; }
+    .label { color: white; font-size: 18px; padding: 2px 6px 3px; border-radius: 3px; margin-right: 3px; vertical-align: bottom; display: inline-block; }
+    .hide { display: none; }
+    .test.failed > h2 > span { background: red; }
+    .test.passed > h2 > span { background: green; }
+    .test.ignored > h2 > span { background: grey; }
+    .test.errored > h2 > span { background: #ff006f; }
+    .test.ignored.passed > h2 > span { background: #E8A408; }
+</style>
+<h1 style="color: green;">All tests passed!
+    <button id='toggle-sequence'>Toggle test sequence</button>
+    <button id='toggle-passed'>Toggle passed tests</button>
+    <button id='toggle-ignored'>Toggle ignored tests</button>
+</h1>
+<div id='test-sequence' class='hide'>
+<p><strong>Test sequence: </strong>parse/empty parse/non-array parse/non-string parse/unknown-expression not/basic log2/basic typecheck/array-invalid-item typecheck/array-length-subtyping typecheck/array-length-subtyping--no-length typecheck/array-item-subtyping typecheck/array-wrong-length downcase/basic concat/basic concat/coercion concat/arity-1 concat/arity-0 interpolate-hcl/linear resolved-locale/basic properties/basic match/mismatch-output match/arity-2 match/basic match/label-number match/infer-array-type match/unreachable-branch-2 match/mismatch-label-1 match/multi-value match/mismatch-label-2 match/arity-1 match/label-null match/empty-case match/arity-0 match/label-boolean match/mixed-type match/unreachable-branch-1 match/arity-3 match/label-non-integer match/label-string match/label-object match/label-array match/label-overflow match/mismatch-input match/label-string-invalid-identifier slice/array-two-indexes slice/invalid-inputs slice/string-one-index slice/array-one-index slice/string-two-indexes object/default-value object/basic object/implicit interpolate-lab/linear any/short-circuiting any/basic any/arity-1 any/arity-0 heatmap-density/basic array/default-value array/implicit-2 array/implicit-1 array/item-type array/basic array/item-type-and-length array/implicit-3 sin/basic asin/basic number-format/currency number-format/default number-format/precision legacy/interval/array legacy/interval/number-default legacy/interval/string-default legacy/interval/tokens-property legacy/interval/implicit legacy/interval/color legacy/interval/duplicate-stops legacy/interval/string legacy/interval/array-default legacy/interval/composite legacy/interval/tokens-zoom legacy/interval/composite-default legacy/interval/color-default legacy/interval/number legacy/exponential/array legacy/exponential/number-default legacy/exponential/color-lab legacy/exponential/implicit legacy/exponential/color legacy/exponential/duplicate-stops legacy/exponential/color-hcl legacy/exponential/array-default legacy/exponential/composite legacy/exponential/base legacy/exponential/composite-default legacy/exponential/color-default legacy/exponential/number legacy/categorical/tokens legacy/categorical/array legacy/categorical/number-default legacy/categorical/string-default legacy/categorical/boolean-default legacy/categorical/color legacy/categorical/string legacy/categorical/array-default legacy/categorical/boolean legacy/categorical/color-default legacy/categorical/number legacy/identity/array legacy/identity/number-default legacy/identity/string-default legacy/identity/enum legacy/identity/boolean-default legacy/identity/color legacy/identity/string legacy/identity/enum-default legacy/identity/array-default legacy/identity/boolean legacy/identity/color-default legacy/identity/number equal/object equal/array equal/null-lhs equal/value equal/collator-value equal/color equal/string equal/null-rhs equal/number equal/mismatch floor/basic within/line-within-polygon within/point-within-polygon within/non-supported within/invalid-geojson upcase/basic not_equal/value not_equal/string not_equal/number not_equal/mismatch let/nested let/invalid-name let/property-function let/basic let/expected-value let/unbound let/shadow let/zoom interpolate/cubic-bezier-5-args interpolate/linear-many-stops interpolate/exponential-single-stop interpolate/cubic-bezier-invalid-control-point interpolate/cubic-bezier-3-args interpolate/duplicate_stops interpolate/linear-color interpolate/infer-array-type interpolate/exponential-number-array interpolate/linear interpolate/exponential interpolate/cubic-bezier interpolate/exponential-string-array interpolate/exponential-uninterpolatable-numeric-array pow/basic to-color/basic to-color/color to-color/2-ary rgb/basic get/basic get/from-object-property get/from-literal get/from-literal--missing times/basic times/arity-1 times/arity-0 divide/basic round/basic index-of/invalid-haystack index-of/with-from-index index-of/basic-array index-of/assert-array index-of/assert-string index-of/basic-string index-of/invalid-needle has/basic cos/basic format/image-sections format/data-driven-font format/basic format/coercion format/implicit format/to-string format/implicit-assert format/data-driven-scale format/implicit-coerce format/implicit-omit plus/basic plus/arity-1 plus/arity-0 typeof/basic id/basic in/invalid-haystack in/basic-array in/assert-array in/assert-string in/basic-string in/invalid-needle string/default-value string/basic to-string/basic to-string/implicit to-string/color to-string/2-ary ln/basic step/duplicate_stops step/basic image/compound image/basic image/implicit-assert image/coalesce atan/basic is-supported-script/default collator/accent-equals-de collator/comparison-number-error collator/variant-gteq-en collator/case-lteq-en collator/case-omitted-en collator/base-equals-en collator/base-gt-en collator/accent-lt-en collator/base-default-locale collator/non-object-error collator/accent-not-equals-en collator/case-not-equals-en collator/diacritic-omitted-en collator/variant-equals-en collator/equals-non-string-error acos/basic abs/basic ceil/basic case/basic case/infer-array-type case/precedence literal/empty literal/object literal/string-array literal/u2028u2029 literal/string literal/infer-empty-array-type literal/boolean-array literal/multiple-args literal/number-array literal/nested-array literal/mixed-primitive-array less/value less/string less/string-and-value less/null less/boolean less/number less/mismatch less_or_equal/value less_or_equal/string less_or_equal/string-and-value less_or_equal/null less_or_equal/boolean less_or_equal/number less_or_equal/mismatch length/array length/invalid length/implicit length/string geometry-type/basic to-boolean/basic to-boolean/2-ary sqrt/basic minus/basic minus/arity-1 minus/arity-0 minus/inference-arity-2 all/short-circuiting all/basic all/arity-1 all/arity-0 rgba/basic rgba/out-of-bounds max/basic max/arity-1 max/arity-0 min/basic min/arity-1 min/arity-0 log10/basic coalesce/error coalesce/argument-type-mismatch coalesce/inference coalesce/basic coalesce/infer-array-type coalesce/null boolean/default-value boolean/basic e/basic tan/basic mod/basic greater_or_equal/value greater_or_equal/string greater_or_equal/string-and-value greater_or_equal/null greater_or_equal/boolean greater_or_equal/number greater_or_equal/mismatch ln2/basic at/basic at/infer-array-type zoom/invalid-nested-2 zoom/invalid-nested-4 zoom/nested-let zoom/basic zoom/invalid-nested-5 zoom/nested-coalesce zoom/invalid-nested-1 zoom/invalid-no-curve zoom/invalid-nested-3 to-number/basic to-number/2-ary to-rgba/alpha to-rgba/zero to-rgba/basic greater/value greater/string greater/string-and-value greater/null greater/boolean greater/number greater/mismatch number/default-value number/basic constant-folding/var constant-folding/to-color constant-folding/evaluation-error constant-folding/to-color-inferred pi/basic </p>
+</div>
+
+<script>
+document.getElementById('toggle-passed').addEventListener('click', function (e) {
+    for (const row of document.querySelectorAll('.test.passed')) {
+        row.classList.toggle('hide');
+    }
+});
+document.getElementById('toggle-ignored').addEventListener('click', function (e) {
+    for (const row of document.querySelectorAll('.test.ignored')) {
+        row.classList.toggle('hide');
+    }
+});
+document.getElementById('toggle-sequence').addEventListener('click', function (e) {
+    document.getElementById('test-sequence').classList.toggle('hide');
+});
+</script>
+<div class="tests">
+<div class="test passed">
+<h2><span class="label">passed</span> parse/empty</h2>
+<p><pre>[]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> parse/non-array</h2>
+<p><pre>["+", ["-", 0, {}], 10]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> parse/non-string</h2>
+<p><pre>[1, 2]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> parse/unknown-expression</h2>
+<p><pre>["+", ["*", 1, 2, 3, ["FAKE-EXPRESSION", 1]], 10]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> not/basic</h2>
+<p><pre>["!", ["boolean", ["get", "x"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["!", ["boolean", ["get", "x"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> log2/basic</h2>
+<p><pre>["log2", 1024]</pre></p>
+<strong>Serialized:</strong><p><pre>10</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> typecheck/array-invalid-item</h2>
+<p><pre>["array", "number", 2, ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> typecheck/array-length-subtyping</h2>
+<p><pre>["array", "string", 2, ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["array", "string", 2, ["get", "x"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> typecheck/array-length-subtyping--no-length</h2>
+<p><pre>["array", "number", ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> typecheck/array-item-subtyping</h2>
+<p><pre>["array", "number", 2, ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["array", "number", 2, ["get", "x"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> typecheck/array-wrong-length</h2>
+<p><pre>["array", "number", 2, ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> downcase/basic</h2>
+<p><pre>["downcase", "StRiNg"]</pre></p>
+<strong>Serialized:</strong><p><pre>"string"</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> concat/basic</h2>
+<p><pre>["concat", "a", "b", "c"]</pre></p>
+<strong>Serialized:</strong><p><pre>"abc"</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> concat/coercion</h2>
+<p><pre>["concat", ["get", "a"], ["get", "1"], ["get", "true"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["concat", ["get", "a"], ["get", "1"], ["get", "true"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> concat/arity-1</h2>
+<p><pre>["concat", "foo"]</pre></p>
+<strong>Serialized:</strong><p><pre>"foo"</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> concat/arity-0</h2>
+<p><pre>["concat"]</pre></p>
+<strong>Serialized:</strong><p><pre>""</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> properties/basic</h2>
+<p><pre>["properties"]</pre></p>
+<strong>Serialized:</strong><p><pre>["properties"]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/mismatch-output</h2>
+<p><pre>["match", ["string", ["get", "x"]], "0", "match", false]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/arity-2</h2>
+<p><pre>["match", "x", "y"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/basic</h2>
+<p><pre>["match", ["get", "x"], "a", "Apple", "b", "Banana", "Kumquat"]</pre></p>
+<strong>Serialized:</strong><p><pre>["match", ["get", "x"], "a", "Apple", "b", "Banana", "Kumquat"]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/label-number</h2>
+<p><pre>["match", ["get", "x"], 0, "match", "otherwise"]</pre></p>
+<strong>Serialized:</strong><p><pre>["match", ["get", "x"], 0, "match", "otherwise"]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/infer-array-type</h2>
+<p><pre>["match", ["number", ["get", "x"]], 0, ["literal", ["one"]], 10, ["literal", ["one", "two"]], ["literal", ["one", "two", "three"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["match", ["number", ["get", "x"]], 0, ["literal", ["one"]], 10, ["literal", ["one", "two"]], ["literal", ["one", "two", "three"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/unreachable-branch-2</h2>
+<p><pre>["match", ["string", ["get", "x"]], ["0", "1"], "match", ["0", "2"], "match", "otherwise"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/mismatch-label-1</h2>
+<p><pre>["match", ["get", "x"], "a", "the letter a", 0, "the number 0", true, "The Truth", "otherwise"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/multi-value</h2>
+<p><pre>["string", ["match", ["string", ["get", "x"]], ["a", "A"], "Apple", ["b", "B"], "Banana", "Kumquat"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["string", ["match", ["string", ["get", "x"]], ["A", "a"], "Apple", ["B", "b"], "Banana", "Kumquat"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/mismatch-label-2</h2>
+<p><pre>["match", ["get", "x"], ["0", 0], "zero", "otherwise"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/arity-1</h2>
+<p><pre>["match", "x"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/label-null</h2>
+<p><pre>["match", null, null, "match", "otherwise"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/empty-case</h2>
+<p><pre>["match", ["get", "x"], [], "thing one", "thing two"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/arity-0</h2>
+<p><pre>["match"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/label-boolean</h2>
+<p><pre>["match", ["boolean", ["get", "x"]], true, "match", "otherwise"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/mixed-type</h2>
+<p><pre>["match", ["get", "x"], "a", "the letter a", 0, "the number 0", true, "The Truth", "otherwise"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/unreachable-branch-1</h2>
+<p><pre>["match", ["string", ["get", "x"]], "0", "match", "0", "match", "otherwise"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/arity-3</h2>
+<p><pre>["match", "x", "y", "z"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/label-non-integer</h2>
+<p><pre>["match", 1, 1.5, "thing one", "thing two"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/label-string</h2>
+<p><pre>["match", ["string", ["get", "x"]], "0", "match", "otherwise"]</pre></p>
+<strong>Serialized:</strong><p><pre>["match", ["string", ["get", "x"]], "0", "match", "otherwise"]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/label-object</h2>
+<p><pre>["match", "x", {}, "thing one", "thing two"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/label-array</h2>
+<p><pre>["match", "x", ["string", ["get", "y"]], "thing one", "thing two"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/label-overflow</h2>
+<p><pre>["match", 0, 10000000000000000, "thing one", "thing two"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/mismatch-input</h2>
+<p><pre>["match", ["string", ["get", "x"]], 0, "match", "otherwise"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> match/label-string-invalid-identifier</h2>
+<p><pre>["match", ["string", ["get", "x"]], ["0-1", "a.b", "{}", "weird json issue"], "match", "otherwise"]</pre></p>
+<strong>Serialized:</strong><p><pre>["match", ["string", ["get", "x"]], ["0-1", "a.b", "weird json issue", "{}"], "match", "otherwise"]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> slice/array-two-indexes</h2>
+<p><pre>["slice", ["array", ["get", "val"]], ["get", "i1"], ["get", "i2"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["slice", ["array", ["get", "val"]], ["get", "i1"], ["get", "i2"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> slice/invalid-inputs</h2>
+<p><pre>["slice", ["get", "input"], ["get", "i1"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["slice", ["get", "input"], ["get", "i1"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> slice/string-one-index</h2>
+<p><pre>["slice", ["get", "val"], ["get", "index"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["slice", ["get", "val"], ["get", "index"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> slice/array-one-index</h2>
+<p><pre>["slice", ["array", ["get", "val"]], ["get", "index"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["slice", ["array", ["get", "val"]], ["get", "index"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> slice/string-two-indexes</h2>
+<p><pre>["slice", ["get", "val"], ["get", "i1"], ["get", "i2"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["slice", ["get", "val"], ["get", "i1"], ["get", "i2"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> object/default-value</h2>
+<p><pre>["object", ["get", "x"], ["literal", {
+      "default": "value"
+    }]]</pre></p>
+<strong>Serialized:</strong><p><pre>["object", ["get", "x"], ["literal", {
+      "default": "value"
+    }]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> object/basic</h2>
+<p><pre>["object", ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["object", ["get", "x"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> object/implicit</h2>
+<p><pre>["get", "b", ["get", "a"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["get", "b", ["object", ["get", "a"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> any/short-circuiting</h2>
+<p><pre>["any", true, ["error", "unreachable"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["any", true, ["error", "unreachable"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> any/basic</h2>
+<p><pre>["any", ["boolean", ["get", "x"]], ["boolean", ["get", "y"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["any", ["boolean", ["get", "x"]], ["boolean", ["get", "y"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> any/arity-1</h2>
+<p><pre>["any", false]</pre></p>
+<strong>Serialized:</strong><p><pre>false</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> any/arity-0</h2>
+<p><pre>["any"]</pre></p>
+<strong>Serialized:</strong><p><pre>false</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> heatmap-density/basic</h2>
+<p><pre>["interpolate", ["linear"], ["heatmap-density"], 0, "#000000", 1, "#ff0000"]</pre></p>
+<strong>Serialized:</strong><p><pre>["interpolate", ["linear"], ["heatmap-density"], 0, ["rgba", 0, 0, 0, 1], 1, ["rgba", 255, 0, 0, 1]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> array/default-value</h2>
+<p><pre>["array", "number", null, ["get", "x"], ["literal", [0]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["array", "number", null, ["get", "x"], ["literal", [0]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> array/implicit-2</h2>
+<p><pre>["get", "array"]</pre></p>
+<strong>Serialized:</strong><p><pre>["array", "string", ["get", "array"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> array/implicit-1</h2>
+<p><pre>["at", 0, ["get", "array"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["at", 0, ["array", ["get", "array"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> array/item-type</h2>
+<p><pre>["array", "string", ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["array", "string", ["get", "x"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> array/basic</h2>
+<p><pre>["array", ["literal", [1, 2, 3]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["literal", [1, 2, 3]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> array/item-type-and-length</h2>
+<p><pre>["array", "number", 2, ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["array", "number", 2, ["get", "x"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> array/implicit-3</h2>
+<p><pre>["get", "array"]</pre></p>
+<strong>Serialized:</strong><p><pre>["array", "number", 2, ["get", "array"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> sin/basic</h2>
+<p><pre>["sin", 0]</pre></p>
+<strong>Serialized:</strong><p><pre>0</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> asin/basic</h2>
+<p><pre>["asin", 0.5]</pre></p>
+<strong>Serialized:</strong><p><pre>0.5235987755982989</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> number-format/currency</h2>
+<p><pre>["number-format", 123456.789, {
+    "currency": ["get", "currency"],
+    "locale": ["get", "locale"]
+  }]</pre></p>
+<strong>Serialized:</strong><p><pre>["number-format", 123456.789, {
+    "currency": ["string", ["get", "currency"]],
+    "locale": ["string", ["get", "locale"]]
+  }]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> number-format/default</h2>
+<p><pre>["number-format", 123456.789, {}]</pre></p>
+<strong>Serialized:</strong><p><pre>"123,456.789"</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> number-format/precision</h2>
+<p><pre>["number-format", 987654321.234567, {
+    "max-fraction-digits": ["get", "max"],
+    "min-fraction-digits": ["get", "min"],
+    "locale": ["get", "locale"]
+  }]</pre></p>
+<strong>Serialized:</strong><p><pre>["number-format", 987654321.234567, {
+    "max-fraction-digits": ["number", ["get", "max"]],
+    "min-fraction-digits": ["number", ["get", "min"]],
+    "locale": ["string", ["get", "locale"]]
+  }]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/interval/array</h2>
+<p><pre>{
+  "stops": [[0, [0]], [1, [1]]],
+  "property": "p",
+  "type": "interval"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["step", ["number", ["get", "p"]], ["literal", [0]], 1, ["literal", [1]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/interval/number-default</h2>
+<p><pre>{
+  "default": -1,
+  "stops": [[0, 0], [1, 1]],
+  "property": "p",
+  "type": "interval"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["case", ["==", ["typeof", ["get", "p"]], "number"], ["step", ["number", ["get", "p"]], 0, 1, 1], -1]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/interval/string-default</h2>
+<p><pre>{
+  "default": "default",
+  "stops": [[0, "0"], [1, "1"]],
+  "property": "p",
+  "type": "interval"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["case", ["==", ["typeof", ["get", "p"]], "number"], ["step", ["number", ["get", "p"]], "0", 1, "1"], "default"]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/interval/tokens-property</h2>
+<p><pre>{
+  "stops": [[0, "0 {a}"], [1, "1 {b}"]],
+  "property": "p",
+  "type": "interval"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["step", ["number", ["get", "p"]], "0 {a}", 1, "1 {b}"]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/interval/implicit</h2>
+<p><pre>{
+  "stops": [[0, "0"], [1, "1"]],
+  "property": "p"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["step", ["number", ["get", "p"]], "0", 1, "1"]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/interval/color</h2>
+<p><pre>{
+  "stops": [[0, "black"], [1, "white"]],
+  "property": "p",
+  "type": "interval"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["step", ["number", ["get", "p"]], ["rgba", 0, 0, 0, 1], 1, ["rgba", 255, 255, 255, 1]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/interval/duplicate-stops</h2>
+<p><pre>{
+  "stops": [[0, "a"], [1, "b"], [1, "c"], [2, "d"]],
+  "type": "interval"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["step", ["zoom"], "a", 1, "b", 2, "d"]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/interval/string</h2>
+<p><pre>{
+  "stops": [[0, "0"], [1, "1"]],
+  "property": "p",
+  "type": "interval"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["step", ["number", ["get", "p"]], "0", 1, "1"]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/interval/array-default</h2>
+<p><pre>{
+  "default": [-1],
+  "stops": [[0, [0]], [1, [1]]],
+  "property": "p",
+  "type": "interval"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["case", ["==", ["typeof", ["get", "p"]], "number"], ["step", ["number", ["get", "p"]], ["literal", [0]], 1, ["literal", [1]]], ["literal", [-1]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/interval/color-default</h2>
+<p><pre>{
+  "default": "red",
+  "stops": [[0, "black"], [1, "white"]],
+  "property": "p",
+  "type": "interval"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["case", ["==", ["typeof", ["get", "p"]], "number"], ["step", ["number", ["get", "p"]], ["rgba", 0, 0, 0, 1], 1, ["rgba", 255, 255, 255, 1]], ["rgba", 255, 0, 0, 1]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/interval/number</h2>
+<p><pre>{
+  "stops": [[0, 0], [1, 1]],
+  "property": "p",
+  "type": "interval"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["step", ["number", ["get", "p"]], 0, 1, 1]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/exponential/array</h2>
+<p><pre>{
+  "stops": [[0, [0]], [1, [1]]],
+  "property": "p",
+  "type": "exponential"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["interpolate", ["linear"], ["number", ["get", "p"]], 0, ["literal", [0]], 1, ["literal", [1]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/exponential/number-default</h2>
+<p><pre>{
+  "default": -1,
+  "stops": [[0, 0], [1, 1]],
+  "property": "p",
+  "type": "exponential"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["case", ["==", ["typeof", ["get", "p"]], "number"], ["interpolate", ["linear"], ["number", ["get", "p"]], 0, 0, 1, 1], -1]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/exponential/implicit</h2>
+<p><pre>{
+  "stops": [[0, 0], [1, 1]],
+  "property": "p"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["interpolate", ["linear"], ["number", ["get", "p"]], 0, 0, 1, 1]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/exponential/color</h2>
+<p><pre>{
+  "stops": [[0, "black"], [1, "white"]],
+  "property": "p",
+  "type": "exponential"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["interpolate", ["linear"], ["number", ["get", "p"]], 0, ["rgba", 0, 0, 0, 1], 1, ["rgba", 255, 255, 255, 1]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/exponential/duplicate-stops</h2>
+<p><pre>{
+  "stops": [[0, 10], [1, 20], [1, 25], [2, 30]],
+  "type": "exponential"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["interpolate", ["linear"], ["zoom"], 0, 10, 1, 20, 2, 30]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/exponential/array-default</h2>
+<p><pre>{
+  "default": [-1],
+  "stops": [[0, [0]], [1, [1]]],
+  "property": "p",
+  "type": "exponential"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["case", ["==", ["typeof", ["get", "p"]], "number"], ["interpolate", ["linear"], ["number", ["get", "p"]], 0, ["literal", [0]], 1, ["literal", [1]]], ["literal", [-1]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/exponential/composite</h2>
+<p><pre>{
+  "stops": [[{
+        "value": 0,
+        "zoom": 0
+      }, 0], [{
+        "value": 1,
+        "zoom": 0
+      }, 1], [{
+        "value": 0,
+        "zoom": 1
+      }, 2], [{
+        "value": 1,
+        "zoom": 1
+      }, 3]],
+  "property": "p",
+  "type": "exponential"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["interpolate", ["linear"], ["zoom"], 0, ["interpolate", ["linear"], ["number", ["get", "p"]], 0, 0, 1, 1], 1, ["interpolate", ["linear"], ["number", ["get", "p"]], 0, 2, 1, 3]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/exponential/base</h2>
+<p><pre>{
+  "stops": [[0, 0], [1, 1]],
+  "base": 0.5,
+  "type": "exponential"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["interpolate", ["exponential", 0.5], ["zoom"], 0, 0, 1, 1]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/exponential/composite-default</h2>
+<p><pre>{
+  "default": -1,
+  "stops": [[{
+        "value": 0,
+        "zoom": 0
+      }, 0], [{
+        "value": 1,
+        "zoom": 0
+      }, 1], [{
+        "value": 0,
+        "zoom": 1
+      }, 2], [{
+        "value": 1,
+        "zoom": 1
+      }, 3]],
+  "property": "p",
+  "type": "exponential"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["interpolate", ["linear"], ["zoom"], 0, ["case", ["==", ["typeof", ["get", "p"]], "number"], ["interpolate", ["linear"], ["number", ["get", "p"]], 0, 0, 1, 1], -1], 1, ["case", ["==", ["typeof", ["get", "p"]], "number"], ["interpolate", ["linear"], ["number", ["get", "p"]], 0, 2, 1, 3], -1]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/exponential/color-default</h2>
+<p><pre>{
+  "default": "red",
+  "stops": [[0, "black"], [1, "white"]],
+  "property": "p",
+  "type": "exponential"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["case", ["==", ["typeof", ["get", "p"]], "number"], ["interpolate", ["linear"], ["number", ["get", "p"]], 0, ["rgba", 0, 0, 0, 1], 1, ["rgba", 255, 255, 255, 1]], ["rgba", 255, 0, 0, 1]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/exponential/number</h2>
+<p><pre>{
+  "stops": [[0, 0], [1, 1]],
+  "property": "p",
+  "type": "exponential"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["interpolate", ["linear"], ["number", ["get", "p"]], 0, 0, 1, 1]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/categorical/tokens</h2>
+<p><pre>{
+  "default": "default",
+  "stops": [["0", "0 {a}"], ["1", "1 {b}"]],
+  "property": "p",
+  "type": "categorical"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["match", ["get", "p"], "0", "0 {a}", "1", "1 {b}", "default"]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/categorical/number-default</h2>
+<p><pre>{
+  "default": -1,
+  "stops": [[0, 0], [1, 1]],
+  "property": "p",
+  "type": "categorical"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["match", ["get", "p"], 0, 0, 1, 1, -1]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/categorical/string-default</h2>
+<p><pre>{
+  "default": "-1",
+  "stops": [["0", "0"], ["1", "1"]],
+  "property": "p",
+  "type": "categorical"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["match", ["get", "p"], "0", "0", "1", "1", "-1"]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/categorical/boolean-default</h2>
+<p><pre>{
+  "default": true,
+  "stops": [[true, true], [false, false]],
+  "property": "p",
+  "type": "categorical"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["case", ["==", ["get", "p"], true], true, ["==", ["get", "p"], false], false, true]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/categorical/array-default</h2>
+<p><pre>{
+  "default": [-1],
+  "stops": [[0, [0]], [1, [1]]],
+  "property": "p",
+  "type": "categorical"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["match", ["get", "p"], 0, ["literal", [0]], 1, ["literal", [1]], ["literal", [-1]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/categorical/color-default</h2>
+<p><pre>{
+  "default": "blue",
+  "stops": [["0", "red"], ["1", "lime"]],
+  "property": "p",
+  "type": "categorical"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["match", ["get", "p"], "0", ["rgba", 255, 0, 0, 1], "1", ["rgba", 0, 255, 0, 1], ["rgba", 0, 0, 255, 1]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/identity/array</h2>
+<p><pre>{
+  "property": "p",
+  "type": "identity"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["array", "number", ["get", "p"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/identity/number-default</h2>
+<p><pre>{
+  "default": -1,
+  "property": "p",
+  "type": "identity"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["number", ["get", "p"], -1]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/identity/string-default</h2>
+<p><pre>{
+  "default": "default",
+  "property": "p",
+  "type": "identity"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["string", ["get", "p"], "default"]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/identity/enum</h2>
+<p><pre>{
+  "property": "p",
+  "type": "identity"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["string", ["get", "p"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/identity/boolean-default</h2>
+<p><pre>{
+  "default": true,
+  "property": "p",
+  "type": "identity"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["boolean", ["get", "p"], true]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/identity/color</h2>
+<p><pre>{
+  "property": "p",
+  "type": "identity"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["to-color", ["get", "p"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/identity/string</h2>
+<p><pre>{
+  "property": "p",
+  "type": "identity"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["string", ["get", "p"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/identity/array-default</h2>
+<p><pre>{
+  "default": [-1],
+  "property": "p",
+  "type": "identity"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["array", "number", null, ["get", "p"], ["literal", [-1]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/identity/boolean</h2>
+<p><pre>{
+  "property": "p",
+  "type": "identity"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["boolean", ["get", "p"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> legacy/identity/number</h2>
+<p><pre>{
+  "property": "p",
+  "type": "identity"
+}</pre></p>
+<strong>Serialized:</strong><p><pre>["number", ["get", "p"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> equal/object</h2>
+<p><pre>["==", ["get", "x"], ["literal", {}]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> equal/array</h2>
+<p><pre>["==", ["get", "x"], ["literal", [1]]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> equal/null-lhs</h2>
+<p><pre>["==", null, ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["==", null, ["get", "x"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> equal/value</h2>
+<p><pre>["==", ["get", "x"], ["get", "y"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["==", ["get", "x"], ["get", "y"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> equal/collator-value</h2>
+<p><pre>["==", ["get", "x"], ["get", "y"], ["collator", {
+      "diacritic-sensitive": false,
+      "case-sensitive": false
+    }]]</pre></p>
+<strong>Serialized:</strong><p><pre>["==", ["get", "x"], ["get", "y"], ["collator", {
+      "diacritic-sensitive": false,
+      "case-sensitive": false
+    }]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> equal/color</h2>
+<p><pre>["==", ["get", "x"], ["to-color", "red"]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> equal/string</h2>
+<p><pre>["==", ["string", ["get", "x"]], ["get", "y"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["==", ["string", ["get", "x"]], ["get", "y"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> equal/null-rhs</h2>
+<p><pre>["==", null, ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["==", null, ["get", "x"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> equal/number</h2>
+<p><pre>["==", ["number", ["get", "x"]], ["get", "y"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["==", ["number", ["get", "x"]], ["get", "y"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> equal/mismatch</h2>
+<p><pre>["==", ["string", ["get", "x"]], ["number", ["get", "y"]]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> floor/basic</h2>
+<p><pre>["floor", ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["floor", ["number", ["get", "x"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> within/line-within-polygon</h2>
+<p><pre>["within", {
+    "coordinates": [[[0, 0], [0, 5], [5, 5], [5, 0], [0, 0]]],
+    "type": "Polygon"
+  }]</pre></p>
+<strong>Serialized:</strong><p><pre>["within", {
+    "coordinates": [[[0, 0], [0, 5], [5, 5], [5, 0], [0, 0]]],
+    "type": "Polygon"
+  }]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> within/point-within-polygon</h2>
+<p><pre>["within", {
+    "coordinates": [[[0, 0], [0, 5], [5, 5], [5, 0], [0, 0]]],
+    "type": "Polygon"
+  }]</pre></p>
+<strong>Serialized:</strong><p><pre>["within", {
+    "coordinates": [[[0, 0], [0, 5], [5, 5], [5, 0], [0, 0]]],
+    "type": "Polygon"
+  }]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> within/invalid-geojson</h2>
+<p><pre>["within", {
+    "coordinates": [[0, 0], [0, 5], [5, 5], [5, 0]],
+    "type": "LineString"
+  }]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> upcase/basic</h2>
+<p><pre>["upcase", "string"]</pre></p>
+<strong>Serialized:</strong><p><pre>"STRING"</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> not_equal/value</h2>
+<p><pre>["!=", ["get", "x"], ["get", "y"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["!=", ["get", "x"], ["get", "y"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> not_equal/string</h2>
+<p><pre>["!=", ["string", ["get", "x"]], ["get", "y"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["!=", ["string", ["get", "x"]], ["get", "y"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> not_equal/number</h2>
+<p><pre>["!=", ["number", ["get", "x"]], ["get", "y"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["!=", ["number", ["get", "x"]], ["get", "y"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> not_equal/mismatch</h2>
+<p><pre>["!=", ["string", ["get", "x"]], ["number", ["get", "y"]]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> let/nested</h2>
+<p><pre>["let", "a", ["number", ["get", "a"]], ["let", "b", ["+", 1, ["var", "a"]], ["+", ["var", "a"], ["var", "b"]]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["let", "a", ["number", ["get", "a"]], ["let", "b", ["+", 1, ["var", "a"]], ["+", ["var", "a"], ["var", "b"]]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> let/invalid-name</h2>
+<p><pre>["let", "$a", 1, ["var", "$a"]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> let/property-function</h2>
+<p><pre>["let", "a", ["get", "x"], ["+", 1, ["number", ["var", "a"]]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["let", "a", ["get", "x"], ["+", 1, ["number", ["var", "a"]]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> let/basic</h2>
+<p><pre>["let", "a", ["number", ["get", "a"]], "b", ["number", ["get", "b"]], ["+", ["+", ["var", "a"], ["var", "b"]], ["var", "a"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["let", "a", ["number", ["get", "a"]], "b", ["number", ["get", "b"]], ["+", ["+", ["var", "a"], ["var", "b"]], ["var", "a"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> let/expected-value</h2>
+<p><pre>["let", "density", ["/", ["get", "population"], ["get", "sq-km"]], ["interpolate", ["linear"], ["var", "density"], 1, "#000000", 100, "#ffffff"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["let", "density", ["/", ["number", ["get", "population"]], ["number", ["get", "sq-km"]]], ["interpolate", ["linear"], ["var", "density"], 1, ["rgba", 0, 0, 0, 1], 100, ["rgba", 255, 255, 255, 1]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> let/unbound</h2>
+<p><pre>["let", "a", 1, ["+", ["+", ["var", "a"], ["var", "b"]], ["var", "a"]]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> let/shadow</h2>
+<p><pre>["let", "a", ["get", "one"], ["let", "a", ["get", "two"], ["var", "a"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["let", "a", ["get", "one"], ["let", "a", ["get", "two"], ["var", "a"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> let/zoom</h2>
+<p><pre>["let", "z0_value", ["number", ["get", "a"]], "z20_value", ["number", ["get", "b"]], ["interpolate", ["linear"], ["zoom"], 0, ["var", "z0_value"], 20, ["var", "z20_value"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["let", "z0_value", ["number", ["get", "a"]], "z20_value", ["number", ["get", "b"]], ["interpolate", ["linear"], ["zoom"], 0, ["var", "z0_value"], 20, ["var", "z20_value"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> interpolate/cubic-bezier-5-args</h2>
+<p><pre>["number", ["interpolate", ["cubic-bezier", 0, 0, 1, 1, 1], ["number", ["get", "x"]], 0, 0, 100, 100]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> interpolate/linear-many-stops</h2>
+<p><pre>["number", ["interpolate", ["exponential", 1], ["number", ["get", "x"]], 2, 100, 55, 200, 132, 300, 607, 400, 1287, 500, 1985, 600, 2650, 700, 3299, 800, 3995, 900, 4927, 1000, 7147, 10000, 10028, 100000, 12889, 1000000, 40000, 10000000]]</pre></p>
+<strong>Serialized:</strong><p><pre>["number", ["interpolate", ["linear"], ["number", ["get", "x"]], 2, 100, 55, 200, 132, 300, 607, 400, 1287, 500, 1985, 600, 2650, 700, 3299, 800, 3995, 900, 4927, 1000, 7147, 10000, 10028, 100000, 12889, 1000000, 40000, 10000000]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> interpolate/exponential-single-stop</h2>
+<p><pre>["number", ["interpolate", ["exponential", 2], ["number", ["get", "x"]], 1, 2]]</pre></p>
+<strong>Serialized:</strong><p><pre>["number", ["interpolate", ["exponential", 2], ["number", ["get", "x"]], 1, 2]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> interpolate/cubic-bezier-invalid-control-point</h2>
+<p><pre>["number", ["interpolate", ["cubic-bezier", 0, 1.75, 1, 1], ["number", ["get", "x"]], 0, 0, 100, 100]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> interpolate/cubic-bezier-3-args</h2>
+<p><pre>["number", ["interpolate", ["cubic-bezier", 0, 0, 1], ["number", ["get", "x"]], 0, 0, 100, 100]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> interpolate/duplicate_stops</h2>
+<p><pre>["interpolate", ["linear"], 0, 0, 1, 0, 2]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> interpolate/linear-color</h2>
+<p><pre>["to-rgba", ["interpolate", ["exponential", 1], ["get", "x"], 1, "red", 11, ["get", "color"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["to-rgba", ["interpolate", ["linear"], ["number", ["get", "x"]], 1, ["rgba", 255, 0, 0, 1], 11, ["to-color", ["get", "color"]]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> interpolate/infer-array-type</h2>
+<p><pre>["step", ["number", ["get", "x"]], ["literal", ["one"]], 10, ["literal", ["one", "two"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["step", ["number", ["get", "x"]], ["literal", ["one"]], 10, ["literal", ["one", "two"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> interpolate/exponential-number-array</h2>
+<p><pre>["interpolate", ["exponential", 2], ["number", ["get", "x"]], 1, ["literal", [2, 1]], 3, ["literal", [6, 1]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["interpolate", ["exponential", 2], ["number", ["get", "x"]], 1, ["literal", [2, 1]], 3, ["literal", [6, 1]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> interpolate/linear</h2>
+<p><pre>["interpolate", ["linear"], ["get", "x"], 0, 100, 10, 200]</pre></p>
+<strong>Serialized:</strong><p><pre>["interpolate", ["linear"], ["number", ["get", "x"]], 0, 100, 10, 200]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> interpolate/exponential</h2>
+<p><pre>["number", ["interpolate", ["exponential", 2], ["number", ["get", "x"]], 1, 2, 3, 6]]</pre></p>
+<strong>Serialized:</strong><p><pre>["number", ["interpolate", ["exponential", 2], ["number", ["get", "x"]], 1, 2, 3, 6]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> interpolate/cubic-bezier</h2>
+<p><pre>["number", ["interpolate", ["cubic-bezier", 0.42, 0, 0.58, 1], ["number", ["get", "x"]], 0, 0, 100, 100]]</pre></p>
+<strong>Serialized:</strong><p><pre>["number", ["interpolate", ["cubic-bezier", 0.42, 0, 0.58, 1], ["number", ["get", "x"]], 0, 0, 100, 100]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> interpolate/exponential-string-array</h2>
+<p><pre>["interpolate", ["exponential", 2], ["number", ["get", "x"]], 1, ["literal", ["a"]], 3, ["literal", ["b"]]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> interpolate/exponential-uninterpolatable-numeric-array</h2>
+<p><pre>["interpolate", ["exponential", 2], ["number", ["get", "x"]], 1, ["array", "number", ["get", "array"]], 3, ["array", "number", ["get", "array_two"]]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> pow/basic</h2>
+<p><pre>["^", 4, ["number", ["get", "x"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["^", 4, ["number", ["get", "x"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> to-color/basic</h2>
+<p><pre>["to-color", ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["to-color", ["get", "x"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> to-color/color</h2>
+<p><pre>["to-color", ["rgba", 0, 0, 0, 1]]</pre></p>
+<strong>Serialized:</strong><p><pre>["rgba", 0, 0, 0, 1]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> to-color/2-ary</h2>
+<p><pre>["to-color", ["get", "x"], ["get", "y"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["to-color", ["get", "x"], ["get", "y"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> rgb/basic</h2>
+<p><pre>["rgb", 0, 0, 255]</pre></p>
+<strong>Serialized:</strong><p><pre>["rgba", 0, 0, 255, 1]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> get/basic</h2>
+<p><pre>["number", ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["number", ["get", "x"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> get/from-object-property</h2>
+<p><pre>["number", ["get", "x", ["object", ["get", "a"]]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["number", ["get", "x", ["object", ["get", "a"]]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> get/from-literal</h2>
+<p><pre>["number", ["get", "x", ["literal", {
+        "x": 0
+      }]]]</pre></p>
+<strong>Serialized:</strong><p><pre>0</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> get/from-literal--missing</h2>
+<p><pre>["number", ["get", "x", ["literal", {
+        "y": 0
+      }]]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> times/basic</h2>
+<p><pre>["*", 3, 2, 0.5, 2]</pre></p>
+<strong>Serialized:</strong><p><pre>6</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> times/arity-1</h2>
+<p><pre>["*", 0]</pre></p>
+<strong>Serialized:</strong><p><pre>0</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> times/arity-0</h2>
+<p><pre>["*"]</pre></p>
+<strong>Serialized:</strong><p><pre>1</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> divide/basic</h2>
+<p><pre>["/", 10, 5]</pre></p>
+<strong>Serialized:</strong><p><pre>2</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> round/basic</h2>
+<p><pre>["round", ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["round", ["number", ["get", "x"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> index-of/invalid-haystack</h2>
+<p><pre>["index-of", ["get", "needle"], ["get", "haystack"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["index-of", ["get", "needle"], ["get", "haystack"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> index-of/with-from-index</h2>
+<p><pre>["index-of", ["get", "needle"], ["get", "hay"], ["get", "i"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["index-of", ["get", "needle"], ["get", "hay"], ["get", "i"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> index-of/basic-array</h2>
+<p><pre>["index-of", ["get", "i"], ["get", "arr"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["index-of", ["get", "i"], ["get", "arr"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> index-of/assert-array</h2>
+<p><pre>["index-of", ["get", "i"], ["array", ["get", "arr"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["index-of", ["get", "i"], ["array", ["get", "arr"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> index-of/assert-string</h2>
+<p><pre>["index-of", ["get", "substr"], ["string", ["get", "str"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["index-of", ["get", "substr"], ["string", ["get", "str"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> index-of/basic-string</h2>
+<p><pre>["index-of", ["get", "substr"], ["get", "str"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["index-of", ["get", "substr"], ["get", "str"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> index-of/invalid-needle</h2>
+<p><pre>["index-of", ["get", "needle"], ["get", "haystack"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["index-of", ["get", "needle"], ["get", "haystack"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> has/basic</h2>
+<p><pre>["has", "x"]</pre></p>
+<strong>Serialized:</strong><p><pre>["has", "x"]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> cos/basic</h2>
+<p><pre>["cos", 0]</pre></p>
+<strong>Serialized:</strong><p><pre>1</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> format/image-sections</h2>
+<p><pre>["format", ["image", "monument-15"], ["image", "beach-11"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["format", ["image", "monument-15"], {}, ["image", "beach-11"], {}]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> format/data-driven-font</h2>
+<p><pre>["format", "a", {
+    "font-scale": ["get", "font-scale"]
+  }]</pre></p>
+<strong>Serialized:</strong><p><pre>["format", "a", {
+    "font-scale": ["number", ["get", "font-scale"]]
+  }]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> format/basic</h2>
+<p><pre>["format", "a", {}, "b", {
+    "font-scale": 2
+  }, "c", {
+    "text-font": ["literal", ["a", "b"]]
+  }, "d", {
+    "text-color": "rgb(0, 255, 0)"
+  }]</pre></p>
+<strong>Serialized:</strong><p><pre>["format", "a", {}, "b", {
+    "font-scale": 2
+  }, "c", {
+    "text-font": ["literal", ["a", "b"]]
+  }, "d", {
+    "text-color": ["rgba", 0, 255, 0, 1]
+  }]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> format/coercion</h2>
+<p><pre>["format", ["get", "a"], {}, ["get", "1"], {}, ["get", "true"], {}]</pre></p>
+<strong>Serialized:</strong><p><pre>["format", ["get", "a"], {}, ["get", "1"], {}, ["get", "true"], {}]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> format/implicit</h2>
+<p><pre>["get", "p"]</pre></p>
+<strong>Serialized:</strong><p><pre>["format", ["get", "p"], {}]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> format/to-string</h2>
+<p><pre>["to-string", ["format", "a", {}, "b", {
+      "font-scale": 2
+    }, "c", {
+      "text-font": ["literal", ["a", "b"]]
+    }]]</pre></p>
+<strong>Serialized:</strong><p><pre>"abc"</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> format/implicit-assert</h2>
+<p><pre>["number", ["get", "p"]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> format/data-driven-scale</h2>
+<p><pre>["format", "a", {
+    "text-font": ["array", ["string", ["get", "text-font"]]]
+  }]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> format/implicit-coerce</h2>
+<p><pre>["to-string", ["get", "p"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["format", ["to-string", ["get", "p"]], {}]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> format/implicit-omit</h2>
+<p><pre>["coalesce", ["get", "q"], ["get", "p"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["format", ["coalesce", ["get", "q"], ["get", "p"]], {}]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> plus/basic</h2>
+<p><pre>["+", 1, 2, 3, 4]</pre></p>
+<strong>Serialized:</strong><p><pre>10</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> plus/arity-1</h2>
+<p><pre>["+", 1]</pre></p>
+<strong>Serialized:</strong><p><pre>1</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> plus/arity-0</h2>
+<p><pre>["+"]</pre></p>
+<strong>Serialized:</strong><p><pre>0</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> typeof/basic</h2>
+<p><pre>["typeof", ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["typeof", ["get", "x"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> id/basic</h2>
+<p><pre>["id"]</pre></p>
+<strong>Serialized:</strong><p><pre>["id"]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> in/invalid-haystack</h2>
+<p><pre>["boolean", ["in", ["get", "needle"], ["get", "haystack"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["boolean", ["in", ["get", "needle"], ["get", "haystack"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> in/basic-array</h2>
+<p><pre>["boolean", ["in", ["get", "i"], ["get", "arr"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["boolean", ["in", ["get", "i"], ["get", "arr"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> in/assert-array</h2>
+<p><pre>["boolean", ["in", ["get", "i"], ["array", ["get", "arr"]]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["boolean", ["in", ["get", "i"], ["array", ["get", "arr"]]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> in/assert-string</h2>
+<p><pre>["boolean", ["in", ["get", "substr"], ["string", ["get", "str"]]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["boolean", ["in", ["get", "substr"], ["string", ["get", "str"]]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> in/basic-string</h2>
+<p><pre>["boolean", ["in", ["get", "substr"], ["get", "str"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["boolean", ["in", ["get", "substr"], ["get", "str"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> in/invalid-needle</h2>
+<p><pre>["boolean", ["in", ["get", "needle"], ["get", "haystack"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["boolean", ["in", ["get", "needle"], ["get", "haystack"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> string/default-value</h2>
+<p><pre>["string", ["get", "x"], "default"]</pre></p>
+<strong>Serialized:</strong><p><pre>["string", ["get", "x"], "default"]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> string/basic</h2>
+<p><pre>["string", ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["string", ["get", "x"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> to-string/basic</h2>
+<p><pre>["to-string", ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["to-string", ["get", "x"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> to-string/implicit</h2>
+<p><pre>["get", "p"]</pre></p>
+<strong>Serialized:</strong><p><pre>["to-string", ["get", "p"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> to-string/color</h2>
+<p><pre>["to-string", ["rgba", 85, 255, 0, 0.5]]</pre></p>
+<strong>Serialized:</strong><p><pre>"rgba(85,255,0,0.5)"</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> to-string/2-ary</h2>
+<p><pre>["to-string", ["get", "x"], ["get", "y"]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> ln/basic</h2>
+<p><pre>["ln", ["e"]]</pre></p>
+<strong>Serialized:</strong><p><pre>1</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> step/duplicate_stops</h2>
+<p><pre>["step", 0, "a", 0, "b", 0, "c"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> step/basic</h2>
+<p><pre>["number", ["step", ["number", ["get", "x"]], 11, 0, 111, 1, 1111]]</pre></p>
+<strong>Serialized:</strong><p><pre>["number", ["step", ["number", ["get", "x"]], 11, 0, 111, 1, 1111]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> image/compound</h2>
+<p><pre>["image", ["get", "icon"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["image", ["string", ["get", "icon"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> image/basic</h2>
+<p><pre>["image", "monument-15"]</pre></p>
+<strong>Serialized:</strong><p><pre>["image", "monument-15"]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> image/implicit-assert</h2>
+<p><pre>["number", ["get", "icon"]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> image/coalesce</h2>
+<p><pre>["coalesce", ["image", "foo"], ["image", "bar"], ["image", "monument-15"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["coalesce", ["image", "foo"], ["image", "bar"], ["image", "monument-15"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> atan/basic</h2>
+<p><pre>["atan", 1]</pre></p>
+<strong>Serialized:</strong><p><pre>0.7853981633974483</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> collator/comparison-number-error</h2>
+<p><pre>["<", 1, 2, ["collator", {
+      "diacritic-sensitive": false,
+      "case-sensitive": false
+    }]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> collator/variant-gteq-en</h2>
+<p><pre>[">=", ["string", ["get", "lhs"]], ["get", "rhs"], ["collator", {
+      "locale": "en",
+      "diacritic-sensitive": true,
+      "case-sensitive": true
+    }]]</pre></p>
+<strong>Serialized:</strong><p><pre>[">=", ["string", ["get", "lhs"]], ["string", ["get", "rhs"]], ["collator", {
+      "locale": "en",
+      "diacritic-sensitive": true,
+      "case-sensitive": true
+    }]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> collator/case-lteq-en</h2>
+<p><pre>["<=", ["string", ["get", "lhs"]], ["get", "rhs"], ["collator", {
+      "locale": "en",
+      "diacritic-sensitive": true,
+      "case-sensitive": false
+    }]]</pre></p>
+<strong>Serialized:</strong><p><pre>["<=", ["string", ["get", "lhs"]], ["string", ["get", "rhs"]], ["collator", {
+      "locale": "en",
+      "diacritic-sensitive": true,
+      "case-sensitive": false
+    }]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> collator/case-omitted-en</h2>
+<p><pre>["==", ["string", ["get", "lhs"]], ["get", "rhs"], ["collator", {
+      "locale": "en",
+      "diacritic-sensitive": true
+    }]]</pre></p>
+<strong>Serialized:</strong><p><pre>["==", ["string", ["get", "lhs"]], ["get", "rhs"], ["collator", {
+      "locale": "en",
+      "diacritic-sensitive": true,
+      "case-sensitive": false
+    }]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> collator/base-equals-en</h2>
+<p><pre>["==", ["string", ["get", "lhs"]], ["get", "rhs"], ["collator", {
+      "locale": "en",
+      "diacritic-sensitive": false,
+      "case-sensitive": false
+    }]]</pre></p>
+<strong>Serialized:</strong><p><pre>["==", ["string", ["get", "lhs"]], ["get", "rhs"], ["collator", {
+      "locale": "en",
+      "diacritic-sensitive": false,
+      "case-sensitive": false
+    }]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> collator/base-gt-en</h2>
+<p><pre>[">", ["string", ["get", "lhs"]], ["get", "rhs"], ["collator", {
+      "locale": "en",
+      "diacritic-sensitive": false,
+      "case-sensitive": false
+    }]]</pre></p>
+<strong>Serialized:</strong><p><pre>[">", ["string", ["get", "lhs"]], ["string", ["get", "rhs"]], ["collator", {
+      "locale": "en",
+      "diacritic-sensitive": false,
+      "case-sensitive": false
+    }]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> collator/accent-lt-en</h2>
+<p><pre>["<", ["string", ["get", "lhs"]], ["get", "rhs"], ["collator", {
+      "locale": "en",
+      "diacritic-sensitive": false,
+      "case-sensitive": true
+    }]]</pre></p>
+<strong>Serialized:</strong><p><pre>["<", ["string", ["get", "lhs"]], ["string", ["get", "rhs"]], ["collator", {
+      "locale": "en",
+      "diacritic-sensitive": false,
+      "case-sensitive": true
+    }]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> collator/base-default-locale</h2>
+<p><pre>["==", ["string", ["get", "lhs"]], ["get", "rhs"], ["collator", {
+      "diacritic-sensitive": false,
+      "case-sensitive": false
+    }]]</pre></p>
+<strong>Serialized:</strong><p><pre>["==", ["string", ["get", "lhs"]], ["get", "rhs"], ["collator", {
+      "diacritic-sensitive": false,
+      "case-sensitive": false
+    }]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> collator/non-object-error</h2>
+<p><pre>["==", "foo", "bar", ["collator", ["subexpression"]]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> collator/accent-not-equals-en</h2>
+<p><pre>["!", ["!=", ["string", ["get", "lhs"]], ["get", "rhs"], ["collator", {
+        "locale": "en",
+        "diacritic-sensitive": false,
+        "case-sensitive": true
+      }]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["!", ["!=", ["string", ["get", "lhs"]], ["get", "rhs"], ["collator", {
+        "locale": "en",
+        "diacritic-sensitive": false,
+        "case-sensitive": true
+      }]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> collator/case-not-equals-en</h2>
+<p><pre>["!", ["!=", ["string", ["get", "lhs"]], ["get", "rhs"], ["collator", {
+        "locale": "en",
+        "diacritic-sensitive": true,
+        "case-sensitive": false
+      }]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["!", ["!=", ["string", ["get", "lhs"]], ["get", "rhs"], ["collator", {
+        "locale": "en",
+        "diacritic-sensitive": true,
+        "case-sensitive": false
+      }]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> collator/diacritic-omitted-en</h2>
+<p><pre>["<", ["string", ["get", "lhs"]], ["get", "rhs"], ["collator", {
+      "locale": "en",
+      "case-sensitive": ["==", 1, 1]
+    }]]</pre></p>
+<strong>Serialized:</strong><p><pre>["<", ["string", ["get", "lhs"]], ["string", ["get", "rhs"]], ["collator", {
+      "locale": "en",
+      "diacritic-sensitive": false,
+      "case-sensitive": true
+    }]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> collator/variant-equals-en</h2>
+<p><pre>["==", ["string", ["get", "lhs"]], ["get", "rhs"], ["collator", {
+      "locale": "en",
+      "diacritic-sensitive": true,
+      "case-sensitive": true
+    }]]</pre></p>
+<strong>Serialized:</strong><p><pre>["==", ["string", ["get", "lhs"]], ["get", "rhs"], ["collator", {
+      "locale": "en",
+      "diacritic-sensitive": true,
+      "case-sensitive": true
+    }]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> collator/equals-non-string-error</h2>
+<p><pre>["==", 1, 2, ["collator", {
+      "diacritic-sensitive": false,
+      "case-sensitive": false
+    }]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> acos/basic</h2>
+<p><pre>["acos", 0.5]</pre></p>
+<strong>Serialized:</strong><p><pre>1.0471975511965979</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> abs/basic</h2>
+<p><pre>["abs", ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["abs", ["number", ["get", "x"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> ceil/basic</h2>
+<p><pre>["ceil", ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["ceil", ["number", ["get", "x"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> case/basic</h2>
+<p><pre>["case", ["get", "x"], "x", ["get", "y"], "y", "otherwise"]</pre></p>
+<strong>Serialized:</strong><p><pre>["case", ["boolean", ["get", "x"]], "x", ["boolean", ["get", "y"]], "y", "otherwise"]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> case/infer-array-type</h2>
+<p><pre>["case", ["boolean", ["get", "x"]], ["literal", ["one"]], ["literal", ["one", "two"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["case", ["boolean", ["get", "x"]], ["literal", ["one"]], ["literal", ["one", "two"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> case/precedence</h2>
+<p><pre>["boolean", ["all", false, ["case", true, true, true]]]</pre></p>
+<strong>Serialized:</strong><p><pre>false</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> literal/empty</h2>
+<p><pre>["literal"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> literal/object</h2>
+<p><pre>["literal", {
+    "x": 1
+  }]</pre></p>
+<strong>Serialized:</strong><p><pre>["literal", {
+    "x": 1
+  }]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> literal/string-array</h2>
+<p><pre>["literal", ["1", "2"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["literal", ["1", "2"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> literal/u2028u2029</h2>
+<p><pre>"ah  oy!"</pre></p>
+<strong>Serialized:</strong><p><pre>"ah  oy!"</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> literal/string</h2>
+<p><pre>"ahoy!"</pre></p>
+<strong>Serialized:</strong><p><pre>"ahoy!"</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> literal/infer-empty-array-type</h2>
+<p><pre>["literal", []]</pre></p>
+<strong>Serialized:</strong><p><pre>["literal", []]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> literal/boolean-array</h2>
+<p><pre>["literal", [true, false]]</pre></p>
+<strong>Serialized:</strong><p><pre>["literal", [true, false]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> literal/multiple-args</h2>
+<p><pre>["literal", {}, []]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> literal/number-array</h2>
+<p><pre>["literal", [1, 2]]</pre></p>
+<strong>Serialized:</strong><p><pre>["literal", [1, 2]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> literal/nested-array</h2>
+<p><pre>["literal", [1, [3, 4]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["literal", [1, [3, 4]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> literal/mixed-primitive-array</h2>
+<p><pre>["literal", [1, "2"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["literal", [1, "2"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> less/value</h2>
+<p><pre>["<", ["get", "x"], ["get", "y"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["<", ["get", "x"], ["get", "y"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> less/string</h2>
+<p><pre>["<", ["string", ["get", "x"]], ["string", ["get", "y"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["<", ["string", ["get", "x"]], ["string", ["get", "y"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> less/string-and-value</h2>
+<p><pre>["<", ["string", ["get", "x"]], ["get", "y"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["<", ["string", ["get", "x"]], ["string", ["get", "y"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> less/null</h2>
+<p><pre>["<", null, null]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> less/boolean</h2>
+<p><pre>["<", ["boolean", ["get", "x"]], ["boolean", ["get", "y"]]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> less/number</h2>
+<p><pre>["<", ["number", ["get", "x"]], ["number", ["get", "y"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["<", ["number", ["get", "x"]], ["number", ["get", "y"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> less/mismatch</h2>
+<p><pre>["<", ["string", ["get", "x"]], ["number", ["get", "y"]]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> less_or_equal/value</h2>
+<p><pre>["<=", ["get", "x"], ["get", "y"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["<=", ["get", "x"], ["get", "y"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> less_or_equal/string</h2>
+<p><pre>["<=", ["string", ["get", "x"]], ["string", ["get", "y"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["<=", ["string", ["get", "x"]], ["string", ["get", "y"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> less_or_equal/string-and-value</h2>
+<p><pre>["<", ["string", ["get", "x"]], ["get", "y"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["<", ["string", ["get", "x"]], ["string", ["get", "y"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> less_or_equal/null</h2>
+<p><pre>["<=", null, null]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> less_or_equal/boolean</h2>
+<p><pre>["<=", ["boolean", ["get", "x"]], ["boolean", ["get", "y"]]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> less_or_equal/number</h2>
+<p><pre>["<=", ["number", ["get", "x"]], ["number", ["get", "y"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["<=", ["number", ["get", "x"]], ["number", ["get", "y"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> less_or_equal/mismatch</h2>
+<p><pre>["<=", ["string", ["get", "x"]], ["number", ["get", "y"]]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> length/array</h2>
+<p><pre>["length", ["array", ["get", "x"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["length", ["array", ["get", "x"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> length/invalid</h2>
+<p><pre>["length", 0]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> length/implicit</h2>
+<p><pre>["length", ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["length", ["get", "x"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> length/string</h2>
+<p><pre>["length", ["string", ["get", "x"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["length", ["string", ["get", "x"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> geometry-type/basic</h2>
+<p><pre>["geometry-type"]</pre></p>
+<strong>Serialized:</strong><p><pre>["geometry-type"]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> to-boolean/basic</h2>
+<p><pre>["to-boolean", ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["to-boolean", ["get", "x"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> to-boolean/2-ary</h2>
+<p><pre>["to-boolean", ["get", "x"], ["get", "y"]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> sqrt/basic</h2>
+<p><pre>["sqrt", ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["sqrt", ["number", ["get", "x"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> minus/basic</h2>
+<p><pre>["-", 5, 7]</pre></p>
+<strong>Serialized:</strong><p><pre>-2</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> minus/arity-1</h2>
+<p><pre>["-", 5]</pre></p>
+<strong>Serialized:</strong><p><pre>-5</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> minus/arity-0</h2>
+<p><pre>["-"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> minus/inference-arity-2</h2>
+<p><pre>["-", ["get", "x"], 7]</pre></p>
+<strong>Serialized:</strong><p><pre>["-", ["number", ["get", "x"]], 7]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> all/short-circuiting</h2>
+<p><pre>["all", false, ["error", "unreachable"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["all", false, ["error", "unreachable"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> all/basic</h2>
+<p><pre>["all", ["boolean", ["get", "x"]], ["boolean", ["get", "y"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["all", ["boolean", ["get", "x"]], ["boolean", ["get", "y"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> all/arity-1</h2>
+<p><pre>["all", false]</pre></p>
+<strong>Serialized:</strong><p><pre>false</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> all/arity-0</h2>
+<p><pre>["all"]</pre></p>
+<strong>Serialized:</strong><p><pre>true</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> rgba/basic</h2>
+<p><pre>["rgba", 0, 0, 255, 1]</pre></p>
+<strong>Serialized:</strong><p><pre>["rgba", 0, 0, 255, 1]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> rgba/out-of-bounds</h2>
+<p><pre>["rgba", 0, 0, ["number", ["get", "b"]], ["number", ["get", "a"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["rgba", 0, 0, ["number", ["get", "b"]], ["number", ["get", "a"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> max/basic</h2>
+<p><pre>["max", 0, -1, 100]</pre></p>
+<strong>Serialized:</strong><p><pre>100</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> max/arity-1</h2>
+<p><pre>["max", 1]</pre></p>
+<strong>Serialized:</strong><p><pre>1</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> max/arity-0</h2>
+<p><pre>["all", ["<", ["max"], 0], ["==", 0, ["/", 1, ["max"]]]]</pre></p>
+<strong>Serialized:</strong><p><pre>true</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> min/basic</h2>
+<p><pre>["min", 0, -1, 10]</pre></p>
+<strong>Serialized:</strong><p><pre>-1</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> min/arity-1</h2>
+<p><pre>["min", 1]</pre></p>
+<strong>Serialized:</strong><p><pre>1</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> min/arity-0</h2>
+<p><pre>["all", [">", ["min"], 0], ["==", 0, ["/", 1, ["min"]]]]</pre></p>
+<strong>Serialized:</strong><p><pre>true</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> log10/basic</h2>
+<p><pre>["log10", 100]</pre></p>
+<strong>Serialized:</strong><p><pre>2</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> coalesce/error</h2>
+<p><pre>["coalesce", ["number", ["get", "x"]], ["number", ["get", "y"]], ["number", ["get", "z"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["coalesce", ["number", ["get", "x"]], ["number", ["get", "y"]], ["number", ["get", "z"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> coalesce/argument-type-mismatch</h2>
+<p><pre>["coalesce", ["get", "a"], 5]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> coalesce/inference</h2>
+<p><pre>["coalesce", ["get", "a"], ["get", "b"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["to-string", ["coalesce", ["get", "a"], ["get", "b"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> coalesce/basic</h2>
+<p><pre>["coalesce", ["get", "x"], ["get", "y"], ["get", "z"], 0]</pre></p>
+<strong>Serialized:</strong><p><pre>["coalesce", ["get", "x"], ["get", "y"], ["get", "z"], 0]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> coalesce/infer-array-type</h2>
+<p><pre>["coalesce", ["literal", ["one"]], ["literal", ["one", "two"]], null]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> coalesce/null</h2>
+<p><pre>["coalesce", ["get", "z"], 0]</pre></p>
+<strong>Serialized:</strong><p><pre>["coalesce", ["get", "z"], 0]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> boolean/default-value</h2>
+<p><pre>["boolean", ["get", "x"], false]</pre></p>
+<strong>Serialized:</strong><p><pre>["boolean", ["get", "x"], false]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> boolean/basic</h2>
+<p><pre>["boolean", ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["boolean", ["get", "x"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> e/basic</h2>
+<p><pre>["e"]</pre></p>
+<strong>Serialized:</strong><p><pre>2.718281828459045</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> tan/basic</h2>
+<p><pre>["tan", 0.7853981633974483]</pre></p>
+<strong>Serialized:</strong><p><pre>0.9999999999999999</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> mod/basic</h2>
+<p><pre>["%", 18, 12]</pre></p>
+<strong>Serialized:</strong><p><pre>6</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> greater_or_equal/value</h2>
+<p><pre>[">=", ["get", "x"], ["get", "y"]]</pre></p>
+<strong>Serialized:</strong><p><pre>[">=", ["get", "x"], ["get", "y"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> greater_or_equal/string</h2>
+<p><pre>[">=", ["string", ["get", "x"]], ["string", ["get", "y"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>[">=", ["string", ["get", "x"]], ["string", ["get", "y"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> greater_or_equal/string-and-value</h2>
+<p><pre>[">=", ["string", ["get", "x"]], ["get", "y"]]</pre></p>
+<strong>Serialized:</strong><p><pre>[">=", ["string", ["get", "x"]], ["string", ["get", "y"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> greater_or_equal/null</h2>
+<p><pre>[">=", null, null]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> greater_or_equal/boolean</h2>
+<p><pre>[">=", ["boolean", ["get", "x"]], ["boolean", ["get", "y"]]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> greater_or_equal/number</h2>
+<p><pre>[">=", ["number", ["get", "x"]], ["number", ["get", "y"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>[">=", ["number", ["get", "x"]], ["number", ["get", "y"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> greater_or_equal/mismatch</h2>
+<p><pre>[">=", ["string", ["get", "x"]], ["number", ["get", "y"]]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> ln2/basic</h2>
+<p><pre>["ln2"]</pre></p>
+<strong>Serialized:</strong><p><pre>0.6931471805599453</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> at/basic</h2>
+<p><pre>["number", ["at", ["number", ["get", "i"]], ["array", ["get", "arr"]]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["number", ["at", ["number", ["get", "i"]], ["array", ["get", "arr"]]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> at/infer-array-type</h2>
+<p><pre>["at", 1, ["literal", [1, 2, 3]]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> zoom/invalid-nested-2</h2>
+<p><pre>["interpolate", ["linear"], ["zoom"], 0, 0, 1, ["interpolate", ["linear"], ["zoom"], 0, 0, 1, 1]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> zoom/invalid-nested-4</h2>
+<p><pre>["coalesce", ["interpolate", ["linear"], ["zoom"], 0, 0, 1, 1], ["interpolate", ["linear"], ["zoom"], 0, 0, 1, 1]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> zoom/nested-let</h2>
+<p><pre>["let", "x", ["number", ["get", "a"]], ["interpolate", ["linear"], ["zoom"], 0, 0, 30, ["var", "x"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>["let", "x", ["number", ["get", "a"]], ["interpolate", ["linear"], ["zoom"], 0, 0, 30, ["var", "x"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> zoom/basic</h2>
+<p><pre>["interpolate", ["linear"], ["zoom"], 0, 0, 30, 30]</pre></p>
+<strong>Serialized:</strong><p><pre>["interpolate", ["linear"], ["zoom"], 0, 0, 30, 30]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> zoom/invalid-nested-5</h2>
+<p><pre>["let", "x", ["interpolate", ["linear"], ["zoom"], 0, 0, 1, 1], ["+", 0.5, ["get", "x"]]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> zoom/nested-coalesce</h2>
+<p><pre>["coalesce", ["interpolate", ["linear"], ["zoom"], 0, 0, 30, 30]]</pre></p>
+<strong>Serialized:</strong><p><pre>["coalesce", ["interpolate", ["linear"], ["zoom"], 0, 0, 30, 30]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> zoom/invalid-nested-1</h2>
+<p><pre>["+", 0.5, ["interpolate", ["linear"], ["zoom"], 0, 0, 1, 1]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> zoom/invalid-no-curve</h2>
+<p><pre>["+", ["zoom"], 0]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> zoom/invalid-nested-3</h2>
+<p><pre>["let", "x", ["interpolate", ["linear"], ["zoom"], 0, 0, 1, 1], ["interpolate", ["linear"], ["zoom"], 0, 0, 1, 1]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> to-number/basic</h2>
+<p><pre>["to-number", ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["to-number", ["get", "x"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> to-number/2-ary</h2>
+<p><pre>["to-number", ["get", "x"], ["get", "y"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["to-number", ["get", "x"], ["get", "y"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> to-rgba/alpha</h2>
+<p><pre>["to-rgba", ["rgba", 0, 128, 255, 0.5]]</pre></p>
+<strong>Serialized:</strong><p><pre>["literal", [0, 128, 255, 0.5]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> to-rgba/zero</h2>
+<p><pre>["to-rgba", ["rgba", 0, 0, 0, 0]]</pre></p>
+<strong>Serialized:</strong><p><pre>["literal", [0, 0, 0, 0]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> to-rgba/basic</h2>
+<p><pre>["to-rgba", ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["to-rgba", ["to-color", ["get", "x"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> greater/value</h2>
+<p><pre>[">", ["get", "x"], ["get", "y"]]</pre></p>
+<strong>Serialized:</strong><p><pre>[">", ["get", "x"], ["get", "y"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> greater/string</h2>
+<p><pre>[">", ["string", ["get", "x"]], ["string", ["get", "y"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>[">", ["string", ["get", "x"]], ["string", ["get", "y"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> greater/string-and-value</h2>
+<p><pre>[">", ["string", ["get", "x"]], ["get", "y"]]</pre></p>
+<strong>Serialized:</strong><p><pre>[">", ["string", ["get", "x"]], ["string", ["get", "y"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> greater/null</h2>
+<p><pre>[">", null, null]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> greater/boolean</h2>
+<p><pre>[">", ["boolean", ["get", "x"]], ["boolean", ["get", "y"]]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> greater/number</h2>
+<p><pre>[">", ["number", ["get", "x"]], ["number", ["get", "y"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>[">", ["number", ["get", "x"]], ["number", ["get", "y"]]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> greater/mismatch</h2>
+<p><pre>[">", ["string", ["get", "x"]], ["number", ["get", "y"]]]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> number/default-value</h2>
+<p><pre>["number", ["get", "x"], -1]</pre></p>
+<strong>Serialized:</strong><p><pre>["number", ["get", "x"], -1]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> number/basic</h2>
+<p><pre>["number", ["get", "x"]]</pre></p>
+<strong>Serialized:</strong><p><pre>["number", ["get", "x"]]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> constant-folding/var</h2>
+<p><pre>["let", "a", 1, "b", 2, ["+", ["+", ["var", "a"], ["var", "b"]], ["var", "a"]]]</pre></p>
+<strong>Serialized:</strong><p><pre>4</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> constant-folding/to-color</h2>
+<p><pre>["to-color", "red"]</pre></p>
+<strong>Serialized:</strong><p><pre>["rgba", 255, 0, 0, 1]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> constant-folding/evaluation-error</h2>
+<p><pre>["step", ["get", "x"], "black", 0, "invalid", 10, "blue"]</pre></p>
+<strong>Serialized:</strong><p><pre></pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> constant-folding/to-color-inferred</h2>
+<p><pre>"red"</pre></p>
+<strong>Serialized:</strong><p><pre>["rgba", 255, 0, 0, 1]</pre></p>
+</div>
+<div class="test passed">
+<h2><span class="label">passed</span> pi/basic</h2>
+<p><pre>["pi"]</pre></p>
+<strong>Serialized:</strong><p><pre>3.141592653589793</pre></p>
+</div>
+<div class="test ignored passed">
+<h2><span class="label">ignored passed</span> collator/accent-equals-de</h2>
+<p><pre>["case", ["==", ["resolved-locale", ["collator", {
+          "locale": "de",
+          "diacritic-sensitive": false,
+          "case-sensitive": true
+        }]], "de"], ["==", ["string", ["get", "lhs"]], ["get", "rhs"], ["collator", {
+        "locale": "de",
+        "diacritic-sensitive": false,
+        "case-sensitive": true
+      }]], ["case", ["==", ["get", "rhs"], "ue"], true, false]]</pre></p>
+<strong>Serialized:</strong><p><pre>["case", ["==", ["resolved-locale", ["collator", {
+          "locale": "de",
+          "diacritic-sensitive": false,
+          "case-sensitive": true
+        }]], "de"], ["==", ["string", ["get", "lhs"]], ["get", "rhs"], ["collator", {
+        "locale": "de",
+        "diacritic-sensitive": false,
+        "case-sensitive": true
+      }]], ["case", ["==", ["get", "rhs"], "ue"], true, false]]</pre></p>
+</div>
+<div class="test ignored hide">
+<h2><span class="label">ignored</span> interpolate-hcl/linear</h2>
+<p><pre>["interpolate-hcl", ["linear"], ["get", "x"], 1, "red", 11, ["get", "color"]]</pre></p>
+<p><strong>Difference:</strong><pre>Compiled expression difference:
+{
+-  "type": "color",
++  "errors": [{
+-  "isZoomConstant": true,
++      "error": "Unknown expression \"interpolate-hcl\". If you wanted a literal array, use [\"literal\", [...]].",
+-  "isFeatureConstant": false,
++      "key": "[0]"
+-  "result": "success"
++    }],
+-}
++  "result": "error"
++}
+
+</pre></p>
+</div>
+<div class="test ignored hide">
+<h2><span class="label">ignored</span> resolved-locale/basic</h2>
+<p><pre>["==", ["resolved-locale", ["collator", {
+        "locale": "en",
+        "diacritic-sensitive": true,
+        "case-sensitive": true
+      }]], "en"]</pre></p>
+<p><strong>Difference:</strong><pre>Compiled expression difference:
+{
+  "type": "boolean",
+  "isZoomConstant": true,
+-  "isFeatureConstant": true,
++  "isFeatureConstant": false,
+  "result": "success"
+}
+
+</pre></p>
+</div>
+<div class="test ignored hide">
+<h2><span class="label">ignored</span> interpolate-lab/linear</h2>
+<p><pre>["interpolate-lab", ["linear"], ["get", "x"], 1, "red", 11, ["get", "color"]]</pre></p>
+<p><strong>Difference:</strong><pre>Compiled expression difference:
+{
+-  "type": "color",
++  "errors": [{
+-  "isZoomConstant": true,
++      "error": "Unknown expression \"interpolate-lab\". If you wanted a literal array, use [\"literal\", [...]].",
+-  "isFeatureConstant": false,
++      "key": "[0]"
+-  "result": "success"
++    }],
+-}
++  "result": "error"
++}
+
+</pre></p>
+</div>
+<div class="test ignored hide">
+<h2><span class="label">ignored</span> legacy/interval/composite</h2>
+<p><pre>{
+  "stops": [[{
+        "value": 0,
+        "zoom": 0
+      }, 0], [{
+        "value": 1,
+        "zoom": 0
+      }, 1], [{
+        "value": 0,
+        "zoom": 1
+      }, 2], [{
+        "value": 1,
+        "zoom": 1
+      }, 3]],
+  "property": "p",
+  "type": "interval"
+}</pre></p>
+<p><strong>Difference:</strong><pre>Serialized expression difference:
+-["interpolate", ["linear"], ["zoom"], 0, ["step", ["number", ["get", "p"]], 0, 1, 1], 1, ["step", ["number", ["get", "p"]], 2, 1, 3]]
++["step", ["zoom"], ["step", ["number", ["get", "p"]], 0, 1, 1], 1, ["step", ["number", ["get", "p"]], 2, 1, 3]]
+
+Expression outputs difference:
+[{
+    "error": "Expected value to be of type number, but found null instead."
+-  }, 1, 1, 1, 2, 2, {
++  }, 0, 0, 0, 1, 1, {
+    "error": "Expected value to be of type number, but found string instead."
+  }]
+
+Roundtripped through serialize expression outputs difference:
+[{
+    "error": "Expected value to be of type number, but found null instead."
+-  }, 1, 1, 1, 2, 2, {
++  }, 0, 0, 0, 1, 1, {
+    "error": "Expected value to be of type number, but found string instead."
+  }]
+
+</pre></p>
+</div>
+<div class="test ignored hide">
+<h2><span class="label">ignored</span> legacy/interval/tokens-zoom</h2>
+<p><pre>{
+  "stops": [[0, "0 {a}"], [1, "{b}"]],
+  "type": "interval"
+}</pre></p>
+<p><strong>Difference:</strong><pre>Compiled expression difference:
+{
+  "type": "string",
+  "isZoomConstant": false,
+-  "isFeatureConstant": false,
++  "isFeatureConstant": true,
+  "result": "success"
+}
+
+</pre></p>
+</div>
+<div class="test ignored hide">
+<h2><span class="label">ignored</span> legacy/interval/composite-default</h2>
+<p><pre>{
+  "default": -1,
+  "stops": [[{
+        "value": 0,
+        "zoom": 0
+      }, 0], [{
+        "value": 1,
+        "zoom": 0
+      }, 1], [{
+        "value": 0,
+        "zoom": 1
+      }, 2], [{
+        "value": 1,
+        "zoom": 1
+      }, 3]],
+  "property": "p",
+  "type": "interval"
+}</pre></p>
+<p><strong>Difference:</strong><pre>Serialized expression difference:
+-["interpolate", ["linear"], ["zoom"], 0, ["case", ["==", ["typeof", ["get", "p"]], "number"], ["step", ["number", ["get", "p"]], 0, 1, 1], -1], 1, ["case", ["==", ["typeof", ["get", "p"]], "number"], ["step", ["number", ["get", "p"]], 2, 1, 3], -1]]
++["step", ["zoom"], ["case", ["==", ["typeof", ["get", "p"]], "number"], ["step", ["number", ["get", "p"]], 0, 1, 1], -1], 1, ["case", ["==", ["typeof", ["get", "p"]], "number"], ["step", ["number", ["get", "p"]], 2, 1, 3], -1]]
+
+Expression outputs difference:
+-[-1, 1, 1, 1, 2, 2, -1]
++[-1, 0, 0, 0, 1, 1, -1]
+
+Roundtripped through serialize expression outputs difference:
+-[-1, 1, 1, 1, 2, 2, -1]
++[-1, 0, 0, 0, 1, 1, -1]
+
+</pre></p>
+</div>
+<div class="test ignored hide">
+<h2><span class="label">ignored</span> legacy/exponential/color-lab</h2>
+<p><pre>{
+  "colorSpace": "lab",
+  "stops": [[0, "black"], [1, "white"]],
+  "property": "p",
+  "type": "exponential"
+}</pre></p>
+<p><strong>Difference:</strong><pre>Serialized expression difference:
+-["interpolate", ["linear"], ["number", ["get", "p"]], 0, ["rgba", 0, 0, 0, 1], 1, ["rgba", 255, 255, 255, 1]]
++["interpolate-lab", ["linear"], ["number", ["get", "p"]], 0, ["rgba", 0, 0, 0, 1], 1, ["rgba", 255, 255, 255, 1]]
+
+Expression outputs difference:
+[{
+    "error": "Expected value to be of type number, but found null instead."
+-  }, [0, 0, 0, 1], [0, 0, 0, 1], [0.5, 0.5, 0.5, 1], [1, 1, 1, 1], [1, 1, 1, 1], {
++  }, [0, 0, 0, 1], [0, 0, 0, 1], [0.499999, 0.5, 0.499999, 1], [1, 1, 1, 1], [1, 1, 1, 1], {
+    "error": "Expected value to be of type number, but found string instead."
+  }]
+
+Roundtripped through serialize expression outputs difference:
+[{
+    "error": "Expected value to be of type number, but found null instead."
+-  }, [0, 0, 0, 1], [0, 0, 0, 1], [0.5, 0.5, 0.5, 1], [1, 1, 1, 1], [1, 1, 1, 1], {
++  }, [0, 0, 0, 1], [0, 0, 0, 1], [0.499999, 0.5, 0.499999, 1], [1, 1, 1, 1], [1, 1, 1, 1], {
+    "error": "Expected value to be of type number, but found string instead."
+  }]
+
+</pre></p>
+</div>
+<div class="test ignored hide">
+<h2><span class="label">ignored</span> legacy/exponential/color-hcl</h2>
+<p><pre>{
+  "colorSpace": "hcl",
+  "stops": [[0, "black"], [1, "white"]],
+  "property": "p",
+  "type": "exponential"
+}</pre></p>
+<p><strong>Difference:</strong><pre>Serialized expression difference:
+-["interpolate", ["linear"], ["number", ["get", "p"]], 0, ["rgba", 0, 0, 0, 1], 1, ["rgba", 255, 255, 255, 1]]
++["interpolate-hcl", ["linear"], ["number", ["get", "p"]], 0, ["rgba", 0, 0, 0, 1], 1, ["rgba", 255, 255, 255, 1]]
+
+Expression outputs difference:
+[{
+    "error": "Expected value to be of type number, but found null instead."
+-  }, [0, 0, 0, 1], [0, 0, 0, 1], [0.5, 0.5, 0.5, 1], [1, 1, 1, 1], [1, 1, 1, 1], {
++  }, [0, 0, 0, 1], [0, 0, 0, 1], [0.5, 0.5, 0.499999, 1], [1, 1, 1, 1], [1, 1, 1, 1], {
+    "error": "Expected value to be of type number, but found string instead."
+  }]
+
+Roundtripped through serialize expression outputs difference:
+[{
+    "error": "Expected value to be of type number, but found null instead."
+-  }, [0, 0, 0, 1], [0, 0, 0, 1], [0.5, 0.5, 0.5, 1], [1, 1, 1, 1], [1, 1, 1, 1], {
++  }, [0, 0, 0, 1], [0, 0, 0, 1], [0.5, 0.5, 0.499999, 1], [1, 1, 1, 1], [1, 1, 1, 1], {
+    "error": "Expected value to be of type number, but found string instead."
+  }]
+
+</pre></p>
+</div>
+<div class="test ignored hide">
+<h2><span class="label">ignored</span> legacy/categorical/array</h2>
+<p><pre>{
+  "stops": [[0, [0]], [1, [1]]],
+  "property": "p",
+  "type": "categorical"
+}</pre></p>
+<p><strong>Difference:</strong><pre>Serialized expression difference:
+-["match", ["get", "p"], 0, ["literal", [0]], 1, ["literal", [1]], ["error"]]
++["match", ["get", "p"], 0, ["literal", [0]], 1, ["literal", [1]], ["literal", [-1]]]
+
+Recompiled expression difference:
+{
+-  "type": "array<number>",
++  "errors": [{
+-  "isZoomConstant": true,
++      "error": "Expected arguments of type (string), but found () instead.",
+-  "isFeatureConstant": false,
++      "key": "[6]"
+-  "result": "success"
++    }],
+-}
++  "result": "error"
++}
+
+Expression outputs difference:
+-[{
++[[-1], [0], [1], [-1], [-1]]
+-    "error": "replaced with default"
+-  }, [0], [1], {
+-    "error": "replaced with default"
+-  }, {
+-    "error": "replaced with default"
+-  }]
+
+</pre></p>
+</div>
+<div class="test ignored hide">
+<h2><span class="label">ignored</span> legacy/categorical/color</h2>
+<p><pre>{
+  "stops": [["0", "red"], ["1", "lime"]],
+  "property": "p",
+  "type": "categorical"
+}</pre></p>
+<p><strong>Difference:</strong><pre>Serialized expression difference:
+-["match", ["get", "p"], "0", ["rgba", 255, 0, 0, 1], "1", ["rgba", 0, 255, 0, 1], ["error"]]
++["match", ["get", "p"], "0", ["rgba", 255, 0, 0, 1], "1", ["rgba", 0, 255, 0, 1], ["rgba", 0, 0, 255, 1]]
+
+Recompiled expression difference:
+{
+-  "type": "color",
++  "errors": [{
+-  "isZoomConstant": true,
++      "error": "Expected arguments of type (string), but found () instead.",
+-  "isFeatureConstant": false,
++      "key": "[6]"
+-  "result": "success"
++    }],
+-}
++  "result": "error"
++}
+
+Expression outputs difference:
+-[{
++[[0, 0, 1, 1], [1, 0, 0, 1], [0, 1, 0, 1], [0, 0, 1, 1]]
+-    "error": "replaced with default"
+-  }, [1, 0, 0, 1], [0, 1, 0, 1], {
+-    "error": "replaced with default"
+-  }]
+
+</pre></p>
+</div>
+<div class="test ignored hide">
+<h2><span class="label">ignored</span> legacy/categorical/string</h2>
+<p><pre>{
+  "stops": [["0", "0"], ["1", "1"]],
+  "property": "p",
+  "type": "categorical"
+}</pre></p>
+<p><strong>Difference:</strong><pre>Serialized expression difference:
+-["match", ["get", "p"], "0", "0", "1", "1", ["error"]]
++["match", ["get", "p"], "0", "0", "1", "1", "-1"]
+
+Recompiled expression difference:
+{
+-  "type": "string",
++  "errors": [{
+-  "isZoomConstant": true,
++      "error": "Expected arguments of type (string), but found () instead.",
+-  "isFeatureConstant": false,
++      "key": "[6]"
+-  "result": "success"
++    }],
+-}
++  "result": "error"
++}
+
+Expression outputs difference:
+-[{
++["-1", "0", "1", "-1"]
+-    "error": "replaced with default"
+-  }, "0", "1", {
+-    "error": "replaced with default"
+-  }]
+
+</pre></p>
+</div>
+<div class="test ignored hide">
+<h2><span class="label">ignored</span> legacy/categorical/boolean</h2>
+<p><pre>{
+  "stops": [[true, true], [false, false]],
+  "property": "p",
+  "type": "categorical"
+}</pre></p>
+<p><strong>Difference:</strong><pre>Serialized expression difference:
+-["case", ["==", ["get", "p"], true], true, ["==", ["get", "p"], false], false, ["error"]]
++["case", ["==", ["get", "p"], true], true, ["==", ["get", "p"], false], false, true]
+
+Recompiled expression difference:
+{
+-  "type": "boolean",
++  "errors": [{
+-  "isZoomConstant": true,
++      "error": "Expected arguments of type (string), but found () instead.",
+-  "isFeatureConstant": false,
++      "key": "[5]"
+-  "result": "success"
++    }],
+-}
++  "result": "error"
++}
+
+Expression outputs difference:
+-[{
++[true, true, false, true]
+-    "error": "replaced with default"
+-  }, true, false, {
+-    "error": "replaced with default"
+-  }]
+
+</pre></p>
+</div>
+<div class="test ignored hide">
+<h2><span class="label">ignored</span> legacy/categorical/number</h2>
+<p><pre>{
+  "stops": [[0, 0], [1, 1]],
+  "property": "p",
+  "type": "categorical"
+}</pre></p>
+<p><strong>Difference:</strong><pre>Serialized expression difference:
+-["match", ["get", "p"], 0, 0, 1, 1, ["error"]]
++["match", ["get", "p"], 0, 0, 1, 1, -1]
+
+Recompiled expression difference:
+{
+-  "type": "number",
++  "errors": [{
+-  "isZoomConstant": true,
++      "error": "Expected arguments of type (string), but found () instead.",
+-  "isFeatureConstant": false,
++      "key": "[6]"
+-  "result": "success"
++    }],
+-}
++  "result": "error"
++}
+
+Expression outputs difference:
+-[{
++[-1, -1, 0, 1, -1, -1]
+-    "error": "replaced with default"
+-  }, {
+-    "error": "replaced with default"
+-  }, 0, 1, {
+-    "error": "replaced with default"
+-  }, {
+-    "error": "replaced with default"
+-  }]
+
+</pre></p>
+</div>
+<div class="test ignored hide">
+<h2><span class="label">ignored</span> legacy/identity/enum-default</h2>
+<p><pre>{
+  "default": "a",
+  "property": "p",
+  "type": "identity"
+}</pre></p>
+<p><strong>Difference:</strong><pre>Serialized expression difference:
+-["string", ["get", "p"], "a"]
++["match", ["get", "p"], ["a", "b"], ["string", ["get", "p"]], "a"]
+
+Expression outputs difference:
+-["a", "a", "b", "c"]
++["a", "a", "b", "a"]
+
+Roundtripped through serialize expression outputs difference:
+-["a", "a", "b", "c"]
++["a", "a", "b", "a"]
+
+</pre></p>
+</div>
+<div class="test ignored hide">
+<h2><span class="label">ignored</span> legacy/identity/color-default</h2>
+<p><pre>{
+  "default": "red",
+  "property": "p",
+  "type": "identity"
+}</pre></p>
+<p><strong>Difference:</strong><pre>Serialized expression difference:
+-["to-color", ["get", "p"], ["rgba", 255, 0, 0, 1]]
++["to-color", ["get", "p"], "red"]
+
+</pre></p>
+</div>
+<div class="test ignored hide">
+<h2><span class="label">ignored</span> within/non-supported</h2>
+<p><pre></pre></p>
+<p><strong>Difference:</strong><pre></pre></p>
+</div>
+<div class="test ignored hide">
+<h2><span class="label">ignored</span> is-supported-script/default</h2>
+<p><pre>["is-supported-script", ["get", "x"]]</pre></p>
+<p><strong>Difference:</strong><pre>Expression outputs difference:
+-[true, false]
++[true, true]
+
+Roundtripped through serialize expression outputs difference:
+-[true, false]
++[true, true]
+
+</pre></p>
+</div>
+</div>
