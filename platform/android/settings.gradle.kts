@@ -39,3 +39,9 @@ includeBuild(cppTestProjectDir) {
 }
 
 includeBuild("./MapLibrePlugin")
+
+buildCache {
+    local {
+        isEnabled = true
+    }
+}
