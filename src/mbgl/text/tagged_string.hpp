@@ -72,8 +72,9 @@ struct SectionOptions {
 struct TaggedString {
     TaggedString() = default;
 
-    TaggedString(std::u16string text_, SectionOptions options)
-        : styledText(std::move(text_), std::vector<uint8_t>(text_.size(), 0)) {
+    TaggedString(std::u16string text_, SectionOptions options) {
+        auto size = text_.size();
+        styledText = {std::move(text_), std::vector<uint8_t>(size, 0)};
         sections.push_back(std::move(options));
     }
 
