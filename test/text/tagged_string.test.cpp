@@ -42,3 +42,19 @@ TEST(TaggedString, ImageSections) {
     EXPECT_EQ(maxSections.getCharCodeAt(0), u'\uE000');
     EXPECT_EQ(maxSections.getCharCodeAt(6399), u'\uF8FF');
 }
+
+TEST(TaggedString, ConstructorWithMove) {
+    // Test the fix for the crash in the constructor where text_.size() was used after std::move(text_)
+    std::u16string text = u"Hello World Test Text";
+    auto textSize = text.size();
+    SectionOptions options(1.0f, {}, GlyphIDType::FontPBF, 0);
+    
+    // This should not cause undefined behavior with the fix
+    TaggedString tagged(std::move(text), options);
+    
+    // Verify the tagged string was created correctly
+    EXPECT_EQ(tagged.length(), textSize);
+    EXPECT_EQ(tagged.rawText(), u"Hello World Test Text");
+    EXPECT_EQ(tagged.sectionCount(), 1);
+    EXPECT_FALSE(tagged.empty());
+}
