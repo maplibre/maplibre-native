@@ -107,7 +107,8 @@ UniqueGPUExpression GPUExpression::create(const Expression& expression, const Zo
 }
 
 float GPUExpression::evaluateFloat(const float zoom) const {
-    const auto index = std::distance(&inputs[0], std::upper_bound(&inputs[0], &inputs[stopCount], zoom));
+    const auto index = static_cast<std::uint16_t>(
+        std::distance(&inputs[0], std::upper_bound(&inputs[0], &inputs[stopCount], zoom)));
     if (index == 0) {
         return stops.floats[0];
     } else if (index == stopCount) {
@@ -153,7 +154,8 @@ Color GPUExpression::getColor(std::size_t index) const {
 }
 
 Color GPUExpression::evaluateColor(const float zoom) const {
-    const auto index = std::distance(&inputs[0], std::upper_bound(&inputs[0], &inputs[stopCount], zoom));
+    const auto index = static_cast<std::uint16_t>(
+        std::distance(&inputs[0], std::upper_bound(&inputs[0], &inputs[stopCount], zoom)));
     if (index == 0) {
         return getColor(0);
     } else if (index == stopCount) {
