@@ -40,6 +40,9 @@ struct MapLibreNavigationView: View {
                 NavigationLink("ObserverExample") {
                     ObserverExampleViewUIViewControllerRepresentable()
                 }
+                NavigationLink("LongRunningMap") {
+                    LongRunningMapView().edgesIgnoringSafeArea(.all)
+                }
                 Group {
                     NavigationLink("AnimatedLineExample") {
                         AnimatedLineExampleUIViewControllerRepresentable()
