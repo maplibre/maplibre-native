@@ -28,48 +28,6 @@ runs:
         distribution: "temurin"
         java-version: "17"
 
-    - uses: actions/setup-node@v4
-      with:
-        node-version-file: ".nvmrc"
-
-    - name: npm install
-      run: npm install --ignore-scripts
-      working-directory: .
-      shell: bash
-
-    - name: run platform/android/scripts/generate-style-code.mjs
-      run: node platform/android/scripts/generate-style-code.mjs
-      working-directory: .
-      shell: bash
-
-    - run: |
-        python3 -m venv venv
-        source venv/bin/activate
-        pip3 install pre-commit
-      shell: bash
-
-    - run: |
-        source venv/bin/activate
-        pre-commit run clang-format --all-files
-      continue-on-error: true # this can mean files are modified, which is not an error
-      shell: bash
-
-    - run: |
-        source venv/bin/activate
-        pre-commit run clang-format --all-files
-        rm -rf venv
-      shell: bash
-
-    - uses: infotroph/tree-is-clean@v1
-      with:
-        check_untracked: true
-
-    - uses: hendrikmuhs/ccache-action@v1.2
-      with:
-        key: ${{ github.job }}
-        append-timestamp: false
-        max-size: 5G
-
     - name: restore-gradle-cache
       uses: actions/cache@v4
       env:
@@ -79,3 +37,5 @@ runs:
         key: ${{ env.cache-name }}-${{ hashFiles('platform/android/buildSrc/src/main/kotlin/maplibre.dependencies.gradle.kts') }}-${{ hashFiles('platform/android/build.gradle.kts') }}-${{ hashFiles('platform/android/local.properties') }}-${{ hashFiles('platform/android/gradle/wrapper/gradle-wrapper.properties') }}
         restore-keys: |
           - ${{ env.cache-name }}
+
+    - uses: ./.github/actions/install-sccache
