@@ -25,8 +25,6 @@ public:
 
     void loadDescription(FileSource&) final;
 
-    mapbox::base::WeakPtr<Source> makeWeakPtr() final { return weakFactory.makeWeakPtr(); }
-
 protected:
     Mutable<Source::Impl> createMutable() const noexcept final;
     virtual void setTilesetOverrides(Tileset& tileset);
@@ -34,8 +32,6 @@ protected:
 private:
     const variant<std::string, Tileset> urlOrTileset;
     std::unique_ptr<AsyncRequest> req;
-    mapbox::base::WeakPtrFactory<Source> weakFactory{this};
-    // Do not add members here, see `WeakPtrFactory`
 };
 
 template <>
