@@ -12,6 +12,7 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
         // #-example-code(actionJournalOptions)
         let options = MLNMapOptions()
         options.actionJournalOptions.enabled = true
+        options.actionJournalOptions.renderingStatsReportInterval = 10
         options.styleURL = AMERICANA_STYLE
         mapView = MLNMapView(frame: view.bounds, options: options)
         // #-end-example-code

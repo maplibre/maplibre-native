@@ -33,7 +33,6 @@ target_sources(
     PRIVATE
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/collator.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/number_format.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/layermanager/layer_manager.cpp
@@ -71,8 +70,16 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/thread_local.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/utf.cpp
-        ${PROJECT_SOURCE_DIR}/platform/linux/src/gl_functions.cpp
 )
+
+if(MLN_WITH_OPENGL)
+    target_sources(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
+            ${PROJECT_SOURCE_DIR}/platform/linux/src/gl_functions.cpp
+    )
+endif()
 
 if(MLN_WITH_EGL)
     find_package(OpenGL REQUIRED EGL)
@@ -168,23 +175,40 @@ target_link_libraries(
         ${WEBP_LIBRARIES}
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:${ICUUC_LIBRARIES}>
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:${ICUI18N_LIBRARIES}>
-        $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:$<IF:$<BOOL:${MLN_CORE_INCLUDE_DEPS}>,$<TARGET_OBJECTS:mbgl-vendor-icu>,mbgl-vendor-icu>>
+        $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:mbgl-vendor-icu>
         PNG::PNG
         mbgl-vendor-nunicode
         mbgl-vendor-sqlite
 )
 
 # Bundle system provided libraries
-if(MLN_CORE_INCLUDE_DEPS AND NOT MLN_USE_BUILTIN_ICU AND NOT "${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
+if(NOT MLN_USE_BUILTIN_ICU AND NOT "${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
     message(STATUS "Found armerge: ${ARMERGE}")
+    include(${CMAKE_CURRENT_LIST_DIR}/cmake/find_static_library.cmake)
+    set(STATIC_LIBS "")
+
+    find_static_library(STATIC_LIBS NAMES png)
+    find_static_library(STATIC_LIBS NAMES z)
+    find_static_library(STATIC_LIBS NAMES jpeg)
+    find_static_library(STATIC_LIBS NAMES webp)
+    find_static_library(STATIC_LIBS NAMES curl)
+    find_static_library(STATIC_LIBS NAMES uv uv_a)
+    find_static_library(STATIC_LIBS NAMES ssl)
+    find_static_library(STATIC_LIBS NAMES crypto)
+
     add_custom_command(
         TARGET mbgl-core
         POST_BUILD
         COMMAND armerge --keep-symbols '.*' --output libmbgl-core-amalgam.a
             $<TARGET_FILE:mbgl-core>
+            $<TARGET_FILE:freetype>
+            $<TARGET_FILE:mbgl-vendor-csscolorparser>
+            $<TARGET_FILE:harfbuzz>
+            $<TARGET_FILE:mbgl-vendor-sqlite>
             ${ICUUC_LIBRARY_DIRS}/libicuuc.a
             ${ICUUC_LIBRARY_DIRS}/libicudata.a
             ${ICUI18N_LIBRARY_DIRS}/libicui18n.a
+            ${STATIC_LIBS}
     )
 endif()
 

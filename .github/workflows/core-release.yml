@@ -21,7 +21,10 @@ jobs:
             include \
             vendor/maplibre-native-base/include \
             vendor/maplibre-native-base/deps/variant/include \
-            vendor/maplibre-native-base/deps/geometry.hpp/include
+            vendor/maplibre-native-base/deps/geometry.hpp/include \
+            vendor/maplibre-native-base/deps/geojson.hpp/include \
+            vendor/metal-cpp \
+            vendor/maplibre-native-base/extras/expected-lite/include
       - name: Create Release
         run: |
           gh release create core-${{ github.sha }} \
@@ -78,8 +81,8 @@ jobs:
 
       - name: Build mbgl-core for Linux
         run: |
-          cmake --preset linux-${{ matrix.renderer }}-core -DCMAKE_CXX_COMPILER_LAUNCHER=""
-          cmake --build --preset linux-${{ matrix.renderer }}-core
+          cmake --preset linux-${{ matrix.renderer }} -DCMAKE_CXX_COMPILER_LAUNCHER=""
+          cmake --build build-linux-${{ matrix.renderer }} --target mbgl-core
 
       - name: Rename artifact
         run: |
