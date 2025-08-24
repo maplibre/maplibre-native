@@ -30,9 +30,13 @@
 #include <mbgl/plugin/plugin_layer_factory.hpp>
 #include <mbgl/plugin/plugin_layer.hpp>
 #include <mbgl/plugin/plugin_layer_impl.hpp>
+#include <mbgl/plugin/plugin_file_source.hpp>
+#include <mbgl/plugin/plugin_style_filter.hpp>
+#include <mbgl/plugin/feature_collection.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/render_pass.hpp>
+#include <mbgl/storage/file_source_manager.hpp>
 
 #import "Mapbox.h"
 #import "MLNShape_Private.h"
@@ -80,8 +84,11 @@
 #import "MLNActionJournalOptions_Private.h"
 #import "MLNMapProjection.h"
 #import "MLNPluginLayer.h"
+#import "MLNPluginProtocolHandler.h"
 #import "MLNStyleLayerManager.h"
 #include "MLNPluginStyleLayer_Private.h"
+#include "MLNStyleFilter.h"
+#include "MLNStyleFilter_Private.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -452,8 +459,12 @@ public:
 @property (nonatomic) CADisplayLink *displayLink;
 @property (nonatomic, assign) BOOL needsDisplayRefresh;
 
-// Plugin Layers
+// Plugin Objects
 @property NSMutableArray *pluginLayers;
+@property NSMutableArray *pluginProtocols;
+
+// Style Filters
+@property NSMutableArray *styleFilters;
 
 @end
 
@@ -7664,6 +7675,44 @@ static void *windowScreenContext = &windowScreenContext;
     _mbglMap->triggerRepaint();
 }
 
+-(MLNPluginLayerTileFeature *)featureFromCore:(std::shared_ptr<mbgl::plugin::Feature>)feature {
+
+    MLNPluginLayerTileFeature *tempResult = [[MLNPluginLayerTileFeature alloc] init];
+
+    NSMutableDictionary *tileProperties = [NSMutableDictionary dictionary];
+    for (auto p: feature->_featureProperties) {
+        NSString *key = [NSString stringWithUTF8String:p.first.c_str()];
+        NSString *value = [NSString stringWithUTF8String:p.second.c_str()];
+        [tileProperties setObject:value forKey:key];
+    }
+
+    tempResult.featureProperties = [NSDictionary dictionaryWithDictionary:tileProperties];
+
+    NSMutableArray *featureCoordinates = [NSMutableArray array];
+    for (auto & coordinateCollection: feature->_featureCoordinates) {
+
+        for (auto & coordinate: coordinateCollection._coordinates) {
+            CLLocationCoordinate2D c = CLLocationCoordinate2DMake(coordinate._lat, coordinate._lon);
+            NSValue *value = [NSValue valueWithBytes:&c objCType:@encode(CLLocationCoordinate2D)];
+            [featureCoordinates addObject:value];
+        }
+
+    }
+    // TODO: Need to figure out how we're going to handle multiple coordinate groups/etc
+    if ([featureCoordinates count] > 0) {
+        tempResult.featureCoordinates = [NSArray arrayWithArray:featureCoordinates];
+    }
+
+    tempResult.featureID = [NSString stringWithUTF8String:feature->_featureID.c_str()];
+
+    return tempResult;
+}
+
+-(NSString *)tileIDToString:(mbgl::OverscaledTileID &)tileID {
+    NSString *tempResult = [NSString stringWithFormat:@"%i,%i,%i", tileID.canonical.z, tileID.canonical.x, tileID.canonical.y];
+    return tempResult;
+}
+
 /**
  Adds a plug-in layer that is external to this library
  */
@@ -7688,6 +7737,13 @@ static void *windowScreenContext = &windowScreenContext;
         pass3D = mbgl::style::LayerTypeInfo::Pass3D::Required;
     }
 
+
+    // If we read tile features, then we need to set these things
+    if (capabilities.supportsReadingTileFeatures) {
+        tileKind = mbgl::style::LayerTypeInfo::TileKind::Geometry;
+        source = mbgl::style::LayerTypeInfo::Source::Required;
+    }
+
     auto factory = std::make_unique<mbgl::PluginLayerPeerFactory>(layerType,
                                                source,
                                                pass3D,
@@ -7699,6 +7755,7 @@ static void *windowScreenContext = &windowScreenContext;
     __weak MLNMapView *weakMapView = self;
 
     Class layerClass = pluginLayerClass;
+    factory->supportsFeatureCollectionBuckets = capabilities.supportsReadingTileFeatures;
     factory->setOnLayerCreatedEvent([layerClass, weakMapView, pluginLayerClass](mbgl::style::PluginLayer *pluginLayer) {
 
         //NSLog(@"Creating Plugin Layer: %@", layerClass);
@@ -7792,6 +7849,58 @@ static void *windowScreenContext = &windowScreenContext;
             }
         });
 
+        // If this layer can read tile features, then setup that lambda
+        if (capabilities.supportsReadingTileFeatures) {
+
+            pluginLayerImpl->setFeatureCollectionLoadedFunction([weakPlugInLayer, weakMapView](const std::shared_ptr<mbgl::plugin::FeatureCollection> featureCollection) {
+
+                @autoreleasepool {
+
+                    MLNPluginLayerTileFeatureCollection *collection = [[MLNPluginLayerTileFeatureCollection alloc] init];
+
+                    // Add the features
+                    NSMutableArray *featureList = [NSMutableArray arrayWithCapacity:featureCollection->_features.size()];
+                    for (auto f: featureCollection->_features) {
+                        [featureList addObject:[weakMapView featureFromCore:f]];
+                    }
+                    collection.features = [NSArray arrayWithArray:featureList];
+                    collection.tileID = [weakMapView tileIDToString:featureCollection->_featureCollectionTileID];
+
+
+                    [weakPlugInLayer onFeatureCollectionLoaded:collection];
+
+                }
+
+            });
+
+            pluginLayerImpl->setFeatureCollectionUnloadedFunction([weakPlugInLayer, weakMapView](const std::shared_ptr<mbgl::plugin::FeatureCollection> featureCollection) {
+
+                @autoreleasepool {
+
+                    // TODO: Map these collections to local vars and maybe don't keep recreating it
+
+                    MLNPluginLayerTileFeatureCollection *collection = [[MLNPluginLayerTileFeatureCollection alloc] init];
+
+                    // Add the features
+                    NSMutableArray *featureList = [NSMutableArray arrayWithCapacity:featureCollection->_features.size()];
+                    for (auto f: featureCollection->_features) {
+                        [featureList addObject:[weakMapView featureFromCore:f]];
+                    }
+                    collection.features = [NSArray arrayWithArray:featureList];
+                    collection.tileID = [weakMapView tileIDToString:featureCollection->_featureCollectionTileID];
+
+                    [weakPlugInLayer onFeatureCollectionUnloaded:collection];
+
+                }
+
+            });
+
+
+
+
+
+        }
+
     });
 
     // TODO: Same question as above.  Do we ever want to have a core only layer type?
@@ -7800,6 +7909,169 @@ static void *windowScreenContext = &windowScreenContext;
     //darwinLayerManager->addLayerTypeCoreOnly(std::move(factory));
 
 }
+
+- (MLNPluginProtocolHandlerResource *)resourceFromCoreResource:(const mbgl::Resource &)resource {
+
+    MLNPluginProtocolHandlerResource *tempResult = [[MLNPluginProtocolHandlerResource alloc] init];
+
+    // The URL of the request
+    tempResult.resourceURL = [NSString stringWithUTF8String:resource.url.c_str()];
+
+    // The kind of request
+    switch (resource.kind) {
+        case mbgl::Resource::Kind::Style:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindStyle;
+            break;
+        case mbgl::Resource::Kind::Source:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindSource;
+            break;
+        case mbgl::Resource::Kind::Tile:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindTile;
+            break;
+        case mbgl::Resource::Kind::Glyphs:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindGlyphs;
+            break;
+        case mbgl::Resource::Kind::SpriteImage:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindSpriteImage;
+            break;
+        case mbgl::Resource::Kind::Image:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindImage;
+            break;
+        case mbgl::Resource::Kind::SpriteJSON:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindSpriteJSON;
+            break;
+        default:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindUnknown;
+            break;
+    }
+
+    // The loading method
+    if (resource.loadingMethod == mbgl::Resource::LoadingMethod::CacheOnly) {
+        tempResult.loadingMethod = MLNPluginProtocolHandlerResourceLoadingMethodCacheOnly;
+    } else if (resource.loadingMethod == mbgl::Resource::LoadingMethod::NetworkOnly) {
+        tempResult.loadingMethod = MLNPluginProtocolHandlerResourceLoadingMethodNetworkOnly;
+    } else if (resource.loadingMethod == mbgl::Resource::LoadingMethod::All) {
+        tempResult.loadingMethod = MLNPluginProtocolHandlerResourceLoadingMethodAll;
+    }
+
+    if (resource.tileData) {
+        auto td = *resource.tileData;
+        MLNTileData *tileData = [[MLNTileData alloc] init];
+        tileData.tileURLTemplate = [NSString stringWithUTF8String:td.urlTemplate.c_str()];
+        tileData.tilePixelRatio = td.pixelRatio;
+        tileData.tileX = td.x;
+        tileData.tileY = td.y;
+        tileData.tileZoom = td.z;
+        tempResult.tileData = tileData;
+    }
+
+    // TODO: Figure out which other properties from resource should be passed along here
+/*
+    Usage usage{Usage::Online};
+    Priority priority{Priority::Regular};
+    std::optional<std::pair<uint64_t, uint64_t>> dataRange = std::nullopt;
+    std::optional<Timestamp> priorModified = std::nullopt;
+    std::optional<Timestamp> priorExpires = std::nullopt;
+    std::optional<std::string> priorEtag = std::nullopt;
+    std::shared_ptr<const std::string> priorData;
+    Duration minimumUpdateInterval{Duration::zero()};
+    StoragePolicy storagePolicy{StoragePolicy::Permanent};
+    */
+
+    return tempResult;
+
+}
+
+- (void)addPluginProtocolHandler:(Class)pluginProtocolHandlerClass {
+
+
+    MLNPluginProtocolHandler *handler = [[pluginProtocolHandlerClass alloc] init];
+    if (!self.pluginProtocols) {
+        self.pluginProtocols = [NSMutableArray array];
+    }
+    [self.pluginProtocols addObject:handler];
+
+    // TODO: Unclear if any of these options are needed for plugins
+    mbgl::ResourceOptions resourceOptions;
+
+    // TODO: Unclear if any of the properties on clientOptions need to be set
+    mbgl::ClientOptions clientOptions;
+
+    // Use weak here so there isn't a retain cycle
+    __weak MLNPluginProtocolHandler *weakHandler = handler;
+    __weak MLNMapView *weakSelf = self;
+
+    std::shared_ptr<mbgl::PluginFileSource> pluginSource = std::make_shared<mbgl::PluginFileSource>(resourceOptions, clientOptions);
+    pluginSource->setOnRequestResourceFunction([weakHandler, weakSelf](const mbgl::Resource &resource) -> mbgl::Response {
+        mbgl::Response tempResult;
+
+        __strong MLNPluginProtocolHandler *strongHandler = weakHandler;
+        if (strongHandler) {
+
+            MLNPluginProtocolHandlerResource *res = [weakSelf resourceFromCoreResource:resource];
+
+            // TODO: Figure out what other fields in response need to be passed back from requestResource
+            MLNPluginProtocolHandlerResponse *response = [strongHandler requestResource:res];
+            if (response.data) {
+                tempResult.data = std::make_shared<std::string>((const char*)[response.data bytes],
+                                                                [response.data length]);
+            }
+        }
+
+        return tempResult;
+
+    });
+
+    pluginSource->setOnCanRequestFunction([weakHandler, weakSelf](const mbgl::Resource &resource) -> bool{
+        @autoreleasepool {
+            __strong MLNPluginProtocolHandler *strongHandler = weakHandler;
+            if (!strongHandler) {
+                return false;
+            }
+
+            MLNPluginProtocolHandlerResource *res = [weakSelf resourceFromCoreResource:resource];
+            BOOL tempResult = [strongHandler canRequestResource:res];
+
+            return tempResult;
+
+        }
+    });
+
+    auto fileSourceManager = mbgl::FileSourceManager::get();
+    fileSourceManager->registerCustomFileSource(pluginSource);
+
+}
+
+-(void)addStyleFilter:(MLNStyleFilter *)styleFilter {
+
+    if (!self.styleFilters) {
+        self.styleFilters = [NSMutableArray array];
+    }
+    [self.styleFilters addObject:styleFilter];
+
+    auto coreStyleFilter = std::make_shared<mbgl::style::PluginStyleFilter>();
+    coreStyleFilter->_filterStyleFunction = [styleFilter](const std::string &filterData) -> const std::string {
+
+        std::string tempResult;
+
+        @autoreleasepool {
+            NSData *sourceData = [NSData dataWithBytesNoCopy:(void *)filterData.data()
+                                                      length:filterData.size()
+                                                freeWhenDone:NO];
+            NSData *filteredData = [styleFilter filterData:sourceData];
+            tempResult = std::string((const char*)[filteredData bytes], [filteredData length]);
+
+        }
+        return tempResult;
+    };
+
+    // Set the ivar
+    [styleFilter setFilter:coreStyleFilter];
+
+    _mbglMap->getStyle().addStyleFilter(coreStyleFilter);
+
+}
+
 
 - (NSArray<NSString*>*)getActionJournalLogFiles
 {

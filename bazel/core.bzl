@@ -4,6 +4,10 @@ MLN_LAYER_PLUGIN_HEADERS = [
     "src/mbgl/plugin/plugin_layer_impl.hpp",
     "src/mbgl/plugin/plugin_layer_render.hpp",
     "src/mbgl/plugin/plugin_layer_properties.hpp",
+    "src/mbgl/plugin/plugin_file_source.hpp",
+    "src/mbgl/plugin/plugin_style_filter.hpp",
+    "src/mbgl/plugin/feature_collection_bucket.hpp",
+    "src/mbgl/plugin/feature_collection.hpp",
 ]
 
 MLN_LAYER_PLUGIN_SOURCE = [
@@ -12,6 +16,9 @@ MLN_LAYER_PLUGIN_SOURCE = [
     "src/mbgl/plugin/plugin_layer_impl.cpp",
     "src/mbgl/plugin/plugin_layer_render.cpp",
     "src/mbgl/plugin/plugin_layer_properties.cpp",
+    "src/mbgl/plugin/plugin_style_filter.cpp",
+    "src/mbgl/plugin/feature_collection_bucket.cpp",
+    "src/mbgl/plugin/feature_collection.cpp",
 ]
 
 MLN_PUBLIC_GENERATED_STYLE_HEADERS = [
