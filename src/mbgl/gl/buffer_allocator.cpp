@@ -262,13 +262,24 @@ public:
         }
         MBGL_CHECK_ERROR(glBindBuffer(type, buffer->id));
 
-        // Map the next available slice of memory
+        // Map the next available slice of memory. On WASM/emscripten we don't have
+        // glMapBufferRange available, so use glBufferSubData as a fallback (upload
+        // directly from client memory).
+        const auto writtenIndex = buffer->pointer;
+#ifdef __EMSCRIPTEN__
+        // glBufferSubData accepts the real size to upload; no need to provide
+        // alignedSize as the upload size — upload only `size` bytes.
+        MBGL_CHECK_ERROR(glBufferSubData(type, buffer->pointer, static_cast<GLsizeiptr>(size), data));
+
+        residentBuffer = buffer->addRef(nullptr, writtenIndex, size);
+        buffer->pointer += alignedSize;
+#else
+        // Map and memcpy path for platforms that support mapping.
         auto* buf = MBGL_CHECK_ERROR(
             glMapBufferRange(type,
                              buffer->pointer,
                              alignedSize,
                              GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_UNSYNCHRONIZED_BIT | GL_MAP_WRITE_BIT));
-        const auto writtenIndex = buffer->pointer;
 
         if (buf) {
             std::memcpy(buf, data, size);
@@ -280,6 +291,7 @@ public:
             assert(0);
             return false;
         }
+#endif
 
 #ifndef NDEBUG
         MBGL_CHECK_ERROR(glBindBuffer(type, 0));
@@ -436,6 +448,15 @@ private:
         auto& destBuffer = buffers[toIndex];
         const auto recycledWriteIndex = destBuffer.pointer;
 
+        // On WASM/emscripten, glMapBufferRange is unavailable; use glBufferSubData
+        // to upload the contents instead.
+#ifdef __EMSCRIPTEN__
+        MBGL_CHECK_ERROR(glBufferSubData(type,
+                                         recycledWriteIndex,
+                                         static_cast<GLsizeiptr>(ref.getOwner()->getSize()),
+                                         ref.getOwner()->getManagedBuffer().getContents().data()));
+        destBuffer.pointer += alignedSize;
+#else
         auto* buf = MBGL_CHECK_ERROR(
             glMapBufferRange(type,
                              recycledWriteIndex,
@@ -450,6 +471,7 @@ private:
             assert(0);
             return false;
         }
+#endif
 
         // 2.c: Now the ref must be made aware of the relocation of its contents.
         // Note that this means defragmentation can never run on refs that are
