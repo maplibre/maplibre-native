@@ -40,7 +40,7 @@ Add a `MapView` to your layout XML file:
 ```
 
 > [!TIP]
-> There are external projects such as [Ramani Maps](https://github.com/ramani-maps/ramani-maps) and [MapLibre Compose Playground](https://github.com/Rallista/maplibre-compose-playground) available to intergrate MapLibre Native Android with Compose-based projects.
+> There is a [maplibre-compose](https://github.com/maplibre/maplibre-compose) project to integrate MapLibre Native in a Kotlin Multiplatform app, and external projects such as [Ramani Maps](https://github.com/ramani-maps/ramani-maps) and [MapLibre Compose Playground](https://github.com/Rallista/maplibre-compose-playground) available to integrate MapLibre Native Android with Compose-based projects.
 
 Next, initialize the map in an activity:
 
@@ -159,7 +159,7 @@ struct SimpleMap: UIViewRepresentable {
 ```
 
 > [!TIP]
-> You can also use [MapLibreSwiftUI](https://github.com/maplibre/swiftui-dsl), a wrapper around MapLibre Native iOS that offers a declarative API like SwiftUI.
+> You can also use [MapLibreSwiftUI](https://github.com/maplibre/swiftui-dsl), a wrapper around MapLibre Native iOS that offers a declarative API like SwiftUI. There is also a [maplibre-compose](https://github.com/maplibre/maplibre-compose) project to integrate MapLibre Native in a Kotlin Multiplatform app.
 
 The [iOS Documentation](https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre/) contains many examples and the entire API of the library.
 
