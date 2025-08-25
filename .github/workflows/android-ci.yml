@@ -1,5 +1,8 @@
 name: android-ci
 
+permissions:
+  id-token: write         # needed for AWS
+
 on:
   push:
     branches:
@@ -58,6 +61,60 @@ jobs:
 
       - uses: ./.github/actions/setup-android-ci
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: npm install
+        run: npm install --ignore-scripts
+        working-directory: .
+        shell: bash
+
+      - name: run platform/android/scripts/generate-style-code.mjs
+        run: node platform/android/scripts/generate-style-code.mjs
+        working-directory: .
+        shell: bash
+
+      - run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          pip3 install pre-commit
+        shell: bash
+
+      - run: |
+          source venv/bin/activate
+          pre-commit run clang-format --all-files
+        continue-on-error: true # this can mean files are modified, which is not an error
+        shell: bash
+
+      - run: |
+          source venv/bin/activate
+          pre-commit run clang-format --all-files
+          rm -rf venv
+        shell: bash
+
+      - uses: infotroph/tree-is-clean@v1
+        with:
+          check_untracked: true
+
+      - name: Configure AWS Credentials
+        if: vars.OIDC_AWS_ROLE_TO_ASSUME
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
+      - name: Configure sccache
+        run: |
+          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
+          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
+
+          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
+            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
+          fi
+
       - name: Check code style
         if: matrix.renderer == 'opengl'
         run: make android-check
@@ -88,7 +145,7 @@ jobs:
 
       - name: Build Benchmark, copy to platform/android
         run: |
-          ./gradlew assemble${{ matrix.renderer }}Release assemble${{ matrix.renderer }}ReleaseAndroidTest -PtestBuildType=release
+          ./gradlew assemble${{ matrix.renderer }}Release assemble${{ matrix.renderer }}ReleaseAndroidTest -PtestBuildType=release -Pmaplibre.abis=arm64-v8a
           cp MapLibreAndroidTestApp/build/outputs/apk/${{ matrix.renderer }}/release/MapLibreAndroidTestApp-${{ matrix.renderer }}-release.apk .
           cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/${{ matrix.renderer }}/release/MapLibreAndroidTestApp-${{ matrix.renderer }}-release-androidTest.apk .
 
@@ -122,7 +179,7 @@ jobs:
 
       - name: Build Instrumentation Tests (${{ matrix.renderer }}), copy to platform/android
         run: |
-          ./gradlew assemble${{ matrix.renderer }}Debug assemble${{ matrix.renderer }}DebugAndroidTest -PtestBuildType=debug
+          ./gradlew assemble${{ matrix.renderer }}Debug assemble${{ matrix.renderer }}DebugAndroidTest -PtestBuildType=debug -Pmaplibre.abis=arm64-v8a
           cp MapLibreAndroidTestApp/build/outputs/apk/${{ matrix.renderer }}/debug/MapLibreAndroidTestApp-${{ matrix.renderer }}-debug.apk InstrumentationTestApp${{ env.renderer }}.apk
           cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/${{ matrix.renderer }}/debug/MapLibreAndroidTestApp-${{ matrix.renderer }}-debug-androidTest.apk InstrumentationTests${{ env.renderer }}.apk
 
@@ -134,6 +191,9 @@ jobs:
           path: |
             platform/android/InstrumentationTestApp${{ env.renderer }}.apk
             platform/android/InstrumentationTests${{ env.renderer }}.apk
+
+      - name: Show sccache stats
+        run: sccache --show-stats
 
   android-build-cpp-test:
     runs-on: ubuntu-24.04
@@ -147,41 +207,38 @@ jobs:
         working-directory: test/android
 
     steps:
-      - name: Free Disk Space (Ubuntu)
-        if: startsWith(runner.name, 'GitHub Actions')
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: false
-          android: false
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: false
-
       - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: "temurin"
-          java-version: "17"
-
-      - uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ github.job }}
-          append-timestamp: false
-          max-size: 5G
+      - uses: ./.github/actions/setup-android-ci
 
       - name: Create data.zip in assets directory
         run: zip -r test/android/app/src/main/assets/data.zip -@ < test/android/app/src/main/assets/to_zip.txt
         working-directory: .
 
+      - name: Configure AWS Credentials
+        if: vars.OIDC_AWS_ROLE_TO_ASSUME
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
+      - name: Configure sccache
+        run: |
+          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
+          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
+
+          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
+            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
+          fi
+
       - name: Build C++ Unit Tests App
         run: |
-          ./gradlew assembleDebug assembleAndroidTest
+          ./gradlew assembleDebug assembleAndroidTest -Pmaplibre.abis=arm64-v8a
           cp app/build/outputs/apk/debug/app-debug.apk .
           cp app/build/outputs/apk/androidTest/release/app-release-androidTest.apk .
 
@@ -208,33 +265,30 @@ jobs:
     if: needs.pre_job.outputs.should_skip != 'true'
 
     steps:
-      - name: Free Disk Space (Ubuntu)
-        if: startsWith(runner.name, 'GitHub Actions')
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: false
-          android: false
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: false
-
       - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
 
-      - uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ github.job }}
-          append-timestamp: false
-          max-size: 5G
+      - uses: ./.github/actions/setup-android-ci
 
-      - uses: actions/setup-java@v4
+      - name: Configure AWS Credentials
+        if: vars.OIDC_AWS_ROLE_TO_ASSUME
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          distribution: "temurin"
-          java-version: "17"
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
+      - name: Configure sccache
+        run: |
+          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
+          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
+
+          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
+            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
+          fi
 
       - name: Build and Upload Render Test APKs (${{ matrix.flavor }})
         uses: ./.github/actions/android-build-and-upload-render-test
