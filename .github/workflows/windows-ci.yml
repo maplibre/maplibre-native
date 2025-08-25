@@ -33,7 +33,7 @@ jobs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.windows_any_modified != 'true' }}
     steps:
       - run: |
-          git config --system core.longpaths true
+          git config --global core.longpaths true
 
       - uses: actions/checkout@v4
         with:
@@ -58,7 +58,7 @@ jobs:
     runs-on: windows-2022
     steps:
       - run: |
-          git config --system core.longpaths true
+          git config --global core.longpaths true
 
       - uses: actions/checkout@v4
         with:
@@ -113,7 +113,7 @@ jobs:
     runs-on: windows-2022
     steps:
       - run: |
-          git config --system core.longpaths true
+          git config --global core.longpaths true
 
       - uses: actions/checkout@v4
         with:
