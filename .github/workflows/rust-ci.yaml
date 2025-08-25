@@ -26,7 +26,7 @@ jobs:
     steps:
       - uses: taiki-e/install-action@v2
         with: { tool: just }
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: just -v ci-test
 
   msrv:
@@ -35,7 +35,7 @@ jobs:
     steps:
       - uses: taiki-e/install-action@v2
         with: { tool: just }
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Read crate metadata
         id: metadata
         run: echo "rust-version=$(sed -ne 's/rust-version *= *\"\(.*\)\"/\1/p' Cargo.toml)" >> "$GITHUB_OUTPUT"
