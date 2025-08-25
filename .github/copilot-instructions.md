@@ -27,6 +27,12 @@ git submodule update --init --recursive  # Takes ~1 minute 8 seconds
 # - libcurl4-openssl-dev libuv1-dev libjpeg-dev libpng-dev
 # - libglfw3-dev libwebp-dev libopengl0 mesa-vulkan-drivers llvm
 # - armerge (Rust tool for merging static libraries)
+
+# Install sccache for faster builds (recommended)
+.github/actions/install-sccache/install-sccache
+
+# Install pre-commit for code formatting and validation
+pip3 install pre-commit
 ```
 
 #### Build Process - NEVER CANCEL builds, they take significant time
@@ -35,9 +41,17 @@ git submodule update --init --recursive  # Takes ~1 minute 8 seconds
 cmake --preset linux-opengl     # OpenGL renderer
 cmake --preset linux-vulkan     # Vulkan renderer
 
+# For faster builds with sccache (recommended), use these flags:
+export SCCACHE_BUCKET=maplibre-native-sccache
+export SCCACHE_REGION=eu-central-1
+cmake --preset linux-opengl -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+
 # Core library build (SET TIMEOUT TO 60+ MINUTES, NEVER CANCEL)
-# Takes ~15 minutes first time, ~7 minutes with ccache
+# Takes ~15 minutes first time, ~7 minutes with ccache, faster with sccache
 cmake --build build-linux-opengl --target mbgl-core -j $(nproc)
+
+# Check sccache statistics after building
+sccache --show-stats
 
 # Test executables (SET TIMEOUT TO 30+ MINUTES, NEVER CANCEL)
 # Takes ~7 minutes
@@ -73,6 +87,20 @@ cmake --preset linux-opengl -DMLN_WITH_NODE=ON -DMLN_WITH_WERROR=OFF -B build-li
 
 # Build Node.js bindings (SET TIMEOUT TO 60+ MINUTES, NEVER CANCEL)
 cmake --build build-linux-node -j $(nproc)
+```
+
+#### Code Formatting and Validation
+```bash
+# Run pre-commit to format and validate code before committing
+pre-commit run --all-files
+
+# This will run:
+# - clang-format for C++ code formatting
+# - trailing whitespace removal
+# - YAML/TOML validation
+# - Swift formatting
+# - Rust formatting
+# - Other code quality checks
 ```
 
 ### iOS Development (macOS required)
@@ -183,13 +211,16 @@ cmake --preset windows-egl         # EGL renderer
 
 ### Always run these after making changes:
 ```bash
-# 1. Build core library
+# 1. Format and validate code
+pre-commit run --all-files
+
+# 2. Build core library
 cmake --build build-linux-opengl --target mbgl-core -j $(nproc)
 
-# 2. Run unit tests to verify no regressions
+# 3. Run unit tests to verify no regressions
 xvfb-run -a build-linux-opengl/mbgl-test-runner
 
-# 3. Test basic rendering functionality
+# 4. Test basic rendering functionality
 xvfb-run -a build-linux-opengl/bin/mbgl-render \
   --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json \
   --output test.png
@@ -238,7 +269,7 @@ xvfb-run -a build-linux-opengl/mbgl-render-test-runner --manifestPath=metrics/li
 - CMake configure: ~5-8 seconds
 
 ### Build times (SET APPROPRIATE TIMEOUTS):
-- Core library: ~15 minutes first build, ~7 minutes with ccache
+- Core library: ~15 minutes first build, ~7 minutes with ccache, faster with sccache
 - Test targets: ~7 minutes
 - Utility targets: ~1 minute
 - Node.js bindings: varies by platform
@@ -266,6 +297,7 @@ xvfb-run -a build-linux-opengl/mbgl-render-test-runner --manifestPath=metrics/li
 
 ### Build Issues
 - **ccache not found**: Install with `sudo apt-get install -y ccache`
+- **sccache not found**: Install with `.github/actions/install-sccache/install-sccache`
 - **Benchmark tests fail**: Requires proper OpenGL context (expected in headless environments)
 - **Bazel network issues**: Expected in offline environments
 - **HarfBuzz warnings**: Cosmetic, can be ignored
