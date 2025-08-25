@@ -16,7 +16,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: extractions/setup-just@v3
       - name: Setup mdBook
         uses: peaceiris/actions-mdbook@v2
@@ -40,9 +40,9 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Download book
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: book
           path: artifacts/book
