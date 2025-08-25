@@ -2018,9 +2018,6 @@ TEST(Map, FillLayerDepthDistribution) {
         test.map.getStyle().addLayer(std::move(layer));
     }
 
-    util::write_file("test/fixtures/map/layer_depth_distribution/fill/expected.png",
-                     encodePNG(test.frontend.render(test.map).image));
-
     test::checkImage(
         "test/fixtures/map/layer_depth_distribution/fill", test.frontend.render(test.map).image, 0.0006, 0.1);
 }
@@ -2071,9 +2068,6 @@ TEST(Map, LineLayerDepthDistribution) {
 
         test.map.getStyle().addLayer(std::move(layer));
     }
-
-    util::write_file("test/fixtures/map/layer_depth_distribution/line/expected.png",
-                     encodePNG(test.frontend.render(test.map).image));
 
     test::checkImage(
         "test/fixtures/map/layer_depth_distribution/line", test.frontend.render(test.map).image, 0.0006, 0.1);
