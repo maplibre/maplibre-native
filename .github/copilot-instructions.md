@@ -24,7 +24,7 @@ git submodule update --init --recursive  # Takes ~1 minute 8 seconds
 .github/scripts/install-linux-deps
 
 # Essential packages installed:
-# - libcurl4-openssl-dev libuv1-dev libjpeg-dev libpng-dev 
+# - libcurl4-openssl-dev libuv1-dev libjpeg-dev libpng-dev
 # - libglfw3-dev libwebp-dev libopengl0 mesa-vulkan-drivers llvm
 # - armerge (Rust tool for merging static libraries)
 ```
@@ -33,17 +33,17 @@ git submodule update --init --recursive  # Takes ~1 minute 8 seconds
 ```bash
 # Configure builds (5-8 seconds each)
 cmake --preset linux-opengl     # OpenGL renderer
-cmake --preset linux-vulkan     # Vulkan renderer 
+cmake --preset linux-vulkan     # Vulkan renderer
 
 # Core library build (SET TIMEOUT TO 60+ MINUTES, NEVER CANCEL)
-# Takes ~15 minutes first time, ~7 minutes with ccache  
+# Takes ~15 minutes first time, ~7 minutes with ccache
 cmake --build build-linux-opengl --target mbgl-core -j $(nproc)
 
 # Test executables (SET TIMEOUT TO 30+ MINUTES, NEVER CANCEL)
 # Takes ~7 minutes
 cmake --build build-linux-opengl --target mbgl-test-runner mbgl-render-test-runner mbgl-expression-test -j $(nproc)
 
-# Utility executables (SET TIMEOUT TO 15+ MINUTES, NEVER CANCEL)  
+# Utility executables (SET TIMEOUT TO 15+ MINUTES, NEVER CANCEL)
 # Takes ~1 minute
 cmake --build build-linux-opengl --target mbgl-render mbgl-benchmark-runner mbgl-glfw -j $(nproc)
 ```
@@ -86,7 +86,7 @@ brew install bazelisk
 bazel --version
 ```
 
-#### Xcode Project Generation  
+#### Xcode Project Generation
 ```bash
 # Generate Xcode project for iOS with Metal renderer
 # NEVER CANCEL - can take several minutes for dependency resolution
@@ -130,7 +130,7 @@ cd platform/android
 ```bash
 # Test runners
 build-linux-opengl/mbgl-test-runner           # C++ unit tests (4m 44s runtime)
-build-linux-opengl/mbgl-render-test-runner    # Render tests (2m 46s runtime)  
+build-linux-opengl/mbgl-render-test-runner    # Render tests (2m 46s runtime)
 build-linux-opengl/expression-test/mbgl-expression-test  # Expression tests (36ms runtime)
 
 # Utilities
@@ -171,7 +171,7 @@ cmake --preset macos-node      # Node.js bindings
 cmake --preset macos-core      # Core library only
 ```
 
-### Windows Development  
+### Windows Development
 ```bash
 # Windows presets
 cmake --preset windows-opengl      # OpenGL renderer
@@ -206,12 +206,12 @@ xvfb-run -a build-linux-opengl/mbgl-render-test-runner --manifestPath=metrics/li
 
 ### Core C++ Code
 - `include/` - Public C++ API headers
-- `src/` - C++ implementation files  
+- `src/` - C++ implementation files
 - `platform/` - Platform-specific SDK code
 
 ### Platform Directories
 - `platform/android/` - Android SDK
-- `platform/ios/` - iOS SDK  
+- `platform/ios/` - iOS SDK
 - `platform/darwin/` - Shared macOS/iOS code
 - `platform/node/` - Node.js bindings
 - `platform/linux/` - Linux development platform
@@ -220,12 +220,12 @@ xvfb-run -a build-linux-opengl/mbgl-render-test-runner --manifestPath=metrics/li
 
 ### Build and Test
 - `test/` - C++ unit tests
-- `render-test/` - Image-based render tests  
+- `render-test/` - Image-based render tests
 - `expression-test/` - Expression feature tests
 - `benchmark/` - Performance benchmarks
 - `metrics/` - Test manifests and baseline images
 
-### Build Configuration  
+### Build Configuration
 - `CMakeLists.txt` - Main CMake configuration
 - `CMakePresets.json` - Platform-specific build presets
 - `BUILD.bazel` - Bazel build configuration (primarily for iOS)
@@ -234,7 +234,7 @@ xvfb-run -a build-linux-opengl/mbgl-render-test-runner --manifestPath=metrics/li
 
 ### First-time setup:
 - Git submodules: ~1 minute 8 seconds
-- Linux dependencies: ~1 minute 4 seconds  
+- Linux dependencies: ~1 minute 4 seconds
 - CMake configure: ~5-8 seconds
 
 ### Build times (SET APPROPRIATE TIMEOUTS):
@@ -259,7 +259,7 @@ xvfb-run -a build-linux-opengl/mbgl-render-test-runner --manifestPath=metrics/li
 | Windows  | ✅     | ❌     | ✅     | CMake        |
 | Node.js  | ✅     | ❌     | ✅ **  | CMake        |
 
-*Requires MoltenVK. Only available when built via CMake.  
+*Requires MoltenVK. Only available when built via CMake.
 **Issue reported, see maplibre/maplibre-native#2928.
 
 ## Known Issues and Workarounds
@@ -270,14 +270,14 @@ xvfb-run -a build-linux-opengl/mbgl-render-test-runner --manifestPath=metrics/li
 - **Bazel network issues**: Expected in offline environments
 - **HarfBuzz warnings**: Cosmetic, can be ignored
 
-### Test Issues  
+### Test Issues
 - **Some render tests fail**: Expected - 7 errored tests are baseline
 - **18 disabled unit tests**: Expected - these are platform-specific or require special setup
 
 ## Documentation References
 
 - [MapLibre Native Developer Documentation](https://maplibre.org/maplibre-native/docs/book/)
-- [Android Developer Guide](https://maplibre.org/maplibre-native/docs/book/platforms/android/index.html)  
+- [Android Developer Guide](https://maplibre.org/maplibre-native/docs/book/platforms/android/index.html)
 - [iOS Developer Guide](https://maplibre.org/maplibre-native/docs/book/platforms/ios/index.html)
 - [Linux Guide](https://maplibre.org/maplibre-native/docs/book/platforms/linux/index.html)
 - [Render Tests Documentation](render-tests.md)
@@ -286,7 +286,7 @@ xvfb-run -a build-linux-opengl/mbgl-render-test-runner --manifestPath=metrics/li
 
 The project supports multiple rendering backends:
 - **OpenGL**: Mature, widely supported, default for Linux/Android
-- **Metal**: Apple platforms only, high performance  
+- **Metal**: Apple platforms only, high performance
 - **Vulkan**: Modern, cross-platform, experimental on some platforms
 
 Choose renderer via CMake presets or Bazel flags:
@@ -295,7 +295,7 @@ Choose renderer via CMake presets or Bazel flags:
 cmake --preset linux-opengl   # OpenGL
 cmake --preset linux-vulkan   # Vulkan
 
-# Bazel examples  
+# Bazel examples
 bazel run //platform/ios:App --//:renderer=metal
 ```
 
