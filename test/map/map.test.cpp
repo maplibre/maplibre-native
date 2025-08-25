@@ -25,6 +25,7 @@
 #include <mbgl/style/layers/background_layer.hpp>
 #include <mbgl/style/layers/background_layer.hpp>
 #include <mbgl/style/layers/fill_layer.hpp>
+#include <mbgl/style/layers/line_layer.hpp>
 #include <mbgl/style/layers/raster_layer.hpp>
 #include <mbgl/style/layers/symbol_layer.hpp>
 #include <mbgl/style/sources/custom_geometry_source.hpp>
@@ -1967,4 +1968,113 @@ TEST(BackgroundLayer, StyleUpdateZoomDependency) {
                      test.frontend.render(test.map).image,
                      0.0006,
                      0.1);
+}
+
+TEST(Map, FillLayerDepthDistribution) {
+    MapTest<> test;
+
+    test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
+
+    test.map.jumpTo(CameraOptions().withZoom(0.0).withPitch(45.0));
+
+    auto backgroundLayer = std::make_unique<BackgroundLayer>("Background");
+    backgroundLayer->setBackgroundColor(Color(1.0f, 1.0f, 0.0f, 1.0f));
+    test.map.getStyle().addLayer(std::move(backgroundLayer));
+
+    constexpr uint32_t layerCount = 1 << 11;
+    const std::vector<Color> colors = {Color::red(), Color::green(), Color::blue()};
+    const auto& bounds = test.map.latLngBoundsForCamera(test.map.getCameraOptions());
+
+    const auto getSource = [&](uint32_t index) {
+        FeatureCollection features;
+
+        mapbox::geojson::polygon geo;
+        mapbox::geojson::linear_ring ring;
+
+        double y = (bounds.north() - bounds.south()) * 0.95 / layerCount * (layerCount - index) / 2.0;
+        double x = (bounds.east() - bounds.west()) * 0.95 / layerCount * (layerCount - index) / 2.0;
+
+        ring.emplace_back(-x, y);
+        ring.emplace_back(x, y);
+        ring.emplace_back(x, -y);
+        ring.emplace_back(-x, -y);
+
+        geo.emplace_back(ring);
+        features.emplace_back(geo);
+
+        auto source = std::make_unique<GeoJSONSource>("GeoJSONSource_" + std::to_string(index));
+        source->setGeoJSON(features);
+
+        return source;
+    };
+
+    for (uint32_t i = 0; i < layerCount; ++i) {
+        // add one source per layer
+        test.map.getStyle().addSource(getSource(i));
+
+        auto layer = std::make_unique<FillLayer>("FillLayer" + std::to_string(i), "GeoJSONSource_" + std::to_string(i));
+        layer->setFillColor(colors[i % colors.size()]);
+
+        test.map.getStyle().addLayer(std::move(layer));
+    }
+
+    util::write_file("test/fixtures/map/layer_depth_distribution/fill/expected.png",
+                     encodePNG(test.frontend.render(test.map).image));
+
+    test::checkImage(
+        "test/fixtures/map/layer_depth_distribution/fill", test.frontend.render(test.map).image, 0.0006, 0.1);
+}
+
+TEST(Map, LineLayerDepthDistribution) {
+    MapTest<> test;
+
+    test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
+
+    test.map.jumpTo(CameraOptions().withZoom(0.0).withPitch(45.0));
+
+    auto backgroundLayer = std::make_unique<BackgroundLayer>("Background");
+    backgroundLayer->setBackgroundColor(Color(1.0f, 1.0f, 0.0f, 1.0f));
+    test.map.getStyle().addLayer(std::move(backgroundLayer));
+
+    constexpr uint32_t layerCount = 1 << 11;
+    const std::vector<Color> colors = {Color::red(), Color::green(), Color::blue()};
+    const auto& bounds = test.map.latLngBoundsForCamera(test.map.getCameraOptions());
+
+    const auto getSource = [&](uint32_t index) {
+        FeatureCollection features;
+
+        mapbox::geojson::line_string geo;
+
+        double y = (bounds.north() - bounds.south()) * 0.95 / layerCount * (index + 1) / 2.0;
+        double x = (bounds.east() - bounds.west()) * 0.95 / layerCount * (index + 1) / 2.0;
+
+        geo.emplace_back(-x, y);
+        geo.emplace_back(x, y);
+        geo.emplace_back(x, -y);
+        geo.emplace_back(-x, -y);
+        geo.emplace_back(-x, y);
+
+        features.emplace_back(geo);
+
+        auto source = std::make_unique<GeoJSONSource>("GeoJSONSource_" + std::to_string(index));
+        source->setGeoJSON(features);
+
+        return source;
+    };
+
+    for (uint32_t i = 0; i < layerCount; ++i) {
+        // add one source per layer
+        test.map.getStyle().addSource(getSource(i));
+
+        auto layer = std::make_unique<LineLayer>("LineLayer" + std::to_string(i), "GeoJSONSource_" + std::to_string(i));
+        layer->setLineColor(colors[i % colors.size()]);
+
+        test.map.getStyle().addLayer(std::move(layer));
+    }
+
+    util::write_file("test/fixtures/map/layer_depth_distribution/line/expected.png",
+                     encodePNG(test.frontend.render(test.map).image));
+
+    test::checkImage(
+        "test/fixtures/map/layer_depth_distribution/line", test.frontend.render(test.map).image, 0.0006, 0.1);
 }
