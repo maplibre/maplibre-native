@@ -11,11 +11,39 @@ if(MSVC)
         set(WITH_ICU -With-ICU)
     endif()
 
-    # Skip Get-VendorPackages.ps1 for ARM64 due to vcpkg compiler detection issues
-    # The required packages should already be installed
-    if(NOT (CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64" OR CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64"))
-        execute_process(COMMAND powershell -ExecutionPolicy Bypass -File ${CMAKE_CURRENT_LIST_DIR}/Get-VendorPackages.ps1 -Triplet ${VCPKG_TARGET_TRIPLET} -Renderer ${_RENDERER} ${WITH_ICU})
+    # Handle ARM64 package management
+    set(IS_ARM64_BUILD FALSE)
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64" OR CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
+        set(IS_ARM64_BUILD TRUE)
     endif()
+
+    if(NOT IS_ARM64_BUILD)
+        # Standard package installation for x86/x64
+        execute_process(COMMAND powershell -ExecutionPolicy Bypass -File ${CMAKE_CURRENT_LIST_DIR}/Get-VendorPackages.ps1 -Triplet ${VCPKG_TARGET_TRIPLET} -Renderer ${_RENDERER} ${WITH_ICU})
+    else()
+        # ARM64-specific package handling
+        message(STATUS "ARM64 build detected - checking for pre-installed packages")
+        
+        # Try to run the enhanced script that handles ARM64
+        execute_process(
+            COMMAND powershell -ExecutionPolicy Bypass -File ${CMAKE_CURRENT_LIST_DIR}/Get-VendorPackages.ps1 -Triplet ${VCPKG_TARGET_TRIPLET} -Renderer ${_RENDERER} ${WITH_ICU}
+            RESULT_VARIABLE VCPKG_RESULT
+            OUTPUT_VARIABLE VCPKG_OUTPUT
+            ERROR_VARIABLE VCPKG_ERROR
+        )
+        
+        if(NOT VCPKG_RESULT EQUAL 0)
+            message(WARNING "vcpkg package installation failed for ARM64. Error: ${VCPKG_ERROR}")
+            message(STATUS "Assuming packages are pre-installed or will be handled manually")
+        endif()
+        
+        # Set up fallback paths for ARM64 packages if vcpkg fails
+        if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/vendor/vcpkg/installed/x64-windows")
+            message(STATUS "Using x64 package fallback for ARM64 build")
+            set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_LIST_DIR}/vendor/vcpkg/installed/x64-windows" ${CMAKE_PREFIX_PATH})
+        endif()
+    endif()
+    
     unset(_RENDERER)
 
     add_compile_definitions(NOMINMAX GHC_WIN_DISABLE_WSTRING_STORAGE_TYPE)
@@ -35,7 +63,9 @@ if(MSVC)
     find_package(WebP REQUIRED)
 
     # ARM64 specific fixes
-    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64" OR CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
+    if(IS_ARM64_BUILD)
+        message(STATUS "Applying ARM64-specific fixes")
+        
         # Simplify library variables to avoid complex generator expressions
         if(TARGET JPEG::JPEG)
             set(JPEG_LIBRARIES JPEG::JPEG)
@@ -48,17 +78,37 @@ if(MSVC)
         # Fix ICU::data target which might not exist for ARM64
         if(NOT TARGET ICU::data AND TARGET ICU::uc)
             add_library(ICU::data INTERFACE IMPORTED)
+            message(STATUS "Created placeholder ICU::data target for ARM64")
         endif()
 
         # Use x86 OpenGL headers if ARM64 headers are missing
-        if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/vendor/vcpkg/installed/x86-windows/include/GLES3")
-            include_directories("${CMAKE_CURRENT_LIST_DIR}/vendor/vcpkg/installed/x86-windows/include")
-            message(STATUS "Using x86 OpenGL headers for ARM64 build")
+        set(X86_HEADERS_PATH "${CMAKE_CURRENT_LIST_DIR}/vendor/vcpkg/installed/x86-windows/include")
+        if(EXISTS "${X86_HEADERS_PATH}/GLES3")
+            include_directories("${X86_HEADERS_PATH}")
+            message(STATUS "Using x86 OpenGL headers for ARM64 build at: ${X86_HEADERS_PATH}")
+        else()
+            # Try x64 headers as fallback
+            set(X64_HEADERS_PATH "${CMAKE_CURRENT_LIST_DIR}/vendor/vcpkg/installed/x64-windows/include")
+            if(EXISTS "${X64_HEADERS_PATH}/GLES3")
+                include_directories("${X64_HEADERS_PATH}")
+                message(STATUS "Using x64 OpenGL headers for ARM64 build at: ${X64_HEADERS_PATH}")
+            else()
+                message(WARNING "No compatible OpenGL headers found for ARM64 build")
+            endif()
         endif()
+        
+        # Additional ARM64 compiler flags if needed
+        target_compile_options(
+            mbgl-compiler-options
+            INTERFACE
+                $<$<COMPILE_LANGUAGE:CXX>:/bigobj>  # Handle large object files on ARM64
+        )
     endif()
 
     find_path(DLFCN_INCLUDE_DIRS dlfcn.h)
     find_path(LIBUV_INCLUDE_DIRS uv.h)
+    
+    # Rest of the file remains the same...
 elseif(DEFINED ENV{MSYSTEM})
     set(MSYS 1)
     set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
@@ -79,6 +129,7 @@ else()
     message(FATAL_ERROR "Unsupported build system: " ${CMAKE_SYSTEM_NAME})
 endif()
 
+# Continue with the rest of your existing code...
 target_sources(
     mbgl-core
     PRIVATE
