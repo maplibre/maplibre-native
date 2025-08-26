@@ -16,7 +16,6 @@ add_node_module(
         47
         48
         51
-        137
 )
 
 if(WIN32)
