@@ -35,7 +35,11 @@ if (MLN_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
 endif()
 
 if(WIN32 AND NOT DEFINED ENV{MSYSTEM} AND NOT MLN_WITH_QT AND NOT CMAKE_SYSTEM_NAME STREQUAL Android)
-    set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/platform/windows/custom-toolchain.cmake)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(ARM64|aarch64)$" OR CMAKE_GENERATOR_PLATFORM MATCHES "ARM64")
+        set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/platform/windows/arm64-windows-toolchain.cmake)
+    else()
+        set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/platform/windows/custom-toolchain.cmake)
+    endif()
 endif()
 
 project("MapLibre Native" LANGUAGES CXX C)
