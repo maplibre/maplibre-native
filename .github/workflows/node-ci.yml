@@ -220,7 +220,7 @@ jobs:
           key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
 
       - name: Configure maplibre-native (Windows)
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && matrix.arch == 'x86_64'
         shell: pwsh
         env:
           VCPKG_INSTALL_OPTIONS: "--debug"
@@ -231,6 +231,20 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} `
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
             -DMLN_WITH_NODE=ON
+
+      - name: Configure maplibre-native (Windows)
+        if: runner.os == 'Windows' && matrix.arch == 'arm64'
+        shell: pwsh
+        env:
+          VCPKG_INSTALL_OPTIONS: "--debug"
+          VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}\\platform\\windows\\vendor\\vcpkg\\archives,readwrite"
+        run: |
+          cmake . -B build `
+            -G Ninja `
+            -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} `
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
+            -DMLN_WITH_NODE=ON `
+            -DCMAKE_PREFIX_PATH=${{ github.workspace }}\\platform\\windows\\vendor\\vcpkg\\installed\\arm64-windows
 
       - name: Build maplibre-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
