@@ -5,7 +5,6 @@
 #include <mbgl/util/variant.hpp>
 
 namespace mbgl {
-
 namespace style {
 
 class RasterSource : public TileSource {
