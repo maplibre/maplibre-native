@@ -121,7 +121,10 @@ function(add_node_module NAME)
         endif()
 
         if(WIN32)
-            if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+            # Determine Windows architecture
+            if(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64" OR CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
+                set(_ARCH arm64)
+            elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
                 set(_ARCH x64)
             else()
                 set(_ARCH x86)
