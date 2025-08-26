@@ -156,13 +156,6 @@ jobs:
           $env:PATH = $env:PATH -replace "C:\\Strawberry\\c\\bin;", ""
           "PATH=$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-      - name: Setup cmake
-        # linux arm not supported https://github.com/jwlawson/actions-setup-cmake/issues/79
-        if: ${{contains(runner.name, 'GitHub Actions') && matrix.runs-on != 'ubuntu-22.04-arm' }}
-        uses: jwlawson/actions-setup-cmake@v2
-        with:
-          cmake-version: '3.31'
-
       - name: cmake version
         run: |
           cmake --version
