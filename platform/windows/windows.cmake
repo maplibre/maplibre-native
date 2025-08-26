@@ -17,16 +17,32 @@ if(MSVC)
         set(IS_ARM64_BUILD TRUE)
         message(STATUS "Configuring for ARM64 build")
         
-        # Ensure proper triplet for ARM64
-        if(NOT VCPKG_TARGET_TRIPLET)
-            set(VCPKG_TARGET_TRIPLET "arm64-windows")
+        # Debug: Show what VCPKG_TARGET_TRIPLET was set to
+        message(STATUS "Current VCPKG_TARGET_TRIPLET: '${VCPKG_TARGET_TRIPLET}'")
+        message(STATUS "CMAKE_SYSTEM_PROCESSOR: '${CMAKE_SYSTEM_PROCESSOR}'")
+        message(STATUS "CMAKE_GENERATOR_PLATFORM: '${CMAKE_GENERATOR_PLATFORM}'")
+        
+        # Force ARM64 triplet regardless of what was set before
+        if(VCPKG_TARGET_TRIPLET AND NOT VCPKG_TARGET_TRIPLET MATCHES "arm64")
+            message(WARNING "VCPKG_TARGET_TRIPLET was set to '${VCPKG_TARGET_TRIPLET}' but this is an ARM64 build. Overriding to 'arm64-windows'")
+            set(VCPKG_TARGET_TRIPLET "arm64-windows" CACHE STRING "Target triplet for vcpkg" FORCE)
+        elseif(NOT VCPKG_TARGET_TRIPLET)
+            set(VCPKG_TARGET_TRIPLET "arm64-windows" CACHE STRING "Target triplet for vcpkg" FORCE)
         endif()
+        
+        message(STATUS "Final VCPKG_TARGET_TRIPLET: '${VCPKG_TARGET_TRIPLET}'")
         
         # Set ARM64-specific CMake variables
         set(CMAKE_SYSTEM_PROCESSOR ARM64)
         if(NOT CMAKE_GENERATOR_PLATFORM)
             set(CMAKE_GENERATOR_PLATFORM ARM64)
         endif()
+    else()
+        # Debug: Show values for non-ARM64 builds too
+        message(STATUS "Non-ARM64 build detected")
+        message(STATUS "CMAKE_SYSTEM_PROCESSOR: '${CMAKE_SYSTEM_PROCESSOR}'")
+        message(STATUS "CMAKE_GENERATOR_PLATFORM: '${CMAKE_GENERATOR_PLATFORM}'")
+        message(STATUS "VCPKG_TARGET_TRIPLET: '${VCPKG_TARGET_TRIPLET}'")
     endif()
 
     # Always run the vendor packages script - it now handles ARM64 properly
