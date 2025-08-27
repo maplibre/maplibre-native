@@ -129,6 +129,7 @@
         "MLN_WITH_NODE": "ON",
         "MLN_WITH_OPENGL": "ON",
         "MLN_WITH_WAYLAND": "OFF",
+        "MLN_WITH_X11": "ON"
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache"
       }
     },
