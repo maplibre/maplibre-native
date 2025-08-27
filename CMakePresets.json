@@ -128,6 +128,7 @@
       "cacheVariables": {
         "MLN_WITH_NODE": "ON",
         "MLN_WITH_OPENGL": "ON",
+        "MLN_WITH_WAYLAND": "OFF",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache"
       }
     },
