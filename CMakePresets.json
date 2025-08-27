@@ -63,6 +63,8 @@
       "name": "macos-node",
       "inherits": "macos",
       "binaryDir": "${sourceDir}/build",
+      "displayName": "MacOS Node",
+      "description": "MacOS Node build (Metal renderer)",
       "cacheVariables": {
         "MLN_WITH_NODE": "ON",
         "MLN_WITH_WERROR": "OFF",
@@ -114,6 +116,19 @@
         "MLN_WITH_VULKAN": "ON",
         "MLN_WITH_WAYLAND": "OFF",
         "MLN_WITH_X11": "ON"
+      }
+    },
+    {
+      "name": "linux-node",
+      "inherits": "linux",
+      "binaryDir": "${sourceDir}/build",
+      "generator": "Ninja",
+      "displayName": "Linux Node",
+      "description": "Linux Node build (OpenGL renderer)",
+      "cacheVariables": {
+        "MLN_WITH_NODE": "ON",
+        "MLN_WITH_OPENGL": "ON",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache"
       }
     },
     {
@@ -221,11 +236,12 @@
     },
     {
       "name": "windows-node",
-      "hidden": false,
       "inherits": "windows",
+      "binaryDir": "${sourceDir}/build",
       "displayName": "Windows Node",
       "description": "Windows Node build (OpenGL renderer)",
       "cacheVariables": {
+        "MLN_WITH_NODE": "ON",
         "MLN_WITH_OPENGL": "ON",
         "CMAKE_CXX_COMPILER_LAUNCHER": "sccache"
       }
