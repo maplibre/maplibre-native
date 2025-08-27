@@ -232,6 +232,21 @@ jobs:
           echo "VSCMD_ARG_TGT_ARCH=%VSCMD_ARG_TGT_ARCH%"
         shell: cmd
 
+      - name: Install missing ARM64 packages
+        if: runner.os == 'Windows' && matrix.arch == 'arm64'
+        shell: pwsh
+        run: |
+          # Try to install dlfcn-win32 for ARM64 specifically
+          cd platform/windows/vendor/vcpkg
+          ./vcpkg install dlfcn-win32:arm64-windows --debug
+          
+          # If that fails, try with manifest mode or specific features
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "Attempting alternative installation method..."
+            ./vcpkg install dlfcn-win32 --triplet arm64-windows --debug --recurse
+          }
+        continue-on-error: true  # Don't fail the build if this step fails
+
       - name: Configure maplibre-native (Windows ARM64)
         if: runner.os == 'Windows' && matrix.arch == 'arm64'
         shell: pwsh
