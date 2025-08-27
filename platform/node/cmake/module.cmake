@@ -1,6 +1,6 @@
 # We need CMake 3.9 because the Xcode generator doesn't know about systems include paths before 3.9.
 # See https://gitlab.kitware.com/cmake/cmake/issues/16795
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.10)
 
 if (NOT NODE_MODULE_MINIMUM_ABI)
     set(NODE_MODULE_MINIMUM_ABI 46) # Don't build node modules for versions earlier than Node 4
