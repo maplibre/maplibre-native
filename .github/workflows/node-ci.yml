@@ -163,14 +163,6 @@ jobs:
           echo "VSCMD_ARG_TGT_ARCH=%VSCMD_ARG_TGT_ARCH%"
         shell: cmd
 
-      # Fixes an issue with the image causing builds to fail - https://github.com/actions/runner-images/issues/8598
-      - name: Remove Strawberry Perl from PATH (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $env:PATH = $env:PATH -replace "C:\\Strawberry\\c\\bin;", ""
-          "PATH=$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
-
       - name: cmake version
         run: |
           cmake --version
