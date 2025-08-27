@@ -222,7 +222,7 @@ jobs:
           key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
 
       - name: Test VSCMD_ARG_TGT_ARCH Environment
-        if: runner.os == 'Windows' && matrix.arch == 'arm64'
+        if: runner.os == 'Windows'
         run: |
           echo "VSCMD_ARG_TGT_ARCH=%VSCMD_ARG_TGT_ARCH%"
         shell: cmd
