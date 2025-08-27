@@ -146,12 +146,8 @@ jobs:
         working-directory: platform/node
         run: npm ci --ignore-scripts
 
-      - name: Set up msvc dev cmd (Windows x64)
-        if: runner.os == 'Windows' && matrix.arch == 'x86_64'
-        uses: ilammy/msvc-dev-cmd@v1
-
       - name: Set up msvc dev cmd (Windows ARM64)
-        if: runner.os == 'Windows' && matrix.arch == 'arm64'
+        if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: amd64_arm64
@@ -225,9 +221,16 @@ jobs:
           path: ${{ github.workspace }}\platform\windows\vendor\vcpkg\archives
           key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
 
+      - name: Test VSCMD_ARG_TGT_ARCH Environment
+        if: runner.os == 'Windows' && matrix.arch == 'arm64'
+        run: |
+          echo "VSCMD_ARG_TGT_ARCH=%VSCMD_ARG_TGT_ARCH%"
+        shell: cmd
+
       - name: Setup ARM64 Build Environment
         if: runner.os == 'Windows' && matrix.arch == 'arm64'
         run: |
+          echo "VSCMD_ARG_TGT_ARCH=%VSCMD_ARG_TGT_ARCH%"
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsamd64_arm64.bat"
           echo "VSCMD_ARG_TGT_ARCH=%VSCMD_ARG_TGT_ARCH%"
         shell: cmd
