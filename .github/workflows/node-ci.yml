@@ -230,7 +230,7 @@ jobs:
           VCPKG_INSTALL_OPTIONS: "--debug"
           VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}\\platform\\windows\\vendor\\vcpkg\\archives,readwrite"
         run: |
-          cmake --preset windows-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
+          cmake . -B build --preset windows-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
       - name: Build maplibre-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
