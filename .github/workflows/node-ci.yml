@@ -156,7 +156,6 @@ jobs:
         with:
           arch: amd64_arm64
 
-
       - name: Test VSCMD_ARG_TGT_ARCH Environment
         if: runner.os == 'Windows'
         run: |
@@ -231,11 +230,7 @@ jobs:
           VCPKG_INSTALL_OPTIONS: "--debug"
           VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}\\platform\\windows\\vendor\\vcpkg\\archives,readwrite"
         run: |
-          cmake . -B build `
-            -G Ninja `
-            -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} `
-            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
-            -DMLN_WITH_NODE=ON
+          cmake --preset windows-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
       - name: Build maplibre-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'

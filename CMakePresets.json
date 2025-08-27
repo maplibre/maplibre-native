@@ -194,8 +194,7 @@
         "MLN_WITH_OPENGL": "OFF",
         "MLN_WITH_EGL": "OFF",
         "MLN_WITH_VULKAN": "OFF",
-        "MLN_WITH_GLFW": "OFF",
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/platform/windows/arm64-windows-toolchain.cmake"
+        "MLN_WITH_GLFW": "OFF"
       }
     },
     {
@@ -218,6 +217,17 @@
       "cacheVariables": {
         "MLN_WITH_VULKAN": "ON",
         "MLN_WITH_GLFW": "ON"
+      }
+    },
+    {
+      "name": "windows-node",
+      "hidden": false,
+      "inherits": "windows",
+      "displayName": "Windows Node",
+      "description": "Windows Node build (OpenGL renderer)",
+      "cacheVariables": {
+        "MLN_WITH_OPENGL": "ON",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "sccache",
       }
     }
   ],
