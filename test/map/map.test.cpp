@@ -2018,8 +2018,14 @@ TEST(Map, FillLayerDepthDistribution) {
         test.map.getStyle().addLayer(std::move(layer));
     }
 
-    test::checkImage(
-        "test/fixtures/map/layer_depth_distribution/fill", test.frontend.render(test.map).image, 0.0006, 0.1);
+    test::checkImages(
+        {
+            "test/fixtures/map/layer_depth_distribution/fill/android",
+            "test/fixtures/map/layer_depth_distribution/fill/ios",
+        },
+        test.frontend.render(test.map).image,
+        0.0006,
+        0.1);
 }
 
 TEST(Map, LineLayerDepthDistribution) {
