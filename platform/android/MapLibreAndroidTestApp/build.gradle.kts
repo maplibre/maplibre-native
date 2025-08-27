@@ -32,6 +32,7 @@ android {
         versionName = file("../VERSION").readText().trim()
 
         manifestPlaceholders["SENTRY_DSN"] = ""
+        manifestPlaceholders["SENTRY_ENV"] = ""
     }
 
     nativeBuild(listOf("example-custom-layer"))
