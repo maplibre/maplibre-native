@@ -227,7 +227,7 @@
       "description": "Windows Node build (OpenGL renderer)",
       "cacheVariables": {
         "MLN_WITH_OPENGL": "ON",
-        "CMAKE_CXX_COMPILER_LAUNCHER": "sccache",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "sccache"
       }
     }
   ],
