@@ -133,32 +133,32 @@ if(MSVC)
         find_package(CURL REQUIRED)
     endif()
     
-	if(IS_ARM64_BUILD)
-		find_package(dlfcn-win32 QUIET)
-		if(dlfcn-win32_FOUND)
-			message(STATUS "Found dlfcn-win32 for ARM64")
-			set(HAVE_DLFCN_WIN32 TRUE)
-		else()
-			message(STATUS "dlfcn-win32 not available for ARM64, creating fallback")
-			set(HAVE_DLFCN_WIN32 FALSE)
-			
-			# Create a dummy interface library for ARM64
-			add_library(dlfcn-win32-fallback INTERFACE)
-			add_library(dlfcn-win32::dl ALIAS dlfcn-win32-fallback)
-			
-			# Add Windows API libraries that provide LoadLibrary/GetProcAddress
-			target_link_libraries(dlfcn-win32-fallback INTERFACE kernel32)
-			
-			# Define a macro to indicate we're using Windows API directly
-			target_compile_definitions(dlfcn-win32-fallback INTERFACE 
-				DLFCN_WIN32_NOT_AVAILABLE
-				USE_WINDOWS_LOADLIBRARY
-			)
-		endif()
-	else()
-		find_package(dlfcn-win32 REQUIRED)
-		set(HAVE_DLFCN_WIN32 TRUE)
-	endif()
+    if(IS_ARM64_BUILD)
+        find_package(dlfcn-win32 QUIET)
+        if(dlfcn-win32_FOUND)
+            message(STATUS "Found dlfcn-win32 for ARM64")
+            set(HAVE_DLFCN_WIN32 TRUE)
+        else()
+            message(STATUS "dlfcn-win32 not available for ARM64, creating fallback")
+            set(HAVE_DLFCN_WIN32 FALSE)
+            
+            # Create a dummy interface library for ARM64
+            add_library(dlfcn-win32-fallback INTERFACE)
+            add_library(dlfcn-win32::dl ALIAS dlfcn-win32-fallback)
+            
+            # Add Windows API libraries that provide LoadLibrary/GetProcAddress
+            target_link_libraries(dlfcn-win32-fallback INTERFACE kernel32)
+            
+            # Define a macro to indicate we're using Windows API directly
+            target_compile_definitions(dlfcn-win32-fallback INTERFACE 
+                DLFCN_WIN32_NOT_AVAILABLE
+                USE_WINDOWS_LOADLIBRARY
+            )
+        endif()
+    else()
+        find_package(dlfcn-win32 REQUIRED)
+        set(HAVE_DLFCN_WIN32 TRUE)
+    endif()
     find_package(ICU OPTIONAL_COMPONENTS i18n uc)
     find_package(JPEG REQUIRED)
     find_package(libuv REQUIRED)
