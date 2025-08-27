@@ -146,9 +146,15 @@ jobs:
         working-directory: platform/node
         run: npm ci --ignore-scripts
 
-      - name: Set up msvc dev cmd (Windows)
-        if: runner.os == 'Windows'
+      - name: Set up msvc dev cmd (Windows x64)
+        if: runner.os == 'Windows' && matrix.arch == 'x86_64'
         uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Set up msvc dev cmd (Windows ARM64)
+        if: runner.os == 'Windows' && matrix.arch == 'arm64'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64_arm64
 
       # Fixes an issue with the image causing builds to fail - https://github.com/actions/runner-images/issues/8598
       - name: Remove Strawberry Perl from PATH (Windows)
@@ -222,23 +228,24 @@ jobs:
       - name: Setup ARM64 Build Environment
         if: runner.os == 'Windows' && matrix.arch == 'arm64'
         run: |
-          # Set up ARM64 cross-compilation environment
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsamd64_arm64.bat"
-          # Verify the environment
           echo "VSCMD_ARG_TGT_ARCH=%VSCMD_ARG_TGT_ARCH%"
         shell: cmd
 
       - name: Configure maplibre-native (Windows ARM64)
         if: runner.os == 'Windows' && matrix.arch == 'arm64'
+        shell: pwsh
+        env:
+          VCPKG_INSTALL_OPTIONS: "--debug"
+          VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}\\platform\\windows\\vendor\\vcpkg\\archives,readwrite"
         run: |
           cmake . -B build `
-            -G Ninja -A ARM64 `
+            -G "Visual Studio 17 2022" -A ARM64 `
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} `
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
             -DMLN_WITH_NODE=ON
-        shell: pwsh
 
-      - name: Configure maplibre-native (Windows)
+      - name: Configure maplibre-native (Windows x64)
         if: runner.os == 'Windows' && matrix.arch == 'x86_64'
         shell: pwsh
         env:
