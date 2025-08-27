@@ -27,9 +27,10 @@ android {
         minSdk = 21
         targetSdk = 33
         versionCode = 14
-        versionName = "6.0.1"
         testInstrumentationRunner = "org.maplibre.android.InstrumentationRunner"
         multiDexEnabled = true
+        versionName = file("../VERSION").readText().trim()
+
         manifestPlaceholders["SENTRY_DSN"] = ""
     }
 
@@ -53,9 +54,11 @@ android {
                     keepDebugSymbols += "**/*.so"
                 }
             }
+
             buildConfigField("String", "SENTRY_DSN", "\"" + (System.getenv("SENTRY_DSN") ?: "") + "\"")
             manifestPlaceholders["SENTRY_DSN"] = System.getenv("SENTRY_DSN") ?: ""
         }
+
         getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
