@@ -18,6 +18,11 @@ RasterDEMSource::RasterDEMSource(std::string id,
     : RasterSource(std::move(id), std::move(urlOrTileset_), tileSize, SourceType::RasterDEM),
       options(std::move(options_)) {}
 
+RasterDEMSource::~RasterDEMSource() {
+    // Invalidate weak pointers before RasterDEMSource members are destroyed
+    invalidateWeakPtrsEarly();
+}
+
 bool RasterDEMSource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) const {
     return mbgl::underlying_type(Tile::Kind::RasterDEM) == mbgl::underlying_type(info->tileKind);
 }

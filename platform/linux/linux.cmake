@@ -191,25 +191,38 @@ if(NOT MLN_USE_BUILTIN_ICU AND NOT "${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
     find_static_library(STATIC_LIBS NAMES z)
     find_static_library(STATIC_LIBS NAMES jpeg)
     find_static_library(STATIC_LIBS NAMES webp)
-    find_static_library(STATIC_LIBS NAMES curl)
     find_static_library(STATIC_LIBS NAMES uv uv_a)
     find_static_library(STATIC_LIBS NAMES ssl)
     find_static_library(STATIC_LIBS NAMES crypto)
+    find_static_library(STATIC_LIBS NAMES bz2 bzip2)
+
+    if(MLN_WITH_VULKAN)
+        find_static_library(STATIC_LIBS NAMES glslang)
+        find_static_library(STATIC_LIBS NAMES glslang-default-resource-limits)
+        find_static_library(STATIC_LIBS NAMES SPIRV)
+        find_static_library(STATIC_LIBS NAMES SPIRV-Tools)
+        find_static_library(STATIC_LIBS NAMES SPIRV-Tools-opt)
+        find_static_library(STATIC_LIBS NAMES MachineIndependent)
+        find_static_library(STATIC_LIBS NAMES GenericCodeGen)
+    endif()
 
     add_custom_command(
         TARGET mbgl-core
         POST_BUILD
-        COMMAND armerge --keep-symbols '.*' --output libmbgl-core-amalgam.a
+        COMMAND armerge --keep-symbols 'mbgl.*' --output libmbgl-core-amalgam.a
             $<TARGET_FILE:mbgl-core>
             $<TARGET_FILE:freetype>
             $<TARGET_FILE:mbgl-vendor-csscolorparser>
             $<TARGET_FILE:harfbuzz>
+            $<TARGET_FILE:mbgl-vendor-nunicode>
             $<TARGET_FILE:mbgl-vendor-sqlite>
+            $<TARGET_FILE:mbgl-vendor-parsedate>
             ${ICUUC_LIBRARY_DIRS}/libicuuc.a
             ${ICUUC_LIBRARY_DIRS}/libicudata.a
             ${ICUI18N_LIBRARY_DIRS}/libicui18n.a
             ${STATIC_LIBS}
     )
+
 endif()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)

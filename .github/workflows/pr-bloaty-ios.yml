@@ -46,12 +46,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Get latest CMake and Ninja
-        uses: lukka/get-cmake@latest
-        with:
-          cmakeVersion: 3.24.1
-          ninjaVersion: latest
-
       - name: Cache Bloaty
         id: cache-bloaty
         uses: actions/cache@v4
