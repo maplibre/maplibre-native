@@ -49,6 +49,8 @@ jobs:
         with:
           submodules: recursive
 
+      - run: brew install webp libuv
+
       - run: cargo install armerge@2.2.0
 
       - name: Build mbgl-core for macOS
