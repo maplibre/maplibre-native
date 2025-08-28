@@ -10,5 +10,6 @@ DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
   libwebp-dev \
   libopengl0 \
   mesa-vulkan-drivers \
-  llvm
+  llvm \
+  glslang-dev
 cargo install armerge@2.2.0

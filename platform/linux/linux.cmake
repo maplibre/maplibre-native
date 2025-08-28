@@ -196,6 +196,16 @@ if(NOT MLN_USE_BUILTIN_ICU AND NOT "${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
     find_static_library(STATIC_LIBS NAMES crypto)
     find_static_library(STATIC_LIBS NAMES bz2 bzip2)
 
+    if(MLN_WITH_VULKAN)
+        find_static_library(STATIC_LIBS NAMES glslang)
+        find_static_library(STATIC_LIBS NAMES glslang-default-resource-limits)
+        find_static_library(STATIC_LIBS NAMES SPIRV)
+        find_static_library(STATIC_LIBS NAMES SPIRV-Tools)
+        find_static_library(STATIC_LIBS NAMES SPIRV-Tools-opt)
+        find_static_library(STATIC_LIBS NAMES MachineIndependent)
+        find_static_library(STATIC_LIBS NAMES GenericCodeGen)
+    endif()
+
     add_custom_command(
         TARGET mbgl-core
         POST_BUILD
