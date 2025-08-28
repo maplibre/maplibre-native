@@ -222,7 +222,7 @@ if(NOT MLN_USE_BUILTIN_ICU AND NOT "${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
             ${ICUI18N_LIBRARY_DIRS}/libicui18n.a
             ${STATIC_LIBS}
     )
-    
+
 endif()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
