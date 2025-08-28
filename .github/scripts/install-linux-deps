@@ -12,5 +12,5 @@ DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
   mesa-vulkan-drivers \
   llvm \
   glslang-dev \
-  bzip2
+  libbz2-dev
 cargo install armerge@2.2.0
