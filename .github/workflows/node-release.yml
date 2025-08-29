@@ -44,16 +44,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runs-on: ubuntu-22.04
+          - runs-on: ubuntu-24.04
             arch: x86_64
-          - runs-on: ubuntu-22.04-arm
-            arch: arm64
-          - runs-on: macos-14
+          - runs-on: ubuntu-24.04-arm
             arch: arm64
           - runs-on: macos-13
             arch: x86_64
+          - runs-on: macos-14
+            arch: arm64
           - runs-on: windows-2022
             arch: x86_64
+          - runs-on: windows-11-arm
+            arch: arm64
     continue-on-error: true
     env:
       BUILDTYPE: "Release"
@@ -125,12 +127,6 @@ jobs:
         run: |
           $env:PATH = $env:PATH -replace "C:\\Strawberry\\c\\bin;", ""
           "PATH=$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-      - name: Setup cmake
-        if: ${{contains(runner.name, 'GitHub Actions')}}
-        uses: jwlawson/actions-setup-cmake@v2
-        with:
-          cmake-version: '3.31'
 
       - name: cmake version
         run: |

@@ -8,10 +8,10 @@
 Binaries are available and downloaded during install for the following platforms:
 
 - Operating systems:
-  - Ubuntu 22.04 (amd64/arm64)
-  - macOS 12 (amd64/arm64)
-  - Windows (amd64)
-- Node.js 18, 20, 22
+  - Ubuntu 24.04 (amd64/arm64)
+  - macOS (amd64/arm64)
+  - Windows (amd64/arm64)
+- Node.js 20, 22, 24
 
 Run:
 

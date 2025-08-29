@@ -74,16 +74,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runs-on: ubuntu-22.04
+          - runs-on: ubuntu-24.04
             arch: x86_64
-          - runs-on: ubuntu-22.04-arm
-            arch: arm64
-          - runs-on: macos-14
+          - runs-on: ubuntu-24.04-arm
             arch: arm64
           - runs-on: macos-13
             arch: x86_64
+          - runs-on: macos-14
+            arch: arm64
           - runs-on: windows-2022
             arch: x86_64
+          - runs-on: windows-11-arm
+            arch: arm64
     continue-on-error: true
     env:
       BUILDTYPE: "Release"
@@ -144,24 +146,21 @@ jobs:
         working-directory: platform/node
         run: npm ci --ignore-scripts
 
-      - name: Set up msvc dev cmd (Windows)
-        if: runner.os == 'Windows'
+      - name: Set up msvc dev cmd (Windows x64)
+        if: runner.os == 'Windows' && matrix.arch == 'x86_64'
         uses: ilammy/msvc-dev-cmd@v1
 
-      # Fixes an issue with the image causing builds to fail - https://github.com/actions/runner-images/issues/8598
-      - name: Remove Strawberry Perl from PATH (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $env:PATH = $env:PATH -replace "C:\\Strawberry\\c\\bin;", ""
-          "PATH=$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-      - name: Setup cmake
-        # linux arm not supported https://github.com/jwlawson/actions-setup-cmake/issues/79
-        if: ${{contains(runner.name, 'GitHub Actions') && matrix.runs-on != 'ubuntu-22.04-arm' }}
-        uses: jwlawson/actions-setup-cmake@v2
+      - name: Set up msvc dev cmd (Windows ARM64)
+        if: runner.os == 'Windows' && matrix.arch == 'arm64'
+        uses: ilammy/msvc-dev-cmd@v1
         with:
-          cmake-version: '3.31'
+          arch: amd64_arm64
+
+      - name: Test VSCMD_ARG_TGT_ARCH Environment
+        if: runner.os == 'Windows'
+        run: |
+          echo "VSCMD_ARG_TGT_ARCH=%VSCMD_ARG_TGT_ARCH%"
+        shell: cmd
 
       - name: cmake version
         run: |
@@ -203,12 +202,7 @@ jobs:
       - name: Configure maplibre-native (Linux)
         if: runner.os == 'Linux'
         run: |
-          cmake . -B build \
-            -G Ninja \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_C_COMPILER=gcc-12 \
-            -DMLN_WITH_NODE=ON
+          cmake --preset linux-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
       - name: Get vcpkg commit id
         if: runner.os == 'Windows'
@@ -224,7 +218,7 @@ jobs:
           path: ${{ github.workspace }}\platform\windows\vendor\vcpkg\archives
           key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
 
-      - name: Configure maplibre-native (Windows)
+      - name: Configure maplibre-native (Windows x64)
         if: runner.os == 'Windows'
         shell: pwsh
         env:
@@ -271,8 +265,8 @@ jobs:
         working-directory: platform/node
         run: npm test
 
-      - name: Test (Windows)
-        if: runner.os == 'Windows'
+      - name: Test (Windows x64)
+        if: runner.os == 'Windows' && matrix.arch == 'x86_64'
         shell: pwsh
         working-directory: platform/node
         env:
@@ -283,6 +277,17 @@ jobs:
           & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v131 .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll
           npm test
 
+      - name: Test (Windows ARM64)
+        if: runner.os == 'Windows' && matrix.arch == 'arm64'
+        shell: pwsh
+        working-directory: platform/node
+        env:
+          LIBGL_ALWAYS_SOFTWARE: true
+          GALLIUM_DRIVER: llvmpipe
+        run: |
+          (Invoke-WebRequest https://api.github.com/repos/mmozeiko/build-mesa/releases -Headers @{ Authorization = ('Bearer {0}' -f '${{ secrets.GITHUB_TOKEN }}') } | ConvertFrom-Json)[0].assets | Where-Object name -match 'mesa-llvmpipe-arm64-.+\.7z' | foreach { Invoke-WebRequest $_.browser_download_url -OutFile mesa3d.7z }
+          & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v131 .\mesa3d.7z opengl32.dll libGLESv2.dll
+          npm test
       # On PRs make sure that the npm package can be packaged.
       - name: Pack
         working-directory: platform/node
