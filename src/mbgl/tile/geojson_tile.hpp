@@ -10,7 +10,8 @@ class GeoJSONData;
 
 class TileParameters;
 
-class GeoJSONTile : public GeometryTile {
+// NOTE: Any derived class must invalidate `weakFactory` in the destructor
+class GeoJSONTile final : public GeometryTile {
 public:
     GeoJSONTile(const OverscaledTileID&,
                 std::string sourceID,

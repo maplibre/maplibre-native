@@ -39,7 +39,9 @@ FillLayer::FillLayer(Immutable<Impl> impl_)
     : Layer(std::move(impl_)) {
 }
 
-FillLayer::~FillLayer() = default;
+FillLayer::~FillLayer() {
+    weakFactory.invalidateWeakPtrs();
+}
 
 const FillLayer::Impl& FillLayer::impl() const {
     return static_cast<const Impl&>(*baseImpl);

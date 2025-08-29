@@ -10,6 +10,7 @@ class AsyncRequest;
 
 namespace style {
 
+// NOTE: Any derived class must invalidate `weakFactory` in the destructor
 class VectorSource final : public TileSource {
 public:
     VectorSource(std::string id,
