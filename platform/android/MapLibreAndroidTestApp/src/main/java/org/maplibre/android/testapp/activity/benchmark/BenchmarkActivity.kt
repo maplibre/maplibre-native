@@ -2,9 +2,11 @@ package org.maplibre.android.testapp.activity.benchmark
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.os.Debug
 import android.os.Environment
 import android.os.Handler
 import android.os.PowerManager
@@ -29,7 +31,7 @@ import org.maplibre.android.maps.MapLibreMap.CancelableCallback
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.RenderingStats
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.styles.TestStyles
+import org.maplibre.android.testapp.utils.BenchmarkAdvancedMetrics
 import org.maplibre.android.testapp.utils.BenchmarkInputData
 import org.maplibre.android.testapp.utils.BenchmarkResult
 import org.maplibre.android.testapp.utils.BenchmarkRun
@@ -39,7 +41,6 @@ import org.maplibre.android.testapp.utils.animateCameraSuspend
 import org.maplibre.android.testapp.utils.jsonPayload
 import org.maplibre.android.testapp.utils.setStyleSuspend
 import java.io.File
-import java.util.ArrayList
 import kotlin.collections.flatMap
 import kotlin.collections.toTypedArray
 import kotlin.coroutines.resume
@@ -49,6 +50,7 @@ import kotlin.coroutines.resume
  */
 class BenchmarkActivity : AppCompatActivity() {
     private val TAG = "BenchmarkActivity"
+    private val useAdvancedMetrics = false
 
     private lateinit var mapView: MapView
     private var handler: Handler? = null
@@ -209,6 +211,9 @@ class BenchmarkActivity : AppCompatActivity() {
 
         val encodingTimeStore = FrameTimeStore()
         val renderingTimeStore = FrameTimeStore()
+        val metrics = if (useAdvancedMetrics) BenchmarkAdvancedMetrics() else null
+
+        metrics?.start()
 
         maplibreMap.setSwapBehaviorFlush(benchmarkRun.syncRendering)
 
@@ -217,6 +222,7 @@ class BenchmarkActivity : AppCompatActivity() {
             renderingTimeStore.add(stats.renderingTime * 1e3)
             numFrames++;
         }
+
         mapView.addOnDidFinishRenderingFrameListener(listener)
         mapView.setStyleSuspend(benchmarkRun.styleURL)
         numFrames = 0
@@ -233,8 +239,9 @@ class BenchmarkActivity : AppCompatActivity() {
         val fps = (numFrames * 1E9) / (endTime - startTime)
 
         mapView.removeOnDidFinishRenderingFrameListener(listener)
+        metrics?.stop()
 
-        return BenchmarkRunResult(fps, encodingTimeStore, renderingTimeStore, getThermalStatus())
+        return BenchmarkRunResult(fps, encodingTimeStore, renderingTimeStore, getThermalStatus(), metrics)
     }
 
     override fun onStart() {
