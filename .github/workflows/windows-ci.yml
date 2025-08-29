@@ -35,7 +35,7 @@ jobs:
       - run: |
           git config --system core.longpaths true
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0
@@ -60,7 +60,7 @@ jobs:
       - run: |
           git config --system core.longpaths true
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           sparse-checkout: |
             platform/windows/vendor
@@ -115,7 +115,7 @@ jobs:
       - run: |
           git config --system core.longpaths true
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
 
@@ -251,7 +251,7 @@ jobs:
           git config --system core.longpaths true
           git config --system core.autocrlf input
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
 
