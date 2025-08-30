@@ -293,7 +293,16 @@ jobs:
         shell: msys2 {0}
         run: |
           cmake --version
-          cmake --preset windows-${{ matrix.renderer }} -DCMAKE_POLICY_DEFAULT_CMP0141=NEW -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+          # Explicitly set renderer flags for MSYS2 to work around preset issues
+          if [[ "${{ matrix.renderer }}" == "opengl" ]]; then
+            cmake --preset windows-${{ matrix.renderer }} -DMLN_WITH_OPENGL=ON -DCMAKE_POLICY_DEFAULT_CMP0141=NEW -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+          elif [[ "${{ matrix.renderer }}" == "egl" ]]; then
+            cmake --preset windows-${{ matrix.renderer }} -DMLN_WITH_OPENGL=ON -DMLN_WITH_EGL=ON -DCMAKE_POLICY_DEFAULT_CMP0141=NEW -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+          elif [[ "${{ matrix.renderer }}" == "vulkan" ]]; then
+            cmake --preset windows-${{ matrix.renderer }} -DMLN_WITH_VULKAN=ON -DCMAKE_POLICY_DEFAULT_CMP0141=NEW -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+          else
+            cmake --preset windows-${{ matrix.renderer }} -DCMAKE_POLICY_DEFAULT_CMP0141=NEW -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+          fi
 
       - name: Build MapLibre Native Core
         shell: msys2 {0}
