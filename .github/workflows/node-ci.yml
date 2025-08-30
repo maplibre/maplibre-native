@@ -236,7 +236,7 @@ jobs:
             -G Ninja `
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} `
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
-            -DMLN_WITH_NODE=ON \
+            -DMLN_WITH_NODE=ON `
             -DMLN_WITH_OPENGL=ON
 
       - name: Build maplibre-native (MacOS/Linux)
