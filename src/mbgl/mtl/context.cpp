@@ -294,7 +294,8 @@ const auto clipMaskStencilMode = gfx::StencilMode{
     /*.pass=*/gfx::StencilOpType::Replace,
 };
 const auto clipMaskDepthMode = gfx::DepthMode{/*.func=*/gfx::DepthFunctionType::Always,
-                                              /*.mask=*/gfx::DepthMaskType::ReadOnly};
+                                              /*.mask=*/gfx::DepthMaskType::ReadOnly,
+                                              /*.range=*/{0.0f, 1.0f}};
 } // namespace
 
 bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
