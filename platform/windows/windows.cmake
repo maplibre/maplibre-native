@@ -35,7 +35,7 @@ elseif(DEFINED ENV{MSYSTEM})
     set(MSYS 1)
     set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
     set(BUILD_SHARED_LIBS OFF)
-    set(CMAKE_EXE_LINKER_FLAGS "-static")
+    set(CMAKE_EXE_LINKER_FLAGS "-static -Wl,--allow-multiple-definition")
 
     add_compile_definitions(WIN32 GHC_WIN_DISABLE_WSTRING_STORAGE_TYPE)
 
