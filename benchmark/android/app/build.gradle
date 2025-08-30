@@ -25,6 +25,7 @@ android {
             cmake {
                 arguments '-DANDROID_CCACHE=ccache'
                 arguments '-DANDROID_STL=c++_static'
+                arguments '-DMLN_WITH_OPENGL=ON'
                 targets 'mbgl-benchmark-runner'
             }
         }
