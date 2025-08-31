@@ -145,22 +145,6 @@
       }
     },
     {
-      "name": "windows-arm64",
-      "hidden": true,
-      "generator": "Visual Studio 17 2022",
-      "architecture": {
-        "value": "ARM64",
-        "strategy": "set"
-      },
-      "cacheVariables": {
-        "CMAKE_SYSTEM_NAME": "Windows",
-        "MLN_WITH_OPENGL": "OFF",
-        "MLN_WITH_EGL": "OFF",
-        "MLN_WITH_VULKAN": "OFF",
-        "MLN_WITH_GLFW": "OFF"
-      }
-    },
-    {
       "name": "windows-opengl",
       "binaryDir": "${sourceDir}/build-windows-opengl",
       "generator": "Ninja",
@@ -175,6 +159,18 @@
       "cacheVariables": {
         "MLN_CORE_INCLUDE_DEPS": "ON",
         "MLN_USE_BUILTIN_ICU": "ON"
+      }
+    },
+    {
+      "name": "windows-opengl-node",
+      "inherits": "windows",
+      "binaryDir": "${sourceDir}/build",
+      "displayName": "Windows Node",
+      "description": "Windows Node build (OpenGL renderer)",
+      "cacheVariables": {
+        "MLN_WITH_NODE": "ON",
+        "MLN_WITH_OPENGL": "ON",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "sccache"
       }
     },
     {
@@ -213,17 +209,20 @@
         "MLN_USE_BUILTIN_ICU": "ON"
       }
     },
-
     {
-      "name": "windows-opengl-node",
-      "inherits": "windows",
-      "binaryDir": "${sourceDir}/build",
-      "displayName": "Windows Node",
-      "description": "Windows Node build (OpenGL renderer)",
+      "name": "windows-arm64",
+      "hidden": true,
+      "generator": "Visual Studio 17 2022",
+      "architecture": {
+        "value": "ARM64",
+        "strategy": "set"
+      },
       "cacheVariables": {
-        "MLN_WITH_NODE": "ON",
-        "MLN_WITH_OPENGL": "ON",
-        "CMAKE_CXX_COMPILER_LAUNCHER": "sccache"
+        "CMAKE_SYSTEM_NAME": "Windows",
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_WITH_EGL": "OFF",
+        "MLN_WITH_VULKAN": "OFF",
+        "MLN_WITH_GLFW": "OFF"
       }
     },
     {
