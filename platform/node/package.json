@@ -55,7 +55,7 @@
     "xcode": "^3.0.1"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "install": "node-pre-gyp install --fallback-to-build=false",
