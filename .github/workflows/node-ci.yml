@@ -197,12 +197,12 @@ jobs:
       - name: Configure maplibre-native (MacOS)
         if: runner.os == 'MacOS'
         run: |
-          cmake --preset macos-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
+          cmake --preset macos-metal-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
       - name: Configure maplibre-native (Linux)
         if: runner.os == 'Linux'
         run: |
-          cmake --preset linux-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
+          cmake --preset linux-opengl-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
       - name: Get vcpkg commit id
         if: runner.os == 'Windows'
@@ -225,7 +225,7 @@ jobs:
           VCPKG_INSTALL_OPTIONS: "--debug"
           VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}\\platform\\windows\\vendor\\vcpkg\\archives,readwrite"
         run: |
-          cmake --preset windows-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
+          cmake --preset windows-opengl-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
       - name: Configure maplibre-native (Windows arm64)
         if: runner.os == 'Windows' && matrix.arch == 'arm64'
@@ -234,7 +234,7 @@ jobs:
           VCPKG_INSTALL_OPTIONS: "--debug"
           VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}\\platform\\windows\\vendor\\vcpkg\\archives,readwrite"
         run: |
-          cmake --preset windows-arm64-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
+          cmake --preset windows-opengl-arm64-node -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
       - name: Build maplibre-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'

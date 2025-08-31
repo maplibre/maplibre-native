@@ -60,7 +60,7 @@
       "inherits": "macos-vulkan"
     },
     {
-      "name": "macos-node",
+      "name": "macos-metal-node",
       "inherits": "macos",
       "binaryDir": "${sourceDir}/build",
       "displayName": "MacOS Node",
@@ -119,10 +119,9 @@
       }
     },
     {
-      "name": "linux-node",
+      "name": "linux-opengl-node",
       "inherits": "linux",
       "binaryDir": "${sourceDir}/build",
-      "generator": "Ninja",
       "displayName": "Linux Node",
       "description": "Linux Node build (OpenGL renderer)",
       "cacheVariables": {
@@ -237,7 +236,7 @@
       }
     },
     {
-      "name": "windows-node",
+      "name": "windows-opengl-node",
       "inherits": "windows",
       "binaryDir": "${sourceDir}/build",
       "displayName": "Windows Node",
@@ -249,17 +248,12 @@
       }
     },
     {
-      "name": "windows-arm64-node",
+      "name": "windows-arm64-opengl-node",
       "binaryDir": "${sourceDir}/build",
-      "generator": "Visual Studio 17 2022",
-      "architecture": {
-        "value": "ARM64",
-        "strategy": "set"
-      },
+      "inherits": "windows-arm64",
       "displayName": "Windows ARM64 Node",
       "description": "Windows ARM64 Node build (OpenGL renderer)",
       "cacheVariables": {
-        "CMAKE_SYSTEM_NAME": "Windows",
         "MLN_WITH_NODE": "ON",
         "MLN_WITH_OPENGL": "ON",
         "CMAKE_CXX_COMPILER_LAUNCHER": "sccache"
