@@ -55,7 +55,7 @@ public:
             case gfx::Backend::Type::Vulkan: {
                 break;
             }
-#else // MLN_RENDER_BACKEND_OPENGL
+#elif MLN_RENDER_BACKEND_OPENGL
             case gfx::Backend::Type::OpenGL: {
                 programBase = std::make_unique<gl::ProgramBase<Name>>(programParameters.withDefaultSource(
                     {gfx::Backend::Type::OpenGL,

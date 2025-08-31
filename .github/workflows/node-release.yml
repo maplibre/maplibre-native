@@ -173,7 +173,8 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DCMAKE_C_COMPILER=gcc-12 \
-            -DMLN_WITH_NODE=ON
+            -DMLN_WITH_NODE=ON \
+            -DMLN_WITH_OPENGL=ON
 
       - name: "Create directory '${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache' (Windows)"
         if: runner.os == 'Windows'
@@ -201,7 +202,8 @@ jobs:
             -G Ninja `
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} `
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
-            -DMLN_WITH_NODE=ON
+            -DMLN_WITH_NODE=ON \
+            -DMLN_WITH_OPENGL=ON
 
       - name: Build maplibre-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
