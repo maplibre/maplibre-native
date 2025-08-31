@@ -247,6 +247,21 @@
         "MLN_WITH_OPENGL": "ON",
         "CMAKE_CXX_COMPILER_LAUNCHER": "sccache"
       }
+    },
+    {
+      "name": "windows-node-arm64",
+      "hidden": true,
+      "generator": "Visual Studio 17 2022",
+      "architecture": {
+        "value": "ARM64",
+        "strategy": "set"
+      },
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "Windows",
+        "MLN_WITH_NODE": "ON",
+        "MLN_WITH_OPENGL": "ON",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "sccache"
+      }
     }
   ],
   "buildPresets": [
