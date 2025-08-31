@@ -250,7 +250,6 @@
     },
     {
       "name": "windows-node-arm64",
-      "hidden": true,
       "generator": "Visual Studio 17 2022",
       "architecture": {
         "value": "ARM64",
