@@ -279,7 +279,7 @@ jobs:
           GALLIUM_DRIVER: llvmpipe
         run: |
           (Invoke-WebRequest https://api.github.com/repos/pal1000/mesa-dist-win/releases -Headers @{ Authorization = ('Bearer {0}' -f '${{ secrets.GITHUB_TOKEN }}') } | ConvertFrom-Json)[0].assets | Where-Object name -match 'mesa3d-.+-release-msvc\.7z' | foreach { Invoke-WebRequest $_.browser_download_url -OutFile mesa3d.7z }
-          & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v131 .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll
+          & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v137 .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll
           npm test
 
       - name: Test (Windows ARM64)
@@ -291,7 +291,7 @@ jobs:
           GALLIUM_DRIVER: llvmpipe
         run: |
           (Invoke-WebRequest https://api.github.com/repos/mmozeiko/build-mesa/releases -Headers @{ Authorization = ('Bearer {0}' -f '${{ secrets.GITHUB_TOKEN }}') } | ConvertFrom-Json)[0].assets | Where-Object name -match 'mesa-llvmpipe-arm64-.+\.7z' | foreach { Invoke-WebRequest $_.browser_download_url -OutFile mesa3d.7z }
-          & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v131 .\mesa3d.7z opengl32.dll libGLESv2.dll
+          & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v137 .\mesa3d.7z opengl32.dll libGLESv2.dll
           npm test
       # On PRs make sure that the npm package can be packaged.
       - name: Pack
