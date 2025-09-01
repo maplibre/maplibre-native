@@ -10,7 +10,7 @@ static hb_language_t getDefaultLanguage() {
 }
 
 static hb_script_t getUnicodeScript(hb_codepoint_t u) {
-    static hb_unicode_funcs_t *unicode_funcs;
+    static hb_unicode_funcs_t* unicode_funcs;
 
     unicode_funcs = hb_unicode_funcs_get_default();
 
@@ -23,7 +23,7 @@ static hb_script_t getUnicodeScript(hb_codepoint_t u) {
     return hb_unicode_script(unicode_funcs, u);
 }
 
-HBShaper::Impl::Impl(GlyphIDType type_, const std::string &fontFileData, const FreeTypeLibrary &lib)
+HBShaper::Impl::Impl(GlyphIDType type_, const std::string& fontFileData, const FreeTypeLibrary& lib)
     : type(type_),
       face(fontFileData.data(), fontFileData.size(), lib) {
     if (!face.isValid()) return;
@@ -39,9 +39,9 @@ HBShaper::Impl::~Impl() {
     hb_buffer_destroy(buffer);
     hb_font_destroy(font);
 }
-void HBShaper::Impl::createComplexGlyphIDs(const std::u16string &text,
-                                           std::vector<GlyphID> &glyphIDs,
-                                           std::vector<HBShapeAdjust> &adjusts) {
+void HBShaper::Impl::createComplexGlyphIDs(const std::u16string& text,
+                                           std::vector<GlyphID>& glyphIDs,
+                                           std::vector<HBShapeAdjust>& adjusts) {
     if (text.empty()) {
         return;
     }
@@ -53,7 +53,7 @@ void HBShaper::Impl::createComplexGlyphIDs(const std::u16string &text,
 
     std::vector<TextPart> textParts;
     textParts.emplace_back();
-    auto *lastTextPart = &textParts.back();
+    auto* lastTextPart = &textParts.back();
     lastTextPart->text = text[0];
     lastTextPart->script = getUnicodeScript(text[0]);
 
@@ -71,7 +71,7 @@ void HBShaper::Impl::createComplexGlyphIDs(const std::u16string &text,
         }
     }
 
-    for (auto &textPart : textParts) {
+    for (auto& textPart : textParts) {
         // Setup harfbuzz
         hb_buffer_reset(buffer);
 
@@ -80,15 +80,15 @@ void HBShaper::Impl::createComplexGlyphIDs(const std::u16string &text,
         hb_buffer_set_language(buffer, getDefaultLanguage());
         size_t length = textPart.text.size();
 
-        hb_buffer_add_utf16(buffer, (const uint16_t *)textPart.text.c_str(), (int)length, 0, (int)length);
+        hb_buffer_add_utf16(buffer, (const uint16_t*)textPart.text.c_str(), (int)length, 0, (int)length);
 
         // harfbuzz shaping
         hb_shape(font, buffer, NULL, 0);
 
         // Get Harfbuzz adjustion
         uint32_t glyphCount;
-        hb_glyph_info_t *glyphInfo = hb_buffer_get_glyph_infos(buffer, &glyphCount);
-        hb_glyph_position_t *glyphPos = hb_buffer_get_glyph_positions(buffer, &glyphCount);
+        hb_glyph_info_t* glyphInfo = hb_buffer_get_glyph_infos(buffer, &glyphCount);
+        hb_glyph_position_t* glyphPos = hb_buffer_get_glyph_positions(buffer, &glyphCount);
 
         glyphIDs.reserve(glyphCount);
         adjusts.reserve(glyphCount);

@@ -10,9 +10,9 @@ char16_t PUAend = u'\uF8FF';
 
 namespace mbgl {
 
-void TaggedString::addTextSection(const std::u16string &sectionText,
+void TaggedString::addTextSection(const std::u16string& sectionText,
                                   double scale,
-                                  const FontStack &fontStack,
+                                  const FontStack& fontStack,
                                   GlyphIDType type,
                                   bool keySection,
                                   std::optional<Color> textColor) {
@@ -25,11 +25,11 @@ void TaggedString::addTextSection(const std::u16string &sectionText,
     sections[sections.size() - 1].keySection = keySection;
 }
 
-void TaggedString::addTextSection(const std::u16string &sectionText,
+void TaggedString::addTextSection(const std::u16string& sectionText,
                                   double scale,
-                                  const FontStack &fontStack,
+                                  const FontStack& fontStack,
                                   GlyphIDType type,
-                                  std::shared_ptr<std::vector<HBShapeAdjust>> &adjusts,
+                                  std::shared_ptr<std::vector<HBShapeAdjust>>& adjusts,
                                   bool keySection,
                                   std::optional<Color> textColor) {
     sections.emplace_back(scale, fontStack, type, static_cast<uint32_t>(styledText.first.size()), std::move(textColor));
@@ -40,8 +40,8 @@ void TaggedString::addTextSection(const std::u16string &sectionText,
     sections[sections.size() - 1].keySection = keySection;
 }
 
-void TaggedString::addImageSection(const std::string &imageID) {
-    const auto &nextImageSectionCharCode = getNextImageSectionCharCode();
+void TaggedString::addImageSection(const std::string& imageID) {
+    const auto& nextImageSectionCharCode = getNextImageSectionCharCode();
     if (!nextImageSectionCharCode) {
         Log::Warning(Event::Style, "Exceeded maximum number of images in a label.");
         return;
@@ -69,7 +69,7 @@ void TaggedString::trim() {
     std::size_t beginningWhitespace = styledText.first.find_first_not_of(u" \t\n\v\f\r");
 
     for (size_t i = 0; (i < beginningWhitespace) && i < styledText.first.length(); ++i) {
-        auto &sec = getSection(i);
+        auto& sec = getSection(i);
         if (sec.type != FontPBF) {
             beginningWhitespace = i;
             break;
@@ -77,7 +77,7 @@ void TaggedString::trim() {
     }
 
     if (beginningWhitespace == std::u16string::npos) {
-        for (auto &section : sections) {
+        for (auto& section : sections) {
             section.startIndex = 0;
         }
         // Entirely whitespace
@@ -87,13 +87,13 @@ void TaggedString::trim() {
         int trailingWhitespace = static_cast<int>(styledText.first.find_last_not_of(u" \t\n\v\f\r") + 1);
 
         if (beginningWhitespace) {
-            for (auto &section : sections) {
+            for (auto& section : sections) {
                 section.startIndex -= beginningWhitespace;
             }
         }
 
         for (int i = static_cast<int>(styledText.first.length()) - 1; i >= trailingWhitespace; --i) {
-            auto &sec = getSection(i);
+            auto& sec = getSection(i);
             if (sec.type != FontPBF) {
                 trailingWhitespace = i + 1;
                 break;
@@ -118,7 +118,7 @@ void TaggedString::verticalizePunctuation() {
     // Relies on verticalization changing characters in place so that style indices don't need updating
     auto replaced = util::i18n::verticalizePunctuation(styledText.first);
     for (size_t i = 0; i < replaced.length(); ++i) {
-        auto &sec = getSection(i);
+        auto& sec = getSection(i);
         if (sec.type != GlyphIDType::FontPBF) replaced[i] = styledText.first[i];
     }
     styledText.first = replaced;
@@ -129,7 +129,7 @@ bool TaggedString::allowsVerticalWritingMode() {
         bool allows = false;
         for (size_t i = 0; i < styledText.first.length(); ++i) {
             auto chr = styledText.first[i];
-            auto &sec = getSection(i);
+            auto& sec = getSection(i);
             if (sec.type == GlyphIDType::FontPBF && util::i18n::hasUprightVerticalOrientation(chr)) {
                 allows = true;
                 break;
