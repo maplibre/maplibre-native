@@ -30,6 +30,7 @@ permissions:
   id-token: write         # needed for AWS
   contents: write         # allow making a release
   actions: write          # for triggering ios-release-cocoapods.yml
+  issues: write           # for notify-release-on-prs.ts
 
 jobs:
   pre_job:
@@ -366,7 +367,7 @@ jobs:
          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Write release notifications
-        if: env.make_release
+        if: env.make_release && github.repository_owner == 'maplibre'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node .github/scripts/notify-release-on-prs.ts --tag ios-v${{ env.version }}
@@ -374,7 +375,7 @@ jobs:
 
   ios-build-cmake:
     needs: pre_job
-    runs-on: macos-latest
+    runs-on: macos-14
     if: needs.pre_job.outputs.should_skip != 'true'
     steps:
       - uses: actions/checkout@v4

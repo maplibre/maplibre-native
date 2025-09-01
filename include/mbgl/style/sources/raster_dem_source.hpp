@@ -6,14 +6,26 @@
 
 namespace mbgl {
 
-class AsyncRequest;
-
 namespace style {
+
+struct RasterDEMOptions {
+    std::optional<Tileset::DEMEncoding> encoding = std::nullopt;
+};
 
 class RasterDEMSource : public RasterSource {
 public:
-    RasterDEMSource(std::string id, variant<std::string, Tileset> urlOrTileset, uint16_t tileSize);
+    RasterDEMSource(std::string id,
+                    variant<std::string, Tileset> urlOrTileset,
+                    uint16_t tileSize,
+                    std::optional<RasterDEMOptions> options = std::nullopt);
+    ~RasterDEMSource() override;
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
+
+protected:
+    void setTilesetOverrides(Tileset& tileset) override;
+
+private:
+    std::optional<RasterDEMOptions> options;
 };
 
 template <>

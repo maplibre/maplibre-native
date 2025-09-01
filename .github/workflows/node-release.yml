@@ -46,11 +46,11 @@ jobs:
         include:
           - runs-on: ubuntu-22.04
             arch: x86_64
-          - runs-on: MapLibre_Native_Ubuntu_22_04_ARM_8_core
+          - runs-on: ubuntu-22.04-arm
             arch: arm64
           - runs-on: macos-14
             arch: arm64
-          - runs-on: macos-14-large
+          - runs-on: macos-13
             arch: x86_64
           - runs-on: windows-2022
             arch: x86_64
@@ -177,7 +177,8 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DCMAKE_C_COMPILER=gcc-12 \
-            -DMLN_WITH_NODE=ON
+            -DMLN_WITH_NODE=ON \
+            -DMLN_WITH_OPENGL=ON
 
       - name: "Create directory '${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache' (Windows)"
         if: runner.os == 'Windows'
@@ -205,7 +206,8 @@ jobs:
             -G Ninja `
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} `
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
-            -DMLN_WITH_NODE=ON
+            -DMLN_WITH_NODE=ON \
+            -DMLN_WITH_OPENGL=ON
 
       - name: Build maplibre-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'

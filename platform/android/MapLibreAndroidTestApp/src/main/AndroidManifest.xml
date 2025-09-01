@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:name=".MapLibreApplication"
@@ -211,6 +212,31 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.stability.LongRunningActivity"
+            android:description="@string/description_long_running_maps"
+            android:exported="true"
+            android:label="@string/activity_long_running_maps"
+            android:screenOrientation="portrait"
+            android:launchMode="singleInstance">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_integration" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.stability.UserMapActivity"
+            android:exported="false"
+            android:launchMode="singleInstance">
+        </activity>
+        <activity
+            android:name=".activity.stability.NavigationMapActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:launchMode="singleInstance">
         </activity>
         <activity
             android:name=".activity.fragment.MultiMapActivity"
@@ -1283,6 +1309,73 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
+
+        <!-- Sentry setup -->
+        <!-- Required: set your sentry.io project identifier (DSN) -->
+        <meta-data
+            android:name="io.sentry.dsn"
+            android:value="${SENTRY_DSN}"
+            />
+
+        <meta-data
+            android:name="io.sentry.environment"
+            android:value="${SENTRY_ENV}"
+            />
+
+        <!-- Add data like request headers, user ip address and device name, see https://docs.sentry.io/platforms/android/data-management/data-collected/ for more info -->
+        <meta-data
+            android:name="io.sentry.send-default-pii"
+            android:value="true"
+            />
+
+        <!-- enable automatic breadcrumbs for user interactions (clicks, swipes, scrolls) -->
+        <meta-data
+            android:name="io.sentry.traces.user-interaction.enable"
+            android:value="true"
+            />
+        <!-- enable screenshot for crashes -->
+        <meta-data
+            android:name="io.sentry.attach-screenshot"
+            android:value="true"
+            />
+        <!-- enable view hierarchy for crashes -->
+        <meta-data
+            android:name="io.sentry.attach-view-hierarchy"
+            android:value="true"
+            />
+
+        <!-- enable the performance API by setting a sample-rate, adjust in production env -->
+        <meta-data
+            android:name="io.sentry.traces.sample-rate"
+            android:value="1.0"
+            />
+
+        <!-- Enable UI profiling, adjust in production env. This is evaluated only once per session -->
+        <meta-data
+            android:name="io.sentry.traces.profiling.session-sample-rate"
+            android:value="1.0"
+            />
+        <!-- Set profiling mode. For more info see https://docs.sentry.io/platforms/android/profiling/#enabling-ui-profiling -->
+        <meta-data
+            android:name="io.sentry.traces.profiling.lifecycle"
+            android:value="trace"
+            />
+        <!-- Enable profiling on app start. The app start profile will be stopped automatically when the app start root span finishes -->
+        <meta-data
+            android:name="io.sentry.traces.profiling.start-on-app-start"
+            android:value="true"
+            />
+
+        <!-- record session replays for 100% of errors and 10% of sessions -->
+        <meta-data
+            android:name="io.sentry.session-replay.on-error-sample-rate"
+            android:value="1.0"
+            />
+        <meta-data
+            android:name="io.sentry.session-replay.session-sample-rate"
+            android:value="0.1"
+            />
+
     </application>
 
 </manifest>

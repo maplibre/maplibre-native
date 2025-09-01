@@ -3,7 +3,7 @@
 #include <mbgl/gfx/debug_group.hpp>
 
 #include <memory>
-#include <string>
+#include <string_view>
 
 namespace mbgl {
 namespace gfx {

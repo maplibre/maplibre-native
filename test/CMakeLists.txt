@@ -51,6 +51,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/style/conversion/light.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/padding.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/property_value.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/style/conversion/raster_dem_options.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/stringify.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/tileset.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/expression/dependency.test.cpp
@@ -147,10 +148,6 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/test/renderer/backend_scope.test.cpp
             ${PROJECT_SOURCE_DIR}/test/util/offscreen_texture.test.cpp
     )
-    target_compile_definitions(
-        mbgl-test
-        PRIVATE MLN_RENDER_BACKEND_OPENGL=1
-    )
 endif()
 
 
@@ -162,17 +159,6 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/test/api/custom_drawable_layer.test.cpp
             ${PROJECT_SOURCE_DIR}/test/renderer/backend_scope.test.cpp
             ${PROJECT_SOURCE_DIR}/test/util/offscreen_texture.test.cpp
-    )
-    target_compile_definitions(
-        mbgl-test
-        PRIVATE MLN_RENDER_BACKEND_VULKAN=1
-    )
-endif()
-
-if(MLN_WITH_METAL)
-    target_compile_definitions(
-        mbgl-test
-        PRIVATE MLN_RENDER_BACKEND_METAL=1
     )
 endif()
 

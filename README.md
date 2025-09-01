@@ -171,6 +171,10 @@ There is an [npm package](https://www.npmjs.com/package/@maplibre/maplibre-gl-na
 
 Please check out the [`maplibre/maplibre-native-qt` repository](https://github.com/maplibre/maplibre-native-qt) to learn how to intergrate MapLibre Native with a Qt project.
 
+## Compose Multiplatform
+
+[MapLibre Compose](https://github.com/maplibre/maplibre-compose) wraps MapLibre Native for various platforms that [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/) supports. As of August 2025, iOS and Android are supported, with web and desktop partially supported.
+
 ## Other Platforms
 
 MapLibre Native can also be built on [Linux](platform/linux/README.md), [Windows](platform/windows/README.md) and [macOS](platform/macos/README.md).
@@ -243,6 +247,8 @@ Gold:
 
 <a href="https://meta.com"><img src="https://maplibre.org/img/meta-logo.svg" alt="Logo Meta" width="25%"/></a>
 
+<a href="https://www.microsoft.com/"><img src="https://maplibre.org/img/msft-logo.svg" alt="Logo Microsoft" width="25%"/></a>
+
 Silver:
 
 <a href="https://www.mierune.co.jp/?lang=en"><img src="https://maplibre.org/img/mierune-logo.svg" alt="Logo MIERUNE" width="25%"/></a>
@@ -252,8 +258,6 @@ Silver:
 <a href="https://www.jawg.io/"><img src="https://maplibre.org/img/jawgmaps-logo.svg" alt="Logo JawgMaps" width="25%"/></a>
 
 <a href="https://www.radar.com/"><img src="https://maplibre.org/img/radar-logo.svg" alt="Logo Radar" width="25%"/></a>
-
-<a href="https://www.microsoft.com/"><img src="https://maplibre.org/img/msft-logo.svg" alt="Logo Microsoft" width="25%"/></a>
 
 <a href="https://www.mappedin.com/"><img src="https://maplibre.org/img/mappedin-logo.svg" alt="Logo mappedin" width="25%"/></a>
 
