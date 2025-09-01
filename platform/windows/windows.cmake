@@ -246,8 +246,6 @@ elseif(MSYS)
         mbgl-core
         PRIVATE
             ${CURL_STATIC_LIBRARIES}
-            # Windows synchronization APIs (needed for GLESv2 and other components)
-            synchronization
     )
 endif()
 
