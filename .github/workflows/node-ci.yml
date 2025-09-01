@@ -146,15 +146,9 @@ jobs:
         working-directory: platform/node
         run: npm ci --ignore-scripts
 
-      - name: Set up msvc dev cmd (Windows x64)
+      - name: Set up msvc dev cmd (Windows)
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
-
-      - name: Test VSCMD_ARG_TGT_ARCH Environment
-        if: runner.os == 'Windows'
-        run: |
-          echo "VSCMD_ARG_TGT_ARCH=%VSCMD_ARG_TGT_ARCH%"
-        shell: cmd
 
       - name: cmake version
         run: |
