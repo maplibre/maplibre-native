@@ -2,16 +2,18 @@ name: windows-ci
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-      - windows-*.*.x
-    tags:
-      - windows-*
+  # temporarily disabled
+  # https://github.com/maplibre/maplibre-native/issues/3670
+  # push:
+  #   branches:
+  #     - main
+  #     - windows-*.*.x
+  #   tags:
+  #     - windows-*
 
-  pull_request:
-    branches:
-      - '*'
+  # pull_request:
+  #   branches:
+  #     - '*'
 
 env:
   SCCACHE_GHA_ENABLED: "true"
