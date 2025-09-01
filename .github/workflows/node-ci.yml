@@ -147,14 +147,8 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Set up msvc dev cmd (Windows x64)
-        if: runner.os == 'Windows' && matrix.arch == 'x86_64'
+        if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
-
-      - name: Set up msvc dev cmd (Windows ARM64)
-        if: runner.os == 'Windows' && matrix.arch == 'arm64'
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: amd64_arm64
 
       - name: Test VSCMD_ARG_TGT_ARCH Environment
         if: runner.os == 'Windows'
