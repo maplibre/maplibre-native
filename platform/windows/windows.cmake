@@ -35,9 +35,14 @@ elseif(DEFINED ENV{MSYSTEM})
     set(MSYS 1)
     set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
     set(BUILD_SHARED_LIBS OFF)
-    set(CMAKE_EXE_LINKER_FLAGS "-static")
-
-    add_compile_definitions(WIN32 GHC_WIN_DISABLE_WSTRING_STORAGE_TYPE)
+    # Use selective static linking to avoid duplicate symbol issues
+    set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+    
+    # Add linker flags to handle potential remaining symbol conflicts
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--allow-multiple-definition")
+    
+    # Target Windows 8+ for synchronization APIs (WaitOnAddress, WakeByAddressSingle)
+    add_compile_definitions(WIN32 GHC_WIN_DISABLE_WSTRING_STORAGE_TYPE _WIN32_WINNT=0x0602)
 
     find_package(ICU OPTIONAL_COMPONENTS i18n uc data)
     find_package(JPEG REQUIRED)
@@ -241,6 +246,8 @@ elseif(MSYS)
         mbgl-core
         PRIVATE
             ${CURL_STATIC_LIBRARIES}
+            # Windows synchronization APIs (needed for GLESv2 and other components)
+            synchronization
     )
 endif()
 
