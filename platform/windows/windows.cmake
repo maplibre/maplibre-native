@@ -44,16 +44,6 @@ elseif(DEFINED ENV{MSYSTEM})
     find_package(PNG REQUIRED)
     find_package(PkgConfig REQUIRED)
 
-    # Fix zlib conflicts in MSYS2 builds
-    if(TARGET PNG::PNG)
-        # Get the actual PNG libraries from pkg-config to avoid zlib conflicts
-        pkg_check_modules(PNG_PC libpng REQUIRED)
-        set_target_properties(PNG::PNG PROPERTIES
-            INTERFACE_LINK_LIBRARIES "${PNG_PC_LINK_LIBRARIES}"
-            INTERFACE_INCLUDE_DIRECTORIES "${PNG_PC_INCLUDE_DIRS}"
-        )
-    endif()
-
     pkg_search_module(WEBP libwebp REQUIRED)
     pkg_search_module(LIBUV libuv REQUIRED)
     pkg_search_module(CURL libcurl REQUIRED)
