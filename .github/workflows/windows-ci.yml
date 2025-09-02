@@ -107,8 +107,8 @@ jobs:
 
   windows-build-and-test-msvc:
     needs: windows-get-or-build-dependencies
-    fail-fast: false
     strategy:
+      fail-fast: false
       matrix:
         renderer: [opengl, egl, vulkan]
     runs-on: windows-2022
@@ -243,7 +243,7 @@ jobs:
     if: needs.pre-job.outputs.should_skip != 'true'
     needs: pre-job
     strategy:
-    fail-fast: false
+      fail-fast: false
       matrix:
         msystem: [clang64, mingw64, ucrt64]
         renderer: [opengl, egl, vulkan]
@@ -274,7 +274,11 @@ jobs:
             libpng:p
             libwebp:p
             libuv:p
-
+            zlib:p
+            bzip2:p
+            freetype:p
+            harfbuzz:p
+            sqlite3:p
       - name: Initialize CodeQL
         uses: github/codeql-action/init@3c3833e0f8c1c83d449a7478aa59c036a9165498 # v3
         with:

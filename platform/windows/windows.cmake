@@ -43,10 +43,11 @@ elseif(DEFINED ENV{MSYSTEM})
     find_package(JPEG REQUIRED)
     find_package(PNG REQUIRED)
     find_package(PkgConfig REQUIRED)
-
+    pkg_check_modules(ZLIB REQUIRED zlib)
+    pkg_check_modules(PNG REQUIRED libpng)
     pkg_search_module(WEBP libwebp REQUIRED)
     pkg_search_module(LIBUV libuv REQUIRED)
-    pkg_search_module(CURL libcurl REQUIRED)
+    pkg_check_modules(CURL REQUIRED libcurl)
 else()
     message(FATAL_ERROR "Unsupported build system: " ${CMAKE_SYSTEM_NAME})
 endif()
@@ -187,7 +188,7 @@ target_include_directories(
     PRIVATE
         ${PROJECT_SOURCE_DIR}/platform/windows/include
         ${CURL_INCLUDE_DIRS}
-		${DLFCN_INCLUDE_DIRS}
+        ${DLFCN_INCLUDE_DIRS}
         ${JPEG_INCLUDE_DIRS}
         ${LIBUV_INCLUDE_DIRS}
         ${WEBP_INCLUDE_DIRS}
@@ -234,7 +235,7 @@ if(MSVC)
         mbgl-core
         PRIVATE
             ${CURL_LIBRARIES}
-    		dlfcn-win32::dl
+            dlfcn-win32::dl
     )
 elseif(MSYS)
     target_link_libraries(
