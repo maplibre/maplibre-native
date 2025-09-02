@@ -73,14 +73,6 @@
       }
     },
     {
-      "name": "macos-core",
-      "inherits": "macos",
-      "cacheVariables": {
-        "MLN_CORE_INCLUDE_DEPS": "ON",
-        "MLN_WITH_GLFW": "OFF"
-      }
-    },
-    {
       "name": "linux",
       "hidden": true,
       "generator": "Ninja",
@@ -266,7 +258,7 @@
   "buildPresets": [
     {
       "name": "macos-core",
-      "configurePreset": "macos-core",
+      "configurePreset": "macos",
       "targets": ["mbgl-core"]
     },
     {
