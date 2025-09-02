@@ -146,7 +146,7 @@ MLN_EXPORT
  @return `YES` if `source` was removed successfully. If `NO`, `outError` contains
  an `NSError` object describing the problem.
  */
-- (BOOL)removeSource:(MLNSource *)source error:(NSError *__nullable *__nullable)outError;
+- (BOOL)removeSource:(MLNSource *)source error:(NSError * __nullable * __nullable)outError;
 
 // MARK: Managing Style Layers
 

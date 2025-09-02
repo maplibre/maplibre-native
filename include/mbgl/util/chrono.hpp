@@ -35,7 +35,7 @@ std::string iso8601(Timestamp);
 // YYYY-mm-ddTHH:MM:SS.MS e.g. "2015-11-26T16:11:23.324Z"
 std::string iso8601(std::chrono::time_point<std::chrono::system_clock, Milliseconds>);
 
-Timestamp parseTimestamp(const char *);
+Timestamp parseTimestamp(const char*);
 
 Timestamp parseTimestamp(int32_t timestamp);
 
