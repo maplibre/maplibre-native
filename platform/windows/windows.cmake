@@ -52,7 +52,7 @@ elseif(DEFINED ENV{MSYSTEM})
             INTERFACE_LINK_LIBRARIES "ZLIB::ZLIB"
         )
     endif()
-    
+
     find_package(PkgConfig REQUIRED)
 
     pkg_search_module(WEBP libwebp REQUIRED)
