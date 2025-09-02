@@ -41,19 +41,18 @@ elseif(DEFINED ENV{MSYSTEM})
 
     find_package(ICU OPTIONAL_COMPONENTS i18n uc data)
     find_package(JPEG REQUIRED)
-
-    # Find ZLIB first to control linking order
-    find_package(ZLIB REQUIRED)
     find_package(PNG REQUIRED)
+    find_package(PkgConfig REQUIRED)
 
-    # For MSYS2, ensure PNG uses static zlib only
-    if(TARGET PNG::PNG AND TARGET ZLIB::ZLIB)
+    # Fix zlib conflicts in MSYS2 builds
+    if(TARGET PNG::PNG)
+        # Get the actual PNG libraries from pkg-config to avoid zlib conflicts
+        pkg_check_modules(PNG_PC libpng REQUIRED)
         set_target_properties(PNG::PNG PROPERTIES
-            INTERFACE_LINK_LIBRARIES "ZLIB::ZLIB"
+            INTERFACE_LINK_LIBRARIES "${PNG_PC_LINK_LIBRARIES}"
+            INTERFACE_INCLUDE_DIRECTORIES "${PNG_PC_INCLUDE_DIRS}"
         )
     endif()
-
-    find_package(PkgConfig REQUIRED)
 
     pkg_search_module(WEBP libwebp REQUIRED)
     pkg_search_module(LIBUV libuv REQUIRED)
