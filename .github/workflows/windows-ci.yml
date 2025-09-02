@@ -107,8 +107,8 @@ jobs:
 
   windows-build-and-test-msvc:
     needs: windows-get-or-build-dependencies
-    fail-fast: false
     strategy:
+      fail-fast: false
       matrix:
         renderer: [opengl, egl, vulkan]
     runs-on: windows-2022
@@ -243,7 +243,7 @@ jobs:
     if: needs.pre-job.outputs.should_skip != 'true'
     needs: pre-job
     strategy:
-    fail-fast: false
+      fail-fast: false
       matrix:
         msystem: [clang64, mingw64, ucrt64]
         renderer: [opengl, egl, vulkan]
