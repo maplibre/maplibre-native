@@ -217,6 +217,9 @@
         "value": "ARM64",
         "strategy": "set"
       },
+      "environment": {
+        "VSCMD_ARG_TGT_ARCH": "arm64"
+      },
       "cacheVariables": {
         "CMAKE_SYSTEM_NAME": "Windows",
         "MLN_WITH_OPENGL": "OFF",
