@@ -78,6 +78,10 @@ jobs:
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
+      - uses: taiki-e/install-action@020705266844b275b711684191e11281be48860c # v2
+        with:
+          tool: armerge@2
+
       - if: matrix.variant.rust
         run: cargo install cxxbridge-cmd --version 1.0.157 --locked
 

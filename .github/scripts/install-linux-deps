@@ -13,4 +13,3 @@ DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
   llvm \
   glslang-dev \
   libbz2-dev
-cargo install armerge@2.2.0
