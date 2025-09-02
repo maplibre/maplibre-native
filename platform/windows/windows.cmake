@@ -41,11 +41,11 @@ elseif(DEFINED ENV{MSYSTEM})
 
     find_package(ICU OPTIONAL_COMPONENTS i18n uc data)
     find_package(JPEG REQUIRED)
-    
+
     # Find ZLIB first to control linking order
     find_package(ZLIB REQUIRED)
     find_package(PNG REQUIRED)
-    
+
     # For MSYS2, ensure PNG uses static zlib only
     if(TARGET PNG::PNG AND TARGET ZLIB::ZLIB)
         set_target_properties(PNG::PNG PROPERTIES
