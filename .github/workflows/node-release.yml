@@ -141,22 +141,24 @@ jobs:
         if: runner.os == 'MacOS' || runner.os == 'Linux'
         uses: hendrikmuhs/ccache-action@63069e3931dedbf3b63792097479563182fe70d1 # v1
         with:
-          key: ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          key: ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.sha }}
           restore-keys: |
             ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
             ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
             ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}
+            ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}
 
       - name: Set up ccache (Windows)
         if: runner.os == 'Windows'
         uses: hendrikmuhs/ccache-action@63069e3931dedbf3b63792097479563182fe70d1 # v1
         with:
           variant: "sccache"
-          key: ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          key: ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.sha }}
           restore-keys: |
             ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
             ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
             ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}-${{ github.job }}
+            ${{ matrix.runs-on }}-${{ matrix.arch }}-${{ env.BUILDTYPE }}
 
       - name: Cache cmake-node-module deps
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
