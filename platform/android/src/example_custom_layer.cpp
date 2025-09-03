@@ -106,11 +106,15 @@ void checkCompileStatus(GLuint shader) {
         GLint maxLength = 0;
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
 
-        // The maxLength includes the NULL character
-        std::vector<GLchar> errorLog(maxLength);
-        glGetShaderInfoLog(shader, maxLength, &maxLength, errorLog.data());
-        __android_log_write(ANDROID_LOG_ERROR, LOG_TAG, errorLog.data());
-        throw Error(std::string(errorLog.begin(), errorLog.end()));
+        if (maxLength > 0) {
+            // The maxLength includes the NULL character
+            std::vector<GLchar> errorLog(maxLength + 1);
+            glGetShaderInfoLog(shader, maxLength, &maxLength, errorLog.data());
+            __android_log_write(ANDROID_LOG_ERROR, LOG_TAG, errorLog.data());
+            throw Error(std::string(errorLog.begin(), errorLog.end()));
+        } else {
+            throw Error("checkCompileStatus failed to get error string");
+        }
     }
 }
 
