@@ -3,6 +3,7 @@ load("//platform/ios/bazel:macros.bzl", "info_plist")
 filegroup(
     name = "ios_benchmark_srcs",
     srcs = [
+        "BenchmarkAdvancedMetrics.mm",
         "MBXBenchAppDelegate.mm",
         "MBXBenchViewController.mm",
         "locations.cpp",
@@ -14,6 +15,7 @@ filegroup(
 filegroup(
     name = "ios_benchmark_hdrs",
     srcs = [
+        "BenchmarkAdvancedMetrics.h",
         "MBXBenchAppDelegate.h",
         "MBXBenchViewController.h",
         "locations.hpp",
