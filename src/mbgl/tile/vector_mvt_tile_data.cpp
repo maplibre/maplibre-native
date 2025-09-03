@@ -27,8 +27,8 @@ FeatureType VectorMVTTileFeature::getType() const {
 }
 
 std::optional<Value> VectorMVTTileFeature::getValue(const std::string& key) const {
-    const std::optional<Value> value(feature.getValue(key));
-    return value->is<NullValue>() ? std::nullopt : value;
+    const auto value = feature.getValue(key);
+    return value.is<NullValue>() ? std::nullopt : std::optional<Value>{std::move(value)};
 }
 
 const PropertyMap& VectorMVTTileFeature::getProperties() const {
