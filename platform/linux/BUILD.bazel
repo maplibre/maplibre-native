@@ -1,4 +1,5 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
 ICU_FLAGS = [
@@ -48,7 +49,7 @@ genrule(
             $$(pkg-config --variable=libdir icu-uc)/libicuuc.a \
             $$(pkg-config --variable=libdir icu-uc)/libicudata.a \
             $$(pkg-config --variable=libdir icu-i18n)/libicui18n.a
-    )"""
+    )""",
 )
 
 sh_binary(

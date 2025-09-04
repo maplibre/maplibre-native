@@ -11,10 +11,10 @@
 #include <mbgl/style/source_impl.hpp>
 #include <mbgl/style/layer_properties.hpp>
 
-#include <unordered_map>
-#include <vector>
 #include <map>
 #include <memory>
+#include <unordered_map>
+#include <vector>
 
 namespace mbgl {
 

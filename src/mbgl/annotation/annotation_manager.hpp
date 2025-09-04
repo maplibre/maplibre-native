@@ -5,13 +5,12 @@
 #include <mbgl/style/image.hpp>
 #include <mbgl/util/noncopyable.hpp>
 
+#include <mapbox/std/weak.hpp>
+
 #include <mutex>
 #include <string>
-#include <vector>
-#include <unordered_set>
 #include <unordered_map>
-
-#include <mapbox/std/weak.hpp>
+#include <unordered_set>
 
 namespace mbgl {
 
@@ -25,7 +24,8 @@ namespace style {
 class Style;
 } // namespace style
 
-class AnnotationManager : private util::noncopyable {
+// NOTE: Any derived class must invalidate `weakFactory` in the destructor
+class AnnotationManager final : private util::noncopyable {
 public:
     AnnotationManager(style::Style&);
     ~AnnotationManager();

@@ -39,7 +39,9 @@ FillExtrusionLayer::FillExtrusionLayer(Immutable<Impl> impl_)
     : Layer(std::move(impl_)) {
 }
 
-FillExtrusionLayer::~FillExtrusionLayer() = default;
+FillExtrusionLayer::~FillExtrusionLayer() {
+    weakFactory.invalidateWeakPtrs();
+}
 
 const FillExtrusionLayer::Impl& FillExtrusionLayer::impl() const {
     return static_cast<const Impl&>(*baseImpl);

@@ -1,3 +1,5 @@
+import com.android.build.gradle.AppExtension
+import java.io.ByteArrayOutputStream
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -39,11 +41,14 @@ class SentryConditionalPlugin : Plugin<Project> {
             }
         }
 
+        val androidExtension = project.extensions.getByType(AppExtension::class.java)
+
         val propertiesToSet = mapOf(
             "getDebug" to true,
             "getOrg" to System.getenv("SENTRY_ORG"),
             "getProjectName" to System.getenv("SENTRY_PROJECT"),
             "getAuthToken" to System.getenv("SENTRY_AUTH_TOKEN"),
+            "getRelease" to androidExtension.defaultConfig.versionName,
             "getIncludeProguardMapping" to true,
             "getAutoUploadProguardMapping" to true,
             "getDexguardEnabled" to false,
@@ -57,6 +62,21 @@ class SentryConditionalPlugin : Plugin<Project> {
 
         propertiesToSet.forEach { (getterName, value) ->
             setProperty(sentryExt, getterName, value)
+        }
+
+        project.afterEvaluate {
+            val commitHash = ByteArrayOutputStream()
+
+            project.exec {
+                commandLine("git", "rev-parse", "HEAD")
+                standardOutput = commitHash
+                workingDir = project.rootDir
+                isIgnoreExitValue = true
+            }
+
+            androidExtension.applicationVariants.forEach { variant ->
+                variant.mergedFlavor.manifestPlaceholders["SENTRY_ENV"] = "${variant.name}-$commitHash"
+            }
         }
     }
 }

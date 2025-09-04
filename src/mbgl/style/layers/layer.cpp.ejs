@@ -129,7 +129,9 @@ const LayerTypeInfo* <%- camelize(type) %>Layer::Impl::staticTypeInfo() noexcept
     : Layer(std::move(impl_)) {
 }
 
-<%- camelize(type) %>Layer::~<%- camelize(type) %>Layer() = default;
+<%- camelize(type) %>Layer::~<%- camelize(type) %>Layer() {
+    weakFactory.invalidateWeakPtrs();
+}
 
 const <%- camelize(type) %>Layer::Impl& <%- camelize(type) %>Layer::impl() const {
     return static_cast<const Impl&>(*baseImpl);

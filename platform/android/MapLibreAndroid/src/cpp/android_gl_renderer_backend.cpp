@@ -37,7 +37,13 @@ AndroidGLRendererBackend::AndroidGLRendererBackend()
     : gl::RendererBackend(gfx::ContextMode::Unique),
       mbgl::gfx::Renderable({64, 64}, std::make_unique<AndroidGLRenderableResource>(*this)) {}
 
-AndroidGLRendererBackend::~AndroidGLRendererBackend() = default;
+AndroidGLRendererBackend::~AndroidGLRendererBackend() {
+#ifndef NDEBUG
+    if (context && static_cast<gl::Context&>(*context).getCleanupOnDestruction()) {
+        assert(eglGetCurrentContext() != EGL_NO_CONTEXT);
+    }
+#endif
+}
 
 gl::ProcAddress AndroidGLRendererBackend::getExtensionFunctionPointer(const char* name) {
     assert(gfx::BackendScope::exists());

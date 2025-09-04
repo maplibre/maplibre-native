@@ -10,6 +10,7 @@ class AsyncRequest;
 
 namespace style {
 
+// NOTE: Any derived class must invalidate `weakFactory` in the destructor
 class VectorSource final : public TileSource {
 public:
     VectorSource(std::string id,
@@ -29,9 +30,12 @@ public:
 
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
 
+    mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
+
 private:
     std::optional<float> maxZoom;
     std::optional<float> minZoom;
+    mapbox::base::WeakPtrFactory<Source> weakFactory{this}; // Must remain last
 };
 
 template <>

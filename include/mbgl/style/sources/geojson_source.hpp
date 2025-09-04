@@ -54,6 +54,7 @@ public:
     virtual std::uint8_t getClusterExpansionZoom(std::uint32_t) = 0;
 };
 
+// NOTE: Any derived class must invalidate `weakFactory` in the destructor
 class GeoJSONSource final : public Source {
 public:
     GeoJSONSource(std::string id, Immutable<GeoJSONOptions> = GeoJSONOptions::defaultOptions());
