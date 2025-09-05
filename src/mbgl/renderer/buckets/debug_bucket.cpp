@@ -13,12 +13,14 @@ DebugBucket::DebugBucket(const OverscaledTileID& id,
                          const bool complete_,
                          std::optional<Timestamp> modified_,
                          std::optional<Timestamp> expires_,
-                         MapDebugOptions debugMode_)
+                         MapDebugOptions debugMode_,
+                         std::string sourceName_)
     : renderable(renderable_),
       complete(complete_),
       modified(std::move(modified_)),
       expires(std::move(expires_)),
-      debugMode(debugMode_) {
+      debugMode(debugMode_),
+      sourceName(std::move(sourceName_)) {
     auto addText = [&](const std::string& text, double left, double baseline, double scale) {
         for (uint8_t c : text) {
             if (c < 32 || c >= 127) continue;
@@ -53,7 +55,8 @@ DebugBucket::DebugBucket(const OverscaledTileID& id,
         const std::string text = util::toString(id) + " - " +
                                  (complete     ? "complete"
                                   : renderable ? "renderable"
-                                               : "pending");
+                                               : "pending") +
+                                 " " + sourceName;
         addText(text, 50, baseline, 5);
         baseline += 200;
     }

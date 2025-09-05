@@ -1,14 +1,19 @@
-#include <mbgl/tile/vector_tile_data.hpp>
+#include <mbgl/tile/vector_mvt_tile_data.hpp>
+
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
 
+#if ANDROID
+#include <mlt/decoder.hpp>
+#endif
+
 namespace mbgl {
 
-VectorTileFeature::VectorTileFeature(const mapbox::vector_tile::layer& layer, const protozero::data_view& view)
+VectorMVTTileFeature::VectorMVTTileFeature(const mapbox::vector_tile::layer& layer, const protozero::data_view& view)
     : feature(view, layer) {}
 
-FeatureType VectorTileFeature::getType() const {
+FeatureType VectorMVTTileFeature::getType() const {
     switch (feature.getType()) {
         case mapbox::vector_tile::GeomType::POINT:
             return FeatureType::Point;
@@ -21,23 +26,23 @@ FeatureType VectorTileFeature::getType() const {
     }
 }
 
-std::optional<Value> VectorTileFeature::getValue(const std::string& key) const {
-    const std::optional<Value> value(feature.getValue(key));
-    return value->is<NullValue>() ? std::nullopt : value;
+std::optional<Value> VectorMVTTileFeature::getValue(const std::string& key) const {
+    const auto value = feature.getValue(key);
+    return value.is<NullValue>() ? std::nullopt : std::optional<Value>{std::move(value)};
 }
 
-const PropertyMap& VectorTileFeature::getProperties() const {
+const PropertyMap& VectorMVTTileFeature::getProperties() const {
     if (!properties) {
         properties = feature.getProperties();
     }
     return *properties;
 }
 
-FeatureIdentifier VectorTileFeature::getID() const {
+FeatureIdentifier VectorMVTTileFeature::getID() const {
     return feature.getID();
 }
 
-const GeometryCollection& VectorTileFeature::getGeometries() const {
+const GeometryCollection& VectorMVTTileFeature::getGeometries() const {
     MLN_TRACE_FUNC();
 
     if (!lines) {
@@ -57,30 +62,30 @@ const GeometryCollection& VectorTileFeature::getGeometries() const {
     return *lines;
 }
 
-VectorTileLayer::VectorTileLayer(std::shared_ptr<const std::string> data_, const protozero::data_view& view)
+VectorMVTTileLayer::VectorMVTTileLayer(std::shared_ptr<const std::string> data_, const protozero::data_view& view)
     : data(std::move(data_)),
       layer(view) {}
 
-std::size_t VectorTileLayer::featureCount() const {
+std::size_t VectorMVTTileLayer::featureCount() const {
     return layer.featureCount();
 }
 
-std::unique_ptr<GeometryTileFeature> VectorTileLayer::getFeature(std::size_t i) const {
-    return std::make_unique<VectorTileFeature>(layer, layer.getFeature(i));
+std::unique_ptr<GeometryTileFeature> VectorMVTTileLayer::getFeature(std::size_t i) const {
+    return std::make_unique<VectorMVTTileFeature>(layer, layer.getFeature(i));
 }
 
-std::string VectorTileLayer::getName() const {
+std::string VectorMVTTileLayer::getName() const {
     return layer.getName();
 }
 
-VectorTileData::VectorTileData(std::shared_ptr<const std::string> data_)
+VectorMVTTileData::VectorMVTTileData(std::shared_ptr<const std::string> data_)
     : data(std::move(data_)) {}
 
-std::unique_ptr<GeometryTileData> VectorTileData::clone() const {
-    return std::make_unique<VectorTileData>(data);
+std::unique_ptr<GeometryTileData> VectorMVTTileData::clone() const {
+    return std::make_unique<VectorMVTTileData>(data);
 }
 
-std::unique_ptr<GeometryTileLayer> VectorTileData::getLayer(const std::string& name) const {
+std::unique_ptr<GeometryTileLayer> VectorMVTTileData::getLayer(const std::string& name) const {
     MLN_TRACE_FUNC();
 
     if (!parsed) {
@@ -93,12 +98,12 @@ std::unique_ptr<GeometryTileLayer> VectorTileData::getLayer(const std::string& n
 
     auto it = layers.find(name);
     if (it != layers.end()) {
-        return std::make_unique<VectorTileLayer>(data, it->second);
+        return std::make_unique<VectorMVTTileLayer>(data, it->second);
     }
     return nullptr;
 }
 
-std::vector<std::string> VectorTileData::layerNames() const {
+std::vector<std::string> VectorMVTTileData::layerNames() const {
     return mapbox::vector_tile::buffer(*data).layerNames();
 }
 

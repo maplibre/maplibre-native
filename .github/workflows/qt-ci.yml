@@ -98,12 +98,15 @@ jobs:
       QT_VERSION: ${{ matrix.qt_version }}
 
     steps:
+      - if: runner.os == 'Windows'
+        run: git config --global core.longpaths true
+
       - name: Checkout
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
         with:
           path: source
-          fetch-depth: 0
-          submodules: true
+          fetch-depth: 1
+          submodules: recursive
 
       - name: Install test dependencies
         if: runner.os == 'Linux'

@@ -301,9 +301,9 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/light.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/position.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/property_value.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/raster_dem_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/rotation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/source.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/source_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/tileset.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/conversion/transition_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/assertion.hpp
@@ -682,9 +682,9 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/light.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/position.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/property_value.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/raster_dem_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/rotation.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/source.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/source_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/stringify.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/tileset.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/transition_options.cpp
@@ -885,10 +885,15 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_operation.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_tile.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_tile.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_tile_data.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_tile_data.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mlt_tile.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mlt_tile.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mlt_tile_data.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mlt_tile_data.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mvt_tile.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mvt_tile.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mvt_tile_data.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_mvt_tile_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/action_journal.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/util/action_journal_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/action_journal_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/camera.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/bounding_volumes.hpp
@@ -1432,6 +1437,7 @@ include(${PROJECT_SOURCE_DIR}/vendor/unordered_dense.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/metal-cpp.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/maplibre-tile-spec.cmake)
 
 if(MLN_USE_RUST)
 include(${PROJECT_SOURCE_DIR}/rustutils/rustutils.cmake)
@@ -1456,6 +1462,7 @@ target_link_libraries(
         mbgl-vendor-unique_resource
         mbgl-vendor-vector-tile
         mbgl-vendor-wagyu
+	    mlt-cpp
         $<$<BOOL:${MLN_WITH_METAL}>:mbgl-vendor-metal-cpp>
         $<IF:$<BOOL:${MLN_USE_RUST}>,mbgl-rustutils,mbgl-vendor-csscolorparser>
         ${SHAPE_TARGETS} # from harfbuzz.cmake
@@ -1490,6 +1497,7 @@ set(EXPORT_TARGETS
     mbgl-vendor-boost
     mbgl-vendor-earcut.hpp
     mbgl-vendor-eternal
+    mbgl-vendor-metal-cpp
     mbgl-vendor-parsedate
     mbgl-vendor-pmtiles
     mbgl-vendor-polylabel
@@ -1497,7 +1505,7 @@ set(EXPORT_TARGETS
     mbgl-vendor-unique_resource
     mbgl-vendor-vector-tile
     mbgl-vendor-wagyu
-    mbgl-vendor-metal-cpp
+    mlt-cpp
     unordered_dense
     ${SHAPE_TARGETS} # from harfbuzz.cmake
 )

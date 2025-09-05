@@ -4,7 +4,6 @@
 #include <mbgl/text/tagged_string.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 
-#include <array>
 #include <string>
 #include <optional>
 
