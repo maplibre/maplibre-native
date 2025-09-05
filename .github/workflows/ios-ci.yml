@@ -56,7 +56,7 @@ jobs:
           echo "List of changes: ${{ steps.changed-files-yaml.outputs.ios_all_changed_files }}"
 
   ios-build:
-    needs: [pre_job]
+    needs: pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: [self-hosted, macOS, ARM64]
     concurrency:
@@ -84,9 +84,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
-
-      - name: Xcode Build Tools version
-        run: xcodebuild -version
 
       - name: Build Example (Swift) App
         run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal
@@ -385,9 +382,6 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-
-      - name: cmake version
-        run: cmake --version
 
       - name: Configure build with CMake
         run: cmake --preset ios

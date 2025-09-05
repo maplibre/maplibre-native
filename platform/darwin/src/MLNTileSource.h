@@ -158,7 +158,7 @@ typedef NS_ENUM(NSUInteger, MLNSourceEncoding) {
   MLNSourceEncodingMapbox = 0,
 
   /**
-   Raster tiles generated with the [Mapzen Terrarium encodingg
+   Raster tiles generated with the [Mapzen Terrarium encoding
    formula](https://aws.amazon.com/public-datasets/terrain/).
   */
   MLNSourceEncodingTerrarium = 1,

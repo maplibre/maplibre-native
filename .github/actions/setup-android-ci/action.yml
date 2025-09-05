@@ -13,7 +13,7 @@ runs:
         haskell: true
         large-packages: true
         docker-images: true
-        swap-storage: true
+        swap-storage: false
 
     - name: Validate VERSION
       run: .github/scripts/validate-version.sh platform/android/VERSION
