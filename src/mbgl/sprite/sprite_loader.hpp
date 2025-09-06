@@ -7,9 +7,6 @@
 
 #include <string>
 #include <map>
-#include <set>
-#include <vector>
-#include <array>
 #include <memory>
 
 namespace mbgl {
@@ -17,7 +14,8 @@ namespace mbgl {
 class FileSource;
 class SpriteLoaderObserver;
 
-class SpriteLoader {
+// NOTE: Any derived class must invalidate `weakFactory` in the destructor
+class SpriteLoader final {
 public:
     SpriteLoader(float pixelRatio, const TaggedScheduler& threadPool_);
     ~SpriteLoader();

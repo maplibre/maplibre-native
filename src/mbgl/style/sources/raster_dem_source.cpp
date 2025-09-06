@@ -6,6 +6,7 @@
 #include <mbgl/style/sources/tile_source_impl.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/mapbox.hpp>
+
 #include <utility>
 
 namespace mbgl {
