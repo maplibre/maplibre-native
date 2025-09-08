@@ -1,5 +1,8 @@
 name: android-ci
 
+permissions:
+  id-token: write         # needed for AWS
+
 on:
   push:
     branches:
@@ -23,14 +26,14 @@ jobs:
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.android_any_modified != 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
 
       - name: Get all Android files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files
-        uses: tj-actions/changed-files@v46
+        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
@@ -51,11 +54,65 @@ jobs:
       IS_LOCAL_DEVELOPMENT: false
       MLN_ANDROID_STL: c++_static
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
 
       - uses: ./.github/actions/setup-android-ci
+
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v4
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: npm install
+        run: npm install --ignore-scripts
+        working-directory: .
+        shell: bash
+
+      - name: run platform/android/scripts/generate-style-code.mjs
+        run: node platform/android/scripts/generate-style-code.mjs
+        working-directory: .
+        shell: bash
+
+      - run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          pip3 install pre-commit
+        shell: bash
+
+      - run: |
+          source venv/bin/activate
+          pre-commit run clang-format --all-files
+        continue-on-error: true # this can mean files are modified, which is not an error
+        shell: bash
+
+      - run: |
+          source venv/bin/activate
+          pre-commit run clang-format --all-files
+          rm -rf venv
+        shell: bash
+
+      - uses: infotroph/tree-is-clean@69d598a958e8cb8f3d0e3d52b5ebcd8684f2adc2 # v1
+        with:
+          check_untracked: true
+
+      - name: Configure AWS Credentials
+        if: vars.OIDC_AWS_ROLE_TO_ASSUME
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
+      - name: Configure sccache
+        run: |
+          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
+          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
+
+          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
+            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
+          fi
 
       - name: Check code style
         if: matrix.renderer == 'opengl'
@@ -87,7 +144,7 @@ jobs:
 
       - name: Build Benchmark, copy to platform/android
         run: |
-          ./gradlew assemble${{ matrix.renderer }}Release assemble${{ matrix.renderer }}ReleaseAndroidTest -PtestBuildType=release
+          ./gradlew assemble${{ matrix.renderer }}Release assemble${{ matrix.renderer }}ReleaseAndroidTest -PtestBuildType=release -Pmaplibre.abis=arm64-v8a
           cp MapLibreAndroidTestApp/build/outputs/apk/${{ matrix.renderer }}/release/MapLibreAndroidTestApp-${{ matrix.renderer }}-release.apk .
           cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/${{ matrix.renderer }}/release/MapLibreAndroidTestApp-${{ matrix.renderer }}-release-androidTest.apk .
 
@@ -99,7 +156,7 @@ jobs:
 
       - name: Create artifact for benchmark APKs
         if: matrix.renderer == 'opengl'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           if-no-files-found: error
           name: benchmarkAPKs
@@ -121,18 +178,21 @@ jobs:
 
       - name: Build Instrumentation Tests (${{ matrix.renderer }}), copy to platform/android
         run: |
-          ./gradlew assemble${{ matrix.renderer }}Debug assemble${{ matrix.renderer }}DebugAndroidTest -PtestBuildType=debug
+          ./gradlew assemble${{ matrix.renderer }}Debug assemble${{ matrix.renderer }}DebugAndroidTest -PtestBuildType=debug -Pmaplibre.abis=arm64-v8a
           cp MapLibreAndroidTestApp/build/outputs/apk/${{ matrix.renderer }}/debug/MapLibreAndroidTestApp-${{ matrix.renderer }}-debug.apk InstrumentationTestApp${{ env.renderer }}.apk
           cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/${{ matrix.renderer }}/debug/MapLibreAndroidTestApp-${{ matrix.renderer }}-debug-androidTest.apk InstrumentationTests${{ env.renderer }}.apk
 
       - name: Upload android-ui-test-${{ matrix.renderer }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           if-no-files-found: error
           name: android-ui-test-${{ matrix.renderer }}
           path: |
             platform/android/InstrumentationTestApp${{ env.renderer }}.apk
             platform/android/InstrumentationTests${{ env.renderer }}.apk
+
+      - name: Show sccache stats
+        run: sccache --show-stats
 
   android-build-cpp-test:
     runs-on: ubuntu-24.04
@@ -146,45 +206,42 @@ jobs:
         working-directory: test/android
 
     steps:
-      - name: Free Disk Space (Ubuntu)
-        if: startsWith(runner.name, 'GitHub Actions')
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: false
-          android: false
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: false
-
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: "temurin"
-          java-version: "17"
-
-      - uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ github.job }}
-          append-timestamp: false
-          max-size: 5G
+      - uses: ./.github/actions/setup-android-ci
 
       - name: Create data.zip in assets directory
         run: zip -r test/android/app/src/main/assets/data.zip -@ < test/android/app/src/main/assets/to_zip.txt
         working-directory: .
 
+      - name: Configure AWS Credentials
+        if: vars.OIDC_AWS_ROLE_TO_ASSUME
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
+      - name: Configure sccache
+        run: |
+          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
+          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
+
+          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
+            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
+          fi
+
       - name: Build C++ Unit Tests App
         run: |
-          ./gradlew assembleDebug assembleAndroidTest
+          ./gradlew assembleDebug assembleAndroidTest -Pmaplibre.abis=arm64-v8a
           cp app/build/outputs/apk/debug/app-debug.apk .
           cp app/build/outputs/apk/androidTest/release/app-release-androidTest.apk .
 
       - name: Store C++ Unit Tests .apk files
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: android-cpp-tests
           if-no-files-found: error
@@ -206,32 +263,29 @@ jobs:
     if: needs.pre_job.outputs.should_skip != 'true'
 
     steps:
-      - name: Free Disk Space (Ubuntu)
-        if: startsWith(runner.name, 'GitHub Actions')
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: false
-          android: false
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: false
-
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
 
-      - uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ github.job }}
-          append-timestamp: false
-          max-size: 5G
+      - uses: ./.github/actions/setup-android-ci
 
-      - uses: actions/setup-java@v4
+      - name: Configure AWS Credentials
+        if: vars.OIDC_AWS_ROLE_TO_ASSUME
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v4
         with:
-          distribution: "temurin"
-          java-version: "17"
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
+      - name: Configure sccache
+        run: |
+          echo SCCACHE_BUCKET=maplibre-native-sccache >> "$GITHUB_ENV"
+          echo SCCACHE_REGION=eu-central-1 >> "$GITHUB_ENV"
+
+          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+            echo "AWS_SECRET_ACCESS_KEY not set; not uploading sccache cache to S3"
+            echo SCCACHE_S3_NO_CREDENTIALS=1 >> "$GITHUB_ENV"
+          fi
 
       - name: Build and Upload Render Test APKs (${{ matrix.flavor }})
         uses: ./.github/actions/android-build-and-upload-render-test
@@ -257,13 +311,13 @@ jobs:
 
       # automatically trigger android-release when code is pushed to main
       # and the platform/android/VERSION file has changed
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
       - name: VERSION file changed
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         id: version-file-android-changed
-        uses: tj-actions/changed-files@v46
+        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46
         with:
           files: platform/android/VERSION
 

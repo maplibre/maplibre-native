@@ -172,9 +172,9 @@ swift_library(
     testonly = True,
     srcs = glob(["test/*.swift"]),
     data = [
+        "app/PluginLayerTestStyle.json",
         "test/amsterdam.geojson",
         "test/one-liner.json",
-        "app/PluginLayerTestStyle.json",
     ],
     visibility = [
         "//platform/ios/test:__pkg__",

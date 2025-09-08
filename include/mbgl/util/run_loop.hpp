@@ -7,18 +7,18 @@
 #include <mbgl/util/work_task.hpp>
 #include <mbgl/util/work_request.hpp>
 
-#include <atomic>
 #include <functional>
-#include <utility>
-#include <queue>
 #include <mutex>
+#include <queue>
+#include <utility>
 
 namespace mbgl {
 namespace util {
 
 using LOOP_HANDLE = void*;
 
-class RunLoop : public Scheduler, private util::noncopyable {
+// NOTE: Any derived class must invalidate `weakFactory` in the destructor
+class RunLoop final : public Scheduler, private util::noncopyable {
 public:
     enum class Type : uint8_t {
         Default,
@@ -87,6 +87,10 @@ public:
     void waitForEmpty(const util::SimpleIdentity = util::SimpleIdentity::Empty) override;
 
     class Impl;
+
+    // Allows derived classes to invalidate weak pointers in
+    // their destructor before their own members are torn down.
+    void invalidateWeakPtrsEarly() { weakFactory.invalidateWeakPtrs(); }
 
 private:
     MBGL_STORE_THREAD(tid)

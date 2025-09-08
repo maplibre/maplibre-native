@@ -1317,6 +1317,11 @@
             android:value="${SENTRY_DSN}"
             />
 
+        <meta-data
+            android:name="io.sentry.environment"
+            android:value="${SENTRY_ENV}"
+            />
+
         <!-- Add data like request headers, user ip address and device name, see https://docs.sentry.io/platforms/android/data-management/data-collected/ for more info -->
         <meta-data
             android:name="io.sentry.send-default-pii"
