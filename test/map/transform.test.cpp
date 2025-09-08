@@ -7,6 +7,9 @@
 #include <mbgl/util/geo.hpp>
 #include <mbgl/util/quaternion.hpp>
 
+#include <numbers>
+
+using namespace std::numbers;
 using namespace mbgl;
 
 TEST(Transform, InvalidZoom) {
@@ -175,7 +178,7 @@ TEST(Transform, UnwrappedLatLng) {
 }
 
 TEST(Transform, ConstrainHeightOnly) {
-    Transform transform(MapObserver::nullObserver(), ConstrainMode::HeightOnly);
+    Transform transform(TransformObserver::nullObserver(), ConstrainMode::HeightOnly);
     transform.resize({2, 2});
 
     transform.jumpTo(CameraOptions().withCenter(LatLngBounds::world().southwest()).withZoom(util::MAX_ZOOM));
@@ -188,7 +191,7 @@ TEST(Transform, ConstrainHeightOnly) {
 }
 
 TEST(Transform, ConstrainWidthAndHeight) {
-    Transform transform(MapObserver::nullObserver(), ConstrainMode::WidthAndHeight);
+    Transform transform(TransformObserver::nullObserver(), ConstrainMode::WidthAndHeight);
     transform.resize({2, 2});
 
     transform.jumpTo(CameraOptions().withCenter(LatLngBounds::world().southwest()).withZoom(util::MAX_ZOOM));
@@ -263,7 +266,7 @@ TEST(Transform, Anchor) {
     ASSERT_NE(latLng.longitude(), transform.getLatLng().longitude());
 
     transform.jumpTo(CameraOptions().withCenter(latLng).withZoom(10.0).withBearing(-45.0));
-    ASSERT_DOUBLE_EQ(M_PI_4, transform.getBearing());
+    ASSERT_DOUBLE_EQ(pi / 4, transform.getBearing());
     ASSERT_DOUBLE_EQ(latLng.latitude(), transform.getLatLng().latitude());
     ASSERT_DOUBLE_EQ(latLng.longitude(), transform.getLatLng().longitude());
 
@@ -538,7 +541,7 @@ TEST(Transform, IsPanning) {
 }
 
 TEST(Transform, DefaultTransform) {
-    struct TransformObserver : public mbgl::MapObserver {
+    struct TransformObserver : public mbgl::TransformObserver {
         void onCameraWillChange(MapObserver::CameraChangeMode) final { cameraWillChangeCallback(); };
 
         void onCameraDidChange(MapObserver::CameraChangeMode) final { cameraDidChangeCallback(); };
@@ -608,6 +611,26 @@ TEST(Transform, DefaultTransform) {
     point = state.latLngToScreenCoordinate(nullIsland);
     ASSERT_DOUBLE_EQ(point.x, center.x);
     ASSERT_DOUBLE_EQ(point.y, center.y);
+
+    // Constrain to screen while resizing
+    transform.resize({1000, 500});
+    transform.setLatLngBounds(LatLngBounds::hull({40.0, -10.0}, {70.0, 40.0}));
+    transform.setConstrainMode(ConstrainMode::Screen);
+
+    // Request impossible zoom
+    AnimationOptions easeOptions(Seconds(1));
+    transform.easeTo(CameraOptions().withCenter(LatLng{56, 11}).withZoom(1), easeOptions);
+    ASSERT_TRUE(transform.inTransition());
+    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(250));
+
+    // Rotate the screen during a transition (resize it)
+    transform.resize({500, 1000});
+
+    // The resize while constraining to screen should have stopped the transition and updated the state
+    ASSERT_FALSE(transform.inTransition());
+    ASSERT_NEAR(transform.getLatLng().longitude(), 8.22103, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().latitude(), 46.6905, 1e-4);
+    ASSERT_NEAR(transform.getState().getScale(), 38.1529, 1e-4);
 }
 
 TEST(Transform, LatLngBounds) {
@@ -800,6 +823,60 @@ TEST(Transform, LatLngBounds) {
     ASSERT_DOUBLE_EQ(transform.getLatLng().longitude(), 120.0);
 }
 
+TEST(Transform, ConstrainScreenToBounds) {
+    Transform transform;
+
+    transform.resize({500, 500});
+    transform.setLatLngBounds(LatLngBounds::hull({40.0, -10.0}, {70.0, 40.0}));
+    transform.setConstrainMode(ConstrainMode::Screen);
+
+    // Request impossible zoom
+    transform.easeTo(CameraOptions().withCenter(LatLng{56, 11}).withZoom(1));
+    ASSERT_NEAR(transform.getZoom(), 2.81378, 1e-4);
+
+    // Request impossible center left
+    transform.easeTo(CameraOptions().withCenter(LatLng{56, -65}).withZoom(4));
+    ASSERT_NEAR(transform.getLatLng().longitude(), 0.98632, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().latitude(), 56.0, 1e-4);
+
+    // Request impossible center top
+    transform.easeTo(CameraOptions().withCenter(LatLng{80, 11}).withZoom(4));
+    ASSERT_NEAR(transform.getLatLng().longitude(), 11.0, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().latitude(), 65.88603, 1e-4);
+
+    // Request impossible center right
+    transform.easeTo(CameraOptions().withCenter(LatLng{56, 50}).withZoom(4));
+    ASSERT_NEAR(transform.getLatLng().longitude(), 29.01367, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().latitude(), 56.0, 1e-4);
+
+    // Request impossible center bottom
+    transform.easeTo(CameraOptions().withCenter(LatLng{30, 11}).withZoom(4));
+    ASSERT_NEAR(transform.getLatLng().longitude(), 11.0, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().latitude(), 47.89217, 1e-4);
+
+    // Request impossible center with anchor
+    transform.easeTo(CameraOptions().withAnchor(ScreenCoordinate{250, 250}).withCenter(LatLng{56, -65}).withZoom(4));
+    ASSERT_NEAR(transform.getLatLng().longitude(), 0.98632, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().latitude(), 56.0, 1e-4);
+
+    // Request impossible center (anchor)
+    transform.easeTo(CameraOptions().withAnchor(ScreenCoordinate{250, 250}).withZoom(4));
+    ASSERT_NEAR(transform.getLatLng().longitude(), 0.98632, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().latitude(), 56.0, 1e-4);
+
+    // Fly to impossible center
+    transform.flyTo(CameraOptions().withCenter(LatLng{56, -65}).withZoom(4));
+    ASSERT_NEAR(transform.getZoom(), 4.0, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().longitude(), 0.98632, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().latitude(), 56.0, 1e-4);
+
+    // Fly to impossible center and zoom
+    transform.flyTo(CameraOptions().withCenter(LatLng{56, -65}).withZoom(2));
+    ASSERT_NEAR(transform.getZoom(), 4.0, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().longitude(), 0.98632, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().latitude(), 56.0, 1e-4);
+}
+
 TEST(Transform, InvalidPitch) {
     Transform transform;
     transform.resize({1, 1});
@@ -946,12 +1023,12 @@ TEST(Transform, FreeCameraOptionsInvalidOrientation) {
     EXPECT_EQ(Quaternion::identity.m, transform.getFreeCameraOptions().orientation);
 
     // Gimbal lock. Both forward and up vectors are on xy-plane
-    options.orientation = Quaternion::fromAxisAngle(vec3{{0.0, 1.0, 0.0}}, M_PI_2).m;
+    options.orientation = Quaternion::fromAxisAngle(vec3{{0.0, 1.0, 0.0}}, pi / 2).m;
     transform.setFreeCameraOptions(options);
     EXPECT_EQ(Quaternion::identity.m, transform.getFreeCameraOptions().orientation);
 
     // Camera is upside down
-    options.orientation = Quaternion::fromAxisAngle(vec3{{1.0, 0.0, 0.0}}, M_PI_2 + M_PI_4).m;
+    options.orientation = Quaternion::fromAxisAngle(vec3{{1.0, 0.0, 0.0}}, pi / 2 + pi / 4).m;
     transform.setFreeCameraOptions(options);
     EXPECT_EQ(Quaternion::identity.m, transform.getFreeCameraOptions().orientation);
 }
@@ -1058,8 +1135,8 @@ TEST(Transform, FreeCameraOptionsOrientationRoll) {
     FreeCameraOptions options;
     transform.resize({100, 100});
 
-    const auto orientationWithoutRoll = Quaternion::fromEulerAngles(-M_PI_4, 0.0, 0.0);
-    const auto orientationWithRoll = orientationWithoutRoll.multiply(Quaternion::fromEulerAngles(0.0, 0.0, M_PI_4));
+    const auto orientationWithoutRoll = Quaternion::fromEulerAngles(-pi / 4, 0.0, 0.0);
+    const auto orientationWithRoll = orientationWithoutRoll.multiply(Quaternion::fromEulerAngles(0.0, 0.0, pi / 4));
 
     options.orientation = orientationWithRoll.m;
     transform.setFreeCameraOptions(options);

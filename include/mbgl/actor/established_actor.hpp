@@ -29,22 +29,18 @@ template <class Object>
 class EstablishedActor {
 public:
     // Construct the Object from a parameter pack `args` (i.e. `Object(args...)`)
-    template <typename U = Object,
-              class... Args,
-              typename std::enable_if_t<std::is_constructible_v<U, Args...> ||
-                                        std::is_constructible_v<U, ActorRef<U>, Args...>>* = nullptr>
+    template <typename U = Object, class... Args>
     EstablishedActor(Scheduler& scheduler, AspiringActor<Object>& parent_, Args&&... args)
+        requires(std::is_constructible_v<U, Args...> || std::is_constructible_v<U, ActorRef<U>, Args...>)
         : parent(parent_) {
         emplaceObject(std::forward<Args>(args)...);
         parent.mailbox->open(scheduler);
     }
 
     // Construct the Object from a parameter pack `args` (i.e. `Object(args...)`)
-    template <typename U = Object,
-              class... Args,
-              typename std::enable_if_t<std::is_constructible_v<U, Args...> ||
-                                        std::is_constructible_v<U, ActorRef<U>, Args...>>* = nullptr>
+    template <typename U = Object, class... Args>
     EstablishedActor(const TaggedScheduler& scheduler, AspiringActor<Object>& parent_, Args&&... args)
+        requires(std::is_constructible_v<U, Args...> || std::is_constructible_v<U, ActorRef<U>, Args...>)
         : parent(parent_) {
         emplaceObject(std::forward<Args>(args)...);
         parent.mailbox->open(scheduler);
@@ -73,18 +69,18 @@ public:
 
 private:
     // Enabled for Objects with a constructor taking ActorRef<Object> as the first parameter
-    template <typename U = Object,
-              class... Args,
-              typename std::enable_if_t<std::is_constructible_v<U, ActorRef<U>, Args...>>* = nullptr>
-    void emplaceObject(Args&&... args_) {
+    template <typename U = Object, class... Args>
+    void emplaceObject(Args&&... args_)
+        requires(std::is_constructible_v<U, ActorRef<U>, Args...>)
+    {
         new (&parent.objectStorage) Object(parent.self(), std::forward<Args>(args_)...);
     }
 
     // Enabled for plain Objects
-    template <typename U = Object,
-              class... Args,
-              typename std::enable_if_t<std::is_constructible_v<U, Args...>>* = nullptr>
-    void emplaceObject(Args&&... args_) {
+    template <typename U = Object, class... Args>
+    void emplaceObject(Args&&... args_)
+        requires(std::is_constructible_v<U, Args...>)
+    {
         new (&parent.objectStorage) Object(std::forward<Args>(args_)...);
     }
 

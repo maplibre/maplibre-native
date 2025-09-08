@@ -108,8 +108,14 @@ public:
     const std::vector<PlacedSymbolData>& getPlacedSymbolsData() const;
 
     // Memory
+    void setTileCacheEnabled(bool);
+    bool getTileCacheEnabled() const;
     void reduceMemoryUse();
     void clearData();
+
+#if MLN_RENDER_BACKEND_OPENGL
+    void enableAndroidEmulatorGoldfishMitigation(bool enable);
+#endif
 
 private:
     class Impl;

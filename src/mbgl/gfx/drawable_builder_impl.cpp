@@ -27,25 +27,25 @@ DrawableBuilder::Impl::LineLayoutVertex DrawableBuilder::Impl::layoutVertex(
      */
     static const int8_t extrudeScale = 63;
     return LineLayoutVertex{
-        {{static_cast<int16_t>((p.x * 2) | (round ? 1 : 0)), static_cast<int16_t>((p.y * 2) | (up ? 1 : 0))}},
-        {{// add 128 to store a byte in an unsigned byte
-          static_cast<uint8_t>(::round(extrudeScale * e.x) + 128),
-          static_cast<uint8_t>(::round(extrudeScale * e.y) + 128),
+        .a1 = {{static_cast<int16_t>((p.x * 2) | (round ? 1 : 0)), static_cast<int16_t>((p.y * 2) | (up ? 1 : 0))}},
+        .a2 = {{// add 128 to store a byte in an unsigned byte
+                static_cast<uint8_t>(::round(extrudeScale * e.x) + 128),
+                static_cast<uint8_t>(::round(extrudeScale * e.y) + 128),
 
-          // Encode the -1/0/1 direction value into the first two bits of .z
-          // of a_data. Combine it with the lower 6 bits of `linesofar`
-          // (shifted by 2 bites to make room for the direction value). The
-          // upper 8 bits of `linesofar` are placed in the `w` component.
-          // `linesofar` is scaled down by `LINE_DISTANCE_SCALE` so that we
-          // can store longer distances while sacrificing precision.
+                // Encode the -1/0/1 direction value into the first two bits of .z
+                // of a_data. Combine it with the lower 6 bits of `linesofar`
+                // (shifted by 2 bites to make room for the direction value). The
+                // upper 8 bits of `linesofar` are placed in the `w` component.
+                // `linesofar` is scaled down by `LINE_DISTANCE_SCALE` so that we
+                // can store longer distances while sacrificing precision.
 
-          // Encode the -1/0/1 direction value into .zw coordinates of
-          // a_data, which is normally covered by linesofar, so we need to
-          // merge them. The z component's first bit, as well as the sign
-          // bit is reserved for the direction, so we need to shift the
-          // linesofar.
-          static_cast<uint8_t>(((dir == 0 ? 0 : (dir < 0 ? -1 : 1)) + 1) | ((linesofar & 0x3F) << 2)),
-          static_cast<uint8_t>(linesofar >> 6)}}};
+                // Encode the -1/0/1 direction value into .zw coordinates of
+                // a_data, which is normally covered by linesofar, so we need to
+                // merge them. The z component's first bit, as well as the sign
+                // bit is reserved for the direction, so we need to shift the
+                // linesofar.
+                static_cast<uint8_t>(((dir == 0 ? 0 : (dir < 0 ? -1 : 1)) + 1) | ((linesofar & 0x3F) << 2)),
+                static_cast<uint8_t>(linesofar >> 6)}}};
 }
 
 void DrawableBuilder::Impl::addPolyline(gfx::DrawableBuilder& builder,
@@ -169,20 +169,20 @@ void DrawableBuilder::Impl::setupForWideVectors(gfx::Context& context, gfx::Draw
     // vertices
     if (!wideVectorVertices) {
         constexpr shaders::VertexTriWideVecB kWideVectorVertices[]{
-            {{0}, {0}, (0 << 16) + 0},
-            {{0}, {0}, (1 << 16) + 0},
-            {{0}, {0}, (2 << 16) + 0},
-            {{0}, {0}, (3 << 16) + 0},
+            {.screenPos = {0}, .color = {0}, .index = (0 << 16) + 0},
+            {.screenPos = {0}, .color = {0}, .index = (1 << 16) + 0},
+            {.screenPos = {0}, .color = {0}, .index = (2 << 16) + 0},
+            {.screenPos = {0}, .color = {0}, .index = (3 << 16) + 0},
 
-            {{0}, {0}, (4 << 16) + 1},
-            {{0}, {0}, (5 << 16) + 1},
-            {{0}, {0}, (6 << 16) + 1},
-            {{0}, {0}, (7 << 16) + 1},
+            {.screenPos = {0}, .color = {0}, .index = (4 << 16) + 1},
+            {.screenPos = {0}, .color = {0}, .index = (5 << 16) + 1},
+            {.screenPos = {0}, .color = {0}, .index = (6 << 16) + 1},
+            {.screenPos = {0}, .color = {0}, .index = (7 << 16) + 1},
 
-            {{0}, {0}, (8 << 16) + 2},
-            {{0}, {0}, (9 << 16) + 2},
-            {{0}, {0}, (10 << 16) + 2},
-            {{0}, {0}, (11 << 16) + 2},
+            {.screenPos = {0}, .color = {0}, .index = (8 << 16) + 2},
+            {.screenPos = {0}, .color = {0}, .index = (9 << 16) + 2},
+            {.screenPos = {0}, .color = {0}, .index = (10 << 16) + 2},
+            {.screenPos = {0}, .color = {0}, .index = (11 << 16) + 2},
         };
         wideVectorVertices = std::make_shared<gfx::VertexVector<shaders::VertexTriWideVecB>>();
         for (auto& v : kWideVectorVertices) {
@@ -203,8 +203,8 @@ void DrawableBuilder::Impl::setupForWideVectors(gfx::Context& context, gfx::Draw
     }
 
     // segments
-    SegmentVector<VertexTriWideVecB> triangleSegments;
-    triangleSegments.emplace_back(Segment<VertexTriWideVecB>{0, 0, 12, 18});
+    SegmentVector triangleSegments;
+    triangleSegments.emplace_back(0, 0, 12, 18);
 
     // add to builder
     {

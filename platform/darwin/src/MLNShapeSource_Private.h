@@ -18,12 +18,12 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
 
 /**
  :nodoc:
- Debug log showing structure of an `MLNFeature`. This method recurses in the case
- that the feature conforms to `MLNCluster`. This method is used for testing and
+ Debug log showing structure of an ``MLNFeature``. This method recurses in the case
+ that the feature conforms to ``MLNCluster``. This method is used for testing and
  should be considered experimental, likely to be removed or changed in future
  releases.
 
- @param feature An object that conforms to the `MLNFeature` protocol.
+ @param feature An object that conforms to the ``MLNFeature`` protocol.
  @param indent Used during recursion. Specify 0.
  */
 

@@ -6,7 +6,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- The `MLNTileServerOptions` defines server properties such as URL etc...
+ The ``MLNTileServerOptions`` defines server properties such as URL etc...
  */
 MLN_EXPORT
 @interface MLNTileServerOptions : NSObject

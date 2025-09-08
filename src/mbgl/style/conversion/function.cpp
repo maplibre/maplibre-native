@@ -131,6 +131,11 @@ template std::optional<PropertyExpression<LineJoinType>> convertFunctionToExpres
                                                                                                    Error&,
                                                                                                    bool);
 template std::optional<PropertyExpression<Color>> convertFunctionToExpression<Color>(const Convertible&, Error&, bool);
+template std::optional<PropertyExpression<Padding>> convertFunctionToExpression<Padding>(const Convertible&,
+                                                                                         Error&,
+                                                                                         bool);
+template std::optional<PropertyExpression<VariableAnchorOffsetCollection>>
+convertFunctionToExpression<VariableAnchorOffsetCollection>(const Convertible&, Error&, bool);
 template std::optional<PropertyExpression<Position>> convertFunctionToExpression<Position>(const Convertible&,
                                                                                            Error&,
                                                                                            bool);
@@ -209,6 +214,8 @@ enum class FunctionType {
 bool interpolatable(type::Type type) noexcept {
     return type.match([&](const type::NumberType&) { return true; },
                       [&](const type::ColorType&) { return true; },
+                      [&](const type::PaddingType&) { return true; },
+                      [&](const type::VariableAnchorOffsetCollectionType&) { return true; },
                       [&](const type::Array& array) { return array.N && array.itemType == type::Number; },
                       [&](const auto&) { return false; });
 }
@@ -241,6 +248,20 @@ std::optional<std::unique_ptr<Expression>> convertLiteral(type::Type type,
         },
         [&](const type::ColorType&) -> std::optional<std::unique_ptr<Expression>> {
             auto result = convert<Color>(value, error);
+            if (!result) {
+                return std::nullopt;
+            }
+            return literal(*result);
+        },
+        [&](const type::PaddingType&) -> std::optional<std::unique_ptr<Expression>> {
+            auto result = convert<Padding>(value, error);
+            if (!result) {
+                return std::nullopt;
+            }
+            return literal(*result);
+        },
+        [&](const type::VariableAnchorOffsetCollectionType&) -> std::optional<std::unique_ptr<Expression>> {
+            auto result = convert<VariableAnchorOffsetCollection>(value, error);
             if (!result) {
                 return std::nullopt;
             }
@@ -778,6 +799,12 @@ std::optional<std::unique_ptr<Expression>> convertFunctionToExpression(type::Typ
             },
             [&](const type::ColorType&) -> std::optional<std::unique_ptr<Expression>> {
                 return toColor(get(literal(*property)), defaultExpr());
+            },
+            [&](const type::PaddingType&) -> std::optional<std::unique_ptr<Expression>> {
+                return toPadding(get(literal(*property)), defaultExpr());
+            },
+            [&](const type::VariableAnchorOffsetCollectionType&) -> std::optional<std::unique_ptr<Expression>> {
+                return toVariableAnchorOffset(get(literal(*property)), defaultExpr());
             },
             [&](const type::Array& array) -> std::optional<std::unique_ptr<Expression>> {
                 return assertion(array, get(literal(*property)), defaultExpr());

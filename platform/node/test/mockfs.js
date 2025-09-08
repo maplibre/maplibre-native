@@ -4,7 +4,7 @@ var fs = require('fs');
 var path = require('path');
 
 function readFixture(file) {
-    return fs.readFileSync(path.join('test/fixtures/resources', file));
+    return fs.readFileSync(path.join('../../test/fixtures/resources', file));
 }
 
 var style_raster  = readFixture('style_raster.json').toString('utf8');

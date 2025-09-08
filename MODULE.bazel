@@ -1,24 +1,106 @@
 module(name = "maplibre")
 
-bazel_dep(name = "apple_support", version = "1.11.1", repo_name = "build_bazel_apple_support")
-bazel_dep(name = "aspect_rules_js", version = "1.34.1")
-bazel_dep(name = "bazel_skylib", version = "1.5.0")
-bazel_dep(name = "platforms", version = "0.0.8")
-bazel_dep(name = "rules_apple", version = "3.1.1", repo_name = "build_bazel_rules_apple")
-bazel_dep(name = "rules_swift", version = "1.13.0", repo_name = "build_bazel_rules_swift")
-bazel_dep(name = "rules_xcodeproj", version = "1.13.0")
+bazel_dep(name = "bazel_skylib", version = "1.8.1")
+bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "rules_apple", version = "4.1.1")
+bazel_dep(name = "rules_swift", version = "3.1.1")
+bazel_dep(name = "rules_xcodeproj", version = "3.1.2")
+bazel_dep(name = "aspect_rules_js", version = "2.4.0")
+bazel_dep(name = "rules_nodejs", version = "6.4.0")
+bazel_dep(name = "libuv", version = "1.48.0")
+bazel_dep(name = "apple_support", version = "1.22.1", repo_name = "build_bazel_apple_support")
+bazel_dep(name = "rules_cc", version = "0.1.3")
+bazel_dep(name = "rules_shell", version = "0.6.0")
 
-npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")
+node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node", dev_dependency = True)
+node.toolchain(node_version = "20.14.0")
+
+npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm", dev_dependency = True)
 npm.npm_translate_lock(
     name = "npm",
     data = ["package.json"],
     pnpm_lock = "//:pnpm-lock.yaml",
-    update_pnpm_lock = True,
+    verify_node_modules_ignored = "//:.bazelignore",
 )
 use_repo(npm, "npm")
 
 pnpm = use_extension("@aspect_rules_js//npm:extensions.bzl", "pnpm")
+
+# Allows developers to use the matching pnpm version, for example:
+# bazel run -- @pnpm --dir /home/runner/work/rules_js/rules_js install
 use_repo(pnpm, "pnpm")
 
-provisioning_profile_repository = use_extension("@build_bazel_rules_apple//apple:apple.bzl", "provisioning_profile_repository_extension")
+provisioning_profile_repository = use_extension("@rules_apple//apple:apple.bzl", "provisioning_profile_repository_extension")
 provisioning_profile_repository.setup()
+
+http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
+
+# This file was created as follows:
+# Download shapefile from NPS
+# https://public-nps.opendata.arcgis.com/datasets/a40e2faa953b4c5cb7fe10004dc3008e_0/explore?location=0.213550%2C-12.488250%2C2.00
+# ogr2ogr -f GeoJSON pois.json -t_srs EPSG:4326 nps-pois.shp
+# tippecanoe -o pois-nps.mbtiles pois.json
+http_file(
+    name = "pois_nps_mbtiles",
+    downloaded_file_path = "pois-nps.mbtiles",
+    sha256 = "6a218702a5a60bb6358494217cac2836a087355ac092f6b01f089d8b1b2842ca",
+    url = "https://maplibre-native.s3.eu-central-1.amazonaws.com/ios-swift-example-app-resources/pois-nps.mbtiles",
+)
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "glfw",
+    build_file = "@//vendor:glfw.BUILD",
+    integrity = "sha256-tewASycS/Qjohh3CcUKPBId1IAot9xnM9XUUO6dJo+k=",
+    strip_prefix = "glfw-3.4",
+    urls = ["https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.zip"],
+)
+
+new_git_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
+
+new_git_repository(
+    name = "tinyobjloader",
+    branch = "release",
+    remote = "https://github.com/tinyobjloader/tinyobjloader.git",
+)
+
+darwin_config = use_repo_rule("//platform/darwin:bazel/darwin_config_repository_rule.bzl", "darwin_config")
+
+darwin_config(
+    name = "darwin_config",
+)
+
+bazel_dep(name = "rules_rust", version = "0.62.0")
+bazel_dep(name = "cxx.rs", version = "1.0.157")
+
+# The registry is not always up to date
+# See https://registry.bazel.build/modules/cxx.rs
+git_override(
+    module_name = "cxx.rs",
+    remote = "https://github.com/dtolnay/cxx.git",
+    tag = "1.0.157",
+)
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2021",
+    extra_target_triples = [
+        "aarch64-apple-ios-sim",
+        "x86_64-apple-ios",
+        "aarch64-apple-ios",
+        "aarch64-apple-darwin",
+        "x86_64-apple-darwin",
+    ],
+)
+use_repo(rust, "rust_toolchains")
+
+register_toolchains("@rust_toolchains//:all")
+
+crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
+crate.from_cargo(
+    name = "crates",
+    cargo_lockfile = "//rustutils:Cargo.lock",
+    manifests = ["//rustutils:Cargo.toml"],
+)
+use_repo(crate, "crates")

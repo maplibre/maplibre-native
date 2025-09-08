@@ -5,7 +5,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- The `MLNDefaultStyle` defines the predefined vendor style
+ The ``MLNDefaultStyle`` defines the predefined vendor style
  */
 MLN_EXPORT
 @interface MLNDefaultStyle : NSObject

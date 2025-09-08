@@ -34,7 +34,9 @@ TEST(Actor, Destruction) {
     };
 
     bool destructed = false;
-    { Actor<TestActor> test(Scheduler::GetBackground(), std::ref(destructed)); }
+    {
+        Actor<TestActor> test(Scheduler::GetBackground(), std::ref(destructed));
+    }
 
     EXPECT_TRUE(destructed);
 }
@@ -78,7 +80,8 @@ TEST(Actor, DestructionBlocksOnReceive) {
 TEST(Actor, DestructionBlocksOnSend) {
     // Destruction blocks until the actor is not being sent a message.
 
-    struct TestScheduler : public Scheduler {
+    // NOTE: Any derived class must invalidate `weakFactory` in the destructor
+    struct TestScheduler final : public Scheduler {
         std::promise<void> promise;
         std::future<void> future;
         std::atomic<bool> waited;

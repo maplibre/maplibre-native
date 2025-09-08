@@ -1,6 +1,7 @@
-load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application", "ios_unit_test")
-load("@build_bazel_rules_apple//apple:resources.bzl", "apple_resource_bundle")
 load("@darwin_config//:config.bzl", "BUNDLE_ID_PREFIX")
+load("@rules_apple//apple:ios.bzl", "ios_application", "ios_unit_test")
+load("@rules_apple//apple:resources.bzl", "apple_resource_bundle")
+load("@rules_cc//cc:defs.bzl", "cc_library", "objc_library")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
 cc_library(
@@ -49,7 +50,7 @@ ios_application(
     infoplists = [
         "Info.plist",
     ],
-    minimum_os_version = "12.0",
+    minimum_os_version = "13.0",
     provisioning_profile = "//platform/ios:xcode_profile",
     deps = [
         "//platform/ios/test/common:test_app_srcs",
@@ -58,7 +59,7 @@ ios_application(
 
 ios_unit_test(
     name = "CppUnitTests",
-    minimum_os_version = "12.0",
+    minimum_os_version = "13.0",
     provisioning_profile = "//platform/ios:xcode_profile",
     test_host = "CppUnitTestsApp",
     visibility = ["@rules_xcodeproj//xcodeproj:generated"],

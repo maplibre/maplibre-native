@@ -58,7 +58,7 @@
     // ... but triggering any camera event will update it.
     self.mapView.zoomLevel = 1;
     [self.mapView layoutIfNeeded];
-    
+
     XCTAssertTrue(CGSizeEqualToSize(scaleBar.intrinsicContentSize, CGSizeZero));
     XCTAssertEqual(scaleBar.alpha, 0);
 

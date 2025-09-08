@@ -11,7 +11,6 @@ import org.maplibre.geojson.Point
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.OnMapClickListener
-import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.Property
@@ -52,18 +51,17 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
         setContentView(R.layout.activity_zoom_symbol_layer)
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(
-            OnMapReadyCallback { map: MapLibreMap ->
-                maplibreMap = map
-                map.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style ->
-                    updateSource(style)
-                    addLayer(style)
-                    map.addOnMapClickListener(mapClickListener)
-                }
+        mapView.getMapAsync { map: MapLibreMap ->
+            maplibreMap = map
+            map.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style ->
+                updateSource(style)
+                addLayer(style)
+                map.addOnMapClickListener(mapClickListener)
             }
-        )
+        }
     }
 
+    // # --8<-- [start:updateSource]
     private fun updateSource(style: Style?) {
         val featureCollection = createFeatureCollection()
         if (source != null) {
@@ -73,6 +71,7 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
             style!!.addSource(source!!)
         }
     }
+    // # --8<-- [end:updateSource]
 
     private fun toggleSymbolLayerVisibility() {
         layer!!.setProperties(
@@ -81,6 +80,7 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
         isShowingSymbolLayer = !isShowingSymbolLayer
     }
 
+    // # --8<-- [start:createFeatureCollection]
     private fun createFeatureCollection(): FeatureCollection {
         val point = if (isInitialPosition) {
             Point.fromLngLat(-74.01618140, 40.701745)
@@ -92,6 +92,7 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
         val feature = Feature.fromGeometry(point, properties)
         return FeatureCollection.fromFeatures(arrayOf(feature))
     }
+    // # --8<-- [end:createFeatureCollection]
 
     private fun addLayer(style: Style) {
         layer = SymbolLayer(LAYER_ID, SOURCE_ID)
@@ -121,7 +122,7 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (maplibreMap != null) {
+        if (this::maplibreMap.isInitialized) {
             if (item.itemId == R.id.menu_action_change_location) {
                 isInitialPosition = !isInitialPosition
                 updateSource(maplibreMap.style)

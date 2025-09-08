@@ -9,7 +9,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class MLNAttributionInfo;
 
 /**
- Options for `MLNTileSource` objects.
+ Options for ``MLNTileSource`` objects.
  */
 typedef NSString *MLNTileSourceOption NS_STRING_ENUM;
 
@@ -18,7 +18,7 @@ typedef NSString *MLNTileSourceOption NS_STRING_ENUM;
  zoom level at which to display tiles from the source.
 
  The value should be between 0 and 22, inclusive, and less than
- `MLNTileSourceOptionMaximumZoomLevel`, if specified. The default value for this
+ ``MLNTileSourceOptionMaximumZoomLevel``, if specified. The default value for this
  option is 0.
 
  This option corresponds to the `minzoom` key in the
@@ -32,7 +32,7 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionMinimu
  zoom level at which to display tiles from the source.
 
  The value should be between 0 and 22, inclusive, and less than
- `MLNTileSourceOptionMinimumZoomLevel`, if specified. The default value for this
+ ``MLNTileSourceOptionMinimumZoomLevel``, if specified. The default value for this
  option is 22.
 
  This option corresponds to the `maxzoom` key in the
@@ -42,7 +42,7 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionMinimu
 FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionMaximumZoomLevel;
 
 /**
- An `NSValue` object containing an `MLNCoordinateBounds` struct that specifies
+ An `NSValue` object containing an ``MLNCoordinateBounds`` struct that specifies
  the geographic extent of the source.
 
  If this option is specified, the SDK avoids requesting any tile that falls
@@ -62,7 +62,7 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionCoordi
  pressed.
 
  By default, no attribution statements are displayed. If the
- `MLNTileSourceOptionAttributionInfos` option is specified, this option is
+ ``MLNTileSourceOptionAttributionInfos`` option is specified, this option is
  ignored.
 
  This option corresponds to the `attribution` key in the
@@ -72,7 +72,7 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionCoordi
 FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionAttributionHTMLString;
 
 /**
- An array of `MLNAttributionInfo` objects defining the buttons to be displayed
+ An array of ``MLNAttributionInfo`` objects defining the buttons to be displayed
  in an action sheet when the source is part of a map view’s style and the map
  view’s attribution button is pressed.
 
@@ -85,7 +85,7 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionAttrib
  attribution view when the source is part of the map view’s style.
 
  By default, no attribution statements are displayed. If the
- `MLNTileSourceOptionAttributionInfos` option is specified, this option is
+ ``MLNTileSourceOptionAttributionInfos`` option is specified, this option is
  ignored.
 
  This option corresponds to the `attribution` key in the
@@ -95,7 +95,7 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionAttrib
 FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionAttributionHTMLString;
 
 /**
- An array of `MLNAttributionInfo` objects defining the buttons to be displayed
+ An array of ``MLNAttributionInfo`` objects defining the buttons to be displayed
  in the map view’s attribution view when the source is part of the map view’s
  style.
 
@@ -107,9 +107,9 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionAttrib
 /**
  An `NSNumber` object containing an unsigned integer that specifies the tile
  coordinate system for the source’s tile URLs. The integer corresponds to one of
- the constants described in `MLNTileCoordinateSystem`.
+ the constants described in ``MLNTileCoordinateSystem``.
 
- The default value for this option is `MLNTileCoordinateSystemXYZ`.
+ The default value for this option is ``MLNTileCoordinateSystem/MLNTileCoordinateSystemXYZ``.
 
  This option corresponds to the `scheme` key in the
  <a href="https://github.com/mapbox/tilejson-spec/tree/master/2.1.0">TileJSON</a>
@@ -162,21 +162,21 @@ typedef NS_ENUM(NSUInteger, MLNDEMEncoding) {
 };
 
 /**
- `MLNTileSource` is a map content source that supplies map tiles to be shown on
+ ``MLNTileSource`` is a map content source that supplies map tiles to be shown on
  the map. The location of and metadata about the tiles are defined either by an
  option dictionary or by an external file that conforms to the
  <a href="https://github.com/mapbox/tilejson-spec/">TileJSON specification</a>.
- A tile source is added to an `MLNStyle` object along with one or more
- `MLNRasterStyleLayer` or `MLNVectorStyleLayer` objects. Use a style layer to
+ A tile source is added to an ``MLNStyle`` object along with one or more
+ ``MLNRasterStyleLayer`` or ``MLNRasterStyleLayer`` objects. Use a style layer to
  control the appearance of content supplied by the tile source.
 
  A tile source is also known as a tile set. To learn about the structure of a
  Mapbox-hosted tile set, view it in
  <a href="https://www.mapbox.com/studio/tilesets/">Mapbox Studio’s Tilesets editor</a>.
 
- Create instances of `MLNRasterTileSource` and `MLNVectorTileSource` in order
- to use `MLNTileSource`'s properties and methods. Do not create instances of
- `MLNTileSource` directly, and do not create your own subclasses of this class.
+ Create instances of ``MLNRasterTileSource`` and ``MLNRasterTileSource`` in order
+ to use ``MLNTileSource``'s properties and methods. Do not create instances of
+ ``MLNTileSource`` directly, and do not create your own subclasses of this class.
  */
 MLN_EXPORT
 @interface MLNTileSource : MLNSource
@@ -195,7 +195,7 @@ MLN_EXPORT
 // MARK: Accessing Attribution Strings
 
 /**
- An array of `MLNAttributionInfo` objects that define the attribution
+ An array of ``MLNAttributionInfo`` objects that define the attribution
  statements to be displayed when the map is shown to the user.
 
  By default, this array is empty. If the source is initialized with a
@@ -203,6 +203,15 @@ MLN_EXPORT
  is loaded.
  */
 @property (nonatomic, copy, readonly) NSArray<MLNAttributionInfo *> *attributionInfos;
+
+/**
+ The attribution HTML string associated with this source.
+
+ By default, this is nil. If the source is initialized with a
+ configuration URL, this is nil until the configuration JSON file
+ is loaded.
+ */
+@property (nonatomic, copy, nullable, readonly) NSString *attributionHTMLString;
 
 @end
 

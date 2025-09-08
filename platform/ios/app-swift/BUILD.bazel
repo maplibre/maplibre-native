@@ -1,6 +1,7 @@
-load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application")
+load("@darwin_config//:config.bzl", "BUNDLE_ID_PREFIX")
+load("@rules_apple//apple:ios.bzl", "ios_application")
 load(
-    "@build_bazel_rules_swift//swift:swift.bzl",
+    "@rules_swift//swift:swift.bzl",
     "swift_library",
 )
 load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
@@ -23,7 +24,7 @@ swift_library(
 
 ios_application(
     name = "MapLibreApp",
-    bundle_id = "org.maplibre.swiftapp",
+    bundle_id = "{}.swiftapp".format(BUNDLE_ID_PREFIX),
     families = [
         "iphone",
         "ipad",
@@ -31,6 +32,9 @@ ios_application(
     infoplists = [":Info.plist"],
     minimum_os_version = "16.0",
     provisioning_profile = "xcode_profile",
+    resources = [
+        "@pois_nps_mbtiles//file",
+    ],
     visibility = ["@rules_xcodeproj//xcodeproj:generated"],
     deps = [":Sources"],
 )

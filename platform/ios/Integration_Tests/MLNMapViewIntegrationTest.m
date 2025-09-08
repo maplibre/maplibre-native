@@ -47,7 +47,7 @@
     if (self.viewForAnnotation) {
         return self.viewForAnnotation(mapView, annotation);
     }
-    
+
     return nil;
 }
 

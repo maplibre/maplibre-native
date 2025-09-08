@@ -10,9 +10,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import com.mapbox.android.gestures.AndroidGesturesManager;
-import com.mapbox.android.gestures.MoveGestureDetector;
-import com.mapbox.android.gestures.RotateGestureDetector;
+import org.maplibre.android.gestures.AndroidGesturesManager;
+import org.maplibre.android.gestures.MoveGestureDetector;
+import org.maplibre.android.gestures.RotateGestureDetector;
 import org.maplibre.android.location.modes.CameraMode;
 import org.maplibre.android.maps.MapLibreMap;
 import org.maplibre.android.maps.Transform;
@@ -314,7 +314,8 @@ final class LocationCameraController {
       if (isLocationTracking()) {
         moveGestureDetector.setMoveThreshold(options.trackingInitialMoveThreshold());
       } else {
-        moveGestureDetector.setMoveThreshold(0f);
+        float initialMoveThreshold = initialGesturesManager.getMoveGestureDetector().getMoveThreshold();
+        moveGestureDetector.setMoveThreshold(initialMoveThreshold);
         moveGestureDetector.setMoveThresholdRect(null);
       }
     }

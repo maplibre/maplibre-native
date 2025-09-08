@@ -1,7 +1,6 @@
 package org.maplibre.android.testapp.activity.annotation
 
 import android.app.ProgressDialog
-import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
@@ -10,20 +9,22 @@ import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.MenuItemCompat
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.GeoParseUtil
 import timber.log.Timber
 import java.io.IOException
-import java.lang.ref.WeakReference
 import java.text.DecimalFormat
 import java.util.*
+import kotlin.math.min
 
 /**
  * Test activity showcasing adding a large amount of Markers.
@@ -38,7 +39,7 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
         setContentView(R.layout.activity_marker_bulk)
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(OnMapReadyCallback { maplibreMap: MapLibreMap -> initMap(maplibreMap) })
+        mapView.getMapAsync { initMap(it) }
     }
 
     private fun initMap(maplibreMap: MapLibreMap) {
@@ -55,7 +56,7 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         menuInflater.inflate(R.menu.menu_bulk_marker, menu)
         val item = menu.findItem(R.id.spinner)
-        val spinner = MenuItemCompat.getActionView(item) as Spinner
+        val spinner = item.actionView as Spinner
         spinner.adapter = spinnerAdapter
         spinner.onItemSelectedListener = this@BulkMarkerActivity
         return true
@@ -65,7 +66,12 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
         val amount = Integer.valueOf(resources.getStringArray(R.array.bulk_marker_list)[position])
         if (locations == null) {
             progressDialog = ProgressDialog.show(this, "Loading", "Fetching markers", false)
-            LoadLocationTask(this, amount).execute()
+            lifecycleScope.launch(Dispatchers.IO) {
+                locations = loadLocationTask(this@BulkMarkerActivity)
+                withContext(Dispatchers.Main) {
+                    onLatLngListLoaded(locations, amount)
+                }
+            }
         } else {
             showMarkers(amount)
         }
@@ -78,15 +84,11 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
     }
 
     private fun showMarkers(amount: Int) {
-        var amount = amount
-        if (maplibreMap == null || locations == null || mapView.isDestroyed) {
+        if (!this::maplibreMap.isInitialized || locations == null || mapView.isDestroyed) {
             return
         }
         maplibreMap.clear()
-        if (locations!!.size < amount) {
-            amount = locations!!.size
-        }
-        showGlMarkers(amount)
+        showGlMarkers(min(amount, locations!!.size))
     }
 
     private fun showGlMarkers(amount: Int) {
@@ -149,38 +151,18 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
         mapView.onLowMemory()
     }
 
-    private class LoadLocationTask constructor(
+    private fun loadLocationTask(
         activity: BulkMarkerActivity,
-        private val amount: Int
-    ) : AsyncTask<Void?, Int?, List<LatLng>?>() {
-        private val activity: WeakReference<BulkMarkerActivity>
-        override fun doInBackground(vararg p0: Void?): List<LatLng>? {
-            val activity = activity.get()
-            if (activity != null) {
-                var json: String? = null
-                try {
-                    json = GeoParseUtil.loadStringFromAssets(
-                        activity.applicationContext,
-                        "points.geojson"
-                    )
-                } catch (exception: IOException) {
-                    Timber.e(exception, "Could not add markers")
-                }
-                if (json != null) {
-                    return GeoParseUtil.parseGeoJsonCoordinates(json)
-                }
-            }
-            return null
+    ) : List<LatLng>? {
+        try {
+            val json = GeoParseUtil.loadStringFromAssets(
+                activity.applicationContext,
+                "points.geojson"
+            )
+            return GeoParseUtil.parseGeoJsonCoordinates(json)
+        } catch (exception: IOException) {
+            Timber.e(exception, "Could not add markers")
         }
-
-        override fun onPostExecute(locations: List<LatLng>?) {
-            super.onPostExecute(locations)
-            val activity = activity.get()
-            activity?.onLatLngListLoaded(locations, amount)
-        }
-
-        init {
-            this.activity = WeakReference(activity)
-        }
+        return null
     }
 }

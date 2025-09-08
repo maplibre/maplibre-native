@@ -39,7 +39,7 @@ typedef NS_ENUM(NSUInteger, MLNAnnotationViewDragState) {
 };
 
 /**
- The `MLNAnnotationView` class is responsible for marking a point annotation
+ The ``MLNAnnotationView`` class is responsible for marking a point annotation
  with a view. Annotation views represent an annotation object, which is an
  object that corresponds to the ``MLNAnnotation`` protocol. When an annotation’s
  geographic coordinate is visible in the map view, the map view asks its
@@ -65,7 +65,7 @@ MLN_EXPORT
  leaves the viewport, the map view moves its associated view to a reuse queue.
  When a new annotation becomes visible, you can request a view for that
  annotation by passing the appropriate reuse identifier string to the
- `-[MLNMapView dequeueReusableAnnotationViewWithIdentifier:]` method.
+ ``MLNMapView/dequeueReusableAnnotationViewWithIdentifier:`` method.
 
  @param reuseIdentifier A unique string identifier for this view that allows you
     to reuse this view with multiple similar annotations. You can set this
@@ -173,7 +173,7 @@ MLN_EXPORT
  The default value of this property is `NO`. Keep this property set to `NO` if
  the view’s legibility is important.
 
- @note Scaling many on-screen annotation views can contribute to poor map
+ > Note: Scaling many on-screen annotation views can contribute to poor map
     performance. Consider keeping this property disabled if your use case
     involves hundreds or thousands of annotation views.
  */
@@ -256,7 +256,7 @@ MLN_EXPORT
  continue to completion.
 
  #### Related examples
- TODO: Enable users to drag `MLNAnnotationView` objects on your map.
+ TODO: Enable users to drag ``MLNAnnotationView`` objects on your map.
  */
 @property (nonatomic, assign, getter=isDraggable) BOOL draggable;
 

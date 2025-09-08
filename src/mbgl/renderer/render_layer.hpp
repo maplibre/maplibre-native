@@ -6,12 +6,10 @@
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/util/mat4.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/change_request.hpp>
 #include <mbgl/util/tiny_unordered_map.hpp>
-#endif // MLN_DRAWABLE_RENDERER
 
 #include <list>
 #include <memory>
@@ -32,12 +30,10 @@ class TransitionParameters;
 class UpdateParameters;
 class UploadParameters;
 
-#if MLN_DRAWABLE_RENDERER
 class ChangeRequest;
 using LayerGroupBasePtr = std::shared_ptr<LayerGroupBase>;
 using UniqueChangeRequest = std::unique_ptr<ChangeRequest>;
 using UniqueChangeRequestVec = std::vector<UniqueChangeRequest>;
-#endif
 
 namespace gfx {
 class Context;
@@ -45,10 +41,8 @@ class ShaderGroup;
 class ShaderRegistry;
 using ShaderGroupPtr = std::shared_ptr<ShaderGroup>;
 
-#if MLN_DRAWABLE_RENDERER
 class UniformBuffer;
 using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
-#endif
 } // namespace gfx
 
 namespace style {
@@ -161,7 +155,6 @@ public:
     // TODO: Only for background layers.
     virtual std::optional<Color> getSolidBackground() const;
 
-#if MLN_DRAWABLE_RENDERER
     /// Generate any changes needed by the layer
     virtual void update(gfx::ShaderRegistry&,
                         gfx::Context&,
@@ -191,7 +184,9 @@ public:
 
     /// Returns the current renderability mode of the layer
     bool isLayerRenderable() const noexcept { return isRenderable; }
-#endif
+
+    /// Remove all the drawables for tiles
+    virtual std::size_t removeAllDrawables();
 
     using Dependency = style::expression::Dependency;
     Dependency getStyleDependencies() const { return styleDependencies; }
@@ -205,7 +200,6 @@ protected:
 
     const LayerRenderData* getRenderDataForPass(const RenderTile&, RenderPass) const;
 
-#if MLN_DRAWABLE_RENDERER
     void setLayerGroup(LayerGroupBasePtr, UniqueChangeRequestVec&);
 
     /// (Un-)Register the layer group with the orchestrator
@@ -247,9 +241,6 @@ protected:
     /// @return The number of drawables actually removed.
     virtual std::size_t removeTile(RenderPass, const OverscaledTileID&);
 
-    /// Remove all the drawables for tiles
-    virtual std::size_t removeAllDrawables();
-
     /// Update `renderTileIDs` from `renderTiles`
     void updateRenderTileIDs();
 
@@ -268,13 +259,14 @@ protected:
     /// unchanged
     bool setRenderTileBucketID(const OverscaledTileID&, util::SimpleIdentity bucketID);
 
-#endif // MLN_DRAWABLE_RENDERER
-
     static bool applyColorRamp(const style::ColorRampPropertyValue&, PremultipliedImage&);
 
 protected:
     // Stores current set of tiles to be rendered for this layer.
     RenderTiles renderTiles;
+
+    // Retains ownership of tiles
+    Immutable<std::vector<RenderTile>> renderTilesOwner;
 
     // Stores what render passes this layer is currently enabled for. This depends on the
     // evaluated StyleProperties object and is updated accordingly.
@@ -282,7 +274,6 @@ protected:
 
     LayerPlacementData placementData;
 
-#if MLN_DRAWABLE_RENDERER
     // will need to be overriden to handle their activation.
     LayerGroupBasePtr layerGroup;
 
@@ -296,7 +287,6 @@ protected:
     using RenderTileIDMap = util::TinyUnorderedMap<OverscaledTileID, util::SimpleIdentity, LinearTileIDs>;
     RenderTileIDMap renderTileIDs;
     RenderTileIDMap newRenderTileIDs;
-#endif
 
     // Current layer index as specified by the layerIndexChanged event
     int32_t layerIndex{0};

@@ -28,10 +28,10 @@ The file `include/mbgl/util/instrumentation.hpp` defines the following instrumen
 ##### `MLN_TRACE_ZONE(label)`
 The macro records the timestamps at the start and end of the code scope. The parameter label is a user defined name for the zone. Example:
 
-~~~
+~~~cpp
 // code is not instrumented
 {
-  MLN_TRACE_ZONE(EmptyZone); // Records from here until the end of the scope
+  MLN_TRACE_ZONE(EmptyZone) // Records from here until the end of the scope
   // code here is instrumented
 }
 // other here not instrumented
@@ -39,7 +39,7 @@ The macro records the timestamps at the start and end of the code scope. The par
 
 ##### `MLN_TRACE_FUNC()`
 The macro is meant to be placed at the start of a function and expands to:
-~~~
+~~~cpp
 MLN_TRACE_ZONE(__FUNCTION__)
 ~~~
 
@@ -90,16 +90,16 @@ Make sure you generate the MapLibre project with the option `MLN_USE_TRACY` enab
 As an example, the glfw sample is used.
 
 With CMake, in MapLibre repository root do
-~~~
+~~~bash
 # generate project
-cmake -B build -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -DMLN_WITH_CLANG_TIDY=OFF -DMLN_WITH_COVERAGE=OFF -DMLN_DRAWABLE_RENDERER=ON -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON -DMLN_USE_TRACY=ON
+cmake -B build -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -DMLN_WITH_CLANG_TIDY=OFF -DMLN_WITH_COVERAGE=OFF -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON -DMLN_USE_TRACY=ON
 # build
 cmake --build build --target mbgl-glfw -j 8
 # run
 ./build/platform/glfw/mbgl-glfw --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --benchmark
 ~~~
 with Bazel
-~~~
+~~~bash
 # build and run
 bazel run //platform/glfw:glfw_app -- --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --benchmark
 ~~~
@@ -108,16 +108,13 @@ In the Tracy Profiler hit the connect button (or select the glfw application fro
 
 #### Connecting the profiler to a MapLibre Android application
 The Android application communicates instrumentation data to the profiler (Tracy server) on the network using port 8086 by default. You can expose the port to the profiler using Android Debug Bridge by running the command:
-~~~
+~~~bash
 adb forward tcp:8086 tcp:8086
 ~~~
 
 #### More information and advanced usage in Tracy
 
-[Tracy Github page](https://github.com/wolfpld/tracy/)
-
-[Tracy user guide](https://github.com/wolfpld/tracy/releases/latest/download/tracy.pdf)
-
-[Tracy demo on Youtube](https://www.youtube.com/watch?v=fB5B46lbapc)
-
-[Tracy CppCon presentation on Youtube](https://www.youtube.com/watch?v=ghXk3Bk5F2U&t=37s)
+- [Tracy Github page](https://github.com/wolfpld/tracy/)
+- [Tracy user guide](https://github.com/wolfpld/tracy/releases/latest/download/tracy.pdf)
+- [Tracy demo on Youtube](https://www.youtube.com/watch?v=fB5B46lbapc)
+- [Tracy CppCon presentation on Youtube](https://www.youtube.com/watch?v=ghXk3Bk5F2U&t=37s)

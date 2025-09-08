@@ -67,20 +67,20 @@ extern NSTimeInterval const kMLNSMCalloutViewRepositionDelayForUIScrollView;
 
 /**
  @brief Custom title view.
- 
+
  @disucssion Keep in mind that @c SMCalloutView calls @c -sizeThatFits on titleView/subtitleView if defined, so your view
  may be resized as a result of that (especially if you're using @c UILabel/UITextField). You may want to subclass and override @c -sizeThatFits, or just wrap your view in a "generic" @c UIView if you do not want it to be auto-sized.
- 
+
  @warning If this is set, the respective @c title property will be ignored.
  */
 @property (nonatomic, strong, nullable) UIView *titleView;
 
 /**
  @brief Custom subtitle view.
- 
+
  @discussion Keep in mind that @c SMCalloutView calls @c -sizeThatFits on subtitleView if defined, so your view
  may be resized as a result of that (especially if you're using @c UILabel/UITextField). You may want to subclass and override @c -sizeThatFits, or just wrap your view in a "generic" @c UIView if you do not want it to be auto-sized.
- 
+
  @warning If this is set, the respective @c subtitle property will be ignored.
  */
 @property (nonatomic, strong, nullable) UIView *subtitleView;
@@ -102,10 +102,10 @@ extern NSTimeInterval const kMLNSMCalloutViewRepositionDelayForUIScrollView;
 
 /**
  @brief Presents a callout view by adding it to "inView" and pointing at the given rect of inView's bounds.
- 
+
  @discussion Constrains the callout to the bounds of the given view. Optionally scrolls the given rect into view (plus margins)
  if @c -delegate is set and responds to @c -delayForRepositionWithSize.
- 
+
  @param rect @c CGRect to present the view from
  @param view view to 'constrain' the @c constrainedView to
  @param constrainedView @c UIView to be constrainted in @c view
@@ -127,10 +127,10 @@ extern NSTimeInterval const kMLNSMCalloutViewRepositionDelayForUIScrollView;
 
 /**
  @brief Present a callout layer in the `layer` and pointing at the given rect of the `layer` bounds
- 
+
  @discussion Same as the view-based presentation, but inserts the callout into a CALayer hierarchy instead.
- @note Be aware that you'll have to direct your own touches to any accessory views, since CALayer doesn't relay touch events.
- 
+ > Note: Be aware that you'll have to direct your own touches to any accessory views, since CALayer doesn't relay touch events.
+
  @param rect @c CGRect to present the view from
  @param layer layer to 'constrain' the @c constrainedLayer to
  @param constrainedLayer @c CALayer to be constrained in @c layer
@@ -140,7 +140,7 @@ extern NSTimeInterval const kMLNSMCalloutViewRepositionDelayForUIScrollView;
 
 /**
  Dismiss the callout view
- 
+
  @param animated @c BOOL if dismissal should be animated
  */
 - (void)dismissCalloutAnimated:(BOOL)animated;
@@ -188,13 +188,13 @@ extern NSTimeInterval const kMLNSMCalloutViewRepositionDelayForUIScrollView;
 - (void)calloutViewClicked:(MLNSMCalloutView *)calloutView;
 
 /**
- Called when the callout view detects that it will be outside the constrained view when it appears, 
- or if the target rect was already outside the constrained view. You can implement this selector 
+ Called when the callout view detects that it will be outside the constrained view when it appears,
+ or if the target rect was already outside the constrained view. You can implement this selector
  to respond to this situation by repositioning your content first in order to make everything visible.
- The @c CGSize passed is the calculated offset necessary to make everything visible (plus a nice margin). 
- It expects you to return the amount of time you need to reposition things so the popup can be delayed. 
+ The @c CGSize passed is the calculated offset necessary to make everything visible (plus a nice margin).
+ It expects you to return the amount of time you need to reposition things so the popup can be delayed.
  Typically you would return @c kSMCalloutViewRepositionDelayForUIScrollView if you're repositioning by calling @c [UIScrollView @c setContentOffset:animated:].
- 
+
  @param calloutView the @c SMCalloutView to reposition
  @param offset caluclated offset necessary to make everything visible
  @returns @c NSTimeInterval to delay the repositioning

@@ -6,13 +6,13 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- `MLNShape` is an abstract class that represents a shape or annotation. Shapes
+ ``MLNShape`` is an abstract class that represents a shape or annotation. Shapes
  constitute the content of a map — not only the overlays atop the map, but also
  the content that forms the base map.
 
- Create instances of `MLNPointAnnotation`, `MLNPointCollection`, `MLNPolyline`,
- `MLNMultiPolyline`, `MLNPolygon`, `MLNMultiPolygon`, or `MLNShapeCollection` in
- order to use `MLNShape`'s methods. Do not create instances of `MLNShape`
+ Create instances of ``MLNPointAnnotation``, ``MLNPointAnnotation``, ``MLNPointAnnotation``,
+ ``MLNMultiPolyline``, ``MLNMultiPolyline``, ``MLNMultiPolyline``, or ``MLNMultiPolyline`` in
+ order to use ``MLNShape``'s methods. Do not create instances of ``MLNShape``
  directly, and do not create your own subclasses of this class. The shape
  classes correspond to the
  <a href="https://tools.ietf.org/html/rfc7946#section-3.1">Geometry</a> object
@@ -20,20 +20,20 @@ NS_ASSUME_NONNULL_BEGIN
  compatibility.
 
  Although you do not create instances of this class directly, you can use its
- `+[MLNShape shapeWithData:encoding:error:]` factory method to create one of the
- concrete subclasses of `MLNShape` noted above from GeoJSON data. To access a
- shape’s attributes, use the corresponding `MLNFeature` class instead.
+ ``MLNShape/shapeWithData:encoding:error:`` factory method to create one of the
+ concrete subclasses of ``MLNShape`` noted above from GeoJSON data. To access a
+ shape’s attributes, use the corresponding ``MLNFeature`` class instead.
 
- You can add shapes to the map by adding them to an `MLNShapeSource` object.
- Configure the appearance of an `MLNShapeSource`’s or `MLNVectorTileSource`’s
- shapes collectively using a concrete instance of `MLNVectorStyleLayer`.
+ You can add shapes to the map by adding them to an ``MLNShapeSource`` object.
+ Configure the appearance of an ``MLNShapeSource``’s or ``MLNShapeSource``’s
+ shapes collectively using a concrete instance of ``MLNVectorStyleLayer``.
  Alternatively, you can add some kinds of shapes directly to a map view as
  annotations or overlays.
 
- You can filter the features in a `MLNVectorStyleLayer` or vary their layout or
- paint attributes based on the features’ geographies. Pass an `MLNShape` into an
+ You can filter the features in a ``MLNVectorStyleLayer`` or vary their layout or
+ paint attributes based on the features’ geographies. Pass an ``MLNShape`` into an
  `NSPredicate` with the format `SELF IN %@` or `%@ CONTAINS SELF` and set the
- `MLNVectorStyleLayer.predicate` property to that predicate, or set a layout or
+ ``MLNVectorStyleLayer/predicate`` property to that predicate, or set a layout or
  paint attribute to a similarly formatted `NSExpression`.
  */
 MLN_EXPORT
@@ -42,14 +42,14 @@ MLN_EXPORT
 // MARK: Creating a Shape
 
 /**
- Returns an `MLNShape` object initialized with the given data interpreted as a
+ Returns an ``MLNShape`` object initialized with the given data interpreted as a
  string containing a GeoJSON object.
 
  If the GeoJSON object is a geometry, the returned value is a kind of
- `MLNShape`. If it is a feature object, the returned value is a kind of
- `MLNShape` that conforms to the `MLNFeature` protocol. If it is a feature
+ ``MLNShape``. If it is a feature object, the returned value is a kind of
+ ``MLNShape`` that conforms to the ``MLNShape`` protocol. If it is a feature
  collection object, the returned value is an instance of
- `MLNShapeCollectionFeature`.
+ ``MLNShapeCollectionFeature``.
 
  ### Example
 
@@ -64,7 +64,7 @@ MLN_EXPORT
  @param encoding The encoding used by `data`.
  @param outError Upon return, if an error has occurred, a pointer to an
     `NSError` object describing the error. Pass in `NULL` to ignore any error.
- @return An `MLNShape` object representation of `data`, or `nil` if `data` could
+ @return An ``MLNShape`` object representation of `data`, or `nil` if `data` could
     not be parsed as valid GeoJSON source code. If `nil`, `outError` contains an
     `NSError` object describing the problem.
  */
@@ -79,9 +79,9 @@ MLN_EXPORT
 
  The default value of this property is `nil`.
 
- This property is ignored when the shape is used in an `MLNShapeSource`. To name
- a shape used in a shape source, create an `MLNFeature` and add an attribute to
- the `MLNFeature.attributes` property.
+ This property is ignored when the shape is used in an ``MLNShapeSource``. To name
+ a shape used in a shape source, create an ``MLNFeature`` and add an attribute to
+ the ``MLNFeature/attributes`` property.
  */
 @property (nonatomic, copy, nullable) NSString *title;
 
@@ -89,9 +89,9 @@ MLN_EXPORT
  The subtitle of the shape annotation. The default value of this property is
  `nil`.
 
- This property is ignored when the shape is used in an `MLNShapeSource`. To
+ This property is ignored when the shape is used in an ``MLNShapeSource``. To
  provide additional information about a shape used in a shape source, create an
- `MLNFeature` and add an attribute to the `MLNFeature.attributes` property.
+ ``MLNFeature`` and add an attribute to the ``MLNFeature/attributes`` property.
  */
 @property (nonatomic, copy, nullable) NSString *subtitle;
 
@@ -102,7 +102,7 @@ MLN_EXPORT
 
  The default value of this property is `nil`.
 
- This property is ignored when the shape is used in an `MLNShapeSource`.
+ This property is ignored when the shape is used in an ``MLNShapeSource``.
  */
 @property (nonatomic, copy, nullable) NSString *toolTip;
 

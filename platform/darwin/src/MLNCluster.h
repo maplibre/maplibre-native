@@ -12,12 +12,12 @@ FOUNDATION_EXTERN MLN_EXPORT const NSUInteger MLNClusterIdentifierInvalid;
 
 /**
  A protocol that feature subclasses (i.e. those already conforming to
- the `MLNFeature` protocol) conform to if they represent clusters.
+ the ``MLNFeature`` protocol) conform to if they represent clusters.
 
- Currently the only class that conforms to `MLNCluster` is
- `MLNPointFeatureCluster` (a subclass of `MLNPointFeature`).
+ Currently the only class that conforms to ``MLNCluster`` is
+ ``MLNPointFeatureCluster`` (a subclass of ``MLNPointFeatureCluster``).
 
- To check if a feature is a cluster, check conformity to `MLNCluster`, for
+ To check if a feature is a cluster, check conformity to ``MLNCluster``, for
  example:
 
  ```swift
@@ -32,8 +32,8 @@ FOUNDATION_EXTERN MLN_EXPORT const NSUInteger MLNClusterIdentifierInvalid;
      throw ExampleError.featureIsNotACluster
  }
 
- // Currently the only supported class that conforms to `MLNCluster` is
- // `MLNPointFeatureCluster`
+ // Currently the only supported class that conforms to ``MLNCluster`` is
+ // ``MLNPointFeatureCluster``
  guard cluster is MLNPointFeatureCluster else {
      throw ExampleError.unexpectedFeatureType
  }

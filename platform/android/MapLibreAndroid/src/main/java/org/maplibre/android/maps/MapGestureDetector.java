@@ -15,13 +15,13 @@ import android.view.animation.DecelerateInterpolator;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.mapbox.android.gestures.AndroidGesturesManager;
-import com.mapbox.android.gestures.MoveGestureDetector;
-import com.mapbox.android.gestures.MultiFingerTapGestureDetector;
-import com.mapbox.android.gestures.RotateGestureDetector;
-import com.mapbox.android.gestures.ShoveGestureDetector;
-import com.mapbox.android.gestures.StandardGestureDetector;
-import com.mapbox.android.gestures.StandardScaleGestureDetector;
+import org.maplibre.android.gestures.AndroidGesturesManager;
+import org.maplibre.android.gestures.MoveGestureDetector;
+import org.maplibre.android.gestures.MultiFingerTapGestureDetector;
+import org.maplibre.android.gestures.RotateGestureDetector;
+import org.maplibre.android.gestures.ShoveGestureDetector;
+import org.maplibre.android.gestures.StandardGestureDetector;
+import org.maplibre.android.gestures.StandardScaleGestureDetector;
 import org.maplibre.android.R;
 import org.maplibre.android.constants.MapLibreConstants;
 import org.maplibre.android.log.Logger;
@@ -124,7 +124,7 @@ final class MapGestureDetector {
     if (attachDefaultListeners) {
       StandardGestureListener standardGestureListener = new StandardGestureListener(
         context.getResources().getDimension(
-          com.mapbox.android.gestures.R.dimen.mapbox_defaultScaleSpanSinceStartThreshold));
+          org.maplibre.android.gestures.R.dimen.mapbox_defaultScaleSpanSinceStartThreshold));
       MoveGestureListener moveGestureListener = new MoveGestureListener();
       ScaleGestureListener scaleGestureListener = new ScaleGestureListener(
         context.getResources().getDimension(R.dimen.maplibre_density_constant),
@@ -138,7 +138,7 @@ final class MapGestureDetector {
         context.getResources().getDimension(R.dimen.maplibre_angular_velocity_multiplier),
         context.getResources().getDimension(R.dimen.maplibre_minimum_angular_velocity),
         context.getResources().getDimension(
-          com.mapbox.android.gestures.R.dimen.mapbox_defaultScaleSpanSinceStartThreshold));
+          org.maplibre.android.gestures.R.dimen.mapbox_defaultScaleSpanSinceStartThreshold));
       ShoveGestureListener shoveGestureListener = new ShoveGestureListener();
       TapGestureListener tapGestureListener = new TapGestureListener();
 
@@ -169,8 +169,15 @@ final class MapGestureDetector {
       androidGesturesManager.setMutuallyExclusiveGestures(shoveScaleSet, shoveRotateSet, ScaleLongPressSet);
     }
 
+    // If this was 0°, every shove gesture (for tilting the map) would be detected as also a rotate
+    androidGesturesManager.getRotateGestureDetector().setAngleThreshold(3f);
+
+    // If this was 0 (the default), a simple tap would also be detected as a move. A (very) small
+    // move threshold solves this issue, while not making the map feel "sticky". (See #2792)
+    androidGesturesManager.getMoveGestureDetector().setMoveThresholdResource(R.dimen.maplibre_minimum_move_threshold);
+
     gesturesManager = androidGesturesManager;
-    gesturesManager.getRotateGestureDetector().setAngleThreshold(3f);
+
   }
 
   /**

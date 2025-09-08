@@ -13,6 +13,13 @@
 
 using namespace mbgl;
 
+#ifdef WIN32
+// Windows doesn't fail immediately like other OS
+constexpr double connectionTimeout = 2.0;
+#else
+constexpr double connectionTimeout = 0;
+#endif
+
 TEST(OnlineFileSource, Cancel) {
     util::RunLoop loop;
     std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
@@ -93,7 +100,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(ConnectionError)) {
 
     const auto start = Clock::now();
     int counter = 0;
-    int wait = 0;
+    double wait = connectionTimeout;
 
     std::unique_ptr<AsyncRequest> req = fs->request({Resource::Unknown, "http://127.0.0.1:3001/"}, [&](Response res) {
         const auto duration = std::chrono::duration<const double>(Clock::now() - start).count();
@@ -111,7 +118,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(ConnectionError)) {
             req.reset();
             loop.stop();
         }
-        wait += (1 << counter);
+        wait += (1 << counter) + connectionTimeout;
         counter++;
     });
 
@@ -155,7 +162,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RetryDelayOnExpiredTile)) {
     std::unique_ptr<AsyncRequest> req = fs->request(resource, [&](Response res) {
         counter++;
         EXPECT_EQ(nullptr, res.error);
-        EXPECT_GT(util::now(), *res.expires);
+        EXPECT_TRUE(util::now() > *res.expires);
         EXPECT_FALSE(res.mustRevalidate);
         loop.stop();
     });
@@ -177,14 +184,14 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RetryOnClockSkew)) {
         switch (counter++) {
             case 0: {
                 EXPECT_EQ(nullptr, res.error);
-                EXPECT_GT(util::now(), *res.expires);
+                EXPECT_TRUE(util::now() > *res.expires);
             } break;
             case 1: {
                 EXPECT_EQ(nullptr, res.error);
 
                 auto now = util::now();
-                EXPECT_LT(now + Seconds(40), *res.expires) << "Expiration not interpolated to 60s";
-                EXPECT_GT(now + Seconds(80), *res.expires) << "Expiration not interpolated to 60s";
+                EXPECT_TRUE(now + Seconds(40) < *res.expires) << "Expiration not interpolated to 60s";
+                EXPECT_TRUE(now + Seconds(80) > *res.expires) << "Expiration not interpolated to 60s";
 
                 loop.stop();
             } break;
@@ -318,13 +325,16 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusChangePreempt)) {
     int counter = 0;
 
     const Resource resource{Resource::Unknown, "http://127.0.0.1:3001/test"};
+
+    double wait = connectionTimeout;
+
     std::unique_ptr<AsyncRequest> req = fs->request(resource, [&](Response res) {
         const auto duration = std::chrono::duration<const double>(Clock::now() - start).count();
         if (counter == 0) {
-            EXPECT_GT(0.2, duration) << "Response came in too late";
+            EXPECT_GT(wait + 0.2, duration) << "Response came in too late";
         } else if (counter == 1) {
-            EXPECT_LT(0.39, duration) << "Preempted retry triggered too early";
-            EXPECT_GT(0.6, duration) << "Preempted retry triggered too late";
+            EXPECT_LT(wait + 0.39, duration) << "Preempted retry triggered too early";
+            EXPECT_GT(wait + 0.6, duration) << "Preempted retry triggered too late";
         } else if (counter > 1) {
             FAIL() << "Retried too often";
         }
@@ -336,15 +346,19 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusChangePreempt)) {
         EXPECT_FALSE(bool(res.modified));
         EXPECT_FALSE(bool(res.etag));
 
+        wait += connectionTimeout;
+
         if (counter++ == 1) {
             req.reset();
             loop.stop();
         }
     });
 
-    // After 400 milliseconds, we're going to trigger a NetworkStatus change.
+    // After 400 milliseconds + connectionTimeout, we're going to trigger a NetworkStatus change.
     util::Timer reachableTimer;
-    reachableTimer.start(Milliseconds(400), Duration::zero(), []() { mbgl::NetworkStatus::Reachable(); });
+    reachableTimer.start(Milliseconds(static_cast<int>(connectionTimeout * 1000) + 400), Duration::zero(), []() {
+        mbgl::NetworkStatus::Reachable();
+    });
 
     fs->resume();
     loop.run();
@@ -385,7 +399,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RateLimitStandard)) {
         ASSERT_NE(nullptr, res.error);
         EXPECT_EQ(Response::Error::Reason::RateLimit, res.error->reason);
         ASSERT_EQ(true, bool(res.error->retryAfter));
-        ASSERT_LT(util::now(), res.error->retryAfter);
+        ASSERT_TRUE(util::now() < res.error->retryAfter);
         loop.stop();
     });
 
@@ -400,7 +414,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RateLimitMBX)) {
         ASSERT_NE(nullptr, res.error);
         EXPECT_EQ(Response::Error::Reason::RateLimit, res.error->reason);
         ASSERT_EQ(true, bool(res.error->retryAfter));
-        ASSERT_LT(util::now(), res.error->retryAfter);
+        ASSERT_TRUE(util::now() < res.error->retryAfter);
         loop.stop();
     });
 

@@ -422,9 +422,26 @@ public class SymbolLayerTest extends BaseLayerTest {
     assertNull(layer.getIconPadding().getValue());
 
     // Set and Get
-    Float propertyValue = 0.3f;
+    Float[] propertyValue = {2.0f, 2.0f, 2.0f, 2.0f};
     layer.setProperties(iconPadding(propertyValue));
     assertEquals(layer.getIconPadding().getValue(), propertyValue);
+    // Single number value can be used too for backward compatibility
+    Float number = propertyValue[0] + 1.0f;
+    layer.setProperties(iconPadding(number));
+    assertEquals(layer.getIconPadding().getValue(), new Float[]{number, number, number, number});
+  }
+
+  @Test
+  @UiThreadTest
+  public void testIconPaddingAsExpression() {
+    Timber.i("icon-padding-expression");
+    assertNotNull(layer);
+    assertNull(layer.getIconPadding().getExpression());
+
+    // Set and Get
+    Expression expression = toPadding(Expression.get("undefined"));
+    layer.setProperties(iconPadding(expression));
+    assertEquals(layer.getIconPadding().getExpression(), expression);
   }
 
   @Test
@@ -707,6 +724,19 @@ public class SymbolLayerTest extends BaseLayerTest {
 
   @Test
   @UiThreadTest
+  public void testTextVariableAnchorOffsetAsConstant() {
+    Timber.i("text-variable-anchor-offset");
+    assertNotNull(layer);
+    assertNull(layer.getTextVariableAnchorOffset().getValue());
+
+    // Set and Get
+    Object[] propertyValue = new Object[] {"top", new Float[]{1f, 2f}};
+    layer.setProperties(textVariableAnchorOffset(propertyValue));
+    assertEquals(layer.getTextVariableAnchorOffset().getValue(), propertyValue);
+  }
+
+  @Test
+  @UiThreadTest
   public void testTextAnchorAsConstant() {
     Timber.i("text-anchor");
     assertNotNull(layer);
@@ -885,6 +915,19 @@ public class SymbolLayerTest extends BaseLayerTest {
     Boolean propertyValue = true;
     layer.setProperties(textOptional(propertyValue));
     assertEquals(layer.getTextOptional().getValue(), propertyValue);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testSymbolScreenSpaceAsConstant() {
+    Timber.i("symbol-screen-space");
+    assertNotNull(layer);
+    assertNull(layer.getSymbolScreenSpace().getValue());
+
+    // Set and Get
+    Boolean propertyValue = true;
+    layer.setProperties(symbolScreenSpace(propertyValue));
+    assertEquals(layer.getSymbolScreenSpace().getValue(), propertyValue);
   }
 
   @Test

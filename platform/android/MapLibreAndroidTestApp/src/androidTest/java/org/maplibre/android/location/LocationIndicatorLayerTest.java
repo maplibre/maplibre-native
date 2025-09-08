@@ -141,6 +141,18 @@ public class LocationIndicatorLayerTest extends BaseLayerTest {
 
   @Test
   @UiThreadTest
+  public void testBearingTransition() {
+    Timber.i("bearingTransitionOptions");
+    assertNotNull(layer);
+
+    // Set and Get
+    TransitionOptions options = new TransitionOptions(300, 100);
+    layer.setBearingTransition(options);
+    assertEquals(layer.getBearingTransition(), options);
+  }
+
+  @Test
+  @UiThreadTest
   public void testBearingAsConstant() {
     Timber.i("bearing");
     assertNotNull(layer);

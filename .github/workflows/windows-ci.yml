@@ -1,0 +1,394 @@
+name: windows-ci
+
+on:
+  workflow_dispatch:
+  # temporarily disabled
+  # https://github.com/maplibre/maplibre-native/issues/3670
+  # push:
+  #   branches:
+  #     - main
+  #     - windows-*.*.x
+  #   tags:
+  #     - windows-*
+
+  # pull_request:
+  #   branches:
+  #     - '*'
+
+env:
+  SCCACHE_GHA_ENABLED: "true"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # INFO: We are cancelling the concurrency group if the change is on PR. For workflow dispatch, this will not work.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  actions: read           # needed for CodeQL
+  contents: read          # needed for CodeQL
+  security-events: write  # needed for CodeQL
+
+jobs:
+  pre-job:
+    runs-on: windows-2022
+    outputs:
+      should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.windows_any_modified != 'true' }}
+    steps:
+      - run: |
+          git config --system core.longpaths true
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Get all Windows files that have changed
+        if: github.event_name != 'workflow_dispatch'
+        id: changed-files
+        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46
+        with:
+          files_yaml_from_source_file: .github/changed-files.yml
+
+      - name: List changed files
+        if: steps.changed-files.outputs.windows_any_modified == 'true'
+        run: |
+          Write-Host "Changed file(s): ${{ steps.changed-files.outputs.windows_all_changed_files }}"
+
+  windows-get-or-build-dependencies:
+    if: needs.pre-job.outputs.should_skip != 'true'
+    needs: pre-job
+    runs-on: windows-2022
+    steps:
+      - run: |
+          git config --system core.longpaths true
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+        with:
+          sparse-checkout: |
+            platform/windows/vendor
+            platform/windows/Get-VendorPackages.ps1
+
+      - name: Get vcpkg commit id
+        run: |
+          $vcpkg_commit_id = (Invoke-WebRequest ${{ github.api_url }}/repos/${{ github.repository }}/contents/platform/windows/vendor/vcpkg?ref=${{ github.ref }} -Headers @{ Authorization = ('Bearer {0}' -f '${{ secrets.GITHUB_TOKEN }}') } | ConvertFrom-Json).sha
+          Add-Content -Path $env:GITHUB_ENV -Value "VCPKG_COMMIT_ID=${vcpkg_commit_id}"
+
+      - name: Restore vcpkg binary cache
+        id: vcpkg-cache
+        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+        with:
+          path: ${{ github.workspace }}\platform\windows\vendor\vcpkg\archives
+          key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
+          lookup-only: true
+
+      - name: Initialize vcpkg submodule
+        if: steps.vcpkg-cache.outputs.cache-hit != 'true'
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --force --depth=1 --recursive platform/windows/vendor/vcpkg
+
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
+        if: steps.vcpkg-cache.outputs.cache-hit != 'true'
+
+      - name: Acquire/Build Maplibre Native Core Dependencies
+        if: steps.vcpkg-cache.outputs.cache-hit != 'true'
+        env:
+          CI: 1,
+          VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}\\platform\\windows\\vendor\\vcpkg\\archives,readwrite"
+        timeout-minutes: 60
+        run: |
+          & ${{ github.workspace }}\platform\windows\Get-VendorPackages.ps1 -Triplet ${{ env.VSCMD_ARG_TGT_ARCH }}-windows -Renderer All -With-ICU
+
+      - name: Save vcpkg binary cache
+        if: steps.vcpkg-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+        with:
+          path: ${{ github.workspace }}\platform\windows\vendor\vcpkg\archives
+          key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
+
+
+  windows-build-and-test-msvc:
+    needs: windows-get-or-build-dependencies
+    strategy:
+      matrix:
+        renderer: [opengl, egl, vulkan]
+    runs-on: windows-2022
+    steps:
+      - run: |
+          git config --system core.longpaths true
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+        with:
+          submodules: recursive
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@f1f6e5f6af878fb37288ce1c627459e94dbf7d01 # v3
+        with:
+          languages: cpp
+
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
+
+      - uses: mozilla-actions/sccache-action@7d986dd989559c6ecdb630a3fd2557667be217ad # v0.0.9
+
+      - name: Initialize sccache
+        run: |
+          & $env:SCCACHE_PATH --start-server
+          & $env:SCCACHE_PATH --zero-stats
+
+      - name: Get vcpkg commit id
+        run: |
+          $vcpkg_commit_id = ($(git submodule status .\platform\windows\vendor\vcpkg).Trim() -split ' ')[0]
+          Add-Content -Path $env:GITHUB_ENV -Value "VCPKG_COMMIT_ID=${vcpkg_commit_id}"
+
+      - name: Restore vcpkg binary cache
+        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+        with:
+          path: ${{ github.workspace }}\platform\windows\vendor\vcpkg\archives
+          key: vcpkg-${{ env.VCPKG_COMMIT_ID }}
+
+      - name: Configure MapLibre Native Core
+        env:
+          CI: 1
+          VCPKG_INSTALL_OPTIONS: "--debug"
+          VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}\\platform\\windows\\vendor\\vcpkg\\archives,readwrite"
+          CMAKE_C_COMPILER_LAUNCHER: "${{ env.SCCACHE_PATH }}"
+          CMAKE_CXX_COMPILER_LAUNCHER: "${{ env.SCCACHE_PATH }}"
+        timeout-minutes: 60
+        run: |
+          cmake --version
+          cmake --preset windows-${{ matrix.renderer }} -DCMAKE_POLICY_DEFAULT_CMP0141=NEW -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded -DCMAKE_BUILD_TYPE=RelWithDebInfo
+
+      - name: Build MapLibre Native Core
+        run: |
+          cmake --build build-windows-${{ matrix.renderer }} --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
+
+      # CodeQL
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@f1f6e5f6af878fb37288ce1c627459e94dbf7d01 # v3
+        with:
+          category: "/language:cpp"
+
+      - name: Download Mesa3D
+        run: |
+          (Invoke-WebRequest https://api.github.com/repos/pal1000/mesa-dist-win/releases -Headers @{ Authorization = ('Bearer {0}' -f '${{ secrets.GITHUB_TOKEN }}') } | ConvertFrom-Json)[0].assets | Where-Object name -match 'mesa3d-.+-release-msvc\.7z' | foreach { Invoke-WebRequest $_.browser_download_url -OutFile mesa3d.7z }
+
+      - name: Extract Mesa3D files for OpenGL
+        if: matrix.renderer != 'vulkan'
+        run: |
+          & 'C:\Program Files\7-Zip\7z.exe' e -obuild-windows-${{ matrix.renderer }} .\mesa3d.7z x64\libgallium_wgl.dll x64\libGLESv2.dll
+
+      - name: Extract Mesa3D files for Vulkan
+        if: matrix.renderer == 'vulkan'
+        run: |
+          & 'C:\Program Files\7-Zip\7z.exe' e -obuild-windows-${{ matrix.renderer }} .\mesa3d.7z x64\lvp_icd.x86_64.json x64\vulkan_lvp.dll
+
+      # unit tests
+
+      - name: Configure Mesa3D drivers (OpenGL)
+        if: matrix.renderer != 'vulkan'
+        run: |
+          reg add 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\OpenGLDrivers\MSOGL' /v DLL /t REG_SZ /d ('{0}\build-windows-${{ matrix.renderer }}\libgallium_wgl.dll' -f $PWD.Path) /f
+          reg add 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\OpenGLDrivers\MSOGL' /v DriverVersion /t REG_DWORD /d 1 /f
+          reg add 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\OpenGLDrivers\MSOGL' /v Flags /t REG_DWORD /d 1 /f
+          reg add 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\OpenGLDrivers\MSOGL' /v Version /t REG_DWORD /d 2 /f
+          Add-Content -Path $env:GITHUB_ENV -Value 'GALLIUM_DRIVER=llvmpipe'
+
+      - name: Configure Mesa3D drivers (Vulkan)
+        if: matrix.renderer == 'vulkan'
+        run: |
+          reg add 'HKLM\Software\Khronos\Vulkan\Drivers' /f /v '${{ github.workspace }}\build-windows-${{ matrix.renderer }}\lvp_icd.x86_64.json' /t REG_DWORD /d 0
+
+      - name: Download and configure Vulkan
+        if: matrix.renderer == 'vulkan'
+        run: |
+          # 1.4.313.1 doesn't have runtime components?
+          # $version = (Invoke-WebRequest -Uri "https://vulkan.lunarg.com/sdk/latest.json" | ConvertFrom-Json).windows
+          $version = '1.4.313.0'
+          Invoke-WebRequest https://sdk.lunarg.com/sdk/download/$version/windows/VulkanRT-X64-$version-Components.zip -OutFile VulkanRT.zip
+          & 'C:\Program Files\7-Zip\7z.exe' e -obuild-windows-${{ matrix.renderer }} -r .\VulkanRT.zip *x64\vulkan-1.*
+
+      - name: Run C++ tests
+        continue-on-error: ${{ matrix.renderer == 'vulkan' }}
+        env:
+          ANGLE_DEFAULT_PLATFORM: 'gl'
+          GALLIUM_DRIVER: llvmpipe
+          LIBGL_ALWAYS_SOFTWARE: true
+        run: build-windows-${{ matrix.renderer }}/mbgl-test-runner.exe
+
+      # render tests
+
+      - name: Run render test
+        id: render_test
+        env:
+          manifest_file: ${{ matrix.renderer }}
+          ANGLE_DEFAULT_PLATFORM: 'gl'
+          GALLIUM_DRIVER: llvmpipe
+          LIBGL_ALWAYS_SOFTWARE: true
+        run: build-windows-${{ matrix.renderer }}/mbgl-render-test-runner.exe "--manifestPath=metrics/windows-${env:manifest_file}.json"
+
+      - name: Upload render test result
+        if: always() && steps.render_test.outcome == 'failure'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: render-test-result-${{ matrix.renderer }}
+          path: |
+            metrics/windows-${{ matrix.renderer }}.html
+
+      # expression tests
+
+      - name: Run expression test
+        run: build-windows-${{ matrix.renderer }}/expression-test/mbgl-expression-test.exe
+
+  windows-build-and-test-msys2:
+    if: needs.pre-job.outputs.should_skip != 'true'
+    needs: pre-job
+    strategy:
+      matrix:
+        msystem: [clang64, mingw64, ucrt64]
+        renderer: [opengl, egl, vulkan]
+    runs-on: windows-2022
+    steps:
+      - run: |
+          git config --system core.longpaths true
+          git config --system core.autocrlf input
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+        with:
+          submodules: recursive
+
+      - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2
+        with:
+          msystem: ${{ matrix.msystem }}
+          update: true
+          pacboy: >-
+            toolchain:p
+            clang:p
+            cmake:p
+            angleproject:p
+            curl-winssl:p
+            dlfcn:p
+            glfw:p
+            icu:p
+            libjpeg-turbo:p
+            libpng:p
+            libwebp:p
+            libuv:p
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@f1f6e5f6af878fb37288ce1c627459e94dbf7d01 # v3
+        with:
+          languages: cpp
+
+      - uses: mozilla-actions/sccache-action@7d986dd989559c6ecdb630a3fd2557667be217ad # v0.0.9
+
+      - name: Initialize sccache
+        run: |
+          & $env:SCCACHE_PATH --start-server
+          & $env:SCCACHE_PATH --zero-stats
+
+      - name: Configure MapLibre Native Core
+        env:
+          CI: 1
+          CMAKE_C_COMPILER_LAUNCHER: "${{ env.SCCACHE_PATH }}"
+          CMAKE_CXX_COMPILER_LAUNCHER: "${{ env.SCCACHE_PATH }}"
+        shell: msys2 {0}
+        run: |
+          cmake --version
+          cmake --preset windows-${{ matrix.renderer }} -DCMAKE_POLICY_DEFAULT_CMP0141=NEW -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+
+      - name: Build MapLibre Native Core
+        shell: msys2 {0}
+        run: |
+          cmake --build build-windows-${{ matrix.renderer }} --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
+
+      # CodeQL
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@f1f6e5f6af878fb37288ce1c627459e94dbf7d01 # v3
+        with:
+          category: "/language:cpp"
+
+      - name: Download Mesa3D
+        run: |
+          (Invoke-WebRequest https://api.github.com/repos/pal1000/mesa-dist-win/releases -Headers @{ Authorization = ('Bearer {0}' -f '${{ secrets.GITHUB_TOKEN }}') } | ConvertFrom-Json)[0].assets | Where-Object name -match 'mesa3d-.+-release-msvc\.7z' | foreach { Invoke-WebRequest $_.browser_download_url -OutFile mesa3d.7z }
+
+      - name: Extract Mesa3D files for OpenGL
+        if: matrix.renderer != 'vulkan'
+        run: |
+          & 'C:\Program Files\7-Zip\7z.exe' e -obuild-windows-${{ matrix.renderer }} .\mesa3d.7z x64\libgallium_wgl.dll x64\libGLESv2.dll
+
+      - name: Extract Mesa3D files for Vulkan
+        if: matrix.renderer == 'vulkan'
+        run: |
+          & 'C:\Program Files\7-Zip\7z.exe' e -obuild-windows-${{ matrix.renderer }} .\mesa3d.7z x64\lvp_icd.x86_64.json x64\vulkan_lvp.dll
+
+      # unit tests
+
+      - name: Configure Mesa3D drivers (OpenGL)
+        if: matrix.renderer != 'vulkan'
+        run: |
+          reg add 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\OpenGLDrivers\MSOGL' /v DLL /t REG_SZ /d ('{0}\build-windows-${{ matrix.renderer }}\libgallium_wgl.dll' -f $PWD.Path) /f
+          reg add 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\OpenGLDrivers\MSOGL' /v DriverVersion /t REG_DWORD /d 1 /f
+          reg add 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\OpenGLDrivers\MSOGL' /v Flags /t REG_DWORD /d 1 /f
+          reg add 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\OpenGLDrivers\MSOGL' /v Version /t REG_DWORD /d 2 /f
+          Add-Content -Path $env:GITHUB_ENV -Value 'GALLIUM_DRIVER=llvmpipe'
+
+      - name: Configure Mesa3D drivers (Vulkan)
+        if: matrix.renderer == 'vulkan'
+        run: |
+          reg add 'HKLM\Software\Khronos\Vulkan\Drivers' /f /v '${{ github.workspace }}\build-windows-${{ matrix.renderer }}\lvp_icd.x86_64.json' /t REG_DWORD /d 0
+
+      - name: Download and configure Vulkan
+        if: matrix.renderer == 'vulkan'
+        run: |
+          # 1.4.313.1 doesn't have runtime components?
+          # $version = (Invoke-WebRequest -Uri "https://vulkan.lunarg.com/sdk/latest.json" | ConvertFrom-Json).windows
+          $version = '1.4.313.0'
+          Invoke-WebRequest https://sdk.lunarg.com/sdk/download/$version/windows/VulkanRT-X64-$version-Components.zip -OutFile VulkanRT.zip
+          & 'C:\Program Files\7-Zip\7z.exe' e -obuild-windows-${{ matrix.renderer }} -r .\VulkanRT.zip *x64\vulkan-1.*
+
+      - name: Run C++ tests
+        continue-on-error: ${{ matrix.renderer == 'vulkan' }}
+        env:
+          ANGLE_DEFAULT_PLATFORM: 'gl'
+          GALLIUM_DRIVER: llvmpipe
+          LIBGL_ALWAYS_SOFTWARE: true
+        run: build-windows-${{ matrix.renderer }}/mbgl-test-runner.exe
+
+      # render tests
+
+      - name: Run render test
+        id: render_test
+        env:
+          manifest_file: ${{ matrix.renderer }}
+          ANGLE_DEFAULT_PLATFORM: 'gl'
+          GALLIUM_DRIVER: llvmpipe
+          LIBGL_ALWAYS_SOFTWARE: true
+        run: build-windows-${{ matrix.renderer }}/mbgl-render-test-runner.exe "--manifestPath=metrics/windows-${env:manifest_file}.json"
+
+      - name: Upload render test result
+        if: always() && steps.render_test.outcome == 'failure'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: render-test-result-${{ matrix.renderer }}
+          path: |
+            metrics/windows-${{ matrix.renderer }}.html
+
+      # expression tests
+
+      - name: Run expression test
+        run: build-windows-${{ matrix.renderer }}/expression-test/mbgl-expression-test.exe
+
+  windows-ci-result:
+    name: Windows CI Result
+    if: needs.pre-job.outputs.should_skip != 'true' && always()
+    runs-on: windows-2022
+    needs:
+      - pre-job
+      - windows-build-and-test-msvc
+      - windows-build-and-test-msys2
+    steps:
+      - name: Mark result as failed
+        if: needs.windows-build-and-test-msvc.result != 'success' || needs.windows-build-and-test-msys2.result != 'success'
+        run: exit 1

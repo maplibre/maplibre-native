@@ -62,7 +62,7 @@ typedef NS_ENUM(NSInteger, MLNErrorCode) {
   MLNErrorCodeRenderingError = 11,
 };
 
-/** Options for enabling debugging features in an `MLNMapView` instance. */
+/** Options for enabling debugging features in an ``MLNMapView`` instance. */
 typedef NS_OPTIONS(NSUInteger, MLNMapDebugMaskOptions) {
   /** Edges of tile boundaries are shown as thick, red lines to help diagnose
       tile clipping issues. */
@@ -76,14 +76,14 @@ typedef NS_OPTIONS(NSUInteger, MLNMapDebugMaskOptions) {
   MLNMapDebugCollisionBoxesMask = 1 << 4,
   /** Each drawing operation is replaced by a translucent fill. Overlapping
       drawing operations appear more prominent to help diagnose overdrawing.
-      @note This option does nothing in Release builds of the SDK. */
+      > Note: This option does nothing in Release builds of the SDK. */
   MLNMapDebugOverdrawVisualizationMask = 1 << 5,
 #if !TARGET_OS_IPHONE
   /** The stencil buffer is shown instead of the color buffer.
-      @note This option does nothing in Release builds of the SDK. */
+      > Note: This option does nothing in Release builds of the SDK. */
   MLNMapDebugStencilBufferMask = 1 << 6,
   /** The depth buffer is shown instead of the color buffer.
-      @note This option does nothing in Release builds of the SDK. */
+      > Note: This option does nothing in Release builds of the SDK. */
   MLNMapDebugDepthBufferMask = 1 << 7,
 #endif
 };
@@ -109,14 +109,14 @@ NS_INLINE NSString *MLNStringFromMLNTransition(MLNTransition transition) {
 }
 
 /**
- Creates a new `MLNTransition` from the given duration and delay.
+ Creates a new ``MLNTransition`` from the given duration and delay.
 
  @param duration The amount of time the animation should take, not including
  the delay.
  @param delay The amount of time in seconds to wait before beginning the
  animation.
 
- @return Returns a `MLNTransition` struct containing the transition attributes.
+ @return Returns a ``MLNTransition`` struct containing the transition attributes.
  */
 NS_INLINE MLNTransition MLNTransitionMake(NSTimeInterval duration, NSTimeInterval delay) {
   MLNTransition transition;

@@ -13,7 +13,6 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
@@ -27,7 +26,6 @@ import org.maplibre.android.utils.BitmapUtils
 import timber.log.Timber
 import java.net.URI
 import java.net.URISyntaxException
-import java.util.Objects
 
 /**
  * Test activity showcasing using a geojson source and visualise that source as a cluster by using filters.
@@ -45,68 +43,68 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         // noinspection ConstantConditions
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(
-            OnMapReadyCallback { map: MapLibreMap? ->
-                if (map != null) {
-                    maplibreMap = map
-                }
-                maplibreMap.animateCamera(
-                    CameraUpdateFactory.newLatLngZoom(
-                        LatLng(37.7749, 122.4194),
-                        0.0
+        mapView.getMapAsync {
+            maplibreMap = it
+            maplibreMap.animateCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(37.7749, 122.4194),
+                    0.0
+                )
+            )
+            val clusterLayers = arrayOf(
+                intArrayOf(
+                    150,
+                    ResourcesCompat.getColor(
+                        resources,
+                        R.color.redAccent,
+                        theme
+                    )
+                ),
+                intArrayOf(20, ResourcesCompat.getColor(resources, R.color.greenAccent, theme)),
+                intArrayOf(
+                    0,
+                    ResourcesCompat.getColor(
+                        resources,
+                        R.color.blueAccent,
+                        theme
                     )
                 )
-                val clusterLayers = arrayOf(
-                    intArrayOf(
-                        150,
-                        ResourcesCompat.getColor(
-                            resources,
-                            R.color.redAccent,
-                            theme
+            )
+            try {
+                maplibreMap.setStyle(
+                    Style.Builder()
+                        .fromUri(TestStyles.getPredefinedStyleWithFallback("Bright"))
+                        .withSource(createClusterSource().also { clusterSource = it })
+                        .withLayer(createSymbolLayer())
+                        .withLayer(createClusterLevelLayer(0, clusterLayers))
+                        .withLayer(createClusterLevelLayer(1, clusterLayers))
+                        .withLayer(createClusterLevelLayer(2, clusterLayers))
+                        .withLayer(createClusterTextLayer())
+                        .withImage(
+                            "icon-id",
+                            BitmapUtils.getBitmapFromDrawable(
+                                ResourcesCompat.getDrawable(
+                                    resources,
+                                    R.drawable.ic_hearing_black_24dp,
+                                    theme
+                                )
+                            )!!,
+                            true
                         )
-                    ),
-                    intArrayOf(20, ResourcesCompat.getColor(resources, R.color.greenAccent, theme)),
-                    intArrayOf(
-                        0,
-                        ResourcesCompat.getColor(
-                            resources,
-                            R.color.blueAccent,
-                            theme
-                        )
-                    )
                 )
-                try {
-                    maplibreMap.setStyle(
-                        Style.Builder()
-                            .fromUri(TestStyles.getPredefinedStyleWithFallback("Bright"))
-                            .withSource(createClusterSource().also { clusterSource = it })
-                            .withLayer(createSymbolLayer())
-                            .withLayer(createClusterLevelLayer(0, clusterLayers))
-                            .withLayer(createClusterLevelLayer(1, clusterLayers))
-                            .withLayer(createClusterLevelLayer(2, clusterLayers))
-                            .withLayer(createClusterTextLayer())
-                            .withImage(
-                                "icon-id",
-                                Objects.requireNonNull(
-                                    BitmapUtils.getBitmapFromDrawable(ResourcesCompat.getDrawable(resources, R.drawable.ic_hearing_black_24dp, null))
-                                )!!,
-                                true
-                            )
-                    )
-                } catch (exception: URISyntaxException) {
-                    Timber.e(exception)
-                }
-                maplibreMap.addOnMapClickListener { latLng: LatLng? ->
-                    val point = maplibreMap.projection.toScreenLocation(latLng!!)
-                    val features =
-                        maplibreMap.queryRenderedFeatures(point, "cluster-0", "cluster-1", "cluster-2")
-                    if (!features.isEmpty()) {
-                        onClusterClick(features[0], Point(point.x.toInt(), point.y.toInt()))
-                    }
-                    true
-                }
+            } catch (exception: URISyntaxException) {
+                Timber.e(exception)
             }
-        )
+            maplibreMap.addOnMapClickListener { latLng: LatLng? ->
+                val point = maplibreMap.projection.toScreenLocation(latLng!!)
+                val features =
+                    maplibreMap.queryRenderedFeatures(point, "cluster-0", "cluster-1", "cluster-2")
+                if (!features.isEmpty()) {
+                    onClusterClick(features[0], Point(point.x.toInt(), point.y.toInt()))
+                }
+                true
+            }
+        }
         findViewById<View>(R.id.fab).setOnClickListener { v: View? ->
             updateClickOptionCounter()
             notifyClickOptionUpdate()
@@ -141,6 +139,7 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
                 .withCluster(true)
                 .withClusterMaxZoom(14)
                 .withClusterRadius(50)
+                .withClusterMinPoints(3)
                 .withClusterProperty(
                     "max",
                     Expression.max(Expression.accumulated(), Expression.get("max")),
@@ -224,7 +223,8 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
                 PropertyFactory.textSize(12f),
                 PropertyFactory.textColor(Color.WHITE),
                 PropertyFactory.textIgnorePlacement(true),
-                PropertyFactory.textAllowOverlap(true)
+                PropertyFactory.textAllowOverlap(true),
+                PropertyFactory.textFont(arrayOf("Noto Sans Regular"))
             )
     }
 
@@ -266,7 +266,7 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
-                onBackPressed()
+                onBackPressedDispatcher.onBackPressed()
                 true
             }
 

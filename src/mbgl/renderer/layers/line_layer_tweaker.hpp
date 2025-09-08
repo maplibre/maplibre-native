@@ -60,6 +60,11 @@ private:
 protected:
     gfx::UniformBufferPtr evaluatedPropsUniformBuffer;
 
+#if MLN_UBO_CONSOLIDATION
+    gfx::UniformBufferPtr drawableUniformBuffer;
+    gfx::UniformBufferPtr tilePropsUniformBuffer;
+#endif
+
 #if MLN_RENDER_BACKEND_METAL
     gfx::UniformBufferPtr expressionUniformBuffer;
     Unevaluated::GPUExpressions gpuExpressions;

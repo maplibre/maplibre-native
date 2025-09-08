@@ -25,17 +25,17 @@ public:
     BenchMapObserver() = delete;
     BenchMapObserver(id<BenchMapDelegate> mapDelegate_) : mapDelegate(mapDelegate_) {}
     virtual ~BenchMapObserver() = default;
-    
-    void onDidFinishRenderingFrame(RenderFrameStatus status) override final {
-        //NSLog(@"Frame encoding time: %4.1f ms", status.frameEncodingTime * 1e3);
-        //NSLog(@"Frame rendering time: %4.1f ms", status.frameRenderingTime * 1e3);
-        
+
+    void onDidFinishRenderingFrame(const RenderFrameStatus& status) override final {
+        //NSLog(@"Frame encoding time: %4.1f ms", status.renderingStats.encodingTime * 1e3);
+        //NSLog(@"Frame rendering time: %4.1f ms", status.renderingStats.renderingTime * 1e3);
+
         bool fullyRendered = status.mode == mbgl::MapObserver::RenderMode::Full;
         [mapDelegate mapDidFinishRenderingFrameFullyRendered:fullyRendered
-                                           frameEncodingTime:status.frameEncodingTime
-                                          frameRenderingTime:status.frameRenderingTime];
+                                           frameEncodingTime:status.renderingStats.encodingTime
+                                          frameRenderingTime:status.renderingStats.renderingTime];
     }
-    
+
 protected:
     __weak id<BenchMapDelegate> mapDelegate = nullptr;
 };
@@ -74,11 +74,11 @@ protected:
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    
+
     #ifdef LOG_TO_DOCUMENTS_DIR
     [self setAndRedirectLogFileToDocuments];
     #endif
-    
+
     // Use a local style and local assets if they’ve been downloaded.
     NSURL *tile = [[NSBundle mainBundle] URLForResource:@"11" withExtension:@"pbf" subdirectory:@"tiles/tiles/v3/5/7"];
     NSURL *tileSourceURL = [[NSBundle mainBundle] URLForResource:@"openmaptiles" withExtension:@"json" subdirectory:@"tiles"];
@@ -92,11 +92,11 @@ protected:
     self.imageView = [[UIImageView alloc] initWithFrame:self.view.bounds];
     self.imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self.view addSubview:self.imageView];
-    
+
     mbgl::Size viewSize = { static_cast<uint32_t>(self.view.bounds.size.width),
                             static_cast<uint32_t>(self.view.bounds.size.height) };
     auto pixelRatio = [[UIScreen mainScreen] scale];
-    
+
     observer = std::make_unique<BenchMapObserver>(self);
     frontend = std::make_unique<mbgl::HeadlessFrontend>(
         viewSize,
@@ -106,7 +106,7 @@ protected:
         /* localFontFamily */ std::nullopt,
         /* invalidateOnUpdate */ false
     );
-    
+
     mbgl::MapOptions mapOptions;
     mapOptions.withMapMode(mbgl::MapMode::Continuous)
               .withSize(viewSize)
@@ -114,24 +114,24 @@ protected:
               .withConstrainMode(mbgl::ConstrainMode::None)
               .withViewportMode(mbgl::ViewportMode::Default)
               .withCrossSourceCollisions(true);
-    
+
     mbgl::TileServerOptions* tileServerOptions = [[MLNSettings sharedSettings] tileServerOptionsInternal];
     mbgl::ResourceOptions resourceOptions;
     resourceOptions.withCachePath(MLNOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
                    .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String)
                    .withTileServerOptions(*tileServerOptions);
     mbgl::ClientOptions clientOptions;
-    
+
     auto apiKey = [[MLNSettings sharedSettings] apiKey];
     if (apiKey) {
         resourceOptions.withApiKey([apiKey UTF8String]);
     }
-    
+
     map = std::make_unique<mbgl::Map>(*frontend, *observer, mapOptions, resourceOptions, clientOptions);
     map->setSize(viewSize);
     map->setDebug(mbgl::MapDebugOptions::NoDebug);
     map->getStyle().loadURL([url.absoluteString UTF8String]);
-    
+
     [self startBenchmarkIteration];
 }
 
@@ -155,7 +155,7 @@ NSDate* const currentDate = [NSDate date];
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
     [formatter setDateFormat:@"yyyy-MM-dd-HHmm"];
     NSString *dateString = [formatter stringFromDate:currentDate];
-    
+
     // Set the log file name
     NSString* filename = [NSString stringWithFormat: @"MapLibre-bench-%@-%@-%@.log", name, DeviceMode, dateString];
 
@@ -192,11 +192,11 @@ namespace  mbgl {
 - (void)renderFrame
 {
     mbgl::gfx::BackendScope guard{*(frontend->getBackend())};
-    
+
     frontend->renderFrame();
-    
+
     auto image = frontend->readStillImage();
-    
+
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     CGContextRef bitmapContext = CGBitmapContextCreate(
        image.data.get(),
@@ -205,12 +205,12 @@ namespace  mbgl {
        8,
        4 * image.size.width,
        colorSpace,
-       kCGImageAlphaPremultipliedLast | kCGBitmapByteOrderDefault
+       kCGImageAlphaPremultipliedLast
     );
     CFRelease(colorSpace);
     CGImageRef cgImage = CGBitmapContextCreateImage(bitmapContext);
     CGContextRelease(bitmapContext);
-    
+
     self.imageView.image = [UIImage imageWithCGImage:cgImage];
     CGImageRelease(cgImage);
 }
@@ -219,7 +219,7 @@ namespace  mbgl {
 {
     if (mbgl::bench::locations.size() > idx) {
         const auto& location = mbgl::bench::locations[idx];
-        
+
         mbgl::CameraOptions cameraOptions;
         cameraOptions.center = mbgl::LatLng(location.latitude, location.longitude);
         cameraOptions.zoom = location.zoom;
@@ -227,24 +227,24 @@ namespace  mbgl {
         mbgl::AnimationOptions animationOptions;
         animationOptions.duration.emplace(std::chrono::duration_cast<mbgl::Duration>(std::chrono::duration<NSTimeInterval>(benchmarkDuration)));
         map->easeTo(cameraOptions, animationOptions);
-        
+
         state = State::WaitingForAssets;
         NSLog(@"Benchmarking \"%s\"", location.name.c_str());
         NSLog(@"- Loading assets...");
-        
+
         dispatch_async(dispatch_get_main_queue(), ^{
             [self renderFrame];
         });
     } else {
         // Do nothing. The benchmark is completed.
         NSLog(@"Benchmark completed.");
-        
+
         NSLog(@"Result:");
         size_t colWidth = 0;
         for (const auto& row : result) {
             colWidth = std::max(row.first.size(), colWidth);
         }
-        
+
         double totalFrameEncodingTime = 0;
         double totalFrameRenderingTime = 0;
         for (const auto& row : result) {
@@ -294,7 +294,7 @@ namespace  mbgl {
         frames++;
         totalFrameEncodingTime += frameEncodingTime;
         totalFrameRenderingTime += frameRenderingTime;
-        
+
         const auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - started).count();
         if (duration >= benchmarkDuration * 1e6)
         {

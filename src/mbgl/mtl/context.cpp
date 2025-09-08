@@ -13,12 +13,12 @@
 #include <mbgl/mtl/uniform_buffer.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
 #include <mbgl/mtl/vertex_buffer_resource.hpp>
-#include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_target.hpp>
 #include <mbgl/shaders/mtl/clipping_mask.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>
@@ -87,7 +87,8 @@ BufferResource Context::createBuffer(
 // `NS::Object::sendMessage`, and the alignment rules are different.  We assume that, because
 // `NS::Object` does not use virtual methods and only serves as a way for C++ code to store
 // and pass ObjC `id`s to `objc_msgSend`, this won't cause any real problems.
-UniqueShaderProgram Context::createProgram(std::string name,
+UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
+                                           std::string name,
                                            const std::string_view source,
                                            const std::string_view vertexName,
                                            const std::string_view fragmentName,
@@ -99,16 +100,20 @@ UniqueShaderProgram Context::createProgram(std::string name,
     const auto& programDefines = programParameters.getDefines();
     const auto numDefines = programDefines.size() + additionalDefines.size();
 
+    std::string defineStr;
     std::vector<const NS::Object*> rawDefines;
     rawDefines.reserve(2 * numDefines);
-    const auto addDefine = [&rawDefines](const auto& pair) {
+    const auto addDefine = [&rawDefines, &defineStr](const auto& pair) {
         const auto* nsKey = NS::String::string(pair.first.data(), NS::UTF8StringEncoding);
         const auto* nsVal = NS::String::string(pair.second.data(), NS::UTF8StringEncoding);
         rawDefines.insert(std::next(rawDefines.begin(), rawDefines.size() / 2), nsKey);
         rawDefines.insert(rawDefines.end(), nsVal);
+        defineStr += "#define " + pair.first + " " + pair.second + "\n";
     };
     std::for_each(programDefines.begin(), programDefines.end(), addDefine);
     std::for_each(additionalDefines.begin(), additionalDefines.end(), addDefine);
+
+    observer->onPreCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
 
     const auto nsDefines = NS::Dictionary::dictionary(
         &rawDefines[numDefines], rawDefines.data(), static_cast<NS::UInteger>(numDefines));
@@ -121,11 +126,13 @@ UniqueShaderProgram Context::createProgram(std::string name,
 
     // TODO: Compile common code into a `LibraryTypeDynamic` to be used by other shaders
     // instead of duplicating that code in each and every shader compilation.
-    options->setLibraryType(MTL::LibraryTypeExecutable);
+    // requires a check for iOS 14+
+    // options->setLibraryType(MTL::LibraryTypeExecutable);
 
     // Allows use of the [[invariant]] attribute on position outputs to
     // guarantee that the GPU performs the calculations the same way.
-    options->setPreserveInvariance(true);
+    // requires a check for iOS 14+
+    // options->setPreserveInvariance(true);
 
     // TODO: Allow use of `LibraryOptimizationLevelSize` which "may also reduce compile time"
     // requires a check for iOS 16+
@@ -140,6 +147,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
         const auto errPtr = error ? error->localizedDescription()->utf8String() : nullptr;
         const auto errStr = (errPtr && errPtr[0]) ? ": " + std::string(errPtr) : std::string();
         Log::Error(Event::Shader, name + " compile failed" + errStr);
+        observer->onShaderCompileFailed(shaderID, gfx::Backend::Type::Metal, defineStr);
         assert(false);
         return nullptr;
     }
@@ -148,6 +156,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
     MTLFunctionPtr vertexFunction = NS::TransferPtr(library->newFunction(nsVertName));
     if (!vertexFunction) {
         Log::Error(Event::Shader, name + " missing vertex function " + vertexName.data());
+        observer->onShaderCompileFailed(shaderID, gfx::Backend::Type::Metal, defineStr);
         assert(false);
         return nullptr;
     }
@@ -159,13 +168,17 @@ UniqueShaderProgram Context::createProgram(std::string name,
         fragmentFunction = NS::TransferPtr(library->newFunction(nsFragName));
         if (!fragmentFunction) {
             Log::Error(Event::Shader, name + " missing fragment function " + fragmentName.data());
+            observer->onShaderCompileFailed(shaderID, gfx::Backend::Type::Metal, defineStr);
             assert(false);
             return nullptr;
         }
     }
 
-    return std::make_unique<ShaderProgram>(
+    auto shader = std::make_unique<ShaderProgram>(
         std::move(name), backend, std::move(vertexFunction), std::move(fragmentFunction));
+    observer->onPostCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
+
+    return shader;
 }
 
 MTLTexturePtr Context::createMetalTexture(MTLTextureDescriptorPtr textureDescriptor) const {
@@ -186,9 +199,13 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<DrawableBuilder>(std::move(name));
 }
 
-gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool persistent) {
+gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool persistent, bool /*ssbo*/) {
     return std::make_shared<UniformBuffer>(
         createBuffer(data, size, gfx::BufferUsageType::StaticDraw, /*isIndexBuffer=*/false, persistent));
+}
+
+UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
+    return std::make_unique<UniformBufferArray>();
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
@@ -213,7 +230,7 @@ RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureC
     return std::make_shared<RenderTarget>(*this, size, type);
 }
 
-void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {}
+void Context::resetState(gfx::DepthMode, gfx::ColorMode) {}
 
 bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
                                            const void* data,
@@ -228,17 +245,9 @@ bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
     }
 }
 
-const BufferResource& Context::getEmptyBuffer() {
-    if (!emptyBuffer) {
-        emptyBuffer.emplace(const_cast<Context&>(*this), nullptr, 0, MTL::ResourceStorageModeShared, false, false);
-    }
-    return *emptyBuffer;
-}
-
 const BufferResource& Context::getTileVertexBuffer() {
     if (!tileVertexBuffer) {
         const auto vertices = RenderStaticData::tileVertices();
-        constexpr auto vertexSize = sizeof(decltype(vertices)::Vertex::a1);
         tileVertexBuffer.emplace(createBuffer(vertices.data(),
                                               vertices.bytes(),
                                               gfx::BufferUsageType::StaticDraw,
@@ -361,7 +370,6 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         vertDesc->layouts()->setObject(layoutDesc.get(), ShaderClass::attributes[0].index);
 
         // Create a render pipeline state, telling Metal how to render the primitives
-        const auto& renderPassDescriptor = mtlRenderPass.getDescriptor();
         const std::size_t hash = mbgl::util::hash(ShaderClass::attributes[0].index,
                                                   0,
                                                   MTL::VertexFormatShort2,
@@ -374,7 +382,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         }
     }
     if (clipMaskPipelineState) {
-        encoder->setRenderPipelineState(clipMaskPipelineState.get());
+        mtlRenderPass.setRenderPipelineState(clipMaskPipelineState);
     } else {
         assert(!"Failed to create render pipeline state for clip masking");
         return false;
@@ -400,7 +408,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         uboBuffer->update(tileUBOs.data(), bufferSize, /*offset=*/0);
     }
 
-    encoder->setCullMode(MTL::CullModeNone);
+    mtlRenderPass.setCullMode(MTL::CullModeNone);
 
     mtlRenderPass.bindVertex(vertexRes, /*offset=*/0, ShaderClass::attributes[0].index);
 
@@ -410,7 +418,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     // Adding a `[[depth(...)]]` output to the shader prevents this error, but the stencil value is
     // still not written to the stencil attachment on those same devices.
 #if STENCIL_INSTANCING
-    encoder->setVertexBuffer(uboBuffer.getMetalBuffer().get(), /*offset=*/0, ShaderClass::uniforms[0].index);
+    encoder->setVertexBuffer(uboBuffer.getMetalBuffer().get(), /*offset=*/0, shaders::idClippingMaskUBO);
     encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
                                    indexCount,
                                    MTL::IndexType::IndexTypeUInt16,
@@ -418,10 +426,9 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                    /*indexOffset=*/0,
                                    /*instanceCount=*/static_cast<NS::UInteger>(tileUBOs.size()));
 #else
-    const auto uboIndex = ShaderClass::uniforms[0].index;
     for (std::size_t ii = 0; ii < tileUBOs.size(); ++ii) {
         encoder->setStencilReferenceValue(tileUBOs[ii].stencil_ref);
-        mtlRenderPass.bindVertex(*uboBuffer, /*offset=*/ii * uboSize, uboIndex, /*size=*/uboSize);
+        mtlRenderPass.bindVertex(*uboBuffer, /*offset=*/ii * uboSize, shaders::idClippingMaskUBO, /*size=*/uboSize);
         encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
                                        indexCount,
                                        MTL::IndexType::IndexTypeUInt16,
@@ -449,14 +456,7 @@ std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size
     return createOffscreenTexture(size, type, false, false);
 }
 
-std::unique_ptr<gfx::TextureResource> Context::createTextureResource(Size,
-                                                                     gfx::TexturePixelType,
-                                                                     gfx::TextureChannelDataType) {
-    assert(false);
-    return nullptr;
-}
-
-std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size size) {
+std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size) {
     return std::make_unique<RenderbufferResource>();
 }
 
@@ -472,7 +472,7 @@ gfx::VertexAttributeArrayPtr Context::createVertexAttributeArray() const {
 #if !defined(NDEBUG)
 void Context::visualizeStencilBuffer() {}
 
-void Context::visualizeDepthBuffer(float depthRangeSize) {}
+void Context::visualizeDepthBuffer(float) {}
 #endif // !defined(NDEBUG)
 
 void Context::clearStencilBuffer(int32_t) {
@@ -598,12 +598,12 @@ MTLDepthStencilStatePtr Context::makeDepthStencilState(const gfx::DepthMode& dep
         // `Draw Errors Validation MTLDepthStencilDescriptor sets depth test but MTLRenderPassDescriptor has a nil
         // depthAttachment texture`
         if (auto* depthTarget = rpd->depthAttachment()) {
-            if (auto* tex = depthTarget->texture()) {
+            if (depthTarget->texture()) {
                 applyDepthMode(depthMode, depthStencilDescriptor.get());
             }
         }
         if (auto* stencilTarget = rpd->stencilAttachment()) {
-            if (auto* tex = stencilTarget->texture()) {
+            if (stencilTarget->texture()) {
                 auto stencilDescriptor = NS::TransferPtr(MTL::StencilDescriptor::alloc()->init());
                 if (!stencilDescriptor) {
                     return {};
@@ -621,15 +621,8 @@ MTLDepthStencilStatePtr Context::makeDepthStencilState(const gfx::DepthMode& dep
 }
 
 void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexcept {
-    for (size_t id = 0; id < globalUniformBuffers.allocatedSize(); id++) {
-        const auto& globalUniformBuffer = globalUniformBuffers.get(id);
-        if (!globalUniformBuffer) continue;
-        const auto& buffer = static_cast<UniformBuffer&>(*globalUniformBuffer.get());
-        const auto& resource = buffer.getBufferResource();
-        auto& mtlRenderPass = static_cast<RenderPass&>(renderPass);
-        mtlRenderPass.bindVertex(resource, 0, id);
-        mtlRenderPass.bindFragment(resource, 0, id);
-    }
+    auto& mtlRenderPass = static_cast<mtl::RenderPass&>(renderPass);
+    globalUniformBuffers.bindMtl(mtlRenderPass);
 }
 
 } // namespace mtl

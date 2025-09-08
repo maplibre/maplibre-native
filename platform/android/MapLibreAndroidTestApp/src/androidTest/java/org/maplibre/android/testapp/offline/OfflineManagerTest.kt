@@ -3,6 +3,8 @@ package org.maplibre.android.testapp.offline
 import android.content.Context
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import org.junit.After
@@ -50,6 +52,7 @@ class OfflineManagerTest : AppCenter() {
         latch.await()
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test(timeout = 30_000)
     fun combinedTest() {
 
@@ -59,18 +62,19 @@ class OfflineManagerTest : AppCenter() {
 
         val latch1 = CountDownLatch(1)
         rule.activity.runOnUiThread {
-            FileUtils.CopyFileFromAssetsTask(
-                rule.activity,
-                object : FileUtils.OnFileCopiedFromAssetsListener {
-                    override fun onFileCopiedFromAssets() {
-                        latch1.countDown()
-                    }
-
-                    override fun onError() {
-                        throw IOException("Unable to copy DB file.")
-                    }
-                }
-            ).execute(TEST_DB_FILE_NAME, FileSource.getResourcesCachePath(rule.activity))
+            var copied = false
+            runTest {
+                copied = FileUtils.copyFileFromAssetsTask(
+                    rule.activity,
+                    TEST_DB_FILE_NAME,
+                    FileSource.getResourcesCachePath(rule.activity)
+                )
+            }
+            if (copied) {
+                latch1.countDown()
+            } else {
+                throw IOException("Unable to copy DB file.")
+            }
         }
         latch1.await()
 
@@ -96,7 +100,7 @@ class OfflineManagerTest : AppCenter() {
 
         // List regions (ensure merge yielded one region only)
 
-        val latch3 = CountDownLatch(1)
+        val latch3 = CountDownLatch(2)
         rule.activity.runOnUiThread {
             OfflineManager.getInstance(context).listOfflineRegions(object : OfflineManager.ListOfflineRegionsCallback {
                 override fun onList(offlineRegions: Array<OfflineRegion>?) {
@@ -109,6 +113,29 @@ class OfflineManagerTest : AppCenter() {
                     throw RuntimeException("Unable to list regions in offline database. $error")
                 }
             })
+        }
+
+        val regionID = 1L
+        rule.activity.runOnUiThread {
+            OfflineManager.getInstance(context).getOfflineRegion(
+                regionID,
+                object: OfflineManager.GetOfflineRegionCallback {
+                    override fun onRegion(offlineRegion: OfflineRegion) {
+                        Assert.assertNotNull(offlineRegion)
+                        Assert.assertEquals(regionID, offlineRegion!!.id)
+                        Assert.assertNotNull(offlineRegion.definition)
+                        latch3.countDown()
+                    }
+
+                    override fun onRegionNotFound() {
+                        throw RuntimeException("Region should be in database")
+                    }
+
+                    override fun onError(error: String) {
+                        throw RuntimeException("Unable to get region in offline database. $error")
+                    }
+                }
+            )
         }
         latch3.await()
 
@@ -146,7 +173,7 @@ class OfflineManagerTest : AppCenter() {
 
         // List regions (ensure deletion was successful)
 
-        val latch6 = CountDownLatch(1)
+        val latch6 = CountDownLatch(2)
         rule.activity.runOnUiThread {
             OfflineManager.getInstance(context).listOfflineRegions(object : OfflineManager.ListOfflineRegionsCallback {
                 override fun onList(offlineRegions: Array<OfflineRegion>?) {
@@ -158,6 +185,25 @@ class OfflineManagerTest : AppCenter() {
                     throw RuntimeException("Unable to list regions in offline database. $error")
                 }
             })
+        }
+
+        rule.activity.runOnUiThread {
+            OfflineManager.getInstance(context).getOfflineRegion(
+                regionID,
+                object: OfflineManager.GetOfflineRegionCallback {
+                    override fun onRegion(offlineRegion: OfflineRegion) {
+                        throw RuntimeException("Region should not be in database")
+                    }
+
+                    override fun onRegionNotFound() {
+                        latch6.countDown()
+                    }
+
+                    override fun onError(error: String) {
+                        throw RuntimeException("Unable to get offline region from db. $error")
+                    }
+                }
+            )
         }
         latch6.await()
     }

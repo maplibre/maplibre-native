@@ -164,7 +164,7 @@ class InfoWindowActivity :
 
     override fun onDestroy() {
         super.onDestroy()
-        if (maplibreMap != null) {
+        if (this::maplibreMap.isInitialized) {
             maplibreMap.removeOnMapLongClickListener(mapLongClickListener)
         }
         mapView.onDestroy()

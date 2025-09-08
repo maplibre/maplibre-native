@@ -22,6 +22,7 @@ import java.net.NoRouteToHostException;
 import java.net.ProtocolException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Objects;
 
 import javax.net.ssl.SSLException;
 
@@ -44,20 +45,21 @@ public class HttpRequestImpl implements HttpRequest {
       BuildConfig.MAPLIBRE_VERSION_STRING,
       BuildConfig.GIT_REVISION_SHORT,
       Build.VERSION.SDK_INT,
-      Build.CPU_ABI)
+      Build.SUPPORTED_ABIS[0])
   );
 
   @VisibleForTesting
   static final OkHttpClient DEFAULT_CLIENT = new OkHttpClient.Builder().dispatcher(getDispatcher()).build();
 
   @VisibleForTesting
-  static OkHttpClient client = DEFAULT_CLIENT;
+  static Call.Factory client = DEFAULT_CLIENT;
 
   private Call call;
 
   @Override
   public void executeRequest(HttpResponder httpRequest, long nativePtr, @NonNull String resourceUrl,
-                             @NonNull String etag, @NonNull String modified, boolean offlineUsage) {
+                             @NonNull String dataRange, @NonNull String etag, @NonNull String modified,
+                             boolean offlineUsage) {
     OkHttpCallback callback = new OkHttpCallback(httpRequest);
     try {
       HttpUrl httpUrl = HttpUrl.parse(resourceUrl);
@@ -73,6 +75,11 @@ public class HttpRequestImpl implements HttpRequest {
         .url(resourceUrl)
         .tag(resourceUrl.toLowerCase(MapLibreConstants.MAPLIBRE_LOCALE))
         .addHeader("User-Agent", userAgentString);
+
+      if (dataRange.length() > 0) {
+        builder.addHeader("Range", dataRange);
+      }
+
       if (etag.length() > 0) {
         builder.addHeader("If-None-Match", etag);
       } else if (modified.length() > 0) {
@@ -105,12 +112,8 @@ public class HttpRequestImpl implements HttpRequest {
     HttpLogger.logEnabled = enabled;
   }
 
-  public static void setOkHttpClient(@Nullable OkHttpClient okHttpClient) {
-    if (okHttpClient != null) {
-      HttpRequestImpl.client = okHttpClient;
-    } else {
-      HttpRequestImpl.client = DEFAULT_CLIENT;
-    }
+  public static void setOkHttpClient(@Nullable Call.Factory client) {
+    HttpRequestImpl.client = Objects.requireNonNullElse(client, DEFAULT_CLIENT);
   }
 
   private static class OkHttpCallback implements Callback {

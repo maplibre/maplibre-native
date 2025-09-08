@@ -112,7 +112,7 @@ class VectorSource : Source {
     fun querySourceFeatures(@Size(min = 1) sourceLayerIds: Array<String>, filter: Expression?): List<Feature> {
         checkThread()
         val features = querySourceFeatures(sourceLayerIds, filter?.toArray())
-        return if (features != null) Arrays.asList(*features) else ArrayList()
+        return listOf(*features)
     }
 
     /**

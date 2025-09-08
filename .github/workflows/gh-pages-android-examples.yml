@@ -1,0 +1,30 @@
+name: gh-pages-android-examples
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'platform/android/**'
+
+jobs:
+  gh-pages-android-examples:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: platform/android
+        shell: bash
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+
+      - name: Generate documentation
+        run: make mkdocs-build
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@6c2d9db40f9296374acc17b90404b6e8864128c8 # v4.7.3
+        with:
+          branch: gh-pages
+          folder: platform/android/site
+          target-folder: android/examples/

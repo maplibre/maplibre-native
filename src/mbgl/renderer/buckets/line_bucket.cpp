@@ -54,14 +54,14 @@ void LineBucket::addFeature(const GeometryTileFeature& feature,
 void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
                              const GeometryTileFeature& feature,
                              const CanonicalTileID& canonical) {
-    gfx::PolylineGenerator<LineLayoutVertex, Segment<LineAttributes>> generator(
+    gfx::PolylineGenerator<LineLayoutVertex, SegmentBase> generator(
         vertices,
-        LineProgram::layoutVertex,
+        LineBucket::layoutVertex,
         segments,
-        [](std::size_t vertexOffset, std::size_t indexOffset) -> Segment<LineAttributes> {
-            return Segment<LineAttributes>(vertexOffset, indexOffset);
+        [](std::size_t vertexOffset, std::size_t indexOffset) -> SegmentBase {
+            return SegmentBase(vertexOffset, indexOffset);
         },
-        [](auto& seg) -> Segment<LineAttributes>& { return seg; },
+        [](auto& seg) -> SegmentBase& { return seg; },
         triangles);
 
     gfx::PolylineGeneratorOptions options;
@@ -86,7 +86,19 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
     }();
 
     // Ignore invalid geometry.
-    if (len < (options.type == FeatureType::Polygon ? 3 : 2)) {
+    const std::size_t minLen = (options.type == FeatureType::Polygon ? 3 : 2);
+    if (len < minLen) {
+        // Warn once, but only if the source geometry is invalid, not if de-duplication made it invalid.
+        // This happens, e.g., when attempting to use a GeoJSON `MultiPoint`
+        // or `MLNPointCollectionFeature` as the source for a line layer.
+        // Unfortunately, we cannot show the layer or source name from here.
+        if (coordinates.size() < minLen) {
+            static bool warned = false; // not thread-safe, there's a small chance of warning more than once
+            if (!warned) {
+                warned = true;
+                Log::Warning(Event::General, "Invalid geometry in line layer");
+            }
+        }
         return;
     }
 
@@ -115,17 +127,6 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
 }
 
 void LineBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
-#if MLN_LEGACY_RENDERER
-    if (!uploaded) {
-        vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
-        indexBuffer = uploadPass.createIndexBuffer(std::move(triangles));
-    }
-
-    for (auto& pair : paintPropertyBinders) {
-        pair.second.upload(uploadPass);
-    }
-#endif // MLN_LEGACY_RENDERER
-
     uploaded = true;
 }
 
@@ -136,7 +137,7 @@ bool LineBucket::hasData() const {
 template <class Property>
 static float get(const LinePaintProperties::PossiblyEvaluated& evaluated,
                  const std::string& id,
-                 const std::map<std::string, LineProgram::Binders>& paintPropertyBinders) {
+                 const std::map<std::string, LineBinders>& paintPropertyBinders) {
     auto it = paintPropertyBinders.find(id);
     if (it == paintPropertyBinders.end() || !it->second.statistics<Property>().max()) {
         return evaluated.get<Property>().constantOr(Property::defaultValue());
@@ -166,6 +167,8 @@ void LineBucket::update(const FeatureStates& states,
     if (it != paintPropertyBinders.end()) {
         it->second.updateVertexVectors(states, layer, imagePositions);
         uploaded = false;
+
+        sharedVertices->updateModified();
     }
 }
 

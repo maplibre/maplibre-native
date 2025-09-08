@@ -15,6 +15,8 @@ class Context;
 class UploadPass;
 class TextureResource;
 
+constexpr int32_t MaxActiveTextureUnits = 8;
+
 class Texture2D {
 public:
     struct SamplerState {
@@ -24,6 +26,9 @@ public:
         TextureWrapType wrapU{TextureWrapType::Clamp};
         /// Wrapping behavior along V coordinate
         TextureWrapType wrapV{TextureWrapType::Clamp};
+
+        uint8_t maxAnisotropy{1};
+        bool mipmapped{false};
     };
 
 public:
@@ -49,6 +54,10 @@ public:
     /// @brief Sets the internal image
     /// @param image_ Image data to transfer
     virtual Texture2D& setImage(std::shared_ptr<PremultipliedImage> image_) noexcept = 0;
+
+    /// @brief Get the pixel format of the texture
+    /// @return Pixel format of the texture
+    virtual TexturePixelType getFormat() const noexcept = 0;
 
     /// @brief Get the size of the texture
     /// @return Size of the texture

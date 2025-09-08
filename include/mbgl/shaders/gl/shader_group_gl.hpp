@@ -3,7 +3,7 @@
 #include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/programs/program_parameters.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/util/containers.hpp>
 
 namespace mbgl {
@@ -14,7 +14,7 @@ class ShaderGroupGL final : public gfx::ShaderGroup {
 public:
     ShaderGroupGL(const ProgramParameters& programParameters_)
         : gfx::ShaderGroup(),
-          programParameters(programParameters_) {}
+          programParameters(programParameters_.withProgramType(ShaderID)) {}
     ~ShaderGroupGL() noexcept override = default;
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& context,

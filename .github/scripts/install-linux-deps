@@ -1,0 +1,15 @@
+#!/usr/bin/bash
+
+sudo apt-get update
+DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
+  libcurl4-openssl-dev \
+  libuv1-dev \
+  libjpeg-dev \
+  libpng-dev \
+  libglfw3-dev \
+  libwebp-dev \
+  libopengl0 \
+  mesa-vulkan-drivers \
+  llvm \
+  glslang-dev \
+  libbz2-dev

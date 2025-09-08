@@ -42,7 +42,7 @@ public:
                 uint16_t tileSize,
                 Range<uint8_t> zoomRange,
                 std::optional<LatLngBounds> bounds,
-                std::function<std::unique_ptr<Tile>(const OverscaledTileID&)> createTile);
+                std::function<std::unique_ptr<Tile>(const OverscaledTileID&, TileObserver*)> createTile);
 
     const std::map<UnwrappedTileID, std::reference_wrapper<Tile>>& getRenderedTiles() const { return renderedTiles; }
     Tile* getTile(const OverscaledTileID&);
@@ -60,7 +60,7 @@ public:
 
     std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const;
 
-    void setCacheSize(size_t);
+    void setCacheEnabled(bool);
     void reduceMemoryUse();
 
     void setObserver(TileObserver*);
@@ -84,6 +84,7 @@ private:
     float prevLng = 0;
 
     bool fadingTiles = false;
+    bool cacheEnabled = true;
 };
 
 } // namespace mbgl

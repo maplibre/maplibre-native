@@ -22,9 +22,6 @@
 [submodule "vendor/eternal"]
 	path = vendor/eternal
 	url = https://github.com/mapbox/eternal.git
-[submodule "vendor/mapbox-base"]
-	path = vendor/mapbox-base
-	url = https://github.com/maplibre/maplibre-native-base.git
 [submodule "vendor/googletest"]
 	path = vendor/googletest
 	url = https://github.com/google/googletest.git
@@ -34,18 +31,78 @@
 [submodule "vendor/cpp-httplib"]
 	path = vendor/cpp-httplib
 	url = https://github.com/yhirose/cpp-httplib.git
-[submodule "platform/android/vendor/mapbox-gestures-android"]
-	path = platform/android/vendor/mapbox-gestures-android
-	url = https://github.com/mapbox/mapbox-gestures-android.git
 [submodule "docs/doxygen/doxygen-awesome-css"]
 	path = docs/doxygen/doxygen-awesome-css
 	url = https://github.com/jothepro/doxygen-awesome-css.git
 [submodule "platform/windows/vendor/vcpkg"]
 	path = platform/windows/vendor/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
+[submodule "vendor/harfbuzzFreetype/freetype"]
+	path = vendor/freetype
+  url=https://github.com/freetype/freetype.git
+[submodule "vendor/harfbuzzFreetype/harfbuzz"]
+	path = vendor/harfbuzz
+  url=https://github.com/harfbuzz/harfbuzz
 [submodule "vendor/boost"]
 	path = vendor/boost
 	url = https://github.com/maplibre/maplibre-gl-native-boost.git
 [submodule "vendor/unordered_dense"]
 	path = vendor/unordered_dense
 	url = https://github.com/martinus/unordered_dense.git
+[submodule "vendor/Vulkan-Headers"]
+	path = vendor/Vulkan-Headers
+	url = https://github.com/KhronosGroup/Vulkan-Headers.git
+[submodule "vendor/VulkanMemoryAllocator"]
+	path = vendor/VulkanMemoryAllocator
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+[submodule "vendor/glslang"]
+	path = vendor/glslang
+	url = https://github.com/KhronosGroup/glslang.git
+[submodule "vendor/PMTiles"]
+	path = vendor/PMTiles
+	url = https://github.com/protomaps/PMTiles.git
+[submodule "vendor/maplibre-native-base/extras/args"]
+	path = vendor/maplibre-native-base/extras/args
+	url = https://github.com/Taywee/args.git
+[submodule "vendor/maplibre-native-base/extras/expected-lite"]
+	path = vendor/maplibre-native-base/extras/expected-lite
+	url = https://github.com/martinmoene/expected-lite.git
+[submodule "vendor/maplibre-native-base/extras/kdbush.hpp"]
+	path = vendor/maplibre-native-base/extras/kdbush.hpp
+	url = https://github.com/mourner/kdbush.hpp.git
+[submodule "vendor/maplibre-native-base/extras/rapidjson"]
+	path = vendor/maplibre-native-base/extras/rapidjson
+	url = https://github.com/Tencent/rapidjson.git
+[submodule "vendor/maplibre-native-base/deps/cheap-ruler-cpp"]
+	path = vendor/maplibre-native-base/deps/cheap-ruler-cpp
+	url = https://github.com/mapbox/cheap-ruler-cpp.git
+[submodule "vendor/maplibre-native-base/deps/geojson-vt-cpp"]
+	path = vendor/maplibre-native-base/deps/geojson-vt-cpp
+	url = https://github.com/mapbox/geojson-vt-cpp.git
+[submodule "vendor/maplibre-native-base/deps/geojson-cpp"]
+	path = vendor/maplibre-native-base/deps/geojson-cpp
+	url = https://github.com/mapbox/geojson-cpp.git
+[submodule "vendor/maplibre-native-base/deps/geometry.hpp"]
+	path = vendor/maplibre-native-base/deps/geometry.hpp
+	url = https://github.com/mapbox/geometry.hpp.git
+[submodule "vendor/maplibre-native-base/deps/jni.hpp"]
+	path = vendor/maplibre-native-base/deps/jni.hpp
+	url = https://github.com/mapbox/jni.hpp.git
+[submodule "vendor/maplibre-native-base/deps/pixelmatch-cpp"]
+	path = vendor/maplibre-native-base/deps/pixelmatch-cpp
+	url = https://github.com/mapbox/pixelmatch-cpp.git
+[submodule "vendor/maplibre-native-base/deps/shelf-pack-cpp"]
+	path = vendor/maplibre-native-base/deps/shelf-pack-cpp
+	url = https://github.com/mapbox/shelf-pack-cpp.git
+[submodule "vendor/maplibre-native-base/deps/supercluster.hpp"]
+	path = vendor/maplibre-native-base/deps/supercluster.hpp
+	url = https://github.com/mapbox/supercluster.hpp.git
+[submodule "vendor/maplibre-native-base/deps/variant"]
+	path = vendor/maplibre-native-base/deps/variant
+	url = https://github.com/mapbox/variant.git
+[submodule "vendor/maplibre-native-base/deps/geojson.hpp"]
+	path = vendor/maplibre-native-base/deps/geojson.hpp
+	url = https://github.com/mapbox/geojson-cpp.git
+[submodule "vendor/maplibre-native-base/extras/filesystem"]
+	path = vendor/maplibre-native-base/extras/filesystem
+	url = https://github.com/gulrak/filesystem.git

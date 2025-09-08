@@ -14,17 +14,20 @@ template <typename GetTileFn,
           typename CreateTileFn,
           typename RetainTileFn,
           typename RenderTileFn,
-          typename IdealTileIDs>
+          typename IdealTileIDs,
+          typename PrefetchedTileMap>
 void updateRenderables(GetTileFn getTile,
                        CreateTileFn createTile,
                        RetainTileFn retainTile,
                        RenderTileFn renderTile,
                        const IdealTileIDs& idealTileIDs,
+                       const PrefetchedTileMap& prefetchedTiles,
                        const Range<uint8_t>& zoomRange,
                        const std::optional<uint8_t>& maxParentOverscaleFactor = std::nullopt) {
     std::unordered_set<OverscaledTileID> checked;
-    bool covered;
-    int32_t overscaledZ;
+    bool covered = false;
+    bool parentOrChildTileFound = false;
+    int32_t overscaledZ = 0;
 
     // for (all in the set of ideal tiles of the source) {
     for (const auto& idealDataTileID : idealTileIDs) {
@@ -55,6 +58,7 @@ void updateRenderables(GetTileFn getTile,
             // The tile isn't loaded yet, but retain it anyway because it's an ideal tile.
             retainTile(*tile, TileNecessity::Required);
             covered = true;
+            parentOrChildTileFound = false;
             overscaledZ = idealDataTileID.overscaledZ + 1;
             if (overscaledZ > zoomRange.max) {
                 // We're looking for an overzoomed child tile.
@@ -63,6 +67,7 @@ void updateRenderables(GetTileFn getTile,
                 if (tile && tile->isRenderable()) {
                     retainTile(*tile, TileNecessity::Optional);
                     renderTile(idealRenderTileID, *tile);
+                    parentOrChildTileFound = true;
                 } else {
                     covered = false;
                 }
@@ -74,6 +79,7 @@ void updateRenderables(GetTileFn getTile,
                     if (tile && tile->isRenderable()) {
                         retainTile(*tile, TileNecessity::Optional);
                         renderTile(childDataTileID.toUnwrapped(), *tile);
+                        parentOrChildTileFound = true;
                     } else {
                         // At least one child tile doesn't exist, so we are
                         // going to look for parents as well.
@@ -127,8 +133,23 @@ void updateRenderables(GetTileFn getTile,
 
                         if (tile->isRenderable()) {
                             renderTile(parentDataTileID.toUnwrapped(), *tile);
+                            parentOrChildTileFound = true;
                             // Break parent tile ascent, since we found one.
                             break;
+                        }
+                    }
+                }
+
+                if (!parentOrChildTileFound) {
+                    // Reuse prefetched tiles in order to avoid empty screen
+                    for (auto& prefetchedTileEntry : prefetchedTiles) {
+                        const auto& prefetchedDataTileID = prefetchedTileEntry.first;
+                        const UnwrappedTileID prefetchedRenderTileID = prefetchedDataTileID.toUnwrapped();
+                        auto* prefetchedTile = prefetchedTileEntry.second.get();
+                        if (prefetchedTile->isRenderable() && prefetchedDataTileID.canonical.z <= zoomRange.max &&
+                            prefetchedDataTileID.isChildOf(idealDataTileID)) {
+                            retainTile(*prefetchedTile, TileNecessity::Optional);
+                            renderTile(prefetchedRenderTileID, *prefetchedTile);
                         }
                     }
                 }

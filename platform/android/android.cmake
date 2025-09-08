@@ -37,7 +37,6 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/android/src/bitmap.hpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/bitmap_factory.cpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/bitmap_factory.hpp
-        ${PROJECT_SOURCE_DIR}/platform/android/src/gl_functions.cpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/image.cpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/jni.cpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/jni.hpp
@@ -48,7 +47,6 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/android/src/timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/map/map_snapshotter.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/platform/time.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/asset_file_source.cpp
@@ -63,6 +61,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_database.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_download.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/online_file_source.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/$<IF:$<BOOL:${MLN_WITH_PMTILES}>,pmtiles_file_source.cpp,pmtiles_file_source_stub.cpp>
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/sqlite3.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/bidi.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/compression.cpp
@@ -72,8 +71,25 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/thread_local.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/utf.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/layermanager/layer_manager.cpp
-        ${PROJECT_SOURCE_DIR}/platform/linux/src/headless_backend_egl.cpp
 )
+
+if(MLN_WITH_OPENGL)
+    target_sources(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
+            ${PROJECT_SOURCE_DIR}/platform/linux/src/headless_backend_egl.cpp
+            ${PROJECT_SOURCE_DIR}/platform/android/src/gl_functions.cpp
+    )
+endif()
+
+if(MLN_WITH_VULKAN)
+    target_sources(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/vulkan/headless_backend.cpp
+    )
+endif()
 
 target_include_directories(
     mbgl-core
@@ -85,7 +101,7 @@ target_link_libraries(
     PRIVATE
         EGL
         GLESv3
-        Mapbox::Base::jni.hpp
+        MapLibreNative::Base::jni.hpp
         android
         atomic
         jnigraphics
@@ -109,7 +125,7 @@ target_link_libraries(
     example-custom-layer
     PRIVATE
         GLESv3
-        Mapbox::Base
+        MapLibreNative::Base
         log
         mbgl-compiler-options
 )
@@ -131,17 +147,23 @@ target_include_directories(
     ${PROJECT_SOURCE_DIR}/src
 )
 
+# this is needed because Android is not officially supported
+# https://discourse.cmake.org/t/error-when-crosscompiling-with-whole-archive-target-link/9394
+# https://cmake.org/cmake/help/latest/release/3.24.html#generator-expressions
+set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE
+"-Wl,--whole-archive <LIBRARY> -Wl,--no-whole-archive"
+)
+set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE_SUPPORTED True)
+
 find_package(curl CONFIG)
 
 target_link_libraries(
     mbgl-test-runner
     PRIVATE
-        Mapbox::Base::jni.hpp
+        MapLibreNative::Base::jni.hpp
         mbgl-compiler-options
         $<$<BOOL:${curl_FOUND}>:curl::curl_static>
-        -Wl,--whole-archive
-        mbgl-test
-        -Wl,--no-whole-archive
+        $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
 )
 
 
@@ -192,11 +214,9 @@ target_include_directories(
 target_link_libraries(
     mbgl-benchmark-runner
     PRIVATE
-        Mapbox::Base::jni.hpp
+        MapLibreNative::Base::jni.hpp
         mbgl-compiler-options
-        -Wl,--whole-archive
-        mbgl-benchmark
-        -Wl,--no-whole-archive
+        $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-benchmark>
 )
 
 add_custom_command(
@@ -233,6 +253,10 @@ add_library(
     ${PROJECT_SOURCE_DIR}/platform/android/MapLibreAndroid/src/cpp/http_file_source.cpp
 )
 
+if(MLN_WITH_VULKAN)
+    target_compile_definitions(mbgl-render-test-runner PRIVATE "MLN_RENDER_BACKEND_VULKAN=1")
+endif()
+
 target_include_directories(
     mbgl-render-test-runner
     PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue ${PROJECT_SOURCE_DIR}/platform/android/src ${PROJECT_SOURCE_DIR}/src
@@ -241,7 +265,7 @@ target_include_directories(
 target_link_libraries(
     mbgl-render-test-runner
     PRIVATE
-        Mapbox::Base::jni.hpp
+        MapLibreNative::Base::jni.hpp
         android
         log
         mbgl-compiler-options

@@ -86,6 +86,8 @@ public:
 
     jni::Local<jni::Object<jni::ObjectTag>> getTextVariableAnchor(jni::JNIEnv&);
 
+    jni::Local<jni::Object<jni::ObjectTag>> getTextVariableAnchorOffset(jni::JNIEnv&);
+
     jni::Local<jni::Object<jni::ObjectTag>> getTextAnchor(jni::JNIEnv&);
 
     jni::Local<jni::Object<jni::ObjectTag>> getTextMaxAngle(jni::JNIEnv&);
@@ -107,6 +109,8 @@ public:
     jni::Local<jni::Object<jni::ObjectTag>> getTextIgnorePlacement(jni::JNIEnv&);
 
     jni::Local<jni::Object<jni::ObjectTag>> getTextOptional(jni::JNIEnv&);
+
+    jni::Local<jni::Object<jni::ObjectTag>> getSymbolScreenSpace(jni::JNIEnv&);
 
     jni::Local<jni::Object<jni::ObjectTag>> getIconOpacity(jni::JNIEnv&);
     void setIconOpacityTransition(jni::JNIEnv&, jlong duration, jlong delay);

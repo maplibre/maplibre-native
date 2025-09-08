@@ -1,9 +1,9 @@
 #pragma once
 
 #include <mbgl/gfx/shader_group.hpp>
-#include <mbgl/programs/program_parameters.hpp>
-#include <mbgl/shaders/mtl/background.hpp>
+#include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/hash.hpp>
 #include <mbgl/util/containers.hpp>
@@ -48,6 +48,7 @@ public:
                                      std::string_view /*firstAttribName*/) override {
         using ShaderSource = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
         constexpr auto& name = ShaderSource::name;
+        constexpr auto& prelude = ShaderSource::prelude;
         constexpr auto& source = ShaderSource::source;
         constexpr auto& vertMain = ShaderSource::vertexMainFunction;
         constexpr auto& fragMain = ShaderSource::fragmentMainFunction;
@@ -63,13 +64,14 @@ public:
             addAdditionalDefines(propertiesAsUniforms, additionalDefines);
 
             auto& context = static_cast<Context&>(gfxContext);
-            const auto shaderSource = std::string(shaders::prelude) + source;
+            const auto shaderSource = std::string(shaders::prelude) + prelude + source;
             shader = context.createProgram(
-                shaderName, shaderSource, vertMain, fragMain, programParameters, additionalDefines);
+                ShaderID, shaderName, shaderSource, vertMain, fragMain, programParameters, additionalDefines);
             assert(shader);
             if (!shader || !registerShader(shader, shaderName)) {
                 assert(false);
-                throw std::runtime_error("Failed to register " + shaderName + " with shader group!");
+                Log::Error(Event::Shader, "Failed to register " + shaderName + " with shader group!");
+                return nullptr;
             }
 
             using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
@@ -80,9 +82,6 @@ public:
             }
             for (const auto& attrib : ShaderClass::instanceAttributes) {
                 shader->initInstanceAttribute(attrib);
-            }
-            for (const auto& uniform : ShaderClass::uniforms) {
-                shader->initUniformBlock(uniform);
             }
             for (const auto& texture : ShaderClass::textures) {
                 shader->initTexture(texture);

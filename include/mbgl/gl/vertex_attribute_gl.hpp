@@ -11,13 +11,10 @@ class VertexBufferResource;
 } // namespace gfx
 namespace gl {
 
-class VertexAttributeArrayGL;
 class UploadPass;
 
 class VertexAttributeGL final : public gfx::VertexAttribute {
-    // Can only be created by VertexAttributeArrayGL
-private:
-    friend VertexAttributeArrayGL;
+public:
     VertexAttributeGL(int index_, gfx::AttributeDataType dataType_, std::size_t count_)
         : VertexAttribute(index_, dataType_, count_) {}
     VertexAttributeGL(const VertexAttributeGL& other)
@@ -26,8 +23,6 @@ private:
     VertexAttributeGL(VertexAttributeGL&& other)
         : VertexAttribute(std::move(other)),
           glType(other.glType) {}
-
-public:
     ~VertexAttributeGL() override = default;
 
     platform::GLenum getGLType() const { return glType; }
@@ -36,9 +31,11 @@ public:
     bool getNormalized() const { return normalized; }
     void setNormalized(bool value) { normalized = value; }
 
-    std::size_t getStride() const;
+    std::size_t getStride() const override;
 
-    static const std::vector<std::uint8_t>& getRaw(gfx::VertexAttribute& attr, platform::GLenum);
+    static const std::vector<std::uint8_t>& getRaw(gfx::VertexAttribute& attr,
+                                                   platform::GLenum,
+                                                   std::optional<std::chrono::duration<double>> lastUpdate);
 
 private:
     static int getSize(platform::GLenum glType);
@@ -63,19 +60,15 @@ public:
     }
     VertexAttributeArrayGL& operator=(const VertexAttributeArrayGL&) = delete;
 
-    /// Indicates whether any values have changed
-    bool isDirty() const override;
-
 private:
     std::unique_ptr<gfx::VertexAttribute> create(int index,
                                                  gfx::AttributeDataType dataType,
                                                  std::size_t count) const override {
-        return std::unique_ptr<gfx::VertexAttribute>(new VertexAttributeGL(index, dataType, count));
+        return std::make_unique<VertexAttributeGL>(index, dataType, count);
     }
-    using gfx::VertexAttributeArray::copy;
+
     std::unique_ptr<gfx::VertexAttribute> copy(const gfx::VertexAttribute& attr) const override {
-        return std::unique_ptr<gfx::VertexAttribute>(
-            new VertexAttributeGL(static_cast<const VertexAttributeGL&>(attr)));
+        return std::make_unique<VertexAttributeGL>(static_cast<const VertexAttributeGL&>(attr));
     }
 };
 

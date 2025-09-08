@@ -208,7 +208,7 @@ class CameraAnimatorActivity : AppCompatActivity(), OnMapReadyCallback {
         for (i in 0 until animators.size()) {
             animators[animators.keyAt(i)]!!.cancel()
         }
-        if (set != null) {
+        if (this::set.isInitialized) {
             set.cancel()
         }
     }

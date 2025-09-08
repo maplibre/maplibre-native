@@ -104,7 +104,7 @@
 - (void)updateLocation
 {
     if ([self.delegate respondsToSelector:@selector(locationManager:didUpdateLocations:)]) {
-        
+
         if (self.index >= [self.coordinates count] ) {
             self.index = 0;
             self.coordinates = [[self.coordinates reverseObjectEnumerator] allObjects];
@@ -130,7 +130,7 @@
     if ([self.delegate respondsToSelector:@selector(locationManagerShouldDisplayHeadingCalibration:)]) {
         return [self.delegate locationManagerShouldDisplayHeadingCalibration:self];
     }
-    
+
     return NO;
 }
 
@@ -152,9 +152,9 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+
     self.mapView = [[MLNMapView alloc] initWithFrame:self.view.bounds];
-    
+
     self.mapView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     MBXCustomLocationManager *mbxLocationManager = [[MBXCustomLocationManager alloc] init];
     self.mapView.locationManager = mbxLocationManager;
@@ -162,7 +162,7 @@
     [self.mapView setCenterCoordinate:CLLocationCoordinate2DMake(37.788380, -122.400121)
                             zoomLevel:13
                         animated:NO];
-    
+
     [self.view addSubview:self.mapView];
     self.mapView.showsUserLocation = YES;
 }

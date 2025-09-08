@@ -10,6 +10,7 @@
 #include <optional>
 
 #include <jni/jni.hpp>
+#include <android/native_window.h>
 
 namespace mbgl {
 
@@ -26,13 +27,20 @@ namespace android {
 
 class AndroidRendererBackend;
 
+class AndroidSurface {
+public:
+    static constexpr auto Name() { return "android/view/Surface"; };
+};
+
 /**
  * The MapRenderer is a peer class that encapsulates the actions
  * performed on the GL Thread.
  *
  * The public methods are safe to call from the main thread, others are not.
+ *
+ * NOTE: Any derived class must invalidate `weakFactory` in the destructor
  */
-class MapRenderer : public Scheduler {
+class MapRenderer final : public Scheduler {
 public:
     static constexpr auto Name() { return "org/maplibre/android/maps/renderer/MapRenderer"; };
 
@@ -75,6 +83,7 @@ public:
     void waitForEmpty(const util::SimpleIdentity tag) override;
 
     void requestRender();
+    void requestRender(JNIEnv&, jni::Local<jni::Object<MapRenderer>>&);
 
     // Snapshot - requires a RunLoop on the calling thread
     using SnapshotCallback = std::function<void(PremultipliedImage)>;
@@ -87,6 +96,10 @@ protected:
     // Called from the GL Thread //
 
     void scheduleSnapshot(std::unique_ptr<SnapshotCallback>);
+
+    // Allows derived classes to invalidate weak pointers in
+    // their destructor before their own members are torn down.
+    void invalidateWeakPtrsEarly() { weakFactory.invalidateWeakPtrs(); }
 
 private:
     struct MailboxData {
@@ -105,7 +118,7 @@ private:
     // Renders a frame.
     void render(JNIEnv&);
 
-    void onSurfaceCreated(JNIEnv&);
+    void onSurfaceCreated(JNIEnv&, const jni::Object<AndroidSurface>& surface);
 
     void onSurfaceChanged(JNIEnv&, jint width, jint height);
 
@@ -132,15 +145,20 @@ private:
     std::unique_ptr<AndroidRendererBackend> backend;
     std::unique_ptr<Renderer> renderer;
     std::unique_ptr<ActorRef<Renderer>> rendererRef;
+    std::unique_ptr<ANativeWindow, std::function<void(ANativeWindow*)>> window;
 
     std::shared_ptr<UpdateParameters> updateParameters;
     std::mutex updateMutex;
 
-    bool framebufferSizeChanged = false;
     std::atomic<bool> destroyed{false};
 
     std::unique_ptr<SnapshotCallback> snapshotCallback;
+
+    bool framebufferSizeChanged = false;
+    bool swapBehaviorFlush = false;
+
     mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
+    // Do not add members here, see `WeakPtrFactory`
 };
 
 } // namespace android

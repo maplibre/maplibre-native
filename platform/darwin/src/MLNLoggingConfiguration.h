@@ -51,7 +51,8 @@ typedef NS_ENUM(NSInteger, MLNLoggingLevel) {
 };
 
 /**
- A block to be called once `loggingLevel` is set to a higher value than `MLNLoggingLevelNone`.
+ A block to be called once `loggingLevel` is set to a higher value than
+ ``MLNLoggingLevel/MLNLoggingLevelNone``.
 
  @param loggingLevel The message logging level.
  @param filePath The description of the file and method for the calling message.
@@ -62,7 +63,7 @@ typedef void (^MLNLoggingBlockHandler)(MLNLoggingLevel loggingLevel, NSString *f
                                        NSUInteger line, NSString *message);
 
 /**
- The `MLNLoggingConfiguration` object provides a global way to set this SDK logging levels
+ The ``MLNLoggingConfiguration`` object provides a global way to set this SDK logging levels
  and logging handler.
  */
 MLN_EXPORT
@@ -81,7 +82,7 @@ MLN_EXPORT
 /**
  The logging level.
 
- The default value is `MLNLoggingLevelNone`.
+ The default value is ``MLNLoggingLevel/MLNLoggingLevelNone``.
 
  Setting this property includes logging levels less than or equal to the setted value.
  */

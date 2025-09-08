@@ -1,0 +1,209 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "ios",
+      "displayName": "iOS",
+      "generator": "Xcode",
+      "description": "Create Xcode project for iOS",
+      "binaryDir": "${sourceDir}/build-ios",
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "iOS",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "MLN_WITH_METAL": "ON",
+        "MLN_WITH_OPENGL": "OFF"
+      }
+    },
+    {
+      "name": "macos",
+      "displayName": "macOS",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-macos",
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "Darwin",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "MLN_WITH_METAL": "ON",
+        "MLN_WITH_OPENGL": "OFF",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "MLN_DARWIN_USE_LIBUV": "ON"
+      }
+    },
+    {
+      "name": "macos-xcode",
+      "displayName": "macOS (Xcode)",
+      "generator": "Xcode",
+      "binaryDir": "${sourceDir}/build-macos-xcode",
+      "inherits": "macos"
+    },
+    {
+      "name": "macos-vulkan",
+      "displayName": "macOS Vulkan",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-macos-vulkan",
+      "inherits": "macos",
+      "cacheVariables": {
+        "MLN_WITH_VULKAN": "ON",
+        "MLN_WITH_METAL": "OFF",
+        "MLN_WITH_OPENGL": "OFF"
+      }
+    },
+    {
+      "name": "macos-vulkan-xcode",
+      "displayName": "macOS Vulkan (Xcode)",
+      "generator": "Xcode",
+      "binaryDir": "${sourceDir}/build-macos-vulkan-xcode",
+      "inherits": "macos-vulkan"
+    },
+    {
+      "name": "macos-node",
+      "inherits": "macos",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "MLN_WITH_NODE": "ON",
+        "MLN_WITH_WERROR": "OFF",
+        "MLN_CREATE_AUTORELEASEPOOL": "ON",
+        "MLN_DARWIN_USE_LIBUV": "OFF"
+      }
+    },
+    {
+      "name": "linux",
+      "hidden": true,
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "Linux",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "MLN_WITH_METAL": "OFF",
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_WITH_VULKAN": "OFF",
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_BUILD_WITH_INSTALL_RPATH": "ON",
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "MLN_WITH_CLANG_TIDY": "OFF",
+        "MLN_WITH_WAYLAND": "ON",
+        "MLN_WITH_X11": "OFF"
+      }
+    },
+    {
+      "name": "linux-opengl",
+      "binaryDir": "${sourceDir}/build-linux-opengl",
+      "generator": "Ninja",
+      "inherits": "linux",
+      "cacheVariables": {
+        "MLN_WITH_OPENGL": "ON"
+      }
+    },
+    {
+      "name": "linux-vulkan",
+      "binaryDir": "${sourceDir}/build-linux-vulkan",
+      "inherits": "linux",
+      "cacheVariables": {
+        "MLN_WITH_VULKAN": "ON",
+        "MLN_WITH_WAYLAND": "OFF",
+        "MLN_WITH_X11": "ON"
+      }
+    },
+    {
+      "name": "windows",
+      "hidden": true,
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "Windows",
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_WITH_EGL": "OFF",
+        "MLN_WITH_VULKAN": "OFF",
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
+      "name": "windows-opengl",
+      "binaryDir": "${sourceDir}/build-windows-opengl",
+      "generator": "Ninja",
+      "inherits": "windows",
+      "cacheVariables": {
+        "MLN_WITH_OPENGL": "ON"
+      }
+    },
+    {
+      "name": "windows-opengl-core",
+      "inherits": "windows-opengl",
+      "cacheVariables": {
+        "MLN_CORE_INCLUDE_DEPS": "ON",
+        "MLN_USE_BUILTIN_ICU": "ON"
+      }
+    },
+    {
+      "name": "windows-egl",
+      "binaryDir": "${sourceDir}/build-windows-egl",
+      "generator": "Ninja",
+      "inherits": "windows",
+      "cacheVariables": {
+        "MLN_WITH_OPENGL": "ON",
+        "MLN_WITH_EGL": "ON"
+      }
+    },
+    {
+      "name": "windows-egl-core",
+      "inherits": "windows-egl",
+      "cacheVariables": {
+        "MLN_CORE_INCLUDE_DEPS": "ON",
+        "MLN_USE_BUILTIN_ICU": "ON"
+      }
+    },
+    {
+      "name": "windows-vulkan",
+      "binaryDir": "${sourceDir}/build-windows-vulkan",
+      "inherits": "windows",
+      "cacheVariables": {
+        "MLN_WITH_OPENGL": "OFF",
+        "MLN_WITH_EGL": "OFF",
+        "MLN_WITH_VULKAN": "ON"
+      }
+    },
+    {
+      "name": "windows-vulkan-core",
+      "inherits": "windows-vulkan",
+      "cacheVariables": {
+        "MLN_CORE_INCLUDE_DEPS": "ON",
+        "MLN_USE_BUILTIN_ICU": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "macos-core",
+      "configurePreset": "macos",
+      "targets": ["mbgl-core"]
+    },
+    {
+      "name": "linux-opengl-core",
+      "configurePreset": "linux-opengl",
+      "targets": ["mbgl-core"]
+    },
+    {
+      "name": "linux-vulkan-core",
+      "configurePreset": "linux-vulkan",
+      "targets": ["mbgl-core"]
+    },
+    {
+      "name": "windows-opengl-core",
+      "configurePreset": "windows-opengl",
+      "targets": ["mbgl-core"]
+    },
+    {
+      "name": "windows-egl-core",
+      "configurePreset": "windows-egl",
+      "targets": ["mbgl-core"]
+    },
+    {
+      "name": "windows-vulkan-core",
+      "configurePreset": "windows-vulkan",
+      "targets": ["mbgl-core"]
+    }
+  ]
+}

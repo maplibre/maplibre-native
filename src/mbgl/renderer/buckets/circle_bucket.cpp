@@ -1,6 +1,5 @@
 #include <mbgl/renderer/buckets/circle_bucket.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>
-#include <mbgl/programs/circle_program.hpp>
 #include <mbgl/style/layers/circle_layer_impl.hpp>
 #include <mbgl/renderer/layers/render_circle_layer.hpp>
 #include <mbgl/util/constants.hpp>
@@ -26,17 +25,6 @@ CircleBucket::~CircleBucket() {
 }
 
 void CircleBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
-#if MLN_LEGACY_RENDERER
-    if (!uploaded) {
-        vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
-        indexBuffer = uploadPass.createIndexBuffer(std::move(triangles));
-    }
-
-    for (auto& pair : paintPropertyBinders) {
-        pair.second.upload(uploadPass);
-    }
-#endif // MLN_LEGACY_RENDERER
-
     uploaded = true;
 }
 
@@ -47,7 +35,7 @@ bool CircleBucket::hasData() const {
 template <class Property>
 static float get(const CirclePaintProperties::PossiblyEvaluated& evaluated,
                  const std::string& id,
-                 const std::map<std::string, CircleProgram::Binders>& paintPropertyBinders) {
+                 const std::map<std::string, CircleBinders>& paintPropertyBinders) {
     auto it = paintPropertyBinders.find(id);
     if (it == paintPropertyBinders.end() || !it->second.statistics<Property>().max()) {
         return evaluated.get<Property>().constantOr(Property::defaultValue());
@@ -72,6 +60,8 @@ void CircleBucket::update(const FeatureStates& states,
     if (it != paintPropertyBinders.end()) {
         it->second.updateVertexVectors(states, layer, imagePositions);
         uploaded = false;
+
+        sharedVertices->updateModified();
     }
 }
 

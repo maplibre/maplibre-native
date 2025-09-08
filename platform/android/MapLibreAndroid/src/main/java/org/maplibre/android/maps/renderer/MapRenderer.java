@@ -1,6 +1,9 @@
 package org.maplibre.android.maps.renderer;
 
 import android.content.Context;
+import android.view.Surface;
+import android.view.TextureView;
+import android.view.View;
 
 import androidx.annotation.CallSuper;
 import androidx.annotation.Keep;
@@ -9,16 +12,14 @@ import androidx.annotation.NonNull;
 import org.maplibre.android.LibraryLoader;
 import org.maplibre.android.log.Logger;
 import org.maplibre.android.maps.MapLibreMap;
-
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
+import org.maplibre.android.maps.MapLibreMapOptions;
 
 /**
- * The {@link MapRenderer} encapsulates the GL thread.
+ * The {@link MapRenderer} encapsulates the render thread.
  * <p>
- * Performs actions on the GL thread to manage the GL resources and
+ * Performs actions on the render thread to manage the resources and
  * render on the one end and acts as a scheduler to request work to
- * be performed on the GL thread on the other.
+ * be performed on the render thread on the other.
  */
 @Keep
 public abstract class MapRenderer implements MapRendererScheduler {
@@ -29,17 +30,55 @@ public abstract class MapRenderer implements MapRendererScheduler {
 
   private static final String TAG = "Mbgl-MapRenderer";
 
-  // Holds the pointer to the native peer after initialisation
+  /**
+   * Rendering presentation refresh mode.
+   */
+  public enum RenderingRefreshMode {
+    /**
+     * The map is rendered only in response to an event that affects the rendering of the map.
+     * This mode is preferred to improve battery life and overall system performance
+     */
+    WHEN_DIRTY,
+
+    /**
+     * The map is repeatedly re-rendered at the refresh rate of the display.
+     * This mode is preferred when benchmarking the rendering
+     */
+    CONTINUOUS,
+  }
+
+  // Holds the pointer to the native peer after initialization
   private long nativePtr = 0;
   private double expectedRenderTime = 0;
   private MapLibreMap.OnFpsChangedListener onFpsChangedListener;
 
+  public static MapRenderer create(MapLibreMapOptions options, @NonNull Context context, Runnable initCallback) {
+
+    MapRenderer renderer = null;
+    String localFontFamily = options.getLocalIdeographFontFamily();
+
+    if (options.getTextureMode()) {
+      TextureView textureView = new TextureView(context);
+      boolean translucentSurface = options.getTranslucentTextureSurface();
+      renderer = MapRendererFactory.newTextureViewMapRenderer(context, textureView, localFontFamily,
+              translucentSurface, initCallback);
+    } else {
+      boolean renderSurfaceOnTop = options.getRenderSurfaceOnTop();
+      renderer = MapRendererFactory.newSurfaceViewMapRenderer(context, localFontFamily,
+              renderSurfaceOnTop, initCallback);
+    }
+
+    return renderer;
+  }
+
   public MapRenderer(@NonNull Context context, String localIdeographFontFamily) {
     float pixelRatio = context.getResources().getDisplayMetrics().density;
 
-    // Initialise native peer
+    // Initialize native peer
     nativeInitialize(this, pixelRatio, localIdeographFontFamily);
   }
+
+  public abstract View getView();
 
   public void onStart() {
     // Implement if needed
@@ -61,18 +100,21 @@ public abstract class MapRenderer implements MapRendererScheduler {
     // Implement if needed
   }
 
+  public abstract void setRenderingRefreshMode(RenderingRefreshMode mode);
+
+  public abstract RenderingRefreshMode getRenderingRefreshMode();
+
   public void setOnFpsChangedListener(MapLibreMap.OnFpsChangedListener listener) {
     onFpsChangedListener = listener;
   }
 
   @CallSuper
-  protected void onSurfaceCreated(GL10 gl, EGLConfig config) {
-    nativeOnSurfaceCreated();
+  protected void onSurfaceCreated(Surface surface) {
+    nativeOnSurfaceCreated(surface);
   }
 
   @CallSuper
-  protected void onSurfaceChanged(@NonNull GL10 gl, int width, int height) {
-    gl.glViewport(0, 0, width, height);
+  protected void onSurfaceChanged(int width, int height) {
     nativeOnSurfaceChanged(width, height);
   }
 
@@ -82,7 +124,7 @@ public abstract class MapRenderer implements MapRendererScheduler {
   }
 
   @CallSuper
-  protected void onDrawFrame(GL10 gl) {
+  protected void onDrawFrame() {
     long startTime = System.nanoTime();
     try {
       nativeRender();
@@ -128,7 +170,7 @@ public abstract class MapRenderer implements MapRendererScheduler {
   @Override
   protected native void finalize() throws Throwable;
 
-  private native void nativeOnSurfaceCreated();
+  private native void nativeOnSurfaceCreated(Surface surface);
 
   private native void nativeOnSurfaceChanged(int width, int height);
 

@@ -39,7 +39,7 @@ private:
     void makeOptional();
 
     void loadFromCache();
-    void loadedData(const Response&);
+    void loadedData(const Response&, Resource::LoadingMethod);
     void loadFromNetwork();
 
     bool hasPendingNetworkRequest() const {

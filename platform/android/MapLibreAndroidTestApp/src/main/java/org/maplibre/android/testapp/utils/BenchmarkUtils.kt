@@ -1,25 +1,67 @@
 package org.maplibre.android.testapp.utils
 
+import android.os.Build
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.addJsonObject
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.putJsonArray
+import org.maplibre.android.BuildConfig.GIT_REVISION
+import org.maplibre.android.testapp.BuildConfig
 import java.util.ArrayList
 
-class FpsStore {
-    private val fpsValues = ArrayList<Double>(100000)
-
-    fun add(fps: Double) {
-        fpsValues.add(fps)
+data class BenchmarkInputData(
+    val styleNames: List<String>,
+    val styleURLs: List<String>,
+) {
+    init {
+        if (styleNames.size != styleURLs.size)
+            throw Error("Different size: styleNames=$styleNames, styleURLs=$styleURLs")
     }
+}
 
-    fun reset() {
-        fpsValues.clear()
-    }
+data class BenchmarkRun(
+    val styleName: String,
+    val styleURL: String,
+    val syncRendering: Boolean,
+    val duration: Int
+)
 
-    fun low1p(): Double {
-        fpsValues.sort()
-        return fpsValues.slice(0..(fpsValues.size / 100)).average()
-    }
+data class BenchmarkRunResult(
+    val fps: Double,
+    val encodingTimeStore: FrameTimeStore,
+    val renderingTimeStore: FrameTimeStore,
+    val thermalState: Int
+)
 
-    fun average(): Double {
-        return fpsValues.average()
+data class BenchmarkResult (
+    var runs: ArrayList<Pair<BenchmarkRun, BenchmarkRunResult>>
+)
+
+//@SuppressLint("NewApi")
+fun jsonPayload(benchmarkResult: BenchmarkResult): JsonObject {
+    return buildJsonObject {
+        putJsonArray("results") {
+            for (run in benchmarkResult.runs) {
+                addJsonObject {
+                    put("styleName", JsonPrimitive(run.first.styleName))
+                    put("syncRendering", JsonPrimitive(run.first.syncRendering))
+                    put("thermalState", JsonPrimitive(run.second.thermalState))
+                    put("fps", JsonPrimitive(run.second.fps))
+                    put("avgEncodingTime", JsonPrimitive(run.second.encodingTimeStore.average()))
+                    put("avgRenderingTime", JsonPrimitive(run.second.renderingTimeStore.average()))
+                    put("low1pEncodingTime", JsonPrimitive(run.second.encodingTimeStore.low1p()))
+                    put("low1pRenderingTime", JsonPrimitive(run.second.renderingTimeStore.low1p()))
+                }
+            }
+        }
+        put("deviceManufacturer", JsonPrimitive(Build.MANUFACTURER))
+        put("model", JsonPrimitive(Build.MODEL))
+        put("renderer", JsonPrimitive(BuildConfig.FLAVOR))
+        put("debugBuild", JsonPrimitive(BuildConfig.DEBUG))
+        put("gitRevision", JsonPrimitive(GIT_REVISION))
+        put("timestamp", JsonPrimitive(System.currentTimeMillis()))
     }
 }
 
@@ -36,40 +78,10 @@ class FrameTimeStore {
 
     fun low1p(): Double {
         timeValues.sort()
-        return timeValues.slice((99 * timeValues.size / 100)..timeValues.size - 1).average()
+        return timeValues.slice((99 * timeValues.size / 100)..<timeValues.size).average()
     }
 
     fun average(): Double {
         return timeValues.average()
-    }
-}
-
-/**
- * Result of single benchmark run
- */
-data class BenchmarkResult(val average: Double, val low1p: Double)
-
-data class BenchmarkResults(
-    var resultsPerStyle: MutableMap<String, List<BenchmarkResult>> = mutableMapOf<String, List<BenchmarkResult>>().withDefault { emptyList() })
-{
-
-    fun addResult(styleName: String, fpsStore: FpsStore) {
-        val newResults = resultsPerStyle.getValue(styleName).plus(
-            BenchmarkResult(
-                fpsStore.average(),
-                fpsStore.low1p()
-            )
-        )
-        resultsPerStyle[styleName] = newResults
-    }
-
-    fun addResult(styleName: String, frameTimeStore: FrameTimeStore) {
-        val newResults = resultsPerStyle.getValue(styleName).plus(
-            BenchmarkResult(
-                frameTimeStore.average(),
-                frameTimeStore.low1p()
-            )
-        )
-        resultsPerStyle[styleName] = newResults
     }
 }

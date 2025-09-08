@@ -37,6 +37,8 @@ public:
     jni::Local<jni::Object<jni::ObjectTag>> getImageTiltDisplacement(jni::JNIEnv&);
 
     jni::Local<jni::Object<jni::ObjectTag>> getBearing(jni::JNIEnv&);
+    void setBearingTransition(jni::JNIEnv&, jlong duration, jlong delay);
+    jni::Local<jni::Object<TransitionOptions>> getBearingTransition(jni::JNIEnv&);
 
     jni::Local<jni::Object<jni::ObjectTag>> getLocation(jni::JNIEnv&);
     void setLocationTransition(jni::JNIEnv&, jlong duration, jlong delay);

@@ -28,7 +28,7 @@
     if (!self) {
         return nil;
     }
-    
+
     self.testStatus = NO;
     self.runner = new TestRunner();
     NSError *error;
@@ -39,10 +39,10 @@
 
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDir = [paths objectAtIndex: 0];
-    
+
     NSString *destinationPath = [documentsDir stringByAppendingPathComponent: @"test-data"];
     NSString *path = destinationPath;
-    
+
     // delete destinationPath if it exists
     if ([fileManager fileExistsAtPath:destinationPath]) {
         success = [fileManager removeItemAtPath: destinationPath error: &error];

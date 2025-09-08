@@ -24,7 +24,7 @@ TEST(Shaping, ZWSP) {
     BiDi bidi;
     auto immutableGlyph = Immutable<Glyph>(makeMutable<Glyph>(std::move(glyph)));
     const std::vector<std::string> fontStack{{"font-stack"}};
-    const SectionOptions sectionOptions(1.0f, fontStack);
+    const SectionOptions sectionOptions(1.0f, fontStack, GlyphIDType::FontPBF, 0);
     const float layoutTextSize = 16.0f;
     const float layoutTextSizeAtBucketZoomLevel = 16.0f;
     GlyphMap glyphs = {{FontStackHasher()(fontStack), {{u'中', std::move(immutableGlyph)}}}};
@@ -101,5 +101,127 @@ TEST(Shaping, ZWSP) {
         ASSERT_EQ(shaping.left, 0);
         ASSERT_EQ(shaping.right, 0);
         ASSERT_EQ(shaping.writingMode, WritingModeType::Horizontal);
+    }
+}
+
+void setupShapedText(Shaping& shapedText, float textSize) {
+    const auto glyph = PositionedGlyph(32,
+                                       0.0f,
+                                       0.0f,
+                                       false,
+                                       0,
+                                       1.0,
+                                       /*texRect*/ {},
+                                       /*metrics*/ {},
+                                       /*imageID*/ std::nullopt);
+    shapedText.right = textSize;
+    shapedText.bottom = textSize;
+    shapedText.positionedLines.emplace_back();
+    shapedText.positionedLines.back().positionedGlyphs.emplace_back(glyph);
+}
+
+void testApplyTextFit(const Rect<uint16_t>& rectangle,
+                      const style::ImageContent& content,
+                      const std::optional<style::TextFit> textFitWidth,
+                      const std::optional<style::TextFit> textFitHeight,
+                      const Shaping& shapedText,
+                      float fontScale,
+                      float expectedRight,
+                      float expectedBottom) {
+    ImagePosition image = {
+        rectangle,
+        style::Image::Impl("test",
+                           PremultipliedImage({static_cast<uint32_t>(rectangle.w), static_cast<uint32_t>(rectangle.h)}),
+                           1.0f,
+                           false,
+                           {},
+                           {},
+                           content,
+                           textFitWidth,
+                           textFitHeight)};
+    auto shapedIcon = PositionedIcon::shapeIcon(image, {0, 0}, style::SymbolAnchorType::TopLeft);
+    shapedIcon.fitIconToText(shapedText, style::IconTextFitType::Both, {0, 0, 0, 0}, {0, 0}, fontScale);
+    const auto& icon = shapedIcon.applyTextFit();
+    ASSERT_EQ(icon.top(), 0);
+    ASSERT_EQ(icon.left(), 0);
+    ASSERT_EQ(icon.right(), expectedRight);
+    ASSERT_EQ(icon.bottom(), expectedBottom);
+}
+
+TEST(Shaping, applyTextFit) {
+    float textSize = 4;
+    float fontScale = 4;
+    float expectedImageSize = textSize * fontScale;
+    Shaping shapedText;
+    setupShapedText(shapedText, textSize);
+
+    {
+        // applyTextFitHorizontal
+        // This set of tests against applyTextFit starts with a 100x20 image with a 5,5,95,15 content box
+        // that has been fitted to a 4*4 text with scale 4, resulting in a 16*16 image.
+        const auto horizontalRectangle = Rect<uint16_t>(0, 0, 100, 20);
+        const style::ImageContent horizontalContent = {5, 5, 95, 15};
+
+        {
+            // applyTextFit: not specified
+            // No change should happen
+            testApplyTextFit(horizontalRectangle,
+                             horizontalContent,
+                             std::nullopt,
+                             std::nullopt,
+                             shapedText,
+                             fontScale,
+                             expectedImageSize,
+                             expectedImageSize);
+        }
+
+        {
+            // applyTextFit: both stretchOrShrink
+            // No change should happen
+            testApplyTextFit(horizontalRectangle,
+                             horizontalContent,
+                             style::TextFit::stretchOrShrink,
+                             style::TextFit::stretchOrShrink,
+                             shapedText,
+                             fontScale,
+                             expectedImageSize,
+                             expectedImageSize);
+        }
+
+        {
+            // applyTextFit: stretchOnly, proportional
+            // Since textFitWidth is stretchOnly, it should be returned to
+            // the aspect ratio of the content rectangle (9:1) aspect ratio so 144x16.
+            testApplyTextFit(horizontalRectangle,
+                             horizontalContent,
+                             style::TextFit::stretchOnly,
+                             style::TextFit::proportional,
+                             shapedText,
+                             fontScale,
+                             expectedImageSize * 9,
+                             expectedImageSize);
+        }
+    }
+
+    {
+        // applyTextFitVertical
+        // This set of tests against applyTextFit starts with a 20x100 image with a 5,5,15,95 content box
+        // that has been fitted to a 4*4 text with scale 4, resulting in a 16*16 image.
+        const auto verticalRectangle = Rect<uint16_t>(0, 0, 20, 100);
+        const style::ImageContent verticalContent = {5, 5, 15, 95};
+
+        {
+            // applyTextFit: stretchOnly, proportional
+            // Since textFitWidth is stretchOnly, it should be returned to
+            // the aspect ratio of the content rectangle (9:1) aspect ratio so 144x16.
+            testApplyTextFit(verticalRectangle,
+                             verticalContent,
+                             style::TextFit::proportional,
+                             style::TextFit::stretchOnly,
+                             shapedText,
+                             fontScale,
+                             expectedImageSize,
+                             expectedImageSize * 9);
+        }
     }
 }

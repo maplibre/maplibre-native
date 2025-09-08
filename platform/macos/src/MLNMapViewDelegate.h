@@ -1,5 +1,7 @@
 #import <AppKit/AppKit.h>
 #import <Foundation/Foundation.h>
+#import "MLNRenderingStats.h"
+#import "MLNTileOperation.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -10,12 +12,13 @@ NS_ASSUME_NONNULL_BEGIN
 @class MLNPolyline;
 @class MLNShape;
 @class MLNStyle;
+@class MLNSource;
 @protocol MLNAnnotation;
 
 /**
- The `MLNMapViewDelegate` protocol defines a set of optional methods that you
- can use to receive messages from an `MLNMapView` instance. Because many map
- operations require the `MLNMapView` class to load data asynchronously, the map
+ The ``MLNMapViewDelegate`` protocol defines a set of optional methods that you
+ can use to receive messages from an ``MLNMapView`` instance. Because many map
+ operations require the ``MLNMapView`` class to load data asynchronously, the map
  view calls these methods to notify your application when specific operations
  complete. The map view also uses these methods to request information about
  annotations displayed on the map, such as the styles and interaction modes to
@@ -44,7 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  This method is called as the currently displayed map camera changes as part of
  an animation, whether due to a user gesture or due to a call to a method such
- as `-[MLNMapView setCamera:animated:]`. This method can be called before
+ as ``MLNMapView/setCamera:animated:``. This method can be called before
  `-mapViewDidFinishLoadingMap:` is called.
 
  During the animation, this method may be called many times to report updates
@@ -167,11 +170,31 @@ NS_ASSUME_NONNULL_BEGIN
  affecting performance.
 
  @param mapView The map view that has just redrawn.
- @param frameTimeNanos The time taken to render the frame, in nanoseconds
+ @param fullyRendered A Boolean value indicating whether the map is fully rendered or not.
+ @param frameEncodingTime The time taken to encode the frame, in milliseconds.
+ @param frameRenderingTime The time taken to render the frame, in milliseconds.
  */
 - (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView
                          fullyRendered:(BOOL)fullyRendered
-                             frameTime:(double)frameTime;
+                     frameEncodingTime:(double)frameEncodingTime
+                    frameRenderingTime:(double)frameRenderingTime;
+
+/**
+ Tells the delegate that the map view has just redrawn.
+
+ This method is called any time the map view needs to redraw due to a change in
+ the viewpoint or style property transition. This method may be called very
+ frequently, even moreso than `-mapViewRegionIsChanging:`. Therefore, your
+ implementation of this method should be as lightweight as possible to avoid
+ affecting performance.
+
+ @param mapView The map view that has just redrawn.
+ @param fullyRendered A Boolean value indicating whether the map is fully rendered or not.
+ @param renderingStats A collection of rendering statistics
+ */
+- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView
+                         fullyRendered:(BOOL)fullyRendered
+                        renderingStats:(MLNRenderingStats *)renderingStats;
 
 /**
  Tells the delegate that the map view is entering an idle state, and no more
@@ -204,8 +227,16 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)mapView:(MLNMapView *)mapView didFinishLoadingStyle:(MLNStyle *)style;
 
 /**
+ Tells the delegate that the source changed.
+
+ @param mapView The map view that owns the source.
+ @param source The source that changed.
+ */
+- (void)mapView:(MLNMapView *)mapView sourceDidChange:(MLNSource *)source;
+
+/**
  Tells the delegate that the `mapView` is missing an image. The image should be added synchronously
- with `-[MLNStyle setImage:forName:]` to be rendered on the current zoom level. When loading icons
+ with ``MLNStyle/setImage:forName:`` to be rendered on the current zoom level. When loading icons
  asynchronously, you can load a placeholder image and replace it when your image has loaded.
 
  @param mapView The map view that is loading the image.
@@ -226,6 +257,50 @@ NS_ASSUME_NONNULL_BEGIN
  the cached image.
  */
 - (BOOL)mapView:(MLNMapView *)mapView shouldRemoveStyleImage:(NSString *)imageName;
+
+// MARK: Shader Compilation
+
+- (void)mapView:(MLNMapView *)mapView
+    shaderWillCompile:(NSInteger)id
+              backend:(NSInteger)backend
+              defines:(NSString *)defines;
+- (void)mapView:(MLNMapView *)mapView
+    shaderDidCompile:(NSInteger)id
+             backend:(NSInteger)backend
+             defines:(NSString *)defines;
+- (void)mapView:(MLNMapView *)mapView
+    shaderDidFailCompile:(NSInteger)id
+                 backend:(NSInteger)backend
+                 defines:(NSString *)defines;
+
+// MARK: Glyph Requests
+
+- (void)mapView:(MLNMapView *)mapView
+    glyphsWillLoad:(NSArray<NSString *> *)fontStack
+             range:(NSRange)range;
+- (void)mapView:(MLNMapView *)mapView
+    glyphsDidLoad:(NSArray<NSString *> *)fontStack
+            range:(NSRange)range;
+- (void)mapView:(MLNMapView *)mapView
+    glyphsDidError:(NSArray<NSString *> *)fontStack
+             range:(NSRange)range;
+
+// MARK: Tile Requests
+
+- (void)mapView:(MLNMapView *)mapView
+    tileDidTriggerAction:(MLNTileOperation)operation
+                       x:(NSInteger)x
+                       y:(NSInteger)y
+                       z:(NSInteger)z
+                    wrap:(NSInteger)wrap
+             overscaledZ:(NSInteger)overscaledZ
+                sourceID:(NSString *)sourceID;
+
+// MARK: Sprite Requests
+
+- (void)mapView:(MLNMapView *)mapView spriteWillLoad:(NSString *)id url:(NSString *)url;
+- (void)mapView:(MLNMapView *)mapView spriteDidLoad:(NSString *)id url:(NSString *)url;
+- (void)mapView:(MLNMapView *)mapView spriteDidError:(NSString *)id url:(NSString *)url;
 
 // MARK: Managing the Appearance of Annotations
 
@@ -370,7 +445,7 @@ NS_ASSUME_NONNULL_BEGIN
  such as `title` and `subtitle`.
 
  If each annotation should have an identical callout, you can set the
- `MLNMapView.calloutViewController` property instead.
+ ``MLNMapView/calloutViewController`` property instead.
 
  @param mapView The map view that is requesting a callout view controller.
  @param annotation The object representing the annotation.

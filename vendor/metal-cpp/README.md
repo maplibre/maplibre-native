@@ -246,7 +246,7 @@ printf( "string = \"%s\"\n", [string cStringUsingEncoding: NSASCIIStringEncoding
 ```objc
 NSAutoreleasePool* pool   = [[NSAutoreleasePool alloc] init];
 NSString*          string = [NSString stringWithCString: "Hello World" encoding: NSASCIIStringEncoding];
-								
+
 printf( "string = \"%s\"\n", [string cStringUsingEncoding: NSASCIIStringEncoding] );
 
 [pool release];

@@ -56,17 +56,14 @@ Log* Log::get() noexcept {
     return &instance;
 }
 
-void Log::useLogThread(bool enable) noexcept {
-    useLogThread(enable, EventSeverity::Debug);
-    useLogThread(enable, EventSeverity::Info);
-    useLogThread(enable, EventSeverity::Warning);
-    useLogThread(enable, EventSeverity::Error);
-}
-
-void Log::useLogThread(bool enable, EventSeverity severity) noexcept {
-    const auto index = underlying_type(severity);
-    if (index < SeverityCount) {
-        useThread[index] = enable;
+void Log::useLogThread(bool enable, std::optional<EventSeverity> severity) {
+    if (severity) {
+        useThread[underlying_type(*severity)] = enable;
+    } else {
+        useLogThread(enable, EventSeverity::Debug);
+        useLogThread(enable, EventSeverity::Info);
+        useLogThread(enable, EventSeverity::Warning);
+        useLogThread(enable, EventSeverity::Error);
     }
 }
 

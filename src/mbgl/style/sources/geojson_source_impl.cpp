@@ -99,6 +99,8 @@ std::shared_ptr<GeoJSONData> GeoJSONData::create(const GeoJSON& geoJSON,
         clusterOptions.maxZoom = options->clusterMaxZoom;
         clusterOptions.extent = util::EXTENT;
         clusterOptions.radius = static_cast<uint16_t>(::round(scale * options->clusterRadius));
+        clusterOptions.minPoints = options->clusterMinPoints;
+
         auto feature = std::make_shared<Feature>();
         clusterOptions.map = [feature, options](const PropertyMap& properties) -> PropertyMap {
             PropertyMap ret{};
@@ -111,7 +113,7 @@ std::shared_ptr<GeoJSONData> GeoJSONData::create(const GeoJSON& geoJSON,
         };
         clusterOptions.reduce = [feature, options](PropertyMap& toReturn, const PropertyMap& toFill) {
             for (const auto& p : options->clusterProperties) {
-                if (toFill.count(p.first) == 0) {
+                if (!toFill.contains(p.first)) {
                     continue;
                 }
                 feature->properties = toFill;

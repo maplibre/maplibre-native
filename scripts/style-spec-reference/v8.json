@@ -17,7 +17,13 @@
     },
     "metadata": {
       "type": "*",
-      "doc": "Arbitrary properties useful to track with the stylesheet, but do not influence rendering. Properties should be prefixed to avoid collisions, like 'mapbox:'."
+      "doc": "Arbitrary properties useful to track with the stylesheet, but do not influence rendering. Properties should be prefixed to avoid collisions, like 'maplibre:'.",
+      "example": {
+        "styleeditor:slimmode": true,
+        "styleeditor:comment": "Style generated 1677776383",
+        "styleeditor:version": "3.14.159265",
+        "example:object": { "String": "one", "Number": 2, "Boolean": false }
+      }
     },
     "center": {
       "type": "array",
@@ -57,26 +63,79 @@
         "intensity": 0.4
       }
     },
+    "sky": {
+      "type": "sky",
+      "doc": "The map's sky configuration. **Note:** this definition is still experimental and is under develoment in maplibre-gl-js.",
+      "example": {
+        "sky-color": "#199EF3",
+        "sky-horizon-blend": 0.5,
+        "horizon-color": "#ffffff",
+        "horizon-fog-blend": 0.5,
+        "fog-color": "#0000ff",
+        "fog-ground-blend": 0.5,
+        "atmosphere-blend": ["interpolate",
+          ["linear"],
+          ["zoom"],
+          0,1,
+          10,1,
+          12,0
+        ]
+      }
+    },
+    "projection": {
+      "type": "projection",
+      "doc": "The projection configuration. **Note:** this definition is still experimental and is under development in maplibre-gl-js.",
+      "example": {
+        "type": "globe"
+      }
+    },
+    "terrain": {
+      "type": "terrain",
+      "doc": "The terrain configuration.",
+      "example": {
+        "source": "raster-dem-source",
+        "exaggeration": 0.5
+      }
+    },
     "sources": {
       "required": true,
       "type": "sources",
-      "doc": "Data source specifications.",
+      "doc": "Sources state which data the map should display. Specify the type of source with the `type` property. Adding a source isn't enough to make data appear on the map because sources don't contain styling details like color or width. Layers refer to a source and give it a visual representation. This makes it possible to style the same source in different ways, like differentiating between types of roads in a highways layer.\n\nTiled sources (vector and raster) must specify their details according to the [TileJSON specification](https://github.com/mapbox/tilejson-spec).",
       "example": {
-        "mapbox-streets": {
+        "maplibre-demotiles": {
           "type": "vector",
-          "url": "mapbox://mapbox.mapbox-streets-v6"
+          "url": "https://demotiles.maplibre.org/tiles/tiles.json"
+        },
+        "maplibre-tilejson": {
+          "type": "vector",
+          "url": "http://api.example.com/tilejson.json"
+        },
+        "maplibre-streets": {
+          "type": "vector",
+          "tiles": [
+              "http://a.example.com/tiles/{z}/{x}/{y}.pbf",
+              "http://b.example.com/tiles/{z}/{x}/{y}.pbf"
+          ],
+          "maxzoom": 14
+        },
+        "wms-imagery": {
+          "type": "raster",
+          "tiles": [
+              "http://a.example.com/wms?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&width=256&height=256&layers=example"
+          ],
+          "tileSize": 256
         }
       }
     },
     "sprite": {
-      "type": "string",
-      "doc": "A base URL for retrieving the sprite image and metadata. The extensions `.png`, `.json` and scale factor `@2x.png` will be automatically appended. This property is required if any layer uses the `background-pattern`, `fill-pattern`, `line-pattern`, `fill-extrusion-pattern`, or `icon-image` properties. The URL must be absolute, containing the [scheme, authority and path components](https://en.wikipedia.org/wiki/URL#Syntax).",
-      "example": "mapbox://sprites/mapbox/bright-v8"
+      "type": "sprite",
+      "doc": "An array of `{id: 'my-sprite', url: 'https://example.com/sprite'}` objects. Each object should represent a unique URL to load a sprite from and and a unique ID to use as a prefix when referencing images from that sprite (i.e. 'my-sprite:image'). All the URLs are internally extended to load both .json and .png files. If the `id` field is equal to 'default', the prefix is omitted (just 'image' instead of 'default:image'). All the IDs and URLs must be unique. For backwards compatibility, instead of an array, one can also provide a single string that represent a URL to load the sprite from. The images in this case won't be prefixed.",
+      "example": "https://demotiles.maplibre.org/styles/osm-bright-gl-style/sprite"
     },
     "glyphs": {
       "type": "string",
-      "doc": "A URL template for loading signed-distance-field glyph sets in PBF format. The URL must include `{fontstack}` and `{range}` tokens. This property is required if any layer uses the `text-field` layout property. The URL must be absolute, containing the [scheme, authority and path components](https://en.wikipedia.org/wiki/URL#Syntax).",
-      "example": "mapbox://fonts/mapbox/{fontstack}/{range}.pbf"
+      "doc": "A URL template for loading signed-distance-field glyph sets in PBF format. \nThe URL must include:\n\n - `{fontstack}` - When requesting glyphs, this token is replaced with a comma separated list of fonts from a font stack specified in the text-font property of a symbol layer. \n\n - `{range}` - When requesting glyphs, this token is replaced with a range of 256 Unicode code points. For example, to load glyphs for the Unicode Basic Latin and Basic Latin-1 Supplement blocks, the range would be 0-255. The actual ranges that are loaded are determined at runtime based on what text needs to be displayed.\n\nThis property is required if any layer uses the `text-field` layout property. The URL must be absolute, containing the [scheme, authority and path components](https://en.wikipedia.org/wiki/URL#Syntax).",
+      "example": "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf"
     },
     "transition": {
       "type": "transition",
@@ -90,15 +149,15 @@
       "required": true,
       "type": "array",
       "value": "layer",
-      "doc": "Layers will be drawn in the order of this array.",
+      "doc": "A style's `layers` property lists all the layers available in that style. The type of layer is specified by the `type` property, and must be one of `background`, `fill`, `line`, `symbol`, `raster`, `circle`, `fill-extrusion`, `heatmap`, `hillshade`.\n\nExcept for layers of the `background` type, each layer needs to refer to a source. Layers take the data that they get from a source, optionally filter features, and then define how those features are styled.",
       "example": [
         {
-          "id": "water",
-          "source": "mapbox-streets",
-          "source-layer": "water",
-          "type": "fill",
+          "id": "coastline",
+          "source": "maplibre",
+          "source-layer": "contries",
+          "type": "line",
           "paint": {
-            "fill-color": "#00ffff"
+            "line-color": "#198EC8"
           }
         }
       ]
@@ -131,7 +190,7 @@
     },
     "url": {
       "type": "string",
-      "doc": "A URL to a TileJSON resource. Supported protocols are `http:`, `https:`, and `mapbox://<Tileset ID>`."
+      "doc": "A URL to a TileJSON resource. Supported protocols are `http:` and `https:`."
     },
     "tiles": {
       "type": "array",
@@ -148,7 +207,7 @@
         180,
         85.051129
       ],
-      "doc": "An array containing the longitude and latitude of the southwest and northeast corners of the source's bounding box in the following order: `[sw.lng, sw.lat, ne.lng, ne.lat]`. When this property is included in a source, no tiles outside of the given bounds are requested by Mapbox GL."
+      "doc": "An array containing the longitude and latitude of the southwest and northeast corners of the source's bounding box in the following order: `[sw.lng, sw.lat, ne.lng, ne.lat]`. When this property is included in a source, no tiles outside of the given bounds are requested by MapLibre."
     },
     "scheme": {
       "type": "enum",
@@ -181,6 +240,17 @@
       "type": "promoteId",
       "doc": "A property to use as a feature id (for feature state). Either a property name, or an object of the form `{<sourceLayer>: <propertyName>}`. If specified as a string for a vector tile source, the same property is used across all its source layers."
     },
+    "volatile": {
+      "type": "boolean",
+      "default": false,
+      "doc": "A setting to determine whether a source's tiles are cached locally.",
+      "sdk-support": {
+        "basic functionality": {
+          "android": "9.3.0",
+          "ios": "5.10.0"
+        }
+      }
+    },
     "*": {
       "type": "*",
       "doc": "Other keys to configure the data source."
@@ -199,7 +269,7 @@
     },
     "url": {
       "type": "string",
-      "doc": "A URL to a TileJSON resource. Supported protocols are `http:`, `https:`, and `mapbox://<Tileset ID>`."
+      "doc": "A URL to a TileJSON resource. Supported protocols are `http:` and `https:`."
     },
     "tiles": {
       "type": "array",
@@ -216,7 +286,7 @@
         180,
         85.051129
       ],
-      "doc": "An array containing the longitude and latitude of the southwest and northeast corners of the source's bounding box in the following order: `[sw.lng, sw.lat, ne.lng, ne.lat]`. When this property is included in a source, no tiles outside of the given bounds are requested by Mapbox GL."
+      "doc": "An array containing the longitude and latitude of the southwest and northeast corners of the source's bounding box in the following order: `[sw.lng, sw.lat, ne.lng, ne.lat]`. When this property is included in a source, no tiles outside of the given bounds are requested by MapLibre."
     },
     "minzoom": {
       "type": "number",
@@ -251,6 +321,17 @@
       "type": "string",
       "doc": "Contains an attribution to be displayed when the map is shown to a user."
     },
+    "volatile": {
+      "type": "boolean",
+      "default": false,
+      "doc": "A setting to determine whether a source's tiles are cached locally.",
+      "sdk-support": {
+        "basic functionality": {
+          "android": "9.3.0",
+          "ios": "5.10.0"
+        }
+      }
+    },
     "*": {
       "type": "*",
       "doc": "Other keys to configure the data source."
@@ -269,7 +350,7 @@
     },
     "url": {
       "type": "string",
-      "doc": "A URL to a TileJSON resource. Supported protocols are `http:`, `https:`, and `mapbox://<Tileset ID>`."
+      "doc": "A URL to a TileJSON resource. Supported protocols are `http:` and `https:`."
     },
     "tiles": {
       "type": "array",
@@ -286,7 +367,7 @@
         180,
         85.051129
       ],
-      "doc": "An array containing the longitude and latitude of the southwest and northeast corners of the source's bounding box in the following order: `[sw.lng, sw.lat, ne.lng, ne.lat]`. When this property is included in a source, no tiles outside of the given bounds are requested by Mapbox GL."
+      "doc": "An array containing the longitude and latitude of the southwest and northeast corners of the source's bounding box in the following order: `[sw.lng, sw.lat, ne.lng, ne.lat]`. When this property is included in a source, no tiles outside of the given bounds are requested by MapLibre."
     },
     "minzoom": {
       "type": "number",
@@ -316,10 +397,64 @@
         },
         "mapbox": {
           "doc": "Mapbox Terrain RGB tiles. See https://www.mapbox.com/help/access-elevation-data/#mapbox-terrain-rgb for more info."
+        },
+        "custom": {
+          "doc": "Decodes tiles using the redFactor, blueFactor, greenFactor, baseShift parameters."
         }
       },
       "default": "mapbox",
-      "doc": "The encoding used by this source. Mapbox Terrain RGB is used by default"
+      "doc": "The encoding used by this source. Mapbox Terrain RGB is used by default."
+    },
+    "redFactor": {
+      "type": "number",
+      "default": 1.0,
+      "doc": "Value that will be multiplied by the red channel value when decoding. Only used on custom encodings.",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "3.4"
+        }
+      }
+    },
+    "blueFactor": {
+      "type": "number",
+      "default": 1.0,
+      "doc": "Value that will be multiplied by the blue channel value when decoding. Only used on custom encodings.",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "3.4"
+        }
+      }
+    },
+    "greenFactor": {
+      "type": "number",
+      "default": 1.0,
+      "doc": "Value that will be multiplied by the green channel value when decoding. Only used on custom encodings.",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "3.4"
+        }
+      }
+    },
+    "baseShift": {
+      "type": "number",
+      "default": 0.0,
+      "doc": "Value that will be added to the encoding mix when decoding. Only used on custom encodings.",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "3.4"
+        }
+      }
+    },
+    "volatile": {
+      "type": "boolean",
+      "default": false,
+      "doc": "A setting to determine whether a source's tiles are cached locally.",
+      "sdk-support": {
+        "basic functionality": {
+          "android": "9.3.0",
+          "ios": "5.10.0"
+        }
+      }
     },
     "*": {
       "type": "*",
@@ -338,6 +473,7 @@
       "doc": "The data type of the GeoJSON source."
     },
     "data": {
+      "required": true,
       "type": "*",
       "doc": "A URL to a GeoJSON file, or inline GeoJSON."
     },
@@ -357,6 +493,10 @@
       "minimum": 0,
       "doc": "Size of the tile buffer on each side. A value of 0 produces no buffer. A value of 512 produces a buffer as wide as the tile itself. Larger values produce fewer rendering artifacts near tile edges and slower performance."
     },
+    "filter": {
+      "type": "*",
+      "doc": "An expression for filtering features prior to processing them for rendering."
+    },
     "tolerance": {
       "type": "number",
       "default": 0.375,
@@ -365,7 +505,7 @@
     "cluster": {
       "type": "boolean",
       "default": false,
-      "doc": "If the data is a collection of point features, setting this to true clusters the points by radius into groups. Cluster groups become new `Point` features in the source with additional properties:\n * `cluster` Is `true` if the point is a cluster \n * `cluster_id` A unqiue id for the cluster to be used in conjunction with the [cluster inspection methods](https://www.mapbox.com/mapbox-gl-js/api/#geojsonsource#getclusterexpansionzoom)\n * `point_count` Number of original points grouped into this cluster\n * `point_count_abbreviated` An abbreviated point count"
+      "doc": "If the data is a collection of point features, setting this to true clusters the points by radius into groups. Cluster groups become new `Point` features in the source with additional properties:\n * `cluster` Is `true` if the point is a cluster \n * `cluster_id` A unqiue id for the cluster to be used in conjunction with the [cluster inspection methods](https://maplibre.org/maplibre-gl-js/docs/API/classes/GeoJSONSource/#getclusterexpansionzoom)\n * `point_count` Number of original points grouped into this cluster\n * `point_count_abbreviated` An abbreviated point count"
     },
     "clusterRadius": {
       "type": "number",
@@ -375,7 +515,11 @@
     },
     "clusterMaxZoom": {
       "type": "number",
-      "doc": "Max zoom on which to cluster points if clustering is enabled. Defaults to one zoom less than maxzoom (so that last zoom features are not clustered)."
+      "doc": "Max zoom on which to cluster points if clustering is enabled. Defaults to one zoom less than maxzoom (so that last zoom features are not clustered). Clusters are re-evaluated at integer zoom levels so setting clusterMaxZoom to 14 means the clusters will be displayed until z15."
+    },
+    "clusterMinPoints": {
+      "type": "number",
+      "doc": "Minimum number of points necessary to form a cluster if clustering is enabled. Defaults to `2`."
     },
     "clusterProperties": {
       "type": "*",
@@ -470,8 +614,7 @@
             "basic functionality": {
               "js": "0.10.0",
               "android": "2.0.1",
-              "ios": "2.0.0",
-              "macos": "0.1.0"
+              "ios": "2.0.0"
             }
           }
         },
@@ -481,8 +624,7 @@
             "basic functionality": {
               "js": "0.10.0",
               "android": "2.0.1",
-              "ios": "2.0.0",
-              "macos": "0.1.0"
+              "ios": "2.0.0"
             }
           }
         },
@@ -492,8 +634,7 @@
             "basic functionality": {
               "js": "0.10.0",
               "android": "2.0.1",
-              "ios": "2.0.0",
-              "macos": "0.1.0"
+              "ios": "2.0.0"
             }
           }
         },
@@ -503,8 +644,7 @@
             "basic functionality": {
               "js": "0.10.0",
               "android": "2.0.1",
-              "ios": "2.0.0",
-              "macos": "0.1.0"
+              "ios": "2.0.0"
             }
           }
         },
@@ -514,8 +654,7 @@
             "basic functionality": {
               "js": "0.41.0",
               "android": "6.0.0",
-              "ios": "4.0.0",
-              "macos": "0.7.0"
+              "ios": "4.0.0"
             }
           }
         },
@@ -525,8 +664,7 @@
             "basic functionality": {
               "js": "0.27.0",
               "android": "5.1.0",
-              "ios": "3.6.0",
-              "macos": "0.5.0"
+              "ios": "3.6.0"
             }
           }
         },
@@ -536,19 +674,17 @@
             "basic functionality": {
               "js": "0.10.0",
               "android": "2.0.1",
-              "ios": "2.0.0",
-              "macos": "0.1.0"
+              "ios": "2.0.0"
             }
           }
         },
         "hillshade": {
-          "doc": "Client-side hillshading visualization based on DEM data. Currently, the implementation only supports Mapbox Terrain RGB and Mapzen Terrarium tiles.",
+          "doc": "Client-side hillshading visualization based on DEM data. The implementation supports Mapbox Terrain RGB, Mapzen Terrarium tiles and custom encodings.",
           "sdk-support": {
             "basic functionality": {
               "js": "0.43.0",
               "android": "6.0.0",
-              "ios": "4.0.0",
-              "macos": "0.7.0"
+              "ios": "4.0.0"
             }
           }
         },
@@ -558,8 +694,7 @@
             "basic functionality": {
               "js": "0.10.0",
               "android": "2.0.1",
-              "ios": "2.0.0",
-              "macos": "0.1.0"
+              "ios": "2.0.0"
             }
           }
         }
@@ -569,7 +704,10 @@
     },
     "metadata": {
       "type": "*",
-      "doc": "Arbitrary properties useful to track with the layer, but do not influence rendering. Properties should be prefixed to avoid collisions, like 'mapbox:'."
+      "doc": "Arbitrary properties useful to track with the layer, but do not influence rendering. Properties should be prefixed to avoid collisions, like 'maplibre:'.",
+      "example": {
+        "source:comment": "Hydrology FCCODE 460 - Narrow wash"
+      }
     },
     "source": {
       "type": "string",
@@ -632,8 +770,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "property-type": "constant"
@@ -645,10 +782,14 @@
       "doc": "Sorts features in ascending order based on this value. Features with a higher sort key will appear above features with a lower sort key.",
       "sdk-support": {
         "basic functionality": {
-          "js": "1.2.0"
+          "js": "1.2.0",
+          "android": "9.1.0",
+          "ios": "5.8.0"
         },
         "data-driven styling": {
-          "js": "1.2.0"
+          "js": "1.2.0",
+          "android": "9.1.0",
+          "ios": "5.8.0"
         }
       },
       "expression": {
@@ -676,8 +817,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "property-type": "constant"
@@ -689,10 +829,14 @@
       "doc": "Sorts features in ascending order based on this value. Features with a higher sort key will appear above features with a lower sort key.",
       "sdk-support": {
         "basic functionality": {
-          "js": "1.2.0"
+          "js": "1.2.0",
+          "android": "9.2.0",
+          "ios": "5.9.0"
         },
         "data-driven styling": {
-          "js": "1.2.0"
+          "js": "1.2.0",
+          "android": "9.2.0",
+          "ios": "5.9.0"
         }
       },
       "expression": {
@@ -720,8 +864,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "property-type": "constant"
@@ -744,8 +887,7 @@
         "basic functionality": {
           "js": "0.41.0",
           "android": "6.0.0",
-          "ios": "4.0.0",
-          "macos": "0.7.0"
+          "ios": "4.0.0"
         }
       },
       "property-type": "constant"
@@ -768,8 +910,7 @@
         "basic functionality": {
           "js": "0.27.0",
           "android": "5.1.0",
-          "ios": "3.6.0",
-          "macos": "0.5.0"
+          "ios": "3.6.0"
         }
       },
       "property-type": "constant"
@@ -795,8 +936,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -826,14 +966,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.40.0",
           "android": "5.2.0",
-          "ios": "3.7.0",
-          "macos": "0.6.0"
+          "ios": "3.7.0"
         }
       },
       "expression": {
@@ -858,8 +996,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -883,8 +1020,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -900,10 +1036,14 @@
       "doc": "Sorts features in ascending order based on this value. Features with a higher sort key will appear above features with a lower sort key.",
       "sdk-support": {
         "basic functionality": {
-          "js": "1.2.0"
+          "js": "1.2.0",
+          "android": "9.1.0",
+          "ios": "5.8.0"
         },
         "data-driven styling": {
-          "js": "1.2.0"
+          "js": "1.2.0",
+          "android": "9.1.0",
+          "ios": "5.8.0"
         }
       },
       "expression": {
@@ -931,8 +1071,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "property-type": "constant"
@@ -958,14 +1097,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "`line-center` value": {
           "js": "0.47.0",
           "android": "6.4.0",
-          "ios": "4.3.0",
-          "macos": "0.10.0"
+          "ios": "4.3.0"
         }
       },
       "expression": {
@@ -991,8 +1128,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -1006,13 +1142,12 @@
     "symbol-avoid-edges": {
       "type": "boolean",
       "default": false,
-      "doc": "If true, the symbols will not cross tile edges to avoid mutual collisions. Recommended in layers that don't have enough padding in the vector tile to prevent collisions, or if it is a point symbol layer placed after a line symbol layer. When using a client that supports global collision detection, like Mapbox GL JS version 0.42.0 or greater, enabling this property is not needed to prevent clipped labels at tile boundaries.",
+      "doc": "If true, the symbols will not cross tile edges to avoid mutual collisions. Recommended in layers that don't have enough padding in the vector tile to prevent collisions, or if it is a point symbol layer placed after a line symbol layer. When using a client that supports global collision detection, like MapLibre GL JS version 0.42.0 or greater, enabling this property is not needed to prevent clipped labels at tile boundaries.",
       "sdk-support": {
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -1030,14 +1165,12 @@
         "basic functionality": {
           "js": "0.53.0",
           "android": "7.4.0",
-          "ios": "4.11.0",
-          "macos": "0.14.0"
+          "ios": "4.11.0"
         },
         "data-driven styling": {
           "js": "0.53.0",
           "android": "7.4.0",
-          "ios": "4.11.0",
-          "macos": "0.14.0"
+          "ios": "4.11.0"
         }
       },
       "expression": {
@@ -1053,23 +1186,22 @@
       "type": "enum",
       "values": {
         "auto": {
-          "doc": "If `symbol-sort-key` is set, sort based on that. Otherwise sort symbols by their y-position relative to the viewport."
+          "doc": "Sorts symbols by `symbol-sort-key` if set. Otherwise, sorts symbols by their y-position relative to the viewport if `icon-allow-overlap` or `text-allow-overlap` is set to `true` or `icon-ignore-placement` or `text-ignore-placement` is `false`."
         },
         "viewport-y": {
-          "doc": "Symbols will be sorted by their y-position relative to the viewport."
+          "doc": "Sorts symbols by their y-position relative to the viewport if `icon-allow-overlap` or `text-allow-overlap` is set to `true` or `icon-ignore-placement` or `text-ignore-placement` is `false`."
         },
         "source": {
-          "doc": "Symbols will be rendered in the same order as the source data with no sorting applied."
+          "doc": "Sorts symbols by `symbol-sort-key` if set. Otherwise, no sorting is applied; symbols are rendered in the same order as the source data."
         }
       },
       "default": "auto",
-      "doc": "Controls the order in which overlapping symbols in the same layer are rendered",
+      "doc": "Determines whether overlapping symbols in the same layer are rendered in the order that they appear in the data source or by their y-position relative to the viewport. To control the order and prioritization of symbols otherwise, use `symbol-sort-key`.",
       "sdk-support": {
         "basic functionality": {
           "js": "0.49.0",
           "android": "6.6.0",
-          "ios": "4.5.0",
-          "macos": "0.12.0"
+          "ios": "4.5.0"
         }
       },
       "expression": {
@@ -1085,14 +1217,48 @@
       "default": false,
       "doc": "If true, the icon will be visible even if it collides with other previously drawn symbols.",
       "requires": [
-        "icon-image"
+        "icon-image",
+        {
+          "!": "icon-overlap"
+        }
       ],
       "sdk-support": {
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
+        }
+      },
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "property-type": "data-constant"
+    },
+    "icon-overlap": {
+      "type": "enum",
+      "values": {
+        "never": {
+          "doc": "The icon will be hidden if it collides with any other previously drawn symbol."
+        },
+        "always": {
+          "doc": "The icon will be visible even if it collides with any other previously drawn symbol."
+        },
+        "cooperative": {
+          "doc": "If the icon collides with another previously drawn symbol, the overlap mode for that symbol is checked. If the previous symbol was placed using `never` overlap mode, the new icon is hidden. If the previous symbol was placed using `always` or `cooperative` overlap mode, the new icon is visible."
+        }
+      },
+      "doc": "Allows for control over whether to show an icon when it overlaps other symbols on the map. If `icon-overlap` is not set, `icon-allow-overlap` is used instead.",
+      "requires": [
+        "icon-image"
+      ],
+      "sdk-support": {
+        "basic functionality": {
+          "js": "2.1.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/251",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/251"
         }
       },
       "expression": {
@@ -1114,8 +1280,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -1138,8 +1303,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -1172,14 +1336,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "`auto` value": {
           "js": "0.25.0",
           "android": "4.2.0",
-          "ios": "3.4.0",
-          "macos": "0.3.0"
+          "ios": "3.4.0"
         }
       },
       "expression": {
@@ -1203,14 +1365,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.35.0",
           "android": "5.1.0",
-          "ios": "3.6.0",
-          "macos": "0.5.0"
+          "ios": "3.6.0"
         }
       },
       "expression": {
@@ -1248,8 +1408,12 @@
         "basic functionality": {
           "js": "0.21.0",
           "android": "4.2.0",
-          "ios": "3.4.0",
-          "macos": "0.2.1"
+          "ios": "3.4.0"
+        },
+        "stretchable icons": {
+          "js": "1.6.0",
+          "android": "9.2.0",
+          "ios": "5.8.0"
         }
       },
       "expression": {
@@ -1287,8 +1451,7 @@
         "basic functionality": {
           "js": "0.21.0",
           "android": "4.2.0",
-          "ios": "3.4.0",
-          "macos": "0.2.1"
+          "ios": "3.4.0"
         }
       },
       "expression": {
@@ -1307,14 +1470,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.35.0",
           "android": "5.1.0",
-          "ios": "3.6.0",
-          "macos": "0.5.0"
+          "ios": "3.6.0"
         }
       },
       "expression": {
@@ -1339,14 +1500,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.21.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -1359,11 +1518,10 @@
       "property-type": "data-driven"
     },
     "icon-padding": {
-      "type": "number",
-      "default": 2,
-      "minimum": 0,
+      "type": "padding",
+      "default": [2],
       "units": "pixels",
-      "doc": "Size of the additional area around the icon bounding box used for detecting symbol collisions.",
+      "doc": "Size of additional area round the icon bounding box used for detecting symbol collisions.",
       "requires": [
         "icon-image"
       ],
@@ -1371,17 +1529,20 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
+        },
+        "data-driven styling": {
+          "js": "2.2.0"
         }
       },
       "expression": {
         "interpolated": true,
         "parameters": [
-          "zoom"
+          "zoom",
+          "feature"
         ]
       },
-      "property-type": "data-constant"
+      "property-type": "data-driven"
     },
     "icon-keep-upright": {
       "type": "boolean",
@@ -1403,8 +1564,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -1431,14 +1591,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.29.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -1490,14 +1648,12 @@
         "basic functionality": {
           "js": "0.40.0",
           "android": "5.2.0",
-          "ios": "3.7.0",
-          "macos": "0.6.0"
+          "ios": "3.7.0"
         },
         "data-driven styling": {
           "js": "0.40.0",
           "android": "5.2.0",
-          "ios": "3.7.0",
-          "macos": "0.6.0"
+          "ios": "3.7.0"
         }
       },
       "expression": {
@@ -1531,8 +1687,7 @@
         "basic functionality": {
           "js": "0.39.0",
           "android": "5.2.0",
-          "ios": "3.7.0",
-          "macos": "0.6.0"
+          "ios": "3.7.0"
         }
       },
       "expression": {
@@ -1565,14 +1720,12 @@
         "basic functionality": {
           "js": "0.21.0",
           "android": "4.2.0",
-          "ios": "3.4.0",
-          "macos": "0.2.1"
+          "ios": "3.4.0"
         },
         "`auto` value": {
           "js": "0.25.0",
           "android": "4.2.0",
-          "ios": "3.4.0",
-          "macos": "0.3.0"
+          "ios": "3.4.0"
         }
       },
       "expression": {
@@ -1592,6 +1745,9 @@
         "viewport": {
           "doc": "Produces glyphs whose x-axes are aligned with the x-axis of the viewport, regardless of the value of `symbol-placement`."
         },
+        "viewport-glyph": {
+          "doc": "When `symbol-placement` is set to `point`, aligns text to the x-axis of the viewport. When `symbol-placement` is set to `line` or `line-center`, aligns glyphs to the x-axis of the viewport and places them along the line."
+        },
         "auto": {
           "doc": "When `symbol-placement` is set to `point`, this is equivalent to `viewport`. When `symbol-placement` is set to `line` or `line-center`, this is equivalent to `map`."
         }
@@ -1605,14 +1761,15 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "`auto` value": {
           "js": "0.25.0",
           "android": "4.2.0",
-          "ios": "3.4.0",
-          "macos": "0.3.0"
+          "ios": "3.4.0"
+        },
+        "`viewport-glyph` value": {
+          "js": "2.1.8"
         }
       },
       "expression": {
@@ -1632,14 +1789,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.33.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -1666,14 +1821,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.43.0",
           "android": "6.0.0",
-          "ios": "4.0.0",
-          "macos": "0.7.0"
+          "ios": "4.0.0"
         }
       },
       "expression": {
@@ -1698,14 +1851,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.35.0",
           "android": "5.1.0",
-          "ios": "3.6.0",
-          "macos": "0.5.0"
+          "ios": "3.6.0"
         }
       },
       "expression": {
@@ -1730,14 +1881,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.40.0",
           "android": "5.2.0",
-          "ios": "3.7.0",
-          "macos": "0.6.0"
+          "ios": "3.7.0"
         }
       },
       "expression": {
@@ -1761,8 +1910,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -1785,14 +1933,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.40.0",
           "android": "5.2.0",
-          "ios": "3.7.0",
-          "macos": "0.6.0"
+          "ios": "3.7.0"
         }
       },
       "expression": {
@@ -1829,20 +1975,17 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.39.0",
           "android": "5.2.0",
-          "ios": "3.7.0",
-          "macos": "0.6.0"
+          "ios": "3.7.0"
         },
         "auto": {
           "js": "0.54.0",
           "android": "7.4.0",
-          "ios": "4.10.0",
-          "macos": "0.14.0"
+          "ios": "4.10.0"
         }
       },
       "expression": {
@@ -1863,14 +2006,12 @@
         "basic functionality": {
           "js": "0.54.0",
           "android": "7.4.0",
-          "ios": "4.10.0",
-          "macos": "0.14.0"
+          "ios": "4.10.0"
         },
         "data-driven styling": {
           "js": "0.54.0",
           "android": "7.4.0",
-          "ios": "4.10.0",
-          "macos": "0.14.0"
+          "ios": "4.10.0"
         }
       },
       "requires": [
@@ -1930,8 +2071,7 @@
         "basic functionality": {
           "js": "0.54.0",
           "android": "7.4.0",
-          "ios": "4.10.0",
-          "macos": "0.14.0"
+          "ios": "4.10.0"
         }
       },
       "expression": {
@@ -1941,6 +2081,38 @@
         ]
       },
       "property-type": "data-constant"
+    },
+    "text-variable-anchor-offset": {
+      "type": "variableAnchorOffsetCollection",
+      "requires": [
+        "text-field",
+        {
+          "symbol-placement": [
+            "point"
+          ]
+        }
+      ],
+      "doc": "To increase the chance of placing high-priority labels on the map, you can provide an array of `text-anchor` locations, each paired with an offset value. The renderer will attempt to place the label at each location, in order, before moving on to the next location+offset. Use `text-justify: auto` to choose justification based on anchor position. \n\n The length of the array must be even, and must alternate between enum and point entries. i.e., each anchor location must be accompanied by a point, and that point defines the offset when the corresponding anchor location is used. Positive offset values indicate right and down, while negative values indicate left and up. Anchor locations may repeat, allowing the renderer to try multiple offsets to try and place a label using the same anchor. \n\n When present, this property takes precedence over `text-anchor`, `text-variable-anchor`, `text-offset`, and `text-radial-offset`. \n\n ```json \n { \"text-variable-anchor-offset\": [\"top\", [0, 4], \"left\", [3,0], \"bottom\", [1, 1]] } \n ``` \n\n When the renderer chooses the `top` anchor, `[0, 4]` will be used for `text-offset`; the text will be shifted down by 4 ems. \n\n When the renderer chooses the `left` anchor, `[3, 0]` will be used for `text-offset`; the text will be shifted right by 3 ems.",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "3.3.0",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/2358",
+          "android": "https://github.com/maplibre/maplibre-native/issues/2358"
+        },
+        "data-driven styling": {
+          "js": "3.3.0",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/2358",
+          "android": "https://github.com/maplibre/maplibre-native/issues/2358"
+        }
+      },
+      "expression": {
+        "interpolated": true,
+        "parameters": [
+          "zoom",
+          "feature"
+        ]
+      },
+      "property-type": "data-driven"
     },
     "text-anchor": {
       "type": "enum",
@@ -1985,14 +2157,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.39.0",
           "android": "5.2.0",
-          "ios": "3.7.0",
-          "macos": "0.6.0"
+          "ios": "3.7.0"
         }
       },
       "expression": {
@@ -2022,8 +2192,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -2058,8 +2227,7 @@
         "basic functionality": {
           "js": "1.3.0",
           "android": "8.3.0",
-          "ios": "5.3.0",
-          "macos": "0.14.0"
+          "ios": "5.3.0"
         }
       },
       "expression": {
@@ -2083,14 +2251,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.35.0",
           "android": "5.1.0",
-          "ios": "3.6.0",
-          "macos": "0.5.0"
+          "ios": "3.6.0"
         }
       },
       "expression": {
@@ -2115,8 +2281,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -2147,8 +2312,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -2181,14 +2345,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.33.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -2220,14 +2382,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.35.0",
           "android": "5.1.0",
-          "ios": "3.6.0",
-          "macos": "0.5.0"
+          "ios": "3.6.0"
         }
       },
       "expression": {
@@ -2244,14 +2404,48 @@
       "default": false,
       "doc": "If true, the text will be visible even if it collides with other previously drawn symbols.",
       "requires": [
-        "text-field"
+        "text-field",
+        {
+          "!": "text-overlap"
+        }
       ],
       "sdk-support": {
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
+        }
+      },
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "property-type": "data-constant"
+    },
+    "text-overlap": {
+      "type": "enum",
+      "values": {
+        "never": {
+          "doc": "The text will be hidden if it collides with any other previously drawn symbol."
+        },
+        "always": {
+          "doc": "The text will be visible even if it collides with any other previously drawn symbol."
+        },
+        "cooperative": {
+          "doc": "If the text collides with another previously drawn symbol, the overlap mode for that symbol is checked. If the previous symbol was placed using `never` overlap mode, the new text is hidden. If the previous symbol was placed using `always` or `cooperative` overlap mode, the new text is visible."
+        }
+      },
+      "doc": "Allows for control over whether to show symbol text when it overlaps other symbols on the map. If `text-overlap` is not set, `text-allow-overlap` is used instead",
+      "requires": [
+        "text-field"
+      ],
+      "sdk-support": {
+        "basic functionality": {
+          "js": "2.1.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/251",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/251"
         }
       },
       "expression": {
@@ -2273,8 +2467,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -2297,8 +2490,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -2325,8 +2517,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "property-type": "constant"
@@ -2349,8 +2540,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "property-type": "constant"
@@ -2373,8 +2563,7 @@
         "basic functionality": {
           "js": "0.43.0",
           "android": "6.0.0",
-          "ios": "4.0.0",
-          "macos": "0.7.0"
+          "ios": "4.0.0"
         }
       },
       "property-type": "constant"
@@ -2529,136 +2718,248 @@
     "type": "enum",
     "values": {
       "let": {
-        "doc": "Binds expressions to named variables, which can then be referenced in the result expression using [\"var\", \"variable_name\"].",
+        "doc": "Binds expressions to named variables, which can then be referenced in the result expression using `[\"var\", \"variable_name\"]`.\n\n - [Visualize population density](https://maplibre.org/maplibre-gl-js/docs/examples/visualize-population-density/)",
+        "example": {
+          "syntax": {
+            "method": ["string", "value", "expression"],
+            "result": "value"
+          },
+          "value": ["let", "someNumber", 500, ["interpolate", ["linear"], ["var", "someNumber"], 274, "#edf8e9", 1551, "#006d2c"]]
+        },
         "group": "Variable binding",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "var": {
-        "doc": "References variable bound using \"let\".",
+        "doc": "References variable bound using `let`.\n\n - [Visualize population density](https://maplibre.org/maplibre-gl-js/docs/examples/visualize-population-density/)",
+        "example": {
+          "syntax": {
+            "method": ["string"],
+            "result": "value"
+          },
+          "value": ["var", "density"]
+        },
         "group": "Variable binding",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "literal": {
-        "doc": "Provides a literal array or object value.",
+        "doc": "Provides a literal array or object value.\n\n - [Display and style rich text labels](https://maplibre.org/maplibre-gl-js/docs/examples/display-and-style-rich-text-labels/)",
+        "example": {
+          "syntax": {
+            "method": ["JSON object or array"],
+            "result": "array | object"
+          },
+          "value": ["literal",["DIN Offc Pro Italic", "Arial Unicode MS Regular"]]
+        },
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "array": {
-        "doc": "Asserts that the input is an array (optionally with a specific item type and length).  If, when the input expression is evaluated, it is not of the asserted type, then this assertion will cause the whole expression to be aborted.",
+        "doc": "Asserts that the input is an array (optionally with a specific item type and length). If, when the input expression is evaluated, it is not of the asserted type, then this assertion will cause the whole expression to be aborted.",
+        "example": {
+          "syntax": {
+            "method": ["value", "string?", "number?"],
+            "result": "array"
+          },
+          "value": ["array", ["literal", ["a", "b", "c"]], "string", 3]
+        },
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "at": {
         "doc": "Retrieves an item from an array.",
+        "example": {
+          "syntax": {
+            "method": ["value", "number"],
+            "result": "value"
+          },
+          "value": ["at", ["literal", ["a", "b", "c"]], 1]
+        },
         "group": "Lookup",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "in": {
-        "doc": "Determines whether an item exists in an array or a substring exists in a string.",
+        "doc": "Determines whether an item exists in an array or a substring exists in a string.\n\n - [Measure distances](https://maplibre.org/maplibre-gl-js/docs/examples/measure/)",
+        "example": {
+          "syntax": {
+            "method": ["value", "value"],
+            "result": "boolean"
+          },
+          "value": ["in", "$type", "Point"]
+        },
         "group": "Lookup",
         "sdk-support": {
           "basic functionality": {
-            "js": "1.6.0"
+            "js": "1.6.0",
+            "android": "9.1.0",
+            "ios": "5.8.0"
+          }
+        }
+      },
+      "index-of": {
+        "doc": "Returns the first position at which an item can be found in an array or a substring can be found in a string, or `-1` if the input cannot be found. Accepts an optional index from where to begin the search. In a string, a UTF-16 surrogate pair counts as a single position.",
+        "example": {
+          "syntax": {
+            "method": ["value", "value", "number?"],
+            "result": "number"
+          },
+          "value": ["index-of", "foo", ["baz", "bar", "hello", "foo", "world"]]
+        },
+        "group": "Lookup",
+        "sdk-support": {
+          "basic functionality": {
+            "js": "1.10.0",
+            "android": "10.3.0",
+            "ios": "6.0.0"
+          }
+        }
+      },
+      "slice": {
+        "doc": "Returns an item from an array or a substring from a string from a specified start index, or between a start index and an end index if set. The return value is inclusive of the start index but not of the end index. In a string, a UTF-16 surrogate pair counts as a single position.",
+        "example": {
+          "syntax": {
+            "method": ["value", "number", "number?"],
+            "result": "value"
+          },
+          "value": ["slice", ["get", "name"], 0, 3]
+        },
+        "group": "Lookup",
+        "sdk-support": {
+          "basic functionality": {
+            "js": "1.10.0",
+            "android": "10.3.0",
+            "ios": "6.0.0"
           }
         }
       },
       "case": {
-        "doc": "Selects the first output whose corresponding test condition evaluates to true, or the fallback value otherwise.",
+        "doc": "Selects the first output whose corresponding test condition evaluates to true, or the fallback value otherwise.\n\n - [Create a hover effect](https://maplibre.org/maplibre-gl-js/docs/examples/hover-styles/)\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/cluster-html/)",
+        "example": {
+          "syntax": {
+            "method": ["value", "value", "...", "fallback: value"],
+            "result": "value"
+          },
+          "value": ["case", ["boolean", ["feature-state", "hover"], false], 1, 0.5 ]
+        },
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "match": {
-        "doc": "Selects the output whose label value matches the input value, or the fallback value if no match is found. The input can be any expression (e.g. `[\"get\", \"building_type\"]`). Each label must be either:\n * a single literal value; or\n * an array of literal values, whose values must be all strings or all numbers (e.g. `[100, 101]` or `[\"c\", \"b\"]`). The input matches if any of the values in the array matches, similar to the `\"in\"` operator.\n\nEach label must be unique. If the input type does not match the type of the labels, the result will be the fallback value.",
+        "doc": "Selects the output whose label value matches the input value, or the fallback value if no match is found. The input can be any expression (e.g. `[\"get\", \"building_type\"]`). Each label must be either:\n - a single literal value; or\n - an array of literal values, whose values must be all strings or all numbers (e.g. `[100, 101]` or `[\"c\", \"b\"]`). The input matches if any of the values in the array matches, similar to the `\"in\"` operator.\nEach label must be unique. If the input type does not match the type of the labels, the result will be the fallback value.",
+        "example": {
+          "syntax": {
+            "method": ["value", "value", "...", "fallback: value"],
+            "result": "value"
+          },
+          "value": ["match", ["get", "building_type"], "residential", "#f00", "commercial", "#0f0", "#000"]
+        },
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "coalesce": {
-        "doc": "Evaluates each expression in turn until the first non-null value is obtained, and returns that value.",
+        "doc": "Evaluates each expression in turn until the first non-null value is obtained, and returns that value.\n\n - [Use a fallback image](https://maplibre.org/maplibre-gl-js/docs/examples/fallback-image/)",
+        "example": {
+          "syntax": {
+            "method": ["coalesce", "value", "fallback"],
+            "result": "value"
+          },
+          "value": ["coalesce", ["image", ["concat", ["get", "icon"], "_15"]], ["image", "marker_15"] ]
+        },
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "step": {
-        "doc": "Produces discrete, stepped results by evaluating a piecewise-constant function defined by pairs of input and output values (\"stops\"). The `input` may be any numeric expression (e.g., `[\"get\", \"population\"]`). Stop inputs must be numeric literals in strictly ascending order. Returns the output value of the stop just less than the input, or the first output if the input is less than the first stop.",
+        "doc": "Produces discrete, stepped results by evaluating a piecewise-constant function defined by pairs of input and output values (\"stops\"). The `input` may be any numeric expression (e.g., `[\"get\", \"population\"]`). Stop inputs must be numeric literals in strictly ascending order. Returns the output value of the stop just less than the input, or the first output if the input is less than the first stop.\n\n - [Create and style clusters](https://maplibre.org/maplibre-gl-js/docs/examples/cluster/)",
+        "example": {
+          "syntax": {
+            "method": ["step", "number", "number", "number", "..."],
+            "result": "number"
+          },
+          "value": [ "step", ["get", "point_count"], 20, 100, 30, 750, 40]
+        },
         "group": "Ramps, scales, curves",
         "sdk-support": {
           "basic functionality": {
             "js": "0.42.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "interpolate": {
-        "doc": "Produces continuous, smooth results by interpolating between pairs of input and output values (\"stops\"). The `input` may be any numeric expression (e.g., `[\"get\", \"population\"]`). Stop inputs must be numeric literals in strictly ascending order. The output type must be `number`, `array<number>`, or `color`.\n\nInterpolation types:\n- `[\"linear\"]`: interpolates linearly between the pair of stops just less than and just greater than the input.\n- `[\"exponential\", base]`: interpolates exponentially between the stops just less than and just greater than the input. `base` controls the rate at which the output increases: higher values make the output increase more towards the high end of the range. With values close to 1 the output increases linearly.\n- `[\"cubic-bezier\", x1, y1, x2, y2]`: interpolates using the cubic bezier curve defined by the given control points.",
+        "doc": "Produces continuous, smooth results by interpolating between pairs of input and output values (\"stops\"). The `input` may be any numeric expression (e.g., `[\"get\", \"population\"]`). Stop inputs must be numeric literals in strictly ascending order. The output type must be `number`, `array<number>`, or `color`.\n\nInterpolation types:\n\n- `[\"linear\"]`, or an expression returning one of those types: Interpolates linearly between the pair of stops just less than and just greater than the input.\n- `[\"exponential\", base]`: Interpolates exponentially between the stops just less than and just greater than the input. `base` controls the rate at which the output increases: higher values make the output increase more towards the high end of the range. With values close to 1 the output increases linearly.\n- `[\"cubic-bezier\", x1, y1, x2, y2]`: Interpolates using the cubic bezier curve defined by the given control points.\n\n - [Animate map camera around a point](https://maplibre.org/maplibre-gl-js/docs/examples/animate-camera-around-point/)\n - [Change building color based on zoom level](https://maplibre.org/maplibre-gl-js/docs/examples/change-building-color-based-on-zoom-level/)\n - [Create a heatmap layer](https://maplibre.org/maplibre-gl-js/docs/examples/heatmap-layer/)\n - [Visualize population density](https://maplibre.org/maplibre-gl-js/docs/examples/visualize-population-density/)",
+        "example": {
+          "syntax": {
+            "method": ["[\"linear\"] | [\"exponential\", base] | [\"cubic-bezier\", x1, y1, x2, y2]", "number", "number", "number", "..."],
+            "result": "number | array<number> | color"
+          },
+          "value": ["interpolate", ["linear"], ["zoom"], 15, 0, 15.05, ["get", "height"]]
+        },
         "group": "Ramps, scales, curves",
         "sdk-support": {
           "basic functionality": {
             "js": "0.42.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "interpolate-hcl": {
         "doc": "Produces continuous, smooth results by interpolating between pairs of input and output values (\"stops\"). Works like `interpolate`, but the output type must be `color`, and the interpolation is performed in the Hue-Chroma-Luminance color space.",
+        "example": {
+          "syntax": {
+            "method": ["[\"linear\"] | [\"exponential\", base] | [\"cubic-bezier\", x1, y1, x2, y2]", "number", "number", "number", "..."],
+            "result": "color"
+          },
+          "value": ["interpolate-hcl", ["linear"], ["zoom"], 15, "#f00", 15.05, "#00f"]
+        },
         "group": "Ramps, scales, curves",
         "sdk-support": {
           "basic functionality": {
@@ -2668,6 +2969,13 @@
       },
       "interpolate-lab": {
         "doc": "Produces continuous, smooth results by interpolating between pairs of input and output values (\"stops\"). Works like `interpolate`, but the output type must be `color`, and the interpolation is performed in the CIELAB color space.",
+        "example": {
+          "syntax": {
+            "method": ["[\"linear\"] | [\"exponential\", base] | [\"cubic-bezier\", x1, y1, x2, y2]", "number", "number", "number", "..."],
+            "result": "color"
+          },
+          "value": ["interpolate-lab", ["linear"], ["zoom"], 15, "#f00", 15.05, "#00f"]
+        },
         "group": "Ramps, scales, curves",
         "sdk-support": {
           "basic functionality": {
@@ -2677,158 +2985,231 @@
       },
       "ln2": {
         "doc": "Returns mathematical constant ln(2).",
+        "example": {
+          "syntax": {
+            "method": [],
+            "result": "number"
+          },
+          "value": ["ln2"]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "pi": {
         "doc": "Returns the mathematical constant pi.",
+        "example": {
+          "syntax": {
+            "method": [],
+            "result": "number"
+          },
+          "value": ["pi"]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "e": {
         "doc": "Returns the mathematical constant e.",
+        "example": {
+          "syntax": {
+            "method": [],
+            "result": "number"
+          },
+          "value": ["e"]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "typeof": {
         "doc": "Returns a string describing the type of the given value.",
+        "example": {
+          "syntax": {
+            "method": ["value"],
+            "result": "string"
+          },
+          "value": ["typeof", ["get", "name"]]
+        },
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "string": {
         "doc": "Asserts that the input value is a string. If multiple values are provided, each one is evaluated in order until a string is obtained. If none of the inputs are strings, the expression is an error.",
+        "example": {
+          "syntax": {
+            "method": ["value", "fallback: value", "fallback: value", "..."],
+            "result": "string"
+          },
+          "value": ["string", ["get", "name"]]
+        },
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "number": {
         "doc": "Asserts that the input value is a number. If multiple values are provided, each one is evaluated in order until a number is obtained. If none of the inputs are numbers, the expression is an error.",
+        "example": {
+          "syntax": {
+            "method": ["value", "fallback: value", "fallback: value", "..."],
+            "result": "number"
+          },
+          "value": ["number", ["get", "population"]]
+        },
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "boolean": {
-        "doc": "Asserts that the input value is a boolean. If multiple values are provided, each one is evaluated in order until a boolean is obtained. If none of the inputs are booleans, the expression is an error.",
+        "doc": "Asserts that the input value is a boolean. If multiple values are provided, each one is evaluated in order until a boolean is obtained. If none of the inputs are booleans, the expression is an error.\n\n - [Create a hover effect](https://maplibre.org/maplibre-gl-js/docs/examples/hover-styles/)",
+        "example": {
+          "syntax": {
+            "method": ["value", "fallback: value", "fallback: value", "..."],
+            "result": "boolean"
+          },
+          "value": ["boolean", ["feature-state", "hover"], false]
+        },
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "object": {
         "doc": "Asserts that the input value is an object. If multiple values are provided, each one is evaluated in order until an object is obtained. If none of the inputs are objects, the expression is an error.",
+        "example": {
+          "syntax": {
+            "method": ["value", "fallback: value", "fallback: value", "..."],
+            "result": "object"
+          },
+          "value": ["object", ["get", "some-property"]]
+        },
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "collator": {
         "doc": "Returns a `collator` for use in locale-dependent comparison operations. The `case-sensitive` and `diacritic-sensitive` options default to `false`. The `locale` argument specifies the IETF language tag of the locale to use. If none is provided, the default locale is used. If the requested locale is not available, the `collator` will use a system-defined fallback locale. Use `resolved-locale` to test the results of locale fallback behavior.",
+        "example": {
+          "syntax": {
+            "method": ["collator", "{ \"case-sensitive\": boolean, \"diacritic-sensitive\": boolean, \"locale\": string }"],
+            "result": "collator"
+          },
+          "value": ["collator", {"case-sensitive": true, "diacritic-sensitive": true, "locale": "fr"}]
+        },
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
             "js": "0.45.0",
             "android": "6.5.0",
-            "ios": "4.2.0",
-            "macos": "0.9.0"
+            "ios": "4.2.0"
           }
         }
       },
       "format": {
-        "doc": "Returns `formatted` text containing annotations for use in mixed-format `text-field` entries. For a `text-field` entries of a string type, following option object's properties are supported: If set, the `text-font` value overrides the font specified by the root layout properties. If set, the `font-scale` value specifies a scaling factor relative to the `text-size` specified in the root layout properties. If set, the `text-color` value overrides the color specified by the root paint properties for this layer.",
+        "doc": "Returns a `formatted` string for displaying mixed-format text in the `text-field` property. The input may contain a string literal or expression, including an [`'image'`](#image) expression. Strings may be followed by a style override object that supports the following properties:\n- `\"text-font\"`: Overrides the font stack specified by the root layout property.\n- `\"text-color\"`: Overrides the color specified by the root paint property.\n- `\"font-scale\"`: Applies a scaling factor on `text-size` as specified by the root layout property.\n\n - [Change the case of labels](https://maplibre.org/maplibre-gl-js/docs/examples/change-case-of-labels/)\n - [Display and style rich text labels](https://maplibre.org/maplibre-gl-js/docs/examples/display-and-style-rich-text-labels/)",
+        "example": {
+          "syntax": {
+            "method": ["value", "{ \"text-font\": string, \"text-color\": color, \"font-scale\": number }", "..."],
+            "result": "formatted"
+          },
+          "value": ["format", ["upcase", ["get", "FacilityName"]], {"font-scale": 0.8}, "\n", {}, ["downcase", ["get", "Comments"]], {"font-scale": 0.6}]
+        },
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
             "js": "0.48.0",
             "android": "6.7.0",
-            "ios": "4.6.0",
-            "macos": "0.12.0"
+            "ios": "4.6.0"
           },
           "text-font": {
             "js": "0.48.0",
             "android": "6.7.0",
-            "ios": "4.6.0",
-            "macos": "0.12.0"
+            "ios": "4.6.0"
           },
           "font-scale": {
             "js": "0.48.0",
             "android": "6.7.0",
-            "ios": "4.6.0",
-            "macos": "0.12.0"
+            "ios": "4.6.0"
           },
           "text-color": {
             "js": "1.3.0",
             "android": "7.3.0",
-            "ios": "4.10.0",
-            "macos": "0.14.0"
+            "ios": "4.10.0"
           },
           "image": {
-            "js": "1.6.0"
+            "js": "1.6.0",
+            "android": "8.6.0",
+            "ios": "5.7.0"
           }
         }
       },
       "image": {
-        "doc": "Returns an `image` type for use in `icon-image`, `*-pattern` entries and as a section in the `format` expression. If set, the `image` argument will check that the requested image exists in the style and will return either the resolved image name or `null`, depending on whether or not the image is currently in the style. This validation process is synchronous and requires the image to have been added to the style before requesting it in the `image` argument.",
+        "doc": "Returns an `image` type for use in `icon-image`, `*-pattern` entries and as a section in the `format` expression. If set, the `image` argument will check that the requested image exists in the style and will return either the resolved image name or `null`, depending on whether or not the image is currently in the style. This validation process is synchronous and requires the image to have been added to the style before requesting it in the `image` argument.\n\n - [Use a fallback image](https://maplibre.org/maplibre-gl-js/docs/examples/fallback-image/)",
+        "example": {
+          "syntax": {
+            "method": ["value"],
+            "result": "image"
+          },
+          "value": ["image", "marker_15"]
+        },
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
             "js": "1.4.0",
             "android": "8.6.0",
-            "ios": "5.6.0"
+            "ios": "5.7.0"
           }
         }
       },
       "number-format": {
-        "doc": "Converts the input number into a string representation using the providing formatting rules. If set, the `locale` argument specifies the locale to use, as a BCP 47 language tag. If set, the `currency` argument specifies an ISO 4217 code to use for currency-style formatting. If set, the `min-fraction-digits` and `max-fraction-digits` arguments specify the minimum and maximum number of fractional digits to include.",
+        "doc": "Converts the input number into a string representation using the providing formatting rules. If set, the `locale` argument specifies the locale to use, as a BCP 47 language tag. If set, the `currency` argument specifies an ISO 4217 code to use for currency-style formatting. If set, the `min-fraction-digits` and `max-fraction-digits` arguments specify the minimum and maximum number of fractional digits to include.\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/cluster-html/)",
+        "example": {
+          "syntax": {
+            "method": ["number", "{ \"locale\": string, \"currency\": string, \"min-fraction-digits\": number, \"max-fraction-digits\": number }"],
+            "result": "string"
+          },
+          "value": ["number-format", ["get", "mag"], {"min-fraction-digits": 1, "max-fraction-digits": 1}]
+        },
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
@@ -2837,139 +3218,212 @@
         }
       },
       "to-string": {
-        "doc": "Converts the input value to a string. If the input is `null`, the result is `\"\"`. If the input is a boolean, the result is `\"true\"` or `\"false\"`. If the input is a number, it is converted to a string as specified by the [\"NumberToString\" algorithm](https://tc39.github.io/ecma262/#sec-tostring-applied-to-the-number-type) of the ECMAScript Language Specification. If the input is a color, it is converted to a string of the form `\"rgba(r,g,b,a)\"`, where `r`, `g`, and `b` are numerals ranging from 0 to 255, and `a` ranges from 0 to 1. Otherwise, the input is converted to a string in the format specified by the [`JSON.stringify`](https://tc39.github.io/ecma262/#sec-json.stringify) function of the ECMAScript Language Specification.",
+        "doc": "Converts the input value to a string. If the input is `null`, the result is `\"\"`. If the input is a boolean, the result is `\"true\"` or `\"false\"`. If the input is a number, it is converted to a string as specified by the [\"NumberToString\" algorithm](https://tc39.github.io/ecma262/#sec-tostring-applied-to-the-number-type) of the ECMAScript Language Specification. If the input is a color, it is converted to a string of the form `\"rgba(r,g,b,a)\"`, where `r`, `g`, and `b` are numerals ranging from 0 to 255, and `a` ranges from 0 to 1. Otherwise, the input is converted to a string in the format specified by the [`JSON.stringify`](https://tc39.github.io/ecma262/#sec-json.stringify) function of the ECMAScript Language Specification.\n\n - [Create a time slider](https://maplibre.org/maplibre-gl-js/docs/examples/timeline-animation/)",
+        "example": {
+          "syntax": {
+            "method": ["value"],
+            "result": "string"
+          },
+          "value": ["to-string", ["get", "mag"]]
+        },
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "to-number": {
         "doc": "Converts the input value to a number, if possible. If the input is `null` or `false`, the result is 0. If the input is `true`, the result is 1. If the input is a string, it is converted to a number as specified by the [\"ToNumber Applied to the String Type\" algorithm](https://tc39.github.io/ecma262/#sec-tonumber-applied-to-the-string-type) of the ECMAScript Language Specification. If multiple values are provided, each one is evaluated in order until the first successful conversion is obtained. If none of the inputs can be converted, the expression is an error.",
+        "example": {
+          "syntax": {
+            "method": ["value", "fallback: value", "fallback: value", "..."],
+            "result": "number"
+          },
+          "value": ["to-number", "someProperty"]
+        },
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "to-boolean": {
         "doc": "Converts the input value to a boolean. The result is `false` when then input is an empty string, 0, `false`, `null`, or `NaN`; otherwise it is `true`.",
+        "example": {
+          "syntax": {
+            "method": ["value"],
+            "result": "boolean"
+          },
+          "value": ["to-boolean", "someProperty"]
+        },
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "to-rgba": {
         "doc": "Returns a four-element array containing the input color's red, green, blue, and alpha components, in that order.",
+        "example": {
+          "syntax": {
+            "method": ["color"],
+            "result": "array"
+          },
+          "value": ["to-rgba", "#ff0000"]
+        },
         "group": "Color",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "to-color": {
-        "doc": "Converts the input value to a color. If multiple values are provided, each one is evaluated in order until the first successful conversion is obtained. If none of the inputs can be converted, the expression is an error.",
+        "doc": "Converts the input value to a color. If multiple values are provided, each one is evaluated in order until the first successful conversion is obtained. If none of the inputs can be converted, the expression is an error.\n\n - [Visualize population density](https://maplibre.org/maplibre-gl-js/docs/examples/visualize-population-density/)",
+        "example": {
+          "syntax": {
+            "method": ["value", "fallback: value", "fallback: value", "..."],
+            "result": "color"
+          },
+          "value": ["to-color", "#edf8e9"]
+        },
         "group": "Types",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "rgb": {
         "doc": "Creates a color value from red, green, and blue components, which must range between 0 and 255, and an alpha component of 1. If any component is out of range, the expression is an error.",
+        "example": {
+          "syntax": {
+            "method": ["number", "number", "number"],
+            "result": "color"
+          },
+          "value": ["rgb", 255, 0, 0]
+        },
         "group": "Color",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "rgba": {
         "doc": "Creates a color value from red, green, blue components, which must range between 0 and 255, and an alpha component which must range between 0 and 1. If any component is out of range, the expression is an error.",
+        "example": {
+          "syntax": {
+            "method": ["number", "number", "number", "number"],
+            "result": "color"
+          },
+          "value": ["rgba", 255, 0, 0, 1]
+        },
         "group": "Color",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "get": {
-        "doc": "Retrieves a property value from the current feature's properties, or from another object if a second argument is provided. Returns null if the requested property is missing.",
+        "doc": "Retrieves a property value from the current feature's properties, or from another object if a second argument is provided. Returns null if the requested property is missing.\n\n - [Change the case of labels](https://maplibre.org/maplibre-gl-js/docs/examples/change-case-of-labels/)\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/cluster-html/)\n - [Extrude polygons for 3D indoor mapping](https://maplibre.org/maplibre-gl-js/docs/examples/3d-extrusion-floorplan/)",
+        "example": {
+          "syntax": {
+            "method": ["string"],
+            "result": "value"
+          },
+          "value": ["get", "someProperty"]
+        },
         "group": "Lookup",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "has": {
-        "doc": "Tests for the presence of an property value in the current feature's properties, or from another object if a second argument is provided.",
+        "doc": "Tests for the presence of an property value in the current feature's properties, or from another object if a second argument is provided.\n\n - [Create and style clusters](https://maplibre.org/maplibre-gl-js/docs/examples/cluster/)",
+        "example": {
+          "syntax": {
+            "method": ["string"],
+            "result": "boolean"
+          },
+          "value": ["has", "someProperty"]
+        },
         "group": "Lookup",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "length": {
-        "doc": "Gets the length of an array or string.",
+        "doc": "Gets the length of an array or string. In a string, a UTF-16 surrogate pair counts as a single position.",
+        "example": {
+          "syntax": {
+            "method": ["array"],
+            "result": "number"
+          },
+          "value": ["length", ["get", "myArray"]]
+        },
         "group": "Lookup",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "properties": {
         "doc": "Gets the feature properties object.  Note that in some cases, it may be more efficient to use [\"get\", \"property_name\"] directly.",
+        "example": {
+          "syntax": {
+            "method": [],
+            "result": "value"
+          },
+          "value": ["properties"]
+        },
         "group": "Feature data",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "feature-state": {
-        "doc": "Retrieves a property value from the current feature's state. Returns null if the requested property is not present on the feature's state. A feature's state is not part of the GeoJSON or vector tile data, and must be set programmatically on each feature. Features are identified by their `id` attribute, which must be an integer or a string that can be cast to an integer. Note that [\"feature-state\"] can only be used with paint properties that support data-driven styling.",
+        "doc": "Retrieves a property value from the current feature's state. Returns null if the requested property is not present on the feature's state. A feature's state is not part of the GeoJSON or vector tile data, and must be set programmatically on each feature. When `source.promoteId` is not provided, features are identified by their `id` attribute, which must be an integer or a string that can be cast to an integer. When `source.promoteId` is provided, features are identified by their `promoteId` property, which may be a number, string, or any primitive data type. Note that [\"feature-state\"] can only be used with paint properties that support data-driven styling.\n\n - [Create a hover effect](https://maplibre.org/maplibre-gl-js/docs/examples/hover-styles/)",
+        "example": {
+          "syntax": {
+            "method": ["string"],
+            "result": "value"
+          },
+          "value": ["feature-state", "hover"]
+        },
         "group": "Feature data",
         "sdk-support": {
           "basic functionality": {
@@ -2978,67 +3432,104 @@
         }
       },
       "geometry-type": {
-        "doc": "Gets the feature's geometry type: Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon.",
+        "doc": "Gets the feature's geometry type: `Point`, `MultiPoint`, `LineString`, `MultiLineString`, `Polygon`, `MultiPolygon`.",
+        "example": {
+          "syntax": {
+            "method": [],
+            "result": "string"
+          },
+          "value": ["==", ["geometry-type"], "Polygon"]
+        },
         "group": "Feature data",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "id": {
         "doc": "Gets the feature's id, if it has one.",
+        "example": {
+          "syntax": {
+            "method": [],
+            "result": "value"
+          },
+          "value": ["id"]
+        },
         "group": "Feature data",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "zoom": {
         "doc": "Gets the current zoom level.  Note that in style layout and paint properties, [\"zoom\"] may only appear as the input to a top-level \"step\" or \"interpolate\" expression.",
+        "example": {
+          "syntax": {
+            "method": [],
+            "result": "number"
+          },
+          "value": ["interpolate",["linear"],["zoom"],15,0,15.05,["get","height"]]
+        },
         "group": "Zoom",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "heatmap-density": {
         "doc": "Gets the kernel density estimation of a pixel in a heatmap layer, which is a relative measure of how many data points are crowded around a particular pixel. Can only be used in the `heatmap-color` property.",
+        "example": {
+          "syntax": {
+            "method": [],
+            "result": "number"
+          },
+          "value": ["heatmap-density"]
+        },
         "group": "Heatmap",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "line-progress": {
         "doc": "Gets the progress along a gradient line. Can only be used in the `line-gradient` property.",
+        "example": {
+          "syntax": {
+            "method": ["number"],
+            "result": "number"
+          },
+          "value": ["line-progress", 0.5]
+        },
         "group": "Feature data",
         "sdk-support": {
           "basic functionality": {
             "js": "0.45.0",
             "android": "6.5.0",
-            "ios": "4.6.0",
-            "macos": "0.12.0"
+            "ios": "4.6.0"
           }
         }
       },
       "accumulated": {
         "doc": "Gets the value of a cluster property accumulated so far. Can only be used in the `clusterProperties` option of a clustered GeoJSON source.",
+        "example": {
+          "syntax": {
+            "method": ["string"],
+            "result": "value"
+          },
+          "value": ["accumulated", "sum"]
+        },
         "group": "Feature data",
         "sdk-support": {
           "basic functionality": {
@@ -3048,414 +3539,637 @@
       },
       "+": {
         "doc": "Returns the sum of the inputs.",
+        "example": {
+          "syntax": {
+            "method": ["number", "number", "..."],
+            "result": "number"
+          },
+          "value": ["+", 2, 3]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "*": {
         "doc": "Returns the product of the inputs.",
+        "example": {
+          "syntax": {
+            "method": ["number", "number", "..."],
+            "result": "number"
+          },
+          "value": ["*", 2, 3]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "-": {
         "doc": "For two inputs, returns the result of subtracting the second input from the first. For a single input, returns the result of subtracting it from 0.",
+        "example": {
+          "syntax": {
+            "method": ["number", "number?"],
+            "result": "number"
+          },
+          "value": ["-", 10]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "/": {
-        "doc": "Returns the result of floating point division of the first input by the second.",
+        "doc": "Returns the result of floating point division of the first input by the second.\n\n - [Visualize population density](https://maplibre.org/maplibre-gl-js/docs/examples/visualize-population-density/)",
+        "example": {
+          "syntax": {
+            "method": ["number", "number"],
+            "result": "number"
+          },
+          "value": ["/", ["get", "population"], ["get", "sq-km"]]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "%": {
         "doc": "Returns the remainder after integer division of the first input by the second.",
+        "example": {
+          "syntax": {
+            "method": ["number", "number"],
+            "result": "number"
+          },
+          "value": ["%", 10, 3]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "^": {
         "doc": "Returns the result of raising the first input to the power specified by the second.",
+        "example": {
+          "syntax": {
+            "method": ["number", "number"],
+            "result": "number"
+          },
+          "value": ["^", 2, 3]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "sqrt": {
         "doc": "Returns the square root of the input.",
+        "example": {
+          "syntax": {
+            "method": ["number"],
+            "result": "number"
+          },
+          "value": ["sqrt", 9]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.42.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "log10": {
         "doc": "Returns the base-ten logarithm of the input.",
+        "example": {
+          "syntax": {
+            "method": ["number"],
+            "result": "number"
+          },
+          "value": ["log10", 8]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "ln": {
         "doc": "Returns the natural logarithm of the input.",
+        "example": {
+          "syntax": {
+            "method": ["number"],
+            "result": "number"
+          },
+          "value": ["ln", 8]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "log2": {
         "doc": "Returns the base-two logarithm of the input.",
+        "example": {
+          "syntax": {
+            "method": ["number"],
+            "result": "number"
+          },
+          "value": ["log2", 8]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "sin": {
         "doc": "Returns the sine of the input.",
+        "example": {
+          "syntax": {
+            "method": ["number"],
+            "result": "number"
+          },
+          "value": ["sin", 1]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "cos": {
         "doc": "Returns the cosine of the input.",
+        "example": {
+          "syntax": {
+            "method": ["number"],
+            "result": "number"
+          },
+          "value": ["cos", 1]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "tan": {
         "doc": "Returns the tangent of the input.",
+        "example": {
+          "syntax": {
+            "method": ["number"],
+            "result": "number"
+          },
+          "value": ["tan", 1]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "asin": {
         "doc": "Returns the arcsine of the input.",
+        "example": {
+          "syntax": {
+            "method": ["number"],
+            "result": "number"
+          },
+          "value": ["asin", 1]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "acos": {
         "doc": "Returns the arccosine of the input.",
+        "example": {
+          "syntax": {
+            "method": ["number"],
+            "result": "number"
+          },
+          "value": ["acos", 1]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "atan": {
         "doc": "Returns the arctangent of the input.",
+        "example": {
+          "syntax": {
+            "method": ["number"],
+            "result": "number"
+          },
+          "value": ["atan", 1]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "min": {
         "doc": "Returns the minimum value of the inputs.",
+        "example": {
+          "syntax": {
+            "method": ["number", "number", "..."],
+            "result": "number"
+          },
+          "value": ["min", 1, 2]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "max": {
         "doc": "Returns the maximum value of the inputs.",
+        "example": {
+          "syntax": {
+            "method": ["number", "number", "..."],
+            "result": "number"
+          },
+          "value": ["max", 1, 2]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "round": {
         "doc": "Rounds the input to the nearest integer. Halfway values are rounded away from zero. For example, `[\"round\", -1.5]` evaluates to -2.",
+        "example": {
+          "syntax": {
+            "method": ["number"],
+            "result": "number"
+          },
+          "value": ["round", 1.5]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.45.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "abs": {
         "doc": "Returns the absolute value of the input.",
+        "example": {
+          "syntax": {
+            "method": ["number"],
+            "result": "number"
+          },
+          "value": ["abs", -1.5]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.45.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "ceil": {
         "doc": "Returns the smallest integer that is greater than or equal to the input.",
+        "example": {
+          "syntax": {
+            "method": ["number"],
+            "result": "number"
+          },
+          "value": ["ceil", 1.5]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.45.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "floor": {
         "doc": "Returns the largest integer that is less than or equal to the input.",
+        "example": {
+          "syntax": {
+            "method": ["number"],
+            "result": "number"
+          },
+          "value": ["floor", 1.5]
+        },
         "group": "Math",
         "sdk-support": {
           "basic functionality": {
             "js": "0.45.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
+          }
+        }
+      },
+      "distance": {
+        "doc": "Returns the shortest distance in meters between the evaluated feature and the input geometry. The input value can be a valid GeoJSON of type `Point`, `MultiPoint`, `LineString`, `MultiLineString`, `Polygon`, `MultiPolygon`, `Feature`, or `FeatureCollection`. Distance values returned may vary in precision due to loss in precision from encoding geometries, particularly below zoom level 13.",
+        "example": {
+          "syntax": {
+            "method": ["GeoJSON geometry"],
+            "result": "number"
+          },
+          "value": ["distance", { "type": "Point", "coordinates": [0, 0]}]
+        },
+        "group": "Math",
+        "sdk-support": {
+          "basic functionality": {
+            "js": "4.2.0",
+            "android": "9.2.0",
+            "ios": "5.9.0"
           }
         }
       },
       "==": {
-        "doc": "Returns `true` if the input values are equal, `false` otherwise. The comparison is strictly typed: values of different runtime types are always considered unequal. Cases where the types are known to be different at parse time are considered invalid and will produce a parse error. Accepts an optional `collator` argument to control locale-dependent string comparisons.",
+        "doc": "Returns `true` if the input values are equal, `false` otherwise. The comparison is strictly typed: values of different runtime types are always considered unequal. Cases where the types are known to be different at parse time are considered invalid and will produce a parse error. Accepts an optional `collator` argument to control locale-dependent string comparisons.\n\n - [Add multiple geometries from one GeoJSON source](https://maplibre.org/maplibre-gl-js/docs/examples/multiple-geometries/)\n - [Create a time slider](https://maplibre.org/maplibre-gl-js/docs/examples/timeline-animation/)\n - [Display buildings in 3D](https://maplibre.org/maplibre-gl-js/docs/examples/3d-buildings/)\n - [Filter symbols by toggling a list](https://maplibre.org/maplibre-gl-js/docs/examples/filter-markers/)",
+        "example": {
+          "syntax": {
+            "method": ["value", "value", "collator?"],
+            "result": "boolean"
+          },
+          "value": ["==", "$type", "Polygon"]
+        },
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           },
           "collator": {
             "js": "0.45.0",
             "android": "6.5.0",
-            "ios": "4.2.0",
-            "macos": "0.9.0"
+            "ios": "4.2.0"
           }
         }
       },
       "!=": {
-        "doc": "Returns `true` if the input values are not equal, `false` otherwise. The comparison is strictly typed: values of different runtime types are always considered unequal. Cases where the types are known to be different at parse time are considered invalid and will produce a parse error. Accepts an optional `collator` argument to control locale-dependent string comparisons.",
+        "doc": "Returns `true` if the input values are not equal, `false` otherwise. The comparison is strictly typed: values of different runtime types are always considered unequal. Cases where the types are known to be different at parse time are considered invalid and will produce a parse error. Accepts an optional `collator` argument to control locale-dependent string comparisons.\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/cluster-html/)",
+        "example": {
+          "syntax": {
+            "method": ["value", "value", "collator?"],
+            "result": "boolean"
+          },
+          "value": ["!=", "cluster", true]
+        },
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           },
           "collator": {
             "js": "0.45.0",
             "android": "6.5.0",
-            "ios": "4.2.0",
-            "macos": "0.9.0"
+            "ios": "4.2.0"
           }
         }
       },
       ">": {
         "doc": "Returns `true` if the first input is strictly greater than the second, `false` otherwise. The arguments are required to be either both strings or both numbers; if during evaluation they are not, expression evaluation produces an error. Cases where this constraint is known not to hold at parse time are considered in valid and will produce a parse error. Accepts an optional `collator` argument to control locale-dependent string comparisons.",
+        "example": {
+            "syntax": {
+              "method": ["value", "value", "collator?"],
+              "result": "boolean"
+            },
+            "value": [">", ["get", "mag"], 2]
+        },
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           },
           "collator": {
             "js": "0.45.0",
             "android": "6.5.0",
-            "ios": "4.2.0",
-            "macos": "0.9.0"
+            "ios": "4.2.0"
           }
         }
       },
       "<": {
-        "doc": "Returns `true` if the first input is strictly less than the second, `false` otherwise. The arguments are required to be either both strings or both numbers; if during evaluation they are not, expression evaluation produces an error. Cases where this constraint is known not to hold at parse time are considered in valid and will produce a parse error. Accepts an optional `collator` argument to control locale-dependent string comparisons.",
+        "doc": "Returns `true` if the first input is strictly less than the second, `false` otherwise. The arguments are required to be either both strings or both numbers; if during evaluation they are not, expression evaluation produces an error. Cases where this constraint is known not to hold at parse time are considered in valid and will produce a parse error. Accepts an optional `collator` argument to control locale-dependent string comparisons.\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/cluster-html/)",
+        "example": {
+          "syntax": {
+            "method": ["value", "value", "collator?"],
+            "result": "boolean"
+          },
+          "value": ["<", ["get", "mag"], 2]
+        },
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           },
           "collator": {
             "js": "0.45.0",
             "android": "6.5.0",
-            "ios": "4.2.0",
-            "macos": "0.9.0"
+            "ios": "4.2.0"
           }
         }
       },
       ">=": {
-        "doc": "Returns `true` if the first input is greater than or equal to the second, `false` otherwise. The arguments are required to be either both strings or both numbers; if during evaluation they are not, expression evaluation produces an error. Cases where this constraint is known not to hold at parse time are considered in valid and will produce a parse error. Accepts an optional `collator` argument to control locale-dependent string comparisons.",
+        "doc": "Returns `true` if the first input is greater than or equal to the second, `false` otherwise. The arguments are required to be either both strings or both numbers; if during evaluation they are not, expression evaluation produces an error. Cases where this constraint is known not to hold at parse time are considered in valid and will produce a parse error. Accepts an optional `collator` argument to control locale-dependent string comparisons.\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/cluster-html/)",
+        "example": {
+          "syntax": {
+            "method": ["value", "value", "collator?"],
+            "result": "boolean"
+          },
+          "value": [">=", ["get", "mag"], 6]
+        },
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           },
           "collator": {
             "js": "0.45.0",
             "android": "6.5.0",
-            "ios": "4.2.0",
-            "macos": "0.9.0"
+            "ios": "4.2.0"
           }
         }
       },
       "<=": {
         "doc": "Returns `true` if the first input is less than or equal to the second, `false` otherwise. The arguments are required to be either both strings or both numbers; if during evaluation they are not, expression evaluation produces an error. Cases where this constraint is known not to hold at parse time are considered in valid and will produce a parse error. Accepts an optional `collator` argument to control locale-dependent string comparisons.",
+        "example": {
+            "syntax": {
+              "method": ["value", "value", "collator?"],
+              "result": "boolean"
+            },
+            "value": ["<=", ["get", "mag"], 6]
+        },
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           },
           "collator": {
             "js": "0.45.0",
             "android": "6.5.0",
-            "ios": "4.2.0",
-            "macos": "0.9.0"
+            "ios": "4.2.0"
           }
         }
       },
       "all": {
-        "doc": "Returns `true` if all the inputs are `true`, `false` otherwise. The inputs are evaluated in order, and evaluation is short-circuiting: once an input expression evaluates to `false`, the result is `false` and no further input expressions are evaluated.",
+        "doc": "Returns `true` if all the inputs are `true`, `false` otherwise. The inputs are evaluated in order, and evaluation is short-circuiting: once an input expression evaluates to `false`, the result is `false` and no further input expressions are evaluated.\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/cluster-html/)",
+        "example": {
+          "syntax": {
+            "method": ["boolean", "boolean", "..."],
+            "result": "boolean"
+          },
+          "value": ["all", [">=", ["get", "mag"], 4], ["<", ["get", "mag"], 5]]
+        },
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "any": {
         "doc": "Returns `true` if any of the inputs are `true`, `false` otherwise. The inputs are evaluated in order, and evaluation is short-circuiting: once an input expression evaluates to `true`, the result is `true` and no further input expressions are evaluated.",
+        "example": {
+          "syntax": {
+            "method": ["boolean", "boolean", "..."],
+            "result": "boolean"
+          },
+          "value": ["any", [">=", ["get", "mag"], 4], ["<", ["get", "mag"], 5]]
+        },
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "!": {
-        "doc": "Logical negation. Returns `true` if the input is `false`, and `false` if the input is `true`.",
+        "doc": "Logical negation. Returns `true` if the input is `false`, and `false` if the input is `true`.\n\n - [Create and style clusters](https://maplibre.org/maplibre-gl-js/docs/examples/cluster/)",
+        "example": {
+          "syntax": {
+            "method": ["value", "value", "collator?"],
+            "result": "boolean"
+          },
+          "value": ["!", ["has", "point_count"]]
+        },
         "group": "Decision",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
+          }
+        }
+      },
+      "within": {
+        "doc": "Returns `true` if the evaluated feature is fully contained inside a boundary of the input geometry, `false` otherwise. The input value can be a valid GeoJSON of type `Polygon`, `MultiPolygon`, `Feature`, or `FeatureCollection`. Supported features for evaluation:\n- `Point`: Returns `false` if a point is on the boundary or falls outside the boundary.\n- `LineString`: Returns `false` if any part of a line falls outside the boundary, the line intersects the boundary, or a line's endpoint is on the boundary.",
+        "example": {
+          "syntax": {
+            "method": ["GeoJSON geometry"],
+            "result": "boolean"
+          },
+          "value": ["within", {"type": "Polygon","coordinates": [[[0, 0], [0, 5], [5, 5], [5, 0], [0, 0]]]}]
+        },
+        "group": "Decision",
+        "sdk-support": {
+          "basic functionality": {
+            "js": "1.9.0",
+            "android": "9.1.0",
+            "ios": "5.8.0"
           }
         }
       },
       "is-supported-script": {
-        "doc": "Returns `true` if the input string is expected to render legibly. Returns `false` if the input string contains sections that cannot be rendered without potential loss of meaning (e.g. Indic scripts that require complex text shaping, or right-to-left scripts if the the `mapbox-gl-rtl-text` plugin is not in use in Mapbox GL JS).",
+        "doc": "Returns `true` if the input string is expected to render legibly. Returns `false` if the input string contains sections that cannot be rendered without potential loss of meaning (e.g. Indic scripts that require complex text shaping, or right-to-left scripts if the the `mapbox-gl-rtl-text` plugin is not in use in MapLibre GL JS).",
+        "example": {
+          "syntax": {
+            "method": ["string"],
+            "result": "boolean"
+          },
+          "value": ["is-supported-script", "दिल्ली"]
+        },
         "group": "String",
         "sdk-support": {
           "basic functionality": {
@@ -3465,50 +4179,77 @@
         }
       },
       "upcase": {
-        "doc": "Returns the input string converted to uppercase. Follows the Unicode Default Case Conversion algorithm and the locale-insensitive case mappings in the Unicode Character Database.",
+        "doc": "Returns the input string converted to uppercase. Follows the Unicode Default Case Conversion algorithm and the locale-insensitive case mappings in the Unicode Character Database.\n\n - [Change the case of labels](https://maplibre.org/maplibre-gl-js/docs/examples/change-case-of-labels/)",
+        "example": {
+          "syntax": {
+            "method": ["string"],
+            "result": "string"
+          },
+          "value": ["upcase", ["get", "name"]]
+        },
         "group": "String",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "downcase": {
-        "doc": "Returns the input string converted to lowercase. Follows the Unicode Default Case Conversion algorithm and the locale-insensitive case mappings in the Unicode Character Database.",
+        "doc": "Returns the input string converted to lowercase. Follows the Unicode Default Case Conversion algorithm and the locale-insensitive case mappings in the Unicode Character Database.\n\n - [Change the case of labels](https://maplibre.org/maplibre-gl-js/docs/examples/change-case-of-labels/)",
+        "example": {
+          "syntax": {
+            "method": ["string"],
+            "result": "string"
+          },
+          "value": ["downcase", ["get", "name"]]
+        },
         "group": "String",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "concat": {
-        "doc": "Returns a `string` consisting of the concatenation of the inputs. Each input is converted to a string as if by `to-string`.",
+        "doc": "Returns a `string` consisting of the concatenation of the inputs. Each input is converted to a string as if by `to-string`.\n\n - [Add a generated icon to the map](https://maplibre.org/maplibre-gl-js/docs/examples/add-image-missing-generated/)\n - [Create a time slider](https://maplibre.org/maplibre-gl-js/docs/examples/timeline-animation/)\n - [Use a fallback image](https://maplibre.org/maplibre-gl-js/docs/examples/fallback-image/)\n - [Variable label placement](https://maplibre.org/maplibre-gl-js/docs/examples/variable-label-placement/)",
+        "example": {
+          "syntax": {
+            "method": ["string", "string", "..."],
+            "result": "string"
+          },
+          "value": ["concat", "square-rgb-", ["get", "color"]]
+        },
         "group": "String",
         "sdk-support": {
           "basic functionality": {
             "js": "0.41.0",
             "android": "6.0.0",
-            "ios": "4.0.0",
-            "macos": "0.7.0"
+            "ios": "4.0.0"
           }
         }
       },
       "resolved-locale": {
         "doc": "Returns the IETF language tag of the locale being used by the provided `collator`. This can be used to determine the default system locale, or to determine if a requested locale was successfully loaded.",
+        "example": {
+          "syntax": {
+            "method": ["collator"],
+            "result": "string"
+          },
+          "value": ["resolved-locale", [
+            "collator",
+            {"case-sensitive": true, "diacritic-sensitive": false, "locale": "de"}
+          ]]
+        },
         "group": "String",
         "sdk-support": {
           "basic functionality": {
             "js": "0.45.0",
             "android": "6.5.0",
-            "ios": "4.2.0",
-            "macos": "0.9.0"
+            "ios": "4.2.0"
           }
         }
       }
@@ -3540,8 +4281,7 @@
         "basic functionality": {
           "js": "0.27.0",
           "android": "5.1.0",
-          "ios": "3.6.0",
-          "macos": "0.5.0"
+          "ios": "3.6.0"
         }
       }
     },
@@ -3572,8 +4312,7 @@
         "basic functionality": {
           "js": "0.27.0",
           "android": "5.1.0",
-          "ios": "3.6.0",
-          "macos": "0.5.0"
+          "ios": "3.6.0"
         }
       }
     },
@@ -3593,8 +4332,7 @@
         "basic functionality": {
           "js": "0.27.0",
           "android": "5.1.0",
-          "ios": "3.6.0",
-          "macos": "0.5.0"
+          "ios": "3.6.0"
         }
       }
     },
@@ -3616,8 +4354,146 @@
         "basic functionality": {
           "js": "0.27.0",
           "android": "5.1.0",
-          "ios": "3.6.0",
-          "macos": "0.5.0"
+          "ios": "3.6.0"
+        }
+      }
+    }
+  },
+  "sky": {
+    "sky-color": {
+      "type": "color",
+      "property-type": "data-constant",
+      "default": "#88C6FC",
+      "expression": {
+        "interpolated": true,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "transition": true,
+      "doc": "The base color for the sky."
+    },
+    "horizon-color": {
+      "type": "color",
+      "property-type": "data-constant",
+      "default": "#ffffff",
+      "expression": {
+        "interpolated": true,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "transition": true,
+      "doc": "The base color at the horizon."
+    },
+    "fog-color": {
+      "type": "color",
+      "property-type": "data-constant",
+      "default": "#ffffff",
+      "expression": {
+        "interpolated": true,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "transition": true,
+      "doc": "The base color for the fog. Requires 3D terrain."
+    },
+    "fog-ground-blend": {
+      "type": "number",
+      "property-type": "data-constant",
+      "default": 0.5,
+      "minimum": 0,
+      "maximum": 1,
+      "expression": {
+        "interpolated": true,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "transition": true,
+      "doc": "How to blend the fog over the 3D terrain. Where 0 is the map center and 1 is the horizon."
+    },
+    "horizon-fog-blend": {
+      "type": "number",
+      "property-type": "data-constant",
+      "default": 0.8,
+      "minimum": 0,
+      "maximum": 1,
+      "expression": {
+        "interpolated": true,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "transition": true,
+      "doc": "How to blend the fog color and the horizon color. Where 0 is using the horizon color only and 1 is using the fog color only."
+    },
+    "sky-horizon-blend": {
+      "type": "number",
+      "property-type": "data-constant",
+      "default": 0.8,
+      "minimum": 0,
+      "maximum": 1,
+      "expression": {
+        "interpolated": true,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "transition": true,
+      "doc": "How to blend the the sky color and the horizon color. Where 1 is blending the color at the middle of the sky and 0 is not blending at all and using the sky color only."
+    },
+    "atmosphere-blend": {
+      "type": "number",
+      "property-type": "data-constant",
+      "default": 0.8,
+      "minimum": 0,
+      "maximum": 1,
+      "expression": {
+        "interpolated": true,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "transition": true,
+      "doc": "How to blend the atmosphere. Where 1 is visible atmosphere and 0 is hidden. It is best to interpolate this expression when using globe projection."
+    }
+  },
+  "terrain": {
+    "source": {
+      "type": "string",
+      "doc": "The source for the terrain data.",
+      "required": true,
+      "sdk-support": {
+        "basic functionality": {
+          "js": "2.2.0"
+        }
+      }
+    },
+    "exaggeration": {
+      "type": "number",
+      "minimum": 0,
+      "doc": "The exaggeration of the terrain - how high it will look.",
+      "default": 1.0,
+      "sdk-support": {
+        "basic functionality": {
+          "js": "2.2.0"
+        }
+      }
+    }
+  },
+  "projection": {
+    "type": {
+      "type": "enum",
+      "doc": "The projection type.",
+      "default": "mercator",
+      "values": {
+        "mercator": {
+          "doc": "The Mercator projection."
+        },
+        "globe": {
+          "doc": "The globe projection."
         }
       }
     }
@@ -3642,8 +4518,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -3665,14 +4540,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.21.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -3699,14 +4572,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.19.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -3735,14 +4606,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.19.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -3770,8 +4639,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -3801,8 +4669,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -3821,13 +4688,11 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.49.0",
           "android": "6.5.0",
-          "macos": "0.11.0",
           "ios": "4.4.0"
         }
       },
@@ -3853,8 +4718,7 @@
         "basic functionality": {
           "js": "0.27.0",
           "android": "5.1.0",
-          "ios": "3.6.0",
-          "macos": "0.5.0"
+          "ios": "3.6.0"
         }
       },
       "expression": {
@@ -3879,14 +4743,12 @@
         "basic functionality": {
           "js": "0.27.0",
           "android": "5.1.0",
-          "ios": "3.6.0",
-          "macos": "0.5.0"
+          "ios": "3.6.0"
         },
         "data-driven styling": {
           "js": "0.27.0",
           "android": "5.1.0",
-          "ios": "3.6.0",
-          "macos": "0.5.0"
+          "ios": "3.6.0"
         }
       },
       "expression": {
@@ -3914,8 +4776,7 @@
         "basic functionality": {
           "js": "0.27.0",
           "android": "5.1.0",
-          "ios": "3.6.0",
-          "macos": "0.5.0"
+          "ios": "3.6.0"
         }
       },
       "expression": {
@@ -3945,8 +4806,7 @@
         "basic functionality": {
           "js": "0.27.0",
           "android": "5.1.0",
-          "ios": "3.6.0",
-          "macos": "0.5.0"
+          "ios": "3.6.0"
         }
       },
       "expression": {
@@ -3965,13 +4825,11 @@
         "basic functionality": {
           "js": "0.27.0",
           "android": "5.1.0",
-          "ios": "3.6.0",
-          "macos": "0.5.0"
+          "ios": "3.6.0"
         },
         "data-driven styling": {
           "js": "0.49.0",
           "android": "6.5.0",
-          "macos": "0.11.0",
           "ios": "4.4.0"
         }
       },
@@ -3995,14 +4853,12 @@
         "basic functionality": {
           "js": "0.27.0",
           "android": "5.1.0",
-          "ios": "3.6.0",
-          "macos": "0.5.0"
+          "ios": "3.6.0"
         },
         "data-driven styling": {
           "js": "0.27.0",
           "android": "5.1.0",
-          "ios": "3.6.0",
-          "macos": "0.5.0"
+          "ios": "3.6.0"
         }
       },
       "expression": {
@@ -4029,14 +4885,12 @@
         "basic functionality": {
           "js": "0.27.0",
           "android": "5.1.0",
-          "ios": "3.6.0",
-          "macos": "0.5.0"
+          "ios": "3.6.0"
         },
         "data-driven styling": {
           "js": "0.27.0",
           "android": "5.1.0",
-          "ios": "3.6.0",
-          "macos": "0.5.0"
+          "ios": "3.6.0"
         }
       },
       "expression": {
@@ -4057,8 +4911,7 @@
       "sdk-support": {
         "basic functionality": {
           "js": "0.50.0",
-          "ios": "4.7.0",
-          "macos": "0.13.0"
+          "ios": "4.7.0"
         }
       },
       "expression": {
@@ -4082,14 +4935,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.29.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -4116,14 +4967,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.23.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -4151,8 +5000,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -4182,8 +5030,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -4205,14 +5052,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.39.0",
           "android": "5.2.0",
-          "ios": "3.7.0",
-          "macos": "0.6.0"
+          "ios": "3.7.0"
         }
       },
       "expression": {
@@ -4236,14 +5081,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.29.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -4266,14 +5109,12 @@
         "basic functionality": {
           "js": "0.12.1",
           "android": "3.0.0",
-          "ios": "3.1.0",
-          "macos": "0.1.0"
+          "ios": "3.1.0"
         },
         "data-driven styling": {
           "js": "0.29.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -4297,14 +5138,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.29.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -4333,8 +5172,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {}
       },
@@ -4354,13 +5192,11 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.49.0",
           "android": "6.5.0",
-          "macos": "0.11.0",
           "ios": "4.4.0"
         }
       },
@@ -4395,8 +5231,7 @@
         "basic functionality": {
           "js": "0.45.0",
           "android": "6.5.0",
-          "ios": "4.4.0",
-          "macos": "0.11.0"
+          "ios": "4.4.0"
         },
         "data-driven styling": {}
       },
@@ -4421,14 +5256,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.18.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -4450,14 +5283,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.18.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -4479,14 +5310,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.20.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -4510,14 +5339,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.20.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -4545,8 +5372,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -4576,8 +5402,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -4604,8 +5429,7 @@
         "basic functionality": {
           "js": "0.21.0",
           "android": "4.2.0",
-          "ios": "3.4.0",
-          "macos": "0.2.1"
+          "ios": "3.4.0"
         }
       },
       "expression": {
@@ -4632,8 +5456,7 @@
         "basic functionality": {
           "js": "0.39.0",
           "android": "5.2.0",
-          "ios": "3.7.0",
-          "macos": "0.6.0"
+          "ios": "3.7.0"
         }
       },
       "expression": {
@@ -4655,14 +5478,12 @@
         "basic functionality": {
           "js": "0.29.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         },
         "data-driven styling": {
           "js": "0.29.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -4684,14 +5505,12 @@
         "basic functionality": {
           "js": "0.29.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         },
         "data-driven styling": {
           "js": "0.29.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -4715,14 +5534,12 @@
         "basic functionality": {
           "js": "0.29.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         },
         "data-driven styling": {
           "js": "0.29.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -4748,14 +5565,12 @@
         "basic functionality": {
           "js": "0.41.0",
           "android": "6.0.0",
-          "ios": "4.0.0",
-          "macos": "0.7.0"
+          "ios": "4.0.0"
         },
         "data-driven styling": {
           "js": "0.43.0",
           "android": "6.0.0",
-          "ios": "4.0.0",
-          "macos": "0.7.0"
+          "ios": "4.0.0"
         }
       },
       "expression": {
@@ -4778,14 +5593,12 @@
         "basic functionality": {
           "js": "0.41.0",
           "android": "6.0.0",
-          "ios": "4.0.0",
-          "macos": "0.7.0"
+          "ios": "4.0.0"
         },
         "data-driven styling": {
           "js": "0.41.0",
           "android": "6.0.0",
-          "ios": "4.0.0",
-          "macos": "0.7.0"
+          "ios": "4.0.0"
         }
       },
       "expression": {
@@ -4808,8 +5621,7 @@
         "basic functionality": {
           "js": "0.41.0",
           "android": "6.0.0",
-          "ios": "4.0.0",
-          "macos": "0.7.0"
+          "ios": "4.0.0"
         }
       },
       "expression": {
@@ -4849,8 +5661,7 @@
         "basic functionality": {
           "js": "0.41.0",
           "android": "6.0.0",
-          "ios": "4.0.0",
-          "macos": "0.7.0"
+          "ios": "4.0.0"
         },
         "data-driven styling": {}
       },
@@ -4873,8 +5684,7 @@
         "basic functionality": {
           "js": "0.41.0",
           "android": "6.0.0",
-          "ios": "4.0.0",
-          "macos": "0.7.0"
+          "ios": "4.0.0"
         }
       },
       "expression": {
@@ -4901,14 +5711,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.33.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -4925,7 +5733,7 @@
       "type": "color",
       "default": "#000000",
       "transition": true,
-      "doc": "The color of the icon. This can only be used with sdf icons.",
+      "doc": "The color of the icon. This can only be used with SDF icons.",
       "requires": [
         "icon-image"
       ],
@@ -4933,14 +5741,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.33.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -4965,14 +5771,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.33.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -4991,7 +5795,7 @@
       "minimum": 0,
       "transition": true,
       "units": "pixels",
-      "doc": "Distance of halo to the icon outline.",
+      "doc": "Distance of halo to the icon outline. \nThe unit is in pixels only for SDF sprites that were created with a blur radius of 8, multiplied by the display density. I.e., the radius needs to be 16 for `@2x` sprites, etc.",
       "requires": [
         "icon-image"
       ],
@@ -4999,14 +5803,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.33.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -5033,14 +5835,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.33.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -5071,8 +5871,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -5103,8 +5902,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -5129,14 +5927,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.33.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -5162,14 +5958,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.33.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -5194,14 +5988,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.33.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -5228,14 +6020,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.33.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -5262,14 +6052,12 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {
           "js": "0.33.0",
           "android": "5.0.0",
-          "ios": "3.5.0",
-          "macos": "0.4.0"
+          "ios": "3.5.0"
         }
       },
       "expression": {
@@ -5300,8 +6088,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -5332,8 +6119,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -5357,8 +6143,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -5380,8 +6165,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -5403,8 +6187,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -5426,8 +6209,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -5449,8 +6231,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -5472,8 +6253,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -5500,8 +6280,7 @@
         "basic functionality": {
           "js": "0.47.0",
           "android": "6.3.0",
-          "ios": "4.2.0",
-          "macos": "0.9.0"
+          "ios": "4.2.0"
         }
       },
       "expression": {
@@ -5518,13 +6297,12 @@
       "minimum": 0,
       "transition": false,
       "units": "milliseconds",
-      "doc": "Fade duration when a new tile is added.",
+      "doc": "Fade duration when a new tile is added, or when a video is started or its coordinates are updated.",
       "sdk-support": {
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -5548,8 +6326,7 @@
         "basic functionality": {
           "js": "0.43.0",
           "android": "6.0.0",
-          "ios": "4.0.0",
-          "macos": "0.7.0"
+          "ios": "4.0.0"
         }
       },
       "expression": {
@@ -5576,8 +6353,7 @@
         "basic functionality": {
           "js": "0.43.0",
           "android": "6.0.0",
-          "ios": "4.0.0",
-          "macos": "0.7.0"
+          "ios": "4.0.0"
         }
       },
       "expression": {
@@ -5599,8 +6375,7 @@
         "basic functionality": {
           "js": "0.43.0",
           "android": "6.0.0",
-          "ios": "4.0.0",
-          "macos": "0.7.0"
+          "ios": "4.0.0"
         }
       },
       "expression": {
@@ -5620,8 +6395,7 @@
         "basic functionality": {
           "js": "0.43.0",
           "android": "6.0.0",
-          "ios": "4.0.0",
-          "macos": "0.7.0"
+          "ios": "4.0.0"
         }
       },
       "expression": {
@@ -5641,8 +6415,7 @@
         "basic functionality": {
           "js": "0.43.0",
           "android": "6.0.0",
-          "ios": "4.0.0",
-          "macos": "0.7.0"
+          "ios": "4.0.0"
         }
       },
       "expression": {
@@ -5662,8 +6435,7 @@
         "basic functionality": {
           "js": "0.43.0",
           "android": "6.0.0",
-          "ios": "4.0.0",
-          "macos": "0.7.0"
+          "ios": "4.0.0"
         }
       },
       "expression": {
@@ -5690,8 +6462,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {
@@ -5710,8 +6481,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         },
         "data-driven styling": {}
       },
@@ -5734,8 +6504,7 @@
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
-          "ios": "2.0.0",
-          "macos": "0.1.0"
+          "ios": "2.0.0"
         }
       },
       "expression": {

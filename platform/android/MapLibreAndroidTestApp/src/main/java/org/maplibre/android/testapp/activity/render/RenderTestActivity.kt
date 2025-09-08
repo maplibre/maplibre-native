@@ -2,7 +2,6 @@ package org.maplibre.android.testapp.activity.render
 
 import android.content.res.AssetManager
 import android.graphics.Bitmap
-import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Environment
 import android.view.Gravity
@@ -10,8 +9,12 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.maplibre.android.snapshotter.MapSnapshot
 import org.maplibre.android.snapshotter.MapSnapshotter
 import okio.buffer
@@ -20,7 +23,6 @@ import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.lang.ref.WeakReference
 import java.nio.charset.Charset
 
 /**
@@ -30,7 +32,7 @@ class RenderTestActivity : AppCompatActivity() {
     private val renderResultMap: MutableMap<RenderTestDefinition, Bitmap> = HashMap()
     private var renderTestDefinitions: List<RenderTestDefinition>? = null
     private var onRenderTestCompletionListener: OnRenderTestCompletionListener? = null
-    private lateinit var mapSnapshotter: MapSnapshotter
+    private var mapSnapshotter: MapSnapshotter? = null
     private var imageView: ImageView? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,97 +46,64 @@ class RenderTestActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        mapSnapshotter.cancel()
+        mapSnapshotter?.cancel()
     }
 
     //
     // Loads the ignore tests from assets folder
     //
-    private class LoadRenderIgnoreTask internal constructor(renderTestActivity: RenderTestActivity?) :
-        AsyncTask<Void?, Void?, List<String>>() {
-        private val renderTestActivityWeakReference: WeakReference<RenderTestActivity?>
-        protected override fun doInBackground(vararg p0: Void?): List<String>? {
-            return loadIgnoreList(
-                renderTestActivityWeakReference.get()!!.assets
-            )
-        }
-
-        override fun onPostExecute(strings: List<String>) {
-            super.onPostExecute(strings)
-            if (renderTestActivityWeakReference.get() != null) {
-                renderTestActivityWeakReference.get()!!.onLoadIgnoreList(strings)
-            }
-        }
-
-        init {
-            renderTestActivityWeakReference = WeakReference(renderTestActivity)
-        }
-    }
+    private fun loadRenderIgnoreTask(renderTestActivity: RenderTestActivity) : List<String> = loadIgnoreList(renderTestActivity.assets)
 
     //
     // Loads the render test definitions from assets folder
     //
-    private class LoadRenderDefinitionTask internal constructor(renderTestActivity: RenderTestActivity) :
-        AsyncTask<Void?, Void?, List<RenderTestDefinition>>() {
-        private val renderTestActivityWeakReference: WeakReference<RenderTestActivity>
-        protected override fun doInBackground(vararg p0: Void?): List<RenderTestDefinition>? {
-            val definitions: MutableList<RenderTestDefinition> = ArrayList()
-            val assetManager = renderTestActivityWeakReference.get()!!.assets
-            val categories =
-                try {
-                    assetManager.list(RENDER_TEST_BASE_PATH)
-                } catch (exception: IOException) {
-                    Timber.e(exception)
-                    throw exception
-                }
+    private fun loadRenderDefinitionTask(renderTestActivity: RenderTestActivity) : List<RenderTestDefinition> {
+        val definitions: MutableList<RenderTestDefinition> = ArrayList()
+        val assetManager = renderTestActivity.assets
+        val categories =
+            try {
+                assetManager.list(RENDER_TEST_BASE_PATH)
+            } catch (exception: IOException) {
+                Timber.e(exception)
+                throw exception
+            }
 
-            for (counter in categories!!.indices.reversed()) {
-                try {
-                    val tests = assetManager.list(
-                        String.format(
-                            "%s/%s",
-                            RENDER_TEST_BASE_PATH,
+        for (counter in categories!!.indices.reversed()) {
+            try {
+                val tests = assetManager.list(
+                    String.format(
+                        "%s/%s",
+                        RENDER_TEST_BASE_PATH,
+                        categories[counter]
+                    )
+                )
+                for (test in tests!!) {
+                    val styleJson = loadStyleJson(assetManager, categories[counter], test)
+                    val renderTestStyleDefinition = Gson()
+                        .fromJson(styleJson, RenderTestStyleDefinition::class.java)
+                    val definition = RenderTestDefinition(
+                        categories[counter],
+                        test,
+                        styleJson,
+                        renderTestStyleDefinition
+                    )
+                    if (!definition.hasOperations()) {
+                        if (!EXCLUDED_TESTS.contains(definition.name + "," + definition.category)) {
+                            definitions.add(definition)
+                        }
+                    } else {
+                        Timber.e(
+                            "could not add test, test requires operations: %s from %s",
+                            test,
                             categories[counter]
                         )
-                    )
-                    for (test in tests!!) {
-                        val styleJson = loadStyleJson(assetManager, categories[counter], test)
-                        val renderTestStyleDefinition = Gson()
-                            .fromJson(styleJson, RenderTestStyleDefinition::class.java)
-                        val definition = RenderTestDefinition(
-                            categories[counter],
-                            test,
-                            styleJson,
-                            renderTestStyleDefinition
-                        )
-                        if (!definition.hasOperations()) {
-                            if (!EXCLUDED_TESTS.contains(definition.name + "," + definition.category)) {
-                                definitions.add(definition)
-                            }
-                        } else {
-                            Timber.e(
-                                "could not add test, test requires operations: %s from %s",
-                                test,
-                                categories[counter]
-                            )
-                        }
                     }
-                } catch (exception: Exception) {
-                    Timber.e(exception)
                 }
+            } catch (exception: Exception) {
+                Timber.e(exception)
             }
-            return definitions
         }
-
-        override fun onPostExecute(renderTestDefinitions: List<RenderTestDefinition>) {
-            super.onPostExecute(renderTestDefinitions)
-            val renderTestActivity = renderTestActivityWeakReference.get()
-            renderTestActivity?.startRenderTests(renderTestDefinitions)
-        }
-
-        init {
-            renderTestActivityWeakReference = WeakReference(renderTestActivity)
-        }
+        return definitions
     }
 
     private fun startRenderTests(renderTestDefinitions: List<RenderTestDefinition>) {
@@ -150,7 +119,7 @@ class RenderTestActivity : AppCompatActivity() {
     private fun render(renderTestDefinition: RenderTestDefinition, testSize: Int) {
         Timber.d("Render test %s,%s", renderTestDefinition.name, renderTestDefinition.category)
         mapSnapshotter = RenderTestSnapshotter(this, renderTestDefinition.toOptions())
-        mapSnapshotter.start(
+        mapSnapshotter?.start(
             object : MapSnapshotter.SnapshotReadyCallback {
                 override fun onSnapshotReady(snapshot: MapSnapshot) {
                     imageView!!.setImageBitmap(snapshot.bitmap)
@@ -177,52 +146,48 @@ class RenderTestActivity : AppCompatActivity() {
     }
 
     private fun finishTesting() {
-        SaveResultToDiskTask(onRenderTestCompletionListener, renderResultMap).execute()
+        lifecycleScope.launch(Dispatchers.IO) {
+            saveResultToDiskTask(renderResultMap)
+            withContext(Dispatchers.Main) {
+                onRenderTestCompletionListener?.onFinish()
+            }
+        }
     }
 
     //
     // Save tests results to disk
     //
-    private class SaveResultToDiskTask internal constructor(
-        private val onRenderTestCompletionListener: OnRenderTestCompletionListener?,
-        private val renderResultMap: Map<RenderTestDefinition, Bitmap>
-    ) : AsyncTask<Void?, Void?, Void?>() {
-        protected override fun doInBackground(vararg p0: Void?): Void? {
-            if (isExternalStorageWritable) {
-                try {
-                    val testResultDir = FileUtils.createTestResultRootFolder()
-                    val basePath = testResultDir.absolutePath
-                    for (testResult in renderResultMap.entries) {
-                        writeResultToDisk(basePath, testResult)
-                    }
-                } catch (exception: Exception) {
-                    Timber.e(exception)
+    private fun saveResultToDiskTask(
+        renderResultMap: Map<RenderTestDefinition, Bitmap>
+    ) {
+        if (isExternalStorageWritable) {
+            try {
+                val testResultDir = FileUtils.createTestResultRootFolder()
+                val basePath = testResultDir.absolutePath
+                for (testResult in renderResultMap.entries) {
+                    writeResultToDisk(basePath, testResult)
                 }
+            } catch (exception: Exception) {
+                Timber.e(exception)
             }
-            return null
-        }
-
-        private fun writeResultToDisk(
-            path: String,
-            result: Map.Entry<RenderTestDefinition, Bitmap>
-        ) {
-            val definition = result.key
-            val categoryName = definition.category
-            val categoryPath = String.format("%s/%s", path, categoryName)
-            FileUtils.createCategoryDirectory(categoryPath)
-            val testName = result.key.name
-            val testDir = FileUtils.createTestDirectory(categoryPath, testName)
-            FileUtils.writeTestResultToDisk(testDir, result.value)
-        }
-
-        private val isExternalStorageWritable: Boolean
-            private get() = Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()
-
-        override fun onPostExecute(aVoid: Void?) {
-            super.onPostExecute(aVoid)
-            onRenderTestCompletionListener?.onFinish()
         }
     }
+
+    private fun writeResultToDisk(
+        path: String,
+        result: Map.Entry<RenderTestDefinition, Bitmap>
+    ) {
+        val definition = result.key
+        val categoryName = definition.category
+        val categoryPath = String.format("%s/%s", path, categoryName)
+        FileUtils.createCategoryDirectory(categoryPath)
+        val testName = result.key.name
+        val testDir = FileUtils.createTestDirectory(categoryPath, testName)
+        FileUtils.writeTestResultToDisk(testDir, result.value)
+    }
+
+    private val isExternalStorageWritable: Boolean
+        get() = Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()
 
     //
     // Callback configuration to notify test executor of test finishing
@@ -233,13 +198,23 @@ class RenderTestActivity : AppCompatActivity() {
 
     fun setOnRenderTestCompletionListener(listener: OnRenderTestCompletionListener?) {
         onRenderTestCompletionListener = listener
-        LoadRenderIgnoreTask(this).execute()
+        lifecycleScope.launch(Dispatchers.IO) {
+            val ignored = loadRenderIgnoreTask(this@RenderTestActivity)
+            withContext(Dispatchers.Main) {
+                onLoadIgnoreList(ignored)
+            }
+        }
     }
 
     fun onLoadIgnoreList(ignoreList: List<String>) {
         Timber.e("We loaded %s of tests to be ignored", ignoreList.size)
         EXCLUDED_TESTS.addAll(ignoreList)
-        LoadRenderDefinitionTask(this).execute()
+        lifecycleScope.launch(Dispatchers.IO) {
+            val definitions = loadRenderDefinitionTask(this@RenderTestActivity)
+            withContext(Dispatchers.Main) {
+                startRenderTests(definitions)
+            }
+         }
     }
 
     //

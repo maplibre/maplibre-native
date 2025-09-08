@@ -1,0 +1,76 @@
+{
+  "name": "@maplibre/maplibre-gl-native",
+  "version": "6.2.0",
+  "description": "Renders map tiles with MapLibre Native",
+  "keywords": [
+    "maplibre",
+    "gl"
+  ],
+  "directories": {
+    "lib": "lib"
+  },
+  "files": [
+    "lib",
+    "index.d.ts"
+  ],
+  "main": "index.js",
+  "types": "index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maplibre/maplibre-native.git"
+  },
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "@mapbox/node-pre-gyp": "2.0.0",
+    "@acalcutt/node-pre-gyp-github": "2.0.1",
+    "minimatch": "^9.0.4",
+    "npm-run-all": "^4.1.5"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-device-farm": "^3.556.0",
+    "@aws-sdk/client-s3": "^3.556.0",
+    "@mapbox/flow-remove-types": "^2.0.0",
+    "@mapbox/mvt-fixtures": "3.10.0",
+    "@octokit/plugin-retry": "^7.1.0",
+    "@octokit/rest": "^20.1.0",
+    "@types/node": "^22.9.0",
+    "argparse": "^2.0.1",
+    "csscolorparser": "^1.0.3",
+    "d3-queue": "3.0.7",
+    "diff": "5.2.0",
+    "ejs": "^3.1.10",
+    "esm": "~3.2.25",
+    "express": "^4.19.2",
+    "json-stringify-pretty-compact": "^4.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mapbox-gl-styles": "2.0.2",
+    "pixelmatch": "^5.3.0",
+    "pngjs": "^7.0.0",
+    "pretty-bytes": "^6.1.1",
+    "semver": "^7.6.0",
+    "shuffle-seed": "1.1.6",
+    "st": "3.0.0",
+    "tape": "^5.7.5",
+    "typescript": "^5.4.5",
+    "xcode": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "install": "node-pre-gyp install --fallback-to-build=false",
+    "test": "tape test/js/**/*.test.js",
+    "test-memory": "node --expose-gc test/memory.test.js",
+    "test-expressions": "node -r esm test/expression.test.js",
+    "test-render": "node -r esm test/render.test.js",
+    "test-query": "node -r esm test/query.test.js"
+  },
+  "gypfile": true,
+  "binary": {
+    "module_name": "mbgl",
+    "module_path": "./lib/{node_abi}",
+    "host": "https://github.com/maplibre/maplibre-native/releases/download/",
+    "remote_path": "node-v{version}",
+    "package_name": "{node_abi}-{platform}-{arch}-{configuration}.tar.gz"
+  }
+}

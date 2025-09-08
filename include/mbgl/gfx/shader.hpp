@@ -33,8 +33,10 @@ public:
     /// @brief Downcast to a type
     /// @tparam T Derived type
     /// @return Type or nullptr if type info was not a match
-    template <typename T, typename std::enable_if_t<is_shader_v<T>, bool>* = nullptr>
-    T* to() noexcept {
+    template <typename T>
+    T* to() noexcept
+        requires(is_shader_v<T>)
+    {
         if (typeName() != T::Name) {
             return nullptr;
         }

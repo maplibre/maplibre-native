@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/programs/raster_program.hpp>
+#include <mbgl/renderer/buckets/raster_bucket.hpp>
 #include <mbgl/style/layers/raster_layer_impl.hpp>
 #include <mbgl/style/layers/raster_layer_properties.hpp>
 #include <mbgl/gfx/context.hpp>
@@ -9,14 +9,12 @@
 namespace mbgl {
 
 class ImageSourceRenderData;
-class RasterProgram;
 
 class RenderRasterLayer final : public RenderLayer {
 public:
     explicit RenderRasterLayer(Immutable<style::RasterLayer::Impl>);
     ~RenderRasterLayer() override;
 
-#if MLN_DRAWABLE_RENDERER
     /// Generate any changes needed by the layer
     void update(gfx::ShaderRegistry&,
                 gfx::Context&,
@@ -24,10 +22,8 @@ public:
                 const std::shared_ptr<UpdateParameters>&,
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
-#endif
 
 protected:
-#if MLN_DRAWABLE_RENDERER
     /// @brief Called by the RenderOrchestrator during RenderTree construction.
     /// This event is run to indicate if the layer should render or not for the current frame.
     /// @param willRender Indicates if this layer should render or not
@@ -42,7 +38,6 @@ protected:
 
     /// Called when the style layer is removed
     void layerRemoved(UniqueChangeRequestVec&) override;
-#endif // MLN_DRAWABLE_RENDERER
 
 private:
     void transition(const TransitionParameters&) override;
@@ -51,20 +46,10 @@ private:
     bool hasCrossfade() const override;
     void prepare(const LayerPrepareParameters&) override;
 
-#if MLN_LEGACY_RENDERER
-    void render(PaintParameters&) override;
-#endif
-
     // Paint properties
     style::RasterPaintProperties::Unevaluated unevaluated;
     const ImageSourceRenderData* imageData = nullptr;
 
-#if MLN_LEGACY_RENDERER
-    // Programs
-    std::shared_ptr<RasterProgram> rasterProgram;
-#endif
-
-#if MLN_DRAWABLE_RENDERER
     gfx::ShaderProgramBasePtr rasterShader;
     LayerGroupPtr imageLayerGroup;
 
@@ -76,10 +61,9 @@ private:
     using TriangleIndexVectorPtr = std::shared_ptr<TriangleIndexVector>;
     TriangleIndexVectorPtr staticDataIndices;
 
-    using RasterSegmentVector = SegmentVector<RasterAttributes>;
+    using RasterSegmentVector = SegmentVector;
     using RasterSegmentVectorPtr = std::shared_ptr<RasterSegmentVector>;
     std::shared_ptr<RasterSegmentVector> staticDataSegments;
-#endif
 };
 
 } // namespace mbgl

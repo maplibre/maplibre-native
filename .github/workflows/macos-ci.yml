@@ -5,10 +5,42 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'platform/macos/**'
+      - 'platform/darwin/**'
+      - '.github/workflows/macos-ci.yml'
+      - 'bin/**'
+      - 'include/**'
+      - 'platform/default/**'
+      - 'src/**'
+      - 'vendor/**'
+      - '.gitmodules'
+      - '!**/*.md'
+      - 'WORKSPACE'
+      - 'BUILD.bazel'
+      - '.bazelrc'
+      - '.bazelversion'
+      - 'pnpm-lock.yaml'
 
   pull_request:
     branches:
       - main
+    paths:
+      - 'platform/macos/**'
+      - 'platform/darwin/**'
+      - '.github/workflows/macos-ci.yml'
+      - 'bin/**'
+      - 'include/**'
+      - 'platform/default/**'
+      - 'src/**'
+      - 'vendor/**'
+      - '.gitmodules'
+      - '!**/*.md'
+      - 'WORKSPACE'
+      - 'BUILD.bazel'
+      - '.bazelrc'
+      - '.bazelversion'
+      - 'pnpm-lock.yaml'
 
 concurrency:
   # cancel jobs on PRs only
@@ -25,28 +57,26 @@ jobs:
         shell: bash
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
           fetch-depth: 0
 
       - name: Cache Bazel
-        uses: actions/cache@v4
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
         with:
           key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
-            
+
       - name: Install dependencies
         run: |
           brew install bazelisk webp libuv webp icu4c jpeg-turbo glfw
           brew link icu4c --force
-      
+
       - name: Build AppKit app, GLFW app, cache tool, render tool for macOS
         run: bazel build //platform/macos/app:macos_app //platform/glfw:glfw_app //bin:cache_tool //bin:render_tool --//:renderer=metal
-      
+
       - name: Generate Xcode project for macOS
         run: bazel run //platform/macos:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
-        
-        

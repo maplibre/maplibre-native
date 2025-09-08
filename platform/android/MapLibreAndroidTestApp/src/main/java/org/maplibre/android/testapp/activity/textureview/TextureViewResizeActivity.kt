@@ -33,7 +33,7 @@ class TextureViewResizeActivity : AppCompatActivity() {
     private fun setupMapView(savedInstanceState: Bundle?) {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(OnMapReadyCallback { maplibreMap: MapLibreMap -> setupMap(maplibreMap) })
+        mapView.getMapAsync { setupMap(it) }
     }
 
     private fun setupMap(maplibreMap: MapLibreMap) {
@@ -43,7 +43,7 @@ class TextureViewResizeActivity : AppCompatActivity() {
     private fun setupFab() {
         val fabDebug = findViewById<FloatingActionButton>(R.id.fabResize)
         fabDebug.setOnClickListener { view: View? ->
-            if (mapView != null) {
+            if (this::mapView.isInitialized) {
                 val parent = findViewById<View>(R.id.coordinator_layout)
                 val width = if (parent.width == mapView.width) parent.width / 2 else parent.width
                 val height =

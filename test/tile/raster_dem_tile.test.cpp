@@ -11,6 +11,7 @@
 #include <mbgl/renderer/buckets/hillshade_bucket.hpp>
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/text/glyph_manager.hpp>
+#include <mbgl/gfx/dynamic_texture_atlas.hpp>
 
 using namespace mbgl;
 
@@ -23,27 +24,30 @@ public:
     AnnotationManager annotationManager{style};
     std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
+    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
+
     Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
     TileParameters tileParameters;
     style::Style style;
 
     RasterDEMTileTest()
-        : tileParameters{1.0,
-                         MapDebugOptions(),
-                         transformState,
-                         fileSource,
-                         MapMode::Continuous,
-                         annotationManager.makeWeakPtr(),
-                         imageManager,
-                         glyphManager,
-                         0,
-                         {Scheduler::GetBackground(), uniqueID}},
+        : tileParameters{.pixelRatio = 1.0,
+                         .debugOptions = MapDebugOptions(),
+                         .transformState = transformState,
+                         .fileSource = fileSource,
+                         .mode = MapMode::Continuous,
+                         .annotationManager = annotationManager.makeWeakPtr(),
+                         .imageManager = imageManager,
+                         .glyphManager = glyphManager,
+                         .prefetchZoomDelta = 0,
+                         .threadPool = {Scheduler::GetBackground(), uniqueID},
+                         .dynamicTextureAtlas = dynamicTextureAtlas},
           style{fileSource, 1, tileParameters.threadPool} {}
 };
 
 TEST(RasterDEMTile, setError) {
     RasterDEMTileTest test;
-    RasterDEMTile tile(OverscaledTileID(0, 0, 0), test.tileParameters, test.tileset);
+    RasterDEMTile tile(OverscaledTileID(0, 0, 0), "testSource", test.tileParameters, test.tileset);
     tile.setError(std::make_exception_ptr(std::runtime_error("test")));
     EXPECT_FALSE(tile.isRenderable());
     EXPECT_TRUE(tile.isLoaded());
@@ -52,7 +56,7 @@ TEST(RasterDEMTile, setError) {
 
 TEST(RasterDEMTile, onError) {
     RasterDEMTileTest test;
-    RasterDEMTile tile(OverscaledTileID(0, 0, 0), test.tileParameters, test.tileset);
+    RasterDEMTile tile(OverscaledTileID(0, 0, 0), "testSource", test.tileParameters, test.tileset);
     tile.onError(std::make_exception_ptr(std::runtime_error("test")), 0);
     EXPECT_FALSE(tile.isRenderable());
     EXPECT_TRUE(tile.isLoaded());
@@ -61,7 +65,7 @@ TEST(RasterDEMTile, onError) {
 
 TEST(RasterDEMTile, onParsed) {
     RasterDEMTileTest test;
-    RasterDEMTile tile(OverscaledTileID(0, 0, 0), test.tileParameters, test.tileset);
+    RasterDEMTile tile(OverscaledTileID(0, 0, 0), "testSource", test.tileParameters, test.tileset);
     tile.onParsed(std::make_unique<HillshadeBucket>(PremultipliedImage({16, 16}), Tileset::DEMEncoding::Mapbox), 0);
     EXPECT_TRUE(tile.isRenderable());
     EXPECT_TRUE(tile.isLoaded());
@@ -85,7 +89,7 @@ TEST(RasterDEMTile, onParsed) {
 
 TEST(RasterDEMTile, onParsedEmpty) {
     RasterDEMTileTest test;
-    RasterDEMTile tile(OverscaledTileID(0, 0, 0), test.tileParameters, test.tileset);
+    RasterDEMTile tile(OverscaledTileID(0, 0, 0), "testSource", test.tileParameters, test.tileset);
     tile.onParsed(nullptr, 0);
     EXPECT_FALSE(tile.isRenderable());
     EXPECT_TRUE(tile.isLoaded());

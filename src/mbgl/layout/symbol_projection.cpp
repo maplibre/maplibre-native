@@ -5,6 +5,10 @@
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
 #include <mbgl/util/math.hpp>
 
+#include <numbers>
+
+using namespace std::numbers;
+
 namespace mbgl {
 
 /*
@@ -137,7 +141,7 @@ bool isVisible(const vec4& anchorPos, const std::array<double, 2>& clippingBuffe
 void addDynamicAttributes(const Point<float>& anchorPoint,
                           const float angle,
                           gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray) {
-    auto dynamicVertex = SymbolSDFIconProgram::dynamicLayoutVertex(anchorPoint, angle);
+    auto dynamicVertex = SymbolBucket::dynamicLayoutVertex(anchorPoint, angle);
     dynamicVertexArray.emplace_back(dynamicVertex);
     dynamicVertexArray.emplace_back(dynamicVertex);
     dynamicVertexArray.emplace_back(dynamicVertex);
@@ -198,10 +202,10 @@ std::optional<PlacedGlyph> placeGlyphAlongLine(const float offsetX,
         // The label needs to be flipped to keep text upright.
         // Iterate in the reverse direction.
         dir *= -1;
-        angle = static_cast<float>(M_PI);
+        angle = pi_v<float>;
     }
 
-    if (dir < 0) angle += static_cast<float>(M_PI);
+    if (dir < 0) angle += pi_v<float>;
 
     int32_t currentIndex = dir > 0 ? anchorSegment : anchorSegment + 1;
 

@@ -58,6 +58,12 @@ TEST(Stringify, Color) {
     ASSERT_EQ(stringify(Color::blue()), "\"rgba(0,0,255,1)\"");
 }
 
+TEST(Stringify, VariableAnchorOffsetCollection) {
+    std::array<float, 2> offset = {1, 1};
+    std::vector<AnchorOffsetPair> test{{AnchorOffsetPair{SymbolAnchorType::Left, offset}}};
+    ASSERT_EQ(stringify(VariableAnchorOffsetCollection(std::move(test))), "[\"left\",[1.0,1.0]]");
+}
+
 TEST(Stringify, Array) {
     ASSERT_EQ(stringify(std::array<float, 2>{{1, 2}}), "[1.0,2.0]");
 }
@@ -128,6 +134,10 @@ TEST(Stringify, Layout) {
 
     SymbolLayoutProperties::Unevaluated layout;
     layout.get<SymbolAvoidEdges>() = true;
-    layout.get<IconPadding>() = 2.0;
-    ASSERT_EQ(stringify(layout), "{\"icon-padding\":2.0,\"symbol-avoid-edges\":true}");
+    layout.get<IconPadding>() = {2.f};
+    ASSERT_EQ(stringify(layout), "{\"icon-padding\":[2.0,2.0,2.0,2.0],\"symbol-avoid-edges\":true}");
+}
+
+TEST(Stringify, Padding) {
+    ASSERT_EQ("[3.5,7.0,9.0,11.0]", stringify(Padding(3.5, 7, 9, 11)));
 }

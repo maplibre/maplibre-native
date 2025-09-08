@@ -30,6 +30,8 @@ extension MLNMapViewDelegateIntegrationTests: MLNMapViewDelegate {
 
     func mapView(_: MLNMapView, didFinishLoading _: MLNStyle) {}
 
+    func mapView(_: MLNMapView, sourceDidChange _: MLNSource) {}
+
     func mapView(_: MLNMapView, didSelect _: MLNAnnotation) {}
 
     func mapView(_: MLNMapView, didDeselect _: MLNAnnotation) {}
@@ -59,6 +61,8 @@ extension MLNMapViewDelegateIntegrationTests: MLNMapViewDelegate {
     func mapViewDidFinishRenderingFrame(_: MLNMapView, fullyRendered _: Bool) {}
 
     func mapViewDidFinishRenderingFrame(_: MLNMapView, fullyRendered _: Bool, frameEncodingTime _: Double, frameRenderingTime _: Double) {}
+
+    func mapViewDidFinishRenderingFrame(_: MLNMapView, fullyRendered _: Bool, renderingStats _: MLNRenderingStats) {}
 
     func mapView(_: MLNMapView, shapeAnnotationIsEnabled _: MLNShape) -> Bool { false }
 
@@ -103,4 +107,24 @@ extension MLNMapViewDelegateIntegrationTests: MLNMapViewDelegate {
     func mapView(_: MLNMapView, didChangeLocationManagerAuthorization _: MLNLocationManager) {}
 
     func mapView(styleForDefaultUserLocationAnnotationView _: MLNMapView) -> MLNUserLocationAnnotationViewStyle { MLNUserLocationAnnotationViewStyle() }
+
+    func mapView(_: MLNMapView, shaderWillCompile _: Int, backend _: Int, defines _: String) {}
+    func mapView(_: MLNMapView, shaderDidCompile _: Int, backend _: Int, defines _: String) {}
+    func mapView(_: MLNMapView, shaderDidFailCompile _: Int, backend _: Int, defines _: String) {}
+
+    func mapView(_: MLNMapView, glyphsWillLoad _: [String], range _: NSRange) {}
+    func mapView(_: MLNMapView, glyphsDidLoad _: [String], range _: NSRange) {}
+    func mapView(_: MLNMapView, glyphsDidError _: [String], range _: NSRange) {}
+
+    func mapView(_: MLNMapView, tileDidTriggerAction _: MLNTileOperation,
+                 x _: Int,
+                 y _: Int,
+                 z _: Int,
+                 wrap _: Int,
+                 overscaledZ _: Int,
+                 sourceID _: String) {}
+
+    func mapView(_: MLNMapView, spriteWillLoad _: String, url _: String) {}
+    func mapView(_: MLNMapView, spriteDidLoad _: String, url _: String) {}
+    func mapView(_: MLNMapView, spriteDidError _: String, url _: String) {}
 }

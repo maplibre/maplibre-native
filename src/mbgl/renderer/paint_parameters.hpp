@@ -21,7 +21,6 @@ namespace mbgl {
 
 class UpdateParameters;
 class RenderStaticData;
-class Programs;
 class TransformState;
 class ImageManager;
 class LineAtlas;
@@ -58,7 +57,10 @@ public:
                     RenderStaticData&,
                     LineAtlas&,
                     PatternAtlas&,
-                    uint64_t frameCount);
+                    uint64_t frameCount,
+                    double tileLodMinRadius,
+                    double tileLodScale,
+                    double tileLodPitchThreshold);
     ~PaintParameters();
 
     gfx::Context& context;
@@ -82,9 +84,6 @@ public:
     float pixelRatio;
     std::array<float, 2> pixelsToGLUnits;
 
-    // Programs is, in effect, an immutable shader registry
-    Programs& programs;
-    // We're migrating to a dynamic one
     gfx::ShaderRegistry& shaders;
 
     gfx::DepthMode depthModeForSublayer(uint8_t n, gfx::DepthMaskType) const;
@@ -131,9 +130,13 @@ public:
 #if MLN_RENDER_BACKEND_OPENGL
     static constexpr float depthEpsilon = 1.0f / (1 << 16);
 #else
-    static constexpr float depthEpsilon = 1.0f / (1 << 12);
+    static constexpr float depthEpsilon = 1.0f / (1 << 11);
 #endif
     static constexpr int maxStencilValue = 255;
+
+    double tileLodMinRadius;
+    double tileLodScale;
+    double tileLodPitchThreshold;
 };
 
 } // namespace mbgl

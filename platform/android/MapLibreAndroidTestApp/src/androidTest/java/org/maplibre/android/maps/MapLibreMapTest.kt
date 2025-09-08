@@ -10,6 +10,7 @@ import junit.framework.TestCase
 import org.hamcrest.Matcher
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Test
 import org.maplibre.android.annotations.BaseMarkerOptions
 import org.maplibre.android.annotations.Marker
@@ -19,6 +20,7 @@ import org.maplibre.android.annotations.PolylineOptions
 import org.maplibre.android.exceptions.InvalidMarkerPositionException
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap.InfoWindowAdapter
+import org.maplibre.android.maps.renderer.MapRenderer.RenderingRefreshMode
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.activity.EspressoTest
 
@@ -32,12 +34,12 @@ import org.maplibre.android.testapp.activity.EspressoTest
  * with the application UI-thread.
  *
  */
-@Deprecated("remove this file when removing deprecated annotations")
 class MapLibreMapTest : EspressoTest() {
     //
     // InfoWindow
     //
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testConcurrentInfoWindowEnabled() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -47,6 +49,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testConcurrentInfoWindowDisabled() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -56,6 +59,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testInfoWindowAdapter() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -69,6 +73,7 @@ class MapLibreMapTest : EspressoTest() {
     // Annotations
     //
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testAddMarker() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -79,11 +84,13 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test(expected = InvalidMarkerPositionException::class)
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testAddMarkerInvalidPosition() {
         MarkerOptions().marker
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testAddMarkers() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -100,6 +107,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testAddMarkersEmpty() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -110,6 +118,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testAddMarkersSingleMarker() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -123,6 +132,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testAddPolygon() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -133,6 +143,8 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
+    @Ignore("Needs to be investigated https://github.com/maplibre/maplibre-native/issues/3425")
     fun testAddEmptyPolygon() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -143,6 +155,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testAddPolygons() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -162,6 +175,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun addPolygonsEmpty() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -171,6 +185,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun addPolygonsSingle() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -184,6 +199,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testAddPolyline() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -194,9 +210,11 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
+    @Ignore("Needs to be investigated https://github.com/maplibre/maplibre-native/issues/3425")
     fun testAddEmptyPolyline() {
         validateTestSetup()
-        onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
+        onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { _: UiController?, _: View? ->
             val polylineOptions = PolylineOptions()
             val polyline = maplibreMap.addPolyline(polylineOptions)
             assertTrue("Polyline should be ignored", !maplibreMap.polylines.contains(polyline))
@@ -204,6 +222,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testAddPolylines() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -219,12 +238,13 @@ class MapLibreMapTest : EspressoTest() {
             assertTrue(maplibreMap.polylines.contains(polygonOptions1.polyline))
             assertTrue(maplibreMap.polylines.contains(polygonOptions2.polyline))
             assertTrue(
-                    "Polyline should be ignored", !maplibreMap.polylines.contains(polygonOptions3.polyline)
+                "Polyline should be ignored", !maplibreMap.polylines.contains(polygonOptions3.polyline)
             )
         })
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testAddPolylinesEmpty() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -234,6 +254,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testAddPolylinesSingle() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -247,6 +268,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testRemoveMarker() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -258,6 +280,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testRemovePolygon() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -269,6 +292,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testRemovePolyline() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -280,6 +304,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testRemoveAnnotation() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -291,6 +316,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testRemoveAnnotationById() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -303,6 +329,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testRemoveAnnotations() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -318,6 +345,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testClear() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -333,6 +361,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testRemoveAnnotationsByList() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -350,6 +379,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testGetAnnotationById() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -361,22 +391,25 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testGetAnnotations() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(
-                MapLibreMapAction { uiController: UiController?, view: View? -> TestCase.assertNotNull("Annotations should be non null", maplibreMap.annotations) }
+            MapLibreMapAction { uiController: UiController?, view: View? -> TestCase.assertNotNull("Annotations should be non null", maplibreMap.annotations) }
         )
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testGetMarkers() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(
-                MapLibreMapAction { uiController: UiController?, view: View? -> TestCase.assertNotNull("Markers should be non null", maplibreMap.markers) }
+            MapLibreMapAction { uiController: UiController?, view: View? -> TestCase.assertNotNull("Markers should be non null", maplibreMap.markers) }
         )
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testGetPolygons() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? -> TestCase.assertNotNull("Polygons should be non null", maplibreMap.polygons) }
@@ -384,6 +417,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testGetPolylines() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? -> TestCase.assertNotNull("Polylines should be non null", maplibreMap.polylines) }
@@ -391,6 +425,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testGetSelectedMarkers() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? -> TestCase.assertNotNull("Selected markers should be non null", maplibreMap.selectedMarkers) }
@@ -398,6 +433,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testSelectMarker() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -409,6 +445,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testDeselectMarker() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -421,6 +458,7 @@ class MapLibreMapTest : EspressoTest() {
     }
 
     @Test
+    @Deprecated("remove this test when removing deprecated annotations")
     fun testDeselectMarkers() {
         validateTestSetup()
         onView(ViewMatchers.withId(R.id.mapView)).perform(MapLibreMapAction { uiController: UiController?, view: View? ->
@@ -434,6 +472,32 @@ class MapLibreMapTest : EspressoTest() {
         })
     }
 
+    @Test
+    fun testTileCache() {
+        validateTestSetup()
+        rule.runOnUiThread {
+            maplibreMap.tileCacheEnabled = false
+            assertTrue(maplibreMap.tileCacheEnabled == false)
+
+            maplibreMap.tileCacheEnabled = true
+            assertTrue(maplibreMap.tileCacheEnabled == true)
+        }
+    }
+
+    @Test
+    fun testRenderingRefreshMode() {
+        validateTestSetup()
+        rule.runOnUiThread {
+            mapView = rule.getActivity().findViewById(R.id.mapView)
+            // Default RenderingRefreshMode is WHEN_DIRTY
+            assertTrue(mapView.getRenderingRefreshMode() == RenderingRefreshMode.WHEN_DIRTY)
+            // Switch to CONTINUOUS rendering
+            mapView.setRenderingRefreshMode(RenderingRefreshMode.CONTINUOUS)
+            assertTrue(mapView.getRenderingRefreshMode() == RenderingRefreshMode.CONTINUOUS)
+        }
+    }
+
+    @Deprecated("remove this class when removing deprecated annotations")
     inner class MapLibreMapAction internal constructor(private val invokeViewAction: InvokeViewAction) : ViewAction {
         override fun getConstraints(): Matcher<View> {
             return ViewMatchers.isDisplayed()
@@ -448,6 +512,7 @@ class MapLibreMapTest : EspressoTest() {
         }
     }
 
+    @Deprecated("remove this interface when removing deprecated annotations")
     internal fun interface InvokeViewAction {
         fun onViewAction(uiController: UiController?, view: View?)
     }

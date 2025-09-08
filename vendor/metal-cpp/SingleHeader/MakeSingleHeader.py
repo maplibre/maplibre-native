@@ -85,7 +85,7 @@ class HeaderPrefix( object ):
 
 	def __get_date_string( self ):
 		today = datetime.date.today()
- 
+
 		return today.strftime( self.__template_date )
 
 	def __meta_data_string( self ):
@@ -158,7 +158,7 @@ class SingleHeader( object ):
 
 
 	def __process_header( self, header_path ):
-		out_header = ''		
+		out_header = ''
 
 		header_path = os.path.realpath( header_path )
 
@@ -167,7 +167,7 @@ class SingleHeader( object ):
 
 			self.__base_path.append( os.path.dirname( header_path ) )
 			self.__included_headers.add( header_path )
-			
+
 			out_header = self.__read_header( header_path )
 			out_header = self.__strip_pragma_once( out_header )
 			out_header = self.__strip_comments( out_header )
@@ -211,7 +211,7 @@ def parse_arguments():
 def make_header( args ):
 	prefix = HeaderPrefix( os.path.basename( args.output_path ) )
 	header = SingleHeader()
-	
+
 	for header_path in args.header_paths:
 		header.append( header_path )
 
@@ -248,7 +248,7 @@ def write_header( args, content ):
 
 if __name__ == '__main__':
 	result = -1
-	
+
 	try:
 		if sys.getdefaultencoding().lower() == 'ascii':
 			reload( sys )

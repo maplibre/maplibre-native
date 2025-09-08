@@ -1,8 +1,10 @@
 #include <mbgl/text/cross_tile_symbol_index.hpp>
+
 #include <mbgl/layout/symbol_instance.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/tile/tile.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 namespace mbgl {
 
@@ -14,9 +16,12 @@ TileLayerIndex::TileLayerIndex(OverscaledTileID coord_,
       bucketInstanceId(bucketInstanceId_),
       bucketLeaderId(std::move(bucketLeaderId_)) {
     for (const SymbolInstance& symbolInstance : symbolInstances) {
-        if (symbolInstance.crossTileID == SymbolInstance::invalidCrossTileID()) continue;
-        indexedSymbolInstances[symbolInstance.key].emplace_back(symbolInstance.crossTileID,
-                                                                getScaledCoordinates(symbolInstance, coord));
+        if (!symbolInstance.check(SYM_GUARD_LOC) ||
+            symbolInstance.getCrossTileID() == SymbolInstance::invalidCrossTileID) {
+            continue;
+        }
+        indexedSymbolInstances[symbolInstance.getKey()].emplace_back(symbolInstance.getCrossTileID(),
+                                                                     getScaledCoordinates(symbolInstance, coord));
     }
 }
 
@@ -26,9 +31,9 @@ Point<int64_t> TileLayerIndex::getScaledCoordinates(const SymbolInstance& symbol
     const double roundingFactor = 512.0 / util::EXTENT / 2.0;
     const double scale = roundingFactor / std::pow(2, childTileCoord.canonical.z - coord.canonical.z);
     return {static_cast<int64_t>(
-                std::floor((childTileCoord.canonical.x * util::EXTENT + symbolInstance.anchor.point.x) * scale)),
+                std::floor((childTileCoord.canonical.x * util::EXTENT + symbolInstance.getAnchor().point.x) * scale)),
             static_cast<int64_t>(
-                std::floor((childTileCoord.canonical.y * util::EXTENT + symbolInstance.anchor.point.y) * scale))};
+                std::floor((childTileCoord.canonical.y * util::EXTENT + symbolInstance.getAnchor().point.y) * scale))};
 }
 
 void TileLayerIndex::findMatches(SymbolBucket& bucket,
@@ -42,12 +47,12 @@ void TileLayerIndex::findMatches(SymbolBucket& bucket,
     if (bucket.bucketLeaderID != bucketLeaderId) return;
 
     for (auto& symbolInstance : symbolInstances) {
-        if (symbolInstance.crossTileID) {
+        if (symbolInstance.getCrossTileID() || !symbolInstance.check(SYM_GUARD_LOC)) {
             // already has a match, skip
             continue;
         }
 
-        auto it = indexedSymbolInstances.find(symbolInstance.key);
+        auto it = indexedSymbolInstances.find(symbolInstance.getKey());
         if (it == indexedSymbolInstances.end()) {
             // No symbol with this key in this bucket
             continue;
@@ -65,7 +70,7 @@ void TileLayerIndex::findMatches(SymbolBucket& bucket,
                 // symbol, don't let any other symbols at the same zoom level
                 // duplicate against the same parent (see issue #10844)
                 zoomCrossTileIDs.insert(thisTileSymbol.crossTileID);
-                symbolInstance.crossTileID = thisTileSymbol.crossTileID;
+                symbolInstance.setCrossTileID(thisTileSymbol.crossTileID);
                 break;
             }
         }
@@ -140,16 +145,16 @@ bool CrossTileSymbolLayerIndex::addBucket(const OverscaledTileID& tileID,
         // For overscaled tiles the viewport might be showing only a small part of the tile,
         // so we filter out the off-screen symbols to improve the performance.
         for (auto& symbolInstance : bucket.symbolInstances) {
-            if (isInVewport(tileMatrix, symbolInstance.anchor.point)) {
-                symbolInstance.crossTileID = 0u;
+            if (symbolInstance.check(SYM_GUARD_LOC) && isInVewport(tileMatrix, symbolInstance.getAnchor().point)) {
+                symbolInstance.setCrossTileID(0u);
             } else {
-                symbolInstance.crossTileID = SymbolInstance::invalidCrossTileID();
+                symbolInstance.setCrossTileID(SymbolInstance::invalidCrossTileID);
                 bucket.hasUninitializedSymbols = true;
             }
         }
     } else {
         for (auto& symbolInstance : bucket.symbolInstances) {
-            symbolInstance.crossTileID = 0u;
+            symbolInstance.setCrossTileID(0u);
         }
     }
 
@@ -174,10 +179,10 @@ bool CrossTileSymbolLayerIndex::addBucket(const OverscaledTileID& tileID,
     }
 
     for (auto& symbolInstance : bucket.symbolInstances) {
-        if (!symbolInstance.crossTileID) {
+        if (symbolInstance.check(SYM_GUARD_LOC) && !symbolInstance.getCrossTileID()) {
             // symbol did not match any known symbol, assign a new id
-            symbolInstance.crossTileID = ++maxCrossTileID;
-            thisZoomUsedCrossTileIDs.insert(symbolInstance.crossTileID);
+            symbolInstance.setCrossTileID(++maxCrossTileID);
+            thisZoomUsedCrossTileIDs.insert(symbolInstance.getCrossTileID());
         }
     }
 
@@ -201,7 +206,7 @@ bool CrossTileSymbolLayerIndex::removeStaleBuckets(const std::unordered_set<uint
     bool tilesChanged = false;
     for (auto& zoomIndexes : indexes) {
         for (auto it = zoomIndexes.second.begin(); it != zoomIndexes.second.end();) {
-            if (!currentIDs.count(it->second.bucketInstanceId)) {
+            if (!currentIDs.contains(it->second.bucketInstanceId)) {
                 removeBucketCrossTileIDs(zoomIndexes.first, it->second);
                 it = zoomIndexes.second.erase(it);
                 tilesChanged = true;
@@ -216,6 +221,9 @@ bool CrossTileSymbolLayerIndex::removeStaleBuckets(const std::unordered_set<uint
 CrossTileSymbolIndex::CrossTileSymbolIndex() = default;
 
 auto CrossTileSymbolIndex::addLayer(const RenderLayer& layer, float lng) -> AddLayerResult {
+    MLN_TRACE_FUNC();
+    MLN_ZONE_STR(layer.getID());
+
     auto found = layerIndexes.find(layer.getID());
     if (found == layerIndexes.end()) {
         found = layerIndexes
@@ -246,6 +254,8 @@ auto CrossTileSymbolIndex::addLayer(const RenderLayer& layer, float lng) -> AddL
 }
 
 void CrossTileSymbolIndex::pruneUnusedLayers(const std::set<std::string>& usedLayers) {
+    MLN_TRACE_FUNC();
+
     for (auto it = layerIndexes.begin(); it != layerIndexes.end();) {
         if (usedLayers.find(it->first) == usedLayers.end()) {
             it = layerIndexes.erase(it);

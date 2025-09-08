@@ -6,8 +6,8 @@ namespace mbgl {
 namespace shaders {
 
 template <>
-struct ShaderSource<BuiltIn::LineProgram, gfx::Backend::Type::OpenGL> {
-    static constexpr const char* name = "LineProgram";
+struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* name = "LineShader";
     static constexpr const char* vertex = R"(// floor(127 / 2) == 63.0
 // the maximum allowed miter limit is 2.0 at the moment. the extrude normal is
 // stored in a byte (-128..127). we scale regular normals up to length 63, but
@@ -19,10 +19,42 @@ struct ShaderSource<BuiltIn::LineProgram, gfx::Backend::Type::OpenGL> {
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
-uniform mat4 u_matrix;
-uniform mediump float u_ratio;
-uniform vec2 u_units_to_pixels;
-uniform lowp float u_device_pixel_ratio;
+layout (std140) uniform GlobalPaintParamsUBO {
+    highp vec2 u_pattern_atlas_texsize;
+    highp vec2 u_units_to_pixels;
+    highp vec2 u_world_size;
+    highp float u_camera_to_center_distance;
+    highp float u_symbol_fade_change;
+    highp float u_aspect_ratio;
+    highp float u_pixel_ratio;
+    highp float u_map_zoom;
+    lowp float global_pad1;
+};
+
+layout (std140) uniform LineDrawableUBO {
+    highp mat4 u_matrix;
+    mediump float u_ratio;
+    // Interpolations
+    lowp float u_color_t;
+    lowp float u_blur_t;
+    lowp float u_opacity_t;
+    lowp float u_gapwidth_t;
+    lowp float u_offset_t;
+    lowp float u_width_t;
+    lowp float drawable_pad1;
+};
+
+layout (std140) uniform LineEvaluatedPropsUBO {
+    highp vec4 u_color;
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+    lowp float u_floorwidth;
+    lowp float props_pad1;
+    lowp float props_pad2;
+};
 
 out vec2 v_normal;
 out vec2 v_width2;
@@ -30,43 +62,25 @@ out float v_gamma_scale;
 out highp float v_linesofar;
 
 #ifndef HAS_UNIFORM_u_color
-uniform lowp float u_color_t;
 layout (location = 2) in highp vec4 a_color;
 out highp vec4 color;
-#else
-uniform highp vec4 u_color;
 #endif
 #ifndef HAS_UNIFORM_u_blur
-uniform lowp float u_blur_t;
 layout (location = 3) in lowp vec2 a_blur;
 out lowp float blur;
-#else
-uniform lowp float u_blur;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
-uniform lowp float u_opacity_t;
 layout (location = 4) in lowp vec2 a_opacity;
 out lowp float opacity;
-#else
-uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_gapwidth
-uniform lowp float u_gapwidth_t;
 layout (location = 5) in mediump vec2 a_gapwidth;
-#else
-uniform mediump float u_gapwidth;
 #endif
 #ifndef HAS_UNIFORM_u_offset
-uniform lowp float u_offset_t;
 layout (location = 6) in lowp vec2 a_offset;
-#else
-uniform lowp float u_offset;
 #endif
 #ifndef HAS_UNIFORM_u_width
-uniform lowp float u_width_t;
 layout (location = 7) in mediump vec2 a_width;
-#else
-uniform mediump float u_width;
 #endif
 
 void main() {
@@ -103,7 +117,7 @@ mediump float width = u_width;
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
-    float ANTIALIASING = 1.0 / u_device_pixel_ratio / 2.0;
+    float ANTIALIASING = 1.0 / DEVICE_PIXEL_RATIO / 2.0;
 
     vec2 a_extrude = a_data.xy - 128.0;
     float a_direction = mod(a_data.z, 4.0) - 1.0;
@@ -151,7 +165,17 @@ mediump float width = u_width;
     v_width2 = vec2(outset, inset);
 }
 )";
-    static constexpr const char* fragment = R"(uniform lowp float u_device_pixel_ratio;
+    static constexpr const char* fragment = R"(layout (std140) uniform LineEvaluatedPropsUBO {
+    highp vec4 u_color;
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+    lowp float u_floorwidth;
+    lowp float props_pad1;
+    lowp float props_pad2;
+};
 
 in vec2 v_width2;
 in vec2 v_normal;
@@ -159,18 +183,12 @@ in float v_gamma_scale;
 
 #ifndef HAS_UNIFORM_u_color
 in highp vec4 color;
-#else
-uniform highp vec4 u_color;
 #endif
 #ifndef HAS_UNIFORM_u_blur
 in lowp float blur;
-#else
-uniform lowp float u_blur;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
 in lowp float opacity;
-#else
-uniform lowp float u_opacity;
 #endif
 
 void main() {
@@ -190,7 +208,7 @@ lowp float opacity = u_opacity;
     // Calculate the antialiasing fade factor. This is either when fading in
     // the line in case of an offset line (v_width2.t) or when fading out
     // (v_width2.s)
-    float blur2 = (blur + 1.0 / u_device_pixel_ratio) * v_gamma_scale;
+    float blur2 = (blur + 1.0 / DEVICE_PIXEL_RATIO) * v_gamma_scale;
     float alpha = clamp(min(dist - (v_width2.t - blur2), v_width2.s - dist) / blur2, 0.0, 1.0);
 
     fragColor = color * (alpha * opacity);

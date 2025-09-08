@@ -3,8 +3,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- An object conforming to the `MLNOfflineRegion` protocol determines which
- resources are required by an `MLNOfflinePack` object.
+ An object conforming to the ``MLNOfflineRegion`` protocol determines which
+ resources are required by an ``MLNOfflinePack`` object.
  */
 @protocol MLNOfflineRegion <NSObject>
 

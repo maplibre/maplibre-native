@@ -38,14 +38,18 @@ Image::Impl::Impl(std::string id_,
                   bool sdf_,
                   ImageStretches stretchX_,
                   ImageStretches stretchY_,
-                  std::optional<ImageContent> content_)
+                  std::optional<ImageContent> content_,
+                  std::optional<TextFit> textFitWidth_,
+                  std::optional<TextFit> textFitHeight_)
     : id(std::move(id_)),
       image(std::move(image_)),
       pixelRatio(pixelRatio_),
       sdf(sdf_),
       stretchX(std::move(stretchX_)),
       stretchY(std::move(stretchY_)),
-      content(std::move(content_)) {
+      content(std::move(content_)),
+      textFitWidth(std::move(textFitWidth_)),
+      textFitHeight(std::move(textFitHeight_)) {
     if (!image.valid()) {
         throw util::StyleImageException("dimensions may not be zero");
     } else if (pixelRatio <= 0) {

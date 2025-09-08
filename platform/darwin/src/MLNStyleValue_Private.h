@@ -15,6 +15,7 @@
 #import <mbgl/style/transition_options.hpp>
 #import <mbgl/style/types.hpp>
 #import "MLNConversion.h"
+#import "MLNSymbolStyleLayer.h"
 
 #import <mbgl/util/enum.hpp>
 #include <mbgl/util/interpolate.hpp>
@@ -201,7 +202,7 @@ class MLNStyleValueTransformer {
     }
   }
 
-  // Padding
+  // Padding as array<float, 4>
   void getMBGLValue(id rawValue, std::array<float, 4> &mbglValue) {
     if ([rawValue isKindOfClass:[NSValue class]]) {
       mbglValue = [rawValue mgl_paddingArrayValue];
@@ -215,8 +216,55 @@ class MLNStyleValueTransformer {
     }
   }
 
+  // Padding type (supports numbers and float arrays w/ sizes 1 to 4)
+  void getMBGLValue(id rawValue, mbgl::Padding &mbglValue) {
+    if ([rawValue isKindOfClass:[NSNumber class]]) {
+      NSNumber *number = (NSNumber *)rawValue;
+      mbglValue = mbgl::Padding(number.floatValue);
+    } else if ([rawValue isKindOfClass:[NSArray class]]) {
+      NSArray *array = (NSArray *)rawValue;
+      if (array.count < 1 || array.count > 4) {
+        [NSException raise:NSInvalidArgumentException
+                    format:@"Padding array should have from 1 to 4 elements."];
+      }
+      std::array<float, 4> values;
+      for (size_t i = 0; i < array.count; ++i) {
+        getMBGLValue(array[i], values[i]);
+      }
+      mbglValue = mbgl::Padding(std::span<float>(values.begin(), array.count));
+    } else if ([rawValue isKindOfClass:[NSValue class]]) {
+      mbglValue = mbgl::Padding([rawValue mgl_paddingArrayValue]);
+    }
+  }
+
   // Color
   void getMBGLValue(MLNColor *rawValue, mbgl::Color &mbglValue) { mbglValue = rawValue.mgl_color; }
+
+  // VariableAnchorOffsetCollection
+  void getMBGLValue(id rawValue, mbgl::VariableAnchorOffsetCollection &mbglValue) {
+    if ([rawValue isKindOfClass:[NSArray class]]) {
+      NSArray *array = (NSArray *)rawValue;
+      if (array.count % 2 != 0) {
+        [NSException
+             raise:NSInvalidArgumentException
+            format:@"VariableTextAnchorOffset array should have an even number of elements."];
+      }
+
+      std::vector<mbgl::AnchorOffsetPair> anchorOffsets;
+      anchorOffsets.reserve(array.count / 2);
+      for (NSUInteger i = 0; i < array.count; i += 2) {
+        mbgl::style::SymbolAnchorType anchor{0};
+        getMBGLValue<mbgl::style::SymbolAnchorType, MLNTextAnchor>(array[i], anchor);
+
+        std::array<float, 2> offsetArray;
+        getMBGLValue(array[i + 1], offsetArray);
+
+        anchorOffsets.emplace_back(anchor, offsetArray);
+      }
+
+      mbglValue = mbgl::VariableAnchorOffsetCollection(std::move(anchorOffsets));
+    }
+  }
 
   // Image
   void getMBGLValue(NSString *rawValue, mbgl::style::expression::Image &mbglValue) {
@@ -245,9 +293,8 @@ class MLNStyleValueTransformer {
   }
 
   // Enumerations
-  template <typename MBGLEnum = MBGLType,
+  template <typename MBGLEnum = MBGLType, typename MLNEnum = ObjCEnum,
             class = typename std::enable_if<std::is_enum<MBGLEnum>::value>::type,
-            typename MLNEnum = ObjCEnum,
             class = typename std::enable_if<std::is_enum<MLNEnum>::value>::type>
   void getMBGLValue(id rawValue, MBGLEnum &mbglValue) {
     if ([rawValue isKindOfClass:[NSString class]]) {
@@ -285,14 +332,32 @@ class MLNStyleValueTransformer {
     return [NSValue mgl_valueWithOffsetArray:mbglStopValue];
   }
 
-  // Padding
+  // Padding as array<float, 4>
   static NSValue *toMLNRawStyleValue(const std::array<float, 4> &mbglStopValue) {
     return [NSValue mgl_valueWithPaddingArray:mbglStopValue];
+  }
+
+  // Padding type
+  static NSValue *toMLNRawStyleValue(const mbgl::Padding &mbglStopValue) {
+    return [NSValue mgl_valueWithPaddingArray:mbglStopValue.toArray()];
   }
 
   // Color
   static MLNColor *toMLNRawStyleValue(const mbgl::Color mbglStopValue) {
     return [MLNColor mgl_colorWithColor:mbglStopValue];
+  }
+
+  // VariableAnchorOffsetCollection
+  static NSArray<NSExpression *> *toMLNRawStyleValue(
+      const mbgl::VariableAnchorOffsetCollection mbglStopValue) {
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:mbglStopValue.size() * 2];
+    for (const auto &anchorOffset : mbglStopValue) {
+      NSString *anchor = toMLNRawStyleValue(anchorOffset.anchorType);
+      NSValue *offset = [NSValue mgl_valueWithOffsetArray:anchorOffset.offset];
+      [array addObject:[NSExpression expressionForConstantValue:anchor]];
+      [array addObject:[NSExpression expressionForConstantValue:offset]];
+    }
+    return array;
   }
 
   // Image

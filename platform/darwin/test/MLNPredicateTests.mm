@@ -27,7 +27,7 @@
     XCTAssertThrowsSpecificNamed([NSPredicate predicateWithFormat:@"a MATCHES 'i\\w{18}n'"].mgl_filter, NSException, NSInvalidArgumentException);
     NSPredicate *selectorPredicate = [NSPredicate predicateWithFormat:@"(SELF isKindOfClass: %@)", [MLNPolyline class]];
     XCTAssertThrowsSpecificNamed(selectorPredicate.mgl_filter, NSException, NSInvalidArgumentException);
-    
+
     XCTAssertThrowsSpecificNamed([NSPredicate predicateWithBlock:^BOOL(id _Nullable evaluatedObject, NSDictionary<NSString *, id> * _Nullable bindings) {
         XCTAssertTrue(NO, @"Predicate block should not be evaluated.");
         return NO;
@@ -466,7 +466,7 @@
         [self testSymmetryWithPredicate:predicate
                           mustRoundTrip:NO];
     }
-    
+
     {
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"a !=[cd] 'b'"];
         NSArray *jsonExpression = @[@"!=", @[@"get", @"a"], @"b", @[@"collator", @{@"case-sensitive": @NO, @"diacritic-sensitive": @NO}]];
@@ -515,7 +515,7 @@
                                         @"locale": @"tlh"}]];
         XCTAssertEqualObjects([predicate.mgl_jsonExpressionObject lastObject], jsonExpression);
     }
-    
+
     // https://github.com/mapbox/mapbox-gl-js/issues/9339
     {
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"ANY {6, 5, 4, 3} =[c] $featureIdentifier"];

@@ -27,18 +27,13 @@ public:
         : v(other.v) {} // buffer is not copied
     IndexVectorBase(IndexVectorBase&& other)
         : v(std::move(other.v)),
-#if MLN_DRAWABLE_RENDERER
           buffer(std::move(other.buffer)),
-#endif // MLN_DRAWABLE_RENDERER
           dirty(other.dirty),
-          released(other.released) {
-    }
+          released(other.released) {}
     virtual ~IndexVectorBase() = default;
 
-#if MLN_DRAWABLE_RENDERER
     IndexBufferBase* getBuffer() const { return buffer.get(); }
     void setBuffer(std::unique_ptr<IndexBufferBase>&& value) { buffer = std::move(value); }
-#endif // MLN_DRAWABLE_RENDERER
 
     bool getDirty() const { return dirty; }
     void setDirty(bool value = true) { dirty = value; }
@@ -73,19 +68,15 @@ public:
     void clear() {
         dirty = true;
         v.clear();
-#if MLN_DRAWABLE_RENDERER
         buffer.reset();
-#endif // MLN_DRAWABLE_RENDERER
     }
 
     /// Indicate that this shared index vector will no longer be updated.
     void release() {
-#if MLN_DRAWABLE_RENDERER
         // If we've already created a buffer, we don't need the raw data any more.
         if (buffer) {
             v.clear();
         }
-#endif // MLN_DRAWABLE_RENDERER
         released = true;
     }
 
@@ -94,9 +85,7 @@ public:
     const std::vector<uint16_t>& vector() const { return v; }
 
 protected:
-#if MLN_DRAWABLE_RENDERER
     std::unique_ptr<IndexBufferBase> buffer;
-#endif // MLN_DRAWABLE_RENDERER
     bool dirty = true;
     bool released = false;
 };
@@ -113,6 +102,7 @@ public:
         static_assert(sizeof...(args) % groupSize == 0, "wrong buffer element count");
         assert(!released);
         util::ignore({(v.emplace_back(std::forward<Args>(args)), 0)...});
+        dirty = true;
     }
 };
 

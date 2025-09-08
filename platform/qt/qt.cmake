@@ -17,7 +17,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
             unset(CMAKE_FIND_ROOT_PATH)
         endif()
 
-        find_package(ICU COMPONENTS uc REQUIRED)
+        # Use PkgConfig to find ICU
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(ICU_UC REQUIRED icu-uc)
+        pkg_check_modules(ICU_I18N REQUIRED icu-i18n)
 
         if(MLN_QT_IGNORE_ICU)
             set(CMAKE_PREFIX_PATH ${_CMAKE_PREFIX_PATH_ORIG})
@@ -32,7 +35,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 if("${QT_VERSION_MAJOR}" STREQUAL "")
-    find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
+    find_package(QT NAMES Qt6 COMPONENTS Core REQUIRED)
 else()
     find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
 endif()
@@ -59,16 +62,28 @@ if (MSVC)
     endforeach()
 endif()
 
+# Qt Vulkan renderer backend: only when MLN_WITH_VULKAN and qvulkaninstance.h present
+if(MLN_WITH_VULKAN)
+    find_path(QT_VULKAN_HEADER qvulkaninstance.h
+        PATHS ${Qt${QT_VERSION_MAJOR}Gui_INCLUDE_DIRS}
+        NO_DEFAULT_PATH)
+
+    if(NOT QT_VULKAN_HEADER)
+        message(FATAL_ERROR "Qt build has no Vulkan headers; can not build Qt Vulkan backend")
+    endif()
+endif()
+
 target_sources(
     mbgl-core
     PRIVATE
         ${PROJECT_SOURCE_DIR}/platform/$<IF:$<PLATFORM_ID:Linux>,default/src/mbgl/text/bidi.cpp,qt/src/mbgl/bidi.cpp>
         ${PROJECT_SOURCE_DIR}/platform/default/include/mbgl/gfx/headless_backend.hpp
         ${PROJECT_SOURCE_DIR}/platform/default/include/mbgl/gfx/headless_frontend.hpp
-        ${PROJECT_SOURCE_DIR}/platform/default/include/mbgl/gl/headless_backend.hpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
+        $<$<BOOL:${MLN_WITH_OPENGL}>:${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp>
+        $<$<BOOL:${MLN_WITH_METAL}>:${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/mtl/headless_backend.cpp>
+        $<$<BOOL:${MLN_WITH_VULKAN}>:${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/vulkan/headless_backend.cpp>
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/collator.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/layermanager/layer_manager.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/platform/time.cpp
@@ -84,6 +99,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_database.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_download.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/online_file_source.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/$<IF:$<BOOL:${MLN_WITH_PMTILES}>,pmtiles_file_source.cpp,pmtiles_file_source_stub.cpp>
         ${PROJECT_SOURCE_DIR}/platform/$<IF:$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>,default/src/mbgl/storage/sqlite3.cpp,qt/src/mbgl/sqlite3.cpp>
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/compression.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/filesystem.cpp
@@ -91,7 +107,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/async_task.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/async_task_impl.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/gl_functions.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/headless_backend_qt.cpp
+        $<$<BOOL:${MLN_WITH_OPENGL}>:${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/headless_backend_qt.cpp>
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_file_source.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_file_source.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_request.cpp
@@ -108,11 +124,6 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/timer_impl.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/utf.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.hpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_observer.hpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/scheduler.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/scheduler.hpp
 )
 
 target_compile_definitions(
@@ -139,6 +150,7 @@ target_link_libraries(
         $<BUILD_INTERFACE:mbgl-vendor-parsedate>
         $<BUILD_INTERFACE:mbgl-vendor-nunicode>
         $<BUILD_INTERFACE:mbgl-vendor-csscolorparser>
+        $<$<PLATFORM_ID:iOS>:$<BUILD_INTERFACE:maplibre-native-base-extras-filesystem>>
         $<$<NOT:$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:Emscripten>>>:z>
         $<IF:$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>,$<BUILD_INTERFACE:mbgl-vendor-sqlite>,Qt${QT_VERSION_MAJOR}::Sql>
     PRIVATE
@@ -152,7 +164,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     if (MLN_QT_WITH_INTERNAL_ICU)
         target_link_libraries(mbgl-core PUBLIC $<BUILD_INTERFACE:mbgl-vendor-icu>)
     else()
-        target_link_libraries(mbgl-core PUBLIC ICU::uc)
+        target_link_libraries(mbgl-core PUBLIC ${ICU_UC_LIBRARIES} ${ICU_I18N_LIBRARIES})
+        target_include_directories(mbgl-core PRIVATE ${ICU_UC_INCLUDE_DIRS} ${ICU_I18N_INCLUDE_DIRS})
     endif()
 endif()
 
@@ -163,6 +176,7 @@ if(MLN_QT_HAS_PARENT)
         mbgl-vendor-parsedate
         mbgl-vendor-nunicode
         mbgl-vendor-csscolorparser
+        $<$<PLATFORM_ID:iOS>:$<BUILD_INTERFACE:maplibre-native-base-extras-filesystem>>
         $<$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>:$<BUILD_INTERFACE:mbgl-vendor-sqlite>>
         $<$<AND:$<PLATFORM_ID:Linux>,$<BOOL:${MLN_QT_WITH_INTERNAL_ICU}>>:$<BUILD_INTERFACE:mbgl-vendor-icu>>
         PARENT_SCOPE
@@ -203,7 +217,7 @@ if(NOT MLN_QT_LIBRARY_ONLY)
     else()
         target_link_libraries(
             mbgl-test-runner
-            PRIVATE -Wl,--whole-archive mbgl-test -Wl,--no-whole-archive
+            PRIVATE $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
         )
     endif()
 

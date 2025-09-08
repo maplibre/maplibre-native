@@ -10,8 +10,8 @@
 #include <mbgl/style/layout_property.hpp>
 #include <mbgl/style/paint_property.hpp>
 #include <mbgl/style/properties.hpp>
-#include <mbgl/programs/attributes.hpp>
-#include <mbgl/programs/uniforms.hpp>
+#include <mbgl/shaders/attributes.hpp>
+#include <mbgl/shaders/uniforms.hpp>
 
 namespace mbgl {
 namespace style {
@@ -51,9 +51,9 @@ struct IconOptional : LayoutProperty<bool> {
     static bool defaultValue() { return false; }
 };
 
-struct IconPadding : LayoutProperty<float> {
+struct IconPadding : DataDrivenLayoutProperty<Padding> {
     static constexpr const char *name() { return "icon-padding"; }
-    static float defaultValue() { return 2.f; }
+    static Padding defaultValue() { return {2}; }
 };
 
 struct IconPitchAlignment : LayoutProperty<AlignmentType> {
@@ -94,6 +94,11 @@ struct SymbolAvoidEdges : LayoutProperty<bool> {
 struct SymbolPlacement : LayoutProperty<SymbolPlacementType> {
     static constexpr const char *name() { return "symbol-placement"; }
     static SymbolPlacementType defaultValue() { return SymbolPlacementType::Point; }
+};
+
+struct SymbolScreenSpace : LayoutProperty<bool> {
+    static constexpr const char *name() { return "symbol-screen-space"; }
+    static bool defaultValue() { return false; }
 };
 
 struct SymbolSortKey : DataDrivenLayoutProperty<float> {
@@ -216,6 +221,11 @@ struct TextVariableAnchor : LayoutProperty<std::vector<TextVariableAnchorType>> 
     static std::vector<TextVariableAnchorType> defaultValue() { return {}; }
 };
 
+struct TextVariableAnchorOffset : DataDrivenLayoutProperty<VariableAnchorOffsetCollection> {
+    static constexpr const char *name() { return "text-variable-anchor-offset"; }
+    static VariableAnchorOffsetCollection defaultValue() { return {}; }
+};
+
 struct TextWritingMode : LayoutProperty<std::vector<TextWritingModeType>> {
     static constexpr const char *name() { return "text-writing-mode"; }
     static std::vector<TextWritingModeType> defaultValue() { return {}; }
@@ -297,6 +307,7 @@ class SymbolLayoutProperties : public Properties<
     IconTextFitPadding,
     SymbolAvoidEdges,
     SymbolPlacement,
+    SymbolScreenSpace,
     SymbolSortKey,
     SymbolSpacing,
     SymbolZOrder,
@@ -321,6 +332,7 @@ class SymbolLayoutProperties : public Properties<
     TextSize,
     TextTransform,
     TextVariableAnchor,
+    TextVariableAnchorOffset,
     TextWritingMode
 > {};
 

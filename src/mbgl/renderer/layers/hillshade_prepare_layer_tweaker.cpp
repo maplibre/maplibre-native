@@ -50,15 +50,16 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup, const Pai
         matrix::ortho(matrix, 0, util::EXTENT, -util::EXTENT, 0, -1, 1);
         matrix::translate(matrix, matrix, 0, -util::EXTENT, 0);
 
-        const HillshadePrepareDrawableUBO drawableUBO = {
-            /* .matrix = */ util::cast<float>(matrix),
-            /* .unpack = */ getUnpackVector(drawableData.encoding),
-            /* .dimension = */ {static_cast<float>(drawableData.stride), static_cast<float>(drawableData.stride)},
-            /* .zoom = */ static_cast<float>(tileID.canonical.z),
-            /* .maxzoom = */ static_cast<float>(drawableData.maxzoom)};
+        const HillshadePrepareDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix)};
+        const HillshadePrepareTilePropsUBO tilePropsUBO = {
+            .unpack = getUnpackVector(drawableData.encoding),
+            .dimension = {static_cast<float>(drawableData.stride), static_cast<float>(drawableData.stride)},
+            .zoom = static_cast<float>(tileID.canonical.z),
+            .maxzoom = static_cast<float>(drawableData.maxzoom)};
 
-        drawable.mutableUniformBuffers().createOrUpdate(
-            idHillshadePrepareDrawableUBO, &drawableUBO, parameters.context);
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idHillshadePrepareDrawableUBO, &drawableUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idHillshadePrepareTilePropsUBO, &tilePropsUBO, parameters.context);
     });
 }
 

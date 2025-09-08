@@ -70,6 +70,19 @@ jni::Local<jni::Object<>> LocationIndicatorLayer::getBearing(jni::JNIEnv& env) {
     return std::move(*convert<jni::Local<jni::Object<>>>(env, toLocationIndicatorLayer(layer).getBearing()));
 }
 
+jni::Local<jni::Object<TransitionOptions>> LocationIndicatorLayer::getBearingTransition(jni::JNIEnv& env) {
+    using namespace mbgl::android::conversion;
+    mbgl::style::TransitionOptions options = toLocationIndicatorLayer(layer).getBearingTransition();
+    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
+}
+
+void LocationIndicatorLayer::setBearingTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    mbgl::style::TransitionOptions options;
+    options.duration.emplace(mbgl::Milliseconds(duration));
+    options.delay.emplace(mbgl::Milliseconds(delay));
+    toLocationIndicatorLayer(layer).setBearingTransition(options);
+}
+
 jni::Local<jni::Object<>> LocationIndicatorLayer::getLocation(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
     return std::move(*convert<jni::Local<jni::Object<>>>(env, toLocationIndicatorLayer(layer).getLocation()));
@@ -244,6 +257,8 @@ void LocationIndicatorJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&LocationIndicatorLayer::getShadowImage, "nativeGetShadowImage"),
         METHOD(&LocationIndicatorLayer::getPerspectiveCompensation, "nativeGetPerspectiveCompensation"),
         METHOD(&LocationIndicatorLayer::getImageTiltDisplacement, "nativeGetImageTiltDisplacement"),
+        METHOD(&LocationIndicatorLayer::getBearingTransition, "nativeGetBearingTransition"),
+        METHOD(&LocationIndicatorLayer::setBearingTransition, "nativeSetBearingTransition"),
         METHOD(&LocationIndicatorLayer::getBearing, "nativeGetBearing"),
         METHOD(&LocationIndicatorLayer::getLocationTransition, "nativeGetLocationTransition"),
         METHOD(&LocationIndicatorLayer::setLocationTransition, "nativeSetLocationTransition"),

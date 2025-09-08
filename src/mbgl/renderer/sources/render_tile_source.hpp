@@ -3,12 +3,10 @@
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/source_state.hpp>
 #include <mbgl/renderer/tile_pyramid.hpp>
-#include <mbgl/style/sources/vector_source_impl.hpp>
+#include <mbgl/style/sources/tile_source_impl.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/context.hpp>
-#endif
 
 namespace mbgl {
 
@@ -29,6 +27,7 @@ public:
     RenderTiles getRenderTiles() const override;
     RenderTiles getRenderTilesSortedByYPosition() const override;
     const Tile* getRenderedTile(const UnwrappedTileID&) const override;
+    Immutable<std::vector<RenderTile>> getRawRenderTiles() const override { return renderTiles; }
 
     std::unordered_map<std::string, std::vector<Feature>> queryRenderedFeatures(
         const ScreenLineString& geometry,
@@ -47,6 +46,7 @@ public:
                             const std::optional<std::string>&,
                             const std::optional<std::string>&) override;
 
+    void setCacheEnabled(bool) override;
     void reduceMemoryUse() override;
     void dumpDebugLogs() const override;
 
@@ -89,6 +89,8 @@ private:
     std::optional<Tileset> cachedTileset;
 };
 
+class PolylineLayerTweaker;
+
 class TileSourceRenderItem : public RenderItem {
 public:
     TileSourceRenderItem(Immutable<std::vector<RenderTile>> renderTiles_, std::string name_)
@@ -97,16 +99,16 @@ public:
 
 private:
     void upload(gfx::UploadPass&) const override;
-    void render(PaintParameters&) const override;
+    void render(PaintParameters&) const override {}
     bool hasRenderPass(RenderPass) const override { return false; }
     const std::string& getName() const override { return name; }
 
-#if MLN_DRAWABLE_RENDERER
     void updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const override;
-#endif
 
     Immutable<std::vector<RenderTile>> renderTiles;
     std::string name;
+
+    mutable std::shared_ptr<PolylineLayerTweaker> layerTweaker;
 };
 
 } // namespace mbgl

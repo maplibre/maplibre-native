@@ -8,11 +8,14 @@
 
 namespace mbgl {
 
+using TileFeatures = style::GeoJSONData::TileFeatures;
+
 GeoJSONTile::GeoJSONTile(const OverscaledTileID& overscaledTileID,
                          std::string sourceID_,
                          const TileParameters& parameters,
-                         std::shared_ptr<style::GeoJSONData> data_)
-    : GeometryTile(overscaledTileID, std::move(sourceID_), parameters) {
+                         std::shared_ptr<style::GeoJSONData> data_,
+                         TileObserver* observer_)
+    : GeometryTile(overscaledTileID, std::move(sourceID_), parameters, observer_) {
     updateData(std::move(data_), false /*needsRelayout*/);
 }
 
@@ -22,14 +25,13 @@ void GeoJSONTile::updateData(std::shared_ptr<style::GeoJSONData> data_, bool nee
     assert(data_);
     data = std::move(data_);
     if (needsRelayout) reset();
-    data->getTile(
-        id.canonical,
-        [this, self = weakFactory.makeWeakPtr(), capturedData = data.get()](style::GeoJSONData::TileFeatures features) {
-            if (!self) return;
-            if (data.get() != capturedData) return;
-            auto tileData = std::make_unique<GeoJSONTileData>(std::move(features));
-            setData(std::move(tileData));
-        });
+    data->getTile(id.canonical,
+                  [this, self = weakFactory.makeWeakPtr(), capturedData = data.get()](TileFeatures features) {
+                      // If the data has changed, a new request is being processed, ignore this one
+                      if (auto guard = self.lock(); self && data.get() == capturedData) {
+                          setData(std::make_unique<GeoJSONTileData>(std::move(features)));
+                      }
+                  });
 }
 
 void GeoJSONTile::querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions& options) {

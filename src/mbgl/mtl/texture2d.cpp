@@ -21,6 +21,11 @@ Texture2D::~Texture2D() {
 }
 
 gfx::Texture2D& Texture2D::setSamplerConfiguration(const SamplerState& samplerState_) noexcept {
+    if (samplerState.filter == samplerState_.filter && samplerState.wrapU == samplerState_.wrapU &&
+        samplerState.wrapV == samplerState_.wrapV) {
+        return *this;
+    }
+
     samplerState = samplerState_;
     samplerStateDirty = true;
     return *this;
@@ -82,15 +87,16 @@ size_t Texture2D::numChannels() const noexcept {
 }
 
 MTL::PixelFormat Texture2D::getMetalPixelFormat() const noexcept {
-    // On iOS simulator, we need to use the combined depth/stencil format.  If the depth and stencil
+    // On iOS simulator and x86-64, we need to use the combined depth/stencil format.  If the depth and stencil
     // formats are both set on a render pipeline, they have to be identical or we'll get, e.g.:
     //     validateWithDevice:4343: failed assertion `Render Pipeline Descriptor Validation
     //                              depthAttachmentPixelFormat (MTLPixelFormatDepth32Float) and
     //                              stencilAttachmentPixelFormat (MTLPixelFormatStencil8) must match.
 
-#if TARGET_OS_SIMULATOR
-    if (channelType == gfx::TextureChannelDataType::Float && pixelFormat == gfx::TexturePixelType::Depth &&
-        (usage & MTL::TextureUsageRenderTarget)) {
+#if TARGET_OS_SIMULATOR || defined(__x86_64__)
+    if ((channelType == gfx::TextureChannelDataType::Float ||
+         channelType == gfx::TextureChannelDataType::UnsignedByte) &&
+        (pixelFormat == gfx::TexturePixelType::Depth || pixelFormat == gfx::TexturePixelType::Stencil)) {
         return MTL::PixelFormatDepth32Float_Stencil8;
     }
 #endif
@@ -151,7 +157,7 @@ void Texture2D::createMetalTexture() noexcept {
     if (auto textureDescriptor = NS::RetainPtr(
             MTL::TextureDescriptor::texture2DDescriptor(format, size.width, size.height, /*mipmapped=*/false))) {
         textureDescriptor->setUsage(usage);
-#if TARGET_OS_SIMULATOR
+#if TARGET_OS_SIMULATOR || defined(__x86_64__)
         switch (format) {
             case MTL::PixelFormatDepth16Unorm:
             case MTL::PixelFormatDepth32Float:
@@ -160,7 +166,7 @@ void Texture2D::createMetalTexture() noexcept {
             case MTL::PixelFormatDepth32Float_Stencil8:
             case MTL::PixelFormatX32_Stencil8:
             case MTL::PixelFormatX24_Stencil8:
-                // On iOS simulator, the default shared mode is invalid for depth and stencil textures.
+                // On iOS simulator and x86-64, the default shared mode is invalid for depth and stencil textures.
                 //  'Texture Descriptor Validation MTLTextureDescriptor: Depth, Stencil, DepthStencil
                 //   textures cannot be allocated with MTLStorageModeShared on this device.
                 textureDescriptor->setStorageMode(MTL::StorageMode::StorageModePrivate);
@@ -215,6 +221,8 @@ void Texture2D::updateSamplerConfiguration() noexcept {
                                            ? MTL::SamplerAddressModeClampToEdge
                                            : MTL::SamplerAddressModeRepeat);
     metalSamplerState = context.createMetalSamplerState(samplerDescriptor);
+
+    samplerStateDirty = false;
 }
 
 void Texture2D::bind(RenderPass& renderPass, int32_t location) noexcept {

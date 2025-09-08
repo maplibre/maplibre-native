@@ -9,11 +9,9 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
-#endif
 
 namespace mbgl {
 
@@ -54,11 +52,6 @@ bool RenderCustomDrawableLayer::hasCrossfade() const {
 
 void RenderCustomDrawableLayer::prepare(const LayerPrepareParameters&) {}
 
-#if MLN_LEGACY_RENDERER
-void RenderCustomDrawableLayer::render(PaintParameters&) {}
-#endif
-
-#if MLN_DRAWABLE_RENDERER
 void RenderCustomDrawableLayer::update(gfx::ShaderRegistry& shaders,
                                        gfx::Context& context,
                                        const TransformState& state,
@@ -83,7 +76,5 @@ void RenderCustomDrawableLayer::update(gfx::ShaderRegistry& shaders,
         host->update(interface);
     }
 }
-
-#endif
 
 } // namespace mbgl

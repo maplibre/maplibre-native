@@ -4,7 +4,6 @@
 #include <mbgl/renderer/sources/render_raster_dem_source.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
-#include <mbgl/programs/programs.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/style/layers/hillshade_layer_impl.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
@@ -13,7 +12,6 @@
 #include <mbgl/math/angles.hpp>
 #include <mbgl/util/geo.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/renderer/layers/hillshade_layer_tweaker.hpp>
 #include <mbgl/renderer/layers/hillshade_prepare_layer_tweaker.hpp>
 #include <mbgl/renderer/layer_group.hpp>
@@ -25,7 +23,6 @@
 #include <mbgl/gfx/hillshade_prepare_drawable_data.hpp>
 #include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
-#endif
 
 namespace mbgl {
 
@@ -65,16 +62,15 @@ std::array<float, 2> RenderHillshadeLayer::getLight(const PaintParameters& param
 
 void RenderHillshadeLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
+    styleDependencies = unevaluated.getDependencies();
 }
 
-#if MLN_DRAWABLE_RENDERER
 void RenderHillshadeLayer::layerChanged(const TransitionParameters& parameters,
                                         const Immutable<style::Layer::Impl>& impl,
                                         UniqueChangeRequestVec& changes) {
     RenderLayer::layerChanged(parameters, impl, changes);
     prepareLayerTweaker.reset();
 }
-#endif
 
 void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     const auto previousProperties = staticImmutableCast<HillshadeLayerProperties>(evaluatedProperties);
@@ -87,14 +83,12 @@ void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& paramete
                  : RenderPass::None;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
-#if MLN_DRAWABLE_RENDERER
     if (layerTweaker) {
         layerTweaker->updateProperties(evaluatedProperties);
     }
     if (prepareLayerTweaker) {
         prepareLayerTweaker->updateProperties(evaluatedProperties);
     }
-#endif
 }
 
 bool RenderHillshadeLayer::hasTransition() const {
@@ -109,158 +103,9 @@ void RenderHillshadeLayer::prepare(const LayerPrepareParameters& params) {
     renderTiles = params.source->getRenderTiles();
     maxzoom = params.source->getMaxZoom();
 
-#if MLN_DRAWABLE_RENDERER
     updateRenderTileIDs();
-#endif // MLN_DRAWABLE_RENDERER
 }
 
-#if MLN_LEGACY_RENDERER
-void RenderHillshadeLayer::render(PaintParameters& parameters) {
-    assert(renderTiles);
-    if (parameters.pass != RenderPass::Translucent && parameters.pass != RenderPass::Pass3D) return;
-
-    if (!parameters.shaders.getLegacyGroup().populate(hillshadeProgram)) return;
-    if (!parameters.shaders.getLegacyGroup().populate(hillshadePrepareProgram)) return;
-
-    const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
-    auto draw = [&](const mat4& matrix,
-                    const auto& vertexBuffer,
-                    const auto& indexBuffer,
-                    const auto& segments,
-                    const UnwrappedTileID& id,
-                    const auto& textureBindings) {
-        const HillshadeProgram::Binders paintAttributeData{evaluated, 0};
-
-        const auto allUniformValues = HillshadeProgram::computeAllUniformValues(
-            HillshadeProgram::LayoutUniformValues{
-                uniforms::matrix::Value(matrix),
-                uniforms::highlight::Value(evaluated.get<HillshadeHighlightColor>()),
-                uniforms::shadow::Value(evaluated.get<HillshadeShadowColor>()),
-                uniforms::accent::Value(evaluated.get<HillshadeAccentColor>()),
-                uniforms::light::Value(getLight(parameters)),
-                uniforms::latrange::Value(getLatRange(id)),
-            },
-            paintAttributeData,
-            evaluated,
-            static_cast<float>(parameters.state.getZoom()));
-        const auto allAttributeBindings = HillshadeProgram::computeAllAttributeBindings(
-            vertexBuffer, paintAttributeData, evaluated);
-
-        checkRenderability(parameters, HillshadeProgram::activeBindingCount(allAttributeBindings));
-
-        hillshadeProgram->draw(parameters.context,
-                               *parameters.renderPass,
-                               gfx::Triangles(),
-                               parameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
-                               gfx::StencilMode::disabled(),
-                               parameters.colorModeForRenderPass(),
-                               gfx::CullFaceMode::disabled(),
-                               indexBuffer,
-                               segments,
-                               allUniformValues,
-                               allAttributeBindings,
-                               textureBindings,
-                               getID());
-    };
-
-    mat4 mat;
-    matrix::ortho(mat, 0, util::EXTENT, -util::EXTENT, 0, 0, 1);
-    matrix::translate(mat, mat, 0, -util::EXTENT, 0);
-
-    for (const RenderTile& tile : *renderTiles) {
-        auto* bucket_ = tile.getBucket(*baseImpl);
-        if (!bucket_) {
-            continue;
-        }
-        auto& bucket = static_cast<HillshadeBucket&>(*bucket_);
-
-        if (!bucket.hasData()) {
-            continue;
-        }
-
-        if (!bucket.isPrepared() && parameters.pass == RenderPass::Pass3D) {
-            assert(bucket.dem);
-            const uint16_t stride = bucket.getDEMData().stride;
-            const uint16_t tilesize = bucket.getDEMData().dim;
-            auto view = parameters.context.createOffscreenTexture({tilesize, tilesize},
-                                                                  gfx::TextureChannelDataType::UnsignedByte);
-
-            auto renderPass = parameters.encoder->createRenderPass("hillshade prepare",
-                                                                   {*view, Color{0.0f, 0.0f, 0.0f, 0.0f}, {}, {}});
-
-            const Properties<>::PossiblyEvaluated properties;
-            const HillshadePrepareProgram::Binders paintAttributeData{properties, 0};
-
-            const auto allUniformValues = HillshadePrepareProgram::computeAllUniformValues(
-                HillshadePrepareProgram::LayoutUniformValues{
-                    uniforms::matrix::Value(mat),
-                    uniforms::dimension::Value({{stride, stride}}),
-                    uniforms::zoom::Value(static_cast<float>(tile.id.canonical.z)),
-                    uniforms::maxzoom::Value(static_cast<float>(maxzoom)),
-                    uniforms::unpack::Value(bucket.getDEMData().getUnpackVector()),
-                },
-                paintAttributeData,
-                properties,
-                static_cast<float>(parameters.state.getZoom()));
-            const auto allAttributeBindings = HillshadePrepareProgram::computeAllAttributeBindings(
-                *parameters.staticData.rasterVertexBuffer, paintAttributeData, properties);
-
-            checkRenderability(parameters, HillshadePrepareProgram::activeBindingCount(allAttributeBindings));
-
-            // Copy over the segments so that we can create our own DrawScopes
-            // that get destroyed after this draw call.
-            auto segments = RenderStaticData::rasterSegments();
-            hillshadePrepareProgram->draw(parameters.context,
-                                          *renderPass,
-                                          gfx::Triangles(),
-                                          parameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
-                                          gfx::StencilMode::disabled(),
-                                          parameters.colorModeForRenderPass(),
-                                          gfx::CullFaceMode::disabled(),
-                                          *parameters.staticData.quadTriangleIndexBuffer,
-                                          segments,
-                                          allUniformValues,
-                                          allAttributeBindings,
-                                          HillshadePrepareProgram::TextureBindings{
-                                              textures::image::Value{bucket.dem->getResource()},
-                                          },
-                                          "prepare");
-            bucket.texture = std::move(view->getTexture());
-            bucket.setPrepared(true);
-        } else if (parameters.pass == RenderPass::Translucent) {
-            assert(bucket.texture);
-
-            if (bucket.vertexBuffer && bucket.indexBuffer) {
-                // Draw only the parts of the tile that aren't drawn by another tile in the layer.
-                draw(parameters.matrixForTile(tile.id, true),
-                     *bucket.vertexBuffer,
-                     *bucket.indexBuffer,
-                     bucket.segments,
-                     tile.id,
-                     HillshadeProgram::TextureBindings{
-                         textures::image::Value{bucket.texture->getResource(), gfx::TextureFilterType::Linear},
-                     });
-            } else {
-                // Draw the full tile.
-                if (bucket.segments.empty()) {
-                    // Copy over the segments so that we can create our own DrawScopes.
-                    bucket.segments = RenderStaticData::rasterSegments();
-                }
-                draw(parameters.matrixForTile(tile.id, true),
-                     *parameters.staticData.rasterVertexBuffer,
-                     *parameters.staticData.quadTriangleIndexBuffer,
-                     bucket.segments,
-                     tile.id,
-                     HillshadeProgram::TextureBindings{
-                         textures::image::Value{bucket.texture->getResource(), gfx::TextureFilterType::Linear},
-                     });
-            }
-        }
-    }
-}
-#endif // MLN_LEGACY_RENDERER
-
-#if MLN_DRAWABLE_RENDERER
 namespace {
 void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, UniqueChangeRequestVec& changes) {
     if (renderTarget_) {
@@ -433,8 +278,9 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
 
             std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
             texture->setImage(bucket.getDEMData().getImagePtr());
-            texture->setSamplerConfiguration(
-                {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+            texture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Linear,
+                                              .wrapU = gfx::TextureWrapType::Clamp,
+                                              .wrapV = gfx::TextureWrapType::Clamp});
             hillshadePrepareBuilder->setTexture(texture, idHillshadeImageTexture);
 
             hillshadePrepareBuilder->flush(context);
@@ -450,17 +296,22 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         // Set up tile drawable
-        auto vertices = staticDataSharedVertices;
-        auto* indices = &staticDataIndices;
+        std::shared_ptr<HillshadeVertexVector> vertices;
+        std::shared_ptr<gfx::IndexVector<gfx::Triangles>> indices;
         auto* segments = &staticDataSegments;
 
         if (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty()) {
             vertices = bucket.sharedVertices;
-            indices = &bucket.indices;
+            indices = bucket.sharedIndices;
             segments = &bucket.segments;
+        } else {
+            vertices = staticDataSharedVertices;
+            indices = std::make_shared<gfx::IndexVector<gfx::Triangles>>(staticDataIndices);
         }
 
-        hillshadeBuilder = context.createDrawableBuilder("hillshade");
+        if (!hillshadeBuilder) {
+            hillshadeBuilder = context.createDrawableBuilder("hillshade");
+        }
 
         gfx::VertexAttributeArrayPtr hillshadeVertexAttrs;
         auto buildVertexAttributes = [&] {
@@ -492,25 +343,14 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                 return false;
             }
 
-            drawable.setVertexAttributes(buildVertexAttributes());
-            drawable.setVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
-
-            // Rebuild segments, since they're not shared.
-            std::vector<std::unique_ptr<gfx::Drawable::DrawSegment>> drawSegments;
-            drawSegments.reserve(segments->size());
-            for (const auto& seg : *segments) {
-                auto segCopy = SegmentBase{
-                    // no copy constructor
-                    seg.vertexOffset,
-                    seg.indexOffset,
-                    seg.vertexLength,
-                    seg.indexLength,
-                    seg.sortKey,
-                };
-                drawSegments.emplace_back(hillshadeBuilder->createSegment(gfx::Triangles(), std::move(segCopy)));
-            }
-            drawable.setIndexData(indices->vector(), std::move(drawSegments));
+            drawable.updateVertexAttributes(buildVertexAttributes(),
+                                            vertices->elements(),
+                                            gfx::Triangles(),
+                                            std::move(indices),
+                                            segments->data(),
+                                            segments->size());
             drawable.setTexture(bucket.renderTarget->getTexture(), idHillshadeImageTexture);
+
             return true;
         };
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {
@@ -538,6 +378,5 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
 }
-#endif // MLN_DRAWABLE_RENDERER
 
 } // namespace mbgl

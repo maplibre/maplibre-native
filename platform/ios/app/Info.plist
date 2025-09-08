@@ -16,8 +16,6 @@
 	<string>$(PRODUCT_NAME)</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
-	<key>CFBundleShortVersionString</key>
-	<string>5.9.0</string>
 	<key>CFBundleSignature</key>
 	<string>MBGL</string>
 	<key>CFBundleVersion</key>
@@ -69,5 +67,6 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>CADisableMinimumFrameDurationOnPhone</key><true/>
 </dict>
 </plist>

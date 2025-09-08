@@ -74,7 +74,7 @@
                                                             documentAttributes:nil
                                                                          error:NULL];
     };
-    
+
     if (![[NSThread currentThread] isMainThread]) {
         dispatch_sync(dispatch_get_main_queue(), initialization);
     } else {
@@ -104,9 +104,13 @@
             [attributedString removeAttribute:NSStrokeWidthAttributeName range:range];
         }
 
-        // Omit whitespace-only strings.
+        // Clean up strings by stripping punctuation and whitespace (often present for the web).
+        NSMutableCharacterSet *charset = [NSMutableCharacterSet whitespaceAndNewlineCharacterSet];
+        [charset formUnionWithCharacterSet:[NSCharacterSet punctuationCharacterSet]];
         NSAttributedString *title = [[attributedString attributedSubstringFromRange:range]
-                                     mgl_attributedStringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+                                     mgl_attributedStringByTrimmingCharactersInSet:charset];
+
+        // Omit strings that are empty after cleaning.
         if (!title.length) {
             return;
         }
@@ -115,7 +119,7 @@
         // and above.
         NSMutableAttributedString *unlinkedTitle = [title mutableCopy];
         [unlinkedTitle removeAttribute:NSLinkAttributeName range:unlinkedTitle.mgl_wholeRange];
-        
+
         MLNAttributionInfo *info = [[MLNAttributionInfo alloc] initWithTitle:unlinkedTitle URL:value];
         info.feedbackLink = isFeedbackLink;
         [infos addObject:info];
@@ -148,7 +152,7 @@
     MLNAttributionInfo *info = [[[self class] allocWithZone:zone] initWithTitle:_title
                                                                             URL:_URL];
     info.feedbackLink = _feedbackLink;
-    
+
     return info;
 }
 
@@ -156,18 +160,18 @@
 {
     NSString *openStreetMap = NSLocalizedStringWithDefaultValue(@"OSM_FULL_NAME", @"Foundation", nil, @"OpenStreetMap", @"OpenStreetMap full name attribution");
     NSString *OSM = NSLocalizedStringWithDefaultValue(@"OSM_SHORT_NAME", @"Foundation", nil, @"OSM", @"OpenStreetMap short name attribution");
-    
+
     NSMutableAttributedString *title = [[NSMutableAttributedString alloc] initWithAttributedString:self.title];
     [title removeAttribute:NSUnderlineStyleAttributeName range:NSMakeRange(0, [title.string length])];
-    
+
     BOOL isAbbreviated = (style == MLNAttributionInfoStyleShort);
-    
+
     if ([title.string rangeOfString:@"OpenStreetMap"].location != NSNotFound) {
         [title.mutableString replaceOccurrencesOfString:@"OpenStreetMap" withString:isAbbreviated ? OSM : openStreetMap
                                                 options:NSCaseInsensitiveSearch
                                                   range:NSMakeRange(0, [title.mutableString length])];
     }
-    
+
     return title;
 }
 

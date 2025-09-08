@@ -80,6 +80,10 @@ Resource Resource::glyphs(const std::string& urlTemplate,
                     })};
 }
 
+Resource Resource::fontFace(const std::string& url) {
+    return Resource{Resource::Kind::Glyphs, url};
+}
+
 Resource Resource::tile(const std::string& urlTemplate,
                         float pixelRatio,
                         int32_t x,

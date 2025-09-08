@@ -1,13 +1,11 @@
 #pragma once
 
-#include <mbgl/tile/geometry_tile_data.hpp>
+#include <mbgl/layout/symbol_instance.hpp>
 #include <mbgl/style/image_impl.hpp>
-#include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/style/layer_impl.hpp>
+#include <mbgl/tile/geometry_tile_data.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/util/identity.hpp>
-#endif
 
 #include <atomic>
 
@@ -21,7 +19,7 @@ class RenderLayer;
 class CrossTileSymbolLayerIndex;
 class OverscaledTileID;
 class PatternDependency;
-using PatternLayerMap = std::map<std::string, PatternDependency>;
+using PatternLayerMap = mbgl::unordered_map<std::string, PatternDependency>;
 class Placement;
 class TransformState;
 class BucketPlacementData;
@@ -70,17 +68,24 @@ public:
     virtual void updateVertices(
         const Placement&, bool /*updateOpacities*/, const TransformState&, const RenderTile&, std::set<uint32_t>&) {}
 
-#if MLN_DRAWABLE_RENDERER
     const util::SimpleIdentity& getID() const { return bucketID; }
+
+#if MLN_SYMBOL_GUARDS
+    virtual bool check(std::source_location) { return true; }
+#else
+    bool check(std::string_view = {}) { return true; }
 #endif
+
+    const std::optional<std::thread::id>& getRenderThreadID() const { return renderThreadID; }
+    void setRenderThreadID(std::optional<std::thread::id> id) { renderThreadID = id; }
 
 protected:
     Bucket() = default;
     std::atomic<bool> uploaded{false};
 
-#if MLN_DRAWABLE_RENDERER
     util::SimpleIdentity bucketID;
-#endif
+
+    std::optional<std::thread::id> renderThreadID;
 };
 
 } // namespace mbgl

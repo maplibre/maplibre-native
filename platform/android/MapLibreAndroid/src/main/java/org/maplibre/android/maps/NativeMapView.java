@@ -37,6 +37,7 @@ import org.maplibre.android.style.light.Light;
 import org.maplibre.android.style.sources.CannotAddSourceException;
 import org.maplibre.android.style.sources.Source;
 import org.maplibre.android.utils.BitmapUtils;
+import org.maplibre.android.tile.TileOperation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -90,23 +91,29 @@ final class NativeMapView implements NativeMap {
   // Constructors
   //
 
-  public NativeMapView(@NonNull final Context context, final boolean crossSourceCollisions,
+  public NativeMapView(@NonNull final Context context,
                        final ViewCallback viewCallback, final StateCallback stateCallback,
                        final MapRenderer mapRenderer) {
-    this(context, context.getResources().getDisplayMetrics().density, crossSourceCollisions, viewCallback,
-      stateCallback, mapRenderer);
+    this(context, new NativeMapOptions(context.getResources().getDisplayMetrics().density, false),
+            viewCallback, stateCallback, mapRenderer);
   }
 
-  public NativeMapView(final Context context, final float pixelRatio, final boolean crossSourceCollisions,
+  public NativeMapView(@NonNull final Context context, final MapLibreMapOptions options,
+                       final ViewCallback viewCallback, final StateCallback stateCallback,
+                       final MapRenderer mapRenderer) {
+    this(context, new NativeMapOptions(options), viewCallback, stateCallback, mapRenderer);
+  }
+
+  public NativeMapView(@NonNull final Context context, final NativeMapOptions nativeOptions,
                        final ViewCallback viewCallback, final StateCallback stateCallback,
                        final MapRenderer mapRenderer) {
     this.mapRenderer = mapRenderer;
     this.viewCallback = viewCallback;
     this.fileSource = FileSource.getInstance(context);
-    this.pixelRatio = pixelRatio;
+    this.pixelRatio = nativeOptions.pixelRatio();
     this.thread = Thread.currentThread();
     this.stateCallback = stateCallback;
-    nativeInitialize(this, fileSource, mapRenderer, pixelRatio, crossSourceCollisions);
+    nativeInitialize(this, fileSource, mapRenderer, nativeOptions);
   }
 
   //
@@ -283,6 +290,8 @@ final class NativeMapView implements NativeMap {
     if (checkState("getCameraForLatLngBounds")) {
       return null;
     }
+    // Note that we have to juggle things a bit to match the ordering of arguments
+    // to match the NativeMapView C++ interface.
     return nativeGetCameraForLatLngBounds(
       bounds,
       padding[1] / pixelRatio,
@@ -644,6 +653,30 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public String[] getActionJournalLogFiles() {
+    if (checkState("getActionJournalLogFiles")) {
+      return null;
+    }
+    return nativeGetActionJournalLogFiles();
+  }
+
+  @Override
+  public String[] getActionJournalLog() {
+    if (checkState("getActionJournalLog")) {
+      return null;
+    }
+    return nativeGetActionJournalLog();
+  }
+
+  @Override
+  public void clearActionJournalLog() {
+    if (checkState("clearActionJournalLog")) {
+      return;
+    }
+    nativeClearActionJournalLog();
+  }
+
+  @Override
   public boolean isFullyLoaded() {
     if (checkState("isFullyLoaded")) {
       return false;
@@ -807,6 +840,85 @@ final class NativeMapView implements NativeMap {
     return nativeGetPrefetchZoomDelta();
   }
 
+  @Override
+  public void setTileCacheEnabled(boolean enabled) {
+    if (checkState("setTileCacheEnabled")) {
+      return;
+    }
+    nativeSetTileCacheEnabled(enabled);
+  }
+
+  @Override
+  public boolean getTileCacheEnabled() {
+    if (checkState("getTileCacheEnabled")) {
+      return false;
+    }
+    return nativeGetTileCacheEnabled();
+  }
+
+  @Override
+  public void setTileLodMinRadius(double radius) {
+    if (checkState("setTileLodMinRadius")) {
+      return;
+    }
+    nativeSetTileLodMinRadius(radius);
+  }
+
+  @Override
+  public double getTileLodMinRadius() {
+    if (checkState("getTileLodMinRadius")) {
+      return 0;
+    }
+    return nativeGetTileLodMinRadius();
+  }
+
+  @Override
+  public void setTileLodScale(double scale) {
+    if (checkState("setTileLodScale")) {
+      return;
+    }
+    nativeSetTileLodScale(scale);
+  }
+
+  @Override
+  public double getTileLodScale() {
+    if (checkState("getTileLodScale")) {
+      return 0;
+    }
+    return nativeGetTileLodScale();
+  }
+
+  @Override
+  public void setTileLodPitchThreshold(double threshold) {
+    if (checkState("setTileLodPitchThreshold")) {
+      return;
+    }
+    nativeSetTileLodPitchThreshold(threshold);
+  }
+
+  @Override
+  public double getTileLodPitchThreshold() {
+    if (checkState("getTileLodPitchThreshold")) {
+      return 0;
+    }
+    return nativeGetTileLodPitchThreshold();
+  }
+
+  @Override
+  public void setTileLodZoomShift(double shift) {
+    if (checkState("setTileLodZoomShift")) {
+      return;
+    }
+    nativeSetTileLodZoomShift(shift);
+  }
+
+  @Override
+  public double getTileLodZoomShift() {
+    if (checkState("getTileLodZoomShift")) {
+      return 0;
+    }
+    return nativeGetTileLodZoomShift();
+  }
   // Runtime style Api
 
   @Override
@@ -1028,6 +1140,16 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public boolean isRenderingStatsViewEnabled() {
+    return nativeIsRenderingStatsViewEnabled();
+  }
+
+  @Override
+  public void enableRenderingStatsView(boolean value) {
+    nativeEnableRenderingStatsView(value);
+  }
+
+  @Override
   public void setSwapBehaviorFlush(boolean flush) {
     mapRenderer.setSwapBehaviorFlush(flush);
   }
@@ -1097,9 +1219,9 @@ final class NativeMapView implements NativeMap {
   }
 
   @Keep
-  private void onDidFinishRenderingFrame(boolean fully, double frameEncodingTime, double frameRenderingTime) {
+  private void onDidFinishRenderingFrame(boolean fully, RenderingStats stats) {
     if (stateCallback != null) {
-      stateCallback.onDidFinishRenderingFrame(fully, frameEncodingTime, frameRenderingTime);
+      stateCallback.onDidFinishRenderingFrame(fully, stats);
     }
   }
 
@@ -1179,6 +1301,76 @@ final class NativeMapView implements NativeMap {
     }
   }
 
+  @Keep
+  private void onPreCompileShader(int id, int type, String additionalDefines) {
+    if (stateCallback != null) {
+      stateCallback.onPreCompileShader(id, type, additionalDefines);
+    }
+  }
+
+  @Keep
+  private void onPostCompileShader(int id, int type, String additionalDefines) {
+    if (stateCallback != null) {
+      stateCallback.onPostCompileShader(id, type, additionalDefines);
+    }
+  }
+
+  @Keep
+  private void onShaderCompileFailed(int id, int type, String additionalDefines) {
+    if (stateCallback != null) {
+      stateCallback.onShaderCompileFailed(id, type, additionalDefines);
+    }
+  }
+
+  @Keep
+  private void onGlyphsLoaded(String[] stack, int rangeStart, int rangeEnd) {
+    if (stateCallback != null) {
+      stateCallback.onGlyphsLoaded(stack, rangeStart, rangeEnd);
+    }
+  }
+
+  @Keep
+  private void onGlyphsError(String[] stack, int rangeStart, int rangeEnd) {
+    if (stateCallback != null) {
+      stateCallback.onGlyphsError(stack, rangeStart, rangeEnd);
+    }
+  }
+
+  @Keep
+  private void onGlyphsRequested(String[] stack, int rangeStart, int rangeEnd) {
+    if (stateCallback != null) {
+      stateCallback.onGlyphsRequested(stack, rangeStart, rangeEnd);
+    }
+  }
+
+  @Keep
+  private void onTileAction(TileOperation op, int x, int y, int z, int wrap, int overscaledZ, String sourceID) {
+    if (stateCallback != null) {
+      stateCallback.onTileAction(op, x, y, z, wrap, overscaledZ, sourceID);
+    }
+  }
+
+  @Keep
+  private void onSpriteLoaded(String id, String url) {
+    if (stateCallback != null) {
+      stateCallback.onSpriteLoaded(id, url);
+    }
+  }
+
+  @Keep
+  private void onSpriteError(String id, String url) {
+    if (stateCallback != null) {
+      stateCallback.onSpriteError(id, url);
+    }
+  }
+
+  @Keep
+  private void onSpriteRequested(String id, String url) {
+    if (stateCallback != null) {
+      stateCallback.onSpriteRequested(id, url);
+    }
+  }
+
   //
   // JNI methods
   //
@@ -1187,8 +1379,7 @@ final class NativeMapView implements NativeMap {
   private native void nativeInitialize(NativeMapView nativeMap,
                                        FileSource fileSource,
                                        MapRenderer mapRenderer,
-                                       float pixelRatio,
-                                       boolean crossSourceCollisions);
+                                       NativeMapOptions nativeOptions);
 
   @Keep
   private native void nativeDestroy();
@@ -1340,6 +1531,15 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native boolean nativeGetDebug();
+
+  @Keep
+  private native String[] nativeGetActionJournalLogFiles();
+
+  @Keep
+  private native String[] nativeGetActionJournalLog();
+
+  @Keep
+  private native void nativeClearActionJournalLog();
 
   @Keep
   private native boolean nativeIsFullyLoaded();
@@ -1500,7 +1700,37 @@ final class NativeMapView implements NativeMap {
   private native void nativeSetPrefetchZoomDelta(int delta);
 
   @Keep
+  private native void nativeSetTileCacheEnabled(boolean enabled);
+
+  @Keep
+  private native boolean nativeGetTileCacheEnabled();
+
+  @Keep
   private native int nativeGetPrefetchZoomDelta();
+
+  @Keep
+  private native void nativeSetTileLodMinRadius(double radius);
+
+  @Keep
+  private native double nativeGetTileLodMinRadius();
+
+  @Keep
+  private native void nativeSetTileLodScale(double scale);
+
+  @Keep
+  private native double nativeGetTileLodScale();
+
+  @Keep
+  private native void nativeSetTileLodPitchThreshold(double threshold);
+
+  @Keep
+  private native double nativeGetTileLodPitchThreshold();
+
+  @Keep
+  private native void nativeSetTileLodZoomShift(double shift);
+
+  @Keep
+  private native double nativeGetTileLodZoomShift();
 
   @Override
   public long getNativePtr() {
@@ -1509,6 +1739,12 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native void nativeTriggerRepaint();
+
+  @Keep
+  private native boolean nativeIsRenderingStatsViewEnabled();
+
+  @Keep
+  private native void nativeEnableRenderingStatsView(boolean enabled);
 
   //
   // Snapshot
@@ -1587,7 +1823,7 @@ final class NativeMapView implements NativeMap {
 
     void onWillStartRenderingFrame();
 
-    void onDidFinishRenderingFrame(boolean fully, double frameEncodingTime, double frameRenderingTime);
+    void onDidFinishRenderingFrame(boolean fully, RenderingStats stats);
 
     void onWillStartRenderingMap();
 
@@ -1600,5 +1836,25 @@ final class NativeMapView implements NativeMap {
     void onStyleImageMissing(String imageId);
 
     boolean onCanRemoveUnusedStyleImage(String imageId);
+
+    void onPreCompileShader(int id, int type, String additionalDefines);
+
+    void onPostCompileShader(int id, int type, String additionalDefines);
+
+    void onShaderCompileFailed(int id, int type, String additionalDefines);
+
+    void onGlyphsLoaded(String[] stack, int rangeStart, int rangeEnd);
+
+    void onGlyphsError(String[] stack, int rangeStart, int rangeEnd);
+
+    void onGlyphsRequested(String[] stack, int rangeStart, int rangeEnd);
+
+    void onTileAction(TileOperation op, int x, int y, int z, int wrap, int overscaledZ, String sourceID);
+
+    void onSpriteLoaded(String id, String url);
+
+    void onSpriteError(String id, String url);
+
+    void onSpriteRequested(String id, String url);
   }
 }

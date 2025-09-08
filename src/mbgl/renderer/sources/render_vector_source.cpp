@@ -8,11 +8,11 @@ namespace mbgl {
 
 using namespace style;
 
-RenderVectorSource::RenderVectorSource(Immutable<style::VectorSource::Impl> impl_, const TaggedScheduler& threadPool_)
+RenderVectorSource::RenderVectorSource(Immutable<style::TileSource::Impl> impl_, const TaggedScheduler& threadPool_)
     : RenderTileSetSource(std::move(impl_), threadPool_) {}
 
 const std::optional<Tileset>& RenderVectorSource::getTileset() const {
-    return static_cast<const style::VectorSource::Impl&>(*baseImpl).tileset;
+    return static_cast<const style::TileSource::Impl&>(*baseImpl).tileset;
 }
 
 void RenderVectorSource::updateInternal(const Tileset& tileset,
@@ -28,8 +28,8 @@ void RenderVectorSource::updateInternal(const Tileset& tileset,
                        util::tileSize_I,
                        tileset.zoomRange,
                        tileset.bounds,
-                       [&](const OverscaledTileID& tileID) {
-                           return std::make_unique<VectorTile>(tileID, baseImpl->id, parameters, tileset);
+                       [&](const OverscaledTileID& tileID, TileObserver* observer_) {
+                           return std::make_unique<VectorTile>(tileID, baseImpl->id, parameters, tileset, observer_);
                        });
 }
 

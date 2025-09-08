@@ -28,8 +28,6 @@
 namespace mbgl {
 namespace style {
 
-static Observer nullObserver;
-
 Style::Impl::Impl(std::shared_ptr<FileSource> fileSource_, float pixelRatio, const TaggedScheduler& threadPool_)
     : fileSource(std::move(fileSource_)),
       spriteLoader(std::make_unique<SpriteLoader>(pixelRatio, threadPool_)),
@@ -136,7 +134,7 @@ void Style::Impl::parse(const std::string& json_) {
                       std::make_exception_ptr(std::runtime_error("Unable to find resource provider for sprite url.")));
     }
     glyphURL = parser.glyphURL;
-
+    fontFaces = parser.fontFaces;
     loaded = true;
     observer->onStyleLoaded();
 }
@@ -388,6 +386,7 @@ void Style::Impl::onSpriteLoaded(std::optional<style::Sprite> sprite,
         spritesLoadingStatus["default"] = true;
     }
     observer->onUpdate(); // For *-pattern properties.
+    observer->onSpriteLoaded(sprite);
 }
 
 void Style::Impl::onSpriteError(std::optional<style::Sprite> sprite, std::exception_ptr error) {
@@ -401,6 +400,11 @@ void Style::Impl::onSpriteError(std::optional<style::Sprite> sprite, std::except
     }
     // Unblock rendering tiles (even though sprite request has failed).
     observer->onUpdate();
+    observer->onSpriteError(sprite, error);
+}
+
+void Style::Impl::onSpriteRequested(const std::optional<style::Sprite>& sprite) {
+    observer->onSpriteRequested(sprite);
 }
 
 void Style::Impl::onLayerChanged(Layer& layer) {
@@ -421,6 +425,10 @@ void Style::Impl::dumpDebugLogs() const {
 
 const std::string& Style::Impl::getGlyphURL() const {
     return glyphURL;
+}
+
+std::shared_ptr<FontFaces> Style::Impl::getFontFaces() const {
+    return fontFaces;
 }
 
 Immutable<std::vector<Immutable<Image::Impl>>> Style::Impl::getImageImpls() const {

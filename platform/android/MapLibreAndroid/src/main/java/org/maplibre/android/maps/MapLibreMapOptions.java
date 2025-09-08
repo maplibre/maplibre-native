@@ -94,6 +94,12 @@ public class MapLibreMapOptions implements Parcelable {
 
   private boolean crossSourceCollisions = true;
 
+  private boolean actionJournalEnabled = false;
+  private String actionJournalPath = "";
+  private long actionJournalLogFileSize = 1024 * 1024;
+  private long actionJournalLogFileCount = 5;
+  private int actionJournalRenderingReportInterval = 60;
+
   /**
    * Creates a new MapLibreMapOptions object.
    *
@@ -151,6 +157,12 @@ public class MapLibreMapOptions implements Parcelable {
     pixelRatio = in.readFloat();
     foregroundLoadColor = in.readInt();
     crossSourceCollisions = in.readByte() != 0;
+
+    actionJournalEnabled = in.readByte() != 0;
+    actionJournalPath = in.readString();
+    actionJournalLogFileSize = in.readLong();
+    actionJournalLogFileCount = in.readLong();
+    actionJournalRenderingReportInterval = in.readInt();
   }
 
   /**
@@ -182,6 +194,8 @@ public class MapLibreMapOptions implements Parcelable {
                                                  @NonNull Context context,
                                                  @Nullable TypedArray typedArray) {
     float pxlRatio = context.getResources().getDisplayMetrics().density;
+    maplibreMapOptions.actionJournalPath(context.getFilesDir().getAbsolutePath());
+
     try {
       maplibreMapOptions.camera(new CameraPosition.Builder(typedArray).build());
 
@@ -304,6 +318,19 @@ public class MapLibreMapOptions implements Parcelable {
       );
       maplibreMapOptions.crossSourceCollisions(
         typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_cross_source_collisions, true)
+      );
+
+      maplibreMapOptions.actionJournalEnabled(
+        typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_actionJournalEnabled, false)
+      );
+      maplibreMapOptions.actionJournalLogFileSize(
+        typedArray.getInteger(R.styleable.maplibre_MapView_maplibre_actionJournalLogFileSize, 1024 * 1024)
+      );
+      maplibreMapOptions.actionJournalLogFileCount(
+        typedArray.getInteger(R.styleable.maplibre_MapView_maplibre_actionJournalLogFileCount, 5)
+      );
+      maplibreMapOptions.actionJournalRenderingReportInterval(
+              typedArray.getInteger(R.styleable.maplibre_MapView_maplibre_actionJournalRenderingReportInterval, 60)
       );
     } finally {
       typedArray.recycle();
@@ -731,6 +758,77 @@ public class MapLibreMapOptions implements Parcelable {
   }
 
   /**
+   * Enable action journal event logging, defaults to false.
+   * <p>
+   * If set to true, enables map event file logging (obtainable via MapView#getActionJournalLog)
+   * </p>
+   *
+   * @param actionJournalEnabled true to enable, false to disable
+   * @return This
+   */
+  @NonNull
+  public MapLibreMapOptions actionJournalEnabled(boolean actionJournalEnabled) {
+    this.actionJournalEnabled = actionJournalEnabled;
+    return this;
+  }
+
+  /**
+   * Set the action journal log path.
+   *
+   * @param actionJournalPath Path to be used
+   * @return This
+   */
+  @NonNull
+  public MapLibreMapOptions actionJournalPath(@NonNull String actionJournalPath) {
+    this.actionJournalPath = actionJournalPath;
+    return this;
+  }
+
+  /**
+   * Set the action journal log file size.
+   * <p>
+   * The action journal uses a rolling log with multiple files.
+   * Total log size is equal to `actionJournalLogFileSize * actionJournalLogFileCount`.
+   * </p>
+   *
+   * @param actionJournalLogFileSize maximum log file size
+   * @return This
+   */
+  @NonNull
+  public MapLibreMapOptions actionJournalLogFileSize(long actionJournalLogFileSize) {
+    this.actionJournalLogFileSize = actionJournalLogFileSize;
+    return this;
+  }
+
+  /**
+   * Set the action journal log file count.
+   * <p>
+   * The action journal uses a rolling log with multiple files.
+   * Total log size is equal to `actionJournalLogFileSize * actionJournalLogFileCount`.
+   * </p>
+   *
+   * @param actionJournalLogFileCount maximum number of log files
+   * @return This
+   */
+  @NonNull
+  public MapLibreMapOptions actionJournalLogFileCount(long actionJournalLogFileCount) {
+    this.actionJournalLogFileCount = actionJournalLogFileCount;
+    return this;
+  }
+
+  /**
+   * Set the number of seconds to wait between rendering stats reports.
+   *
+   * @param actionJournalRenderingReportInterval time interval in seconds
+   * @return This
+   */
+  @NonNull
+  public MapLibreMapOptions actionJournalRenderingReportInterval(int actionJournalRenderingReportInterval) {
+    this.actionJournalRenderingReportInterval = actionJournalRenderingReportInterval;
+    return this;
+  }
+
+  /**
    * Enable local ideograph font family, defaults to true.
    *
    * @param enabled true to enable, false to disable
@@ -819,6 +917,53 @@ public class MapLibreMapOptions implements Parcelable {
    */
   public boolean getCrossSourceCollisions() {
     return crossSourceCollisions;
+  }
+
+  /**
+   * Check whether action journal logging is enabled.
+   *
+   * @return true if enabled
+   */
+  public boolean getActionJournalEnabled() {
+    return actionJournalEnabled;
+  }
+
+  /**
+   * Get the current configured action journal log path.
+   *
+   * @return log file path
+   */
+  public String getActionJournalPath() {
+    return actionJournalPath;
+  }
+
+  /**
+   * Get the current configured action journal log file size.
+   * Total log size is equal to `actionJournalLogFileSize * actionJournalLogFileCount`.
+   *
+   * @return maximum file size
+   */
+  public long getActionJournalLogFileSize() {
+    return actionJournalLogFileSize;
+  }
+
+  /**
+   * Get the current configured action journal log file count.
+   * Total log size is equal to `actionJournalLogFileSize * actionJournalLogFileCount`.
+   *
+   * @return maximum log files used
+   */
+  public long getActionJournalLogFileCount() {
+    return actionJournalLogFileCount;
+  }
+
+  /**
+   * Get the current configured action journal rendering stats report time interval.
+   *
+   * @return time interval in seconds
+   */
+  public int getActionJournalRenderingReportInterval() {
+    return actionJournalRenderingReportInterval;
   }
 
   /**
@@ -1205,6 +1350,12 @@ public class MapLibreMapOptions implements Parcelable {
     dest.writeFloat(pixelRatio);
     dest.writeInt(foregroundLoadColor);
     dest.writeByte((byte) (crossSourceCollisions ? 1 : 0));
+
+    dest.writeByte((byte) (actionJournalEnabled ? 1 : 0));
+    dest.writeString(actionJournalPath);
+    dest.writeLong(actionJournalLogFileSize);
+    dest.writeLong(actionJournalLogFileCount);
+    dest.writeInt(actionJournalRenderingReportInterval);
   }
 
   @Override
@@ -1325,6 +1476,26 @@ public class MapLibreMapOptions implements Parcelable {
       return false;
     }
 
+    if (actionJournalEnabled != options.actionJournalEnabled) {
+      return false;
+    }
+
+    if (actionJournalPath.equals(options.actionJournalPath)) {
+      return false;
+    }
+
+    if (actionJournalLogFileSize != options.actionJournalLogFileSize) {
+      return false;
+    }
+
+    if (actionJournalLogFileCount != options.actionJournalLogFileCount) {
+      return false;
+    }
+
+    if (actionJournalRenderingReportInterval != options.actionJournalRenderingReportInterval) {
+      return false;
+    }
+
     return false;
   }
 
@@ -1372,6 +1543,11 @@ public class MapLibreMapOptions implements Parcelable {
     result = 31 * result + Arrays.hashCode(localIdeographFontFamilies);
     result = 31 * result + (int) pixelRatio;
     result = 31 * result + (crossSourceCollisions ? 1 : 0);
+    result = 31 * result + (actionJournalEnabled ? 1 : 0);
+    result = 31 * result + (actionJournalPath != null ? actionJournalPath.hashCode() : 0);
+    result = 31 * result + (int) actionJournalLogFileSize;
+    result = 31 * result + (int) actionJournalLogFileCount;
+    result = 31 * result + (int) actionJournalRenderingReportInterval;
     return result;
   }
 }

@@ -4,7 +4,7 @@
     <string name="maplibre_attributionsIconContentDescription">Icône d’attribution. Activer pour afficher le dialogue d’attribution.</string>
     <string name="maplibre_myLocationViewContentDescription">Vue de géolocalisation. Ceci affiche votre localisation sur la carte.</string>
     <string name="maplibre_mapActionDescription">Affichage d’une carte créée avec MapLibre. Faites la glisser en traînant deux doigts. Zoomez ou dézoomez en écartant ou rapprochant deux doigts.</string>
-    <string name="maplibre_attributionsDialogTitle">SDK MapLibre Maps pour Android</string>
+    <string name="maplibre_attributionsDialogTitle">MapLibre Android</string>
     <string name="maplibre_attributionErrorNoBrowser">Aucun navigateur web installé sur l’appareil, impossible d’ouvrir une page web.</string>
     <string name="maplibre_offline_error_region_definition_invalid">Le cadre OfflineRegionDefinition pour définir la région de navigation ne tient pas dans les limites du monde : %s</string>
     </resources>

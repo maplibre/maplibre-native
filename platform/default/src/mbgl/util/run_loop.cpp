@@ -149,6 +149,12 @@ void RunLoop::stop() {
     invoke([&] { uv_unref(impl->holderHandle()); });
 }
 
+void RunLoop::updateTime() {
+    MBGL_VERIFY_THREAD(tid);
+
+    uv_update_time(impl->loop);
+}
+
 void RunLoop::waitForEmpty([[maybe_unused]] const mbgl::util::SimpleIdentity tag) {
     while (true) {
         std::size_t remaining;

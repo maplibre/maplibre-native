@@ -1553,7 +1553,7 @@ public class Expression {
   }
 
   /**
-   * Returns the first position at which a `needle` can be found in a `haystack`. 
+   * Returns the first position at which a `needle` can be found in a `haystack`.
    *
    * @param needle   the item expression
    * @param haystack the array or string expression
@@ -1578,7 +1578,7 @@ public class Expression {
   }
 
   /**
-   * Returns items from an array or a substring from a string from a specified start index. 
+   * Returns items from an array or a substring from a string from a specified start index.
    * The return value is inclusive of the start index.
    *
    * @param input the array or string expression
@@ -1591,7 +1591,7 @@ public class Expression {
   }
 
   /**
-   * Returns items from an array or a substring from a string between a start index and an end index if set. 
+   * Returns items from an array or a substring from a string between a start index and an end index if set.
    * The return value is inclusive of the start index, but not of the end index.
    *
    * @param input the array or string expression
@@ -3686,6 +3686,20 @@ public class Expression {
    */
   public static Expression toColor(@NonNull Expression input) {
     return new Expression("to-color", input);
+  }
+
+  /**
+   * Converts input value to a padding.
+   *
+   * If the input is a number or an array of numbers padding is created following
+   * the same pattern as CSS padding. See <a href="https://maplibre.org/maplibre-style-spec/types/#padding">Style specification</a>.
+   * Otherwise, the expression is an error.
+   *
+   * @param input expression input
+   * @return expression
+   */
+  public static Expression toPadding(@NonNull Expression input) {
+    return new Expression("to-padding", input);
   }
 
   /**

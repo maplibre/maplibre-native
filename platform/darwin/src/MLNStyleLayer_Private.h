@@ -20,7 +20,7 @@ struct LayerWrapper {
  Assert that the style layer is valid.
 
  This macro should be used at the beginning of any public-facing instance method
- of `MLNStyleLayer` and its subclasses. For private methods, an assertion is more appropriate.
+ of ``MLNStyleLayer`` and its subclasses. For private methods, an assertion is more appropriate.
  */
 #define MLNAssertStyleLayerIsValid()                                                           \
   do {                                                                                         \
@@ -77,7 +77,7 @@ struct LayerWrapper {
  Removes the mbgl style layer that this object represents from the mbgl map.
 
  When a mbgl style layer is removed, ownership of the object is transferred back
- to the `MLNStyleLayer` instance and the unique_ptr reference is valid again. It
+ to the ``MLNStyleLayer`` instance and the unique_ptr reference is valid again. It
  is safe to add the layer back to the style after it is removed.
  */
 - (void)removeFromStyle:(MLNStyle *)style;

@@ -12,7 +12,6 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.FillLayer
@@ -40,29 +39,25 @@ class DataDrivenStyleActivity : AppCompatActivity() {
         // Initialize map as normal
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(
-            OnMapReadyCallback { map: MapLibreMap? ->
-                // Store for later
-                if (map != null) {
-                    maplibreMap = map
-                }
-                maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style? ->
-                    // Add a parks layer
-                    addParksLayer()
+        mapView.getMapAsync {
+            // Store for later
+            maplibreMap = it
+            it.setStyle(TestStyles.OPENFREEMAP_BRIGHT) { style: Style? ->
+                // Add a parks layer
+                addParksLayer()
 
-                    // Add debug overlay
-                    setupDebugZoomView()
-                }
-
-                // Center and Zoom (Amsterdam, zoomed to streets)
-                maplibreMap.animateCamera(
-                    CameraUpdateFactory.newLatLngZoom(
-                        LatLng(52.379189, 4.899431),
-                        14.0
-                    )
-                )
+                // Add debug overlay
+                setupDebugZoomView()
             }
-        )
+
+            // Center and Zoom (Amsterdam, zoomed to streets)
+            it.animateCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(52.379189, 4.899431),
+                    14.0
+                )
+            )
+        }
     }
 
     private fun setupDebugZoomView() {
@@ -107,7 +102,7 @@ class DataDrivenStyleActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (maplibreMap != null && idleListener != null) {
+        if (this::maplibreMap.isInitialized && idleListener != null) {
             maplibreMap.removeOnCameraIdleListener(idleListener!!)
         }
         mapView.onDestroy()
@@ -160,42 +155,56 @@ class DataDrivenStyleActivity : AppCompatActivity() {
         }
     }
 
+
     private fun addExponentialZoomFunction() {
         Timber.i("Add exponential zoom function")
-        val layer = maplibreMap.style!!.getLayerAs<FillLayer>("water")!!
-        layer.setProperties(
-            PropertyFactory.fillColor(
-                Expression.interpolate(
-                    Expression.exponential(0.5f),
-                    Expression.zoom(),
-                    Expression.stop(1, Expression.color(Color.RED)),
-                    Expression.stop(5, Expression.color(Color.BLUE)),
-                    Expression.stop(10, Expression.color(Color.GREEN))
-                )
-            )
-        )
-        Timber.i("Fill color: %s", layer.fillColor)
+        maplibreMap.getStyle { style ->
+            style.layers.filter { it.id.startsWith("water") }.filterIsInstance<FillLayer>()
+                .forEach { layer ->
+                    // --8<-- [start:addExponentialZoomFunction]
+                    layer.setProperties(
+                        PropertyFactory.fillColor(
+                            Expression.interpolate(
+                                Expression.exponential(0.5f),
+                                Expression.zoom(),
+                                Expression.stop(1, Expression.color(Color.RED)),
+                                Expression.stop(5, Expression.color(Color.BLUE)),
+                                Expression.stop(10, Expression.color(Color.GREEN))
+                            )
+                        )
+                    )
+                    // --8<-- [end:addExponentialZoomFunction]
+                    Timber.i("Fill color: %s", layer.fillColor)
+                }
+        }
     }
 
     private fun addIntervalZoomFunction() {
         Timber.i("Add interval zoom function")
-        val layer = maplibreMap.style!!.getLayerAs<FillLayer>("water")!!
-        layer.setProperties(
-            PropertyFactory.fillColor(
-                Expression.step(
-                    Expression.zoom(),
-                    Expression.rgba(0.0f, 255.0f, 255.0f, 1.0f),
-                    Expression.stop(1, Expression.rgba(255.0f, 0.0f, 0.0f, 1.0f)),
-                    Expression.stop(5, Expression.rgba(0.0f, 0.0f, 255.0f, 1.0f)),
-                    Expression.stop(10, Expression.rgba(0.0f, 255.0f, 0.0f, 1.0f))
+        maplibreMap.getStyle { style ->
+            style.layers.filter { it.id.startsWith("water") }.filterIsInstance<FillLayer>().forEach { layer ->
+                // --8<-- [start:addIntervalZoomFunction]
+                layer.setProperties(
+                    PropertyFactory.fillColor(
+                        Expression.step(
+                            Expression.zoom(),
+                            Expression.rgba(0.0f, 255.0f, 255.0f, 1.0f),
+                            Expression.stop(1, Expression.rgba(255.0f, 0.0f, 0.0f, 1.0f)),
+                            Expression.stop(5, Expression.rgba(0.0f, 0.0f, 255.0f, 1.0f)),
+                            Expression.stop(10, Expression.rgba(0.0f, 255.0f, 0.0f, 1.0f))
+                        )
+                    )
                 )
-            )
-        )
-        Timber.i("Fill color: %s", layer.fillColor)
+                // --8<-- [end:addIntervalZoomFunction]
+
+                Timber.i("Fill color: %s", layer.fillColor)
+            }
+        }
     }
 
     private fun addExponentialSourceFunction() {
         Timber.i("Add exponential source function")
+        // --8<-- [start:addExponentialSourceFunction]
         val layer = maplibreMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
         layer.setProperties(
             PropertyFactory.fillColor(
@@ -208,11 +217,13 @@ class DataDrivenStyleActivity : AppCompatActivity() {
                 )
             )
         )
+        // --8<-- [end:addExponentialSourceFunction]
         Timber.i("Fill color: %s", layer.fillColor)
     }
 
     private fun addCategoricalSourceFunction() {
         Timber.i("Add categorical source function")
+        // --8<-- [start:addCategoricalSourceFunction]
         val layer = maplibreMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
         layer.setProperties(
             PropertyFactory.fillColor(
@@ -228,22 +239,27 @@ class DataDrivenStyleActivity : AppCompatActivity() {
                 )
             )
         )
+        // --8<-- [end:addCategoricalSourceFunction]
+
         Timber.i("Fill color: %s", layer.fillColor)
     }
 
     private fun addIdentitySourceFunction() {
         Timber.i("Add identity source function")
+        // --8<-- [start:addIdentitySourceFunction]
         val layer = maplibreMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
         layer.setProperties(
             PropertyFactory.fillOpacity(
                 Expression.get("fill-opacity")
             )
         )
+        // --8<-- [end:addIdentitySourceFunction]
         Timber.i("Fill opacity: %s", layer.fillOpacity)
     }
 
     private fun addIntervalSourceFunction() {
         Timber.i("Add interval source function")
+        // --8<-- [start:addIntervalSourceFunction]
         val layer = maplibreMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
         layer.setProperties(
             PropertyFactory.fillColor(
@@ -256,11 +272,13 @@ class DataDrivenStyleActivity : AppCompatActivity() {
                 )
             )
         )
+        // --8<-- [end:addIntervalSourceFunction]
         Timber.i("Fill color: %s", layer.fillColor)
     }
 
     private fun addCompositeExponentialFunction() {
         Timber.i("Add composite exponential function")
+        // --8<-- [start:addCompositeExponentialFunction]
         val layer = maplibreMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
         layer.setProperties(
             PropertyFactory.fillColor(
@@ -300,11 +318,13 @@ class DataDrivenStyleActivity : AppCompatActivity() {
                 )
             )
         )
+        // --8<-- [end:addCompositeExponentialFunction]
         Timber.i("Fill color: %s", layer.fillColor)
     }
 
     private fun addCompositeIntervalFunction() {
         Timber.i("Add composite interval function")
+        // --8<-- [start:addCompositeIntervalFunction]
         val layer = maplibreMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
         layer.setProperties(
             PropertyFactory.fillColor(
@@ -344,11 +364,13 @@ class DataDrivenStyleActivity : AppCompatActivity() {
                 )
             )
         )
+        // --8<-- [end:addCompositeIntervalFunction]
         Timber.i("Fill color: %s", layer.fillColor)
     }
 
     private fun addCompositeCategoricalFunction() {
         Timber.i("Add composite categorical function")
+        // --8<-- [start:addCompositeCategoricalFunction]
         val layer = maplibreMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
         layer.setProperties(
             PropertyFactory.fillColor(
@@ -508,6 +530,7 @@ class DataDrivenStyleActivity : AppCompatActivity() {
                 )
             )
         )
+        // --8<-- [end:addCompositeCategoricalFunction]
         Timber.i("Fill color: %s", layer.fillColor)
     }
 

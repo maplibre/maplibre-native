@@ -1,5 +1,4 @@
 #include <mbgl/renderer/buckets/fill_bucket.hpp>
-#include <mbgl/programs/fill_program.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>
 #include <mbgl/style/layers/fill_layer_impl.hpp>
 #include <mbgl/renderer/layers/render_fill_layer.hpp>
@@ -76,19 +75,6 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
 #endif // MLN_TRIANGULATE_FILL_OUTLINES
 
 void FillBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
-#if MLN_LEGACY_RENDERER
-    if (!uploaded) {
-        vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
-        lineIndexBuffer = uploadPass.createIndexBuffer(std::move(basicLines));
-        triangleIndexBuffer = triangles.empty() ? std::optional<gfx::IndexBuffer>{}
-                                                : uploadPass.createIndexBuffer(std::move(triangles));
-    }
-
-    for (auto& pair : paintPropertyBinders) {
-        pair.second.upload(uploadPass);
-    }
-#endif // MLN_LEGACY_RENDERER
-
     uploaded = true;
 }
 
@@ -111,6 +97,8 @@ void FillBucket::update(const FeatureStates& states,
     if (it != paintPropertyBinders.end()) {
         it->second.updateVertexVectors(states, layer, imagePositions);
         uploaded = false;
+
+        sharedVertices->updateModified();
     }
 }
 

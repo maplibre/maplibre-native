@@ -7,8 +7,6 @@
 #include <mbgl/gl/enum.hpp>
 #include <mbgl/gl/renderer_backend.hpp>
 #include <mbgl/gl/renderbuffer_resource.hpp>
-#include <mbgl/gl/texture_resource.hpp>
-#include <mbgl/gl/texture.hpp>
 #include <mbgl/gl/offscreen_texture.hpp>
 #include <mbgl/gl/debugging_extension.hpp>
 #include <mbgl/gl/timestamp_query_extension.hpp>
@@ -19,7 +17,6 @@
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/thread_pool.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/gl/drawable_gl_builder.hpp>
 #include <mbgl/gl/layer_group_gl.hpp>
@@ -27,7 +24,6 @@
 #include <mbgl/gl/texture2d.hpp>
 #include <mbgl/renderer/render_target.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
-#endif
 
 #include <cstring>
 #include <iterator>
@@ -95,16 +91,24 @@ constexpr size_t renderBufferByteSize(const gfx::RenderbufferPixelType type, con
 Context::Context(RendererBackend& backend_)
     : gfx::Context(/*maximumVertexBindingCount=*/getMaxVertexAttribs()),
       backend(backend_) {
-#if MLN_DRAWABLE_RENDERER
     uboAllocator = std::make_unique<gl::UniformBufferAllocator>();
-#endif
+
+    texturePool = std::make_unique<Texture2DPool>(this);
 }
 
 Context::~Context() noexcept {
     if (cleanupOnDestruction) {
         backend.getThreadPool().runRenderJobs(true /* closeQueue */);
 
+        for (size_t i = 0; i < globalUniformBuffers.allocatedSize(); i++) {
+            globalUniformBuffers.set(i, nullptr);
+        }
+
         reset();
+
+        // Delete all pooled resources while the context is still valid
+        texturePool.reset();
+
 #if !defined(NDEBUG)
         Log::Debug(Event::General, "Rendering Stats:\n" + stats.toString("\n"));
 #endif
@@ -117,7 +121,6 @@ void Context::beginFrame() {
 
     backend.getThreadPool().runRenderJobs();
 
-#if MLN_DRAWABLE_RENDERER
     frameInFlightFence = std::make_shared<gl::Fence>();
 
     // Run allocator defragmentation on this frame interval.
@@ -129,19 +132,16 @@ void Context::beginFrame() {
     } else {
         frameNum++;
     }
-#endif
 }
 
 void Context::endFrame() {
     MLN_TRACE_FUNC();
 
-#if MLN_DRAWABLE_RENDERER
     if (!frameInFlightFence) {
         return;
     }
 
     frameInFlightFence->insert();
-#endif
 }
 
 void Context::initializeExtensions(const std::function<gl::ProcAddress(const char*)>& getProcAddress) {
@@ -265,18 +265,14 @@ void Context::verifyProgramLinkage(ProgramID program_) {
     throw std::runtime_error("program failed to link");
 }
 
-UniqueTexture Context::createUniqueTexture() {
+UniqueTexture Context::createUniqueTexture(const Size& size,
+                                           gfx::TexturePixelType format,
+                                           gfx::TextureChannelDataType type) {
     MLN_TRACE_FUNC();
 
-    if (pooledTextures.empty()) {
-        pooledTextures.resize(TextureMax);
-        MBGL_CHECK_ERROR(glGenTextures(TextureMax, pooledTextures.data()));
-        stats.numCreatedTextures += TextureMax;
-    }
+    assert(texturePool);
+    TextureID id = texturePool->alloc(size, format, type);
 
-    TextureID id = pooledTextures.back();
-    pooledTextures.pop_back();
-    stats.numActiveTextures++;
     // NOLINTNEXTLINE(performance-move-const-arg)
     return UniqueTexture{std::move(id), {this}};
 }
@@ -299,43 +295,6 @@ UniqueFramebuffer Context::createFramebuffer() {
     stats.numFrameBuffers++;
     // NOLINTNEXTLINE(performance-move-const-arg)
     return UniqueFramebuffer{std::move(id), {this}};
-}
-
-std::unique_ptr<gfx::TextureResource> Context::createTextureResource(const Size size,
-                                                                     const gfx::TexturePixelType format,
-                                                                     const gfx::TextureChannelDataType type) {
-    MLN_TRACE_FUNC();
-
-    auto obj = createUniqueTexture();
-    int textureByteSize = gl::TextureResource::getStorageSize(size, format, type);
-    stats.memTextures += textureByteSize;
-    std::unique_ptr<gfx::TextureResource> resource = std::make_unique<gl::TextureResource>(std::move(obj),
-                                                                                           textureByteSize);
-
-    // Always use texture unit 0 for manipulating it.
-    activeTextureUnit = 0;
-    texture[0] = static_cast<gl::TextureResource&>(*resource).texture;
-
-    // Creates an empty texture with the specified size and format.
-    MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D,
-                                  0,
-                                  Enum<gfx::TexturePixelType>::sizedFor(format, type),
-                                  size.width,
-                                  size.height,
-                                  0,
-                                  Enum<gfx::TexturePixelType>::to(format),
-                                  Enum<gfx::TextureChannelDataType>::to(type),
-                                  nullptr));
-
-    // We are using clamp to edge here since OpenGL ES doesn't allow GL_REPEAT
-    // on NPOT textures. We use those when the pixelRatio isn't a power of two,
-    // e.g. on iPhone 6 Plus.
-    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-
-    return resource;
 }
 
 std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(const gfx::RenderbufferPixelType type,
@@ -469,51 +428,6 @@ Framebuffer Context::createFramebuffer(const gfx::Renderbuffer<gfx::Renderbuffer
     return {color.getSize(), std::move(fbo)};
 }
 
-Framebuffer Context::createFramebuffer(
-    const gfx::Texture& color, const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>& depthStencil) {
-    MLN_TRACE_FUNC();
-
-    if (color.size != depthStencil.getSize()) {
-        throw std::runtime_error("Renderbuffer size mismatch");
-    }
-    auto fbo = createFramebuffer();
-    bindFramebuffer = fbo;
-    MBGL_CHECK_ERROR(glFramebufferTexture2D(
-        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color.getResource<gl::TextureResource>().texture, 0));
-    bindDepthStencilRenderbuffer(depthStencil);
-    checkFramebuffer();
-    return {color.size, std::move(fbo)};
-}
-
-Framebuffer Context::createFramebuffer(const gfx::Texture& color) {
-    MLN_TRACE_FUNC();
-
-    auto fbo = createFramebuffer();
-    bindFramebuffer = fbo;
-    MBGL_CHECK_ERROR(glFramebufferTexture2D(
-        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color.getResource<gl::TextureResource>().texture, 0));
-    checkFramebuffer();
-    return {color.size, std::move(fbo)};
-}
-
-Framebuffer Context::createFramebuffer(const gfx::Texture& color,
-                                       const gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>& depth) {
-    MLN_TRACE_FUNC();
-    if (color.size != depth.getSize()) {
-        throw std::runtime_error("Renderbuffer size mismatch");
-    }
-    auto fbo = createFramebuffer();
-    bindFramebuffer = fbo;
-    MBGL_CHECK_ERROR(glFramebufferTexture2D(
-        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color.getResource<gl::TextureResource>().texture, 0));
-
-    auto& depthResource = depth.getResource<gl::RenderbufferResource>();
-    MBGL_CHECK_ERROR(
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthResource.renderbuffer));
-    checkFramebuffer();
-    return {depth.getSize(), std::move(fbo)};
-}
-
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(const Size size,
                                                                        const gfx::TextureChannelDataType type) {
     MLN_TRACE_FUNC();
@@ -530,12 +444,12 @@ std::unique_ptr<gfx::DrawScopeResource> Context::createDrawScopeResource() {
 void Context::reset() {
     MLN_TRACE_FUNC();
 
-    std::copy(pooledTextures.begin(), pooledTextures.end(), std::back_inserter(abandonedTextures));
-    pooledTextures.resize(0);
     performCleanup();
+
+    // Delete all unused pooled resources
+    texturePool->shrink();
 }
 
-#if MLN_DRAWABLE_RENDERER
 void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
     MLN_TRACE_FUNC();
     MLN_TRACE_FUNC_GL();
@@ -566,30 +480,14 @@ bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
 void Context::bindGlobalUniformBuffers(gfx::RenderPass&) const noexcept {
     MLN_TRACE_FUNC();
 
-    for (size_t id = 0; id < globalUniformBuffers.allocatedSize(); id++) {
-        const auto& globalUniformBuffer = globalUniformBuffers.get(id);
-        if (!globalUniformBuffer) continue;
-        GLint binding = static_cast<GLint>(id);
-        const auto& uniformBufferGL = static_cast<const UniformBufferGL&>(*globalUniformBuffer);
-        MBGL_CHECK_ERROR(glBindBufferRange(GL_UNIFORM_BUFFER,
-                                           binding,
-                                           uniformBufferGL.getID(),
-                                           uniformBufferGL.getManagedBuffer().getBindingOffset(),
-                                           uniformBufferGL.getSize()));
-    }
+    globalUniformBuffers.bind();
 }
 
 void Context::unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept {
     MLN_TRACE_FUNC();
 
-    for (size_t id = 0; id < globalUniformBuffers.allocatedSize(); id++) {
-        const auto& globalUniformBuffer = globalUniformBuffers.get(id);
-        if (!globalUniformBuffer) continue;
-        GLint binding = static_cast<GLint>(id);
-        MBGL_CHECK_ERROR(glBindBufferBase(GL_UNIFORM_BUFFER, binding, 0));
-    }
+    globalUniformBuffers.unbind();
 }
-#endif
 
 void Context::setDirtyState() {
     MLN_TRACE_FUNC();
@@ -630,17 +528,23 @@ void Context::setDirtyState() {
     globalVertexArrayState.setDirty();
 }
 
-#if MLN_DRAWABLE_RENDERER
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     MLN_TRACE_FUNC();
 
     return std::make_unique<gl::DrawableGLBuilder>(std::move(name));
 }
 
-gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool /*persistent*/) {
+gfx::UniformBufferPtr Context::createUniformBuffer(const void* data,
+                                                   std::size_t size,
+                                                   bool /*persistent*/,
+                                                   bool /*ssbo*/) {
     MLN_TRACE_FUNC();
 
-    return std::make_shared<gl::UniformBufferGL>(data, size, *uboAllocator);
+    return std::make_shared<gl::UniformBufferGL>(*this, data, size, *uboAllocator);
+}
+
+gfx::UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
+    return std::make_unique<UniformBufferArrayGL>();
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
@@ -695,8 +599,6 @@ gfx::VertexAttributeArrayPtr Context::createVertexAttributeArray() const {
     return std::make_shared<VertexAttributeArrayGL>();
 }
 
-#endif
-
 void Context::clear(std::optional<mbgl::Color> color, std::optional<float> depth, std::optional<int32_t> stencil) {
     MLN_TRACE_FUNC();
     MLN_TRACE_FUNC_GL();
@@ -724,6 +626,7 @@ void Context::clear(std::optional<mbgl::Color> color, std::optional<float> depth
     MBGL_CHECK_ERROR(glClear(mask));
 
     stats.numDrawCalls = 0;
+    stats.numFrames++;
 }
 
 void Context::setCullFaceMode(const gfx::CullFaceMode& mode) {
@@ -804,11 +707,9 @@ void Context::finish() {
     MBGL_CHECK_ERROR(glFinish());
 }
 
-#if MLN_DRAWABLE_RENDERER
 std::shared_ptr<gl::Fence> Context::getCurrentFrameFence() const {
     return frameInFlightFence;
 }
-#endif
 
 void Context::draw(const gfx::DrawMode& drawMode, std::size_t indexOffset, std::size_t indexLength) {
     MLN_TRACE_FUNC();
@@ -832,13 +733,15 @@ void Context::draw(const gfx::DrawMode& drawMode, std::size_t indexOffset, std::
                                     reinterpret_cast<GLvoid*>(sizeof(uint16_t) * indexOffset)));
 
     stats.numDrawCalls++;
+    stats.totalDrawCalls++;
 }
 
 void Context::performCleanup() {
     MLN_TRACE_FUNC();
-
-    // TODO: Find a better way to unbind VAOs after we're done with them without
-    // introducing unnecessary bind(0)/bind(N) sequences.
+#ifndef NDEBUG
+    // In debug builds, un-bind all texture units so that any incorrect use results in an
+    // error rather than using whatever texture happened to have been bound previously.
+    // This takes some time, however, so don't do it in release builds.
     {
         for (auto i = 0; i < gfx::MaxActiveTextureUnits; i++) {
             activeTextureUnit = i;
@@ -847,6 +750,7 @@ void Context::performCleanup() {
 
         bindVertexArray = 0;
     }
+#endif
 
     for (auto id : abandonedPrograms) {
         if (program == id) {
@@ -881,10 +785,8 @@ void Context::performCleanup() {
                     binding.setDirty();
                 }
             }
+            texturePool->release(id);
         }
-        MBGL_CHECK_ERROR(glDeleteTextures(int(abandonedTextures.size()), abandonedTextures.data()));
-        stats.numCreatedTextures -= int(abandonedTextures.size());
-        assert(stats.numCreatedTextures >= 0);
         abandonedTextures.clear();
     }
 
@@ -921,6 +823,8 @@ void Context::reduceMemoryUsage() {
     MLN_TRACE_FUNC_GL();
 
     performCleanup();
+    assert(texturePool);
+    texturePool->shrink();
 
     // Ensure that all pending actions are executed to ensure that they happen
     // before the app goes to the background.
@@ -945,6 +849,11 @@ void Context::clearStencilBuffer(const int32_t bits) {
     MBGL_CHECK_ERROR(glClear(GL_STENCIL_BUFFER_BIT));
 
     stats.stencilClears++;
+}
+
+Texture2DPool& Context::getTexturePool() {
+    assert(texturePool);
+    return *texturePool;
 }
 
 } // namespace gl

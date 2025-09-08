@@ -12,20 +12,24 @@ using namespace platform;
 
 namespace {
 
+constexpr const char *const extName = "GL_EXT_disjoint_timer_query";
+
 struct TimestampQueryLoader {
     TimestampQueryLoader(const GlContexsLoader &loadExtension)
-        : glGenQueries(loadExtension({{"GL_EXT_disjoint_timer_query", "glGenQueries"}})),
-          glDeleteQueries(loadExtension({{"GL_EXT_disjoint_timer_query", "glDeleteQueries"}})),
-          glIsQuery(loadExtension({{"GL_EXT_disjoint_timer_query", "glIsQuery"}})),
-          glBeginQuery(loadExtension({{"GL_EXT_disjoint_timer_query", "glBeginQuery"}})),
-          glEndQuery(loadExtension({{"GL_EXT_disjoint_timer_query", "glEndQuery"}})),
-          glQueryCounter(loadExtension({{"GL_EXT_disjoint_timer_query", "glQueryCounter"}})),
-          glGetQueryiv(loadExtension({{"GL_EXT_disjoint_timer_query", "glGetQueryiv"}})),
-          glGetQueryObjectiv(loadExtension({{"GL_EXT_disjoint_timer_query", "glGetQueryObjectiv"}})),
-          glGetQueryObjectuiv(loadExtension({{"GL_EXT_disjoint_timer_query", "glGetQueryObjectuiv"}})),
-          glGetQueryObjecti64v(loadExtension({{"GL_EXT_disjoint_timer_query", "glGetQueryObjecti64v"}})),
-          glGetQueryObjectui64v(loadExtension({{"GL_EXT_disjoint_timer_query", "glGetQueryObjectui64v"}})),
-          glGetInteger64v(loadExtension({{"GL_EXT_disjoint_timer_query", "glGetInteger64v"}})) {}
+        : glGenQueries(loadExtension({{extName, "glGenQueries"}, {extName, "glGenQueriesEXT"}})),
+          glDeleteQueries(loadExtension({{extName, "glDeleteQueries"}, {extName, "glDeleteQueriesEXT"}})),
+          glIsQuery(loadExtension({{extName, "glIsQuery"}, {extName, "glIsQueryEXT"}})),
+          glBeginQuery(loadExtension({{extName, "glBeginQuery"}, {extName, "glBeginQueryEXT"}})),
+          glEndQuery(loadExtension({{extName, "glEndQuery"}, {extName, "glEndQueryEXT"}})),
+          glQueryCounter(loadExtension({{extName, "glQueryCounter"}, {extName, "glQueryCounterEXT"}})),
+          glGetQueryiv(loadExtension({{extName, "glGetQueryiv"}, {extName, "glGetQueryivEXT"}})),
+          glGetQueryObjectiv(loadExtension({{extName, "glGetQueryObjectiv"}, {extName, "glGetQueryObjectivEXT"}})),
+          glGetQueryObjectuiv(loadExtension({{extName, "glGetQueryObjectuiv"}, {extName, "glGetQueryObjectuivEXT"}})),
+          glGetQueryObjecti64v(
+              loadExtension({{extName, "glGetQueryObjecti64v"}, {extName, "glGetQueryObjecti64vEXT"}})),
+          glGetQueryObjectui64v(
+              loadExtension({{extName, "glGetQueryObjectui64v"}, {extName, "glGetQueryObjectui64vEXT"}})),
+          glGetInteger64v(loadExtension({{extName, "glGetInteger64v"}, {extName, "glGetInteger64vEXT"}})) {}
 
     ExtensionFunction<void(GLsizei n, GLuint *ids)> glGenQueries;
     ExtensionFunction<void(GLsizei n, const GLuint *ids)> glDeleteQueries;

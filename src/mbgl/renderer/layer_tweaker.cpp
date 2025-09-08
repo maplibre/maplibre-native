@@ -9,7 +9,6 @@
 #include <mbgl/util/containers.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
-#include <mbgl/shaders/layer_ubo.hpp>
 #include <mbgl/util/monotonic_timer.hpp>
 #include <chrono>
 #endif // MLN_RENDER_BACKEND_METAL
@@ -65,7 +64,7 @@ void LayerTweaker::multiplyWithProjectionMatrix(/*in-out*/ mat4& matrix,
     if (!drawable.getIs3D() && drawable.getEnableDepth()) {
         // copy and adjust the projection matrix
         mat4 projMatrix = projMatrixRef;
-        projMatrix[14] -= ((1 + drawable.getLayerIndex()) * PaintParameters::numSublayers -
+        projMatrix[14] -= ((1 + parameters.currentLayer) * PaintParameters::numSublayers -
                            drawable.getSubLayerIndex()) *
                           PaintParameters::depthEpsilon;
         // multiply with the copy

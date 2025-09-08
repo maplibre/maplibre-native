@@ -1,6 +1,7 @@
-#!/usr/bin/env node
-/* jshint node: true */
-'use strict';
+import express from "express";
+import path from "node:path";
+
+if (!import.meta.dirname) throw new Error("Could not get import.meta.dirname. Use Node.js 20.11 or newer.");
 
 // This needs to be here to make sure the pipe stays open.
 // We're waiting until the stdin pipe gets closed (e.g. because the parent
@@ -8,15 +9,13 @@
 process.stdin.on('readable', function() {});
 process.stdin.on('end', function() { process.exit(0); });
 
-
-var fs = require('fs');
-var express = require('express');
 var app = express();
 
 // We're manually setting Etag headers.
 app.disable('etag');
 
 app.get('/test', function (req, res) {
+    var content = 'Hello World!';
     if (req.query.modified) {
         res.setHeader('Last-Modified', (new Date(req.query.modified * 1000)).toUTCString());
     }
@@ -29,7 +28,12 @@ app.get('/test', function (req, res) {
     if (req.query.cachecontrol) {
         res.setHeader('Cache-Control', req.query.cachecontrol);
     }
-    res.send('Hello World!');
+    if (req.range()) {
+        const [ range ] = req.range();
+        content = content.substring(range.start, range.end + 1);
+        res.status(206);
+    }
+    res.send(content);
 });
 
 app.get('/stale/*', function() {
@@ -170,7 +174,7 @@ app.get('/load/:number(\\d+)', function(req, res) {
 });
 
 app.get('/online/:style(*)', function(req, res) {
-    const file = (__dirname + "/../fixtures/map/online/" + req.params.style).replace("storage/../", "");
+    const file = path.join(import.meta.dirname, "../fixtures/map/online", req.params.style);
     res.sendFile(file); // Set disposition and send it.
     // res.status(200).send();
     // res.send('Request ' + req.params.style);

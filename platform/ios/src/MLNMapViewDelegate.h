@@ -1,6 +1,8 @@
 #import <UIKit/UIKit.h>
 
 #import "MLNCameraChangeReason.h"
+#import "MLNRenderingStats.h"
+#import "MLNTileOperation.h"
 #import "Mapbox.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -9,9 +11,9 @@ NS_ASSUME_NONNULL_BEGIN
 @class MLNUserLocationAnnotationViewStyle;
 
 /**
- The `MLNMapViewDelegate` protocol defines a set of optional methods that you
+ The ``MLNMapViewDelegate`` protocol defines a set of optional methods that you
  can use to receive map-related update messages. Because many map operations
- require the `MLNMapView` class to load data asynchronously, the map view calls
+ require the ``MLNMapView`` class to load data asynchronously, the map view calls
  these methods to notify your application when specific operations complete. The
  map view also uses these methods to request information about annotations
  displayed on the map, such as the styles and interaction modes to apply to
@@ -73,7 +75,8 @@ NS_ASSUME_NONNULL_BEGIN
  @return A Boolean value indicating whether the map view should stay at
  `oldCamera` or transition to `newCamera`.
 
- @note If this method is implemented `-mapView:shouldChangeFromCamera:toCamera:` will not be called.
+ > Note: If this method is implemented `-mapView:shouldChangeFromCamera:toCamera:` will not be
+ called.
  */
 - (BOOL)mapView:(MLNMapView *)mapView
     shouldChangeFromCamera:(MLNMapCamera *)oldCamera
@@ -102,7 +105,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param animated Whether the change will cause an animated effect on the map.
  @param reason The reason for the camera change.
 
- @note If this method is implemented `-mapView:regionWillChangeAnimated:` will not be called.
+ > Note: If this method is implemented `-mapView:regionWillChangeAnimated:` will not be called.
  */
 - (void)mapView:(MLNMapView *)mapView
     regionWillChangeWithReason:(MLNCameraChangeReason)reason
@@ -113,7 +116,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  This method is called as the currently displayed map camera changes as part of
  an animation, whether due to a user gesture or due to a call to a method such
- as `-[MLNMapView setCamera:animated:]`. This method can be called before
+ as ``MLNMapView/setCamera:animated:``. This method can be called before
  `-mapViewDidFinishLoadingMap:` is called.
 
  During the animation, this method may be called many times to report updates to
@@ -134,7 +137,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  This method is called as the currently displayed map camera changes as part of
  an animation, whether due to a user gesture or due to a call to a method such
- as `-[MLNMapView setCamera:animated:]`. This method can be called before
+ as ``MLNMapView/setCamera:animated:``. This method can be called before
  `-mapViewDidFinishLoadingMap:` is called.
 
  During the animation, this method may be called many times to report updates to
@@ -144,7 +147,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param mapView The map view whose viewpoint is changing.
  @param reason The reason for the camera change.
 
- @note If this method is implemented `-mapViewRegionIsChanging:` will not be called.
+ > Note: If this method is implemented `-mapViewRegionIsChanging:` will not be called.
  */
 - (void)mapView:(MLNMapView *)mapView regionIsChangingWithReason:(MLNCameraChangeReason)reason;
 
@@ -174,7 +177,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param animated Whether the change caused an animated effect on the map.
  @param reason The reason for the camera change.
 
- @note If this method is implemented `-mapView:regionDidChangeAnimated:` will not be called.
+ > Note: If this method is implemented `-mapView:regionDidChangeAnimated:` will not be called.
  */
 - (void)mapView:(MLNMapView *)mapView
     regionDidChangeWithReason:(MLNCameraChangeReason)reason
@@ -244,9 +247,9 @@ NS_ASSUME_NONNULL_BEGIN
  affecting performance.
 
  @param mapView The map view that has just redrawn.
+ @param fullyRendered A Boolean value indicating whether the map is fully rendered or not.
  */
 - (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView fullyRendered:(BOOL)fullyRendered;
-
 /**
  Tells the delegate that the map view has just redrawn.
 
@@ -257,12 +260,30 @@ NS_ASSUME_NONNULL_BEGIN
  affecting performance.
 
  @param mapView The map view that has just redrawn.
- @param frameTimeNanos The time taken to render the frame, in nanoseconds
+ @param fullyRendered A Boolean value indicating whether the map is fully rendered or not.
+ @param frameEncodingTime The time taken to encode the frame, in milliseconds.
+ @param frameRenderingTime The time taken to render the frame, in milliseconds.
  */
 - (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView
                          fullyRendered:(BOOL)fullyRendered
                      frameEncodingTime:(double)frameEncodingTime
                     frameRenderingTime:(double)frameRenderingTime;
+/**
+ Tells the delegate that the map view has just redrawn.
+
+ This method is called any time the map view needs to redraw due to a change in
+ the viewpoint or style property transition. This method may be called very
+ frequently, even moreso than `-mapViewRegionIsChanging:`. Therefore, your
+ implementation of this method should be as lightweight as possible to avoid
+ affecting performance.
+
+ @param mapView The map view that has just redrawn.
+ @param fullyRendered A Boolean value indicating whether the map is fully rendered or not.
+ @param renderingStats A collection of rendering statistics
+ */
+- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView
+                         fullyRendered:(BOOL)fullyRendered
+                        renderingStats:(MLNRenderingStats *)renderingStats;
 
 /**
  Tells the delegate that the map view is entering an idle state, and no more
@@ -300,8 +321,16 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)mapView:(MLNMapView *)mapView didFinishLoadingStyle:(MLNStyle *)style;
 
 /**
+ Tells the delegate that the source changed.
+
+ @param mapView The map view that owns the source.
+ @param source The source that changed.
+ */
+- (void)mapView:(MLNMapView *)mapView sourceDidChange:(MLNSource *)source;
+
+/**
  Tells the delegate that the `mapView` is missing an image. The image should be added synchronously
- with `-[MLNStyle setImage:forName:]` to be rendered on the current zoom level. When loading icons
+ with ``MLNStyle/setImage:forName:`` to be rendered on the current zoom level. When loading icons
  asynchronously, you can load a placeholder image and replace it when your image has loaded.
 
  @param mapView The map view that is loading the image.
@@ -322,6 +351,157 @@ NS_ASSUME_NONNULL_BEGIN
  the cached image.
  */
 - (BOOL)mapView:(MLNMapView *)mapView shouldRemoveStyleImage:(NSString *)imageName;
+
+// MARK: - Shader Compilation
+
+/**
+ Called when a shader is about to be compiled.
+
+ @param mapView The ``MLNMapView`` instance invoking this delegate method.
+ @param id The unique identifier for the shader being compiled.
+ @param backend An integer representing the backend type used for shader compilation.
+ @param defines A string containing the shader program configuration definitions.
+
+ > Warning: This method is not thread-safe.
+ */
+- (void)mapView:(MLNMapView *)mapView
+    shaderWillCompile:(NSInteger)id
+              backend:(NSInteger)backend
+              defines:(NSString *)defines;
+
+/**
+Called when a shader was successfully compiled.
+
+@param mapView The ``MLNMapView`` instance invoking this delegate method.
+@param id The unique identifier for the shader that was compiled.
+@param backend An integer representing the backend type used for shader compilation.
+@param defines A string containing the shader program configuration definitions.
+
+> Warning: This method is not thread-safe.
+*/
+- (void)mapView:(MLNMapView *)mapView
+    shaderDidCompile:(NSInteger)id
+             backend:(NSInteger)backend
+             defines:(NSString *)defines;
+
+/**
+Called when a shader failed to compile.
+
+@param mapView The ``MLNMapView`` instance invoking this delegate method.
+@param id The unique identifier for the shader that failed to compile.
+@param backend An integer representing the backend type used for shader compilation.
+@param defines A string containing the shader program configuration definitions.
+
+> Warning: This method is not thread-safe.
+*/
+- (void)mapView:(MLNMapView *)mapView
+    shaderDidFailCompile:(NSInteger)id
+                 backend:(NSInteger)backend
+                 defines:(NSString *)defines;
+
+// MARK: - Glyph Requests
+
+/**
+Called when glyphs for the specified font stack are about to be loaded.
+
+@param mapView The ``MLNMapView`` instance invoking this delegate method.
+@param fontStack An array of strings identifying the requested font stack.
+@param range The range of glyphs that are being requested.
+
+> Warning: This method is not thread-safe.
+*/
+- (void)mapView:(MLNMapView *)mapView
+    glyphsWillLoad:(NSArray<NSString *> *)fontStack
+             range:(NSRange)range;
+
+/**
+Called when glyphs for the specified font stack have been successfully loaded.
+
+@param mapView The ``MLNMapView`` instance invoking this delegate method.
+@param fontStack An array of strings identifying the requested font stack.
+@param range The range of glyphs that were successfully loaded.
+
+> Warning: This method is not thread-safe.
+*/
+- (void)mapView:(MLNMapView *)mapView
+    glyphsDidLoad:(NSArray<NSString *> *)fontStack
+            range:(NSRange)range;
+
+/**
+Called when an error occurred while loading glyphs for the specified font stack.
+
+@param mapView The ``MLNMapView`` instance invoking this delegate method.
+@param fontStack An array of strings identifying the requested font stack.
+@param range The range of glyphs for which loading failed.
+
+> Warning: This method is not thread-safe.
+*/
+- (void)mapView:(MLNMapView *)mapView
+    glyphsDidError:(NSArray<NSString *> *)fontStack
+             range:(NSRange)range;
+
+// MARK: - Tile Requests
+
+/**
+Called when a tile-related action is triggered.
+
+This method notifies the delegate of various stages of tile processing, such as requesting from
+cache or network, parsing, or encountering errors.
+
+@param mapView The ``MLNMapView`` instance invoking this delegate method.
+@param operation The type of tile operation triggered. See ``MLNTileOperation``.
+@param x The x-coordinate of the tile.
+@param y The y-coordinate of the tile.
+@param z The z (zoom) level of the tile.
+@param wrap The wrap value for the tile.
+@param overscaledZ The overscaled zoom level of the tile.
+@param sourceID A string identifier for the tile source.
+
+> Warning: This method is not thread-safe.
+*/
+- (void)mapView:(MLNMapView *)mapView
+    tileDidTriggerAction:(MLNTileOperation)operation
+                       x:(NSInteger)x
+                       y:(NSInteger)y
+                       z:(NSInteger)z
+                    wrap:(NSInteger)wrap
+             overscaledZ:(NSInteger)overscaledZ
+                sourceID:(NSString *)sourceID;
+
+// MARK: - Sprite Requests
+
+/**
+Called when a sprite is about to be loaded.
+
+@param mapView The ``MLNMapView`` instance invoking this delegate method.
+@param id The unique identifier for the sprite being loaded.
+@param url The URL from which the sprite is being requested.
+
+> Warning: This method is not thread-safe.
+*/
+- (void)mapView:(MLNMapView *)mapView spriteWillLoad:(NSString *)id url:(NSString *)url;
+
+/**
+Called when a sprite has been successfully loaded.
+
+@param mapView The ``MLNMapView`` instance invoking this delegate method.
+@param id The unique identifier for the sprite that was loaded.
+@param url The URL from which the sprite was loaded.
+
+> Warning: This method is not thread-safe.
+*/
+- (void)mapView:(MLNMapView *)mapView spriteDidLoad:(NSString *)id url:(NSString *)url;
+
+/**
+Called when an error occurs while loading a sprite.
+
+@param mapView The ``MLNMapView`` instance invoking this delegate method.
+@param id The unique identifier for the sprite for which loading failed.
+@param url The URL from which the sprite was being requested.
+
+> Warning: This method is not thread-safe.
+*/
+- (void)mapView:(MLNMapView *)mapView spriteDidError:(NSString *)id url:(NSString *)url;
 
 // MARK: Tracking User Location
 
@@ -362,8 +542,8 @@ NS_ASSUME_NONNULL_BEGIN
  While the `showsUserLocation` property is set to `YES`, this method is called
  whenever a new location update is received by the map view. This method is also
  called if the map view’s user tracking mode is set to
- `MLNUserTrackingModeFollowWithHeading` and the heading changes, or if it is set
- to `MLNUserTrackingModeFollowWithCourse` and the course changes.
+ ``MLNUserTrackingMode/MLNUserTrackingModeFollowWithHeading`` and the heading changes, or if it is
+ set to ``MLNUserTrackingMode/MLNUserTrackingModeFollowWithCourse`` and the course changes.
 
  This method is not called if the application is currently running in the
  background. If you want to receive location updates while running in the
@@ -407,8 +587,8 @@ NS_ASSUME_NONNULL_BEGIN
  When unimplemented, the user location annotation is aligned within the center of
  the map view with respect to the content insets.
 
- This method will override any values set by `MLNMapView.userLocationVerticalAlignment`
- or `-[MLNMapView setUserLocationVerticalAlignment:animated:]`.
+ This method will override any values set by ``MLNMapView/userLocationVerticalAlignment``
+ or ``MLNMapView/setUserLocationVerticalAlignment:animated:``.
 
  @param mapView The map view that is tracking the user's location.
  */
@@ -452,7 +632,7 @@ NS_ASSUME_NONNULL_BEGIN
  TODO: Annotation models
  TODO: Add annotation views and images
  TODO: Mark a place on the map with an image, learn to specify which
- image should be used for `MLNAnnotation` objects that have been added to
+ image should be used for ``MLNAnnotation`` objects that have been added to
  your map
  */
 - (nullable MLNAnnotationImage *)mapView:(MLNMapView *)mapView
@@ -490,7 +670,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  #### Related examples
  TODO: Annotation models, learn how to modify the outline color of an
- `MLNShape` object that has been added to your map as an annotation.
+ ``MLNShape`` object that has been added to your map as an annotation.
  */
 - (UIColor *)mapView:(MLNMapView *)mapView strokeColorForShapeAnnotation:(MLNShape *)annotation;
 
@@ -509,7 +689,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  #### Related examples
  TODO: Add a polygon annotation, learn how to modify the color of a an
- `MLNPolygon` at runtime.
+ ``MLNPolygon`` at runtime.
  */
 - (UIColor *)mapView:(MLNMapView *)mapView fillColorForPolygonAnnotation:(MLNPolygon *)annotation;
 
@@ -525,7 +705,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  #### Related examples
  TODO: Add a line annotation from GeoJSON, learn how to modify the
- line width of an `MLNPolylineFeature` on your map.
+ line width of an ``MLNPolylineFeature`` on your map.
  */
 - (CGFloat)mapView:(MLNMapView *)mapView lineWidthForPolylineAnnotation:(MLNPolyline *)annotation;
 
@@ -544,8 +724,8 @@ NS_ASSUME_NONNULL_BEGIN
  and draw more quickly than annotation views.
 
  The user location annotation view can also be customized via this method. When
- `annotation` is an instance of `MLNUserLocation` (or equal to the map view’s
- `userLocation` property), return an instance of `MLNUserLocationAnnotationView`
+ `annotation` is an instance of ``MLNUserLocation`` (or equal to the map view’s
+ `userLocation` property), return an instance of ``MLNUserLocationAnnotationView``
  (or a subclass thereof).
 
  @param mapView The map view that requested the annotation view.
@@ -556,7 +736,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  #### Related examples
  TODO: Add annotation views and images, learn how to specify what
- `MLNViewAnnotation` to use for a given `MLNPointAnnotation` object on your
+ ``MLNAnnotation`` to use for a given ``MLNAnnotation`` object on your
  map.
  */
 - (nullable MLNAnnotationView *)mapView:(MLNMapView *)mapView
@@ -570,7 +750,7 @@ NS_ASSUME_NONNULL_BEGIN
  implement this method to animate the addition of the annotation views.
 
  @param mapView The map view to which the annotation views were added.
- @param annotationViews An array of `MLNAnnotationView` objects representing the
+ @param annotationViews An array of ``MLNAnnotationView`` objects representing the
     views that were added.
  */
 - (void)mapView:(MLNMapView *)mapView
@@ -684,7 +864,7 @@ NS_ASSUME_NONNULL_BEGIN
  TODO: Add annotation views and images
  TODO: Display custom views as callouts
  TODO: Default callout usage, learn how to show callouts for
- `MLNAnnotation` objects.
+ ``MLNAnnotation`` objects.
  */
 - (BOOL)mapView:(MLNMapView *)mapView annotationCanShowCallout:(id<MLNAnnotation>)annotation;
 
@@ -700,12 +880,12 @@ NS_ASSUME_NONNULL_BEGIN
 
  @param mapView The map view that requested the callout view.
  @param annotation The object representing the annotation.
- @return A view conforming to the `MLNCalloutView` protocol, or `nil` to use the
+ @return A view conforming to the ``MLNCalloutView`` protocol, or `nil` to use the
     default callout view.
 
  #### Related examples
  TODO: Display custom views as callouts, learn how to customize an
- `MLNAnnotation` object's `MLNCalloutView`.
+ ``MLNAnnotation`` object's ``MLNAnnotation``.
  */
 - (nullable id<MLNCalloutView>)mapView:(MLNMapView *)mapView
               calloutViewForAnnotation:(id<MLNAnnotation>)annotation;
@@ -788,7 +968,7 @@ NS_ASSUME_NONNULL_BEGIN
  If your custom accessory views are not descendants of the `UIControl` class,
  the map view does not call this method. If the annotation has a custom callout
  view via the `-mapView:calloutViewForAnnotation:` method, you can specify the
- custom accessory views using the `MLNCalloutView` protocol’s
+ custom accessory views using the ``MLNCalloutView`` protocol’s
  `leftAccessoryView` and `rightAccessoryView` properties.
 
  @param mapView The map view containing the specified annotation.
@@ -810,7 +990,7 @@ NS_ASSUME_NONNULL_BEGIN
  opposed to the callout’s left or right accessory view. If the annotation has a
  custom callout view via the `-mapView:calloutViewForAnnotation:` method, this
  method is only called whenever the callout view calls its delegate’s
- `-[MLNCalloutViewDelegate calloutViewTapped:]` method.
+ ``MLNCalloutViewDelegate/calloutViewTapped:`` method.
 
  If this method is present on the delegate, the standard callout view’s body
  momentarily highlights when the user taps it, whether or not this method does
@@ -821,7 +1001,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  #### Related examples
  TODO: Display custom views as callouts, learn how to trigger an
- action when an `MLNAnnotation`s `MLNCalloutView` is tapped.
+ action when an ``MLNAnnotation``s ``MLNAnnotation`` is tapped.
  */
 - (void)mapView:(MLNMapView *)mapView tapOnCalloutForAnnotation:(id<MLNAnnotation>)annotation;
 

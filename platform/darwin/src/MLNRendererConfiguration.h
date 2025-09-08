@@ -20,7 +20,7 @@ MLN_EXPORT
 
 /** The name of the font family to use for client-side text rendering of CJK ideographs.
 
- Set MLNIdeographicFontFamilyName in your containing application's Info.plist to
+ Set `MLNIdeographicFontFamilyName` in your containing application's Info.plist to
  font family name(s) that will be available at run time, such as “PingFang TC”
  or “Marker Felt”. This plist key accepts:
 

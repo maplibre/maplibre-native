@@ -11,7 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 MLN_EXPORT
 @interface MLNAttributionButton : NSButton
 
-/// Returns an `MLNAttributionButton` instance with the given info.
+/// Returns an ``MLNAttributionButton`` instance with the given info.
 - (instancetype)initWithAttributionInfo:(MLNAttributionInfo *)info;
 
 /// The URL to open and display as a tooltip.

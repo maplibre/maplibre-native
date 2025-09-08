@@ -11,6 +11,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <thread>
 #include <unordered_set>
 
 namespace mbgl {
@@ -75,6 +76,8 @@ public:
     void pruneUnusedLayers(const std::set<std::string>&);
 
     void reset();
+
+    const std::thread::id renderThreadID = std::this_thread::get_id();
 
 private:
     std::map<std::string, CrossTileSymbolLayerIndex> layerIndexes;

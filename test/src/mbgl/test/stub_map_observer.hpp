@@ -32,7 +32,7 @@ public:
         }
     }
 
-    void onDidFinishRenderingFrame(RenderFrameStatus status) final {
+    void onDidFinishRenderingFrame(const RenderFrameStatus& status) final {
         if (didFinishRenderingFrameCallback) {
             didFinishRenderingFrameCallback(status);
         }
@@ -50,6 +50,50 @@ public:
         }
     }
 
+    void onPreCompileShader(shaders::BuiltIn id, gfx::Backend::Type type, const std::string& additionalDefines) final {
+        if (onPreCompileShaderCallback) {
+            onPreCompileShaderCallback(id, type, additionalDefines);
+        }
+    }
+
+    void onPostCompileShader(shaders::BuiltIn id, gfx::Backend::Type type, const std::string& additionalDefines) final {
+        if (onPostCompileShaderCallback) {
+            onPostCompileShaderCallback(id, type, additionalDefines);
+        }
+    }
+
+    void onShaderCompileFailed(shaders::BuiltIn id,
+                               gfx::Backend::Type type,
+                               const std::string& additionalDefines) final {
+        if (onShaderCompileFailedCallback) {
+            onShaderCompileFailedCallback(id, type, additionalDefines);
+        }
+    }
+
+    void onGlyphsLoaded(const FontStack& stack, const GlyphRange& range) final {
+        if (onGlyphsLoadedCallback) {
+            onGlyphsLoadedCallback(stack, range);
+        }
+    }
+
+    void onGlyphsError(const FontStack& stack, const GlyphRange& range, std::exception_ptr ex) final {
+        if (onGlyphsErrorCallback) {
+            onGlyphsErrorCallback(stack, range, ex);
+        }
+    }
+
+    void onGlyphsRequested(const FontStack& stack, const GlyphRange& range) final {
+        if (onGlyphsRequestedCallback) {
+            onGlyphsRequestedCallback(stack, range);
+        }
+    }
+
+    void onTileAction(TileOperation op, const OverscaledTileID& id, const std::string& sourceID) final {
+        if (onTileActionCallback) {
+            onTileActionCallback(op, id, sourceID);
+        }
+    }
+
     std::function<void()> willStartLoadingMapCallback;
     std::function<void()> didFinishLoadingMapCallback;
     std::function<void()> didFailLoadingMapCallback;
@@ -57,6 +101,13 @@ public:
     std::function<void(RenderFrameStatus)> didFinishRenderingFrameCallback;
     std::function<void()> didBecomeIdleCallback;
     std::function<void(gfx::ShaderRegistry&)> onRegisterShadersCallback;
+    std::function<void(shaders::BuiltIn, gfx::Backend::Type, const std::string&)> onPreCompileShaderCallback;
+    std::function<void(shaders::BuiltIn, gfx::Backend::Type, const std::string&)> onPostCompileShaderCallback;
+    std::function<void(shaders::BuiltIn, gfx::Backend::Type, const std::string&)> onShaderCompileFailedCallback;
+    std::function<void(const FontStack&, const GlyphRange&)> onGlyphsLoadedCallback;
+    std::function<void(const FontStack&, const GlyphRange&, std::exception_ptr)> onGlyphsErrorCallback;
+    std::function<void(const FontStack&, const GlyphRange&)> onGlyphsRequestedCallback;
+    std::function<void(TileOperation, const OverscaledTileID&, const std::string&)> onTileActionCallback;
 };
 
 } // namespace mbgl

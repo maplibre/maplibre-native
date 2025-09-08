@@ -1,0 +1,25 @@
+name: Build and Upload APKs
+description: Build the APK and Android test APK for a given flavor, and upload them as artifacts
+inputs:
+  flavor:
+    description: 'The build flavor (e.g., opengl, vulkan)'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Build APK and Android Test APK for ${{ inputs.flavor }}
+      shell: bash
+      run: |
+        ./gradlew assemble${{ inputs.flavor }}Release assemble${{ inputs.flavor }}AndroidTest
+        cp app/build/outputs/apk/${{ inputs.flavor }}/release/app-${{ inputs.flavor }}-release.apk RenderTestsApp-${{ inputs.flavor }}.apk
+        cp app/build/outputs/apk/androidTest/${{ inputs.flavor }}/release/app-${{ inputs.flavor }}-release-androidTest.apk RenderTests-${{ inputs.flavor }}.apk
+      working-directory: ./render-test/android
+
+    - name: Upload APK files for ${{ inputs.flavor }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-render-tests-${{ inputs.flavor }}
+        if-no-files-found: error
+        path: |
+          ./render-test/android/RenderTestsApp-${{ inputs.flavor }}.apk
+          ./render-test/android/RenderTests-${{ inputs.flavor }}.apk

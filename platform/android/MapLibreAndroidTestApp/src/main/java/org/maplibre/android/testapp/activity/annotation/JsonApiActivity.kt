@@ -27,7 +27,7 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-/* ANCHOR: top */
+// # --8<-- [start:top]
 class JsonApiActivity : AppCompatActivity() {
 
     // Declare a variable for MapView
@@ -35,7 +35,7 @@ class JsonApiActivity : AppCompatActivity() {
 
     // Declare a variable for MapLibreMap
     private lateinit var maplibreMap: MapLibreMap
-    /* ANCHOR_END: top */
+    // # --8<-- [end:top]
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +48,7 @@ class JsonApiActivity : AppCompatActivity() {
         // Init the MapView
         mapView = findViewById(R.id.mapView)
 
-        /* ANCHOR: mapAsync */
+        // # --8<-- [start:mapAsync]
         mapView.getMapAsync { map ->
             maplibreMap = map
 
@@ -57,10 +57,10 @@ class JsonApiActivity : AppCompatActivity() {
             // Fetch data from USGS
             getEarthQuakeDataFromUSGS()
         }
-        /* ANCHOR_END: mapAsync */
+        // # --8<-- [end:mapAsync]
     }
 
-    /* ANCHOR: getEarthquakes */
+    // # --8<-- [start:getEarthquakes]
     // Get Earthquake data from usgs.gov, read API doc at:
     // https://earthquake.usgs.gov/fdsnws/event/1/
     private fun getEarthQuakeDataFromUSGS() {
@@ -91,9 +91,9 @@ class JsonApiActivity : AppCompatActivity() {
             }
         })
     }
-    /* ANCHOR_END: getEarthquakes */
+    // # --8<-- [end:getEarthquakes]
 
-    /* ANCHOR: addMarkers */
+    // # --8<-- [start:addMarkers]
     private fun addMarkersToMap(data: FeatureCollection) {
         val bounds = mutableListOf<LatLng>()
 
@@ -103,7 +103,7 @@ class JsonApiActivity : AppCompatActivity() {
             // Intentionally specify package name
             // This makes copy from another project easier
             org.maplibre.android.R.drawable.maplibre_info_icon_default,
-            null
+            theme
         )!!
         val bitmapBlue = infoIconDrawable.toBitmap()
         val bitmapRed = infoIconDrawable
@@ -146,7 +146,7 @@ class JsonApiActivity : AppCompatActivity() {
             maplibreMap.cameraPosition = newCameraPosition
         }
     }
-    /* ANCHOR_END: addMarkers */
+    // # --8<-- [end:addMarkers]
 
     override fun onStart() {
         super.onStart()

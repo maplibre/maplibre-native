@@ -4,6 +4,7 @@
 #include <mbgl/style/property_value.hpp>
 #include <mbgl/style/expression/value.hpp>
 #include <mbgl/style/expression/formatted.hpp>
+#include <mbgl/style/variable_anchor_offset_collection.hpp>
 #include <mbgl/util/enum.hpp>
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/feature.hpp>
@@ -59,6 +60,21 @@ void stringify(Writer& writer, const Color& v) {
 }
 
 template <class Writer>
+void stringify(Writer& writer, const VariableAnchorOffsetCollection& v) {
+    writer.StartArray();
+
+    for (const auto& pair : v) {
+        writer.String(Enum<SymbolAnchorType>::toString(pair.anchorType));
+        writer.StartArray();
+        writer.Double(pair.offset[0]);
+        writer.Double(pair.offset[1]);
+        writer.EndArray();
+    }
+
+    writer.EndArray();
+}
+
+template <class Writer>
 void stringify(Writer& writer, const std::array<float, 2>& v) {
     writer.StartArray();
     writer.Double(v[0]);
@@ -83,6 +99,11 @@ void stringify(Writer& writer, const std::array<double, 3>& v) {
     writer.Double(v[1]);
     writer.Double(v[2]);
     writer.EndArray();
+}
+
+template <class Writer>
+void stringify(Writer& writer, const Padding& v) {
+    stringify(writer, v.toArray());
 }
 
 template <class Writer>

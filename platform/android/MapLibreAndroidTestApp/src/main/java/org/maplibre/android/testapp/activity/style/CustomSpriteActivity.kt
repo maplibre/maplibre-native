@@ -13,7 +13,6 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.Layer
 import org.maplibre.android.style.layers.PropertyFactory
@@ -36,81 +35,81 @@ class CustomSpriteActivity : AppCompatActivity() {
         setContentView(R.layout.activity_add_sprite)
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(
-            OnMapReadyCallback { map: MapLibreMap ->
-                maplibreMap = map
-                map.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style ->
-                    val fab = findViewById<FloatingActionButton>(R.id.fab)
-                    fab.setColorFilter(
-                        ContextCompat.getColor(
-                            this@CustomSpriteActivity,
-                            R.color.primary
-                        )
+        mapView.getMapAsync {
+            maplibreMap = it
+            it.setStyle(TestStyles.OPENFREEMAP_LIBERTY) { style: Style ->
+                val fab = findViewById<FloatingActionButton>(R.id.fab)
+                fab.setColorFilter(
+                    ContextCompat.getColor(
+                        this@CustomSpriteActivity,
+                        R.color.primary
                     )
-                    fab.setOnClickListener(object : View.OnClickListener {
-                        private lateinit var point: Point
-                        override fun onClick(view: View) {
-                            if (point == null) {
-                                Timber.i("First click -> Car")
-                                // Add an icon to reference later
-                                style.addImage(
-                                    CUSTOM_ICON,
-                                    BitmapFactory.decodeResource(
-                                        resources,
-                                        R.drawable.ic_car_top
-                                    )
+                )
+                fab.setOnClickListener(object : View.OnClickListener {
+                    private lateinit var point: Point
+                    override fun onClick(view: View) {
+                        if (!this::point.isInitialized) {
+                            Timber.i("First click -> Car")
+                            // --8<-- [start:addImage]
+                            // Add an icon to reference later
+                            style.addImage(
+                                CUSTOM_ICON,
+                                BitmapFactory.decodeResource(
+                                    resources,
+                                    R.drawable.ic_car_top
                                 )
+                            )
 
-                                // Add a source with a geojson point
-                                point = Point.fromLngLat(13.400972, 52.519003)
-                                source = GeoJsonSource(
-                                    "point",
-                                    FeatureCollection.fromFeatures(arrayOf(Feature.fromGeometry(point)))
-                                )
-                                maplibreMap.style!!.addSource(source!!)
+                            // Add a source with a geojson point
+                            point = Point.fromLngLat(13.400972, 52.519003)
+                            source = GeoJsonSource(
+                                "point",
+                                FeatureCollection.fromFeatures(arrayOf(Feature.fromGeometry(point)))
+                            )
+                            maplibreMap.style!!.addSource(source!!)
 
-                                // Add a symbol layer that references that point source
-                                layer = SymbolLayer("layer", "point")
-                                layer.setProperties( // Set the id of the sprite to use
-                                    PropertyFactory.iconImage(CUSTOM_ICON),
-                                    PropertyFactory.iconAllowOverlap(true),
-                                    PropertyFactory.iconIgnorePlacement(true)
-                                )
+                            // Add a symbol layer that references that point source
+                            layer = SymbolLayer("layer", "point")
+                            layer.setProperties( // Set the id of the sprite to use
+                                PropertyFactory.iconImage(CUSTOM_ICON),
+                                PropertyFactory.iconAllowOverlap(true),
+                                PropertyFactory.iconIgnorePlacement(true)
+                            )
 
-                                // lets add a circle below labels!
-                                maplibreMap.style!!.addLayerBelow(layer, "water_intermittent")
-                                fab.setImageResource(R.drawable.ic_directions_car_black)
-                            } else {
-                                // Update point
-                                point = Point.fromLngLat(
-                                    point!!.longitude() + 0.001,
-                                    point!!.latitude() + 0.001
-                                )
-                                source!!.setGeoJson(
-                                    FeatureCollection.fromFeatures(
-                                        arrayOf(
-                                            Feature.fromGeometry(
-                                                point
-                                            )
+                            // lets add a circle below labels!
+                            maplibreMap.style!!.addLayerBelow(layer, "water-intermittent")
+                            fab.setImageResource(R.drawable.ic_directions_car_black)
+                            // --8<-- [end:addImage]
+                        } else {
+                            // Update point
+                            point = Point.fromLngLat(
+                                point.longitude() + 0.001,
+                                point.latitude() + 0.001
+                            )
+                            source!!.setGeoJson(
+                                FeatureCollection.fromFeatures(
+                                    arrayOf(
+                                        Feature.fromGeometry(
+                                            point
                                         )
                                     )
                                 )
+                            )
 
-                                // Move the camera as well
-                                maplibreMap.moveCamera(
-                                    CameraUpdateFactory.newLatLng(
-                                        LatLng(
-                                            point.latitude(),
-                                            point.longitude()
-                                        )
+                            // Move the camera as well
+                            maplibreMap.moveCamera(
+                                CameraUpdateFactory.newLatLng(
+                                    LatLng(
+                                        point.latitude(),
+                                        point.longitude()
                                     )
                                 )
-                            }
+                            )
                         }
-                    })
-                }
+                    }
+                })
             }
-        )
+        }
     }
 
     override fun onStart() {

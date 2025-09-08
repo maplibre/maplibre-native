@@ -11,7 +11,7 @@ Binaries are available and downloaded during install for the following platforms
   - Ubuntu 22.04 (amd64/arm64)
   - macOS 12 (amd64/arm64)
   - Windows (amd64)
-- Node.js 16, 18, 20
+- Node.js 18, 20, 22
 
 Run:
 
@@ -229,7 +229,7 @@ Stylesheets are free to use any protocols, but your implementation of `request` 
 
 ## Listening for log events
 
-The module imported with `require('maplibre-gl-native')` inherits from [`EventEmitter`](https://nodejs.org/api/events.html), and the `NodeLogObserver` will push log events to this. Log messages can have [`class`](https://github.com/maplibre/maplibre-native/blob/node-v2.1.0/include/mbgl/platform/event.hpp#L43-L60), [`severity`](https://github.com/maplibre/maplibre-native/blob/node-v2.1.0/include/mbgl/platform/event.hpp#L17-L23), `code` ([HTTP status codes](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html)), and `text` parameters.
+The module imported with `require('maplibre-gl-native')` inherits from [`EventEmitter`](https://nodejs.org/api/events.html), and the `NodeLogObserver` will push log events to this. Log messages can have [`class`](https://github.com/maplibre/maplibre-native/blob/0dea8bad2ff68a95772a6e3b3a788946c0596f15/src/mbgl/util/event.cpp#L15-L35), [`severity`](https://github.com/maplibre/maplibre-native/blob/0dea8bad2ff68a95772a6e3b3a788946c0596f15/src/mbgl/util/event.cpp#L6-L13), `code` ([HTTP status codes](https://www.rfc-editor.org/rfc/rfc9110#name-status-codes)), and `text` parameters.
 
 ```js
 var mbgl = require('@maplibre/maplibre-gl-native');
@@ -243,4 +243,4 @@ mbgl.on('message', function(msg) {
 
 ## Contributing
 
-See [DEVELOPING.md](DEVELOPING.md) for instructions on building this module for development.
+See [DEVELOPING.md](https://github.com/maplibre/maplibre-native/blob/main/platform/node/DEVELOPING.md) for instructions on building this module for development.

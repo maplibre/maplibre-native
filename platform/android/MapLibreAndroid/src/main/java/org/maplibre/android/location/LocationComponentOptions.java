@@ -15,7 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
 
-import com.mapbox.android.gestures.AndroidGesturesManager;
+import org.maplibre.android.gestures.AndroidGesturesManager;
 
 import org.maplibre.android.R;
 import org.maplibre.android.maps.MapLibreMap;
@@ -730,7 +730,7 @@ public class LocationComponentOptions implements Parcelable {
    * like zooming in and out, without breaking tracking.
    * <p>
    * <strong>Note</strong>: If set to true, this can overwrite some of the gesture thresholds
-   * and the custom {@link com.mapbox.android.gestures.AndroidGesturesManager} that was set with
+   * and the custom {@link org.maplibre.android.gestures.AndroidGesturesManager} that was set with
    * {@link MapLibreMap#setGesturesManager(AndroidGesturesManager, boolean, boolean)}.
    *
    * @return true if gestures are adjusted when in one of the camera tracking modes, false otherwise
@@ -1784,7 +1784,7 @@ public class LocationComponentOptions implements Parcelable {
      * like zooming in and out, without breaking tracking.
      * <p>
      * <strong>Note</strong>: This can overwrite some of the gesture thresholds
-     * and the custom {@link com.mapbox.android.gestures.AndroidGesturesManager} that was set with
+     * and the custom {@link org.maplibre.android.gestures.AndroidGesturesManager} that was set with
      * {@link MapLibreMap#setGesturesManager(AndroidGesturesManager, boolean, boolean)}.
      *
      * @param trackingGesturesManagement true if gestures should be adjusted when in one of the camera tracking modes,

@@ -5,10 +5,9 @@
 #include <mbgl/util/thread_local.hpp>
 #include <mbgl/util/containers.hpp>
 #include <mbgl/util/identity.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
-#include <algorithm>
 #include <condition_variable>
-#include <map>
 #include <mutex>
 #include <queue>
 #include <thread>
@@ -107,6 +106,7 @@ public:
     }
 
     void runRenderJobs(const util::SimpleIdentity tag, bool closeQueue = false) override {
+        MLN_TRACE_FUNC();
         std::shared_ptr<RenderQueue> queue;
         std::unique_lock<std::mutex> lock(taggedRenderQueueLock);
 
@@ -130,6 +130,7 @@ public:
             auto fn = std::move(queue->queue.front());
             queue->queue.pop();
             if (fn) {
+                MLN_TRACE_ZONE(render job);
                 fn();
             }
         }
@@ -141,6 +142,11 @@ public:
     }
 
     mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
+
+protected:
+    // Allows derived classes to invalidate weak pointers in
+    // their destructor before their own members are torn down.
+    void invalidateWeakPtrsEarly() { weakFactory.invalidateWeakPtrs(); }
 
 private:
     std::vector<std::thread> threads;
@@ -156,22 +162,25 @@ private:
     // Do not add members here, see `WeakPtrFactory`
 };
 
-class SequencedScheduler : public ThreadedScheduler {
+class SequencedScheduler final : public ThreadedScheduler {
 public:
     SequencedScheduler()
         : ThreadedScheduler(1) {}
+    ~SequencedScheduler() override { invalidateWeakPtrsEarly(); }
 };
 
 class ParallelScheduler : public ThreadedScheduler {
 public:
     ParallelScheduler(std::size_t extra)
         : ThreadedScheduler(1 + extra) {}
+    ~ParallelScheduler() override { invalidateWeakPtrsEarly(); }
 };
 
-class ThreadPool : public ParallelScheduler {
+class ThreadPool final : public ParallelScheduler {
 public:
     ThreadPool()
         : ParallelScheduler(3) {}
+    ~ThreadPool() override { invalidateWeakPtrsEarly(); }
 };
 
 } // namespace mbgl

@@ -61,13 +61,13 @@ class DynamicInfoWindowAdapterActivity : AppCompatActivity(), OnMapReadyCallback
         map.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
 
         // Add info window adapter
-        addCustomInfoWindowAdapter(maplibreMap!!)
+        addCustomInfoWindowAdapter(maplibreMap)
 
         // Keep info windows open on click
         maplibreMap.uiSettings.isDeselectMarkersOnTap = false
 
         // Add a marker
-        marker = addMarker(maplibreMap!!)
+        marker = addMarker(maplibreMap)
         maplibreMap.selectMarker(marker!!)
 
         // On map click, change the info window contents
@@ -130,7 +130,7 @@ class DynamicInfoWindowAdapterActivity : AppCompatActivity(), OnMapReadyCallback
 
     override fun onDestroy() {
         super.onDestroy()
-        if (maplibreMap != null) {
+        if (this::maplibreMap.isInitialized) {
             maplibreMap.removeOnMapClickListener(mapClickListener)
         }
         mapView.onDestroy()

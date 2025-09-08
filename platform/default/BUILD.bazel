@@ -1,3 +1,4 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
 cc_library(
@@ -25,6 +26,17 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "utf_conversion",
+    srcs = ["src/mbgl/util/utf.cpp"],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
+        "-Wno-deprecated-declarations",
+    ],
+    deps = [
+        "//:mbgl-core",
+    ],
+)
+
 # From: platform/ios/core-files.json
 # Mostly platform/default
 cc_library(
@@ -46,6 +58,7 @@ cc_library(
         "src/mbgl/storage/offline_database.cpp",
         "src/mbgl/storage/offline_download.cpp",
         "src/mbgl/storage/online_file_source.cpp",
+        "src/mbgl/storage/pmtiles_file_source.cpp",
         "src/mbgl/storage/sqlite3.cpp",
         "src/mbgl/text/bidi.cpp",
         "src/mbgl/util/compression.cpp",
@@ -53,7 +66,6 @@ cc_library(
         "src/mbgl/util/monotonic_timer.cpp",
         "src/mbgl/util/png_writer.cpp",
         "src/mbgl/util/thread_local.cpp",
-        "src/mbgl/util/utf.cpp",
     ] + select({
         "//:metal_renderer": ["src/mbgl/mtl/headless_backend.cpp"],
         "//conditions:default": ["src/mbgl/gl/headless_backend.cpp"],
@@ -125,6 +137,7 @@ cc_library(
         "//test:__pkg__",
     ],
     deps = [
+        ":utf_conversion",
         "//:mbgl-core",
     ] + select({
         "@platforms//os:ios": [
@@ -132,6 +145,7 @@ cc_library(
         ],
         "@platforms//os:linux": [
             "default-collator",
+            "//vendor:sqlite",
         ],
         "@platforms//os:osx": [
             ":default-collator",

@@ -78,6 +78,13 @@ template std::optional<PropertyValue<Color>> Converter<PropertyValue<Color>>::op
                                                                                          conversion::Error&,
                                                                                          bool,
                                                                                          bool) const;
+template std::optional<PropertyValue<Padding>> Converter<PropertyValue<Padding>>::operator()(
+    conversion::Convertible const&, conversion::Error&, bool, bool) const;
+template std::optional<PropertyValue<VariableAnchorOffsetCollection>>
+Converter<PropertyValue<VariableAnchorOffsetCollection>>::operator()(conversion::Convertible const&,
+                                                                     conversion::Error&,
+                                                                     bool,
+                                                                     bool) const;
 template std::optional<PropertyValue<std::string>> Converter<PropertyValue<std::string>>::operator()(
     conversion::Convertible const&, conversion::Error&, bool, bool) const;
 template std::optional<PropertyValue<std::vector<std::string>>>

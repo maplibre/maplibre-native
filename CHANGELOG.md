@@ -5,6 +5,7 @@
 ### ✨ New features
 
 - *...Add new stuff here...*
+- [core] Added new map observer events: onPreCompileShader, onPostCompileShader, onShaderCompileFailed, onGlyphsLoaded, onGlyphsError, onGlyphsRequested, onTileAction, onSpriteLoaded, onSpriteError, onSpriteRequested ([#2694](https://github.com/maplibre/maplibre-native/pull/2694)).
 - [core] Add WebP image decoding support to default platform (Linux, Windows)
 - [core] All CMake properties are now prefixed `MLN_*` [1054](https://github.com/maplibre/maplibre-native/pull/1054).
 - [windows] Added windows build support for core applications and node [#707](https://github.com/maplibre/maplibre-native/pull/707)
@@ -30,6 +31,8 @@
 - [core] Fix memory access violation exception in vector_tile_data.cpp [#632](https://github.com/maplibre/maplibre-native/pull/632)
 - [iOS] Fix a bug where the compass was determined to be misplaced when hidden [#498](https://github.com/maplibre/maplibre-native/pull/498).
 - [core] `MaptilerFileSource` renamed to `MBTilesFileSource` [#198](https://github.com/maplibre/maplibre-native/pull/198).
+- [android] Fix `OnMoveListener::onMoveBegin` was always called even on a simple tap. [#2792](https://github.com/maplibre/maplibre-native/issues/2792)
+  In case you rely on the old behavior, call `maplibreMap.getGesturesManager().getMoveGestureDetector().setMoveThreshold(0f)` to restore it
 
 ## maps-v1.6.0
 

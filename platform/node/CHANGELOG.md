@@ -1,5 +1,30 @@
-
 ## main
+
+## 6.2.0
+* Fix freezing in macos/metal after ~32 renders ([Issue](https://github.com/maplibre/maplibre-native/issues/2928), [PR](https://github.com/maplibre/maplibre-native/pull/3673)).
+* Add HarfBuzz Text Shaping and Font Fallback Support ([#3611](https://github.com/maplibre/maplibre-native/pull/3611)).
+  This implements the [`font-faces` property of the MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/font-faces/).
+
+## 6.1.0
+* Add `textFitWidth` and `textFitHeight` properties to sprites ([#2780](https://github.com/maplibre/maplibre-native/pull/2780)).
+  More information can be found in the [MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/sprite/#text-fit-properties).
+* Update NAN to 2.22.0 ([#2948](https://github.com/maplibre/maplibre-native/pull/2948))
+* Add PMTiles support ([#2882](https://github.com/maplibre/maplibre-native/pull/2882)).
+* Replace deprecated Node Buffer constructor ([#3126](https://github.com/maplibre/maplibre-native/pull/3126)).
+* Moved from legacy renderer to drawable renderer in linux and windows builds. the legacy renderer has been removed. ([#3384](https://github.com/maplibre/maplibre-native/pull/3384))
+* Moved node-pre-gyp back to @mapbox/node-pre-gyp. Note that @mapbox/node-pre-gyp requires node 18+, so node 16 support has been removed. ([#3381](https://github.com/maplibre/maplibre-native/pull/3381))
+
+## 6.0.0
+* [Note] This is the first release that is back on the main branch.
+* This is the first release that uses Metal for rendering for macOS. This is a graphics API from Apple that replaces OpenGL (ES) on Apple platforms.
+* This is the first release that uses OpenGL ES 3.0 for Windows and Linux.
+* macOS binary is now built on macOS 14.
+
+## 5.4.1
+* [Note] This is a OpenGL-2 release. It does not include metal support.
+* Fix crash that happened with some PBF files ([Issue](https://github.com/maplibre/maplibre-native/issues/795), [PR](https://github.com/maplibre/maplibre-native/pull/2460)).
+* Upgrade NAN to 2.19 to support Node 22 (https://github.com/maplibre/maplibre-native/pull/2426)
+* Add Node 22 binary build and publish (https://github.com/maplibre/maplibre-native/pull/2553)
 
 ## 5.4.0
 

@@ -201,7 +201,7 @@ TEST(Query, QueryFeatureExtensionsSuperclusterChildren) {
     QueryTest test;
     auto topClusterFeature = getTopClusterFeature(test);
 
-    EXPECT_EQ(topClusterFeature.size(), 1u);
+    ASSERT_EQ(topClusterFeature.size(), 1u);
     const auto featureProps = topClusterFeature[0].properties;
     auto clusterId = featureProps.find("cluster_id"s);
     auto cluster = featureProps.find("cluster"s);
@@ -213,7 +213,7 @@ TEST(Query, QueryFeatureExtensionsSuperclusterChildren) {
 
     EXPECT_TRUE(queryChildren.is<FeatureCollection>());
     auto children = queryChildren.get<FeatureCollection>();
-    EXPECT_EQ(children.size(), 4u);
+    ASSERT_EQ(children.size(), 4u);
 
     // Compare results produced by supercluster with default clustering options.
     EXPECT_EQ(children[0].properties["cluster_id"].get<uint64_t>(), 2u);
@@ -229,7 +229,7 @@ TEST(Query, QueryFeatureExtensionsSuperclusterChildren) {
 TEST(Query, QueryFeatureExtensionsSuperclusterExpansionZoom) {
     QueryTest test;
     auto topClusterFeature = getTopClusterFeature(test);
-    EXPECT_EQ(topClusterFeature.size(), 1u);
+    ASSERT_EQ(topClusterFeature.size(), 1u);
 
     auto queryChildren = test.frontend.getRenderer()->queryFeatureExtensions(
         "cluster_source"s, topClusterFeature[0], "supercluster"s, "children"s);
@@ -251,7 +251,7 @@ TEST(Query, QueryFeatureExtensionsSuperclusterExpansionZoom) {
 TEST(Query, QueryFeatureExtensionsSuperclusterLeaves) {
     QueryTest test;
     auto topClusterFeature = getTopClusterFeature(test);
-    EXPECT_EQ(topClusterFeature.size(), 1u);
+    ASSERT_EQ(topClusterFeature.size(), 1u);
 
     // Get leaves for cluster 1, with default limit 10, offset 0.
     auto queryClusterLeaves = test.frontend.getRenderer()->queryFeatureExtensions(
@@ -265,7 +265,7 @@ TEST(Query, QueryFeatureExtensionsSuperclusterLeaves) {
     auto queryClusterLeavesLimit3 = test.frontend.getRenderer()->queryFeatureExtensions(
         "cluster_source"s, topClusterFeature[0], "supercluster"s, "leaves"s, limitOpts);
     auto limitLeaves3 = queryClusterLeavesLimit3.get<FeatureCollection>();
-    EXPECT_EQ(limitLeaves3.size(), 3u);
+    ASSERT_EQ(limitLeaves3.size(), 3u);
 
     EXPECT_EQ(limitLeaves3[0].properties["name"].get<std::string>(), "Niagara Falls"s);
     EXPECT_EQ(limitLeaves3[1].properties["name"].get<std::string>(), "Cape May"s);

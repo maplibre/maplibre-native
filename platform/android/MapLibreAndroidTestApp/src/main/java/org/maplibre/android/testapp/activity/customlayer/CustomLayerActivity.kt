@@ -11,7 +11,6 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.CustomLayer
 import org.maplibre.android.testapp.R
@@ -35,30 +34,26 @@ class CustomLayerActivity : AppCompatActivity() {
         setContentView(R.layout.activity_custom_layer)
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(
-            OnMapReadyCallback { map: MapLibreMap? ->
-                maplibreMap = map!!
-                maplibreMap.moveCamera(
-                    CameraUpdateFactory.newLatLngZoom(
-                        LatLng(39.91448, -243.60947),
-                        10.0
-                    )
+        mapView.getMapAsync { map: MapLibreMap ->
+            maplibreMap = map
+            maplibreMap.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(39.91448, -243.60947),
+                    10.0
                 )
-                maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style? -> initFab() }
-            }
-        )
+            )
+            maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { _: Style? -> initFab() }
+        }
     }
 
     private fun initFab() {
         fab = findViewById(R.id.fab)
         fab.setColorFilter(ContextCompat.getColor(this, R.color.primary))
-        fab.setOnClickListener(
-            View.OnClickListener { view: View? ->
-                if (maplibreMap != null) {
-                    swapCustomLayer()
-                }
+        fab.setOnClickListener { _: View? ->
+            if (this::maplibreMap.isInitialized) {
+                swapCustomLayer()
             }
-        )
+        }
     }
 
     private fun swapCustomLayer() {
@@ -66,19 +61,19 @@ class CustomLayerActivity : AppCompatActivity() {
         if (customLayer != null) {
             style!!.removeLayer(customLayer!!)
             customLayer = null
-            fab!!.setImageResource(R.drawable.ic_layers)
+            fab.setImageResource(R.drawable.ic_layers)
         } else {
             customLayer = CustomLayer(
                 "custom",
                 ExampleCustomLayer.createContext()
             )
             style!!.addLayerBelow(customLayer!!, "building")
-            fab!!.setImageResource(R.drawable.ic_layers_clear)
+            fab.setImageResource(R.drawable.ic_layers_clear)
         }
     }
 
     private fun updateLayer() {
-        if (maplibreMap != null) {
+        if (this::maplibreMap.isInitialized) {
             maplibreMap.triggerRepaint()
         }
     }

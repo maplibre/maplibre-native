@@ -50,7 +50,7 @@ public abstract class BaseTest extends AppCenter {
   @Before
   @CallSuper
   public void beforeTest() {
-    initialiseMap();
+    initializeMap();
     holdTestRunnerForStyleLoad();
   }
 
@@ -71,15 +71,15 @@ public abstract class BaseTest extends AppCenter {
     if (!MapLibre.isConnected()) {
       Timber.e("Not connected to the internet while running test");
     }
-    assertNotNull("MapView isn't initialised", mapView);
-    assertNotNull("MapLibreMap isn't initialised", maplibreMap);
-    assertNotNull("Style isn't initialised", maplibreMap.getStyle());
+    assertNotNull("MapView isn't initialized", mapView);
+    assertNotNull("MapLibreMap isn't initialized", maplibreMap);
+    assertNotNull("Style isn't initialized", maplibreMap.getStyle());
     assertTrue("Style isn't fully loaded", maplibreMap.getStyle().isFullyLoaded());
   }
 
   protected abstract Class getActivityClass();
 
-  private void initialiseMap() {
+  private void initializeMap() {
     try {
       rule.runOnUiThread(() -> {
         mapView = rule.getActivity().findViewById(R.id.mapView);

@@ -1,6 +1,7 @@
 param(
 	[Parameter(Mandatory=$true)][string]$Triplet,
-	[Parameter(Mandatory=$true)][string]$Renderer
+	[Parameter(Mandatory=$true)][string]$Renderer,
+    [Parameter(Mandatory=$false)][switch]${With-ICU}
 )
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path -Parent)
@@ -14,6 +15,7 @@ foreach($letter in [byte][char]'Z'..[byte][char]'A')
     if(-not (Test-Path $vcpkg_temp_dir))
     {
         & subst $vcpkg_temp_dir ([System.IO.Path]::Combine($PWD.Path, 'vendor', 'vcpkg'))
+        $env:VCPKG_ROOT = ('{0}\' -f $vcpkg_temp_dir)
         break
     }
 }
@@ -21,24 +23,24 @@ foreach($letter in [byte][char]'Z'..[byte][char]'A')
 switch($Renderer)
 {
     'EGL'    { $renderer_packages = @('egl', 'opengl-registry'); break }
-    'OSMesa' { $renderer_packages = @('');                       break }
     'OpenGL' { $renderer_packages = @('opengl-registry');        break }
+	'Vulkan' { $renderer_packages = @();                         break }
+	'All'    { $renderer_packages = @('egl', 'opengl-registry'); break }
 }
 
-if(-not (Test-Path "$vcpkg_temp_dir\vcpkg.exe"))
+if(-not (Test-Path ('{0}\vcpkg.exe' -f $vcpkg_temp_dir)))
 {
-    & "$vcpkg_temp_dir\bootstrap-vcpkg.bat"
+    & ('{0}\bootstrap-vcpkg.bat' -f $vcpkg_temp_dir)
 }
 
-& "$vcpkg_temp_dir\vcpkg.exe" --disable-metrics --overlay-triplets=$([System.IO.Path]::Combine($PWD.Path, 'vendor', 'vcpkg-custom-triplets')) --triplet=$($Triplet) --clean-after-build install curl dlfcn-win32 glfw3 icu libuv libjpeg-turbo libpng libwebp $($renderer_packages)
+& ('{0}\vcpkg.exe' -f $vcpkg_temp_dir) $(
+    @(
+        '--disable-metrics',
+        ('--overlay-triplets={0}' -f [System.IO.Path]::Combine($PWD.Path, 'vendor', 'vcpkg-custom-triplets')),
+        ('--triplet={0}' -f $Triplet),
+        '--clean-after-build',
+        'install', 'curl', 'dlfcn-win32', 'glfw3', 'libuv', 'libjpeg-turbo', 'libpng', 'libwebp'
+    ) + $renderer_packages + $(if(${With-ICU}) {@('icu')} else {@()})
+)
 
 subst $vcpkg_temp_dir /D
-
-if($Renderer -eq 'OSMesa' -and -not (Test-Path ([System.IO.Path]::Combine($PWD.Path, 'vendor', 'mesa3d'))))
-{
-    New-Item -Name temp -Type Directory | Out-Null
-    Invoke-WebRequest https://www.7-zip.org/a/7zr.exe -OutFile ([System.IO.Path]::Combine($PWD.Path, 'temp', '7zr.exe'))
-    (Invoke-WebRequest https://api.github.com/repos/pal1000/mesa-dist-win/releases | ConvertFrom-Json)[0].assets | Where-Object name -match 'mesa3d-.+-(release|development-pack)-msvc\.7z' | foreach { Invoke-WebRequest $_.browser_download_url -OutFile ([System.IO.Path]::Combine($PWD.Path, 'temp', $_.name)) }
-    Get-ChildItem 'temp\*.7z' | foreach { .\temp\7zr.exe x -ovendor\mesa3d $_.FullName }
-    Remove-Item temp -Recurse
-}

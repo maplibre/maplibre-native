@@ -2,9 +2,7 @@
 
 #include <mbgl/annotation/annotation_manager.hpp>
 #include <mbgl/layermanager/layer_manager.hpp>
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/renderer/change_request.hpp>
-#endif
 #include <mbgl/renderer/renderer_observer.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_layer.hpp>
@@ -53,9 +51,7 @@ const std::string& LayerRenderItem::getName() const {
     return layer.get().getID();
 }
 
-#if MLN_DRAWABLE_RENDERER
 void LayerRenderItem::updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const {};
-#endif
 
 namespace {
 
@@ -157,7 +153,7 @@ void RenderOrchestrator::setObserver(RendererObserver* observer_) {
 }
 
 std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
-    const std::shared_ptr<UpdateParameters>& updateParameters) {
+    const std::shared_ptr<UpdateParameters>& updateParameters, gfx::DynamicTextureAtlasPtr dynamicTextureAtlas) {
     MLN_TRACE_FUNC();
 
     const auto startTime = util::MonotonicTimer::now().count();
@@ -169,8 +165,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     }
 
     if (LayerManager::annotationsEnabled) {
-        auto guard = updateParameters->annotationManager.lock();
-        if (updateParameters->annotationManager) {
+        if (auto guard = updateParameters->annotationManager.lock(); updateParameters->annotationManager) {
             updateParameters->annotationManager->updateData();
         }
     }
@@ -181,25 +176,32 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     const TransitionOptions transitionOptions = isMapModeContinuous ? updateParameters->transitionOptions
                                                                     : TransitionOptions();
 
-    const TransitionParameters transitionParameters{updateParameters->timePoint, transitionOptions};
+    const TransitionParameters transitionParameters{.now = updateParameters->timePoint,
+                                                    .transition = transitionOptions};
     const auto transitionDuration = transitionOptions.duration.value_or(
         isMapModeContinuous ? util::DEFAULT_TRANSITION_DURATION : Duration::zero());
 
     PropertyEvaluationParameters evaluationParameters{zoomHistory, updateParameters->timePoint, transitionDuration};
     evaluationParameters.zoomChanged = zoomChanged;
 
-    const TileParameters tileParameters{updateParameters->pixelRatio,
-                                        updateParameters->debugOptions,
-                                        updateParameters->transformState,
-                                        updateParameters->fileSource,
-                                        updateParameters->mode,
-                                        updateParameters->annotationManager,
-                                        imageManager,
-                                        glyphManager,
-                                        updateParameters->prefetchZoomDelta,
-                                        threadPool};
+    const TileParameters tileParameters{.pixelRatio = updateParameters->pixelRatio,
+                                        .debugOptions = updateParameters->debugOptions,
+                                        .transformState = updateParameters->transformState,
+                                        .fileSource = updateParameters->fileSource,
+                                        .mode = updateParameters->mode,
+                                        .annotationManager = updateParameters->annotationManager,
+                                        .imageManager = imageManager,
+                                        .glyphManager = glyphManager,
+                                        .prefetchZoomDelta = updateParameters->prefetchZoomDelta,
+                                        .threadPool = threadPool,
+                                        .tileLodMinRadius = updateParameters->tileLodMinRadius,
+                                        .tileLodScale = updateParameters->tileLodScale,
+                                        .tileLodPitchThreshold = updateParameters->tileLodPitchThreshold,
+                                        .tileLodZoomShift = updateParameters->tileLodZoomShift,
+                                        .dynamicTextureAtlas = dynamicTextureAtlas};
 
     glyphManager->setURL(updateParameters->glyphURL);
+    glyphManager->setFontFaces(updateParameters->fontFaces);
 
     // Update light.
     const bool lightChanged = renderLight.impl != updateParameters->light;
@@ -246,23 +248,21 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     layerImpls = updateParameters->layers;
     const bool layersAddedOrRemoved = !layerDiff.added.empty() || !layerDiff.removed.empty();
 
-#if MLN_DRAWABLE_RENDERER
     std::vector<std::unique_ptr<ChangeRequest>> changes;
-#endif
 
     // Remove render layers for removed layers.
     for (const auto& entry : layerDiff.removed) {
+        MLN_TRACE_ZONE(remove layer);
         const auto hit = renderLayers.find(entry.first);
         if (hit != renderLayers.end()) {
-#if MLN_DRAWABLE_RENDERER
             hit->second->layerRemoved(changes);
-#endif
             renderLayers.erase(hit);
         }
     }
 
     // Create render layers for newly added layers.
     for (const auto& entry : layerDiff.added) {
+        MLN_TRACE_ZONE(add layer);
         auto renderLayer = LayerManager::get()->createRenderLayer(entry.second);
         renderLayer->transition(transitionParameters);
         renderLayers.emplace(entry.first, std::move(renderLayer));
@@ -270,13 +270,11 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     // Update render layers for changed layers.
     for (const auto& entry : layerDiff.changed) {
+        MLN_TRACE_ZONE(change layer);
         if (const auto& renderLayer = renderLayers.at(entry.first)) {
             const auto& newLayer = entry.second.after;
 
-#if MLN_DRAWABLE_RENDERER
             renderLayer->layerChanged(transitionParameters, newLayer, changes);
-#endif // MLN_DRAWABLE_RENDERER
-
             renderLayer->transition(transitionParameters, newLayer);
         }
     }
@@ -290,10 +288,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             assert(layer);
             orderedLayers.emplace_back(*layer);
 
-#if MLN_DRAWABLE_RENDERER
             // We're mutating the list of ordered layers and must notify them of their new assigned indices
             layer->layerIndexChanged(layerIndex++, changes);
-#endif
         }
     }
     assert(orderedLayers.size() == renderLayers.size());
@@ -305,11 +301,19 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     // Update layers for class and zoom changes.
     std::unordered_set<std::string> constantsMaskChanged;
     for (RenderLayer& layer : orderedLayers) {
+        MLN_TRACE_ZONE(update layer);
         const std::string& id = layer.getID();
-        const bool layerAddedOrChanged = layerDiff.added.count(id) || layerDiff.changed.count(id);
+        const bool layerAddedOrChanged = layerDiff.added.contains(id) || layerDiff.changed.contains(id);
         evaluationParameters.layerChanged = layerAddedOrChanged;
         evaluationParameters.hasCrossfade = layer.hasCrossfade();
-        if (layerAddedOrChanged || zoomChanged || evaluationParameters.hasCrossfade || layer.hasTransition()) {
+
+        // Only re-evaluate on change of zoom if the style has some reference to it
+        using Dependency = expression::Dependency;
+        const bool zoomChangedAndMatters = zoomChanged && !layerAddedOrChanged &&
+                                           (layer.getStyleDependencies() & Dependency::Zoom);
+
+        if (layerAddedOrChanged || zoomChangedAndMatters || evaluationParameters.hasCrossfade ||
+            layer.hasTransition()) {
             const auto previousMask = layer.evaluatedProperties->constantsMask();
             layer.evaluate(evaluationParameters);
             if (previousMask != layer.evaluatedProperties->constantsMask()) {
@@ -328,8 +332,10 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     // Create render sources for newly added sources.
     for (const auto& entry : sourceDiff.added) {
+        MLN_TRACE_ZONE(create source);
         std::unique_ptr<RenderSource> renderSource = RenderSource::create(entry.second, threadPool);
         renderSource->setObserver(this);
+        renderSource->setCacheEnabled(tileCacheEnabled);
         renderSources.emplace(entry.first, std::move(renderSource));
     }
     transformState = updateParameters->transformState;
@@ -351,13 +357,14 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         filteredLayersForSource.reserve(layerImpls->size());
     }
 
-#if MLN_DRAWABLE_RENDERER
     // Track which layers are flagged for rendering
     std::vector<bool> updateList(orderedLayers.size());
-#endif
 
     // Update all sources and initialize renderItems.
     for (const auto& sourceImpl : *sourceImpls) {
+        MLN_TRACE_ZONE(update source);
+        MLN_ZONE_STR(sourceImpl->id);
+
         RenderSource* source = renderSources.at(sourceImpl->id).get();
         bool sourceNeedsRendering = false;
         bool sourceNeedsRelayout = false;
@@ -372,7 +379,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             if (layerInfo->source != LayerTypeInfo::Source::NotRequired) {
                 if (layer.baseImpl->source == sourceImpl->id) {
                     const std::string& layerId = layer.getID();
-                    sourceNeedsRelayout = (sourceNeedsRelayout || hasImageDiff || constantsMaskChanged.count(layerId) ||
+                    sourceNeedsRelayout = (sourceNeedsRelayout || hasImageDiff ||
+                                           constantsMaskChanged.contains(layerId) ||
                                            hasLayoutDifference(layerDiff, layerId));
                     if (layerIsVisible) {
                         filteredLayersForSource.push_back(layer.evaluatedProperties);
@@ -380,9 +388,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                             sourceNeedsRendering = true;
                             renderItemsEmplaceHint = layerRenderItems.emplace_hint(
                                 renderItemsEmplaceHint, layer, source, static_cast<uint32_t>(index));
-#if MLN_DRAWABLE_RENDERER
                             updateList[index] = true;
-#endif
                         }
                     }
                 }
@@ -401,15 +407,12 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                 }
                 renderItemsEmplaceHint = layerRenderItems.emplace_hint(
                     renderItemsEmplaceHint, layer, nullptr, static_cast<uint32_t>(index));
-#if MLN_DRAWABLE_RENDERER
                 updateList[index] = true;
-#endif
             }
         }
         source->update(sourceImpl, filteredLayersForSource, sourceNeedsRendering, sourceNeedsRelayout, tileParameters);
         filteredLayersForSource.clear();
 
-#if MLN_DRAWABLE_RENDERER
         // Update all layers with their new renderability status, if it changed.
         for (size_t i = 0; i < updateList.size(); i++) {
             if (orderedLayers[i].get().isLayerRenderable() != updateList[i]) {
@@ -417,7 +420,6 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             }
         }
         addChanges(changes);
-#endif
     }
 
     renderTreeParameters->loaded = updateParameters->styleLoaded && isLoaded();
@@ -427,17 +429,25 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     // Prepare. Update all matrices and generate data that we should upload to the GPU.
     for (const auto& entry : renderSources) {
+        MLN_TRACE_ZONE(prepare source);
         if (entry.second->isEnabled()) {
-            entry.second->prepare(
-                {renderTreeParameters->transformParams, updateParameters->debugOptions, *imageManager});
+            entry.second->prepare({.transform = renderTreeParameters->transformParams,
+                                   .debugOptions = updateParameters->debugOptions,
+                                   .imageManager = *imageManager});
         }
     }
 
     auto opaquePassCutOffEstimation = layerRenderItems.size();
     for (auto& renderItem : layerRenderItems) {
         RenderLayer& renderLayer = renderItem.layer;
-        renderLayer.prepare(
-            {renderItem.source, *imageManager, *patternAtlas, *lineAtlas, updateParameters->transformState});
+        MLN_TRACE_ZONE(prepare layer);
+        MLN_ZONE_STR(renderLayer.getID());
+
+        renderLayer.prepare({.source = renderItem.source,
+                             .imageManager = *imageManager,
+                             .patternAtlas = *patternAtlas,
+                             .lineAtlas = *lineAtlas,
+                             .state = updateParameters->transformState});
         if (renderLayer.needsPlacement()) {
             layersNeedPlacement.emplace_back(renderLayer);
         }
@@ -448,6 +458,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             }
         }
     }
+
     // Symbol placement.
     assert((updateParameters->mode == MapMode::Tile) || !placedSymbolDataCollected);
     bool symbolBucketsChanged = false;
@@ -455,6 +466,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     std::set<std::string> usedSymbolLayers;
     const auto longitude = static_cast<float>(updateParameters->transformState.getLatLng().longitude());
     for (auto it = layersNeedPlacement.crbegin(); it != layersNeedPlacement.crend(); ++it) {
+        MLN_TRACE_ZONE(placement layer);
         RenderLayer& layer = *it;
         auto result = crossTileSymbolIndex.addLayer(layer, longitude);
         if (isMapModeContinuous) {
@@ -465,6 +477,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     }
 
     if (isMapModeContinuous) {
+        MLN_TRACE_ZONE(placement);
+
         std::optional<Duration> placementUpdatePeriodOverride;
         if (symbolBucketsAdded && !tiltedView) {
             // If the view is not tilted, we want *the new* symbols to show up
@@ -499,6 +513,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             updateParameters->timePoint);
         renderTreeParameters->needsRepaint = hasTransitions(updateParameters->timePoint);
     } else {
+        MLN_TRACE_ZONE(placement);
+
         renderTreeParameters->placementChanged = symbolBucketsChanged = !layersNeedPlacement.empty();
         if (renderTreeParameters->placementChanged) {
             Mutable<Placement> placement = Placement::create(updateParameters);
@@ -512,6 +528,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     }
 
     if (!renderTreeParameters->needsRepaint && renderTreeParameters->loaded) {
+        MLN_TRACE_ZONE(reduce);
         // Notify observer about unused images when map is fully loaded
         // and there are no ongoing transitions.
         imageManager->reduceMemoryUseIfCacheSizeExceedsLimit();
@@ -737,6 +754,18 @@ void RenderOrchestrator::removeFeatureState(const std::string& sourceID,
     }
 }
 
+void RenderOrchestrator::setTileCacheEnabled(bool enable) {
+    tileCacheEnabled = enable;
+
+    for (const auto& entry : renderSources) {
+        entry.second->setCacheEnabled(enable);
+    }
+}
+
+bool RenderOrchestrator::getTileCacheEnabled() const {
+    return tileCacheEnabled;
+}
+
 void RenderOrchestrator::reduceMemoryUse() {
     MLN_TRACE_FUNC();
 
@@ -829,7 +858,6 @@ void RenderOrchestrator::clearData() {
     if (!layerImpls->empty()) layerImpls = makeMutable<std::vector<Immutable<style::Layer::Impl>>>();
     if (!imageImpls->empty()) imageImpls = makeMutable<std::vector<Immutable<style::Image::Impl>>>();
 
-#if MLN_DRAWABLE_RENDERER
     UniqueChangeRequestVec changes;
     for (const auto& entry : renderLayers) {
         entry.second->layerRemoved(changes);
@@ -837,7 +865,6 @@ void RenderOrchestrator::clearData() {
     addChanges(changes);
 
     debugLayerGroups.clear();
-#endif
 
     renderSources.clear();
     renderLayers.clear();
@@ -851,7 +878,6 @@ void RenderOrchestrator::clearData() {
     glyphManager->evict(fontStacks(*layerImpls));
 }
 
-#if MLN_DRAWABLE_RENDERER
 void RenderOrchestrator::addChanges(UniqueChangeRequestVec& changes) {
     pendingChanges.insert(
         pendingChanges.end(), std::make_move_iterator(changes.begin()), std::make_move_iterator(changes.end()));
@@ -919,16 +945,6 @@ size_t RenderOrchestrator::numLayerGroups() const noexcept {
     return layerGroupsByLayerIndex.size();
 }
 
-int32_t RenderOrchestrator::maxLayerIndex() const {
-    MLN_TRACE_FUNC();
-
-    if (!layerGroupsByLayerIndex.empty()) {
-        assert(layerGroupsByLayerIndex.crbegin()->first == layerGroupsByLayerIndex.crbegin()->second->getLayerIndex());
-        return layerGroupsByLayerIndex.crbegin()->first;
-    }
-    return -1;
-}
-
 void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
                                       const TransformState& state,
@@ -953,6 +969,13 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
 
     for (const auto& item : items) {
         auto& renderLayer = item.layer.get();
+#if MLN_RENDER_BACKEND_OPENGL
+        // Android Emulator: Goldfish is *very* broken. This will prevent a crash
+        // inside the GL translation layer at the cost of emulator performance.
+        if (androidGoldfishMitigationEnabled) {
+            renderLayer.removeAllDrawables();
+        }
+#endif
         renderLayer.update(shaders, context, state, updateParameters, renderTree, changes);
     }
     addChanges(changes);
@@ -991,18 +1014,30 @@ void RenderOrchestrator::updateDebugLayerGroups(const RenderTree& renderTree, Pa
     }
 }
 
-#endif // MLN_DRAWABLE_RENDERER
+void RenderOrchestrator::onGlyphsLoaded(const FontStack& fontStack, const GlyphRange& range) {
+    observer->onGlyphsLoaded(fontStack, range);
+}
 
 void RenderOrchestrator::onGlyphsError(const FontStack& fontStack,
                                        const GlyphRange& glyphRange,
                                        std::exception_ptr error) {
     MLN_TRACE_FUNC();
 
-    Log::Error(Event::Style,
-               "Failed to load glyph range " + std::to_string(glyphRange.first) + "-" +
-                   std::to_string(glyphRange.second) + " for font stack " + fontStackToString(fontStack) + ": " +
-                   util::toString(error));
+    std::stringstream ss;
+    ss << "Failed to load glyph range ";
+    if (glyphRange.type == FontPBF) {
+        ss << glyphRange.first << "-" << glyphRange.second;
+    } else {
+        ss << (int)glyphRange.type << "(font file)";
+    }
+    ss << " for font stack " << fontStackToString(fontStack) << ":( " << util::toString(error) << ")";
+    auto errorDetail = ss.str();
+    Log::Error(Event::Style, errorDetail);
     observer->onResourceError(error);
+}
+
+void RenderOrchestrator::onGlyphsRequested(const FontStack& fontStack, const GlyphRange& range) {
+    observer->onGlyphsRequested(fontStack, range);
 }
 
 void RenderOrchestrator::onTileError(RenderSource& source, const OverscaledTileID& tileID, std::exception_ptr error) {
@@ -1018,6 +1053,13 @@ void RenderOrchestrator::onTileChanged(RenderSource&, const OverscaledTileID&) {
     MLN_TRACE_FUNC();
 
     observer->onInvalidate();
+}
+
+void RenderOrchestrator::onTileAction(RenderSource&,
+                                      TileOperation op,
+                                      const OverscaledTileID& id,
+                                      const std::string& sourceID) {
+    observer->onTileAction(op, id, sourceID);
 }
 
 void RenderOrchestrator::onStyleImageMissing(const std::string& id, const std::function<void()>& done) {

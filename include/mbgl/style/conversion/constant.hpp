@@ -2,8 +2,10 @@
 
 #include <mbgl/style/conversion.hpp>
 #include <mbgl/style/types.hpp>
+#include <mbgl/style/variable_anchor_offset_collection.hpp>
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/enum.hpp>
+#include <mbgl/util/padding.hpp>
 #include <mbgl/util/string.hpp>
 
 #include <array>
@@ -42,6 +44,16 @@ struct Converter<std::vector<T>, typename std::enable_if_t<std::is_enum_v<T>>> {
 template <>
 struct Converter<Color> {
     std::optional<Color> operator()(const Convertible& value, Error& error) const;
+};
+
+template <>
+struct Converter<Padding> {
+    std::optional<Padding> operator()(const Convertible& value, Error& error) const;
+};
+
+template <>
+struct Converter<VariableAnchorOffsetCollection> {
+    std::optional<VariableAnchorOffsetCollection> operator()(const Convertible& value, Error& error) const;
 };
 
 template <size_t N>

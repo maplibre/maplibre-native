@@ -1,6 +1,7 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary")
-load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
 load("@npm//:defs.bzl", "npm_link_all_packages")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load(
     "//bazel:core.bzl",
     "MLN_CORE_HEADERS",
@@ -13,11 +14,15 @@ load(
     "MLN_DRAWABLES_SOURCE",
     "MLN_GENERATED_OPENGL_SHADER_HEADERS",
     "MLN_GENERATED_SHADER_HEADERS",
+    "MLN_GENERATED_SHADER_SOURCE",
     "MLN_GENERATED_STYLE_SOURCE",
+    "MLN_LAYER_PLUGIN_HEADERS",
+    "MLN_LAYER_PLUGIN_SOURCE",
     "MLN_OPENGL_HEADERS",
     "MLN_OPENGL_SOURCE",
     "MLN_PRIVATE_GENERATED_STYLE_HEADERS",
     "MLN_PUBLIC_GENERATED_STYLE_HEADERS",
+    "MLN_SHAPING_HARFBUZZ_SRCS",
 )
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
@@ -42,6 +47,7 @@ js_run_binary(
         allow_empty = False,
     ),
     outs = MLN_GENERATED_SHADER_HEADERS +
+           MLN_GENERATED_SHADER_SOURCE +
            MLN_GENERATED_OPENGL_SHADER_HEADERS,
     tool = ":generate-shader-code-script",
 )
@@ -73,38 +79,35 @@ cc_library(
 # the prefix from the path.
 cc_library(
     name = "mbgl-core",
-    srcs = MLN_CORE_SOURCE +
+    srcs = MLN_LAYER_PLUGIN_SOURCE +
+           MLN_CORE_SOURCE +
+           MLN_GENERATED_SHADER_SOURCE +
            MLN_GENERATED_STYLE_SOURCE + select({
         ":drawable_renderer": MLN_OPENGL_SOURCE + MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_GL_SOURCE,
-        ":legacy_renderer": MLN_OPENGL_SOURCE,
         ":metal_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_MTL_SOURCE,
         "//conditions:default": [],
+    }) + select({
+        "//:harfbuzz_text_shaping": MLN_SHAPING_HARFBUZZ_SRCS,
+        "//conditions:default": [],
     }),
-    hdrs = MLN_CORE_HEADERS + select({
+    hdrs = MLN_LAYER_PLUGIN_HEADERS + MLN_CORE_HEADERS + select({
         ":drawable_renderer": MLN_OPENGL_HEADERS + MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_GL_HEADERS,
-        ":legacy_renderer": MLN_OPENGL_HEADERS,
         ":metal_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_MTL_HEADERS,
         "//conditions:default": [],
     }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     defines = select({
-        ":legacy_renderer": [
-            "MLN_RENDER_BACKEND_OPENGL=1",
-            "MLN_LEGACY_RENDERER=1",
-            "MLN_DRAWABLE_RENDERER=0",
-        ],
         ":drawable_renderer": [
             "MLN_RENDER_BACKEND_OPENGL=1",
-            "MLN_LEGACY_RENDERER=0",
-            "MLN_DRAWABLE_RENDERER=1",
         ],
         ":metal_renderer": [
             "MLN_RENDER_BACKEND_METAL=1",
-            "MLN_LEGACY_RENDERER=0",
-            "MLN_DRAWABLE_RENDERER=1",
         ],
     }) + select({
         "@platforms//os:ios": ["GLES_SILENCE_DEPRECATION=1"],
+        "//conditions:default": [],
+    }) + select({
+        "//:harfbuzz_text_shaping": ["MLN_TEXT_SHAPING_HARFBUZZ=1"],
         "//conditions:default": [],
     }),
     includes = [
@@ -113,6 +116,12 @@ cc_library(
     ] + select({
         ":metal_renderer": [
             "vendor/metal-cpp",
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//:harfbuzz_text_shaping": [
+            "vendor/freetype/include",
+            "vendor/harfbuzz/src",
         ],
         "//conditions:default": [],
     }),
@@ -124,11 +133,11 @@ cc_library(
         ":mbgl-core-generated-private-artifacts",
         ":mbgl-core-generated-public-artifacts",
         "//vendor:boost",
-        "//vendor:csscolorparser",
         "//vendor:earcut.hpp",
         "//vendor:eternal",
-        "//vendor:mapbox-base",
+        "//vendor:maplibre-native-base",
         "//vendor:parsedate",
+        "//vendor:pmtiles",
         "//vendor:polylabel",
         "//vendor:protozero",
         "//vendor:unique_resource",
@@ -142,42 +151,40 @@ cc_library(
         "@platforms//os:osx": [
             "//vendor:icu",
         ],
+        "@platforms//os:linux": [
+            "//vendor:sqlite",
+        ],
         "//conditions:default": [],
     }) + select({
         ":metal_renderer": [
             "//vendor:metal-cpp",
         ],
         "//conditions:default": [],
+    }) + select({
+        ":harfbuzz_text_shaping": [
+            "//vendor:freetype",
+            "//vendor:harfbuzz",
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":rust": [
+            "//rustutils:rustutilslib",
+        ],
+        "//conditions:default": [
+            "//vendor:csscolorparser",
+        ],
     }),
-)
-
-genrule(
-    name = "git_hash",
-    outs = ["hash"],
-    cmd = """
-        git rev-parse HEAD > $@
-    """,
-    local = True,
-    visibility = ["//visibility:public"],
 )
 
 # Selects the rendering implementation to utilize in the core
 
 string_flag(
     name = "renderer",
-    build_setting_default = "legacy",
+    build_setting_default = "drawable",
     values = [
-        "legacy",
         "drawable",
         "metal",
     ],
-)
-
-config_setting(
-    name = "legacy_renderer",
-    flag_values = {
-        ":renderer": "legacy",
-    },
 )
 
 config_setting(
@@ -191,6 +198,44 @@ config_setting(
     name = "metal_renderer",
     flag_values = {
         ":renderer": "metal",
+    },
+)
+
+# Selects the shaping implementation to utilize in the core
+
+string_flag(
+    name = "shaping",
+    build_setting_default = "harfbuzz",
+    values = [
+        "legacy",
+        "harfbuzz",
+    ],
+)
+
+config_setting(
+    name = "harfbuzz_text_shaping",
+    flag_values = {
+        ":shaping": "harfbuzz",
+    },
+)
+
+config_setting(
+    name = "legacy_text_shaping",
+    flag_values = {
+        ":shaping": "legacy",
+    },
+)
+
+bool_flag(
+    name = "use_rust",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "rust",
+    flag_values = {
+        "//:use_rust": "true",
     },
 )
 
@@ -214,7 +259,7 @@ js_binary(
         ":style-code",
         ":style-spec",
     ],
-    entry_point = "scripts/generate-style-code.js",
+    entry_point = "scripts/generate-style-code.mjs",
 )
 
 js_binary(
@@ -222,14 +267,13 @@ js_binary(
     data = [
         ":node_modules/argparse",
     ],
-    entry_point = "shaders/generate_shader_code.js",
+    entry_point = "shaders/generate_shader_code.mjs",
 )
 
 js_library(
     name = "style-spec",
-    srcs = ["scripts/style-spec.js"],
+    srcs = ["scripts/style-spec.mjs"],
     data = glob([
-        "scripts/style-spec-reference/*.js",
         "scripts/style-spec-reference/*.json",
     ]),
     visibility = ["//visibility:public"],
@@ -237,7 +281,7 @@ js_library(
 
 js_library(
     name = "style-code",
-    srcs = ["scripts/style-code.js"],
+    srcs = ["scripts/style-code.mjs"],
     visibility = ["//visibility:public"],
     deps = [
         ":node_modules/ejs",

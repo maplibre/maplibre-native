@@ -52,4 +52,3 @@ public abstract class LibraryLoader {
 
   public abstract void load(String name);
 }
-

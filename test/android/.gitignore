@@ -1,1 +1,3 @@
 .gradle/
+**/.cxx/
+app/build

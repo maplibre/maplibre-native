@@ -1,16 +1,16 @@
 #include <mbgl/renderer/render_source.hpp>
+
+#include <mbgl/annotation/render_annotation_source.hpp>
+#include <mbgl/layermanager/layer_manager.hpp>
 #include <mbgl/renderer/render_source_observer.hpp>
 #include <mbgl/renderer/sources/render_geojson_source.hpp>
 #include <mbgl/renderer/sources/render_raster_source.hpp>
 #include <mbgl/renderer/sources/render_raster_dem_source.hpp>
 #include <mbgl/renderer/sources/render_vector_source.hpp>
-#include <mbgl/renderer/tile_parameters.hpp>
-#include <mbgl/annotation/render_annotation_source.hpp>
 #include <mbgl/renderer/sources/render_image_source.hpp>
 #include <mbgl/renderer/sources/render_custom_geometry_source.hpp>
+#include <mbgl/renderer/tile_parameters.hpp>
 #include <mbgl/tile/tile.hpp>
-
-#include <mbgl/layermanager/layer_manager.hpp>
 #include <mbgl/util/constants.hpp>
 
 #include <memory>
@@ -24,13 +24,13 @@ std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>
                                                    const TaggedScheduler& threadPool_) {
     switch (impl->type) {
         case SourceType::Vector:
-            return std::make_unique<RenderVectorSource>(staticImmutableCast<VectorSource::Impl>(impl),
+            return std::make_unique<RenderVectorSource>(staticImmutableCast<TileSource::Impl>(impl),
                                                         std::move(threadPool_));
         case SourceType::Raster:
-            return std::make_unique<RenderRasterSource>(staticImmutableCast<RasterSource::Impl>(impl),
+            return std::make_unique<RenderRasterSource>(staticImmutableCast<TileSource::Impl>(impl),
                                                         std::move(threadPool_));
         case SourceType::RasterDEM:
-            return std::make_unique<RenderRasterDEMSource>(staticImmutableCast<RasterSource::Impl>(impl),
+            return std::make_unique<RenderRasterDEMSource>(staticImmutableCast<TileSource::Impl>(impl),
                                                            std::move(threadPool_));
         case SourceType::GeoJSON:
             return std::make_unique<RenderGeoJSONSource>(staticImmutableCast<GeoJSONSource::Impl>(impl),
@@ -78,6 +78,10 @@ void RenderSource::onTileError(Tile& tile, std::exception_ptr error) {
     observer->onTileError(*this, tile.id, error);
 }
 
+void RenderSource::onTileAction(OverscaledTileID id, std::string sourceID, TileOperation op) {
+    observer->onTileAction(*this, op, id, sourceID);
+}
+
 bool RenderSource::isEnabled() const {
     return enabled;
 }
@@ -85,6 +89,10 @@ bool RenderSource::isEnabled() const {
 uint8_t RenderSource::getMaxZoom() const {
     assert(false);
     return util::TERRAIN_RGB_MAXZOOM;
+}
+
+Immutable<std::vector<RenderTile>> RenderSource::getRawRenderTiles() const {
+    return makeMutable<std::vector<RenderTile>>();
 }
 
 } // namespace mbgl

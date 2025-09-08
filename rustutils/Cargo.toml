@@ -1,0 +1,21 @@
+[package]
+name = "rustutils"
+version = "0.0.0"
+publish = false  # This crate is not intended to be published on crates.io
+authors = ["MapLibre contributors"]
+description = "Core Rust utilities for MapLibre Native"
+edition = "2021"
+license = "BSD-2-Clause"
+repository = "https://github.com/maplibre/maplibre-native"
+rust-version = "1.78.0"
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+csscolorparser = "0.7.0"
+cxx = "1.0.157"
+
+[profile.release]
+lto = true
+codegen-units = 1

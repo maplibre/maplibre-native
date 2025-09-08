@@ -17,10 +17,9 @@ std::unique_ptr<style::Layer> SymbolLayerFactory::createLayer(const std::string&
     return std::unique_ptr<style::Layer>(source ? new (std::nothrow) style::SymbolLayer(id, *source) : nullptr);
 }
 
-std::unique_ptr<Layout> SymbolLayerFactory::createLayout(
-    const LayoutParameters& parameters,
-    std::unique_ptr<GeometryTileLayer> tileLayer,
-    const std::vector<Immutable<style::LayerProperties>>& group) noexcept {
+std::unique_ptr<Layout> SymbolLayerFactory::createLayout(const LayoutParameters& parameters,
+                                                         std::unique_ptr<GeometryTileLayer> tileLayer,
+                                                         const std::vector<Immutable<style::LayerProperties>>& group) {
     return std::unique_ptr<Layout>(
         new (std::nothrow) SymbolLayout(parameters.bucketParameters, group, std::move(tileLayer), parameters));
 }

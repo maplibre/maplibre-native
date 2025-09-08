@@ -9,6 +9,14 @@
 -keep class com.google.gson.JsonObject { *; }
 -keep class com.google.gson.JsonPrimitive { *; }
 -dontnote com.google.gson.**
+-keep enum org.maplibre.android.tile.TileOperation
+-keep class org.maplibre.android.maps.RenderingStats { *; }
+-keep class org.maplibre.android.maps.NativeMapOptions { *; }
+-keepclassmembers class * extends java.lang.Enum {
+    <fields>;
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
 
 # dontnote for keeps the entry point x but not the descriptor class y
 -dontnote org.maplibre.android.maps.MapLibreMap$OnFpsChangedListener
@@ -16,11 +24,6 @@
 -dontnote org.maplibre.android.maps.MapLibreMap
 -dontnote org.maplibre.android.maps.MapLibreMapOptions
 -dontnote org.maplibre.android.log.LoggerDefinition
-
-# config for okhttp 3.11.0, https://github.com/square/okhttp/pull/3354
--dontwarn javax.annotation.**
--dontnote okhttp3.internal.**
--dontwarn org.codehaus.**
 
 # config for mapbox-sdk-geojson:3.0.1
 -keep class org.maplibre.geojson.** { *; }
@@ -38,12 +41,3 @@
 # a large amount of users combine it with our SDK
 # we aren't able to provide a proguard config in that project (jar vs aar)
 -dontwarn com.sun.xml.internal.ws.spi.db.*
-
-# okhttp
--dontwarn org.bouncycastle.jsse.BCSSLSocket
--dontwarn org.bouncycastle.jsse.BCSSLParameters
--dontwarn org.bouncycastle.jsse.provider.BouncyCastleJsseProvider
--dontwarn org.conscrypt.*
--dontwarn org.openjsse.javax.net.ssl.SSLParameters
--dontwarn org.openjsse.javax.net.ssl.SSLSocket
--dontwarn org.openjsse.net.ssl.OpenJSSE

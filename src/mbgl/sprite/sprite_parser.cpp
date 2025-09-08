@@ -26,7 +26,9 @@ std::unique_ptr<style::Image> createStyleImage(const std::string& id,
                                                const bool sdf,
                                                style::ImageStretches&& stretchX,
                                                style::ImageStretches&& stretchY,
-                                               const std::optional<style::ImageContent>& content) {
+                                               const std::optional<style::ImageContent>& content,
+                                               const std::optional<style::TextFit>& textFitWidth,
+                                               const std::optional<style::TextFit>& textFitHeight) {
     // Disallow invalid parameter configurations.
     if (width <= 0 || height <= 0 || width > 1024 || height > 1024 || ratio <= 0 || ratio > 10 || srcX < 0 ||
         srcY < 0 || srcX >= static_cast<int32_t>(image.size.width) || srcY >= static_cast<int32_t>(image.size.height) ||
@@ -47,8 +49,15 @@ std::unique_ptr<style::Image> createStyleImage(const std::string& id,
     PremultipliedImage::copy(image, dstImage, {static_cast<uint32_t>(srcX), static_cast<uint32_t>(srcY)}, {0, 0}, size);
 
     try {
-        return std::make_unique<style::Image>(
-            id, std::move(dstImage), static_cast<float>(ratio), sdf, std::move(stretchX), std::move(stretchY), content);
+        return std::make_unique<style::Image>(id,
+                                              std::move(dstImage),
+                                              static_cast<float>(ratio),
+                                              sdf,
+                                              std::move(stretchX),
+                                              std::move(stretchY),
+                                              content,
+                                              textFitWidth,
+                                              textFitHeight);
     } catch (const util::StyleImageException& ex) {
         Log::Error(Event::Sprite, std::string("Can't create image with invalid metadata: ") + ex.what());
         return nullptr;
@@ -150,6 +159,40 @@ std::optional<style::ImageContent> getContent(const JSValue& value, const char* 
     return std::nullopt;
 }
 
+std::optional<style::TextFit> parseTextFit(const std::string_view& value) {
+    if (value == "stretchOrShrink") {
+        return style::TextFit::stretchOrShrink;
+    } else if (value == "stretchOnly") {
+        return style::TextFit::stretchOnly;
+    } else if (value == "proportional") {
+        return style::TextFit::proportional;
+    } else {
+        return std::nullopt;
+    }
+}
+
+std::optional<style::TextFit> getTextFit(const JSValue& value, const char* property, const char* name) {
+    if (value.HasMember(property)) {
+        const auto& v = value[property];
+        if (v.IsString()) {
+            const auto& valueString = v.GetString();
+            const auto textFit = parseTextFit(std::string_view(valueString));
+            if (!textFit.has_value()) {
+                Log::Warning(Event::Sprite,
+                             std::string("Invalid sprite image '") + name + "': value of '" + property +
+                                 "' is an invalid value '" + valueString + "'");
+            }
+            return textFit;
+        } else {
+            Log::Warning(
+                Event::Sprite,
+                std::string("Invalid sprite image '") + name + "': value of '" + property + "' must be a string");
+        }
+    }
+
+    return std::nullopt;
+}
+
 } // namespace
 
 std::vector<Immutable<style::Image::Impl>> parseSprite(const std::string& id,
@@ -189,6 +232,8 @@ std::vector<Immutable<style::Image::Impl>> parseSprite(const std::string& id,
             style::ImageStretches stretchX = getStretches(value, "stretchX", name.c_str());
             style::ImageStretches stretchY = getStretches(value, "stretchY", name.c_str());
             std::optional<style::ImageContent> content = getContent(value, "content", name.c_str());
+            std::optional<style::TextFit> textFitWidth = getTextFit(value, "textFitWidth", name.c_str());
+            std::optional<style::TextFit> textFitHeight = getTextFit(value, "textFitHeight", name.c_str());
 
             auto image = createStyleImage(completeName,
                                           raster,
@@ -200,7 +245,9 @@ std::vector<Immutable<style::Image::Impl>> parseSprite(const std::string& id,
                                           sdf,
                                           std::move(stretchX),
                                           std::move(stretchY),
-                                          content);
+                                          content,
+                                          textFitWidth,
+                                          textFitHeight);
             if (image) {
                 images.push_back(std::move(image->baseImpl));
             }

@@ -6,12 +6,14 @@
 #include <mbgl/util/noncopyable.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/programs/debug_program.hpp>
-#include <mbgl/programs/fill_program.hpp>
+#include <mbgl/shaders/segment.hpp>
+#include <mbgl/renderer/buckets/fill_bucket.hpp>
 
 namespace mbgl {
 
 class OverscaledTileID;
+
+using DebugLayoutVertex = gfx::Vertex<TypeList<attributes::pos>>;
 
 class DebugBucket : private util::noncopyable {
 public:
@@ -33,11 +35,10 @@ public:
     gfx::VertexVector<FillLayoutVertex> vertices;
     gfx::IndexVector<gfx::Lines> indices;
 
-    SegmentVector<DebugAttributes> segments;
-    SegmentVector<DebugAttributes> tileBorderSegments;
+    SegmentVector segments;
+    SegmentVector tileBorderSegments;
     std::optional<gfx::VertexBuffer<DebugLayoutVertex>> vertexBuffer;
     std::optional<gfx::IndexBuffer> indexBuffer;
-    std::optional<gfx::Texture> texture;
 };
 
 } // namespace mbgl

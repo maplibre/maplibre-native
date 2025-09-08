@@ -6,6 +6,7 @@
     <string name="description_map_fragment">Showcase MapFragment</string>
     <string name="description_map_fragment_support">Showcase SupportMapFragment</string>
     <string name="description_map_fragment_backstack">Showcase using a Map Fragment with a fragment backstack</string>
+    <string name="description_long_running_maps">Showcase a long running scenario</string>
     <string name="description_multimap">Activity with multiple maps on screen</string>
     <string name="description_press_for_marker">Add marker to map on long press</string>
     <string name="description_add_makers_by_json_api">Use JSON API to add markers</string>
@@ -72,6 +73,7 @@
     <string name="description_map_snapshotter_local_style">Show how to load a local style with a Snapshot</string>
     <string name="description_camera_animator">Use Android SDK Animators to animate camera position changes</string>
     <string name="description_symbol_generator">Use Android SDK Views as symbols</string>
+    <string name="description_observer_activity">Use map observers to log map event information</string>
     <string name="description_textureview_debug">Use TextureView to render the map</string>
     <string name="description_textureview_resize">Resize a map rendered on a TextureView</string>
     <string name="description_textureview_animate">Animate a map rendered on a TextureView</string>
@@ -79,6 +81,7 @@
     <string name="description_overlay">Blend an overlay on a map</string>
     <string name="description_grid_source">Example Custom Geometry Source</string>
     <string name="description_no_style">Load a map without providing a style URI or JSON</string>
+    <string name="description_vector_tile">Load MVT data</string>
     <string name="description_local_glyph">Suzhou using Droid Sans for Chinese glyphs</string>
     <string name="description_hillshade">Example raster-dem source and hillshade layer</string>
     <string name="description_heatmaplayer">Use HeatmapLayer to visualise earthquakes</string>
@@ -93,8 +96,10 @@
     <string name="description_location_manual">Force location updates and don\'t rely on the engine</string>
     <string name="description_location_activation_builder">Use LocationComponentActivationOptions to set options</string>
     <string name="description_recyclerview_textureview">Show multiple TextureView MapViews as recyclerView items</string>
-    <string name="description_recyclerview_glsurfaceview">Show multiple GLSurfaceView MapViews as recyclerView items</string>
+    <string name="description_recyclerview_surfaceview">Show multiple SurfaceView MapViews as recyclerView items</string>
     <string name="description_nested_viewpager">Show a MapView inside a viewpager inside a recyclerView</string>
     <string name="description_performance_measurement">Show the use PerformanceEvent for performance measurements</string>
     <string name="description_physical_circle">Use TurfTransformation#circle() to show a Cirlce expressed in physical units</string>
+    <string name="description_map_options_run_time">Learn How to use MapOptions to configure map</string>
+    <string name="description_map_options_xml">Learn How to use custom map tags in xml to preconfigure MapView</string>
 </resources>

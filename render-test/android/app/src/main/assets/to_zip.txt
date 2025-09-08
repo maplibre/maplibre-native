@@ -6,5 +6,7 @@ metrics/tests/
 metrics/android-render-test-runner/
 metrics/android-render-test-runner-metrics.json
 metrics/android-render-test-runner-style.json
+metrics/android-vulkan-render-test-runner-metrics.json
+metrics/android-vulkan-render-test-runner-style.json
 metrics/cache-metrics.db
 metrics/cache-style.db

@@ -14,8 +14,8 @@ target_include_directories(
 set_target_properties(
     mbgl-vendor-polylabel
     PROPERTIES
-        INTERFACE_MAPBOX_NAME "polylabel"
-        INTERFACE_MAPBOX_URL "https://github.com/mapbox/polylabel"
-        INTERFACE_MAPBOX_AUTHOR "Mapbox"
-        INTERFACE_MAPBOX_LICENSE ${CMAKE_CURRENT_LIST_DIR}/polylabel/LICENSE
+        INTERFACE_MAPLIBRE_NAME "polylabel"
+        INTERFACE_MAPLIBRE_URL "https://github.com/mapbox/polylabel"
+        INTERFACE_MAPLIBRE_AUTHOR "Mapbox"
+        INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/polylabel/LICENSE
 )

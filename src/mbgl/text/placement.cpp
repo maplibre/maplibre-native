@@ -1,13 +1,16 @@
-#include <list>
+#include <mbgl/text/placement.hpp>
+
 #include <mbgl/layout/symbol_layout.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
-#include <mbgl/text/placement.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/math.hpp>
+
+#include <list>
 #include <utility>
 
 namespace mbgl {
@@ -62,7 +65,7 @@ const CollisionGroups::CollisionGroup& CollisionGroups::get(const std::string& s
 
 using namespace style;
 
-// PlacementContext implemenation
+// PlacementContext implementation
 class PlacementContext {
     std::reference_wrapper<const SymbolBucket> bucket;
     std::reference_wrapper<const RenderTile> renderTile;
@@ -93,10 +96,6 @@ public:
     const OverscaledTileID& getOverscaledID() const { return renderTile.get().getOverscaledTileID(); }
 
     const TransformState& getTransformState() const { return state; }
-
-    const std::vector<style::TextVariableAnchorType>& getVariableTextAnchors() const {
-        return getLayout().get<style::TextVariableAnchor>();
-    }
 
     float pixelsToTileUnits;
     float scale;
@@ -148,7 +147,7 @@ public:
     std::optional<CollisionBoundaries> avoidEdges;
 };
 
-// PlacementController implemenation
+// PlacementController implementation
 
 PlacementController::PlacementController()
     : placement(makeMutable<Placement>()) {}
@@ -226,8 +225,7 @@ Point<float> calculateVariableLayoutOffset(style::SymbolAnchorType anchor,
     AnchorAlignment alignment = AnchorAlignment::getAnchorAlignment(anchor);
     float shiftX = -(alignment.horizontalAlign - 0.5f) * width;
     float shiftY = -(alignment.verticalAlign - 0.5f) * height;
-    auto variableOffset = SymbolLayout::evaluateVariableOffset(anchor, offset);
-    Point<float> shift{shiftX + variableOffset[0] * textBoxScale, shiftY + variableOffset[1] * textBoxScale};
+    Point<float> shift{shiftX + offset[0] * textBoxScale, shiftY + offset[1] * textBoxScale};
     if (rotateWithMap) {
         shift = util::rotate(shift, pitchWithMap ? bearing : -bearing);
     }
@@ -246,12 +244,13 @@ void Placement::placeSymbolBucket(const BucketPlacementData& params, std::set<ui
                          collisionGroups.get(params.sourceId),
                          getAvoidEdges(symbolBucket, renderTile.matrix)};
     for (const SymbolInstance& symbol : getSortedSymbols(params, ctx.pixelRatio)) {
-        if (seenCrossTileIDs.count(symbol.crossTileID) != 0u) continue;
+        if (!symbol.check(SYM_GUARD_LOC)) continue;
+        if (seenCrossTileIDs.contains(symbol.getCrossTileID())) continue;
         placeSymbol(symbol, ctx);
 
         // Prevent a flickering issue while zooming out.
-        if (symbol.crossTileID != SymbolInstance::invalidCrossTileID() && !ctx.getRenderTile().holdForFade()) {
-            seenCrossTileIDs.insert(symbol.crossTileID);
+        if (symbol.getCrossTileID() != SymbolInstance::invalidCrossTileID && !ctx.getRenderTile().holdForFade()) {
+            seenCrossTileIDs.insert(symbol.getCrossTileID());
         }
     }
 
@@ -268,7 +267,8 @@ void Placement::placeSymbolBucket(const BucketPlacementData& params, std::set<ui
 
 JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, const PlacementContext& ctx) {
     static const JointPlacement kUnplaced(false, false, false);
-    if (symbolInstance.crossTileID == SymbolInstance::invalidCrossTileID()) return kUnplaced;
+    if (!symbolInstance.check(SYM_GUARD_LOC)) return kUnplaced;
+    if (symbolInstance.getCrossTileID() == SymbolInstance::invalidCrossTileID) return kUnplaced;
 
     if (ctx.getRenderTile().holdForFade()) {
         // Mark all symbols from this tile as "not placed", but don't add to
@@ -279,7 +279,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
     const SymbolBucket& bucket = ctx.getBucket();
     const mat4& posMatrix = ctx.getRenderTile().matrix;
     const auto& collisionGroup = ctx.collisionGroup;
-    auto variableTextAnchors = ctx.getVariableTextAnchors();
+    auto variableTextAnchors = symbolInstance.getTextAnchors();
     textBoxes.clear();
     iconBoxes.clear();
 
@@ -297,15 +297,15 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
 
         const auto updatePreviousOrientationIfNotPlaced = [&](bool isPlaced) {
             if (bucket.allowVerticalPlacement && !isPlaced && getPrevPlacement()) {
-                auto prevOrientation = getPrevPlacement()->placedOrientations.find(symbolInstance.crossTileID);
+                auto prevOrientation = getPrevPlacement()->placedOrientations.find(symbolInstance.getCrossTileID());
                 if (prevOrientation != getPrevPlacement()->placedOrientations.end()) {
-                    placedOrientations[symbolInstance.crossTileID] = prevOrientation->second;
+                    placedOrientations[symbolInstance.getCrossTileID()] = prevOrientation->second;
                 }
             }
         };
 
         const auto placeTextForPlacementModes = [&](auto& placeHorizontalFn, auto& placeVerticalFn) {
-            if (bucket.allowVerticalPlacement && symbolInstance.writingModes & WritingModeType::Vertical) {
+            if (bucket.allowVerticalPlacement && symbolInstance.getWritingModes() & WritingModeType::Vertical) {
                 assert(!bucket.placementModes.empty());
                 for (auto& placementMode : bucket.placementModes) {
                     if (placementMode == TextWritingModeType::Vertical) {
@@ -343,18 +343,18 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                                                                  collisionGroup.second,
                                                                  textBoxes);
                 if (placedFeature.first) {
-                    placedOrientations.emplace(symbolInstance.crossTileID, orientation);
+                    placedOrientations.emplace(symbolInstance.getCrossTileID(), orientation);
                 }
                 return placedFeature;
             };
 
             const auto placeHorizontal = [&] {
-                return placeFeature(symbolInstance.textCollisionFeature, style::TextWritingModeType::Horizontal);
+                return placeFeature(symbolInstance.getTextCollisionFeature(), style::TextWritingModeType::Horizontal);
             };
 
             const auto placeVertical = [&] {
-                if (bucket.allowVerticalPlacement && symbolInstance.verticalTextCollisionFeature) {
-                    return placeFeature(*symbolInstance.verticalTextCollisionFeature,
+                if (bucket.allowVerticalPlacement && symbolInstance.getVerticalTextCollisionFeature()) {
+                    return placeFeature(*symbolInstance.getVerticalTextCollisionFeature(),
                                         style::TextWritingModeType::Vertical);
                 }
                 return std::pair<bool, bool>{false, false};
@@ -365,13 +365,13 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
 
             placeText = placed.first;
             offscreen &= placed.second;
-        } else if (!symbolInstance.textCollisionFeature.alongLine &&
-                   !symbolInstance.textCollisionFeature.boxes.empty()) {
+        } else if (!symbolInstance.getTextCollisionFeature().alongLine &&
+                   !symbolInstance.getTextCollisionFeature().boxes.empty()) {
             // If this symbol was in the last placement, shift the previously
             // used anchor to the front of the anchor list, only if the previous
             // anchor is still in the anchor list.
             if (getPrevPlacement()) {
-                auto prevOffset = getPrevPlacement()->variableOffsets.find(symbolInstance.crossTileID);
+                auto prevOffset = getPrevPlacement()->variableOffsets.find(symbolInstance.getCrossTileID());
                 if (prevOffset != getPrevPlacement()->variableOffsets.end()) {
                     const auto prevAnchor = prevOffset->second.anchor;
                     auto found = std::find(variableTextAnchors.begin(), variableTextAnchors.end(), prevAnchor);
@@ -390,14 +390,14 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
             }
 
             const bool doVariableIconPlacement = ctx.hasIconTextFit && !ctx.iconAllowOverlap &&
-                                                 symbolInstance.placedIconIndex;
+                                                 symbolInstance.getPlacedIconIndex();
             const auto placeFeatureForVariableAnchors = [&](const CollisionFeature& textCollisionFeature,
                                                             style::TextWritingModeType orientation,
                                                             const CollisionFeature& iconCollisionFeature) {
                 const CollisionBox& textBox = textCollisionFeature.boxes[0];
                 const float width = textBox.x2 - textBox.x1;
                 const float height = textBox.y2 - textBox.y1;
-                const float textBoxScale = symbolInstance.textBoxScale;
+                const float textBoxScale = symbolInstance.getTextBoxScale();
                 std::pair<bool, bool> placedFeature = {false, false};
                 const size_t anchorsSize = variableTextAnchors.size();
                 const size_t placementAttempts = ctx.textAllowOverlap ? anchorsSize * 2 : anchorsSize;
@@ -406,11 +406,12 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                     // so this code would not be reached
                     // NOLINTNEXTLINE(clang-analyzer-core.DivideZero)
                     auto anchor = variableTextAnchors[i % anchorsSize];
+                    auto variableTextOffset = symbolInstance.getTextVariableAnchorOffset()->getOffsetByAnchor(anchor);
                     const bool allowOverlap = (i >= anchorsSize);
                     shift = calculateVariableLayoutOffset(anchor,
                                                           width,
                                                           height,
-                                                          symbolInstance.variableTextOffset,
+                                                          variableTextOffset,
                                                           textBoxScale,
                                                           ctx.rotateTextWithMap,
                                                           ctx.pitchTextWithMap,
@@ -457,15 +458,15 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                     }
 
                     if (placedFeature.first) {
-                        assert(symbolInstance.crossTileID != 0u);
+                        assert(symbolInstance.getCrossTileID() != 0u);
                         std::optional<style::TextVariableAnchorType> prevAnchor;
 
                         // If this label was placed in the previous
                         // placement, record the anchor position to allow us
                         // to animate the transition
                         if (getPrevPlacement()) {
-                            auto prevOffset = getPrevPlacement()->variableOffsets.find(symbolInstance.crossTileID);
-                            auto prevPlacements = getPrevPlacement()->placements.find(symbolInstance.crossTileID);
+                            auto prevOffset = getPrevPlacement()->variableOffsets.find(symbolInstance.getCrossTileID());
+                            auto prevPlacements = getPrevPlacement()->placements.find(symbolInstance.getCrossTileID());
                             if (prevOffset != getPrevPlacement()->variableOffsets.end() &&
                                 prevPlacements != getPrevPlacement()->placements.end() && prevPlacements->second.text) {
                                 // TODO: The prevAnchor seems to be unused, needs to be fixed.
@@ -474,12 +475,11 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                         }
 
                         variableOffsets.insert(std::make_pair(
-                            symbolInstance.crossTileID,
-                            VariableOffset{
-                                symbolInstance.variableTextOffset, width, height, anchor, textBoxScale, prevAnchor}));
+                            symbolInstance.getCrossTileID(),
+                            VariableOffset{variableTextOffset, width, height, anchor, textBoxScale, prevAnchor}));
 
                         if (bucket.allowVerticalPlacement) {
-                            placedOrientations.emplace(symbolInstance.crossTileID, orientation);
+                            placedOrientations.emplace(symbolInstance.getCrossTileID(), orientation);
                         }
                         break;
                     }
@@ -489,18 +489,19 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
             };
 
             const auto placeHorizontal = [&] {
-                return placeFeatureForVariableAnchors(symbolInstance.textCollisionFeature,
+                return placeFeatureForVariableAnchors(symbolInstance.getTextCollisionFeature(),
                                                       style::TextWritingModeType::Horizontal,
-                                                      symbolInstance.iconCollisionFeature);
+                                                      symbolInstance.getIconCollisionFeature());
             };
 
             const auto placeVertical = [&] {
-                if (bucket.allowVerticalPlacement && !placed.first && symbolInstance.verticalTextCollisionFeature) {
-                    return placeFeatureForVariableAnchors(*symbolInstance.verticalTextCollisionFeature,
+                if (bucket.allowVerticalPlacement && !placed.first &&
+                    symbolInstance.getVerticalTextCollisionFeature()) {
+                    return placeFeatureForVariableAnchors(*symbolInstance.getVerticalTextCollisionFeature(),
                                                           style::TextWritingModeType::Vertical,
-                                                          symbolInstance.verticalIconCollisionFeature
-                                                              ? *symbolInstance.verticalIconCollisionFeature
-                                                              : symbolInstance.iconCollisionFeature);
+                                                          symbolInstance.getVerticalTextCollisionFeature()
+                                                              ? *symbolInstance.getVerticalTextCollisionFeature()
+                                                              : symbolInstance.getIconCollisionFeature());
                 }
                 return std::pair<bool, bool>{false, false};
             };
@@ -515,21 +516,21 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
             // If we didn't get placed, we still need to copy our position from
             // the last placement for fade animations
             if (!placeText && getPrevPlacement()) {
-                auto prevOffset = getPrevPlacement()->variableOffsets.find(symbolInstance.crossTileID);
+                auto prevOffset = getPrevPlacement()->variableOffsets.find(symbolInstance.getCrossTileID());
                 if (prevOffset != getPrevPlacement()->variableOffsets.end()) {
-                    variableOffsets[symbolInstance.crossTileID] = prevOffset->second;
+                    variableOffsets[symbolInstance.getCrossTileID()] = prevOffset->second;
                 }
             }
         }
     }
 
-    if (symbolInstance.placedIconIndex) {
+    if (symbolInstance.getPlacedIconIndex()) {
         if (!ctx.hasIconTextFit || !placeText || variableTextAnchors.empty()) {
             shift = {0.0f, 0.0f};
         }
 
         const auto& iconBuffer = symbolInstance.hasSdfIcon() ? bucket.sdfIcon : bucket.icon;
-        const PlacedSymbol& placedSymbol = iconBuffer.placedSymbols.at(*symbolInstance.placedIconIndex);
+        const PlacedSymbol& placedSymbol = iconBuffer.placedSymbols.at(*symbolInstance.getPlacedIconIndex());
         const float fontSize = evaluateSizeForFeature(ctx.partiallyEvaluatedIconSize, placedSymbol);
         const auto& placeIconFeature = [&](const CollisionFeature& collisionFeature) {
             return collisionIndex.placeFeature(collisionFeature,
@@ -548,11 +549,11 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                                                iconBoxes);
         };
 
-        std::pair<bool, bool> placedIcon = {false, false};
-        if (placedVerticalText.first && symbolInstance.verticalIconCollisionFeature) {
-            placedIcon = placedVerticalIcon = placeIconFeature(*symbolInstance.verticalIconCollisionFeature);
+        std::pair<bool, bool> placedIcon;
+        if (placedVerticalText.first && symbolInstance.getVerticalIconCollisionFeature()) {
+            placedIcon = placedVerticalIcon = placeIconFeature(*symbolInstance.getVerticalIconCollisionFeature());
         } else {
-            placedIcon = placeIconFeature(symbolInstance.iconCollisionFeature);
+            placedIcon = placeIconFeature(symbolInstance.getIconCollisionFeature());
         }
         placeIcon = placedIcon.first;
         offscreen &= placedIcon.second;
@@ -571,14 +572,14 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
     }
 
     if (placeText) {
-        if (placedVerticalText.first && symbolInstance.verticalTextCollisionFeature) {
-            collisionIndex.insertFeature(*symbolInstance.verticalTextCollisionFeature,
+        if (placedVerticalText.first && symbolInstance.getVerticalTextCollisionFeature()) {
+            collisionIndex.insertFeature(*symbolInstance.getVerticalTextCollisionFeature(),
                                          textBoxes,
                                          ctx.getLayout().get<TextIgnorePlacement>(),
                                          bucket.bucketInstanceId,
                                          collisionGroup.first);
         } else {
-            collisionIndex.insertFeature(symbolInstance.textCollisionFeature,
+            collisionIndex.insertFeature(symbolInstance.getTextCollisionFeature(),
                                          textBoxes,
                                          ctx.getLayout().get<TextIgnorePlacement>(),
                                          bucket.bucketInstanceId,
@@ -587,14 +588,14 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
     }
 
     if (placeIcon) {
-        if (placedVerticalIcon.first && symbolInstance.verticalIconCollisionFeature) {
-            collisionIndex.insertFeature(*symbolInstance.verticalIconCollisionFeature,
+        if (placedVerticalIcon.first && symbolInstance.getVerticalIconCollisionFeature()) {
+            collisionIndex.insertFeature(*symbolInstance.getVerticalIconCollisionFeature(),
                                          iconBoxes,
                                          ctx.getLayout().get<IconIgnorePlacement>(),
                                          bucket.bucketInstanceId,
                                          collisionGroup.first);
         } else {
-            collisionIndex.insertFeature(symbolInstance.iconCollisionFeature,
+            collisionIndex.insertFeature(symbolInstance.getIconCollisionFeature(),
                                          iconBoxes,
                                          ctx.getLayout().get<IconIgnorePlacement>(),
                                          bucket.bucketInstanceId,
@@ -605,25 +606,34 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
     const bool hasIconCollisionCircleData = bucket.hasIconCollisionCircleData();
     const bool hasTextCollisionCircleData = bucket.hasTextCollisionCircleData();
 
-    if (hasIconCollisionCircleData && symbolInstance.iconCollisionFeature.alongLine && !iconBoxes.empty()) {
-        collisionCircles[&symbolInstance.iconCollisionFeature] = iconBoxes;
+    if (hasIconCollisionCircleData && symbolInstance.getIconCollisionFeature().alongLine && !iconBoxes.empty()) {
+        collisionCircles[&symbolInstance.getIconCollisionFeature()] = iconBoxes;
     }
-    if (hasTextCollisionCircleData && symbolInstance.textCollisionFeature.alongLine && !textBoxes.empty()) {
-        collisionCircles[&symbolInstance.textCollisionFeature] = textBoxes;
+    if (hasTextCollisionCircleData && symbolInstance.getTextCollisionFeature().alongLine && !textBoxes.empty()) {
+        collisionCircles[&symbolInstance.getTextCollisionFeature()] = textBoxes;
     }
 
-    assert(symbolInstance.crossTileID != 0);
+    if (!symbolInstance.check(SYM_GUARD_LOC)) {
+        return kUnplaced;
+    }
 
-    if (placements.find(symbolInstance.crossTileID) != placements.end()) {
-        // If there's a previous placement with this ID, it comes from a tile
-        // that's fading out Erase it so that the placement result from the
-        // non-fading tile supersedes it
-        placements.erase(symbolInstance.crossTileID);
+    if (symbolInstance.getCrossTileID() != 0) {
+        const auto hit = placements.find(symbolInstance.getCrossTileID());
+        if (hit != placements.end()) {
+            // If there's a previous placement with this ID, it comes from a tile that's fading out
+            // Erase it so that the placement result from the non-fading tile supersedes it
+            placements.erase(hit);
+        }
+    } else {
+        assert(false);
+        // We skipped some setup, don't use this one or we might run into inconsistencies
+        symbolInstance.forceFail();
+        return kUnplaced;
     }
 
     JointPlacement result(
         placeText || ctx.alwaysShowText, placeIcon || ctx.alwaysShowIcon, offscreen || bucket.justReloaded);
-    placements.emplace(symbolInstance.crossTileID, result);
+    placements.emplace(symbolInstance.getCrossTileID(), result);
     newSymbolPlaced(symbolInstance, ctx, result, ctx.placementType, textBoxes, iconBoxes);
     return result;
 }
@@ -661,7 +671,7 @@ SymbolInstanceReferences Placement::getSortedSymbols(const BucketPlacementData& 
                              }
                              if (!bPlacement) {
                                  // a < b, if 'b' is new and 'a' was previously shown.
-                                 return aPlacement && aPlacement->placed();
+                                 return aPlacement->placed();
                              }
                              // a < b, if 'a' was shown and 'b' was hidden.
                              return aPlacement->placed() && !bPlacement->placed();
@@ -751,12 +761,11 @@ Point<float> calculateVariableRenderShift(style::SymbolAnchorType anchor,
                                           std::array<float, 2> textOffset,
                                           float textBoxScale,
                                           float renderTextSize) {
-    AnchorAlignment alignment = AnchorAlignment::getAnchorAlignment(anchor);
-    float shiftX = -(alignment.horizontalAlign - 0.5f) * width;
-    float shiftY = -(alignment.verticalAlign - 0.5f) * height;
-    auto variablOffset = SymbolLayout::evaluateVariableOffset(anchor, textOffset);
-    return {(shiftX / textBoxScale + variablOffset[0]) * renderTextSize,
-            (shiftY / textBoxScale + variablOffset[1]) * renderTextSize};
+    const AnchorAlignment alignment = AnchorAlignment::getAnchorAlignment(anchor);
+    const float shiftX = -(alignment.horizontalAlign - 0.5f) * width;
+    const float shiftY = -(alignment.verticalAlign - 0.5f) * height;
+    return {(shiftX / textBoxScale + textOffset[0]) * renderTextSize,
+            (shiftY / textBoxScale + textOffset[1]) * renderTextSize};
 }
 } // namespace
 
@@ -766,7 +775,7 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
     using namespace style;
     const auto& layout = *bucket.layout;
     const bool alongLine = layout.get<SymbolPlacement>() != SymbolPlacementType::Point;
-    const bool hasVariableAnchors = !layout.get<TextVariableAnchor>().empty() && bucket.hasTextData();
+    const bool hasVariableAnchors = bucket.hasVariableTextAnchors() && bucket.hasTextData();
     const bool updateTextFitIcon = layout.get<IconTextFit>() != IconTextFitType::None &&
                                    (bucket.allowVerticalPlacement || hasVariableAnchors) &&
                                    (bucket.hasIconData() || bucket.hasSdfIconData());
@@ -961,10 +970,11 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
 
     const bool textAllowOverlap = bucket.layout->get<style::TextAllowOverlap>();
     const bool iconAllowOverlap = bucket.layout->get<style::IconAllowOverlap>();
-    const bool variablePlacement = !bucket.layout->get<style::TextVariableAnchor>().empty();
+    const bool variablePlacement = bucket.hasVariableTextAnchors();
     const bool rotateWithMap = bucket.layout->get<style::TextRotationAlignment>() == style::AlignmentType::Map;
     const bool pitchWithMap = bucket.layout->get<style::TextPitchAlignment>() == style::AlignmentType::Map;
     const bool hasIconTextFit = bucket.layout->get<style::IconTextFit>() != style::IconTextFitType::None;
+    const bool screenSpace = bucket.layout->get<style::SymbolScreenSpace>();
 
     // If allow-overlap is true, we can show symbols before placement runs on them
     // But we have to wait for placement if we potentially depend on a paired icon/text
@@ -972,17 +982,18 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
     // See https://github.com/mapbox/mapbox-gl-native/issues/12483
     // Prevent a flickering issue when showing a symbol allowing overlap.
     const JointOpacityState defaultOpacityState(
-        bucket.justReloaded && textAllowOverlap &&
+        (screenSpace || bucket.justReloaded) && textAllowOverlap &&
             (iconAllowOverlap || !(bucket.hasIconData() || bucket.hasSdfIconData()) ||
              bucket.layout->get<style::IconOptional>()),
-        bucket.justReloaded && iconAllowOverlap &&
+        (screenSpace || bucket.justReloaded) && iconAllowOverlap &&
             (textAllowOverlap || !bucket.hasTextData() || bucket.layout->get<style::TextOptional>()),
         true);
 
     for (SymbolInstance& symbolInstance : bucket.symbolInstances) {
-        bool isDuplicate = seenCrossTileIDs.count(symbolInstance.crossTileID) > 0;
+        if (!symbolInstance.check(SYM_GUARD_LOC)) continue;
+        bool isDuplicate = seenCrossTileIDs.contains(symbolInstance.getCrossTileID());
 
-        auto it = opacities.find(symbolInstance.crossTileID);
+        auto it = opacities.find(symbolInstance.getCrossTileID());
         auto opacityState = defaultOpacityState;
         if (isDuplicate) {
             opacityState = duplicateOpacityState;
@@ -990,62 +1001,70 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
             opacityState = it->second;
         }
 
-        seenCrossTileIDs.insert(symbolInstance.crossTileID);
+        seenCrossTileIDs.insert(symbolInstance.getCrossTileID());
 
+        if (symbolInstance.hasText() || symbolInstance.hasIcon()) {
+            if (!symbolInstance.checkIndexes(bucket.text.placedSymbols.size(),
+                                             bucket.icon.placedSymbols.size(),
+                                             bucket.sdfIcon.placedSymbols.size(),
+                                             SYM_GUARD_LOC))
+                return;
+        }
         if (symbolInstance.hasText()) {
             size_t textOpacityVerticesSize = 0u;
-            const auto& opacityVertex = SymbolSDFTextProgram::opacityVertex(opacityState.text.placed,
-                                                                            opacityState.text.opacity);
-            if (symbolInstance.placedRightTextIndex) {
-                textOpacityVerticesSize += symbolInstance.rightJustifiedGlyphQuadsSize * 4;
-                PlacedSymbol& placed = bucket.text.placedSymbols[*symbolInstance.placedRightTextIndex];
+            const auto& opacityVertex = SymbolBucket::opacityVertex(opacityState.text.placed,
+                                                                    opacityState.text.opacity);
+            if (symbolInstance.getPlacedRightTextIndex()) {
+                textOpacityVerticesSize += symbolInstance.getRightJustifiedGlyphQuadsSize() * 4;
+                PlacedSymbol& placed = bucket.text.placedSymbols[*symbolInstance.getPlacedRightTextIndex()];
                 placed.hidden = opacityState.isHidden();
             }
-            if (symbolInstance.placedCenterTextIndex && !symbolInstance.singleLine) {
-                textOpacityVerticesSize += symbolInstance.centerJustifiedGlyphQuadsSize * 4;
-                PlacedSymbol& placed = bucket.text.placedSymbols[*symbolInstance.placedCenterTextIndex];
+            if (symbolInstance.getPlacedCenterTextIndex() && !symbolInstance.getSingleLine()) {
+                textOpacityVerticesSize += symbolInstance.getCenterJustifiedGlyphQuadsSize() * 4;
+                PlacedSymbol& placed = bucket.text.placedSymbols[*symbolInstance.getPlacedCenterTextIndex()];
                 placed.hidden = opacityState.isHidden();
             }
-            if (symbolInstance.placedLeftTextIndex && !symbolInstance.singleLine) {
-                textOpacityVerticesSize += symbolInstance.leftJustifiedGlyphQuadsSize * 4;
-                PlacedSymbol& placed = bucket.text.placedSymbols[*symbolInstance.placedLeftTextIndex];
+            if (symbolInstance.getPlacedLeftTextIndex() && !symbolInstance.getSingleLine()) {
+                textOpacityVerticesSize += symbolInstance.getLeftJustifiedGlyphQuadsSize() * 4;
+                PlacedSymbol& placed = bucket.text.placedSymbols[*symbolInstance.getPlacedLeftTextIndex()];
                 placed.hidden = opacityState.isHidden();
             }
-            if (symbolInstance.placedVerticalTextIndex) {
-                textOpacityVerticesSize += symbolInstance.verticalGlyphQuadsSize * 4;
-                bucket.text.placedSymbols[*symbolInstance.placedVerticalTextIndex].hidden = opacityState.isHidden();
+            if (symbolInstance.getPlacedVerticalTextIndex()) {
+                textOpacityVerticesSize += symbolInstance.getVerticalGlyphQuadsSize() * 4;
+                bucket.text.placedSymbols[*symbolInstance.getPlacedVerticalTextIndex()].hidden =
+                    opacityState.isHidden();
             }
 
             bucket.text.opacityVertices().extend(textOpacityVerticesSize, opacityVertex);
 
             style::TextWritingModeType previousOrientation = style::TextWritingModeType::Horizontal;
             if (bucket.allowVerticalPlacement) {
-                auto prevOrientation = placedOrientations.find(symbolInstance.crossTileID);
+                auto prevOrientation = placedOrientations.find(symbolInstance.getCrossTileID());
                 if (prevOrientation != placedOrientations.end()) {
                     previousOrientation = prevOrientation->second;
                     markUsedOrientation(bucket, prevOrientation->second, symbolInstance);
                 }
             }
 
-            auto prevOffset = variableOffsets.find(symbolInstance.crossTileID);
+            auto prevOffset = variableOffsets.find(symbolInstance.getCrossTileID());
             if (prevOffset != variableOffsets.end()) {
                 markUsedJustification(bucket, prevOffset->second.anchor, symbolInstance, previousOrientation);
             }
         }
         if (symbolInstance.hasIcon()) {
             size_t iconOpacityVerticesSize = 0u;
-            const auto& opacityVertex = SymbolIconProgram::opacityVertex(opacityState.icon.placed,
-                                                                         opacityState.icon.opacity);
+            const auto& opacityVertex = SymbolBucket::opacityVertex(opacityState.icon.placed,
+                                                                    opacityState.icon.opacity);
             auto& iconBuffer = symbolInstance.hasSdfIcon() ? bucket.sdfIcon : bucket.icon;
 
-            if (symbolInstance.placedIconIndex) {
-                iconOpacityVerticesSize += symbolInstance.iconQuadsSize * 4;
-                iconBuffer.placedSymbols[*symbolInstance.placedIconIndex].hidden = opacityState.isHidden();
+            if (symbolInstance.getPlacedIconIndex()) {
+                iconOpacityVerticesSize += symbolInstance.getIconQuadsSize() * 4;
+                iconBuffer.placedSymbols[*symbolInstance.getPlacedIconIndex()].hidden = opacityState.isHidden();
             }
 
-            if (symbolInstance.placedVerticalIconIndex) {
-                iconOpacityVerticesSize += symbolInstance.iconQuadsSize * 4;
-                iconBuffer.placedSymbols[*symbolInstance.placedVerticalIconIndex].hidden = opacityState.isHidden();
+            if (symbolInstance.getPlacedVerticalIconIndex()) {
+                iconOpacityVerticesSize += symbolInstance.getIconQuadsSize() * 4;
+                iconBuffer.placedSymbols[*symbolInstance.getPlacedVerticalIconIndex()].hidden = opacityState.isHidden();
             }
 
             iconBuffer.opacityVertices().extend(iconOpacityVerticesSize, opacityVertex);
@@ -1055,7 +1074,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
             if (feature.alongLine) {
                 return;
             }
-            const auto& dynamicVertex = CollisionBoxProgram::dynamicVertex(placed, false, shift);
+            const auto& dynamicVertex = SymbolBucket::collisionDynamicVertex(placed, false, shift);
             bucket.iconCollisionBox->dynamicVertices().extend(feature.boxes.size() * 4, dynamicVertex);
         };
 
@@ -1068,7 +1087,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
                 }
                 bool used = true;
                 if (variablePlacement) {
-                    auto foundOffset = variableOffsets.find(symbolInstance.crossTileID);
+                    auto foundOffset = variableOffsets.find(symbolInstance.getCrossTileID());
                     if (foundOffset != variableOffsets.end()) {
                         const VariableOffset& variableOffset = foundOffset->second;
                         // This will show either the currently placed position or
@@ -1091,7 +1110,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
                         used = false;
                     }
                 }
-                const auto& dynamicVertex = CollisionBoxProgram::dynamicVertex(placed, !used, shift);
+                const auto& dynamicVertex = SymbolBucket::collisionDynamicVertex(placed, !used, shift);
                 bucket.textCollisionBox->dynamicVertices().extend(feature.boxes.size() * 4, dynamicVertex);
                 return shift;
             };
@@ -1103,14 +1122,14 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
             auto circles = collisionCircles.find(&feature);
             if (circles != collisionCircles.end()) {
                 for (const auto& circle : circles->second) {
-                    const auto& dynamicVertex = CollisionBoxProgram::dynamicVertex(placed, !circle.isCircle(), {});
+                    const auto& dynamicVertex = SymbolBucket::collisionDynamicVertex(placed, !circle.isCircle(), {});
                     isText ? bucket.textCollisionCircle->dynamicVertices().extend(4, dynamicVertex)
                            : bucket.iconCollisionCircle->dynamicVertices().extend(4, dynamicVertex);
                 }
             } else {
                 // This feature was not placed, because it was not loaded or
                 // from a fading tile. Apply default values.
-                static const auto dynamicVertex = CollisionBoxProgram::dynamicVertex(placed, false /*not used*/, {});
+                static const auto dynamicVertex = SymbolBucket::collisionDynamicVertex(placed, false /*not used*/, {});
                 isText ? bucket.textCollisionCircle->dynamicVertices().extend(4 * feature.boxes.size(), dynamicVertex)
                        : bucket.iconCollisionCircle->dynamicVertices().extend(4 * feature.boxes.size(), dynamicVertex);
             }
@@ -1118,33 +1137,35 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
         Point<float> textShift{0.0f, 0.0f};
         Point<float> verticalTextShift{0.0f, 0.0f};
         if (bucket.hasTextCollisionBoxData()) {
-            textShift = updateTextCollisionBox(symbolInstance.textCollisionFeature, opacityState.text.placed);
-            if (bucket.allowVerticalPlacement && symbolInstance.verticalTextCollisionFeature) {
-                verticalTextShift = updateTextCollisionBox(*symbolInstance.verticalTextCollisionFeature,
+            textShift = updateTextCollisionBox(symbolInstance.getTextCollisionFeature(), opacityState.text.placed);
+            if (bucket.allowVerticalPlacement && symbolInstance.getVerticalTextCollisionFeature()) {
+                verticalTextShift = updateTextCollisionBox(*symbolInstance.getVerticalTextCollisionFeature(),
                                                            opacityState.text.placed);
             }
         }
         if (bucket.hasIconCollisionBoxData()) {
-            updateIconCollisionBox(symbolInstance.iconCollisionFeature,
+            updateIconCollisionBox(symbolInstance.getIconCollisionFeature(),
                                    opacityState.icon.placed,
                                    hasIconTextFit ? textShift : Point<float>{0.0f, 0.0f});
-            if (bucket.allowVerticalPlacement && symbolInstance.verticalIconCollisionFeature) {
-                updateIconCollisionBox(*symbolInstance.verticalIconCollisionFeature,
+            if (bucket.allowVerticalPlacement && symbolInstance.getVerticalIconCollisionFeature()) {
+                updateIconCollisionBox(*symbolInstance.getVerticalIconCollisionFeature(),
                                        opacityState.text.placed,
                                        hasIconTextFit ? verticalTextShift : Point<float>{0.0f, 0.0f});
             }
         }
 
         if (bucket.hasIconCollisionCircleData()) {
-            updateCollisionCircles(symbolInstance.iconCollisionFeature, opacityState.icon.placed, false);
+            updateCollisionCircles(symbolInstance.getIconCollisionFeature(), opacityState.icon.placed, false);
         }
         if (bucket.hasTextCollisionCircleData()) {
-            updateCollisionCircles(symbolInstance.textCollisionFeature, opacityState.text.placed, true);
+            updateCollisionCircles(symbolInstance.getTextCollisionFeature(), opacityState.text.placed, true);
         }
     }
 
     bucket.sortFeatures(static_cast<float>(state.getBearing()));
-    auto retainedData = retainedQueryData.find(bucket.bucketInstanceId);
+    static_cast<Bucket&>(bucket).check(SYM_GUARD_LOC);
+
+    const auto retainedData = retainedQueryData.find(bucket.bucketInstanceId);
     if (retainedData != retainedQueryData.end()) {
         retainedData->second.featureSortOrder = bucket.featureSortOrder;
     }
@@ -1156,16 +1177,16 @@ std::optional<size_t> justificationToIndex(style::TextJustifyType justify,
                                            style::TextWritingModeType orientation) {
     // Vertical symbol has just one justification, style::TextJustifyType::Left.
     if (orientation == style::TextWritingModeType::Vertical) {
-        return symbolInstance.placedVerticalTextIndex;
+        return symbolInstance.getPlacedVerticalTextIndex();
     }
 
     switch (justify) {
         case style::TextJustifyType::Right:
-            return symbolInstance.placedRightTextIndex;
+            return symbolInstance.getPlacedRightTextIndex();
         case style::TextJustifyType::Center:
-            return symbolInstance.placedCenterTextIndex;
+            return symbolInstance.getPlacedCenterTextIndex();
         case style::TextJustifyType::Left:
-            return symbolInstance.placedLeftTextIndex;
+            return symbolInstance.getPlacedLeftTextIndex();
         case style::TextJustifyType::Auto:
             break;
     }
@@ -1190,12 +1211,13 @@ void Placement::markUsedJustification(SymbolBucket& bucket,
         const std::optional<size_t> index = justificationToIndex(justify, symbolInstance, orientation);
         if (index) {
             assert(bucket.text.placedSymbols.size() > *index);
+            if (!symbolInstance.checkIndex(index, bucket.text.placedSymbols.size(), SYM_GUARD_LOC)) continue;
             if (autoIndex && *index != *autoIndex) {
                 // There are multiple justifications and this one isn't it: shift offscreen
                 bucket.text.placedSymbols.at(*index).crossTileID = 0u;
             } else {
                 // Either this is the chosen justification or the justification is hardwired: use this one
-                bucket.text.placedSymbols.at(*index).crossTileID = symbolInstance.crossTileID;
+                bucket.text.placedSymbols.at(*index).crossTileID = symbolInstance.getCrossTileID();
             }
         }
     }
@@ -1204,36 +1226,43 @@ void Placement::markUsedJustification(SymbolBucket& bucket,
 void Placement::markUsedOrientation(SymbolBucket& bucket,
                                     style::TextWritingModeType orientation,
                                     const SymbolInstance& symbolInstance) const {
-    auto horizontal = orientation == style::TextWritingModeType::Horizontal
-                          ? std::optional<style::TextWritingModeType>(orientation)
-                          : std::nullopt;
-    auto vertical = orientation == style::TextWritingModeType::Vertical
-                        ? std::optional<style::TextWritingModeType>(orientation)
-                        : std::nullopt;
+    const auto horizontal = orientation == style::TextWritingModeType::Horizontal
+                                ? std::optional<style::TextWritingModeType>(orientation)
+                                : std::nullopt;
+    const auto vertical = orientation == style::TextWritingModeType::Vertical
+                              ? std::optional<style::TextWritingModeType>(orientation)
+                              : std::nullopt;
 
-    if (symbolInstance.placedRightTextIndex) {
-        bucket.text.placedSymbols.at(*symbolInstance.placedRightTextIndex).placedOrientation = horizontal;
+    if (!symbolInstance.checkIndexes(bucket.text.placedSymbols.size(),
+                                     bucket.icon.placedSymbols.size(),
+                                     bucket.sdfIcon.placedSymbols.size(),
+                                     SYM_GUARD_LOC)) {
+        return;
     }
 
-    if (symbolInstance.placedCenterTextIndex && !symbolInstance.singleLine) {
-        bucket.text.placedSymbols.at(*symbolInstance.placedCenterTextIndex).placedOrientation = horizontal;
+    if (symbolInstance.getPlacedRightTextIndex()) {
+        bucket.text.placedSymbols.at(*symbolInstance.getPlacedRightTextIndex()).placedOrientation = horizontal;
     }
 
-    if (symbolInstance.placedLeftTextIndex && !symbolInstance.singleLine) {
-        bucket.text.placedSymbols.at(*symbolInstance.placedLeftTextIndex).placedOrientation = horizontal;
+    if (symbolInstance.getPlacedCenterTextIndex() && !symbolInstance.getSingleLine()) {
+        bucket.text.placedSymbols.at(*symbolInstance.getPlacedCenterTextIndex()).placedOrientation = horizontal;
     }
 
-    if (symbolInstance.placedVerticalTextIndex) {
-        bucket.text.placedSymbols.at(*symbolInstance.placedVerticalTextIndex).placedOrientation = vertical;
+    if (symbolInstance.getPlacedLeftTextIndex() && !symbolInstance.getSingleLine()) {
+        bucket.text.placedSymbols.at(*symbolInstance.getPlacedLeftTextIndex()).placedOrientation = horizontal;
+    }
+
+    if (symbolInstance.getPlacedVerticalTextIndex()) {
+        bucket.text.placedSymbols.at(*symbolInstance.getPlacedVerticalTextIndex()).placedOrientation = vertical;
     }
 
     auto& iconBuffer = symbolInstance.hasSdfIcon() ? bucket.sdfIcon : bucket.icon;
-    if (symbolInstance.placedIconIndex) {
-        iconBuffer.placedSymbols.at(*symbolInstance.placedIconIndex).placedOrientation = horizontal;
+    if (symbolInstance.getPlacedIconIndex()) {
+        iconBuffer.placedSymbols.at(*symbolInstance.getPlacedIconIndex()).placedOrientation = horizontal;
     }
 
-    if (symbolInstance.placedVerticalIconIndex) {
-        iconBuffer.placedSymbols.at(*symbolInstance.placedVerticalIconIndex).placedOrientation = vertical;
+    if (symbolInstance.getPlacedVerticalIconIndex()) {
+        iconBuffer.placedSymbols.at(*symbolInstance.getPlacedVerticalIconIndex()).placedOrientation = vertical;
     }
 }
 
@@ -1261,8 +1290,8 @@ float Placement::zoomAdjustment(const float zoom) const {
 }
 
 const JointPlacement* Placement::getSymbolPlacement(const SymbolInstance& symbol) const {
-    assert(symbol.crossTileID != 0);
-    auto found = placements.find(symbol.crossTileID);
+    assert(symbol.getCrossTileID() != 0);
+    const auto found = placements.find(symbol.getCrossTileID());
     return (found != placements.end()) ? &found->second : nullptr;
 }
 
@@ -1379,7 +1408,7 @@ void TilePlacement::placeLayers(const RenderLayerReferences& layers) {
     seenCrossTileIDs.clear();
     intersections.clear();
     currentIntersectionPriority = 0u;
-    // Populale intersections.
+    // Populate intersections.
     populateIntersections = true;
     for (auto it = layers.crbegin(); it != layers.crend(); ++it) {
         placeLayer(*it, seenCrossTileIDs);
@@ -1392,29 +1421,30 @@ void TilePlacement::placeLayers(const RenderLayerReferences& layers) {
         // Items arranged as: VerticalBorders & HorizontalBorders (3) ->
         // VerticalBorders (2) -> HorizontalBorders (1)
         if (flagsA != flagsB) return flagsA > flagsB;
-        // If both intersects the same border(s), look for a more noticable cut-off.
+        // If both intersects the same border(s), look for a more noticeable cut-off.
         if (a.status.minSectionLength != b.status.minSectionLength) {
             return a.status.minSectionLength > b.status.minSectionLength;
         }
         // Look at the anchor coordinates
-        if (a.symbol.get().anchor.point.y != b.symbol.get().anchor.point.y) {
-            return a.symbol.get().anchor.point.y < b.symbol.get().anchor.point.y;
+        if (a.symbol.get().getAnchor().point.y != b.symbol.get().getAnchor().point.y) {
+            return a.symbol.get().getAnchor().point.y < b.symbol.get().getAnchor().point.y;
         }
-        if (a.symbol.get().anchor.point.x != b.symbol.get().anchor.point.x) {
-            return a.symbol.get().anchor.point.x < b.symbol.get().anchor.point.x;
+        if (a.symbol.get().getAnchor().point.x != b.symbol.get().getAnchor().point.x) {
+            return a.symbol.get().getAnchor().point.x < b.symbol.get().getAnchor().point.x;
         }
         // Finally, looking at the key hashes.
-        return std::hash<std::u16string>()(a.symbol.get().key) < std::hash<std::u16string>()(b.symbol.get().key);
+        return std::hash<std::u16string>()(a.symbol.get().getKey()) <
+               std::hash<std::u16string>()(b.symbol.get().getKey());
     });
     // Place intersections.
     for (const auto& intersection : intersections) {
         const SymbolInstance& symbol = intersection.symbol;
         const PlacementContext& ctx = intersection.ctx;
         currentIntersectionPriority = intersection.priority;
-        if (seenCrossTileIDs.count(symbol.crossTileID) != 0u) continue;
+        if (seenCrossTileIDs.contains(symbol.getCrossTileID())) continue;
         JointPlacement placement = placeSymbol(symbol, ctx);
         if (shouldRetryPlacement(placement, ctx)) continue;
-        seenCrossTileIDs.insert(symbol.crossTileID);
+        seenCrossTileIDs.insert(symbol.getCrossTileID());
     }
     // Place the rest labels.
     populateIntersections = false;
@@ -1454,14 +1484,11 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
                          collisionGroups.get(params.sourceId),
                          getAvoidEdges(bucket, renderTile.matrix)};
 
-    const auto& variableTextAnchors = ctx.getVariableTextAnchors();
     // In this case we first try to place symbols, which intersects the tile
     // borders, so that those symbols will remain even if each tile is handled
     // independently.
     SymbolInstanceReferences symbolInstances = getBucketSymbols(
         bucket, params.sortKeyRange, collisionIndex.getTransformState().getBearing());
-    std::optional<style::TextVariableAnchorType> variableAnchor;
-    if (!variableTextAnchors.empty()) variableAnchor = variableTextAnchors.front();
 
     // Keeps the data necessary to find a feature location according to a tile.
     struct NeighborTileData {
@@ -1505,25 +1532,33 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
     };
 
     auto symbolIntersectsTileEdges = [&collisionBoxIntersectsTileEdges,
-                                      variableAnchor,
                                       pitchTextWithMap = ctx.pitchTextWithMap,
                                       rotateTextWithMap = ctx.rotateTextWithMap,
                                       variableIconPlacement = ctx.hasIconTextFit && !ctx.iconAllowOverlap,
                                       bearing = static_cast<float>(ctx.getTransformState().getBearing())](
                                          const SymbolInstance& symbol) noexcept -> IntersectStatus {
         IntersectStatus result;
-        if (!symbol.textCollisionFeature.boxes.empty()) {
-            const auto& textCollisionBox = symbol.textCollisionFeature.boxes.front();
+        std::optional<style::TextVariableAnchorType> variableAnchor;
+        auto textVariableAnchorOffset = symbol.getTextVariableAnchorOffset();
+        if (textVariableAnchorOffset && !textVariableAnchorOffset->empty()) {
+            variableAnchor = textVariableAnchorOffset->begin()->anchorType;
+        }
+
+        if (!symbol.getTextCollisionFeature().boxes.empty()) {
+            const auto& textCollisionBox = symbol.getTextCollisionFeature().boxes.front();
 
             Point<float> offset{};
             if (variableAnchor) {
                 float width = textCollisionBox.x2 - textCollisionBox.x1;
                 float height = textCollisionBox.y2 - textCollisionBox.y1;
+
+                auto variableTextOffset = textVariableAnchorOffset->getOffsetByAnchor(*variableAnchor);
+
                 offset = calculateVariableLayoutOffset(*variableAnchor,
                                                        width,
                                                        height,
-                                                       symbol.variableTextOffset,
-                                                       symbol.textBoxScale,
+                                                       variableTextOffset,
+                                                       symbol.getTextBoxScale(),
                                                        rotateTextWithMap,
                                                        pitchTextWithMap,
                                                        bearing);
@@ -1531,17 +1566,20 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
             result = collisionBoxIntersectsTileEdges(textCollisionBox, offset);
         }
 
-        if (!symbol.iconCollisionFeature.boxes.empty()) {
-            const auto& iconCollisionBox = symbol.iconCollisionFeature.boxes.front();
+        if (!symbol.getIconCollisionFeature().boxes.empty()) {
+            const auto& iconCollisionBox = symbol.getIconCollisionFeature().boxes.front();
             Point<float> offset{};
             if (variableAnchor && variableIconPlacement) {
                 float width = iconCollisionBox.x2 - iconCollisionBox.x1;
                 float height = iconCollisionBox.y2 - iconCollisionBox.y1;
+
+                auto variableTextOffset = textVariableAnchorOffset->getOffsetByAnchor(*variableAnchor);
+
                 offset = calculateVariableLayoutOffset(*variableAnchor,
                                                        width,
                                                        height,
-                                                       symbol.variableTextOffset,
-                                                       symbol.textBoxScale,
+                                                       variableTextOffset,
+                                                       symbol.getTextBoxScale(),
                                                        rotateTextWithMap,
                                                        pitchTextWithMap,
                                                        bearing);
@@ -1555,8 +1593,13 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
     };
 
     for (const SymbolInstance& symbol : symbolInstances) {
-        auto intersectStatus = symbolIntersectsTileEdges(symbol);
-        if (intersectStatus.flags == IntersectStatus::None) continue;
+        if (!symbol.check(SYM_GUARD_LOC)) {
+            continue;
+        }
+        const auto intersectStatus = symbolIntersectsTileEdges(symbol);
+        if (intersectStatus.flags == IntersectStatus::None) {
+            continue;
+        }
         intersections.emplace_back(symbol, ctx, intersectStatus, currentIntersectionPriority);
     }
 
@@ -1612,7 +1655,7 @@ void TilePlacement::newSymbolPlaced(const SymbolInstance& symbol,
         assert(box.isBox());
         iconCollisionBox = box.box();
     }
-    PlacedSymbolData symbolData{symbol.key,
+    PlacedSymbolData symbolData{symbol.getKey(),
                                 textCollisionBox,
                                 iconCollisionBox,
                                 placement.text,
@@ -1625,12 +1668,13 @@ void TilePlacement::newSymbolPlaced(const SymbolInstance& symbol,
 
 bool TilePlacement::shouldRetryPlacement(const JointPlacement& placement, const PlacementContext& ctx) {
     // We re-try the placement to try out remaining variable anchors.
-    return populateIntersections && !placement.placed() && !ctx.getVariableTextAnchors().empty();
+    return populateIntersections && !placement.placed() && ctx.getBucket().hasVariableTextAnchors();
 }
 
 // static
 Mutable<Placement> Placement::create(std::shared_ptr<const UpdateParameters> updateParameters_,
                                      std::optional<Immutable<Placement>> prevPlacement) {
+    MLN_TRACE_FUNC();
     assert(updateParameters_);
     switch (updateParameters_->mode) {
         case MapMode::Continuous:

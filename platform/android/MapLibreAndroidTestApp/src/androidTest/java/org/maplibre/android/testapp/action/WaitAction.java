@@ -38,4 +38,3 @@ public final class WaitAction implements ViewAction {
     onView(isRoot()).perform(new WaitAction(loopTime));
   }
 }
-

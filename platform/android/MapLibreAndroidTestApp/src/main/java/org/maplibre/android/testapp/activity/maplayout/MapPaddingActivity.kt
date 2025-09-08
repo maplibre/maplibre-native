@@ -24,22 +24,20 @@ class MapPaddingActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         mapView.setTag(true)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(
-            OnMapReadyCallback { maplibreMap: MapLibreMap ->
-                this@MapPaddingActivity.maplibreMap = maplibreMap
-                maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
-                val paddingLeft = resources.getDimension(R.dimen.map_padding_left).toInt()
-                val paddingBottom = resources.getDimension(R.dimen.map_padding_bottom).toInt()
-                val paddingRight = resources.getDimension(R.dimen.map_padding_right).toInt()
-                val paddingTop = resources.getDimension(R.dimen.map_padding_top).toInt()
-                maplibreMap.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom)
-                val settings = maplibreMap.uiSettings
-                settings.setLogoMargins(paddingLeft, 0, 0, paddingBottom)
-                settings.setCompassMargins(0, paddingTop, paddingRight, 0)
-                settings.isAttributionEnabled = false
-                moveToBangalore()
-            }
-        )
+        mapView.getMapAsync {
+            maplibreMap = it
+            it.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
+            val paddingLeft = resources.getDimension(R.dimen.map_padding_left).toInt()
+            val paddingBottom = resources.getDimension(R.dimen.map_padding_bottom).toInt()
+            val paddingRight = resources.getDimension(R.dimen.map_padding_right).toInt()
+            val paddingTop = resources.getDimension(R.dimen.map_padding_top).toInt()
+            it.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom)
+            val settings = it.uiSettings
+            settings.setLogoMargins(paddingLeft, 0, 0, paddingBottom)
+            settings.setCompassMargins(0, paddingTop, paddingRight, 0)
+            settings.isAttributionEnabled = false
+            moveToBangalore()
+        }
     }
 
     override fun onStart() {
@@ -97,7 +95,7 @@ class MapPaddingActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_bangalore -> {
-                if (maplibreMap != null) {
+                if (this::maplibreMap.isInitialized) {
                     moveToBangalore()
                 }
                 true

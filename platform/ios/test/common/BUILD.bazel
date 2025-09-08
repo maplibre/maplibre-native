@@ -1,5 +1,6 @@
-load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application")
 load("@darwin_config//:config.bzl", "BUNDLE_ID_PREFIX")
+load("@rules_apple//apple:ios.bzl", "ios_application")
+load("@rules_cc//cc:defs.bzl", "cc_library", "objc_library")
 
 cc_library(
     name = "ios_test_runner_lib",
@@ -41,7 +42,7 @@ ios_application(
     infoplists = [
         "//render-test/ios:Info.plist",
     ],
-    minimum_os_version = "12.0",
+    minimum_os_version = "13.0",
     provisioning_profile = "//platform/ios:xcode_profile",
     visibility = [
         "//visibility:public",

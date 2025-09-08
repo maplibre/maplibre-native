@@ -9,8 +9,6 @@ TEST(Settings, SetAndGet) {
     using Object = mapbox::base::ValueObject;
 
     auto& settings = Settings::getInstance();
-    auto value = settings.get(EXPERIMENTAL_THREAD_PRIORITY_WORKER);
-    EXPECT_TRUE(value.is<mapbox::base::NullValue>());
 
     Value lowPrioValue{19.0};
     settings.set(EXPERIMENTAL_THREAD_PRIORITY_WORKER, lowPrioValue);

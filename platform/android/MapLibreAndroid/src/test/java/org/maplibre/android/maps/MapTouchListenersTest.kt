@@ -1,10 +1,10 @@
 package org.maplibre.android.maps
 
 import android.graphics.PointF
-import com.mapbox.android.gestures.MoveGestureDetector
-import com.mapbox.android.gestures.RotateGestureDetector
-import com.mapbox.android.gestures.ShoveGestureDetector
-import com.mapbox.android.gestures.StandardScaleGestureDetector
+import org.maplibre.android.gestures.MoveGestureDetector
+import org.maplibre.android.gestures.RotateGestureDetector
+import org.maplibre.android.gestures.ShoveGestureDetector
+import org.maplibre.android.gestures.StandardScaleGestureDetector
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap.*
 import org.junit.Before

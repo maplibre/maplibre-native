@@ -2,6 +2,7 @@ package org.maplibre.android.maps
 
 import android.content.Context
 import android.graphics.PointF
+import android.view.View
 import androidx.test.annotation.UiThreadTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
@@ -45,8 +46,10 @@ class NativeMapViewTest : AppCenter() {
     fun before() {
         val context = InstrumentationRegistry.getInstrumentation().context
         val apiKey = MapLibre.getApiKey()
+        val options = NativeMapOptions(2.0f, false)
+
         MapLibre.getInstance(context, apiKey, WellKnownTileServer.MapTiler)
-        nativeMapView = NativeMapView(context, 2.0f, false, null, null, DummyRenderer(context))
+        nativeMapView = NativeMapView(context, options, null, null, DummyRenderer(context))
         nativeMapView.resizeView(WIDTH, HEIGHT)
     }
 
@@ -436,6 +439,8 @@ class NativeMapViewTest : AppCenter() {
 
     class DummyRenderer(context: Context) : MapRenderer(context, null) {
 
+        private var renderingRefreshMode: RenderingRefreshMode = RenderingRefreshMode.WHEN_DIRTY
+
         override fun requestRender() {
             // no-op
         }
@@ -443,9 +448,21 @@ class NativeMapViewTest : AppCenter() {
         override fun queueEvent(runnable: Runnable?) {
             // no-op
         }
-        
+
         override fun waitForEmpty() {
             // no-op
+        }
+
+        override fun getView(): View? {
+            return null;
+        }
+
+        override fun setRenderingRefreshMode(mode : RenderingRefreshMode) {
+            renderingRefreshMode = mode
+        }
+
+        override fun getRenderingRefreshMode() : RenderingRefreshMode{
+            return renderingRefreshMode
         }
     }
 }

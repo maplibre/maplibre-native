@@ -14,6 +14,7 @@ public:
 
     virtual void onGlyphsLoaded(const FontStack&, const GlyphRange&) {}
     virtual void onGlyphsError(const FontStack&, const GlyphRange&, std::exception_ptr) {}
+    virtual void onGlyphsRequested(const FontStack&, const GlyphRange&) {}
 };
 
 } // namespace mbgl

@@ -49,6 +49,12 @@ QNetworkRequest HTTPRequest::networkRequest() const {
     req.setRawHeader("User-Agent", agent);
 #endif
 
+    if (m_resource.dataRange) {
+        std::string range = std::string("bytes=") + std::to_string(m_resource.dataRange->first) + std::string("-") +
+                            std::to_string(m_resource.dataRange->second);
+        req.setRawHeader("Range", QByteArray(range.data(), static_cast<int>(range.size())));
+    }
+
     if (m_resource.priorEtag) {
         const auto etag = m_resource.priorEtag;
         req.setRawHeader("If-None-Match", QByteArray(etag->data(), static_cast<int>(etag->size())));
@@ -112,7 +118,8 @@ void HTTPRequest::handleNetworkReply(QNetworkReply* reply, const QByteArray& dat
     int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
     switch (responseCode) {
-        case 200: {
+        case 200:
+        case 206: {
             if (data.isEmpty()) {
                 response.data = std::make_shared<std::string>();
             } else {

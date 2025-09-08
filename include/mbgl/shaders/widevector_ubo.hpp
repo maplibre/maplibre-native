@@ -6,36 +6,35 @@ namespace mbgl {
 namespace shaders {
 
 struct alignas(16) WideVectorUniformsUBO {
-    std::array<float, 4 * 4> mvpMatrix;
-    std::array<float, 4 * 4> mvpMatrixDiff;
-    std::array<float, 4 * 4> mvMatrix;
-    std::array<float, 4 * 4> mvMatrixDiff;
-    std::array<float, 4 * 4> pMatrix;
-    std::array<float, 4 * 4> pMatrixDiff;
-    std::array<float, 2> frameSize;
+    /*   0 */ std::array<float, 4 * 4> mvpMatrix;
+    /*  64 */ std::array<float, 4 * 4> mvpMatrixDiff;
+    /* 128 */ std::array<float, 4 * 4> mvMatrix;
+    /* 192 */ std::array<float, 4 * 4> mvMatrixDiff;
+    /* 256 */ std::array<float, 4 * 4> pMatrix;
+    /* 320 */ std::array<float, 4 * 4> pMatrixDiff;
+    /* 384 */ std::array<float, 2> frameSize;
+    /* 392 */ float pad1;
+    /* 396 */ float pad2;
+    /* 400 */
 };
-static_assert(sizeof(WideVectorUniformsUBO) % 16 == 0);
+static_assert(sizeof(WideVectorUniformsUBO) == 25 * 16);
 
 struct alignas(16) WideVectorUniformWideVecUBO {
-    std::array<float, 4> color;
-    float w2;
-    float offset;
-    float edge;
-    float texRepeat;
-    std::array<float, 2> texOffset;
-    float miterLimit;
-    int32_t join;
-    int32_t cap;
-    int32_t hasExp;
-    float interClipLimit;
+    /*  0 */ std::array<float, 4> color;
+    /* 16 */ float w2;
+    /* 20 */ float offset;
+    /* 24 */ float edge;
+    /* 28 */ float texRepeat;
+    /* 32 */ std::array<float, 2> texOffset;
+    /* 40 */ float miterLimit;
+    /* 44 */ int32_t join;
+    /* 48 */ int32_t cap;
+    /* 52 */ int32_t hasExp;
+    /* 56 */ float interClipLimit;
+    /* 60 */ float pad1;
+    /* 64 */
 };
-static_assert(sizeof(WideVectorUniformWideVecUBO) % 16 == 0);
-
-enum {
-    idWideVectorUniformsUBO = globalUBOCount,
-    idWideVectorUniformWideVecUBO,
-    wideVectorUBOCount
-};
+static_assert(sizeof(WideVectorUniformWideVecUBO) == 4 * 16);
 
 struct VertexTriWideVecB {
     // x, y offset around the center
@@ -50,7 +49,7 @@ struct VertexTriWideVecInstance {
     std::array<float, 4> color;
     int32_t prev;
     int32_t next;
-    int64_t pad_;
+    int64_t pad1;
 };
 static_assert(sizeof(VertexTriWideVecInstance) == 48);
 

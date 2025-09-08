@@ -40,6 +40,8 @@ void SpriteLoader::load(const std::optional<style::Sprite> sprite, FileSource& f
         return;
     }
 
+    observer->onSpriteRequested(sprite);
+
     std::string id = sprite->id;
     std::string url = sprite->spriteURL;
 
@@ -97,20 +99,20 @@ void SpriteLoader::emitSpriteLoadedIfComplete(style::Sprite sprite) {
         /* parseClosure */
         [sprite = sprite, image = data->image, json = data->json]() -> ParseResult {
             try {
-                return {parseSprite(sprite.id, *image, *json), nullptr};
+                return {.images = parseSprite(sprite.id, *image, *json), .error = nullptr};
             } catch (...) {
-                return {{}, std::current_exception()};
+                return {.images = {}, .error = std::current_exception()};
             }
         },
         /* resultClosure */
-        [this, sprite = sprite, weak = weakFactory.makeWeakPtr()](ParseResult result) {
-            if (!weak) return; // This instance has been deleted.
-
-            if (result.error) {
-                observer->onSpriteError(std::optional(sprite), result.error);
-                return;
+        [this, sprite = sprite, factory = weakFactory.makeWeakPtr()](ParseResult result) {
+            if (auto guard = factory.lock(); factory) {
+                if (result.error) {
+                    observer->onSpriteError(std::optional(sprite), result.error);
+                } else {
+                    observer->onSpriteLoaded(std::optional(sprite), std::move(result.images));
+                }
             }
-            observer->onSpriteLoaded(std::optional(sprite), std::move(result.images));
         });
 }
 

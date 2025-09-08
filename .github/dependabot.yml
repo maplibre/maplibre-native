@@ -14,15 +14,18 @@ updates:
       - dependency-name: 'codecov/codecov-action'
         versions: ['4']
     groups:
-      dependencies:
+      github-actions:
         patterns:
           - '*'
   - package-ecosystem: 'gradle'
     open-pull-requests-limit: 1
-    directory: '/platform/android'
+    directories:
+      - '*'
     schedule:
       interval: 'weekly'
+    ignore:
+      - dependency-name: 'io.github.vvb2060.ndk:curl'
     groups:
-      dependencies:
+      gradle-deps:
         patterns:
           - '*'

@@ -1,3 +1,11 @@
-bazel-bin
+.git
+node_modules
 bazel-out
+bazel-bin
 bazel-testlogs
+.cache
+.idea
+.vscode
+.cxx
+build-*
+build

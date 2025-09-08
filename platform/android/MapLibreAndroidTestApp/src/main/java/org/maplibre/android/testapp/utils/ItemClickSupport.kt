@@ -10,13 +10,13 @@ class ItemClickSupport private constructor(private val recyclerView: RecyclerVie
     private val onClickListener = View.OnClickListener { view ->
         onItemClickListener?.let {
             val holder = recyclerView.getChildViewHolder(view)
-            it.onItemClicked(recyclerView, holder.adapterPosition, view)
+            it.onItemClicked(recyclerView, holder.bindingAdapterPosition, view)
         }
     }
     private val onLongClickListener = View.OnLongClickListener { view ->
         onItemLongClickListener?.let {
             val holder = recyclerView.getChildViewHolder(view)
-            it.onItemLongClicked(recyclerView, holder.adapterPosition, view)
+            it.onItemLongClicked(recyclerView, holder.bindingAdapterPosition, view)
         }
         false
     }
@@ -61,9 +61,7 @@ class ItemClickSupport private constructor(private val recyclerView: RecyclerVie
 
         fun removeFrom(view: RecyclerView): ItemClickSupport? {
             val support = view.getTag(R.id.item_click_support) as ItemClickSupport?
-            support?.let {
-                it.detach(view)
-            }
+            support?.detach(view)
             return support
         }
     }

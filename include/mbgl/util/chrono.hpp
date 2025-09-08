@@ -32,6 +32,9 @@ std::string rfc1123(Timestamp);
 // YYYY-mm-dd HH:MM:SS e.g. "2015-11-26 16:11:23"
 std::string iso8601(Timestamp);
 
+// YYYY-mm-ddTHH:MM:SS.MS e.g. "2015-11-26T16:11:23.324Z"
+std::string iso8601(std::chrono::time_point<std::chrono::system_clock, Milliseconds>);
+
 Timestamp parseTimestamp(const char *);
 
 Timestamp parseTimestamp(int32_t timestamp);
@@ -46,11 +49,10 @@ _NODISCARD constexpr std::chrono::duration<_Rep, _Period> abs(const std::chrono:
                                                                : _Dur;
 }
 #else
-template <
-    class Rep,
-    class Period,
-    class = std::enable_if_t<std::chrono::duration<Rep, Period>::min() < std::chrono::duration<Rep, Period>::zero()>>
-constexpr std::chrono::duration<Rep, Period> abs(std::chrono::duration<Rep, Period> d) {
+template <class Rep, class Period>
+constexpr std::chrono::duration<Rep, Period> abs(std::chrono::duration<Rep, Period> d)
+    requires(std::chrono::duration<Rep, Period>::min() < std::chrono::duration<Rep, Period>::zero())
+{
     return d >= d.zero() ? d : -d;
 }
 #endif

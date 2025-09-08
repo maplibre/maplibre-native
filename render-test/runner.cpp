@@ -290,7 +290,7 @@ void TestRunner::checkProbingResults(TestMetadata& resultMetadata) {
                                                 const std::string& message = std::string()) {
         try {
             mbgl::filesystem::create_directories(path);
-            mbgl::util::write_file(path / "metrics.json", serializeMetrics(resultMetadata.metrics));
+            mbgl::util::write_file((path / "metrics.json").generic_string(), serializeMetrics(resultMetadata.metrics));
             resultMetadata.errorMessage += message;
         } catch (mbgl::filesystem::filesystem_error& ex) {
             const auto msg = "Failed to write metrics. path='" + path.string() + "' err='" + ex.what() +
@@ -829,7 +829,14 @@ void TestRunner::run(TestMetadata& metadata) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #endif
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
                     static std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> cv;
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 #if defined(__clang__)
 #pragma clang diagnostic pop
 #endif

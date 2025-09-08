@@ -17,10 +17,11 @@ class CustomTileLoader;
 class CustomGeometryTile : public GeometryTile {
 public:
     CustomGeometryTile(const OverscaledTileID&,
-                       std::string sourceID,
+                       std::string,
                        const TileParameters&,
                        Immutable<style::CustomGeometrySource::TileOptions>,
-                       ActorRef<style::CustomTileLoader> loader);
+                       ActorRef<style::CustomTileLoader> loader,
+                       TileObserver* observer = nullptr);
     ~CustomGeometryTile() override;
 
     void setTileData(const GeoJSON& geoJSON);
@@ -32,6 +33,7 @@ public:
 
 private:
     bool stale = true;
+    std::string sourceID;
     TileNecessity necessity;
     Immutable<style::CustomGeometrySource::TileOptions> options;
     ActorRef<style::CustomTileLoader> loader;

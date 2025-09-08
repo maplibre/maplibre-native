@@ -316,13 +316,13 @@ public class SymbolLayer extends Layer {
   /**
    * Get the IconPadding property
    *
-   * @return property wrapper value around Float
+   * @return property wrapper value around Float[]
    */
   @NonNull
   @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getIconPadding() {
+  public PropertyValue<Float[]> getIconPadding() {
     checkThread();
-    return (PropertyValue<Float>) new PropertyValue("icon-padding", nativeGetIconPadding());
+    return (PropertyValue<Float[]>) new PropertyValue("icon-padding", nativeGetIconPadding());
   }
 
   /**
@@ -506,6 +506,18 @@ public class SymbolLayer extends Layer {
   }
 
   /**
+   * Get the TextVariableAnchorOffset property
+   *
+   * @return property wrapper value around Object[]
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Object[]> getTextVariableAnchorOffset() {
+    checkThread();
+    return (PropertyValue<Object[]>) new PropertyValue("text-variable-anchor-offset", nativeGetTextVariableAnchorOffset());
+  }
+
+  /**
    * Get the TextAnchor property
    *
    * @return property wrapper value around String
@@ -638,6 +650,18 @@ public class SymbolLayer extends Layer {
   }
 
   /**
+   * Get the SymbolScreenSpace property
+   *
+   * @return property wrapper value around Boolean
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Boolean> getSymbolScreenSpace() {
+    checkThread();
+    return (PropertyValue<Boolean>) new PropertyValue("symbol-screen-space", nativeGetSymbolScreenSpace());
+  }
+
+  /**
    * Get the IconOpacity property
    *
    * @return property wrapper value around Float
@@ -683,7 +707,7 @@ public class SymbolLayer extends Layer {
   }
 
   /**
-   * The color of the icon. This can only be used with sdf icons.
+   * The color of the icon. This can only be used with SDF icons.
    *
    * @return int representation of a rgba string color
    * @throws RuntimeException thrown if property isn't a value
@@ -1247,6 +1271,10 @@ public class SymbolLayer extends Layer {
 
   @NonNull
   @Keep
+  private native Object nativeGetTextVariableAnchorOffset();
+
+  @NonNull
+  @Keep
   private native Object nativeGetTextAnchor();
 
   @NonNull
@@ -1288,6 +1316,10 @@ public class SymbolLayer extends Layer {
   @NonNull
   @Keep
   private native Object nativeGetTextOptional();
+
+  @NonNull
+  @Keep
+  private native Object nativeGetSymbolScreenSpace();
 
   @NonNull
   @Keep

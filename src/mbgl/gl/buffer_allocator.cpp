@@ -2,6 +2,8 @@
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/uniform_buffer_gl.hpp>
+#include <mbgl/util/instrumentation.hpp>
+
 #include <utility>
 
 namespace mbgl {
@@ -298,6 +300,7 @@ public:
     // Look for buffers that either have zero living references or equal or under FragmentationThresh
     // references. In the latter case, attempt to relocate these allocations to more utilized buffers.
     void defragment(const std::shared_ptr<gl::Fence>& fence) override {
+        MLN_TRACE_FUNC();
         if (buffers.size() == 0) {
             return;
         }

@@ -10,16 +10,10 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
-	<key>CFBundleShortVersionString</key>
-	<string>5.9.0</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>15256</string>
-	<key>MLNCommitHash</key>
-	<string>$(CURRENT_COMMIT_HASH)</string>
-	<key>MLNSemanticVersionString</key>
-	<string>$(CURRENT_SEMANTIC_VERSION)</string>
 	<key>NSPrincipalClass</key>
 	<string></string>
 </dict>

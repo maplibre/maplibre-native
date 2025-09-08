@@ -40,13 +40,11 @@ class MapInDialogActivity : AppCompatActivity() {
             super.onViewCreated(view, savedInstanceState)
             mapView = view.findViewById(R.id.mapView)
             mapView.onCreate(savedInstanceState)
-            mapView.getMapAsync(
-                OnMapReadyCallback { maplibreMap: MapLibreMap ->
-                    maplibreMap.setStyle(
-                        TestStyles.getPredefinedStyleWithFallback("Outdoor")
-                    )
-                }
-            )
+            mapView.getMapAsync {
+                it.setStyle(
+                    TestStyles.getPredefinedStyleWithFallback("Outdoor")
+                )
+            }
         }
 
         override fun onStart() {
@@ -76,14 +74,14 @@ class MapInDialogActivity : AppCompatActivity() {
 
         override fun onLowMemory() {
             super.onLowMemory()
-            if (mapView != null) {
+            if (this::mapView.isInitialized) {
                 mapView.onLowMemory()
             }
         }
 
         override fun onSaveInstanceState(outState: Bundle) {
             super.onSaveInstanceState(outState)
-            if (mapView != null) {
+            if (this::mapView.isInitialized) {
                 mapView.onSaveInstanceState(outState)
             }
         }

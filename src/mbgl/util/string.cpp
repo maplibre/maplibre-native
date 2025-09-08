@@ -4,6 +4,7 @@
 #include <rapidjson/stringbuffer.h>
 
 #include <cassert>
+#include <sstream>
 
 namespace mbgl {
 namespace util {
@@ -34,6 +35,10 @@ std::string toString(uint64_t t) {
     rapidjson::Writer<rapidjson::StringBuffer> writer(s);
     writer.Uint64(t);
     return s.GetString();
+}
+
+std::string toString(const std::thread::id& t) {
+    return ((std::stringstream{}) << t).str();
 }
 
 std::string toString(double t, bool decimal) {

@@ -33,8 +33,9 @@ public:
                             ? std::min((now - zoomHistory.lastIntegerZoomTime) / d, 1.0f)
                             : 1.0f;
 
-        return z > zoomHistory.lastIntegerZoom ? CrossfadeParameters{2.0f, 1.0f, fraction + (1.0f - fraction) * t}
-                                               : CrossfadeParameters{0.5f, 1.0f, 1 - (1 - t) * fraction};
+        return z > zoomHistory.lastIntegerZoom
+                   ? CrossfadeParameters{.fromScale = 2.0f, .toScale = 1.0f, .t = fraction + (1.0f - fraction) * t}
+                   : CrossfadeParameters{.fromScale = 0.5f, .toScale = 1.0f, .t = 1 - (1 - t) * fraction};
     }
 
     float z;

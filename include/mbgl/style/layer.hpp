@@ -10,9 +10,8 @@
 
 #include <cassert>
 #include <memory>
-#include <string>
-#include <stdexcept>
 #include <optional>
+#include <string>
 
 namespace mbgl {
 namespace style {
@@ -90,6 +89,10 @@ struct LayerTypeInfo {
     } tileKind;
 };
 
+// Added this to support plugins and that their LayerTypeInfo isn't the same point
+// across the board
+bool layerTypeInfoEquals(const mbgl::style::LayerTypeInfo* one, const mbgl::style::LayerTypeInfo* other);
+
 /**
  * The runtime representation of a [layer](https://maplibre.org/maplibre-style-spec/#layers)
  * from the MapLibre Style Spec.
@@ -105,6 +108,8 @@ struct LayerTypeInfo {
  * create an instance of the desired type, calling `LayerManager`:
  *
  *     auto circleLayer = LayerManager::get()->createLayer("circle", ...);
+ *
+ * NOTE: Derived class must invalidate `weakFactory` in their destructor
  */
 class Layer {
 public:

@@ -1,3 +1,4 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
 cc_binary(

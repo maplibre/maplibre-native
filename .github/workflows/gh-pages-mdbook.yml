@@ -1,45 +1,54 @@
-name: Build & Deploy mdBook documentation
+name: gh-pages-mdbook
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'docs/mdbook/**'
   push:
     branches:
       - main
+    paths:
+      - 'docs/mdbook/**'
 
 jobs:
-  build-docs:
+  gh-pages-mdbook-build:
     name: Build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: extractions/setup-just@v2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+      - uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v3
       - name: Setup mdBook
-        uses: peaceiris/actions-mdbook@v2
+        uses: peaceiris/actions-mdbook@ee69d230fe19748b7abf22df32acaa93833fad08 # v2
       - name: Install Dependencies
         shell: bash
         run: sudo apt-get install -y libwayland-dev libxkbcommon-dev # Required for winit
+      - name: Install mdbook-alerts, mdbook-mermaid
+        run: cargo install mdbook-alerts mdbook-mermaid
       - name: Build
         working-directory: docs/mdbook
         shell: bash
         run: mdbook build
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: book
           path: docs/mdbook/book/
 
-  deploy-docs:
-    needs: build-docs
+  gh-pages-mdbook-deploy:
+    needs: gh-pages-mdbook-build
+    if: github.event_name != 'pull_request'
     name: Deploy
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
       - name: Download book
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v4
         with:
           name: book
           path: artifacts/book
+
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4.6.1
+        uses: JamesIves/github-pages-deploy-action@6c2d9db40f9296374acc17b90404b6e8864128c8 # v4.7.3
         with:
           branch: gh-pages
           folder: artifacts/book

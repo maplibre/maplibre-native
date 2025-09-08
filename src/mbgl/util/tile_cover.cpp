@@ -1,4 +1,3 @@
-#include <mbgl/map/transform_state.hpp>
 #include <mbgl/math/log2.hpp>
 #include <mbgl/util/bounding_volumes.hpp>
 #include <mbgl/util/constants.hpp>
@@ -9,6 +8,8 @@
 
 #include <functional>
 #include <list>
+
+using namespace std::numbers;
 
 namespace mbgl {
 
@@ -154,7 +155,7 @@ int32_t coveringZoomLevel(double zoom, style::SourceType type, uint16_t size) no
     }
 }
 
-std::vector<OverscaledTileID> tileCover(const TransformState& state,
+std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
                                         uint8_t z,
                                         const std::optional<uint8_t>& overscaledZ) {
     struct Node {
@@ -170,23 +171,26 @@ std::vector<OverscaledTileID> tileCover(const TransformState& state,
         double sqrDist;
     };
 
+    const auto& transform = state.transformState;
     const double numTiles = std::pow(2.0, z);
-    const double worldSize = Projection::worldSize(state.getScale());
-    const uint8_t minZoom = state.getPitch() <= (60.0 / 180.0) * M_PI ? z : 0;
+    const double worldSize = Projection::worldSize(transform.getScale());
+    const uint8_t minZoom = transform.getPitch() <= state.tileLodPitchThreshold ? z : 0;
     const uint8_t maxZoom = z;
-    const uint8_t overscaledZoom = overscaledZ.value_or(z);
-    const bool flippedY = state.getViewportMode() == ViewportMode::FlippedY;
+    const uint8_t overscaledZoom = std::max(overscaledZ.value_or(z), z);
+    const bool flippedY = transform.getViewportMode() == ViewportMode::FlippedY;
 
-    const auto centerPoint =
-        TileCoordinate::fromScreenCoordinate(state, z, {state.getSize().width / 2.0, state.getSize().height / 2.0}).p;
+    const auto centerPoint = TileCoordinate::fromScreenCoordinate(
+                                 transform, z, {transform.getSize().width / 2.0, transform.getSize().height / 2.0})
+                                 .p;
 
     const vec3 centerCoord = {{centerPoint.x, centerPoint.y, 0.0}};
 
-    const Frustum frustum = Frustum::fromInvProjMatrix(state.getInvProjectionMatrix(), worldSize, z, flippedY);
+    const Frustum frustum = Frustum::fromInvProjMatrix(transform.getInvProjectionMatrix(), worldSize, z, flippedY);
 
     // There should always be a certain number of maximum zoom level tiles
     // surrounding the center location
-    const double radiusOfMaxLvlLodInTiles = 3;
+    assert(state.tileLodMinRadius >= 1);
+    const double radiusOfMaxLvlLodInTiles = std::max(1.0, state.tileLodMinRadius);
 
     const auto newRootTile = [&](int16_t wrap) -> Node {
         return {AABB({{wrap * numTiles, 0.0, 0.0}}, {{(wrap + 1) * numTiles, numTiles, 0.0}}),
@@ -232,12 +236,14 @@ std::vector<OverscaledTileID> tileCover(const TransformState& state,
         // there's always a certain number of maxLevel tiles next to the map
         // center. Using the fact that a parent node in quadtree is twice the
         // size of its children (per dimension) we can define distance
-        // thresholds for each relative level: f(k) = offset + 2 + 4 + 8 + 16 +
-        // ... + 2^k. This is the same as "offset+2^(k+1)-2"
+        // thresholds for each relative level:
+        // f(k) = offset + 2 + 4 + 8 + 16 + ... + 2^k
+        // This is the same as:
+        // f(k) = offset + 2^(k+1)-2
         const double distToSplit = radiusOfMaxLvlLodInTiles + (1 << (maxZoom - node.zoom)) - 2;
 
         // Have we reached the target depth or is the tile too far away to be any split further?
-        if (node.zoom == maxZoom || (*longestDim > distToSplit && node.zoom >= minZoom)) {
+        if (node.zoom == maxZoom || (*longestDim * state.tileLodScale > distToSplit && node.zoom >= minZoom)) {
             // Perform precise intersection test between the frustum and aabb.
             // This will cull < 1% false positives missed by the original test
             if (node.fullyVisible || frustum.intersectsPrecise(node.aabb, true) != IntersectionResult::Separate) {

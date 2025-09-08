@@ -5,7 +5,7 @@
 #include <mbgl/style/types.hpp>
 #include <mbgl/gfx/vertex_vector.hpp>
 #include <mbgl/gfx/index_vector.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/util/math.hpp>
 
 #include <cstdint>

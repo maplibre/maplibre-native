@@ -4,7 +4,11 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.annotation.ColorInt
@@ -13,21 +17,26 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.mapbox.android.gestures.*
+import org.maplibre.android.gestures.AndroidGesturesManager
+import org.maplibre.android.gestures.MoveGestureDetector
+import org.maplibre.android.gestures.RotateGestureDetector
+import org.maplibre.android.gestures.ShoveGestureDetector
+import org.maplibre.android.gestures.StandardScaleGestureDetector
 import org.maplibre.android.annotations.Marker
 import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.MapLibreMap.*
-import org.maplibre.android.maps.OnMapReadyCallback
+import org.maplibre.android.maps.MapLibreMap.CancelableCallback
+import org.maplibre.android.maps.MapLibreMap.OnMoveListener
+import org.maplibre.android.maps.MapLibreMap.OnRotateListener
+import org.maplibre.android.maps.MapLibreMap.OnScaleListener
+import org.maplibre.android.maps.MapLibreMap.OnShoveListener
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.FontCache
 import org.maplibre.android.testapp.utils.ResourceUtils
-import java.lang.annotation.Retention
-import java.lang.annotation.RetentionPolicy
 
 /** Test activity showcasing APIs around gestures implementation. */
 class GestureDetectorActivity : AppCompatActivity() {
@@ -43,13 +52,11 @@ class GestureDetectorActivity : AppCompatActivity() {
         setContentView(R.layout.activity_gesture_detector)
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(
-            OnMapReadyCallback { maplibreMap: MapLibreMap ->
-                this@GestureDetectorActivity.maplibreMap = maplibreMap
-                maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
-                initializeMap()
-            }
-        )
+        mapView.getMapAsync { map: MapLibreMap ->
+            maplibreMap = map
+            maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
+            initializeMap()
+        }
         recyclerView = findViewById(R.id.alerts_recycler)
         recyclerView.setLayoutManager(LinearLayoutManager(this))
         gestureAlertsAdapter = GestureAlertsAdapter()
@@ -94,15 +101,16 @@ class GestureDetectorActivity : AppCompatActivity() {
 
     private fun initializeMap() {
         gesturesManager = maplibreMap.gesturesManager
-        val layoutParams = recyclerView!!.layoutParams as RelativeLayout.LayoutParams
+        val layoutParams = recyclerView.layoutParams as RelativeLayout.LayoutParams
         layoutParams.height = (mapView.height / 1.75).toInt()
         layoutParams.width = mapView.width / 3
-        recyclerView!!.layoutParams = layoutParams
+        recyclerView.layoutParams = layoutParams
         attachListeners()
         fixedFocalPointEnabled(maplibreMap.uiSettings.focalPoint != null)
     }
 
     fun attachListeners() {
+        // # --8<-- [start:addOnMoveListener]
         maplibreMap.addOnMoveListener(
             object : OnMoveListener {
                 override fun onMoveBegin(detector: MoveGestureDetector) {
@@ -125,6 +133,7 @@ class GestureDetectorActivity : AppCompatActivity() {
                 }
             }
         )
+        // # --8<-- [end:addOnMoveListener]
         maplibreMap.addOnRotateListener(
             object : OnRotateListener {
                 override fun onRotateBegin(detector: RotateGestureDetector) {
@@ -313,8 +322,6 @@ class GestureDetectorActivity : AppCompatActivity() {
         class ViewHolder internal constructor(view: View) : RecyclerView.ViewHolder(view) {
             var alertMessageTv: TextView
 
-            @ColorInt var textColor = 0
-
             init {
                 val typeface = FontCache.get("Roboto-Regular.ttf", view.context)
                 alertMessageTv = view.findViewById(R.id.alert_message)
@@ -371,25 +378,24 @@ class GestureDetectorActivity : AppCompatActivity() {
         }
     }
 
-    private class GestureAlert
-    internal constructor(
+    private class GestureAlert(
         @field:Type @param:Type
         val alertType: Int,
         val message: String?
     ) {
-        @Retention(RetentionPolicy.SOURCE)
+        @Retention(AnnotationRetention.SOURCE)
         @IntDef(TYPE_NONE, TYPE_START, TYPE_PROGRESS, TYPE_END, TYPE_OTHER)
-        internal annotation class Type
+        annotation class Type
 
         @ColorInt var color = 0
-        override fun equals(o: Any?): Boolean {
-            if (this === o) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) {
                 return true
             }
-            if (o == null || javaClass != o.javaClass) {
+            if (other == null || javaClass != other.javaClass) {
                 return false
             }
-            val that = o as GestureAlert
+            val that = other as GestureAlert
             if (alertType != that.alertType) {
                 return false
             }

@@ -11,9 +11,7 @@
 #import "MLNSymbolStyleLayer_Private.h"
 #import "MLNCustomStyleLayer_Private.h"
 
-#if MLN_DRAWABLE_RENDERER
 #import "MLNCustomDrawableStyleLayer_Private.h"
-#endif
 
 #include <vector>
 
@@ -70,13 +68,11 @@ LayerManagerDarwin::LayerManagerDarwin() {
 #elif !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
     addLayerType(std::make_unique<CustomStyleLayerPeerFactory>());
 #endif
-    
-#if MLN_DRAWABLE_RENDERER
+
 #if defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_RUNTIME)
     addLayerTypeCoreOnly(std::make_unique<CustomDrawableLayerFactory>());
 #elif !defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_ALL)
     addLayerType(std::make_unique<CustomDrawableStyleLayerPeerFactory>());
-#endif
 #endif
 }
 
@@ -113,7 +109,7 @@ void LayerManagerDarwin::registerCoreFactory(LayerFactory* factory) {
 
 LayerPeerFactory* LayerManagerDarwin::getPeerFactory(const mbgl::style::LayerTypeInfo* typeInfo) {
     for (const auto& factory: peerFactories) {
-        if (factory->getCoreLayerFactory()->getTypeInfo() == typeInfo) {
+        if (layerTypeInfoEquals(factory->getCoreLayerFactory()->getTypeInfo(), typeInfo)) {
             return factory.get();
         }
     }
@@ -131,7 +127,8 @@ LayerFactory* LayerManagerDarwin::getFactory(const mbgl::style::LayerTypeInfo* i
     }
 
     for (const auto& factory: coreFactories) {
-        if (factory->getTypeInfo() == info) {
+        if (layerTypeInfoEquals(factory->getTypeInfo(), info)) {
+      //  if (factory->getTypeInfo() == info) {
             return factory.get();
         }
     }

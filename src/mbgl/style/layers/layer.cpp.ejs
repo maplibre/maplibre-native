@@ -3,6 +3,16 @@
   const layoutProperties = locals.layoutProperties;
   const paintProperties = locals.paintProperties;
   const allProperties = paintProperties.concat(layoutProperties);
+
+  // Define the mapping from capability keys to struct member names
+  const memberMap = {
+    'Source': 'source',
+    'Pass3D': 'pass3d',
+    'Layout': 'layout',
+    'FadingTiles': 'fadingTiles',
+    'CrossTileIndex': 'crossTileIndex',
+    'TileKind': 'tileKind'
+  };
 -%>
 // clang-format off
 
@@ -97,11 +107,13 @@ const split120Line = line => {
 %>
 // static
 const LayerTypeInfo* <%- camelize(type) %>Layer::Impl::staticTypeInfo() noexcept {
-    const static LayerTypeInfo typeInfo{"<%- type %>",
-                                        <%-`${layerCapabilities[type].map(cap => `LayerTypeInfo::${cap}`).join(',\n                                        ')}` %>};
+    const static LayerTypeInfo typeInfo{.type="<%- type %>",
+                                        <%- layerCapabilities[type].map(cap => {
+                                            const key = cap.split('::')[0];
+                                            return `.${memberMap[key]}=LayerTypeInfo::${cap}`;
+                                        }).join(',\n                                        ') %>};
     return &typeInfo;
 }
-
 
 <% if ((type === 'background') || (type === 'location-indicator')) { -%>
 <%- camelize(type) %>Layer::<%- camelize(type) %>Layer(const std::string& layerID)
@@ -117,7 +129,9 @@ const LayerTypeInfo* <%- camelize(type) %>Layer::Impl::staticTypeInfo() noexcept
     : Layer(std::move(impl_)) {
 }
 
-<%- camelize(type) %>Layer::~<%- camelize(type) %>Layer() = default;
+<%- camelize(type) %>Layer::~<%- camelize(type) %>Layer() {
+    weakFactory.invalidateWeakPtrs();
+}
 
 const <%- camelize(type) %>Layer::Impl& <%- camelize(type) %>Layer::impl() const {
     return static_cast<const Impl&>(*baseImpl);

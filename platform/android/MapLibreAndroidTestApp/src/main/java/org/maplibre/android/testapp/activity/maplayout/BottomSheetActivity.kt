@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -13,6 +14,8 @@ import org.maplibre.android.maps.*
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.utils.MapFragmentUtils
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Test activity showcasing using a bottomView with a MapView and stacking map fragments below.
@@ -22,6 +25,16 @@ class BottomSheetActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bottom_sheet)
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val fragmentManager = supportFragmentManager
+                if (fragmentManager.backStackEntryCount > 0) {
+                    fragmentManager.popBackStack()
+                } else {
+                    finish()
+                }
+            }
+        })
         val actionBar = supportActionBar
         actionBar?.setDisplayHomeAsUpEnabled(true)
         findViewById<View>(R.id.fabFragment).setOnClickListener { v: View? -> addMapFragment() }
@@ -35,18 +48,9 @@ class BottomSheetActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         }
         return super.onOptionsItemSelected(item)
-    }
-
-    override fun onBackPressed() {
-        val fragmentManager = supportFragmentManager
-        if (fragmentManager.backStackEntryCount > 0) {
-            fragmentManager.popBackStack()
-        } else {
-            super.onBackPressed()
-        }
     }
 
     private fun addMapFragment() {
@@ -124,8 +128,8 @@ class BottomSheetActivity : AppCompatActivity() {
             maplibreMap.setStyle(
                 Style.Builder().fromUri(
                     STYLES[
-                        Math.min(
-                            Math.max(arguments!!.getInt("mapcounter"), 0),
+                        min(
+                            max(requireArguments().getInt("mapcounter"), 0),
                             STYLES.size - 1
                         )
                     ]

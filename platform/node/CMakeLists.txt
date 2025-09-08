@@ -1,17 +1,22 @@
 set(NODE_MODULE_MINIMUM_ABI 83) # Minimum supported Node.js version: 14
-set(NODE_MODULE_CACHE_DIR ${CMAKE_SOURCE_DIR}/build/headers)
+set(NODE_MODULE_CACHE_DIR ${CMAKE_BINARY_DIR}/headers)
+
+if(DEFINED ENV{MSYSTEM})
+    message(FATAL "MSYS2 is not supported, Node.js in Windows only has binary compatibility with Microsoft Visual C++.")
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/module.cmake)
 
 add_node_module(
     mbgl-node
-    INSTALL_PATH ${PROJECT_SOURCE_DIR}/lib/{node_abi}/mbgl.node
-    NAN_VERSION 2.19.0
+    INSTALL_PATH ${PROJECT_SOURCE_DIR}/platform/node/lib/{node_abi}/mbgl.node
+    NAN_VERSION 2.22.2
     EXCLUDE_NODE_ABIS
         46
         47
         48
         51
+        137
 )
 
 if(WIN32)
@@ -43,7 +48,7 @@ target_include_directories(
 target_link_libraries(
     mbgl-node-loop
     PUBLIC
-        Mapbox::Base
+        MapLibreNative::Base
 )
 
 target_sources(
@@ -75,4 +80,10 @@ target_link_libraries(
 if(CMAKE_SYSTEM_NAME STREQUAL Linux AND NOT MLN_WITH_SANITIZER)
     add_test(NAME mbgl-node-memory COMMAND npm run test-memory WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
     add_test(NAME mbgl-node-test COMMAND npm run test WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+endif()
+
+# needed because v8config.h uses __cplusplus
+# https://learn.microsoft.com/en-us/cpp/build/reference/zc-cplusplus?view=msvc-170
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus")
 endif()

@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.location.LocationComponentActivationOptions
@@ -41,7 +42,7 @@ class LocationFragmentActivity : AppCompatActivity() {
                     .addToBackStack("transaction2")
                     .commit()
             } else {
-                this.onBackPressed()
+                finish()
             }
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -85,7 +86,7 @@ class LocationFragmentActivity : AppCompatActivity() {
         permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
-    class LocationFragment : androidx.fragment.app.Fragment(), LocationEngineCallback<LocationEngineResult> {
+    class LocationFragment : Fragment(), LocationEngineCallback<LocationEngineResult> {
         companion object {
             const val TAG = "LFragment"
             fun newInstance(): LocationFragment {
@@ -167,7 +168,7 @@ class LocationFragmentActivity : AppCompatActivity() {
         }
     }
 
-    class EmptyFragment : androidx.fragment.app.Fragment() {
+    class EmptyFragment : Fragment() {
         companion object {
             const val TAG = "EmptyFragment"
             fun newInstance(): EmptyFragment {

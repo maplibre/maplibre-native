@@ -3,9 +3,7 @@
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/enum.hpp>
 #include <mbgl/platform/gl_functions.hpp>
-
-#include <mbgl/gl/texture_resource.hpp>
-#include <mbgl/gfx/texture.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 namespace mbgl {
 namespace gl {
@@ -17,7 +15,7 @@ Texture2D::~Texture2D() {}
 
 Texture2D& Texture2D::setSamplerConfiguration(const SamplerState& samplerState_) noexcept {
     samplerState = samplerState_;
-    samplerStateDirty = textureResource != nullptr;
+    samplerStateDirty = texture != nullptr;
     return *this;
 }
 
@@ -26,7 +24,7 @@ Texture2D& Texture2D::setFormat(gfx::TexturePixelType pixelFormat_, gfx::Texture
         return *this;
     }
 
-    assert(!textureResource);
+    assert(!texture);
     pixelFormat = pixelFormat_;
     channelType = channelType_;
     storageDirty = true;
@@ -70,51 +68,33 @@ size_t Texture2D::numChannels() const noexcept {
     }
 }
 
-void Texture2D::createObject() noexcept {
-    // Create a new texture object
-    assert(!textureResource);
-    auto obj = context.createUniqueTexture();
-    const auto storageSize = gl::TextureResource::getStorageSize(size, pixelFormat, channelType);
-    context.renderingStats().memTextures += storageSize;
+void Texture2D::allocateTexture() noexcept {
+    MLN_TRACE_FUNC();
 
-    // @TODO: TextureResource is still needed while we have legacy rendering pathways
-    textureResource = std::make_unique<gl::TextureResource>(std::move(obj), storageSize);
+    // Create a new texture object
+    auto obj = context.createUniqueTexture(size, pixelFormat, channelType);
+    texture = std::make_unique<UniqueTexture>(std::move(obj));
 }
 
-void Texture2D::createStorage(const void* data) noexcept {
-    assert(textureResource);
+void Texture2D::updateTextureData(const void* data) noexcept {
+    MLN_TRACE_FUNC();
+    if (data) {
+        uploadSubRegion(data, size, 0, 0);
+    }
 
-    // Create backing storage for our texture object
-    using namespace platform;
-
-    // Bind to TU 0 and upload
-    context.activeTextureUnit = 0;
-    context.texture[0] = getTextureID();
-    context.pixelStoreUnpack = {1};
-    MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D,
-                                  0,
-                                  Enum<gfx::TexturePixelType>::sizedFor(pixelFormat, channelType),
-                                  size.width,
-                                  size.height,
-                                  0,
-                                  Enum<gfx::TexturePixelType>::to(pixelFormat),
-                                  Enum<gfx::TextureChannelDataType>::to(channelType),
-                                  data));
     storageDirty = false;
     updateSamplerConfiguration();
 }
 
 void Texture2D::create() noexcept {
-    if (!textureResource) {
-        createObject();
-    }
+    allocateTexture();
     if (storageDirty) {
-        createStorage();
+        updateTextureData();
     }
 }
 
 platform::GLuint Texture2D::getTextureID() const noexcept {
-    return textureResource ? static_cast<gl::TextureResource&>(*textureResource).texture : 0;
+    return texture ? *texture : 0;
 }
 
 void Texture2D::updateSamplerConfiguration() noexcept {
@@ -133,12 +113,6 @@ void Texture2D::updateSamplerConfiguration() noexcept {
     MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D,
                                      GL_TEXTURE_WRAP_T,
                                      samplerState.wrapV == gfx::TextureWrapType::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
-
-    // Keep the resource sampler configuration in sync
-    auto& glResource = static_cast<gl::TextureResource&>(*textureResource);
-    glResource.filter = samplerState.filter;
-    glResource.wrapX = samplerState.wrapU;
-    glResource.wrapY = samplerState.wrapV;
 }
 
 void Texture2D::bind(int32_t location, int32_t textureUnit) noexcept {
@@ -181,28 +155,19 @@ void Texture2D::unbind() noexcept {
 }
 
 void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
-    if (!textureResource || storageDirty || size_ == Size{0, 0} || size_ != size) {
+    if (!texture || storageDirty || size_ == Size{0, 0} || size_ != size) {
         size = size_;
 
-        // Create the texture object if we don't already have one
-        if (!textureResource) {
-            createObject();
-        }
-
-        createStorage(pixelData);
-
-    } else {
-        if (pixelData) {
-            // Upload to existing memory
-            uploadSubRegion(pixelData, size, 0, 0);
-        }
+        // Create the texture object if we don't already have one or if storage is dirty
+        allocateTexture();
     }
+    updateTextureData(pixelData);
 }
 
 void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16_t xOffset, uint16_t yOffset) noexcept {
     using namespace platform;
 
-    assert(textureResource);
+    assert(texture);
 
     // update sampler configuration if needed
     if (samplerStateDirty) {
@@ -222,6 +187,9 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
                                      Enum<gfx::TexturePixelType>::to(pixelFormat),
                                      Enum<gfx::TextureChannelDataType>::to(channelType),
                                      pixelData));
+
+    context.renderingStats().numTextureUpdates++;
+    context.renderingStats().textureUpdateBytes += static_cast<size_t>(getPixelStride() * size_.width * size_.height);
 }
 
 void Texture2D::upload() noexcept {

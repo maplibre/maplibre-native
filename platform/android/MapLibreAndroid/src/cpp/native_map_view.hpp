@@ -5,6 +5,7 @@
 #include <mbgl/map/map.hpp>
 #include <mbgl/util/noncopyable.hpp>
 #include <mbgl/util/run_loop.hpp>
+#include <mbgl/tile/tile_operation.hpp>
 #include <mbgl/storage/network_status.hpp>
 
 #include "annotation/marker.hpp"
@@ -22,6 +23,7 @@
 #include "map/camera_position.hpp"
 #include "map/image.hpp"
 #include "style/light.hpp"
+#include "native_map_options.hpp"
 #include "bitmap.hpp"
 
 #include <exception>
@@ -37,6 +39,7 @@ namespace android {
 class AndroidRendererFrontend;
 class FileSource;
 class MapRenderer;
+class RenderingStats;
 
 class NativeMapView : public MapObserver {
 public:
@@ -48,8 +51,7 @@ public:
                   const jni::Object<NativeMapView>&,
                   const jni::Object<FileSource>&,
                   const jni::Object<MapRenderer>&,
-                  jni::jfloat,
-                  jni::jboolean);
+                  const jni::Object<NativeMapOptions>&);
 
     virtual ~NativeMapView();
 
@@ -61,7 +63,7 @@ public:
     void onDidFinishLoadingMap() override;
     void onDidFailLoadingMap(MapLoadError, const std::string&) override;
     void onWillStartRenderingFrame() override;
-    void onDidFinishRenderingFrame(MapObserver::RenderFrameStatus) override;
+    void onDidFinishRenderingFrame(const MapObserver::RenderFrameStatus&) override;
     void onWillStartRenderingMap() override;
     void onDidFinishRenderingMap(MapObserver::RenderMode) override;
     void onDidBecomeIdle() override;
@@ -198,6 +200,12 @@ public:
 
     jni::jboolean getDebug(JNIEnv&);
 
+    jni::Local<jni::Array<jni::String>> getActionJournalLogFiles(JNIEnv&);
+
+    jni::Local<jni::Array<jni::String>> getActionJournalLog(JNIEnv&);
+
+    void clearActionJournalLog(JNIEnv&);
+
     jni::jboolean isFullyLoaded(JNIEnv&);
 
     jni::jdouble getMetersPerPixelAtLatitude(JNIEnv&, jni::jdouble, jni::jdouble);
@@ -290,12 +298,54 @@ public:
 
     jni::jint getPrefetchZoomDelta(JNIEnv&);
 
+    void setTileCacheEnabled(JNIEnv&, jni::jboolean);
+
+    jni::jboolean getTileCacheEnabled(JNIEnv&);
+
+    void setTileLodMinRadius(JNIEnv&, jni::jdouble);
+
+    jni::jdouble getTileLodMinRadius(JNIEnv&);
+
+    void setTileLodScale(JNIEnv&, jni::jdouble);
+
+    jni::jdouble getTileLodScale(JNIEnv&);
+
+    void setTileLodPitchThreshold(JNIEnv&, jni::jdouble);
+
+    jni::jdouble getTileLodPitchThreshold(JNIEnv&);
+
+    void setTileLodZoomShift(JNIEnv&, jni::jdouble);
+
+    jni::jdouble getTileLodZoomShift(JNIEnv&);
+
     mbgl::Map& getMap();
 
     void triggerRepaint(JNIEnv&);
 
+    jni::jboolean isRenderingStatsViewEnabled(JNIEnv&);
+    void enableRenderingStatsView(JNIEnv&, jni::jboolean);
+
+    // Shader compilation
+    void onRegisterShaders(mbgl::gfx::ShaderRegistry&) override;
+    void onPreCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type, const std::string&) override;
+    void onPostCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type, const std::string&) override;
+    void onShaderCompileFailed(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type, const std::string&) override;
+
+    // Glyph requests
+    void onGlyphsLoaded(const mbgl::FontStack&, const mbgl::GlyphRange&) override;
+    void onGlyphsError(const mbgl::FontStack&, const mbgl::GlyphRange&, std::exception_ptr) override;
+    void onGlyphsRequested(const mbgl::FontStack&, const mbgl::GlyphRange&) override;
+
+    // Tile requests
+    void onTileAction(mbgl::TileOperation, const mbgl::OverscaledTileID&, const std::string&) override;
+
+    // Sprite requests
+    void onSpriteLoaded(const std::optional<mbgl::style::Sprite>&) override;
+    void onSpriteError(const std::optional<mbgl::style::Sprite>&, std::exception_ptr) override;
+    void onSpriteRequested(const std::optional<mbgl::style::Sprite>&) override;
+
 private:
-    std::unique_ptr<AndroidRendererFrontend> rendererFrontend;
+    std::shared_ptr<AndroidRendererFrontend> rendererFrontend;
 
     JavaVM* vm = nullptr;
     jni::WeakReference<jni::Object<NativeMapView>> javaPeer;
@@ -305,6 +355,8 @@ private:
     std::string styleUrl;
 
     float pixelRatio;
+
+    jni::Global<jni::Object<RenderingStats>> renderingStats;
 
     // Minimum texture size according to OpenGL ES 2.0 specification.
     int width = 64;

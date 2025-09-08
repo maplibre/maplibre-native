@@ -13,6 +13,8 @@
 #include <mbgl/style/layer.hpp>
 #include <mbgl/style/collection.hpp>
 
+#include <mbgl/text/glyph.hpp>
+
 #include <mbgl/map/camera.hpp>
 
 #include <mbgl/util/noncopyable.hpp>
@@ -80,6 +82,7 @@ public:
     void removeImage(const std::string&);
 
     const std::string& getGlyphURL() const;
+    std::shared_ptr<FontFaces> getFontFaces() const;
 
     using ImageImpls = std::vector<Immutable<Image::Impl>>;
     Immutable<ImageImpls> getImageImpls() const;
@@ -104,6 +107,7 @@ private:
     std::unique_ptr<SpriteLoader> spriteLoader;
 
     std::string glyphURL;
+    std::shared_ptr<FontFaces> fontFaces;
     Immutable<ImageImpls> images = makeMutable<ImageImpls>();
     CollectionWithPersistentOrder<Source> sources;
     Collection<Layer> layers;
@@ -118,6 +122,7 @@ private:
     // SpriteLoaderObserver implementation.
     void onSpriteLoaded(std::optional<style::Sprite> sprite, std::vector<Immutable<style::Image::Impl>>) override;
     void onSpriteError(std::optional<style::Sprite> sprite, std::exception_ptr) override;
+    void onSpriteRequested(const std::optional<style::Sprite>&) override;
 
     // SourceObserver implementation.
     void onSourceLoaded(Source&) override;

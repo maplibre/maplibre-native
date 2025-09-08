@@ -3,6 +3,8 @@ package org.maplibre.android.testapp.activity.fragment
 import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentStatePagerAdapter
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMapOptions
@@ -38,7 +40,7 @@ class ViewPagerActivity : AppCompatActivity() {
         }
     }
 
-    internal class MapFragmentAdapter(private val context: Context, fragmentManager: androidx.fragment.app.FragmentManager) : androidx.fragment.app.FragmentStatePagerAdapter(fragmentManager) {
+    internal class MapFragmentAdapter(private val context: Context, fragmentManager: FragmentManager) : FragmentStatePagerAdapter(fragmentManager) {
 
         override fun getCount(): Int {
             return NUM_ITEMS

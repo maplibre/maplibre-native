@@ -20,13 +20,18 @@ const void* castGpuIdToTracyPtr(GpuId id) {
     return reinterpret_cast<const void*>(static_cast<std::ptrdiff_t>(id));
 }
 
-#ifndef MLN_RENDER_BACKEND_OPENGL
+#if !defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MLN_RENDER_BACKEND_VULKAN)
 #error \
-    "MLN_RENDER_BACKEND_OPENGL is not defined. MLN_RENDER_BACKEND_OPENGL is expected to be defined in CMake and Bazel"
+    "MLN_RENDER_BACKEND_OPENGL/MLN_RENDER_BACKEND_VULKAN is not defined. \
+    MLN_RENDER_BACKEND_OPENGL/MLN_RENDER_BACKEND_VULKAN is expected to be defined in CMake and Bazel"
 #endif
 
 #define MLN_TRACE_FUNC() ZoneScoped
 #define MLN_TRACE_ZONE(label) ZoneScopedN(#label)
+
+#define MLN_ZONE_TEXT(text, size) ZoneText(text, size)
+#define MLN_ZONE_STR(str) ZoneText(str.c_str(), str.size())
+#define MLN_ZONE_VALUE(n) ZoneValue(n)
 
 constexpr const char* tracyTextureMemoryLabel = "Texture Memory";
 #define MLN_TRACE_ALLOC_TEXTURE(id, size) TracyAllocN(castGpuIdToTracyPtr(id), size, tracyTextureMemoryLabel)
@@ -74,7 +79,7 @@ constexpr const char* tracyConstMemoryLabel = "Constant Buffer Memory";
     do {                 \
         FrameMark;       \
         TracyGpuCollect; \
-    } while (0)
+    } while (0);
 
 #undef glGenQueries
 #undef glGetQueryiv
@@ -84,32 +89,42 @@ constexpr const char* tracyConstMemoryLabel = "Constant Buffer Memory";
 #undef glGetQueryObjectui64v
 #undef GLint
 
-#else // MLN_RENDER_BACKEND_OPENGL
+#elif MLN_RENDER_BACKEND_VULKAN
 
-#define MLN_TRACE_GL_CONTEXT()
-#define MLN_TRACE_GL_ZONE(label)
-#define MLN_TRACE_FUNC_GL()
+#define MLN_END_FRAME() \
+    do {                \
+        FrameMark;      \
+    } while (0);
+
+#else
+
+#define MLN_TRACE_GL_CONTEXT() ((void)0)
+#define MLN_TRACE_GL_ZONE(label) ((void)0)
+#define MLN_TRACE_FUNC_GL() ((void)0)
 #define MLN_END_FRAME() FrameMark
 
-#endif // MLN_RENDER_BACKEND_OPENGL
+#endif
 
 #else // MLN_TRACY_ENABLE
 
-#define MLN_TRACE_GL_CONTEXT()
-#define MLN_TRACE_GL_ZONE(label)
-#define MLN_TRACE_FUNC_GL()
-#define MLN_END_FRAME()
-#define MLN_TRACE_ALLOC_TEXTURE(id, size)
-#define MLN_TRACE_FREE_TEXTURE(id)
-#define MLN_TRACE_ALLOC_RT(id, size)
-#define MLN_TRACE_FREE_RT(id)
-#define MLN_TRACE_ALLOC_VERTEX_BUFFER(id, size)
-#define MLN_TRACE_FREE_VERTEX_BUFFER(id)
-#define MLN_TRACE_ALLOC_INDEX_BUFFER(id, size)
-#define MLN_TRACE_FREE_INDEX_BUFFER(id)
-#define MLN_TRACE_ALLOC_CONST_BUFFER(id, size)
-#define MLN_TRACE_FREE_CONST_BUFFER(id)
-#define MLN_TRACE_FUNC()
-#define MLN_TRACE_ZONE(label)
+#define MLN_TRACE_GL_CONTEXT() ((void)0)
+#define MLN_TRACE_GL_ZONE(label) ((void)0)
+#define MLN_ZONE_TEXT(label) ((void)0)
+#define MLN_ZONE_STR(str) ((void)0)
+#define MLN_ZONE_VALUE(val) ((void)0)
+#define MLN_TRACE_FUNC_GL() ((void)0)
+#define MLN_END_FRAME() ((void)0)
+#define MLN_TRACE_ALLOC_TEXTURE(id, size) ((void)0)
+#define MLN_TRACE_FREE_TEXTURE(id) ((void)0)
+#define MLN_TRACE_ALLOC_RT(id, size) ((void)0)
+#define MLN_TRACE_FREE_RT(id) ((void)0)
+#define MLN_TRACE_ALLOC_VERTEX_BUFFER(id, size) ((void)0)
+#define MLN_TRACE_FREE_VERTEX_BUFFER(id) ((void)0)
+#define MLN_TRACE_ALLOC_INDEX_BUFFER(id, size) ((void)0)
+#define MLN_TRACE_FREE_INDEX_BUFFER(id) ((void)0)
+#define MLN_TRACE_ALLOC_CONST_BUFFER(id, size) ((void)0)
+#define MLN_TRACE_FREE_CONST_BUFFER(id) ((void)0)
+#define MLN_TRACE_FUNC() ((void)0)
+#define MLN_TRACE_ZONE(label) ((void)0)
 
 #endif // MLN_TRACY_ENABLE

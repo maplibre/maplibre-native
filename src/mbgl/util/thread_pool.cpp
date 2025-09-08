@@ -2,6 +2,7 @@
 
 #include <mbgl/platform/settings.hpp>
 #include <mbgl/platform/thread.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/monotonic_timer.hpp>
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/string.hpp>
@@ -109,27 +110,35 @@ void ThreadedSchedulerBase::schedule(std::function<void()>&& fn) {
 }
 
 void ThreadedSchedulerBase::schedule(const util::SimpleIdentity tag, std::function<void()>&& fn) {
+    MLN_TRACE_FUNC();
     assert(fn);
     if (!fn) return;
 
     std::shared_ptr<Queue> q;
     {
+        MLN_TRACE_ZONE(queue);
         std::lock_guard<std::mutex> lock(taggedQueueLock);
-        auto it = taggedQueue.find(tag);
-        if (it == taggedQueue.end()) {
-            q = std::make_shared<Queue>();
-            taggedQueue.insert({tag, q});
-        } else {
-            q = it->second;
+
+        // find or insert
+        auto result = taggedQueue.insert(std::make_pair(tag, std::shared_ptr<Queue>{}));
+        if (result.second) {
+            // new entry inserted
+            result.first->second = std::make_shared<Queue>();
         }
+        q = result.first->second;
+
+        MLN_ZONE_VALUE(taggedQueue.size());
     }
 
     {
+        MLN_TRACE_ZONE(push);
         std::lock_guard<std::mutex> lock(q->lock);
         q->queue.push(std::move(fn));
         taskCount++;
     }
 
+    // Take the worker lock before notifying to prevent threads from waiting while we try to wake them
+    std::lock_guard<std::mutex> workerLock(workerMutex);
     cvAvailable.notify_one();
 }
 

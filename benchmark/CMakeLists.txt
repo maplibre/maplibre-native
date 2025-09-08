@@ -10,8 +10,8 @@ add_library(
     ${PROJECT_SOURCE_DIR}/benchmark/parse/vector_tile.benchmark.cpp
     ${PROJECT_SOURCE_DIR}/benchmark/src/mbgl/benchmark/benchmark.cpp
     ${PROJECT_SOURCE_DIR}/benchmark/storage/offline_database.benchmark.cpp
-    ${PROJECT_SOURCE_DIR}/benchmark/util/dtoa.benchmark.cpp
     ${PROJECT_SOURCE_DIR}/benchmark/util/tilecover.benchmark.cpp
+    ${PROJECT_SOURCE_DIR}/benchmark/util/color.benchmark.cpp
 )
 
 target_include_directories(
@@ -61,7 +61,3 @@ target_link_libraries(
 )
 
 set_property(TARGET mbgl-benchmark PROPERTY FOLDER MapLibre)
-
-if(MLN_WITH_OPENGL)
-    target_compile_definitions(mbgl-benchmark PRIVATE "MLN_RENDER_BACKEND_OPENGL=1")
-endif()

@@ -1,6 +1,7 @@
 #include <mbgl/actor/mailbox.hpp>
 #include <mbgl/actor/message.hpp>
 #include <mbgl/actor/scheduler.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/scoped.hpp>
 
 #include <cassert>
@@ -19,7 +20,7 @@ Mailbox::Mailbox(const TaggedScheduler& scheduler_)
 void Mailbox::open(const TaggedScheduler& scheduler_) {
     assert(!weakScheduler);
     schedulerTag = scheduler_.tag;
-    return open(*scheduler_.get());
+    open(*scheduler_.get());
 }
 
 void Mailbox::open(Scheduler& scheduler_) {
@@ -37,10 +38,7 @@ void Mailbox::open(Scheduler& scheduler_) {
     weakScheduler = scheduler_.makeWeakPtr();
 
     if (!queue.empty()) {
-        auto guard = weakScheduler.lock();
-        if (weakScheduler) {
-            weakScheduler->schedule(makeClosure(shared_from_this()));
-        }
+        scheduleToRecieve();
     }
 }
 
@@ -71,10 +69,11 @@ void Mailbox::abandon() {
 }
 
 bool Mailbox::isOpen() const {
-    return bool(weakScheduler) && !closed;
+    return !closed && weakScheduler;
 }
 
 void Mailbox::push(std::unique_ptr<Message> message) {
+    MLN_TRACE_FUNC();
     auto idleState = State::Idle;
     while (!state.compare_exchange_strong(idleState, State::Processing)) {
         if (state == State::Abandoned) {
@@ -88,19 +87,27 @@ void Mailbox::push(std::unique_ptr<Message> message) {
         }
     }};
 
-    std::lock_guard<std::mutex> pushingLock(pushingMutex);
+    {
+        MLN_TRACE_ZONE(push lock);
+        std::lock_guard<std::mutex> pushingLock(pushingMutex);
 
-    if (closed) {
-        state = State::Abandoned;
-        return;
-    }
+        if (closed) {
+            state = State::Abandoned;
+            return;
+        }
 
-    std::lock_guard<std::mutex> queueLock(queueMutex);
-    bool wasEmpty = queue.empty();
-    queue.push(std::move(message));
-    auto guard = weakScheduler.lock();
-    if (wasEmpty && weakScheduler) {
-        weakScheduler->schedule(schedulerTag, makeClosure(shared_from_this()));
+        bool wasEmpty = false;
+        {
+            MLN_TRACE_ZONE(queue lock);
+            std::lock_guard<std::mutex> queueLock(queueMutex);
+            wasEmpty = queue.empty();
+            queue.push(std::move(message));
+        }
+
+        if (wasEmpty) {
+            MLN_TRACE_ZONE(schedule);
+            scheduleToRecieve(schedulerTag);
+        }
     }
 }
 
@@ -125,7 +132,7 @@ void Mailbox::receive() {
     }
 
     std::unique_ptr<Message> message;
-    bool wasEmpty;
+    bool wasEmpty = false;
 
     {
         std::lock_guard<std::mutex> queueLock(queueMutex);
@@ -140,25 +147,24 @@ void Mailbox::receive() {
     // If there are more messages in the queue and the scheduler
     // is still active, create a new task to handle the next one
     if (!wasEmpty) {
-        auto guard = weakScheduler.lock();
-        if (weakScheduler) {
-            weakScheduler->schedule(makeClosure(shared_from_this()));
+        scheduleToRecieve();
+    }
+}
+
+void Mailbox::scheduleToRecieve(const std::optional<util::SimpleIdentity>& tag) {
+    if (auto guard = weakScheduler.lock(); weakScheduler) {
+        std::weak_ptr<Mailbox> mailbox = shared_from_this();
+        auto setToRecieve = [mbox = std::move(mailbox)]() {
+            if (auto locked = mbox.lock()) {
+                locked->receive();
+            }
+        };
+        if (tag) {
+            weakScheduler->schedule(*tag, std::move(setToRecieve));
+        } else {
+            weakScheduler->schedule(std::move(setToRecieve));
         }
     }
-}
-
-// static
-void Mailbox::maybeReceive(const std::weak_ptr<Mailbox>& mailbox) {
-    if (auto locked = mailbox.lock()) {
-        locked->receive();
-    }
-}
-
-// static
-std::function<void()> Mailbox::makeClosure(std::weak_ptr<Mailbox> mailbox) {
-    return [mailbox = std::move(mailbox)]() {
-        maybeReceive(mailbox);
-    };
 }
 
 } // namespace mbgl

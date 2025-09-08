@@ -50,7 +50,7 @@ private:
     std::shared_ptr<Mailbox> mailbox;
     std::aligned_storage_t<sizeof(Object)> objectStorage;
 
-    Object& object() { return *reinterpret_cast<Object*>(&objectStorage); }
+    Object& object() { return reinterpret_cast<Object&>(objectStorage); }
 
     friend class EstablishedActor<Object>;
     friend class Actor<Object>;

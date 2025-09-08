@@ -4,6 +4,7 @@
 
 #import "MLNFoundation.h"
 #import "MLNGeometry.h"
+#import "MLNMapOptions.h"
 #import "MLNStyle.h"
 #import "MLNTypes.h"
 
@@ -22,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
  An interactive, customizable map view with an interface similar to the one
  provided by Apple’s MapKit.
 
- Using `MLNMapView`, you can embed the map inside a view, allow users to
+ Using ``MLNMapView``, you can embed the map inside a view, allow users to
  manipulate it with standard gestures, animate the map between different
  viewpoints, and present information in the form of annotations and overlays.
 
@@ -34,7 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
  <a href="https://www.mapbox.com/studio/">Mapbox Studio</a> and hosted on
  mapbox.com.
 
- A collection of Mapbox-hosted styles is available through the `MLNStyle` class.
+ A collection of Mapbox-hosted styles is available through the ``MLNStyle`` class.
  These basic styles use
  <a href="https://www.mapbox.com/developers/vector-tiles/mapbox-streets">Mapbox Streets</a>
  or <a href="https://www.mapbox.com/satellite/">Mapbox Satellite</a> data
@@ -47,12 +48,12 @@ NS_ASSUME_NONNULL_BEGIN
  your Mapbox account. They also deter other developers from using your styles
  without your permission.
 
- Adding your own gesture recognizer to `MLNMapView` will block the corresponding
- gesture recognizer built into `MLNMapView`. To avoid conflicts, define which
+ Adding your own gesture recognizer to ``MLNMapView`` will block the corresponding
+ gesture recognizer built into ``MLNMapView``. To avoid conflicts, define which
  gesture recognizer takes precedence. For example, you can subclass
  `NSClickGestureRecognizer` and override `-[NSGestureRecognizer
  shouldRequireFailureOfGestureRecognizer:]`, so that your subclass will be invoked only if the
- default `MLNMapView` click gesture recognizer fails:
+ default ``MLNMapView`` click gesture recognizer fails:
 
  ```swift
  class MapClickGestureRecognizer: NSClickGestureRecognizer {
@@ -90,6 +91,16 @@ MLN_EXPORT IB_DESIGNABLE @interface MLNMapView : NSView<MLNStylable>
  */
 - (instancetype)initWithFrame:(NSRect)frame styleURL:(nullable NSURL *)styleURL;
 
+/**
+ Initializes and returns a newly allocated map view with the specified frame
+ and the default style.
+
+ @param frame The frame for the view, measured in points.
+ @param options The map instance options
+ @return An initialized map view.
+ */
+- (instancetype)initWithFrame:(CGRect)frame options:(MLNMapOptions *)options;
+
 // MARK: Accessing the Delegate
 
 /**
@@ -113,16 +124,9 @@ MLN_EXPORT IB_DESIGNABLE @interface MLNMapView : NSView<MLNStylable>
  If the style is loading, this property is set to `nil` until the style finishes
  loading. If the style has failed to load, this property is set to `nil`.
  Because the style loads asynchronously, you should manipulate it in the
- `-[MLNMapViewDelegate mapView:didFinishLoadingStyle:]` or
- `-[MLNMapViewDelegate mapViewDidFinishLoadingMap:]` method. It is not possible
+ ``MLNMapViewDelegate/mapView:didFinishLoadingStyle:`` or
+ ``MLNMapViewDelegate/mapViewDidFinishLoadingMap:`` method. It is not possible
  to manipulate the style before it has finished loading.
-
- @note The default styles provided by Mapbox contain sources and layers with
-    identifiers that will change over time. Applications that use APIs that
-    manipulate a style's sources and layers must first set the style URL to an
-    explicitly versioned style using a convenience method like
-    `+[MLNStyle outdoorsStyleURLWithVersion:]`, `MLNMapView`’s “Style URL”
-    inspectable in Interface Builder, or a manually constructed `NSURL`.
  */
 @property (nonatomic, readonly, nullable) MLNStyle *style;
 
@@ -197,6 +201,50 @@ MLN_EXPORT IB_DESIGNABLE @interface MLNMapView : NSView<MLNStylable>
  The default value of this property is `YES`.
  */
 @property (nonatomic, assign) BOOL prefetchesTiles;
+
+// MARK: Tile LOD controls
+
+/**
+ Camera based tile level of detail controls
+
+ Minimum radius around the view point in unit of tiles in which the fine
+ grained zoom level tiles are always used when performing LOD
+ radius must be greater than 1 (At least 1 fine detailed tile is present)
+ A smaller radius value may improve performance at the cost of quality (tiles away from
+ camera use lower Zoom levels)
+ */
+@property (nonatomic, assign) double tileLodMinRadius;
+
+/**
+ Camera based tile level of detail controls
+
+ Factor for the distance to the camera view point
+ A value larger than 1 increases the distance to the camera view point reducing LOD
+ Larger values may improve performance at the cost of quality (tiles away from camera
+ use lower Zoom levels)
+ */
+@property (nonatomic, assign) double tileLodScale;
+
+/**
+ Camera based tile level of detail controls
+
+ Pitch angle in radians above which LOD calculation is performed
+ A smaller radius value may improve performance at the cost of quality
+ */
+@property (nonatomic, assign) double tileLodPitchThreshold;
+
+/**
+ Camera based tile level of detail controls
+
+ Shift applied to the Zoom level during LOD calculation
+ A negative value shifts the Zoom level to a coarser level reducing quality but improving
+ performance A positive value shifts the Zoom level to a finer level increasing details but
+ negatively affecting performance A value of zero (default) does not apply any shift to the Zoom
+ level It is not recommended to change the default value unless performance is critical and the loss
+ of quality is acceptable. A value of -1 reduces the number of displayed tiles by a factor of 4 on
+ average It is recommended to first configure the pixelRatio before adjusting TileLodZoomShift.
+ */
+@property (nonatomic, assign) double tileLodZoomShift;
 
 // MARK: Manipulating the Viewpoint
 
@@ -787,7 +835,7 @@ around the returned camera object if it were set as the receiver’s camera.
 /**
  The complete list of annotations associated with the receiver. (read-only)
 
- The objects in this array must adopt the `MLNAnnotation` protocol. If no
+ The objects in this array must adopt the ``MLNAnnotation`` protocol. If no
  annotations are associated with the map view, the value of this property is
  `nil`.
  */
@@ -796,14 +844,14 @@ around the returned camera object if it were set as the receiver’s camera.
 /**
  Adds an annotation to the map view.
 
- @note `MLNMultiPolyline`, `MLNMultiPolygon`, and `MLNShapeCollection` objects
-    cannot be added to the map view at this time. Nor can `MLNMultiPoint`
-    objects that are not instances of `MLNPolyline` or `MLNPolygon`. Any
+ @note ``MLNMultiPolyline``, ``MLNMultiPolyline``, and ``MLNMultiPolyline`` objects
+    cannot be added to the map view at this time. Nor can ``MLNMultiPoint``
+    objects that are not instances of ``MLNPolyline`` or ``MLNPolyline``. Any
     multipoint, multipolyline, multipolygon, or shape collection object that is
     specified is silently ignored.
 
  @param annotation The annotation object to add to the receiver. This object
-    must conform to the `MLNAnnotation` protocol. The map view retains the
+    must conform to the ``MLNAnnotation`` protocol. The map view retains the
     annotation object.
  */
 - (void)addAnnotation:(id<MLNAnnotation>)annotation;
@@ -811,14 +859,14 @@ around the returned camera object if it were set as the receiver’s camera.
 /**
  Adds an array of annotations to the map view.
 
- @note `MLNMultiPolyline`, `MLNMultiPolygon`, and `MLNShapeCollection` objects
-    cannot be added to the map view at this time. Nor can `MLNMultiPoint`
-    objects that are not instances of `MLNPolyline` or `MLNPolygon`. Any
+ @note ``MLNMultiPolyline``, ``MLNMultiPolyline``, and ``MLNMultiPolyline`` objects
+    cannot be added to the map view at this time. Nor can ``MLNMultiPoint``
+    objects that are not instances of ``MLNPolyline`` or ``MLNPolyline``. Any
     multipoint, multipolyline, multipolygon, or shape collection objects that
     are specified are silently ignored.
 
  @param annotations An array of annotation objects. Each object in the array
-    must conform to the `MLNAnnotation` protocol. The map view retains each
+    must conform to the ``MLNAnnotation`` protocol. The map view retains each
     individual annotation object.
  */
 - (void)addAnnotations:(NSArray<id<MLNAnnotation>> *)annotations;
@@ -827,7 +875,7 @@ around the returned camera object if it were set as the receiver’s camera.
  The complete list of annotations associated with the receiver that are
  currently visible.
 
- The objects in this array must adopt the `MLNAnnotation` protocol. If no
+ The objects in this array must adopt the ``MLNAnnotation`` protocol. If no
  annotations are associated with the map view or if no annotations associated
  with the map view are currently visible, the value of this property is `nil`.
  */
@@ -841,7 +889,7 @@ around the returned camera object if it were set as the receiver’s camera.
  this method only when you want to hide or delete a given annotation.
 
  @param annotation The annotation object to remove. This object must conform to
-    the `MLNAnnotation` protocol.
+    the ``MLNAnnotation`` protocol.
  */
 - (void)removeAnnotation:(id<MLNAnnotation>)annotation;
 
@@ -854,14 +902,14 @@ around the returned camera object if it were set as the receiver’s camera.
  this method only when you want to hide or delete the given annotations.
 
  @param annotations The array of annotation objects to remove. Objects in the
-    array must conform to the `MLNAnnotation` protocol.
+    array must conform to the ``MLNAnnotation`` protocol.
  */
 - (void)removeAnnotations:(NSArray<id<MLNAnnotation>> *)annotations;
 
 /**
  Returns a reusable annotation image object associated with its identifier.
 
- For performance reasons, you should generally reuse `MLNAnnotationImage`
+ For performance reasons, you should generally reuse ``MLNAnnotationImage``
  objects for identical-looking annotations in your map views. Dequeueing saves
  time and memory during performance-critical operations such as scrolling.
 
@@ -879,7 +927,7 @@ around the returned camera object if it were set as the receiver’s camera.
  the given rectangle.
 
  @param rect A rectangle expressed in the map view’s coordinate system.
- @return An array of objects that adopt the `MLNAnnotation` protocol or `nil` if
+ @return An array of objects that adopt the ``MLNAnnotation`` protocol or `nil` if
  no annotations associated with the map view are currently visible in the
  rectangle.
  */
@@ -893,7 +941,7 @@ around the returned camera object if it were set as the receiver’s camera.
  Assigning a new array to this property selects only the first annotation in the
  array.
 
- If the annotation is of type `MLNPointAnnotation` and is offscreen, the map is
+ If the annotation is of type ``MLNPointAnnotation`` and is offscreen, the map is
  panned so that the annotation and its callout are brought just onscreen. The
  annotation is *not* centered within the viewport.
 
@@ -905,7 +953,7 @@ around the returned camera object if it were set as the receiver’s camera.
 /**
  Selects an annotation and displays a callout popover for it.
 
- If the annotation is of type `MLNPointAnnotation` and is offscreen, the map is
+ If the annotation is of type ``MLNPointAnnotation`` and is offscreen, the map is
  panned so that the annotation and its callout are brought just onscreen. The
  annotation is *not* centered within the viewport.
 
@@ -955,7 +1003,7 @@ around the returned camera object if it were set as the receiver’s camera.
 /**
  The complete list of overlays associated with the receiver. (read-only)
 
- The objects in this array must adopt the `MLNOverlay` protocol. If no
+ The objects in this array must adopt the ``MLNOverlay`` protocol. If no
  overlays are associated with the map view, the value of this property is
  empty array.
  */
@@ -967,7 +1015,7 @@ around the returned camera object if it were set as the receiver’s camera.
  To remove an overlay from a map, use the `-removeOverlay:` method.
 
  @param overlay The overlay object to add. This object must conform to the
-     `MLNOverlay` protocol.
+     ``MLNOverlay`` protocol.
  */
 - (void)addOverlay:(id<MLNOverlay>)overlay;
 
@@ -977,7 +1025,7 @@ around the returned camera object if it were set as the receiver’s camera.
  To remove multiple overlays from a map, use the `-removeOverlays:` method.
 
  @param overlays An array of objects, each of which must conform to the
-     `MLNOverlay` protocol.
+     ``MLNOverlay`` protocol.
  */
 - (void)addOverlays:(NSArray<id<MLNOverlay>> *)overlays;
 
@@ -996,7 +1044,7 @@ around the returned camera object if it were set as the receiver’s camera.
 
  If a given overlay object is not associated with the map view, it is ignored.
 
- @param overlays An array of objects, each of which conforms to the `MLNOverlay`
+ @param overlays An array of objects, each of which conforms to the ``MLNOverlay``
      protocol.
  */
 - (void)removeOverlays:(NSArray<id<MLNOverlay>> *)overlays;
@@ -1012,7 +1060,7 @@ around the returned camera object if it were set as the receiver’s camera.
  information about searching for map features, see that method’s documentation.
 
  @param point A point expressed in the map view’s coordinate system.
- @return An array of objects conforming to the `MLNFeature` protocol that
+ @return An array of objects conforming to the ``MLNFeature`` protocol that
     represent features in the sources used by the current style.
  */
 - (NSArray<id<MLNFeature>> *)visibleFeaturesAtPoint:(NSPoint)point
@@ -1032,7 +1080,7 @@ around the returned camera object if it were set as the receiver’s camera.
  @param styleLayerIdentifiers A set of strings that correspond to the names of
     layers defined in the current style. Only the features contained in these
     layers are included in the returned array.
- @return An array of objects conforming to the `MLNFeature` protocol that
+ @return An array of objects conforming to the ``MLNFeature`` protocol that
     represent features in the sources used by the current style.
  */
 - (NSArray<id<MLNFeature>> *)visibleFeaturesAtPoint:(NSPoint)point
@@ -1047,8 +1095,8 @@ around the returned camera object if it were set as the receiver’s camera.
  Each object in the returned array represents a feature rendered by the
  current style and provides access to attributes specified by the relevant map
  content sources. The returned array includes features loaded by
- `MLNShapeSource` and `MLNVectorTileSource` objects but does not include
- anything from `MLNRasterTileSource` objects, or from video or canvas sources,
+ ``MLNShapeSource`` and ``MLNShapeSource`` objects but does not include
+ anything from ``MLNRasterTileSource`` objects, or from video or canvas sources,
  which are unsupported by this SDK.
 
  The returned features are drawn by a style layer in the current style. For
@@ -1058,7 +1106,7 @@ around the returned camera object if it were set as the receiver’s camera.
  property set to `bus`. If you pass a point corresponding to the location of a
  bus stop into this method, the bus stop feature does not appear in the
  resulting array. On the other hand, if the style does include bus stops, an
- `MLNFeature` object representing that bus stop is returned and its
+ ``MLNFeature`` object representing that bus stop is returned and its
  `attributes` dictionary has the `maki` key set to `bus` (along with other
  attributes). The dictionary contains only the attributes provided by the
  tile source; it does not include computed attribute values or rules about how
@@ -1081,23 +1129,16 @@ around the returned camera object if it were set as the receiver’s camera.
 
  Only visible features are returned. To obtain features regardless of
  visibility, use the
- `-[MLNVectorTileSource featuresInSourceLayersWithIdentifiers:predicate:]` and
- `-[MLNShapeSource featuresMatchingPredicate:]` methods on the relevant sources.
+ ``MLNVectorTileSource/featuresInSourceLayersWithIdentifiers:predicate:`` and
+ ``MLNShapeSource/featuresMatchingPredicate:`` methods on the relevant sources.
 
- @note Layer identifiers are not guaranteed to exist across styles or different
-    versions of the same style. Applications that use this API must first set
-    the style URL to an explicitly versioned style using a convenience method
-    like `+[MLNStyle outdoorsStyleURLWithVersion:]`, `MLNMapView`’s “Style URL”
-    inspectable in Interface Builder, or a manually constructed `NSURL`. This
-    approach also avoids layer identifer name changes that will occur in the
-    default style’s layers over time.
 
  @param point A point expressed in the map view’s coordinate system.
  @param styleLayerIdentifiers A set of strings that correspond to the names of
     layers defined in the current style. Only the features contained in these
     layers are included in the returned array.
  @param predicate A predicate to filter the returned features.
- @return An array of objects conforming to the `MLNFeature` protocol that
+ @return An array of objects conforming to the ``MLNFeature`` protocol that
     represent features in the sources used by the current style.
  */
 - (NSArray<id<MLNFeature>> *)visibleFeaturesAtPoint:(NSPoint)point
@@ -1116,7 +1157,7 @@ around the returned camera object if it were set as the receiver’s camera.
  information about searching for map features, see that method’s documentation.
 
  @param rect A rectangle expressed in the map view’s coordinate system.
- @return An array of objects conforming to the `MLNFeature` protocol that
+ @return An array of objects conforming to the ``MLNFeature`` protocol that
     represent features in the sources used by the current style.
  */
 - (NSArray<id<MLNFeature>> *)visibleFeaturesInRect:(NSRect)rect NS_SWIFT_NAME(visibleFeatures(in:));
@@ -1135,7 +1176,7 @@ around the returned camera object if it were set as the receiver’s camera.
  @param styleLayerIdentifiers A set of strings that correspond to the names of
     layers defined in the current style. Only the features contained in these
     layers are included in the returned array.
- @return An array of objects conforming to the `MLNFeature` protocol that
+ @return An array of objects conforming to the ``MLNFeature`` protocol that
     represent features in the sources used by the current style.
  */
 - (NSArray<id<MLNFeature>> *)visibleFeaturesInRect:(NSRect)rect
@@ -1151,8 +1192,8 @@ around the returned camera object if it were set as the receiver’s camera.
  Each object in the returned array represents a feature rendered by the
  current style and provides access to attributes specified by the relevant map
  content sources. The returned array includes features loaded by
- `MLNShapeSource` and `MLNVectorTileSource` objects but does not include
- anything from `MLNRasterTileSource` objects, or from video or canvas sources,
+ ``MLNShapeSource`` and ``MLNShapeSource`` objects but does not include
+ anything from ``MLNRasterTileSource`` objects, or from video or canvas sources,
  which are unsupported by this SDK.
 
  The returned features are drawn by a style layer in the current style. For
@@ -1161,7 +1202,7 @@ around the returned camera object if it were set as the receiver’s camera.
  but none of the specified style layers includes features that have the `maki`
  property set to `bus`. If you pass a rectangle containing the location of a bus
  stop into this method, the bus stop feature does not appear in the resulting
- array. On the other hand, if the style does include bus stops, an `MLNFeature`
+ array. On the other hand, if the style does include bus stops, an ``MLNFeature``
  object representing that bus stop is returned and its `attributes` dictionary
  has the `maki` key set to `bus` (along with other attributes). The dictionary
  contains only the attributes provided by the tile source; it does not include
@@ -1186,23 +1227,15 @@ around the returned camera object if it were set as the receiver’s camera.
 
  Only visible features are returned. To obtain features regardless of
  visibility, use the
- `-[MLNVectorTileSource featuresInSourceLayersWithIdentifiers:predicate:]` and
- `-[MLNShapeSource featuresMatchingPredicate:]` methods on the relevant sources.
-
- @note Layer identifiers are not guaranteed to exist across styles or different
-    versions of the same style. Applications that use this API must first set
-    the style URL to an explicitly versioned style using a convenience method
-    like `+[MLNStyle outdoorsStyleURLWithVersion:]`, `MLNMapView`’s “Style URL”
-    inspectable in Interface Builder, or a manually constructed `NSURL`. This
-    approach also avoids layer identifer name changes that will occur in the
-    default style’s layers over time.
+ ``MLNVectorTileSource/featuresInSourceLayersWithIdentifiers:predicate:`` and
+ ``MLNShapeSource/featuresMatchingPredicate:`` methods on the relevant sources.
 
  @param rect A rectangle expressed in the map view’s coordinate system.
  @param styleLayerIdentifiers A set of strings that correspond to the names of
     layers defined in the current style. Only the features contained in these
     layers are included in the returned array.
  @param predicate A predicate to filter the returned features.
- @return An array of objects conforming to the `MLNFeature` protocol that
+ @return An array of objects conforming to the ``MLNFeature`` protocol that
     represent features in the sources used by the current style.
  */
 - (NSArray<id<MLNFeature>> *)visibleFeaturesInRect:(NSRect)rect
@@ -1291,6 +1324,17 @@ around the returned camera object if it were set as the receiver’s camera.
  released software for performance and aesthetic reasons.
  */
 @property (nonatomic) MLNMapDebugMaskOptions debugMask;
+
+/**
+ Get the action journal events from oldest to newest.
+ Each element contains a serialized json object with the event data.
+ */
+- (NSArray<NSString *> *)getActionJournalLog;
+
+/**
+ Clear stored action journal events.
+ */
+- (void)clearActionJournalLog;
 
 @end
 

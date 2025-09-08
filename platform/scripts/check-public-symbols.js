@@ -1,11 +1,7 @@
-#!/usr/bin/env node
-
-'use strict';
-
-const fs = require('fs');
-const path = require('path');
-const execFileSync = require('child_process').execFileSync;
-const _ = require('lodash');
+import fs from "node:fs";
+import path from "node:path";
+import { execFileSync } from "node:child_process";
+import _ from "lodash";
 
 const keyword = /\bMLN_EXPORT\b/;
 

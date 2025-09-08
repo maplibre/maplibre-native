@@ -13,8 +13,10 @@
     <string name="category_style">Styling</string>
     <string name="category_features">Features</string>
     <string name="category_storage">Storage</string>
+    <string name="category_events">Events</string>
     <string name="category_textureview">Texture View</string>
     <string name="category_location">Location</string>
     <string name="category_integration">_Integration</string>
     <string name="category_turf">Turf</string>
+    <string name="category_map_options">Map Options</string>
 </resources>

@@ -34,6 +34,8 @@
 #include "map_renderer_runnable.hpp"
 #include "maplibre.hpp"
 #include "native_map_view.hpp"
+#include "native_map_options.hpp"
+#include "rendering_stats.hpp"
 #include "util/tile_server_options.hpp"
 #ifndef MBGL_MODULE_OFFLINE_DISABLE
 #include "offline/offline_manager.hpp"
@@ -56,6 +58,7 @@
 #include "i18n/number_format_jni.hpp"
 #include "logger.hpp"
 #include "text/local_glyph_rasterizer_jni.hpp"
+#include "tile/tile_operation.hpp"
 
 namespace mbgl {
 namespace android {
@@ -67,8 +70,6 @@ void registerNatives(JavaVM* vm) {
 
     jni::JNIEnv& env = jni::GetEnv(*vm, jni::jni_version_1_6);
 
-    // For the FileSource
-    static mbgl::util::RunLoop mainRunLoop;
     FileSource::registerNative(env);
 
     // Basic types
@@ -110,6 +111,8 @@ void registerNatives(JavaVM* vm) {
     MapRenderer::registerNative(env);
     MapRendererRunnable::registerNative(env);
     NativeMapView::registerNative(env);
+    NativeMapOptions::registerNative(env);
+    RenderingStats::registerNative(env);
 
     // Http
     RegisterNativeHTTPRequest(env);
@@ -157,6 +160,9 @@ void registerNatives(JavaVM* vm) {
     Collator::registerNative(env);
     StringUtils::registerNative(env);
     NumberFormat::registerNative(env);
+
+    // Tile
+    TileOperation::registerNative(env);
 
     // Logger
     Logger::registerNative(env);

@@ -37,6 +37,27 @@ TEST(HTTPFileSource, TEST_REQUIRES_SERVER(HTTP200)) {
     loop.run();
 }
 
+TEST(HTTPFileSource, TEST_REQUIRES_SERVER(HTTP206)) {
+    util::RunLoop loop;
+    HTTPFileSource fs(ResourceOptions::Default(), ClientOptions());
+
+    Resource resource(Resource::Unknown, "http://127.0.0.1:3000/test");
+    resource.dataRange = std::make_pair<uint64_t, uint64_t>(3, 8);
+
+    auto req = fs.request(resource, [&](Response res) {
+        EXPECT_EQ(nullptr, res.error);
+        ASSERT_TRUE(res.data.get());
+        EXPECT_EQ("lo Wor", *res.data);
+        EXPECT_FALSE(bool(res.expires));
+        EXPECT_FALSE(res.mustRevalidate);
+        EXPECT_FALSE(bool(res.modified));
+        EXPECT_FALSE(bool(res.etag));
+        loop.stop();
+    });
+
+    loop.run();
+}
+
 TEST(HTTPFileSource, TEST_REQUIRES_SERVER(HTTP404)) {
     util::RunLoop loop;
     HTTPFileSource fs(ResourceOptions::Default(), ClientOptions());
@@ -140,9 +161,9 @@ TEST(HTTPFileSource, TEST_REQUIRES_SERVER(ExpiresParsing)) {
                               EXPECT_EQ(nullptr, res.error);
                               ASSERT_TRUE(res.data.get());
                               EXPECT_EQ("Hello World!", *res.data);
-                              EXPECT_EQ(Timestamp{Seconds(1420797926)}, res.expires);
+                              EXPECT_TRUE(Timestamp{Seconds(1420797926)} == res.expires);
                               EXPECT_FALSE(res.mustRevalidate);
-                              EXPECT_EQ(Timestamp{Seconds(1420794326)}, res.modified);
+                              EXPECT_TRUE(Timestamp{Seconds(1420794326)} == res.modified);
                               EXPECT_EQ("foo", *res.etag);
                               loop.stop();
                           });

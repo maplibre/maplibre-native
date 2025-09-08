@@ -22,11 +22,11 @@ public:
     uint32_t height = 0;
 };
 
-constexpr inline bool operator==(const Size& a, const Size& b) noexcept {
+constexpr bool operator==(const Size& a, const Size& b) noexcept {
     return a.width == b.width && a.height == b.height;
 }
 
-constexpr inline bool operator!=(const Size& a, const Size& b) noexcept {
+constexpr bool operator!=(const Size& a, const Size& b) noexcept {
     return !(a == b);
 }
 

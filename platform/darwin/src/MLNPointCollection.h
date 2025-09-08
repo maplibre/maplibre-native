@@ -6,33 +6,33 @@
 #import "MLNShape.h"
 
 /**
- An `MLNPointCollection` object represents a shape consisting of one or more
+ An ``MLNPointCollection`` object represents a shape consisting of one or more
  disconnected vertices, specified as `CLLocationCoordinate2D` instances. The
  points in the collection may be related but are not connected spatially. For
  example, you could use a point collection to represent all the trees in an
  orchard.
 
- You can add point collections to the map by adding them to an `MLNShapeSource`
- object. Configure the appearance of an `MLNShapeSource`’s or
- `MLNVectorTileSource`’s point collections collectively using an
- `MLNCircleStyleLayer` or `MLNSymbolStyleLayer` object. To access a point
- collection’s attributes, use an `MLNPointCollectionFeature` object.
+ You can add point collections to the map by adding them to an ``MLNShapeSource``
+ object. Configure the appearance of an ``MLNShapeSource``’s or
+ ``MLNVectorTileSource``’s point collections collectively using an
+ ``MLNCircleStyleLayer`` or ``MLNCircleStyleLayer`` object. To access a point
+ collection’s attributes, use an ``MLNPointCollectionFeature`` object.
 
- You cannot add an `MLNPointCollection` object directly to a map view as an
- annotation. However, you can create individual `MLNPointAnnotation` objects
+ You cannot add an ``MLNPointCollection`` object directly to a map view as an
+ annotation. However, you can create individual ``MLNPointAnnotation`` objects
  from the `coordinates` array and add those annotation objects to the map view
- using the `-[MLNMapView addAnnotations:]` method.
+ using the ``MLNMapView/addAnnotations:`` method.
 
  A point collection is known as a
  <a href="https://tools.ietf.org/html/rfc7946#section-3.1.3">MultiPoint</a>
- geometry in GeoJSON. Do not confuse `MLNPointCollection` with `MLNMultiPoint`,
- the abstract superclass of `MLNPolyline` and `MLNPolygon`.
+ geometry in GeoJSON. Do not confuse ``MLNPointCollection`` with ``MLNPointCollection``,
+ the abstract superclass of ``MLNPolyline`` and ``MLNPolyline``.
  */
 MLN_EXPORT
 @interface MLNPointCollection : MLNShape <MLNOverlay>
 
 /**
- Creates and returns a `MLNPointCollection` object from the specified set of
+ Creates and returns a ``MLNPointCollection`` object from the specified set of
  coordinates.
 
  @param coords The array of coordinates defining the shape. The data in this

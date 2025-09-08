@@ -59,7 +59,7 @@ function(add_node_module NAME)
         set(_CACHE_DIR "${NODE_MODULE_CACHE_DIR}")
     endif()
     if (NOT _INSTALL_PATH)
-        set(_INSTALL_PATH "lib/{node_abi}/${NAME}.node")
+        set(_INSTALL_PATH "platform/node/lib/{node_abi}/${NAME}.node")
     endif()
     get_filename_component(_CACHE_DIR "${_CACHE_DIR}" REALPATH BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
     if(_UNPARSED_ARGUMENTS)
@@ -211,18 +211,6 @@ function(add_node_module NAME)
         )
 
         if(WIN32)
-            if(MLN_WITH_OSMESA)
-                get_filename_component(_OUTPUT_PATH "${_OUTPUT_PATH}" DIRECTORY "${CMAKE_CURRENT_SOURCE_PATH}")
-
-                add_custom_command(
-                    TARGET ${_TARGET}
-                    POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/platform/windows/vendor/mesa3d/${_ARCH}/libglapi.dll"  "${_OUTPUT_PATH}"
-                    COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/platform/windows/vendor/mesa3d/${_ARCH}/libGLESv2.dll" "${_OUTPUT_PATH}"
-                    COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/platform/windows/vendor/mesa3d/${_ARCH}/osmesa.dll"    "${_OUTPUT_PATH}"
-                )
-            endif()
-                
             unset(_ARCH)
         endif()
     endforeach()

@@ -8,6 +8,7 @@
 #include <mbgl/style/filter.hpp>
 #include <mbgl/style/property_value.hpp>
 #include <mbgl/style/expression/formatted.hpp>
+#include <mbgl/style/variable_anchor_offset_collection.hpp>
 #include <mbgl/util/color.hpp>
 
 #include <vector>
@@ -52,9 +53,9 @@ public:
     const PropertyValue<bool>& getIconOptional() const;
     void setIconOptional(const PropertyValue<bool>&);
 
-    static PropertyValue<float> getDefaultIconPadding();
-    const PropertyValue<float>& getIconPadding() const;
-    void setIconPadding(const PropertyValue<float>&);
+    static PropertyValue<Padding> getDefaultIconPadding();
+    const PropertyValue<Padding>& getIconPadding() const;
+    void setIconPadding(const PropertyValue<Padding>&);
 
     static PropertyValue<AlignmentType> getDefaultIconPitchAlignment();
     const PropertyValue<AlignmentType>& getIconPitchAlignment() const;
@@ -87,6 +88,10 @@ public:
     static PropertyValue<SymbolPlacementType> getDefaultSymbolPlacement();
     const PropertyValue<SymbolPlacementType>& getSymbolPlacement() const;
     void setSymbolPlacement(const PropertyValue<SymbolPlacementType>&);
+
+    static PropertyValue<bool> getDefaultSymbolScreenSpace();
+    const PropertyValue<bool>& getSymbolScreenSpace() const;
+    void setSymbolScreenSpace(const PropertyValue<bool>&);
 
     static PropertyValue<float> getDefaultSymbolSortKey();
     const PropertyValue<float>& getSymbolSortKey() const;
@@ -183,6 +188,10 @@ public:
     static PropertyValue<std::vector<TextVariableAnchorType>> getDefaultTextVariableAnchor();
     const PropertyValue<std::vector<TextVariableAnchorType>>& getTextVariableAnchor() const;
     void setTextVariableAnchor(const PropertyValue<std::vector<TextVariableAnchorType>>&);
+
+    static PropertyValue<VariableAnchorOffsetCollection> getDefaultTextVariableAnchorOffset();
+    const PropertyValue<VariableAnchorOffsetCollection>& getTextVariableAnchorOffset() const;
+    void setTextVariableAnchorOffset(const PropertyValue<VariableAnchorOffsetCollection>&);
 
     static PropertyValue<std::vector<TextWritingModeType>> getDefaultTextWritingMode();
     const PropertyValue<std::vector<TextWritingModeType>>& getTextWritingMode() const;

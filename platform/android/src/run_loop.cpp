@@ -269,7 +269,10 @@ void RunLoop::run() {
     while (impl->running) {
         process();
         auto timeout = impl->processRunnables().count();
-        ALooper_pollAll(timeout, &outFd, &outEvents, reinterpret_cast<void**>(&outData));
+        auto result = ALooper_pollOnce(timeout, &outFd, &outEvents, reinterpret_cast<void**>(&outData));
+        if (result == ALOOPER_POLL_ERROR) {
+            throw std::runtime_error("ALooper_pollOnce returned an error");
+        }
     }
 }
 

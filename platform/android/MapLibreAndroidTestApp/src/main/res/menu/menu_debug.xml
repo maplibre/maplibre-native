@@ -13,5 +13,9 @@
         android:id="@+id/menu_action_limit_to_60_fps"
         android:title="Limit FPS to 60"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_action_toggle_continuous_rendering"
+        android:title="Toggle continuous rendering"
+        app:showAsAction="never" />
 
 </menu>

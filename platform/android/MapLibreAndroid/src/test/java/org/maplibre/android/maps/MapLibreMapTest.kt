@@ -1,6 +1,7 @@
 package org.maplibre.android.maps
 
 import android.content.Context
+import android.graphics.PointF
 import org.maplibre.android.MapLibreInjector
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
@@ -243,5 +244,20 @@ class MapLibreMapTest {
         maplibreMap.setStyle(builder, onStyleLoadedListener)
         maplibreMap.onFinishLoadingStyle()
         verify(exactly = 1) { onStyleLoadedListener.onStyleLoaded(style) }
+    }
+
+    @Test
+    fun testGetZoom() {
+        maplibreMap.zoom
+        verify { nativeMapView.zoom }
+        assertEquals(maplibreMap.zoom, 0.0, 0.0)
+    }
+
+    @Test
+    fun testSetZoom() {
+        val target = PointF(100f, 100f)
+        maplibreMap.setZoom(2.0, target, 0)
+        verify { developerAnimationListener.onDeveloperAnimationStarted() }
+        verify { nativeMapView.setZoom(2.0, target, 0) }
     }
 }

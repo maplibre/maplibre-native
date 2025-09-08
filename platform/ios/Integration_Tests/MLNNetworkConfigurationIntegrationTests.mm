@@ -298,7 +298,7 @@
 }
 
 - (void)testNetworkConfigurationWithSessionConfigurationWithCustomHeadersLOCKED {
-    // Custom session configuration, based on `MLNNetworkConfiguration.defaultSessionConfiguration`
+    // Custom session configuration, based on ``MLNNetworkConfiguration/defaultSessionConfiguration``
     NSURLSessionConfiguration *sessionConfig = [NSURLSessionConfiguration defaultSessionConfiguration];
     sessionConfig.HTTPAdditionalHeaders = @{ @"testing" : @YES };
     sessionConfig.HTTPMaximumConnectionsPerHost = 1;
@@ -347,7 +347,3 @@
     }
 }
 @end
-
-
-
-

@@ -1,12 +1,21 @@
 #pragma once
 
-#include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/mtl/common.hpp>
-#include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/shaders/widevector_ubo.hpp>
+#include <mbgl/shaders/shader_source.hpp>
+#include <mbgl/shaders/mtl/shader_program.hpp>
 
 namespace mbgl {
 namespace shaders {
+
+constexpr auto wideVectorShaderPrelude = R"(
+
+enum {
+    idWideVectorUniformsUBO = idDrawableReservedVertexOnlyUBO,
+    idWideVectorUniformWideVecUBO = drawableReservedUBOCount,
+    wideVectorUBOCount
+};
+
+)";
 
 template <>
 struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Metal> {
@@ -14,30 +23,19 @@ struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexTri_wideVecPerf";
     static constexpr auto fragmentMainFunction = "fragmentTri_wideVecPerf";
 
-    static constexpr std::array<UniformBlockInfo, 2> uniforms{
-        UniformBlockInfo{true, false, sizeof(WideVectorUniformsUBO), idWideVectorUniformsUBO},
-        UniformBlockInfo{true, false, sizeof(WideVectorUniformWideVecUBO), idWideVectorUniformWideVecUBO},
-    };
-    static constexpr std::array<AttributeInfo, 3> attributes{
-        AttributeInfo{wideVectorUBOCount + 0, gfx::AttributeDataType::Float3, idWideVectorScreenPos},
-        AttributeInfo{wideVectorUBOCount + 1, gfx::AttributeDataType::Float4, idWideVectorColor},
-        AttributeInfo{wideVectorUBOCount + 2, gfx::AttributeDataType::Int, idWideVectorIndex}};
-    static constexpr std::array<AttributeInfo, 4> instanceAttributes{
-        AttributeInfo{wideVectorUBOCount + 3, gfx::AttributeDataType::Float3, idWideVectorInstanceCenter},
-        AttributeInfo{wideVectorUBOCount + 3, gfx::AttributeDataType::Float4, idWideVectorInstanceColor},
-        AttributeInfo{wideVectorUBOCount + 3, gfx::AttributeDataType::Int, idWideVectorInstancePrevious},
-        AttributeInfo{wideVectorUBOCount + 3, gfx::AttributeDataType::Int, idWideVectorInstanceNext}};
-    static constexpr std::array<TextureInfo, 0> textures{};
+    static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<AttributeInfo, 4> instanceAttributes;
+    static const std::array<TextureInfo, 0> textures;
 
+    static constexpr auto prelude = wideVectorShaderPrelude;
     static constexpr auto source = R"(
-#include <metal_stdlib>
 
 namespace WhirlyKitShader
 {
 
 /** Expressions are used to change values like width and opacity over zoom levels. **/
 #define WKSExpStops 8
-    
+
 // Line Joins
 // These are assumed to match WideVectorLineJoinType
 typedef enum {
@@ -112,9 +110,9 @@ typedef struct
 struct VertexTriWideVecB
 {
     // x, y offset around the center
-    float3 screenPos [[attribute(3)]];
-    float4 color [[attribute(4)]];
-    int index [[attribute(5)]];
+    float3 screenPos [[attribute(wideVectorUBOCount + 0)]];
+    float4 color [[attribute(wideVectorUBOCount + 1)]];
+    int index [[attribute(wideVectorUBOCount + 2)]];
 };
 
 // Wide vector vertex passed to fragment shader (new version)
@@ -204,7 +202,7 @@ float3 viewPos(constant simd::float4x4 &mat, float3 vec) {
 
 float2 screenPos_MVP(constant Uniforms &u, float3 viewPos) {
     const float4 p4 = float4(viewPos, 1.0);
-    
+
     // Use the MVP matrix
     const float4 s = u.mvpMatrix * p4;
 
@@ -221,16 +219,16 @@ constant constexpr float4 discardPt(0,0,-1e6,NAN);
 // Performance version of wide vector shader
 vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
           thread const VertexTriWideVecB vert [[ stage_in ]],
-          constant Uniforms &uniforms [[ buffer(1) ]],
-          constant UniformWideVec &wideVec [[ buffer(2) ]],
+          constant Uniforms &uniforms [[ buffer(idWideVectorUniformsUBO) ]],
+          constant UniformWideVec &wideVec [[ buffer(idWideVectorUniformWideVecUBO) ]],
           uint instanceID [[ instance_id ]],
-          constant VertexTriWideVecInstance *wideVecInsts   [[ buffer(6) ]])
+          constant VertexTriWideVecInstance *wideVecInsts   [[ buffer(wideVectorUBOCount + 3) ]])
 {
     ProjVertexTriWideVecPerf outVert = {
         .position = discardPt,
         .roundJoin = false,
     };
-    
+
     // Vertex index within the instance, 0-11
     // Odd indexes are on the left, evens are on the right.
     const int whichVert = (vert.index >> 16) & 0xffff;
@@ -315,7 +313,7 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
             centers[ii].norm = float2(-centers[ii].nDir.y, centers[ii].nDir.x);
         }
     }
-    
+
     // Pull out the center line offset, or calculate one
     float centerLine = wideVec.offset;
 
@@ -333,7 +331,7 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
     // If we're on the far end of the body segment, we need this and the next two segments.
     // Otherwise we need the previous, this, and the next segment.
     if (instValid[interIdx] && instValid[interIdx+1] && instValid[interIdx+2]) {
-        
+
         // Don't even bother computing intersections for very acute angles or very small turns
         dotProd = dot(centers[interIdx+1].nDir, centers[interIdx+2].nDir);
         if (-wideVecMaxTurnThreshold < dotProd &&
@@ -356,7 +354,7 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
                     }
                 }
             }
-            
+
             // Intersect the left or right sides of prev-this and this-next, plus offset
             thread const CenterInfo &prev = centers[interIdx+0];
             thread const CenterInfo &cur  = centers[interIdx+1];
@@ -387,7 +385,7 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
                         offsetCenter = i2.interPt;
                     }
                 }
-                
+
                 const float2 interVec = (interPt - offsetCenter) / screenScale;
                 const float interDist2 = length_squared(interVec);
                 const float maxClipDist2 = (maxAdjDist * wideVec.interClipLimit) *
@@ -563,7 +561,7 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
 // Fragment shader that takes the back of the globe into account
 fragment float4 fragmentTri_wideVecPerf(
             ProjVertexTriWideVecPerf vert [[stage_in]],
-            constant Uniforms &uniforms [[ buffer(1) ]])
+            constant Uniforms &uniforms [[ buffer(idWideVectorUniformsUBO) ]])
 {
     float patternAlpha = 1.0;
 

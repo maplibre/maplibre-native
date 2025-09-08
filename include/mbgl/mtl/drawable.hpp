@@ -3,7 +3,7 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
-#include <mbgl/programs/segment.hpp>
+#include <mbgl/shaders/segment.hpp>
 
 #include <memory>
 
@@ -57,6 +57,13 @@ public:
     void setSubLayerIndex(int32_t) override;
     void setDepthType(gfx::DepthMaskType) override;
 
+    void updateVertexAttributes(gfx::VertexAttributeArrayPtr,
+                                std::size_t vertexCount,
+                                gfx::DrawMode,
+                                gfx::IndexVectorBasePtr,
+                                const SegmentBase* segments,
+                                std::size_t segmentCount) override;
+
 protected:
     // For testing only.
     Drawable(std::unique_ptr<Impl>);
@@ -65,9 +72,6 @@ protected:
     void unbindAttributes(RenderPass&) const noexcept {}
 
     void bindInstanceAttributes(RenderPass&) const noexcept;
-
-    void bindUniformBuffers(RenderPass&) const noexcept;
-    void unbindUniformBuffers(RenderPass&) const noexcept {}
 
     void bindTextures(RenderPass&) const noexcept;
     void unbindTextures(RenderPass&) const noexcept;

@@ -14,8 +14,8 @@ target_include_directories(
 set_target_properties(
     mbgl-vendor-wagyu
     PROPERTIES
-        INTERFACE_MAPBOX_NAME "wagyu"
-        INTERFACE_MAPBOX_URL "https://github.com/mapbox/wagyu.git"
-        INTERFACE_MAPBOX_AUTHOR "Angus Johnson and Mapbox"
-        INTERFACE_MAPBOX_LICENSE ${CMAKE_CURRENT_LIST_DIR}/wagyu/LICENSE
+        INTERFACE_MAPLIBRE_NAME "wagyu"
+        INTERFACE_MAPLIBRE_URL "https://github.com/mapbox/wagyu.git"
+        INTERFACE_MAPLIBRE_AUTHOR "Angus Johnson and Mapbox"
+        INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/wagyu/LICENSE
 )

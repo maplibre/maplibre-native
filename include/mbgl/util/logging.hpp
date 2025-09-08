@@ -38,8 +38,11 @@ public:
     Log();
     ~Log();
 
-    static void useLogThread(bool enable) noexcept;
-    static void useLogThread(bool enable, EventSeverity) noexcept;
+    /// @brief Determines whether messages of a given severity level are logged asynchronously.
+    ///
+    /// In a crash or other unexpected termination, pending asynchronous log entries will be lost.
+    /// The default is true (asynchronous) for all levels except `Error`.
+    static void useLogThread(bool enable, std::optional<EventSeverity> = {});
 
     template <typename... Args>
     static void Debug(Event event, Args&&... args) noexcept {
@@ -64,7 +67,7 @@ public:
     template <typename... Args>
     static void Record(EventSeverity severity, Event event, Args&&... args) noexcept {
         if (!includes(severity, disabledEventSeverities) && !includes(event, disabledEvents) &&
-            !includes({severity, event}, disabledEventPermutations)) {
+            !includes({.severity = severity, .event = event}, disabledEventPermutations)) {
             record(severity, event, ::std::forward<Args>(args)...);
         }
     }

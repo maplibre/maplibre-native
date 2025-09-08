@@ -3,6 +3,10 @@ package org.maplibre.android.testapp.activity.offline
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.maplibre.android.MapLibre
 import org.maplibre.android.log.Logger
 import org.maplibre.android.maps.Style
@@ -12,6 +16,7 @@ import org.maplibre.android.storage.FileSource
 import org.maplibre.android.testapp.databinding.ActivityMergeOfflineRegionsBinding
 import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.FileUtils
+import java.util.Locale
 
 class MergeOfflineRegionsActivity : AppCompatActivity() {
 
@@ -23,25 +28,6 @@ class MergeOfflineRegionsActivity : AppCompatActivity() {
         private var TEST_STYLE = TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid")
     }
 
-    private val onFileCopiedListener = object : FileUtils.OnFileCopiedFromAssetsListener {
-        override fun onFileCopiedFromAssets() {
-            Toast.makeText(
-                this@MergeOfflineRegionsActivity,
-                String.format("OnFileCopied."),
-                Toast.LENGTH_LONG
-            ).show()
-            mergeDb()
-        }
-
-        override fun onError() {
-            Toast.makeText(
-                this@MergeOfflineRegionsActivity,
-                String.format("Error copying DB file."),
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }
-
     private val onRegionMergedListener = object : OfflineManager.MergeOfflineRegionsCallback {
         override fun onMerge(offlineRegions: Array<OfflineRegion>?) {
             binding.mapView.getMapAsync {
@@ -49,7 +35,7 @@ class MergeOfflineRegionsActivity : AppCompatActivity() {
             }
             Toast.makeText(
                 this@MergeOfflineRegionsActivity,
-                String.format("Merged %d regions.", offlineRegions?.size ?: 0),
+                String.format(Locale.ENGLISH, "Merged %d regions.", offlineRegions?.size ?: 0),
                 Toast.LENGTH_LONG
             ).show()
         }
@@ -105,7 +91,29 @@ class MergeOfflineRegionsActivity : AppCompatActivity() {
 
     private fun copyAsset() {
         // copy db asset to internal memory
-        FileUtils.CopyFileFromAssetsTask(this, onFileCopiedListener).execute(TEST_DB_FILE_NAME, FileSource.getResourcesCachePath(this))
+        lifecycleScope.launch(Dispatchers.IO) {
+            val copied = FileUtils.copyFileFromAssetsTask(
+                this@MergeOfflineRegionsActivity,
+                TEST_DB_FILE_NAME,
+                FileSource.getResourcesCachePath(this@MergeOfflineRegionsActivity)
+            )
+            withContext(Dispatchers.Main) {
+                if (copied) {
+                    Toast.makeText(
+                        this@MergeOfflineRegionsActivity,
+                        String.format("OnFileCopied."),
+                        Toast.LENGTH_LONG
+                    ).show()
+                    mergeDb()
+                } else {
+                    Toast.makeText(
+                        this@MergeOfflineRegionsActivity,
+                        String.format("Error copying DB file."),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
     }
 
     private fun mergeDb() {

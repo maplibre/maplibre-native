@@ -5,7 +5,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- The `MLNAnnotation` protocol is used to provide annotation-related information
+ The ``MLNAnnotation`` protocol is used to provide annotation-related information
  to a map view. To use this protocol, you adopt it in any custom objects that
  store or represent annotation data. Each object then serves as the source of
  information about a single map annotation and provides critical information,
@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
  #### Related examples
  TODO: Annotation models
  TODO: Annotation views, learn how to add objects that follow the
- `MLNAnnotation` protocol
+ ``MLNAnnotation`` protocol
  */
 @protocol MLNAnnotation <NSObject>
 

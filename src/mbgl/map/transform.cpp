@@ -12,9 +12,11 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/platform.hpp>
 
-#include <cmath>
 #include <cstdio>
 #include <utility>
+#include <numbers>
+
+using namespace std::numbers;
 
 namespace mbgl {
 
@@ -25,8 +27,8 @@ static double _normalizeAngle(double angle, double anchorAngle) {
         return 0;
     }
 
-    angle = util::wrap(angle, -M_PI, M_PI);
-    if (angle == -M_PI) angle = M_PI;
+    angle = util::wrap(angle, -pi, pi);
+    if (angle == -pi) angle = pi;
     double diff = std::abs(angle - anchorAngle);
     if (std::abs(angle - util::M2PI - anchorAngle) < diff) {
         angle -= util::M2PI;
@@ -38,7 +40,7 @@ static double _normalizeAngle(double angle, double anchorAngle) {
     return angle;
 }
 
-Transform::Transform(MapObserver& observer_, ConstrainMode constrainMode, ViewportMode viewportMode)
+Transform::Transform(TransformObserver& observer_, ConstrainMode constrainMode, ViewportMode viewportMode)
     : observer(observer_),
       state(constrainMode, viewportMode) {}
 
@@ -58,6 +60,23 @@ void Transform::resize(const Size size) {
     double scale{state.getScale()};
     double x{state.getX()};
     double y{state.getY()};
+
+    double lat;
+    double lon;
+    if (state.constrainScreen(scale, lat, lon)) {
+        // Turns out that if you resize during a transition any changes made to the state will be ignored :(
+        // So if we have to constrain because of a resize and a transition is in progress - cancel the transition!
+        if (inTransition()) {
+            cancelTransitions();
+        }
+
+        // It also turns out that state.setProperties isn't enough if you change the center, you need to set Cc and Bc
+        // too, which setLatLngZoom does.
+        state.setLatLngZoom(mbgl::LatLng{lat, lon}, state.scaleZoom(scale));
+        observer.onCameraDidChange(MapObserver::CameraChangeMode::Immediate);
+
+        return;
+    }
     state.constrain(scale, x, y);
     state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y));
 
@@ -84,17 +103,23 @@ void Transform::jumpTo(const CameraOptions& camera) {
  * smooth animation between old and new values. The map will retain the current
  * values for any options not included in `options`.
  */
-void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& animation) {
+void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions& animation) {
+    CameraOptions camera = inputCamera;
+
     Duration duration = animation.duration.value_or(Duration::zero());
     if (state.getLatLngBounds() == LatLngBounds() && !isGestureInProgress() && duration != Duration::zero()) {
         // reuse flyTo, without exaggerated animation, to achieve constant ground speed.
         return flyTo(camera, animation, true);
     }
+
+    double zoom = camera.zoom.value_or(getZoom());
+    state.constrainCameraAndZoomToBounds(camera, zoom);
+
     const EdgeInsets& padding = camera.padding.value_or(state.getEdgeInsets());
     LatLng startLatLng = getLatLng(LatLng::Unwrapped);
     const LatLng& unwrappedLatLng = camera.center.value_or(startLatLng);
     const LatLng& latLng = state.getLatLngBounds() != LatLngBounds() ? unwrappedLatLng : unwrappedLatLng.wrapped();
-    double zoom = camera.zoom.value_or(getZoom());
+
     double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
 
@@ -142,13 +167,13 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
     startTransition(
         camera,
         animation,
-        [=](double t) {
+        [=, this](double t) {
             Point<double> framePoint = util::interpolate(startPoint, endPoint, t);
             LatLng frameLatLng = Projection::unproject(framePoint, state.zoomScale(startZoom));
             double frameZoom = util::interpolate(startZoom, zoom, t);
             state.setLatLngZoom(frameLatLng, frameZoom);
             if (bearing != startBearing) {
-                state.setBearing(util::wrap(util::interpolate(startBearing, bearing, t), -M_PI, M_PI));
+                state.setBearing(util::wrap(util::interpolate(startBearing, bearing, t), -pi, pi));
             }
             if (padding != startEdgeInsets) {
                 // Interpolate edge insets
@@ -174,10 +199,17 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
 
     Where applicable, local variable documentation begins with the associated
     variable or function in van Wijk (2003). */
-void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& animation, bool linearZoomInterpolation) {
+void Transform::flyTo(const CameraOptions& inputCamera,
+                      const AnimationOptions& animation,
+                      bool linearZoomInterpolation) {
+    CameraOptions camera = inputCamera;
+
+    double zoom = camera.zoom.value_or(getZoom());
+    state.constrainCameraAndZoomToBounds(camera, zoom);
+
     const EdgeInsets& padding = camera.padding.value_or(state.getEdgeInsets());
     const LatLng& latLng = camera.center.value_or(getLatLng(LatLng::Unwrapped)).wrapped();
-    double zoom = camera.zoom.value_or(getZoom());
+
     double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
 
@@ -299,7 +331,7 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
     startTransition(
         camera,
         animation,
-        [=](double k) {
+        [=, this](double k) {
             /// s: The distance traveled along the flight path, measured in
             /// ρ-screenfuls.
             double s = k * S;
@@ -319,7 +351,7 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
             LatLng frameLatLng = Projection::unproject(framePoint, startScale);
             state.setLatLngZoom(frameLatLng, frameZoom);
             if (bearing != startBearing) {
-                state.setBearing(util::wrap(util::interpolate(startBearing, bearing, k), -M_PI, M_PI));
+                state.setBearing(util::wrap(util::interpolate(startBearing, bearing, k), -pi, pi));
             }
 
             if (padding != startEdgeInsets) {
@@ -646,7 +678,7 @@ double Transform::getMaxPitchForEdgeInsets(const EdgeInsets& insets) const {
     // clipping plane.
     const double tangentOfFovAboveCenterAngle = 1.03 * (height / 2.0 + centerOffsetY) / (1.5 * height);
     const double fovAboveCenter = std::atan(tangentOfFovAboveCenterAngle);
-    return M_PI * 0.5 - fovAboveCenter;
+    return pi * 0.5 - fovAboveCenter;
     // e.g. Maximum pitch of 60 degrees is when perspective center's offset from
     // the top is 84% of screen height.
 }

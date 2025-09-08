@@ -7,12 +7,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.print.PrintHelper
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
 
 /**
- * Test activity showcasing using the Snaphot API to print a Map.
+ * Test activity showcasing using the Snapshot API to print a Map.
  */
 class PrintActivity : AppCompatActivity(), MapLibreMap.SnapshotReadyCallback {
     private lateinit var mapView: MapView
@@ -22,10 +21,10 @@ class PrintActivity : AppCompatActivity(), MapLibreMap.SnapshotReadyCallback {
         setContentView(R.layout.activity_print)
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(OnMapReadyCallback { maplibreMap: MapLibreMap -> initMap(maplibreMap) })
+        mapView.getMapAsync(this::initMap)
         val fab = findViewById<View>(R.id.fab)
-        fab?.setOnClickListener { view: View? ->
-            if (maplibreMap != null && maplibreMap.style != null) {
+        fab?.setOnClickListener { _: View? ->
+            if (this::maplibreMap.isInitialized && maplibreMap.style != null) {
                 maplibreMap.snapshot(this@PrintActivity)
             }
         }

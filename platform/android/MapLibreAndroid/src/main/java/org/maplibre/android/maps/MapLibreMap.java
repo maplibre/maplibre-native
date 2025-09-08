@@ -15,11 +15,11 @@ import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 import androidx.annotation.UiThread;
 
-import com.mapbox.android.gestures.AndroidGesturesManager;
-import com.mapbox.android.gestures.MoveGestureDetector;
-import com.mapbox.android.gestures.RotateGestureDetector;
-import com.mapbox.android.gestures.ShoveGestureDetector;
-import com.mapbox.android.gestures.StandardScaleGestureDetector;
+import org.maplibre.android.gestures.AndroidGesturesManager;
+import org.maplibre.android.gestures.MoveGestureDetector;
+import org.maplibre.android.gestures.RotateGestureDetector;
+import org.maplibre.android.gestures.ShoveGestureDetector;
+import org.maplibre.android.gestures.StandardScaleGestureDetector;
 import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.Geometry;
 import org.maplibre.android.MapStrictMode;
@@ -101,6 +101,20 @@ public final class MapLibreMap {
    */
   public void triggerRepaint() {
     nativeMapView.triggerRepaint();
+  }
+
+  /**
+   * Query rendering statistics overlay status.
+   */
+  public boolean isRenderingStatsViewEnabled() {
+    return nativeMapView.isRenderingStatsViewEnabled();
+  }
+
+  /**
+   * Enable rendering statistics overlay with {@link RenderingStats} values.
+   */
+  public void enableRenderingStatsView(boolean value) {
+    nativeMapView.enableRenderingStatsView(value);
   }
 
   public void setSwapBehaviorFlush(boolean flush) {
@@ -322,6 +336,121 @@ public final class MapLibreMap {
   @IntRange(from = 0)
   public int getPrefetchZoomDelta() {
     return nativeMapView.getPrefetchZoomDelta();
+  }
+
+  /**
+   * Indicating whether the map may cache tiles for different zoom levels or not.
+   *
+   * @param enabled true causes the map view to consume more memory and have a smoother user
+   * experience when zoom in/out. The default value of this property is `true`.
+   */
+  public void setTileCacheEnabled(boolean enabled) {
+    nativeMapView.setTileCacheEnabled(enabled);
+  }
+
+  /**
+   * Check whether tile cache is enabled or not.
+   *
+   * @return true if enabled
+   * @see MapLibreMap#setTileCacheEnabled(boolean)
+   */
+  public boolean getTileCacheEnabled() {
+    return nativeMapView.getTileCacheEnabled();
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @param radius minimum radius around the view point in unit of tiles in which the fine
+   * grained zoom level tiles are always used when performing LOD
+   * radius must be greater than 1 (At least 1 fine detailed tile is present)
+   * A smaller radius value may improve performance at the cost of quality (tiles away from
+   * camera use lower Zoom levels)
+   */
+  public void setTileLodMinRadius(@FloatRange(from = 1, fromInclusive = true) double radius) {
+    nativeMapView.setTileLodMinRadius(radius);
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @return minimum radius around the view point in unit of tiles in which the fine grained
+   * zoom level tiles are always used when performing LOD
+   * @see MapLibreMap#setTileLodMinRadius(double)
+   */
+  public double getTileLodMinRadius() {
+    return nativeMapView.getTileLodMinRadius();
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @param scale factor for the distance to the camera view point
+   * A value larger than 1 increases the distance to the camera view point reducing LOD
+   * Larger values may improve performance at the cost of quality (tiles away from camera
+   * use lower Zoom levels)
+   */
+  public void setTileLodScale(@FloatRange(from = 0, fromInclusive = false) double scale) {
+    nativeMapView.setTileLodScale(scale);
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @return scale factor for the distance to the camera view point
+   * @see MapLibreMap#setTileLodScale(double)
+   */
+  public double getTileLodScale() {
+    return nativeMapView.getTileLodScale();
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @param threshold pitch angle in radians above which LOD calculation is performed
+   * A smaller radius value may improve performance at the cost of quality
+   */
+  public void setTileLodPitchThreshold(@FloatRange(from = 0, to = Math.PI) double threshold) {
+    nativeMapView.setTileLodPitchThreshold(threshold);
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @return pitch angle threshold in radians above which LOD calculation is performed
+   * @see MapLibreMap#setTileLodPitchThreshold(double)
+   */
+  public double getTileLodPitchThreshold() {
+    return nativeMapView.getTileLodPitchThreshold();
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @param shift shift applied to the Zoom level during LOD calculation
+   * A negative value shifts the Zoom level to a coarser level reducing quality but
+   * improving performance
+   * A positive value shifts the Zoom level to a finer level increasing details but
+   * negatively affecting performance
+   * A value of zero (default) does not apply any shift to the Zoom level
+   * It is not recommended to change the default value unless performance is critical
+   * and the loss of quality is acceptable. A value of -1 reduces the number of
+   * displayed tiles by a factor of 4 on average
+   * It is recommended to first configure the pixelRatio before adjusting
+   * TileLodZoomShift. {@link MapLibreMapOptions#pixelRatio(float)}
+   */
+  public void setTileLodZoomShift(double shift) {
+    nativeMapView.setTileLodZoomShift(shift);
+  }
+
+  /**
+   * Camera based tile level of detail controls
+   *
+   * @return shift applied to the Zoom level during LOD calculation
+   * @see MapLibreMap#setTileLodZoomShift(double)
+   */
+  public double getTileLodZoomShift() {
+    return nativeMapView.getTileLodZoomShift();
   }
 
   //
@@ -739,6 +868,24 @@ public final class MapLibreMap {
     nativeMapView.moveBy(x, y, duration);
   }
 
+  /**
+   * Returns the current zoom level.
+   */
+  public double getZoom() {
+    return nativeMapView.getZoom();
+  }
+
+  /**
+   * Zooms the camera to the specified level.
+   * @param zoom              The zoom level to which the camera should move.
+   * @param focalPoint        The point around which to zoom.
+   * @param duration          The duration for the zoom animation
+   */
+  public void setZoom(double zoom, @NonNull PointF focalPoint, long duration ) {
+    notifyDeveloperAnimationListeners();
+    nativeMapView.setZoom(zoom, focalPoint, duration);
+  }
+
   //
   //  Reset North
   //
@@ -857,6 +1004,49 @@ public final class MapLibreMap {
   public void cycleDebugOptions() {
     this.debugActive = !nativeMapView.getDebug();
     nativeMapView.setDebug(debugActive);
+  }
+
+  /**
+   * <p>
+   * Get the list of action journal log files from oldest to newest.
+   * </p>
+   */
+  public String[] getActionJournalLogFiles() {
+    return nativeMapView.getActionJournalLogFiles();
+  }
+
+  /**
+   * <p>
+   * Get the action journal events from oldest to newest.
+   * </p>
+   * Each element contains a serialized json object with the event data.
+   * Example
+   * `{
+   *   "name" : "onTileAction",
+   *   "time" : "2025-04-17T13:13:13.974Z",
+   *   "styleName" : "Streets",
+   *   "styleURL" : "maptiler://maps/streets",
+   *   "event" : {
+   *     "action" : "RequestedFromNetwork",
+   *     "tileX" : 0,
+   *     "tileY" : 0,
+   *     "tileZ" : 0,
+   *     "overscaledZ" : 0,
+   *     "sourceID" : "openmaptiles"
+   *   }
+   * }`
+   */
+  public String[] getActionJournalLog() {
+    return nativeMapView.getActionJournalLog();
+  }
+
+  /**
+   * <p>
+   * Clear stored action journal events.
+   * </p>
+   */
+  public void clearActionJournalLog() {
+    nativeMapView.clearActionJournalLog();
   }
 
   //
@@ -1526,7 +1716,7 @@ public final class MapLibreMap {
    * Get a camera position that fits a provided bounds and padding and the current camera tilt and bearing.
    *
    * @param latLngBounds the bounds to set the map with
-   * @param padding      the padding to apply to the bounds
+   * @param padding      the padding to apply to the bounds (in left, top, right, bottom order)
    * @return the camera position that fits the bounds and padding
    */
   @Nullable
@@ -1559,7 +1749,7 @@ public final class MapLibreMap {
    * Get a camera position that fits a provided bounds, padding, bearing and tilt.
    *
    * @param latLngBounds the bounds to set the map with
-   * @param padding      the padding to apply to the bounds
+   * @param padding      the padding to apply to the bounds (in left, top, right, bottom order)
    * @param bearing      the bearing to transform the camera position with
    * @param tilt         to transform the camera position with
    * @return the camera position that fits the bounds, bearing and tilt

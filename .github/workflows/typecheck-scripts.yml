@@ -9,8 +9,8 @@ jobs:
   typecheck-scripts:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
 
       - run: |
-          npm install --ignore-scripts
-          npx tsc -p scripts/jsconfig.json
+          npm install
+          npx tsc -p tsconfig.json

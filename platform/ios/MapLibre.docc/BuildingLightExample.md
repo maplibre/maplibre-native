@@ -77,7 +77,7 @@ class BuildingLightExample: UIViewController, MLNMapViewDelegate {
     }
 
     func addFillExtrusionLayer(style: MLNStyle) {
-        // Access the OpenMapTiles source and use it to create a `MLNFillExtrusionStyleLayer`. The source identifier is `openmaptiles`. Use the `sources` property on a style to verify source identifiers.
+        // Access the OpenMapTiles source and use it to create a ``MLNFillExtrusionStyleLayer``. The source identifier is `openmaptiles`. Use the `sources` property on a style to verify source identifiers.
         guard let source = style.source(withIdentifier: "openmaptiles") else {
             print("Could not find source openmaptiles")
             return

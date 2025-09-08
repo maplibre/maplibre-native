@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/mtl/buffer_resource.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
 
 #include <memory>
 
@@ -9,7 +10,6 @@ namespace mtl {
 
 class VertexBufferResource : public gfx::VertexBufferResource {
 public:
-    VertexBufferResource() noexcept = default;
     VertexBufferResource(BufferResource&&) noexcept;
     VertexBufferResource(VertexBufferResource&& other) noexcept
         : buffer(std::move(other.buffer)) {}
@@ -21,8 +21,12 @@ public:
     BufferResource& get() noexcept { return buffer; }
     const BufferResource& get() const noexcept { return buffer; }
 
+    std::chrono::duration<double> getLastUpdated() const { return lastUpdated; }
+    void setLastUpdated(std::chrono::duration<double> time) { lastUpdated = time; }
+
 protected:
     BufferResource buffer;
+    std::chrono::duration<double> lastUpdated;
 };
 
 using UniqueVertexBufferResource = std::unique_ptr<VertexBufferResource>;

@@ -12,4 +12,10 @@
 // Sets whether the scale uses metric
 @property (nonatomic, assign) BOOL usesMetricSystem;
 
+// Sets the primary color of the scale bar
+@property (nonatomic) UIColor *primaryColor;
+
+// Sets the secondary color of the scale bar
+@property (nonatomic) UIColor *secondaryColor;
+
 @end

@@ -91,6 +91,18 @@ public class PropertyFactory {
   }
 
 <% } -%>
+<% if (property.type === 'padding') { -%>
+  /**
+   * <%- propertyFactoryMethodDoc(property) %>
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> <%- camelizeWithLeadingLowercase(property.name) %>(Float value) {
+    return new LayoutPropertyValue<>("<%-  property.name %>", value);
+  }
+
+<% } -%>
   /**
    * <%- propertyFactoryMethodDoc(property) %>
    *

@@ -81,6 +81,7 @@ BufferResource& BufferResource::operator=(BufferResource&& other) noexcept {
         context.renderingStats().numBuffers--;
         context.renderingStats().memBuffers -= size;
     }
+
     buffer = std::move(other.buffer);
     raw = std::move(other.raw);
     size = other.size;
@@ -102,15 +103,22 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
         // Until we can be sure that the buffer is not still in use to render the
         // previous frame, replace it with a new buffer instead of updating it.
 
-        auto& device = context.getBackend().getDevice();
         const uint8_t* newBufferSource = nullptr;
         std::unique_ptr<uint8_t[]> tempBuffer;
+        const bool updateIsEntireBuffer = (offset == 0 && updateSize == size);
 
+        // If the entire buffer is being updated, make sure it's changed
+        if (updateIsEntireBuffer) {
+            if (memcmp(buffer->contents(), newData, updateSize) == 0) {
+                return;
+            }
+        }
+
+        auto& device = context.getBackend().getDevice();
         // `[MTLBuffer contents]` may involve memory mapping and/or synchronization.  If the entire
         // buffer is being replaced, avoid accessing the old one by creating the new buffer directly
         // from the given data. If it's just being updated, apply the update to a local buffer to
         // avoid needing to access the new buffer.
-        const bool updateIsEntireBuffer = (offset == 0 && updateSize == size);
         if (updateIsEntireBuffer) {
             newBufferSource = static_cast<const uint8_t*>(newData);
         } else {
@@ -184,7 +192,7 @@ void BufferResource::updateVertexBindOffset(const MTLRenderCommandEncoderPtr& en
     // The documentation for `setVertexBufferOffset` indicates that it should work for buffers
     // assigned using `setVertexBytes` but, in practice, it produces a validation failure:
     // `Set Vertex Buffer Offset Validation index(1) must have an existing buffer.`
-    if (const auto* mtlBuf = buffer.get()) {
+    if (buffer.get()) {
         encoder->setVertexBufferOffset(offset, index);
     } else {
         bindVertex(encoder, offset, index, size_);
@@ -195,7 +203,7 @@ void BufferResource::updateFragmentBindOffset(const MTLRenderCommandEncoderPtr& 
                                               std::size_t offset,
                                               std::size_t index,
                                               std::size_t size_) const noexcept {
-    if (const auto* mtlBuf = buffer.get()) {
+    if (buffer.get()) {
         encoder->setFragmentBufferOffset(offset, index);
     } else {
         bindFragment(encoder, offset, index, size_);

@@ -42,9 +42,9 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CacheResponse)) {
             EXPECT_EQ(response.error, res2.error);
             ASSERT_TRUE(res2.data.get());
             EXPECT_EQ(*response.data, *res2.data);
-            EXPECT_EQ(response.expires, res2.expires);
+            EXPECT_TRUE(response.expires == res2.expires);
             EXPECT_EQ(response.mustRevalidate, res2.mustRevalidate);
-            EXPECT_EQ(response.modified, res2.modified);
+            EXPECT_TRUE(response.modified == res2.modified);
             EXPECT_EQ(response.etag, res2.etag);
 
             loop.stop();
@@ -69,7 +69,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(VolatileStoragePolicy)) {
 
         // Volatile resources are not stored in cache,
         // so we always get new data from the server ("Response N+1").
-        req = fs.request(resource, [&](Response res2) {
+        req = fs.request(resource, [&, firstData](Response res2) {
             req.reset();
             EXPECT_EQ(nullptr, res2.error);
             ASSERT_TRUE(res2.data);
@@ -166,7 +166,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CacheRevalidateModified)) {
         EXPECT_EQ("Response", *res.data);
         EXPECT_FALSE(bool(res.expires));
         EXPECT_TRUE(res.mustRevalidate);
-        EXPECT_EQ(Timestamp{Seconds(1420070400)}, *res.modified);
+        EXPECT_TRUE(Timestamp{Seconds(1420070400)} == *res.modified);
         EXPECT_FALSE(res.etag);
 
         // The first response is stored in the cache, but it has
@@ -188,7 +188,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CacheRevalidateModified)) {
                 EXPECT_EQ("Response", *res2.data);
                 EXPECT_TRUE(bool(res2.expires));
                 EXPECT_TRUE(res2.mustRevalidate);
-                EXPECT_EQ(Timestamp{Seconds(1420070400)}, *res2.modified);
+                EXPECT_TRUE(Timestamp{Seconds(1420070400)} == *res2.modified);
                 EXPECT_FALSE(res2.etag);
             } else {
                 // The test server sends a Cache-Control header with a max-age
@@ -203,7 +203,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CacheRevalidateModified)) {
                 EXPECT_FALSE(res2.data.get());
                 EXPECT_TRUE(bool(res2.expires));
                 EXPECT_TRUE(res2.mustRevalidate);
-                EXPECT_EQ(Timestamp{Seconds(1420070400)}, *res2.modified);
+                EXPECT_TRUE(Timestamp{Seconds(1420070400)} == *res2.modified);
                 EXPECT_FALSE(res2.etag);
                 loop.stop();
             }
@@ -311,7 +311,7 @@ TEST(MainResourceLoader, OptionalNonExpired) {
             ASSERT_TRUE(res.data.get());
             EXPECT_EQ("Cached value", *res.data);
             ASSERT_TRUE(bool(res.expires));
-            EXPECT_EQ(*response.expires, *res.expires);
+            EXPECT_TRUE(*response.expires == *res.expires);
             EXPECT_FALSE(res.mustRevalidate);
             EXPECT_FALSE(bool(res.modified));
             EXPECT_FALSE(bool(res.etag));
@@ -344,7 +344,7 @@ TEST(MainResourceLoader, OptionalExpired) {
             ASSERT_TRUE(res.data.get());
             EXPECT_EQ("Cached value", *res.data);
             ASSERT_TRUE(bool(res.expires));
-            EXPECT_EQ(*response.expires, *res.expires);
+            EXPECT_TRUE(*response.expires == *res.expires);
             EXPECT_FALSE(res.mustRevalidate);
             EXPECT_FALSE(bool(res.modified));
             EXPECT_FALSE(bool(res.etag));
@@ -406,7 +406,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshEtagNotModified)) {
             EXPECT_TRUE(res.notModified);
             EXPECT_FALSE(res.data.get());
             ASSERT_TRUE(bool(res.expires));
-            EXPECT_LT(util::now(), *res.expires);
+            EXPECT_TRUE(util::now() < *res.expires);
             EXPECT_TRUE(res.mustRevalidate);
             EXPECT_FALSE(bool(res.modified));
             ASSERT_TRUE(bool(res.etag));
@@ -517,10 +517,10 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshModifiedNotModified)
             EXPECT_TRUE(res.notModified);
             EXPECT_FALSE(res.data.get());
             ASSERT_TRUE(bool(res.expires));
-            EXPECT_LT(util::now(), *res.expires);
+            EXPECT_TRUE(util::now() < *res.expires);
             EXPECT_TRUE(res.mustRevalidate);
             ASSERT_TRUE(bool(res.modified));
-            EXPECT_EQ(Timestamp{Seconds(1420070400)}, *res.modified);
+            EXPECT_TRUE(Timestamp{Seconds(1420070400)} == *res.modified);
             EXPECT_FALSE(bool(res.etag));
             loop.stop();
         });
@@ -557,7 +557,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshModifiedModified)) {
             EXPECT_EQ("Response", *res.data);
             EXPECT_FALSE(bool(res.expires));
             EXPECT_TRUE(res.mustRevalidate);
-            EXPECT_EQ(Timestamp{Seconds(1420070400)}, *res.modified);
+            EXPECT_TRUE(Timestamp{Seconds(1420070400)} == *res.modified);
             EXPECT_FALSE(res.etag);
             loop.stop();
         });
@@ -662,10 +662,10 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(RespondToStaleMustRevalidate)) {
             ASSERT_TRUE(res.data.get());
             EXPECT_EQ("Cached value", *res.data);
             ASSERT_TRUE(res.expires);
-            EXPECT_EQ(Timestamp{Seconds(1417392000)}, *res.expires);
+            EXPECT_TRUE(Timestamp{Seconds(1417392000)} == *res.expires);
             EXPECT_TRUE(res.mustRevalidate);
             ASSERT_TRUE(res.modified);
-            EXPECT_EQ(Timestamp{Seconds(1417392000)}, *res.modified);
+            EXPECT_TRUE(Timestamp{Seconds(1417392000)} == *res.modified);
             ASSERT_TRUE(res.etag);
             EXPECT_EQ("snowfall", *res.etag);
 
@@ -702,10 +702,10 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(RespondToStaleMustRevalidate)) {
         // a 304 Not Modified response.
         EXPECT_EQ("Prior value", *res.data);
         ASSERT_TRUE(res.expires);
-        EXPECT_LE(util::now(), *res.expires);
+        EXPECT_TRUE(util::now() <= *res.expires);
         EXPECT_TRUE(res.mustRevalidate);
         ASSERT_TRUE(res.modified);
-        EXPECT_EQ(Timestamp{Seconds(1417392000)}, *res.modified);
+        EXPECT_TRUE(Timestamp{Seconds(1417392000)} == *res.modified);
         ASSERT_TRUE(res.etag);
         EXPECT_EQ("snowfall", *res.etag);
         loop.stop();

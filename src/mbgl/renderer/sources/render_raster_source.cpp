@@ -8,11 +8,11 @@ namespace mbgl {
 
 using namespace style;
 
-RenderRasterSource::RenderRasterSource(Immutable<style::RasterSource::Impl> impl_, const TaggedScheduler& threadPool_)
+RenderRasterSource::RenderRasterSource(Immutable<style::TileSource::Impl> impl_, const TaggedScheduler& threadPool_)
     : RenderTileSetSource(std::move(impl_), threadPool_) {}
 
-inline const style::RasterSource::Impl& RenderRasterSource::impl() const {
-    return static_cast<const style::RasterSource::Impl&>(*baseImpl);
+inline const style::TileSource::Impl& RenderRasterSource::impl() const {
+    return static_cast<const style::TileSource::Impl&>(*baseImpl);
 }
 
 const std::optional<Tileset>& RenderRasterSource::getTileset() const {
@@ -24,16 +24,17 @@ void RenderRasterSource::updateInternal(const Tileset& tileset,
                                         const bool needsRendering,
                                         const bool needsRelayout,
                                         const TileParameters& parameters) {
-    tilePyramid.update(
-        layers,
-        needsRendering,
-        needsRelayout,
-        parameters,
-        *baseImpl,
-        impl().getTileSize(),
-        tileset.zoomRange,
-        tileset.bounds,
-        [&](const OverscaledTileID& tileID) { return std::make_unique<RasterTile>(tileID, parameters, tileset); });
+    tilePyramid.update(layers,
+                       needsRendering,
+                       needsRelayout,
+                       parameters,
+                       *baseImpl,
+                       impl().getTileSize(),
+                       tileset.zoomRange,
+                       tileset.bounds,
+                       [&](const OverscaledTileID& tileID, TileObserver* observer_) {
+                           return std::make_unique<RasterTile>(tileID, baseImpl->id, parameters, tileset, observer_);
+                       });
     algorithm::updateTileMasks(tilePyramid.getRenderedTiles());
 }
 

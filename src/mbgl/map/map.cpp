@@ -20,6 +20,7 @@
 #include <mbgl/util/mapbox.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/tile_coordinate.hpp>
+#include <mbgl/util/action_journal.hpp>
 
 #include <utility>
 
@@ -31,19 +32,30 @@ Map::Map(RendererFrontend& frontend,
          MapObserver& observer,
          const MapOptions& mapOptions,
          const ResourceOptions& resourceOptions,
-         const ClientOptions& clientOptions)
+         const ClientOptions& clientOptions,
+         const util::ActionJournalOptions& actionJournalOptions)
     : impl(std::make_unique<Impl>(frontend,
                                   observer,
                                   FileSourceManager::get()
                                       ? std::shared_ptr<FileSource>(FileSourceManager::get()->getFileSource(
                                             ResourceLoader, resourceOptions, clientOptions))
                                       : nullptr,
-                                  mapOptions)) {}
+                                  mapOptions)) {
+    if (actionJournalOptions.enabled()) {
+        impl->actionJournal = std::make_unique<util::ActionJournal>(*this, actionJournalOptions);
+    }
+}
 
-Map::Map(std::unique_ptr<Impl> impl_)
-    : impl(std::move(impl_)) {}
+Map::Map(std::unique_ptr<Impl> impl_, const util::ActionJournalOptions& actionJournalOptions)
+    : impl(std::move(impl_)) {
+    if (actionJournalOptions.enabled()) {
+        impl->actionJournal = std::make_unique<util::ActionJournal>(*this, actionJournalOptions);
+    }
+}
 
-Map::~Map() = default;
+Map::~Map() {
+    impl->actionJournal.reset();
+}
 
 void Map::renderStill(StillImageCallback callback) {
     if (!callback) {
@@ -314,7 +326,7 @@ void Map::setBounds(const BoundOptions& options) {
         impl->transform.setMinZoom(*options.minZoom);
         if (impl->transform.getZoom() < *options.minZoom) {
             changeCamera = true;
-            cameraOptions.withZoom(*options.minZoom);
+            cameraOptions.withZoom(options.minZoom);
         }
     }
 
@@ -322,7 +334,7 @@ void Map::setBounds(const BoundOptions& options) {
         impl->transform.setMaxZoom(*options.maxZoom);
         if (impl->transform.getZoom() > *options.maxZoom) {
             changeCamera = true;
-            cameraOptions.withZoom(*options.maxZoom);
+            cameraOptions.withZoom(options.maxZoom);
         }
     }
 
@@ -330,7 +342,7 @@ void Map::setBounds(const BoundOptions& options) {
         impl->transform.setMaxPitch(*options.maxPitch);
         if (impl->transform.getPitch() > impl->transform.getState().getMaxPitch()) {
             changeCamera = true;
-            cameraOptions.withPitch(*options.maxPitch);
+            cameraOptions.withPitch(options.maxPitch);
         }
     }
 
@@ -338,7 +350,7 @@ void Map::setBounds(const BoundOptions& options) {
         impl->transform.setMinPitch(*options.minPitch);
         if (impl->transform.getPitch() < impl->transform.getState().getMinPitch()) {
             changeCamera = true;
-            cameraOptions.withPitch(*options.minPitch);
+            cameraOptions.withPitch(options.minPitch);
         }
     }
 
@@ -495,6 +507,14 @@ MapDebugOptions Map::getDebug() const {
     return impl->debugOptions;
 }
 
+bool Map::isRenderingStatsViewEnabled() const {
+    return impl->isRenderingStatsViewEnabled();
+}
+
+void Map::enableRenderingStatsView(bool value) {
+    impl->enableRenderingStatsView(value);
+}
+
 void Map::setPrefetchZoomDelta(uint8_t delta) {
     impl->prefetchZoomDelta = delta;
 }
@@ -525,6 +545,46 @@ void Map::setFreeCameraOptions(const FreeCameraOptions& camera) {
 
 FreeCameraOptions Map::getFreeCameraOptions() const {
     return impl->transform.getFreeCameraOptions();
+}
+
+void Map::setTileLodMinRadius(double radius) {
+    impl->tileLodMinRadius = radius;
+}
+
+double Map::getTileLodMinRadius() const {
+    return impl->tileLodMinRadius;
+}
+
+void Map::setTileLodScale(double scale) {
+    impl->tileLodScale = scale;
+}
+
+double Map::getTileLodScale() const {
+    return impl->tileLodScale;
+}
+
+void Map::setTileLodPitchThreshold(double threshold) {
+    impl->tileLodPitchThreshold = threshold;
+}
+
+double Map::getTileLodPitchThreshold() const {
+    return impl->tileLodPitchThreshold;
+}
+
+void Map::setTileLodZoomShift(double shift) {
+    impl->tileLodZoomShift = shift;
+}
+
+double Map::getTileLodZoomShift() const {
+    return impl->tileLodZoomShift;
+}
+
+ClientOptions Map::getClientOptions() const {
+    return impl->fileSource ? impl->fileSource->getClientOptions() : ClientOptions();
+}
+
+const std::unique_ptr<util::ActionJournal>& Map::getActionJournal() {
+    return impl->actionJournal;
 }
 
 } // namespace mbgl

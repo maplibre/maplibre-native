@@ -1,7 +1,5 @@
 #include <mbgl/renderer/buckets/hillshade_bucket.hpp>
 #include <mbgl/renderer/layers/render_hillshade_layer.hpp>
-#include <mbgl/programs/hillshade_program.hpp>
-#include <mbgl/programs/hillshade_prepare_program.hpp>
 #include <mbgl/gfx/context.hpp>
 
 namespace mbgl {
@@ -31,30 +29,15 @@ void HillshadeBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
         return;
     }
 
-#if MLN_LEGACY_RENDERER
-    const PremultipliedImage* image = demdata.getImage();
-    dem = uploadPass.createTexture(*image);
-
-    if (!vertices.empty()) {
-        vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
-    }
-    if (!indices.empty()) {
-        indexBuffer = uploadPass.createIndexBuffer(std::move(indices));
-    }
-#endif // MLN_LEGACY_RENDERER
-
     uploaded = true;
 }
 
 void HillshadeBucket::clear() {
-#if MLN_LEGACY_RENDERER
-    vertexBuffer = {};
-    indexBuffer = {};
-#endif // MLN_LEGACY_RENDERER
-
     segments.clear();
     vertices.clear();
     indices.clear();
+
+    vertices.updateModified();
 
     uploaded = false;
 }
@@ -95,13 +78,13 @@ void HillshadeBucket::setMask(TileMask&& mask_) {
             segments.emplace_back(vertices.elements(), indices.elements());
         }
 
-        vertices.emplace_back(HillshadeProgram::layoutVertex(
+        vertices.emplace_back(HillshadeBucket::layoutVertex(
             {tlVertex.x, tlVertex.y}, {static_cast<uint16_t>(tlVertex.x), static_cast<uint16_t>(tlVertex.y)}));
-        vertices.emplace_back(HillshadeProgram::layoutVertex(
+        vertices.emplace_back(HillshadeBucket::layoutVertex(
             {brVertex.x, tlVertex.y}, {static_cast<uint16_t>(brVertex.x), static_cast<uint16_t>(tlVertex.y)}));
-        vertices.emplace_back(HillshadeProgram::layoutVertex(
+        vertices.emplace_back(HillshadeBucket::layoutVertex(
             {tlVertex.x, brVertex.y}, {static_cast<uint16_t>(tlVertex.x), static_cast<uint16_t>(brVertex.y)}));
-        vertices.emplace_back(HillshadeProgram::layoutVertex(
+        vertices.emplace_back(HillshadeBucket::layoutVertex(
             {brVertex.x, brVertex.y}, {static_cast<uint16_t>(brVertex.x), static_cast<uint16_t>(brVertex.y)}));
 
         auto& segment = segments.back();
@@ -116,6 +99,8 @@ void HillshadeBucket::setMask(TileMask&& mask_) {
         segment.vertexLength += vertexLength;
         segment.indexLength += 6;
     }
+
+    vertices.updateModified();
 }
 
 bool HillshadeBucket::hasData() const {

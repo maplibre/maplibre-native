@@ -1,30 +1,17 @@
 {
-  "name": "@maplibre/maplibre-gl-native",
+  "name": "maplibre-native",
   "version": "5.4.0",
-  "description": "Renders map tiles with MapLibre Native",
-  "keywords": [
-    "maplibre",
-    "gl"
-  ],
-  "directories": {
-    "lib": "lib"
-  },
-  "files": [
-    "lib",
-    "platform/node/index.d.ts"
-  ],
-  "main": "platform/node/index.js",
-  "types": "platform/node/index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/maplibre/maplibre-native.git"
-  },
+  "description": "",
+  "keywords": [],
+  "files": [],
+  "main": "index.js",
   "license": "BSD-2-Clause",
   "dependencies": {
-    "@acalcutt/node-pre-gyp": "^1.0.14",
-    "@acalcutt/node-pre-gyp-github": "1.4.8",
+    "@actions/core": "^1.11.1",
+    "@maplibre/maplibre-gl-style-spec": "^20.3.1",
     "minimatch": "^9.0.4",
-    "npm-run-all": "^4.1.5"
+    "npm-run-all": "^4.1.5",
+    "simple-git": "^3.25.0"
   },
   "devDependencies": {
     "@aws-sdk/client-device-farm": "^3.556.0",
@@ -33,9 +20,11 @@
     "@mapbox/mvt-fixtures": "3.10.0",
     "@octokit/plugin-retry": "^7.1.0",
     "@octokit/rest": "^20.1.0",
-    "@types/node": "^20.12.7",
+    "@types/argparse": "^2.0.16",
+    "@types/ejs": "^3.1.5",
+    "@types/node": "^22.9.0",
     "argparse": "^2.0.1",
-    "csscolorparser": "~1.0.3",
+    "csscolorparser": "^1.0.3",
     "d3-queue": "3.0.7",
     "diff": "5.2.0",
     "ejs": "^3.1.10",
@@ -57,23 +46,8 @@
     "typescript": "^5.4.5",
     "xcode": "^3.0.1"
   },
-  "engines": {
-    "node": ">=6"
-  },
   "scripts": {
-    "install": "node-pre-gyp install --fallback-to-build=false",
-    "test": "tape platform/node/test/js/**/*.test.js",
-    "test-memory": "node --expose-gc platform/node/test/memory.test.js",
-    "test-expressions": "node -r esm platform/node/test/expression.test.js",
-    "test-render": "node -r esm platform/node/test/render.test.js",
-    "test-query": "node -r esm platform/node/test/query.test.js"
+    "copy-style-spec": "cp node_modules/@maplibre/maplibre-gl-style-spec/dist/latest.json scripts/style-spec-reference/v8.json"
   },
-  "gypfile": true,
-  "binary": {
-    "module_name": "mbgl",
-    "module_path": "./lib/{node_abi}",
-    "host": "https://github.com/maplibre/maplibre-native/releases/download/",
-    "remote_path": "node-v{version}",
-    "package_name": "{node_abi}-{platform}-{arch}-{configuration}.tar.gz"
-  }
+  "type": "module"
 }

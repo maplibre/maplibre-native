@@ -8,6 +8,10 @@
 #include <mbgl/util/geo.hpp>
 #include <mbgl/util/projection.hpp>
 
+#include <numbers>
+
+using namespace std::numbers;
+
 namespace mbgl {
 
 namespace {
@@ -31,11 +35,11 @@ static double mercatorXfromLng(double lng) noexcept {
 }
 
 static double mercatorYfromLat(double lat) noexcept {
-    return (180.0 - (180.0 / M_PI * std::log(std::tan(M_PI_4 + lat * M_PI / 360.0)))) / 360.0;
+    return (180.0 - (180.0 / pi * std::log(std::tan((pi / 4) + lat * pi / 360.0)))) / 360.0;
 }
 
 static double latFromMercatorY(double y) noexcept {
-    return util::rad2deg(2.0 * std::atan(std::exp(M_PI - y * util::M2PI)) - M_PI_2);
+    return util::rad2deg(2.0 * std::atan(std::exp(pi - y * util::M2PI)) - (pi / 2));
 }
 
 static double lngFromMercatorX(double x) noexcept {

@@ -11,9 +11,7 @@
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/logging.hpp>
 
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/renderer/layer_group.hpp>
-#endif
 
 namespace mbgl {
 
@@ -21,7 +19,8 @@ using namespace style;
 
 RenderLayer::RenderLayer(Immutable<style::LayerProperties> properties)
     : evaluatedProperties(std::move(properties)),
-      baseImpl(evaluatedProperties->baseImpl) {}
+      baseImpl(evaluatedProperties->baseImpl),
+      renderTilesOwner(makeMutable<std::vector<RenderTile>>()) {}
 
 void RenderLayer::transition(const TransitionParameters& parameters, Immutable<style::Layer::Impl> newImpl) {
     baseImpl = std::move(newImpl);
@@ -58,18 +57,16 @@ void RenderLayer::prepare(const LayerPrepareParameters& params) {
     assert(params.source);
     assert(params.source->isEnabled());
     renderTiles = params.source->getRenderTiles();
+    renderTilesOwner = params.source->getRawRenderTiles();
     addRenderPassesFromTiles();
 
-#if MLN_DRAWABLE_RENDERER
     updateRenderTileIDs();
-#endif // MLN_DRAWABLE_RENDERER
 }
 
 std::optional<Color> RenderLayer::getSolidBackground() const {
     return std::nullopt;
 }
 
-#if MLN_DRAWABLE_RENDERER
 void RenderLayer::layerChanged(const TransitionParameters&,
                                const Immutable<style::Layer::Impl>&,
                                UniqueChangeRequestVec&) {
@@ -86,7 +83,6 @@ void RenderLayer::layerRemoved(UniqueChangeRequestVec& changes) {
     removeAllDrawables();
     activateLayerGroup(layerGroup, false, changes);
 }
-#endif
 
 void RenderLayer::markContextDestroyed() {
     // no-op
@@ -140,7 +136,6 @@ const LayerRenderData* RenderLayer::getRenderDataForPass(const RenderTile& tile,
     return nullptr;
 }
 
-#if MLN_DRAWABLE_RENDERER
 std::size_t RenderLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
     if (const auto tileGroup = static_cast<TileLayerGroup*>(layerGroup.get())) {
         const auto n = tileGroup->removeDrawables(renderPass, tileID).size();
@@ -236,7 +231,6 @@ void RenderLayer::activateLayerGroup(const LayerGroupBasePtr& layerGroup_,
         }
     }
 }
-#endif
 
 bool RenderLayer::applyColorRamp(const style::ColorRampPropertyValue& colorValue, PremultipliedImage& image) {
     if (colorValue.isUndefined()) {

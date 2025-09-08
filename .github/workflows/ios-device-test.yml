@@ -6,6 +6,9 @@ on:
     types:
       - completed
 
+permissions:
+  id-token: write         # needed for AWS
+
 jobs:
   ios-device-test:
     strategy:
@@ -18,16 +21,16 @@ jobs:
     runs-on: ubuntu-22.04
     if: github.repository_owner == 'maplibre' && github.event.workflow_run.conclusion == 'success'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
 
       - name: Generate token
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2
         id: generate_token
-        uses: tibdex/github-app-token@v2
         with:
-          app_id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
-          private_key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
+          app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
+          private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
-      - uses: LouisBrunner/checks-action@v2.0.0
+      - uses: LouisBrunner/checks-action@6b626ffbad7cc56fd58627f774b9067e6118af23 # v2.0.0
         id: create_check
         with:
           token: ${{ steps.generate_token.outputs.token }}
@@ -42,29 +45,45 @@ jobs:
 
       - name: Check if test files exist (otherwise the parent workflow was skipped)
         id: check_files
-        uses: andstor/file-existence-action@v3.0.0
+        uses: andstor/file-existence-action@076e0072799f4942c8bc574a82233e1e4d13e9d6 # v3.0.0
         with:
           files: "${{ matrix.test.xcTestFile }}, ${{ matrix.test.ipaFile }}"
 
-      - uses: ./.github/actions/aws-device-farm-run
-        if: steps.check_files.outputs.files_exists == 'true'
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v4
         with:
-          name: ${{ matrix.test.name }}
-          appType: IOS_APP
-          appFile: ${{ matrix.test.ipaFile }}
-          testFile: ${{ matrix.test.xcTestFile }}
-          testPackageType: XCTEST_TEST_PACKAGE
-          testType: XCTEST
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME }}
-          AWS_DEVICE_FARM_PROJECT_ARN: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
-          AWS_DEVICE_FARM_DEVICE_POOL_ARN: ${{ vars.AWS_DEVICE_FARM_IPHONE_DEVICE_POOL_ARN }}
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+          role-duration-seconds: 14400
 
-      - uses: LouisBrunner/checks-action@v2.0.0
+      - name: Run ${{ matrix.test.name }} on AWS Device Farm
+        if: steps.check_files.outputs.files_exists == 'true'
+        run: |
+          export name="${{ matrix.test.name }}"
+          export appType=IOS_APP
+          export appFile="${{ matrix.test.ipaFile }}"
+          export testFile="${{ matrix.test.xcTestFile }}"
+          export testPackageType=XCTEST_TEST_PACKAGE
+          export testType=XCTEST
+          export AWS_DEVICE_FARM_PROJECT_ARN="${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}"
+          export AWS_DEVICE_FARM_DEVICE_POOL_ARN="${{ vars.AWS_DEVICE_FARM_IPHONE_DEVICE_POOL_ARN }}"
+          export wait_for_completion=true
+
+          ./scripts/aws-device-farm/aws-device-farm-run.sh
+
+      - name: Generate another token (previous one could have expired)
+        if: always()
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2
+        id: generate_token_2
+        with:
+          app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
+          private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
+
+      - uses: LouisBrunner/checks-action@6b626ffbad7cc56fd58627f774b9067e6118af23 # v2.0.0
         if: always()
         with:
-          token: ${{ steps.generate_token.outputs.token }}
+          token: ${{ steps.generate_token_2.outputs.token }}
           check_id: ${{ steps.create_check.outputs.check_id }}
           conclusion: ${{ job.status }}
           sha: ${{ github.event.workflow_run.sha }}

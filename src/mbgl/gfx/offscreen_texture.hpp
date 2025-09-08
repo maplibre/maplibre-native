@@ -22,11 +22,7 @@ public:
 
     virtual PremultipliedImage readStillImage() = 0;
 
-#if MLN_LEGACY_RENDERER
-    virtual gfx::Texture& getTexture() = 0;
-#else
     virtual const gfx::Texture2DPtr& getTexture() = 0;
-#endif
 };
 
 } // namespace gfx

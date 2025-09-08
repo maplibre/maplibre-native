@@ -8,32 +8,44 @@ namespace mbgl {
 namespace util {
 
 template <typename T>
-typename std::enable_if_t<std::is_integral_v<T>, T> max(T a, T b) {
+T max(T a, T b)
+    requires(std::is_integral_v<T>)
+{
     return std::max(a, b);
 }
 
 template <typename T>
-typename std::enable_if_t<std::is_floating_point_v<T>, T> max(T a, T b) {
+T max(T a, T b)
+    requires(std::is_floating_point_v<T>)
+{
     return ::fmax(a, b);
 }
 
 template <typename T, typename... Ts>
-typename std::enable_if_t<std::is_arithmetic_v<T>, T> max(T a, T b, Ts... args) {
+T max(T a, T b, Ts... args)
+    requires(std::is_arithmetic_v<T>)
+{
     return max(a, max(b, args...));
 }
 
 template <typename T>
-typename std::enable_if_t<std::is_integral_v<T>, T> min(T a, T b) {
+T min(T a, T b)
+    requires(std::is_integral_v<T>)
+{
     return std::min(a, b);
 }
 
 template <typename T>
-typename std::enable_if_t<std::is_floating_point_v<T>, T> min(T a, T b) {
+T min(T a, T b)
+    requires(std::is_floating_point_v<T>)
+{
     return ::fmin(a, b);
 }
 
 template <typename T, typename... Ts>
-typename std::enable_if_t<std::is_arithmetic_v<T>, T> min(T a, T b, Ts... args) {
+T min(T a, T b, Ts... args)
+    requires(std::is_arithmetic_v<T>)
+{
     return min(a, min(b, args...));
 }
 

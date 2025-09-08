@@ -1,10 +1,9 @@
 #pragma once
 
-#include <mbgl/renderer/image_atlas.hpp>
+#include <mbgl/style/image_impl.hpp>
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/text/glyph.hpp>
-#include <mbgl/text/glyph_atlas.hpp>
 #include <mbgl/text/tagged_string.hpp>
 
 #include <utility>
@@ -27,20 +26,6 @@ style::TextJustifyType getAnchorJustification(style::SymbolAnchorType anchor);
 
 class SymbolFeature;
 class BiDi;
-
-class Padding {
-public:
-    float left = 0;
-    float top = 0;
-    float right = 0;
-    float bottom = 0;
-
-    explicit operator bool() const { return left != 0 || top != 0 || right != 0 || bottom != 0; }
-
-    bool operator==(const Padding& rhs) const {
-        return left == rhs.left && top == rhs.top && right == rhs.right && bottom == rhs.bottom;
-    }
-};
 
 class PositionedIcon {
 private:
@@ -72,6 +57,10 @@ public:
                        const std::array<float, 4>& padding,
                        const std::array<float, 2>& iconOffset,
                        float fontScale);
+
+    // Called after a PositionedIcon has already been run through fitIconToText,
+    // but needs further adjustment to apply textFitWidth and textFitHeight.
+    PositionedIcon applyTextFit() const;
 
     const ImagePosition& image() const { return _image; }
     float top() const { return _top; }

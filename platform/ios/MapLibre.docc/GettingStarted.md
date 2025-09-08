@@ -45,14 +45,13 @@ struct SimpleMap: UIViewRepresentable {
 }
 ```
 
-You can use this view directly in a SwiftUI View hierarcy, for example:
+You can use this view directly in a SwiftUI View hierarchy, for example:
 
 ```swift
 struct MyApp: App {
-
     var body: some Scene {
         WindowGroup {
-            MapLibreMapView().edgesIgnoringSafeArea(.all)
+            SimpleMap().edgesIgnoringSafeArea(.all)
         }
     }
 }

@@ -39,14 +39,14 @@ MLN_EXPORT
 /**
  The minimum zoom level for which to download tiles and other resources.
 
- For more information about zoom levels, `-[MLNMapView zoomLevel]`.
+ For more information about zoom levels, ``MLNMapView/zoomLevel``.
  */
 @property (nonatomic, readonly) double minimumZoomLevel;
 
 /**
  The maximum zoom level for which to download tiles and other resources.
 
- For more information about zoom levels, `-[MLNMapView zoomLevel]`.
+ For more information about zoom levels, ``MLNMapView/zoomLevel``.
  */
 @property (nonatomic, readonly) double maximumZoomLevel;
 
@@ -56,7 +56,7 @@ MLN_EXPORT
  Initializes a newly created offline region with the given style URL, geometry,
  and range of zoom levels.
 
- This is the designated initializer for `MLNShapeOfflineRegion`.
+ This is the designated initializer for ``MLNShapeOfflineRegion``.
 
  @param styleURL URL of the map style for which to download resources. The URL
     may be a full HTTP or HTTPS URL or a canonical URL.

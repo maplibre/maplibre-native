@@ -1,6 +1,8 @@
 #include "test_runner_common.hpp"
 #include <android/log.h>
 
+#include <functional>
+
 namespace mbgl {
 
 void Log::platformRecord(EventSeverity severity, const std::string& msg) {

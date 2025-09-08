@@ -234,11 +234,15 @@ void AnnotationManager::removeTile(AnnotationTile& tile) {
     tiles.erase(&tile);
 }
 
+namespace {
+
 // To ensure that annotation images do not collide with images from the style,
 // we prefix input image IDs with "org.maplibre.annotations".
-static std::string prefixedImageID(const std::string& id) {
+std::string prefixedImageID(const std::string& id) {
     return AnnotationManager::SourceID + "." + id;
 }
+
+} // namespace
 
 void AnnotationManager::addImage(std::unique_ptr<style::Image> image) {
     CHECK_ANNOTATIONS_ENABLED_AND_RETURN_NOARG();

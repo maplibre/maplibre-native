@@ -5,7 +5,7 @@ project(MapLibreAndroid)
 add_subdirectory(../../../../../
                  ../../../../../${ANDROID_ABI})
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 target_compile_options(mbgl-compiler-options INTERFACE -frtti)
@@ -110,6 +110,8 @@ add_library(maplibre SHARED
             ${PROJECT_SOURCE_DIR}/map_renderer_runnable.hpp
             ${PROJECT_SOURCE_DIR}/native_map_view.cpp
             ${PROJECT_SOURCE_DIR}/native_map_view.hpp
+            ${PROJECT_SOURCE_DIR}/native_map_options.cpp
+            ${PROJECT_SOURCE_DIR}/native_map_options.hpp
             ${PROJECT_SOURCE_DIR}/offline/offline_manager.cpp
             ${PROJECT_SOURCE_DIR}/offline/offline_manager.hpp
             ${PROJECT_SOURCE_DIR}/offline/offline_region.cpp
@@ -120,6 +122,8 @@ add_library(maplibre SHARED
             ${PROJECT_SOURCE_DIR}/offline/offline_region_error.hpp
             ${PROJECT_SOURCE_DIR}/offline/offline_region_status.cpp
             ${PROJECT_SOURCE_DIR}/offline/offline_region_status.hpp
+            ${PROJECT_SOURCE_DIR}/rendering_stats.cpp
+            ${PROJECT_SOURCE_DIR}/rendering_stats.hpp
             ${PROJECT_SOURCE_DIR}/snapshotter/map_snapshot.cpp
             ${PROJECT_SOURCE_DIR}/snapshotter/map_snapshot.hpp
             ${PROJECT_SOURCE_DIR}/snapshotter/map_snapshotter.cpp
@@ -189,10 +193,27 @@ add_library(maplibre SHARED
             ${PROJECT_SOURCE_DIR}/style/transition_options.hpp
             ${PROJECT_SOURCE_DIR}/style/value.cpp
             ${PROJECT_SOURCE_DIR}/style/value.hpp
-            ${PROJECT_SOURCE_DIR}/util/default_style.cpp    
+            ${PROJECT_SOURCE_DIR}/tile/tile_operation.cpp
+            ${PROJECT_SOURCE_DIR}/util/default_style.cpp
             ${PROJECT_SOURCE_DIR}/util/tile_server_options.cpp
             ${PROJECT_SOURCE_DIR}/util/default_style.hpp
             ${PROJECT_SOURCE_DIR}/util/tile_server_options.hpp)
+
+if(MLN_WITH_OPENGL)
+    target_sources(
+        maplibre PRIVATE
+            ${PROJECT_SOURCE_DIR}/android_gl_renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/android_gl_renderer_backend.hpp
+    )
+endif()
+
+if(MLN_WITH_VULKAN)
+    target_sources(
+        maplibre PRIVATE
+            ${PROJECT_SOURCE_DIR}/android_vulkan_renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/android_vulkan_renderer_backend.hpp
+    )
+endif()
 
 target_include_directories(
   maplibre
@@ -214,7 +235,7 @@ target_link_libraries(maplibre
                               $<$<CONFIG:Release>:-Wl,--gc-sections>
                               $<$<CONFIG:Release>:-flto>
                               $<$<CONFIG:Release>:-fuse-ld=gold>
-                              Mapbox::Base::jni.hpp
+                              MapLibreNative::Base::jni.hpp
                               mbgl-core
                               mbgl-vendor-unique_resource)
 

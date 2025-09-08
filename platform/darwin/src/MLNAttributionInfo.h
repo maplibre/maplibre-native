@@ -67,8 +67,8 @@ MLN_EXPORT
 /**
  Returns a copy of the current `title` formatted accordingly to `style`.
 
- Example: If the `style` property is set to `MLNAttributionInfoStyleShort` and the
- `title` property is set to `OpenStreetMap`, then this method returns `OSM`.
+ Example: If the `style` property is set to ``MLNAttributionInfoStyle/MLNAttributionInfoStyleShort``
+ and the `title` property is set to `OpenStreetMap`, then this method returns `OSM`.
 
  @param style The attribution info style.
 

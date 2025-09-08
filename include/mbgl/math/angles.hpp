@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cmath>
+#include <numbers>
 
 namespace mbgl {
 namespace util {
@@ -12,7 +12,7 @@ namespace util {
  * @return Radians as double.
  */
 constexpr double deg2rad(double deg) noexcept {
-    return deg * M_PI / 180.0;
+    return deg * std::numbers::pi / 180.0;
 }
 
 /**
@@ -22,7 +22,7 @@ constexpr double deg2rad(double deg) noexcept {
  * @return Radians as float.
  */
 constexpr float deg2radf(float deg) noexcept {
-    return deg * static_cast<float>(M_PI) / 180.0F;
+    return deg * std::numbers::pi_v<float> / 180.0F;
 }
 
 /**
@@ -32,7 +32,7 @@ constexpr float deg2radf(float deg) noexcept {
  * @return Degrees as double.
  */
 constexpr double rad2deg(double rad) noexcept {
-    return rad * 180.0 / M_PI;
+    return rad * 180.0 / std::numbers::pi;
 }
 
 /**
@@ -42,7 +42,7 @@ constexpr double rad2deg(double rad) noexcept {
  * @return Degrees as float.
  */
 constexpr float rad2degf(float rad) noexcept {
-    return rad * 180.0F / static_cast<float>(M_PI);
+    return rad * 180.0F / std::numbers::pi_v<float>;
 }
 
 } // namespace util

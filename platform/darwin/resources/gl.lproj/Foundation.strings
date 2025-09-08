@@ -303,4 +303,3 @@
 
 /* User-friendly error description */
 "REMOVE_SRC_FAIL_MISMATCH_FMT" = "A fonte non se pode eliminar porque o seu identificador, “%@”, pertence a unha fonte diferente neste estilo.";
-

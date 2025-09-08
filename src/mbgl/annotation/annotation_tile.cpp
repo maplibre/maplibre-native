@@ -7,18 +7,18 @@
 
 namespace mbgl {
 
-AnnotationTile::AnnotationTile(const OverscaledTileID& overscaledTileID, const TileParameters& parameters)
-    : GeometryTile(overscaledTileID, AnnotationManager::SourceID, parameters),
+AnnotationTile::AnnotationTile(const OverscaledTileID& overscaledTileID,
+                               const TileParameters& parameters,
+                               TileObserver* observer_)
+    : GeometryTile(overscaledTileID, AnnotationManager::SourceID, parameters, observer_),
       annotationManager(parameters.annotationManager) {
-    auto guard = annotationManager.lock();
-    if (annotationManager) {
+    if (auto guard = annotationManager.lock(); annotationManager) {
         annotationManager->addTile(*this);
     }
 }
 
 AnnotationTile::~AnnotationTile() {
-    auto guard = annotationManager.lock();
-    if (annotationManager) {
+    if (auto guard = annotationManager.lock(); annotationManager) {
         annotationManager->removeTile(*this);
     }
 }

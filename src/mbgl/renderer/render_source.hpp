@@ -11,10 +11,10 @@
 #include <mbgl/style/source_impl.hpp>
 #include <mbgl/style/layer_properties.hpp>
 
-#include <unordered_map>
-#include <vector>
 #include <map>
 #include <memory>
+#include <unordered_map>
+#include <vector>
 
 namespace mbgl {
 
@@ -76,6 +76,7 @@ public:
     // If supported, returns pointer to image data; returns nullptr otherwise.
     virtual const ImageSourceRenderData* getImageRenderData() const { return nullptr; }
     virtual const Tile* getRenderedTile(const UnwrappedTileID&) const { return nullptr; }
+    virtual Immutable<std::vector<RenderTile>> getRawRenderTiles() const;
 
     virtual std::unordered_map<std::string, std::vector<Feature>> queryRenderedFeatures(
         const ScreenLineString& geometry,
@@ -101,6 +102,8 @@ public:
                                     const std::optional<std::string>&,
                                     const std::optional<std::string>&) {}
 
+    virtual void setCacheEnabled(bool) {};
+
     virtual void reduceMemoryUse() = 0;
 
     virtual void dumpDebugLogs() const = 0;
@@ -119,6 +122,7 @@ protected:
 
     void onTileChanged(Tile&) override;
     void onTileError(Tile&, std::exception_ptr) final;
+    void onTileAction(OverscaledTileID, std::string, TileOperation) override;
 };
 
 } // namespace mbgl

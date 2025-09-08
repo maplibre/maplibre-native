@@ -8,27 +8,27 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- An `MLNShapeCollection` object represents a shape consisting of zero or more
- distinct but related shapes that are instances of `MLNShape`. The constituent
+ An ``MLNShapeCollection`` object represents a shape consisting of zero or more
+ distinct but related shapes that are instances of ``MLNShape``. The constituent
  shapes can be a mixture of different kinds of shapes.
 
- `MLNShapeCollection` is most commonly used to add multiple shapes to a single
- `MLNShapeSource`. Configure the appearance of an `MLNShapeSource`’s or
- `MLNVectorTileSource`’s shape collection collectively using an
- `MLNSymbolStyleLayer` object, or use multiple instances of
- `MLNCircleStyleLayer`, `MLNFillStyleLayer`, and `MLNLineStyleLayer` to
+ ``MLNShapeCollection`` is most commonly used to add multiple shapes to a single
+ ``MLNShapeSource``. Configure the appearance of an ``MLNShapeSource``’s or
+ ``MLNVectorTileSource``’s shape collection collectively using an
+ ``MLNSymbolStyleLayer`` object, or use multiple instances of
+ ``MLNCircleStyleLayer``, ``MLNCircleStyleLayer``, and ``MLNCircleStyleLayer`` to
  configure the appearance of each kind of shape inside the collection.
 
- You cannot add an `MLNShapeCollection` object directly to a map view as an
- annotation. However, you can create individual `MLNPointAnnotation`,
- `MLNPolyline`, and `MLNPolygon` objects from the `shapes` array and add those
- annotation objects to the map view using the `-[MLNMapView addAnnotations:]`
+ You cannot add an ``MLNShapeCollection`` object directly to a map view as an
+ annotation. However, you can create individual ``MLNPointAnnotation``,
+ ``MLNPolyline``, and ``MLNPolyline`` objects from the `shapes` array and add those
+ annotation objects to the map view using the ``MLNMapView/addAnnotations:``
  method.
 
  To represent a collection of point, polyline, or polygon shapes, it may be more
- convenient to use an `MLNPointCollection`, `MLNMultiPolyline`, or
- `MLNMultiPolygon` object, respectively. To access a shape collection’s
- attributes, use the corresponding `MLNFeature` object.
+ convenient to use an ``MLNPointCollection``, ``MLNPointCollection``, or
+ ``MLNMultiPolygon`` object, respectively. To access a shape collection’s
+ attributes, use the corresponding ``MLNFeature`` object.
 
  A shape collection is known as a
  <a href="https://tools.ietf.org/html/rfc7946#section-3.1.8">GeometryCollection</a>

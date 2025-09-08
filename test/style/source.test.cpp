@@ -44,6 +44,7 @@
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/renderer/tile_render_data.hpp>
 #include <mbgl/text/glyph_manager.hpp>
+#include <mbgl/gfx/dynamic_texture_atlas.hpp>
 
 #include <cstdint>
 #include <optional>
@@ -64,20 +65,22 @@ public:
     AnnotationManager annotationManager{style};
     std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
+    gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
     TaggedScheduler threadPool;
     Style style;
 
     TileParameters tileParameters(MapMode mapMode = MapMode::Continuous) {
-        return {1.0,
-                MapDebugOptions(),
-                transformState,
-                fileSource,
-                mapMode,
-                annotationManager.makeWeakPtr(),
-                imageManager,
-                glyphManager,
-                0,
-                threadPool};
+        return {.pixelRatio = 1.0,
+                .debugOptions = MapDebugOptions(),
+                .transformState = transformState,
+                .fileSource = fileSource,
+                .mode = mapMode,
+                .annotationManager = annotationManager.makeWeakPtr(),
+                .imageManager = imageManager,
+                .glyphManager = glyphManager,
+                .prefetchZoomDelta = 0,
+                .threadPool = threadPool,
+                .dynamicTextureAtlas = dynamicTextureAtlas};
     };
 
     SourceTest()
@@ -765,8 +768,8 @@ class FakeTileSource;
 
 class FakeTile : public Tile {
 public:
-    FakeTile(FakeTileSource& source_, const OverscaledTileID& tileID)
-        : Tile(Tile::Kind::Geometry, tileID),
+    FakeTile(FakeTileSource& source_, const OverscaledTileID& tileID, TileObserver* observer_)
+        : Tile(Tile::Kind::Geometry, tileID, "FakeTileSource", observer_),
           source(source_) {
         renderable = true;
     }
@@ -802,7 +805,9 @@ public:
                            util::tileSize_I,
                            tileset.zoomRange,
                            tileset.bounds,
-                           [&](const OverscaledTileID& tileID) { return std::make_unique<FakeTile>(*this, tileID); });
+                           [&](const OverscaledTileID& tileID, TileObserver* observer_) {
+                               return std::make_unique<FakeTile>(*this, tileID, observer_);
+                           });
     }
 
     const std::optional<Tileset>& getTileset() const override {
