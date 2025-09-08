@@ -6,11 +6,7 @@ if (MLN_TEXT_SHAPING_HARFBUZZ)
     set(FT_REQUIRE_BROTLI OFF CACHE BOOL "freetype option")
     set(FT_DISABLE_ZLIB ON CACHE BOOL "freetype option")
     set(FT_REQUIRE_ZLIB OFF CACHE BOOL "freetype option")
-    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.25")
-        add_subdirectory(vendor/freetype SYSTEM)
-    else()
-        add_subdirectory(vendor/freetype)
-    endif()
+    add_subdirectory(vendor/freetype)
 
     set_target_properties(
         freetype

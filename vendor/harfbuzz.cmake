@@ -2,11 +2,7 @@ if(TARGET harfbuzz)
     return()
 endif()
 if (MLN_TEXT_SHAPING_HARFBUZZ)
-    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.25")
-        add_subdirectory(vendor/harfbuzz SYSTEM)
-    else()
-        add_subdirectory(vendor/harfbuzz)
-    endif()
+    add_subdirectory(vendor/harfbuzz)
 
     target_compile_definitions(harfbuzz PRIVATE -DHAVE_FREETYPE)
 
