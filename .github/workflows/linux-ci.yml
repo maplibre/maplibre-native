@@ -9,10 +9,6 @@ on:
     tags:
       - linux-*
 
-  pull_request:
-    branches:
-      - '*'
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   # INFO: We are cancelling the concurrency group if the change is on PR. For workflow dispatch, this will not work.

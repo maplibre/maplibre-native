@@ -22,10 +22,6 @@ on:
     tags:
       - 'ios-*'
 
-  pull_request:
-    branches:
-      - '*'
-
 permissions:
   id-token: write         # needed for AWS
   contents: write         # allow making a release
