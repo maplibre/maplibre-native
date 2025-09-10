@@ -25,8 +25,8 @@ public:
         
         Log::Info(Event::General, "Initializing WebGPU backend");
         
-        // TODO: Create instance with appropriate backend (Dawn or wgpu)
-        // For now, we'll use a compile-time flag to choose
+        // Create instance with appropriate backend (Dawn or wgpu)
+        // Using compile-time flag to choose backend
         
 #ifdef USE_DAWN
         Log::Info(Event::General, "Using Dawn WebGPU implementation");

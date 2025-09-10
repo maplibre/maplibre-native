@@ -81,8 +81,9 @@ public:
         // 3. Map the buffer and read the data
         // This is an async operation in WebGPU, but we need sync behavior here
         
-        auto device = context.getDevice();
-        auto queue = context.getQueue();
+        auto& backend = static_cast<const RendererBackend&>(context.getBackend());
+        auto device = static_cast<WGPUDevice>(backend.getDevice());
+        auto queue = static_cast<WGPUQueue>(backend.getQueue());
         if (!device || !queue) {
             return {size, std::move(data)};
         }
