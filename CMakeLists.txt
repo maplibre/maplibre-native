@@ -1332,10 +1332,9 @@ if(MLN_WITH_WEBGPU)
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/shader_program.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/webgpu_impl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/vertex_buffer_resource.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/vertex_attribute_array.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/vertex_attribute.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/texture2d.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/offscreen_texture.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/renderbuffer.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/tile_layer_group.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/layer_group.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/render_target.cpp
