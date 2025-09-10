@@ -30,6 +30,7 @@ public:
 
     void create() noexcept override;
     void upload(const void* pixelData, const Size& size) noexcept override;
+    void upload() noexcept override;
     void uploadSubRegion(const void* pixelData, const Size& size, uint16_t xOffset, uint16_t yOffset) noexcept override;
     bool needsUpload() const noexcept override { return dirty; }
 

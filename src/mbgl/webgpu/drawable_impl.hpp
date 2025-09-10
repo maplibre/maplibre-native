@@ -49,11 +49,8 @@ public:
     std::optional<gfx::RenderPassDescriptor> renderPassDescriptor;
 };
 
-struct Drawable::DrawSegment final : public gfx::Drawable::DrawSegment {
-    DrawSegment(gfx::DrawMode mode_, SegmentBase&& segment_)
-        : gfx::Drawable::DrawSegment(mode_, std::move(segment_)) {}
-    ~DrawSegment() override = default;
-};
+// WebGPU uses the base DrawSegment implementation directly
+using DrawSegment = gfx::Drawable::DrawSegment;
 
 } // namespace webgpu
 } // namespace mbgl

@@ -79,8 +79,13 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registr
         return it->second;
     }
     
+    // TODO: Get actual shader sources from registry
+    // For now, create with placeholder sources
+    std::string vertexSource = "// Vertex shader placeholder for " + name;
+    std::string fragmentSource = "// Fragment shader placeholder for " + name;
+    
     // Create new shader program
-    auto shader = std::make_shared<ShaderProgram>(name);
+    auto shader = std::make_shared<ShaderProgram>(*this, vertexSource, fragmentSource);
     impl->shaderCache[name] = shader;
     return shader;
 }
