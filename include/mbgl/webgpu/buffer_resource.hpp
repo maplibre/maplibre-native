@@ -1,6 +1,6 @@
 #pragma once
 
-#include <webgpu/webgpu_cpp.h>
+#include <mbgl/webgpu/backend_impl.hpp>
 
 #include <cstdint>
 #include <cstddef>
@@ -16,7 +16,7 @@ public:
     BufferResource(Context& context,
                    const void* data,
                    std::size_t size,
-                   wgpu::BufferUsage usage,
+                   uint32_t usage,
                    bool persistent = false);
     ~BufferResource();
     
@@ -29,7 +29,7 @@ public:
     // Enable move
     BufferResource(BufferResource&& other) noexcept
         : context(other.context),
-          buffer(std::move(other.buffer)),
+          buffer(other.buffer),
           size(other.size),
           usage(other.usage),
           persistent(other.persistent) {
@@ -40,10 +40,10 @@ public:
     BufferResource& operator=(BufferResource&& other) noexcept {
         if (this != &other) {
             if (buffer) {
-                buffer.Destroy();
+                wgpuBufferRelease(buffer);
             }
             context = other.context;
-            buffer = std::move(other.buffer);
+            buffer = other.buffer;
             size = other.size;
             usage = other.usage;
             persistent = other.persistent;
@@ -53,18 +53,18 @@ public:
         return *this;
     }
 
-    wgpu::Buffer getBuffer() const { return buffer; }
+    WGPUBuffer getBuffer() const { return buffer; }
     std::size_t getSize() const { return size; }
-    wgpu::BufferUsage getUsage() const { return usage; }
+    uint32_t getUsage() const { return usage; }
     bool isPersistent() const { return persistent; }
 
     void update(const void* data, std::size_t updateSize, std::size_t offset = 0);
 
 private:
     Context* context = nullptr;
-    wgpu::Buffer buffer;
+    WGPUBuffer buffer = nullptr;
     std::size_t size = 0;
-    wgpu::BufferUsage usage = wgpu::BufferUsage::None;
+    uint32_t usage = 0;
     bool persistent = false;
 };
 

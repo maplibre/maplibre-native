@@ -19,6 +19,10 @@ public:
     BufferResource& getBuffer() { return buffer; }
 
     std::size_t getSizeInBytes() const { return buffer.getSize(); }
+    
+    void update(const void* data, std::size_t size) {
+        buffer.update(data, size, 0);
+    }
 
 private:
     BufferResource buffer;

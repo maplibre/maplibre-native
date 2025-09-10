@@ -693,6 +693,10 @@ inline WGPUBuffer wgpuDeviceCreateBuffer(WGPUDevice /*device*/, const WGPUBuffer
     return nullptr;
 }
 
+inline void* wgpuBufferGetMappedRange(WGPUBuffer /*buffer*/, size_t /*offset*/, size_t /*size*/) {
+    return nullptr;
+}
+
 inline void* wgpuBufferGetConstMappedRange(WGPUBuffer /*buffer*/, size_t /*offset*/, size_t /*size*/) {
     return nullptr;
 }

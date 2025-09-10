@@ -1,8 +1,9 @@
 #include <mbgl/webgpu/upload_pass.hpp>
 #include <mbgl/webgpu/command_encoder.hpp>
 #include <mbgl/webgpu/context.hpp>
-#include <mbgl/webgpu/vertex_buffer.hpp>
-#include <mbgl/webgpu/index_buffer.hpp>
+#include <mbgl/webgpu/buffer_resource.hpp>
+#include <mbgl/webgpu/vertex_buffer_resource.hpp>
+#include <mbgl/webgpu/index_buffer_resource.hpp>
 
 namespace mbgl {
 namespace webgpu {
@@ -38,13 +39,9 @@ std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResourc
     gfx::BufferUsageType usage,
     bool persistent) {
     
-    return std::make_unique<VertexBufferResource>(
-        static_cast<Context&>(getContext()),
-        data,
-        size,
-        usage,
-        persistent
-    );
+    auto& context = static_cast<Context&>(getContext());
+    BufferResource buffer(context, data, size, WGPUBufferUsage_Vertex, persistent);
+    return std::make_unique<VertexBufferResource>(std::move(buffer));
 }
 
 void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource, 
@@ -60,13 +57,9 @@ std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(
     gfx::BufferUsageType usage,
     bool persistent) {
     
-    return std::make_unique<IndexBufferResource>(
-        static_cast<Context&>(getContext()),
-        data,
-        size,
-        usage,
-        persistent
-    );
+    auto& context = static_cast<Context&>(getContext());
+    BufferResource buffer(context, data, size, WGPUBufferUsage_Index, persistent);
+    return std::make_unique<IndexBufferResource>(std::move(buffer));
 }
 
 void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource, 
