@@ -1,5 +1,8 @@
 #include <mbgl/webgpu/drawable_builder.hpp>
+#include <mbgl/gfx/drawable_builder_impl.hpp>
+#include <mbgl/gfx/drawable_impl.hpp>
 #include <mbgl/webgpu/drawable.hpp>
+#include <mbgl/webgpu/drawable_impl.hpp>
 #include <mbgl/webgpu/context.hpp>
 #include <mbgl/util/logging.hpp>
 
@@ -14,6 +17,14 @@ DrawableBuilder::~DrawableBuilder() = default;
 
 std::unique_ptr<gfx::Drawable> DrawableBuilder::createDrawable() const {
     return std::make_unique<Drawable>(name);
+}
+
+std::unique_ptr<gfx::Drawable::DrawSegment> DrawableBuilder::createSegment(gfx::DrawMode drawMode, SegmentBase&& segment) {
+    return std::make_unique<Drawable::DrawSegment>(drawMode, std::move(segment));
+}
+
+void DrawableBuilder::init() {
+    // TODO: Initialize WebGPU-specific resources
 }
 
 } // namespace webgpu
