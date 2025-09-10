@@ -11,6 +11,9 @@ class Context : public gfx::Context {
 public:
     explicit Context(RendererBackend& backend);
     ~Context() override;
+    
+    RendererBackend& getBackend() { return backend; }
+    const RendererBackend& getBackend() const { return backend; }
 
     // Frame management
     void beginFrame() override;

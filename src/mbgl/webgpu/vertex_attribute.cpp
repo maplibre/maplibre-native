@@ -6,21 +6,41 @@
 namespace mbgl {
 namespace webgpu {
 
-const gfx::UniqueVertexBufferResource& VertexAttribute::getBuffer(gfx::VertexAttribute& attrib,
+const gfx::UniqueVertexBufferResource& VertexAttribute::getBuffer(gfx::VertexAttribute& attrib_,
                                                                   UploadPass& uploadPass,
                                                                   const gfx::BufferUsageType usage,
                                                                   bool forceUpdate) {
-    if (!attrib.getBuffer() || forceUpdate) {
-        // Create or update the vertex buffer
-        const auto& data = attrib.getData();
-        if (!data.empty()) {
-            attrib.setBuffer(uploadPass.createVertexBufferResource(
-                data.data(), 
-                data.size(),
-                usage));
+    if (!attrib_.getBuffer() || forceUpdate) {
+        auto& attrib = static_cast<VertexAttribute&>(attrib_);
+        
+        // Check if we have shared raw data
+        if (attrib.sharedRawData) {
+            // WebGPU doesn't have a getBuffer method yet, need to create buffer
+            if (!attrib.rawData.empty()) {
+                auto buffer = uploadPass.createVertexBufferResource(
+                    attrib.rawData.data(), 
+                    attrib.rawData.size(),
+                    usage,
+                    false);
+                attrib.setBuffer(std::move(buffer));
+                attrib.setRawData({});
+                attrib_.setDirty(false);
+            }
+        } else {
+            // Check if we have raw data to upload
+            if (!attrib.rawData.empty()) {
+                auto buffer = uploadPass.createVertexBufferResource(
+                    attrib.rawData.data(), 
+                    attrib.rawData.size(),
+                    usage,
+                    false);
+                attrib.setBuffer(std::move(buffer));
+                attrib.setRawData({});
+                attrib_.setDirty(false);
+            }
         }
     }
-    return attrib.getBuffer();
+    return attrib_.getBuffer();
 }
 
 } // namespace webgpu

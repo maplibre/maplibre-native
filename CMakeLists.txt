@@ -1321,6 +1321,7 @@ if(MLN_WITH_WEBGPU)
 
     list(APPEND
         SRC_FILES
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/context.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/command_encoder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/renderer_backend.cpp
@@ -1328,8 +1329,7 @@ if(MLN_WITH_WEBGPU)
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable_builder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/draw_scope_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/uniform_buffer.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/uniform_buffer_array.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/shader_program.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/shader_program.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/webgpu_impl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/vertex_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/vertex_attribute.cpp
@@ -1337,7 +1337,6 @@ if(MLN_WITH_WEBGPU)
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/offscreen_texture.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/tile_layer_group.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/layer_group.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/render_target.cpp
     )
 
     list(APPEND
@@ -1351,7 +1350,7 @@ if(MLN_WITH_WEBGPU)
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/index_buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/render_pass.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/renderer_backend.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/shader_program.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/shader_program.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/texture2d.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/uniform_buffer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/upload_pass.hpp
@@ -1361,6 +1360,7 @@ if(MLN_WITH_WEBGPU)
     list(APPEND
         SRC_FILES
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/backend_impl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/command_encoder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/context.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable.cpp

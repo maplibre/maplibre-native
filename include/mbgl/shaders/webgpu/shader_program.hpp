@@ -18,6 +18,7 @@ public:
     ~ShaderProgram() override;
 
     // ShaderProgramBase interface
+    const std::string_view typeName() const noexcept override { return "WebGPU"; }
     std::optional<size_t> getSamplerLocation(const size_t) const override { return std::nullopt; }
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
     const gfx::VertexAttributeArray& getInstanceAttributes() const override { return instanceAttributes; }

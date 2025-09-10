@@ -3,12 +3,11 @@
 #include <memory>
 #include <cstdint>
 
+// Check if WebGPU headers are already included (Dawn or wgpu)
+#ifndef WEBGPU_H_
 // WebGPU C API types
 // These are the standard WebGPU types that both Dawn and wgpu implement
-// If actual headers are available, they should be included instead
-
-#ifndef WGPU_TYPES_DEFINED
-#define WGPU_TYPES_DEFINED
+// Only define these if the actual WebGPU headers are not available
 
 // Basic types
 typedef struct WGPUAdapterImpl* WGPUAdapter;
@@ -659,7 +658,7 @@ struct WGPUBindGroupLayoutDescriptor {
     WGPUBindGroupLayoutEntry const* entries;
 };
 
-#endif // WGPU_TYPES_DEFINED
+#endif // WEBGPU_H_
 
 namespace mbgl {
 namespace webgpu {

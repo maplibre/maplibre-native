@@ -1,7 +1,7 @@
 #include <mbgl/webgpu/drawable.hpp>
 #include <mbgl/webgpu/context.hpp>
 #include <mbgl/webgpu/upload_pass.hpp>
-#include <mbgl/webgpu/uniform_buffer_array.hpp>
+#include <mbgl/webgpu/uniform_buffer.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>

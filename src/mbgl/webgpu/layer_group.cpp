@@ -1,5 +1,6 @@
 #include <mbgl/webgpu/layer_group.hpp>
 #include <mbgl/gfx/drawable.hpp>
+#include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_orchestrator.hpp>

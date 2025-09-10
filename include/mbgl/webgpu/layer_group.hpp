@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/webgpu/uniform_buffer_array.hpp>
+#include <mbgl/webgpu/uniform_buffer.hpp>
 
 namespace mbgl {
 
@@ -24,7 +24,7 @@ public:
     gfx::UniformBufferArray& mutableUniformBuffers() override { return uniformBuffers; }
 
 protected:
-    UniformBufferArray uniformBuffers;
+    webgpu::UniformBufferArray uniformBuffers;
 };
 
 } // namespace webgpu

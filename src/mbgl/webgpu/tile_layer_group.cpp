@@ -1,5 +1,6 @@
 #include <mbgl/webgpu/tile_layer_group.hpp>
 #include <mbgl/gfx/drawable.hpp>
+#include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_orchestrator.hpp>
@@ -44,19 +45,23 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     // TODO: Bind uniform buffers to WebGPU pipeline
     
     // Render tiles
-    for (const auto& tileID : getCurrentTileIDs()) {
-        visitDrawables(parameters.pass, tileID, [&](gfx::Drawable& drawable) {
+    // TileLayerGroup doesn't have getCurrentTileIDs() - just visit all drawables
+    visitDrawables([&](gfx::Drawable& drawable) {
+
             if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
                 return;
             }
 
-            for (const auto& tweaker : drawable.getTweakers()) {
+        // Apply tweakers if any
+        const auto& tweakers = drawable.getTweakers();
+        for (const auto& tweaker : tweakers) {
+            if (tweaker) {
                 tweaker->execute(drawable, parameters);
             }
+        }
 
-            drawable.draw(parameters);
-        });
-    }
+        drawable.draw(parameters);
+    });
 }
 
 } // namespace webgpu

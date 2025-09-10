@@ -1,36 +1,28 @@
 #pragma once
 
 #include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/webgpu/backend_impl.hpp>
+#include <mbgl/webgpu/buffer_resource.hpp>
+
 #include <cstddef>
-#include <memory>
 
 namespace mbgl {
 namespace webgpu {
 
 class Context;
 
-class IndexBufferResource {
+class IndexBufferResource : public gfx::IndexBufferResource {
 public:
-    IndexBufferResource(Context& context, const void* data, std::size_t size, std::size_t indexCount, bool uses32BitIndices = false);
-    ~IndexBufferResource();
+    IndexBufferResource(BufferResource&& buffer) noexcept;
+    ~IndexBufferResource() noexcept override;
 
-    WGPUBuffer getBuffer() const { return buffer; }
-    std::size_t getSize() const { return size; }
-    std::size_t getIndexCount() const { return indexCount; }
-    WGPUIndexFormat getIndexFormat() const { return indexFormat; }
-    
-    void update(const void* data, std::size_t updateSize);
+    const BufferResource& getBuffer() const { return buffer; }
+    BufferResource& getBuffer() { return buffer; }
+
+    std::size_t getSizeInBytes() const { return buffer.getSize(); }
 
 private:
-    Context& context;
-    WGPUBuffer buffer = nullptr;
-    std::size_t size;
-    std::size_t indexCount;
-    WGPUIndexFormat indexFormat;
+    BufferResource buffer;
 };
-
-using UniqueIndexBufferResource = std::unique_ptr<IndexBufferResource>;
 
 } // namespace webgpu
 } // namespace mbgl

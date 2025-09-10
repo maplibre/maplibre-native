@@ -9,11 +9,10 @@
 #include <mbgl/webgpu/renderbuffer.hpp>
 #include <mbgl/webgpu/renderbuffer_resource.hpp>
 #include <mbgl/webgpu/uniform_buffer.hpp>
-#include <mbgl/webgpu/uniform_buffer_array.hpp>
 #include <mbgl/webgpu/vertex_attribute.hpp>
-#include <mbgl/webgpu/shader_program.hpp>
+#include <mbgl/shaders/webgpu/shader_program.hpp>
 #include <mbgl/webgpu/texture2d.hpp>
-#include <mbgl/webgpu/render_target.hpp>
+#include <mbgl/renderer/render_target.hpp>
 #include <mbgl/webgpu/tile_layer_group.hpp>
 #include <mbgl/webgpu/layer_group.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
@@ -50,8 +49,8 @@ void Context::reduceMemoryUsage() {
     // Free cached resources to reduce memory
 }
 
-std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size, gfx::TextureChannelDataType) {
-    return std::make_unique<OffscreenTexture>(*this, size);
+std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size, gfx::TextureChannelDataType type) {
+    return std::make_unique<OffscreenTexture>(*this, size, type, true, false);
 }
 
 std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
@@ -86,11 +85,11 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registr
     return shader;
 }
 
-gfx::TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
+TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
     return std::make_shared<webgpu::TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
 }
 
-gfx::LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
+LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
     return std::make_shared<webgpu::LayerGroup>(layerIndex, initialCapacity, std::move(name));
 }
 
