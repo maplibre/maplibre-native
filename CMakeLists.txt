@@ -12,6 +12,7 @@ option(MLN_WITH_OPENGL "Build with OpenGL renderer" OFF)
 option(MLN_WITH_EGL "Build with EGL renderer" OFF)
 option(MLN_WITH_VULKAN "Build with Vulkan renderer" OFF)
 option(MLN_WITH_METAL "Build with Metal renderer" OFF)
+option(MLN_WITH_WEBGPU "Build with WebGPU renderer" OFF)
 option(MLN_WITH_PMTILES "Build with PMTiles support" ON)
 option(MLN_WITH_WERROR "Make all compilation warnings errors" ON)
 option(MLN_USE_UNORDERED_DENSE "Use ankerl dense containers for performance" ON)
@@ -1307,6 +1308,34 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/symbol.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/widevector.cpp
     )
+endif()
+
+if(MLN_WITH_WEBGPU)
+    message(STATUS "Configuring WebGPU renderer backend")
+
+    target_compile_definitions(
+        mbgl-core
+        PUBLIC
+            MLN_RENDER_BACKEND_WEBGPU=1
+    )
+
+    list(APPEND
+        INCLUDE_FILES
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/backend_impl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/buffer_resource.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/context.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/renderer_backend.hpp
+    )
+
+    list(APPEND
+        SRC_FILES
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/backend_impl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/context.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/renderer_backend.cpp
+    )
+
+    # Include WebGPU vendor configuration (Dawn or wgpu)
+    include(${PROJECT_SOURCE_DIR}/vendor/webgpu.cmake)
 endif()
 
 list(APPEND
