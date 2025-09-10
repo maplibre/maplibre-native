@@ -80,6 +80,13 @@ void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
     // TODO: Upload data to WebGPU texture
 }
 
+void Texture2D::upload() noexcept {
+    if (image) {
+        upload(image->data.get(), image->size);
+        dirty = false;
+    }
+}
+
 void Texture2D::uploadSubRegion(const void* pixelData, const Size& regionSize, uint16_t xOffset, uint16_t yOffset) noexcept {
     // TODO: Upload subregion to WebGPU texture
 }
