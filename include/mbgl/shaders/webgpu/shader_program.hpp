@@ -33,6 +33,8 @@ private:
     WGPURenderPipeline pipeline = nullptr;
     WGPUBindGroupLayout bindGroupLayout = nullptr;
     WGPUPipelineLayout pipelineLayout = nullptr;
+    WGPUShaderModule vertexShaderModule = nullptr;
+    WGPUShaderModule fragmentShaderModule = nullptr;
     
     gfx::VertexAttributeArray vertexAttributes;
     gfx::VertexAttributeArray instanceAttributes;

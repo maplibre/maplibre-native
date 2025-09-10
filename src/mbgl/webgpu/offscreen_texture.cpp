@@ -72,8 +72,87 @@ public:
     
     PremultipliedImage readStillImage() {
         // Read back the color texture data
-        auto data = std::make_unique<uint8_t[]>(colorTexture->getDataSize());
-        // TODO: Implement WebGPU texture readback
+        auto dataSize = colorTexture->getDataSize();
+        auto data = std::make_unique<uint8_t[]>(dataSize);
+        
+        // WebGPU texture readback requires:
+        // 1. Create a buffer with MAP_READ usage
+        // 2. Copy texture to buffer using command encoder
+        // 3. Map the buffer and read the data
+        // This is an async operation in WebGPU, but we need sync behavior here
+        
+        auto device = context.getDevice();
+        auto queue = context.getQueue();
+        if (!device || !queue) {
+            return {size, std::move(data)};
+        }
+        
+        // Create staging buffer for readback
+        WGPUBufferDescriptor bufferDesc = {};
+        bufferDesc.label = "Readback Buffer";
+        bufferDesc.size = dataSize;
+        bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_MapRead;
+        
+        WGPUBuffer stagingBuffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
+        if (!stagingBuffer) {
+            return {size, std::move(data)};
+        }
+        
+        // Copy texture to buffer
+        WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
+        if (encoder) {
+            auto& webgpuTexture = static_cast<Texture2D&>(*colorTexture);
+            WGPUTexture texture = webgpuTexture.getTexture();
+            
+            if (texture) {
+                WGPUImageCopyTexture src = {};
+                src.texture = texture;
+                src.mipLevel = 0;
+                src.origin = {0, 0, 0};
+                src.aspect = WGPUTextureAspect_All;
+                
+                WGPUImageCopyBuffer dst = {};
+                dst.buffer = stagingBuffer;
+                dst.layout.offset = 0;
+                dst.layout.bytesPerRow = size.width * 4; // Assuming RGBA
+                dst.layout.rowsPerImage = size.height;
+                
+                WGPUExtent3D copySize = {
+                    static_cast<uint32_t>(size.width),
+                    static_cast<uint32_t>(size.height),
+                    1
+                };
+                
+                wgpuCommandEncoderCopyTextureToBuffer(encoder, &src, &dst, &copySize);
+                
+                WGPUCommandBuffer commands = wgpuCommandEncoderFinish(encoder, nullptr);
+                wgpuQueueSubmit(queue, 1, &commands);
+                wgpuCommandBufferRelease(commands);
+            }
+            wgpuCommandEncoderRelease(encoder);
+        }
+        
+        // Map buffer and read data (blocking)
+        // Note: This is simplified - real implementation would need async callback
+        wgpuBufferMapAsync(stagingBuffer, WGPUMapMode_Read, 0, dataSize,
+                          [](WGPUBufferMapAsyncStatus status, void* userdata) {
+                              // Callback for when mapping is complete
+                              (void)status;
+                              (void)userdata;
+                          }, nullptr);
+        
+        // Wait for mapping to complete (simplified synchronous wait)
+        wgpuDevicePoll(device, true, nullptr);
+        
+        // Read the mapped data
+        const void* mappedData = wgpuBufferGetConstMappedRange(stagingBuffer, 0, dataSize);
+        if (mappedData) {
+            std::memcpy(data.get(), mappedData, dataSize);
+        }
+        
+        wgpuBufferUnmap(stagingBuffer);
+        wgpuBufferRelease(stagingBuffer);
+        
         return {size, std::move(data)};
     }
     
@@ -100,8 +179,13 @@ OffscreenTexture::OffscreenTexture(Context& context,
 }
 
 bool OffscreenTexture::isRenderable() {
-    // TODO: Implement renderability check
-    return true;
+    // Check if the texture resource is valid and can be rendered to
+    try {
+        auto& resource = getResource<OffscreenTextureResource>();
+        return resource.getTexture() != nullptr;
+    } catch (...) {
+        return false;
+    }
 }
 
 PremultipliedImage OffscreenTexture::readStillImage() {
