@@ -1,9 +1,13 @@
 #include <mbgl/webgpu/context.hpp>
-#include <mbgl/webgpu/backend_impl.hpp>
+#include <mbgl/webgpu/context_impl.hpp>
+#include <mbgl/gfx/color_mode.hpp>
+#include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/webgpu/command_encoder.hpp>
 #include <mbgl/webgpu/drawable_builder.hpp>
+#include <mbgl/webgpu/draw_scope_resource.hpp>
 #include <mbgl/webgpu/offscreen_texture.hpp>
 #include <mbgl/webgpu/renderbuffer.hpp>
+#include <mbgl/webgpu/renderbuffer_resource.hpp>
 #include <mbgl/webgpu/uniform_buffer.hpp>
 #include <mbgl/webgpu/uniform_buffer_array.hpp>
 #include <mbgl/webgpu/vertex_attribute_array.hpp>
@@ -18,27 +22,14 @@
 namespace mbgl {
 namespace webgpu {
 
-class Context::Impl {
-public:
-    Impl() = default;
-    ~Impl() = default;
-    
-    WGPUDevice getDevice() const { return reinterpret_cast<WGPUDevice>(device); }
-    WGPUQueue getQueue() const { return reinterpret_cast<WGPUQueue>(queue); }
-    
-    void* device = nullptr;
-    void* queue = nullptr;
-    std::unordered_map<std::string, gfx::ShaderProgramBasePtr> shaderCache;
-};
-
 Context::Context(RendererBackend& backend_)
     : gfx::Context(gfx::Context::minimumRequiredVertexBindingCount),
-      backend(backend_),
       impl(std::make_unique<Impl>()),
+      backend(backend_),
       globalUniformBuffers(std::make_unique<UniformBufferArray>()) {
     
     impl->device = backend.getDevice();
-    Log::Info(Event::WebGPU, "WebGPU Context created");
+    Log::Info(Event::General, "WebGPU Context created");
 }
 
 Context::~Context() = default;
@@ -59,7 +50,7 @@ void Context::reduceMemoryUsage() {
     // Free cached resources to reduce memory
 }
 
-std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size, gfx::TextureChannelDataType type) {
+std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size, gfx::TextureChannelDataType) {
     return std::make_unique<OffscreenTexture>(*this, size);
 }
 
@@ -75,7 +66,7 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<DrawableBuilder>(std::move(name));
 }
 
-gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool persistent, bool ssbo) {
+gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool persistent, bool) {
     return std::make_shared<UniformBuffer>(data, size, persistent);
 }
 
@@ -95,12 +86,12 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registr
     return shader;
 }
 
-TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    return std::make_shared<TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
+gfx::TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
+    return std::make_shared<webgpu::TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
 }
 
-LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    return std::make_shared<LayerGroup>(layerIndex, initialCapacity, std::move(name));
+gfx::LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
+    return std::make_shared<webgpu::LayerGroup>(layerIndex, initialCapacity, std::move(name));
 }
 
 gfx::Texture2DPtr Context::createTexture2D() {
@@ -111,7 +102,7 @@ RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureC
     return std::make_shared<RenderTarget>(size, type);
 }
 
-void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
+void Context::resetState(gfx::DepthMode, gfx::ColorMode) {
     // Reset WebGPU render state
 }
 
