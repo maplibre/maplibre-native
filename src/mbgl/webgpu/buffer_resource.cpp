@@ -58,8 +58,9 @@ void BufferResource::update(const void* data, std::size_t updateSize, std::size_
     }
 
     
-    // Get the queue from context
-    auto queue = context->getQueue();
+    // Get the queue from backend
+    auto& backend = static_cast<RendererBackend&>(context->getBackend());
+    WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
     if (!queue) {
         return;
     }

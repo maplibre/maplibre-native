@@ -28,7 +28,9 @@ public:
     
     // WebGPU-specific methods
     void setDevice(void* device);
+    void setQueue(void* queue);
     void* getDevice() const;
+    void* getQueue() const;
     void* getSurface() const;
 
 protected:

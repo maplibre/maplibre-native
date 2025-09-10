@@ -1,4 +1,4 @@
-#include <mbgl/shaders/webgpu/hillshade.hpp>
+#include <mbgl/shaders/webgpu/hillshade_prepare.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/shaders/hillshade_prepare_layer_ubo.hpp>
 
