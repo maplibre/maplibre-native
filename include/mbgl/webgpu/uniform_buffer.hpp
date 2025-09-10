@@ -2,49 +2,52 @@
 
 #include <mbgl/gfx/uniform_buffer.hpp>
 #include <mbgl/webgpu/backend_impl.hpp>
-#include <cstddef>
-#include <vector>
 
 namespace mbgl {
 namespace webgpu {
 
 class Context;
 
-class UniformBuffer : public gfx::UniformBuffer {
+class UniformBuffer final : public gfx::UniformBuffer {
 public:
-    UniformBuffer(Context& context, const void* data, std::size_t size, bool persistent);
+    UniformBuffer(Context& context, const void* data, std::size_t size);
     ~UniformBuffer() override;
 
-    // Update buffer data
-    void update(const void* data, std::size_t size) override;
-    
-    // WebGPU specific
+    UniformBuffer(const UniformBuffer&);
+    UniformBuffer(UniformBuffer&& other) noexcept;
+    UniformBuffer& operator=(const UniformBuffer&) = delete;
+    UniformBuffer& operator=(UniformBuffer&&) = delete;
+
+    void update(const void* data, std::size_t dataSize) override;
+
     WGPUBuffer getBuffer() const { return buffer; }
-    std::size_t getSize() const { return size; }
-    bool isPersistent() const { return persistent; }
-    
-    // For creating bind group entries
-    WGPUBindGroupEntry createBindGroupEntry(uint32_t binding) const;
 
 private:
-    void createBuffer(const void* data);
-    
     Context& context;
     WGPUBuffer buffer = nullptr;
-    std::size_t size;
-    bool persistent;
-    
-    // For dynamic updates
-    std::vector<uint8_t> stagingData;
 };
 
-// SSBO (Storage Buffer) variant
-class StorageBuffer : public UniformBuffer {
+class UniformBufferArray final : public gfx::UniformBufferArray {
 public:
-    StorageBuffer(Context& context, const void* data, std::size_t size, bool persistent);
+    UniformBufferArray() = default;
+    UniformBufferArray(UniformBufferArray&& other) noexcept
+        : gfx::UniformBufferArray(std::move(other)) {}
+    UniformBufferArray(const UniformBufferArray&) = delete;
     
-    // Override to use storage buffer usage flags
-    WGPUBindGroupEntry createBindGroupEntry(uint32_t binding) const;
+    UniformBufferArray& operator=(UniformBufferArray&& other) {
+        gfx::UniformBufferArray::operator=(std::move(other));
+        return *this;
+    }
+    
+    UniformBufferArray& operator=(const UniformBufferArray& other) {
+        gfx::UniformBufferArray::operator=(other);
+        return *this;
+    }
+
+    void bind(gfx::RenderPass& renderPass) override;
+
+private:
+    std::unique_ptr<gfx::UniformBuffer> copy(const gfx::UniformBuffer& uniformBuffer) override;
 };
 
 } // namespace webgpu
