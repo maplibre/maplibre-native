@@ -1368,7 +1368,7 @@ if(MLN_WITH_WEBGPU)
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/index_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/render_pass.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/renderer_backend.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/shader_program.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/shader_program.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/texture2d.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/uniform_buffer.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/upload_pass.cpp
