@@ -1,147 +1,111 @@
 #include <mbgl/webgpu/upload_pass.hpp>
 #include <mbgl/webgpu/command_encoder.hpp>
 #include <mbgl/webgpu/context.hpp>
-#include <mbgl/webgpu/drawable.hpp>
-#include <mbgl/gfx/texture2d.hpp>
-#include <mbgl/gfx/uniform_buffer.hpp>
-#include <mbgl/util/logging.hpp>
-#include <cstring>
+#include <mbgl/webgpu/vertex_buffer.hpp>
+#include <mbgl/webgpu/index_buffer.hpp>
 
 namespace mbgl {
 namespace webgpu {
 
-UploadPass::UploadPass(CommandEncoder& commandEncoder_,
-                      const char* name,
-                      gfx::UploadPassDescriptor&& descriptor_)
-    : gfx::UploadPass(name),
-      commandEncoder(commandEncoder_),
-      descriptor(std::move(descriptor_)) {
+UploadPass::UploadPass(CommandEncoder& commandEncoder_, const char* name)
+    : commandEncoder(commandEncoder_) {
+    pushDebugGroup(name);
 }
 
-UploadPass::~UploadPass() {
-    // Clean up staging buffers
-    for (auto& staging : stagingBuffers) {
-        if (staging.mappedData) {
-            // wgpuBufferUnmap(staging.buffer);
-        }
-        if (staging.buffer) {
-            // wgpuBufferDestroy(staging.buffer);
-        }
-    }
+void UploadPass::pushDebugGroup(const char* /*name*/) {
+    // WebGPU debug groups are typically set on command encoders
+    // This would require access to the WebGPU command encoder
+    // For now, this is a no-op
 }
 
-void UploadPass::upload(gfx::Drawable& drawable) {
-    auto& webgpuDrawable = static_cast<Drawable&>(drawable);
-    webgpuDrawable.upload(*this);
+void UploadPass::popDebugGroup() {
+    // WebGPU debug groups are typically set on command encoders
+    // This would require access to the WebGPU command encoder
+    // For now, this is a no-op
 }
 
-void UploadPass::uploadTexture(gfx::Texture2D& texture) {
-    // TODO: Implement texture upload
-    // This involves:
-    // 1. Getting the texture data
-    // 2. Creating a staging buffer
-    // 3. Copying data to staging buffer
-    // 4. Encoding a copy from buffer to texture
+gfx::Context& UploadPass::getContext() {
+    return commandEncoder.getContext();
 }
 
-void UploadPass::updateUniformBuffer(gfx::UniformBuffer& uniformBuffer, const void* data, std::size_t size) {
-    if (!data || size == 0) {
-        return;
-    }
-    
-    // Get or cast to WebGPU uniform buffer
-    // TODO: Implement proper uniform buffer type
-    // auto& webgpuBuffer = static_cast<WebGPUUniformBuffer&>(uniformBuffer);
-    
-    // For uniform buffers, we might be able to update directly if they're mapped
-    // Otherwise, use a staging buffer
-    
-    auto* staging = getOrCreateStagingBuffer(size);
-    if (!staging || !staging->mappedData) {
-        Log::Error(Event::Render, "Failed to get staging buffer for uniform update");
-        return;
-    }
-    
-    // Copy data to staging buffer
-    std::memcpy(staging->mappedData, data, size);
-    
-    // Encode copy from staging to uniform buffer
-    // WGPUBuffer dstBuffer = webgpuBuffer.getBuffer();
-    // copyBufferToBuffer(staging->buffer, dstBuffer, size);
+const gfx::Context& UploadPass::getContext() const {
+    return commandEncoder.getContext();
 }
 
-void UploadPass::updateTexture(gfx::Texture2D& texture, const void* data, std::size_t size) {
-    if (!data || size == 0) {
-        return;
-    }
+std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResource(
+    const void* data,
+    std::size_t size,
+    gfx::BufferUsageType usage,
+    bool persistent) {
     
-    // TODO: Implement texture data update
-    // Similar to uploadTexture but for updating existing texture
+    return std::make_unique<VertexBufferResource>(
+        static_cast<Context&>(getContext()),
+        data,
+        size,
+        usage,
+        persistent
+    );
 }
 
-UploadPass::StagingBuffer* UploadPass::getOrCreateStagingBuffer(std::size_t size) {
-    // Find an existing staging buffer that's large enough
-    for (auto& staging : stagingBuffers) {
-        if (staging.size >= size) {
-            return &staging;
-        }
-    }
-    
-    // Create a new staging buffer
-    StagingBuffer staging;
-    staging.size = size;
-    
-    // TODO: Get device from context
-    // WGPUDevice device = ...;
-    
-    WGPUBufferDescriptor bufferDesc = {};
-    bufferDesc.label = "Staging Buffer";
-    bufferDesc.size = size;
-    bufferDesc.usage = WGPUBufferUsage_CopySrc | WGPUBufferUsage_MapWrite;
-    bufferDesc.mappedAtCreation = true;
-    
-    // staging.buffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
-    
-    if (!staging.buffer) {
-        Log::Error(Event::Render, "Failed to create staging buffer");
-        return nullptr;
-    }
-    
-    // Get mapped data pointer
-    // staging.mappedData = wgpuBufferGetMappedRange(staging.buffer, 0, size);
-    
-    stagingBuffers.push_back(staging);
-    return &stagingBuffers.back();
+void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource, 
+                                           const void* data, 
+                                           std::size_t size) {
+    auto& buffer = static_cast<VertexBufferResource&>(resource);
+    buffer.update(data, size);
 }
 
-void UploadPass::copyBufferToBuffer(WGPUBuffer src, WGPUBuffer dst, std::size_t size) {
-    WGPUCommandEncoder encoder = commandEncoder.getEncoder();
-    if (!encoder) {
-        return;
-    }
+std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(
+    const void* data,
+    std::size_t size,
+    gfx::BufferUsageType usage,
+    bool persistent) {
     
-    // wgpuCommandEncoderCopyBufferToBuffer(encoder, src, 0, dst, 0, size);
+    return std::make_unique<IndexBufferResource>(
+        static_cast<Context&>(getContext()),
+        data,
+        size,
+        usage,
+        persistent
+    );
 }
 
-void UploadPass::copyBufferToTexture(WGPUBuffer src, WGPUTexture dst, const WGPUExtent3D& size) {
-    WGPUCommandEncoder encoder = commandEncoder.getEncoder();
-    if (!encoder) {
-        return;
+void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource, 
+                                          const void* data, 
+                                          std::size_t size) {
+    auto& buffer = static_cast<IndexBufferResource&>(resource);
+    buffer.update(data, size);
+}
+
+gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
+    const std::size_t /*vertexCount*/,
+    const gfx::AttributeDataType /*vertexType*/,
+    const std::size_t /*vertexAttributeIndex*/,
+    const std::vector<std::uint8_t>& vertexData,
+    const gfx::VertexAttributeArray& /*defaults*/,
+    const gfx::VertexAttributeArray& /*overrides*/,
+    gfx::BufferUsageType usage,
+    const std::optional<std::chrono::duration<double>> /*lastUpdate*/,
+    /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) {
+    
+    gfx::AttributeBindingArray result;
+    
+    // Create vertex buffer for the vertex data
+    if (!vertexData.empty()) {
+        auto vertexBuffer = createVertexBufferResource(
+            vertexData.data(),
+            vertexData.size(),
+            usage,
+            false // not persistent for now
+        );
+        
+        // Build attribute bindings based on the vertex attributes
+        // This is a simplified implementation - a full implementation would
+        // need to properly parse the vertex format and create appropriate bindings
+        
+        outBuffers.push_back(std::move(vertexBuffer));
     }
     
-    WGPUImageCopyBuffer source = {};
-    source.buffer = src;
-    source.layout.offset = 0;
-    source.layout.bytesPerRow = 0; // TODO: Calculate based on texture format
-    source.layout.rowsPerImage = 0;
-    
-    WGPUImageCopyTexture destination = {};
-    destination.texture = dst;
-    destination.mipLevel = 0;
-    destination.origin = {0, 0, 0};
-    destination.aspect = WGPUTextureAspect_All;
-    
-    // wgpuCommandEncoderCopyBufferToTexture(encoder, &source, &destination, &size);
+    return result;
 }
 
 } // namespace webgpu

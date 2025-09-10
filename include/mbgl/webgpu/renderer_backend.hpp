@@ -25,6 +25,11 @@ public:
 
     // Platform-specific surface creation
     void setSurface(void* nativeWindow);
+    
+    // WebGPU-specific methods
+    void setDevice(void* device);
+    void* getDevice() const;
+    void* getSurface() const;
 
 protected:
     std::unique_ptr<gfx::Context> createContext() override;

@@ -9,8 +9,11 @@ namespace webgpu {
 
 class RendererBackend::Impl : public gfx::Renderable {
 public:
-    Impl() = default;
+    Impl() : gfx::Renderable({800, 600}, nullptr) {}  // Default size
     ~Impl() override = default;
+    
+    void* wgpuDevice = nullptr;
+    void* wgpuSurface = nullptr;
 };
 
 RendererBackend::RendererBackend(gfx::ContextMode contextMode)
@@ -34,7 +37,21 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramPa
 void RendererBackend::setSurface(void* nativeWindow) {
     // Platform-specific surface creation
     // This will be used to create the WebGPU surface from a native window handle
+    impl->wgpuSurface = nativeWindow;
     Log::Info(Event::General, "Setting WebGPU surface");
+}
+
+void RendererBackend::setDevice(void* device) {
+    impl->wgpuDevice = device;
+    Log::Info(Event::General, "Setting WebGPU device");
+}
+
+void* RendererBackend::getDevice() const {
+    return impl->wgpuDevice;
+}
+
+void* RendererBackend::getSurface() const {
+    return impl->wgpuSurface;
 }
 
 std::unique_ptr<gfx::Context> RendererBackend::createContext() {

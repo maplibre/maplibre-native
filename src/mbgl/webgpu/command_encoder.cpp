@@ -2,113 +2,56 @@
 #include <mbgl/webgpu/context.hpp>
 #include <mbgl/webgpu/render_pass.hpp>
 #include <mbgl/webgpu/upload_pass.hpp>
-#include <mbgl/util/logging.hpp>
 
 namespace mbgl {
 namespace webgpu {
 
-CommandEncoder::CommandEncoder(Context& context_)
-    : context(context_) {
-    
-    auto* impl = context.getImpl();
-    if (!impl) {
-        Log::Error(Event::Render, "WebGPU context implementation is null");
-        return;
-    }
-    
-    WGPUDevice device = impl->getDevice();
-    if (!device) {
-        Log::Error(Event::Render, "WebGPU device is null");
-        return;
-    }
-    
-    // Create command encoder
-    WGPUCommandEncoderDescriptor desc = {};
-    desc.label = "MapLibre Command Encoder";
-    
-    // encoder = wgpuDeviceCreateCommandEncoder(device, &desc);
-    
-    if (!encoder) {
-        Log::Error(Event::Render, "Failed to create WebGPU command encoder");
-    }
+CommandEncoder::CommandEncoder(Context& context) 
+    : context_(context) {
 }
 
-CommandEncoder::~CommandEncoder() {
-    if (!finished && encoder) {
-        finish();
-    }
-    
-    if (commandBuffer) {
-        // wgpuCommandBufferRelease(commandBuffer);
-    }
-    
-    if (encoder) {
-        // wgpuCommandEncoderRelease(encoder);
-    }
-}
+CommandEncoder::~CommandEncoder() = default;
+
+void CommandEncoder::setDepthMode(const gfx::DepthMode&) {}
+void CommandEncoder::setStencilMode(const gfx::StencilMode&) {}
+void CommandEncoder::setColorMode(const gfx::ColorMode&) {}
+void CommandEncoder::setCullFaceMode(const gfx::CullFaceMode&) {}
+void CommandEncoder::setDrawableProvider(gfx::DrawableProvider*) {}
+void CommandEncoder::setScissorTest(bool) {}
+void CommandEncoder::setScissorRect(const gfx::ScissorTest&) {}
+void CommandEncoder::clearColor(const Color&) {}
+void CommandEncoder::clearStencil(int32_t) {}
+void CommandEncoder::clearDepth(float) {}
+void CommandEncoder::setViewport(const gfx::Viewport&) {}
+void CommandEncoder::draw(const gfx::DrawablePtr&) {}
 
 std::unique_ptr<gfx::RenderPass> CommandEncoder::createRenderPass(const char* name, 
-                                                                 const gfx::RenderPassDescriptor& desc) {
-    if (!encoder) {
-        return nullptr;
-    }
-    
-    return std::make_unique<RenderPass>(*this, name, desc);
+                                                                  const gfx::RenderPassDescriptor& descriptor) {
+    return std::make_unique<RenderPass>(*this, name, descriptor);
 }
 
-std::unique_ptr<gfx::UploadPass> CommandEncoder::createUploadPass(const char* name,
-                                                                 gfx::UploadPassDescriptor&& desc) {
-    if (!encoder) {
-        return nullptr;
-    }
-    
-    return std::make_unique<UploadPass>(*this, name, std::move(desc));
+std::unique_ptr<gfx::UploadPass> CommandEncoder::createUploadPass(const /*char* name*/) {
+    return std::make_unique<UploadPass>(*this, name);
 }
 
-void CommandEncoder::present() {
-    if (!encoder || finished) {
-        return;
-    }
-    
-    finish();
-    
-    auto* impl = context.getImpl();
-    if (!impl || !commandBuffer) {
-        return;
-    }
-    
-    WGPUQueue queue = impl->getQueue();
-    if (!queue) {
-        return;
-    }
-    
-    // Submit command buffer to queue
-    // wgpuQueueSubmit(queue, 1, &commandBuffer);
-    
-    // Present the surface if needed
-    WGPUSurface surface = impl->getSurface();
-    if (surface) {
-        // wgpuSurfacePresent(surface);
-    }
-}
-
-void CommandEncoder::clearStencilBuffer(int32_t clearValue) {
-    // TODO: Implement stencil buffer clearing
-    // This might need to be done as part of a render pass
+void CommandEncoder::present(gfx::Renderable&) {
+    // TODO: Present to WebGPU surface
 }
 
 void CommandEncoder::finish() {
-    if (finished || !encoder) {
-        return;
-    }
-    
-    // Finish encoding and create command buffer
-    WGPUCommandBufferDescriptor desc = {};
-    desc.label = "MapLibre Command Buffer";
-    
-    // commandBuffer = wgpuCommandEncoderFinish(encoder, &desc);
-    
-    finished = true;
+    // TODO: Finish WebGPU command encoding
+}
+
+gfx::Context& CommandEncoder::getContext() {
+    return context_;
+}
+
+const gfx::Context& CommandEncoder::getContext() const {
+    return context_;
+}
+
+std::unique_ptr<gfx::DebugGroup<gfx::CommandEncoder>> CommandEncoder::createDebugGroup(const char* name) {
+    return std::make_unique<gfx::DebugGroup<gfx::CommandEncoder>>(*this, name);
 }
 
 } // namespace webgpu
