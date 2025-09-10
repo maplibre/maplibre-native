@@ -57,9 +57,15 @@ void BufferResource::update(const void* data, std::size_t updateSize, std::size_
         return;
     }
 
-    // TODO: Implement buffer update once we have queue access
-    // For now, this is a placeholder
-    // The proper implementation would use wgpuQueueWriteBuffer
+    
+    // Get the queue from context
+    auto queue = context->getQueue();
+    if (!queue) {
+        return;
+    }
+    
+    // Write data to buffer using queue
+    wgpuQueueWriteBuffer(queue, buffer, offset, data, updateSize);
 }
 
 } // namespace webgpu
