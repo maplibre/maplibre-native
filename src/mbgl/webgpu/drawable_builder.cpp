@@ -13,7 +13,7 @@ DrawableBuilder::DrawableBuilder(std::string name)
 DrawableBuilder::~DrawableBuilder() = default;
 
 std::unique_ptr<gfx::Drawable> DrawableBuilder::createDrawable() const {
-    return std::make_unique<Drawable>();
+    return std::make_unique<Drawable>(name);
 }
 
 } // namespace webgpu

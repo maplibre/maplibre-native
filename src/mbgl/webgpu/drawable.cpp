@@ -1,5 +1,7 @@
 #include <mbgl/webgpu/drawable.hpp>
 #include <mbgl/webgpu/context.hpp>
+#include <mbgl/webgpu/upload_pass.hpp>
+#include <mbgl/webgpu/uniform_buffer_array.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
@@ -36,16 +38,19 @@ public:
     gfx::CullFaceMode cullFaceMode;
     
     // Uniform buffers
-    gfx::UniformBufferArray uniformBuffers;
+    std::unique_ptr<gfx::UniformBufferArray> uniformBuffers;
     
     // Draw segments
-    std::vector<std::unique_ptr<DrawSegment>> segments;
+    // TODO: Implement DrawSegment
+    // std::vector<std::unique_ptr<DrawSegment>> segments;
     gfx::IndexVectorBasePtr indexVector;
 };
 
 Drawable::Drawable(std::string name)
     : gfx::Drawable(std::move(name)),
       impl(std::make_unique<Impl>()) {
+    // Initialize uniform buffers
+    impl->uniformBuffers = std::make_unique<UniformBufferArray>();
 }
 
 Drawable::~Drawable() {
@@ -77,11 +82,12 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
     }
     
     // Upload textures
-    uploadTextures(static_cast<UploadPass&>(uploadPass));
+    auto& webgpuUploadPass = static_cast<webgpu::UploadPass&>(uploadPass);
+    uploadTextures(webgpuUploadPass);
 }
 
-void Drawable::draw(PaintParameters& parameters) const {
-    if (!isEnabled() || !impl->pipeline) {
+void Drawable::draw(PaintParameters&) const {
+    if (!getEnabled() || !impl->pipeline) {
         return;
     }
     
@@ -91,15 +97,17 @@ void Drawable::draw(PaintParameters& parameters) const {
     // TODO: Bind uniform buffers and textures
     // TODO: Draw indexed or non-indexed based on whether we have indices
     
-    stats.drawCalls++;
-    if (impl->indexVector) {
-        stats.totalIndexCount += impl->indexVector->elements();
-    }
+    // TODO: Update statistics
+    // stats.drawCalls++;
+    // if (impl->indexVector) {
+    //     stats.totalIndexCount += impl->indexVector->elements();
+    // }
 }
 
-void Drawable::setIndexData(gfx::IndexVectorBasePtr indices, std::vector<UniqueDrawSegment> segments) {
+void Drawable::setIndexData(gfx::IndexVectorBasePtr indices, std::vector<UniqueDrawSegment>) {
     impl->indexVector = std::move(indices);
-    impl->segments = std::move(segments);
+    // TODO: Store segments when DrawSegment is implemented
+    // impl->segments = std::move(segments);
     
     // Mark as dirty to rebuild pipeline if needed
     buildWebGPUPipeline();
@@ -114,11 +122,11 @@ void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::
 }
 
 const gfx::UniformBufferArray& Drawable::getUniformBuffers() const {
-    return impl->uniformBuffers;
+    return *impl->uniformBuffers;
 }
 
 gfx::UniformBufferArray& Drawable::mutableUniformBuffers() {
-    return impl->uniformBuffers;
+    return *impl->uniformBuffers;
 }
 
 void Drawable::setEnableColor(bool value) {
@@ -139,7 +147,7 @@ void Drawable::setDepthType(gfx::DepthMaskType value) {
 
 void Drawable::setDepthModeFor3D(const gfx::DepthMode& value) {
     // Set depth mode for 3D rendering
-    impl->depthEnabled = value.enabled;
+    impl->depthEnabled = value.func != gfx::DepthFunctionType::Never;
     impl->depthMask = value.mask;
 }
 
@@ -166,15 +174,16 @@ void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr attributes,
     // Update vertex attributes and rebuild pipeline if needed
     vertexAttributes = std::move(attributes);
     impl->vertexCount = vertexCount;
-    drawModeType = drawMode;
+    // TODO: Store draw mode properly - drawMode parameter
     impl->indexVector = std::move(indices);
     
     if (segments && segmentCount > 0) {
-        impl->segments.clear();
-        impl->segments.reserve(segmentCount);
-        for (std::size_t i = 0; i < segmentCount; ++i) {
-            // TODO: Convert segments to draw segments
-        }
+        // TODO: Store segments when DrawSegment is implemented
+        // impl->segments.clear();
+        // impl->segments.reserve(segmentCount);
+        // for (std::size_t i = 0; i < segmentCount; ++i) {
+        //     // TODO: Convert segments to draw segments
+        // }
     }
     
     buildWebGPUPipeline();
