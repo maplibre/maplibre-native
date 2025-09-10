@@ -2,10 +2,51 @@
 
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/webgpu/backend_impl.hpp>
+#include <mbgl/gfx/attribute.hpp>
 #include <string>
 #include <unordered_map>
+#include <array>
 
 namespace mbgl {
+namespace shaders {
+
+struct UniformBlockInfo {
+    constexpr UniformBlockInfo(bool vertex_, bool fragment_, std::size_t size_, std::size_t id_)
+        : index(id_),
+          vertex(vertex_),
+          fragment(fragment_),
+          size(size_),
+          id(id_) {}
+
+    std::size_t index;
+    bool vertex;
+    bool fragment;
+    std::size_t size;
+    std::size_t id;
+};
+
+struct AttributeInfo {
+    constexpr AttributeInfo(std::size_t index_, gfx::AttributeDataType dataType_, std::size_t id_)
+        : index(index_),
+          dataType(dataType_),
+          id(id_) {}
+
+    std::size_t index;
+    gfx::AttributeDataType dataType;
+    std::size_t id;
+};
+
+struct TextureInfo {
+    constexpr TextureInfo(std::size_t index_, std::size_t id_)
+        : index(index_),
+          id(id_) {}
+
+    std::size_t index;
+    std::size_t id;
+};
+
+} // namespace shaders
+
 namespace webgpu {
 
 class Context;

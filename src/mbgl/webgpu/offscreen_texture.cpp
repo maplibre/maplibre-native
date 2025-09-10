@@ -124,6 +124,8 @@ public:
                     1
                 };
                 
+                // Copy texture to buffer - function name varies between Dawn and wgpu
+                // Using the standard C API name
                 wgpuCommandEncoderCopyTextureToBuffer(encoder, &src, &dst, &copySize);
                 
                 WGPUCommandBuffer commands = wgpuCommandEncoderFinish(encoder, nullptr);
@@ -135,12 +137,17 @@ public:
         
         // Map buffer and read data (blocking)
         // Note: This is simplified - real implementation would need async callback
+        struct MapContext {
+            bool completed = false;
+        };
+        MapContext mapContext;
+        
         wgpuBufferMapAsync(stagingBuffer, WGPUMapMode_Read, 0, dataSize,
                           [](WGPUBufferMapAsyncStatus status, void* userdata) {
-                              // Callback for when mapping is complete
+                              auto* ctx = static_cast<MapContext*>(userdata);
+                              ctx->completed = true;
                               (void)status;
-                              (void)userdata;
-                          }, nullptr);
+                          }, &mapContext);
         
         // Wait for mapping to complete (simplified synchronous wait)
         wgpuDevicePoll(device, true, nullptr);

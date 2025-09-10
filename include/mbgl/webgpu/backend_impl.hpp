@@ -199,6 +199,21 @@ typedef enum WGPUSType {
     WGPUSType_SurfaceDescriptorFromXlibWindow = 0x00000009,
 } WGPUSType;
 
+typedef uint32_t WGPUMapMode;
+enum WGPUMapMode_ {
+    WGPUMapMode_None = 0x00000000,
+    WGPUMapMode_Read = 0x00000001,
+    WGPUMapMode_Write = 0x00000002,
+};
+
+typedef enum WGPUBufferMapAsyncStatus {
+    WGPUBufferMapAsyncStatus_Success = 0,
+    WGPUBufferMapAsyncStatus_Error = 1,
+    WGPUBufferMapAsyncStatus_UnmappedBeforeCallback = 2,
+    WGPUBufferMapAsyncStatus_DestroyedBeforeCallback = 3,
+    WGPUBufferMapAsyncStatus_DeviceLost = 4,
+} WGPUBufferMapAsyncStatus;
+
 typedef enum WGPUStoreOp {
     WGPUStoreOp_Undefined = 0,
     WGPUStoreOp_Store = 1,

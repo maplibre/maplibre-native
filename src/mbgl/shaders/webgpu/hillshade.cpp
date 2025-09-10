@@ -1,0 +1,19 @@
+#include <mbgl/shaders/webgpu/hillshade.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
+#include <mbgl/shaders/hillshade_layer_ubo.hpp>
+
+namespace mbgl {
+namespace shaders {
+
+using HillshadeShaderSource = ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::WebGPU>;
+
+const std::array<AttributeInfo, 2> HillshadeShaderSource::attributes = {
+    AttributeInfo{0, gfx::AttributeDataType::Float2, idHillshadePosVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Float2, idHillshadeTexCoordVertexAttribute},
+};
+const std::array<TextureInfo, 1> HillshadeShaderSource::textures = {
+    TextureInfo{0, idHillshadeTexture}
+};
+
+} // namespace shaders
+} // namespace mbgl
