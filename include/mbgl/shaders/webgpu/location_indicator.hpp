@@ -1,26 +1,25 @@
 #pragma once
 
+#include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
-#include <mbgl/shaders/layer_ubo.hpp>
-
-#include <array>
-#include <string>
 
 namespace mbgl {
 namespace shaders {
 
-class LocationIndicatorShader final : public gfx::ShaderProgramBase {
-public:
-    LocationIndicatorShader();
-    ~LocationIndicatorShader() override;
+template <>
+struct ShaderSource<BuiltIn::LocationIndicatorShader, gfx::Backend::Type::WebGPU> {
+    static constexpr const char* name = "LocationIndicatorShader";
+    static const std::array<AttributeInfo, 1> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<TextureInfo, 0> textures;
+};
 
-    const std::string programIdentifier;
-
-    static constexpr std::array<AttributeInfo, 1> attributes = {{
-        {"a_pos", gfx::AttributeType::Float2}
-    }};
-    
-    static constexpr std::array<TextureInfo, 0> textures = {};
+template <>
+struct ShaderSource<BuiltIn::LocationIndicatorTexturedShader, gfx::Backend::Type::WebGPU> {
+    static constexpr const char* name = "LocationIndicatorTexturedShader";
+    static const std::array<AttributeInfo, 2> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<TextureInfo, 1> textures;
 };
 
 } // namespace shaders

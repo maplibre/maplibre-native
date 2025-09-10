@@ -13,6 +13,7 @@ public:
     ~Impl() override = default;
     
     void* wgpuDevice = nullptr;
+    void* wgpuQueue = nullptr;
     void* wgpuSurface = nullptr;
 };
 
@@ -52,8 +53,17 @@ void RendererBackend::setDevice(void* device) {
     Log::Info(Event::General, "Setting WebGPU device");
 }
 
+void RendererBackend::setQueue(void* queue) {
+    impl->wgpuQueue = queue;
+    Log::Info(Event::General, "Setting WebGPU queue");
+}
+
 void* RendererBackend::getDevice() const {
     return impl->wgpuDevice;
+}
+
+void* RendererBackend::getQueue() const {
+    return impl->wgpuQueue;
 }
 
 void* RendererBackend::getSurface() const {

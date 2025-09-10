@@ -2,14 +2,30 @@
 #include <mbgl/webgpu/context.hpp>
 #include <mbgl/webgpu/render_pass.hpp>
 #include <mbgl/webgpu/upload_pass.hpp>
+#include <mbgl/webgpu/renderer_backend.hpp>
+#include <mbgl/webgpu/backend_impl.hpp>
 
 namespace mbgl {
 namespace webgpu {
 
 CommandEncoder::CommandEncoder(Context& ctx) 
-    : context(ctx) {}
+    : context(ctx) {
+    // Initialize WebGPU command encoder
+    auto& backend = static_cast<RendererBackend&>(context.getBackend());
+    WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
+    
+    if (device) {
+        WGPUCommandEncoderDescriptor desc = {};
+        desc.label = "MapLibre Command Encoder";
+        encoder = wgpuDeviceCreateCommandEncoder(device, &desc);
+    }
+}
 
-CommandEncoder::~CommandEncoder() = default;
+CommandEncoder::~CommandEncoder() {
+    if (encoder) {
+        wgpuCommandEncoderRelease(encoder);
+    }
+}
 
 std::unique_ptr<gfx::RenderPass> CommandEncoder::createRenderPass(const char* name,
                                                                    const gfx::RenderPassDescriptor& descriptor) {
@@ -22,23 +38,18 @@ std::unique_ptr<gfx::UploadPass> CommandEncoder::createUploadPass(const char* na
 
 void CommandEncoder::present(gfx::Renderable& renderable) {
     // Submit command buffer and present the surface
-    auto device = context.getDevice();
-    auto queue = context.getQueue();
+    auto& backend = static_cast<RendererBackend&>(context.getBackend());
+    WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
+    WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
     
-    if (!device || !queue) {
-        return;
-    }
-    
-    // Get the command encoder from context
-    WGPUCommandEncoder cmdEncoder = context.getCommandEncoder();
-    if (!cmdEncoder) {
+    if (!device || !queue || !encoder) {
         return;
     }
     
     // Finish and submit the command buffer
     WGPUCommandBufferDescriptor cmdBufferDesc = {};
     cmdBufferDesc.label = "Command Buffer";
-    WGPUCommandBuffer cmdBuffer = wgpuCommandEncoderFinish(cmdEncoder, &cmdBufferDesc);
+    WGPUCommandBuffer cmdBuffer = wgpuCommandEncoderFinish(encoder, &cmdBufferDesc);
     
     if (cmdBuffer) {
         wgpuQueueSubmit(queue, 1, &cmdBuffer);
@@ -50,60 +61,62 @@ void CommandEncoder::present(gfx::Renderable& renderable) {
     (void)renderable;
 }
 
-void CommandEncoder::trackRenderPass(RenderPass* renderPass) {
-    renderPasses.insert(renderPass);
-    
-    // Propagate existing debug groups to the new render pass
-    if (!debugGroupNames.empty() && renderPass) {
-        // WebGPU doesn't have a direct way to push debug groups to an existing pass
-        // This would typically be handled when creating the render pass encoder
-    }
+void CommandEncoder::clearStencilBuffer(const gfx::ClearValue& value) {
+    // WebGPU doesn't have a direct clear stencil command outside of render pass
+    // This would typically be done within a render pass
+    (void)value;
 }
 
-void CommandEncoder::forgetRenderPass(RenderPass* renderPass) {
-    renderPasses.erase(renderPass);
+void CommandEncoder::clearDepthBuffer(const gfx::ClearValue& value) {
+    // WebGPU doesn't have a direct clear depth command outside of render pass
+    // This would typically be done within a render pass
+    (void)value;
 }
 
-void CommandEncoder::trackUploadPass(UploadPass* uploadPass) {
-    uploadPasses.insert(uploadPass);
-    
-    // Propagate existing debug groups to the new upload pass
-    if (!debugGroupNames.empty() && uploadPass) {
-        // WebGPU doesn't have a direct way to push debug groups to an existing pass
-        // This would typically be handled when creating the upload pass
-    }
+void CommandEncoder::setStencilMode(const gfx::StencilMode& mode) {
+    // Stencil mode is set per pipeline in WebGPU
+    currentStencilMode = mode;
 }
 
-void CommandEncoder::forgetUploadPass(UploadPass* uploadPass) {
-    uploadPasses.erase(uploadPass);
+void CommandEncoder::setDepthMode(const gfx::DepthMode& mode) {
+    // Depth mode is set per pipeline in WebGPU
+    currentDepthMode = mode;
+}
+
+void CommandEncoder::setColorMode(const gfx::ColorMode& mode) {
+    // Color mode is set per pipeline in WebGPU
+    currentColorMode = mode;
+}
+
+void CommandEncoder::setCullFaceMode(const gfx::CullFaceMode& mode) {
+    // Cull face mode is set per pipeline in WebGPU
+    currentCullFaceMode = mode;
+}
+
+void CommandEncoder::draw(const gfx::DrawMode& drawMode,
+                          std::size_t vertexOffset,
+                          std::size_t vertexCount) {
+    // Drawing commands must be issued within a render pass
+    // This will be handled by the RenderPass class
+    (void)drawMode;
+    (void)vertexOffset;
+    (void)vertexCount;
 }
 
 void CommandEncoder::pushDebugGroup(const char* name) {
-    debugGroupNames.push_back({name, 0, 0});
-    
-    // Get the WebGPU command encoder
-    WGPUCommandEncoder cmdEncoder = context.getCommandEncoder();
-    if (cmdEncoder) {
-        wgpuCommandEncoderPushDebugGroup(cmdEncoder, name);
+    if (encoder) {
+        wgpuCommandEncoderPushDebugGroup(encoder, name);
     }
-    
-    // Note: Individual render/upload passes handle their own debug groups
-    // when they create their respective encoders
 }
 
 void CommandEncoder::popDebugGroup() {
-    if (!debugGroupNames.empty()) {
-        debugGroupNames.pop_back();
-        
-        // Get the WebGPU command encoder
-        WGPUCommandEncoder cmdEncoder = context.getCommandEncoder();
-        if (cmdEncoder) {
-            wgpuCommandEncoderPopDebugGroup(cmdEncoder);
-        }
-        
-        // Note: Individual render/upload passes handle their own debug groups
-        // when they create their respective encoders
+    if (encoder) {
+        wgpuCommandEncoderPopDebugGroup(encoder);
     }
+}
+
+WGPUCommandEncoder CommandEncoder::getWGPUEncoder() const {
+    return encoder;
 }
 
 } // namespace webgpu

@@ -71,7 +71,8 @@ UniformBuffer::~UniformBuffer() {
 
 void UniformBuffer::update(const void* data, std::size_t dataSize) {
     if (data && dataSize > 0 && buffer) {
-        auto queue = context.getQueue();
+        auto& backend = static_cast<RendererBackend&>(context.getBackend());
+        WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
         if (queue) {
             wgpuQueueWriteBuffer(queue, buffer, 0, data, dataSize);
         }
@@ -89,10 +90,9 @@ void UniformBufferArray::bind(gfx::RenderPass& renderPass) {
 }
 
 gfx::UniqueUniformBuffer UniformBufferArray::copy(const gfx::UniformBuffer& buffer) {
-    if (auto* webgpuBuffer = dynamic_cast<const UniformBuffer*>(&buffer)) {
-        return std::make_unique<UniformBuffer>(*webgpuBuffer);
-    }
-    return nullptr;
+    // Since we know this is a WebGPU context, we can safely cast
+    auto* webgpuBuffer = static_cast<const UniformBuffer*>(&buffer);
+    return std::make_unique<UniformBuffer>(*webgpuBuffer);
 }
 
 } // namespace webgpu

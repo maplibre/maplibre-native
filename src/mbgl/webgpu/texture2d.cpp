@@ -1,5 +1,7 @@
 #include <mbgl/webgpu/texture2d.hpp>
 #include <mbgl/webgpu/context.hpp>
+#include <mbgl/webgpu/renderer_backend.hpp>
+#include <mbgl/webgpu/backend_impl.hpp>
 
 namespace mbgl {
 namespace webgpu {
@@ -41,7 +43,7 @@ gfx::Texture2D& Texture2D::setSamplerConfiguration(const gfx::Texture2D::Sampler
         ? WGPUFilterMode_Linear : WGPUFilterMode_Nearest;
     samplerDesc.magFilter = (samplerState.filter == gfx::TextureFilterType::Linear)
         ? WGPUFilterMode_Linear : WGPUFilterMode_Nearest;
-    samplerDesc.mipmapFilter = (samplerState.mipmap == gfx::TextureMipMapType::Yes)
+    samplerDesc.mipmapFilter = samplerState.mipmapped
         ? WGPUMipmapFilterMode_Linear : WGPUMipmapFilterMode_Nearest;
     
     // Map wrap modes
@@ -56,12 +58,13 @@ gfx::Texture2D& Texture2D::setSamplerConfiguration(const gfx::Texture2D::Sampler
         }
     };
     
-    samplerDesc.addressModeU = mapWrapMode(samplerState.wrapX);
-    samplerDesc.addressModeV = mapWrapMode(samplerState.wrapY);
+    samplerDesc.addressModeU = mapWrapMode(samplerState.wrapU);
+    samplerDesc.addressModeV = mapWrapMode(samplerState.wrapV);
     samplerDesc.addressModeW = WGPUAddressMode_ClampToEdge;
     
     // Create the sampler
-    auto device = context.getDevice();
+    auto& backend = static_cast<RendererBackend&>(context.getBackend());
+    WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
     if (device) {
         sampler = wgpuDeviceCreateSampler(device, &samplerDesc);
     }
@@ -133,7 +136,8 @@ void Texture2D::create() noexcept {
         texture = nullptr;
     }
     
-    auto device = context.getDevice();
+    auto& backend = static_cast<RendererBackend&>(context.getBackend());
+    WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
     if (!device || size.width == 0 || size.height == 0) {
         return;
     }
@@ -203,8 +207,9 @@ void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
         return;
     }
     
-    auto device = context.getDevice();
-    auto queue = context.getQueue();
+    auto& backend = static_cast<RendererBackend&>(context.getBackend());
+    WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
+    WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
     if (!device || !queue) {
         return;
     }
@@ -249,7 +254,8 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& regionSize, u
         return;
     }
     
-    auto queue = context.getQueue();
+    auto& backend = static_cast<RendererBackend&>(context.getBackend());
+    WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
     if (!queue) {
         return;
     }

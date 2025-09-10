@@ -1,4 +1,4 @@
-#include <mbgl/shaders/webgpu/heatmap.hpp>
+#include <mbgl/shaders/webgpu/heatmap_texture.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/shaders/heatmap_texture_layer_ubo.hpp>
 
