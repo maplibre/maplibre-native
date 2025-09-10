@@ -79,32 +79,22 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registr
         return it->second;
     }
     
-    // Get shader sources from registry
-    const auto& group = registry.getShaderGroup(name);
-    if (!group) {
-        // Fallback to placeholder if shader not found in registry
-        std::string vertexSource = "// Vertex shader placeholder for " + name;
-        std::string fragmentSource = "// Fragment shader placeholder for " + name;
-        
-        auto shader = std::make_shared<ShaderProgram>(*this, vertexSource, fragmentSource);
-        impl->shaderCache[name] = shader;
-        return shader;
-    }
+    // For WebGPU, we need WGSL shaders
+    // Since the registry doesn't provide WGSL yet, we'll use placeholders
+    // In a complete implementation, this would either:
+    // 1. Load pre-compiled WGSL shaders from the registry
+    // 2. Convert GLSL shaders to WGSL at runtime
+    // 3. Use a shader cross-compilation tool
     
-    // Get WGSL shader sources from the shader group
-    std::string vertexSource = group->vertexSource;
-    std::string fragmentSource = group->fragmentSource;
-    
-    // If WGSL sources are not available, we'd need to convert from GLSL
-    // For now, use the GLSL sources as placeholders
-    if (vertexSource.empty() || fragmentSource.empty()) {
-        vertexSource = "// WGSL conversion needed for: " + name;
-        fragmentSource = "// WGSL conversion needed for: " + name;
-    }
+    std::string vertexSource = "// WGSL vertex shader placeholder for " + name;
+    std::string fragmentSource = "// WGSL fragment shader placeholder for " + name;
     
     // Create new shader program
     auto shader = std::make_shared<ShaderProgram>(*this, vertexSource, fragmentSource);
     impl->shaderCache[name] = shader;
+    
+    (void)registry; // Mark as used to avoid warning
+    
     return shader;
 }
 

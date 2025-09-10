@@ -24,7 +24,8 @@ std::unique_ptr<gfx::Drawable::DrawSegment> DrawableBuilder::createSegment(gfx::
 }
 
 void DrawableBuilder::init() {
-    // TODO: Initialize WebGPU-specific resources
+    // WebGPU resources are initialized lazily when the drawable is created
+    // Pipeline creation happens when the drawable is first drawn
 }
 
 } // namespace webgpu
