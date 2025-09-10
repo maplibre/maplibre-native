@@ -26,7 +26,7 @@ class DrawScopeResource;
 #include <mbgl/webgpu/renderbuffer.hpp>
 #include <mbgl/webgpu/vertex_attribute_array.hpp>
 #include <mbgl/webgpu/texture2d.hpp>
-#include <mbgl/webgpu/render_target.hpp>
+#include <mbgl/renderer/render_target.hpp>
 #include <mbgl/webgpu/tile_layer_group.hpp>
 #include <mbgl/webgpu/layer_group.hpp>
-#include <mbgl/webgpu/uniform_buffer_array.hpp>
+#include <mbgl/webgpu/uniform_buffer.hpp>

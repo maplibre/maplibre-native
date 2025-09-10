@@ -7,6 +7,7 @@ namespace mbgl {
 namespace webgpu {
 
 class Context;
+class RenderPass;
 
 class UniformBuffer final : public gfx::UniformBuffer {
 public:
@@ -27,18 +28,18 @@ private:
     WGPUBuffer buffer = nullptr;
 };
 
+/// Stores a collection of uniform buffers by name
 class UniformBufferArray final : public gfx::UniformBufferArray {
 public:
     UniformBufferArray() = default;
-    UniformBufferArray(UniformBufferArray&& other) noexcept
+    UniformBufferArray(UniformBufferArray&& other)
         : gfx::UniformBufferArray(std::move(other)) {}
     UniformBufferArray(const UniformBufferArray&) = delete;
-    
+
     UniformBufferArray& operator=(UniformBufferArray&& other) {
         gfx::UniformBufferArray::operator=(std::move(other));
         return *this;
     }
-    
     UniformBufferArray& operator=(const UniformBufferArray& other) {
         gfx::UniformBufferArray::operator=(other);
         return *this;
@@ -47,7 +48,7 @@ public:
     void bind(gfx::RenderPass& renderPass) override;
 
 private:
-    std::unique_ptr<gfx::UniformBuffer> copy(const gfx::UniformBuffer& uniformBuffer) override;
+    gfx::UniqueUniformBuffer copy(const gfx::UniformBuffer& buffer) override;
 };
 
 } // namespace webgpu

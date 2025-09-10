@@ -17,6 +17,8 @@ public:
 
 protected:
     std::unique_ptr<gfx::Drawable> createDrawable() const override;
+    std::unique_ptr<gfx::Drawable::DrawSegment> createSegment(gfx::DrawMode, SegmentBase&&) override;
+    void init() override;
 
 private:
     // TODO: Implement WebGPU-specific drawable configuration
