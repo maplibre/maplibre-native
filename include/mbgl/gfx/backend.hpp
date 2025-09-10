@@ -14,6 +14,7 @@ public:
         OpenGL,   ///< The OpenGL API backend
         Metal,    ///< The Metal API backend
         Vulkan,   ///< The Vulkan API backend
+        WebGPU,   ///< The WebGPU API backend
         TYPE_MAX, ///< Not a valid backend type, used to determine the number
                   ///< of available backends (ie for array allocation).
     };
@@ -22,6 +23,8 @@ public:
     static constexpr Type DefaultType = Type::Metal;
 #elif MLN_RENDER_BACKEND_VULKAN
     static constexpr Type DefaultType = Type::Vulkan;
+#elif MLN_RENDER_BACKEND_WEBGPU
+    static constexpr Type DefaultType = Type::WebGPU;
 #else // assume MLN_RENDER_BACKEND_OPENGL
     static constexpr Type DefaultType = Type::OpenGL;
 #endif
@@ -43,6 +46,8 @@ public:
         return Create<Type::Metal, T, Args...>(std::forward<Args>(args)...);
 #elif MLN_RENDER_BACKEND_VULKAN
         return Create<Type::Vulkan, T, Args...>(std::forward<Args>(args)...);
+#elif MLN_RENDER_BACKEND_WEBGPU
+        return Create<Type::WebGPU, T, Args...>(std::forward<Args>(args)...);
 #else // assume MLN_RENDER_BACKEND_OPENGL
         return Create<Type::OpenGL, T, Args...>(std::forward<Args>(args)...);
 #endif
