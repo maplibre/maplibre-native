@@ -802,3 +802,15 @@ inline void wgpuCommandEncoderPushDebugGroup(WGPUCommandEncoder /*encoder*/, con
 
 inline void wgpuCommandEncoderPopDebugGroup(WGPUCommandEncoder /*encoder*/) {
 }
+
+inline void wgpuCommandEncoderCopyTextureToBuffer(WGPUCommandEncoder /*encoder*/, const WGPUImageCopyTexture* /*source*/, const WGPUImageCopyBuffer* /*destination*/, const WGPUExtent3D* /*copySize*/) {
+}
+
+typedef void (*WGPUBufferMapCallback)(WGPUBufferMapAsyncStatus status, void* userdata);
+
+inline void wgpuBufferMapAsync(WGPUBuffer /*buffer*/, WGPUMapMode /*mode*/, size_t /*offset*/, size_t /*size*/, WGPUBufferMapCallback /*callback*/, void* /*userdata*/) {
+}
+
+inline bool wgpuDevicePoll(WGPUDevice /*device*/, bool /*wait*/, const void* /*timeoutNs*/) {
+    return false;
+}

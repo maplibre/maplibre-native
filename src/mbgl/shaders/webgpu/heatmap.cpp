@@ -7,9 +7,10 @@ namespace shaders {
 
 using HeatmapShaderSource = ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::WebGPU>;
 
-const std::array<AttributeInfo, 2> HeatmapShaderSource::attributes = {
+const std::array<AttributeInfo, 3> HeatmapShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Float2, idHeatmapPosVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::Float, idHeatmapWeightVertexAttribute},
+    AttributeInfo{2, gfx::AttributeDataType::Float, idHeatmapRadiusVertexAttribute},
 };
 const std::array<TextureInfo, 0> HeatmapShaderSource::textures = {};
 

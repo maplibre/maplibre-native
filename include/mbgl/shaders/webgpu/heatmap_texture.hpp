@@ -1,30 +1,17 @@
 #pragma once
 
+#include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
-#include <mbgl/shaders/layer_ubo.hpp>
-
-#include <array>
-#include <string>
 
 namespace mbgl {
 namespace shaders {
 
-class HeatmapTextureShader final : public gfx::ShaderProgramBase {
-public:
-    HeatmapTextureShader();
-    ~HeatmapTextureShader() override;
-
-    const std::string programIdentifier;
-
-    static constexpr std::array<AttributeInfo, 2> attributes = {{
-        {"a_pos", gfx::AttributeType::Float2},
-        {"a_texture_pos", gfx::AttributeType::Float2}
-    }};
-    
-    static constexpr std::array<TextureInfo, 2> textures = {{
-        {"u_image", 0},
-        {"u_color_ramp", 1}
-    }};
+template <>
+struct ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::WebGPU> {
+    static constexpr const char* name = "HeatmapTextureShader";
+    static const std::array<AttributeInfo, 1> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<TextureInfo, 2> textures;
 };
 
 } // namespace shaders
