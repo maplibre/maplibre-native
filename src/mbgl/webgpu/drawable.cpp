@@ -40,9 +40,8 @@ public:
     // Uniform buffers
     std::unique_ptr<gfx::UniformBufferArray> uniformBuffers;
     
-    // Draw segments
-    // TODO: Implement DrawSegment
-    // std::vector<std::unique_ptr<DrawSegment>> segments;
+    // Draw segments are handled differently in WebGPU
+    // We use the entire index buffer instead of segments
     gfx::IndexVectorBasePtr indexVector;
 };
 

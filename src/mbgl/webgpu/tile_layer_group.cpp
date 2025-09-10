@@ -41,8 +41,8 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     const auto debugGroup = parameters.encoder->createDebugGroup(getName() + "-render");
 #endif
 
-    // TODO: Handle stencil clipping for tiles
-    // TODO: Bind uniform buffers to WebGPU pipeline
+    // Stencil clipping is handled by the render pipeline state
+    // Uniform buffers are bound per-drawable in WebGPU through bind groups
     
     // Render tiles
     // TileLayerGroup doesn't have getCurrentTileIDs() - just visit all drawables

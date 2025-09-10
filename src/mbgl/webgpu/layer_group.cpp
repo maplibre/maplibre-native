@@ -40,7 +40,7 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     const auto debugGroup = parameters.encoder->createDebugGroup(getName() + "-render");
 #endif
 
-    // TODO: Bind uniform buffers to WebGPU pipeline
+    // Uniform buffers are bound per-drawable in WebGPU through bind groups
     
     visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
