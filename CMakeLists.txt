@@ -1326,10 +1326,15 @@ if(MLN_WITH_WEBGPU)
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/command_encoder.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/context.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/drawable.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/drawable_builder.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/index_buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/render_pass.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/renderer_backend.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/shader_program.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/texture2d.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/uniform_buffer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/upload_pass.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/vertex_buffer_resource.hpp
     )
 
     list(APPEND
@@ -1338,10 +1343,15 @@ if(MLN_WITH_WEBGPU)
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/command_encoder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/context.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable_builder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/index_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/render_pass.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/shader_program.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/texture2d.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/uniform_buffer.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/upload_pass.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/vertex_buffer_resource.cpp
     )
 
     # Include WebGPU vendor configuration (Dawn or wgpu)
