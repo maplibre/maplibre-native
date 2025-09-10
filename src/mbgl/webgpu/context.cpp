@@ -79,10 +79,28 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registr
         return it->second;
     }
     
-    // TODO: Get actual shader sources from registry
-    // For now, create with placeholder sources
-    std::string vertexSource = "// Vertex shader placeholder for " + name;
-    std::string fragmentSource = "// Fragment shader placeholder for " + name;
+    // Get shader sources from registry
+    const auto& group = registry.getShaderGroup(name);
+    if (!group) {
+        // Fallback to placeholder if shader not found in registry
+        std::string vertexSource = "// Vertex shader placeholder for " + name;
+        std::string fragmentSource = "// Fragment shader placeholder for " + name;
+        
+        auto shader = std::make_shared<ShaderProgram>(*this, vertexSource, fragmentSource);
+        impl->shaderCache[name] = shader;
+        return shader;
+    }
+    
+    // Get WGSL shader sources from the shader group
+    std::string vertexSource = group->vertexSource;
+    std::string fragmentSource = group->fragmentSource;
+    
+    // If WGSL sources are not available, we'd need to convert from GLSL
+    // For now, use the GLSL sources as placeholders
+    if (vertexSource.empty() || fragmentSource.empty()) {
+        vertexSource = "// WGSL conversion needed for: " + name;
+        fragmentSource = "// WGSL conversion needed for: " + name;
+    }
     
     // Create new shader program
     auto shader = std::make_shared<ShaderProgram>(*this, vertexSource, fragmentSource);

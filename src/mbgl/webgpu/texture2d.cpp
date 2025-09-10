@@ -9,12 +9,63 @@ Texture2D::Texture2D(Context& context_)
 }
 
 Texture2D::~Texture2D() {
-    // TODO: Release WebGPU resources
+    if (textureView) {
+        wgpuTextureViewRelease(textureView);
+        textureView = nullptr;
+    }
+    if (texture) {
+        wgpuTextureRelease(texture);
+        texture = nullptr;
+    }
+    if (sampler) {
+        wgpuSamplerRelease(sampler);
+        sampler = nullptr;
+    }
 }
 
 gfx::Texture2D& Texture2D::setSamplerConfiguration(const gfx::Texture2D::SamplerState& samplerState_) noexcept {
     samplerState = samplerState_;
-    // TODO: Update WebGPU sampler
+    
+    // Release old sampler if it exists
+    if (sampler) {
+        wgpuSamplerRelease(sampler);
+        sampler = nullptr;
+    }
+    
+    // Create new sampler with updated configuration
+    WGPUSamplerDescriptor samplerDesc = {};
+    samplerDesc.label = "Texture Sampler";
+    
+    // Map filter modes
+    samplerDesc.minFilter = (samplerState.filter == gfx::TextureFilterType::Linear) 
+        ? WGPUFilterMode_Linear : WGPUFilterMode_Nearest;
+    samplerDesc.magFilter = (samplerState.filter == gfx::TextureFilterType::Linear)
+        ? WGPUFilterMode_Linear : WGPUFilterMode_Nearest;
+    samplerDesc.mipmapFilter = (samplerState.mipmap == gfx::TextureMipMapType::Yes)
+        ? WGPUMipmapFilterMode_Linear : WGPUMipmapFilterMode_Nearest;
+    
+    // Map wrap modes
+    auto mapWrapMode = [](gfx::TextureWrapType wrap) -> WGPUAddressMode {
+        switch (wrap) {
+            case gfx::TextureWrapType::Repeat:
+                return WGPUAddressMode_Repeat;
+            case gfx::TextureWrapType::Clamp:
+                return WGPUAddressMode_ClampToEdge;
+            default:
+                return WGPUAddressMode_ClampToEdge;
+        }
+    };
+    
+    samplerDesc.addressModeU = mapWrapMode(samplerState.wrapX);
+    samplerDesc.addressModeV = mapWrapMode(samplerState.wrapY);
+    samplerDesc.addressModeW = WGPUAddressMode_ClampToEdge;
+    
+    // Create the sampler
+    auto device = context.getDevice();
+    if (device) {
+        sampler = wgpuDeviceCreateSampler(device, &samplerDesc);
+    }
+    
     return *this;
 }
 
@@ -72,12 +123,118 @@ size_t Texture2D::numChannels() const noexcept {
 }
 
 void Texture2D::create() noexcept {
-    // TODO: Create WebGPU texture
+    // Release old resources if they exist
+    if (textureView) {
+        wgpuTextureViewRelease(textureView);
+        textureView = nullptr;
+    }
+    if (texture) {
+        wgpuTextureRelease(texture);
+        texture = nullptr;
+    }
+    
+    auto device = context.getDevice();
+    if (!device || size.width == 0 || size.height == 0) {
+        return;
+    }
+    
+    // Determine WebGPU texture format based on pixel format
+    WGPUTextureFormat format;
+    switch (pixelFormat) {
+        case gfx::TexturePixelType::Alpha:
+            format = WGPUTextureFormat_R8Unorm;
+            break;
+        case gfx::TexturePixelType::Luminance:
+            format = WGPUTextureFormat_R8Unorm;
+            break;
+        case gfx::TexturePixelType::RGBA:
+        default:
+            format = WGPUTextureFormat_RGBA8Unorm;
+            break;
+    }
+    
+    // Create texture descriptor
+    WGPUTextureDescriptor textureDesc = {};
+    textureDesc.label = "Texture2D";
+    textureDesc.size = {
+        static_cast<uint32_t>(size.width),
+        static_cast<uint32_t>(size.height),
+        1
+    };
+    textureDesc.mipLevelCount = 1;
+    textureDesc.sampleCount = 1;
+    textureDesc.dimension = WGPUTextureDimension_2D;
+    textureDesc.format = format;
+    textureDesc.usage = WGPUTextureUsage_TextureBinding | WGPUTextureUsage_CopyDst;
+    
+    // Create the texture
+    texture = wgpuDeviceCreateTexture(device, &textureDesc);
+    
+    // Create texture view
+    if (texture) {
+        WGPUTextureViewDescriptor viewDesc = {};
+        viewDesc.label = "Texture2D View";
+        viewDesc.format = format;
+        viewDesc.dimension = WGPUTextureViewDimension_2D;
+        viewDesc.baseMipLevel = 0;
+        viewDesc.mipLevelCount = 1;
+        viewDesc.baseArrayLayer = 0;
+        viewDesc.arrayLayerCount = 1;
+        viewDesc.aspect = WGPUTextureAspect_All;
+        
+        textureView = wgpuTextureCreateView(texture, &viewDesc);
+    }
+    
+    // Create default sampler if not already created
+    if (!sampler) {
+        setSamplerConfiguration(samplerState);
+    }
 }
 
 void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
     size = size_;
-    // TODO: Upload data to WebGPU texture
+    
+    // Create texture if it doesn't exist
+    if (!texture) {
+        create();
+    }
+    
+    if (!texture || !pixelData) {
+        return;
+    }
+    
+    auto device = context.getDevice();
+    auto queue = context.getQueue();
+    if (!device || !queue) {
+        return;
+    }
+    
+    // Write texture data using queue
+    WGPUImageCopyTexture destination = {};
+    destination.texture = texture;
+    destination.mipLevel = 0;
+    destination.origin = {0, 0, 0};
+    destination.aspect = WGPUTextureAspect_All;
+    
+    WGPUTextureDataLayout dataLayout = {};
+    dataLayout.offset = 0;
+    dataLayout.bytesPerRow = static_cast<uint32_t>(size.width * getPixelStride());
+    dataLayout.rowsPerImage = static_cast<uint32_t>(size.height);
+    
+    WGPUExtent3D writeSize = {
+        static_cast<uint32_t>(size.width),
+        static_cast<uint32_t>(size.height),
+        1
+    };
+    
+    wgpuQueueWriteTexture(
+        queue,
+        &destination,
+        pixelData,
+        getDataSize(),
+        &dataLayout,
+        &writeSize
+    );
 }
 
 void Texture2D::upload() noexcept {
@@ -88,7 +245,43 @@ void Texture2D::upload() noexcept {
 }
 
 void Texture2D::uploadSubRegion(const void* pixelData, const Size& regionSize, uint16_t xOffset, uint16_t yOffset) noexcept {
-    // TODO: Upload subregion to WebGPU texture
+    if (!texture || !pixelData) {
+        return;
+    }
+    
+    auto queue = context.getQueue();
+    if (!queue) {
+        return;
+    }
+    
+    // Write texture subregion data using queue
+    WGPUImageCopyTexture destination = {};
+    destination.texture = texture;
+    destination.mipLevel = 0;
+    destination.origin = {xOffset, yOffset, 0};
+    destination.aspect = WGPUTextureAspect_All;
+    
+    WGPUTextureDataLayout dataLayout = {};
+    dataLayout.offset = 0;
+    dataLayout.bytesPerRow = static_cast<uint32_t>(regionSize.width * getPixelStride());
+    dataLayout.rowsPerImage = static_cast<uint32_t>(regionSize.height);
+    
+    WGPUExtent3D writeSize = {
+        static_cast<uint32_t>(regionSize.width),
+        static_cast<uint32_t>(regionSize.height),
+        1
+    };
+    
+    size_t dataSize = regionSize.width * regionSize.height * getPixelStride();
+    
+    wgpuQueueWriteTexture(
+        queue,
+        &destination,
+        pixelData,
+        dataSize,
+        &dataLayout,
+        &writeSize
+    );
 }
 
 } // namespace webgpu
