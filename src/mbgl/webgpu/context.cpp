@@ -66,7 +66,7 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
 }
 
 gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool persistent, bool) {
-    return std::make_shared<UniformBuffer>(data, size, persistent);
+    return std::make_shared<UniformBuffer>(*this, data, size);
 }
 
 gfx::UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
@@ -98,7 +98,7 @@ gfx::Texture2DPtr Context::createTexture2D() {
 }
 
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
-    return std::make_shared<RenderTarget>(size, type);
+    return std::make_shared<RenderTarget>(*this, size, type);
 }
 
 void Context::resetState(gfx::DepthMode, gfx::ColorMode) {
