@@ -1,0 +1,32 @@
+#pragma once
+
+#include <mbgl/shaders/webgpu/shader_program.hpp>
+#include <mbgl/shaders/layer_ubo.hpp>
+
+#include <array>
+#include <string>
+
+namespace mbgl {
+namespace shaders {
+
+class CustomSymbolIconShader final : public gfx::ShaderProgramBase {
+public:
+    CustomSymbolIconShader();
+    ~CustomSymbolIconShader() override;
+
+    const std::string programIdentifier;
+
+    static constexpr std::array<AttributeInfo, 4> attributes = {{
+        {"a_pos", gfx::AttributeType::Float2},
+        {"a_offset", gfx::AttributeType::Float2},
+        {"a_texture_pos", gfx::AttributeType::UShort4},
+        {"a_data", gfx::AttributeType::UByte4}
+    }};
+    
+    static constexpr std::array<TextureInfo, 1> textures = {{
+        {"u_texture", 0}
+    }};
+};
+
+} // namespace shaders
+} // namespace mbgl
