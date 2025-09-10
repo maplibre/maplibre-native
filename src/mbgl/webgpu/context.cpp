@@ -11,6 +11,22 @@
 #include <mbgl/webgpu/uniform_buffer.hpp>
 #include <mbgl/webgpu/vertex_attribute.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
+#include <mbgl/shaders/webgpu/shader_group.hpp>
+#include <mbgl/shaders/shader_source.hpp>
+// Include all WebGPU shader headers
+#include <mbgl/shaders/webgpu/background.hpp>
+#include <mbgl/shaders/webgpu/circle.hpp>
+#include <mbgl/shaders/webgpu/clipping_mask.hpp>
+#include <mbgl/shaders/webgpu/collision.hpp>
+#include <mbgl/shaders/webgpu/custom_geometry.hpp>
+#include <mbgl/shaders/webgpu/debug.hpp>
+#include <mbgl/shaders/webgpu/fill.hpp>
+#include <mbgl/shaders/webgpu/fill_extrusion.hpp>
+#include <mbgl/shaders/webgpu/heatmap.hpp>
+#include <mbgl/shaders/webgpu/hillshade.hpp>
+#include <mbgl/shaders/webgpu/line.hpp>
+#include <mbgl/shaders/webgpu/raster.hpp>
+#include <mbgl/shaders/webgpu/symbol.hpp>
 #include <mbgl/webgpu/texture2d.hpp>
 #include <mbgl/renderer/render_target.hpp>
 #include <mbgl/webgpu/tile_layer_group.hpp>
@@ -79,21 +95,73 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registr
         return it->second;
     }
     
-    // For WebGPU, we need WGSL shaders
-    // Since the registry doesn't provide WGSL yet, we'll use placeholders
-    // In a complete implementation, this would either:
-    // 1. Load pre-compiled WGSL shaders from the registry
-    // 2. Convert GLSL shaders to WGSL at runtime
-    // 3. Use a shader cross-compilation tool
+    // Get the shader group from registry
+    auto& shaderGroup = registry.getShaderGroup(name);
+    if (!shaderGroup) {
+        // If no shader group exists, create and initialize one
+        auto webgpuShaderGroup = std::make_shared<webgpu::ShaderGroup>();
+        webgpuShaderGroup->initialize(*this);
+        bool registered = registry.registerShaderGroup(std::move(webgpuShaderGroup), name);
+        (void)registered; // Ignore return value
+    }
     
-    std::string vertexSource = "// WGSL vertex shader placeholder for " + name;
-    std::string fragmentSource = "// WGSL fragment shader placeholder for " + name;
+    // Try to get the shader from the group
+    if (shaderGroup) {
+        auto shader = shaderGroup->getShader(name);
+        if (shader) {
+            // Convert gfx::Shader to ShaderProgramBase
+            // Since our ShaderProgram inherits from ShaderProgramBase, we need to cast
+            auto shaderProgram = std::static_pointer_cast<gfx::ShaderProgramBase>(shader);
+            impl->shaderCache[name] = shaderProgram;
+            return shaderProgram;
+        }
+    }
+    
+    // Fallback: Use the built-in WGSL shaders based on name
+    std::string vertexSource;
+    std::string fragmentSource;
+    
+    using namespace shaders;
+    
+    // Map shader names to built-in shaders
+#define MAP_SHADER(ShaderType, ShaderName) \
+    if (name == ShaderName) { \
+        vertexSource = ShaderSource<BuiltIn::ShaderType, gfx::Backend::Type::WebGPU>::vertex; \
+        fragmentSource = ShaderSource<BuiltIn::ShaderType, gfx::Backend::Type::WebGPU>::fragment; \
+    } else
+    
+    MAP_SHADER(BackgroundShader, "BackgroundShader")
+    MAP_SHADER(BackgroundPatternShader, "BackgroundPatternShader")
+    MAP_SHADER(CircleShader, "CircleShader")
+    MAP_SHADER(ClippingMaskProgram, "ClippingMaskProgram")
+    MAP_SHADER(CollisionBoxShader, "CollisionBoxShader")
+    MAP_SHADER(CollisionCircleShader, "CollisionCircleShader")
+    MAP_SHADER(CustomGeometryShader, "CustomGeometryShader")
+    MAP_SHADER(CustomSymbolIconShader, "CustomSymbolIconShader")
+    MAP_SHADER(DebugShader, "DebugShader")
+    MAP_SHADER(FillShader, "FillShader")
+    MAP_SHADER(FillOutlineShader, "FillOutlineShader")
+    MAP_SHADER(FillExtrusionShader, "FillExtrusionShader")
+    MAP_SHADER(FillExtrusionPatternShader, "FillExtrusionPatternShader")
+    MAP_SHADER(HeatmapShader, "HeatmapShader")
+    MAP_SHADER(HeatmapTextureShader, "HeatmapTextureShader")
+    MAP_SHADER(HillshadePrepareShader, "HillshadePrepareShader")
+    MAP_SHADER(HillshadeShader, "HillshadeShader")
+    MAP_SHADER(LineShader, "LineShader")
+    MAP_SHADER(RasterShader, "RasterShader")
+    MAP_SHADER(SymbolIconShader, "SymbolIconShader")
+    MAP_SHADER(SymbolSDFShader, "SymbolSDFShader")
+    {
+        // Unknown shader, use placeholder
+        vertexSource = "// WGSL vertex shader placeholder for " + name;
+        fragmentSource = "// WGSL fragment shader placeholder for " + name;
+    }
+    
+#undef MAP_SHADER
     
     // Create new shader program
     auto shader = std::make_shared<ShaderProgram>(*this, vertexSource, fragmentSource);
     impl->shaderCache[name] = shader;
-    
-    (void)registry; // Mark as used to avoid warning
     
     return shader;
 }

@@ -1330,6 +1330,25 @@ if(MLN_WITH_WEBGPU)
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/draw_scope_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/uniform_buffer.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/shader_program.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/shader_group.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/background.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/circle.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/clipping_mask.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/collision.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/custom_geometry.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/custom_symbol_icon.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/debug.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/fill.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/fill_extrusion.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/heatmap.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/heatmap_texture.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/hillshade.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/hillshade_prepare.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/line.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/location_indicator.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/raster.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/symbol.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/widevector.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/webgpu_impl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/vertex_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/vertex_attribute.cpp
@@ -1351,6 +1370,25 @@ if(MLN_WITH_WEBGPU)
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/render_pass.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/renderer_backend.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/shader_program.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/background.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/clipping_mask.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/collision.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/common.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/custom_geometry.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/custom_symbol_icon.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/debug.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/fill.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/fill_extrusion.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/heatmap.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/heatmap_texture.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/hillshade.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/hillshade_prepare.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/line.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/location_indicator.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/raster.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/symbol.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/widevector.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/texture2d.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/uniform_buffer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/upload_pass.hpp
