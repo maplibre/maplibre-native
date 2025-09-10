@@ -1,5 +1,9 @@
 #include <mbgl/webgpu/context.hpp>
 #include <mbgl/webgpu/renderer_backend.hpp>
+#include <mbgl/webgpu/command_encoder.hpp>
+#include <mbgl/webgpu/drawable_builder.hpp>
+#include <mbgl/webgpu/texture2d.hpp>
+#include <mbgl/webgpu/uniform_buffer.hpp>
 #include <mbgl/gfx/command_encoder.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/gfx/uniform_buffer.hpp>
@@ -49,8 +53,7 @@ std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size
 }
 
 std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
-    // TODO: Implement WebGPU command encoder
-    return nullptr;
+    return std::make_unique<CommandEncoder>(*this);
 }
 
 void Context::clearStencilBuffer(int32_t) {
@@ -67,16 +70,18 @@ gfx::VertexAttributeArrayPtr Context::createVertexAttributeArray() const {
 }
 
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
-    // TODO: Implement drawable builder
-    return nullptr;
+    return std::make_unique<DrawableBuilder>(*this, std::move(name));
 }
 
 gfx::UniformBufferPtr Context::createUniformBuffer(const void* data,
                                                   std::size_t size,
                                                   bool persistent,
                                                   bool ssbo) {
-    // TODO: Implement uniform buffer creation
-    return nullptr;
+    if (ssbo) {
+        return std::make_shared<StorageBuffer>(*this, data, size, persistent);
+    } else {
+        return std::make_shared<UniformBuffer>(*this, data, size, persistent);
+    }
 }
 
 gfx::UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
@@ -104,8 +109,7 @@ LayerGroupPtr Context::createLayerGroup(int32_t layerIndex,
 }
 
 gfx::Texture2DPtr Context::createTexture2D() {
-    // TODO: Implement texture creation
-    return nullptr;
+    return std::make_shared<Texture2D>(*this);
 }
 
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
