@@ -1,5 +1,6 @@
 #include <mbgl/webgpu/index_buffer_resource.hpp>
 #include <mbgl/webgpu/context.hpp>
+#include <mbgl/webgpu/context_impl.hpp>
 #include <mbgl/util/logging.hpp>
 #include <cstring>
 
