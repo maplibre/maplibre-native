@@ -1323,15 +1323,25 @@ if(MLN_WITH_WEBGPU)
         INCLUDE_FILES
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/backend_impl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/buffer_resource.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/command_encoder.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/context.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/drawable.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/render_pass.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/renderer_backend.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/texture2d.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/upload_pass.hpp
     )
 
     list(APPEND
         SRC_FILES
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/backend_impl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/command_encoder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/context.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/render_pass.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/texture2d.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/upload_pass.cpp
     )
 
     # Include WebGPU vendor configuration (Dawn or wgpu)
