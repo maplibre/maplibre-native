@@ -10,7 +10,7 @@
 #include <mbgl/webgpu/renderbuffer_resource.hpp>
 #include <mbgl/webgpu/uniform_buffer.hpp>
 #include <mbgl/webgpu/uniform_buffer_array.hpp>
-#include <mbgl/webgpu/vertex_attribute_array.hpp>
+#include <mbgl/webgpu/vertex_attribute.hpp>
 #include <mbgl/webgpu/shader_program.hpp>
 #include <mbgl/webgpu/texture2d.hpp>
 #include <mbgl/webgpu/render_target.hpp>

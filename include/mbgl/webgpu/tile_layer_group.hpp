@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/renderer/tile_layer_group.hpp>
+#include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/webgpu/uniform_buffer_array.hpp>
 
 namespace mbgl {
