@@ -1,38 +1,30 @@
 #pragma once
 
 #include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/webgpu/backend_impl.hpp>
+#include <mbgl/gfx/vertex_attribute.hpp>
 #include <string>
-#include <unordered_map>
 
 namespace mbgl {
 namespace webgpu {
 
-class Context;
-
 class ShaderProgram : public gfx::ShaderProgramBase {
 public:
-    ShaderProgram(Context& context,
-                  const std::string& vertexSource,
-                  const std::string& fragmentSource);
+    explicit ShaderProgram(const std::string& name);
     ~ShaderProgram() override;
-
-    // ShaderProgramBase interface
+    
+    // ShaderProgramBase overrides
     std::optional<size_t> getSamplerLocation(const size_t) const override { return std::nullopt; }
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
     const gfx::VertexAttributeArray& getInstanceAttributes() const override { return instanceAttributes; }
-
-    WGPURenderPipeline getPipeline() const { return pipeline; }
-    WGPUBindGroupLayout getBindGroupLayout() const { return bindGroupLayout; }
+    
+    const std::string& getName() const { return name_; }
+    void* getPipeline() const { return pipeline; }
 
 private:
-    void createPipeline(const std::string& vertexSource, const std::string& fragmentSource);
-
-    Context& context;
-    WGPURenderPipeline pipeline = nullptr;
-    WGPUBindGroupLayout bindGroupLayout = nullptr;
-    WGPUPipelineLayout pipelineLayout = nullptr;
-    
+    std::string name_;
+    void* pipeline = nullptr;
+    void* vertexShader = nullptr;
+    void* fragmentShader = nullptr;
     gfx::VertexAttributeArray vertexAttributes;
     gfx::VertexAttributeArray instanceAttributes;
 };

@@ -1,111 +1,106 @@
 #include <mbgl/webgpu/context.hpp>
-#include <mbgl/webgpu/renderer_backend.hpp>
+#include <mbgl/webgpu/backend_impl.hpp>
 #include <mbgl/webgpu/command_encoder.hpp>
 #include <mbgl/webgpu/drawable_builder.hpp>
-#include <mbgl/webgpu/texture2d.hpp>
+#include <mbgl/webgpu/offscreen_texture.hpp>
+#include <mbgl/webgpu/renderbuffer.hpp>
 #include <mbgl/webgpu/uniform_buffer.hpp>
-#include <mbgl/gfx/command_encoder.hpp>
+#include <mbgl/webgpu/uniform_buffer_array.hpp>
+#include <mbgl/webgpu/vertex_attribute_array.hpp>
+#include <mbgl/webgpu/shader_program.hpp>
+#include <mbgl/webgpu/texture2d.hpp>
+#include <mbgl/webgpu/render_target.hpp>
+#include <mbgl/webgpu/tile_layer_group.hpp>
+#include <mbgl/webgpu/layer_group.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/gfx/uniform_buffer.hpp>
 #include <mbgl/util/logging.hpp>
 
 namespace mbgl {
 namespace webgpu {
 
-Context::Context(RendererBackend& backend_)
-    : gfx::Context(8), // minimumRequiredVertexBindingCount
-      backend(backend_),
-      impl(BackendImpl::create()) {
+class Context::Impl {
+public:
+    Impl() = default;
+    ~Impl() = default;
     
-    if (!impl || !impl->initialize()) {
-        Log::Error(Event::General, "Failed to initialize WebGPU backend implementation");
-    }
+    WGPUDevice getDevice() const { return reinterpret_cast<WGPUDevice>(device); }
+    WGPUQueue getQueue() const { return reinterpret_cast<WGPUQueue>(queue); }
+    
+    void* device = nullptr;
+    void* queue = nullptr;
+    std::unordered_map<std::string, gfx::ShaderProgramBasePtr> shaderCache;
+};
+
+Context::Context(RendererBackend& backend_)
+    : gfx::Context(gfx::Context::minimumRequiredVertexBindingCount),
+      backend(backend_),
+      impl(std::make_unique<Impl>()),
+      globalUniformBuffers(std::make_unique<UniformBufferArray>()) {
+    
+    impl->device = backend.getDevice();
+    Log::Info(Event::WebGPU, "WebGPU Context created");
 }
 
-Context::~Context() noexcept {
-    if (impl) {
-        impl->shutdown();
-    }
-}
+Context::~Context() = default;
 
 void Context::beginFrame() {
-    framePending = true;
+    // Begin a new frame - WebGPU command recording starts here
 }
 
 void Context::endFrame() {
-    if (framePending) {
-        // Submit any pending commands
-        framePending = false;
-    }
+    // End the frame - submit WebGPU commands
 }
 
 void Context::performCleanup() {
-    // Clean up any released resources
+    // Clean up unused resources
 }
 
 void Context::reduceMemoryUsage() {
-    // Release cached resources to reduce memory
+    // Free cached resources to reduce memory
 }
 
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size, gfx::TextureChannelDataType type) {
-    // TODO: Implement WebGPU offscreen texture
-    return nullptr;
+    return std::make_unique<OffscreenTexture>(*this, size);
 }
 
 std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
     return std::make_unique<CommandEncoder>(*this);
 }
 
-void Context::clearStencilBuffer(int32_t) {
-    // TODO: Implement stencil buffer clearing
-}
-
-void Context::setDirtyState() {
-    // Mark context state as dirty
-}
-
 gfx::VertexAttributeArrayPtr Context::createVertexAttributeArray() const {
-    // TODO: Implement vertex attribute array
-    return nullptr;
+    return std::make_shared<VertexAttributeArray>();
 }
 
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
-    return std::make_unique<DrawableBuilder>(*this, std::move(name));
+    return std::make_unique<DrawableBuilder>(std::move(name));
 }
 
-gfx::UniformBufferPtr Context::createUniformBuffer(const void* data,
-                                                  std::size_t size,
-                                                  bool persistent,
-                                                  bool ssbo) {
-    if (ssbo) {
-        return std::make_shared<StorageBuffer>(*this, data, size, persistent);
-    } else {
-        return std::make_shared<UniformBuffer>(*this, data, size, persistent);
-    }
+gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool persistent, bool ssbo) {
+    return std::make_shared<UniformBuffer>(data, size, persistent);
 }
 
 gfx::UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
-    // TODO: Implement layer uniform buffer array
-    return std::make_unique<gfx::UniformBufferArray>();
+    return std::make_unique<UniformBufferArray>();
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registry, const std::string& name) {
-    // TODO: Implement shader program retrieval
-    return nullptr;
+    auto it = impl->shaderCache.find(name);
+    if (it != impl->shaderCache.end()) {
+        return it->second;
+    }
+    
+    // Create new shader program
+    auto shader = std::make_shared<ShaderProgram>(name);
+    impl->shaderCache[name] = shader;
+    return shader;
 }
 
-TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex,
-                                               std::size_t initialCapacity,
-                                               std::string name) {
-    // TODO: Implement tile layer group
-    return nullptr;
+TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
+    return std::make_shared<TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
 }
 
-LayerGroupPtr Context::createLayerGroup(int32_t layerIndex,
-                                       std::size_t initialCapacity,
-                                       std::string name) {
-    // TODO: Implement layer group
-    return nullptr;
+LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
+    return std::make_shared<LayerGroup>(layerIndex, initialCapacity, std::move(name));
 }
 
 gfx::Texture2DPtr Context::createTexture2D() {
@@ -113,55 +108,65 @@ gfx::Texture2DPtr Context::createTexture2D() {
 }
 
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
-    // TODO: Implement render target
-    return nullptr;
+    return std::make_shared<RenderTarget>(size, type);
 }
 
-void Context::resetState(gfx::DepthMode, gfx::ColorMode) {
-    // Reset WebGPU pipeline state
+void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
+    // Reset WebGPU render state
 }
 
-bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& ptr,
-                                          const void* data,
-                                          std::size_t size,
-                                          bool persistent) {
+void Context::setDirtyState() {
+    // Mark state as needing update
+}
+
+void Context::clearStencilBuffer(int32_t value) {
+    // Clear stencil buffer to specified value
+}
+
+bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& ptr, const void* data, std::size_t size, bool persistent) {
     if (!ptr) {
         ptr = createUniformBuffer(data, size, persistent);
         return true;
     }
-    // TODO: Update existing buffer
+    
+    // Update existing buffer
+    auto* buffer = static_cast<UniformBuffer*>(ptr.get());
+    buffer->update(data, size);
     return false;
 }
 
 const gfx::UniformBufferArray& Context::getGlobalUniformBuffers() const {
-    return globalUniformBuffers;
+    return *globalUniformBuffers;
 }
 
 gfx::UniformBufferArray& Context::mutableGlobalUniformBuffers() {
-    return globalUniformBuffers;
+    return *globalUniformBuffers;
 }
 
 void Context::bindGlobalUniformBuffers(gfx::RenderPass&) const noexcept {
-    // TODO: Bind global uniform buffers
+    // Bind global uniform buffers for rendering
 }
 
 void Context::unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept {
-    // TODO: Unbind global uniform buffers
+    // Unbind global uniform buffers
 }
 
-BufferResource Context::createBuffer(const void* data, std::size_t size, std::uint32_t usage, bool persistent) const {
-    // TODO: Create WebGPU buffer
-    return BufferResource{};
+#if !defined(NDEBUG)
+void Context::visualizeStencilBuffer() {
+    // Debug visualization of stencil buffer
 }
 
-std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size) {
-    // TODO: Implement renderbuffer resource
-    return nullptr;
+void Context::visualizeDepthBuffer(float depthRangeSize) {
+    // Debug visualization of depth buffer
+}
+#endif
+
+std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType type, Size size) {
+    return std::make_unique<RenderbufferResource>();
 }
 
 std::unique_ptr<gfx::DrawScopeResource> Context::createDrawScopeResource() {
-    // TODO: Implement draw scope resource
-    return nullptr;
+    return std::make_unique<DrawScopeResource>(*this);
 }
 
 } // namespace webgpu

@@ -1320,6 +1320,20 @@ if(MLN_WITH_WEBGPU)
     )
 
     list(APPEND
+        SRC_FILES
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/context.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/command_encoder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable_builder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/uniform_buffer.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/shader_program.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/webgpu_impl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/vertex_buffer_resource.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/texture2d.cpp
+    )
+
+    list(APPEND
         INCLUDE_FILES
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/backend_impl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/buffer_resource.hpp
@@ -1356,6 +1370,11 @@ if(MLN_WITH_WEBGPU)
 
     # Include WebGPU vendor configuration (Dawn or wgpu)
     include(${PROJECT_SOURCE_DIR}/vendor/webgpu.cmake)
+
+    # Include Dawn if available
+    if(EXISTS "/Users/admin/repos/dawn")
+        include(${PROJECT_SOURCE_DIR}/vendor/dawn.cmake)
+    endif()
 endif()
 
 list(APPEND
@@ -1640,5 +1659,10 @@ endif()
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)
 add_subdirectory(${PROJECT_SOURCE_DIR}/benchmark)
 add_subdirectory(${PROJECT_SOURCE_DIR}/render-test)
+
+# Add examples if WebGPU is enabled
+if(MLN_WITH_WEBGPU)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/examples)
+endif()
 
 include(cmake/mbgl-core-deps.cmake)
