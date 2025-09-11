@@ -44,6 +44,7 @@ public:
     gfx::IndexVectorBasePtr indexVector;
     std::size_t vertexCount = 0;
     gfx::AttributeDataType vertexType = gfx::AttributeDataType::Invalid;
+    bool needsVertexExtraction = false;  // Flag to indicate vertices need extraction from attributes
 
     gfx::AttributeBindingArray attributeBindings;
     gfx::AttributeBindingArray instanceBindings;
