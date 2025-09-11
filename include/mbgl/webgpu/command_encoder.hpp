@@ -67,6 +67,7 @@ protected:
 
 protected:
     webgpu::Context& context;
+    WGPUCommandEncoder encoder = nullptr;
     std::vector<GroupEntry> debugGroupNames;
     std::vector<gfx::DebugGroup<gfx::RenderPass>> renderDebugGroups;
     std::vector<gfx::DebugGroup<gfx::UploadPass>> uploadDebugGroups;
