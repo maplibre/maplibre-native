@@ -36,6 +36,8 @@ const std::array<TextureInfo, 1> SymbolSDFShaderSource::textures = {
     TextureInfo{0, idSymbolImageTexture},
 };
 
+
+
 // Symbol Text and Icon
 using SymbolTextAndIconShaderSource = ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::WebGPU>;
 

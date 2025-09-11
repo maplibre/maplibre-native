@@ -25,6 +25,7 @@ public:
     ~Drawable() override;
 
     void upload(gfx::UploadPass&);
+    void uploadTextures(UploadPass&) const noexcept;
     void draw(PaintParameters&) const override;
     
     void setIndexData(gfx::IndexVectorBasePtr, std::vector<UniqueDrawSegment> segments) override;
@@ -51,9 +52,6 @@ public:
 
 protected:
     void buildWebGPUPipeline() noexcept;
-    bool bindBuffers(CommandEncoder&) const noexcept;
-    bool bindTextures(CommandEncoder&) const noexcept;
-    void uploadTextures(UploadPass&) const noexcept;
 
     class Impl;
     const std::unique_ptr<Impl> impl;

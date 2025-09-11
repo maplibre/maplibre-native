@@ -12,6 +12,83 @@ struct ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::WebGPU> {
     static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
+    
+    static constexpr auto vertex = R"(
+struct VertexInput {
+    @location(0) position: vec2<i32>,
+    @location(1) anchor_position: vec2<i32>,
+    @location(2) extrude: vec2<i32>,
+    @location(3) placed: vec2<u32>,
+    @location(4) shift: vec2<f32>,
+};
+
+struct VertexOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) placed: f32,
+    @location(1) not_used: f32,
+};
+
+struct CollisionDrawableUBO {
+    matrix: mat4x4<f32>,
+};
+
+struct CollisionTilePropsUBO {
+    extrude_scale: vec2<f32>,
+    overscale_factor: f32,
+    pad1: f32,
+};
+
+@group(0) @binding(0) var<uniform> drawable: CollisionDrawableUBO;
+@group(0) @binding(1) var<uniform> tile_props: CollisionTilePropsUBO;
+
+@vertex
+fn main(in: VertexInput) -> VertexOutput {
+    var out: VertexOutput;
+    
+    let projected_point = drawable.matrix * vec4<f32>(f32(in.anchor_position.x), f32(in.anchor_position.y), 0.0, 1.0);
+    let camera_to_anchor_distance = projected_point.w;
+    
+    // Assuming camera_to_center_distance is 1.0 for now
+    let collision_perspective_ratio = clamp(0.5 + 0.5 * (1.0 / camera_to_anchor_distance), 0.0, 4.0);
+    
+    out.position = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    let extrude_shift = vec2<f32>(f32(in.extrude.x), f32(in.extrude.y)) + in.shift;
+    out.position.x += extrude_shift.x * tile_props.extrude_scale.x * out.position.w * collision_perspective_ratio;
+    out.position.y += extrude_shift.y * tile_props.extrude_scale.y * out.position.w * collision_perspective_ratio;
+    
+    out.placed = f32(in.placed.x);
+    out.not_used = f32(in.placed.y);
+    
+    return out;
+}
+)";
+    
+    static constexpr auto fragment = R"(
+struct FragmentInput {
+    @location(0) placed: f32,
+    @location(1) not_used: f32,
+};
+
+@fragment
+fn main(in: FragmentInput) -> @location(0) vec4<f32> {
+    let alpha = 0.5;
+    
+    // Red = collision, hide label
+    var color = vec4<f32>(1.0, 0.0, 0.0, 1.0) * alpha;
+    
+    // Blue = no collision, label is showing
+    if (in.placed > 0.5) {
+        color = vec4<f32>(0.0, 0.0, 1.0, 0.5) * alpha;
+    }
+    
+    if (in.not_used > 0.5) {
+        // This box not used, fade it out
+        color = color * 0.1;
+    }
+    
+    return color;
+}
+)";
 };
 
 template <>
@@ -20,6 +97,91 @@ struct ShaderSource<BuiltIn::CollisionCircleShader, gfx::Backend::Type::WebGPU> 
     static const std::array<AttributeInfo, 4> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
+    
+    static constexpr auto vertex = R"(
+struct VertexInput {
+    @location(0) position: vec2<i32>,
+    @location(1) anchor_position: vec2<i32>,
+    @location(2) extrude: vec2<i32>,
+    @location(3) placed: u32,
+};
+
+struct VertexOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) placed: f32,
+    @location(1) radius: f32,
+    @location(2) extrude: vec2<f32>,
+};
+
+struct CollisionDrawableUBO {
+    matrix: mat4x4<f32>,
+};
+
+struct CollisionTilePropsUBO {
+    extrude_scale: vec2<f32>,
+    overscale_factor: f32,
+    pad1: f32,
+};
+
+@group(0) @binding(0) var<uniform> drawable: CollisionDrawableUBO;
+@group(0) @binding(1) var<uniform> tile_props: CollisionTilePropsUBO;
+
+@vertex
+fn main(in: VertexInput) -> VertexOutput {
+    var out: VertexOutput;
+    
+    let collision_index = f32(in.position.x);
+    let radius = collision_index / 10.0;
+    
+    let projected_point = drawable.matrix * vec4<f32>(f32(in.anchor_position.x), f32(in.anchor_position.y), 0.0, 1.0);
+    let camera_to_anchor_distance = projected_point.w;
+    let collision_perspective_ratio = clamp(0.5 + 0.5 * (1.0 / camera_to_anchor_distance), 0.0, 4.0);
+    
+    let extrude_vec = vec2<f32>(f32(in.extrude.x) / 256.0 - 128.0, f32(in.extrude.y) / 256.0 - 128.0);
+    
+    out.position = drawable.matrix * vec4<f32>(
+        f32(in.anchor_position.x) + extrude_vec.x * radius,
+        f32(in.anchor_position.y) + extrude_vec.y * radius,
+        0.0,
+        1.0
+    );
+    
+    out.placed = f32(in.placed);
+    out.radius = radius;
+    out.extrude = extrude_vec;
+    
+    return out;
+}
+)";
+    
+    static constexpr auto fragment = R"(
+struct FragmentInput {
+    @location(0) placed: f32,
+    @location(1) radius: f32,
+    @location(2) extrude: vec2<f32>,
+};
+
+@fragment
+fn main(in: FragmentInput) -> @location(0) vec4<f32> {
+    let alpha = 0.5;
+    
+    // Red = collision, hide label
+    var color = vec4<f32>(1.0, 0.0, 0.0, 1.0) * alpha;
+    
+    // Blue = no collision, label is showing
+    if (in.placed > 0.5) {
+        color = vec4<f32>(0.0, 0.0, 1.0, 0.5) * alpha;
+    }
+    
+    // Add circle outline effect
+    let dist = length(in.extrude);
+    if (dist > 1.0) {
+        discard;
+    }
+    
+    return color;
+}
+)";
 };
 
 } // namespace shaders

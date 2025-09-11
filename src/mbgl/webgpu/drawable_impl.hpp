@@ -32,7 +32,13 @@ public:
     WGPURenderPipeline pipeline = nullptr;
     WGPUBindGroup bindGroup = nullptr;
     
-    gfx::IndexVectorBasePtr indexes;
+    // Buffer resources
+    WGPUBuffer vertexBuffer = nullptr;
+    WGPUBuffer indexBuffer = nullptr;
+    std::vector<uint8_t> vertexData;
+    std::size_t vertexStride = 0;
+    
+    gfx::IndexVectorBasePtr indexVector;
     std::size_t vertexCount = 0;
     gfx::AttributeDataType vertexType = gfx::AttributeDataType::Invalid;
 
