@@ -11,7 +11,7 @@ const std::array<AttributeInfo, 1> HeatmapTextureShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Float2, idHeatmapPosVertexAttribute},
 };
 const std::array<TextureInfo, 2> HeatmapTextureShaderSource::textures = {
-    TextureInfo{0, idHeatmapTexture},
+    TextureInfo{0, idHeatmapImageTexture},
     TextureInfo{1, idHeatmapColorRampTexture}
 };
 

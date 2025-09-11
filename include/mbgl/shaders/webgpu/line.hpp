@@ -7,7 +7,7 @@ namespace mbgl {
 namespace shaders {
 
 template <>
-structstruct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::WebGPU> {
+struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "LineShader";
     static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
@@ -93,22 +93,6 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     return vec4<f32>(line_props.color.rgb, line_props.color.a * line_props.opacity * alpha);
 }
 )";
-};
-
-template <>
-struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::WebGPU> {
-    static constexpr const char* name = "LineGradientShader";
-    static const std::array<AttributeInfo, 7> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
-};
-
-template <>
-struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::WebGPU> {
-    static constexpr const char* name = "LinePatternShader";
-    static const std::array<AttributeInfo, 9> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 1> textures;
 };
 
 template <>

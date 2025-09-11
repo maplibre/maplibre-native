@@ -9,7 +9,7 @@ using HillshadePrepareShaderSource = ShaderSource<BuiltIn::HillshadePrepareShade
 
 const std::array<AttributeInfo, 2> HillshadePrepareShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Float2, idHillshadePosVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::Float2, idHillshadeTexCoordVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Float2, idHillshadeTexturePosVertexAttribute},
 };
 const std::array<TextureInfo, 1> HillshadePrepareShaderSource::textures = {
     TextureInfo{0, idHillshadeImageTexture}

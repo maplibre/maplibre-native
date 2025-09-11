@@ -206,6 +206,69 @@ enum WGPUMapMode_ {
     WGPUMapMode_Write = 0x00000002,
 };
 
+typedef enum WGPUFeatureName {
+    WGPUFeatureName_Undefined = 0,
+} WGPUFeatureName;
+
+typedef enum WGPUDeviceLostReason {
+    WGPUDeviceLostReason_Undefined = 0,
+    WGPUDeviceLostReason_Destroyed = 1,
+} WGPUDeviceLostReason;
+
+typedef enum WGPURequestAdapterStatus {
+    WGPURequestAdapterStatus_Success = 0,
+    WGPURequestAdapterStatus_Unavailable = 1,
+    WGPURequestAdapterStatus_Error = 2,
+    WGPURequestAdapterStatus_Unknown = 3,
+} WGPURequestAdapterStatus;
+
+typedef void (*WGPUDeviceLostCallback)(WGPUDeviceLostReason reason, char const* message, void* userdata);
+typedef void (*WGPURequestAdapterCallback)(WGPURequestAdapterStatus status, WGPUAdapter adapter, char const* message, void* userdata);
+
+struct WGPULimits {
+    uint32_t maxTextureDimension1D;
+    uint32_t maxTextureDimension2D;
+    uint32_t maxTextureDimension3D;
+    uint32_t maxTextureArrayLayers;
+    uint32_t maxBindGroups;
+    uint32_t maxBindingsPerBindGroup;
+    uint32_t maxDynamicUniformBuffersPerPipelineLayout;
+    uint32_t maxDynamicStorageBuffersPerPipelineLayout;
+    uint32_t maxSampledTexturesPerShaderStage;
+    uint32_t maxSamplersPerShaderStage;
+    uint32_t maxStorageBuffersPerShaderStage;
+    uint32_t maxStorageTexturesPerShaderStage;
+    uint32_t maxUniformBuffersPerShaderStage;
+    uint64_t maxUniformBufferBindingSize;
+    uint64_t maxStorageBufferBindingSize;
+    uint32_t minUniformBufferOffsetAlignment;
+    uint32_t minStorageBufferOffsetAlignment;
+    uint32_t maxVertexBuffers;
+    uint64_t maxBufferSize;
+    uint32_t maxVertexAttributes;
+    uint32_t maxVertexBufferArrayStride;
+    uint32_t maxInterStageShaderComponents;
+    uint32_t maxInterStageShaderVariables;
+    uint32_t maxColorAttachments;
+    uint32_t maxColorAttachmentBytesPerSample;
+    uint32_t maxComputeWorkgroupStorageSize;
+    uint32_t maxComputeInvocationsPerWorkgroup;
+    uint32_t maxComputeWorkgroupSizeX;
+    uint32_t maxComputeWorkgroupSizeY;
+    uint32_t maxComputeWorkgroupSizeZ;
+    uint32_t maxComputeWorkgroupsPerDimension;
+};
+
+struct WGPURequiredLimits {
+    struct WGPUChainedStruct const* nextInChain;
+    WGPULimits limits;
+};
+
+struct WGPUQueueDescriptor {
+    struct WGPUChainedStruct const* nextInChain;
+    char const* label;
+};
+
 typedef enum WGPUBufferMapAsyncStatus {
     WGPUBufferMapAsyncStatus_Success = 0,
     WGPUBufferMapAsyncStatus_Error = 1,
@@ -231,6 +294,17 @@ typedef enum WGPUTextureDimension {
     WGPUTextureDimension_2D = 1,
     WGPUTextureDimension_3D = 2,
 } WGPUTextureDimension;
+
+typedef enum WGPUStencilOperation {
+    WGPUStencilOperation_Keep = 0,
+    WGPUStencilOperation_Zero = 1,
+    WGPUStencilOperation_Replace = 2,
+    WGPUStencilOperation_Invert = 3,
+    WGPUStencilOperation_IncrementClamp = 4,
+    WGPUStencilOperation_DecrementClamp = 5,
+    WGPUStencilOperation_IncrementWrap = 6,
+    WGPUStencilOperation_DecrementWrap = 7,
+} WGPUStencilOperation;
 
 typedef enum WGPUTextureFormat {
     WGPUTextureFormat_Undefined = 0,
@@ -433,23 +507,20 @@ struct WGPUCommandEncoderDescriptor {
     char const* label;
 };
 
+struct WGPUStencilFaceState {
+    WGPUCompareFunction compare;
+    WGPUStencilOperation failOp;
+    WGPUStencilOperation depthFailOp;
+    WGPUStencilOperation passOp;
+};
+
 struct WGPUDepthStencilState {
     struct WGPUChainedStruct const* nextInChain;
     WGPUTextureFormat format;
     bool depthWriteEnabled;
     WGPUCompareFunction depthCompare;
-    struct {
-        WGPUCompareFunction compare;
-        uint32_t failOp;
-        uint32_t depthFailOp;
-        uint32_t passOp;
-    } stencilFront;
-    struct {
-        WGPUCompareFunction compare;
-        uint32_t failOp;
-        uint32_t depthFailOp;
-        uint32_t passOp;
-    } stencilBack;
+    WGPUStencilFaceState stencilFront;
+    WGPUStencilFaceState stencilBack;
     uint32_t stencilReadMask;
     uint32_t stencilWriteMask;
     int32_t depthBias;
@@ -537,17 +608,21 @@ struct WGPURenderPassDescriptor {
     WGPURenderPassDepthStencilAttachment const* depthStencilAttachment;
 };
 
+struct WGPUVertexState {
+    struct WGPUChainedStruct const* nextInChain;
+    WGPUShaderModule module;
+    char const* entryPoint;
+    uint32_t constantCount;
+    struct WGPUConstantEntry const* constants;
+    uint32_t bufferCount;
+    struct WGPUVertexBufferLayout const* buffers;
+};
+
 struct WGPURenderPipelineDescriptor {
     struct WGPUChainedStruct const* nextInChain;
     char const* label;
     WGPUPipelineLayout layout;
-    struct {
-        struct WGPUChainedStruct const* nextInChain;
-        WGPUShaderModule module;
-        char const* entryPoint;
-        uint32_t bufferCount;
-        struct WGPUVertexBufferLayout const* buffers;
-    } vertex;
+    WGPUVertexState vertex;
     WGPUPrimitiveState primitive;
     WGPUDepthStencilState const* depthStencil;
     WGPUMultisampleState multisample;
@@ -594,6 +669,22 @@ struct WGPUSurfaceDescriptorFromXlibWindow {
     WGPUChainedStruct chain;
     void* display;
     uint32_t window;
+};
+
+struct WGPUSurfaceDescriptor {
+    struct WGPUChainedStruct const* nextInChain;
+    char const* label;
+};
+
+struct WGPUDeviceDescriptor {
+    struct WGPUChainedStruct const* nextInChain;
+    char const* label;
+    uint32_t requiredFeaturesCount;
+    WGPUFeatureName const* requiredFeatures;
+    WGPURequiredLimits const* requiredLimits;
+    WGPUQueueDescriptor defaultQueue;
+    WGPUDeviceLostCallback deviceLostCallback;
+    void* deviceLostUserdata;
 };
 
 struct WGPURequestAdapterOptions {
@@ -813,4 +904,52 @@ inline void wgpuBufferMapAsync(WGPUBuffer /*buffer*/, WGPUMapMode /*mode*/, size
 
 inline bool wgpuDevicePoll(WGPUDevice /*device*/, bool /*wait*/, const void* /*timeoutNs*/) {
     return false;
+}
+inline WGPURenderPassEncoder wgpuCommandEncoderBeginRenderPass(WGPUCommandEncoder /*encoder*/, const WGPURenderPassDescriptor* /*descriptor*/) {
+    return nullptr;
+}
+inline void wgpuRenderPassEncoderSetPipeline(WGPURenderPassEncoder /*encoder*/, WGPURenderPipeline /*pipeline*/) {
+}
+inline void wgpuRenderPassEncoderSetVertexBuffer(WGPURenderPassEncoder /*encoder*/, uint32_t /*slot*/, WGPUBuffer /*buffer*/, uint64_t /*offset*/, uint64_t /*size*/) {
+}
+inline void wgpuRenderPassEncoderDraw(WGPURenderPassEncoder /*encoder*/, uint32_t /*vertexCount*/, uint32_t /*instanceCount*/, uint32_t /*firstVertex*/, uint32_t /*firstInstance*/) {
+}
+inline void wgpuRenderPassEncoderEnd(WGPURenderPassEncoder /*encoder*/) {
+}
+inline void wgpuRenderPassEncoderRelease(WGPURenderPassEncoder /*encoder*/) {
+}
+inline void wgpuSurfacePresent(WGPUSurface /*surface*/) {
+}
+inline void wgpuDeviceRelease(WGPUDevice /*device*/) {
+}
+inline void wgpuAdapterRelease(WGPUAdapter /*adapter*/) {
+}
+inline void wgpuSurfaceRelease(WGPUSurface /*surface*/) {
+}
+inline void wgpuInstanceRelease(WGPUInstance /*instance*/) {
+}
+inline WGPUInstance wgpuCreateInstance(const WGPUInstanceDescriptor* /*descriptor*/) {
+    return nullptr;
+}
+inline void wgpuInstanceRequestAdapter(WGPUInstance /*instance*/, const WGPURequestAdapterOptions* /*options*/, WGPURequestAdapterCallback /*callback*/, void* /*userdata*/) {
+}
+inline WGPUDevice wgpuAdapterCreateDevice(WGPUAdapter /*adapter*/, const WGPUDeviceDescriptor* /*descriptor*/) {
+    return nullptr;
+}
+inline WGPUQueue wgpuDeviceGetQueue(WGPUDevice /*device*/) {
+    return nullptr;
+}
+inline WGPUSurface wgpuInstanceCreateSurface(WGPUInstance /*instance*/, const WGPUSurfaceDescriptor* /*descriptor*/) {
+    return nullptr;
+}
+
+typedef struct WGPUSwapChainImpl* WGPUSwapChain;
+
+inline WGPUSwapChain wgpuDeviceCreateSwapChain(WGPUDevice /*device*/, WGPUSurface /*surface*/, const WGPUSwapChainDescriptor* /*descriptor*/) {
+    return nullptr;
+}
+inline WGPUTextureView wgpuSwapChainGetCurrentTextureView(WGPUSwapChain /*swapChain*/) {
+    return nullptr;
+}
+inline void wgpuSwapChainRelease(WGPUSwapChain /*swapChain*/) {
 }
