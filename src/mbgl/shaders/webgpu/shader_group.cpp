@@ -27,11 +27,17 @@ struct VertexOutput {
 };
 
 @vertex
-fn main(input: VertexInput) -> VertexOutput {
+fn main(@builtin(vertex_index) vertex_index: u32, input: VertexInput) -> VertexOutput {
     var output: VertexOutput;
-    // Convert int16 position to float and apply transformation matrix
-    let pos = vec4<f32>(f32(input.position.x), f32(input.position.y), 0.0, 1.0);
-    output.position = uniforms.matrix * pos;
+    
+    // Just normalize the input coordinates to NDC (-1 to 1)
+    // MapLibre uses tile coordinates 0-8192
+    let x = (f32(input.position.x) / 4096.0) - 1.0;
+    let y = 1.0 - (f32(input.position.y) / 4096.0);
+    
+    // Set z to 0.5 to be in the middle of depth range
+    output.position = vec4<f32>(x, y, 0.5, 1.0);
+    
     return output;
 }
 )";
@@ -40,8 +46,8 @@ fn main(input: VertexInput) -> VertexOutput {
     const std::string fragmentSource = R"(
 @fragment
 fn main() -> @location(0) vec4<f32> {
-    // Output a solid red color for maximum visibility
-    return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+    // Output a bright green color for maximum visibility
+    return vec4<f32>(0.0, 1.0, 0.0, 1.0);
 }
 )";
 
