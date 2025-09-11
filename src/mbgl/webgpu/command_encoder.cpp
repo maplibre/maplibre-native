@@ -72,17 +72,15 @@ void CommandEncoder::present(gfx::Renderable&) {
         Log::Error(Event::General, "Failed to finish command encoder");
     }
     
-    // Present the surface by calling swap
-    // For GLFW backend, we need to call swap on the backend itself
-    #ifdef __APPLE__
-    // Since we can't use dynamic_cast (no RTTI), we assume this is GLFWWebGPUBackend
-    // This is safe because we know we're using GLFW on macOS with WebGPU
-    auto* glfw_backend = static_cast<GLFWWebGPUBackend*>(&backend);
-    if (glfw_backend) {
-        glfw_backend->swap();
-        Log::Info(Event::General, "Called swap on GLFWWebGPUBackend");
-    }
-    #endif
+    // Note: Surface presentation (swap) is handled by GLFWView::renderSync()
+    // We don't need to call swap here as it will be called by the view
+    
+    // Create a new command encoder for the next frame
+    encoder = nullptr;
+    WGPUCommandEncoderDescriptor newDesc = {};
+    WGPUStringView newLabel = {"MapLibre Command Encoder", strlen("MapLibre Command Encoder")};
+    newDesc.label = newLabel;
+    encoder = wgpuDeviceCreateCommandEncoder(device, &newDesc);
 }
 
 

@@ -45,7 +45,8 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     
     // Create vertex shader module
     WGPUShaderModuleWGSLDescriptor wgslDesc = {};
-    wgslDesc.chain.sType = (WGPUSType)0x00040006;
+    wgslDesc.chain.sType = (WGPUSType)0x00040006;  // WGPUSType_ShaderModuleWGSLDescriptor
+    wgslDesc.chain.next = nullptr;
     WGPUStringView vertexCode = {vertexSource.c_str(), vertexSource.length()};
     wgslDesc.code = vertexCode;
     
@@ -193,10 +194,13 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
         Log::Error(Event::General, "Failed to create WebGPU render pipeline - shader compilation or pipeline configuration error");
         Log::Error(Event::General, "Vertex shader length: " + std::to_string(vertexSource.length()));
         Log::Error(Event::General, "Fragment shader length: " + std::to_string(fragmentSource.length()));
+        Log::Error(Event::General, "Vertex shader module: " + std::to_string(vertexShaderModule != nullptr));
+        Log::Error(Event::General, "Fragment shader module: " + std::to_string(fragmentShaderModule != nullptr));
     } else {
         uintptr_t pipelineAddr = reinterpret_cast<uintptr_t>(pipeline);
         Log::Info(Event::General, "Successfully created WebGPU render pipeline at address: 0x" + 
                   std::to_string(pipelineAddr));
+        Log::Info(Event::General, "Pipeline created with vertex buffers: " + std::to_string(vertexState.bufferCount));
     }
 }
 

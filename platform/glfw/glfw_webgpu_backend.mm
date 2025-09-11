@@ -164,6 +164,11 @@ wgpu::TextureView GLFWWebGPUBackend::getCurrentTextureView() {
         return nullptr;
     }
     
+    if (!surfaceTexture.texture) {
+        mbgl::Log::Error(mbgl::Event::General, "Surface texture is null");
+        return nullptr;
+    }
+    
     mbgl::Log::Info(mbgl::Event::General, "Successfully got surface texture");
     return surfaceTexture.texture.CreateView();
 }
