@@ -178,9 +178,12 @@ struct VertexOutput {
 @vertex
 fn main(input: VertexInput) -> VertexOutput {
     var output: VertexOutput;
-    // Convert int16 position to float without normalization (matrix handles scaling)
+    // Convert int16 position to float
     let pos = vec2<f32>(f32(input.position.x), f32(input.position.y));
+    
+    // Apply the MVP matrix - WebGPU will handle perspective division
     output.position = uniforms.mvp_matrix * vec4<f32>(pos, 0.0, 1.0);
+    
     // Bright color for debugging - make tiles visible
     output.color = vec4<f32>(
         1.0,  // Red

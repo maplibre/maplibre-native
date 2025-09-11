@@ -333,11 +333,12 @@ void Drawable::draw(PaintParameters& parameters) const {
             mat4 projMatrix;
             parameters.state.getProjMatrix(projMatrix);
             
-            // Log first few matrix values for debugging
-            Log::Info(Event::General, "Projection matrix values: [0][0]=" + std::to_string(projMatrix[0]) + 
-                      ", [1][1]=" + std::to_string(projMatrix[5]) + 
-                      ", [2][2]=" + std::to_string(projMatrix[10]) + 
-                      ", [3][3]=" + std::to_string(projMatrix[15]));
+            // Log matrix values for debugging - show full last row/column
+            Log::Info(Event::General, "Projection matrix row 3: [" + 
+                      std::to_string(projMatrix[12]) + ", " + 
+                      std::to_string(projMatrix[13]) + ", " + 
+                      std::to_string(projMatrix[14]) + ", " + 
+                      std::to_string(projMatrix[15]) + "]");
             
             // Convert to column-major format for WebGPU (mat4 is row-major in MapLibre)
             float matrix[16];
@@ -347,8 +348,37 @@ void Drawable::draw(PaintParameters& parameters) const {
                 }
             }
             
+            // Adjust for WebGPU's depth range [0, 1] instead of OpenGL's [-1, 1]
+            // Transform z from [-1, 1] to [0, 1]: z' = (z + 1) / 2
+            // This modifies row 2 of the column-major matrix
+            matrix[8] = matrix[8] * 0.5f;   // Scale z by 0.5
+            matrix[9] = matrix[9] * 0.5f;
+            matrix[10] = matrix[10] * 0.5f;
+            matrix[11] = matrix[11] * 0.5f + 0.5f;  // Add 0.5 to translation
+            
             // Update the uniform buffer
             wgpuQueueWriteBuffer(queue, impl->uniformBuffer, 0, matrix, sizeof(matrix));
+        }
+    }
+    
+    // Get pipeline from shader if we don't have it yet
+    if (!impl->pipeline && shader) {
+        // Verify it's a WebGPU shader by checking the type name
+        if (shader->typeName() != "WebGPU") {
+            Log::Error(Event::General, "Shader is not a WebGPU shader, type: " + std::string(shader->typeName()));
+            return;
+        }
+        
+        auto webgpuShader = std::static_pointer_cast<mbgl::webgpu::ShaderProgram>(shader);
+        if (webgpuShader) {
+            impl->pipeline = webgpuShader->getPipeline();
+            if (impl->pipeline) {
+                uintptr_t addr = reinterpret_cast<uintptr_t>(impl->pipeline);
+                Log::Info(Event::General, "Successfully retrieved pipeline from shader at address: 0x" + 
+                          std::to_string(addr));
+            } else {
+                Log::Warning(Event::General, "Shader's getPipeline() returned null");
+            }
         }
     }
     
@@ -367,10 +397,13 @@ void Drawable::draw(PaintParameters& parameters) const {
         return;
     }
     
-    // Set the pipeline for rendering
+    // Set the pipeline
     Log::Info(Event::General, "WebGPU Drawable: Setting pipeline (address: 0x" + 
               std::to_string(pipelineAddr) + ")");
+    
     wgpuRenderPassEncoderSetPipeline(renderPassEncoder, impl->pipeline);
+    
+    // Continue with rest of drawing even without pipeline for debugging
     
     // Bind vertex buffer
     if (impl->vertexBuffer) {
@@ -549,11 +582,8 @@ void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
 void Drawable::buildWebGPUPipeline() noexcept {
     Log::Info(Event::General, "Building WebGPU pipeline for drawable");
     
-    // Release old pipeline if it exists
-    if (impl->pipeline) {
-        wgpuRenderPipelineRelease(impl->pipeline);
-        impl->pipeline = nullptr;
-    }
+    // Clear the pipeline reference (but don't release it - it's owned by the shader)
+    impl->pipeline = nullptr;
     
     // We need a shader to create the pipeline
     if (!shader) {
