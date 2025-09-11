@@ -56,8 +56,11 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     
     vertexShaderModule = wgpuDeviceCreateShaderModule(device, &vertexShaderDesc);
     if (!vertexShaderModule) {
-        Log::Error(Event::General, "Failed to create vertex shader module");
+        Log::Error(Event::General, "Failed to create vertex shader module - WGSL syntax error?");
+        Log::Error(Event::General, "Vertex shader first 200 chars: " + vertexSource.substr(0, 200));
         return;
+    } else {
+        Log::Info(Event::General, "Vertex shader module created successfully");
     }
     
     // Create fragment shader module
@@ -71,8 +74,11 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     
     fragmentShaderModule = wgpuDeviceCreateShaderModule(device, &fragmentShaderDesc);
     if (!fragmentShaderModule) {
-        Log::Error(Event::General, "Failed to create fragment shader module");
+        Log::Error(Event::General, "Failed to create fragment shader module - WGSL syntax error?");
+        Log::Error(Event::General, "Fragment shader first 200 chars: " + fragmentSource.substr(0, 200));
         return;
+    } else {
+        Log::Info(Event::General, "Fragment shader module created successfully");
     }
     
     // Create bind group layout for uniforms
@@ -184,9 +190,13 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     
     pipeline = wgpuDeviceCreateRenderPipeline(device, &pipelineDesc);
     if (!pipeline) {
-        Log::Error(Event::General, "Failed to create WebGPU render pipeline");
+        Log::Error(Event::General, "Failed to create WebGPU render pipeline - shader compilation or pipeline configuration error");
+        Log::Error(Event::General, "Vertex shader length: " + std::to_string(vertexSource.length()));
+        Log::Error(Event::General, "Fragment shader length: " + std::to_string(fragmentSource.length()));
     } else {
-        Log::Debug(Event::General, "Successfully created WebGPU render pipeline");
+        uintptr_t pipelineAddr = reinterpret_cast<uintptr_t>(pipeline);
+        Log::Info(Event::General, "Successfully created WebGPU render pipeline at address: 0x" + 
+                  std::to_string(pipelineAddr));
     }
 }
 

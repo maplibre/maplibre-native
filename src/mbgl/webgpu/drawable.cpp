@@ -15,6 +15,7 @@
 #include <mbgl/gfx/vertex_vector.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/logging.hpp>
+#include <memory>
 
 namespace mbgl {
 namespace webgpu {
@@ -332,6 +333,12 @@ void Drawable::draw(PaintParameters& parameters) const {
             mat4 projMatrix;
             parameters.state.getProjMatrix(projMatrix);
             
+            // Log first few matrix values for debugging
+            Log::Info(Event::General, "Projection matrix values: [0][0]=" + std::to_string(projMatrix[0]) + 
+                      ", [1][1]=" + std::to_string(projMatrix[5]) + 
+                      ", [2][2]=" + std::to_string(projMatrix[10]) + 
+                      ", [3][3]=" + std::to_string(projMatrix[15]));
+            
             // Convert to column-major format for WebGPU (mat4 is row-major in MapLibre)
             float matrix[16];
             for (int i = 0; i < 4; ++i) {
@@ -346,32 +353,50 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
     
     // Set the pipeline
-    if (impl->pipeline) {
-        Log::Info(Event::General, "WebGPU Drawable: Setting pipeline");
-        // Add safety check - Dawn crashes if pipeline is invalid
-        if (!impl->pipeline) {
-            Log::Error(Event::General, "WebGPU Drawable: Pipeline pointer is invalid");
-            return;
-        }
-        
-        // Set the pipeline for rendering
-        Log::Info(Event::General, "WebGPU Drawable: Setting pipeline");
-        wgpuRenderPassEncoderSetPipeline(renderPassEncoder, impl->pipeline);
-    } else {
-        Log::Info(Event::General, "WebGPU Drawable: No pipeline available, cannot draw");
+    if (!impl->pipeline) {
+        Log::Warning(Event::General, "WebGPU Drawable: No pipeline available, cannot draw");
         return;
     }
     
+    // Additional safety check for pipeline validity
+    uintptr_t pipelineAddr = reinterpret_cast<uintptr_t>(impl->pipeline);
+    if (pipelineAddr < 0x1000) { // Likely a bad pointer
+        Log::Error(Event::General, "WebGPU Drawable: Pipeline pointer is invalid (address: 0x" + 
+                    std::to_string(pipelineAddr) + ")");
+        impl->pipeline = nullptr; // Clear the bad pointer
+        return;
+    }
+    
+    // Set the pipeline for rendering
+    Log::Info(Event::General, "WebGPU Drawable: Setting pipeline (address: 0x" + 
+              std::to_string(pipelineAddr) + ")");
+    wgpuRenderPassEncoderSetPipeline(renderPassEncoder, impl->pipeline);
+    
     // Bind vertex buffer
     if (impl->vertexBuffer) {
+        Log::Info(Event::General, "WebGPU Drawable: Setting vertex buffer, size: " + std::to_string(impl->vertexData.size()));
+        // Log first vertex position for debugging (assuming int16x2 format)
+        if (impl->vertexData.size() >= 4) {
+            int16_t x = *reinterpret_cast<const int16_t*>(impl->vertexData.data());
+            int16_t y = *reinterpret_cast<const int16_t*>(impl->vertexData.data() + 2);
+            Log::Info(Event::General, "First vertex position: x=" + std::to_string(x) + ", y=" + std::to_string(y));
+        }
         wgpuRenderPassEncoderSetVertexBuffer(renderPassEncoder, 0, impl->vertexBuffer, 0, impl->vertexData.size());
+    } else {
+        Log::Warning(Event::General, "WebGPU Drawable: No vertex buffer to bind");
     }
     
     // Bind index buffer if available
     if (impl->indexBuffer && impl->indexVector) {
         // For now, we assume 16-bit indices
         WGPUIndexFormat indexFormat = WGPUIndexFormat_Uint16;
+        Log::Info(Event::General, "WebGPU Drawable: Setting index buffer, size: " + std::to_string(impl->indexVector->bytes()) + 
+                  ", elements: " + std::to_string(impl->indexVector->elements()));
         wgpuRenderPassEncoderSetIndexBuffer(renderPassEncoder, impl->indexBuffer, indexFormat, 0, impl->indexVector->bytes());
+    } else {
+        Log::Info(Event::General, "WebGPU Drawable: No index buffer (indexBuffer: " + 
+                  std::to_string(impl->indexBuffer != nullptr) + ", indexVector: " + 
+                  std::to_string(impl->indexVector != nullptr) + ")");
     }
     
     // Bind uniform buffers and textures via bind group
@@ -537,7 +562,20 @@ void Drawable::buildWebGPUPipeline() noexcept {
     }
     
     // Cast to WebGPU shader program
-    auto* webgpuShader = static_cast<mbgl::webgpu::ShaderProgram*>(shader.get());
+    // The shader is a shared_ptr<gfx::ShaderProgramBase> which actually contains a webgpu::ShaderProgram
+    // We use static_pointer_cast because RTTI is disabled
+    if (!shader) {
+        Log::Error(Event::General, "Shader is null!");
+        return;
+    }
+    
+    // Verify it's a WebGPU shader by checking the type name
+    if (shader->typeName() != "WebGPU") {
+        Log::Error(Event::General, "Shader is not a WebGPU shader, type: " + std::string(shader->typeName()));
+        return;
+    }
+    
+    auto webgpuShader = std::static_pointer_cast<mbgl::webgpu::ShaderProgram>(shader);
     if (!webgpuShader) {
         Log::Error(Event::General, "Failed to cast shader to WebGPU type");
         return;
