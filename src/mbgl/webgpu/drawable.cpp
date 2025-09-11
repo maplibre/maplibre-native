@@ -138,7 +138,13 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
                     
                     // Calculate total size needed
                     std::size_t totalVertices = impl->vertexCount;
-                    std::size_t vertexSize = stride ? stride : 4; // Default to 4 bytes (2 x int16)
+                    // For fill vertices, we typically have 2 int16 values (x,y) = 4 bytes per vertex
+                    std::size_t vertexSize = stride;
+                    if (vertexSize == 0) {
+                        // Default stride for position data (2 x int16)
+                        vertexSize = 4;
+                        Log::Info(Event::General, "Stride is 0, using default of 4 bytes per vertex");
+                    }
                     std::size_t totalSize = totalVertices * vertexSize;
                     
                     impl->vertexData.resize(totalSize);
@@ -183,7 +189,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
     }
     
     // Upload vertex data to GPU
-    if (!impl->vertexData.empty()) {
+    if (!impl->vertexData.empty() && impl->vertexData.size() > 0) {
         Log::Info(Event::General, "Creating vertex buffer with " + std::to_string(impl->vertexData.size()) + " bytes");
         
         // Release old buffer if it exists
@@ -192,25 +198,37 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
             impl->vertexBuffer = nullptr;
         }
         
+        // Ensure buffer size is at least 4 bytes (minimum for WebGPU)
+        std::size_t bufferSize = std::max(impl->vertexData.size(), std::size_t(4));
+        
         // Create vertex buffer
         WGPUBufferDescriptor bufferDesc = {};
         WGPUStringView vertexLabel = {"Vertex Buffer", strlen("Vertex Buffer")};
         bufferDesc.label = vertexLabel;
-        bufferDesc.size = impl->vertexData.size();
+        bufferDesc.size = bufferSize;
         bufferDesc.usage = WGPUBufferUsage_Vertex | WGPUBufferUsage_CopyDst;
-        bufferDesc.mappedAtCreation = 1;
+        bufferDesc.mappedAtCreation = 0; // Don't map at creation
         
         impl->vertexBuffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
         
         if (impl->vertexBuffer) {
-            // Copy data to buffer
-            void* mappedData = wgpuBufferGetMappedRange(impl->vertexBuffer, 0, impl->vertexData.size());
-            if (mappedData) {
-                std::memcpy(mappedData, impl->vertexData.data(), impl->vertexData.size());
-                wgpuBufferUnmap(impl->vertexBuffer);
-                Log::Info(Event::General, "Vertex buffer created and data copied successfully");
+            // Use queue write instead of mapping
+            auto& webgpuContext = static_cast<webgpu::Context&>(context);
+            WGPUDevice contextDevice = static_cast<WGPUDevice>(webgpuContext.getBackend().getDevice());
+            WGPUQueue queue = wgpuDeviceGetQueue(contextDevice);
+            if (queue) {
+                // Write the actual data (padded with zeros if needed)
+                if (impl->vertexData.size() < bufferSize) {
+                    // Need to pad with zeros
+                    std::vector<uint8_t> paddedData(bufferSize, 0);
+                    std::memcpy(paddedData.data(), impl->vertexData.data(), impl->vertexData.size());
+                    wgpuQueueWriteBuffer(queue, impl->vertexBuffer, 0, paddedData.data(), bufferSize);
+                } else {
+                    wgpuQueueWriteBuffer(queue, impl->vertexBuffer, 0, impl->vertexData.data(), impl->vertexData.size());
+                }
+                Log::Info(Event::General, "Vertex buffer created and data written via queue successfully");
             } else {
-                Log::Error(Event::General, "Failed to get mapped range for vertex buffer");
+                Log::Error(Event::General, "Failed to get queue for writing vertex buffer");
             }
         } else {
             Log::Error(Event::General, "Failed to create vertex buffer");
@@ -239,19 +257,22 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         bufferDesc.label = indexLabel;
         bufferDesc.size = indexSize;
         bufferDesc.usage = WGPUBufferUsage_Index | WGPUBufferUsage_CopyDst;
-        bufferDesc.mappedAtCreation = 1;
+        bufferDesc.mappedAtCreation = 0; // Don't map at creation
         
+        Log::Info(Event::General, "Creating index buffer with size: " + std::to_string(indexSize) + 
+                  ", device: " + std::to_string(device != nullptr));
         impl->indexBuffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
         
         if (impl->indexBuffer) {
-            // Copy data to buffer
-            void* mappedData = wgpuBufferGetMappedRange(impl->indexBuffer, 0, indexSize);
-            if (mappedData) {
-                std::memcpy(mappedData, indexData, indexSize);
-                wgpuBufferUnmap(impl->indexBuffer);
-                Log::Info(Event::General, "Index buffer created and data copied successfully");
+            // Use queue write instead of mapping
+            auto& webgpuContext = static_cast<webgpu::Context&>(context);
+            WGPUDevice contextDevice = static_cast<WGPUDevice>(webgpuContext.getBackend().getDevice());
+            WGPUQueue queue = wgpuDeviceGetQueue(contextDevice);
+            if (queue) {
+                wgpuQueueWriteBuffer(queue, impl->indexBuffer, 0, indexData, indexSize);
+                Log::Info(Event::General, "Index buffer created and data written via queue successfully");
             } else {
-                Log::Error(Event::General, "Failed to get mapped range for index buffer");
+                Log::Error(Event::General, "Failed to get queue for writing index buffer");
             }
         } else {
             Log::Error(Event::General, "Failed to create index buffer");
@@ -326,6 +347,14 @@ void Drawable::draw(PaintParameters& parameters) const {
     
     // Set the pipeline
     if (impl->pipeline) {
+        Log::Info(Event::General, "WebGPU Drawable: Setting pipeline");
+        // Add safety check - Dawn crashes if pipeline is invalid
+        if (!impl->pipeline) {
+            Log::Error(Event::General, "WebGPU Drawable: Pipeline pointer is invalid");
+            return;
+        }
+        
+        // Set the pipeline for rendering
         Log::Info(Event::General, "WebGPU Drawable: Setting pipeline");
         wgpuRenderPassEncoderSetPipeline(renderPassEncoder, impl->pipeline);
     } else {

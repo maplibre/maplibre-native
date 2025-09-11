@@ -1,5 +1,8 @@
 #include "glfw_view.hpp"
 #include "glfw_backend.hpp"
+#if defined(MLN_RENDER_BACKEND_WEBGPU)
+#include "glfw_webgpu_backend.hpp"
+#endif
 #include "glfw_renderer_frontend.hpp"
 #include "ny_route.hpp"
 #include "test_writer.hpp"
@@ -282,7 +285,7 @@ GLFWView::GLFWView(bool fullscreen_,
     glfwSetScrollCallback(window, onScroll);
     glfwSetKeyCallback(window, onKey);
     glfwSetWindowFocusCallback(window, onWindowFocus);
-#if defined(__APPLE__) && defined(MLN_RENDER_BACKEND_VULKAN)
+#if defined(__APPLE__) && (defined(MLN_RENDER_BACKEND_VULKAN) || defined(MLN_RENDER_BACKEND_WEBGPU))
     glfwSetWindowRefreshCallback(window, onWindowRefresh);
 #endif
 
@@ -1031,14 +1034,11 @@ void GLFWView::onFramebufferResize(GLFWwindow *window, int width, int height) {
     // which triggers a rerender with the new framebuffer dimensions.
     view->invalidate();
 
-#if defined(__APPLE__) && defined(MLN_RENDER_BACKEND_VULKAN)
+#if defined(__APPLE__) && (defined(MLN_RENDER_BACKEND_VULKAN) || defined(MLN_RENDER_BACKEND_WEBGPU))
     // Render continuously while resizing
     // Untested elsewhere
     view->render();
-
-#if defined(MLN_RENDER_BACKEND_OPENGL)
-    glfwSwapBuffers(window);
-#endif
+    // Note: swap is now handled inside render() for all backends
 #endif
 }
 
@@ -1146,15 +1146,13 @@ void GLFWView::onWindowFocus(GLFWwindow *window, int focused) {
     }
 }
 
-#if defined(__APPLE__) && defined(MLN_RENDER_BACKEND_VULKAN)
+#if defined(__APPLE__) && (defined(MLN_RENDER_BACKEND_VULKAN) || defined(MLN_RENDER_BACKEND_WEBGPU))
 void GLFWView::onWindowRefresh(GLFWwindow *window) {
     // Untested elsewhere
     if (auto *view = reinterpret_cast<GLFWView *>(glfwGetWindowUserPointer(window))) {
         view->invalidate();
         view->render();
-#if defined(MLN_RENDER_BACKEND_OPENGL)
-        glfwSwapBuffers(window);
-#endif
+        // Note: swap is now handled inside render() for all backends
     }
 }
 #endif
@@ -1182,6 +1180,14 @@ void GLFWView::render() {
             updateFreeCameraDemo();
         }
 
+        // Swap buffers for the appropriate backend
+#if defined(MLN_RENDER_BACKEND_OPENGL)
+        glfwSwapBuffers(window);
+#elif defined(MLN_RENDER_BACKEND_WEBGPU)
+        // We know it's a WebGPU backend at compile time
+        static_cast<GLFWWebGPUBackend*>(backend.get())->swap();
+#endif
+
         report(static_cast<float>(1000 * (glfwGetTime() - started)));
         if (benchmark) {
             invalidate();
@@ -1198,6 +1204,7 @@ void GLFWView::run() {
         {
             MLN_TRACE_ZONE(glfwWindowShouldClose);
             if (glfwWindowShouldClose(window)) {
+                mbgl::Log::Info(mbgl::Event::General, "Window should close detected in callback, stopping run loop");
                 runLoop.stop();
                 return;
             }
@@ -1225,7 +1232,18 @@ void GLFWView::run() {
     }
     frameTick.start(mbgl::Duration::zero(), tickDuration, callback);
 #if defined(__APPLE__)
-    while (!glfwWindowShouldClose(window)) runLoop.run();
+    mbgl::Log::Info(mbgl::Event::General, "Starting main loop");
+    int frameCount = 0;
+    while (!glfwWindowShouldClose(window)) {
+        // Use runOnce() instead of run() to process events without blocking indefinitely
+        runLoop.runOnce();
+        frameCount++;
+        
+        if (frameCount % 60 == 0) {
+            mbgl::Log::Info(mbgl::Event::General, "Main loop running, frame " + std::to_string(frameCount));
+        }
+    }
+    mbgl::Log::Info(mbgl::Event::General, "Main loop exited after " + std::to_string(frameCount) + " frames");
 #else
     runLoop.run();
 #endif

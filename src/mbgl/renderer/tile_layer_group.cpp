@@ -21,6 +21,8 @@ TileLayerGroup::TileLayerGroup(int32_t layerIndex_, std::size_t initialCapacity,
 TileLayerGroup::~TileLayerGroup() = default;
 
 std::size_t TileLayerGroup::getDrawableCount() const {
+    mbgl::Log::Info(mbgl::Event::General, "TileLayerGroup::getDrawableCount - returning " + std::to_string(drawablesByTile.size()) + 
+                     ", sortedDrawables.size: " + std::to_string(sortedDrawables.size()));
     return drawablesByTile.size();
 }
 
@@ -53,12 +55,17 @@ std::vector<gfx::UniqueDrawable> TileLayerGroup::removeDrawables(mbgl::RenderPas
 
 void TileLayerGroup::addDrawable(mbgl::RenderPass pass, const OverscaledTileID& id, gfx::UniqueDrawable&& drawable) {
     assert(drawablesByTile.size() == sortedDrawables.size());
+    mbgl::Log::Info(mbgl::Event::General, "TileLayerGroup::addDrawable - pass: " + std::to_string(static_cast<int>(pass)) + 
+                     ", tileID: " + util::toString(id) + 
+                     ", drawable: " + (drawable ? "valid" : "null") +
+                     ", current count: " + std::to_string(drawablesByTile.size()));
     if (drawable) {
         LayerGroupBase::addDrawable(drawable);
         [[maybe_unused]] const auto result = sortedDrawables.insert(drawable.get());
         assert(result.second);
         drawablesByTile.insert(
             std::make_pair(TileLayerGroupTileKey{.renderPass = pass, .tileID = id}, std::move(drawable)));
+        mbgl::Log::Info(mbgl::Event::General, "TileLayerGroup::addDrawable - added, new count: " + std::to_string(drawablesByTile.size()));
     }
 }
 

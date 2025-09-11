@@ -115,6 +115,20 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     setDevice(device);
     setQueue(reinterpret_cast<void*>(queue.Get()));
     
+    // Make sure the window is visible and focused
+    glfwShowWindow(window);
+    glfwFocusWindow(window);
+    
+    // Check if window is actually visible
+    if (glfwGetWindowAttrib(window, GLFW_VISIBLE) != GLFW_TRUE) {
+        mbgl::Log::Error(mbgl::Event::General, "Window is not visible after glfwShowWindow");
+    }
+    
+    // Make sure window shouldn't close
+    if (glfwWindowShouldClose(window)) {
+        mbgl::Log::Error(mbgl::Event::General, "Window should close is already set during init!");
+    }
+    
     mbgl::Log::Info(mbgl::Event::General, "WebGPU backend initialized successfully");
 }
 
@@ -162,6 +176,9 @@ void GLFWWebGPUBackend::swap() {
         wgpuSurface.Present();
         mbgl::Log::Info(mbgl::Event::General, "Surface presented");
     }
+    
+    // Poll for window events to keep the window responsive
+    glfwPollEvents();
     
     // Note: We don't call glfwSwapBuffers for WebGPU as it doesn't use OpenGL swap chains
     // The presentation is handled by wgpuSurface.Present() above
