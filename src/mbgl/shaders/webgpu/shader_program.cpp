@@ -45,12 +45,14 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     
     // Create vertex shader module
     WGPUShaderModuleWGSLDescriptor wgslDesc = {};
-    wgslDesc.chain.sType = WGPUSType_ShaderModuleWGSLDescriptor;
-    wgslDesc.code = vertexSource.c_str();
+    wgslDesc.chain.sType = (WGPUSType)0x00040006;
+    WGPUStringView vertexCode = {vertexSource.c_str(), vertexSource.length()};
+    wgslDesc.code = vertexCode;
     
     WGPUShaderModuleDescriptor vertexShaderDesc = {};
-    vertexShaderDesc.label = "Vertex Shader Module";
-    vertexShaderDesc.nextInChain = reinterpret_cast<const WGPUChainedStruct*>(&wgslDesc);
+    WGPUStringView vertexLabel = {"Vertex Shader Module", strlen("Vertex Shader Module")};
+    vertexShaderDesc.label = vertexLabel;
+    vertexShaderDesc.nextInChain = (WGPUChainedStruct*)&wgslDesc;
     
     vertexShaderModule = wgpuDeviceCreateShaderModule(device, &vertexShaderDesc);
     if (!vertexShaderModule) {
@@ -59,11 +61,13 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     }
     
     // Create fragment shader module
-    wgslDesc.code = fragmentSource.c_str();
+    WGPUStringView fragmentCode = {fragmentSource.c_str(), fragmentSource.length()};
+    wgslDesc.code = fragmentCode;
     
     WGPUShaderModuleDescriptor fragmentShaderDesc = {};
-    fragmentShaderDesc.label = "Fragment Shader Module";
-    fragmentShaderDesc.nextInChain = reinterpret_cast<const WGPUChainedStruct*>(&wgslDesc);
+    WGPUStringView fragmentLabel = {"Fragment Shader Module", strlen("Fragment Shader Module")};
+    fragmentShaderDesc.label = fragmentLabel;
+    fragmentShaderDesc.nextInChain = (WGPUChainedStruct*)&wgslDesc;
     
     fragmentShaderModule = wgpuDeviceCreateShaderModule(device, &fragmentShaderDesc);
     if (!fragmentShaderModule) {
@@ -74,7 +78,8 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     // Create bind group layout for uniforms and textures
     // For now, create an empty bind group layout
     WGPUBindGroupLayoutDescriptor bindGroupLayoutDesc = {};
-    bindGroupLayoutDesc.label = "Bind Group Layout";
+    WGPUStringView bindGroupLabel = {"Bind Group Layout", strlen("Bind Group Layout")};
+    bindGroupLayoutDesc.label = bindGroupLabel;
     bindGroupLayoutDesc.entryCount = 0;
     bindGroupLayoutDesc.entries = nullptr;
     
@@ -82,7 +87,8 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     
     // Create pipeline layout
     WGPUPipelineLayoutDescriptor pipelineLayoutDesc = {};
-    pipelineLayoutDesc.label = "Pipeline Layout";
+    WGPUStringView pipelineLayoutLabel = {"Pipeline Layout", strlen("Pipeline Layout")};
+    pipelineLayoutDesc.label = pipelineLayoutLabel;
     pipelineLayoutDesc.bindGroupLayoutCount = 1;
     pipelineLayoutDesc.bindGroupLayouts = &bindGroupLayout;
     
@@ -91,7 +97,8 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     // Set up vertex state
     WGPUVertexState vertexState = {};
     vertexState.module = vertexShaderModule;
-    vertexState.entryPoint = "main";
+    WGPUStringView vertexState_entryPoint_str = {"main", strlen("main")};
+    vertexState.entryPoint = vertexState_entryPoint_str;
     vertexState.bufferCount = 0;
     vertexState.buffers = nullptr;
     
@@ -103,7 +110,8 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     
     WGPUFragmentState fragmentState = {};
     fragmentState.module = fragmentShaderModule;
-    fragmentState.entryPoint = "main";
+    WGPUStringView fragmentState_entryPoint_str = {"main", strlen("main")};
+    fragmentState.entryPoint = fragmentState_entryPoint_str;
     fragmentState.targetCount = 1;
     fragmentState.targets = &colorTarget;
     
@@ -117,7 +125,7 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     // Set up depth stencil state (optional)
     WGPUDepthStencilState depthStencilState = {};
     depthStencilState.format = WGPUTextureFormat_Depth24PlusStencil8;
-    depthStencilState.depthWriteEnabled = true;
+    depthStencilState.depthWriteEnabled = WGPUOptionalBool_True;
     depthStencilState.depthCompare = WGPUCompareFunction_Less;
     depthStencilState.stencilFront.compare = WGPUCompareFunction_Always;
     depthStencilState.stencilFront.failOp = WGPUStencilOperation_Keep;
@@ -132,7 +140,8 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     
     // Create render pipeline
     WGPURenderPipelineDescriptor pipelineDesc = {};
-    pipelineDesc.label = "Render Pipeline";
+    WGPUStringView pipelineLabel = {"Render Pipeline", strlen("Render Pipeline")};
+    pipelineDesc.label = pipelineLabel;
     pipelineDesc.layout = pipelineLayout;
     pipelineDesc.vertex = vertexState;
     pipelineDesc.fragment = &fragmentState;
@@ -140,7 +149,7 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     pipelineDesc.depthStencil = &depthStencilState;
     pipelineDesc.multisample.count = 1;
     pipelineDesc.multisample.mask = 0xFFFFFFFF;
-    pipelineDesc.multisample.alphaToCoverageEnabled = false;
+    pipelineDesc.multisample.alphaToCoverageEnabled = 0;
     
     pipeline = wgpuDeviceCreateRenderPipeline(device, &pipelineDesc);
     if (!pipeline) {

@@ -4,13 +4,7 @@
 #include <mbgl/webgpu/upload_pass.hpp>
 #include <mbgl/webgpu/renderer_backend.hpp>
 #include <mbgl/webgpu/backend_impl.hpp>
-#include <mbgl/util/logging.hpp>
 #include <cstring> // for strlen
-
-// Platform-specific includes for swap
-#ifdef __APPLE__
-#include "../../platform/glfw/glfw_webgpu_backend.hpp"
-#endif
 
 namespace mbgl {
 namespace webgpu {
@@ -23,8 +17,7 @@ CommandEncoder::CommandEncoder(Context& ctx)
     
     if (device) {
         WGPUCommandEncoderDescriptor desc = {};
-        WGPUStringView label = {"MapLibre Command Encoder", strlen("MapLibre Command Encoder")};
-        desc.label = label;
+        desc.label = "MapLibre Command Encoder";
         encoder = wgpuDeviceCreateCommandEncoder(device, &desc);
     }
 }
@@ -44,67 +37,43 @@ std::unique_ptr<gfx::UploadPass> CommandEncoder::createUploadPass(const char* na
     return std::make_unique<UploadPass>(*this, name);
 }
 
-void CommandEncoder::present(gfx::Renderable&) {
-    Log::Info(Event::General, "CommandEncoder::present called");
-    
+void CommandEncoder::present(gfx::Renderable& renderable) {
     // Submit command buffer and present the surface
     auto& backend = static_cast<RendererBackend&>(context.getBackend());
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
     WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
     
     if (!device || !queue || !encoder) {
-        Log::Error(Event::General, "Missing device, queue, or encoder in present");
         return;
     }
     
     // Finish and submit the command buffer
     WGPUCommandBufferDescriptor cmdBufferDesc = {};
-    WGPUStringView label = {"Command Buffer", strlen("Command Buffer")};
-    cmdBufferDesc.label = label;
+    cmdBufferDesc.label = "Command Buffer";
     WGPUCommandBuffer cmdBuffer = wgpuCommandEncoderFinish(encoder, &cmdBufferDesc);
     
     if (cmdBuffer) {
-        Log::Info(Event::General, "Submitting command buffer to queue");
         wgpuQueueSubmit(queue, 1, &cmdBuffer);
         wgpuCommandBufferRelease(cmdBuffer);
-        Log::Info(Event::General, "Command buffer submitted successfully");
-    } else {
-        Log::Error(Event::General, "Failed to finish command encoder");
     }
     
-    // Present the surface by calling swap
-    // For GLFW backend, we need to call swap on the backend itself
-    #ifdef __APPLE__
-    // Since we can't use dynamic_cast (no RTTI), we assume this is GLFWWebGPUBackend
-    // This is safe because we know we're using GLFW on macOS with WebGPU
-    auto* glfw_backend = static_cast<GLFWWebGPUBackend*>(&backend);
-    if (glfw_backend) {
-        glfw_backend->swap();
-        Log::Info(Event::General, "Called swap on GLFWWebGPUBackend");
-    }
-    #endif
+    // Present the surface if applicable
+    // Note: The actual surface presentation depends on the platform integration
+    (void)renderable;
 }
 
 
 
 void CommandEncoder::pushDebugGroup(const char* name) {
-    Log::Info(Event::General, std::string("CommandEncoder::pushDebugGroup called: ") + (name ? name : "null"));
     if (encoder) {
         WGPUStringView label = {name, name ? strlen(name) : 0};
         wgpuCommandEncoderPushDebugGroup(encoder, label);
-        Log::Info(Event::General, "pushDebugGroup completed");
-    } else {
-        Log::Warning(Event::General, "pushDebugGroup called but encoder is null");
     }
 }
 
 void CommandEncoder::popDebugGroup() {
-    Log::Info(Event::General, "CommandEncoder::popDebugGroup called");
     if (encoder) {
         wgpuCommandEncoderPopDebugGroup(encoder);
-        Log::Info(Event::General, "popDebugGroup completed");
-    } else {
-        Log::Warning(Event::General, "popDebugGroup called but encoder is null");
     }
 }
 
