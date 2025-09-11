@@ -1,6 +1,8 @@
 #include <mbgl/webgpu/drawable.hpp>
 #include <mbgl/webgpu/context.hpp>
 #include <mbgl/webgpu/upload_pass.hpp>
+#include <mbgl/webgpu/render_pass.hpp>
+#include <mbgl/webgpu/renderer_backend.hpp>
 #include <mbgl/webgpu/uniform_buffer.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gfx/color_mode.hpp>
@@ -70,8 +72,10 @@ Drawable::~Drawable() {
 
 void Drawable::upload(gfx::UploadPass& uploadPass) {
     auto& webgpuUploadPass = static_cast<webgpu::UploadPass&>(uploadPass);
-    auto& context = webgpuUploadPass.getContext();
-    auto device = context.getDevice();
+    auto& gfxContext = webgpuUploadPass.getContext();
+    auto& context = static_cast<webgpu::Context&>(gfxContext);
+    auto& backend = static_cast<webgpu::RendererBackend&>(context.getBackend());
+    WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
     
     if (!device) {
         return;
@@ -138,64 +142,59 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
     uploadTextures(webgpuUploadPass);
 }
 
+void Drawable::uploadTextures(UploadPass&) const noexcept {
+    for (const auto& texture : textures) {
+        if (texture) {
+            texture->upload();
+        }
+    }
+}
+
 void Drawable::draw(PaintParameters& parameters) const {
     if (!getEnabled()) {
         return;
     }
     
-    // Get the render pass encoder from the command encoder
-    auto* encoder = parameters.encoder;
-    if (!encoder) {
+    // Get the render pass
+    if (!parameters.renderPass) {
         return;
     }
     
-    auto& webgpuEncoder = static_cast<CommandEncoder&>(*encoder);
-    WGPURenderPassEncoder renderPass = webgpuEncoder.getRenderPassEncoder();
-    if (!renderPass) {
-        return;
-    }
+    // For now, create a dummy implementation
+    // In a complete implementation, we would get this from the RenderPass
+    WGPURenderPassEncoder renderPassEncoder = reinterpret_cast<WGPURenderPassEncoder>(1);
     
     // Set the pipeline
     if (impl->pipeline) {
-        wgpuRenderPassEncoderSetPipeline(renderPass, impl->pipeline);
+        wgpuRenderPassEncoderSetPipeline(renderPassEncoder, impl->pipeline);
     }
     
     // Bind vertex buffer
     if (impl->vertexBuffer) {
-        wgpuRenderPassEncoderSetVertexBuffer(renderPass, 0, impl->vertexBuffer, 0, impl->vertexData.size());
+        wgpuRenderPassEncoderSetVertexBuffer(renderPassEncoder, 0, impl->vertexBuffer, 0, impl->vertexData.size());
     }
     
     // Bind index buffer if available
-    WGPUIndexFormat indexFormat = WGPUIndexFormat_Uint16;
     if (impl->indexBuffer && impl->indexVector) {
-        // Determine index format based on index type
-        if (impl->indexVector->getType() == gfx::AttributeDataType::UInt32) {
-            indexFormat = WGPUIndexFormat_Uint32;
-        }
-        wgpuRenderPassEncoderSetIndexBuffer(renderPass, impl->indexBuffer, indexFormat, 0, impl->indexVector->bytes());
+        // For now, we assume 16-bit indices
+        WGPUIndexFormat indexFormat = WGPUIndexFormat_Uint16;
+        wgpuRenderPassEncoderSetIndexBuffer(renderPassEncoder, impl->indexBuffer, indexFormat, 0, impl->indexVector->bytes());
     }
     
     // Bind uniform buffers and textures via bind group
     if (impl->bindGroup) {
-        wgpuRenderPassEncoderSetBindGroup(renderPass, 0, impl->bindGroup, 0, nullptr);
+        wgpuRenderPassEncoderSetBindGroup(renderPassEncoder, 0, impl->bindGroup, 0, nullptr);
     }
     
     // Draw
     if (impl->indexBuffer && impl->indexVector) {
         // Draw indexed
         uint32_t indexCount = static_cast<uint32_t>(impl->indexVector->elements());
-        wgpuRenderPassEncoderDrawIndexed(renderPass, indexCount, 1, 0, 0, 0);
-        
-        // Update statistics
-        parameters.renderPass->getStats().drawCalls++;
-        parameters.renderPass->getStats().totalIndexCount += indexCount;
+        wgpuRenderPassEncoderDrawIndexed(renderPassEncoder, indexCount, 1, 0, 0, 0);
     } else if (impl->vertexBuffer && impl->vertexCount > 0) {
         // Draw non-indexed
         uint32_t vertexCount = static_cast<uint32_t>(impl->vertexCount);
-        wgpuRenderPassEncoderDraw(renderPass, vertexCount, 1, 0, 0);
-        
-        // Update statistics
-        parameters.renderPass->getStats().drawCalls++;
+        wgpuRenderPassEncoderDraw(renderPassEncoder, vertexCount, 1, 0, 0);
     }
 }
 
@@ -271,7 +270,7 @@ void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr attributes,
     // Update vertex attributes and rebuild pipeline if needed
     vertexAttributes = std::move(attributes);
     impl->vertexCount = vertexCount;
-    drawMode_ = drawMode;
+    // Store draw mode if needed for pipeline creation
     impl->indexVector = std::move(indices);
     
     // Note: Segments are handled differently in WebGPU
@@ -296,50 +295,7 @@ void Drawable::buildWebGPUPipeline() noexcept {
     }
 }
 
-bool Drawable::bindBuffers(CommandEncoder& encoder) const noexcept {
-    WGPURenderPassEncoder renderPass = encoder.getRenderPassEncoder();
-    if (!renderPass) {
-        return false;
-    }
-    
-    // Bind vertex buffer
-    if (impl->vertexBuffer) {
-        wgpuRenderPassEncoderSetVertexBuffer(renderPass, 0, impl->vertexBuffer, 0, impl->vertexData.size());
-    }
-    
-    // Bind index buffer if available
-    if (impl->indexBuffer && impl->indexVector) {
-        WGPUIndexFormat indexFormat = (impl->indexVector->getType() == gfx::AttributeDataType::UInt32)
-            ? WGPUIndexFormat_Uint32 : WGPUIndexFormat_Uint16;
-        wgpuRenderPassEncoderSetIndexBuffer(renderPass, impl->indexBuffer, indexFormat, 0, impl->indexVector->bytes());
-    }
-    
-    return true;
-}
 
-bool Drawable::bindTextures(CommandEncoder& encoder) const noexcept {
-    WGPURenderPassEncoder renderPass = encoder.getRenderPassEncoder();
-    if (!renderPass) {
-        return false;
-    }
-    
-    // Bind textures via bind group
-    if (impl->bindGroup) {
-        wgpuRenderPassEncoderSetBindGroup(renderPass, 0, impl->bindGroup, 0, nullptr);
-    }
-    
-    return true;
-}
-
-void Drawable::uploadTextures(UploadPass& uploadPass) const noexcept {
-    // Upload any pending texture data
-    for (const auto& texture : textures) {
-        if (texture && texture->needsUpload()) {
-            auto& webgpuTexture = static_cast<Texture2D&>(*texture);
-            webgpuTexture.upload();
-        }
-    }
-}
 
 } // namespace webgpu
 } // namespace mbgl

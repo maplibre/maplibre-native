@@ -10,8 +10,10 @@ namespace shaders {
 
 using FillShaderSource = ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::WebGPU>;
 
-const std::array<AttributeInfo, 1> FillShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Float2, idFillPosVertexAttribute},
+const std::array<AttributeInfo, 3> FillShaderSource::attributes = {
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idFillPosVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Float4, idFillColorVertexAttribute},
+    AttributeInfo{2, gfx::AttributeDataType::Float2, idFillOpacityVertexAttribute},
 };
 const std::array<TextureInfo, 0> FillShaderSource::textures = {};
 
@@ -20,10 +22,54 @@ const std::array<TextureInfo, 0> FillShaderSource::textures = {};
 
 using FillOutlineShaderSource = ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::WebGPU>;
 
-const std::array<AttributeInfo, 1> FillOutlineShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Float2, idFillPosVertexAttribute},
+const std::array<AttributeInfo, 3> FillOutlineShaderSource::attributes = {
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idFillPosVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Float4, idFillOutlineColorVertexAttribute},
+    AttributeInfo{2, gfx::AttributeDataType::Float2, idFillOpacityVertexAttribute},
 };
 const std::array<TextureInfo, 0> FillOutlineShaderSource::textures = {};
+
+//
+// Fill pattern
+
+using FillPatternShaderSource = ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::WebGPU>;
+
+const std::array<AttributeInfo, 4> FillPatternShaderSource::attributes = {
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idFillPosVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Float2, idFillOpacityVertexAttribute},
+    AttributeInfo{2, gfx::AttributeDataType::UShort4, idFillPatternFromVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::UShort4, idFillPatternToVertexAttribute},
+};
+const std::array<TextureInfo, 1> FillPatternShaderSource::textures = {
+    TextureInfo{0, idFillImageTexture}
+};
+
+//
+// Fill outline pattern
+
+using FillOutlinePatternShaderSource = ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::WebGPU>;
+
+const std::array<AttributeInfo, 4> FillOutlinePatternShaderSource::attributes = {
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idFillPosVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Float2, idFillOpacityVertexAttribute},
+    AttributeInfo{2, gfx::AttributeDataType::UShort4, idFillPatternFromVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::UShort4, idFillPatternToVertexAttribute},
+};
+const std::array<TextureInfo, 1> FillOutlinePatternShaderSource::textures = {
+    TextureInfo{0, idFillImageTexture}
+};
+
+//
+// Fill outline triangulated
+
+using FillOutlineTriangulatedShaderSource = ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::WebGPU>;
+
+const std::array<AttributeInfo, 3> FillOutlineTriangulatedShaderSource::attributes = {
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idFillPosVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Float4, idFillOutlineColorVertexAttribute},
+    AttributeInfo{2, gfx::AttributeDataType::Float2, idFillOpacityVertexAttribute},
+};
+const std::array<TextureInfo, 0> FillOutlineTriangulatedShaderSource::textures = {};
 
 } // namespace shaders
 } // namespace mbgl
