@@ -65,6 +65,8 @@ enum {
     idGlobalUBOIndex,
 #elif MLN_RENDER_BACKEND_VULKAN
     idGlobalPlatformParamsUBO,
+#elif MLN_RENDER_BACKEND_WEBGPU
+    idGlobalPlatformParamsUBO,
 #endif
     globalUBOCount
 };

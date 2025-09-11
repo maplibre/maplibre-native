@@ -156,6 +156,9 @@ void PaintParameters::clearStencil() {
     vulkanRenderPass.clearStencil();
 
     context.renderingStats().stencilClears++;
+#elif MLN_RENDER_BACKEND_WEBGPU
+    // WebGPU clears stencil through render pass descriptor
+    context.renderingStats().stencilClears++;
 #elif MLN_RENDER_BACKEND_OPENGL
     context.clearStencilBuffer(0b00000000);
 #endif
