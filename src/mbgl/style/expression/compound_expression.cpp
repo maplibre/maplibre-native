@@ -16,6 +16,7 @@
 
 #include <cmath>
 #include <limits>
+#include <numbers>
 
 namespace mbgl {
 namespace style {
@@ -226,14 +227,16 @@ struct SignatureType<Lambda, std::enable_if_t<std::is_class_v<Lambda>>> {
 };
 
 template <typename Fn>
-static std::unique_ptr<detail::SignatureBase> makeSignature(std::string name,
-                                                            Fn evaluateFunction,
-                                                            Dependency dependencies = Dependency::None) {
+std::unique_ptr<detail::SignatureBase> makeSignature(std::string name,
+                                                     Fn evaluateFunction,
+                                                     Dependency dependencies = Dependency::None) {
     return std::make_unique<Signature<typename SignatureType<Fn>::Type>>(
         evaluateFunction, std::move(name), dependencies);
 }
 
 } // namespace detail
+
+namespace {
 
 Value featureIdAsExpressionValue(const EvaluationContext& params) {
     assert(params.feature);
@@ -296,18 +299,20 @@ std::optional<std::string> featureIdAsString(const EvaluationContext& params) {
     return id.match([](std::string value) { return value; }, [](const auto&) { return std::optional<std::string>(); });
 };
 
+} // unnamed namespace
+
 const auto& eCompoundExpression() {
-    static auto signature = detail::makeSignature("e", []() -> Result<double> { return 2.718281828459045; });
+    static auto signature = detail::makeSignature("e", []() -> Result<double> { return std::numbers::e; });
     return signature;
 }
 
 const auto& piCompoundExpression() {
-    static auto signature = detail::makeSignature("pi", []() -> Result<double> { return 3.141592653589793; });
+    static auto signature = detail::makeSignature("pi", []() -> Result<double> { return std::numbers::pi; });
     return signature;
 }
 
 const auto& ln2CompoundExpression() {
-    static auto signature = detail::makeSignature("ln2", []() -> Result<double> { return 0.6931471805599453; });
+    static auto signature = detail::makeSignature("ln2", []() -> Result<double> { return std::numbers::ln2; });
     return signature;
 }
 
@@ -987,6 +992,8 @@ const auto& filterInCompoundExpression() {
     return signature;
 }
 
+namespace {
+
 using ParseCompoundFunction = const std::unique_ptr<detail::SignatureBase>& (*)();
 constexpr const auto compoundExpressionRegistry =
     mapbox::eternal::hash_map<mapbox::eternal::string, ParseCompoundFunction>({
@@ -1066,10 +1073,14 @@ constexpr const auto compoundExpressionRegistry =
         {"filter-in", filterInCompoundExpression},
     });
 
+} // unnamed namespace
+
 using namespace mbgl::style::conversion;
 
 using DefinitionIterator = decltype(compoundExpressionRegistry)::const_iterator;
 using Definitions = std::pair<DefinitionIterator, DefinitionIterator>;
+
+namespace {
 
 std::string expectedTypesError(const Definitions& definitions, const std::vector<std::unique_ptr<Expression>>& args) {
     std::vector<std::string> availableOverloads; // Only used if there are no overloads
@@ -1113,9 +1124,9 @@ std::string expectedTypesError(const Definitions& definitions, const std::vector
     return "Expected arguments of type " + signatures + ", but found (" + actualTypes + ") instead.";
 }
 
-static ParseResult createCompoundExpression(const Definitions& definitions,
-                                            std::vector<std::unique_ptr<Expression>> args,
-                                            ParsingContext& ctx) {
+ParseResult createCompoundExpression(const Definitions& definitions,
+                                     std::vector<std::unique_ptr<Expression>> args,
+                                     ParsingContext& ctx) {
     ParsingContext signatureContext(ctx.getKey());
 
     for (auto it = definitions.first; it != definitions.second; ++it) {
@@ -1161,6 +1172,8 @@ static ParseResult createCompoundExpression(const Definitions& definitions,
 
     return ParseResult();
 }
+
+} // unnamed namespace
 
 ParseResult parseCompoundExpression(const std::string& name, const Convertible& value, ParsingContext& ctx) {
     assert(isArray(value) && arrayLength(value) > 0);

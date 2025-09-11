@@ -155,9 +155,11 @@ std::string makeQueryString(const TileServerOptions& tileServerOptions, const st
     return queryString;
 }
 
-static bool equals(const std::string& str, const URL::Segment& segment, std::string& ref) {
+namespace {
+bool equals(const std::string& str, const URL::Segment& segment, std::string& ref) {
     return str.compare(segment.first, segment.second, ref) == 0;
 }
+} // unnamed namespace
 
 std::string normalizeSourceURL(const TileServerOptions& tileServerOptions,
                                const std::string& str,

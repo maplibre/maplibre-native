@@ -22,17 +22,19 @@
 #include <cstdio>
 #include <optional>
 
-static void handleError(CURLMcode code) {
+namespace {
+void handleError(CURLMcode code) {
     if (code != CURLM_OK) {
         throw std::runtime_error(std::string("CURL multi error: ") + curl_multi_strerror(code));
     }
 }
 
-static void handleError(CURLcode code) {
+void handleError(CURLcode code) {
     if (code != CURLE_OK) {
         throw std::runtime_error(std::string("CURL easy error: ") + curl_easy_strerror(code));
     }
 }
+} // namespace
 
 namespace mbgl {
 

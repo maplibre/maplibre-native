@@ -459,8 +459,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
     const auto& getCollisionTileLayerGroup = [&] {
         if (!collisionTileLayerGroup) {
-            if ((collisionTileLayerGroup = context.createTileLayerGroup(
-                     layerIndex, /*initialCapacity=*/64, getID() + "-collision"))) {
+            collisionTileLayerGroup = context.createTileLayerGroup(
+                layerIndex, /*initialCapacity=*/64, getID() + "-collision");
+            if (collisionTileLayerGroup) {
                 activateLayerGroup(collisionTileLayerGroup, true, changes);
             }
         }

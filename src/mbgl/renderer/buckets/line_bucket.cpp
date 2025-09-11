@@ -134,10 +134,11 @@ bool LineBucket::hasData() const {
     return !segments.empty();
 }
 
+namespace {
 template <class Property>
-static float get(const LinePaintProperties::PossiblyEvaluated& evaluated,
-                 const std::string& id,
-                 const std::map<std::string, LineBinders>& paintPropertyBinders) {
+float get(const LinePaintProperties::PossiblyEvaluated& evaluated,
+          const std::string& id,
+          const std::map<std::string, LineBinders>& paintPropertyBinders) {
     auto it = paintPropertyBinders.find(id);
     if (it == paintPropertyBinders.end() || !it->second.statistics<Property>().max()) {
         return evaluated.get<Property>().constantOr(Property::defaultValue());
@@ -145,6 +146,7 @@ static float get(const LinePaintProperties::PossiblyEvaluated& evaluated,
         return *it->second.statistics<Property>().max();
     }
 }
+} // namespace
 
 float LineBucket::getQueryRadius(const RenderLayer& layer) const {
     const auto& evaluated = getEvaluated<LineLayerProperties>(layer.evaluatedProperties);

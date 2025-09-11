@@ -33,7 +33,7 @@ public:
         } else {
             Log::record(severity, event, code, msg, {});
         }
-    } catch (...) {
+    } catch (...) { // NOLINT(bugprone-empty-catch)
         // ignore exceptions during logging
         // What would we do, log them?
 #if !defined(NDEBUG)

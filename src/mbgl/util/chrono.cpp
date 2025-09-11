@@ -14,8 +14,10 @@
 namespace mbgl {
 namespace util {
 
-static const char *week[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-static const char *months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+namespace {
+const char* week[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+const char* months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+}
 
 std::string rfc1123(Timestamp timestamp) {
     std::time_t time = std::chrono::system_clock::to_time_t(timestamp);

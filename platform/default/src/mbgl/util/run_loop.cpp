@@ -35,6 +35,8 @@ struct Watch {
             case UV_READABLE | UV_WRITABLE:
                 watchEvent = RunLoop::Event::ReadWrite;
                 break;
+            default:
+                break;
         }
 
         watch->eventCallback(watch->fd, watchEvent);

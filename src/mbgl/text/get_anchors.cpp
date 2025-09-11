@@ -20,7 +20,9 @@ float getLineLength(const GeometryCoordinates& line) {
     return lineLength;
 }
 
-static Anchors resample(const GeometryCoordinates& line,
+namespace {
+
+Anchors resample(const GeometryCoordinates& line,
                         const float offset,
                         const float spacing,
                         const float angleWindowSize,
@@ -81,6 +83,8 @@ static Anchors resample(const GeometryCoordinates& line,
 
     return anchors;
 }
+
+} // unnamed namespace
 
 Anchors getAnchors(const GeometryCoordinates& line,
                    float spacing,
