@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/renderer_backend.hpp>
+#include <mbgl/util/size.hpp>
 #include <memory>
 
 namespace mbgl {
@@ -34,6 +35,10 @@ public:
     void* getDevice() const;
     void* getQueue() const;
     void* getSurface() const;
+    
+    // Surface texture access - to be overridden by platform backends
+    virtual void* getCurrentTextureView();
+    virtual mbgl::Size getFramebufferSize() const;
 
 protected:
     std::unique_ptr<gfx::Context> createContext() override;

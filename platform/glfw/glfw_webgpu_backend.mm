@@ -153,27 +153,7 @@ mbgl::gfx::Renderable& GLFWWebGPUBackend::getDefaultRenderable() {
     return *this;
 }
 
-wgpu::TextureView GLFWWebGPUBackend::getCurrentTextureView() {
-    mbgl::Log::Info(mbgl::Event::General, "getCurrentTextureView called");
-    
-    wgpu::SurfaceTexture surfaceTexture;
-    wgpuSurface.GetCurrentTexture(&surfaceTexture);
-    
-    if (surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal &&
-        surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::SuccessSuboptimal) {
-        mbgl::Log::Error(mbgl::Event::General, std::string("Failed to get surface texture, status: ") + 
-                         std::to_string(static_cast<int>(surfaceTexture.status)));
-        return nullptr;
-    }
-    
-    if (!surfaceTexture.texture) {
-        mbgl::Log::Error(mbgl::Event::General, "Surface texture is null");
-        return nullptr;
-    }
-    
-    mbgl::Log::Info(mbgl::Event::General, "Successfully got surface texture");
-    return surfaceTexture.texture.CreateView();
-}
+
 
 void GLFWWebGPUBackend::swap() {
     // Present the current frame
@@ -222,4 +202,31 @@ void GLFWWebGPUBackend::setSize(mbgl::Size newSize) {
         // Recreate swap chain with new size
         // TODO: Implement swap chain recreation
     }
+}
+
+void* GLFWWebGPUBackend::getCurrentTextureView() {
+    mbgl::Log::Info(mbgl::Event::General, "getCurrentTextureView (void*) called");
+    
+    wgpu::SurfaceTexture surfaceTexture;
+    wgpuSurface.GetCurrentTexture(&surfaceTexture);
+    
+    if (surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal &&
+        surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::SuccessSuboptimal) {
+        mbgl::Log::Error(mbgl::Event::General, std::string("Failed to get surface texture, status: ") +
+                          std::to_string(static_cast<int>(surfaceTexture.status)));
+        return nullptr;
+    }
+    
+    if (!surfaceTexture.texture) {
+        mbgl::Log::Error(mbgl::Event::General, "Surface texture is null");
+        return nullptr;
+    }
+    
+    mbgl::Log::Info(mbgl::Event::General, "Successfully got surface texture");
+    wgpu::TextureView view = surfaceTexture.texture.CreateView();
+    return reinterpret_cast<void*>(view.Get());
+}
+
+mbgl::Size GLFWWebGPUBackend::getFramebufferSize() const {
+    return getSize();
 }

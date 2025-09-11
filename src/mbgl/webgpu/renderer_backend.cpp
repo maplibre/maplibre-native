@@ -158,5 +158,15 @@ void RendererBackend::deactivate() {
     // Release the current WebGPU context
 }
 
+void* RendererBackend::getCurrentTextureView() {
+    // Default implementation - platform backends should override
+    return nullptr;
+}
+
+mbgl::Size RendererBackend::getFramebufferSize() const {
+    // Default implementation - platform backends should override
+    return {800, 600};
+}
+
 } // namespace webgpu
 } // namespace mbgl

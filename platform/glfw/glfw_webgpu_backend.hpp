@@ -46,8 +46,11 @@ protected:
 public:
     WGPUDeviceImpl* getWGPUDevice() { return device; }
     WGPUSurfaceImpl* getWGPUSurface() { return surface; }
-    wgpu::TextureView getCurrentTextureView();
     wgpu::TextureFormat getSwapChainFormat() const { return swapChainFormat; }
+    
+    // Override virtual methods from RendererBackend
+    void* getCurrentTextureView() override;
+    mbgl::Size getFramebufferSize() const override;
 
 private:
     GLFWwindow* window;
