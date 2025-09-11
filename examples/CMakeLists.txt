@@ -178,6 +178,8 @@ if(MLN_WITH_GLFW)
     if(MLN_WITH_WEBGPU)
         message(STATUS "Simple Dawn WebGPU demo will be built")
 
+        message(STATUS "Simple Dawn WebGPU demo will be built")
+
         add_executable(simple_dawn_webgpu simple_dawn_webgpu.cpp)
 
         target_link_libraries(
@@ -191,6 +193,46 @@ if(MLN_WITH_GLFW)
         PRIVATE
             USE_DAWN=1
     )
+    endif()
+
+    # Dawn WebGPU Triangle with GLFW
+    if(MLN_WITH_WEBGPU AND MLN_WITH_GLFW)
+        message(STATUS "Dawn WebGPU triangle example will be built")
+
+        if(APPLE)
+            add_executable(dawn_webgpu_triangle dawn_webgpu_triangle.mm)
+        else()
+            add_executable(dawn_webgpu_triangle dawn_webgpu_triangle.cpp)
+        endif()
+
+        target_link_libraries(
+        dawn_webgpu_triangle
+        PRIVATE
+            mbgl-core
+            ${GLFW_LIBRARIES}
+    )
+
+        target_include_directories(
+        dawn_webgpu_triangle
+        PRIVATE
+            ${GLFW_INCLUDE_DIRS}
+    )
+
+        target_compile_definitions(
+        dawn_webgpu_triangle
+        PRIVATE
+            USE_DAWN=1
+    )
+
+        if(APPLE)
+            target_link_libraries(
+            dawn_webgpu_triangle
+            PRIVATE
+                "-framework Cocoa"
+                "-framework IOKit"
+                "-framework CoreVideo"
+        )
+        endif()
     endif()
 endif()
 
