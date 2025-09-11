@@ -61,47 +61,7 @@ void CommandEncoder::present(gfx::Renderable& renderable) {
     (void)renderable;
 }
 
-void CommandEncoder::clearStencilBuffer(const gfx::ClearValue& value) {
-    // WebGPU doesn't have a direct clear stencil command outside of render pass
-    // This would typically be done within a render pass
-    (void)value;
-}
 
-void CommandEncoder::clearDepthBuffer(const gfx::ClearValue& value) {
-    // WebGPU doesn't have a direct clear depth command outside of render pass
-    // This would typically be done within a render pass
-    (void)value;
-}
-
-void CommandEncoder::setStencilMode(const gfx::StencilMode& mode) {
-    // Stencil mode is set per pipeline in WebGPU
-    currentStencilMode = mode;
-}
-
-void CommandEncoder::setDepthMode(const gfx::DepthMode& mode) {
-    // Depth mode is set per pipeline in WebGPU
-    currentDepthMode = mode;
-}
-
-void CommandEncoder::setColorMode(const gfx::ColorMode& mode) {
-    // Color mode is set per pipeline in WebGPU
-    currentColorMode = mode;
-}
-
-void CommandEncoder::setCullFaceMode(const gfx::CullFaceMode& mode) {
-    // Cull face mode is set per pipeline in WebGPU
-    currentCullFaceMode = mode;
-}
-
-void CommandEncoder::draw(const gfx::DrawMode& drawMode,
-                          std::size_t vertexOffset,
-                          std::size_t vertexCount) {
-    // Drawing commands must be issued within a render pass
-    // This will be handled by the RenderPass class
-    (void)drawMode;
-    (void)vertexOffset;
-    (void)vertexCount;
-}
 
 void CommandEncoder::pushDebugGroup(const char* name) {
     if (encoder) {
@@ -113,10 +73,6 @@ void CommandEncoder::popDebugGroup() {
     if (encoder) {
         wgpuCommandEncoderPopDebugGroup(encoder);
     }
-}
-
-WGPUCommandEncoder CommandEncoder::getWGPUEncoder() const {
-    return encoder;
 }
 
 } // namespace webgpu

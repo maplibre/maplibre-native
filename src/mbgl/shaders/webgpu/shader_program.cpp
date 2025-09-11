@@ -36,7 +36,8 @@ ShaderProgram::~ShaderProgram() {
 }
 
 void ShaderProgram::createPipeline(const std::string& vertexSource, const std::string& fragmentSource) {
-    auto device = context.getDevice();
+    auto& backend = static_cast<webgpu::RendererBackend&>(context.getBackend());
+    WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
     if (!device) {
         Log::Error(Event::General, "Failed to get WebGPU device for shader creation");
         return;

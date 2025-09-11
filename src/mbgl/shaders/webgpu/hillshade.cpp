@@ -9,10 +9,10 @@ using HillshadeShaderSource = ShaderSource<BuiltIn::HillshadeShader, gfx::Backen
 
 const std::array<AttributeInfo, 2> HillshadeShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Float2, idHillshadePosVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::Float2, idHillshadeTexCoordVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Float2, idHillshadeTexturePosVertexAttribute},
 };
 const std::array<TextureInfo, 1> HillshadeShaderSource::textures = {
-    TextureInfo{0, idHillshadeTexture}
+    TextureInfo{0, idHillshadeImageTexture}
 };
 
 } // namespace shaders
