@@ -13,41 +13,53 @@ void ShaderGroup::initialize(Context& context) {
     // Vertex shader that transforms tile coordinates using projection matrix
     const std::string vertexSource = R"(
 struct Uniforms {
-    matrix: mat4x4<f32>,
-};
+    mvp_matrix: mat4x4<f32>,
+}
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
 
 struct VertexInput {
-    @location(0) position: vec2<i32>,  // MapLibre uses int16x2 for positions
-};
+    @location(0) position: vec2<i32>,
+}
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
-};
+    @location(0) color: vec4<f32>,
+}
 
 @vertex
-fn main(@builtin(vertex_index) vertex_index: u32, input: VertexInput) -> VertexOutput {
+fn main(input: VertexInput) -> VertexOutput {
     var output: VertexOutput;
     
-    // Just normalize the input coordinates to NDC (-1 to 1)
-    // MapLibre uses tile coordinates 0-8192
-    let x = (f32(input.position.x) / 4096.0) - 1.0;
-    let y = 1.0 - (f32(input.position.y) / 4096.0);
+    // Convert int16 position to tile coordinates
+    // MapLibre uses 0-8192 for tile coordinates
+    let pos = vec2<f32>(f32(input.position.x), f32(input.position.y));
     
-    // Set z to 0.5 to be in the middle of depth range
-    output.position = vec4<f32>(x, y, 0.5, 1.0);
+    // Apply the MVP matrix transformation
+    output.position = uniforms.mvp_matrix * vec4<f32>(pos, 0.0, 1.0);
+    
+    // Use different colors based on position for debugging
+    output.color = vec4<f32>(
+        pos.x / 8192.0,
+        pos.y / 8192.0,
+        0.5,
+        1.0
+    );
     
     return output;
 }
 )";
 
-    // Fragment shader that outputs a visible color for tiles
+    // Fragment shader that outputs the interpolated color
     const std::string fragmentSource = R"(
+struct VertexOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) color: vec4<f32>,
+}
+
 @fragment
-fn main() -> @location(0) vec4<f32> {
-    // Output a bright green color for maximum visibility
-    return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+fn main(input: VertexOutput) -> @location(0) vec4<f32> {
+    return input.color;
 }
 )";
 

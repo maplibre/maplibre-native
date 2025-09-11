@@ -10,6 +10,8 @@ AddLayerGroupRequest::AddLayerGroupRequest(AddLayerGroupRequest &&other)
     : layerGroup(std::move(other.layerGroup)) {}
 
 void AddLayerGroupRequest::execute(RenderOrchestrator &orchestrator) {
+    mbgl::Log::Info(mbgl::Event::General, "AddLayerGroupRequest::execute - adding layer group: " + 
+                    (layerGroup ? layerGroup->getName() : "null"));
     orchestrator.addLayerGroup(std::move(layerGroup));
 }
 

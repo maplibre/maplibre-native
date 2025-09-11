@@ -157,9 +157,55 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registr
     MAP_SHADER(SymbolIconShader, "SymbolIconShader")
     MAP_SHADER(SymbolSDFShader, "SymbolSDFShader")
     {
-        // Unknown shader, use placeholder
-        vertexSource = "// WGSL vertex shader placeholder for " + name;
-        fragmentSource = "// WGSL fragment shader placeholder for " + name;
+        // For now, use a basic WGSL shader that works for all types
+        // This is a temporary solution until proper shaders are implemented
+        vertexSource = R"(
+struct Uniforms {
+    mvp_matrix: mat4x4<f32>,
+}
+
+@group(0) @binding(0) var<uniform> uniforms: Uniforms;
+
+struct VertexInput {
+    @location(0) position: vec2<i32>,
+}
+
+struct VertexOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) color: vec4<f32>,
+}
+
+@vertex
+fn main(input: VertexInput) -> VertexOutput {
+    var output: VertexOutput;
+    // Convert int16 position to normalized coordinates
+    let pos = vec2<f32>(f32(input.position.x) / 4096.0, f32(input.position.y) / 4096.0);
+    output.position = uniforms.mvp_matrix * vec4<f32>(pos, 0.0, 1.0);
+    // Simple color based on position for debugging
+    output.color = vec4<f32>(
+        (pos.x + 1.0) * 0.5,
+        (pos.y + 1.0) * 0.5,
+        0.5,
+        1.0
+    );
+    return output;
+}
+)";
+        
+        fragmentSource = R"(
+struct VertexOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) color: vec4<f32>,
+}
+
+@fragment
+fn main(input: VertexOutput) -> @location(0) vec4<f32> {
+    // For debugging, use the interpolated color
+    return input.color;
+}
+)";
+        
+        Log::Info(Event::General, "Using basic WGSL shader for: " + name);
     }
     
 #undef MAP_SHADER

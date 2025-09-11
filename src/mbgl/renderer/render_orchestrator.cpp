@@ -245,6 +245,10 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     imageManager->setLoaded(updateParameters->spriteLoaded);
 
     const LayerDifference layerDiff = diffLayers(layerImpls, updateParameters->layers);
+    Log::Info(Event::General, "Layer diff - added: " + std::to_string(layerDiff.added.size()) + 
+              ", removed: " + std::to_string(layerDiff.removed.size()) + 
+              ", changed: " + std::to_string(layerDiff.changed.size()) +
+              ", updateParameters->layers size: " + std::to_string(updateParameters->layers->size()));
     layerImpls = updateParameters->layers;
     const bool layersAddedOrRemoved = !layerDiff.added.empty() || !layerDiff.removed.empty();
 
@@ -952,6 +956,8 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
                                       const std::shared_ptr<UpdateParameters>& updateParameters,
                                       const RenderTree& renderTree) {
     MLN_TRACE_FUNC();
+    Log::Info(Event::General, "RenderOrchestrator::updateLayers called, renderLayers count: " + 
+              std::to_string(renderLayers.size()));
 
     const bool isMapModeContinuous = updateParameters->mode == MapMode::Continuous;
     const auto transitionOptions = isMapModeContinuous ? updateParameters->transitionOptions
@@ -984,6 +990,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
 
 void RenderOrchestrator::processChanges() {
     auto localChanges = std::move(pendingChanges);
+    Log::Info(Event::General, "RenderOrchestrator::processChanges - processing " + std::to_string(localChanges.size()) + " changes");
     for (auto& change : localChanges) {
         change->execute(*this);
     }
