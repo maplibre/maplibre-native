@@ -234,6 +234,86 @@ if(MLN_WITH_GLFW)
         )
         endif()
     endif()
+endif()  # Close the parent if(MLN_WITH_GLFW) block
+
+# WebGPU Map Example
+if(MLN_WITH_WEBGPU AND MLN_WITH_GLFW)
+    message(STATUS "WebGPU Map example will be built")
+
+    if(APPLE)
+        add_executable(webgpu_map webgpu_map.mm)
+    else()
+        add_executable(webgpu_map webgpu_map.cpp)
+    endif()
+
+    target_link_libraries(
+        webgpu_map
+        PRIVATE
+            mbgl-core
+            ${GLFW_LIBRARIES}
+    )
+
+    target_include_directories(
+        webgpu_map
+        PRIVATE
+            ${GLFW_INCLUDE_DIRS}
+    )
+
+    target_compile_definitions(
+        webgpu_map
+        PRIVATE
+            USE_DAWN=1
+    )
+
+    if(APPLE)
+        target_link_libraries(
+            webgpu_map
+            PRIVATE
+                "-framework Cocoa"
+                "-framework IOKit"
+                "-framework CoreVideo"
+        )
+    endif()
+endif()
+
+# WebGPU Render Demo
+if(MLN_WITH_WEBGPU AND MLN_WITH_GLFW)
+    message(STATUS "WebGPU Render Demo will be built")
+
+    if(APPLE)
+        add_executable(webgpu_render_demo webgpu_render_demo.mm)
+    else()
+        add_executable(webgpu_render_demo webgpu_render_demo.cpp)
+    endif()
+
+    target_link_libraries(
+        webgpu_render_demo
+        PRIVATE
+            mbgl-core
+            ${GLFW_LIBRARIES}
+    )
+
+    target_include_directories(
+        webgpu_render_demo
+        PRIVATE
+            ${GLFW_INCLUDE_DIRS}
+    )
+
+    target_compile_definitions(
+        webgpu_render_demo
+        PRIVATE
+            USE_DAWN=1
+    )
+
+    if(APPLE)
+        target_link_libraries(
+            webgpu_render_demo
+            PRIVATE
+                "-framework Cocoa"
+                "-framework IOKit"
+                "-framework CoreVideo"
+        )
+    endif()
 endif()
 
 # OpenGL triangle example (shows what WebGPU would render)
@@ -480,111 +560,5 @@ if(MLN_WITH_WEBGPU AND MLN_WITH_GLFW AND EXISTS "/Users/admin/repos/dawn")
     message(STATUS "Simple Dawn WebGPU demo will be built")
 endif()
 
-# WebGPU Map Example - Full MapLibre map with WebGPU backend
-if(MLN_WITH_WEBGPU AND MLN_WITH_GLFW AND EXISTS "/Users/admin/repos/dawn")
-    add_executable(webgpu_map webgpu_map.cpp)
-
-    # Dawn paths
-    set(DAWN_DIR "/Users/admin/repos/dawn")
-    set(DAWN_BUILD_DIR "${DAWN_DIR}/out/Release")
-
-    target_include_directories(webgpu_map
-        PRIVATE
-            ${GLFW_INCLUDE_DIRS}
-            ${DAWN_DIR}/include
-            ${DAWN_BUILD_DIR}/gen/include
-            ${CMAKE_SOURCE_DIR}/include
-            ${CMAKE_SOURCE_DIR}/src
-            ${CMAKE_SOURCE_DIR}/platform/default/include
-    )
-
-    # Get all Dawn libraries
-    execute_process(
-        COMMAND find ${DAWN_BUILD_DIR} -name "*.a" -type f
-        OUTPUT_VARIABLE ALL_DAWN_LIBS
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    string(REPLACE "\n" ";" ALL_DAWN_LIBS_LIST ${ALL_DAWN_LIBS})
-
-    target_link_libraries(webgpu_map
-        PRIVATE
-            mbgl-core
-            ${GLFW_LIBRARIES}
-            ${ALL_DAWN_LIBS_LIST}
-            "-framework Metal"
-            "-framework QuartzCore"
-            "-framework Cocoa"
-            "-framework IOKit"
-            "-framework IOSurface"
-            "-framework CoreVideo"
-            "-framework CoreGraphics"
-            "-framework Foundation"
-    )
-
-    # Only build for arm64
-    set_target_properties(webgpu_map PROPERTIES
-        OSX_ARCHITECTURES "arm64"
-        CXX_STANDARD 17
-    )
-
-    target_compile_definitions(webgpu_map
-        PRIVATE
-            DAWN_ENABLE_BACKEND_METAL=1
-            MLN_RENDER_BACKEND_WEBGPU=1
-    )
-
-    message(STATUS "WebGPU Map example will be built")
-endif()
-
-# WebGPU Render Demo - Shows actual rendering with WebGPU
-if(MLN_WITH_WEBGPU AND MLN_WITH_GLFW AND EXISTS "/Users/admin/repos/dawn")
-    add_executable(webgpu_render_demo webgpu_render_demo.mm)
-
-    # Dawn paths
-    set(DAWN_DIR "/Users/admin/repos/dawn")
-    set(DAWN_BUILD_DIR "${DAWN_DIR}/out/Release")
-
-    target_include_directories(webgpu_render_demo
-        PRIVATE
-            ${GLFW_INCLUDE_DIRS}
-            ${DAWN_DIR}/include
-            ${DAWN_BUILD_DIR}/gen/include
-    )
-
-    # Get all Dawn libraries
-    execute_process(
-        COMMAND find ${DAWN_BUILD_DIR} -name "*.a" -type f
-        OUTPUT_VARIABLE ALL_DAWN_LIBS
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    string(REPLACE "\n" ";" ALL_DAWN_LIBS_LIST ${ALL_DAWN_LIBS})
-
-    target_link_libraries(webgpu_render_demo
-        PRIVATE
-            ${GLFW_LIBRARIES}
-            ${ALL_DAWN_LIBS_LIST}
-            "-framework Metal"
-            "-framework QuartzCore"
-            "-framework Cocoa"
-            "-framework IOKit"
-            "-framework IOSurface"
-            "-framework CoreVideo"
-            "-framework CoreGraphics"
-            "-framework Foundation"
-    )
-
-    # Only build for arm64
-    set_target_properties(webgpu_render_demo PROPERTIES
-        OSX_ARCHITECTURES "arm64"
-        CXX_STANDARD 17
-    )
-
-    target_compile_definitions(webgpu_render_demo
-        PRIVATE
-            DAWN_ENABLE_BACKEND_METAL=1
-    )
-
-    message(STATUS "WebGPU Render Demo will be built")
-endif()
 
 # Add more examples here as needed

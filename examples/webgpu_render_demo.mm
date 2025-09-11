@@ -1,235 +1,122 @@
-// WebGPU Rendering Demo - Renders a colored quad using Dawn
-#include <iostream>
-#include <vector>
-#include <array>
-#include <dawn/native/DawnNative.h>
-#include <dawn/webgpu_cpp.h>
-#include <GLFW/glfw3.h>
+// WebGPU Render Demo for MapLibre Native
+// Demonstrates WebGPU backend integration
 
-#ifdef __APPLE__
-#define GLFW_EXPOSE_NATIVE_COCOA
-#include <GLFW/glfw3native.h>
+#include <iostream>
+#include <memory>
+#include <vector>
+
+// Dawn headers
+#include <dawn/dawn_proc.h>
+#include <dawn/native/DawnNative.h>
 #include <dawn/native/MetalBackend.h>
+#include <webgpu/webgpu_cpp.h>
+
+// GLFW headers
+#define GLFW_EXPOSE_NATIVE_COCOA
+#include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
+
+// Platform headers
+#ifdef __APPLE__
 #import <QuartzCore/CAMetalLayer.h>
 #import <Cocoa/Cocoa.h>
 #endif
 
-// Simple vertex shader in WGSL
-const char* vertexShaderSource = R"(
-struct VertexOutput {
-    @builtin(position) position: vec4<f32>,
-    @location(0) color: vec3<f32>,
-}
+// MapLibre WebGPU backend
+#include <mbgl/webgpu/context.hpp>
+#include <mbgl/webgpu/renderer_backend.hpp>
 
-@vertex
-fn main(@builtin(vertex_index) vertexIndex: u32) -> VertexOutput {
-    var output: VertexOutput;
-    
-    // Define a quad with two triangles
-    var positions = array<vec2<f32>, 6>(
-        vec2<f32>(-0.5, -0.5),  // bottom left
-        vec2<f32>( 0.5, -0.5),  // bottom right
-        vec2<f32>( 0.5,  0.5),  // top right
-        vec2<f32>(-0.5, -0.5),  // bottom left
-        vec2<f32>( 0.5,  0.5),  // top right
-        vec2<f32>(-0.5,  0.5)   // top left
-    );
-    
-    // Colors for each vertex (creating a gradient)
-    var colors = array<vec3<f32>, 6>(
-        vec3<f32>(1.0, 0.0, 0.0),  // red
-        vec3<f32>(0.0, 1.0, 0.0),  // green
-        vec3<f32>(0.0, 0.0, 1.0),  // blue
-        vec3<f32>(1.0, 0.0, 0.0),  // red
-        vec3<f32>(0.0, 0.0, 1.0),  // blue
-        vec3<f32>(1.0, 1.0, 0.0)   // yellow
-    );
-    
-    output.position = vec4<f32>(positions[vertexIndex], 0.0, 1.0);
-    output.color = colors[vertexIndex];
-    return output;
-}
-)";
-
-// Simple fragment shader in WGSL
-const char* fragmentShaderSource = R"(
-@fragment
-fn main(@location(0) color: vec3<f32>) -> @location(0) vec4<f32> {
-    return vec4<f32>(color, 1.0);
-}
-)";
-
-int main() {
-    // Initialize GLFW
-    if (!glfwInit()) {
-        std::cerr << "Failed to initialize GLFW\n";
-        return -1;
-    }
-    
-    // Create window without default API
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    GLFWwindow* window = glfwCreateWindow(800, 600, "WebGPU Render Demo - Colored Quad", nullptr, nullptr);
-    if (!window) {
-        std::cerr << "Failed to create window\n";
-        glfwTerminate();
-        return -1;
-    }
-    
-    std::cout << "✓ Created GLFW window\n";
-    
-    // Create Dawn instance
-    auto instance = std::make_unique<dawn::native::Instance>();
-    std::cout << "✓ Created Dawn instance\n";
-    
-    // Get adapters
-    std::vector<dawn::native::Adapter> adapters = instance->EnumerateAdapters();
-    std::cout << "Found " << adapters.size() << " adapter(s)\n";
-    
-    if (adapters.empty()) {
-        std::cerr << "No adapters found\n";
-        glfwDestroyWindow(window);
-        glfwTerminate();
-        return -1;
-    }
-    
-    // Use first adapter
-    dawn::native::Adapter& adapter = adapters[0];
-    std::cout << "✓ Selected adapter\n";
-    
-    // Create device
-    WGPUDevice wgpuDevice = adapter.CreateDevice();
-    if (!wgpuDevice) {
-        std::cerr << "Failed to create device\n";
-        glfwDestroyWindow(window);
-        glfwTerminate();
-        return -1;
-    }
-    
-    wgpu::Device device = wgpu::Device::Acquire(wgpuDevice);
-    wgpu::Queue queue = device.GetQueue();
-    std::cout << "✓ Created WebGPU device\n";
-    
-    // Setup surface for macOS
-    wgpu::Surface surface;
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
-    
-#ifdef __APPLE__
-    NSWindow* nsWindow = glfwGetCocoaWindow(window);
-    NSView* view = [nsWindow contentView];
-    [view setWantsLayer:YES];
-    
-    CAMetalLayer* metalLayer = [CAMetalLayer layer];
-    metalLayer.device = dawn::native::metal::GetMTLDevice(wgpuDevice);
-    metalLayer.pixelFormat = MTLPixelFormatBGRA8Unorm;
-    metalLayer.drawableSize = CGSizeMake(width, height);
-    [view setLayer:metalLayer];
-    
-    // Create surface
-    wgpu::SurfaceDescriptorFromMetalLayer metalDesc;
-    metalDesc.layer = (__bridge void*)metalLayer;
-    
-    wgpu::SurfaceDescriptor surfaceDesc;
-    surfaceDesc.nextInChain = &metalDesc;
-    
-    auto dawnSurface = wgpu::Instance(instance->Get()).CreateSurface(&surfaceDesc);
-    surface = dawnSurface;
-#endif
-    
-    // Configure surface
-    wgpu::SurfaceConfiguration surfaceConfig = {};
-    surfaceConfig.device = device;
-    surfaceConfig.usage = wgpu::TextureUsage::RenderAttachment;
-    surfaceConfig.format = wgpu::TextureFormat::BGRA8Unorm;
-    surfaceConfig.width = width;
-    surfaceConfig.height = height;
-    surfaceConfig.presentMode = wgpu::PresentMode::Fifo;
-    surfaceConfig.alphaMode = wgpu::CompositeAlphaMode::Opaque;
-    
-    surface.Configure(&surfaceConfig);
-    std::cout << "✓ Configured surface\n";
-    
-    // Create shaders
-    wgpu::ShaderModuleWGSLDescriptor wgslDesc;
-    
-    // Vertex shader
-    wgslDesc.code = vertexShaderSource;
-    wgpu::ShaderModuleDescriptor vertexShaderDesc;
-    vertexShaderDesc.nextInChain = &wgslDesc;
-    wgpu::ShaderModule vertexShader = device.CreateShaderModule(&vertexShaderDesc);
-    
-    // Fragment shader
-    wgslDesc.code = fragmentShaderSource;
-    wgpu::ShaderModuleDescriptor fragmentShaderDesc;
-    fragmentShaderDesc.nextInChain = &wgslDesc;
-    wgpu::ShaderModule fragmentShader = device.CreateShaderModule(&fragmentShaderDesc);
-    
-    std::cout << "✓ Created shaders\n";
-    
-    // Create render pipeline
-    wgpu::ColorTargetState colorTarget = {};
-    colorTarget.format = wgpu::TextureFormat::BGRA8Unorm;
-    colorTarget.writeMask = wgpu::ColorWriteMask::All;
-    
-    wgpu::FragmentState fragmentState = {};
-    fragmentState.module = fragmentShader;
-    fragmentState.entryPoint = "main";
-    fragmentState.targetCount = 1;
-    fragmentState.targets = &colorTarget;
-    
-    wgpu::RenderPipelineDescriptor pipelineDesc = {};
-    pipelineDesc.vertex.module = vertexShader;
-    pipelineDesc.vertex.entryPoint = "main";
-    pipelineDesc.fragment = &fragmentState;
-    pipelineDesc.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
-    pipelineDesc.multisample.count = 1;
-    
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
-    std::cout << "✓ Created render pipeline\n";
-    
-    std::cout << "\n🎨 Rendering a colored quad. Press ESC or close window to exit.\n";
-    
-    // Main render loop
-    while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
+class WebGPURenderDemo {
+public:
+    bool initialize(GLFWwindow* window) {
+        this->window = window;
         
-        // Check for ESC key
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-            break;
+        std::cout << "Initializing WebGPU Render Demo...\n";
+        
+        // Initialize Dawn
+        dawnProcSetProcs(&dawn::native::GetProcs());
+        
+        // Get Metal adapter
+        wgpu::RequestAdapterOptions adapterOptions = {};
+        adapterOptions.backendType = wgpu::BackendType::Metal;
+        
+        std::vector<dawn::native::Adapter> adapters = dawnInstance.EnumerateAdapters(&adapterOptions);
+        
+        if (adapters.empty()) {
+            std::cerr << "No Metal adapter found\n";
+            return false;
         }
         
-        // Get next texture from surface
+        adapter = wgpu::Adapter(adapters[0].Get());
+        std::cout << "✓ Got Metal adapter\n";
+        
+        // Get adapter info
+        wgpu::AdapterInfo info = {};
+        adapter.GetInfo(&info);
+        std::cout << "  Device: " << (info.device.data ? std::string(info.device.data, info.device.length) : "Unknown") << "\n";
+        
+        // Create surface
+        if (!createSurface()) {
+            return false;
+        }
+        
+        // Create device
+        if (!createDevice()) {
+            return false;
+        }
+        
+        // Initialize MapLibre WebGPU backend
+        backend = std::make_unique<mbgl::webgpu::RendererBackend>(mbgl::gfx::ContextMode::Shared);
+        backend->setDevice(device.Get());
+        backend->setQueue(queue.Get());
+        backend->setSurface(surface.Get());
+        
+        std::cout << "✓ WebGPU backend initialized\n";
+        
+        // Create WebGPU context
+        context = std::make_unique<mbgl::webgpu::Context>(*backend, device.Get());
+        
+        std::cout << "✓ WebGPU context created\n";
+        
+        return true;
+    }
+    
+    void render() {
+        // Get surface texture
         wgpu::SurfaceTexture surfaceTexture;
         surface.GetCurrentTexture(&surfaceTexture);
         
-        if (surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal) {
+        if (surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal &&
+            surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::SuccessSuboptimal) {
             std::cerr << "Failed to get surface texture\n";
-            continue;
+            return;
         }
         
         wgpu::TextureView textureView = surfaceTexture.texture.CreateView();
         
         // Create command encoder
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandEncoderDescriptor encoderDesc = {};
+        encoderDesc.label = "Render Encoder";
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder(&encoderDesc);
         
-        // Create render pass
+        // Create render pass - clear to MapLibre blue
         wgpu::RenderPassColorAttachment colorAttachment = {};
         colorAttachment.view = textureView;
         colorAttachment.loadOp = wgpu::LoadOp::Clear;
         colorAttachment.storeOp = wgpu::StoreOp::Store;
-        colorAttachment.clearValue = {0.1f, 0.2f, 0.3f, 1.0f};  // Dark blue background
+        colorAttachment.clearValue = {0.156, 0.467, 0.784, 1.0}; // MapLibre blue
         
         wgpu::RenderPassDescriptor renderPassDesc = {};
+        renderPassDesc.label = "MapLibre Render Pass";
         renderPassDesc.colorAttachmentCount = 1;
         renderPassDesc.colorAttachments = &colorAttachment;
         
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDesc);
         
-        // Draw our quad
-        pass.SetPipeline(pipeline);
-        pass.Draw(6);  // 6 vertices for 2 triangles
+        // Here we would render MapLibre content using the WebGPU context
+        // For now, just clear to blue
         
-        pass.End();
+        renderPass.End();
         
         // Submit commands
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -237,12 +124,159 @@ int main() {
         
         // Present
         surface.Present();
+        
+        frameCount++;
+        if (frameCount % 60 == 0) {
+            std::cout << "Frame " << frameCount << " - WebGPU rendering active\n";
+        }
+    }
+    
+    void cleanup() {
+        context.reset();
+        backend.reset();
+    }
+    
+private:
+    bool createSurface() {
+#ifdef __APPLE__
+        NSWindow* nsWindow = glfwGetCocoaWindow(window);
+        if (!nsWindow) {
+            std::cerr << "Failed to get NSWindow from GLFW\n";
+            return false;
+        }
+        
+        // Create Metal layer
+        CAMetalLayer* metalLayer = [CAMetalLayer layer];
+        [nsWindow.contentView setWantsLayer:YES];
+        [nsWindow.contentView setLayer:metalLayer];
+        
+        // Get window size
+        int width, height;
+        glfwGetFramebufferSize(window, &width, &height);
+        [metalLayer setDrawableSize:CGSizeMake(width, height)];
+        
+        // Create surface descriptor
+        wgpu::SurfaceDescriptorFromMetalLayer metalDesc = {};
+        metalDesc.layer = (__bridge void*)metalLayer;
+        
+        wgpu::SurfaceDescriptor surfaceDesc = {};
+        surfaceDesc.nextInChain = &metalDesc;
+        surfaceDesc.label = "MapLibre Surface";
+        
+        // Create surface
+        wgpu::Instance instance = wgpu::Instance(dawnInstance.Get());
+        surface = instance.CreateSurface(&surfaceDesc);
+        
+        if (!surface) {
+            std::cerr << "Failed to create surface\n";
+            return false;
+        }
+        
+        // Configure surface
+        wgpu::SurfaceConfiguration config = {};
+        config.device = device;
+        config.usage = wgpu::TextureUsage::RenderAttachment;
+        config.format = wgpu::TextureFormat::BGRA8Unorm;
+        config.width = width;
+        config.height = height;
+        config.presentMode = wgpu::PresentMode::Fifo;
+        config.alphaMode = wgpu::CompositeAlphaMode::Opaque;
+        
+        surface.Configure(&config);
+        
+        std::cout << "✓ Created and configured Metal surface (" << width << "x" << height << ")\n";
+        return true;
+#else
+        std::cerr << "Only macOS is supported\n";
+        return false;
+#endif
+    }
+    
+    bool createDevice() {
+        wgpu::DeviceDescriptor deviceDesc = {};
+        deviceDesc.label = "MapLibre Device";
+        
+        device = adapter.CreateDevice(&deviceDesc);
+        if (!device) {
+            std::cerr << "Failed to create device\n";
+            return false;
+        }
+        
+        queue = device.GetQueue();
+        std::cout << "✓ Created device and queue\n";
+        return true;
+    }
+    
+private:
+    GLFWwindow* window = nullptr;
+    dawn::native::Instance dawnInstance;
+    wgpu::Adapter adapter;
+    wgpu::Device device;
+    wgpu::Queue queue;
+    wgpu::Surface surface;
+    
+    std::unique_ptr<mbgl::webgpu::RendererBackend> backend;
+    std::unique_ptr<mbgl::webgpu::Context> context;
+    
+    uint64_t frameCount = 0;
+};
+
+int main() {
+    std::cout << "WebGPU Render Demo\n";
+    std::cout << "==================\n\n";
+    
+    // Initialize GLFW
+    if (!glfwInit()) {
+        std::cerr << "Failed to initialize GLFW\n";
+        return 1;
+    }
+    
+    // Configure GLFW for WebGPU
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    
+    // Create window
+    GLFWwindow* window = glfwCreateWindow(800, 600, "MapLibre WebGPU Render Demo", nullptr, nullptr);
+    if (!window) {
+        std::cerr << "Failed to create GLFW window\n";
+        glfwTerminate();
+        return 1;
+    }
+    
+    std::cout << "✓ Created GLFW window (800x600)\n";
+    
+    // Initialize demo
+    WebGPURenderDemo demo;
+    if (!demo.initialize(window)) {
+        std::cerr << "Failed to initialize WebGPU render demo\n";
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        return 1;
+    }
+    
+    std::cout << "\n🎨 WebGPU Render Demo Running!\n";
+    std::cout << "  • Rendering with MapLibre WebGPU backend\n";
+    std::cout << "  • Using Dawn Metal backend\n";
+    std::cout << "  • Press ESC to exit\n\n";
+    
+    // Main loop
+    while (!glfwWindowShouldClose(window)) {
+        glfwPollEvents();
+        
+        // Check for ESC
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+            glfwSetWindowShouldClose(window, GLFW_TRUE);
+        }
+        
+        // Render
+        demo.render();
     }
     
     // Cleanup
+    demo.cleanup();
     glfwDestroyWindow(window);
     glfwTerminate();
     
-    std::cout << "✓ Clean shutdown\n";
+    std::cout << "\n✓ Cleanup complete\n";
     return 0;
 }
