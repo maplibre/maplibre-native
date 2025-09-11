@@ -91,10 +91,11 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         
         // Create vertex buffer
         WGPUBufferDescriptor bufferDesc = {};
-        bufferDesc.label = "Vertex Buffer";
+        WGPUStringView vertexLabel = {"Vertex Buffer", strlen("Vertex Buffer")};
+        bufferDesc.label = vertexLabel;
         bufferDesc.size = impl->vertexData.size();
         bufferDesc.usage = WGPUBufferUsage_Vertex | WGPUBufferUsage_CopyDst;
-        bufferDesc.mappedAtCreation = true;
+        bufferDesc.mappedAtCreation = 1;
         
         impl->vertexBuffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
         
@@ -121,10 +122,11 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         std::size_t indexSize = impl->indexVector->bytes();
         
         WGPUBufferDescriptor bufferDesc = {};
-        bufferDesc.label = "Index Buffer";
+        WGPUStringView indexLabel = {"Index Buffer", strlen("Index Buffer")};
+        bufferDesc.label = indexLabel;
         bufferDesc.size = indexSize;
         bufferDesc.usage = WGPUBufferUsage_Index | WGPUBufferUsage_CopyDst;
-        bufferDesc.mappedAtCreation = true;
+        bufferDesc.mappedAtCreation = 1;
         
         impl->indexBuffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
         
@@ -151,18 +153,33 @@ void Drawable::uploadTextures(UploadPass&) const noexcept {
 }
 
 void Drawable::draw(PaintParameters& parameters) const {
+    Log::Info(Event::General, "Drawable::draw called, enabled: " + std::to_string(getEnabled()));
+    
     if (!getEnabled()) {
+        Log::Info(Event::General, "Drawable::draw - not enabled, returning");
         return;
     }
     
     // Get the render pass
     if (!parameters.renderPass) {
+        Log::Info(Event::General, "Drawable::draw - no renderPass, returning");
         return;
     }
     
-    // For now, create a dummy implementation
-    // In a complete implementation, we would get this from the RenderPass
-    WGPURenderPassEncoder renderPassEncoder = reinterpret_cast<WGPURenderPassEncoder>(1);
+    // Get the actual WebGPU render pass encoder
+    auto* webgpuRenderPass = static_cast<webgpu::RenderPass*>(parameters.renderPass.get());
+    if (!webgpuRenderPass) {
+        Log::Info(Event::General, "Drawable::draw - renderPass cast failed, returning");
+        return;
+    }
+    
+    WGPURenderPassEncoder renderPassEncoder = webgpuRenderPass->getEncoder();
+    if (!renderPassEncoder) {
+        Log::Info(Event::General, "Drawable::draw - no encoder, returning");
+        return;
+    }
+    
+    Log::Info(Event::General, "Drawable::draw - have encoder, proceeding with draw");
     
     // Set the pipeline
     if (impl->pipeline) {
