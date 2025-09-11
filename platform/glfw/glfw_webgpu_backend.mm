@@ -3,6 +3,8 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
+#include <mbgl/webgpu/renderer_backend.hpp>
+#include <mbgl/gfx/renderable.hpp>
 
 #include <GLFW/glfw3.h>
 
@@ -88,13 +90,17 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     
     // Create surface using the instance
     wgpu::Instance wgpuInstance(instance->Get());
-    wgpu::Surface wgpuSurface = wgpuInstance.CreateSurface(&surfaceDesc);
+    wgpuSurface = wgpuInstance.CreateSurface(&surfaceDesc);
     surface = reinterpret_cast<WGPUSurfaceImpl*>(wgpuSurface.Get());
+    
+    // Store the device and get the queue
+    this->wgpuDevice = wgpuDevice;
+    this->queue = wgpuDevice.GetQueue();
     
     // Configure surface
     wgpu::SurfaceConfiguration config = {};
     config.device = wgpuDevice;
-    config.format = wgpu::TextureFormat::BGRA8Unorm;
+    config.format = swapChainFormat;
     config.usage = wgpu::TextureUsage::RenderAttachment;
     config.alphaMode = wgpu::CompositeAlphaMode::Auto;
     config.width = width;
@@ -104,8 +110,10 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     wgpuSurface.Configure(&config);
 #endif
     
-    // Store WebGPU device and queue in the base class
+    // Store WebGPU instance, device and queue in the base class
+    setInstance(instance->Get());
     setDevice(device);
+    setQueue(reinterpret_cast<void*>(queue.Get()));
     
     mbgl::Log::Info(mbgl::Event::General, "WebGPU backend initialized successfully");
 }
@@ -119,9 +127,44 @@ GLFWWebGPUBackend::~GLFWWebGPUBackend() {
 #endif
 }
 
+mbgl::gfx::RendererBackend& GLFWWebGPUBackend::getRendererBackend() {
+    // We inherit from mbgl::webgpu::RendererBackend which is a mbgl::gfx::RendererBackend
+    return *this;
+}
+
+mbgl::gfx::Renderable& GLFWWebGPUBackend::getDefaultRenderable() {
+    // We directly inherit from mbgl::gfx::Renderable
+    return *this;
+}
+
+wgpu::TextureView GLFWWebGPUBackend::getCurrentTextureView() {
+    mbgl::Log::Info(mbgl::Event::General, "getCurrentTextureView called");
+    
+    wgpu::SurfaceTexture surfaceTexture;
+    wgpuSurface.GetCurrentTexture(&surfaceTexture);
+    
+    if (surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal &&
+        surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::SuccessSuboptimal) {
+        mbgl::Log::Error(mbgl::Event::General, std::string("Failed to get surface texture, status: ") + 
+                         std::to_string(static_cast<int>(surfaceTexture.status)));
+        return nullptr;
+    }
+    
+    mbgl::Log::Info(mbgl::Event::General, "Successfully got surface texture");
+    return surfaceTexture.texture.CreateView();
+}
+
 void GLFWWebGPUBackend::swap() {
     // Present the current frame
-    // TODO: Implement swap chain presentation
+    if (wgpuSurface) {
+        // The surface presentation happens automatically when the current
+        // texture view goes out of scope and gets presented
+        wgpuSurface.Present();
+        mbgl::Log::Info(mbgl::Event::General, "Surface presented");
+    }
+    
+    // Note: We don't call glfwSwapBuffers for WebGPU as it doesn't use OpenGL swap chains
+    // The presentation is handled by wgpuSurface.Present() above
 }
 
 void GLFWWebGPUBackend::activate() {
