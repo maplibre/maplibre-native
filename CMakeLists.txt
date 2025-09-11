@@ -1324,6 +1324,7 @@ if(MLN_WITH_WEBGPU)
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/context.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/command_encoder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/headless_backend.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/renderer_backend.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable_builder.cpp
@@ -1550,7 +1551,7 @@ include(${PROJECT_SOURCE_DIR}/vendor/kdbush.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/filesystem.cmake)
 
 if(MLN_USE_RUST)
-include(${PROJECT_SOURCE_DIR}/rustutils/rustutils.cmake)
+    include(${PROJECT_SOURCE_DIR}/rustutils/rustutils.cmake)
 endif()
 
 target_link_libraries(

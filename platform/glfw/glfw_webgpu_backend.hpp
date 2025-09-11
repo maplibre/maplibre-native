@@ -37,11 +37,10 @@ protected:
     void activate() override;
     void deactivate() override;
 
-    // mbgl::webgpu::RendererBackend implementation
-protected:
-    void updateAssumedState() override;
-    WGPUDeviceImpl* getDevice() override { return device; }
-    WGPUSurfaceImpl* getSurface() override { return surface; }
+    // WebGPU-specific methods
+public:
+    WGPUDeviceImpl* getWGPUDevice() { return device; }
+    WGPUSurfaceImpl* getWGPUSurface() { return surface; }
 
 private:
     GLFWwindow* window;
