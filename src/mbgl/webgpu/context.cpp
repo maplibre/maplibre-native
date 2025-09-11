@@ -19,11 +19,14 @@
 #include <mbgl/shaders/webgpu/clipping_mask.hpp>
 #include <mbgl/shaders/webgpu/collision.hpp>
 #include <mbgl/shaders/webgpu/custom_geometry.hpp>
+#include <mbgl/shaders/webgpu/custom_symbol_icon.hpp>
 #include <mbgl/shaders/webgpu/debug.hpp>
 #include <mbgl/shaders/webgpu/fill.hpp>
 #include <mbgl/shaders/webgpu/fill_extrusion.hpp>
 #include <mbgl/shaders/webgpu/heatmap.hpp>
+#include <mbgl/shaders/webgpu/heatmap_texture.hpp>
 #include <mbgl/shaders/webgpu/hillshade.hpp>
+#include <mbgl/shaders/webgpu/hillshade_prepare.hpp>
 #include <mbgl/shaders/webgpu/line.hpp>
 #include <mbgl/shaders/webgpu/raster.hpp>
 #include <mbgl/shaders/webgpu/symbol.hpp>
