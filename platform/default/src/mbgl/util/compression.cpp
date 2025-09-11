@@ -32,19 +32,23 @@ namespace util {
 #undef compress
 
 bool is_compressed(const std::string &v) {
-    if (static_cast<uint8_t>(v[0]) == 0x1f && static_cast<uint8_t>(v[1]) == 0x8b) {
-        // gzip (rfc1952)
-        return true;
-    } else if (static_cast<uint8_t>(v[0]) == 0x78) {
-        // zlib (rfc1950)
-        switch (v[1]) {
-            case 0x01: // 78 01 - No Compression/low
-            case 0x5E: // 78 5E - Fast Compression
-            case 0x9C: // 78 9C - Default Compression
-            case 0xDA: // 78 DA - Best Compression
-                return true;
-            default:
-                return false;
+    if (v.size() > 2) {
+        const auto byte0 = static_cast<uint8_t>(v[0]);
+        const auto byte1 = static_cast<uint8_t>(v[1]);
+        if (byte0 == 0x1f && byte1 == 0x8b) {
+            // gzip (rfc1952)
+            return true;
+        } else if (byte0 == 0x78) {
+            // zlib (rfc1950)
+            switch (byte1) {
+                case 0x01: // 78 01 - No Compression/low
+                case 0x5E: // 78 5E - Fast Compression
+                case 0x9C: // 78 9C - Default Compression
+                case 0xDA: // 78 DA - Best Compression
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
     return false;
