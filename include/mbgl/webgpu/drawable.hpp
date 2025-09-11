@@ -45,6 +45,7 @@ public:
     void setStencilModeFor3D(const gfx::StencilMode& value);
     void setLineWidth(int32_t value) override;
     void setCullFaceMode(const gfx::CullFaceMode&) override;
+    void setVertexAttrId(std::size_t id);
     
     void updateVertexAttributes(gfx::VertexAttributeArrayPtr,
                                std::size_t vertexCount,
