@@ -19,7 +19,7 @@ ShaderProgram::~ShaderProgram() {
     }
     if (bindGroupLayout) {
         wgpuBindGroupLayoutRelease(bindGroupLayout);
-        bindGroupLayout = nullptr;
+        // No bind group layout needed for testing
     }
     if (pipelineLayout) {
         wgpuPipelineLayoutRelease(pipelineLayout);
@@ -82,49 +82,22 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
         Log::Info(Event::General, "Fragment shader module created successfully");
     }
     
-    // Create bind group layout for uniforms
-    WGPUBindGroupLayoutEntry uniformEntry = {};
-    uniformEntry.binding = 0;
-    uniformEntry.visibility = WGPUShaderStage_Vertex;
-    uniformEntry.buffer.type = WGPUBufferBindingType_Uniform;
-    uniformEntry.buffer.minBindingSize = 64; // 4x4 matrix = 16 floats = 64 bytes
-    
-    WGPUBindGroupLayoutDescriptor bindGroupLayoutDesc = {};
-    WGPUStringView bindGroupLabel = {"Bind Group Layout", strlen("Bind Group Layout")};
-    bindGroupLayoutDesc.label = bindGroupLabel;
-    bindGroupLayoutDesc.entryCount = 1;
-    bindGroupLayoutDesc.entries = &uniformEntry;
-    
-    bindGroupLayout = wgpuDeviceCreateBindGroupLayout(device, &bindGroupLayoutDesc);
-    
-    // Create pipeline layout
+    // Create pipeline layout with no bind groups (for testing)
     WGPUPipelineLayoutDescriptor pipelineLayoutDesc = {};
     WGPUStringView pipelineLayoutLabel = {"Pipeline Layout", strlen("Pipeline Layout")};
     pipelineLayoutDesc.label = pipelineLayoutLabel;
-    pipelineLayoutDesc.bindGroupLayoutCount = 1;
-    pipelineLayoutDesc.bindGroupLayouts = &bindGroupLayout;
+    pipelineLayoutDesc.bindGroupLayoutCount = 0;  // No bind groups
+    pipelineLayoutDesc.bindGroupLayouts = nullptr;
     
     pipelineLayout = wgpuDeviceCreatePipelineLayout(device, &pipelineLayoutDesc);
     
-    // Set up vertex buffer layout for int16x2 (MapLibre's format)
-    WGPUVertexAttribute positionAttribute = {};
-    positionAttribute.format = WGPUVertexFormat_Sint16x2;
-    positionAttribute.offset = 0;
-    positionAttribute.shaderLocation = 0;
-    
-    WGPUVertexBufferLayout vertexBufferLayout = {};
-    vertexBufferLayout.arrayStride = 4; // 2 int16 * 2 bytes
-    vertexBufferLayout.stepMode = WGPUVertexStepMode_Vertex;
-    vertexBufferLayout.attributeCount = 1;
-    vertexBufferLayout.attributes = &positionAttribute;
-    
-    // Set up vertex state
+    // Set up vertex state - no vertex buffers for now (using hardcoded triangle)
     WGPUVertexState vertexState = {};
     vertexState.module = vertexShaderModule;
     WGPUStringView vertexState_entryPoint_str = {"main", strlen("main")};
     vertexState.entryPoint = vertexState_entryPoint_str;
-    vertexState.bufferCount = 1;
-    vertexState.buffers = &vertexBufferLayout;
+    vertexState.bufferCount = 0;  // No vertex buffers
+    vertexState.buffers = nullptr;
     
     // Set up fragment state with alpha blending
     WGPUBlendComponent alphaBlend = {};

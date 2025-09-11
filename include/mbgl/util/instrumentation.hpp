@@ -20,10 +20,10 @@ const void* castGpuIdToTracyPtr(GpuId id) {
     return reinterpret_cast<const void*>(static_cast<std::ptrdiff_t>(id));
 }
 
-#if !defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MLN_RENDER_BACKEND_VULKAN)
+#if !defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MLN_RENDER_BACKEND_VULKAN) && !defined(MLN_RENDER_BACKEND_WEBGPU)
 #error \
-    "MLN_RENDER_BACKEND_OPENGL/MLN_RENDER_BACKEND_VULKAN is not defined. \
-    MLN_RENDER_BACKEND_OPENGL/MLN_RENDER_BACKEND_VULKAN is expected to be defined in CMake and Bazel"
+    "No render backend is defined. \
+    MLN_RENDER_BACKEND_OPENGL/MLN_RENDER_BACKEND_VULKAN/MLN_RENDER_BACKEND_WEBGPU is expected to be defined in CMake and Bazel"
 #endif
 
 #define MLN_TRACE_FUNC() ZoneScoped
@@ -90,6 +90,13 @@ constexpr const char* tracyConstMemoryLabel = "Constant Buffer Memory";
 #undef GLint
 
 #elif MLN_RENDER_BACKEND_VULKAN
+
+#define MLN_END_FRAME() \
+    do {                \
+        FrameMark;      \
+    } while (0);
+
+#elif MLN_RENDER_BACKEND_WEBGPU
 
 #define MLN_END_FRAME() \
     do {                \
