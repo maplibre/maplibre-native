@@ -86,6 +86,7 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
 }
 
 gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool persistent, bool) {
+    (void)persistent;
     return std::make_shared<UniformBuffer>(*this, data, size);
 }
 
@@ -161,50 +162,29 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registr
         // This is a temporary solution until proper shaders are implemented
         vertexSource = R"(
 struct Uniforms {
-    mvp_matrix: mat4x4<f32>,
+    matrix: mat4x4<f32>,
 }
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
 
-struct VertexInput {
-    @location(0) position: vec2<i32>,
-}
-
-struct VertexOutput {
-    @builtin(position) position: vec4<f32>,
-    @location(0) color: vec4<f32>,
-}
-
 @vertex
-fn main(input: VertexInput) -> VertexOutput {
-    var output: VertexOutput;
-    // Convert int16 position to float
-    let pos = vec2<f32>(f32(input.position.x), f32(input.position.y));
+fn main(@location(0) pos: vec2<i32>) -> @builtin(position) vec4<f32> {
+    // Convert int16 tile coordinates to normalized coordinates
+    // MapLibre uses coordinates in range [0, 8192] for tiles
+    let normalized_pos = vec2<f32>(f32(pos.x), f32(pos.y)) / 8192.0;
     
-    // Apply the MVP matrix - WebGPU will handle perspective division
-    output.position = uniforms.mvp_matrix * vec4<f32>(pos, 0.0, 1.0);
-    
-    // Bright color for debugging - make tiles visible
-    output.color = vec4<f32>(
-        1.0,  // Red
-        0.5,  // Green  
-        0.0,  // Blue
-        1.0   // Alpha
-    );
-    return output;
+    // Apply transformation matrix
+    let position = vec4<f32>(normalized_pos, 0.0, 1.0);
+    return uniforms.matrix * position;
 }
 )";
         
         fragmentSource = R"(
-struct VertexOutput {
-    @builtin(position) position: vec4<f32>,
-    @location(0) color: vec4<f32>,
-}
-
 @fragment
-fn main(input: VertexOutput) -> @location(0) vec4<f32> {
-    // For debugging, use the interpolated color
-    return input.color;
+fn main() -> @location(0) vec4<f32> {
+    // For now, return a solid color for all fragments
+    // TODO: Add proper color/texture support
+    return vec4<f32>(0.2, 0.4, 0.8, 1.0); // Blue-ish color for water/land
 }
 )";
         
@@ -252,6 +232,7 @@ void Context::setDirtyState() {
 
 void Context::clearStencilBuffer(int32_t value) {
     // Clear stencil buffer to specified value
+    (void)value;
 }
 
 bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& ptr, const void* data, std::size_t size, bool persistent) {
@@ -293,6 +274,8 @@ void Context::visualizeDepthBuffer(float depthRangeSize) {
 #endif
 
 std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType type, Size size) {
+    (void)type;
+    (void)size;
     return std::make_unique<RenderbufferResource>();
 }
 

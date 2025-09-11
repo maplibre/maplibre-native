@@ -1,6 +1,7 @@
 #include <mbgl/webgpu/drawable.hpp>
 #include <mbgl/webgpu/drawable_impl.hpp>
 #include <mbgl/webgpu/context.hpp>
+#include <mbgl/util/mat4.hpp>
 #include <mbgl/webgpu/upload_pass.hpp>
 #include <mbgl/webgpu/render_pass.hpp>
 #include <mbgl/webgpu/renderer_backend.hpp>
@@ -228,6 +229,14 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
                     wgpuQueueWriteBuffer(queue, impl->vertexBuffer, 0, impl->vertexData.data(), impl->vertexData.size());
                 }
                 Log::Info(Event::General, "Vertex buffer created and data written via queue successfully");
+                
+                // Log first few vertices for debugging
+                static int vertexLogCount = 0;
+                if (vertexLogCount++ < 5 && impl->vertexData.size() >= 4) {
+                    const int16_t* vertices = reinterpret_cast<const int16_t*>(impl->vertexData.data());
+                    Log::Info(Event::General, "First vertex for " + getName() + ": [" +
+                              std::to_string(vertices[0]) + ", " + std::to_string(vertices[1]) + "]");
+                }
             } else {
                 Log::Error(Event::General, "Failed to get queue for writing vertex buffer");
             }
@@ -329,32 +338,49 @@ void Drawable::draw(PaintParameters& parameters) const {
         WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
         
         if (device && queue) {
-            // Get the projection matrix from state
-            mat4 projMatrix;
-            parameters.state.getProjMatrix(projMatrix);
+            // Get the tile-specific matrix (following Metal's approach)
+            mat4 tileMatrix;
             
-            // Log matrix values for debugging - show full last row/column
-            Log::Info(Event::General, "Projection matrix row 3: [" + 
-                      std::to_string(projMatrix[12]) + ", " + 
-                      std::to_string(projMatrix[13]) + ", " + 
-                      std::to_string(projMatrix[14]) + ", " + 
-                      std::to_string(projMatrix[15]) + "]");
+            if (const auto& tileID = getTileID()) {
+                // Use the tile-specific matrix which includes both projection and tile transformation
+                parameters.state.matrixFor(tileMatrix, tileID->toUnwrapped());
+                
+                // Apply drawable origin if it exists (as done in Metal)
+                if (const auto& origin = getOrigin(); origin.has_value()) {
+                    matrix::translate(tileMatrix, tileMatrix, origin->x, origin->y, 0);
+                }
+                
+                // Multiply with projection matrix to get final MVP matrix (following Metal's approach)
+                const mat4& projMatrix = parameters.transformParams.projMatrix;
+                matrix::multiply(tileMatrix, projMatrix, tileMatrix);
+            } else {
+                // Fallback to projection matrix if no tile
+                tileMatrix = parameters.transformParams.projMatrix;
+            }
+            
+            // Log matrix values for debugging - show full matrix
+            static int matrixLogCount = 0;
+            if (matrixLogCount++ < 5) {  // Only log first few matrices to avoid spam
+                Log::Info(Event::General, "Tile matrix for " + getName() + ":");
+                for (int i = 0; i < 4; i++) {
+                    Log::Info(Event::General, "  Row " + std::to_string(i) + ": [" + 
+                              std::to_string(tileMatrix[i*4]) + ", " + 
+                              std::to_string(tileMatrix[i*4+1]) + ", " + 
+                              std::to_string(tileMatrix[i*4+2]) + ", " + 
+                              std::to_string(tileMatrix[i*4+3]) + "]");
+                }
+            }
             
             // Convert to column-major format for WebGPU (mat4 is row-major in MapLibre)
             float matrix[16];
             for (int i = 0; i < 4; ++i) {
                 for (int j = 0; j < 4; ++j) {
-                    matrix[j * 4 + i] = projMatrix[i * 4 + j];
+                    matrix[j * 4 + i] = tileMatrix[i * 4 + j];
                 }
             }
             
-            // Adjust for WebGPU's depth range [0, 1] instead of OpenGL's [-1, 1]
-            // Transform z from [-1, 1] to [0, 1]: z' = (z + 1) / 2
-            // This modifies row 2 of the column-major matrix
-            matrix[8] = matrix[8] * 0.5f;   // Scale z by 0.5
-            matrix[9] = matrix[9] * 0.5f;
-            matrix[10] = matrix[10] * 0.5f;
-            matrix[11] = matrix[11] * 0.5f + 0.5f;  // Add 0.5 to translation
+            // Note: WebGPU uses depth range [0, 1] vs OpenGL's [-1, 1]
+            // But MapLibre's matrices might already account for this
             
             // Update the uniform buffer
             wgpuQueueWriteBuffer(queue, impl->uniformBuffer, 0, matrix, sizeof(matrix));
@@ -405,6 +431,11 @@ void Drawable::draw(PaintParameters& parameters) const {
     
     // Continue with rest of drawing even without pipeline for debugging
     
+    // Use actual vertex data
+    bool debugHardcodedTriangle = false;
+    
+    if (!debugHardcodedTriangle) {
+    
     // Bind vertex buffer
     if (impl->vertexBuffer) {
         Log::Info(Event::General, "WebGPU Drawable: Setting vertex buffer, size: " + std::to_string(impl->vertexData.size()));
@@ -439,10 +470,13 @@ void Drawable::draw(PaintParameters& parameters) const {
     } else {
         Log::Info(Event::General, "WebGPU Drawable: No bind group to set");
     }
+    } else {
+        Log::Info(Event::General, "WebGPU Drawable: Debug mode - skipping all buffer bindings");
+    }
     
     // Draw
     if (impl->indexBuffer && impl->indexVector) {
-        // Draw indexed
+        // Draw indexed geometry
         uint32_t indexCount = static_cast<uint32_t>(impl->indexVector->elements());
         Log::Info(Event::General, "WebGPU Drawable: Drawing indexed with " + std::to_string(indexCount) + " indices");
         wgpuRenderPassEncoderDrawIndexed(renderPassEncoder, indexCount, 1, 0, 0, 0);

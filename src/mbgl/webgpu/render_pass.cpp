@@ -58,22 +58,41 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_,
     
     // Create a default render pass if we have a texture view
     if (textureView) {
+        Log::Info(Event::General, "Got texture view for render pass");
+        
+        // Track if this is the first render pass in the frame
+        static int renderPassCount = 0;
+        static bool newFrame = true;
+        
         wgpu::RenderPassColorAttachment colorAttachment = {};
-        colorAttachment.view = textureView;
-        colorAttachment.loadOp = descriptor.clearColor ? wgpu::LoadOp::Clear : wgpu::LoadOp::Load;
+        colorAttachment.view = wgpu::TextureView(textureView);
+        
+        // Only clear on the first render pass of each frame
+        if (descriptor.clearColor && newFrame) {
+            colorAttachment.loadOp = wgpu::LoadOp::Clear;
+            // Use the actual requested clear color
+            colorAttachment.clearValue = {
+                static_cast<float>(descriptor.clearColor->r),
+                static_cast<float>(descriptor.clearColor->g),
+                static_cast<float>(descriptor.clearColor->b),
+                static_cast<float>(descriptor.clearColor->a)
+            };
+            Log::Info(Event::General, "RenderPass #" + std::to_string(renderPassCount) + 
+                      ": CLEAR (first pass)");
+            newFrame = false;
+        } else {
+            colorAttachment.loadOp = wgpu::LoadOp::Load;
+            Log::Info(Event::General, "RenderPass #" + std::to_string(renderPassCount) + 
+                      ": LOAD existing content");
+        }
         colorAttachment.storeOp = wgpu::StoreOp::Store;
         
-        if (descriptor.clearColor) {
-            colorAttachment.clearValue = {
-                descriptor.clearColor->r,
-                descriptor.clearColor->g,
-                descriptor.clearColor->b,
-                descriptor.clearColor->a
-            };
-            Log::Info(Event::General, "Clear color set: R=" + std::to_string(descriptor.clearColor->r) + 
-                      " G=" + std::to_string(descriptor.clearColor->g) + 
-                      " B=" + std::to_string(descriptor.clearColor->b) + 
-                      " A=" + std::to_string(descriptor.clearColor->a));
+        renderPassCount++;
+        
+        // Reset for next frame (heuristic: if we've had many passes, likely new frame)
+        if (renderPassCount > 10) {
+            renderPassCount = 0;
+            newFrame = true;
         }
         
         wgpu::RenderPassDescriptor renderPassDesc = {};
@@ -92,7 +111,7 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_,
         impl->encoder = passEncoder.MoveToCHandle();
         
         if (impl->encoder) {
-            Log::Info(Event::General, "Created WebGPU render pass encoder");
+            Log::Info(Event::General, "Render pass encoder created successfully");
             
             // Set viewport to full framebuffer
             // Get the framebuffer size from the backend
@@ -104,6 +123,12 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_,
                     0, 0,  // x, y
                     static_cast<float>(size.width), static_cast<float>(size.height),  // width, height
                     0.0f, 1.0f);  // minDepth, maxDepth
+                    
+                // Also set scissor rect to full viewport
+                wgpuRenderPassEncoderSetScissorRect(impl->encoder, 
+                    0, 0,  // x, y
+                    size.width, size.height);  // width, height
+                Log::Info(Event::General, "Set scissor rect to full viewport");
             }
             #endif
         }
