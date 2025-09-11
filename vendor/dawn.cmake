@@ -12,32 +12,33 @@ if(MLN_WITH_WEBGPU)
         PUBLIC
             ${DAWN_DIR}/include
             ${DAWN_BUILD_DIR}/gen/include
+            ${DAWN_DIR}/src  # Add src directory for internal headers
     )
 
-    # Find all Dawn libraries we need
-    find_library(DAWN_NATIVE_LIB dawn_native PATHS ${DAWN_BUILD_DIR}/src/dawn/native NO_DEFAULT_PATH)
-    find_library(DAWN_PROC_LIB dawn_proc PATHS ${DAWN_BUILD_DIR}/src/dawn NO_DEFAULT_PATH)
-    find_library(DAWN_PLATFORM_LIB dawn_platform PATHS ${DAWN_BUILD_DIR}/src/dawn/platform NO_DEFAULT_PATH)
-    find_library(DAWN_COMMON_LIB dawn_common PATHS ${DAWN_BUILD_DIR}/src/dawn/common NO_DEFAULT_PATH)
-    find_library(DAWN_WIRE_LIB dawn_wire PATHS ${DAWN_BUILD_DIR}/src/dawn/wire NO_DEFAULT_PATH)
-
-    # Link Dawn libraries
+    # Link core Dawn libraries that we have
     target_link_libraries(mbgl-core
         PUBLIC
-            ${DAWN_BUILD_DIR}/src/dawn/native/libdawn_native.a
             ${DAWN_BUILD_DIR}/src/dawn/libdawn_proc.a
             ${DAWN_BUILD_DIR}/src/dawn/platform/libdawn_platform.a
             ${DAWN_BUILD_DIR}/src/dawn/common/libdawn_common.a
             ${DAWN_BUILD_DIR}/src/dawn/wire/libdawn_wire.a
+            ${DAWN_BUILD_DIR}/src/dawn/utils/libdawn_wgpu_utils.a
     )
 
-    # Link Tint libraries
+    # Link Tint libraries (shader compiler)
     file(GLOB TINT_LIBS "${DAWN_BUILD_DIR}/src/tint/*.a")
     target_link_libraries(mbgl-core PUBLIC ${TINT_LIBS})
 
-    # Link abseil libraries
+    # Link abseil libraries (Dawn dependency)
     file(GLOB_RECURSE ABSEIL_LIBS "${DAWN_BUILD_DIR}/third_party/abseil/*.a")
     target_link_libraries(mbgl-core PUBLIC ${ABSEIL_LIBS})
+
+    # Link other third party libraries
+    file(GLOB THIRD_PARTY_LIBS
+        "${DAWN_BUILD_DIR}/third_party/protobuf/*.a"
+        "${DAWN_BUILD_DIR}/third_party/glslang/**/*.a"
+    )
+    target_link_libraries(mbgl-core PUBLIC ${THIRD_PARTY_LIBS})
 
     # Platform-specific libraries
     if(APPLE)
@@ -56,5 +57,6 @@ if(MLN_WITH_WEBGPU)
         PUBLIC
             DAWN_ENABLE_BACKEND_METAL=1
             USE_DAWN=1
+            WEBGPU_BACKEND_DAWN=1
     )
 endif()
