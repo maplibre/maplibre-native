@@ -1,0 +1,14 @@
+@@ -27,11 +27,11 @@
+     auto& backend = static_cast<RendererBackend&>(context.getBackend());
+     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
+ 
+     WGPUBufferDescriptor bufferDesc = {};
+-    bufferDesc.label = "Buffer Resource";
++    bufferDesc.label = {"Buffer Resource", strlen("Buffer Resource")};
+     bufferDesc.size = size;
+     bufferDesc.usage = usage | WGPUBufferUsage_CopyDst;
+-    bufferDesc.mappedAtCreation = false;
++    bufferDesc.mappedAtCreation = WGPUBool_False;
+ 
+     buffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
+ }

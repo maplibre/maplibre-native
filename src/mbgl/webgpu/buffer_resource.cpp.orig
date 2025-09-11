@@ -27,11 +27,10 @@ BufferResource::BufferResource(Context& context_,
 
     // Create buffer descriptor
     WGPUBufferDescriptor bufferDesc{};
-    WGPUStringView label = {"Buffer Resource", strlen("Buffer Resource")};
-    bufferDesc.label = label;
+    bufferDesc.label = "Buffer Resource";
     bufferDesc.usage = usage | WGPUBufferUsage_CopyDst;
     bufferDesc.size = size;
-    bufferDesc.mappedAtCreation = data ? 1 : 0;
+    bufferDesc.mappedAtCreation = (data != nullptr);
 
     // Create buffer
     buffer = wgpuDeviceCreateBuffer(device, &bufferDesc);

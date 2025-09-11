@@ -1,9 +1,11 @@
 #pragma once
 
 #include "glfw_backend.hpp"
-#include <mbgl/gfx/renderable.hpp>
 #include <mbgl/webgpu/renderer_backend.hpp>
+#include <mbgl/gfx/renderable.hpp>
+#include <mbgl/gfx/renderer_backend.hpp>
 #include <memory>
+#include <webgpu/webgpu_cpp.h>
 
 struct GLFWwindow;
 struct WGPUDeviceImpl;
@@ -14,9 +16,11 @@ class Instance;
 class Adapter;
 }
 
-class GLFWWebGPUBackend final : public GLFWBackend, 
-                                public mbgl::webgpu::RendererBackend, 
-                                public mbgl::gfx::Renderable {
+// Multiple inheritance: GLFWBackend for window management, 
+// webgpu::RendererBackend for rendering, gfx::Renderable for framebuffer
+class GLFWWebGPUBackend final : public GLFWBackend,
+                                 public mbgl::webgpu::RendererBackend,
+                                 public mbgl::gfx::Renderable {
 public:
     GLFWWebGPUBackend(GLFWwindow* window, bool capFrameRate);
     ~GLFWWebGPUBackend() override;
@@ -25,13 +29,14 @@ public:
 
     // GLFWBackend implementation
 public:
-    mbgl::gfx::RendererBackend& getRendererBackend() override { return *this; }
+    mbgl::gfx::RendererBackend& getRendererBackend() override;
     mbgl::Size getSize() const override;
     void setSize(mbgl::Size) override;
 
     // mbgl::gfx::RendererBackend implementation
 public:
-    mbgl::gfx::Renderable& getDefaultRenderable() override { return *this; }
+    mbgl::gfx::Renderable& getDefaultRenderable() override; 
+    
 
 protected:
     void activate() override;
@@ -41,6 +46,8 @@ protected:
 public:
     WGPUDeviceImpl* getWGPUDevice() { return device; }
     WGPUSurfaceImpl* getWGPUSurface() { return surface; }
+    wgpu::TextureView getCurrentTextureView();
+    wgpu::TextureFormat getSwapChainFormat() const { return swapChainFormat; }
 
 private:
     GLFWwindow* window;
@@ -48,4 +55,8 @@ private:
     WGPUDeviceImpl* device = nullptr;
     WGPUSurfaceImpl* surface = nullptr;
     void* metalLayer = nullptr; // CAMetalLayer on macOS
+    wgpu::Device wgpuDevice;
+    wgpu::Queue queue;
+    wgpu::Surface wgpuSurface;
+    wgpu::TextureFormat swapChainFormat = wgpu::TextureFormat::BGRA8Unorm;
 };

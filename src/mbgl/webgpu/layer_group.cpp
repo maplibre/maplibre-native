@@ -6,6 +6,7 @@
 #include <mbgl/renderer/render_orchestrator.hpp>
 #include <mbgl/webgpu/render_pass.hpp>
 #include <mbgl/webgpu/drawable.hpp>
+#include <mbgl/util/logging.hpp>
 
 namespace mbgl {
 namespace webgpu {
@@ -32,7 +33,13 @@ void LayerGroup::upload(gfx::UploadPass& uploadPass) {
 }
 
 void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
+    Log::Info(Event::General, "LayerGroup::render called - name: " + getName() + 
+              ", enabled: " + std::to_string(enabled) + 
+              ", drawableCount: " + std::to_string(getDrawableCount()) +
+              ", hasRenderPass: " + std::to_string(parameters.renderPass != nullptr));
+    
     if (!enabled || !getDrawableCount() || !parameters.renderPass) {
+        Log::Info(Event::General, "LayerGroup::render early return");
         return;
     }
 
@@ -42,7 +49,13 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
     // Uniform buffers are bound per-drawable in WebGPU through bind groups
     
+    int drawableCount = 0;
     visitDrawables([&](gfx::Drawable& drawable) {
+        drawableCount++;
+        Log::Info(Event::General, "Visiting drawable " + std::to_string(drawableCount) + 
+                  ", enabled: " + std::to_string(drawable.getEnabled()) +
+                  ", hasRenderPass: " + std::to_string(drawable.hasRenderPass(parameters.pass)));
+        
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
         }
@@ -51,8 +64,11 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             tweaker->execute(drawable, parameters);
         }
 
+        Log::Info(Event::General, "Calling drawable.draw()");
         drawable.draw(parameters);
     });
+    
+    Log::Info(Event::General, "LayerGroup::render finished, visited " + std::to_string(drawableCount) + " drawables");
 }
 
 } // namespace webgpu

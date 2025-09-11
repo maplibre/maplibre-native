@@ -12,6 +12,7 @@ public:
     Impl() : gfx::Renderable({800, 600}, nullptr) {}  // Default size
     ~Impl() override = default;
     
+    void* wgpuInstance = nullptr;
     void* wgpuDevice = nullptr;
     void* wgpuQueue = nullptr;
     void* wgpuSurface = nullptr;
@@ -50,6 +51,11 @@ void RendererBackend::setSurface(void* nativeWindow) {
     Log::Info(Event::General, "Setting WebGPU surface");
 }
 
+void RendererBackend::setInstance(void* instance) {
+    impl->wgpuInstance = instance;
+    Log::Info(Event::General, "Setting WebGPU instance");
+}
+
 void RendererBackend::setDevice(void* device) {
     impl->wgpuDevice = device;
     Log::Info(Event::General, "Setting WebGPU device");
@@ -58,6 +64,10 @@ void RendererBackend::setDevice(void* device) {
 void RendererBackend::setQueue(void* queue) {
     impl->wgpuQueue = queue;
     Log::Info(Event::General, "Setting WebGPU queue");
+}
+
+void* RendererBackend::getInstance() const {
+    return impl->wgpuInstance;
 }
 
 void* RendererBackend::getDevice() const {

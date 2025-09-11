@@ -27,8 +27,10 @@ public:
     void setSurface(void* nativeWindow);
     
     // WebGPU-specific methods
+    void setInstance(void* instance);
     void setDevice(void* device);
     void setQueue(void* queue);
+    void* getInstance() const;
     void* getDevice() const;
     void* getQueue() const;
     void* getSurface() const;

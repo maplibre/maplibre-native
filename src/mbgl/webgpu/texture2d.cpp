@@ -36,7 +36,8 @@ gfx::Texture2D& Texture2D::setSamplerConfiguration(const gfx::Texture2D::Sampler
     
     // Create new sampler with updated configuration
     WGPUSamplerDescriptor samplerDesc = {};
-    samplerDesc.label = "Texture Sampler";
+    WGPUStringView samplerLabel = {"Texture Sampler", strlen("Texture Sampler")};
+    samplerDesc.label = samplerLabel;
     
     // Map filter modes
     samplerDesc.minFilter = (samplerState.filter == gfx::TextureFilterType::Linear) 
@@ -159,7 +160,8 @@ void Texture2D::create() noexcept {
     
     // Create texture descriptor
     WGPUTextureDescriptor textureDesc = {};
-    textureDesc.label = "Texture2D";
+    WGPUStringView textureLabel = {"Texture2D", strlen("Texture2D")};
+    textureDesc.label = textureLabel;
     textureDesc.size = {
         static_cast<uint32_t>(size.width),
         static_cast<uint32_t>(size.height),
@@ -177,7 +179,8 @@ void Texture2D::create() noexcept {
     // Create texture view
     if (texture) {
         WGPUTextureViewDescriptor viewDesc = {};
-        viewDesc.label = "Texture2D View";
+        WGPUStringView viewLabel = {"Texture2D View", strlen("Texture2D View")};
+        viewDesc.label = viewLabel;
         viewDesc.format = format;
         viewDesc.dimension = WGPUTextureViewDimension_2D;
         viewDesc.baseMipLevel = 0;
@@ -215,13 +218,13 @@ void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
     }
     
     // Write texture data using queue
-    WGPUImageCopyTexture destination = {};
+    WGPUTexelCopyTextureInfo destination = {};
     destination.texture = texture;
     destination.mipLevel = 0;
     destination.origin = {0, 0, 0};
     destination.aspect = WGPUTextureAspect_All;
     
-    WGPUTextureDataLayout dataLayout = {};
+    WGPUTexelCopyBufferLayout dataLayout = {};
     dataLayout.offset = 0;
     dataLayout.bytesPerRow = static_cast<uint32_t>(size.width * getPixelStride());
     dataLayout.rowsPerImage = static_cast<uint32_t>(size.height);
@@ -261,13 +264,13 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& regionSize, u
     }
     
     // Write texture subregion data using queue
-    WGPUImageCopyTexture destination = {};
+    WGPUTexelCopyTextureInfo destination = {};
     destination.texture = texture;
     destination.mipLevel = 0;
     destination.origin = {xOffset, yOffset, 0};
     destination.aspect = WGPUTextureAspect_All;
     
-    WGPUTextureDataLayout dataLayout = {};
+    WGPUTexelCopyBufferLayout dataLayout = {};
     dataLayout.offset = 0;
     dataLayout.bytesPerRow = static_cast<uint32_t>(regionSize.width * getPixelStride());
     dataLayout.rowsPerImage = static_cast<uint32_t>(regionSize.height);

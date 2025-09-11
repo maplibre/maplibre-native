@@ -16,11 +16,10 @@ UniformBuffer::UniformBuffer(Context& context_, const void* data, std::size_t si
     
     if (device && size > 0) {
         WGPUBufferDescriptor bufferDesc = {};
-        WGPUStringView label = {"Uniform Buffer", strlen("Uniform Buffer")};
-        bufferDesc.label = label;
+        bufferDesc.label = "Uniform Buffer";
         bufferDesc.size = size;
         bufferDesc.usage = WGPUBufferUsage_Uniform | WGPUBufferUsage_CopyDst;
-        bufferDesc.mappedAtCreation = data ? 1 : 0;
+        bufferDesc.mappedAtCreation = (data != nullptr);
         
         buffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
         
@@ -45,11 +44,9 @@ UniformBuffer::UniformBuffer(const UniformBuffer& other)
         
         if (device) {
             WGPUBufferDescriptor bufferDesc = {};
-            WGPUStringView label = {"Uniform Buffer (Copy)", strlen("Uniform Buffer (Copy)")};
-            bufferDesc.label = label;
+            bufferDesc.label = "Uniform Buffer (Copy)";
             bufferDesc.size = getSize();
             bufferDesc.usage = WGPUBufferUsage_Uniform | WGPUBufferUsage_CopyDst;
-            bufferDesc.mappedAtCreation = 0;
             buffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
             
             // Note: We can't directly copy buffer contents in WebGPU without a command encoder

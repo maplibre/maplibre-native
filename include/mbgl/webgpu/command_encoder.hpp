@@ -28,6 +28,7 @@ public:
 
     webgpu::Context& getContext() { return context; }
     const webgpu::Context& getContext() const { return context; }
+    WGPUCommandEncoder getEncoder() const { return encoder; }
 
     std::unique_ptr<gfx::UploadPass> createUploadPass(const char* name, gfx::Renderable&) override;
     std::unique_ptr<gfx::RenderPass> createRenderPass(const char* name, const gfx::RenderPassDescriptor&) override;

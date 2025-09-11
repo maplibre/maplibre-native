@@ -1,13 +1,14 @@
 #include <mbgl/webgpu/offscreen_texture.hpp>
 #include <mbgl/webgpu/context.hpp>
-#include <mbgl/webgpu/renderable_resource.hpp>
 #include <mbgl/webgpu/renderer_backend.hpp>
 #include <mbgl/webgpu/texture2d.hpp>
+#include <mbgl/util/logging.hpp>
+#include <cstring>
 
 namespace mbgl {
 namespace webgpu {
 
-class OffscreenTextureResource final : public RenderableResource {
+class OffscreenTextureResource final : public gfx::RenderableResource {
 public:
     OffscreenTextureResource(Context& context_,
                              const Size size_,
@@ -62,13 +63,8 @@ public:
         }
     }
     
-    void swap() override {
-        // WebGPU doesn't require explicit swap for offscreen textures
-    }
-    
-    const RendererBackend& getBackend() const override {
-        return context.getBackend();
-    }
+    // Note: swap() and getBackend() are not part of gfx::RenderableResource
+    // They would be implemented if we had a WebGPU-specific RenderableResource base class
     
     PremultipliedImage readStillImage() {
         // Read back the color texture data
@@ -90,7 +86,8 @@ public:
         
         // Create staging buffer for readback
         WGPUBufferDescriptor bufferDesc = {};
-        bufferDesc.label = "Readback Buffer";
+        WGPUStringView bufferLabel = {"Readback Buffer", strlen("Readback Buffer")};
+        bufferDesc.label = bufferLabel;
         bufferDesc.size = dataSize;
         bufferDesc.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_MapRead;
         
@@ -106,13 +103,13 @@ public:
             WGPUTexture texture = webgpuTexture.getTexture();
             
             if (texture) {
-                WGPUImageCopyTexture src = {};
+                WGPUTexelCopyTextureInfo src = {};
                 src.texture = texture;
                 src.mipLevel = 0;
                 src.origin = {0, 0, 0};
                 src.aspect = WGPUTextureAspect_All;
                 
-                WGPUImageCopyBuffer dst = {};
+                WGPUTexelCopyBufferInfo dst = {};
                 dst.buffer = stagingBuffer;
                 dst.layout.offset = 0;
                 dst.layout.bytesPerRow = size.width * 4; // Assuming RGBA
@@ -136,26 +133,58 @@ public:
         }
         
         // Map buffer and read data (blocking)
-        // Note: This is simplified - real implementation would need async callback
+        // Use Dawn's new async API with WGPUBufferMapCallbackInfo
         struct MapContext {
             bool completed = false;
+            WGPUMapAsyncStatus status = WGPUMapAsyncStatus_Error;
         };
         MapContext mapContext;
         
-        wgpuBufferMapAsync(stagingBuffer, WGPUMapMode_Read, 0, dataSize,
-                          [](WGPUBufferMapAsyncStatus status, void* userdata) {
-                              auto* ctx = static_cast<MapContext*>(userdata);
-                              ctx->completed = true;
-                              (void)status;
-                          }, &mapContext);
+        WGPUBufferMapCallbackInfo callbackInfo = {};
+        callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
+        callbackInfo.callback = [](WGPUMapAsyncStatus status, WGPUStringView message, void* userdata1, void* userdata2) {
+            auto* ctx = static_cast<MapContext*>(userdata1);
+            ctx->completed = true;
+            ctx->status = status;
+            (void)message;
+            (void)userdata2;
+        };
+        callbackInfo.userdata1 = &mapContext;
+        callbackInfo.userdata2 = nullptr;
         
-        // Wait for mapping to complete (simplified synchronous wait)
-        wgpuDevicePoll(device, true, nullptr);
+        WGPUFuture future = wgpuBufferMapAsync(stagingBuffer, WGPUMapMode_Read, 0, dataSize, callbackInfo);
         
-        // Read the mapped data
-        const void* mappedData = wgpuBufferGetConstMappedRange(stagingBuffer, 0, dataSize);
-        if (mappedData) {
-            std::memcpy(data.get(), mappedData, dataSize);
+        // Proper async handling with wgpuInstanceWaitAny
+        WGPUInstance instance = static_cast<WGPUInstance>(backend.getInstance());
+        if (instance) {
+            WGPUFutureWaitInfo waitInfo = {};
+            waitInfo.future = future;
+            waitInfo.completed = false;
+            
+            // Wait for the async operation with a 5 second timeout
+            uint64_t timeout_ns = 5000000000; // 5 seconds in nanoseconds
+            WGPUWaitStatus waitStatus = wgpuInstanceWaitAny(instance, 1, &waitInfo, timeout_ns);
+            
+            if (waitStatus == WGPUWaitStatus_Success) {
+                // The callback should have been invoked
+                if (!mapContext.completed) {
+                    Log::Warning(Event::General, "Buffer map future completed but callback not invoked");
+                }
+            } else if (waitStatus == WGPUWaitStatus_TimedOut) {
+                Log::Error(Event::General, "Timeout waiting for buffer map");
+            } else {
+                Log::Error(Event::General, std::string("Error waiting for buffer map: ") + std::to_string(static_cast<int>(waitStatus)));
+            }
+        } else {
+            Log::Error(Event::General, "No WebGPU instance available for async wait");
+        }
+        
+        // Check if mapping was successful and read the data
+        if (mapContext.completed && mapContext.status == WGPUMapAsyncStatus_Success) {
+            const void* mappedData = wgpuBufferGetConstMappedRange(stagingBuffer, 0, dataSize);
+            if (mappedData) {
+                std::memcpy(data.get(), mappedData, dataSize);
+            }
         }
         
         wgpuBufferUnmap(stagingBuffer);
