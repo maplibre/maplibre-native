@@ -81,6 +81,7 @@ gfx::VertexAttributeArrayPtr Context::createVertexAttributeArray() const {
 }
 
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
+    Log::Info(Event::General, "WebGPU Context::createDrawableBuilder called for: " + name);
     return std::make_unique<DrawableBuilder>(std::move(name));
 }
 
@@ -93,6 +94,7 @@ gfx::UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registry, const std::string& name) {
+    Log::Info(Event::General, "Context::getGenericShader requested for: " + name);
     auto it = impl->shaderCache.find(name);
     if (it != impl->shaderCache.end()) {
         return it->second;
@@ -170,11 +172,17 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registr
 }
 
 TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    return std::make_shared<webgpu::TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
+    Log::Info(Event::General, "WebGPU Context::createTileLayerGroup called: " + name);
+    auto tileLayerGroup = std::make_shared<webgpu::TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
+    Log::Info(Event::General, "WebGPU TileLayerGroup created successfully");
+    return tileLayerGroup;
 }
 
 LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    return std::make_shared<webgpu::LayerGroup>(layerIndex, initialCapacity, std::move(name));
+    Log::Info(Event::General, "WebGPU Context::createLayerGroup called: " + name);
+    auto layerGroup = std::make_shared<webgpu::LayerGroup>(layerIndex, initialCapacity, std::move(name));
+    Log::Info(Event::General, "WebGPU LayerGroup created successfully");
+    return layerGroup;
 }
 
 gfx::Texture2DPtr Context::createTexture2D() {

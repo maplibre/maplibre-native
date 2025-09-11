@@ -1,9 +1,11 @@
 #include <mbgl/webgpu/drawable.hpp>
+#include <mbgl/webgpu/drawable_impl.hpp>
 #include <mbgl/webgpu/context.hpp>
 #include <mbgl/webgpu/upload_pass.hpp>
 #include <mbgl/webgpu/render_pass.hpp>
 #include <mbgl/webgpu/renderer_backend.hpp>
 #include <mbgl/webgpu/uniform_buffer.hpp>
+#include <mbgl/shaders/webgpu/shader_program.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
@@ -16,42 +18,10 @@
 namespace mbgl {
 namespace webgpu {
 
-class Drawable::Impl {
-public:
-    Impl() = default;
-    ~Impl() = default;
-
-    // WebGPU resources
-    WGPUBuffer vertexBuffer = nullptr;
-    WGPUBuffer indexBuffer = nullptr;
-    WGPURenderPipeline pipeline = nullptr;
-    WGPUBindGroup bindGroup = nullptr;
-    
-    // Buffer data
-    std::vector<uint8_t> vertexData;
-    std::size_t vertexCount = 0;
-    std::size_t vertexSize = 0;
-    
-    // Pipeline state
-    bool colorEnabled = true;
-    bool depthEnabled = true;
-    gfx::DepthMaskType depthMask = gfx::DepthMaskType::ReadWrite;
-    gfx::ColorMode colorMode;
-    gfx::CullFaceMode cullFaceMode;
-    
-    // Uniform buffers
-    std::unique_ptr<gfx::UniformBufferArray> uniformBuffers;
-    
-    // Draw segments are handled differently in WebGPU
-    // We use the entire index buffer instead of segments
-    gfx::IndexVectorBasePtr indexVector;
-};
-
 Drawable::Drawable(std::string name)
     : gfx::Drawable(std::move(name)),
       impl(std::make_unique<Impl>()) {
-    // Initialize uniform buffers
-    impl->uniformBuffers = std::make_unique<UniformBufferArray>();
+    // Uniform buffers are initialized in Impl constructor
 }
 
 Drawable::~Drawable() {
@@ -79,6 +49,60 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
     
     if (!device) {
         return;
+    }
+    
+    // Create bind group if we have a stored layout
+    if (impl->bindGroupLayout && !impl->bindGroup) {
+        Log::Info(Event::General, "Creating bind group in upload pass");
+        
+        // Create a uniform buffer for the transformation matrix if not exists
+        if (!impl->uniformBuffer) {
+            // Create identity matrix as placeholder - will be updated in draw()
+            float matrix[16] = {
+                1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 1.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f
+            };
+            
+            WGPUBufferDescriptor uniformBufferDesc = {};
+            WGPUStringView uniformLabel = {"Uniform Buffer", strlen("Uniform Buffer")};
+            uniformBufferDesc.label = uniformLabel;
+            uniformBufferDesc.size = sizeof(matrix);
+            uniformBufferDesc.usage = WGPUBufferUsage_Uniform | WGPUBufferUsage_CopyDst;
+            uniformBufferDesc.mappedAtCreation = 1;
+            
+            impl->uniformBuffer = wgpuDeviceCreateBuffer(device, &uniformBufferDesc);
+            
+            if (impl->uniformBuffer) {
+                void* mappedData = wgpuBufferGetMappedRange(impl->uniformBuffer, 0, sizeof(matrix));
+                if (mappedData) {
+                    std::memcpy(mappedData, matrix, sizeof(matrix));
+                    wgpuBufferUnmap(impl->uniformBuffer);
+                }
+            }
+        }
+        
+        // Create bind group with uniform buffer
+        WGPUBindGroupEntry uniformEntry = {};
+        uniformEntry.binding = 0;
+        uniformEntry.buffer = impl->uniformBuffer;
+        uniformEntry.offset = 0;
+        uniformEntry.size = 64; // 4x4 matrix
+        
+        WGPUBindGroupDescriptor bindGroupDesc = {};
+        WGPUStringView label = {"Drawable Bind Group", strlen("Drawable Bind Group")};
+        bindGroupDesc.label = label;
+        bindGroupDesc.layout = impl->bindGroupLayout;
+        bindGroupDesc.entryCount = 1;
+        bindGroupDesc.entries = &uniformEntry;
+        
+        impl->bindGroup = wgpuDeviceCreateBindGroup(device, &bindGroupDesc);
+        if (impl->bindGroup) {
+            Log::Info(Event::General, "Successfully created bind group");
+        } else {
+            Log::Warning(Event::General, "Failed to create bind group");
+        }
     }
     
     // Upload vertex data to GPU
@@ -153,33 +177,50 @@ void Drawable::uploadTextures(UploadPass&) const noexcept {
 }
 
 void Drawable::draw(PaintParameters& parameters) const {
-    Log::Info(Event::General, "Drawable::draw called, enabled: " + std::to_string(getEnabled()));
-    
     if (!getEnabled()) {
-        Log::Info(Event::General, "Drawable::draw - not enabled, returning");
         return;
     }
     
     // Get the render pass
     if (!parameters.renderPass) {
-        Log::Info(Event::General, "Drawable::draw - no renderPass, returning");
         return;
     }
     
     // Get the actual WebGPU render pass encoder
     auto* webgpuRenderPass = static_cast<webgpu::RenderPass*>(parameters.renderPass.get());
     if (!webgpuRenderPass) {
-        Log::Info(Event::General, "Drawable::draw - renderPass cast failed, returning");
         return;
     }
     
     WGPURenderPassEncoder renderPassEncoder = webgpuRenderPass->getEncoder();
     if (!renderPassEncoder) {
-        Log::Info(Event::General, "Drawable::draw - no encoder, returning");
         return;
     }
     
-    Log::Info(Event::General, "Drawable::draw - have encoder, proceeding with draw");
+    // Update uniform buffer with current projection matrix
+    if (impl->uniformBuffer) {
+        auto& context = static_cast<webgpu::Context&>(parameters.context);
+        auto& backend = static_cast<webgpu::RendererBackend&>(context.getBackend());
+        WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
+        WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
+        
+        if (device && queue) {
+            // Get the projection matrix from state
+            mat4 projMatrix;
+            parameters.state.getProjMatrix(projMatrix);
+            
+            // Convert to column-major format for WebGPU (mat4 is row-major in MapLibre)
+            float matrix[16];
+            for (int i = 0; i < 4; ++i) {
+                for (int j = 0; j < 4; ++j) {
+                    matrix[j * 4 + i] = projMatrix[i * 4 + j];
+                }
+            }
+            
+            // Update the uniform buffer
+            wgpuQueueWriteBuffer(queue, impl->uniformBuffer, 0, matrix, sizeof(matrix));
+        }
+    }
     
     // Set the pipeline
     if (impl->pipeline) {
@@ -229,16 +270,16 @@ void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::
     impl->vertexData = std::move(data);
     impl->vertexCount = count;
     if (count > 0) {
-        impl->vertexSize = impl->vertexData.size() / count;
+        impl->vertexStride = impl->vertexData.size() / count;
     }
 }
 
 const gfx::UniformBufferArray& Drawable::getUniformBuffers() const {
-    return *impl->uniformBuffers;
+    return impl->uniformBuffers;
 }
 
 gfx::UniformBufferArray& Drawable::mutableUniformBuffers() {
-    return *impl->uniformBuffers;
+    return impl->uniformBuffers;
 }
 
 void Drawable::setEnableColor(bool value) {
@@ -299,17 +340,55 @@ void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr attributes,
 }
 
 void Drawable::buildWebGPUPipeline() noexcept {
-    // Pipeline creation is deferred until we have a shader program
-    // The actual pipeline will be created when we bind with a specific shader
-    // This is because WebGPU pipelines are immutable and depend on:
-    // - Shader modules
-    // - Vertex layout
-    // - Render state (depth, stencil, blend)
-    // For now, we just mark that pipeline needs rebuilding
+    Log::Info(Event::General, "Building WebGPU pipeline for drawable");
+    
+    // Release old pipeline if it exists
     if (impl->pipeline) {
         wgpuRenderPipelineRelease(impl->pipeline);
         impl->pipeline = nullptr;
     }
+    
+    // We need a shader to create the pipeline
+    if (!shader) {
+        Log::Warning(Event::General, "No shader set for drawable, skipping pipeline creation");
+        return;
+    }
+    
+    // Cast to WebGPU shader program
+    auto* webgpuShader = static_cast<mbgl::webgpu::ShaderProgram*>(shader.get());
+    if (!webgpuShader) {
+        Log::Error(Event::General, "Failed to cast shader to WebGPU type");
+        return;
+    }
+    
+    // Use the pre-built pipeline from the shader program
+    impl->pipeline = webgpuShader->getPipeline();
+    if (impl->pipeline) {
+        Log::Info(Event::General, "Successfully set pipeline from shader");
+        
+        // Also get the bind group layout for creating bind groups
+        WGPUBindGroupLayout bindGroupLayout = webgpuShader->getBindGroupLayout();
+        if (bindGroupLayout) {
+            // Create bind group for uniforms
+            createBindGroup(bindGroupLayout);
+        }
+    } else {
+        Log::Warning(Event::General, "Shader has no pipeline");
+    }
+}
+
+void Drawable::createBindGroup(WGPUBindGroupLayout layout) noexcept {
+    Log::Info(Event::General, "Storing bind group layout for deferred creation");
+    
+    // Release old bind group if it exists
+    if (impl->bindGroup) {
+        wgpuBindGroupRelease(impl->bindGroup);
+        impl->bindGroup = nullptr;
+    }
+    
+    // Store the layout for creating bind group during upload
+    impl->bindGroupLayout = layout;
+    Log::Info(Event::General, "Bind group layout stored, will create bind group in upload()");
 }
 
 

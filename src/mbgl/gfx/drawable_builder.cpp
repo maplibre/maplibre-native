@@ -40,6 +40,7 @@ UniqueDrawable& DrawableBuilder::getCurrentDrawable(bool createIfNone) {
 }
 
 void DrawableBuilder::flush(gfx::Context& context) {
+    Log::Info(Event::General, "DrawableBuilder::flush called for: " + name + ", vertex count: " + std::to_string(curVertexCount()));
     if (curVertexCount()) {
         if (Impl::Mode::Polylines == impl->getMode()) {
             // setup for polylines
@@ -171,6 +172,7 @@ void DrawableBuilder::addQuad(int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
 std::size_t DrawableBuilder::addVertices(const std::vector<std::array<int16_t, 2>>& vertices,
                                          std::size_t vertexOffset,
                                          std::size_t vertexLength) {
+    Log::Info(Event::General, "DrawableBuilder::addVertices called for: " + name + ", length: " + std::to_string(vertexLength));
     const auto baseIndex = impl->vertices.elements();
     std::for_each(std::next(vertices.begin(), vertexOffset),
                   std::next(vertices.begin(), vertexOffset + vertexLength),

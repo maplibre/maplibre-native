@@ -75,13 +75,18 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
         return;
     }
     
-    // Create bind group layout for uniforms and textures
-    // For now, create an empty bind group layout
+    // Create bind group layout for uniforms
+    WGPUBindGroupLayoutEntry uniformEntry = {};
+    uniformEntry.binding = 0;
+    uniformEntry.visibility = WGPUShaderStage_Vertex;
+    uniformEntry.buffer.type = WGPUBufferBindingType_Uniform;
+    uniformEntry.buffer.minBindingSize = 64; // 4x4 matrix = 16 floats = 64 bytes
+    
     WGPUBindGroupLayoutDescriptor bindGroupLayoutDesc = {};
     WGPUStringView bindGroupLabel = {"Bind Group Layout", strlen("Bind Group Layout")};
     bindGroupLayoutDesc.label = bindGroupLabel;
-    bindGroupLayoutDesc.entryCount = 0;
-    bindGroupLayoutDesc.entries = nullptr;
+    bindGroupLayoutDesc.entryCount = 1;
+    bindGroupLayoutDesc.entries = &uniformEntry;
     
     bindGroupLayout = wgpuDeviceCreateBindGroupLayout(device, &bindGroupLayoutDesc);
     
@@ -94,18 +99,44 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     
     pipelineLayout = wgpuDeviceCreatePipelineLayout(device, &pipelineLayoutDesc);
     
+    // Set up vertex buffer layout for int16x2 (MapLibre's format)
+    WGPUVertexAttribute positionAttribute = {};
+    positionAttribute.format = WGPUVertexFormat_Sint16x2;
+    positionAttribute.offset = 0;
+    positionAttribute.shaderLocation = 0;
+    
+    WGPUVertexBufferLayout vertexBufferLayout = {};
+    vertexBufferLayout.arrayStride = 4; // 2 int16 * 2 bytes
+    vertexBufferLayout.stepMode = WGPUVertexStepMode_Vertex;
+    vertexBufferLayout.attributeCount = 1;
+    vertexBufferLayout.attributes = &positionAttribute;
+    
     // Set up vertex state
     WGPUVertexState vertexState = {};
     vertexState.module = vertexShaderModule;
     WGPUStringView vertexState_entryPoint_str = {"main", strlen("main")};
     vertexState.entryPoint = vertexState_entryPoint_str;
-    vertexState.bufferCount = 0;
-    vertexState.buffers = nullptr;
+    vertexState.bufferCount = 1;
+    vertexState.buffers = &vertexBufferLayout;
     
-    // Set up fragment state
+    // Set up fragment state with alpha blending
+    WGPUBlendComponent alphaBlend = {};
+    alphaBlend.operation = WGPUBlendOperation_Add;
+    alphaBlend.srcFactor = WGPUBlendFactor_SrcAlpha;
+    alphaBlend.dstFactor = WGPUBlendFactor_OneMinusSrcAlpha;
+    
+    WGPUBlendComponent colorBlend = {};
+    colorBlend.operation = WGPUBlendOperation_Add;
+    colorBlend.srcFactor = WGPUBlendFactor_SrcAlpha;
+    colorBlend.dstFactor = WGPUBlendFactor_OneMinusSrcAlpha;
+    
+    WGPUBlendState blendState = {};
+    blendState.color = colorBlend;
+    blendState.alpha = alphaBlend;
+    
     WGPUColorTargetState colorTarget = {};
     colorTarget.format = WGPUTextureFormat_BGRA8Unorm; // Default format, should match surface
-    colorTarget.blend = nullptr; // No blending for now
+    colorTarget.blend = &blendState;
     colorTarget.writeMask = WGPUColorWriteMask_All;
     
     WGPUFragmentState fragmentState = {};
@@ -122,11 +153,11 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     primitiveState.frontFace = WGPUFrontFace_CCW;
     primitiveState.cullMode = WGPUCullMode_None;
     
-    // Set up depth stencil state (optional)
+    // Set up depth stencil state - disable depth testing for now
     WGPUDepthStencilState depthStencilState = {};
     depthStencilState.format = WGPUTextureFormat_Depth24PlusStencil8;
-    depthStencilState.depthWriteEnabled = WGPUOptionalBool_True;
-    depthStencilState.depthCompare = WGPUCompareFunction_Less;
+    depthStencilState.depthWriteEnabled = WGPUOptionalBool_False;
+    depthStencilState.depthCompare = WGPUCompareFunction_Always;
     depthStencilState.stencilFront.compare = WGPUCompareFunction_Always;
     depthStencilState.stencilFront.failOp = WGPUStencilOperation_Keep;
     depthStencilState.stencilFront.depthFailOp = WGPUStencilOperation_Keep;
@@ -146,7 +177,7 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     pipelineDesc.vertex = vertexState;
     pipelineDesc.fragment = &fragmentState;
     pipelineDesc.primitive = primitiveState;
-    pipelineDesc.depthStencil = &depthStencilState;
+    pipelineDesc.depthStencil = nullptr; // No depth-stencil for now
     pipelineDesc.multisample.count = 1;
     pipelineDesc.multisample.mask = 0xFFFFFFFF;
     pipelineDesc.multisample.alphaToCoverageEnabled = 0;

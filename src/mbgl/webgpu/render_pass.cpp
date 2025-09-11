@@ -93,6 +93,18 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_,
         
         if (impl->encoder) {
             Log::Info(Event::General, "Created WebGPU render pass encoder");
+            
+            // Set viewport to full framebuffer
+            // Get the framebuffer size from the backend
+            #ifdef __APPLE__
+            if (glfw_backend) {
+                auto size = glfw_backend->getSize();
+                wgpuRenderPassEncoderSetViewport(impl->encoder, 
+                    0, 0,  // x, y
+                    static_cast<float>(size.width), static_cast<float>(size.height),  // width, height
+                    0.0f, 1.0f);  // minDepth, maxDepth
+            }
+            #endif
         }
     } else {
         Log::Warning(Event::General, "No texture view available for render pass");
