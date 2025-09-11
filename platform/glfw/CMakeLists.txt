@@ -69,6 +69,13 @@ if(MLN_WITH_METAL)
     )
 endif()
 
+if(MLN_WITH_WEBGPU)
+    target_sources(
+        mbgl-glfw
+        PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_webgpu_backend.mm
+    )
+endif()
+
 target_include_directories(
     mbgl-glfw
     PRIVATE

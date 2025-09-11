@@ -16,6 +16,19 @@
 // WebGPU backend
 #include <mbgl/webgpu/context.hpp>
 #include <mbgl/webgpu/renderer_backend.hpp>
+#include <mbgl/gfx/renderable.hpp>
+
+// Frontend
+#include <mbgl/renderer/renderer_frontend.hpp>
+#include <mbgl/actor/scheduler.hpp>
+#include <mbgl/util/identity.hpp>
+#include <mbgl/gfx/color_mode.hpp>
+#include <mbgl/gfx/depth_mode.hpp>
+
+// Forward declarations
+namespace mbgl {
+    class UpdateParameters;
+}
 
 // Dawn headers
 #include <dawn/dawn_proc.h>
@@ -51,12 +64,11 @@ void signalHandler(int) {
 namespace mbgl {
 namespace webgpu {
 
-// Custom WebGPU backend for MapLibre that integrates with Dawn
-class MapRendererBackend : public RendererBackend {
+// Custom WebGPU backend wrapper for MapLibre that integrates with Dawn
+class MapRendererBackend {
 public:
     MapRendererBackend(GLFWwindow* window_, wgpu::Device device_, wgpu::Surface surface_)
-        : RendererBackend(gfx::ContextMode::Unique),
-          window(window_),
+        : window(window_),
           wgpuDevice(device_),
           wgpuSurface(surface_) {
         
@@ -66,34 +78,102 @@ public:
         // Configure surface
         configureSurface();
         
-        // Set the WebGPU device and surface in the base class
-        setDevice(device_.Get());
-        setSurface(surface_.Get());
-        
         std::cout << "✓ MapRendererBackend initialized (" << width << "x" << height << ")\n";
     }
     
     ~MapRendererBackend() override = default;
     
-    void updateAssumedState() override {
+    void updateAssumedState() {
         // Update any WebGPU state assumptions
         // This is called when the context needs to be reset
     }
     
+    // Surface renderable implementation
+    class SurfaceRenderable : public gfx::Renderable {
+    public:
+        SurfaceRenderable(Size size_) 
+            : gfx::Renderable(size_, nullptr), size(size_) {}
+        Size getSize() const { return size; }
+        void updateSize(Size newSize) { size = newSize; }
+        ~SurfaceRenderable() override = default;
+    private:
+        Size size;
+    };
+    
     gfx::Renderable& getDefaultRenderable() override {
         // Return the default renderable (the main surface)
-        if (!defaultRenderable) {
-            // Create a default renderable that points to the surface
-            class SurfaceRenderable : public gfx::Renderable {
-            public:
-                SurfaceRenderable(Size size_) : size(size_) {}
-                Size getSize() const override { return size; }
-            private:
-                Size size;
-            };
-            defaultRenderable = std::make_unique<SurfaceRenderable>(Size{static_cast<uint32_t>(width), static_cast<uint32_t>(height)});
+        if (!surfaceRenderable) {
+            surfaceRenderable = std::make_unique<SurfaceRenderable>(Size{static_cast<uint32_t>(width), static_cast<uint32_t>(height)});
         }
-        return *defaultRenderable;
+        return *surfaceRenderable;
+    }
+    
+    void initShaders(gfx::ShaderRegistry& registry, const ProgramParameters& params) override {
+        // Initialize shaders - WebGPU shaders will be loaded on demand
+        (void)registry;
+        (void)params;
+    }
+    
+    std::unique_ptr<gfx::Context> createContext() override {
+        // For now, return a dummy context - in a real implementation,
+        // we would create a proper WebGPU context here
+        class DummyContext : public gfx::Context {
+        public:
+            DummyContext() : gfx::Context(16) {} // 16 is max vertex binding count
+            
+            // Required pure virtual methods
+            void beginFrame() override {}
+            void endFrame() override {}
+            void performCleanup() override {}
+            void reduceMemoryUsage() override {}
+            std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override { return nullptr; }
+            std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override { return nullptr; }
+
+            void clearStencilBuffer(int32_t) override {}
+            void setDirtyState() override {}
+            gfx::VertexAttributeArrayPtr createVertexAttributeArray() const override { return nullptr; }
+            gfx::UniqueDrawableBuilder createDrawableBuilder(std::string) override { return {}; }
+            gfx::UniformBufferPtr createUniformBuffer(const void*, std::size_t, bool, bool = false) override { return nullptr; }
+            gfx::UniqueUniformBufferArray createLayerUniformBufferArray() override { return {}; }
+            gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string&) override { return nullptr; }
+            LayerGroupPtr createLayerGroup(int32_t, std::size_t, std::string) override { return nullptr; }
+            TileLayerGroupPtr createTileLayerGroup(int32_t, std::size_t, std::string) override { return nullptr; }
+            gfx::Texture2DPtr createTexture2D() override { return nullptr; }
+            RenderTargetPtr createRenderTarget(const Size, const gfx::TextureChannelDataType) override { return nullptr; }
+            void resetState(gfx::DepthMode, gfx::ColorMode) override {}
+            bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&, const void*, std::size_t, bool) override { return false; }
+            const gfx::UniformBufferArray& getGlobalUniformBuffers() const override {
+                class DummyUniformBufferArray : public gfx::UniformBufferArray {
+                public:
+                    void bind(gfx::RenderPass&) override {}
+                    std::unique_ptr<gfx::UniformBuffer> copy(const gfx::UniformBuffer&) override { return nullptr; }
+                };
+                static DummyUniformBufferArray buffers;
+                return buffers;
+            }
+            gfx::UniformBufferArray& mutableGlobalUniformBuffers() override {
+                class DummyUniformBufferArray : public gfx::UniformBufferArray {
+                public:
+                    void bind(gfx::RenderPass&) override {}
+                    std::unique_ptr<gfx::UniformBuffer> copy(const gfx::UniformBuffer&) override { return nullptr; }
+                };
+                static DummyUniformBufferArray buffers;
+                return buffers;
+            }
+            void bindGlobalUniformBuffers(gfx::RenderPass&) const noexcept override {}
+            void unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept override {}
+            std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType, Size) override { return nullptr; }
+            std::unique_ptr<gfx::DrawScopeResource> createDrawScopeResource() override { return nullptr; }
+        };
+        return std::make_unique<DummyContext>();
+    }
+    
+    void activate() override {
+        // Activate the WebGPU context
+    }
+    
+    void deactivate() override {
+        // Deactivate the WebGPU context
     }
     
     void beginFrame() {
@@ -132,8 +212,10 @@ public:
         height = newHeight;
         configureSurface();
         
-        // Update the default renderable
-        defaultRenderable.reset();
+        // Update the surface renderable
+        if (surfaceRenderable) {
+            surfaceRenderable->updateSize(Size{static_cast<uint32_t>(width), static_cast<uint32_t>(height)});
+        }
     }
     
 private:
@@ -156,7 +238,7 @@ private:
     wgpu::SurfaceTexture currentSurfaceTexture;
     wgpu::TextureView currentTextureView;
     int width, height;
-    std::unique_ptr<gfx::Renderable> defaultRenderable;
+    std::unique_ptr<SurfaceRenderable> surfaceRenderable;
 };
 
 } // namespace webgpu
@@ -181,7 +263,7 @@ public:
         std::cout << "Map: Style loaded\n";
     }
     
-    void onDidFinishRenderingFrame(mbgl::MapObserver::RenderFrameStatus status) override {
+    void onDidFinishRenderingFrame(const mbgl::MapObserver::RenderFrameStatus& status) override {
         if (status.mode == mbgl::MapObserver::RenderMode::Full) {
             frameCount++;
             if (frameCount % 60 == 0) {
@@ -249,14 +331,19 @@ public:
     }
     
     void render() {
-        if (!map || !backend) return;
+        if (!map || !backend || !renderer || !frontend) return;
         
         // Begin frame
         backend->beginFrame();
         
         // Render the map
         try {
-            map->render(*backend);
+            // The frontend update will be handled internally by MapLibre
+            // Just trigger the map to repaint
+            map->triggerRepaint();
+            
+            // Process any pending tasks
+            runLoop.runOnce();
         } catch (const std::exception& e) {
             std::cerr << "Render error: " << e.what() << "\n";
         }
@@ -399,6 +486,41 @@ private:
         // Create renderer
         renderer = std::make_unique<mbgl::Renderer>(*backend, 1.0f);
         
+        // Create a simple renderer frontend
+        class SimpleRendererFrontend : public mbgl::RendererFrontend {
+        public:
+            SimpleRendererFrontend(mbgl::Renderer& renderer_, mbgl::Scheduler& scheduler_) 
+                : renderer(renderer_), scheduler(scheduler_) {}
+            
+            void reset() override {}
+            
+            void update(std::shared_ptr<mbgl::UpdateParameters> params) override {
+                // When update is called, we should render
+                if (params) {
+                    renderer.render(params);
+                }
+            }
+            
+            void setObserver(mbgl::RendererObserver&) override {}
+            
+            const mbgl::TaggedScheduler& getThreadPool() const override {
+                static mbgl::util::SimpleIdentity identity;
+                static mbgl::TaggedScheduler taggedScheduler{std::shared_ptr<mbgl::Scheduler>(&scheduler, [](auto*){}), 
+                                                             identity};
+                return taggedScheduler;
+            }
+            
+            mbgl::Renderer& getRenderer() { return renderer; }
+            
+        private:
+            mbgl::Renderer& renderer;
+            mbgl::Scheduler& scheduler;
+        };
+        
+        // Get the default scheduler from the run loop
+        auto& scheduler = *mbgl::Scheduler::GetCurrent();
+        frontend = std::make_unique<SimpleRendererFrontend>(*renderer, scheduler);
+        
         // Create map observer
         mapObserver = std::make_unique<MapObserver>();
         
@@ -408,14 +530,16 @@ private:
                  .withSize(backend->getFramebufferSize())
                  .withPixelRatio(2.0f);  // Retina display
         
+        mbgl::ResourceOptions resourceOptions;
+        resourceOptions.withCachePath(":memory:")
+                      .withAssetPath(".")
+                      .withMaximumCacheSize(64 * 1024 * 1024);
+        
         map = std::make_unique<mbgl::Map>(
-            *renderer,
-            mapObserver.get(),
+            *frontend,
+            *mapObserver,
             mapOptions,
-            mbgl::ResourceOptions()
-                .withCachePath(":memory:")
-                .withAssetPath(".")
-                .withMaximumCacheSize(64 * 1024 * 1024));
+            resourceOptions);
         
         // Load a style
         std::string styleUrl = "https://demotiles.maplibre.org/style.json";
@@ -444,6 +568,7 @@ private:
     
     std::unique_ptr<mbgl::webgpu::MapRendererBackend> backend;
     std::unique_ptr<mbgl::Renderer> renderer;
+    std::unique_ptr<mbgl::RendererFrontend> frontend;
     std::unique_ptr<mbgl::Map> map;
     std::unique_ptr<MapObserver> mapObserver;
     mbgl::util::RunLoop runLoop;

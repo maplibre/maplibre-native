@@ -242,6 +242,7 @@ if(MLN_WITH_WEBGPU AND MLN_WITH_GLFW)
 
     if(APPLE)
         add_executable(webgpu_map webgpu_map.mm)
+        add_executable(webgpu_map_simple webgpu_map_simple.mm)
     else()
         add_executable(webgpu_map webgpu_map.cpp)
     endif()
