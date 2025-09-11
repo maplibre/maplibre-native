@@ -4,7 +4,7 @@ if(MLN_WITH_WEBGPU)
     message(STATUS "Configuring Dawn WebGPU implementation")
 
     # Dawn library paths
-    set(DAWN_DIR "/Users/admin/repos/dawn")
+    set(DAWN_DIR "/Users/admin/repos/maplibre-native/vendor/dawn")
     set(DAWN_BUILD_DIR "${DAWN_DIR}/build")
 
     # Add Dawn include directories
@@ -15,14 +15,15 @@ if(MLN_WITH_WEBGPU)
             ${DAWN_DIR}/src  # Add src directory for internal headers
     )
 
-    # Link core Dawn libraries that we have
+    # Link core Dawn libraries (order matters for static linking)
     target_link_libraries(mbgl-core
         PUBLIC
+            ${DAWN_BUILD_DIR}/src/dawn/native/libwebgpu_dawn.a
+            ${DAWN_BUILD_DIR}/src/dawn/native/libdawn_native.a
+            ${DAWN_BUILD_DIR}/src/dawn/wire/libdawn_wire.a
             ${DAWN_BUILD_DIR}/src/dawn/libdawn_proc.a
             ${DAWN_BUILD_DIR}/src/dawn/platform/libdawn_platform.a
             ${DAWN_BUILD_DIR}/src/dawn/common/libdawn_common.a
-            ${DAWN_BUILD_DIR}/src/dawn/wire/libdawn_wire.a
-            ${DAWN_BUILD_DIR}/src/dawn/utils/libdawn_wgpu_utils.a
     )
 
     # Link Tint libraries (shader compiler)

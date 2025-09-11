@@ -9,6 +9,8 @@
 // Platform detection
 #ifdef __APPLE__
     #define GLFW_EXPOSE_NATIVE_COCOA
+    #import <Cocoa/Cocoa.h>
+    #import <QuartzCore/CAMetalLayer.h>
 #elif defined(_WIN32)
     #define GLFW_EXPOSE_NATIVE_WIN32
 #else
@@ -19,8 +21,15 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
-// WebGPU headers - using our backend_impl types
+// Dawn-specific headers
+#ifdef USE_DAWN
+#include <dawn/dawn_proc.h>
+#include <dawn/native/DawnNative.h>
+#include <webgpu/webgpu.h>
+#else
+// Generic WebGPU headers
 #include <mbgl/webgpu/backend_impl.hpp>
+#endif
 
 // Simple vertex data for a triangle
 const float triangleVertices[] = {
@@ -104,7 +113,12 @@ public:
         
         // Create command encoder
         WGPUCommandEncoderDescriptor encoderDesc = {};
+#ifdef USE_DAWN
+        WGPUStringView encoderLabel = { "Command Encoder", WGPU_STRLEN };
+        encoderDesc.label = encoderLabel;
+#else
         encoderDesc.label = "Command Encoder";
+#endif
         WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, &encoderDesc);
         
         // Create render pass
@@ -115,7 +129,12 @@ public:
         colorAttachment.clearValue = {0.2, 0.2, 0.3, 1.0};  // Dark blue background
         
         WGPURenderPassDescriptor renderPassDesc = {};
+#ifdef USE_DAWN
+        WGPUStringView renderPassLabel = { "Render Pass", WGPU_STRLEN };
+        renderPassDesc.label = renderPassLabel;
+#else
         renderPassDesc.label = "Render Pass";
+#endif
         renderPassDesc.colorAttachmentCount = 1;
         renderPassDesc.colorAttachments = &colorAttachment;
         
@@ -132,7 +151,12 @@ public:
         
         // Submit commands
         WGPUCommandBufferDescriptor cmdBufferDesc = {};
+#ifdef USE_DAWN
+        WGPUStringView cmdBufferLabel = { "Command Buffer", WGPU_STRLEN };
+        cmdBufferDesc.label = cmdBufferLabel;
+#else
         cmdBufferDesc.label = "Command Buffer";
+#endif
         WGPUCommandBuffer commands = wgpuCommandEncoderFinish(encoder, &cmdBufferDesc);
         wgpuQueueSubmit(queue, 1, &commands);
         
@@ -166,8 +190,18 @@ private:
     WGPUBuffer vertexBuffer = nullptr;
     
     bool createInstance() {
+#ifdef USE_DAWN
+        // Initialize Dawn's proc table
+        dawnProcSetProcs(&dawn::native::GetProcs());
+        
+        // Create Dawn instance with default descriptor
         WGPUInstanceDescriptor desc = {};
         instance = wgpuCreateInstance(&desc);
+#else
+        WGPUInstanceDescriptor desc = {};
+        instance = wgpuCreateInstance(&desc);
+#endif
+        
         if (!instance) {
             std::cerr << "Failed to create WebGPU instance\n";
             return false;
@@ -177,16 +211,52 @@ private:
     }
     
     bool createSurface() {
+#ifdef USE_DAWN
+    #ifdef __APPLE__
+        // Create Metal surface for macOS
+        NSWindow* nsWindow = glfwGetCocoaWindow(window);
+        if (!nsWindow) {
+            std::cerr << "Failed to get NSWindow from GLFW\n";
+            return false;
+        }
+        
+        // Create Metal layer
+        CAMetalLayer* metalLayer = [CAMetalLayer layer];
+        [nsWindow.contentView setWantsLayer:YES];
+        [nsWindow.contentView setLayer:metalLayer];
+        
+        // Create surface descriptor
         WGPUSurfaceDescriptor surfaceDesc = {};
         
-        // TODO: Add platform-specific surface creation
-        // For now, using a stub implementation
-        WGPUSurfaceDescriptorFromMetalLayer metalDesc = {};
-        metalDesc.chain.sType = static_cast<WGPUSType>(0);
-        metalDesc.layer = nullptr;
-        surfaceDesc.nextInChain = reinterpret_cast<const WGPUChainedStruct*>(&metalDesc.chain);
+        // Dawn-specific Metal surface setup
+        struct WGPUSurfaceDescriptorFromMetalLayer {
+            WGPUChainedStruct chain;
+            void* layer;  // CAMetalLayer*
+        };
         
+        WGPUSurfaceDescriptorFromMetalLayer metalDesc = {};
+        metalDesc.chain.sType = static_cast<WGPUSType>(0x0000000E); // WGPUSType_SurfaceDescriptorFromMetalLayer
+        metalDesc.layer = metalLayer;
+        surfaceDesc.nextInChain = reinterpret_cast<const WGPUChainedStruct*>(&metalDesc);
+#ifdef USE_DAWN
+        WGPUStringView surfaceLabel = { "Metal Surface", WGPU_STRLEN };
+        surfaceDesc.label = surfaceLabel;
+#else
+        surfaceDesc.label = "Metal Surface";
+#endif
+    #else
+        #error "Non-macOS platforms not yet supported with Dawn"
+    #endif
+#else
+        WGPUSurfaceDescriptor surfaceDesc = {};
+#ifdef USE_DAWN
+        WGPUStringView surfaceLabel = { "GLFW Surface", WGPU_STRLEN };
+        surfaceDesc.label = surfaceLabel;
+#else
         surfaceDesc.label = "GLFW Surface";
+#endif
+#endif
+        
         surface = wgpuInstanceCreateSurface(instance, &surfaceDesc);
         
         if (!surface) {
@@ -264,12 +334,22 @@ private:
     bool createPipeline() {
         // Create shader module
         WGPUShaderModuleWGSLDescriptor wgslDesc = {};
-        wgslDesc.chain.sType = WGPUSType_ShaderModuleWGSLDescriptor;
+        wgslDesc.chain.sType = static_cast<WGPUSType>(0x00000006); // WGPUSType_ShaderModuleWGSLDescriptor
+#ifdef USE_DAWN
+        WGPUStringView codeView = { shaderCode, WGPU_STRLEN };
+        wgslDesc.code = codeView;
+#else
         wgslDesc.code = shaderCode;
+#endif
         
         WGPUShaderModuleDescriptor shaderDesc = {};
         shaderDesc.nextInChain = &wgslDesc.chain;
+#ifdef USE_DAWN
+        WGPUStringView shaderLabel = { "Triangle Shader", WGPU_STRLEN };
+        shaderDesc.label = shaderLabel;
+#else
         shaderDesc.label = "Triangle Shader";
+#endif
         
         WGPUShaderModule shaderModule = wgpuDeviceCreateShaderModule(device, &shaderDesc);
         
@@ -291,16 +371,31 @@ private:
         
         // Pipeline
         WGPURenderPipelineDescriptor pipelineDesc = {};
+#ifdef USE_DAWN
+        WGPUStringView pipelineLabel = { "Triangle Pipeline", WGPU_STRLEN };
+        pipelineDesc.label = pipelineLabel;
+#else
         pipelineDesc.label = "Triangle Pipeline";
+#endif
         
         pipelineDesc.vertex.module = shaderModule;
+#ifdef USE_DAWN
+        WGPUStringView vsEntryPoint = { "vs_main", WGPU_STRLEN };
+        pipelineDesc.vertex.entryPoint = vsEntryPoint;
+#else
         pipelineDesc.vertex.entryPoint = "vs_main";
+#endif
         pipelineDesc.vertex.bufferCount = 1;
         pipelineDesc.vertex.buffers = &vertexLayout;
         
         WGPUFragmentState fragmentState = {};
         fragmentState.module = shaderModule;
+#ifdef USE_DAWN
+        WGPUStringView fsEntryPoint = { "fs_main", WGPU_STRLEN };
+        fragmentState.entryPoint = fsEntryPoint;
+#else
         fragmentState.entryPoint = "fs_main";
+#endif
         
         WGPUColorTargetState colorTarget = {};
         colorTarget.format = WGPUTextureFormat_BGRA8Unorm;
@@ -331,7 +426,12 @@ private:
     
     bool createVertexBuffer() {
         WGPUBufferDescriptor bufferDesc = {};
+#ifdef USE_DAWN
+        WGPUStringView bufferLabel = { "Vertex Buffer", WGPU_STRLEN };
+        bufferDesc.label = bufferLabel;
+#else
         bufferDesc.label = "Vertex Buffer";
+#endif
         bufferDesc.size = sizeof(triangleVertices);
         bufferDesc.usage = WGPUBufferUsage_Vertex | WGPUBufferUsage_CopyDst;
         bufferDesc.mappedAtCreation = true;
