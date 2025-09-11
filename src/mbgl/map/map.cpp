@@ -41,6 +41,13 @@ Map::Map(RendererFrontend& frontend,
                                             ResourceLoader, resourceOptions, clientOptions))
                                       : nullptr,
                                   mapOptions)) {
+    auto* fsManager = FileSourceManager::get();
+    if (fsManager) {
+        auto fileSource = fsManager->getFileSource(ResourceLoader, resourceOptions, clientOptions);
+        Log::Info(Event::General, "Map constructor: FileSourceManager exists, fileSource = " + std::string(fileSource ? "valid" : "null"));
+    } else {
+        Log::Info(Event::General, "Map constructor: FileSourceManager::get() returned null");
+    }
     if (actionJournalOptions.enabled()) {
         impl->actionJournal = std::make_unique<util::ActionJournal>(*this, actionJournalOptions);
     }
