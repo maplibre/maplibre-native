@@ -14,6 +14,7 @@
 
 #include <mapbox/eternal.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
 #include <numbers>
@@ -21,7 +22,7 @@
 namespace mbgl {
 namespace style {
 namespace expression {
-
+namespace {
 /*
     Represents the parameter list for an expression that takes an arbitrary
     number of arguments (of a specific type).
@@ -40,7 +41,7 @@ struct Varargs : std::vector<T> {
     explicit Varargs(Args&&... args)
         : std::vector<T>(std::forward<Args>(args)...) {}
 };
-
+} // namespace
 namespace detail {
 // Base class for the Signature<Fn> structs that are used to determine
 // each CompoundExpression definition's type::Type data from the type of its
@@ -226,6 +227,7 @@ struct SignatureType<Lambda, std::enable_if_t<std::is_class_v<Lambda>>> {
     using Type = typename SignatureType<decltype(&Lambda::operator())>::Type;
 };
 
+namespace {
 template <typename Fn>
 std::unique_ptr<detail::SignatureBase> makeSignature(std::string name,
                                                      Fn evaluateFunction,
@@ -233,11 +235,10 @@ std::unique_ptr<detail::SignatureBase> makeSignature(std::string name,
     return std::make_unique<Signature<typename SignatureType<Fn>::Type>>(
         evaluateFunction, std::move(name), dependencies);
 }
-
+} // namespace
 } // namespace detail
 
 namespace {
-
 Value featureIdAsExpressionValue(const EvaluationContext& params) {
     assert(params.feature);
     auto id = params.feature->getID();
@@ -961,8 +962,8 @@ const auto& filterTypeInCompoundExpression() {
         "filter-type-in",
         [](const EvaluationContext& params, const Varargs<std::string>& types) -> Result<bool> {
             assert(params.feature);
-            std::optional<std::string> type = featureTypeAsString(params.feature->getType());
-            return std::find(types.begin(), types.end(), type) != types.end();
+            const auto type = featureTypeAsString(params.feature->getType());
+            return std::ranges::find(types, type) != types.end();
         },
         Dependency::Feature);
     return signature;
@@ -972,8 +973,8 @@ const auto& filterIdInCompoundExpression() {
     static auto signature = detail::makeSignature(
         "filter-id-in",
         [](const EvaluationContext& params, const Varargs<Value>& ids) -> Result<bool> {
-            auto id = featureIdAsExpressionValue(params);
-            return std::find(ids.begin(), ids.end(), id) != ids.end();
+            const auto id = featureIdAsExpressionValue(params);
+            return std::ranges::find(ids, id) != ids.end();
         },
         Dependency::Feature);
     return signature;
@@ -1173,7 +1174,7 @@ ParseResult createCompoundExpression(const Definitions& definitions,
     return ParseResult();
 }
 
-} // unnamed namespace
+} // namespace
 
 ParseResult parseCompoundExpression(const std::string& name, const Convertible& value, ParsingContext& ctx) {
     assert(isArray(value) && arrayLength(value) > 0);

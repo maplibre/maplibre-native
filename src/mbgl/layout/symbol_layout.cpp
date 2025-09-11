@@ -35,7 +35,6 @@ bool has(const style::SymbolLayoutProperties::PossiblyEvaluated& layout) {
 }
 } // namespace
 
-namespace {
 expression::Value sectionOptionsToValue(const SectionOptions& options) {
     std::unordered_map<std::string, expression::Value> result;
     // TODO: Data driven properties that can be overridden on per section basis.

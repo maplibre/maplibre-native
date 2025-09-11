@@ -94,11 +94,14 @@ jobs:
         shell: bash
 
     steps:
+      - if: runner.os == 'Windows'
+        run: git config --global core.longpaths true
+
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
-          submodules: true
-          fetch-depth: 0
+          submodules: recursive
+          fetch-depth: 1
 
       - name: Get OS Architecture
         if: runner.os == 'MacOS' || runner.os == 'Linux'

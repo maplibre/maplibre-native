@@ -55,8 +55,7 @@ GeometryCollection toGeometryCollection(MultiPolygon<int16_t>&& multipolygon) {
     }
     return result;
 }
-
-} // unnamed namespace
+} // namespace
 
 GeometryCollection fixupPolygons(const GeometryCollection& rings) {
     MLN_TRACE_FUNC();

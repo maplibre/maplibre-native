@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <mbgl/storage/http_file_source.hpp>
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/storage/resource.hpp>
@@ -16,7 +17,6 @@
 
 #include <dlfcn.h>
 #include <queue>
-#include <map>
 #include <cassert>
 #include <cstring>
 #include <cstdio>
@@ -235,10 +235,8 @@ int HTTPFileSource::Impl::startTimeout(CURLM * /* multi */, long timeout_ms, voi
     assert(userp);
     auto context = reinterpret_cast<Impl *>(userp);
 
-    if (timeout_ms < 0) {
-        // A timeout of 0 ms means that the timer will invoked in the next loop iteration.
-        timeout_ms = 0;
-    }
+    // A timeout of 0 ms means that the timer will invoked in the next loop iteration.
+    timeout_ms = std::max<long>(timeout_ms, 0);
 
     context->timeout.stop();
     context->timeout.start(mbgl::Milliseconds(timeout_ms), Duration::zero(), std::bind(&Impl::onTimeout, context));
@@ -247,22 +245,22 @@ int HTTPFileSource::Impl::startTimeout(CURLM * /* multi */, long timeout_ms, voi
 }
 
 void HTTPFileSource::Impl::setResourceOptions(ResourceOptions options) {
-    std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+    std::lock_guard lock(resourceOptionsMutex);
     resourceOptions = options;
 }
 
 ResourceOptions HTTPFileSource::Impl::getResourceOptions() {
-    std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+    std::lock_guard lock(resourceOptionsMutex);
     return resourceOptions.clone();
 }
 
 void HTTPFileSource::Impl::setClientOptions(ClientOptions options) {
-    std::lock_guard<std::mutex> lock(clientOptionsMutex);
+    std::lock_guard lock(clientOptionsMutex);
     clientOptions = options;
 }
 
 ClientOptions HTTPFileSource::Impl::getClientOptions() {
-    std::lock_guard<std::mutex> lock(clientOptionsMutex);
+    std::lock_guard lock(clientOptionsMutex);
     return clientOptions.clone();
 }
 
@@ -340,6 +338,7 @@ size_t HTTPRequest::writeCallback(void *const contents, const size_t size, const
     return size * nmemb;
 }
 
+namespace {
 // Compares the beginning of the (non-zero-terminated!) data buffer with the
 // (zero-terminated!) header string. If the data buffer contains the header
 // string at the beginning, it returns the length of the header string == begin
@@ -356,6 +355,7 @@ size_t headerMatches(const char *const header, const char *const buffer, const s
     }
     return i == headerLength ? i : std::string::npos;
 }
+} // namespace
 
 size_t HTTPRequest::headerCallback(char *const buffer, const size_t size, const size_t nmemb, void *userp) {
     assert(userp);
