@@ -18,7 +18,7 @@ bool isFeatureConstant(const Expression& expression) {
             return false;
         } else if (name == "properties" || name == "geometry-type" || name == "id" || name == "feature-state") {
             return false;
-    } else if (name.starts_with(filter)) {
+        } else if (name.starts_with(filter)) {
             // Legacy filters begin with "filter-" and are never constant.
             return false;
         }

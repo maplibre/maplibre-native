@@ -106,40 +106,39 @@ bool VertexAttributeGL::get(const gfx::VertexAttribute::ElementType& element, GL
     // TODO: do we need to handle unsigned inputs?
     switch (glType) {
         case GL_FLOAT:
-         return detail::get<float>(element, buffer) || detail::get<float, std::int32_t>(element, buffer);
+            return detail::get<float>(element, buffer) || detail::get<float, std::int32_t>(element, buffer);
         case GL_FLOAT_VEC2:
-         return detail::get<float2>(element, buffer) || detail::get<int2, float2>(element, buffer, [](int2 x) {
-              return float2{(float)x[0], (float)x[1]};
-             });
+            return detail::get<float2>(element, buffer) ||
+                   detail::get<int2, float2>(element, buffer, [](int2 x) { return float2{(float)x[0], (float)x[1]}; });
         case GL_FLOAT_VEC3:
-         return detail::get<float3>(element, buffer);
+            return detail::get<float3>(element, buffer);
         case GL_FLOAT_VEC4:
         case GL_FLOAT_MAT2:
-         return detail::get<float4>(element, buffer) ||
-             detail::get<int4, float4>(
+            return detail::get<float4>(element, buffer) ||
+                   detail::get<int4, float4>(
                        element,
                        buffer,
                        [](int4 x) { return float4{(float)x[0], (float)x[1], (float)x[2], (float)x[3]}; }) ||
-             detail::get<ushort8, float4>(element, buffer, [](ushort8 x) {
+                   detail::get<ushort8, float4>(element, buffer, [](ushort8 x) {
                        return float4{(float)x[0], (float)x[1], (float)x[2], (float)x[3]};
                    });
         case GL_INT:
-         return detail::get<std::int32_t>(element, buffer) || detail::get<float, std::int32_t>(element, buffer);
+            return detail::get<std::int32_t>(element, buffer) || detail::get<float, std::int32_t>(element, buffer);
         case GL_UNSIGNED_INT:
-         return detail::get<std::int32_t, std::uint32_t>(element, buffer) ||
-             detail::get<float, std::uint32_t>(element, buffer);
+            return detail::get<std::int32_t, std::uint32_t>(element, buffer) ||
+                   detail::get<float, std::uint32_t>(element, buffer);
         case GL_INT_VEC2:
-         return detail::get<int2>(element, buffer) || detail::get<float2, int2>(element, buffer, [](float2 x) {
+            return detail::get<int2>(element, buffer) || detail::get<float2, int2>(element, buffer, [](float2 x) {
                        return int2{(std::int32_t)x[0], (std::int32_t)x[1]};
                    });
         case GL_UNSIGNED_INT_VEC2:
             return false; // TODO
         case GL_INT_VEC3:
-         return detail::get<int3>(element, buffer);
+            return detail::get<int3>(element, buffer);
         case GL_UNSIGNED_INT_VEC3:
             return false; // TODO
         case GL_INT_VEC4:
-         return detail::get<int4>(element, buffer);
+            return detail::get<int4>(element, buffer);
         case GL_UNSIGNED_INT_VEC4:
             return false; // TODO
         default:

@@ -36,7 +36,7 @@ std::optional<Filter> Converter<Filter>::operator()(const Convertible& value, Er
             assert(error.message.size() > 0);
             return std::nullopt;
         }
-    return Filter(std::optional<std::unique_ptr<Expression>>(std::move(expression)), serializeLegacyFilter(value));
+        return Filter(std::optional<std::unique_ptr<Expression>>(std::move(expression)), serializeLegacyFilter(value));
     }
 }
 

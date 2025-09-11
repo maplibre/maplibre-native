@@ -34,8 +34,8 @@ public:
             Log::record(severity, event, code, msg, {});
         }
     } catch (...) { // NOLINT(bugprone-empty-catch)
-        // ignore exceptions during logging
-        // What would we do, log them?
+                    // ignore exceptions during logging
+                    // What would we do, log them?
 #if !defined(NDEBUG)
         [[maybe_unused]] auto ex = std::current_exception();
         assert(!"unhandled exception while logging");

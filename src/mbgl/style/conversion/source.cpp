@@ -38,8 +38,8 @@ std::optional<variant<std::string, Tileset>> convertURLOrTileset(const Convertib
 }
 
 std::optional<std::unique_ptr<Source>> convertRasterSource(const std::string& id,
-                                                                  const Convertible& value,
-                                                                  Error& error) {
+                                                           const Convertible& value,
+                                                           Error& error) {
     std::optional<variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
     if (!urlOrTileset) {
         return std::nullopt;
@@ -60,8 +60,8 @@ std::optional<std::unique_ptr<Source>> convertRasterSource(const std::string& id
 }
 
 std::optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::string& id,
-                                                                     const Convertible& value,
-                                                                     Error& error) {
+                                                              const Convertible& value,
+                                                              Error& error) {
     std::optional<variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
     if (!urlOrTileset) {
         return std::nullopt;
@@ -89,8 +89,8 @@ std::optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::string&
 }
 
 std::optional<std::unique_ptr<Source>> convertVectorSource(const std::string& id,
-                                                                  const Convertible& value,
-                                                                  Error& error) {
+                                                           const Convertible& value,
+                                                           Error& error) {
     std::optional<variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
     if (!urlOrTileset) {
         return std::nullopt;
@@ -117,8 +117,8 @@ std::optional<std::unique_ptr<Source>> convertVectorSource(const std::string& id
 }
 
 std::optional<std::unique_ptr<Source>> convertGeoJSONSource(const std::string& id,
-                                                                   const Convertible& value,
-                                                                   Error& error) {
+                                                            const Convertible& value,
+                                                            Error& error) {
     auto dataValue = objectMember(value, "data");
     if (!dataValue) {
         error.message = "GeoJSON source must have a data value";
@@ -149,8 +149,8 @@ std::optional<std::unique_ptr<Source>> convertGeoJSONSource(const std::string& i
 }
 
 std::optional<std::unique_ptr<Source>> convertImageSource(const std::string& id,
-                                                                 const Convertible& value,
-                                                                 Error& error) {
+                                                          const Convertible& value,
+                                                          Error& error) {
     auto urlValue = objectMember(value, "url");
     if (!urlValue) {
         error.message = "Image source must have a url value";

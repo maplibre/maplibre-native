@@ -13,7 +13,6 @@
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/style/properties.hpp>
 
-
 using namespace mbgl;
 
 namespace mbgl {

@@ -17,7 +17,7 @@ namespace util {
 namespace {
 const char* week[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 const char* months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-}
+} // namespace
 
 std::string rfc1123(Timestamp timestamp) {
     std::time_t time = std::chrono::system_clock::to_time_t(timestamp);
@@ -69,7 +69,7 @@ std::string iso8601(std::chrono::time_point<std::chrono::system_clock, Milliseco
     return buffer;
 }
 
-Timestamp parseTimestamp(const char *timestamp) {
+Timestamp parseTimestamp(const char* timestamp) {
     return std::chrono::time_point_cast<Seconds>(std::chrono::system_clock::from_time_t(parse_date(timestamp)));
 }
 

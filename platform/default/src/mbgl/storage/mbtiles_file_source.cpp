@@ -107,7 +107,7 @@ public:
         auto format_ptr = values.find("format");
         std::string format = format_ptr == values.end() ? "png" : format_ptr->second;
 
-    if (format != "pbf" && !values.contains("scale")) {
+        if (format != "pbf" && !values.contains("scale")) {
             values["scale"] = "1";
         }
 
