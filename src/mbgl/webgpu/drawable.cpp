@@ -12,6 +12,7 @@
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
 #include <mbgl/gfx/vertex_attribute.hpp>
+#include <mbgl/gfx/vertex_vector.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/logging.hpp>
 
@@ -105,6 +106,69 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         }
     }
     
+    // Extract vertex data from attributes if needed
+    if (impl->needsVertexExtraction && vertexAttributes) {
+        Log::Info(Event::General, "Extracting vertex data from vertex attributes");
+        
+        // Look for the position attribute (usually index 0)
+        vertexAttributes->visitAttributes([this](const gfx::VertexAttribute& attr) {
+            if (attr.getIndex() == 0) { // Position attribute
+                // Check if this attribute has shared raw data
+                if (attr.getSharedRawData()) {
+                    auto sharedData = attr.getSharedRawData();
+                    auto offset = attr.getSharedOffset();
+                    auto vertexOffset = attr.getSharedVertexOffset();
+                    auto stride = attr.getSharedStride();
+                    auto type = attr.getSharedType();
+                    
+                    Log::Info(Event::General, "Found shared vertex data - offset: " + std::to_string(offset) + 
+                             ", vertexOffset: " + std::to_string(vertexOffset) + ", stride: " + std::to_string(stride));
+                    
+                    // Get the raw bytes from the shared data
+                    const void* rawData = sharedData->getRawData();
+                    std::size_t rawSize = sharedData->getRawSize();
+                    
+                    // Calculate total size needed
+                    std::size_t totalVertices = impl->vertexCount;
+                    std::size_t vertexSize = stride ? stride : 4; // Default to 4 bytes (2 x int16)
+                    std::size_t totalSize = totalVertices * vertexSize;
+                    
+                    impl->vertexData.resize(totalSize);
+                    impl->vertexStride = vertexSize;
+                    impl->vertexSize = totalSize;
+                    impl->vertexType = type;
+                    
+                    // Copy vertex data with proper stride
+                    const uint8_t* srcBytes = static_cast<const uint8_t*>(rawData);
+                    for (std::size_t i = 0; i < totalVertices; ++i) {
+                        std::size_t srcOffset = (vertexOffset + i) * stride + offset;
+                        std::size_t dstOffset = i * vertexSize;
+                        
+                        if (srcOffset + vertexSize <= rawSize) {
+                            std::memcpy(impl->vertexData.data() + dstOffset, 
+                                      srcBytes + srcOffset, 
+                                      vertexSize);
+                        }
+                    }
+                    
+                    Log::Info(Event::General, "Extracted " + std::to_string(totalSize) + " bytes of vertex data for " + std::to_string(totalVertices) + " vertices");
+                    return; // Found position, stop visiting
+                } else if (!attr.getRawData().empty()) {
+                    // Use the raw data directly
+                    impl->vertexData = attr.getRawData();
+                    impl->vertexStride = attr.getStride();
+                    impl->vertexSize = impl->vertexData.size();
+                    impl->vertexType = attr.getDataType();
+                    
+                    Log::Info(Event::General, "Using raw vertex data directly - " + std::to_string(impl->vertexData.size()) + " bytes");
+                    return; // Found position, stop visiting
+                }
+            }
+        });
+        
+        impl->needsVertexExtraction = false;
+    }
+    
     // Upload vertex data to GPU
     if (!impl->vertexData.empty()) {
         // Release old buffer if it exists
@@ -177,12 +241,16 @@ void Drawable::uploadTextures(UploadPass&) const noexcept {
 }
 
 void Drawable::draw(PaintParameters& parameters) const {
+    Log::Info(Event::General, "WebGPU Drawable::draw called for " + getName());
+    
     if (!getEnabled()) {
+        Log::Info(Event::General, "Drawable not enabled, returning");
         return;
     }
     
     // Get the render pass
     if (!parameters.renderPass) {
+        Log::Info(Event::General, "No render pass, returning");
         return;
     }
     
@@ -224,7 +292,11 @@ void Drawable::draw(PaintParameters& parameters) const {
     
     // Set the pipeline
     if (impl->pipeline) {
+        Log::Info(Event::General, "WebGPU Drawable: Setting pipeline");
         wgpuRenderPassEncoderSetPipeline(renderPassEncoder, impl->pipeline);
+    } else {
+        Log::Info(Event::General, "WebGPU Drawable: No pipeline available, cannot draw");
+        return;
     }
     
     // Bind vertex buffer
@@ -241,18 +313,25 @@ void Drawable::draw(PaintParameters& parameters) const {
     
     // Bind uniform buffers and textures via bind group
     if (impl->bindGroup) {
+        Log::Info(Event::General, "WebGPU Drawable: Setting bind group");
         wgpuRenderPassEncoderSetBindGroup(renderPassEncoder, 0, impl->bindGroup, 0, nullptr);
+    } else {
+        Log::Info(Event::General, "WebGPU Drawable: No bind group to set");
     }
     
     // Draw
     if (impl->indexBuffer && impl->indexVector) {
         // Draw indexed
         uint32_t indexCount = static_cast<uint32_t>(impl->indexVector->elements());
+        Log::Info(Event::General, "WebGPU Drawable: Drawing indexed with " + std::to_string(indexCount) + " indices");
         wgpuRenderPassEncoderDrawIndexed(renderPassEncoder, indexCount, 1, 0, 0, 0);
     } else if (impl->vertexBuffer && impl->vertexCount > 0) {
         // Draw non-indexed
         uint32_t vertexCount = static_cast<uint32_t>(impl->vertexCount);
+        Log::Info(Event::General, "WebGPU Drawable: Drawing non-indexed with " + std::to_string(vertexCount) + " vertices");
         wgpuRenderPassEncoderDraw(renderPassEncoder, vertexCount, 1, 0, 0);
+    } else {
+        Log::Info(Event::General, "WebGPU Drawable: No vertex/index data to draw");
     }
 }
 
@@ -267,10 +346,22 @@ void Drawable::setIndexData(gfx::IndexVectorBasePtr indices, std::vector<UniqueD
 }
 
 void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::AttributeDataType) {
+    Log::Info(Event::General, "Drawable::setVertices called with " + std::to_string(count) + " vertices, data size: " + std::to_string(data.size()));
     impl->vertexData = std::move(data);
     impl->vertexCount = count;
     if (count > 0) {
         impl->vertexStride = impl->vertexData.size() / count;
+        
+        // Log the first few vertices to understand the coordinate range  
+        if (impl->vertexData.size() >= 4) {
+            const int16_t* vertices = reinterpret_cast<const int16_t*>(impl->vertexData.data());
+            Log::Info(Event::General, "First vertex: x=" + std::to_string(vertices[0]) + 
+                      ", y=" + std::to_string(vertices[1]));
+            if (impl->vertexData.size() >= 8) {
+                Log::Info(Event::General, "Second vertex: x=" + std::to_string(vertices[2]) + 
+                          ", y=" + std::to_string(vertices[3]));
+            }
+        }
     }
 }
 
@@ -319,22 +410,43 @@ void Drawable::setCullFaceMode(const gfx::CullFaceMode& value) {
     impl->cullFaceMode = value;
 }
 
-void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr attributes,
+void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
                                      std::size_t vertexCount,
-                                     gfx::DrawMode drawMode,
-                                     gfx::IndexVectorBasePtr indices,
+                                     gfx::DrawMode mode,
+                                     gfx::IndexVectorBasePtr indexes,
                                      const SegmentBase* segments,
                                      std::size_t segmentCount) {
-    // Update vertex attributes and rebuild pipeline if needed
-    vertexAttributes = std::move(attributes);
-    impl->vertexCount = vertexCount;
-    // Store draw mode if needed for pipeline creation
-    impl->indexVector = std::move(indices);
+    Log::Info(Event::General, "WebGPU Drawable::updateVertexAttributes - vertexCount: " + std::to_string(vertexCount) + ", segmentCount: " + std::to_string(segmentCount));
     
-    // Note: Segments are handled differently in WebGPU
-    // We'll use the entire buffer for now
-    (void)segments;
-    (void)segmentCount;
+    // Store the vertex attributes (base class method)
+    gfx::Drawable::setVertexAttributes(std::move(vertices));
+    
+    // Store vertex count
+    impl->vertexCount = vertexCount;
+    
+    // Handle segments - check for nullptr
+    std::vector<UniqueDrawSegment> drawSegs;
+    if (segments && segmentCount > 0) {
+        drawSegs.reserve(segmentCount);
+        for (std::size_t i = 0; i < segmentCount; ++i) {
+            const auto& seg = segments[i];
+            drawSegs.push_back(std::make_unique<DrawSegment>(mode, SegmentBase{
+                seg.vertexOffset,
+                seg.indexOffset,
+                seg.vertexLength,
+                seg.indexLength,
+                seg.sortKey
+            }));
+        }
+    }
+    
+    // Set the index data with segments
+    setIndexData(std::move(indexes), std::move(drawSegs));
+    
+    // Mark that we need to extract vertex data from attributes during upload
+    impl->needsVertexExtraction = true;
+    
+    Log::Info(Event::General, "Vertex attributes set, will extract data during upload");
     
     buildWebGPUPipeline();
 }

@@ -43,6 +43,8 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         Log::Info(Event::General, "WebGPU TileLayerGroup::render early return");
         return;
     }
+    
+    Log::Info(Event::General, "WebGPU TileLayerGroup::render - proceeding to visit drawables for " + getName());
 
 #if !defined(NDEBUG)
     const auto debugGroup = parameters.encoder->createDebugGroup(getName() + "-render");

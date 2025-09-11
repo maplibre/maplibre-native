@@ -99,6 +99,7 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_,
             #ifdef __APPLE__
             if (glfw_backend) {
                 auto size = glfw_backend->getSize();
+                Log::Info(Event::General, "Setting viewport: " + std::to_string(size.width) + "x" + std::to_string(size.height));
                 wgpuRenderPassEncoderSetViewport(impl->encoder, 
                     0, 0,  // x, y
                     static_cast<float>(size.width), static_cast<float>(size.height),  // width, height
@@ -115,8 +116,12 @@ RenderPass::~RenderPass() {
     if (impl->encoder) {
         Log::Info(Event::General, "Ending WebGPU render pass");
         // End the render pass
-        wgpuRenderPassEncoderEnd(impl->encoder);
-        Log::Info(Event::General, "wgpuRenderPassEncoderEnd called");
+        try {
+            wgpuRenderPassEncoderEnd(impl->encoder);
+            Log::Info(Event::General, "wgpuRenderPassEncoderEnd called");
+        } catch (...) {
+            Log::Warning(Event::General, "Failed to end render pass encoder");
+        }
         wgpuRenderPassEncoderRelease(impl->encoder);
         Log::Info(Event::General, "WebGPU render pass ended");
     }

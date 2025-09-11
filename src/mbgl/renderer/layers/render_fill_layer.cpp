@@ -199,14 +199,21 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     fillTileLayerGroup->setStencilTiles(renderTiles);
 
     StringIDSetsPair propertiesAsUniforms;
+    Log::Info(Event::General, "RenderFillLayer: Iterating over " + std::to_string(renderTiles->size()) + " tiles");
     for (const RenderTile& tile : *renderTiles) {
+        Log::Info(Event::General, "RenderFillLayer: Processing tile");
         const auto& tileID = tile.getOverscaledTileID();
 
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
         if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
+            Log::Info(Event::General, "RenderFillLayer: No render data/bucket for tile - renderData: " + 
+                      std::to_string(renderData != nullptr) + 
+                      ", bucket: " + std::to_string(renderData && renderData->bucket != nullptr) +
+                      ", hasData: " + std::to_string(renderData && renderData->bucket && renderData->bucket->hasData()));
             removeTile(renderPass, tileID);
             continue;
         }
+        Log::Info(Event::General, "RenderFillLayer: Tile has valid render data and bucket");
 
         auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
         auto& binders = bucket.paintPropertyBinders.at(getID());
