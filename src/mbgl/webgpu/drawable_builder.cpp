@@ -25,13 +25,18 @@ std::unique_ptr<gfx::Drawable::DrawSegment> DrawableBuilder::createSegment(gfx::
 
 void DrawableBuilder::init() {
     if (!currentDrawable) {
+        Log::Warning(Event::General, "DrawableBuilder::init - currentDrawable is null!");
         return;
     }
     
-    Log::Info(Event::General, "DrawableBuilder::init - mode: " + std::to_string(static_cast<int>(impl->getMode())) +
-              ", polylineVertices: " + std::to_string(impl->polylineVertices.elements()));
+    Log::Info(Event::General, "DrawableBuilder::init - currentDrawable present, mode: " + std::to_string(static_cast<int>(impl->getMode())) +
+              ", polylineVertices: " + std::to_string(impl->polylineVertices.elements()) +
+              ", vertexAttrId: " + std::to_string(vertexAttrId));
     
     auto& drawable = static_cast<Drawable&>(*currentDrawable);
+    
+    // Set the vertex attribute ID so the drawable knows which shared vertex buffer to use
+    drawable.setVertexAttrId(vertexAttrId);
     
     // Handle special case where rawVerticesCount is set but rawVertices is empty (from fills)
     // In this case, the vertex data is in the vertex attributes
@@ -40,7 +45,11 @@ void DrawableBuilder::init() {
                    " but rawVertices empty - vertex data is in attributes, calling updateVertexAttributes");
         // The vertex data is in the vertex attributes, use updateVertexAttributes
         // Get the vertex attributes from the drawable (already set by base class flush())
+        Log::Info(Event::General, "DrawableBuilder: checking vertex attributes: " + 
+                  std::to_string(drawable.getVertexAttributes() != nullptr) + 
+                  ", segments: " + std::to_string(impl->segments.size()));
         if (drawable.getVertexAttributes() && !impl->segments.empty()) {
+            Log::Info(Event::General, "DrawableBuilder: segments available: " + std::to_string(impl->segments.size()));
             // Get the draw mode from the first segment
             gfx::DrawMode drawMode = impl->segments[0]->getMode();
             // The segments in the drawable will be set by setIndexData below
@@ -52,6 +61,9 @@ void DrawableBuilder::init() {
                                            impl->sharedIndexes,
                                            nullptr,
                                            0);
+            Log::Info(Event::General, "DrawableBuilder: updateVertexAttributes completed");
+        } else {
+            Log::Info(Event::General, "DrawableBuilder: no vertex attributes or segments, skipping updateVertexAttributes");
         }
     } else if (impl->rawVerticesCount && !impl->rawVertices.empty()) {
         Log::Info(Event::General, "DrawableBuilder: Setting raw vertices, count: " + std::to_string(impl->rawVerticesCount) +
@@ -80,8 +92,15 @@ void DrawableBuilder::init() {
     }
     
     if (impl->sharedIndexes && impl->sharedIndexes->elements()) {
+        Log::Info(Event::General, "DrawableBuilder::init - setting index data with " + 
+                  std::to_string(impl->segments.size()) + " segments");
         drawable.setIndexData(impl->sharedIndexes, std::move(impl->segments));
+    } else {
+        Log::Info(Event::General, "DrawableBuilder::init - no index data to set");
     }
+    
+    Log::Info(Event::General, "DrawableBuilder::init - completed, currentDrawable still valid: " + 
+              std::to_string(currentDrawable != nullptr));
 }
 
 } // namespace webgpu

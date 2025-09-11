@@ -42,6 +42,8 @@ Drawable::~Drawable() {
 }
 
 void Drawable::upload(gfx::UploadPass& uploadPass) {
+    Log::Info(Event::General, "WebGPU Drawable::upload called for " + getName());
+    
     auto& webgpuUploadPass = static_cast<webgpu::UploadPass&>(uploadPass);
     auto& gfxContext = webgpuUploadPass.getContext();
     auto& context = static_cast<webgpu::Context&>(gfxContext);
@@ -49,6 +51,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
     
     if (!device) {
+        Log::Warning(Event::General, "No device available in upload pass");
         return;
     }
     
@@ -110,11 +113,16 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
     if (impl->needsVertexExtraction && vertexAttributes) {
         Log::Info(Event::General, "Extracting vertex data from vertex attributes");
         
-        // Look for the position attribute (usually index 0)
-        vertexAttributes->visitAttributes([this](const gfx::VertexAttribute& attr) {
-            if (attr.getIndex() == 0) { // Position attribute
-                // Check if this attribute has shared raw data
-                if (attr.getSharedRawData()) {
+        // Look for the vertex attribute with our ID
+        // For fill layers, the attribute might have index -1 but still contain the vertex data
+        const auto& attrPtr = vertexAttributes->get(impl->vertexAttrId);
+        if (attrPtr) {
+            const auto& attr = *attrPtr;
+            Log::Info(Event::General, "Found attribute at vertexAttrId " + std::to_string(impl->vertexAttrId) + 
+                      " with index " + std::to_string(attr.getIndex()));
+            
+            // Check if this attribute has shared raw data
+            if (attr.getSharedRawData()) {
                     auto sharedData = attr.getSharedRawData();
                     auto offset = attr.getSharedOffset();
                     auto vertexOffset = attr.getSharedVertexOffset();
@@ -151,26 +159,33 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
                         }
                     }
                     
-                    Log::Info(Event::General, "Extracted " + std::to_string(totalSize) + " bytes of vertex data for " + std::to_string(totalVertices) + " vertices");
-                    return; // Found position, stop visiting
-                } else if (!attr.getRawData().empty()) {
-                    // Use the raw data directly
-                    impl->vertexData = attr.getRawData();
-                    impl->vertexStride = attr.getStride();
-                    impl->vertexSize = impl->vertexData.size();
-                    impl->vertexType = attr.getDataType();
-                    
-                    Log::Info(Event::General, "Using raw vertex data directly - " + std::to_string(impl->vertexData.size()) + " bytes");
-                    return; // Found position, stop visiting
-                }
+                Log::Info(Event::General, "Extracted " + std::to_string(totalSize) + " bytes of vertex data for " + std::to_string(totalVertices) + " vertices");
+            } else if (!attr.getRawData().empty()) {
+                // Use the raw data directly
+                impl->vertexData = attr.getRawData();
+                impl->vertexStride = attr.getStride();
+                impl->vertexSize = impl->vertexData.size();
+                impl->vertexType = attr.getDataType();
+                
+                Log::Info(Event::General, "Using raw vertex data directly - " + std::to_string(impl->vertexData.size()) + " bytes");
+            } else {
+                Log::Info(Event::General, "Vertex attribute has no data (neither shared nor raw)");
             }
-        });
+        } else {
+            Log::Info(Event::General, "No attribute found at vertexAttrId " + std::to_string(impl->vertexAttrId));
+        }
         
         impl->needsVertexExtraction = false;
+        
+        if (impl->vertexData.empty()) {
+            Log::Warning(Event::General, "Failed to extract vertex data from attributes");
+        }
     }
     
     // Upload vertex data to GPU
     if (!impl->vertexData.empty()) {
+        Log::Info(Event::General, "Creating vertex buffer with " + std::to_string(impl->vertexData.size()) + " bytes");
+        
         // Release old buffer if it exists
         if (impl->vertexBuffer) {
             wgpuBufferRelease(impl->vertexBuffer);
@@ -193,12 +208,23 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
             if (mappedData) {
                 std::memcpy(mappedData, impl->vertexData.data(), impl->vertexData.size());
                 wgpuBufferUnmap(impl->vertexBuffer);
+                Log::Info(Event::General, "Vertex buffer created and data copied successfully");
+            } else {
+                Log::Error(Event::General, "Failed to get mapped range for vertex buffer");
             }
+        } else {
+            Log::Error(Event::General, "Failed to create vertex buffer");
         }
+    } else {
+        Log::Info(Event::General, "No vertex data to upload");
     }
     
     // Upload index data to GPU
     if (impl->indexVector && impl->indexVector->elements() > 0) {
+        std::size_t indexSize = impl->indexVector->bytes();
+        Log::Info(Event::General, "Creating index buffer with " + std::to_string(indexSize) + " bytes, " + 
+                  std::to_string(impl->indexVector->elements()) + " indices");
+        
         // Release old buffer if it exists
         if (impl->indexBuffer) {
             wgpuBufferRelease(impl->indexBuffer);
@@ -207,7 +233,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         
         // Create index buffer
         const void* indexData = impl->indexVector->data();
-        std::size_t indexSize = impl->indexVector->bytes();
         
         WGPUBufferDescriptor bufferDesc = {};
         WGPUStringView indexLabel = {"Index Buffer", strlen("Index Buffer")};
@@ -224,12 +249,21 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
             if (mappedData) {
                 std::memcpy(mappedData, indexData, indexSize);
                 wgpuBufferUnmap(impl->indexBuffer);
+                Log::Info(Event::General, "Index buffer created and data copied successfully");
+            } else {
+                Log::Error(Event::General, "Failed to get mapped range for index buffer");
             }
+        } else {
+            Log::Error(Event::General, "Failed to create index buffer");
         }
+    } else {
+        Log::Info(Event::General, "No index data to upload");
     }
     
     // Upload textures
     uploadTextures(webgpuUploadPass);
+    
+    Log::Info(Event::General, "WebGPU Drawable::upload completed for " + getName());
 }
 
 void Drawable::uploadTextures(UploadPass&) const noexcept {
@@ -341,8 +375,8 @@ void Drawable::setIndexData(gfx::IndexVectorBasePtr indices, std::vector<UniqueD
     // We'll use the entire index buffer for now
     (void)segments;
     
-    // Mark as dirty to rebuild pipeline if needed
-    buildWebGPUPipeline();
+    // Don't call buildWebGPUPipeline here - it will be called by the caller if needed
+    // This avoids redundant calls and potential recursion issues
 }
 
 void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::AttributeDataType) {
@@ -410,6 +444,11 @@ void Drawable::setCullFaceMode(const gfx::CullFaceMode& value) {
     impl->cullFaceMode = value;
 }
 
+void Drawable::setVertexAttrId(std::size_t id) {
+    impl->vertexAttrId = id;
+    Log::Info(Event::General, "WebGPU Drawable: Setting vertexAttrId to " + std::to_string(id));
+}
+
 void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
                                      std::size_t vertexCount,
                                      gfx::DrawMode mode,
@@ -449,6 +488,8 @@ void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
     Log::Info(Event::General, "Vertex attributes set, will extract data during upload");
     
     buildWebGPUPipeline();
+    
+    Log::Info(Event::General, "WebGPU Drawable::updateVertexAttributes - completed successfully");
 }
 
 void Drawable::buildWebGPUPipeline() noexcept {
