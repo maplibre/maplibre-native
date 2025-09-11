@@ -11,9 +11,6 @@
 
 #include <cstring> // for strlen
 
-// Platform specific - for getting the current texture view
-#include "../../platform/glfw/glfw_webgpu_backend.hpp"
-
 namespace mbgl {
 namespace webgpu {
 
@@ -23,97 +20,94 @@ public:
     WGPUCommandEncoder commandEncoder = nullptr;
 };
 
-RenderPass::RenderPass(CommandEncoder& commandEncoder_, 
-                      const char* name,
-                      const gfx::RenderPassDescriptor& descriptor)
+RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const gfx::RenderPassDescriptor& descriptor)
     : debugGroup(commandEncoder_.createDebugGroup(name)),
       impl(std::make_unique<Impl>()) {
-    
     // Get the WebGPU command encoder from our CommandEncoder
     impl->commandEncoder = commandEncoder_.getEncoder();
-    
+
     if (!impl->commandEncoder) {
         Log::Error(Event::General, "Failed to get WebGPU command encoder for render pass");
         return;
     }
-    
+
     // Get the backend to access device and surface
     auto& context = commandEncoder_.getContext();
     auto& backend = static_cast<RendererBackend&>(context.getBackend());
-    
+
     // Try to get the current texture view from the surface
     wgpu::TextureView textureView;
-    
-    // This is a bit hacky - we need to get the texture view from the GLFW backend
-    // In a proper implementation, this would be passed through the descriptor
-    // Using static_cast since we know the backend type in this context
-    auto* glfw_backend = static_cast<GLFWWebGPUBackend*>(&backend);
-    if (glfw_backend) {
-        textureView = glfw_backend->getCurrentTextureView();
+
+    // Get the texture view through the virtual method
+    void* textureViewPtr = backend.getCurrentTextureView();
+    if (textureViewPtr) {
+        textureView = wgpu::TextureView::Acquire(reinterpret_cast<WGPUTextureView>(textureViewPtr));
     }
-    
+
     // Create a default render pass if we have a texture view
     if (textureView) {
         Log::Info(Event::General, "Got texture view for render pass");
-        
+
         wgpu::RenderPassColorAttachment colorAttachment = {};
         colorAttachment.view = wgpu::TextureView(textureView);
-        
+
         // Use the descriptor to determine if we should clear
         // MapLibre sets clearColor for the first pass that needs clearing
         if (descriptor.clearColor) {
             colorAttachment.loadOp = wgpu::LoadOp::Clear;
-            colorAttachment.clearValue = {
-                static_cast<float>(descriptor.clearColor->r),
-                static_cast<float>(descriptor.clearColor->g),
-                static_cast<float>(descriptor.clearColor->b),
-                static_cast<float>(descriptor.clearColor->a)
-            };
-            Log::Info(Event::General, "RenderPass '" + std::string(name) + "': CLEAR to color (" +
-                      std::to_string(descriptor.clearColor->r) + ", " +
-                      std::to_string(descriptor.clearColor->g) + ", " +
-                      std::to_string(descriptor.clearColor->b) + ", " +
-                      std::to_string(descriptor.clearColor->a) + ")");
+            colorAttachment.clearValue = {static_cast<float>(descriptor.clearColor->r),
+                                          static_cast<float>(descriptor.clearColor->g),
+                                          static_cast<float>(descriptor.clearColor->b),
+                                          static_cast<float>(descriptor.clearColor->a)};
+            Log::Info(Event::General,
+                      "RenderPass '" + std::string(name) + "': CLEAR to color (" +
+                          std::to_string(descriptor.clearColor->r) + ", " + std::to_string(descriptor.clearColor->g) +
+                          ", " + std::to_string(descriptor.clearColor->b) + ", " +
+                          std::to_string(descriptor.clearColor->a) + ")");
         } else {
             colorAttachment.loadOp = wgpu::LoadOp::Load;
             Log::Info(Event::General, "RenderPass '" + std::string(name) + "': LOAD");
         }
         colorAttachment.storeOp = wgpu::StoreOp::Store;
-        
+
         wgpu::RenderPassDescriptor renderPassDesc = {};
         renderPassDesc.label = name;
         renderPassDesc.colorAttachmentCount = 1;
         renderPassDesc.colorAttachments = &colorAttachment;
-        
+
         // TODO: Add depth/stencil attachment if needed
         if (descriptor.clearDepth || descriptor.clearStencil) {
             // Would need to create/get depth texture and set up depth/stencil attachment
         }
-        
+
         // Create the render pass encoder
         wgpu::CommandEncoder wgpuEncoder(impl->commandEncoder);
         wgpu::RenderPassEncoder passEncoder = wgpuEncoder.BeginRenderPass(&renderPassDesc);
         impl->encoder = passEncoder.MoveToCHandle();
-        
+
         if (impl->encoder) {
             Log::Info(Event::General, "Render pass encoder created successfully");
-            
+
             // Set viewport to full framebuffer
             // Get the framebuffer size from the backend
-            if (glfw_backend) {
-                auto size = glfw_backend->getSize();
-                Log::Info(Event::General, "Setting viewport: " + std::to_string(size.width) + "x" + std::to_string(size.height));
-                wgpuRenderPassEncoderSetViewport(impl->encoder, 
-                    0, 0,  // x, y
-                    static_cast<float>(size.width), static_cast<float>(size.height),  // width, height
-                    0.0f, 1.0f);  // minDepth, maxDepth
-                    
-                // Also set scissor rect to full viewport
-                wgpuRenderPassEncoderSetScissorRect(impl->encoder, 
-                    0, 0,  // x, y
-                    size.width, size.height);  // width, height
-                Log::Info(Event::General, "Set scissor rect to full viewport");
-            }
+            auto size = backend.getFramebufferSize();
+            Log::Info(Event::General,
+                      "Setting viewport: " + std::to_string(size.width) + "x" + std::to_string(size.height));
+            wgpuRenderPassEncoderSetViewport(impl->encoder,
+                                             0,
+                                             0, // x, y
+                                             static_cast<float>(size.width),
+                                             static_cast<float>(size.height), // width, height
+                                             0.0f,
+                                             1.0f); // minDepth, maxDepth
+
+            // Also set scissor rect to full viewport
+            wgpuRenderPassEncoderSetScissorRect(impl->encoder,
+                                                0,
+                                                0, // x, y
+                                                size.width,
+                                                size.height); // width, height
+            Log::Info(Event::General, "Set scissor rect to full viewport");
         }
     } else {
         Log::Warning(Event::General, "No texture view available for render pass");
