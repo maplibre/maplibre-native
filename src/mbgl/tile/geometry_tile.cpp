@@ -246,7 +246,10 @@ void GeometryTile::setError(std::exception_ptr err) {
 void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_) {
     MLN_TRACE_FUNC();
 
+    mbgl::Log::Info(mbgl::Event::General, "GeometryTile::setData called for tile " + util::toString(id));
+    
     if (obsolete) {
+        mbgl::Log::Info(mbgl::Event::General, "GeometryTile::setData - tile is obsolete");
         return;
     }
 
@@ -258,6 +261,7 @@ void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_) {
     // signaling a complete state despite pending parse operations.
     pending = true;
 
+    mbgl::Log::Info(mbgl::Event::General, "GeometryTile::setData - invoking worker for tile " + util::toString(id));
     ++correlationID;
     worker.self().invoke(
         &GeometryTileWorker::setData, std::move(data_), imageManager->getAvailableImages(), correlationID);
@@ -290,6 +294,7 @@ std::unique_ptr<TileRenderData> GeometryTile::createRenderData() {
 
 void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& layers) {
     MLN_TRACE_FUNC();
+    mbgl::Log::Info(mbgl::Event::General, "GeometryTile::setLayers called for tile " + util::toString(id) + " with " + std::to_string(layers.size()) + " layers");
 
     // Mark the tile as pending again if it was complete before to prevent
     // signaling a complete state despite pending parse operations.

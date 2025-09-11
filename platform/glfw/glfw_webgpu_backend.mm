@@ -54,13 +54,13 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     mbgl::Log::Info(mbgl::Event::General, "Selected WebGPU adapter");
     
     // Create device with error callbacks
-    device = reinterpret_cast<WGPUDeviceImpl*>(selectedAdapter.CreateDevice());
-    if (!device) {
+    WGPUDevice rawDevice = selectedAdapter.CreateDevice();
+    if (!rawDevice) {
         mbgl::Log::Error(mbgl::Event::General, "Failed to create WebGPU device");
         throw std::runtime_error("Failed to create WebGPU device");
     }
     
-    wgpu::Device wgpuDevice = wgpu::Device::Acquire(reinterpret_cast<WGPUDevice>(device));
+    wgpuDevice = wgpu::Device::Acquire(rawDevice);
     
     // TODO: Add error callbacks once we figure out the correct Dawn API
     
@@ -72,7 +72,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     
     // Create CAMetalLayer
     CAMetalLayer* layer = [CAMetalLayer layer];
-    layer.device = dawn::native::metal::GetMTLDevice(reinterpret_cast<WGPUDevice>(device));
+    layer.device = dawn::native::metal::GetMTLDevice(wgpuDevice.Get());
     layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
     
     // Get window size
@@ -93,11 +93,9 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     // Create surface using the instance
     wgpu::Instance wgpuInstance(instance->Get());
     wgpuSurface = wgpuInstance.CreateSurface(&surfaceDesc);
-    surface = reinterpret_cast<WGPUSurfaceImpl*>(wgpuSurface.Get());
     
-    // Store the device and get the queue
-    this->wgpuDevice = wgpuDevice;
-    this->queue = wgpuDevice.GetQueue();
+    // Get the queue
+    queue = wgpuDevice.GetQueue();
     
     // Configure surface
     wgpu::SurfaceConfiguration config = {};
@@ -114,7 +112,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     
     // Store WebGPU instance, device and queue in the base class
     setInstance(instance->Get());
-    setDevice(device);
+    setDevice(reinterpret_cast<void*>(wgpuDevice.Get()));
     setQueue(reinterpret_cast<void*>(queue.Get()));
     
     // Make sure the window is visible and focused
@@ -162,6 +160,9 @@ void GLFWWebGPUBackend::swap() {
         // texture view goes out of scope and gets presented
         wgpuSurface.Present();
         mbgl::Log::Info(mbgl::Event::General, "Surface presented");
+        
+        // Clear the current texture view after presenting
+        currentTextureView = nullptr;
     }
     
     // Poll for window events to keep the window responsive
@@ -223,8 +224,9 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
     }
     
     mbgl::Log::Info(mbgl::Event::General, "Successfully got surface texture");
-    wgpu::TextureView view = surfaceTexture.texture.CreateView();
-    return reinterpret_cast<void*>(view.Get());
+    // Store the texture view to keep it alive
+    currentTextureView = surfaceTexture.texture.CreateView();
+    return reinterpret_cast<void*>(currentTextureView.Get());
 }
 
 mbgl::Size GLFWWebGPUBackend::getFramebufferSize() const {

@@ -34,7 +34,9 @@ void VectorTile::setMetadata(std::optional<Timestamp> modified_, std::optional<T
 }
 
 void VectorTile::setData(const std::shared_ptr<const std::string>& data_) {
+    mbgl::Log::Info(mbgl::Event::General, "VectorTile::setData called for tile " + util::toString(id) + ", data size=" + (data_ ? std::to_string(data_->size()) : "null"));
     if (obsolete) {
+        mbgl::Log::Info(mbgl::Event::General, "VectorTile::setData - tile is obsolete");
         return;
     }
 
