@@ -5,6 +5,8 @@
 #include <mbgl/tile/tile_loader.hpp>
 #include <mbgl/util/async_request.hpp>
 #include <mbgl/util/tileset.hpp>
+#include <mbgl/util/logging.hpp>
+#include <mbgl/util/string.hpp>
 
 #include <cassert>
 
@@ -188,10 +190,12 @@ template <typename T>
 void TileLoader<T>::loadFromNetwork() {
     assert(!request);
     if (!fileSource) {
+        mbgl::Log::Info(mbgl::Event::General, "TileLoader::loadFromNetwork - no fileSource for tile " + resource.url);
         tile.setError(getCantLoadTileError());
         return;
     }
 
+    mbgl::Log::Info(mbgl::Event::General, "TileLoader::loadFromNetwork - requesting tile " + resource.url);
     tile.onTileAction(TileOperation::RequestedFromNetwork);
 
     // Instead of using Resource::LoadingMethod::All, we're first doing a

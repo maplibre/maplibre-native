@@ -536,14 +536,8 @@ void Drawable::draw(PaintParameters& parameters) const {
     
     // Continue with rest of drawing even without pipeline for debugging
     
-    // For now, always draw the debug triangle to test the pipeline
-    Log::Info(Event::General, "Drawing debug triangle for " + getName());
-    wgpuRenderPassEncoderDraw(renderPassEncoder, 3, 1, 0, 0);
-    return; // Exit early for testing
-    
-    if (false) { // Disabled for now
-        // Bind vertex buffer
-        if (impl->vertexBuffer) {
+    // Bind vertex buffer
+    if (impl->vertexBuffer) {
         Log::Info(Event::General, "WebGPU Drawable: Setting vertex buffer, size: " + std::to_string(impl->vertexData.size()));
         // Log first vertex position for debugging (assuming int16x2 format)
         if (impl->vertexData.size() >= 4) {
@@ -573,9 +567,8 @@ void Drawable::draw(PaintParameters& parameters) const {
     if (impl->bindGroup) {
         Log::Info(Event::General, "WebGPU Drawable: Setting bind group");
         wgpuRenderPassEncoderSetBindGroup(renderPassEncoder, 0, impl->bindGroup, 0, nullptr);
-        } else {
-            Log::Info(Event::General, "WebGPU Drawable: No bind group to set");
-        }
+    } else {
+        Log::Info(Event::General, "WebGPU Drawable: No bind group to set");
     }
     
     // Draw

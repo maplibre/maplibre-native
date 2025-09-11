@@ -133,6 +133,7 @@ void GeometryTileWorker::setData(std::unique_ptr<const GeometryTileData> data_,
                                  std::set<std::string> availableImages_,
                                  uint64_t correlationID_) {
     MLN_TRACE_FUNC();
+    mbgl::Log::Info(mbgl::Event::General, "GeometryTileWorker::setData called for tile " + util::toString(id) + ", data=" + (data_ ? "yes" : "null"));
 
     try {
         data = std::move(data_);
@@ -160,6 +161,7 @@ void GeometryTileWorker::setLayers(std::vector<Immutable<LayerProperties>> layer
                                    std::set<std::string> availableImages_,
                                    uint64_t correlationID_) {
     MLN_TRACE_FUNC();
+    mbgl::Log::Info(mbgl::Event::General, "GeometryTileWorker::setLayers called for tile " + util::toString(id) + " with " + std::to_string(layers_.size()) + " layers");
 
     try {
         layers = std::move(layers_);
@@ -408,11 +410,14 @@ void GeometryTileWorker::requestNewImages(const ImageDependencies& imageDependen
 
 void GeometryTileWorker::parse() {
     MLN_TRACE_FUNC();
+    mbgl::Log::Info(mbgl::Event::General, "GeometryTileWorker::parse called for tile " + util::toString(id));
 
     if (!data || !layers) {
+        mbgl::Log::Info(mbgl::Event::General, "GeometryTileWorker::parse - no data or layers");
         return;
     }
 
+    mbgl::Log::Info(mbgl::Event::General, "GeometryTileWorker::parse - starting parse with " + std::to_string(layers->size()) + " layers");
     MBGL_TIMING_START(watch)
 
     std::unordered_map<std::string, std::unique_ptr<SymbolLayout>> symbolLayoutMap;

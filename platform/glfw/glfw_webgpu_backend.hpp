@@ -44,8 +44,8 @@ protected:
 
     // WebGPU-specific methods
 public:
-    WGPUDeviceImpl* getWGPUDevice() { return device; }
-    WGPUSurfaceImpl* getWGPUSurface() { return surface; }
+    WGPUDevice getWGPUDevice() { return wgpuDevice.Get(); }
+    WGPUSurface getWGPUSurface() { return wgpuSurface.Get(); }
     wgpu::TextureFormat getSwapChainFormat() const { return swapChainFormat; }
     
     // Override virtual methods from RendererBackend
@@ -55,11 +55,10 @@ public:
 private:
     GLFWwindow* window;
     std::unique_ptr<dawn::native::Instance> instance;
-    WGPUDeviceImpl* device = nullptr;
-    WGPUSurfaceImpl* surface = nullptr;
     void* metalLayer = nullptr; // CAMetalLayer on macOS
-    wgpu::Device wgpuDevice;
+    wgpu::Device wgpuDevice;  // This owns the device
     wgpu::Queue queue;
     wgpu::Surface wgpuSurface;
     wgpu::TextureFormat swapChainFormat = wgpu::TextureFormat::BGRA8Unorm;
+    wgpu::TextureView currentTextureView;  // Keep the current texture view alive
 };
