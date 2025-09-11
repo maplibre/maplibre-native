@@ -1707,8 +1707,8 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/benchmark)
 add_subdirectory(${PROJECT_SOURCE_DIR}/render-test)
 
 # Add examples if WebGPU is enabled
-if(MLN_WITH_WEBGPU)
-    add_subdirectory(${PROJECT_SOURCE_DIR}/examples)
-endif()
+# if(MLN_WITH_WEBGPU)
+#     add_subdirectory(${PROJECT_SOURCE_DIR}/examples)
+# endif()
 
 include(cmake/mbgl-core-deps.cmake)

@@ -20,6 +20,14 @@ public:
     gfx::ShaderPtr getOrCreateShader(gfx::Context& context,
                                      const StringIDSetsPair& propertiesAsUniforms,
                                      std::string_view firstAttribName = "a_pos") override;
+    
+    // Override base class methods
+    bool isShader(const std::string& shaderName) const noexcept override;
+    const gfx::ShaderPtr getShader(const std::string& shaderName) const noexcept override;
+
+private:
+    gfx::ShaderPtr defaultShader;
+    std::unordered_map<std::string, gfx::ShaderPtr> shaders;
 };
 
 } // namespace webgpu

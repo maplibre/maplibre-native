@@ -7,6 +7,7 @@
 #include <mbgl/webgpu/render_pass.hpp>
 #include <mbgl/webgpu/drawable.hpp>
 #include <mbgl/tile/tile_id.hpp>
+#include <mbgl/util/logging.hpp>
 
 namespace mbgl {
 namespace webgpu {
@@ -33,7 +34,13 @@ void TileLayerGroup::upload(gfx::UploadPass& uploadPass) {
 }
 
 void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
+    Log::Info(Event::General, "WebGPU TileLayerGroup::render called - name: " + getName() + 
+              ", enabled: " + std::to_string(enabled) + 
+              ", drawableCount: " + std::to_string(getDrawableCount()) +
+              ", hasRenderPass: " + std::to_string(parameters.renderPass != nullptr));
+    
     if (!enabled || !getDrawableCount() || !parameters.renderPass) {
+        Log::Info(Event::General, "WebGPU TileLayerGroup::render early return");
         return;
     }
 
@@ -46,11 +53,16 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     
     // Render tiles
     // TileLayerGroup doesn't have getCurrentTileIDs() - just visit all drawables
+    int drawableIndex = 0;
     visitDrawables([&](gfx::Drawable& drawable) {
+        drawableIndex++;
+        Log::Info(Event::General, "Visiting drawable " + std::to_string(drawableIndex) + 
+                  ", enabled: " + std::to_string(drawable.getEnabled()) +
+                  ", hasRenderPass: " + std::to_string(drawable.hasRenderPass(parameters.pass)));
 
-            if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
-                return;
-            }
+        if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
+            return;
+        }
 
         // Apply tweakers if any
         const auto& tweakers = drawable.getTweakers();
@@ -60,6 +72,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             }
         }
 
+        Log::Info(Event::General, "Calling drawable.draw() for drawable " + std::to_string(drawableIndex));
         drawable.draw(parameters);
     });
 }

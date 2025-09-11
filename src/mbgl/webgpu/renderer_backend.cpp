@@ -1,5 +1,6 @@
 #include <mbgl/webgpu/renderer_backend.hpp>
 #include <mbgl/webgpu/context.hpp>
+#include <mbgl/shaders/webgpu/shader_group.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/util/logging.hpp>
@@ -36,11 +37,74 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramPa
     // Initialize WebGPU shaders by registering shader groups
     // The actual shader compilation happens lazily when they're first used
     Log::Info(Event::General, "Initializing WebGPU shaders");
+    Log::Info(Event::General, "WebGPU backend: Rendering map tiles with basic shader.");
     
-    // Register shader groups with the registry
-    // Shader sources will be loaded from the registry when needed
-    // The Context::getGenericShader() method handles the actual shader creation
-    (void)registry;
+    // Create and register shader groups for all shader names used by render layers
+    const std::vector<std::string> shaderNames = {
+        // Background
+        "BackgroundShader",
+        "BackgroundPatternShader",
+        
+        // Fill
+        "FillShader",
+        "FillOutlineShader",
+        "FillPatternShader",
+        "FillOutlinePatternShader",
+        "FillOutlineTriangulatedShader",
+        
+        // Line
+        "LineShader",
+        "LinePatternShader",
+        "LineSDFShader",
+        "LineGradientShader",
+        
+        // Circle
+        "CircleShader",
+        
+        // Symbol
+        "SymbolIconShader",
+        "SymbolSDFIconShader",
+        "SymbolTextAndIconShader",
+        "SymbolSDFTextShader",
+        
+        // Raster
+        "RasterShader",
+        
+        // Hillshade
+        "HillshadeShader",
+        "HillshadePrepareShader",
+        
+        // Fill Extrusion
+        "FillExtrusionShader",
+        "FillExtrusionPatternShader",
+        
+        // Heatmap
+        "HeatmapShader",
+        "HeatmapTextureShader",
+        
+        // Custom
+        "CustomSymbolIconShader",
+        
+        // Debug
+        "CollisionBoxShader",
+        "CollisionCircleShader",
+        "ClippingMaskProgram",
+        "DebugShader"
+    };
+    
+    // Get the context to initialize shader groups
+    auto contextPtr = createContext();
+    auto& context = static_cast<webgpu::Context&>(*contextPtr);
+    
+    for (const auto& shaderName : shaderNames) {
+        auto webgpuShaderGroup = std::make_shared<webgpu::ShaderGroup>();
+        webgpuShaderGroup->initialize(context);
+        bool registered = registry.registerShaderGroup(std::move(webgpuShaderGroup), shaderName);
+        if (registered) {
+            Log::Debug(Event::General, "Registered WebGPU shader group for: " + shaderName);
+        }
+    }
+    
     (void)parameters;
 }
 

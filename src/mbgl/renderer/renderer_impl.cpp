@@ -363,8 +363,9 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         parameters.currentLayer = 0;
         Log::Info(Event::General, "Visiting layer groups (opaque), count: " + std::to_string(orchestrator.numLayerGroups()));
         orchestrator.visitLayerGroupsReversed([&](LayerGroupBase& layerGroup) {
-            Log::Info(Event::General, "In visitLayerGroupsReversed lambda");
+            Log::Info(Event::General, "In visitLayerGroupsReversed lambda, calling render on layer group");
             layerGroup.render(orchestrator, parameters);
+            Log::Info(Event::General, "After layerGroup.render call");
             parameters.currentLayer++;
         });
         Log::Info(Event::General, "Finished drawableOpaquePass");

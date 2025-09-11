@@ -123,7 +123,11 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              const std::shared_ptr<UpdateParameters>&,
                              const RenderTree&,
                              UniqueChangeRequestVec& changes) {
+    Log::Info(Event::General, "RenderFillLayer::update called for " + getID() + 
+              ", renderTiles: " + std::to_string(renderTiles != nullptr) + 
+              ", empty: " + std::to_string(renderTiles ? renderTiles->empty() : true));
     if (!renderTiles || renderTiles->empty()) {
+        Log::Info(Event::General, "RenderFillLayer::update - no render tiles, removing drawables");
         removeAllDrawables();
         return;
     }
@@ -162,9 +166,15 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         outlinePatternShaderGroup = shaders.getShaderGroup(std::string(FillOutlinePatternShaderName));
     }
     if (!fillShaderGroup || !outlineShaderGroup || !patternShaderGroup || !outlinePatternShaderGroup) {
+        Log::Info(Event::General, "RenderFillLayer: Missing shader groups - fill: " + std::to_string(fillShaderGroup != nullptr) +
+                  ", outline: " + std::to_string(outlineShaderGroup != nullptr) +
+                  ", pattern: " + std::to_string(patternShaderGroup != nullptr) +
+                  ", outlinePattern: " + std::to_string(outlinePatternShaderGroup != nullptr));
         removeAllDrawables();
         return;
     }
+
+    Log::Info(Event::General, "RenderFillLayer: All shader groups present, continuing with drawable creation");
 
     std::unique_ptr<gfx::DrawableBuilder> fillBuilder;
     std::unique_ptr<gfx::DrawableBuilder> outlineBuilder;
@@ -380,7 +390,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                            : nullptr;
 
             if (!fillBuilder && fillShader) {
+                Log::Info(Event::General, "Creating fill drawable builder for: " + layerPrefix);
+                Log::Info(Event::General, "RenderFillLayer: Creating fill drawable builder");
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill")) {
+                    Log::Info(Event::General, "RenderFillLayer: Fill drawable builder created successfully");
                     // Only write opaque fills to the depth buffer, matching `fillRenderPass` in legacy rendering
                     const bool opaque = (evaluated.get<FillColor>().constantOr(Color()).a >= 1.0f &&
                                          evaluated.get<FillOpacity>().constantOr(0) >= 1.0f);

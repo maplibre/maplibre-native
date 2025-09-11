@@ -31,12 +31,15 @@ public:
 
     WGPURenderPipeline pipeline = nullptr;
     WGPUBindGroup bindGroup = nullptr;
+    WGPUBindGroupLayout bindGroupLayout = nullptr;  // Store layout for deferred bind group creation
     
     // Buffer resources
     WGPUBuffer vertexBuffer = nullptr;
     WGPUBuffer indexBuffer = nullptr;
+    WGPUBuffer uniformBuffer = nullptr;
     std::vector<uint8_t> vertexData;
     std::size_t vertexStride = 0;
+    std::size_t vertexSize = 0;
     
     gfx::IndexVectorBasePtr indexVector;
     std::size_t vertexCount = 0;
@@ -47,6 +50,11 @@ public:
 
     UniformBufferArray uniformBuffers;
 
+    // Render state
+    bool colorEnabled = true;
+    gfx::ColorMode colorMode;
+    bool depthEnabled = false;
+    gfx::DepthMaskType depthMask = gfx::DepthMaskType::ReadWrite;
     gfx::DepthMode depthMode = gfx::DepthMode::disabled();
     gfx::StencilMode stencilMode;
     gfx::CullFaceMode cullFaceMode;

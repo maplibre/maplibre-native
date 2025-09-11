@@ -81,7 +81,7 @@ public:
         std::cout << "✓ MapRendererBackend initialized (" << width << "x" << height << ")\n";
     }
     
-    ~MapRendererBackend() override = default;
+    ~MapRendererBackend() = default;
     
     void updateAssumedState() {
         // Update any WebGPU state assumptions
@@ -100,7 +100,7 @@ public:
         Size size;
     };
     
-    gfx::Renderable& getDefaultRenderable() override {
+    gfx::Renderable& getDefaultRenderable() {
         // Return the default renderable (the main surface)
         if (!surfaceRenderable) {
             surfaceRenderable = std::make_unique<SurfaceRenderable>(Size{static_cast<uint32_t>(width), static_cast<uint32_t>(height)});
@@ -108,13 +108,13 @@ public:
         return *surfaceRenderable;
     }
     
-    void initShaders(gfx::ShaderRegistry& registry, const ProgramParameters& params) override {
+    void initShaders(gfx::ShaderRegistry& registry, const ProgramParameters& params) {
         // Initialize shaders - WebGPU shaders will be loaded on demand
         (void)registry;
         (void)params;
     }
     
-    std::unique_ptr<gfx::Context> createContext() override {
+    std::unique_ptr<gfx::Context> createContext() {
         // For now, return a dummy context - in a real implementation,
         // we would create a proper WebGPU context here
         class DummyContext : public gfx::Context {
@@ -168,11 +168,11 @@ public:
         return std::make_unique<DummyContext>();
     }
     
-    void activate() override {
+    void activate() {
         // Activate the WebGPU context
     }
     
-    void deactivate() override {
+    void deactivate() {
         // Deactivate the WebGPU context
     }
     

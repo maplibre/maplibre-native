@@ -1,0 +1,31 @@
+{
+  "version": 8,
+  "name": "Test Style",
+  "sources": {
+    "test": {
+      "type": "vector",
+      "tiles": ["https://demotiles.maplibre.org/tiles/{z}/{x}/{y}.pbf"],
+      "minzoom": 0,
+      "maxzoom": 14
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#f0f0f0"
+      }
+    },
+    {
+      "id": "test-fill",
+      "type": "fill",
+      "source": "test",
+      "source-layer": "water",
+      "paint": {
+        "fill-color": "#0000ff",
+        "fill-opacity": 0.5
+      }
+    }
+  ]
+}

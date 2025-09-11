@@ -6,6 +6,9 @@
 #include <memory>
 #include <vector>
 
+// Forward declare WebGPU types
+typedef struct WGPUBindGroupLayoutImpl* WGPUBindGroupLayout;
+
 namespace mbgl {
 namespace gfx {
 class UploadPass;
@@ -52,6 +55,7 @@ public:
 
 protected:
     void buildWebGPUPipeline() noexcept;
+    void createBindGroup(WGPUBindGroupLayout layout) noexcept;
 
     class Impl;
     const std::unique_ptr<Impl> impl;
