@@ -23,7 +23,9 @@ RendererBackend::RendererBackend(gfx::ContextMode contextMode)
     Log::Info(Event::General, "Initializing WebGPU renderer backend");
 }
 
-RendererBackend::~RendererBackend() = default;
+RendererBackend::~RendererBackend() {
+    // Explicitly defined destructor to ensure vtable is generated
+}
 
 gfx::Renderable& RendererBackend::getDefaultRenderable() {
     return *impl;
