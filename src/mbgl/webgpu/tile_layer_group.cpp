@@ -17,6 +17,7 @@ TileLayerGroup::TileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, 
 }
 
 void TileLayerGroup::upload(gfx::UploadPass& uploadPass) {
+    Log::Info(Event::General, "TileLayerGroup::upload called for " + getName() + ", enabled=" + std::to_string(enabled));
     if (!enabled) {
         return;
     }
@@ -25,12 +26,15 @@ void TileLayerGroup::upload(gfx::UploadPass& uploadPass) {
     const auto debugGroup = uploadPass.createDebugGroup(getName() + "-upload");
 #endif
 
+    int count = 0;
     visitDrawables([&](gfx::Drawable& drawable) {
         if (drawable.getEnabled()) {
+            Log::Info(Event::General, "TileLayerGroup: Uploading drawable " + std::to_string(++count));
             auto& drawableWebGPU = static_cast<webgpu::Drawable&>(drawable);
             drawableWebGPU.upload(uploadPass);
         }
     });
+    Log::Info(Event::General, "TileLayerGroup::upload completed, uploaded " + std::to_string(count) + " drawables");
 }
 
 void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {

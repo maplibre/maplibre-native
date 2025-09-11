@@ -340,15 +340,19 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         const auto finish = [&](gfx::DrawableBuilder& builder, FillVariant type) {
             builder.flush(context);
 
-            for (auto& drawable : builder.clearDrawables()) {
+            auto drawables = builder.clearDrawables();
+            Log::Info(Event::General, "RenderFillLayer: Got " + std::to_string(drawables.size()) + " drawables from builder");
+            for (auto& drawable : drawables) {
                 drawable->setTileID(tileID);
                 drawable->setType(static_cast<size_t>(type));
                 drawable->setLayerTweaker(layerTweaker);
                 drawable->setBinders(renderData->bucket, &binders);
                 drawable->setRenderTile(renderTilesOwner, &tile);
+                Log::Info(Event::General, "RenderFillLayer: Adding drawable to tile layer group");
                 fillTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
             }
+            Log::Info(Event::General, "RenderFillLayer: Added " + std::to_string(stats.drawablesAdded) + " drawables total");
         };
 
         // Outline always occurs in translucent pass, defaults to fill color

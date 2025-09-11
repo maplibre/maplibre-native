@@ -5,6 +5,7 @@
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/gfx/polyline_generator.hpp>
+#include <mbgl/util/logging.hpp>
 
 #include <array>
 #include <memory>
@@ -48,6 +49,7 @@ public:
 
     /// Get all the completed drawables and release ownership
     std::vector<UniqueDrawable> clearDrawables() {
+        Log::Info(Event::General, "DrawableBuilder::clearDrawables - Returning " + std::to_string(drawables.size()) + " drawables");
         std::vector<UniqueDrawable> v = std::move(drawables);
         drawables = std::vector<UniqueDrawable>{};
         return v;
