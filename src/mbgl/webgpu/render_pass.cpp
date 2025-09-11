@@ -12,9 +12,7 @@
 #include <cstring> // for strlen
 
 // Platform specific - for getting the current texture view
-#ifdef __APPLE__
 #include "../../platform/glfw/glfw_webgpu_backend.hpp"
-#endif
 
 namespace mbgl {
 namespace webgpu {
@@ -49,51 +47,38 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_,
     // This is a bit hacky - we need to get the texture view from the GLFW backend
     // In a proper implementation, this would be passed through the descriptor
     // Using static_cast since we know the backend type in this context
-    #ifdef __APPLE__
     auto* glfw_backend = static_cast<GLFWWebGPUBackend*>(&backend);
     if (glfw_backend) {
         textureView = glfw_backend->getCurrentTextureView();
     }
-    #endif
     
     // Create a default render pass if we have a texture view
     if (textureView) {
         Log::Info(Event::General, "Got texture view for render pass");
         
-        // Track if this is the first render pass in the frame
-        static int renderPassCount = 0;
-        static bool newFrame = true;
-        
         wgpu::RenderPassColorAttachment colorAttachment = {};
         colorAttachment.view = wgpu::TextureView(textureView);
         
-        // Only clear on the first render pass of each frame
-        if (descriptor.clearColor && newFrame) {
+        // Use the descriptor to determine if we should clear
+        // MapLibre sets clearColor for the first pass that needs clearing
+        if (descriptor.clearColor) {
             colorAttachment.loadOp = wgpu::LoadOp::Clear;
-            // Use the actual requested clear color
             colorAttachment.clearValue = {
                 static_cast<float>(descriptor.clearColor->r),
                 static_cast<float>(descriptor.clearColor->g),
                 static_cast<float>(descriptor.clearColor->b),
                 static_cast<float>(descriptor.clearColor->a)
             };
-            Log::Info(Event::General, "RenderPass #" + std::to_string(renderPassCount) + 
-                      ": CLEAR (first pass)");
-            newFrame = false;
+            Log::Info(Event::General, "RenderPass '" + std::string(name) + "': CLEAR to color (" +
+                      std::to_string(descriptor.clearColor->r) + ", " +
+                      std::to_string(descriptor.clearColor->g) + ", " +
+                      std::to_string(descriptor.clearColor->b) + ", " +
+                      std::to_string(descriptor.clearColor->a) + ")");
         } else {
             colorAttachment.loadOp = wgpu::LoadOp::Load;
-            Log::Info(Event::General, "RenderPass #" + std::to_string(renderPassCount) + 
-                      ": LOAD existing content");
+            Log::Info(Event::General, "RenderPass '" + std::string(name) + "': LOAD");
         }
         colorAttachment.storeOp = wgpu::StoreOp::Store;
-        
-        renderPassCount++;
-        
-        // Reset for next frame (heuristic: if we've had many passes, likely new frame)
-        if (renderPassCount > 10) {
-            renderPassCount = 0;
-            newFrame = true;
-        }
         
         wgpu::RenderPassDescriptor renderPassDesc = {};
         renderPassDesc.label = name;
@@ -115,7 +100,6 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_,
             
             // Set viewport to full framebuffer
             // Get the framebuffer size from the backend
-            #ifdef __APPLE__
             if (glfw_backend) {
                 auto size = glfw_backend->getSize();
                 Log::Info(Event::General, "Setting viewport: " + std::to_string(size.width) + "x" + std::to_string(size.height));
@@ -130,7 +114,6 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_,
                     size.width, size.height);  // width, height
                 Log::Info(Event::General, "Set scissor rect to full viewport");
             }
-            #endif
         }
     } else {
         Log::Warning(Event::General, "No texture view available for render pass");

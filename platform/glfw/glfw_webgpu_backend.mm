@@ -53,7 +53,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     dawn::native::Adapter& selectedAdapter = adapters[0];
     mbgl::Log::Info(mbgl::Event::General, "Selected WebGPU adapter");
     
-    // Create device
+    // Create device with error callbacks
     device = reinterpret_cast<WGPUDeviceImpl*>(selectedAdapter.CreateDevice());
     if (!device) {
         mbgl::Log::Error(mbgl::Event::General, "Failed to create WebGPU device");
@@ -61,6 +61,8 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     }
     
     wgpu::Device wgpuDevice = wgpu::Device::Acquire(reinterpret_cast<WGPUDevice>(device));
+    
+    // TODO: Add error callbacks once we figure out the correct Dawn API
     
 #ifdef __APPLE__
     // Setup Metal surface on macOS

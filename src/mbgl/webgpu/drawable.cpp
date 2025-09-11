@@ -231,11 +231,18 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
                 Log::Info(Event::General, "Vertex buffer created and data written via queue successfully");
                 
                 // Log first few vertices for debugging
-                static int vertexLogCount = 0;
-                if (vertexLogCount++ < 5 && impl->vertexData.size() >= 4) {
+                if (impl->vertexData.size() >= 12) {
                     const int16_t* vertices = reinterpret_cast<const int16_t*>(impl->vertexData.data());
-                    Log::Info(Event::General, "First vertex for " + getName() + ": [" +
-                              std::to_string(vertices[0]) + ", " + std::to_string(vertices[1]) + "]");
+                    std::string vertexInfo = "Vertices for " + getName() + ":\n";
+                    for (int i = 0; i < std::min(3, static_cast<int>(impl->vertexData.size() / 4)); i++) {
+                        float x = static_cast<float>(vertices[i * 2]) / 8192.0f;
+                        float y = static_cast<float>(vertices[i * 2 + 1]) / 8192.0f;
+                        vertexInfo += "  V" + std::to_string(i) + ": raw=[" + 
+                                     std::to_string(vertices[i * 2]) + ", " + 
+                                     std::to_string(vertices[i * 2 + 1]) + "], normalized=[" +
+                                     std::to_string(x) + ", " + std::to_string(y) + "]\n";
+                    }
+                    Log::Info(Event::General, vertexInfo);
                 }
             } else {
                 Log::Error(Event::General, "Failed to get queue for writing vertex buffer");
@@ -338,21 +345,60 @@ void Drawable::draw(PaintParameters& parameters) const {
         WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
         
         if (device && queue) {
-            // Get the tile-specific matrix (following Metal's approach)
+            // Get the appropriate matrix for transformation
             mat4 tileMatrix;
             
-            if (const auto& tileID = getTileID()) {
-                // Use the tile-specific matrix which includes both projection and tile transformation
-                parameters.state.matrixFor(tileMatrix, tileID->toUnwrapped());
+            // For debugging: Try using just the projection matrix to see if vertices appear
+            static bool useSimpleProjection = true;
+            
+            if (useSimpleProjection) {
+                // Create a simple orthographic projection for testing
+                // The vertex data seems to use a larger range (0-16384 or more)
+                // Let's use a wider range to capture all geometry
+                float range = 32768.0f;  // Wider range to capture all vertices
                 
-                // Apply drawable origin if it exists (as done in Metal)
+                // Initialize to identity
+                for (int i = 0; i < 16; i++) tileMatrix[i] = 0.0f;
+                
+                // Column 0: X axis scaling
+                tileMatrix[0] = 2.0f / range;  // Scale X
+                
+                // Column 1: Y axis scaling (flip for Y-down to Y-up)
+                tileMatrix[5] = -2.0f / range; // Scale Y (negative to flip)
+                
+                // Column 2: Z axis (no change)
+                tileMatrix[10] = 1.0f;
+                
+                // Column 3: Translation - center the range
+                tileMatrix[12] = -1.0f;  // Translate X: map 0 -> -1
+                tileMatrix[13] = 1.0f;   // Translate Y: map 0 -> 1 (after flip)
+                tileMatrix[14] = 0.0f;   // No Z translation
+                
+                // W component (homogeneous coordinate)
+                tileMatrix[15] = 1.0f;
+                
+                // Debug: Print what we just set
+                Log::Info(Event::General, "Simple ortho matrix setup: [0]=" + std::to_string(tileMatrix[0]) +
+                          ", [5]=" + std::to_string(tileMatrix[5]) +
+                          ", [10]=" + std::to_string(tileMatrix[10]) +
+                          ", [12]=" + std::to_string(tileMatrix[12]) +
+                          ", [13]=" + std::to_string(tileMatrix[13]) + 
+                          ", [15]=" + std::to_string(tileMatrix[15]));
+                
+                Log::Info(Event::General, "Using simple orthographic projection for debugging");
+            } else if (const auto& tileID = getTileID()) {
+                // Get the tile-specific transformation matrix
+                mat4 tileTransform;
+                parameters.state.matrixFor(tileTransform, tileID->toUnwrapped());
+                
+                // Apply drawable origin if it exists
                 if (const auto& origin = getOrigin(); origin.has_value()) {
-                    matrix::translate(tileMatrix, tileMatrix, origin->x, origin->y, 0);
+                    matrix::translate(tileTransform, tileTransform, origin->x, origin->y, 0);
                 }
                 
-                // Multiply with projection matrix to get final MVP matrix (following Metal's approach)
+                // Compute final MVP: Projection * View * Model
                 const mat4& projMatrix = parameters.transformParams.projMatrix;
-                matrix::multiply(tileMatrix, projMatrix, tileMatrix);
+                matrix::multiply(tileMatrix, projMatrix, tileTransform);
             } else {
                 // Fallback to projection matrix if no tile
                 tileMatrix = parameters.transformParams.projMatrix;
@@ -372,11 +418,20 @@ void Drawable::draw(PaintParameters& parameters) const {
             }
             
             // Convert to column-major format for WebGPU (mat4 is row-major in MapLibre)
+            // Convert from double (mat4) to float for WebGPU
+            // mat4 is std::array<double, 16> but WebGPU needs float[16]
             float matrix[16];
-            for (int i = 0; i < 4; ++i) {
-                for (int j = 0; j < 4; ++j) {
-                    matrix[j * 4 + i] = tileMatrix[i * 4 + j];
-                }
+            for (int i = 0; i < 16; i++) {
+                matrix[i] = static_cast<float>(tileMatrix[i]);
+            }
+            
+            // Debug: verify conversion
+            static int debugCount = 0;
+            if (debugCount++ < 5) {
+                Log::Info(Event::General, "After conversion: matrix[0]=" + std::to_string(matrix[0]) +
+                          ", [5]=" + std::to_string(matrix[5]) +
+                          ", [10]=" + std::to_string(matrix[10]) +
+                          ", [15]=" + std::to_string(matrix[15]));
             }
             
             // Note: WebGPU uses depth range [0, 1] vs OpenGL's [-1, 1]
@@ -384,6 +439,56 @@ void Drawable::draw(PaintParameters& parameters) const {
             
             // Update the uniform buffer
             wgpuQueueWriteBuffer(queue, impl->uniformBuffer, 0, matrix, sizeof(matrix));
+            
+            // Log matrix values for debugging (first drawable only)
+            static bool loggedMatrix = false;
+            if (!loggedMatrix && getName().find("fill") != std::string::npos) {
+                loggedMatrix = true;
+                std::string matrixInfo = "Matrix for " + getName() + " (column-major storage):\n";
+                const float* matrixData = reinterpret_cast<const float*>(&matrix);
+                // Print as rows for readability, but data is stored column-major
+                for (int row = 0; row < 4; row++) {
+                    matrixInfo += "  Row " + std::to_string(row) + ": [";
+                    for (int col = 0; col < 4; col++) {
+                        // Column-major: element at row r, column c is at index c*4 + r
+                        matrixInfo += std::to_string(matrixData[col * 4 + row]);
+                        if (col < 3) matrixInfo += ", ";
+                    }
+                    matrixInfo += "]\n";
+                }
+                Log::Info(Event::General, matrixInfo);
+                
+                // Test transform a sample vertex to see where it ends up
+                if (impl->vertexData.size() >= 4) {
+                    const int16_t* vertices = reinterpret_cast<const int16_t*>(impl->vertexData.data());
+                    float x = static_cast<float>(vertices[0]);
+                    float y = static_cast<float>(vertices[1]);
+                    
+                    // Apply matrix transformation (column-major order)
+                    // For column-major: column i is at indices [i*4, i*4+1, i*4+2, i*4+3]
+                    float tx = matrixData[0] * x + matrixData[4] * y + matrixData[8] * 0 + matrixData[12];
+                    float ty = matrixData[1] * x + matrixData[5] * y + matrixData[9] * 0 + matrixData[13];
+                    float tz = matrixData[2] * x + matrixData[6] * y + matrixData[10] * 0 + matrixData[14];
+                    float tw = matrixData[3] * x + matrixData[7] * y + matrixData[11] * 0 + matrixData[15];
+                    
+                    Log::Info(Event::General, "Matrix elements for w: [3]=" + std::to_string(matrixData[3]) +
+                              ", [7]=" + std::to_string(matrixData[7]) +
+                              ", [11]=" + std::to_string(matrixData[11]) +
+                              ", [15]=" + std::to_string(matrixData[15]));
+                    
+                    // Perspective divide to get NDC
+                    if (tw != 0) {
+                        tx /= tw;
+                        ty /= tw;
+                        tz /= tw;
+                    }
+                    
+                    Log::Info(Event::General, "Sample vertex (" + std::to_string(x) + ", " + std::to_string(y) + 
+                              ") -> Clip: (" + std::to_string(tx * tw) + ", " + std::to_string(ty * tw) + ", " + 
+                              std::to_string(tz * tw) + ", " + std::to_string(tw) + 
+                              ") -> NDC: (" + std::to_string(tx) + ", " + std::to_string(ty) + ", " + std::to_string(tz) + ")");
+                }
+            }
         }
     }
     
@@ -431,13 +536,14 @@ void Drawable::draw(PaintParameters& parameters) const {
     
     // Continue with rest of drawing even without pipeline for debugging
     
-    // Use actual vertex data
-    bool debugHardcodedTriangle = false;
+    // For now, always draw the debug triangle to test the pipeline
+    Log::Info(Event::General, "Drawing debug triangle for " + getName());
+    wgpuRenderPassEncoderDraw(renderPassEncoder, 3, 1, 0, 0);
+    return; // Exit early for testing
     
-    if (!debugHardcodedTriangle) {
-    
-    // Bind vertex buffer
-    if (impl->vertexBuffer) {
+    if (false) { // Disabled for now
+        // Bind vertex buffer
+        if (impl->vertexBuffer) {
         Log::Info(Event::General, "WebGPU Drawable: Setting vertex buffer, size: " + std::to_string(impl->vertexData.size()));
         // Log first vertex position for debugging (assuming int16x2 format)
         if (impl->vertexData.size() >= 4) {
@@ -467,26 +573,41 @@ void Drawable::draw(PaintParameters& parameters) const {
     if (impl->bindGroup) {
         Log::Info(Event::General, "WebGPU Drawable: Setting bind group");
         wgpuRenderPassEncoderSetBindGroup(renderPassEncoder, 0, impl->bindGroup, 0, nullptr);
-    } else {
-        Log::Info(Event::General, "WebGPU Drawable: No bind group to set");
-    }
-    } else {
-        Log::Info(Event::General, "WebGPU Drawable: Debug mode - skipping all buffer bindings");
+        } else {
+            Log::Info(Event::General, "WebGPU Drawable: No bind group to set");
+        }
     }
     
     // Draw
     if (impl->indexBuffer && impl->indexVector) {
         // Draw indexed geometry
         uint32_t indexCount = static_cast<uint32_t>(impl->indexVector->elements());
-        Log::Info(Event::General, "WebGPU Drawable: Drawing indexed with " + std::to_string(indexCount) + " indices");
+        
+        // Log draw call details for first few drawables
+        static int drawCallLogCount = 0;
+        if (drawCallLogCount++ < 10) {
+            Log::Info(Event::General, "WebGPU Drawable: Drawing " + getName() + 
+                      " with " + std::to_string(indexCount) + " indices, " +
+                      std::to_string(impl->vertexCount) + " vertices");
+        }
+        
         wgpuRenderPassEncoderDrawIndexed(renderPassEncoder, indexCount, 1, 0, 0, 0);
     } else if (impl->vertexBuffer && impl->vertexCount > 0) {
         // Draw non-indexed
         uint32_t vertexCount = static_cast<uint32_t>(impl->vertexCount);
-        Log::Info(Event::General, "WebGPU Drawable: Drawing non-indexed with " + std::to_string(vertexCount) + " vertices");
+        
+        static int drawCallLogCount = 0;
+        if (drawCallLogCount++ < 10) {
+            Log::Info(Event::General, "WebGPU Drawable: Drawing non-indexed " + getName() +
+                      " with " + std::to_string(vertexCount) + " vertices");
+        }
+        
         wgpuRenderPassEncoderDraw(renderPassEncoder, vertexCount, 1, 0, 0);
     } else {
-        Log::Info(Event::General, "WebGPU Drawable: No vertex/index data to draw");
+        static int noDataLogCount = 0;
+        if (noDataLogCount++ < 5) {
+            Log::Info(Event::General, "WebGPU Drawable: No vertex/index data to draw for " + getName());
+        }
     }
 }
 

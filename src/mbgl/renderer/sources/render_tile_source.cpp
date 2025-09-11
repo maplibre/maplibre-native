@@ -26,7 +26,7 @@
 #include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/renderer/layer_tweaker.hpp>
 
-#if MLN_RENDER_BACKEND_METAL || (MLN_RENDER_BACKEND_VULKAN && defined(__ANDROID__))
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_WEBGPU || (MLN_RENDER_BACKEND_VULKAN && defined(__ANDROID__))
 #define MLN_ENABLE_POLYLINE_DRAWABLES 1
 #else
 #define MLN_ENABLE_POLYLINE_DRAWABLES 0
