@@ -178,15 +178,15 @@ struct VertexOutput {
 @vertex
 fn main(input: VertexInput) -> VertexOutput {
     var output: VertexOutput;
-    // Convert int16 position to normalized coordinates
-    let pos = vec2<f32>(f32(input.position.x) / 4096.0, f32(input.position.y) / 4096.0);
+    // Convert int16 position to float without normalization (matrix handles scaling)
+    let pos = vec2<f32>(f32(input.position.x), f32(input.position.y));
     output.position = uniforms.mvp_matrix * vec4<f32>(pos, 0.0, 1.0);
-    // Simple color based on position for debugging
+    // Bright color for debugging - make tiles visible
     output.color = vec4<f32>(
-        (pos.x + 1.0) * 0.5,
-        (pos.y + 1.0) * 0.5,
-        0.5,
-        1.0
+        1.0,  // Red
+        0.5,  // Green  
+        0.0,  // Blue
+        1.0   // Alpha
     );
     return output;
 }
