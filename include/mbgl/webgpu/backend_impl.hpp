@@ -912,6 +912,12 @@ inline void wgpuRenderPassEncoderSetPipeline(WGPURenderPassEncoder /*encoder*/, 
 }
 inline void wgpuRenderPassEncoderSetVertexBuffer(WGPURenderPassEncoder /*encoder*/, uint32_t /*slot*/, WGPUBuffer /*buffer*/, uint64_t /*offset*/, uint64_t /*size*/) {
 }
+inline void wgpuRenderPassEncoderSetIndexBuffer(WGPURenderPassEncoder /*encoder*/, WGPUBuffer /*buffer*/, WGPUIndexFormat /*format*/, uint64_t /*offset*/, uint64_t /*size*/) {
+}
+inline void wgpuRenderPassEncoderSetBindGroup(WGPURenderPassEncoder /*encoder*/, uint32_t /*groupIndex*/, WGPUBindGroup /*group*/, uint32_t /*dynamicOffsetCount*/, const uint32_t* /*dynamicOffsets*/) {
+}
+inline void wgpuRenderPassEncoderDrawIndexed(WGPURenderPassEncoder /*encoder*/, uint32_t /*indexCount*/, uint32_t /*instanceCount*/, uint32_t /*firstIndex*/, int32_t /*baseVertex*/, uint32_t /*firstInstance*/) {
+}
 inline void wgpuRenderPassEncoderDraw(WGPURenderPassEncoder /*encoder*/, uint32_t /*vertexCount*/, uint32_t /*instanceCount*/, uint32_t /*firstVertex*/, uint32_t /*firstInstance*/) {
 }
 inline void wgpuRenderPassEncoderEnd(WGPURenderPassEncoder /*encoder*/) {
