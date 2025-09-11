@@ -14,14 +14,14 @@ namespace mbgl {
 
 class HBShaper::Impl {
 public:
-    explicit Impl(GlyphIDType type_, const std::string &fontFileData, const FreeTypeLibrary &lib);
+    explicit Impl(GlyphIDType type_, const std::string& fontFileData, const FreeTypeLibrary& lib);
     ~Impl();
 
-    void createComplexGlyphIDs(const std::u16string &text,
-                               std::vector<GlyphID> &glyphIDs,
-                               std::vector<HBShapeAdjust> &adjusts);
+    void createComplexGlyphIDs(const std::u16string& text,
+                               std::vector<GlyphID>& glyphIDs,
+                               std::vector<HBShapeAdjust>& adjusts);
 
-    Glyph rasterizeGlyph(const GlyphID &glyph) { return face.rasterizeGlyph(glyph); }
+    Glyph rasterizeGlyph(const GlyphID& glyph) { return face.rasterizeGlyph(glyph); }
 
     bool valid() { return face.isValid(); }
 
@@ -29,8 +29,8 @@ private:
     GlyphIDType type;
     FreeTypeFace face;
 
-    hb_font_t *font;
-    hb_buffer_t *buffer;
+    hb_font_t* font;
+    hb_buffer_t* buffer;
 };
 
 } // namespace mbgl

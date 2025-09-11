@@ -449,9 +449,7 @@ TEST(OfflineDatabase, CreateRegion) {
                               EXPECT_EQ(definition.pixelRatio, def.pixelRatio);
                               EXPECT_EQ(definition.includeIdeographs, def.includeIdeographs);
                           },
-                          [](auto&) {
-                              EXPECT_FALSE(false);
-                          }},
+                          [](auto&) { EXPECT_FALSE(false); }},
                region->getDefinition());
     EXPECT_EQ(metadata, region->getMetadata());
 }
@@ -495,9 +493,7 @@ TEST(OfflineDatabase, ListRegions) {
                               EXPECT_EQ(definition.pixelRatio, def.pixelRatio);
                               EXPECT_EQ(definition.includeIdeographs, def.includeIdeographs);
                           },
-                          [&](auto&) {
-                              EXPECT_FALSE(false);
-                          }},
+                          [&](auto&) { EXPECT_FALSE(false); }},
                regions.at(0).getDefinition());
     EXPECT_EQ(metadata, regions.at(0).getMetadata());
 
@@ -525,9 +521,7 @@ TEST(OfflineDatabase, GetRegion) {
                               EXPECT_EQ(definition.pixelRatio, def.pixelRatio);
                               EXPECT_EQ(definition.includeIdeographs, def.includeIdeographs);
                           },
-                          [&](auto&) {
-                              EXPECT_FALSE(false);
-                          }},
+                          [&](auto&) { EXPECT_FALSE(false); }},
                region->getDefinition());
     EXPECT_EQ(metadata, region->getMetadata());
 
@@ -554,9 +548,7 @@ TEST(OfflineDatabase, GetRegionDefinition) {
                               EXPECT_EQ(definition.pixelRatio, result.pixelRatio);
                               EXPECT_EQ(definition.includeIdeographs, result.includeIdeographs);
                           },
-                          [&](auto&) {
-                              EXPECT_FALSE(false);
-                          }},
+                          [&](auto&) { EXPECT_FALSE(false); }},
                regionDefinition);
 }
 

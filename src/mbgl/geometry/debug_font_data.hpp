@@ -149,7 +149,7 @@ const int8_t simplex_94[] = {3,  6, 3, 8, 4,  11, 6,  12, 8,  12, 10, 11, 14, 8,
 struct glyph {
     uint8_t width;
     uint8_t length;
-    const int8_t *data;
+    const int8_t* data;
 };
 
 // Font data From Hershey Simplex Font
