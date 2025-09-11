@@ -80,7 +80,11 @@ endif()
 
 # GLFW + WebGPU Example
 if(MLN_WITH_WEBGPU AND MLN_WITH_GLFW)
-    add_executable(webgpu_glfw_example webgpu_glfw_example.cpp)
+    if(APPLE)
+        add_executable(webgpu_glfw_example webgpu_glfw_example.mm)
+    else()
+        add_executable(webgpu_glfw_example webgpu_glfw_example.cpp)
+    endif()
 
     target_link_libraries(
         webgpu_glfw_example
@@ -169,6 +173,25 @@ if(MLN_WITH_GLFW)
     endif()
 
     message(STATUS "WebGPU GLFW standalone example will be built")
+
+    # Simple Dawn WebGPU demo
+    if(MLN_WITH_WEBGPU)
+        message(STATUS "Simple Dawn WebGPU demo will be built")
+
+        add_executable(simple_dawn_webgpu simple_dawn_webgpu.cpp)
+
+        target_link_libraries(
+        simple_dawn_webgpu
+        PRIVATE
+            mbgl-core
+    )
+
+        target_compile_definitions(
+        simple_dawn_webgpu
+        PRIVATE
+            USE_DAWN=1
+    )
+    endif()
 endif()
 
 # OpenGL triangle example (shows what WebGPU would render)
