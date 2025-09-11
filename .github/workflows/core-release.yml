@@ -51,7 +51,7 @@ jobs:
 
       - run: brew install webp libuv
 
-      - uses: taiki-e/install-action@57511bcdf8cdb0eab6448cb7fa632952d9f25742 # v2
+      - uses: taiki-e/install-action@57511bcdf8cdb0eab6448cb7fa632952d9f25742 # v2.59.1
         with:
           tool: armerge@2
 
@@ -67,7 +67,7 @@ jobs:
 
       - name: Upload macOS artifacts
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: macos-metal-build
           path: |
@@ -104,7 +104,7 @@ jobs:
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
-      - uses: taiki-e/install-action@57511bcdf8cdb0eab6448cb7fa632952d9f25742 # v2
+      - uses: taiki-e/install-action@57511bcdf8cdb0eab6448cb7fa632952d9f25742 # v2.59.1
         with:
           tool: armerge@2
 
@@ -120,7 +120,7 @@ jobs:
 
       - name: Upload Linux artifacts
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: linux-${{ matrix.runner.arch }}-${{ matrix.renderer }}-build
           path: |
@@ -149,7 +149,7 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
       - name: Build mbgl-core for Windows
         run: |
@@ -161,7 +161,7 @@ jobs:
 
       - name: Upload Windows artifact
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: windows-${{ matrix.renderer }}-build
           path: |
