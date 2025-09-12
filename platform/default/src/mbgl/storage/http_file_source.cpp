@@ -269,7 +269,6 @@ HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, Fil
       resource(std::move(resource_)),
       callback(std::move(callback_)),
       handle(context->getHandle()) {
-    mbgl::Log::Info(mbgl::Event::General, "HTTPRequest created for: " + resource.url);
     if (resource.dataRange) {
         const std::string header = std::string("Range: bytes=") + std::to_string(resource.dataRange->first) +
                                    std::string("-") + std::to_string(resource.dataRange->second);
@@ -313,7 +312,6 @@ HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, Fil
 
 HTTPRequest::~HTTPRequest() {
     if (curl_multi_remove_handle(context->multi, handle) != CURLM_OK) {
-        mbgl::Log::Error(mbgl::Event::HttpRequest, "Error removing curl multi handle");
     }
 
     context->returnHandle(handle);
@@ -462,7 +460,6 @@ HTTPFileSource::HTTPFileSource(const ResourceOptions &resourceOptions, const Cli
 HTTPFileSource::~HTTPFileSource() = default;
 
 std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource &resource, Callback callback) {
-    mbgl::Log::Info(mbgl::Event::General, "HTTPFileSource::request for URL: " + resource.url);
     return std::make_unique<HTTPRequest>(impl.get(), resource, callback);
 }
 

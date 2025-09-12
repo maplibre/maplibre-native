@@ -9,7 +9,6 @@ HeadlessBackend::HeadlessBackend(Size size, SwapBehaviour swapBehaviour_, gfx::C
       gfx::HeadlessBackend(size),
       swapBehaviour(swapBehaviour_) {
     (void)swapBehaviour; // TODO: Use this when implementing swap buffer behavior
-    mbgl::Log::Info(mbgl::Event::General, "Initializing WebGPU headless backend");
     // TODO: Initialize WebGPU context for headless rendering
 }
 

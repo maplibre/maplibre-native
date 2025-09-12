@@ -322,9 +322,7 @@ mbgl::Value Within::serialize() const {
             serialized.emplace(m.name.GetString(), valueConverter(m.value));
         }
     } else {
-        mbgl::Log::Error(mbgl::Event::General,
-                         "Failed to serialize 'within' expression, converted rapidJSON is "
-                         "not an object");
+
     }
     return std::vector<mbgl::Value>{{getOperator(), serialized}};
 }

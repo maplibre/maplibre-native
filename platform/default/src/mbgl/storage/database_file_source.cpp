@@ -24,29 +24,22 @@ public:
           onlineFileSource(std::move(onlineFileSource_)) {}
 
     void request(const Resource& resource, const ActorRef<FileSourceRequest>& req) {
-        mbgl::Log::Info(mbgl::Event::General, "DatabaseFileSourceThread::request for: " + resource.url);
         std::optional<Response> offlineResponse = (resource.storagePolicy != Resource::StoragePolicy::Volatile)
                                                       ? db->get(resource)
                                                       : std::nullopt;
         if (!offlineResponse) {
-            mbgl::Log::Info(mbgl::Event::General, "DatabaseFileSourceThread: Not found in cache: " + resource.url);
             offlineResponse.emplace();
             offlineResponse->noContent = true;
             offlineResponse->error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
                                                                        "Not found in offline database");
         } else if (!offlineResponse->isUsable()) {
-            mbgl::Log::Info(mbgl::Event::General, "DatabaseFileSourceThread: Cache unusable: " + resource.url);
             offlineResponse->error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
                                                                        "Cached resource is unusable");
         } else {
-            mbgl::Log::Info(mbgl::Event::General, "DatabaseFileSourceThread: Found in cache: " + resource.url + 
-                           ", data size: " + (offlineResponse->data ? std::to_string(offlineResponse->data->size()) : "null") +
-                           ", noContent: " + std::to_string(offlineResponse->noContent));
+
         }
-        mbgl::Log::Info(mbgl::Event::General, "DatabaseFileSourceThread: About to invoke setResponse on thread: " + 
-                        std::to_string(std::hash<std::thread::id>{}(std::this_thread::get_id())));
+
         req.invoke(&FileSourceRequest::setResponse, *offlineResponse);
-        mbgl::Log::Info(mbgl::Event::General, "DatabaseFileSourceThread: Invoked setResponse");
     }
 
     void setDatabasePath(const std::string& path, const std::function<void()>& callback) {

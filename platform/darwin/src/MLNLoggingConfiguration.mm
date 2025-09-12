@@ -54,7 +54,6 @@ public:
 
 - (id)init{
     if(self = [super init]){
-        mbgl::Log::setObserver(std::make_unique<mbgl::MLNCoreLoggingObserver>());
     }
     return self;
 }
