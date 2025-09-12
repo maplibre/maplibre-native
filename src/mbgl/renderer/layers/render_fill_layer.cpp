@@ -123,11 +123,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              const std::shared_ptr<UpdateParameters>&,
                              const RenderTree&,
                              UniqueChangeRequestVec& changes) {
-    Log::Info(Event::General, "RenderFillLayer::update called for " + getID() + 
-              ", renderTiles: " + std::to_string(renderTiles != nullptr) + 
-              ", empty: " + std::to_string(renderTiles ? renderTiles->empty() : true));
     if (!renderTiles || renderTiles->empty()) {
-        Log::Info(Event::General, "RenderFillLayer::update - no render tiles, removing drawables");
         removeAllDrawables();
         return;
     }
@@ -166,15 +162,12 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         outlinePatternShaderGroup = shaders.getShaderGroup(std::string(FillOutlinePatternShaderName));
     }
     if (!fillShaderGroup || !outlineShaderGroup || !patternShaderGroup || !outlinePatternShaderGroup) {
-        Log::Info(Event::General, "RenderFillLayer: Missing shader groups - fill: " + std::to_string(fillShaderGroup != nullptr) +
-                  ", outline: " + std::to_string(outlineShaderGroup != nullptr) +
-                  ", pattern: " + std::to_string(patternShaderGroup != nullptr) +
+
                   ", outlinePattern: " + std::to_string(outlinePatternShaderGroup != nullptr));
         removeAllDrawables();
         return;
-    }
+}
 
-    Log::Info(Event::General, "RenderFillLayer: All shader groups present, continuing with drawable creation");
 
     std::unique_ptr<gfx::DrawableBuilder> fillBuilder;
     std::unique_ptr<gfx::DrawableBuilder> outlineBuilder;
@@ -199,21 +192,16 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     fillTileLayerGroup->setStencilTiles(renderTiles);
 
     StringIDSetsPair propertiesAsUniforms;
-    Log::Info(Event::General, "RenderFillLayer: Iterating over " + std::to_string(renderTiles->size()) + " tiles");
     for (const RenderTile& tile : *renderTiles) {
-        Log::Info(Event::General, "RenderFillLayer: Processing tile");
         const auto& tileID = tile.getOverscaledTileID();
 
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
         if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
-            Log::Info(Event::General, "RenderFillLayer: No render data/bucket for tile - renderData: " + 
-                      std::to_string(renderData != nullptr) + 
-                      ", bucket: " + std::to_string(renderData && renderData->bucket != nullptr) +
+
                       ", hasData: " + std::to_string(renderData && renderData->bucket && renderData->bucket->hasData()));
             removeTile(renderPass, tileID);
             continue;
         }
-        Log::Info(Event::General, "RenderFillLayer: Tile has valid render data and bucket");
 
         auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
         auto& binders = bucket.paintPropertyBinders.at(getID());
@@ -341,18 +329,15 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             builder.flush(context);
 
             auto drawables = builder.clearDrawables();
-            Log::Info(Event::General, "RenderFillLayer: Got " + std::to_string(drawables.size()) + " drawables from builder");
             for (auto& drawable : drawables) {
                 drawable->setTileID(tileID);
                 drawable->setType(static_cast<size_t>(type));
                 drawable->setLayerTweaker(layerTweaker);
                 drawable->setBinders(renderData->bucket, &binders);
                 drawable->setRenderTile(renderTilesOwner, &tile);
-                Log::Info(Event::General, "RenderFillLayer: Adding drawable to tile layer group");
                 fillTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
             }
-            Log::Info(Event::General, "RenderFillLayer: Added " + std::to_string(stats.drawablesAdded) + " drawables total");
         };
 
         // Outline always occurs in translucent pass, defaults to fill color
@@ -401,10 +386,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                            : nullptr;
 
             if (!fillBuilder && fillShader) {
-                Log::Info(Event::General, "Creating fill drawable builder for: " + layerPrefix);
-                Log::Info(Event::General, "RenderFillLayer: Creating fill drawable builder");
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill")) {
-                    Log::Info(Event::General, "RenderFillLayer: Fill drawable builder created successfully");
                     // Only write opaque fills to the depth buffer, matching `fillRenderPass` in legacy rendering
                     const bool opaque = (evaluated.get<FillColor>().constantOr(Color()).a >= 1.0f &&
                                          evaluated.get<FillOpacity>().constantOr(0) >= 1.0f);

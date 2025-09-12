@@ -324,7 +324,6 @@ std::tuple<std::filesystem::path, std::vector<std::filesystem::path>, bool, uint
     } catch (const args::Help&) {
         std::ostringstream stream;
         stream << argumentParser;
-        Log::Info(Event::General, stream.str());
         exit(0);
     } catch (const args::ParseError& e) {
         std::ostringstream stream;
