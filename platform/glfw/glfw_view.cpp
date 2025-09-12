@@ -46,6 +46,8 @@
 #include <mapbox/geometry.hpp>
 #include <mapbox/geojson.hpp>
 
+#include <chrono>
+
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
@@ -1235,8 +1237,15 @@ void GLFWView::run() {
     mbgl::Log::Info(mbgl::Event::General, "Starting main loop");
     int frameCount = 0;
     while (!glfwWindowShouldClose(window)) {
-        // Use runOnce() instead of run() to process events without blocking indefinitely
-        runLoop.runOnce();
+        // Poll GLFW events first
+        glfwPollEvents();
+        
+        // Process RunLoop with a time limit to avoid blocking
+        auto start = std::chrono::steady_clock::now();
+        while (std::chrono::steady_clock::now() - start < std::chrono::milliseconds(16)) { // ~60fps
+            runLoop.runOnce();
+        }
+        
         frameCount++;
         
         if (frameCount % 60 == 0) {

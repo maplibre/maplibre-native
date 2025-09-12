@@ -520,6 +520,7 @@ void GeometryTileWorker::parse() {
                                    << " SourceID: " << sourceID.c_str()
                                    << " Canonical: " << static_cast<int>(id.canonical.z) << "/" << id.canonical.x << "/"
                                    << id.canonical.y << " Time");
+    mbgl::Log::Info(mbgl::Event::General, "GeometryTileWorker::parse calling finalizeLayout for tile " + util::toString(id));
     finalizeLayout();
 }
 
@@ -538,8 +539,14 @@ bool GeometryTileWorker::hasPendingParseResult() const {
 
 void GeometryTileWorker::finalizeLayout() {
     MLN_TRACE_FUNC();
+    mbgl::Log::Info(mbgl::Event::General, "GeometryTileWorker::finalizeLayout called for tile " + util::toString(id));
 
     if (!data || !layers || !hasPendingParseResult() || hasPendingDependencies()) {
+        mbgl::Log::Info(mbgl::Event::General, "GeometryTileWorker::finalizeLayout exiting early for tile " + util::toString(id) +
+                       ", data=" + std::to_string(data != nullptr) +
+                       ", layers=" + std::to_string(layers.has_value()) + 
+                       ", hasPendingParseResult=" + std::to_string(hasPendingParseResult()) +
+                       ", hasPendingDependencies=" + std::to_string(hasPendingDependencies()));
         return;
     }
 
@@ -583,6 +590,7 @@ void GeometryTileWorker::finalizeLayout() {
                                    << " Canonical: " << static_cast<int>(id.canonical.z) << "/" << id.canonical.x << "/"
                                    << id.canonical.y << " Time");
 
+    mbgl::Log::Info(mbgl::Event::General, "GeometryTileWorker::parse complete, invoking onLayout for tile " + util::toString(id));
     parent.invoke(&GeometryTile::onLayout,
                   std::make_shared<GeometryTile::LayoutResult>(std::move(renderData),
                                                                std::move(featureIndex),
@@ -590,6 +598,7 @@ void GeometryTileWorker::finalizeLayout() {
                                                                std::move(imageAtlas),
                                                                dynamicTextureAtlas),
                   correlationID);
+    mbgl::Log::Info(mbgl::Event::General, "GeometryTileWorker::parse invoked onLayout for tile " + util::toString(id));
 }
 
 } // namespace mbgl
