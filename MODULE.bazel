@@ -97,6 +97,17 @@ use_repo(rust, "rust_toolchains")
 
 register_toolchains("@rust_toolchains//:all")
 
+# Configure and register shell toolchains required by rules_shell.
+# Fixes: "No matching toolchains found for types: @@rules_shell+//shell:toolchain_type"
+sh_configure = use_extension("@rules_shell//shell/private/extensions:sh_configure.bzl", "sh_configure")
+use_repo(sh_configure, "local_config_shell")
+
+register_toolchains("@local_config_shell//:all")
+
+register_toolchains(
+    "//bazel/tools/shell:osx_sh_toolchain_exec",
+)
+
 crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
 crate.from_cargo(
     name = "crates",
