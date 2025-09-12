@@ -237,6 +237,7 @@ std::unique_ptr<detail::SignatureBase> makeSignature(std::string name,
 }
 } // namespace
 } // namespace detail
+
 namespace {
 Value featureIdAsExpressionValue(const EvaluationContext& params) {
     assert(params.feature);
@@ -298,6 +299,8 @@ std::optional<std::string> featureIdAsString(const EvaluationContext& params) {
     auto id = params.feature->getID();
     return id.match([](std::string value) { return value; }, [](const auto&) { return std::optional<std::string>(); });
 };
+
+} // unnamed namespace
 
 const auto& eCompoundExpression() {
     static auto signature = detail::makeSignature("e", []() -> Result<double> { return std::numbers::e; });
@@ -990,6 +993,8 @@ const auto& filterInCompoundExpression() {
     return signature;
 }
 
+namespace {
+
 using ParseCompoundFunction = const std::unique_ptr<detail::SignatureBase>& (*)();
 constexpr const auto compoundExpressionRegistry =
     mapbox::eternal::hash_map<mapbox::eternal::string, ParseCompoundFunction>({
@@ -1069,10 +1074,14 @@ constexpr const auto compoundExpressionRegistry =
         {"filter-in", filterInCompoundExpression},
     });
 
+} // unnamed namespace
+
 using namespace mbgl::style::conversion;
 
 using DefinitionIterator = decltype(compoundExpressionRegistry)::const_iterator;
 using Definitions = std::pair<DefinitionIterator, DefinitionIterator>;
+
+namespace {
 
 std::string expectedTypesError(const Definitions& definitions, const std::vector<std::unique_ptr<Expression>>& args) {
     std::vector<std::string> availableOverloads; // Only used if there are no overloads

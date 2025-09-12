@@ -27,7 +27,9 @@ static_assert(mbgl::underlying_type(Tile::Kind::Raster) == mbgl::underlying_type
 static_assert(mbgl::underlying_type(Tile::Kind::RasterDEM) == mbgl::underlying_type(LayerTypeInfo::TileKind::RasterDEM),
               "tile kind error");
 
-static LayerObserver nullObserver;
+namespace {
+LayerObserver nullObserver;
+}
 
 Layer::Layer(Immutable<Impl> impl)
     : baseImpl(std::move(impl)),
