@@ -25,7 +25,7 @@ void TileLayerGroup::upload(gfx::UploadPass& uploadPass) {
     const auto debugGroup = uploadPass.createDebugGroup(getName() + "-upload");
 #endif
 
-    int count = 0;
+    // int count = 0;
     visitDrawables([&](gfx::Drawable& drawable) {
         if (drawable.getEnabled()) {
             auto& drawableWebGPU = static_cast<webgpu::Drawable&>(drawable);
@@ -37,7 +37,6 @@ void TileLayerGroup::upload(gfx::UploadPass& uploadPass) {
 
 void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
-              ", hasRenderPass: " + std::to_string(parameters.renderPass != nullptr));
 
     if (!enabled || !getDrawableCount() || !parameters.renderPass) {
         return;

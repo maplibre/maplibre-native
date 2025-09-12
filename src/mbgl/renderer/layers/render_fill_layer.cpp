@@ -163,7 +163,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     }
     if (!fillShaderGroup || !outlineShaderGroup || !patternShaderGroup || !outlinePatternShaderGroup) {
 
-                  ", outlinePattern: " + std::to_string(outlinePatternShaderGroup != nullptr));
         removeAllDrawables();
         return;
 }
@@ -198,7 +197,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
         if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
 
-                      ", hasData: " + std::to_string(renderData && renderData->bucket && renderData->bucket->hasData()));
             removeTile(renderPass, tileID);
             continue;
         }

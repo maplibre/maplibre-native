@@ -353,8 +353,6 @@ void Drawable::draw(PaintParameters& parameters) const {
 
                 // Debug: Print what we just set
 
-                          ", [12]=" + std::to_string(tileMatrix[12]) +
-                          ", [13]=" + std::to_string(tileMatrix[13]) +
             } else if (const auto& tileID = getTileID()) {
                 // Get the tile-specific transformation matrix
                 mat4 tileTransform;
@@ -376,11 +374,9 @@ void Drawable::draw(PaintParameters& parameters) const {
             // Log matrix values for debugging - show full matrix
             static int matrixLogCount = 0;
             if (matrixLogCount++ < 5) {  // Only log first few matrices to avoid spam
-                for (int i = 0; i < 4; i++) {
-
-                              std::to_string(tileMatrix[i*4+2]) + ", " +
-                              std::to_string(tileMatrix[i*4+3]) + "]");
-                }
+                // for (int i = 0; i < 4; i++) {
+                //               std::to_string(tileMatrix[i*4+2]) + ", " +
+                // }
             }
 
             // Convert to column-major format for WebGPU (mat4 is row-major in MapLibre)
@@ -422,24 +418,24 @@ void Drawable::draw(PaintParameters& parameters) const {
 
                 // Test transform a sample vertex to see where it ends up
                 if (impl->vertexData.size() >= 4) {
-                    const int16_t* vertices = reinterpret_cast<const int16_t*>(impl->vertexData.data());
-                    float x = static_cast<float>(vertices[0]);
-                    float y = static_cast<float>(vertices[1]);
+                    // const int16_t* vertices = reinterpret_cast<const int16_t*>(impl->vertexData.data());
+                    // float x = static_cast<float>(vertices[0]);
+                    // float y = static_cast<float>(vertices[1]);
 
                     // Apply matrix transformation (column-major order)
                     // For column-major: column i is at indices [i*4, i*4+1, i*4+2, i*4+3]
-                    float tx = matrixData[0] * x + matrixData[4] * y + matrixData[8] * 0 + matrixData[12];
-                    float ty = matrixData[1] * x + matrixData[5] * y + matrixData[9] * 0 + matrixData[13];
-                    float tz = matrixData[2] * x + matrixData[6] * y + matrixData[10] * 0 + matrixData[14];
-                    float tw = matrixData[3] * x + matrixData[7] * y + matrixData[11] * 0 + matrixData[15];
+                    // float tx = matrixData[0] * x + matrixData[4] * y + matrixData[8] * 0 + matrixData[12];
+                    // float ty = matrixData[1] * x + matrixData[5] * y + matrixData[9] * 0 + matrixData[13];
+                    // float tz = matrixData[2] * x + matrixData[6] * y + matrixData[10] * 0 + matrixData[14];
+                    // float tw = matrixData[3] * x + matrixData[7] * y + matrixData[11] * 0 + matrixData[15];
 
 
                     // Perspective divide to get NDC
-                    if (tw != 0) {
-                        tx /= tw;
-                        ty /= tw;
-                        tz /= tw;
-                    }
+                    // if (tw != 0) {
+                    //     tx /= tw;
+                    //     ty /= tw;
+                    //     tz /= tw;
+                    // }
 
 
                 }
@@ -459,7 +455,7 @@ void Drawable::draw(PaintParameters& parameters) const {
         if (webgpuShader) {
             impl->pipeline = webgpuShader->getPipeline();
             if (impl->pipeline) {
-                uintptr_t addr = reinterpret_cast<uintptr_t>(impl->pipeline);
+                // uintptr_t addr = reinterpret_cast<uintptr_t>(impl->pipeline);
 
             } else {
                 Log::Warning(Event::General, "Shader's getPipeline() returned null");
@@ -492,8 +488,8 @@ void Drawable::draw(PaintParameters& parameters) const {
     if (impl->vertexBuffer) {
         // Log first vertex position for debugging (assuming int16x2 format)
         if (impl->vertexData.size() >= 4) {
-            int16_t x = *reinterpret_cast<const int16_t*>(impl->vertexData.data());
-            int16_t y = *reinterpret_cast<const int16_t*>(impl->vertexData.data() + 2);
+            // int16_t x = *reinterpret_cast<const int16_t*>(impl->vertexData.data());
+            // int16_t y = *reinterpret_cast<const int16_t*>(impl->vertexData.data() + 2);
         }
         wgpuRenderPassEncoderSetVertexBuffer(renderPassEncoder, 0, impl->vertexBuffer, 0, impl->vertexData.size());
     } else {
@@ -520,20 +516,13 @@ void Drawable::draw(PaintParameters& parameters) const {
         // Draw indexed geometry
         uint32_t indexCount = static_cast<uint32_t>(impl->indexVector->elements());
 
-        // Log draw call details for first few drawables
-        static int drawCallLogCount = 0;
-        if (drawCallLogCount++ < 10) {
 
-        }
 
         wgpuRenderPassEncoderDrawIndexed(renderPassEncoder, indexCount, 1, 0, 0, 0);
     } else if (impl->vertexBuffer && impl->vertexCount > 0) {
         // Draw non-indexed
         uint32_t vertexCount = static_cast<uint32_t>(impl->vertexCount);
 
-    static int drawCallLogCount = 0;
-        if (drawCallLogCount++ < 10) {
-        }
 
         wgpuRenderPassEncoderDraw(renderPassEncoder, vertexCount, 1, 0, 0);
     } else {
@@ -561,10 +550,7 @@ void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::
 
         // Log the first few vertices to understand the coordinate range
         if (impl->vertexData.size() >= 4) {
-            const int16_t* vertices = reinterpret_cast<const int16_t*>(impl->vertexData.data());
-                      ", y=" + std::to_string(vertices[1]));
-            if (impl->vertexData.size() >= 8) {
-            }
+
         }
     }
 }

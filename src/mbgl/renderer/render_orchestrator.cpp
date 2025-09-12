@@ -246,7 +246,6 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     const LayerDifference layerDiff = diffLayers(layerImpls, updateParameters->layers);
 
-              ", updateParameters->layers size: " + std::to_string(updateParameters->layers->size()));
     layerImpls = updateParameters->layers;
     const bool layersAddedOrRemoved = !layerDiff.added.empty() || !layerDiff.removed.empty();
 
