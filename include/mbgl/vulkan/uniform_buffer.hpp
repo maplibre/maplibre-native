@@ -40,11 +40,11 @@ public:
 
     UniformBufferArray(UniformBufferArray&& other) noexcept
         : gfx::UniformBufferArray(std::move(other)),
-          descriptorSetType(other.descriptorSetType),  // NOLINT(bugprone-use-after-move)
-          descriptorStartIndex(other.descriptorStartIndex),  // NOLINT(bugprone-use-after-move)
-          descriptorStorageCount(other.descriptorStorageCount),  // NOLINT(bugprone-use-after-move)
-          descriptorUniformCount(other.descriptorUniformCount),  // NOLINT(bugprone-use-after-move)
-          descriptorSet(std::move(other.descriptorSet)) {}  // NOLINT(bugprone-use-after-move)
+          descriptorSetType(other.descriptorSetType),           // NOLINT(bugprone-use-after-move)
+          descriptorStartIndex(other.descriptorStartIndex),     // NOLINT(bugprone-use-after-move)
+          descriptorStorageCount(other.descriptorStorageCount), // NOLINT(bugprone-use-after-move)
+          descriptorUniformCount(other.descriptorUniformCount), // NOLINT(bugprone-use-after-move)
+          descriptorSet(std::move(other.descriptorSet)) {}      // NOLINT(bugprone-use-after-move)
 
     UniformBufferArray(const UniformBufferArray&) = delete;
 

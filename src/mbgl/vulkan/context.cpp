@@ -570,7 +570,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 
     auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();
     const float rad = renderableResource.getRotation();
-    const mat4 rotationMat = {std::cos(rad), -std::sin(rad), 0, 0, std::sin(rad), std::cos(rad), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+    const mat4 rotationMat = {
+        std::cos(rad), -std::sin(rad), 0, 0, std::sin(rad), std::cos(rad), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 
     for (const auto& tileInfo : tileUBOs) {
         commandBuffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, tileInfo.stencil_ref, dispatcher);

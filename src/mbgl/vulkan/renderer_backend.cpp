@@ -93,7 +93,7 @@ bool checkAvailability(const std::vector<T>& availableValues,
     return true;
 }
 
-}
+} // namespace
 
 RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
     : gfx::RendererBackend(contextMode_),
