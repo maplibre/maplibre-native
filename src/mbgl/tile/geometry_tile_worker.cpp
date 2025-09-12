@@ -133,7 +133,6 @@ void GeometryTileWorker::setData(std::unique_ptr<const GeometryTileData> data_,
                                  std::set<std::string> availableImages_,
                                  uint64_t correlationID_) {
     MLN_TRACE_FUNC();
-    mbgl::Log::Info(mbgl::Event::General, "GeometryTileWorker::setData called for tile " + util::toString(id) + ", data=" + (data_ ? "yes" : "null"));
 
     try {
         data = std::move(data_);
@@ -539,14 +538,8 @@ bool GeometryTileWorker::hasPendingParseResult() const {
 
 void GeometryTileWorker::finalizeLayout() {
     MLN_TRACE_FUNC();
-    mbgl::Log::Info(mbgl::Event::General, "GeometryTileWorker::finalizeLayout called for tile " + util::toString(id));
 
     if (!data || !layers || !hasPendingParseResult() || hasPendingDependencies()) {
-        mbgl::Log::Info(mbgl::Event::General, "GeometryTileWorker::finalizeLayout exiting early for tile " + util::toString(id) +
-                       ", data=" + std::to_string(data != nullptr) +
-                       ", layers=" + std::to_string(layers.has_value()) + 
-                       ", hasPendingParseResult=" + std::to_string(hasPendingParseResult()) +
-                       ", hasPendingDependencies=" + std::to_string(hasPendingDependencies()));
         return;
     }
 
