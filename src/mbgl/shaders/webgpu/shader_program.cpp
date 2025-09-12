@@ -168,7 +168,7 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
         Log::Error(Event::General, "Vertex shader module: " + std::to_string(vertexShaderModule != nullptr));
         Log::Error(Event::General, "Fragment shader module: " + std::to_string(fragmentShaderModule != nullptr));
     } else {
-        uintptr_t pipelineAddr = reinterpret_cast<uintptr_t>(pipeline);
+        (void)reinterpret_cast<uintptr_t>(pipeline);
     }
 }
 
