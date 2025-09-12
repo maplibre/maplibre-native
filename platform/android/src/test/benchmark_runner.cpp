@@ -63,7 +63,6 @@ void android_main(struct android_app* app) {
         }
 
         if (!running && !done) {
-            mbgl::Log::Info(mbgl::Event::General, "BenchmarkRunner done");
             done = true;
             benchmarkThread.join();
             changeState(env, app, true);
@@ -71,7 +70,6 @@ void android_main(struct android_app* app) {
 
         if (app->destroyRequested != 0) {
             app->activity->vm->DetachCurrentThread();
-            mbgl::Log::Info(mbgl::Event::General, "Close the App!");
             return;
         }
     }

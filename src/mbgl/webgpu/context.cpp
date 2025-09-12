@@ -45,9 +45,9 @@ Context::Context(RendererBackend& backend_)
       impl(std::make_unique<Impl>()),
       backend(backend_),
       globalUniformBuffers(std::make_unique<UniformBufferArray>()) {
-    
+
     impl->device = backend.getDevice();
-    Log::Info(Event::General, "WebGPU Context created");
+
 }
 
 Context::~Context() = default;
@@ -81,7 +81,6 @@ gfx::VertexAttributeArrayPtr Context::createVertexAttributeArray() const {
 }
 
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
-    Log::Info(Event::General, "WebGPU Context::createDrawableBuilder called for: " + name);
     return std::make_unique<DrawableBuilder>(std::move(name));
 }
 
@@ -95,12 +94,11 @@ gfx::UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registry, const std::string& name) {
-    Log::Info(Event::General, "Context::getGenericShader requested for: " + name);
     auto it = impl->shaderCache.find(name);
     if (it != impl->shaderCache.end()) {
         return it->second;
     }
-    
+
     // Get the shader group from registry
     auto& shaderGroup = registry.getShaderGroup(name);
     if (!shaderGroup) {
@@ -110,7 +108,7 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registr
         bool registered = registry.registerShaderGroup(std::move(webgpuShaderGroup), name);
         (void)registered; // Ignore return value
     }
-    
+
     // Try to get the shader from the group
     if (shaderGroup) {
         auto shader = shaderGroup->getShader(name);
@@ -122,20 +120,20 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registr
             return shaderProgram;
         }
     }
-    
+
     // Fallback: Use the built-in WGSL shaders based on name
     std::string vertexSource;
     std::string fragmentSource;
-    
+
     using namespace shaders;
-    
+
     // Map shader names to built-in shaders
 #define MAP_SHADER(ShaderType, ShaderName) \
     if (name == ShaderName) { \
         vertexSource = ShaderSource<BuiltIn::ShaderType, gfx::Backend::Type::WebGPU>::vertex; \
         fragmentSource = ShaderSource<BuiltIn::ShaderType, gfx::Backend::Type::WebGPU>::fragment; \
     } else
-    
+
     MAP_SHADER(BackgroundShader, "BackgroundShader")
     MAP_SHADER(BackgroundPatternShader, "BackgroundPatternShader")
     MAP_SHADER(CircleShader, "CircleShader")
@@ -169,13 +167,13 @@ fn main(
     // This doesn't use any vertex buffers or uniforms
     var positions = array<vec2<f32>, 3>(
         vec2<f32>(-0.8, -0.8),  // Bottom left
-        vec2<f32>(0.8, -0.8),   // Bottom right  
+        vec2<f32>(0.8, -0.8),   // Bottom right
         vec2<f32>(0.0, 0.8)     // Top center
     );
     return vec4<f32>(positions[vertex_index], 0.0, 1.0);
 }
 )";
-        
+
         fragmentSource = R"(
 @fragment
 fn main() -> @location(0) vec4<f32> {
@@ -183,30 +181,25 @@ fn main() -> @location(0) vec4<f32> {
     return vec4<f32>(1.0, 0.0, 0.0, 1.0); // Bright red
 }
 )";
-        
-        Log::Info(Event::General, "Using basic WGSL shader for: " + name);
+
     }
-    
+
 #undef MAP_SHADER
-    
+
     // Create new shader program
     auto shader = std::make_shared<ShaderProgram>(*this, vertexSource, fragmentSource);
     impl->shaderCache[name] = shader;
-    
+
     return shader;
 }
 
 TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    Log::Info(Event::General, "WebGPU Context::createTileLayerGroup called: " + name);
     auto tileLayerGroup = std::make_shared<webgpu::TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
-    Log::Info(Event::General, "WebGPU TileLayerGroup created successfully");
     return tileLayerGroup;
 }
 
 LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    Log::Info(Event::General, "WebGPU Context::createLayerGroup called: " + name);
     auto layerGroup = std::make_shared<webgpu::LayerGroup>(layerIndex, initialCapacity, std::move(name));
-    Log::Info(Event::General, "WebGPU LayerGroup created successfully");
     return layerGroup;
 }
 
@@ -236,7 +229,7 @@ bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& ptr, const voi
         ptr = createUniformBuffer(data, size, persistent);
         return true;
     }
-    
+
     // Update existing buffer
     auto* buffer = static_cast<UniformBuffer*>(ptr.get());
     buffer->update(data, size);

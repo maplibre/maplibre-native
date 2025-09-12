@@ -77,7 +77,6 @@ void OfflineDatabase::initialize() {
 }
 
 void OfflineDatabase::changePath(const std::string& path_) {
-    Log::Info(Event::Database, "Changing the database path.");
     cleanup();
     path = path_;
     initialize();
@@ -317,7 +316,6 @@ std::pair<bool, uint64_t> OfflineDatabase::putInternal(const Resource& resource,
     if (evict_) {
         stats = DatabaseSizeChangeStats(this);
         if (!evict(size, *stats)) {
-            Log::Info(Event::Database, "Unable to make space for entry");
             return {false, 0};
         }
     }

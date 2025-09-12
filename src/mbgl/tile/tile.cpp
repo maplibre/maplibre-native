@@ -44,11 +44,6 @@ void Tile::dumpDebugLogs() const {
             kindString = "Unknown";
             break;
     }
-    Log::Info(Event::General, "Tile::Kind: " + kindString);
-    Log::Info(Event::General, "Tile::id: " + util::toString(id));
-    Log::Info(Event::General, "Tile::renderable: " + std::string(isRenderable() ? "yes" : "no"));
-    Log::Info(Event::General, "Tile::complete: " + std::string(isComplete() ? "yes" : "no"));
-    Log::Info(Event::General, "Tile::loaded: " + std::string(isLoaded() ? "yes" : "no"));
 }
 
 void Tile::queryRenderedFeatures(std::unordered_map<std::string, std::vector<Feature>>&,

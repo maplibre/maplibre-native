@@ -417,7 +417,6 @@ void Style::Impl::onLightChanged(const Light&) {
 }
 
 void Style::Impl::dumpDebugLogs() const {
-    Log::Info(Event::General, "styleURL: " + url);
     for (const auto& source : sources) {
         source->dumpDebugLogs();
     }

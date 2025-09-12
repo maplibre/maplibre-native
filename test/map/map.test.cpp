@@ -1715,7 +1715,6 @@ TEST(Map, StencilOverflow) {
     ASSERT_LE(0, result.stats.stencilUpdates);
 
 #if !defined(NDEBUG)
-    Log::Info(Event::General, result.stats.toString("\n"));
 #endif // !defined(NDEBUG)
 
     // TODO: confirm that the stencil masking actually worked

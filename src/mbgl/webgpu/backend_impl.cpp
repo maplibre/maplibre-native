@@ -22,35 +22,30 @@ public:
     bool initialize() override {
         // Initialize WebGPU instance
         // This code will work with both Dawn and wgpu as they share the same C API
-        
-        Log::Info(Event::General, "Initializing WebGPU backend");
-        
+
+
         // Create instance with appropriate backend (Dawn or wgpu)
         // Using compile-time flag to choose backend
-        
+
 #ifdef USE_DAWN
-        Log::Info(Event::General, "Using Dawn WebGPU implementation");
         // Dawn-specific initialization
 #elif defined(USE_WGPU)
-        Log::Info(Event::General, "Using wgpu WebGPU implementation");
         // wgpu-specific initialization
 #else
-        Log::Info(Event::General, "Using native WebGPU implementation");
         // Generic WebGPU initialization that works with both
 #endif
-        
+
         // The initialization process is similar for both:
         // 1. Create instance
         // 2. Enumerate adapters
         // 3. Request device
         // 4. Get queue
-        
+
         return true; // Placeholder - actual implementation would check for errors
     }
 
     void shutdown() override {
-        Log::Info(Event::General, "Shutting down WebGPU backend");
-        
+
         // Clean up WebGPU resources in reverse order
         if (queue) {
             // Release queue

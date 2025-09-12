@@ -46,7 +46,6 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
 
     // Create a default render pass if we have a texture view
     if (textureView) {
-        Log::Info(Event::General, "Got texture view for render pass");
 
         wgpu::RenderPassColorAttachment colorAttachment = {};
         colorAttachment.view = wgpu::TextureView(textureView);
@@ -59,14 +58,10 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
                                           static_cast<float>(descriptor.clearColor->g),
                                           static_cast<float>(descriptor.clearColor->b),
                                           static_cast<float>(descriptor.clearColor->a)};
-            Log::Info(Event::General,
-                      "RenderPass '" + std::string(name) + "': CLEAR to color (" +
-                          std::to_string(descriptor.clearColor->r) + ", " + std::to_string(descriptor.clearColor->g) +
-                          ", " + std::to_string(descriptor.clearColor->b) + ", " +
-                          std::to_string(descriptor.clearColor->a) + ")");
+
         } else {
             colorAttachment.loadOp = wgpu::LoadOp::Load;
-            Log::Info(Event::General, "RenderPass '" + std::string(name) + "': LOAD");
+
         }
         colorAttachment.storeOp = wgpu::StoreOp::Store;
 
@@ -86,13 +81,11 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
         impl->encoder = passEncoder.MoveToCHandle();
 
         if (impl->encoder) {
-            Log::Info(Event::General, "Render pass encoder created successfully");
+
 
             // Set viewport to full framebuffer
             // Get the framebuffer size from the backend
             auto size = backend.getFramebufferSize();
-            Log::Info(Event::General,
-                      "Setting viewport: " + std::to_string(size.width) + "x" + std::to_string(size.height));
             wgpuRenderPassEncoderSetViewport(impl->encoder,
                                              0,
                                              0, // x, y
@@ -107,7 +100,6 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
                                                 0, // x, y
                                                 size.width,
                                                 size.height); // width, height
-            Log::Info(Event::General, "Set scissor rect to full viewport");
         }
     } else {
         Log::Warning(Event::General, "No texture view available for render pass");
@@ -116,39 +108,33 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
 
 RenderPass::~RenderPass() {
     if (impl->encoder) {
-        Log::Info(Event::General, "Ending WebGPU render pass");
+
         // End the render pass
         try {
             wgpuRenderPassEncoderEnd(impl->encoder);
-            Log::Info(Event::General, "wgpuRenderPassEncoderEnd called");
         } catch (...) {
             Log::Warning(Event::General, "Failed to end render pass encoder");
         }
         wgpuRenderPassEncoderRelease(impl->encoder);
-        Log::Info(Event::General, "WebGPU render pass ended");
     }
 }
 
 void RenderPass::pushDebugGroup(const char* name) {
-    Log::Info(Event::General, std::string("RenderPass::pushDebugGroup called: ") + (name ? name : "null"));
     if (impl->encoder) {
         // TODO: Debug groups on render pass encoders seem to cause a freeze in Dawn
         // Commenting out for now to allow rendering to proceed
         // WGPUStringView label = {name, name ? strlen(name) : 0};
         // wgpuRenderPassEncoderPushDebugGroup(impl->encoder, label);
-        Log::Info(Event::General, "RenderPass::pushDebugGroup skipped (Dawn issue)");
     } else {
         Log::Warning(Event::General, "RenderPass::pushDebugGroup called but encoder is null");
     }
 }
 
 void RenderPass::popDebugGroup() {
-    Log::Info(Event::General, "RenderPass::popDebugGroup called");
     if (impl->encoder) {
         // TODO: Debug groups on render pass encoders seem to cause a freeze in Dawn
         // Commenting out for now to allow rendering to proceed
         // wgpuRenderPassEncoderPopDebugGroup(impl->encoder);
-        Log::Info(Event::General, "RenderPass::popDebugGroup skipped (Dawn issue)");
     } else {
         Log::Warning(Event::General, "RenderPass::popDebugGroup called but encoder is null");
     }

@@ -149,12 +149,9 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!layerGroup) {
-        Log::Info(Event::General, "RenderBackgroundLayer: Creating tile layer group for " + getID());
         if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
-            Log::Info(Event::General, "RenderBackgroundLayer: Tile layer group created successfully");
             setLayerGroup(std::move(layerGroup_), changes);
         } else {
-            Log::Info(Event::General, "RenderBackgroundLayer: Failed to create tile layer group");
             return;
         }
     }

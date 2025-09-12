@@ -153,7 +153,6 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
             const auto captureManager = NS::RetainPtr(MTL::CaptureManager::sharedCaptureManager());
             if (captureManager->isCapturing()) {
-                Log::Info(Event::Render, "Capturing frame " + util::toString(frameCount));
             }
         }
     }
@@ -351,24 +350,17 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     // Actually render the layers
     // Drawables
     const auto drawableOpaquePass = [&] {
-        Log::Info(Event::General, "Starting drawableOpaquePass");
-        Log::Info(Event::General, "Creating debug group");
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-opaque"));
-        Log::Info(Event::General, "Debug group created");
         parameters.pass = RenderPass::Opaque;
         parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * PaintParameters::numSublayers *
                                             PaintParameters::depthEpsilon;
 
         // draw layer groups, opaque pass
         parameters.currentLayer = 0;
-        Log::Info(Event::General, "Visiting layer groups (opaque), count: " + std::to_string(orchestrator.numLayerGroups()));
         orchestrator.visitLayerGroupsReversed([&](LayerGroupBase& layerGroup) {
-            Log::Info(Event::General, "In visitLayerGroupsReversed lambda, calling render on layer group");
             layerGroup.render(orchestrator, parameters);
-            Log::Info(Event::General, "After layerGroup.render call");
             parameters.currentLayer++;
         });
-        Log::Info(Event::General, "Finished drawableOpaquePass");
     };
 
     const auto drawableTranslucentPass = [&] {
@@ -416,35 +408,23 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         common3DPass();
         drawable3DPass();
     }
-    Log::Info(Event::General, "Starting render passes");
     drawableTargetsPass();
-    Log::Info(Event::General, "drawableTargetsPass done");
     commonClearPass();
-    Log::Info(Event::General, "commonClearPass done");
     context.bindGlobalUniformBuffers(*parameters.renderPass);
-    Log::Info(Event::General, "Global uniform buffers bound");
     drawableOpaquePass();
-    Log::Info(Event::General, "drawableOpaquePass done");
     drawableTranslucentPass();
-    Log::Info(Event::General, "drawableTranslucentPass done");
     drawableDebugOverlays();
-    Log::Info(Event::General, "drawableDebugOverlays done");
 
     // Give the layers a chance to do cleanup
     orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.postRender(orchestrator, parameters); });
     context.unbindGlobalUniformBuffers(*parameters.renderPass);
-    Log::Info(Event::General, "Unbinding global uniform buffers");
 
     // Ends the RenderPass
-    Log::Info(Event::General, "Resetting render pass");
     parameters.renderPass.reset();
-    Log::Info(Event::General, "Render pass reset complete");
 
     const auto startRendering = util::MonotonicTimer::now().count();
     // present submits render commands
-    Log::Info(Event::General, "About to call encoder->present");
     parameters.encoder->present(parameters.backend.getDefaultRenderable());
-    Log::Info(Event::General, "encoder->present called successfully");
     context.renderingStats().renderingTime = util::MonotonicTimer::now().count() - startRendering;
 
     parameters.encoder.reset();

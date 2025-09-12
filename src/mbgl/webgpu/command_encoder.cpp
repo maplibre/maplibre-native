@@ -15,12 +15,12 @@
 namespace mbgl {
 namespace webgpu {
 
-CommandEncoder::CommandEncoder(Context& ctx) 
+CommandEncoder::CommandEncoder(Context& ctx)
     : context(ctx) {
     // Initialize WebGPU command encoder
     auto& backend = static_cast<RendererBackend&>(context.getBackend());
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
-    
+
     if (device) {
         WGPUCommandEncoderDescriptor desc = {};
         WGPUStringView label = {"MapLibre Command Encoder", strlen("MapLibre Command Encoder")};
@@ -45,36 +45,33 @@ std::unique_ptr<gfx::UploadPass> CommandEncoder::createUploadPass(const char* na
 }
 
 void CommandEncoder::present(gfx::Renderable&) {
-    Log::Info(Event::General, "CommandEncoder::present called");
-    
+
     // Submit command buffer and present the surface
     auto& backend = static_cast<RendererBackend&>(context.getBackend());
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
     WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
-    
+
     if (!device || !queue || !encoder) {
         Log::Error(Event::General, "Missing device, queue, or encoder in present");
         return;
     }
-    
+
     // Finish and submit the command buffer
     WGPUCommandBufferDescriptor cmdBufferDesc = {};
     WGPUStringView label = {"Command Buffer", strlen("Command Buffer")};
     cmdBufferDesc.label = label;
     WGPUCommandBuffer cmdBuffer = wgpuCommandEncoderFinish(encoder, &cmdBufferDesc);
-    
+
     if (cmdBuffer) {
-        Log::Info(Event::General, "Submitting command buffer to queue");
         wgpuQueueSubmit(queue, 1, &cmdBuffer);
         wgpuCommandBufferRelease(cmdBuffer);
-        Log::Info(Event::General, "Command buffer submitted successfully");
     } else {
         Log::Error(Event::General, "Failed to finish command encoder");
     }
-    
+
     // Note: Surface presentation (swap) is handled by GLFWView::renderSync()
     // We don't need to call swap here as it will be called by the view
-    
+
     // Create a new command encoder for the next frame
     encoder = nullptr;
     WGPUCommandEncoderDescriptor newDesc = {};
@@ -86,21 +83,17 @@ void CommandEncoder::present(gfx::Renderable&) {
 
 
 void CommandEncoder::pushDebugGroup(const char* name) {
-    Log::Info(Event::General, std::string("CommandEncoder::pushDebugGroup called: ") + (name ? name : "null"));
     if (encoder) {
         WGPUStringView label = {name, name ? strlen(name) : 0};
         wgpuCommandEncoderPushDebugGroup(encoder, label);
-        Log::Info(Event::General, "pushDebugGroup completed");
     } else {
         Log::Warning(Event::General, "pushDebugGroup called but encoder is null");
     }
 }
 
 void CommandEncoder::popDebugGroup() {
-    Log::Info(Event::General, "CommandEncoder::popDebugGroup called");
     if (encoder) {
         wgpuCommandEncoderPopDebugGroup(encoder);
-        Log::Info(Event::General, "popDebugGroup completed");
     } else {
         Log::Warning(Event::General, "popDebugGroup called but encoder is null");
     }

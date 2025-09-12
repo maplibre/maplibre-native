@@ -9,7 +9,7 @@ namespace webgpu {
 void ShaderGroup::initialize(Context& context) {
     // For now, create a simple test shader that can render basic geometry
     // In a complete implementation, all shader types would be registered here
-    
+
     // Vertex shader that transforms tile coordinates using projection matrix
     const std::string vertexSource = R"(
 struct Uniforms {
@@ -30,14 +30,14 @@ struct VertexOutput {
 @vertex
 fn main(input: VertexInput) -> VertexOutput {
     var output: VertexOutput;
-    
+
     // Convert int16 position to tile coordinates
     // MapLibre uses 0-8192 for tile coordinates
     let pos = vec2<f32>(f32(input.position.x), f32(input.position.y));
-    
+
     // Apply the MVP matrix transformation
     output.position = uniforms.mvp_matrix * vec4<f32>(pos, 0.0, 1.0);
-    
+
     // Use different colors based on position for debugging
     output.color = vec4<f32>(
         pos.x / 8192.0,
@@ -45,7 +45,7 @@ fn main(input: VertexInput) -> VertexOutput {
         0.5,
         1.0
     );
-    
+
     return output;
 }
 )";
@@ -65,12 +65,12 @@ fn main(input: VertexOutput) -> @location(0) vec4<f32> {
 
     // Create a default shader program
     defaultShader = std::make_shared<ShaderProgram>(context, vertexSource, fragmentSource);
-    
+
     // Register the default shader for all common shader names
     // This is a temporary solution - in production, each shader type would have its own implementation
     const std::vector<std::string> shaderNames = {
         "BackgroundShader",
-        "BackgroundPatternShader", 
+        "BackgroundPatternShader",
         "CircleShader",
         "FillShader",
         "FillPatternShader",
@@ -86,12 +86,11 @@ fn main(input: VertexOutput) -> @location(0) vec4<f32> {
         "SymbolSDFIconShader",
         "SymbolTextAndIconShader"
     };
-    
+
     for (const auto& name : shaderNames) {
         shaders[name] = defaultShader;
     }
-    
-    Log::Info(Event::General, "WebGPU shader group initialized with default shader");
+
 }
 
 gfx::ShaderPtr ShaderGroup::getOrCreateShader(gfx::Context& context,
@@ -103,8 +102,7 @@ gfx::ShaderPtr ShaderGroup::getOrCreateShader(gfx::Context& context,
     (void)context;
     (void)propertiesAsUniforms;
     (void)firstAttribName;
-    
-    Log::Info(Event::General, "ShaderGroup::getOrCreateShader returning default shader");
+
     return defaultShader;
 }
 
@@ -115,10 +113,8 @@ bool ShaderGroup::isShader(const std::string& shaderName) const noexcept {
 const gfx::ShaderPtr ShaderGroup::getShader(const std::string& shaderName) const noexcept {
     auto it = shaders.find(shaderName);
     if (it != shaders.end()) {
-        Log::Info(Event::General, "ShaderGroup::getShader found shader: " + shaderName);
         return it->second;
     }
-    Log::Info(Event::General, "ShaderGroup::getShader shader not found: " + shaderName);
     return nullptr;
 }
 
