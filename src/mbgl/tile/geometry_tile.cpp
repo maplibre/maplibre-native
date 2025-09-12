@@ -338,6 +338,9 @@ void GeometryTile::setShowCollisionBoxes(const bool showCollisionBoxes_) {
 
 void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t resultCorrelationID) {
     MLN_TRACE_FUNC();
+    mbgl::Log::Info(mbgl::Event::General, "GeometryTile::onLayout called for tile " + util::toString(id) + 
+                    ", has result: " + std::to_string(result != nullptr) +
+                    ", correlationID match: " + std::to_string(resultCorrelationID == correlationID));
 
     loaded = true;
     renderable = true;

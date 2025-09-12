@@ -617,6 +617,7 @@ OnlineFileSource::OnlineFileSource(const ResourceOptions& resourceOptions, const
 OnlineFileSource::~OnlineFileSource() = default;
 
 std::unique_ptr<AsyncRequest> OnlineFileSource::request(const Resource& resource, Callback callback) {
+    mbgl::Log::Info(mbgl::Event::General, "OnlineFileSource::request for: " + resource.url);
     Resource res = resource;
     const TileServerOptions options = impl->getResourceOptions().tileServerOptions();
 
