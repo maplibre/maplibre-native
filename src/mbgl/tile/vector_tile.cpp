@@ -2,6 +2,8 @@
 #include <mbgl/tile/tile_loader_impl.hpp>
 #include <mbgl/tile/vector_tile.hpp>
 #include <mbgl/tile/vector_tile_data.hpp>
+#include <mbgl/util/logging.hpp>
+#include <mbgl/util/string.hpp>
 #include <utility>
 
 namespace mbgl {
@@ -21,6 +23,8 @@ VectorTile::~VectorTile() {
 }
 
 void VectorTile::setNecessity(TileNecessity necessity) {
+    mbgl::Log::Info(mbgl::Event::General, "VectorTile::setNecessity called for tile " + util::toString(id) + 
+                    " with necessity: " + std::to_string(static_cast<int>(necessity)));
     loader.setNecessity(necessity);
 }
 
@@ -38,6 +42,10 @@ void VectorTile::setData(const std::shared_ptr<const std::string>& data_) {
     if (obsolete) {
         mbgl::Log::Info(mbgl::Event::General, "VectorTile::setData - tile is obsolete");
         return;
+    }
+    
+    if (!data_) {
+        mbgl::Log::Warning(mbgl::Event::General, "VectorTile::setData - no data provided for tile " + util::toString(id));
     }
 
     GeometryTile::setData(data_ ? std::make_unique<VectorTileData>(data_) : nullptr);
