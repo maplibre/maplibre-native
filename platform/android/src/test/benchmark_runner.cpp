@@ -22,9 +22,7 @@ void runner() {
     }
     argv.push_back(nullptr);
 
-    mbgl::Log::Info(mbgl::Event::General, "Start BenchmarkRunner");
     int status = mbgl::runBenchmark(argv.size(), argv.data());
-    mbgl::Log::Info(mbgl::Event::General, "BenchmarkRunner finished with status: '%d'", status);
     running = false;
     ALooper_wake(looper);
 }

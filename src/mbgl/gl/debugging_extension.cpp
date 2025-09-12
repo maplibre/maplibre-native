@@ -98,7 +98,6 @@ void Debugging::DebugCallback(GLenum source,
     }
     const std::string logMsg = "GL_" + strSource + " GL_" + strType + " " + std::to_string(id) + " GL_" + strSeverity +
                                " - " + message;
-    mbgl::Log::Record(evtSeverity, mbgl::Event::OpenGL, logMsg);
 }
 
 } // namespace extension

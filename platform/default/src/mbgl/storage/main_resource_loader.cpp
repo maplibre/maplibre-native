@@ -34,19 +34,14 @@ public:
 
     void request(AsyncRequest* req, const Resource& resource, const ActorRef<FileSourceRequest>& ref) {
         auto callback = [ref, resource](const Response& res) {
-            mbgl::Log::Info(mbgl::Event::General, "MainResourceLoader callback for " + resource.url + 
-                           " about to invoke ref.invoke on thread: " + 
-                           std::to_string(std::hash<std::thread::id>{}(std::this_thread::get_id())));
+
             ref.invoke(&FileSourceRequest::setResponse, res);
-            mbgl::Log::Info(mbgl::Event::General, "MainResourceLoader callback for " + resource.url + " invoked ref.invoke");
         };
 
         auto requestFromNetwork = [=, this](const Resource& res,
                                             std::unique_ptr<AsyncRequest> parent) -> std::unique_ptr<AsyncRequest> {
             if (!onlineFileSource || !onlineFileSource->canRequest(resource)) {
-                mbgl::Log::Warning(mbgl::Event::General, "MainResourceLoader cannot request from network: " + res.url + 
-                                   ", onlineFileSource=" + std::to_string(onlineFileSource != nullptr) +
-                                   ", canRequest=" + (onlineFileSource ? std::to_string(onlineFileSource->canRequest(resource)) : "N/A"));
+
                 return parent;
             }
 
@@ -54,7 +49,6 @@ public:
             std::shared_ptr<AsyncRequest> parentKeepAlive = std::move(parent);
 
             MBGL_TIMING_START(watch);
-            mbgl::Log::Info(mbgl::Event::General, "MainResourceLoader requesting from onlineFileSource: " + res.url);
             return onlineFileSource->request(res, [=, ptr = parentKeepAlive, this](const Response& response) {
                 if (databaseFileSource) {
                     databaseFileSource->forward(res, response, nullptr);
@@ -89,10 +83,8 @@ public:
             // Local file request
             tasks[req] = localFileSource->request(resource, callback);
         } else if (databaseFileSource && databaseFileSource->canRequest(resource)) {
-            mbgl::Log::Info(mbgl::Event::General, "MainResourceLoader has databaseFileSource for: " + resource.url);
             // Try cache only request if needed.
             if (resource.loadingMethod == Resource::LoadingMethod::CacheOnly) {
-                mbgl::Log::Info(mbgl::Event::General, "MainResourceLoader CacheOnly request for: " + resource.url);
                 tasks[req] = databaseFileSource->request(resource, callback);
             } else {
                 // Cache request with fallback to network with cache control
@@ -129,8 +121,6 @@ public:
 
         // If no new tasks were added, notify client that request cannot be processed.
         if (tasks.size() == tasksSize) {
-            mbgl::Log::Warning(mbgl::Event::General, "MainResourceLoader: No handler for request: " + resource.url + 
-                             ", CacheOnly=" + std::to_string(resource.loadingMethod == Resource::LoadingMethod::CacheOnly));
             Response response;
             response.noContent = true;
             response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,

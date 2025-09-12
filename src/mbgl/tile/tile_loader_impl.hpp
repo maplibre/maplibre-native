@@ -38,14 +38,11 @@ TileLoader<T>::TileLoader(T& tile_,
     shared = std::make_shared<Shared>();
 
     if (!fileSource) {
-        mbgl::Log::Error(mbgl::Event::General, "TileLoader constructor - no fileSource!");
         tile.setError(getCantLoadTileError());
         return;
     }
 
-    mbgl::Log::Info(mbgl::Event::General, "TileLoader constructor - fileSource exists, supportsCacheOnlyRequests=" + 
-                    std::to_string(fileSource->supportsCacheOnlyRequests()) + ", necessity=" + 
-                    std::to_string(static_cast<int>(necessity)));
+
 
     if (fileSource->supportsCacheOnlyRequests()) {
         // When supported, the first request is always std::optional, even if
@@ -117,22 +114,17 @@ void TileLoader<T>::loadFromCache() {
     tile.onTileAction(TileOperation::RequestedFromCache);
 
     resource.loadingMethod = Resource::LoadingMethod::CacheOnly;
-    mbgl::Log::Info(mbgl::Event::General, "TileLoader::loadFromCache - making cache request for: " + resource.url + 
-                    " on thread: " + std::to_string(std::hash<std::thread::id>{}(std::this_thread::get_id())));
-    
+
     // Check if scheduler is available
     auto* scheduler = mbgl::Scheduler::GetCurrent();
     if (!scheduler) {
-        mbgl::Log::Error(mbgl::Event::General, "TileLoader::loadFromCache - NO SCHEDULER SET!");
     } else {
-        mbgl::Log::Info(mbgl::Event::General, "TileLoader::loadFromCache - Scheduler is set");
     }
-    
+
     // Store the URL in the lambda to avoid accessing 'this' if it's destroyed
     auto capturedUrl = resource.url;
     request = fileSource->request(resource, [this, shared_{shared}, capturedUrl](const Response& res) {
-        mbgl::Log::Info(mbgl::Event::General, "TileLoader::loadFromCache callback invoked for: " + capturedUrl +
-                        " on thread: " + std::to_string(std::hash<std::thread::id>{}(std::this_thread::get_id())));
+
         do {
             if (shared_->requestLock.try_lock_shared()) {
                 std::shared_lock<std::shared_mutex> lock(shared_->requestLock, std::adopt_lock);
@@ -153,19 +145,14 @@ void TileLoader<T>::loadFromCache() {
                     resource.priorEtag = res.etag;
                     resource.priorData = res.data;
                 } else {
-                    mbgl::Log::Info(mbgl::Event::General, "TileLoader cache callback - calling loadedData with data size: " + 
-                                   (res.data ? std::to_string(res.data->size()) : "null") + 
-                                   ", noContent: " + std::to_string(res.noContent));
+
                     loadedData(res, Resource::LoadingMethod::CacheOnly);
                 }
 
-                mbgl::Log::Info(mbgl::Event::General, "TileLoader cache callback - necessity=" + 
-                                std::to_string(static_cast<int>(necessity)) + ", Required=" +
-                                std::to_string(static_cast<int>(TileNecessity::Required)));
+
                 if (necessity == TileNecessity::Required) {
                     loadFromNetwork();
                 } else {
-                    mbgl::Log::Info(mbgl::Event::General, "TileLoader cache callback - NOT loading from network because necessity is not Required");
                 }
                 break;
             }
@@ -175,7 +162,6 @@ void TileLoader<T>::loadFromCache() {
 
 template <typename T>
 void TileLoader<T>::makeRequired() {
-    mbgl::Log::Info(mbgl::Event::General, "TileLoader::makeRequired - request exists: " + std::to_string(request != nullptr));
     if (!request) {
         loadFromNetwork();
     }
@@ -192,9 +178,7 @@ void TileLoader<T>::makeOptional() {
 
 template <typename T>
 void TileLoader<T>::loadedData(const Response& res, Resource::LoadingMethod method) {
-    mbgl::Log::Info(mbgl::Event::General, "TileLoader::loadedData - has error: " + std::to_string(res.error != nullptr) +
-                    ", noContent: " + std::to_string(res.noContent) + 
-                    ", data: " + std::to_string(res.data != nullptr));
+
     if (res.error && res.error->reason != Response::Error::Reason::NotFound) {
         tile.setError(std::make_exception_ptr(std::runtime_error(res.error->message)));
         tile.onTileAction(TileOperation::Error);
@@ -224,12 +208,10 @@ template <typename T>
 void TileLoader<T>::loadFromNetwork() {
     assert(!request);
     if (!fileSource) {
-        mbgl::Log::Info(mbgl::Event::General, "TileLoader::loadFromNetwork - no fileSource for tile " + resource.url);
         tile.setError(getCantLoadTileError());
         return;
     }
 
-    mbgl::Log::Info(mbgl::Event::General, "TileLoader::loadFromNetwork - requesting tile " + resource.url);
     tile.onTileAction(TileOperation::RequestedFromNetwork);
 
     // Instead of using Resource::LoadingMethod::All, we're first doing a
@@ -240,10 +222,7 @@ void TileLoader<T>::loadFromNetwork() {
                                                          : Resource::StoragePolicy::Permanent;
 
     request = fileSource->request(resource, [this, shared_{shared}](const Response& res) {
-        mbgl::Log::Info(mbgl::Event::General, "TileLoader network response - url: " + resource.url + 
-                        ", has data: " + std::to_string(res.data != nullptr) +
-                        ", data size: " + (res.data ? std::to_string(res.data->size()) : "0") +
-                        ", has error: " + std::to_string(res.error != nullptr));
+
         do {
             if (shared_->requestLock.try_lock_shared()) {
                 std::shared_lock<std::shared_mutex> lock(shared_->requestLock, std::adopt_lock);

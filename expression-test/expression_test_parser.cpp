@@ -329,14 +329,10 @@ std::tuple<std::filesystem::path, std::vector<std::filesystem::path>, bool, uint
     } catch (const args::ParseError& e) {
         std::ostringstream stream;
         stream << argumentParser;
-        Log::Info(Event::General, stream.str());
-        Log::Error(Event::General, e.what());
         exit(1);
     } catch (const args::ValidationError& e) {
         std::ostringstream stream;
         stream << argumentParser;
-        Log::Info(Event::General, stream.str());
-        Log::Error(Event::General, e.what());
         exit(2);
     }
 
