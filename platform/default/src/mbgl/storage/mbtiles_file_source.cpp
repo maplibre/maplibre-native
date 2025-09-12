@@ -29,7 +29,7 @@
 
 namespace {
 bool acceptsURL(const std::string &url) {
-    return 0 == url.rfind(mbgl::util::MBTILES_PROTOCOL, 0);
+    return url.starts_with(mbgl::util::MBTILES_PROTOCOL);
 }
 
 std::string url_to_path(const std::string &url) {

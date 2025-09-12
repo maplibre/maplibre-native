@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <optional>
+#include <type_traits>
 
 namespace mbgl {
 namespace gl {
@@ -41,9 +42,9 @@ public:
     static constexpr const char* getFirstAttribName() {
         // Static assert that attribute list starts with position: we bind it on location 0.
         using TypeOfFirst = typename std::tuple_element_t<0, std::tuple<As...>>;
-        static_assert(std::is_same<attributes::pos, TypeOfFirst>::value ||
-                          std::is_same<attributes::pos_offset, TypeOfFirst>::value ||
-                          std::is_same<attributes::pos_normal, TypeOfFirst>::value,
+        static_assert(std::is_same_v<attributes::pos, TypeOfFirst> ||
+                          std::is_same_v<attributes::pos_offset, TypeOfFirst> ||
+                          std::is_same_v<attributes::pos_normal, TypeOfFirst>,
                       "Program must start with position related attribute.");
         return concat_literals<&string_literal<'a', '_'>::value, TypeOfFirst::name>::value();
     }

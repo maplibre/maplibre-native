@@ -29,34 +29,35 @@ vec2 vec2Scale(const vec2& v, double s) noexcept {
 } // namespace
 
 namespace util {
+namespace {
 
-static double mercatorXfromLng(double lng) noexcept {
+double mercatorXfromLng(double lng) noexcept {
     return (180.0 + lng) / 360.0;
 }
 
-static double mercatorYfromLat(double lat) noexcept {
+double mercatorYfromLat(double lat) noexcept {
     return (180.0 - (180.0 / pi * std::log(std::tan((pi / 4) + lat * pi / 360.0)))) / 360.0;
 }
 
-static double latFromMercatorY(double y) noexcept {
+double latFromMercatorY(double y) noexcept {
     return util::rad2deg(2.0 * std::atan(std::exp(pi - y * util::M2PI)) - (pi / 2));
 }
 
-static double lngFromMercatorX(double x) noexcept {
+double lngFromMercatorX(double x) noexcept {
     return x * 360.0 - 180.0;
 }
 
-static double* getColumn(mat4& matrix, int col) noexcept {
+double* getColumn(mat4& matrix, int col) noexcept {
     assert(col >= 0 && col < 4);
     return &matrix[col * 4];
 }
 
-static const double* getColumn(const mat4& matrix, int col) noexcept {
+const double* getColumn(const mat4& matrix, int col) noexcept {
     assert(col >= 0 && col < 4);
     return &matrix[col * 4];
 }
 
-static vec3 toMercator(const LatLng& location, double altitudeMeters) noexcept {
+vec3 toMercator(const LatLng& location, double altitudeMeters) noexcept {
     const double pixelsPerMeter = 1.0 / Projection::getMetersPerPixelAtLatitude(location.latitude(), 0.0);
     const double worldSize = Projection::worldSize(std::pow(2.0, 0.0));
 
@@ -65,7 +66,7 @@ static vec3 toMercator(const LatLng& location, double altitudeMeters) noexcept {
              altitudeMeters * pixelsPerMeter / worldSize}};
 }
 
-static Quaternion orientationFromPitchBearing(double pitch, double bearing) noexcept {
+Quaternion orientationFromPitchBearing(double pitch, double bearing) noexcept {
     // Both angles have to be negated to achieve CW rotation around the axis of rotation
     const Quaternion rotBearing = Quaternion::fromAxisAngle({{0.0, 0.0, 1.0}}, -bearing);
     const Quaternion rotPitch = Quaternion::fromAxisAngle({{1.0, 0.0, 0.0}}, -pitch);
@@ -73,7 +74,7 @@ static Quaternion orientationFromPitchBearing(double pitch, double bearing) noex
     return rotBearing.multiply(rotPitch);
 }
 
-static void updateTransform(mat4& transform, const Quaternion& orientation) noexcept {
+void updateTransform(mat4& transform, const Quaternion& orientation) noexcept {
     // Construct rotation matrix from orientation
     mat4 m = orientation.toRotationMatrix();
 
@@ -87,11 +88,13 @@ static void updateTransform(mat4& transform, const Quaternion& orientation) noex
     transform = m;
 }
 
-static void updateTransform(mat4& transform, const vec3& position) {
+void updateTransform(mat4& transform, const vec3& position) {
     getColumn(transform, 3)[0] = position[0];
     getColumn(transform, 3)[1] = position[1];
     getColumn(transform, 3)[2] = position[2];
 }
+
+} // namespace
 
 Camera::Camera() noexcept
     : orientation(Quaternion::identity) {

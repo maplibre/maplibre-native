@@ -58,7 +58,9 @@ std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>
     return nullptr;
 }
 
-static RenderSourceObserver nullObserver;
+namespace {
+RenderSourceObserver nullObserver;
+}
 
 RenderSource::RenderSource(Immutable<style::Source::Impl> impl)
     : baseImpl(std::move(impl)),

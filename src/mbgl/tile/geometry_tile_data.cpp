@@ -19,8 +19,8 @@
 using namespace std::numbers;
 
 namespace mbgl {
-
 namespace {
+
 double signedArea(const GeometryCoordinates& ring) {
     double sum = 0;
 
