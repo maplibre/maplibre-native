@@ -164,7 +164,6 @@ void Context::initializeExtensions(const std::function<gl::ProcAddress(const cha
 
         static const std::string renderer = []() {
             std::string r = reinterpret_cast<const char*>(MBGL_CHECK_ERROR(glGetString(GL_RENDERER)));
-            Log::Info(Event::General, "GPU Identifier: " + r);
             return r;
         }();
 

@@ -94,13 +94,10 @@ ArgumentsTuple parseArguments(int argc, char** argv) {
     } catch (const args::Help&) {
         std::ostringstream stream;
         stream << argumentParser;
-        mbgl::Log::Info(mbgl::Event::General, stream.str());
         exit(0);
     } catch (const args::ParseError& e) {
         std::ostringstream stream;
         stream << argumentParser;
-        mbgl::Log::Info(mbgl::Event::General, stream.str());
-        mbgl::Log::Error(mbgl::Event::General, e.what());
         exit(1);
     } catch (const args::ValidationError& e) {
         std::ostringstream stream;

@@ -17,7 +17,6 @@ TileLayerGroup::TileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, 
 }
 
 void TileLayerGroup::upload(gfx::UploadPass& uploadPass) {
-    Log::Info(Event::General, "TileLayerGroup::upload called for " + getName() + ", enabled=" + std::to_string(enabled));
     if (!enabled) {
         return;
     }
@@ -29,26 +28,21 @@ void TileLayerGroup::upload(gfx::UploadPass& uploadPass) {
     int count = 0;
     visitDrawables([&](gfx::Drawable& drawable) {
         if (drawable.getEnabled()) {
-            Log::Info(Event::General, "TileLayerGroup: Uploading drawable " + std::to_string(++count));
             auto& drawableWebGPU = static_cast<webgpu::Drawable&>(drawable);
             drawableWebGPU.upload(uploadPass);
         }
     });
-    Log::Info(Event::General, "TileLayerGroup::upload completed, uploaded " + std::to_string(count) + " drawables");
+
 }
 
 void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
-    Log::Info(Event::General, "WebGPU TileLayerGroup::render called - name: " + getName() + 
-              ", enabled: " + std::to_string(enabled) + 
-              ", drawableCount: " + std::to_string(getDrawableCount()) +
+
               ", hasRenderPass: " + std::to_string(parameters.renderPass != nullptr));
-    
+
     if (!enabled || !getDrawableCount() || !parameters.renderPass) {
-        Log::Info(Event::General, "WebGPU TileLayerGroup::render early return");
         return;
     }
-    
-    Log::Info(Event::General, "WebGPU TileLayerGroup::render - proceeding to visit drawables for " + getName());
+
 
 #if !defined(NDEBUG)
     const auto debugGroup = parameters.encoder->createDebugGroup(getName() + "-render");
@@ -56,15 +50,13 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
     // Stencil clipping is handled by the render pipeline state
     // Uniform buffers are bound per-drawable in WebGPU through bind groups
-    
+
     // Render tiles
     // TileLayerGroup doesn't have getCurrentTileIDs() - just visit all drawables
     int drawableIndex = 0;
     visitDrawables([&](gfx::Drawable& drawable) {
         drawableIndex++;
-        Log::Info(Event::General, "Visiting drawable " + std::to_string(drawableIndex) + 
-                  ", enabled: " + std::to_string(drawable.getEnabled()) +
-                  ", hasRenderPass: " + std::to_string(drawable.hasRenderPass(parameters.pass)));
+
 
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
@@ -78,7 +70,6 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             }
         }
 
-        Log::Info(Event::General, "Calling drawable.draw() for drawable " + std::to_string(drawableIndex));
         drawable.draw(parameters);
     });
 }

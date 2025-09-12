@@ -12,7 +12,7 @@ class RendererBackend::Impl : public gfx::Renderable {
 public:
     Impl() : gfx::Renderable({800, 600}, nullptr) {}  // Default size
     ~Impl() override = default;
-    
+
     void* wgpuInstance = nullptr;
     void* wgpuDevice = nullptr;
     void* wgpuQueue = nullptr;
@@ -22,7 +22,6 @@ public:
 RendererBackend::RendererBackend(gfx::ContextMode contextMode)
     : gfx::RendererBackend(contextMode),
       impl(std::make_unique<Impl>()) {
-    Log::Info(Event::General, "Initializing WebGPU renderer backend");
 }
 
 RendererBackend::~RendererBackend() {
@@ -36,66 +35,64 @@ gfx::Renderable& RendererBackend::getDefaultRenderable() {
 void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramParameters& parameters) {
     // Initialize WebGPU shaders by registering shader groups
     // The actual shader compilation happens lazily when they're first used
-    Log::Info(Event::General, "Initializing WebGPU shaders");
-    Log::Info(Event::General, "WebGPU backend: Rendering map tiles with basic shader.");
-    
+
     // Create and register shader groups for all shader names used by render layers
     const std::vector<std::string> shaderNames = {
         // Background
         "BackgroundShader",
         "BackgroundPatternShader",
-        
+
         // Fill
         "FillShader",
         "FillOutlineShader",
         "FillPatternShader",
         "FillOutlinePatternShader",
         "FillOutlineTriangulatedShader",
-        
+
         // Line
         "LineShader",
         "LinePatternShader",
         "LineSDFShader",
         "LineGradientShader",
-        
+
         // Circle
         "CircleShader",
-        
+
         // Symbol
         "SymbolIconShader",
         "SymbolSDFIconShader",
         "SymbolTextAndIconShader",
         "SymbolSDFTextShader",
-        
+
         // Raster
         "RasterShader",
-        
+
         // Hillshade
         "HillshadeShader",
         "HillshadePrepareShader",
-        
+
         // Fill Extrusion
         "FillExtrusionShader",
         "FillExtrusionPatternShader",
-        
+
         // Heatmap
         "HeatmapShader",
         "HeatmapTextureShader",
-        
+
         // Custom
         "CustomSymbolIconShader",
-        
+
         // Debug
         "CollisionBoxShader",
         "CollisionCircleShader",
         "ClippingMaskProgram",
         "DebugShader"
     };
-    
+
     // Get the context to initialize shader groups
     auto contextPtr = createContext();
     auto& context = static_cast<webgpu::Context&>(*contextPtr);
-    
+
     for (const auto& shaderName : shaderNames) {
         auto webgpuShaderGroup = std::make_shared<webgpu::ShaderGroup>();
         webgpuShaderGroup->initialize(context);
@@ -104,7 +101,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramPa
             Log::Debug(Event::General, "Registered WebGPU shader group for: " + shaderName);
         }
     }
-    
+
     (void)parameters;
 }
 
@@ -112,22 +109,19 @@ void RendererBackend::setSurface(void* nativeWindow) {
     // Platform-specific surface creation
     // This will be used to create the WebGPU surface from a native window handle
     impl->wgpuSurface = nativeWindow;
-    Log::Info(Event::General, "Setting WebGPU surface");
+
 }
 
 void RendererBackend::setInstance(void* instance) {
     impl->wgpuInstance = instance;
-    Log::Info(Event::General, "Setting WebGPU instance");
 }
 
 void RendererBackend::setDevice(void* device) {
     impl->wgpuDevice = device;
-    Log::Info(Event::General, "Setting WebGPU device");
 }
 
 void RendererBackend::setQueue(void* queue) {
     impl->wgpuQueue = queue;
-    Log::Info(Event::General, "Setting WebGPU queue");
 }
 
 void* RendererBackend::getInstance() const {

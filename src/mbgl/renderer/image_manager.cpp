@@ -310,7 +310,7 @@ void ImageManager::notify(ImageRequestor& requestor, const ImageRequestPair& pai
 }
 
 void ImageManager::dumpDebugLogs() const {
-    Log::Info(Event::General, "ImageManager::loaded: " + std::string(loaded ? "1" : "0"));
+
 }
 
 ImageRequestor::ImageRequestor(std::shared_ptr<ImageManager> imageManager_)

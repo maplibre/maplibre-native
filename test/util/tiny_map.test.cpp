@@ -356,18 +356,14 @@ void benchmark(const std::string_view label,
     for (std::size_t i = 0; i < reports; ++i) {
         ss << std::setw(6) << std::round(times[i] * 10);
     }
-    Log::Info(Event::Timing, ss.str());
 }
 
 constexpr std::size_t lookups = 100;
 
 TEST(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(BenchmarkRef)) {
 #if defined(DEBUG)
-    Log::Info(Event::General, "Build Type: Debug");
 #elif defined(NDEBUG)
-    Log::Info(Event::General, "Build Type: Release");
 #else
-    Log::Info(Event::General, "Build Type: ?");
 #endif
 
     // std::unordered_map with size_t keys
