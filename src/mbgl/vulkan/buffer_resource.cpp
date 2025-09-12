@@ -94,7 +94,6 @@ BufferResource::BufferResource(
 
     bufferAllocation = std::make_shared<BufferAllocation>(allocator);
     if (!bufferAllocation->create(allocationInfo, bufferInfo)) {
-        mbgl::Log::Error(mbgl::Event::Render, "Vulkan buffer allocation failed");
         return;
     }
 

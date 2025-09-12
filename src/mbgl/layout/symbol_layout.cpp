@@ -250,11 +250,7 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                             }
                         }
                     } catch (...) {
-                        mbgl::Log::Error(
-                            mbgl::Event::ParseTile,
-                            "Encountered section with invalid UTF-8 in tile, source: " + sourceLayer->getName() +
-                                " z: " + std::to_string(canonicalID.z) + " x: " + std::to_string(canonicalID.x) +
-                                " y: " + std::to_string(canonicalID.y));
+
                         continue; // skip section
                     }
                 } else {

@@ -141,24 +141,20 @@ void cycleTileLodMode(mbgl::Map &map) {
             map.setTileLodMinRadius(defaultRadius);
             map.setTileLodScale(defaultScale);
             map.setTileLodPitchThreshold(defaultTilePitchThreshold);
-            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: default");
             break;
         case TileLodMode::NoLod:
             // When LOD is off we set a maximum PitchThreshold
             map.setTileLodPitchThreshold(std::numbers::pi);
-            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: disabled");
             break;
         case TileLodMode::Reduced:
             map.setTileLodMinRadius(2);
             map.setTileLodScale(1.5);
             map.setTileLodPitchThreshold(std::numbers::pi / 4);
-            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: reduced");
             break;
         case TileLodMode::Aggressive:
             map.setTileLodMinRadius(1);
             map.setTileLodScale(2);
             map.setTileLodPitchThreshold(0);
-            mbgl::Log::Info(mbgl::Event::General, "Tile LOD mode: aggressive");
             break;
     }
     map.triggerRepaint();
@@ -169,7 +165,6 @@ void tileLodZoomShift(mbgl::Map &map, bool positive) {
     auto shift = positive ? tileLodZoomShiftStep : -tileLodZoomShiftStep;
     shift = map.getTileLodZoomShift() + shift;
     shift = mbgl::util::clamp(shift, -2.5, 2.5);
-    mbgl::Log::Info(mbgl::Event::OpenGL, "Zoom shift: " + std::to_string(shift));
     map.setTileLodZoomShift(shift);
     map.triggerRepaint();
 }
@@ -210,7 +205,6 @@ void addFillExtrusionLayer(mbgl::style::Style &style, bool visible) {
 } // namespace
 
 void glfwError(int error, const char *description) {
-    mbgl::Log::Error(mbgl::Event::OpenGL, std::string("GLFW error (") + std::to_string(error) + "): " + description);
 }
 
 GLFWView::GLFWView(bool fullscreen_,
@@ -229,7 +223,6 @@ GLFWView::GLFWView(bool fullscreen_,
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
     if (!glfwInit()) {
-        mbgl::Log::Error(mbgl::Event::OpenGL, "failed to initialize glfw");
         exit(1);
     }
 
@@ -275,7 +268,6 @@ GLFWView::GLFWView(bool fullscreen_,
     window = glfwCreateWindow(width, height, "MapLibre Native", monitor, nullptr);
     if (!window) {
         glfwTerminate();
-        mbgl::Log::Error(mbgl::Event::OpenGL, "failed to initialize window");
         exit(1);
     }
 
@@ -612,21 +604,16 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                                    .write(view->testDirectory);
 
                 if (success) {
-                    mbgl::Log::Info(mbgl::Event::General, "Render test created!");
                 } else {
-                    mbgl::Log::Error(mbgl::Event::General,
-                                     "Fail to create render test! Base directory does not "
-                                     "exist or permission denied.");
+
                 }
             } break;
             case GLFW_KEY_U: {
                 auto bounds = view->map->getBounds();
                 if (bounds.minPitch == mbgl::util::rad2deg(mbgl::util::PITCH_MIN) &&
                     bounds.maxPitch == mbgl::util::rad2deg(mbgl::util::PITCH_MAX)) {
-                    mbgl::Log::Info(mbgl::Event::General, "Limiting pitch bounds to [30, 40] degrees");
                     view->map->setBounds(mbgl::BoundOptions().withMinPitch(30).withMaxPitch(40));
                 } else {
-                    mbgl::Log::Info(mbgl::Event::General, "Resetting pitch bounds to [0, 60] degrees");
                     view->map->setBounds(mbgl::BoundOptions().withMinPitch(0).withMaxPitch(60));
                 }
             } break;
@@ -960,11 +947,10 @@ void GLFWView::makeSnapshot(bool withOverlay) {
                 std::ostringstream oss;
                 oss << "Made snapshot './snapshot.png' with size w:" << image.size.width << "px h:" << image.size.height
                     << "px";
-                mbgl::Log::Info(mbgl::Event::General, oss.str());
                 std::ofstream file("./snapshot.png");
                 file << mbgl::encodePNG(image);
             } else {
-                mbgl::Log::Error(mbgl::Event::General, "Failed to make a snapshot!");
+
             }
         });
     };
@@ -1206,7 +1192,6 @@ void GLFWView::run() {
         {
             MLN_TRACE_ZONE(glfwWindowShouldClose);
             if (glfwWindowShouldClose(window)) {
-                mbgl::Log::Info(mbgl::Event::General, "Window should close detected in callback, stopping run loop");
                 runLoop.stop();
                 return;
             }
@@ -1234,25 +1219,22 @@ void GLFWView::run() {
     }
     frameTick.start(mbgl::Duration::zero(), tickDuration, callback);
 #if defined(__APPLE__)
-    mbgl::Log::Info(mbgl::Event::General, "Starting main loop");
     int frameCount = 0;
     while (!glfwWindowShouldClose(window)) {
         // Poll GLFW events first
         glfwPollEvents();
-        
+
         // Process RunLoop with a time limit to avoid blocking
         auto start = std::chrono::steady_clock::now();
         while (std::chrono::steady_clock::now() - start < std::chrono::milliseconds(16)) { // ~60fps
             runLoop.runOnce();
         }
-        
+
         frameCount++;
-        
+
         if (frameCount % 60 == 0) {
-            mbgl::Log::Info(mbgl::Event::General, "Main loop running, frame " + std::to_string(frameCount));
         }
     }
-    mbgl::Log::Info(mbgl::Event::General, "Main loop exited after " + std::to_string(frameCount) + " frames");
 #else
     runLoop.run();
 #endif
@@ -1284,7 +1266,6 @@ void GLFWView::report(float duration) {
         std::ostringstream oss;
         oss.precision(2);
         oss << "Frame time: " << std::fixed << frameTime << "ms (" << 1000 / frameTime << "fps)";
-        mbgl::Log::Info(mbgl::Event::Render, oss.str());
 
         frames = 0;
         frameTime = 0;

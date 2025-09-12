@@ -236,7 +236,6 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             }
             default: {
 #ifndef NDEBUG
-                mbgl::Log::Error(mbgl::Event::Render, "Invalid fill variant type supplied during drawable update!");
 #endif
                 break;
             }

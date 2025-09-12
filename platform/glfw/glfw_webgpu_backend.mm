@@ -36,67 +36,63 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
       mbgl::webgpu::RendererBackend(mbgl::gfx::ContextMode::Unique),
       mbgl::gfx::Renderable(mbgl::Size{0, 0}, nullptr),
       window(window_) {
-    
-    mbgl::Log::Info(mbgl::Event::General, "Initializing WebGPU backend");
-    
+
+
     // Create Dawn instance
     instance = std::make_unique<dawn::native::Instance>();
-    
+
     // Enumerate adapters
     std::vector<dawn::native::Adapter> adapters = instance->EnumerateAdapters();
     if (adapters.empty()) {
-        mbgl::Log::Error(mbgl::Event::General, "No WebGPU adapters found");
         throw std::runtime_error("No WebGPU adapters found");
     }
-    
+
     // Select first adapter (should be Metal on macOS)
     dawn::native::Adapter& selectedAdapter = adapters[0];
-    mbgl::Log::Info(mbgl::Event::General, "Selected WebGPU adapter");
-    
+
     // Create device with error callbacks
     WGPUDevice rawDevice = selectedAdapter.CreateDevice();
     if (!rawDevice) {
-        mbgl::Log::Error(mbgl::Event::General, "Failed to create WebGPU device");
         throw std::runtime_error("Failed to create WebGPU device");
     }
-    
+
     wgpuDevice = wgpu::Device::Acquire(rawDevice);
-    
+
     // TODO: Add error callbacks once we figure out the correct Dawn API
-    
+
 #ifdef __APPLE__
     // Setup Metal surface on macOS
     NSWindow* nsWindow = glfwGetCocoaWindow(window);
     NSView* view = [nsWindow contentView];
     [view setWantsLayer:YES];
-    
+
     // Create CAMetalLayer
     CAMetalLayer* layer = [CAMetalLayer layer];
     layer.device = dawn::native::metal::GetMTLDevice(wgpuDevice.Get());
     layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
-    
+
     // Get window size
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
     layer.drawableSize = CGSizeMake(width, height);
-    
+
     [view setLayer:layer];
     metalLayer = (__bridge_retained void*)layer;
-    
+
     // Create surface from metal layer
     wgpu::SurfaceDescriptorFromMetalLayer metalDesc;
     metalDesc.layer = metalLayer;
-    
+
     wgpu::SurfaceDescriptor surfaceDesc;
     surfaceDesc.nextInChain = &metalDesc;
-    
+
     // Create surface using the instance
     wgpu::Instance wgpuInstance(instance->Get());
     wgpuSurface = wgpuInstance.CreateSurface(&surfaceDesc);
-    
+
     // Get the queue
     queue = wgpuDevice.GetQueue();
-    
+
     // Configure surface
     wgpu::SurfaceConfiguration config = {};
     config.device = wgpuDevice;
@@ -106,30 +102,27 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     config.width = width;
     config.height = height;
     config.presentMode = wgpu::PresentMode::Fifo;
-    
+
     wgpuSurface.Configure(&config);
 #endif
-    
+
     // Store WebGPU instance, device and queue in the base class
     setInstance(instance->Get());
     setDevice(reinterpret_cast<void*>(wgpuDevice.Get()));
     setQueue(reinterpret_cast<void*>(queue.Get()));
-    
+
     // Make sure the window is visible and focused
     glfwShowWindow(window);
     glfwFocusWindow(window);
-    
+
     // Check if window is actually visible
     if (glfwGetWindowAttrib(window, GLFW_VISIBLE) != GLFW_TRUE) {
-        mbgl::Log::Error(mbgl::Event::General, "Window is not visible after glfwShowWindow");
     }
-    
+
     // Make sure window shouldn't close
     if (glfwWindowShouldClose(window)) {
-        mbgl::Log::Error(mbgl::Event::General, "Window should close is already set during init!");
     }
-    
-    mbgl::Log::Info(mbgl::Event::General, "WebGPU backend initialized successfully");
+
 }
 
 GLFWWebGPUBackend::~GLFWWebGPUBackend() {
@@ -159,15 +152,14 @@ void GLFWWebGPUBackend::swap() {
         // The surface presentation happens automatically when the current
         // texture view goes out of scope and gets presented
         wgpuSurface.Present();
-        mbgl::Log::Info(mbgl::Event::General, "Surface presented");
-        
+
         // Clear the current texture view after presenting
         currentTextureView = nullptr;
     }
-    
+
     // Poll for window events to keep the window responsive
     glfwPollEvents();
-    
+
     // Note: We don't call glfwSwapBuffers for WebGPU as it doesn't use OpenGL swap chains
     // The presentation is handled by wgpuSurface.Present() above
 }
@@ -190,8 +182,8 @@ void GLFWWebGPUBackend::setSize(mbgl::Size newSize) {
     // Update swap chain size if needed
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
-    
-    if (static_cast<uint32_t>(width) != newSize.width || 
+
+    if (static_cast<uint32_t>(width) != newSize.width ||
         static_cast<uint32_t>(height) != newSize.height) {
 #ifdef __APPLE__
         if (metalLayer) {
@@ -199,31 +191,26 @@ void GLFWWebGPUBackend::setSize(mbgl::Size newSize) {
             layer.drawableSize = CGSizeMake(newSize.width, newSize.height);
         }
 #endif
-        
+
         // Recreate swap chain with new size
         // TODO: Implement swap chain recreation
     }
 }
 
 void* GLFWWebGPUBackend::getCurrentTextureView() {
-    mbgl::Log::Info(mbgl::Event::General, "getCurrentTextureView (void*) called");
-    
+
     wgpu::SurfaceTexture surfaceTexture;
     wgpuSurface.GetCurrentTexture(&surfaceTexture);
-    
+
     if (surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal &&
         surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::SuccessSuboptimal) {
-        mbgl::Log::Error(mbgl::Event::General, std::string("Failed to get surface texture, status: ") +
-                          std::to_string(static_cast<int>(surfaceTexture.status)));
         return nullptr;
     }
-    
+
     if (!surfaceTexture.texture) {
-        mbgl::Log::Error(mbgl::Event::General, "Surface texture is null");
         return nullptr;
     }
-    
-    mbgl::Log::Info(mbgl::Event::General, "Successfully got surface texture");
+
     // Store the texture view to keep it alive
     currentTextureView = surfaceTexture.texture.CreateView();
     return reinterpret_cast<void*>(currentTextureView.Get());

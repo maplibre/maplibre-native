@@ -278,25 +278,22 @@ bool DrawableBuilder::Impl::checkAndSetMode(Mode target) {
     if (target != mode && vertexCount()) {
         // log error
         using namespace std::string_literals;
-        auto to_string = [](Mode value) -> std::string {
-            switch (value) {
-                case Mode::Primitives:
-                    return "Mode::Primitives";
-                case Mode::Polylines:
-                    return "Mode::Polylines";
-                case Mode::WideVectorLocal:
-                    return "Mode::WideVectorLocal";
-                case Mode::WideVectorGlobal:
-                    return "Mode::WideVectorGlobal";
-                case Mode::Custom:
-                    return "Mode::Custom";
-                default:
-                    return "Unknown"; // Handle unknown enum values if needed
-            }
-        };
-        mbgl::Log::Error(
-            mbgl::Event::General,
-            "DrawableBuilder mode mismatch. Target is "s + to_string(target) + ", current is " + to_string(mode));
+        // auto to_string = [](Mode value) -> std::string {
+        //     switch (value) {
+        //         case Mode::Primitives:
+        //             return "Mode::Primitives";
+        //         case Mode::Polylines:
+        //             return "Mode::Polylines";
+        //         case Mode::WideVectorLocal:
+        //             return "Mode::WideVectorLocal";
+        //         case Mode::WideVectorGlobal:
+        //             return "Mode::WideVectorGlobal";
+        //         case Mode::Custom:
+        //             return "Mode::Custom";
+        //         default:
+        //             return "Unknown"; // Handle unknown enum values if needed
+        //     }
+        // };
 
         // the builder is building in a different mode
         assert(false);

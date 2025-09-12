@@ -62,7 +62,6 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
                          const Range<uint8_t> zoomRange,
                          std::optional<LatLngBounds> bounds,
                          std::function<std::unique_ptr<Tile>(const OverscaledTileID&, TileObserver*)> createTile) {
-    mbgl::Log::Info(mbgl::Event::General, "TilePyramid::update called for source " + sourceImpl.id + ", needsRendering=" + std::to_string(needsRendering) + ", tiles=" + std::to_string(tiles.size()));
     // If we need a relayout, abandon any cached tiles; they're now stale.
     if (needsRelayout) {
         cache.clear();
@@ -71,7 +70,6 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     // If we're not going to render anything, move our existing tiles into
     // the cache (if they're not stale) or abandon them, and return.
     if (!needsRendering) {
-        mbgl::Log::Info(mbgl::Event::General, "TilePyramid::update - not rendering, moving tiles to cache");
         for (auto& entry : tiles) {
             if (!needsRelayout) {
                 // These tiles are invisible, we set optional necessity
@@ -142,12 +140,9 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         }
 
         idealTiles = util::tileCover(tileCoverParameters, idealZoom, tileZoom);
-        mbgl::Log::Info(mbgl::Event::General, "TilePyramid::update - calculated " + std::to_string(idealTiles.size()) + " ideal tiles for zoom " + std::to_string(idealZoom));
         if (parameters.mode == MapMode::Tile && type != SourceType::Raster && type != SourceType::RasterDEM &&
             idealTiles.size() > 1) {
-            mbgl::Log::Warning(mbgl::Event::General,
-                               "Provided camera options returned " + std::to_string(idealTiles.size()) +
-                                   " tiles, only " + util::toString(idealTiles[0]) + " is taken in Tile mode.");
+
             idealTiles = {idealTiles[0]};
         }
     }
@@ -183,22 +178,17 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
             *bounds, zoomRange.min, std::min(tileZoom, static_cast<int32_t>(zoomRange.max)));
     }
     auto createTileFn = [&](const OverscaledTileID& tileID) -> Tile* {
-        mbgl::Log::Info(mbgl::Event::General, "TilePyramid createTileFn called for tile " + util::toString(tileID));
         if (tileRange && !tileRange->contains(tileID.canonical)) {
-            mbgl::Log::Info(mbgl::Event::General, "TilePyramid createTileFn - tile out of range");
             return nullptr;
         }
         std::unique_ptr<Tile> tile = cache.pop(tileID);
         if (!tile) {
-            mbgl::Log::Info(mbgl::Event::General, "TilePyramid createTileFn - creating new tile");
             tile = createTile(tileID, observer);
             if (!tile) {
-                mbgl::Log::Info(mbgl::Event::General, "TilePyramid createTileFn - createTile failed");
                 return nullptr;
             }
             tile->setLayers(layers);
         } else {
-            mbgl::Log::Info(mbgl::Event::General, "TilePyramid createTileFn - reused tile from cache");
         }
 
         return tiles.emplace(tileID, std::move(tile)).first->second.get();
