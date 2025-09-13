@@ -24,7 +24,6 @@ std::unique_ptr<gfx::Drawable::DrawSegment> DrawableBuilder::createSegment(gfx::
 
 void DrawableBuilder::init() {
     if (!currentDrawable) {
-        Log::Warning(Event::General, "DrawableBuilder::init - currentDrawable is null!");
         return;
     }
 

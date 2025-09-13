@@ -39,7 +39,6 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     auto& backend = static_cast<webgpu::RendererBackend&>(context.getBackend());
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
     if (!device) {
-        Log::Error(Event::General, "Failed to get WebGPU device for shader creation");
         return;
     }
 
@@ -57,8 +56,6 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
 
     vertexShaderModule = wgpuDeviceCreateShaderModule(device, &vertexShaderDesc);
     if (!vertexShaderModule) {
-        Log::Error(Event::General, "Failed to create vertex shader module - WGSL syntax error?");
-        Log::Error(Event::General, "Vertex shader first 200 chars: " + vertexSource.substr(0, 200));
         return;
     } else {
     }
@@ -74,8 +71,6 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
 
     fragmentShaderModule = wgpuDeviceCreateShaderModule(device, &fragmentShaderDesc);
     if (!fragmentShaderModule) {
-        Log::Error(Event::General, "Failed to create fragment shader module - WGSL syntax error?");
-        Log::Error(Event::General, "Fragment shader first 200 chars: " + fragmentSource.substr(0, 200));
         return;
     } else {
     }
@@ -162,11 +157,6 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
 
     pipeline = wgpuDeviceCreateRenderPipeline(device, &pipelineDesc);
     if (!pipeline) {
-        Log::Error(Event::General, "Failed to create WebGPU render pipeline - shader compilation or pipeline configuration error");
-        Log::Error(Event::General, "Vertex shader length: " + std::to_string(vertexSource.length()));
-        Log::Error(Event::General, "Fragment shader length: " + std::to_string(fragmentSource.length()));
-        Log::Error(Event::General, "Vertex shader module: " + std::to_string(vertexShaderModule != nullptr));
-        Log::Error(Event::General, "Fragment shader module: " + std::to_string(fragmentShaderModule != nullptr));
     } else {
         (void)reinterpret_cast<uintptr_t>(pipeline);
     }
