@@ -168,15 +168,11 @@ public:
             if (waitStatus == WGPUWaitStatus_Success) {
                 // The callback should have been invoked
                 if (!mapContext.completed) {
-                    Log::Warning(Event::General, "Buffer map future completed but callback not invoked");
                 }
             } else if (waitStatus == WGPUWaitStatus_TimedOut) {
-                Log::Error(Event::General, "Timeout waiting for buffer map");
             } else {
-                Log::Error(Event::General, std::string("Error waiting for buffer map: ") + std::to_string(static_cast<int>(waitStatus)));
             }
         } else {
-            Log::Error(Event::General, "No WebGPU instance available for async wait");
         }
         
         // Check if mapping was successful and read the data

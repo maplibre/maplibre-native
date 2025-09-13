@@ -52,7 +52,6 @@ void CommandEncoder::present(gfx::Renderable&) {
     WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
 
     if (!device || !queue || !encoder) {
-        Log::Error(Event::General, "Missing device, queue, or encoder in present");
         return;
     }
 
@@ -66,7 +65,6 @@ void CommandEncoder::present(gfx::Renderable&) {
         wgpuQueueSubmit(queue, 1, &cmdBuffer);
         wgpuCommandBufferRelease(cmdBuffer);
     } else {
-        Log::Error(Event::General, "Failed to finish command encoder");
     }
 
     // Note: Surface presentation (swap) is handled by GLFWView::renderSync()
@@ -87,7 +85,6 @@ void CommandEncoder::pushDebugGroup(const char* name) {
         WGPUStringView label = {name, name ? strlen(name) : 0};
         wgpuCommandEncoderPushDebugGroup(encoder, label);
     } else {
-        Log::Warning(Event::General, "pushDebugGroup called but encoder is null");
     }
 }
 
@@ -95,7 +92,6 @@ void CommandEncoder::popDebugGroup() {
     if (encoder) {
         wgpuCommandEncoderPopDebugGroup(encoder);
     } else {
-        Log::Warning(Event::General, "popDebugGroup called but encoder is null");
     }
 }
 

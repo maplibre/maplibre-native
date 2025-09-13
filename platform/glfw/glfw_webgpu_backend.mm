@@ -21,6 +21,8 @@
 
 #include <iostream>
 #include <cassert>
+#include <thread>
+#include <chrono>
 
 namespace mbgl {
 namespace gfx {
@@ -37,14 +39,24 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
       mbgl::gfx::Renderable(mbgl::Size{0, 0}, nullptr),
       window(window_) {
 
+    // Add small delay to let previous resources clean up
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     // Create Dawn instance
     instance = std::make_unique<dawn::native::Instance>();
 
-    // Enumerate adapters
-    std::vector<dawn::native::Adapter> adapters = instance->EnumerateAdapters();
+    // Enumerate adapters with retry logic
+    std::vector<dawn::native::Adapter> adapters;
+    for (int attempt = 0; attempt < 3; ++attempt) {
+        adapters = instance->EnumerateAdapters();
+        if (!adapters.empty()) {
+            break;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
+    
     if (adapters.empty()) {
-        throw std::runtime_error("No WebGPU adapters found");
+        throw std::runtime_error("No WebGPU adapters found after retries");
     }
 
     // Select first adapter (should be Metal on macOS)
@@ -53,10 +65,18 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     // Create device with error callbacks
     WGPUDevice rawDevice = selectedAdapter.CreateDevice();
     if (!rawDevice) {
-        throw std::runtime_error("Failed to create WebGPU device");
+        // Retry once after delay
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        rawDevice = selectedAdapter.CreateDevice();
+        if (!rawDevice) {
+            throw std::runtime_error("Failed to create WebGPU device after retry");
+        }
     }
 
     wgpuDevice = wgpu::Device::Acquire(rawDevice);
+    
+    // Process device events to ensure it's ready
+    wgpuDeviceTick(rawDevice);
 
     // TODO: Add error callbacks once we figure out the correct Dawn API
 
@@ -122,7 +142,10 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     // Make sure window shouldn't close
     if (glfwWindowShouldClose(window)) {
     }
-
+    
+    // Final delay to ensure everything is ready
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    
 }
 
 GLFWWebGPUBackend::~GLFWWebGPUBackend() {

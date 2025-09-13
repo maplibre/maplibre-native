@@ -98,7 +98,6 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramPa
         webgpuShaderGroup->initialize(context);
         bool registered = registry.registerShaderGroup(std::move(webgpuShaderGroup), shaderName);
         if (registered) {
-            Log::Debug(Event::General, "Registered WebGPU shader group for: " + shaderName);
         }
     }
 

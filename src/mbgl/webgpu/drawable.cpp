@@ -52,7 +52,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
 
     if (!device) {
-        Log::Warning(Event::General, "No device available in upload pass");
         return;
     }
 
@@ -104,7 +103,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         impl->bindGroup = wgpuDeviceCreateBindGroup(device, &bindGroupDesc);
         if (impl->bindGroup) {
         } else {
-            Log::Warning(Event::General, "Failed to create bind group");
         }
     }
 
@@ -173,7 +171,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         impl->needsVertexExtraction = false;
 
         if (impl->vertexData.empty()) {
-            Log::Warning(Event::General, "Failed to extract vertex data from attributes");
         }
     }
 
@@ -229,10 +226,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
                     }
                 }
             } else {
-                Log::Error(Event::General, "Failed to get queue for writing vertex buffer");
             }
         } else {
-            Log::Error(Event::General, "Failed to create vertex buffer");
         }
     } else {
     }
@@ -267,10 +262,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
             if (queue) {
                 wgpuQueueWriteBuffer(queue, impl->indexBuffer, 0, indexData, indexSize);
             } else {
-                Log::Error(Event::General, "Failed to get queue for writing index buffer");
             }
         } else {
-            Log::Error(Event::General, "Failed to create index buffer");
         }
     } else {
     }
@@ -447,7 +440,6 @@ void Drawable::draw(PaintParameters& parameters) const {
     if (!impl->pipeline && shader) {
         // Verify it's a WebGPU shader by checking the type name
         if (shader->typeName() != "WebGPU") {
-            Log::Error(Event::General, "Shader is not a WebGPU shader, type: " + std::string(shader->typeName()));
             return;
         }
 
@@ -458,22 +450,20 @@ void Drawable::draw(PaintParameters& parameters) const {
                 // uintptr_t addr = reinterpret_cast<uintptr_t>(impl->pipeline);
 
             } else {
-                Log::Warning(Event::General, "Shader's getPipeline() returned null");
             }
         }
     }
 
     // Set the pipeline
     if (!impl->pipeline) {
-        Log::Warning(Event::General, "WebGPU Drawable: No pipeline available, cannot draw");
         return;
     }
 
     // Additional safety check for pipeline validity
     uintptr_t pipelineAddr = reinterpret_cast<uintptr_t>(impl->pipeline);
     if (pipelineAddr < 0x1000) { // Likely a bad pointer
-        Log::Error(Event::General, "WebGPU Drawable: Pipeline pointer is invalid (address: 0x" +
-                    std::to_string(pipelineAddr) + ")");
+        // Log::Error(Event::General, "WebGPU Drawable: Pipeline pointer is invalid (address: 0x" +
+        //             std::to_string(pipelineAddr) + ")");
         impl->pipeline = nullptr; // Clear the bad pointer
         return;
     }
@@ -493,7 +483,6 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
         wgpuRenderPassEncoderSetVertexBuffer(renderPassEncoder, 0, impl->vertexBuffer, 0, impl->vertexData.size());
     } else {
-        Log::Warning(Event::General, "WebGPU Drawable: No vertex buffer to bind");
     }
 
     // Bind index buffer if available
@@ -653,7 +642,6 @@ void Drawable::buildWebGPUPipeline() noexcept {
 
     // We need a shader to create the pipeline
     if (!shader) {
-        Log::Warning(Event::General, "No shader set for drawable, skipping pipeline creation");
         return;
     }
 
@@ -661,19 +649,16 @@ void Drawable::buildWebGPUPipeline() noexcept {
     // The shader is a shared_ptr<gfx::ShaderProgramBase> which actually contains a webgpu::ShaderProgram
     // We use static_pointer_cast because RTTI is disabled
     if (!shader) {
-        Log::Error(Event::General, "Shader is null!");
         return;
     }
 
     // Verify it's a WebGPU shader by checking the type name
     if (shader->typeName() != "WebGPU") {
-        Log::Error(Event::General, "Shader is not a WebGPU shader, type: " + std::string(shader->typeName()));
         return;
     }
 
     auto webgpuShader = std::static_pointer_cast<mbgl::webgpu::ShaderProgram>(shader);
     if (!webgpuShader) {
-        Log::Error(Event::General, "Failed to cast shader to WebGPU type");
         return;
     }
 
@@ -688,7 +673,6 @@ void Drawable::buildWebGPUPipeline() noexcept {
             createBindGroup(bindGroupLayout);
         }
     } else {
-        Log::Warning(Event::General, "Shader has no pipeline");
     }
 }
 
