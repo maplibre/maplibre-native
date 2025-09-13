@@ -5,7 +5,11 @@
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <memory>
+#include <mutex>
 #include <webgpu/webgpu_cpp.h>
+#include <queue>
+#include <atomic>
+#include <condition_variable>
 
 struct GLFWwindow;
 struct WGPUDeviceImpl;
@@ -60,5 +64,39 @@ private:
     wgpu::Queue queue;
     wgpu::Surface wgpuSurface;
     wgpu::TextureFormat swapChainFormat = wgpu::TextureFormat::BGRA8Unorm;
+    
+    // Protect texture view access from multiple threads
+    mutable std::mutex textureViewMutex;
     wgpu::TextureView currentTextureView;  // Keep the current texture view alive
+    wgpu::Texture currentTexture;  // Keep the texture alive as well
+    
+    // Frame synchronization
+    std::atomic<bool> frameInProgress{false};
+    std::condition_variable frameCV;
+    std::mutex frameMutex;
+    
+    // Track if we have presented the current frame
+    std::atomic<bool> framePresented{true};
+    
+    // Deferred cleanup - keep old resources alive until safe to release
+    struct FrameResources {
+        wgpu::TextureView view;
+        wgpu::Texture texture;
+    };
+    std::queue<FrameResources> deferredCleanup;
+    static constexpr size_t maxDeferredFrames = 3;
+    
+    // Surface state tracking
+    std::atomic<bool> surfaceConfigured{false};
+    std::atomic<bool> surfaceNeedsReconfigure{false};
+    mbgl::Size lastConfiguredSize{0, 0};
+    
+    // Error recovery
+    std::atomic<int> consecutiveErrors{0};
+    static constexpr int maxConsecutiveErrors = 3;
+    
+    // Helper methods
+    void reconfigureSurface();
+    bool waitForFrame(std::chrono::milliseconds timeout = std::chrono::milliseconds(100));
+    void signalFrameComplete();
 };
