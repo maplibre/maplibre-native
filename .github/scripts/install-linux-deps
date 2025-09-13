@@ -11,5 +11,5 @@ DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
   libopengl0 \
   mesa-vulkan-drivers \
   llvm \
-  glslang-dev
-cargo install armerge@2.2.0
+  glslang-dev \
+  libbz2-dev

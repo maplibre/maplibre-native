@@ -16,7 +16,7 @@ pkg_search_module(ICUUC icu-uc)
 pkg_search_module(ICUI18N icu-i18n)
 find_program(ARMERGE NAMES armerge)
 
-if(MLN_WITH_WAYLAND)
+if(MLN_WITH_WAYLAND AND NOT MLN_WITH_VULKAN)
     # See https://github.com/maplibre/maplibre-native/pull/2022
 
     # MLN_WITH_EGL needs to be set for Wayland, otherwise this CMakeLists will
@@ -184,7 +184,7 @@ target_link_libraries(
 # Bundle system provided libraries
 if(NOT MLN_USE_BUILTIN_ICU AND NOT "${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
     message(STATUS "Found armerge: ${ARMERGE}")
-    include(${CMAKE_CURRENT_LIST_DIR}/cmake/find_static_library.cmake)
+    include(${PROJECT_SOURCE_DIR}/cmake/find_static_library.cmake)
     set(STATIC_LIBS "")
 
     find_static_library(STATIC_LIBS NAMES png)
