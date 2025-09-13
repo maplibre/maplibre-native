@@ -220,26 +220,6 @@ ios_application(
 )
 
 ios_application(
-    name = "AppDynamicLib",
-    bundle_id = "org.maplibre.app",
-    families = [
-        "iphone",
-        "ipad",
-    ],
-    frameworks = [
-        "MapLibre.link",
-    ],
-    infoplists = ["app/Info.plist"],
-    minimum_os_version = "12.0",
-    provisioning_profile = ":xcode_profile",
-    resources = _IOS_APPLICATION_RESOURCES,
-    visibility = ["//visibility:public"],
-    deps = [
-        "//platform:iosapp",
-    ],
-)
-
-ios_application(
     name = "BenchmarkApp",
     bundle_id = "{}.benchmark.app".format(BUNDLE_ID_PREFIX),
     families = [
