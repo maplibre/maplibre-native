@@ -110,7 +110,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     layer.drawableSize = CGSizeMake(width, height);
 
     [view setLayer:layer];
-    metalLayer = (__bridge_retained void*)layer;
+    metalLayer = (__bridge_retained void*)layer;  // ARC will handle the retain
 
     // Create surface from metal layer
     wgpu::SurfaceDescriptorFromMetalLayer metalDesc;
@@ -163,53 +163,60 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
 }
 
 GLFWWebGPUBackend::~GLFWWebGPUBackend() {
-    // Force frame completion to unblock any waiting threads
-    frameInProgress = false;
-    signalFrameComplete();
+    // Set shutdown flag atomically with memory barrier
+    isShuttingDown.store(true, std::memory_order_release);
     
-    // Give time for any pending operations to complete
+    // Signal any waiting threads to wake up
+    {
+        std::lock_guard<std::mutex> lock(frameMutex);
+        frameInProgress = false;
+    }
+    frameCV.notify_all();
+    
+    // Give threads time to exit their wait loops
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     
-    // Release current texture view and texture if any
+    // Clear all Dawn/WebGPU resources in proper order
     {
         std::lock_guard<std::mutex> lock(textureViewMutex);
-        currentTextureView = nullptr;
-        currentTexture = nullptr;
         
-        // Clear deferred cleanup queue
-        while (!deferredCleanup.empty()) {
-            deferredCleanup.pop();
-        }
+        // Release texture views first (they reference textures)
+        currentTextureView = nullptr;
+        previousTextureView = nullptr;
+        
+        // Then release textures
+        currentTexture = nullptr;
+        previousTexture = nullptr;
     }
     
-    // Process final device work
-    if (wgpuDevice) {
-        wgpuDeviceTick(wgpuDevice.Get());
+    // Ensure all GPU work is complete
+    if (queue) {
+        // Note: Dawn doesn't have a Finish() method, but tick processes pending work
+        if (wgpuDevice) {
+            wgpuDeviceTick(wgpuDevice.Get());
+        }
     }
 
-    // Unconfigure surface before releasing
+    // Unconfigure surface before releasing device
     if (wgpuSurface && surfaceConfigured) {
         wgpuSurface.Unconfigure();
         surfaceConfigured = false;
     }
 
-    // Release surface
-    wgpuSurface = nullptr;
-
-    // Release queue
-    queue = nullptr;
-
-    // Release device
-    wgpuDevice = nullptr;
+    // Release WebGPU resources in reverse order of creation
+    wgpuSurface = nullptr;  // Surface depends on device
+    queue = nullptr;         // Queue is owned by device
+    wgpuDevice = nullptr;    // Device depends on instance
 
 #ifdef __APPLE__
+    // Release Metal layer after all WebGPU resources
     if (metalLayer) {
-        CFRelease(metalLayer);
+        CFRelease(metalLayer);  // Release the bridged retain
         metalLayer = nullptr;
     }
 #endif
 
-    // Release instance last
+    // Release Dawn instance last (it owns the backend)
     instance.reset();
 }
 
@@ -226,10 +233,38 @@ mbgl::gfx::Renderable& GLFWWebGPUBackend::getDefaultRenderable() {
 
 
 void GLFWWebGPUBackend::swap() {
+    // Don't do anything if we're shutting down
+    if (isShuttingDown) {
+        return;
+    }
+    
+    // Keep track of swap calls for debugging
+    static int swapCount = 0;
+    static auto lastSwapTime = std::chrono::steady_clock::now();
+    auto now = std::chrono::steady_clock::now();
+    auto timeSinceLastSwap = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSwapTime).count();
+    
+    // If it's been too long since last swap, tick the device to keep it alive
+    if (timeSinceLastSwap > 1000) {  // 1 second
+        // Keep Dawn device alive during idle periods
+        if (wgpuDevice) {
+            wgpuDeviceTick(wgpuDevice.Get());
+        }
+        // Only reconfigure if really needed (> 10 seconds)
+        if (timeSinceLastSwap > 10000 && surfaceConfigured) {
+            surfaceNeedsReconfigure = true;
+        }
+    }
+    lastSwapTime = now;
+    swapCount++;
+    
     // Process any pending device work
     if (wgpuDevice) {
         wgpuDeviceTick(wgpuDevice.Get());
     }
+    
+    // Run periodic maintenance
+    periodicMaintenance();
     
     // Wait for any previous frame to complete with longer timeout
     if (!waitForFrame(std::chrono::milliseconds(500))) {
@@ -251,28 +286,16 @@ void GLFWWebGPUBackend::swap() {
             // Only present if we have a valid texture view and haven't presented yet
             if (currentTextureView && !framePresented) {
                 // Validate the texture view before presenting
-                WGPUTextureView raw = currentTextureView.Get();
-                if (raw != nullptr) {
-                    uintptr_t ptr = reinterpret_cast<uintptr_t>(raw);
-                    if (ptr > 0x1000 && ptr < 0x0001000000000000ULL) {
-                        // Valid pointer, safe to present
-                        wgpuSurface.Present();
-                        framePresented = true;
-                    }
-                }
+                // Present without pointer validation - Dawn handles this internally
+                wgpuSurface.Present();
+                framePresented = true;
                 
-                // Move current resources to deferred cleanup
-                // They will be released after a few frames when GPU is done with them
-                if (currentTextureView && currentTexture) {
-                    deferredCleanup.push({std::move(currentTextureView), std::move(currentTexture)});
-                    
-                    // Clean up old frames that are guaranteed to be done
-                    while (deferredCleanup.size() > maxDeferredFrames) {
-                        deferredCleanup.pop();
-                    }
-                }
+                // Move current resources to previous (keep them alive)
+                // They will be released on the next swap
+                previousTextureView = std::move(currentTextureView);
+                previousTexture = std::move(currentTexture);
                 
-                // Clear current references (resources are now in deferred cleanup)
+                // Clear current references
                 currentTextureView = nullptr;
                 currentTexture = nullptr;
             }
@@ -323,6 +346,11 @@ void GLFWWebGPUBackend::setSize(mbgl::Size newSize) {
 }
 
 void* GLFWWebGPUBackend::getCurrentTextureView() {
+    // Don't do anything if we're shutting down
+    if (isShuttingDown) {
+        return nullptr;
+    }
+    
     if (!wgpuSurface || !surfaceConfigured) {
         return nullptr;
     }
@@ -331,6 +359,9 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
     if (wgpuDevice) {
         wgpuDeviceTick(wgpuDevice.Get());
     }
+    
+    // Run periodic maintenance
+    periodicMaintenance();
     
     // Check error threshold
     if (consecutiveErrors >= maxConsecutiveErrors) {
@@ -343,20 +374,27 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
     // Lock to protect texture view access
     std::lock_guard<std::mutex> lock(textureViewMutex);
     
-    // If we already have a current texture view and haven't presented, return it
+    // Track when we acquired the current texture view
+    static auto textureAcquiredTime = std::chrono::steady_clock::now();
+    
+    // If we already have a current texture view and haven't presented, check if it's still fresh
     if (currentTextureView && !framePresented) {
-        // Ensure it's still valid
-        WGPUTextureView raw = currentTextureView.Get();
-        if (raw != nullptr) {
-            // Validate pointer range - ARM64 uses 48-bit virtual addresses
-            uintptr_t ptr = reinterpret_cast<uintptr_t>(raw);
-            if (ptr > 0x1000 && ptr < 0x0001000000000000ULL) {
-                return reinterpret_cast<void*>(raw);
-            }
+        auto now = std::chrono::steady_clock::now();
+        auto age = std::chrono::duration_cast<std::chrono::milliseconds>(now - textureAcquiredTime).count();
+        
+        // If texture view is too old (e.g., > 1 second), discard it
+        if (age > 1000) {
+            currentTextureView = nullptr;
+            currentTexture = nullptr;
+            frameInProgress = false;
+            framePresented = true;
+        } else {
+            // Return the texture view - Dawn handles validation
+            return reinterpret_cast<void*>(currentTextureView.Get());
+            // Invalid, clear both texture and view
+            currentTextureView = nullptr;
+            currentTexture = nullptr;
         }
-        // Invalid, clear both texture and view
-        currentTextureView = nullptr;
-        currentTexture = nullptr;
     }
     
     // Mark frame as in progress
@@ -405,18 +443,8 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
         return nullptr;
     }
 
-    // Validate the texture pointer before creating a view
-    WGPUTexture rawTexture = surfaceTexture.texture.Get();
-    if (rawTexture == nullptr) {
-        consecutiveErrors++;
-        frameInProgress = false;
-        return nullptr;
-    }
-    
-    // Validate pointer is in valid ARM64 address range
-    uintptr_t texPtr = reinterpret_cast<uintptr_t>(rawTexture);
-    if (texPtr <= 0x1000 || texPtr >= 0x0001000000000000ULL) {
-        // Invalid pointer range
+    // Check if texture is valid
+    if (!surfaceTexture.texture) {
         consecutiveErrors++;
         frameInProgress = false;
         return nullptr;
@@ -436,8 +464,13 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
     // Store the texture to keep it alive
     currentTexture = surfaceTexture.texture;
     
+    // Update the acquisition time
+    textureAcquiredTime = std::chrono::steady_clock::now();
+    
+    // Create the texture view with validation
+    wgpu::TextureView newView;
     try {
-        currentTextureView = currentTexture.CreateView(&viewDesc);
+        newView = currentTexture.CreateView(&viewDesc);
     } catch (...) {
         // Handle any exceptions from Dawn
         currentTexture = nullptr;
@@ -446,28 +479,19 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
         return nullptr;
     }
     
+    // Validate the new view before storing
+    if (!newView) {
+        currentTexture = nullptr;
+        consecutiveErrors++;
+        frameInProgress = false;
+        return nullptr;
+    }
+    
+    // Store the validated view
+    currentTextureView = newView;
+    
+    // Return the created texture view
     if (!currentTextureView) {
-        currentTexture = nullptr;
-        consecutiveErrors++;
-        frameInProgress = false;
-        return nullptr;
-    }
-    
-    // Final validation of the created texture view
-    WGPUTextureView raw = currentTextureView.Get();
-    if (raw == nullptr) {
-        currentTextureView = nullptr;
-        currentTexture = nullptr;
-        consecutiveErrors++;
-        frameInProgress = false;
-        return nullptr;
-    }
-    
-    // Validate the pointer is in valid ARM64 48-bit address space
-    uintptr_t ptr = reinterpret_cast<uintptr_t>(raw);
-    if (ptr <= 0x1000 || ptr >= 0x0001000000000000ULL) {
-        // Pointer outside valid range - likely corrupted
-        currentTextureView = nullptr;
         currentTexture = nullptr;
         consecutiveErrors++;
         frameInProgress = false;
@@ -477,10 +501,7 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
     // Success - reset error counter
     consecutiveErrors = 0;
     
-    // Memory barrier to ensure all writes are visible
-    std::atomic_thread_fence(std::memory_order_release);
-    
-    return reinterpret_cast<void*>(raw);
+    return reinterpret_cast<void*>(currentTextureView.Get());
 }
 
 mbgl::Size GLFWWebGPUBackend::getFramebufferSize() const {
@@ -488,24 +509,26 @@ mbgl::Size GLFWWebGPUBackend::getFramebufferSize() const {
 }
 
 void GLFWWebGPUBackend::reconfigureSurface() {
-    if (!wgpuSurface || !wgpuDevice) {
+    if (!wgpuSurface || !wgpuDevice || isShuttingDown) {
         return;
     }
     
     // Wait for any in-progress frame
     waitForFrame();
     
+    // Don't proceed if we're shutting down after waiting
+    if (isShuttingDown) {
+        return;
+    }
+    
     // Lock to ensure exclusive access
     std::lock_guard<std::mutex> lock(textureViewMutex);
     
-    // Clear current state
+    // Clear all texture state
     currentTextureView = nullptr;
     currentTexture = nullptr;
-    
-    // Clear deferred cleanup
-    while (!deferredCleanup.empty()) {
-        deferredCleanup.pop();
-    }
+    previousTextureView = nullptr;
+    previousTexture = nullptr;
     
     // Get current size
     int width, height;
@@ -539,16 +562,55 @@ void GLFWWebGPUBackend::reconfigureSurface() {
 }
 
 bool GLFWWebGPUBackend::waitForFrame(std::chrono::milliseconds timeout) {
+    // Check shutdown flag with acquire ordering to see destructor's release
+    if (isShuttingDown.load(std::memory_order_acquire)) {
+        return true;
+    }
+    
     std::unique_lock<std::mutex> lock(frameMutex);
-    if (!frameInProgress) {
+    if (!frameInProgress.load(std::memory_order_acquire)) {
         return true;  // No frame in progress
     }
     
     // Wait for frame to complete with timeout
-    return frameCV.wait_for(lock, timeout, [this] { return !frameInProgress.load(); });
+    return frameCV.wait_for(lock, timeout, [this] { 
+        return !frameInProgress.load(std::memory_order_acquire) || 
+               isShuttingDown.load(std::memory_order_acquire); 
+    });
 }
 
 void GLFWWebGPUBackend::signalFrameComplete() {
+    // Don't use mutex if we're shutting down
+    if (isShuttingDown) {
+        frameInProgress = false;
+        return;
+    }
+    
     frameInProgress = false;
     frameCV.notify_all();
+}
+
+void GLFWWebGPUBackend::periodicMaintenance() {
+    // Check shutdown with proper memory ordering
+    if (isShuttingDown.load(std::memory_order_acquire)) {
+        return;
+    }
+    
+    static auto lastMaintenanceTime = std::chrono::steady_clock::now();
+    auto now = std::chrono::steady_clock::now();
+    auto timeSinceLastMaintenance = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastMaintenanceTime).count();
+    
+    // Run maintenance every 100ms to keep Dawn alive during idle periods
+    if (timeSinceLastMaintenance > 100) {
+        // Tick the device to process any pending work and keep connection alive
+        if (wgpuDevice) {
+            try {
+                wgpuDeviceTick(wgpuDevice.Get());
+            } catch (...) {
+                // Ignore exceptions during maintenance
+            }
+        }
+        
+        lastMaintenanceTime = now;
+    }
 }
