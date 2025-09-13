@@ -533,7 +533,8 @@ void GeometryTile::querySourceFeatures(std::vector<Feature>& result, const Sourc
 
     // No source layers, specified, nothing to do
     if (!options.sourceLayers) {
-        Log::Warning(Event::General, "At least one sourceLayer required");
+        // Log::Warning(Event::General, "At least one sourceLayer required");
+        // Logging disabled to prevent heap corruption in multi-threaded context
         return;
     }
 

@@ -13,22 +13,28 @@ ShaderProgram::ShaderProgram(Context& context_,
 }
 
 ShaderProgram::~ShaderProgram() {
+    // Release resources in reverse order of creation
+    // Pipeline depends on pipeline layout and shader modules
     if (pipeline) {
         wgpuRenderPipelineRelease(pipeline);
         pipeline = nullptr;
     }
+    
     if (bindGroupLayout) {
         wgpuBindGroupLayoutRelease(bindGroupLayout);
-        // No bind group layout needed for testing
+        bindGroupLayout = nullptr;
     }
+    
     if (pipelineLayout) {
         wgpuPipelineLayoutRelease(pipelineLayout);
         pipelineLayout = nullptr;
     }
+    
     if (vertexShaderModule) {
         wgpuShaderModuleRelease(vertexShaderModule);
         vertexShaderModule = nullptr;
     }
+    
     if (fragmentShaderModule) {
         wgpuShaderModuleRelease(fragmentShaderModule);
         fragmentShaderModule = nullptr;
@@ -39,6 +45,8 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     auto& backend = static_cast<webgpu::RendererBackend&>(context.getBackend());
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
     if (!device) {
+        // Log::Error(Event::Shader, "WebGPU ShaderProgram: Device is null");
+        // Logging disabled to prevent heap corruption in multi-threaded context
         return;
     }
 
@@ -56,8 +64,9 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
 
     vertexShaderModule = wgpuDeviceCreateShaderModule(device, &vertexShaderDesc);
     if (!vertexShaderModule) {
+        // Log::Error(Event::Shader, "WebGPU ShaderProgram: Failed to create vertex shader module");
+        // Logging disabled to prevent heap corruption in multi-threaded context
         return;
-    } else {
     }
 
     // Create fragment shader module
@@ -71,26 +80,88 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
 
     fragmentShaderModule = wgpuDeviceCreateShaderModule(device, &fragmentShaderDesc);
     if (!fragmentShaderModule) {
+        // Log::Error(Event::Shader, "WebGPU ShaderProgram: Failed to create fragment shader module");
+        // Logging disabled to prevent heap corruption in multi-threaded context
+        // Clean up vertex module before returning
+        if (vertexShaderModule) {
+            wgpuShaderModuleRelease(vertexShaderModule);
+            vertexShaderModule = nullptr;
+        }
         return;
-    } else {
     }
 
-    // Create pipeline layout with no bind groups (for testing)
+    // Create bind group layout for uniforms (MVP matrix)
+    WGPUBindGroupLayoutEntry bindingEntry = {};
+    bindingEntry.binding = 0;
+    bindingEntry.visibility = WGPUShaderStage_Vertex;
+    bindingEntry.buffer.type = WGPUBufferBindingType_Uniform;
+    bindingEntry.buffer.hasDynamicOffset = 0;
+    bindingEntry.buffer.minBindingSize = 64; // 4x4 matrix
+    
+    WGPUBindGroupLayoutDescriptor bindGroupLayoutDesc = {};
+    WGPUStringView bindGroupLabel = {"Uniform Bind Group Layout", strlen("Uniform Bind Group Layout")};
+    bindGroupLayoutDesc.label = bindGroupLabel;
+    bindGroupLayoutDesc.entryCount = 1;
+    bindGroupLayoutDesc.entries = &bindingEntry;
+    
+    bindGroupLayout = wgpuDeviceCreateBindGroupLayout(device, &bindGroupLayoutDesc);
+    if (!bindGroupLayout) {
+        // Log::Warning(Event::Shader, "WebGPU ShaderProgram: Failed to create bind group layout, using auto layout");
+        // Logging disabled to prevent heap corruption in multi-threaded context
+    }
+    
+    // Create pipeline layout
     WGPUPipelineLayoutDescriptor pipelineLayoutDesc = {};
     WGPUStringView pipelineLayoutLabel = {"Pipeline Layout", strlen("Pipeline Layout")};
     pipelineLayoutDesc.label = pipelineLayoutLabel;
-    pipelineLayoutDesc.bindGroupLayoutCount = 0;  // No bind groups
-    pipelineLayoutDesc.bindGroupLayouts = nullptr;
+    
+    if (bindGroupLayout) {
+        pipelineLayoutDesc.bindGroupLayoutCount = 1;
+        pipelineLayoutDesc.bindGroupLayouts = &bindGroupLayout;
+    } else {
+        // Use auto layout if bind group layout creation failed
+        pipelineLayoutDesc.bindGroupLayoutCount = 0;
+        pipelineLayoutDesc.bindGroupLayouts = nullptr;
+    }
 
     pipelineLayout = wgpuDeviceCreatePipelineLayout(device, &pipelineLayoutDesc);
+    if (!pipelineLayout) {
+        // Log::Error(Event::Shader, "WebGPU ShaderProgram: Failed to create pipeline layout");
+        // Logging disabled to prevent heap corruption in multi-threaded context
+        // Clean up resources
+        if (bindGroupLayout) {
+            wgpuBindGroupLayoutRelease(bindGroupLayout);
+            bindGroupLayout = nullptr;
+        }
+        if (vertexShaderModule) {
+            wgpuShaderModuleRelease(vertexShaderModule);
+            vertexShaderModule = nullptr;
+        }
+        if (fragmentShaderModule) {
+            wgpuShaderModuleRelease(fragmentShaderModule);
+            fragmentShaderModule = nullptr;
+        }
+        return;
+    }
 
-    // Set up vertex state - no vertex buffers for now (using hardcoded triangle)
+    // Set up vertex state with vertex buffer for position data
+    WGPUVertexAttribute vertexAttribute = {};
+    vertexAttribute.format = WGPUVertexFormat_Sint16x2;  // 2 int16 values for x,y
+    vertexAttribute.offset = 0;
+    vertexAttribute.shaderLocation = 0;  // @location(0) in shader
+    
+    WGPUVertexBufferLayout vertexBufferLayout = {};
+    vertexBufferLayout.arrayStride = 4;  // 2 * sizeof(int16)
+    vertexBufferLayout.stepMode = WGPUVertexStepMode_Vertex;
+    vertexBufferLayout.attributeCount = 1;
+    vertexBufferLayout.attributes = &vertexAttribute;
+    
     WGPUVertexState vertexState = {};
     vertexState.module = vertexShaderModule;
     WGPUStringView vertexState_entryPoint_str = {"main", strlen("main")};
     vertexState.entryPoint = vertexState_entryPoint_str;
-    vertexState.bufferCount = 0;  // No vertex buffers
-    vertexState.buffers = nullptr;
+    vertexState.bufferCount = 1;  // One vertex buffer
+    vertexState.buffers = &vertexBufferLayout;
 
     // Set up fragment state with alpha blending
     WGPUBlendComponent alphaBlend = {};
@@ -157,8 +228,28 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
 
     pipeline = wgpuDeviceCreateRenderPipeline(device, &pipelineDesc);
     if (!pipeline) {
+        // Log::Error(Event::Shader, "WebGPU ShaderProgram: Failed to create render pipeline");
+        // Logging disabled to prevent heap corruption in multi-threaded context
+        // Clean up all resources on failure
+        if (bindGroupLayout) {
+            wgpuBindGroupLayoutRelease(bindGroupLayout);
+            bindGroupLayout = nullptr;
+        }
+        if (pipelineLayout) {
+            wgpuPipelineLayoutRelease(pipelineLayout);
+            pipelineLayout = nullptr;
+        }
+        if (vertexShaderModule) {
+            wgpuShaderModuleRelease(vertexShaderModule);
+            vertexShaderModule = nullptr;
+        }
+        if (fragmentShaderModule) {
+            wgpuShaderModuleRelease(fragmentShaderModule);
+            fragmentShaderModule = nullptr;
+        }
     } else {
-        (void)reinterpret_cast<uintptr_t>(pipeline);
+        // Log::Info(Event::Shader, "WebGPU ShaderProgram: Successfully created render pipeline");
+        // Logging disabled to prevent heap corruption in multi-threaded context
     }
 }
 

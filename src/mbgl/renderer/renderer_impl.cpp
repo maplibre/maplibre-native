@@ -131,7 +131,8 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                             captureDesc->setDestination(captureDest);
                             NS::Error* errorPtr = nullptr;
                             if (captureManager->startCapture(captureDesc.get(), &errorPtr)) {
-                                Log::Warning(Event::Render, "Capture Started");
+                                // Log::Warning(Event::Render, "Capture Started");
+                                // Logging disabled to prevent heap corruption
                             } else {
                                 std::string errStr = "<none>";
                                 if (auto error = NS::TransferPtr(errorPtr)) {
@@ -141,7 +142,8 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                                         }
                                     }
                                 }
-                                Log::Warning(Event::Render, "Capture Failed: " + errStr);
+                                // Log::Warning(Event::Render, "Capture Failed: " + errStr);
+                                // String concatenation logging disabled to prevent heap corruption
                             }
                         }
                     }

@@ -19,7 +19,7 @@ struct Uniforms {
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
 
 struct VertexInput {
-    @location(0) position: vec2<i32>,
+    @location(0) position: vec2<i32>,  // int16x2 vertex position
 }
 
 struct VertexOutput {
@@ -31,17 +31,19 @@ struct VertexOutput {
 fn main(input: VertexInput) -> VertexOutput {
     var output: VertexOutput;
 
-    // Convert int16 position to tile coordinates
-    // MapLibre uses 0-8192 for tile coordinates
+    // Convert int16 position to normalized coordinates
+    // MapLibre tile coordinates typically use range 0-8192 or similar
     let pos = vec2<f32>(f32(input.position.x), f32(input.position.y));
 
     // Apply the MVP matrix transformation
     output.position = uniforms.mvp_matrix * vec4<f32>(pos, 0.0, 1.0);
 
     // Use different colors based on position for debugging
+    // This helps visualize that vertices are being processed correctly
+    let normalized_pos = pos / 8192.0;
     output.color = vec4<f32>(
-        pos.x / 8192.0,
-        pos.y / 8192.0,
+        abs(normalized_pos.x),
+        abs(normalized_pos.y),
         0.5,
         1.0
     );
@@ -59,6 +61,7 @@ struct VertexOutput {
 
 @fragment
 fn main(input: VertexOutput) -> @location(0) vec4<f32> {
+    // Output the interpolated color from vertex shader
     return input.color;
 }
 )";
