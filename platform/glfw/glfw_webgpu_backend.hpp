@@ -78,13 +78,12 @@ private:
     // Track if we have presented the current frame
     std::atomic<bool> framePresented{true};
     
-    // Deferred cleanup - keep old resources alive until safe to release
-    struct FrameResources {
-        wgpu::TextureView view;
-        wgpu::Texture texture;
-    };
-    std::queue<FrameResources> deferredCleanup;
-    static constexpr size_t maxDeferredFrames = 3;
+    // Track if we're shutting down to prevent mutex usage during destruction
+    std::atomic<bool> isShuttingDown{false};
+    
+    // Previous frame resources - keep alive until next swap
+    wgpu::TextureView previousTextureView;
+    wgpu::Texture previousTexture;
     
     // Surface state tracking
     std::atomic<bool> surfaceConfigured{false};
@@ -99,4 +98,5 @@ private:
     void reconfigureSurface();
     bool waitForFrame(std::chrono::milliseconds timeout = std::chrono::milliseconds(100));
     void signalFrameComplete();
+    void periodicMaintenance();
 };

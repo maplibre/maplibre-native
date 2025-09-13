@@ -233,6 +233,43 @@ if(MLN_WITH_GLFW)
                 "-framework CoreVideo"
         )
         endif()
+        
+        # Simple WebGPU Triangle Example
+        message(STATUS "Simple WebGPU triangle example will be built")
+        
+        add_executable(webgpu_simple_triangle webgpu_simple_triangle.cpp)
+        
+        target_link_libraries(
+            webgpu_simple_triangle
+            PRIVATE
+                mbgl-core
+                ${GLFW_LIBRARIES}
+        )
+        
+        target_include_directories(
+            webgpu_simple_triangle
+            PRIVATE
+                ${GLFW_INCLUDE_DIRS}
+        )
+        
+        target_compile_definitions(
+            webgpu_simple_triangle
+            PRIVATE
+                USE_DAWN=1
+                MLN_RENDER_BACKEND_WEBGPU=1
+        )
+        
+        if(APPLE)
+            target_link_libraries(
+                webgpu_simple_triangle
+                PRIVATE
+                    "-framework Cocoa"
+                    "-framework IOKit"
+                    "-framework CoreVideo"
+                    "-framework Metal"
+                    "-framework QuartzCore"
+            )
+        endif()
     endif()
 endif()  # Close the parent if(MLN_WITH_GLFW) block
 
