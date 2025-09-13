@@ -38,6 +38,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
       mbgl::webgpu::RendererBackend(mbgl::gfx::ContextMode::Unique),
       mbgl::gfx::Renderable(mbgl::Size{0, 0}, nullptr),
       window(window_) {
+    
 
     // Add small delay to let previous resources clean up
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -136,6 +137,8 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     config.presentMode = wgpu::PresentMode::Fifo;
 
     wgpuSurface.Configure(&config);
+    surfaceConfigured = true;
+    lastConfiguredSize = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
 #endif
 
     // Store WebGPU instance, device and queue in the base class
@@ -157,13 +160,38 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
 
     // Final delay to ensure everything is ready
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
-
 }
 
 GLFWWebGPUBackend::~GLFWWebGPUBackend() {
+    // Force frame completion to unblock any waiting threads
+    frameInProgress = false;
+    signalFrameComplete();
+    
+    // Give time for any pending operations to complete
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    
+    // Release current texture view and texture if any
+    {
+        std::lock_guard<std::mutex> lock(textureViewMutex);
+        currentTextureView = nullptr;
+        currentTexture = nullptr;
+        
+        // Clear deferred cleanup queue
+        while (!deferredCleanup.empty()) {
+            deferredCleanup.pop();
+        }
+    }
+    
+    // Process final device work
+    if (wgpuDevice) {
+        wgpuDeviceTick(wgpuDevice.Get());
+    }
 
-    // Release current texture view if any
-    currentTextureView = nullptr;
+    // Unconfigure surface before releasing
+    if (wgpuSurface && surfaceConfigured) {
+        wgpuSurface.Unconfigure();
+        surfaceConfigured = false;
+    }
 
     // Release surface
     wgpuSurface = nullptr;
@@ -198,21 +226,67 @@ mbgl::gfx::Renderable& GLFWWebGPUBackend::getDefaultRenderable() {
 
 
 void GLFWWebGPUBackend::swap() {
-    // Present the current frame
-    if (wgpuSurface) {
-        // The surface presentation happens automatically when the current
-        // texture view goes out of scope and gets presented
-        wgpuSurface.Present();
-
-        // Clear the current texture view after presenting
-        currentTextureView = nullptr;
+    // Process any pending device work
+    if (wgpuDevice) {
+        wgpuDeviceTick(wgpuDevice.Get());
     }
+    
+    // Wait for any previous frame to complete with longer timeout
+    if (!waitForFrame(std::chrono::milliseconds(500))) {
+        // Timeout - force frame completion
+        signalFrameComplete();
+    }
+    
+    // Present the current frame
+    if (wgpuSurface && surfaceConfigured) {
+        // Check if surface needs reconfiguration
+        if (surfaceNeedsReconfigure) {
+            reconfigureSurface();
+        }
+        
+        // Lock for texture view manipulation
+        {
+            std::lock_guard<std::mutex> lock(textureViewMutex);
+            
+            // Only present if we have a valid texture view and haven't presented yet
+            if (currentTextureView && !framePresented) {
+                // Validate the texture view before presenting
+                WGPUTextureView raw = currentTextureView.Get();
+                if (raw != nullptr) {
+                    uintptr_t ptr = reinterpret_cast<uintptr_t>(raw);
+                    if (ptr > 0x1000 && ptr < 0x0001000000000000ULL) {
+                        // Valid pointer, safe to present
+                        wgpuSurface.Present();
+                        framePresented = true;
+                    }
+                }
+                
+                // Move current resources to deferred cleanup
+                // They will be released after a few frames when GPU is done with them
+                if (currentTextureView && currentTexture) {
+                    deferredCleanup.push({std::move(currentTextureView), std::move(currentTexture)});
+                    
+                    // Clean up old frames that are guaranteed to be done
+                    while (deferredCleanup.size() > maxDeferredFrames) {
+                        deferredCleanup.pop();
+                    }
+                }
+                
+                // Clear current references (resources are now in deferred cleanup)
+                currentTextureView = nullptr;
+                currentTexture = nullptr;
+            }
+        }
+        
+        // Reset error counter on successful present
+        consecutiveErrors = 0;
+    }
+    
+    // Signal frame completion
+    signalFrameComplete();
 
     // Poll for window events to keep the window responsive
     glfwPollEvents();
-
-    // Note: We don't call glfwSwapBuffers for WebGPU as it doesn't use OpenGL swap chains
-    // The presentation is handled by wgpuSurface.Present() above
 }
 
 void GLFWWebGPUBackend::activate() {
@@ -243,60 +317,238 @@ void GLFWWebGPUBackend::setSize(mbgl::Size newSize) {
         }
 #endif
 
-        // Recreate swap chain with new size
-        // TODO: Implement swap chain recreation
+        // Mark surface for reconfiguration
+        surfaceNeedsReconfigure = true;
     }
 }
 
 void* GLFWWebGPUBackend::getCurrentTextureView() {
-    if (!wgpuSurface) {
+    if (!wgpuSurface || !surfaceConfigured) {
+        return nullptr;
+    }
+    
+    // Process any pending device work before acquiring texture
+    if (wgpuDevice) {
+        wgpuDeviceTick(wgpuDevice.Get());
+    }
+    
+    // Check error threshold
+    if (consecutiveErrors >= maxConsecutiveErrors) {
+        // Too many errors, need to reconfigure
+        surfaceNeedsReconfigure = true;
+        reconfigureSurface();
+        consecutiveErrors = 0;
+    }
+
+    // Lock to protect texture view access
+    std::lock_guard<std::mutex> lock(textureViewMutex);
+    
+    // If we already have a current texture view and haven't presented, return it
+    if (currentTextureView && !framePresented) {
+        // Ensure it's still valid
+        WGPUTextureView raw = currentTextureView.Get();
+        if (raw != nullptr) {
+            // Validate pointer range - ARM64 uses 48-bit virtual addresses
+            uintptr_t ptr = reinterpret_cast<uintptr_t>(raw);
+            if (ptr > 0x1000 && ptr < 0x0001000000000000ULL) {
+                return reinterpret_cast<void*>(raw);
+            }
+        }
+        // Invalid, clear both texture and view
+        currentTextureView = nullptr;
+        currentTexture = nullptr;
+    }
+    
+    // Mark frame as in progress
+    bool expected = false;
+    if (!frameInProgress.compare_exchange_strong(expected, true)) {
+        // Another frame is already in progress, skip this request
+        return nullptr;
+    }
+    
+    // Mark that we haven't presented this frame yet
+    framePresented = false;
+    
+    // Acquire new surface texture with additional safety
+    wgpu::SurfaceTexture surfaceTexture;
+    try {
+        wgpuSurface.GetCurrentTexture(&surfaceTexture);
+    } catch (...) {
+        // Handle any exceptions during texture acquisition
+        consecutiveErrors++;
+        frameInProgress = false;
         return nullptr;
     }
 
-    wgpu::SurfaceTexture surfaceTexture;
-    wgpuSurface.GetCurrentTexture(&surfaceTexture);
-
+    // Handle various error states
+    if (surfaceTexture.status == wgpu::SurfaceGetCurrentTextureStatus::Timeout ||
+        surfaceTexture.status == wgpu::SurfaceGetCurrentTextureStatus::Outdated ||
+        surfaceTexture.status == wgpu::SurfaceGetCurrentTextureStatus::Lost) {
+        // Surface needs reconfiguration
+        surfaceNeedsReconfigure = true;
+        consecutiveErrors++;
+        frameInProgress = false;
+        return nullptr;
+    }
+    
     if (surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal &&
         surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::SuccessSuboptimal) {
-        const char* statusName = "Unknown";
-        switch (surfaceTexture.status) {
-            case wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal:
-                statusName = "SuccessOptimal";
-                break;
-            case wgpu::SurfaceGetCurrentTextureStatus::SuccessSuboptimal:
-                statusName = "SuccessSuboptimal";
-                break;
-            case wgpu::SurfaceGetCurrentTextureStatus::Timeout:
-                statusName = "Timeout";
-                break;
-            case wgpu::SurfaceGetCurrentTextureStatus::Outdated:
-                statusName = "Outdated";
-                break;
-            case wgpu::SurfaceGetCurrentTextureStatus::Lost:
-                statusName = "Lost";
-                break;
-            case wgpu::SurfaceGetCurrentTextureStatus::Error:
-                statusName = "Error";
-                break;
-            default:
-                break;
-        }
+        // Some other error
+        consecutiveErrors++;
+        frameInProgress = false;
         return nullptr;
     }
 
     if (!surfaceTexture.texture) {
-       return nullptr;
-    }
-
-    // Store the texture view to keep it alive
-    currentTextureView = surfaceTexture.texture.CreateView();
-    if (!currentTextureView) {
+        consecutiveErrors++;
+        frameInProgress = false;
         return nullptr;
     }
 
-    return reinterpret_cast<void*>(currentTextureView.Get());
+    // Validate the texture pointer before creating a view
+    WGPUTexture rawTexture = surfaceTexture.texture.Get();
+    if (rawTexture == nullptr) {
+        consecutiveErrors++;
+        frameInProgress = false;
+        return nullptr;
+    }
+    
+    // Validate pointer is in valid ARM64 address range
+    uintptr_t texPtr = reinterpret_cast<uintptr_t>(rawTexture);
+    if (texPtr <= 0x1000 || texPtr >= 0x0001000000000000ULL) {
+        // Invalid pointer range
+        consecutiveErrors++;
+        frameInProgress = false;
+        return nullptr;
+    }
+
+    // Create texture view with explicit descriptor
+    wgpu::TextureViewDescriptor viewDesc = {};
+    viewDesc.format = swapChainFormat;
+    viewDesc.dimension = wgpu::TextureViewDimension::e2D;
+    viewDesc.baseMipLevel = 0;
+    viewDesc.mipLevelCount = 1;
+    viewDesc.baseArrayLayer = 0;
+    viewDesc.arrayLayerCount = 1;
+    viewDesc.aspect = wgpu::TextureAspect::All;
+    viewDesc.label = "SwapChain TextureView";
+    
+    // Store the texture to keep it alive
+    currentTexture = surfaceTexture.texture;
+    
+    try {
+        currentTextureView = currentTexture.CreateView(&viewDesc);
+    } catch (...) {
+        // Handle any exceptions from Dawn
+        currentTexture = nullptr;
+        consecutiveErrors++;
+        frameInProgress = false;
+        return nullptr;
+    }
+    
+    if (!currentTextureView) {
+        currentTexture = nullptr;
+        consecutiveErrors++;
+        frameInProgress = false;
+        return nullptr;
+    }
+    
+    // Final validation of the created texture view
+    WGPUTextureView raw = currentTextureView.Get();
+    if (raw == nullptr) {
+        currentTextureView = nullptr;
+        currentTexture = nullptr;
+        consecutiveErrors++;
+        frameInProgress = false;
+        return nullptr;
+    }
+    
+    // Validate the pointer is in valid ARM64 48-bit address space
+    uintptr_t ptr = reinterpret_cast<uintptr_t>(raw);
+    if (ptr <= 0x1000 || ptr >= 0x0001000000000000ULL) {
+        // Pointer outside valid range - likely corrupted
+        currentTextureView = nullptr;
+        currentTexture = nullptr;
+        consecutiveErrors++;
+        frameInProgress = false;
+        return nullptr;
+    }
+    
+    // Success - reset error counter
+    consecutiveErrors = 0;
+    
+    // Memory barrier to ensure all writes are visible
+    std::atomic_thread_fence(std::memory_order_release);
+    
+    return reinterpret_cast<void*>(raw);
 }
 
 mbgl::Size GLFWWebGPUBackend::getFramebufferSize() const {
     return getSize();
+}
+
+void GLFWWebGPUBackend::reconfigureSurface() {
+    if (!wgpuSurface || !wgpuDevice) {
+        return;
+    }
+    
+    // Wait for any in-progress frame
+    waitForFrame();
+    
+    // Lock to ensure exclusive access
+    std::lock_guard<std::mutex> lock(textureViewMutex);
+    
+    // Clear current state
+    currentTextureView = nullptr;
+    currentTexture = nullptr;
+    
+    // Clear deferred cleanup
+    while (!deferredCleanup.empty()) {
+        deferredCleanup.pop();
+    }
+    
+    // Get current size
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    
+    // Skip if size hasn't changed and we're already configured
+    if (surfaceConfigured && 
+        lastConfiguredSize.width == static_cast<uint32_t>(width) &&
+        lastConfiguredSize.height == static_cast<uint32_t>(height)) {
+        surfaceNeedsReconfigure = false;
+        return;
+    }
+    
+    // Configure surface
+    wgpu::SurfaceConfiguration config = {};
+    config.device = wgpuDevice;
+    config.format = swapChainFormat;
+    config.usage = wgpu::TextureUsage::RenderAttachment;
+    config.alphaMode = wgpu::CompositeAlphaMode::Auto;
+    config.width = width;
+    config.height = height;
+    config.presentMode = wgpu::PresentMode::Fifo;
+    
+    wgpuSurface.Configure(&config);
+    
+    // Update state
+    surfaceConfigured = true;
+    surfaceNeedsReconfigure = false;
+    lastConfiguredSize = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+    consecutiveErrors = 0;
+}
+
+bool GLFWWebGPUBackend::waitForFrame(std::chrono::milliseconds timeout) {
+    std::unique_lock<std::mutex> lock(frameMutex);
+    if (!frameInProgress) {
+        return true;  // No frame in progress
+    }
+    
+    // Wait for frame to complete with timeout
+    return frameCV.wait_for(lock, timeout, [this] { return !frameInProgress.load(); });
+}
+
+void GLFWWebGPUBackend::signalFrameComplete() {
+    frameInProgress = false;
+    frameCV.notify_all();
 }

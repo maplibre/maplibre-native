@@ -1169,12 +1169,13 @@ void GLFWView::render() {
         }
 
         // Swap buffers for the appropriate backend
-#if defined(MLN_RENDER_BACKEND_OPENGL)
-        glfwSwapBuffers(window);
-#elif defined(MLN_RENDER_BACKEND_WEBGPU)
-        // We know it's a WebGPU backend at compile time
-        static_cast<GLFWWebGPUBackend*>(backend.get())->swap();
-#endif
+        // WebGPU backend handles its own swap
+        if (mbgl::gfx::Backend::GetType() == mbgl::gfx::Backend::Type::WebGPU) {
+            static_cast<GLFWWebGPUBackend*>(backend.get())->swap();
+        } else {
+            // OpenGL or other backends
+            glfwSwapBuffers(window);
+        }
 
         report(static_cast<float>(1000 * (glfwGetTime() - started)));
         if (benchmark) {
@@ -1221,14 +1222,20 @@ void GLFWView::run() {
 #if defined(__APPLE__)
     int frameCount = 0;
     while (!glfwWindowShouldClose(window)) {
-        // Poll GLFW events first
+        // Poll GLFW events
         glfwPollEvents();
-
-        // Process RunLoop with a time limit to avoid blocking
-        auto start = std::chrono::steady_clock::now();
-        while (std::chrono::steady_clock::now() - start < std::chrono::milliseconds(16)) { // ~60fps
-            runLoop.runOnce();
+        
+        // Check if window should close
+        if (glfwWindowShouldClose(window)) {
+            runLoop.stop();
+            break;
         }
+        
+        // Render directly instead of through callback to avoid double polling
+        render();
+        
+        // Process RunLoop for any timer events
+        runLoop.runOnce();
 
         frameCount++;
 
