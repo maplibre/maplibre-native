@@ -27,7 +27,6 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
     impl->commandEncoder = commandEncoder_.getEncoder();
 
     if (!impl->commandEncoder) {
-        Log::Error(Event::General, "Failed to get WebGPU command encoder for render pass");
         return;
     }
 
@@ -102,7 +101,6 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
                                                 size.height); // width, height
         }
     } else {
-        Log::Warning(Event::General, "No texture view available for render pass");
     }
 }
 
@@ -113,7 +111,6 @@ RenderPass::~RenderPass() {
         try {
             wgpuRenderPassEncoderEnd(impl->encoder);
         } catch (...) {
-            Log::Warning(Event::General, "Failed to end render pass encoder");
         }
         wgpuRenderPassEncoderRelease(impl->encoder);
     }
@@ -126,7 +123,6 @@ void RenderPass::pushDebugGroup(const char* name) {
         // WGPUStringView label = {name, name ? strlen(name) : 0};
         // wgpuRenderPassEncoderPushDebugGroup(impl->encoder, label);
     } else {
-        Log::Warning(Event::General, "RenderPass::pushDebugGroup called but encoder is null");
     }
 }
 
@@ -136,7 +132,6 @@ void RenderPass::popDebugGroup() {
         // Commenting out for now to allow rendering to proceed
         // wgpuRenderPassEncoderPopDebugGroup(impl->encoder);
     } else {
-        Log::Warning(Event::General, "RenderPass::popDebugGroup called but encoder is null");
     }
 }
 
