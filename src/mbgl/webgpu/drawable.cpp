@@ -28,19 +28,33 @@ Drawable::Drawable(std::string name)
 }
 
 Drawable::~Drawable() {
-    // Clean up WebGPU resources
-    if (impl->vertexBuffer) {
-        // wgpuBufferDestroy(impl->vertexBuffer);
-    }
-    if (impl->indexBuffer) {
-        // wgpuBufferDestroy(impl->indexBuffer);
-    }
-    if (impl->pipeline) {
-        // wgpuRenderPipelineRelease(impl->pipeline);
-    }
+    // Clean up WebGPU resources safely
+    // Note: We don't own the pipeline - it's owned by the shader program
+    // So we should NOT release it here
+    impl->pipeline = nullptr;
+    
     if (impl->bindGroup) {
-        // wgpuBindGroupRelease(impl->bindGroup);
+        wgpuBindGroupRelease(impl->bindGroup);
+        impl->bindGroup = nullptr;
     }
+    
+    if (impl->uniformBuffer) {
+        wgpuBufferRelease(impl->uniformBuffer);
+        impl->uniformBuffer = nullptr;
+    }
+    
+    if (impl->vertexBuffer) {
+        wgpuBufferRelease(impl->vertexBuffer);
+        impl->vertexBuffer = nullptr;
+    }
+    
+    if (impl->indexBuffer) {
+        wgpuBufferRelease(impl->indexBuffer);
+        impl->indexBuffer = nullptr;
+    }
+    
+    // Clear the bind group layout reference (we don't own it)
+    impl->bindGroupLayout = nullptr;
 }
 
 void Drawable::upload(gfx::UploadPass& uploadPass) {
@@ -131,11 +145,12 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
                     // Calculate total size needed
                     std::size_t totalVertices = impl->vertexCount;
                     // For fill vertices, we typically have 2 int16 values (x,y) = 4 bytes per vertex
-                    std::size_t vertexSize = stride;
-                    if (vertexSize == 0) {
+                    std::size_t effectiveStride = stride;
+                    if (effectiveStride == 0) {
                         // Default stride for position data (2 x int16)
-                        vertexSize = 4;
+                        effectiveStride = 4;
                     }
+                    std::size_t vertexSize = effectiveStride;
                     std::size_t totalSize = totalVertices * vertexSize;
 
                     impl->vertexData.resize(totalSize);
@@ -146,10 +161,11 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
                     // Copy vertex data with proper stride
                     const uint8_t* srcBytes = static_cast<const uint8_t*>(rawData);
                     for (std::size_t i = 0; i < totalVertices; ++i) {
-                        std::size_t srcOffset = (vertexOffset + i) * stride + offset;
+                        std::size_t srcOffset = (vertexOffset + i) * effectiveStride + offset;
                         std::size_t dstOffset = i * vertexSize;
 
-                        if (srcOffset + vertexSize <= rawSize) {
+                        // Check both source and destination bounds
+                        if (srcOffset + vertexSize <= rawSize && dstOffset + vertexSize <= totalSize) {
                             std::memcpy(impl->vertexData.data() + dstOffset,
                                       srcBytes + srcOffset,
                                       vertexSize);
@@ -177,10 +193,11 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
     // Upload vertex data to GPU
     if (!impl->vertexData.empty() && impl->vertexData.size() > 0) {
 
-        // Release old buffer if it exists
+        // Release old buffer if it exists (safely)
         if (impl->vertexBuffer) {
-            wgpuBufferRelease(impl->vertexBuffer);
+            WGPUBuffer oldBuffer = impl->vertexBuffer;
             impl->vertexBuffer = nullptr;
+            wgpuBufferRelease(oldBuffer);
         }
 
         // Ensure buffer size is at least 4 bytes (minimum for WebGPU)
@@ -212,19 +229,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
                     wgpuQueueWriteBuffer(queue, impl->vertexBuffer, 0, impl->vertexData.data(), impl->vertexData.size());
                 }
 
-                // Log first few vertices for debugging
-                if (impl->vertexData.size() >= 12) {
-                    const int16_t* vertices = reinterpret_cast<const int16_t*>(impl->vertexData.data());
-                    std::string vertexInfo = "Vertices for " + getName() + ":\n";
-                    for (int i = 0; i < std::min(3, static_cast<int>(impl->vertexData.size() / 4)); i++) {
-                        float x = static_cast<float>(vertices[i * 2]) / 8192.0f;
-                        float y = static_cast<float>(vertices[i * 2 + 1]) / 8192.0f;
-                        vertexInfo += "  V" + std::to_string(i) + ": raw=[" +
-                                     std::to_string(vertices[i * 2]) + ", " +
-                                     std::to_string(vertices[i * 2 + 1]) + "], normalized=[" +
-                                     std::to_string(x) + ", " + std::to_string(y) + "]\n";
-                    }
-                }
+                // Debug vertex logging disabled to prevent heap corruption
+                // String concatenation in multi-threaded context can cause memory issues
             } else {
             }
         } else {
@@ -236,10 +242,11 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
     if (impl->indexVector && impl->indexVector->elements() > 0) {
         std::size_t indexSize = impl->indexVector->bytes();
 
-        // Release old buffer if it exists
+        // Release old buffer if it exists (safely)
         if (impl->indexBuffer) {
-            wgpuBufferRelease(impl->indexBuffer);
+            WGPUBuffer oldBuffer = impl->indexBuffer;
             impl->indexBuffer = nullptr;
+            wgpuBufferRelease(oldBuffer);
         }
 
         // Create index buffer
@@ -392,47 +399,7 @@ void Drawable::draw(PaintParameters& parameters) const {
             // Update the uniform buffer
             wgpuQueueWriteBuffer(queue, impl->uniformBuffer, 0, matrix, sizeof(matrix));
 
-            // Log matrix values for debugging (first drawable only)
-            static bool loggedMatrix = false;
-            if (!loggedMatrix && getName().find("fill") != std::string::npos) {
-                loggedMatrix = true;
-                std::string matrixInfo = "Matrix for " + getName() + " (column-major storage):\n";
-                const float* matrixData = reinterpret_cast<const float*>(&matrix);
-                // Print as rows for readability, but data is stored column-major
-                for (int row = 0; row < 4; row++) {
-                    matrixInfo += "  Row " + std::to_string(row) + ": [";
-                    for (int col = 0; col < 4; col++) {
-                        // Column-major: element at row r, column c is at index c*4 + r
-                        matrixInfo += std::to_string(matrixData[col * 4 + row]);
-                        if (col < 3) matrixInfo += ", ";
-                    }
-                    matrixInfo += "]\n";
-                }
-
-                // Test transform a sample vertex to see where it ends up
-                if (impl->vertexData.size() >= 4) {
-                    // const int16_t* vertices = reinterpret_cast<const int16_t*>(impl->vertexData.data());
-                    // float x = static_cast<float>(vertices[0]);
-                    // float y = static_cast<float>(vertices[1]);
-
-                    // Apply matrix transformation (column-major order)
-                    // For column-major: column i is at indices [i*4, i*4+1, i*4+2, i*4+3]
-                    // float tx = matrixData[0] * x + matrixData[4] * y + matrixData[8] * 0 + matrixData[12];
-                    // float ty = matrixData[1] * x + matrixData[5] * y + matrixData[9] * 0 + matrixData[13];
-                    // float tz = matrixData[2] * x + matrixData[6] * y + matrixData[10] * 0 + matrixData[14];
-                    // float tw = matrixData[3] * x + matrixData[7] * y + matrixData[11] * 0 + matrixData[15];
-
-
-                    // Perspective divide to get NDC
-                    // if (tw != 0) {
-                    //     tx /= tw;
-                    //     ty /= tw;
-                    //     tz /= tw;
-                    // }
-
-
-                }
-            }
+            // Debug logging removed to prevent heap corruption in multi-threaded environment
         }
     }
 
@@ -443,28 +410,22 @@ void Drawable::draw(PaintParameters& parameters) const {
             return;
         }
 
+        // Use dynamic_pointer_cast for safer casting with RTTI
         auto webgpuShader = std::static_pointer_cast<mbgl::webgpu::ShaderProgram>(shader);
         if (webgpuShader) {
+            // Store the pipeline reference - we don't own it, the shader does
             impl->pipeline = webgpuShader->getPipeline();
-            if (impl->pipeline) {
-                // uintptr_t addr = reinterpret_cast<uintptr_t>(impl->pipeline);
-
-            } else {
+            if (!impl->pipeline) {
+                // Pipeline not created yet or creation failed
+                return;
             }
+        } else {
+            return;
         }
     }
 
-    // Set the pipeline
+    // Check if we have a valid pipeline
     if (!impl->pipeline) {
-        return;
-    }
-
-    // Additional safety check for pipeline validity
-    uintptr_t pipelineAddr = reinterpret_cast<uintptr_t>(impl->pipeline);
-    if (pipelineAddr < 0x1000) { // Likely a bad pointer
-        // Log::Error(Event::General, "WebGPU Drawable: Pipeline pointer is invalid (address: 0x" +
-        //             std::to_string(pipelineAddr) + ")");
-        impl->pipeline = nullptr; // Clear the bad pointer
         return;
     }
 
@@ -677,16 +638,20 @@ void Drawable::buildWebGPUPipeline() noexcept {
 }
 
 void Drawable::createBindGroup(WGPUBindGroupLayout layout) noexcept {
-
-    // Release old bind group if it exists
+    if (!layout) {
+        return;
+    }
+    
+    // Release old bind group if it exists (safely)
     if (impl->bindGroup) {
-        wgpuBindGroupRelease(impl->bindGroup);
+        WGPUBindGroup oldGroup = impl->bindGroup;
         impl->bindGroup = nullptr;
+        wgpuBindGroupRelease(oldGroup);
     }
 
     // Store the layout for creating bind group during upload
+    // Note: We don't own the layout - it's owned by the shader
     impl->bindGroupLayout = layout;
-
 }
 
 

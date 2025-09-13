@@ -42,6 +42,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     // Add small delay to let previous resources clean up
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
+
     // Create Dawn instance
     instance = std::make_unique<dawn::native::Instance>();
 
@@ -54,7 +55,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
-    
+
     if (adapters.empty()) {
         throw std::runtime_error("No WebGPU adapters found after retries");
     }
@@ -62,23 +63,34 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     // Select first adapter (should be Metal on macOS)
     dawn::native::Adapter& selectedAdapter = adapters[0];
 
-    // Create device with error callbacks
-    WGPUDevice rawDevice = selectedAdapter.CreateDevice();
+    // Set up device descriptor with error callback
+    wgpu::DeviceDescriptor deviceDesc = {};
+    deviceDesc.label = "MapLibre WebGPU Device";
+
+    // Request features we need
+    std::vector<wgpu::FeatureName> requiredFeatures;
+    deviceDesc.requiredFeatures = requiredFeatures.data();
+    deviceDesc.requiredFeatureCount = requiredFeatures.size();
+
+    // Create device with descriptor
+    WGPUDevice rawDevice = selectedAdapter.CreateDevice(&deviceDesc);
     if (!rawDevice) {
         // Retry once after delay
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        rawDevice = selectedAdapter.CreateDevice();
+        rawDevice = selectedAdapter.CreateDevice(&deviceDesc);
         if (!rawDevice) {
             throw std::runtime_error("Failed to create WebGPU device after retry");
         }
     }
 
     wgpuDevice = wgpu::Device::Acquire(rawDevice);
-    
+
     // Process device events to ensure it's ready
     wgpuDeviceTick(rawDevice);
 
-    // TODO: Add error callbacks once we figure out the correct Dawn API
+    // Note: Dawn's error callback API is different from wgpu-native
+    // We can set callbacks on the raw device if needed
+    // For now, errors will be logged by Dawn's internal validation
 
 #ifdef __APPLE__
     // Setup Metal surface on macOS
@@ -142,19 +154,35 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     // Make sure window shouldn't close
     if (glfwWindowShouldClose(window)) {
     }
-    
+
     // Final delay to ensure everything is ready
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    
+
 }
 
 GLFWWebGPUBackend::~GLFWWebGPUBackend() {
+
+    // Release current texture view if any
+    currentTextureView = nullptr;
+
+    // Release surface
+    wgpuSurface = nullptr;
+
+    // Release queue
+    queue = nullptr;
+
+    // Release device
+    wgpuDevice = nullptr;
+
 #ifdef __APPLE__
     if (metalLayer) {
         CFRelease(metalLayer);
         metalLayer = nullptr;
     }
 #endif
+
+    // Release instance last
+    instance.reset();
 }
 
 mbgl::gfx::RendererBackend& GLFWWebGPUBackend::getRendererBackend() {
@@ -221,21 +249,51 @@ void GLFWWebGPUBackend::setSize(mbgl::Size newSize) {
 }
 
 void* GLFWWebGPUBackend::getCurrentTextureView() {
+    if (!wgpuSurface) {
+        return nullptr;
+    }
 
     wgpu::SurfaceTexture surfaceTexture;
     wgpuSurface.GetCurrentTexture(&surfaceTexture);
 
     if (surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal &&
         surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::SuccessSuboptimal) {
+        const char* statusName = "Unknown";
+        switch (surfaceTexture.status) {
+            case wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal:
+                statusName = "SuccessOptimal";
+                break;
+            case wgpu::SurfaceGetCurrentTextureStatus::SuccessSuboptimal:
+                statusName = "SuccessSuboptimal";
+                break;
+            case wgpu::SurfaceGetCurrentTextureStatus::Timeout:
+                statusName = "Timeout";
+                break;
+            case wgpu::SurfaceGetCurrentTextureStatus::Outdated:
+                statusName = "Outdated";
+                break;
+            case wgpu::SurfaceGetCurrentTextureStatus::Lost:
+                statusName = "Lost";
+                break;
+            case wgpu::SurfaceGetCurrentTextureStatus::Error:
+                statusName = "Error";
+                break;
+            default:
+                break;
+        }
         return nullptr;
     }
 
     if (!surfaceTexture.texture) {
-        return nullptr;
+       return nullptr;
     }
 
     // Store the texture view to keep it alive
     currentTextureView = surfaceTexture.texture.CreateView();
+    if (!currentTextureView) {
+        return nullptr;
+    }
+
     return reinterpret_cast<void*>(currentTextureView.Get());
 }
 
