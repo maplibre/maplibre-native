@@ -1034,7 +1034,8 @@ void RenderOrchestrator::onGlyphsError(const FontStack& fontStack,
     }
     ss << " for font stack " << fontStackToString(fontStack) << ":( " << util::toString(error) << ")";
     auto errorDetail = ss.str();
-    Log::Error(Event::Style, errorDetail);
+    // Log::Error(Event::Style, errorDetail);
+    // Logging disabled to prevent heap corruption in multi-threaded context
     observer->onResourceError(error);
 }
 
@@ -1045,9 +1046,10 @@ void RenderOrchestrator::onGlyphsRequested(const FontStack& fontStack, const Gly
 void RenderOrchestrator::onTileError(RenderSource& source, const OverscaledTileID& tileID, std::exception_ptr error) {
     MLN_TRACE_FUNC();
 
-    Log::Error(Event::Style,
-               "Failed to load tile " + util::toString(tileID) + " for source " + source.baseImpl->id + ": " +
-                   util::toString(error));
+    // Log::Error(Event::Style,
+    //            "Failed to load tile " + util::toString(tileID) + " for source " + source.baseImpl->id + ": " +
+    //                util::toString(error));
+    // Logging with string concatenation disabled to prevent heap corruption in multi-threaded context
     observer->onResourceError(error);
 }
 
