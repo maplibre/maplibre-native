@@ -62,9 +62,13 @@ public:
                   const std::string& vertexSource,
                   const std::string& fragmentSource,
                   const std::array<shaders::AttributeInfo, N>& attrs)
-        : ShaderProgram(ctx, vertexSource, fragmentSource) {
-        // Copy attributes - just set them in the vertex attribute array
-        // The attributes will be populated by the drawable when needed
+        : context(ctx) {
+        // Store attributes for pipeline creation
+        attributeInfos.reserve(N);
+        for (const auto& attr : attrs) {
+            attributeInfos.push_back(attr);
+        }
+        createPipeline(vertexSource, fragmentSource);
     }
 
     // Basic constructor
@@ -84,6 +88,7 @@ public:
 
 private:
     void createPipeline(const std::string& vertexSource, const std::string& fragmentSource);
+    static WGPUVertexFormat getWGPUFormat(gfx::AttributeDataType type);
 
     Context& context;
     WGPURenderPipeline pipeline = nullptr;
@@ -94,6 +99,7 @@ private:
 
     gfx::VertexAttributeArray vertexAttributes;
     gfx::VertexAttributeArray instanceAttributes;
+    std::vector<shaders::AttributeInfo> attributeInfos;
 };
 
 } // namespace webgpu
