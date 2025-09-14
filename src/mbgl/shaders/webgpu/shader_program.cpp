@@ -146,28 +146,48 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     }
 
     // Create bind group layout for uniforms
-    // For fill shaders, we need two uniform buffers:
-    // - Binding 2: FillDrawableUBO (vertex shader) - matches Metal's idFillDrawableUBO
-    // - Binding 3: FillEvaluatedPropsUBO (fragment shader) - matches Metal's idFillEvaluatedPropsUBO
+    // Different shaders need different uniform buffer bindings:
+    // - Fill shaders: Binding 2 (drawable) and Binding 5 (evaluated props)
+    // - Line shaders: Binding 2 (drawable) and Binding 4 (evaluated props)
+    // - Circle shaders: Binding 2 (drawable) and Binding 5 (evaluated props)
+    // For now, create a layout that supports all possible bindings (2, 3, 4, 5)
+    // The actual bindings used will depend on what uniform buffers are provided
     std::vector<WGPUBindGroupLayoutEntry> bindingEntries;
 
-    // Binding 2: Drawable UBO (vertex shader)
+    // Binding 2: Drawable UBO (vertex shader) - used by all shaders
     WGPUBindGroupLayoutEntry drawableEntry = {};
-    drawableEntry.binding = 2;  // idFillDrawableUBO
+    drawableEntry.binding = 2;
     drawableEntry.visibility = WGPUShaderStage_Vertex;
     drawableEntry.buffer.type = WGPUBufferBindingType_Uniform;
     drawableEntry.buffer.hasDynamicOffset = 0;
-    drawableEntry.buffer.minBindingSize = 80; // FillDrawableUBO size
+    drawableEntry.buffer.minBindingSize = 0; // Allow any size
     bindingEntries.push_back(drawableEntry);
 
-    // Binding 3: Evaluated Props UBO (fragment shader)
-    // TODO: Only add this for shaders that need it (e.g., FillShader)
+    // Binding 3: Tile Props UBO (fragment shader) - used by some shaders like LineSDF
+    WGPUBindGroupLayoutEntry tilePropsEntry = {};
+    tilePropsEntry.binding = 3;
+    tilePropsEntry.visibility = WGPUShaderStage_Fragment;
+    tilePropsEntry.buffer.type = WGPUBufferBindingType_Uniform;
+    tilePropsEntry.buffer.hasDynamicOffset = 0;
+    tilePropsEntry.buffer.minBindingSize = 0; // Allow any size
+    bindingEntries.push_back(tilePropsEntry);
+
+    // Binding 4: Line Evaluated Props UBO (fragment shader)
+    WGPUBindGroupLayoutEntry linePropsEntry = {};
+    linePropsEntry.binding = 4;
+    linePropsEntry.visibility = WGPUShaderStage_Fragment;
+    linePropsEntry.buffer.type = WGPUBufferBindingType_Uniform;
+    linePropsEntry.buffer.hasDynamicOffset = 0;
+    linePropsEntry.buffer.minBindingSize = 0; // Allow any size
+    bindingEntries.push_back(linePropsEntry);
+
+    // Binding 5: Fill/Circle Evaluated Props UBO (fragment shader)
     WGPUBindGroupLayoutEntry propsEntry = {};
-    propsEntry.binding = 3;  // idFillEvaluatedPropsUBO (Metal/WebGPU, not Vulkan)
+    propsEntry.binding = 5;
     propsEntry.visibility = WGPUShaderStage_Fragment;
     propsEntry.buffer.type = WGPUBufferBindingType_Uniform;
     propsEntry.buffer.hasDynamicOffset = 0;
-    propsEntry.buffer.minBindingSize = 48; // FillEvaluatedPropsUBO size
+    propsEntry.buffer.minBindingSize = 0; // Allow any size
     bindingEntries.push_back(propsEntry);
 
     WGPUBindGroupLayoutDescriptor bindGroupLayoutDesc = {};

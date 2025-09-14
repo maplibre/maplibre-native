@@ -95,8 +95,8 @@ struct FillEvaluatedPropsUBO {
     to_scale: f32,
 };
 
-// Use the same binding index as Metal: idFillEvaluatedPropsUBO = 3 (Metal/WebGPU, not Vulkan)
-@group(0) @binding(3) var<uniform> props: FillEvaluatedPropsUBO;
+// Use the same binding index as Metal: idFillEvaluatedPropsUBO = 5 (Metal/WebGPU, not Vulkan)
+@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
