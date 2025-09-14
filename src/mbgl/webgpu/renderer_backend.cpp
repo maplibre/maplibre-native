@@ -1,132 +1,141 @@
 #include <mbgl/webgpu/renderer_backend.hpp>
 #include <mbgl/webgpu/context.hpp>
-#include <mbgl/shaders/webgpu/shader_group.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
+#include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/logging.hpp>
+
+// Include shader group and individual shader headers
+#include <mbgl/shaders/webgpu/shader_group.hpp>
+#include <mbgl/shaders/webgpu/fill.hpp>
 
 namespace mbgl {
 namespace webgpu {
 
-class RendererBackend::Impl : public gfx::Renderable {
-public:
-    Impl() : gfx::Renderable({800, 600}, nullptr) {}  // Default size
-    ~Impl() override = default;
-
-    void* wgpuInstance = nullptr;
-    void* wgpuDevice = nullptr;
-    void* wgpuQueue = nullptr;
-    void* wgpuSurface = nullptr;
-};
-
-RendererBackend::RendererBackend(gfx::ContextMode mode)
-    : gfx::RendererBackend(mode),
-      impl(std::make_unique<Impl>()) {
+RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
+    : gfx::RendererBackend(contextMode_) {
 }
 
-RendererBackend::~RendererBackend() {
-    // Explicitly defined destructor to ensure vtable is generated
-}
+RendererBackend::~RendererBackend() = default;
 
-gfx::Renderable& RendererBackend::getDefaultRenderable() {
-    return *impl;
-}
-
-void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramParameters& parameters) {
-    // Initialize WebGPU shaders by registering shader groups
-    // The actual shader compilation happens lazily when they're first used
-
-    // Get the context to initialize shader groups
-    auto contextPtr = createContext();
-    auto& ctx = static_cast<webgpu::Context&>(*contextPtr);
-
-    // Create ONE shader group that contains all shaders
-    auto webgpuShaderGroup = std::make_shared<webgpu::ShaderGroup>();
-    webgpuShaderGroup->initialize(ctx);
-
-    // Register the same shader group under multiple names for different layer types
-    // This allows layers to find their shaders either by specific name or through the group
-    const std::vector<std::string> shaderGroupNames = {
-        "FillShader",
-        "LineShader",
-        "CircleShader",
-        "BackgroundShader",
-        "RasterShader",
-        "HillshadeShader",
-        "FillExtrusionShader",
-        "HeatmapShader",
-        "SymbolShader"
-    };
-
-    for (const auto& groupName : shaderGroupNames) {
-        // Clone the shared pointer for each registration
-        auto groupClone = webgpuShaderGroup;
-        registry.registerShaderGroup(std::move(groupClone), groupName);
-    }
-
-    (void)parameters;
-}
-
-void RendererBackend::setSurface(void* nativeWindow) {
-    // Platform-specific surface creation
-    // This will be used to create the WebGPU surface from a native window handle
-    impl->wgpuSurface = nativeWindow;
-
-}
-
-void RendererBackend::setInstance(void* instance) {
-    impl->wgpuInstance = instance;
-}
-
-void RendererBackend::setDevice(void* device) {
-    impl->wgpuDevice = device;
-}
-
-void RendererBackend::setQueue(void* queue) {
-    impl->wgpuQueue = queue;
-}
-
-void* RendererBackend::getInstance() const {
-    return impl->wgpuInstance;
-}
-
-void* RendererBackend::getDevice() const {
-    return impl->wgpuDevice;
-}
-
-void* RendererBackend::getQueue() const {
-    return impl->wgpuQueue;
-}
-
-void* RendererBackend::getSurface() const {
-    return impl->wgpuSurface;
+void RendererBackend::bind() {
+    gfx::RendererBackend::bind();
 }
 
 std::unique_ptr<gfx::Context> RendererBackend::createContext() {
-    return std::make_unique<Context>(*this);
+    auto context = std::make_unique<Context>(*this);
+    return context;
 }
 
-void RendererBackend::activate() {
-    // Make the WebGPU context current
+gfx::BackendScope RendererBackend::getDefaultRenderable() {
+    return gfx::BackendScope{};
 }
 
-void RendererBackend::deactivate() {
-    // Release the current WebGPU context
+namespace {
+
+template <shaders::BuiltIn... ShaderID>
+void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& programParameters) {
+    using namespace std::string_literals;
+
+    // Register each shader type using fold expression
+    ([&]() {
+        using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::WebGPU>;
+        auto group = std::make_shared<webgpu::ShaderGroup<ShaderID>>(programParameters);
+        if (!registry.registerShaderGroup(std::move(group), ShaderClass::name)) {
+            assert(!"duplicate shader group");
+            throw std::runtime_error("Failed to register "s + ShaderClass::name + " with shader registry!");
+        }
+    }(), ...);
 }
 
-void* RendererBackend::getCurrentTextureView() {
-    // Default implementation - platform backends should override
-    return nullptr;
+} // namespace
+
+void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramParameters& parameters) {
+    // Register just the FillShader for now - more will be added as their headers are created
+    registerTypes<shaders::BuiltIn::FillShader>(registry, parameters);
+
+    // TODO: Add more shader types as their WebGPU implementations are created:
+    // registerTypes<
+    //     shaders::BuiltIn::FillShader,
+    //     shaders::BuiltIn::LineShader,
+    //     shaders::BuiltIn::CircleShader,
+    //     shaders::BuiltIn::BackgroundShader,
+    //     ...
+    // >(registry, parameters);
 }
 
-void* RendererBackend::getDepthStencilView() {
-    // Default implementation - platform backends should override
-    return nullptr;
+void RendererBackend::updateSurface(wgpu::Surface surface) {
+    this->surface = surface;
 }
 
-mbgl::Size RendererBackend::getFramebufferSize() const {
-    // Default implementation - platform backends should override
-    return {800, 600};
+wgpu::Device RendererBackend::getDevice() const {
+    if (device) {
+        return device;
+    }
+
+    // Initialize WebGPU if not already done
+    const_cast<RendererBackend*>(this)->initializeDevice();
+    return device;
+}
+
+wgpu::Surface RendererBackend::getSurface() const {
+    return surface;
+}
+
+void RendererBackend::initializeDevice() {
+    if (device) {
+        return;
+    }
+
+    // Create instance
+    wgpu::InstanceDescriptor desc{};
+    instance = wgpu::CreateInstance(&desc);
+
+    // Request adapter
+    adapter = nullptr;
+    instance.RequestAdapter(
+        nullptr,
+        [](WGPURequestAdapterStatus status, WGPUAdapter adapter, const char* message, void* userdata) {
+            if (status == WGPURequestAdapterStatus_Success) {
+                *static_cast<wgpu::Adapter*>(userdata) = wgpu::Adapter(adapter);
+            } else {
+                Log::Error(Event::Render, "Failed to get WebGPU adapter: %s", message);
+            }
+        },
+        &adapter
+    );
+
+    // Wait for adapter (in production, this should be async)
+    while (!adapter) {
+        // Process callbacks - implementation depends on the backend
+    }
+
+    // Request device
+    device = nullptr;
+    adapter.RequestDevice(
+        nullptr,
+        [](WGPURequestDeviceStatus status, WGPUDevice device, const char* message, void* userdata) {
+            if (status == WGPURequestDeviceStatus_Success) {
+                *static_cast<wgpu::Device*>(userdata) = wgpu::Device(device);
+            } else {
+                Log::Error(Event::Render, "Failed to get WebGPU device: %s", message);
+            }
+        },
+        &device
+    );
+
+    // Wait for device (in production, this should be async)
+    while (!device) {
+        // Process callbacks
+    }
+
+    // Set up error callback
+    device.SetUncapturedErrorCallback(
+        [](WGPUErrorType type, const char* message, void*) {
+            Log::Error(Event::Render, "WebGPU Error (%d): %s", type, message);
+        },
+        nullptr
+    );
 }
 
 } // namespace webgpu
