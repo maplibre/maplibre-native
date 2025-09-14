@@ -36,69 +36,32 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramPa
     // Initialize WebGPU shaders by registering shader groups
     // The actual shader compilation happens lazily when they're first used
 
-    // Create and register shader groups for all shader names used by render layers
-    const std::vector<std::string> shaderNames = {
-        // Background
-        "BackgroundShader",
-        "BackgroundPatternShader",
-
-        // Fill
-        "FillShader",
-        "FillOutlineShader",
-        "FillPatternShader",
-        "FillOutlinePatternShader",
-        "FillOutlineTriangulatedShader",
-
-        // Line
-        "LineShader",
-        "LinePatternShader",
-        "LineSDFShader",
-        "LineGradientShader",
-
-        // Circle
-        "CircleShader",
-
-        // Symbol
-        "SymbolIconShader",
-        "SymbolSDFIconShader",
-        "SymbolTextAndIconShader",
-        "SymbolSDFTextShader",
-
-        // Raster
-        "RasterShader",
-
-        // Hillshade
-        "HillshadeShader",
-        "HillshadePrepareShader",
-
-        // Fill Extrusion
-        "FillExtrusionShader",
-        "FillExtrusionPatternShader",
-
-        // Heatmap
-        "HeatmapShader",
-        "HeatmapTextureShader",
-
-        // Custom
-        "CustomSymbolIconShader",
-
-        // Debug
-        "CollisionBoxShader",
-        "CollisionCircleShader",
-        "ClippingMaskProgram",
-        "DebugShader"
-    };
-
     // Get the context to initialize shader groups
     auto contextPtr = createContext();
     auto& ctx = static_cast<webgpu::Context&>(*contextPtr);
 
-    for (const auto& shaderName : shaderNames) {
-        auto webgpuShaderGroup = std::make_shared<webgpu::ShaderGroup>();
-        webgpuShaderGroup->initialize(ctx);
-        bool registered = registry.registerShaderGroup(std::move(webgpuShaderGroup), shaderName);
-        if (registered) {
-        }
+    // Create ONE shader group that contains all shaders
+    auto webgpuShaderGroup = std::make_shared<webgpu::ShaderGroup>();
+    webgpuShaderGroup->initialize(ctx);
+
+    // Register the same shader group under multiple names for different layer types
+    // This allows layers to find their shaders either by specific name or through the group
+    const std::vector<std::string> shaderGroupNames = {
+        "FillShader",
+        "LineShader",
+        "CircleShader",
+        "BackgroundShader",
+        "RasterShader",
+        "HillshadeShader",
+        "FillExtrusionShader",
+        "HeatmapShader",
+        "SymbolShader"
+    };
+
+    for (const auto& groupName : shaderGroupNames) {
+        // Clone the shared pointer for each registration
+        auto groupClone = webgpuShaderGroup;
+        registry.registerShaderGroup(std::move(groupClone), groupName);
     }
 
     (void)parameters;
