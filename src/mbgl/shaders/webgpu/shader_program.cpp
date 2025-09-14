@@ -144,25 +144,21 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
         return;
     }
 
-    // Set up vertex state with vertex buffer for line data
-    // Lines need two attributes: pos_normal and data
-    WGPUVertexAttribute vertexAttrs[2] = {};
-
-    // Attribute 0: pos_normal (vec2<i16>)
-    vertexAttrs[0].format = WGPUVertexFormat_Sint16x2;  // 2 int16 values for packed pos/normal
-    vertexAttrs[0].offset = 0;
-    vertexAttrs[0].shaderLocation = 0;  // @location(0) in shader
-
-    // Attribute 1: data (vec4<u8>)
-    vertexAttrs[1].format = WGPUVertexFormat_Uint8x4;  // 4 uint8 values for extrusion/direction
-    vertexAttrs[1].offset = 4;  // After pos_normal (2 * sizeof(int16))
-    vertexAttrs[1].shaderLocation = 1;  // @location(1) in shader
-
+    // Set up vertex state - for now just use position attribute
+    // The actual attribute layout should come from the shader definitions
     WGPUVertexBufferLayout vertexBufferLayout = {};
-    vertexBufferLayout.arrayStride = 8;  // 4 bytes for pos_normal + 4 bytes for data
+
+    static WGPUVertexAttribute fillAttrs[1] = {};
+
+    // Attribute 0: position (vec2<i16>)
+    fillAttrs[0].format = WGPUVertexFormat_Sint16x2;
+    fillAttrs[0].offset = 0;
+    fillAttrs[0].shaderLocation = 0;
+
+    vertexBufferLayout.arrayStride = 4;  // 4 bytes for position only for now
     vertexBufferLayout.stepMode = WGPUVertexStepMode_Vertex;
-    vertexBufferLayout.attributeCount = 2;
-    vertexBufferLayout.attributes = vertexAttrs;
+    vertexBufferLayout.attributeCount = 1;
+    vertexBufferLayout.attributes = fillAttrs;
     
     WGPUVertexState vertexState = {};
     vertexState.module = vertexShaderModule;

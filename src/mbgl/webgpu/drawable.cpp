@@ -495,14 +495,24 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     // Bind vertex buffer
     if (impl->vertexBuffer) {
-        // Log first vertex position for debugging (assuming int16x2 format)
-        if (impl->vertexData.size() >= 4) {
-            int16_t x = *reinterpret_cast<const int16_t*>(impl->vertexData.data());
-            int16_t y = *reinterpret_cast<const int16_t*>(impl->vertexData.data() + 2);
+        // Log first vertex data for debugging (lines have 8 bytes per vertex)
+        if (impl->vertexData.size() >= 8) {
+            int16_t pos_normal_x = *reinterpret_cast<const int16_t*>(impl->vertexData.data());
+            int16_t pos_normal_y = *reinterpret_cast<const int16_t*>(impl->vertexData.data() + 2);
+            uint8_t data0 = impl->vertexData[4];
+            uint8_t data1 = impl->vertexData[5];
+            uint8_t data2 = impl->vertexData[6];
+            uint8_t data3 = impl->vertexData[7];
+
             static int vertexLogCount = 0;
             if (vertexLogCount++ < 5) {
-                mbgl::Log::Info(mbgl::Event::Render, "WebGPU: First vertex position: (" +
-                    std::to_string(x) + ", " + std::to_string(y) + ")");
+                mbgl::Log::Info(mbgl::Event::Render, "WebGPU: First vertex - pos_normal: (" +
+                    std::to_string(pos_normal_x) + ", " + std::to_string(pos_normal_y) +
+                    "), data: (" + std::to_string(data0) + ", " + std::to_string(data1) +
+                    ", " + std::to_string(data2) + ", " + std::to_string(data3) + ")");
+
+                mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Vertex buffer size: " +
+                    std::to_string(impl->vertexData.size()) + " bytes");
             }
         }
         wgpuRenderPassEncoderSetVertexBuffer(renderPassEncoder, 0, impl->vertexBuffer, 0, impl->vertexData.size());
