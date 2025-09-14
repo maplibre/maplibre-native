@@ -11,7 +11,7 @@ namespace shaders {
 using LocationIndicatorShaderSource = ShaderSource<BuiltIn::LocationIndicatorShader, gfx::Backend::Type::WebGPU>;
 
 const std::array<AttributeInfo, 1> LocationIndicatorShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Float2, idLocationIndicatorPosVertexAttribute},
+    AttributeInfo{locationIndicatorUBOCount + 0, gfx::AttributeDataType::Float2, idLocationIndicatorPosVertexAttribute},
 };
 const std::array<TextureInfo, 0> LocationIndicatorShaderSource::textures = {};
 
@@ -21,8 +21,8 @@ const std::array<TextureInfo, 0> LocationIndicatorShaderSource::textures = {};
 using LocationIndicatorTexturedShaderSource = ShaderSource<BuiltIn::LocationIndicatorTexturedShader, gfx::Backend::Type::WebGPU>;
 
 const std::array<AttributeInfo, 2> LocationIndicatorTexturedShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Float2, idLocationIndicatorPosVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::Float2, idLocationIndicatorTexVertexAttribute},
+    AttributeInfo{locationIndicatorUBOCount + 0, gfx::AttributeDataType::Float2, idLocationIndicatorPosVertexAttribute},
+    AttributeInfo{locationIndicatorUBOCount + 1, gfx::AttributeDataType::Float2, idLocationIndicatorTexVertexAttribute},
 };
 const std::array<TextureInfo, 1> LocationIndicatorTexturedShaderSource::textures = {
     TextureInfo{0, idLocationIndicatorTexture}

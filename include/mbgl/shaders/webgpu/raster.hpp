@@ -2,6 +2,7 @@
 
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
+#include <mbgl/shaders/raster_layer_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {

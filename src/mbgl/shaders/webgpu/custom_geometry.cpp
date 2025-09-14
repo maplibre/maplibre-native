@@ -8,8 +8,8 @@ namespace shaders {
 using CustomGeometryShaderSource = ShaderSource<BuiltIn::CustomGeometryShader, gfx::Backend::Type::WebGPU>;
 
 const std::array<AttributeInfo, 2> CustomGeometryShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Float3, idCustomGeometryPosVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::Float2, idCustomGeometryTexVertexAttribute},
+    AttributeInfo{customGeometryUBOCount + 0, gfx::AttributeDataType::Float3, idCustomGeometryPosVertexAttribute},
+    AttributeInfo{customGeometryUBOCount + 1, gfx::AttributeDataType::Float2, idCustomGeometryTexVertexAttribute},
 };
 const std::array<TextureInfo, 1> CustomGeometryShaderSource::textures = {
     TextureInfo{0, idCustomGeometryTexture},

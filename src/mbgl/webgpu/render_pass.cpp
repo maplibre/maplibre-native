@@ -58,6 +58,7 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
                                           static_cast<float>(descriptor.clearColor->g),
                                           static_cast<float>(descriptor.clearColor->b),
                                           static_cast<float>(descriptor.clearColor->a)};
+            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Clearing with light blue background color");
 
         } else {
             colorAttachment.loadOp = wgpu::LoadOp::Load;
@@ -111,6 +112,7 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
             // Set viewport to full framebuffer
             // Get the framebuffer size from the backend
             auto size = backend.getFramebufferSize();
+            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Setting viewport size");
             wgpuRenderPassEncoderSetViewport(impl->encoder,
                                              0,
                                              0, // x, y
@@ -132,11 +134,13 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
 
 RenderPass::~RenderPass() {
     if (impl->encoder) {
-
+        mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Ending render pass");
         // End the render pass
         try {
             wgpuRenderPassEncoderEnd(impl->encoder);
+            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Render pass ended successfully");
         } catch (...) {
+            mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to end render pass");
         }
         wgpuRenderPassEncoderRelease(impl->encoder);
     }

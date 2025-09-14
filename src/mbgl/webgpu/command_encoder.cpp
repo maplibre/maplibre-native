@@ -62,9 +62,12 @@ void CommandEncoder::present(gfx::Renderable&) {
     WGPUCommandBuffer cmdBuffer = wgpuCommandEncoderFinish(encoder, &cmdBufferDesc);
 
     if (cmdBuffer) {
+        mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Submitting command buffer to queue");
         wgpuQueueSubmit(queue, 1, &cmdBuffer);
         wgpuCommandBufferRelease(cmdBuffer);
+        mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Command buffer submitted successfully");
     } else {
+        mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to finish command encoder");
     }
 
     // Note: Surface presentation (swap) is handled by GLFWView::renderSync()

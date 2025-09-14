@@ -15,6 +15,7 @@
 #include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/gfx/vertex_vector.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/shaders/segment.hpp>
 #include <mbgl/util/logging.hpp>
 #include <memory>
 
@@ -78,72 +79,101 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
 
     // Extract vertex data from attributes if needed
     if (impl->needsVertexExtraction && vertexAttributes) {
+        // For WebGPU, we need to interleave all vertex attributes into a single buffer
+        // Get the shader to determine the expected vertex layout
+        if (!shader) {
+            impl->needsVertexExtraction = false;
+            return;
+        }
 
-        // Look for the vertex attribute with our ID
-        // For fill layers, the attribute might have index -1 but still contain the vertex data
-        const auto& attrPtr = vertexAttributes->get(impl->vertexAttrId);
-        if (attrPtr) {
-            const auto& attr = *attrPtr;
+        auto webgpuShader = std::static_pointer_cast<mbgl::webgpu::ShaderProgram>(shader);
+        if (!webgpuShader) {
+            impl->needsVertexExtraction = false;
+            return;
+        }
 
-            // Check if this attribute has shared raw data
-            if (attr.getSharedRawData()) {
-                    auto sharedData = attr.getSharedRawData();
-                    auto offset = attr.getSharedOffset();
-                    auto vertexOffset = attr.getSharedVertexOffset();
-                    auto stride = attr.getSharedStride();
-                    auto attrType = attr.getSharedType();
+        // Get the attribute infos from the shader
+        const auto& attributeInfos = webgpuShader->getAttributeInfos();
+        if (attributeInfos.empty()) {
+            impl->needsVertexExtraction = false;
+            return;
+        }
 
-
-                    // Get the raw bytes from the shared data
-                    const void* rawData = sharedData->getRawData();
-                    std::size_t rawSize = sharedData->getRawSize();
-
-                    // Calculate total size needed
-                    std::size_t totalVertices = impl->vertexCount;
-                    // For fill vertices, we typically have 2 int16 values (x,y) = 4 bytes per vertex
-                    std::size_t effectiveStride = stride;
-                    if (effectiveStride == 0) {
-                        // Default stride for position data (2 x int16)
-                        effectiveStride = 4;
-                    }
-                    std::size_t vertexSize = effectiveStride;
-                    std::size_t totalSize = totalVertices * vertexSize;
-
-                    impl->vertexData.resize(totalSize);
-                    impl->vertexStride = vertexSize;
-                    impl->vertexSize = totalSize;
-                    impl->vertexType = attrType;
-
-                    // Copy vertex data with proper stride
-                    const uint8_t* srcBytes = static_cast<const uint8_t*>(rawData);
-                    for (std::size_t i = 0; i < totalVertices; ++i) {
-                        std::size_t srcOffset = (vertexOffset + i) * effectiveStride + offset;
-                        std::size_t dstOffset = i * vertexSize;
-
-                        // Check both source and destination bounds
-                        if (srcOffset + vertexSize <= rawSize && dstOffset + vertexSize <= totalSize) {
-                            std::memcpy(impl->vertexData.data() + dstOffset,
-                                      srcBytes + srcOffset,
-                                      vertexSize);
-                        }
-                    }
-
-            } else if (!attr.getRawData().empty()) {
-                // Use the raw data directly
-                impl->vertexData = attr.getRawData();
-                impl->vertexStride = attr.getStride();
-                impl->vertexSize = impl->vertexData.size();
-                impl->vertexType = attr.getDataType();
-
-            } else {
+        // Calculate the total vertex stride and attribute strides
+        std::vector<std::size_t> attrStrides;
+        std::size_t totalStride = 0;
+        for (const auto& attrInfo : attributeInfos) {
+            std::size_t stride = 0;
+            switch (attrInfo.dataType) {
+                case gfx::AttributeDataType::Byte: stride = 1; break;
+                case gfx::AttributeDataType::UByte: stride = 1; break;
+                case gfx::AttributeDataType::Short: stride = 2; break;
+                case gfx::AttributeDataType::UShort: stride = 2; break;
+                case gfx::AttributeDataType::Int: stride = 4; break;
+                case gfx::AttributeDataType::UInt: stride = 4; break;
+                case gfx::AttributeDataType::Float: stride = 4; break;
+                case gfx::AttributeDataType::Byte2: stride = 2; break;
+                case gfx::AttributeDataType::UByte2: stride = 2; break;
+                case gfx::AttributeDataType::Short2: stride = 4; break;
+                case gfx::AttributeDataType::UShort2: stride = 4; break;
+                case gfx::AttributeDataType::Int2: stride = 8; break;
+                case gfx::AttributeDataType::UInt2: stride = 8; break;
+                case gfx::AttributeDataType::Float2: stride = 8; break;
+                case gfx::AttributeDataType::Byte4: stride = 4; break;
+                case gfx::AttributeDataType::UByte4: stride = 4; break;
+                case gfx::AttributeDataType::Short4: stride = 8; break;
+                case gfx::AttributeDataType::UShort4: stride = 8; break;
+                case gfx::AttributeDataType::Int4: stride = 16; break;
+                case gfx::AttributeDataType::UInt4: stride = 16; break;
+                case gfx::AttributeDataType::Float4: stride = 16; break;
+                case gfx::AttributeDataType::Int3: stride = 12; break;
+                case gfx::AttributeDataType::UInt3: stride = 12; break;
+                case gfx::AttributeDataType::Float3: stride = 12; break;
+                default: stride = 8; break;
             }
-        } else {
+            attrStrides.push_back(stride);
+            totalStride += stride;
+        }
+
+        if (totalStride == 0 || impl->vertexCount == 0) {
+            impl->needsVertexExtraction = false;
+            return;
+        }
+
+        // Resize vertex data buffer
+        impl->vertexData.resize(impl->vertexCount * totalStride);
+        impl->vertexStride = totalStride;
+
+        // Interleave data from all attributes
+        for (std::size_t vertexIndex = 0; vertexIndex < impl->vertexCount; ++vertexIndex) {
+            std::size_t dstOffset = 0;
+
+            for (std::size_t attrIndex = 0; attrIndex < attributeInfos.size(); ++attrIndex) {
+                const auto& attrInfo = attributeInfos[attrIndex];
+                std::size_t attrStride = attrStrides[attrIndex];
+
+                // Find the corresponding vertex attribute in the drawable
+                const auto& drawableAttrPtr = vertexAttributes->get(attrInfo.index);
+                if (!drawableAttrPtr) continue;
+
+                const auto& drawableAttr = *drawableAttrPtr;
+
+                // Get the raw data for this attribute
+                const auto& rawData = drawableAttr.getRawData();
+                if (rawData.empty()) continue;
+
+                // Calculate offset for this vertex in the raw data
+                std::size_t vertexOffset = vertexIndex * drawableAttr.getStride();
+                if (vertexOffset + attrStride > rawData.size()) continue;
+
+                // Copy to the interleaved buffer
+                std::memcpy(impl->vertexData.data() + (vertexIndex * totalStride) + dstOffset, 
+                          rawData.data() + vertexOffset, attrStride);
+                dstOffset += attrStride;
+            }
         }
 
         impl->needsVertexExtraction = false;
-
-        if (impl->vertexData.empty()) {
-        }
     }
 
     // Upload vertex data to GPU
@@ -473,15 +503,29 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     // Draw
     if (impl->indexBuffer && impl->indexVector) {
-        // Draw indexed geometry
-        uint32_t indexCount = static_cast<uint32_t>(impl->indexVector->elements());
-
-        static int indexedDrawCount = 0;
-        if (indexedDrawCount++ < 5) {
-            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Drawing indexed with " + std::to_string(indexCount) + " indices");
+        // Draw indexed geometry - loop through segments like Metal does
+        static int totalSegmentLogCount = 0;
+        if (totalSegmentLogCount++ < 5) {
+            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Drawing " + std::to_string(impl->segments.size()) + " segments");
         }
+        for (const auto& seg_ : impl->segments) {
+            const auto& segment = static_cast<DrawSegment&>(*seg_);
+            const auto& mlSegment = segment.getSegment();
+            if (mlSegment.indexLength > 0) {
+                uint32_t indexCount = mlSegment.indexLength;
+                uint32_t indexOffset = mlSegment.indexOffset;
+                uint32_t baseVertex = mlSegment.vertexOffset;
 
-        wgpuRenderPassEncoderDrawIndexed(renderPassEncoder, indexCount, 1, 0, 0, 0);
+                static int segmentDrawCount = 0;
+                if (segmentDrawCount++ < 10) {
+                    mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Drawing segment with " + 
+                        std::to_string(indexCount) + " indices, offset " + std::to_string(indexOffset) + 
+                        ", base vertex " + std::to_string(baseVertex));
+                }
+
+                wgpuRenderPassEncoderDrawIndexed(renderPassEncoder, indexCount, 1, indexOffset, baseVertex, 0);
+            }
+        }
     } else if (impl->vertexBuffer && impl->vertexCount > 0) {
         // Draw non-indexed
         uint32_t vertexCount = static_cast<uint32_t>(impl->vertexCount);
@@ -502,12 +546,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
 void Drawable::setIndexData(gfx::IndexVectorBasePtr indices, std::vector<UniqueDrawSegment> segments) {
     impl->indexVector = std::move(indices);
-    // Note: DrawSegments are handled differently in WebGPU
-    // We'll use the entire index buffer for now
-    (void)segments;
-
-    // Don't call buildWebGPUPipeline here - it will be called by the caller if needed
-    // This avoids redundant calls and potential recursion issues
+    impl->segments = std::move(segments);
 }
 
 void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::AttributeDataType) {

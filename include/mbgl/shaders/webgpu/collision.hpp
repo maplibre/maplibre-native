@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/shaders/collision_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
 
@@ -15,11 +16,11 @@ struct ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::WebGPU> {
     
     static constexpr auto vertex = R"(
 struct VertexInput {
-    @location(0) position: vec2<i32>,
-    @location(1) anchor_position: vec2<i32>,
-    @location(2) extrude: vec2<i32>,
-    @location(3) placed: vec2<u32>,
-    @location(4) shift: vec2<f32>,
+    @location(3) position: vec2<i32>,
+    @location(4) anchor_position: vec2<i32>,
+    @location(5) extrude: vec2<i32>,
+    @location(6) placed: vec2<u32>,
+    @location(7) shift: vec2<f32>,
 };
 
 struct VertexOutput {
@@ -100,10 +101,10 @@ struct ShaderSource<BuiltIn::CollisionCircleShader, gfx::Backend::Type::WebGPU> 
     
     static constexpr auto vertex = R"(
 struct VertexInput {
-    @location(0) position: vec2<i32>,
-    @location(1) anchor_position: vec2<i32>,
-    @location(2) extrude: vec2<i32>,
-    @location(3) placed: u32,
+    @location(3) position: vec2<i32>,
+    @location(4) anchor_position: vec2<i32>,
+    @location(5) extrude: vec2<i32>,
+    @location(6) placed: u32,
 };
 
 struct VertexOutput {

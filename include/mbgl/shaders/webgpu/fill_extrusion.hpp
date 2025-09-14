@@ -2,6 +2,7 @@
 
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
+#include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {
@@ -15,11 +16,11 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::WebGPU> {
     
     static constexpr auto vertex = R"(
 struct VertexInput {
-    @location(0) position: vec2<i32>,
-    @location(1) normal_ed: vec4<i32>,
-    @location(2) color: vec4<f32>,
-    @location(3) base: f32,
-    @location(4) height: f32,
+    @location(3) position: vec2<i32>,
+    @location(4) normal_ed: vec4<i32>,
+    @location(5) color: vec4<f32>,
+    @location(6) base: f32,
+    @location(7) height: f32,
 };
 
 struct VertexOutput {
@@ -125,12 +126,12 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Web
     
     static constexpr auto vertex = R"(
 struct VertexInput {
-    @location(0) position: vec2<i32>,
-    @location(1) normal_ed: vec4<i32>,
-    @location(2) color: vec4<f32>,
-    @location(3) base: f32,
-    @location(4) height: f32,
-    @location(5) pattern: vec4<f32>,
+    @location(3) position: vec2<i32>,
+    @location(4) normal_ed: vec4<i32>,
+    @location(5) color: vec4<f32>,
+    @location(6) base: f32,
+    @location(7) height: f32,
+    @location(8) pattern: vec4<f32>,
 };
 
 struct VertexOutput {

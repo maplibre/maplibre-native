@@ -8,8 +8,8 @@ namespace shaders {
 using CustomSymbolIconShaderSource = ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::WebGPU>;
 
 const std::array<AttributeInfo, 2> CustomSymbolIconShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Float3, idCustomSymbolPosVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::Float2, idCustomSymbolTexVertexAttribute},
+    AttributeInfo{customSymbolUBOCount + 0, gfx::AttributeDataType::Float3, idCustomSymbolPosVertexAttribute},
+    AttributeInfo{customSymbolUBOCount + 1, gfx::AttributeDataType::Float2, idCustomSymbolTexVertexAttribute},
 };
 const std::array<TextureInfo, 1> CustomSymbolIconShaderSource::textures = {
     TextureInfo{0, idCustomSymbolImageTexture}
