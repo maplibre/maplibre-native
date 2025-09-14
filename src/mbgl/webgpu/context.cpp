@@ -102,14 +102,19 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registr
     // Try getting shader group by name first (for layer-specific shader groups)
     auto shaderGroup = registry.getShaderGroup(name);
     if (shaderGroup) {
-        auto shader = shaderGroup->getShader(name);
+        mbgl::Log::Info(mbgl::Event::Shader, "WebGPU: Found shader group for '" + name + "'");
+        auto shader = shaderGroup->getOrCreateShader(*this, {});
         if (shader) {
+            mbgl::Log::Info(mbgl::Event::Shader, "WebGPU: Successfully created shader '" + name + "' from shader group");
             // Convert gfx::Shader to ShaderProgramBase
             auto shaderProgram = std::static_pointer_cast<gfx::ShaderProgramBase>(shader);
             impl->shaderCache[name] = shaderProgram;
-            mbgl::Log::Info(mbgl::Event::Shader, "WebGPU: Retrieved shader '" + name + "' from shader group");
             return shaderProgram;
+        } else {
+            mbgl::Log::Warning(mbgl::Event::Shader, "WebGPU: Failed to create shader '" + name + "' from shader group");
         }
+    } else {
+        mbgl::Log::Info(mbgl::Event::Shader, "WebGPU: No shader group found for '" + name + "', using fallback");
     }
 
     // Fallback: Use the built-in WGSL shaders based on name

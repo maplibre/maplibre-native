@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
+#include <mbgl/shaders/webgpu/common.hpp>
 #include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/hash.hpp>
