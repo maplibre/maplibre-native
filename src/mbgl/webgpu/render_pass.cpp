@@ -58,7 +58,7 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
                                           static_cast<float>(descriptor.clearColor->g),
                                           static_cast<float>(descriptor.clearColor->b),
                                           static_cast<float>(descriptor.clearColor->a)};
-            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Clearing with light blue background color");
+            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Clearing with clearColor");
 
         } else {
             colorAttachment.loadOp = wgpu::LoadOp::Load;
