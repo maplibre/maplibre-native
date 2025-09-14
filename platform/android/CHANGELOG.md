@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## 11.13.2
+
+### ✨ Features and improvements
+
+- Sync with maplibre primary repo
+
 ## 11.13.1
 
 ### ✨ Features and improvements
