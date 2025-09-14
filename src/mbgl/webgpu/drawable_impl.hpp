@@ -60,12 +60,9 @@ public:
     // WebGPU-specific resources needed for rendering
     WGPUBindGroup bindGroup = nullptr;
     WGPUBindGroupLayout bindGroupLayout = nullptr;
-    WGPUBuffer vertexBuffer = nullptr;
-    WGPUBuffer indexBuffer = nullptr;
-    std::vector<uint8_t> vertexData;
 };
 
-// WebGPU uses the base DrawSegment implementation directly
+// WebGPU-specific DrawSegment inheriting from the base gfx::Drawable::DrawSegment
 using DrawSegment = gfx::Drawable::DrawSegment;
 
 } // namespace webgpu
