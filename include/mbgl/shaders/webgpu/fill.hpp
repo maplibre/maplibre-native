@@ -15,29 +15,6 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::WebGPU> {
     static const std::array<TextureInfo, 0> textures;
     
     static constexpr const char* vertex = R"(
-// Helper functions for unpacking colors
-fn unpack_float(packedValue: f32) -> vec2<f32> {
-    let packedIntValue = i32(packedValue);
-    let v0 = packedIntValue / 256;
-    return vec2<f32>(f32(v0), f32(packedIntValue - v0 * 256));
-}
-
-fn decode_color(encoded: vec2<f32>) -> vec4<f32> {
-    let e0 = unpack_float(encoded[0]) / 255.0;
-    let e1 = unpack_float(encoded[1]) / 255.0;
-    return vec4<f32>(e0.x, e0.y, e1.x, e1.y);
-}
-
-fn unpack_mix_color(packedColors: vec4<f32>, t: f32) -> vec4<f32> {
-    let color1 = decode_color(vec2<f32>(packedColors[0], packedColors[1]));
-    let color2 = decode_color(vec2<f32>(packedColors[2], packedColors[3]));
-    return mix(color1, color2, t);
-}
-
-fn unpack_mix_float(packedValue: vec2<f32>, t: f32) -> f32 {
-    return mix(packedValue[0], packedValue[1], t);
-}
-
 struct VertexInput {
     @location(4) position: vec2<i32>,
     @location(5) color: vec4<f32>,
@@ -67,7 +44,11 @@ fn main(in: VertexInput) -> VertexOutput {
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
     out.position = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
 
-    // Since we're using uniform opacity, we don't compute vertex opacity
+    // Note: Color and opacity are handled as uniforms in fragment shader
+    // If we had vertex attributes, we'd use:
+    // let color = unpack_mix_color(in.color, drawable.color_t);
+    // let opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+
     return out;
 }
 )";
@@ -121,25 +102,27 @@ struct VertexOutput {
     @location(1) opacity: f32,
 };
 
-struct FillOutlineUBO {
+struct FillOutlineDrawableUBO {
     matrix: mat4x4<f32>,
-    ratio: f32,
+    outline_color_t: f32,
+    opacity_t: f32,
     pad1: f32,
     pad2: f32,
-    pad3: f32,
 };
 
-@group(0) @binding(0) var<uniform> outline_ubo: FillOutlineUBO;
+@group(0) @binding(2) var<uniform> drawable: FillOutlineDrawableUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-    
+
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
-    out.position = outline_ubo.matrix * vec4<f32>(pos, 0.0, 1.0);
-    out.outline_color = in.outline_color;
-    out.opacity = in.opacity.x;
-    
+    out.position = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
+
+    // Use helper functions for unpacking if we have per-vertex attributes
+    out.outline_color = unpack_mix_color(in.outline_color, drawable.outline_color_t);
+    out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+
     return out;
 }
 )";
@@ -163,10 +146,170 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::WebGPU> {
     static const std::array<AttributeInfo, 4> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
-    
-    // Pattern shader implementations would go here
-    static constexpr const char* vertex = "";
-    static constexpr const char* fragment = "";
+
+    static constexpr const char* vertex = R"(
+struct VertexInput {
+    @location(4) position: vec2<i32>,
+    @location(5) pattern_from: vec4<u32>,
+    @location(6) pattern_to: vec4<u32>,
+    @location(7) opacity: vec2<f32>,
+};
+
+struct VertexOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) v_pos_a: vec2<f32>,
+    @location(1) v_pos_b: vec2<f32>,
+    @location(2) pattern_from: vec4<f32>,
+    @location(3) pattern_to: vec4<f32>,
+    @location(4) opacity: f32,
+};
+
+struct FillPatternDrawableUBO {
+    matrix: mat4x4<f32>,
+    pixel_coord_upper: vec2<f32>,
+    pixel_coord_lower: vec2<f32>,
+    tile_ratio: f32,
+    pattern_from_t: f32,
+    pattern_to_t: f32,
+    opacity_t: f32,
+};
+
+struct FillPatternTilePropsUBO {
+    pattern_from: vec4<f32>,
+    pattern_to: vec4<f32>,
+    texsize: vec2<f32>,
+    pad1: f32,
+    pad2: f32,
+};
+
+struct FillEvaluatedPropsUBO {
+    color: vec4<f32>,
+    outline_color: vec4<f32>,
+    opacity: f32,
+    fade: f32,
+    from_scale: f32,
+    to_scale: f32,
+};
+
+struct GlobalPaintParamsUBO {
+    pixel_ratio: f32,
+    // other fields...
+};
+
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
+@group(0) @binding(2) var<storage, read> drawableVector: array<FillPatternDrawableUBO>;
+@group(0) @binding(3) var<storage, read> tilePropsVector: array<FillPatternTilePropsUBO>;
+@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+@group(0) @binding(6) var<uniform> uboIndex: u32;
+
+@vertex
+fn main(in: VertexInput) -> VertexOutput {
+    var out: VertexOutput;
+    let drawable = drawableVector[uboIndex];
+    let tileProps = tilePropsVector[uboIndex];
+
+    let pattern_from = vec4<f32>(in.pattern_from);
+    let pattern_to = vec4<f32>(in.pattern_to);
+
+    let pattern_tl_a = pattern_from.xy;
+    let pattern_br_a = pattern_from.zw;
+    let pattern_tl_b = pattern_to.xy;
+    let pattern_br_b = pattern_to.zw;
+
+    let pixelRatio = paintParams.pixel_ratio;
+    let tileZoomRatio = drawable.tile_ratio;
+    let fromScale = props.from_scale;
+    let toScale = props.to_scale;
+
+    let display_size_a = vec2<f32>(
+        (pattern_br_a.x - pattern_tl_a.x) / pixelRatio,
+        (pattern_br_a.y - pattern_tl_a.y) / pixelRatio
+    );
+    let display_size_b = vec2<f32>(
+        (pattern_br_b.x - pattern_tl_b.x) / pixelRatio,
+        (pattern_br_b.y - pattern_tl_b.y) / pixelRatio
+    );
+
+    let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
+
+    out.position = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
+    out.v_pos_a = get_pattern_pos(
+        drawable.pixel_coord_upper,
+        drawable.pixel_coord_lower,
+        fromScale * display_size_a,
+        tileZoomRatio,
+        pos
+    );
+    out.v_pos_b = get_pattern_pos(
+        drawable.pixel_coord_upper,
+        drawable.pixel_coord_lower,
+        toScale * display_size_b,
+        tileZoomRatio,
+        pos
+    );
+    out.pattern_from = pattern_from;
+    out.pattern_to = pattern_to;
+    out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+
+    return out;
+}
+)";
+
+    static constexpr const char* fragment = R"(
+struct FragmentInput {
+    @location(0) v_pos_a: vec2<f32>,
+    @location(1) v_pos_b: vec2<f32>,
+    @location(2) pattern_from: vec4<f32>,
+    @location(3) pattern_to: vec4<f32>,
+    @location(4) opacity: f32,
+};
+
+struct FillPatternTilePropsUBO {
+    pattern_from: vec4<f32>,
+    pattern_to: vec4<f32>,
+    texsize: vec2<f32>,
+    pad1: f32,
+    pad2: f32,
+};
+
+struct FillEvaluatedPropsUBO {
+    color: vec4<f32>,
+    outline_color: vec4<f32>,
+    opacity: f32,
+    fade: f32,
+    from_scale: f32,
+    to_scale: f32,
+};
+
+@group(0) @binding(3) var<storage, read> tilePropsVector: array<FillPatternTilePropsUBO>;
+@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+@group(0) @binding(6) var<uniform> uboIndex: u32;
+@group(1) @binding(0) var texture_sampler: sampler;
+@group(1) @binding(1) var pattern_texture: texture_2d<f32>;
+
+@fragment
+fn main(in: FragmentInput) -> @location(0) vec4<f32> {
+    let tileProps = tilePropsVector[uboIndex];
+
+    let pattern_tl_a = in.pattern_from.xy;
+    let pattern_br_a = in.pattern_from.zw;
+    let pattern_tl_b = in.pattern_to.xy;
+    let pattern_br_b = in.pattern_to.zw;
+
+    // Sample pattern A
+    let imagecoord_a = gl_mod(in.v_pos_a, vec2<f32>(1.0));
+    let pos_a = mix(pattern_tl_a / tileProps.texsize, pattern_br_a / tileProps.texsize, imagecoord_a);
+    let color_a = textureSample(pattern_texture, texture_sampler, pos_a);
+
+    // Sample pattern B
+    let imagecoord_b = gl_mod(in.v_pos_b, vec2<f32>(1.0));
+    let pos_b = mix(pattern_tl_b / tileProps.texsize, pattern_br_b / tileProps.texsize, imagecoord_b);
+    let color_b = textureSample(pattern_texture, texture_sampler, pos_b);
+
+    // Mix patterns and apply opacity
+    return mix(color_a, color_b, props.fade) * in.opacity;
+}
+)";
 };
 
 template <>
@@ -175,9 +318,175 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::WebGP
     static const std::array<AttributeInfo, 4> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
-    
-    static constexpr const char* vertex = "";
-    static constexpr const char* fragment = "";
+
+    static constexpr const char* vertex = R"(
+struct VertexInput {
+    @location(4) position: vec2<i32>,
+    @location(5) pattern_from: vec4<u32>,
+    @location(6) pattern_to: vec4<u32>,
+    @location(7) opacity: vec2<f32>,
+};
+
+struct VertexOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) v_pos_a: vec2<f32>,
+    @location(1) v_pos_b: vec2<f32>,
+    @location(2) v_pos: vec2<f32>,
+    @location(3) pattern_from: vec4<f32>,
+    @location(4) pattern_to: vec4<f32>,
+    @location(5) opacity: f32,
+};
+
+struct FillOutlinePatternDrawableUBO {
+    matrix: mat4x4<f32>,
+    pixel_coord_upper: vec2<f32>,
+    pixel_coord_lower: vec2<f32>,
+    tile_ratio: f32,
+    pattern_from_t: f32,
+    pattern_to_t: f32,
+    opacity_t: f32,
+};
+
+struct FillOutlinePatternTilePropsUBO {
+    pattern_from: vec4<f32>,
+    pattern_to: vec4<f32>,
+    texsize: vec2<f32>,
+    pad1: f32,
+    pad2: f32,
+};
+
+struct FillEvaluatedPropsUBO {
+    color: vec4<f32>,
+    outline_color: vec4<f32>,
+    opacity: f32,
+    fade: f32,
+    from_scale: f32,
+    to_scale: f32,
+};
+
+struct GlobalPaintParamsUBO {
+    pixel_ratio: f32,
+    world_size: vec2<f32>,
+    // other fields...
+};
+
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
+@group(0) @binding(2) var<storage, read> drawableVector: array<FillOutlinePatternDrawableUBO>;
+@group(0) @binding(3) var<storage, read> tilePropsVector: array<FillOutlinePatternTilePropsUBO>;
+@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+@group(0) @binding(6) var<uniform> uboIndex: u32;
+
+@vertex
+fn main(in: VertexInput) -> VertexOutput {
+    var out: VertexOutput;
+    let drawable = drawableVector[uboIndex];
+    let tileProps = tilePropsVector[uboIndex];
+
+    let pattern_from = vec4<f32>(in.pattern_from);
+    let pattern_to = vec4<f32>(in.pattern_to);
+
+    let pattern_tl_a = pattern_from.xy;
+    let pattern_br_a = pattern_from.zw;
+    let pattern_tl_b = pattern_to.xy;
+    let pattern_br_b = pattern_to.zw;
+
+    let pixelRatio = paintParams.pixel_ratio;
+    let tileZoomRatio = drawable.tile_ratio;
+    let fromScale = props.from_scale;
+    let toScale = props.to_scale;
+
+    let display_size_a = vec2<f32>(
+        (pattern_br_a.x - pattern_tl_a.x) / pixelRatio,
+        (pattern_br_a.y - pattern_tl_a.y) / pixelRatio
+    );
+    let display_size_b = vec2<f32>(
+        (pattern_br_b.x - pattern_tl_b.x) / pixelRatio,
+        (pattern_br_b.y - pattern_tl_b.y) / pixelRatio
+    );
+
+    let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
+    let position = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
+
+    out.position = position;
+    out.v_pos_a = get_pattern_pos(
+        drawable.pixel_coord_upper,
+        drawable.pixel_coord_lower,
+        fromScale * display_size_a,
+        tileZoomRatio,
+        pos
+    );
+    out.v_pos_b = get_pattern_pos(
+        drawable.pixel_coord_upper,
+        drawable.pixel_coord_lower,
+        toScale * display_size_b,
+        tileZoomRatio,
+        pos
+    );
+    out.v_pos = (position.xy / position.w + 1.0) / 2.0 * paintParams.world_size;
+    out.pattern_from = pattern_from;
+    out.pattern_to = pattern_to;
+    out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+
+    return out;
+}
+)";
+
+    static constexpr const char* fragment = R"(
+struct FragmentInput {
+    @location(0) v_pos_a: vec2<f32>,
+    @location(1) v_pos_b: vec2<f32>,
+    @location(2) v_pos: vec2<f32>,
+    @location(3) pattern_from: vec4<f32>,
+    @location(4) pattern_to: vec4<f32>,
+    @location(5) opacity: f32,
+};
+
+struct FillOutlinePatternTilePropsUBO {
+    pattern_from: vec4<f32>,
+    pattern_to: vec4<f32>,
+    texsize: vec2<f32>,
+    pad1: f32,
+    pad2: f32,
+};
+
+struct FillEvaluatedPropsUBO {
+    color: vec4<f32>,
+    outline_color: vec4<f32>,
+    opacity: f32,
+    fade: f32,
+    from_scale: f32,
+    to_scale: f32,
+};
+
+@group(0) @binding(3) var<storage, read> tilePropsVector: array<FillOutlinePatternTilePropsUBO>;
+@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+@group(0) @binding(6) var<uniform> uboIndex: u32;
+@group(1) @binding(0) var texture_sampler: sampler;
+@group(1) @binding(1) var pattern_texture: texture_2d<f32>;
+
+@fragment
+fn main(in: FragmentInput) -> @location(0) vec4<f32> {
+    let tileProps = tilePropsVector[uboIndex];
+
+    let pattern_tl_a = in.pattern_from.xy;
+    let pattern_br_a = in.pattern_from.zw;
+    let pattern_tl_b = in.pattern_to.xy;
+    let pattern_br_b = in.pattern_to.zw;
+
+    // Sample pattern A
+    let imagecoord_a = gl_mod(in.v_pos_a, vec2<f32>(1.0));
+    let pos_a = mix(pattern_tl_a / tileProps.texsize, pattern_br_a / tileProps.texsize, imagecoord_a);
+    let color_a = textureSample(pattern_texture, texture_sampler, pos_a);
+
+    // Sample pattern B
+    let imagecoord_b = gl_mod(in.v_pos_b, vec2<f32>(1.0));
+    let pos_b = mix(pattern_tl_b / tileProps.texsize, pattern_br_b / tileProps.texsize, imagecoord_b);
+    let color_b = textureSample(pattern_texture, texture_sampler, pos_b);
+
+    // Mix patterns and apply opacity
+    return mix(color_a, color_b, props.fade) * in.opacity;
+}
+)";
 };
 
 template <>

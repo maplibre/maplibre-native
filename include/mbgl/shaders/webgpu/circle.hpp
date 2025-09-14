@@ -75,9 +75,8 @@ struct CircleEvaluatedPropsUBO {
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
     
-    // Use uniform radius if available, otherwise use attribute
-    let radius = props.radius;
-    let stroke_width = props.stroke_width;
+    let radius = unpack_mix_float(in.radius, drawable.radius_t);
+    let stroke_width = unpack_mix_float(in.stroke_width, drawable.stroke_width_t);
     
     // Decode the extrusion vector from position
     let pos_f = vec2<f32>(f32(in.position.x), f32(in.position.y));
@@ -94,15 +93,14 @@ fn main(in: VertexInput) -> VertexOutput {
     // Calculate antialiasing blur
     out.antialiasblur = 1.0 / (radius + stroke_width);
     
-    // Pass through values
     out.extrude = extrude;
-    out.color = in.color;
+    out.color = unpack_mix_color(in.color, drawable.color_t);
     out.radius = radius;
-    out.blur = in.blur.x;
-    out.opacity = in.opacity.x;
-    out.stroke_color = in.stroke_color;
+    out.blur = unpack_mix_float(in.blur, drawable.blur_t);
+    out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+    out.stroke_color = unpack_mix_color(in.stroke_color, drawable.stroke_color_t);
     out.stroke_width = stroke_width;
-    out.stroke_opacity = in.stroke_opacity.x;
+    out.stroke_opacity = unpack_mix_float(in.stroke_opacity, drawable.stroke_opacity_t);
     
     return out;
 }

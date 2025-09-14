@@ -23,9 +23,8 @@ using BackgroundPatternShaderSource = ShaderSource<BuiltIn::BackgroundPatternSha
 const std::array<AttributeInfo, 1> BackgroundPatternShaderSource::attributes = {
     AttributeInfo{backgroundUBOCount + 0, gfx::AttributeDataType::Float2, idBackgroundPosVertexAttribute},
 };
-const std::array<TextureInfo, 2> BackgroundPatternShaderSource::textures = {
-    TextureInfo{0, idBackgroundImageTexture},
-    TextureInfo{1, idBackgroundImageTexture}
+const std::array<TextureInfo, 1> BackgroundPatternShaderSource::textures = {
+    TextureInfo{0, idBackgroundImageTexture}
 };
 
 } // namespace shaders
