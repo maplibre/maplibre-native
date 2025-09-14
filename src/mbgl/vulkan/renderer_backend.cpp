@@ -257,9 +257,9 @@ void RendererBackend::triggerFrameCapture([[maybe_unused]] uint32_t frameCount, 
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                                                            VkDebugUtilsMessageTypeFlagsEXT,
-                                                           const VkDebugUtilsMessengerCallbackDataEXT* callbackData,
+                                                           [[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* callbackData,
                                                            void*) {
-    EventSeverity mbglSeverity = EventSeverity::Debug;
+    [[maybe_unused]] EventSeverity mbglSeverity = EventSeverity::Debug;
 
     switch (messageSeverity) {
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
@@ -294,7 +294,7 @@ static VKAPI_ATTR VkBool32 vkDebugReportCallback(VkDebugReportFlagsEXT flags,
                                                  const char* pLayerPrefix,
                                                  const char* pMessage,
                                                  [[maybe_unused]] void* pUserData) {
-    EventSeverity mbglSeverity = EventSeverity::Debug;
+    [[maybe_unused]] EventSeverity mbglSeverity = EventSeverity::Debug;
 
     if (flags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT) {
         mbglSeverity = EventSeverity::Info;

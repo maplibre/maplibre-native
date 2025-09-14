@@ -222,6 +222,12 @@ GLFWView::GLFWView(bool fullscreen_,
 
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
+#ifdef __linux__
+    // Force X11 platform for WebGPU compatibility (Dawn doesn't support Wayland yet)
+    // For now, always use X11 when WebGPU might be used
+    glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+#endif
+
     if (!glfwInit()) {
         exit(1);
     }

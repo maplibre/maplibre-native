@@ -214,8 +214,8 @@ OffscreenTexture::OffscreenTexture(Context& context,
 bool OffscreenTexture::isRenderable() {
     // Check if the texture resource is valid and can be rendered to
     try {
-        auto& resource = getResource<OffscreenTextureResource>();
-        return resource.getTexture() != nullptr;
+        auto& res = getResource<OffscreenTextureResource>();
+        return res.getTexture() != nullptr;
     } catch (...) {
         return false;
     }

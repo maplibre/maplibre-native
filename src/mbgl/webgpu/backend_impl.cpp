@@ -27,7 +27,7 @@ public:
         // Create instance with appropriate backend (Dawn or wgpu)
         // Using compile-time flag to choose backend
 
-#ifdef USE_DAWN
+#ifdef MLN_USE_DAWN
         // Dawn-specific initialization
 #elif defined(USE_WGPU)
         // wgpu-specific initialization

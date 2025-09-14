@@ -4,9 +4,9 @@
 namespace mbgl {
 namespace webgpu {
 
-HeadlessBackend::HeadlessBackend(Size size, SwapBehaviour swapBehaviour_, gfx::ContextMode contextMode)
-    : webgpu::RendererBackend(contextMode),
-      gfx::HeadlessBackend(size),
+HeadlessBackend::HeadlessBackend(Size size_, SwapBehaviour swapBehaviour_, gfx::ContextMode mode)
+    : webgpu::RendererBackend(mode),
+      gfx::HeadlessBackend(size_),
       swapBehaviour(swapBehaviour_) {
     (void)swapBehaviour; // TODO: Use this when implementing swap buffer behavior
     // TODO: Initialize WebGPU context for headless rendering
