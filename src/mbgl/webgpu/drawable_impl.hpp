@@ -37,6 +37,7 @@ public:
     WGPUBuffer vertexBuffer = nullptr;
     WGPUBuffer indexBuffer = nullptr;
     WGPUBuffer uniformBuffer = nullptr;
+    WGPUBuffer propsUniformBuffer = nullptr;  // Second uniform buffer for evaluated properties
     std::vector<uint8_t> vertexData;
     std::size_t vertexStride = 0;
     std::size_t vertexSize = 0;
