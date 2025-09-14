@@ -73,8 +73,8 @@ struct CircleEvaluatedPropsUBO {
     pad1: f32,
 };
 
-@group(0) @binding(0) var<uniform> drawable: CircleDrawableUBO;
-@group(0) @binding(1) var<uniform> props: CircleEvaluatedPropsUBO;
+@group(0) @binding(2) var<uniform> drawable: CircleDrawableUBO;
+@group(0) @binding(5) var<uniform> props: CircleEvaluatedPropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {

@@ -34,7 +34,7 @@ struct LineUBO {
     pad2: f32,
 };
 
-@group(0) @binding(0) var<uniform> line_ubo: LineUBO;
+@group(0) @binding(2) var<uniform> line_ubo: LineUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -79,7 +79,7 @@ struct LinePropsUBO {
     pad3: f32,
 };
 
-@group(0) @binding(1) var<uniform> line_props: LinePropsUBO;
+@group(0) @binding(4) var<uniform> line_props: LinePropsUBO;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
@@ -117,7 +117,7 @@ struct LineGradientUBO {
     matrix: mat4x4<f32>,
 };
 
-@group(0) @binding(0) var<uniform> ubo: LineGradientUBO;
+@group(0) @binding(2) var<uniform> ubo: LineGradientUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -133,8 +133,8 @@ fn main(in: VertexInput) -> VertexOutput {
 )";
 
     static constexpr const char* fragment = R"(
-@group(0) @binding(1) var gradient_texture: texture_2d<f32>;
-@group(0) @binding(2) var gradient_sampler: sampler;
+@group(0) @binding(3) var gradient_texture: texture_2d<f32>;
+@group(0) @binding(4) var gradient_sampler: sampler;
 
 @fragment
 fn main(@location(0) v_lineprogress: f32) -> @location(0) vec4<f32> {
@@ -227,7 +227,7 @@ struct LineSDFUBO {
     pad: f32,
 };
 
-@group(0) @binding(0) var<uniform> ubo: LineSDFUBO;
+@group(0) @binding(2) var<uniform> ubo: LineSDFUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -244,8 +244,8 @@ fn main(in: VertexInput) -> VertexOutput {
 )";
 
     static constexpr const char* fragment = R"(
-@group(0) @binding(1) var sdf_texture: texture_2d<f32>;
-@group(0) @binding(2) var sdf_sampler: sampler;
+@group(0) @binding(3) var sdf_texture: texture_2d<f32>;
+@group(0) @binding(4) var sdf_sampler: sampler;
 
 @fragment
 fn main(@location(0) v_normal: vec2<f32>, @location(1) v_tex: vec2<f32>) -> @location(0) vec4<f32> {

@@ -52,6 +52,10 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.set(idFillEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
+    // Debug logging for WebGPU
+    mbgl::Log::Info(mbgl::Event::Render, "FillLayerTweaker: Set uniform buffer at index " +
+        std::to_string(idFillEvaluatedPropsUBO) + " for layer: " + layerGroup.getName());
+
     const auto& translation = evaluated.get<FillTranslate>();
     const auto anchor = evaluated.get<FillTranslateAnchor>();
     const auto zoom = static_cast<float>(parameters.state.getZoom());
@@ -104,6 +108,13 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
 #if !MLN_UBO_CONSOLIDATION
         auto& drawableUniforms = drawable.mutableUniformBuffers();
+
+        // Debug: Copy layer uniform buffer at index 3 to drawable
+        if (layerUniforms.get(idFillEvaluatedPropsUBO)) {
+            drawableUniforms.set(idFillEvaluatedPropsUBO, layerUniforms.get(idFillEvaluatedPropsUBO));
+            mbgl::Log::Info(mbgl::Event::Render, "FillLayerTweaker: Copied buffer at index " +
+                std::to_string(idFillEvaluatedPropsUBO) + " to drawable");
+        }
 #endif
         switch (static_cast<RenderFillLayer::FillVariant>(drawable.getType())) {
             case RenderFillLayer::FillVariant::Fill: {
