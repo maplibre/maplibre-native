@@ -42,6 +42,11 @@ Drawable::~Drawable() {
         wgpuBufferRelease(impl->uniformBuffer);
         impl->uniformBuffer = nullptr;
     }
+
+    if (impl->propsUniformBuffer) {
+        wgpuBufferRelease(impl->propsUniformBuffer);
+        impl->propsUniformBuffer = nullptr;
+    }
     
     if (impl->vertexBuffer) {
         wgpuBufferRelease(impl->vertexBuffer);
@@ -339,6 +344,9 @@ void Drawable::draw(PaintParameters& parameters) const {
     WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
 
     if (device && queue) {
+        // First, make sure the UniformBufferArray is bound (this updates the buffers)
+        impl->uniformBuffers.bind(*parameters.renderPass);
+
         // Create uniform buffer if it doesn't exist
         if (!impl->uniformBuffer) {
             WGPUBufferDescriptor uniformBufferDesc = {};
@@ -490,20 +498,90 @@ void Drawable::draw(PaintParameters& parameters) const {
                             }
                         }
 
-                        // Create bind group entry for uniform buffer
-                        WGPUBindGroupEntry entry = {};
-                        entry.binding = 0;  // Binding 0 for uniforms
-                        entry.buffer = impl->uniformBuffer;
-                        entry.offset = 0;
-                        entry.size = 80;  // FillDrawableUBO size (matrix + color_t + opacity_t + padding)
+                        // Create second uniform buffer for props if it doesn't exist
+                        if (!impl->propsUniformBuffer) {
+                            // Create props uniform buffer with default values
+                            struct FillEvaluatedPropsUBO {
+                                float color[4];
+                                float outline_color[4];
+                                float opacity;
+                                float fade;
+                                float from_scale;
+                                float to_scale;
+                            } propsData = {
+                                {1.0f, 1.0f, 1.0f, 1.0f},  // color
+                                {0.0f, 0.0f, 0.0f, 1.0f},  // outline_color
+                                1.0f,  // opacity
+                                1.0f,  // fade
+                                1.0f,  // from_scale
+                                1.0f   // to_scale
+                            };
+
+                            WGPUBufferDescriptor propsBufferDesc = {};
+                            WGPUStringView propsLabel = {"Props Uniform Buffer", strlen("Props Uniform Buffer")};
+                            propsBufferDesc.label = propsLabel;
+                            propsBufferDesc.size = 48; // FillEvaluatedPropsUBO size
+                            propsBufferDesc.usage = WGPUBufferUsage_Uniform | WGPUBufferUsage_CopyDst;
+                            propsBufferDesc.mappedAtCreation = 1;
+
+                            impl->propsUniformBuffer = wgpuDeviceCreateBuffer(device, &propsBufferDesc);
+                            if (impl->propsUniformBuffer) {
+                                void* mappedData = wgpuBufferGetMappedRange(impl->propsUniformBuffer, 0, 48);
+                                if (mappedData) {
+                                    std::memcpy(mappedData, &propsData, sizeof(propsData));
+                                    wgpuBufferUnmap(impl->propsUniformBuffer);
+                                }
+                            }
+                        }
+
+                        // Create bind group entries from UniformBufferArray
+                        std::vector<WGPUBindGroupEntry> entries;
+
+                        // Check the UniformBufferArray for actual uniform buffers
+                        // The layer tweakers populate these with the correct data
+                        for (size_t i = 0; i < impl->uniformBuffers.allocatedSize(); ++i) {
+                            const auto& uniformBuffer = impl->uniformBuffers.get(i);
+                            if (uniformBuffer) {
+                                const auto* webgpuUniformBuffer = static_cast<const webgpu::UniformBuffer*>(uniformBuffer.get());
+                                if (webgpuUniformBuffer && webgpuUniformBuffer->getBuffer()) {
+                                    WGPUBindGroupEntry entry = {};
+                                    entry.binding = static_cast<uint32_t>(i);
+                                    entry.buffer = webgpuUniformBuffer->getBuffer();
+                                    entry.offset = 0;
+                                    entry.size = webgpuUniformBuffer->getSize();
+                                    entries.push_back(entry);
+                                }
+                            }
+                        }
+
+                        // If no uniform buffers from the array, use our fallback buffers
+                        if (entries.empty()) {
+                            // Binding 0: Drawable UBO
+                            WGPUBindGroupEntry drawableEntry = {};
+                            drawableEntry.binding = 0;
+                            drawableEntry.buffer = impl->uniformBuffer;
+                            drawableEntry.offset = 0;
+                            drawableEntry.size = 80;  // FillDrawableUBO size
+                            entries.push_back(drawableEntry);
+
+                            // Binding 1: Props UBO (if available)
+                            if (impl->propsUniformBuffer) {
+                                WGPUBindGroupEntry propsEntry = {};
+                                propsEntry.binding = 1;
+                                propsEntry.buffer = impl->propsUniformBuffer;
+                                propsEntry.offset = 0;
+                                propsEntry.size = 48;  // FillEvaluatedPropsUBO size
+                                entries.push_back(propsEntry);
+                            }
+                        }
 
                         // Create bind group descriptor
                         WGPUBindGroupDescriptor bgDesc = {};
                         WGPUStringView bgLabel = {"Drawable Bind Group", strlen("Drawable Bind Group")};
                         bgDesc.label = bgLabel;
                         bgDesc.layout = layout;
-                        bgDesc.entryCount = 1;
-                        bgDesc.entries = &entry;
+                        bgDesc.entryCount = entries.size();
+                        bgDesc.entries = entries.data();
 
                         // Create the bind group
                         impl->bindGroup = wgpuDeviceCreateBindGroup(device, &bgDesc);
