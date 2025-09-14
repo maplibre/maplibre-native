@@ -85,16 +85,29 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
             WGPUBufferDescriptor uniformBufferDesc = {};
             WGPUStringView uniformLabel = {"Uniform Buffer", strlen("Uniform Buffer")};
             uniformBufferDesc.label = uniformLabel;
-            uniformBufferDesc.size = sizeof(matrix);
+            uniformBufferDesc.size = 80; // FillDrawableUBO size (matrix + color_t + opacity_t + padding)
             uniformBufferDesc.usage = WGPUBufferUsage_Uniform | WGPUBufferUsage_CopyDst;
             uniformBufferDesc.mappedAtCreation = 1;
 
             impl->uniformBuffer = wgpuDeviceCreateBuffer(device, &uniformBufferDesc);
 
             if (impl->uniformBuffer) {
-                void* mappedData = wgpuBufferGetMappedRange(impl->uniformBuffer, 0, sizeof(matrix));
+                void* mappedData = wgpuBufferGetMappedRange(impl->uniformBuffer, 0, 80);
                 if (mappedData) {
-                    std::memcpy(mappedData, matrix, sizeof(matrix));
+                    // Create full uniform buffer structure
+                    struct {
+                        float matrix[16];
+                        float color_t;
+                        float opacity_t;
+                        float pad1;
+                        float pad2;
+                    } uboData;
+                    std::memcpy(uboData.matrix, matrix, sizeof(matrix));
+                    uboData.color_t = 0.0f;
+                    uboData.opacity_t = 1.0f;
+                    uboData.pad1 = 0.0f;
+                    uboData.pad2 = 0.0f;
+                    std::memcpy(mappedData, &uboData, 80);
                     wgpuBufferUnmap(impl->uniformBuffer);
                 }
             }
@@ -105,7 +118,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         uniformEntry.binding = 0;
         uniformEntry.buffer = impl->uniformBuffer;
         uniformEntry.offset = 0;
-        uniformEntry.size = 64; // 4x4 matrix
+        uniformEntry.size = 80; // FillDrawableUBO size
 
         WGPUBindGroupDescriptor bindGroupDesc = {};
         WGPUStringView label = {"Drawable Bind Group", strlen("Drawable Bind Group")};
@@ -367,7 +380,7 @@ void Drawable::draw(PaintParameters& parameters) const {
                     std::to_string(proj[12]) + ", " + std::to_string(proj[13]) + ", " +
                     std::to_string(proj[14]) + ", " + std::to_string(proj[15]));
 
-                if (const auto& tileid = getTileID()) {
+                if (getTileID()) {
                     mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Tile matrix (should give NDC):");
                     mbgl::Log::Info(mbgl::Event::Render, "  Row 0: " +
                         std::to_string(tileMatrix[0]) + ", " + std::to_string(tileMatrix[1]) + ", " +
@@ -402,8 +415,26 @@ void Drawable::draw(PaintParameters& parameters) const {
             // Note: WebGPU uses depth range [0, 1] vs OpenGL's [-1, 1]
             // But MapLibre's matrices might already account for this
 
-            // Update the uniform buffer
-            wgpuQueueWriteBuffer(queue, impl->uniformBuffer, 0, matrix, sizeof(matrix));
+            // Create the full uniform buffer data (80 bytes total)
+            struct FillDrawableUBO {
+                float matrix[16];  // 64 bytes
+                float color_t;     // 4 bytes
+                float opacity_t;   // 4 bytes
+                float pad1;        // 4 bytes
+                float pad2;        // 4 bytes
+            } uboData;
+
+            // Copy matrix
+            std::memcpy(uboData.matrix, matrix, sizeof(matrix));
+
+            // Set default values for now
+            uboData.color_t = 0.0f;
+            uboData.opacity_t = 1.0f;
+            uboData.pad1 = 0.0f;
+            uboData.pad2 = 0.0f;
+
+            // Update the uniform buffer with full 80 bytes
+            wgpuQueueWriteBuffer(queue, impl->uniformBuffer, 0, &uboData, sizeof(uboData));
 
             // Create bind group if needed
             if (!impl->bindGroup && shader) {
@@ -417,7 +448,7 @@ void Drawable::draw(PaintParameters& parameters) const {
                         entry.binding = 0;  // Binding 0 for uniforms
                         entry.buffer = impl->uniformBuffer;
                         entry.offset = 0;
-                        entry.size = sizeof(matrix);
+                        entry.size = 80;  // FillDrawableUBO size (matrix + color_t + opacity_t + padding)
 
                         // Create bind group descriptor
                         WGPUBindGroupDescriptor bgDesc = {};
@@ -429,7 +460,16 @@ void Drawable::draw(PaintParameters& parameters) const {
 
                         // Create the bind group
                         impl->bindGroup = wgpuDeviceCreateBindGroup(device, &bgDesc);
+                        if (impl->bindGroup) {
+                            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Successfully created bind group for drawable");
+                        } else {
+                            mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to create bind group for drawable");
+                        }
+                    } else {
+                        mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: No bind group layout available from shader");
                     }
+                } else {
+                    mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: Failed to cast shader to WebGPU shader");
                 }
             }
 
@@ -530,8 +570,16 @@ void Drawable::draw(PaintParameters& parameters) const {
 
 // Bind uniform buffers and textures via bind group
     if (impl->bindGroup) {
+        static int bindGroupSetCount = 0;
+        if (bindGroupSetCount++ < 10) {
+            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Setting bind group on render pass encoder");
+        }
         wgpuRenderPassEncoderSetBindGroup(renderPassEncoder, 0, impl->bindGroup, 0, nullptr);
     } else {
+        static int noBindGroupCount = 0;
+        if (noBindGroupCount++ < 10) {
+            mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: No bind group available for drawable");
+        }
     }
 
     // Draw

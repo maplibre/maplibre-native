@@ -178,8 +178,9 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
 
     bindGroupLayout = wgpuDeviceCreateBindGroupLayout(device, &bindGroupLayoutDesc);
     if (!bindGroupLayout) {
-        // Log::Warning(Event::Shader, "WebGPU ShaderProgram: Failed to create bind group layout, using auto layout");
-        // Logging disabled to prevent heap corruption in multi-threaded context
+        mbgl::Log::Warning(mbgl::Event::Shader, "WebGPU ShaderProgram: Failed to create bind group layout, using auto layout");
+    } else {
+        mbgl::Log::Info(mbgl::Event::Shader, "WebGPU ShaderProgram: Successfully created bind group layout");
     }
     
     // Create pipeline layout
