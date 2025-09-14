@@ -452,11 +452,11 @@ void Drawable::draw(PaintParameters& parameters) const {
             mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Attempting to get pipeline from shader");
         }
         // Verify it's a WebGPU shader by checking the type name
-        if (shader->typeName() != "WebGPU") {
+        if (shader->typeName() != "WebGPUShader") {
             static int wrongTypeCount = 0;
             if (wrongTypeCount++ < 5) {
                 std::string typeName(shader->typeName());
-                mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: Shader type is '" + typeName + "', expected 'WebGPU'");
+                mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: Shader type is '" + typeName + "', expected 'WebGPUShader'");
             }
             return;
         }
