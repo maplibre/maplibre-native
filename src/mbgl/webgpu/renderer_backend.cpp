@@ -19,8 +19,8 @@ public:
     void* wgpuSurface = nullptr;
 };
 
-RendererBackend::RendererBackend(gfx::ContextMode contextMode)
-    : gfx::RendererBackend(contextMode),
+RendererBackend::RendererBackend(gfx::ContextMode mode)
+    : gfx::RendererBackend(mode),
       impl(std::make_unique<Impl>()) {
 }
 
@@ -91,11 +91,11 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramPa
 
     // Get the context to initialize shader groups
     auto contextPtr = createContext();
-    auto& context = static_cast<webgpu::Context&>(*contextPtr);
+    auto& ctx = static_cast<webgpu::Context&>(*contextPtr);
 
     for (const auto& shaderName : shaderNames) {
         auto webgpuShaderGroup = std::make_shared<webgpu::ShaderGroup>();
-        webgpuShaderGroup->initialize(context);
+        webgpuShaderGroup->initialize(ctx);
         bool registered = registry.registerShaderGroup(std::move(webgpuShaderGroup), shaderName);
         if (registered) {
         }

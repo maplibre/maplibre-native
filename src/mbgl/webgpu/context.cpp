@@ -257,7 +257,7 @@ void Context::visualizeStencilBuffer() {
     // Debug visualization of stencil buffer
 }
 
-void Context::visualizeDepthBuffer(float depthRangeSize) {
+void Context::visualizeDepthBuffer([[maybe_unused]] float depthRangeSize) {
     // Debug visualization of depth buffer
 }
 #endif

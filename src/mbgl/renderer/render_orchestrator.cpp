@@ -1043,7 +1043,7 @@ void RenderOrchestrator::onGlyphsRequested(const FontStack& fontStack, const Gly
     observer->onGlyphsRequested(fontStack, range);
 }
 
-void RenderOrchestrator::onTileError(RenderSource& source, const OverscaledTileID& tileID, std::exception_ptr error) {
+void RenderOrchestrator::onTileError(RenderSource& /*source*/, const OverscaledTileID& /*tileID*/, std::exception_ptr error) {
     MLN_TRACE_FUNC();
 
     // Log::Error(Event::Style,

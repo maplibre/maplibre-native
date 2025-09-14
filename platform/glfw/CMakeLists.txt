@@ -72,7 +72,20 @@ endif()
 if(MLN_WITH_WEBGPU)
     target_sources(
         mbgl-glfw
-        PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_webgpu_backend.mm
+        PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_webgpu_backend.cpp
+    )
+    # Add Dawn include directories for GLFW
+    target_include_directories(mbgl-glfw SYSTEM PRIVATE
+        ${PROJECT_SOURCE_DIR}/vendor/dawn/include
+        ${PROJECT_SOURCE_DIR}/vendor/dawn/build/gen/include
+    )
+    # Link Dawn libraries
+    target_link_libraries(mbgl-glfw PRIVATE
+        ${PROJECT_SOURCE_DIR}/vendor/dawn/build/src/dawn/native/libwebgpu_dawn.a
+        ${PROJECT_SOURCE_DIR}/vendor/dawn/build/src/dawn/libdawn_proc.a
+        ${PROJECT_SOURCE_DIR}/vendor/dawn/build/src/dawn/platform/libdawn_platform.a
+        ${PROJECT_SOURCE_DIR}/vendor/dawn/build/src/dawn/common/libdawn_common.a
+        ${PROJECT_SOURCE_DIR}/vendor/dawn/build/src/dawn/glfw/libdawn_glfw.a
     )
 endif()
 

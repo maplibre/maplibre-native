@@ -4,7 +4,7 @@
 #include <cstdint>
 
 // When using Dawn, include its headers instead of defining our own types
-#ifdef USE_DAWN
+#ifdef MLN_USE_DAWN
 #include <webgpu/webgpu.h>
 #else
 
@@ -629,7 +629,7 @@ struct WGPUBindGroupLayoutDescriptor {
 };
 
 #endif // !defined(WEBGPU_H_) && !defined(DAWN_WEBGPU_H)
-#endif // USE_DAWN
+#endif // MLN_USE_DAWN
 
 namespace mbgl {
 namespace webgpu {

@@ -57,7 +57,7 @@ if(MLN_WITH_WEBGPU)
     target_compile_definitions(mbgl-core
         PUBLIC
             DAWN_ENABLE_BACKEND_METAL=1
-            USE_DAWN=1
+            MLN_USE_DAWN=1
             WEBGPU_BACKEND_DAWN=1
     )
 endif()

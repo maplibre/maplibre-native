@@ -12,8 +12,8 @@
 namespace mbgl {
 namespace webgpu {
 
-TileLayerGroup::TileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name)
-    : mbgl::TileLayerGroup(layerIndex, initialCapacity, std::move(name)) {
+TileLayerGroup::TileLayerGroup(int32_t layerIndex_, std::size_t initialCapacity, std::string name_)
+    : mbgl::TileLayerGroup(layerIndex_, initialCapacity, std::move(name_)) {
 }
 
 void TileLayerGroup::upload(gfx::UploadPass& uploadPass) {

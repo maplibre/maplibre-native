@@ -191,7 +191,7 @@ if(MLN_WITH_GLFW)
         target_compile_definitions(
         simple_dawn_webgpu
         PRIVATE
-            USE_DAWN=1
+            MLN_USE_DAWN=1
     )
     endif()
 
@@ -221,7 +221,7 @@ if(MLN_WITH_GLFW)
         target_compile_definitions(
         dawn_webgpu_triangle
         PRIVATE
-            USE_DAWN=1
+            MLN_USE_DAWN=1
     )
 
         if(APPLE)
@@ -255,7 +255,7 @@ if(MLN_WITH_GLFW)
         target_compile_definitions(
             webgpu_simple_triangle
             PRIVATE
-                USE_DAWN=1
+                MLN_USE_DAWN=1
                 MLN_RENDER_BACKEND_WEBGPU=1
         )
         
@@ -300,7 +300,7 @@ if(MLN_WITH_WEBGPU AND MLN_WITH_GLFW)
     target_compile_definitions(
         webgpu_map
         PRIVATE
-            USE_DAWN=1
+            MLN_USE_DAWN=1
     )
 
     if(APPLE)
@@ -340,7 +340,7 @@ if(MLN_WITH_WEBGPU AND MLN_WITH_GLFW)
     target_compile_definitions(
         webgpu_render_demo
         PRIVATE
-            USE_DAWN=1
+            MLN_USE_DAWN=1
     )
 
     if(APPLE)

@@ -21,8 +21,8 @@
 namespace mbgl {
 namespace webgpu {
 
-Drawable::Drawable(std::string name)
-    : gfx::Drawable(std::move(name)),
+Drawable::Drawable(std::string name_)
+    : gfx::Drawable(std::move(name_)),
       impl(std::make_unique<Impl>()) {
     // Uniform buffers are initialized in Impl constructor
 }
@@ -135,7 +135,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
                     auto offset = attr.getSharedOffset();
                     auto vertexOffset = attr.getSharedVertexOffset();
                     auto stride = attr.getSharedStride();
-                    auto type = attr.getSharedType();
+                    auto attrType = attr.getSharedType();
 
 
                     // Get the raw bytes from the shared data
@@ -156,7 +156,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
                     impl->vertexData.resize(totalSize);
                     impl->vertexStride = vertexSize;
                     impl->vertexSize = totalSize;
-                    impl->vertexType = type;
+                    impl->vertexType = attrType;
 
                     // Copy vertex data with proper stride
                     const uint8_t* srcBytes = static_cast<const uint8_t*>(rawData);
@@ -353,14 +353,14 @@ void Drawable::draw(PaintParameters& parameters) const {
 
                 // Debug: Print what we just set
 
-            } else if (const auto& tileID = getTileID()) {
+            } else if (const auto& tileid = getTileID()) {
                 // Get the tile-specific transformation matrix
                 mat4 tileTransform;
-                parameters.state.matrixFor(tileTransform, tileID->toUnwrapped());
+                parameters.state.matrixFor(tileTransform, tileid->toUnwrapped());
 
                 // Apply drawable origin if it exists
-                if (const auto& origin = getOrigin(); origin.has_value()) {
-                    matrix::translate(tileTransform, tileTransform, origin->x, origin->y, 0);
+                if (const auto& orig = getOrigin(); orig.has_value()) {
+                    matrix::translate(tileTransform, tileTransform, orig->x, orig->y, 0);
                 }
 
                 // Compute final MVP: Projection * View * Model
@@ -404,9 +404,26 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
 
     // Get pipeline from shader if we don't have it yet
-    if (!impl->pipeline && shader) {
+    if (!impl->pipeline) {
+        if (!shader) {
+            static int noShaderCount = 0;
+            if (noShaderCount++ < 5) {
+                mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: No shader set for drawable");
+            }
+            return;
+        }
+
+        static int shaderCheckCount = 0;
+        if (shaderCheckCount++ < 5) {
+            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Attempting to get pipeline from shader");
+        }
         // Verify it's a WebGPU shader by checking the type name
         if (shader->typeName() != "WebGPU") {
+            static int wrongTypeCount = 0;
+            if (wrongTypeCount++ < 5) {
+                std::string typeName(shader->typeName());
+                mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: Shader type is '" + typeName + "', expected 'WebGPU'");
+            }
             return;
         }
 
@@ -426,6 +443,10 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     // Check if we have a valid pipeline
     if (!impl->pipeline) {
+        static int noPipelineCount = 0;
+        if (noPipelineCount++ < 5) {
+            mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: No pipeline available for drawable");
+        }
         return;
     }
 
@@ -541,7 +562,7 @@ void Drawable::setStencilModeFor3D(const gfx::StencilMode& value) {
     (void)value;
 }
 
-void Drawable::setLineWidth(int32_t value) {
+void Drawable::setLineWidth([[maybe_unused]] int32_t value) {
     // WebGPU doesn't support line width directly
     // This might need to be handled in the shader
 }

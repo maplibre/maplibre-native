@@ -7,8 +7,8 @@
 namespace mbgl {
 namespace webgpu {
 
-UniformBuffer::UniformBuffer(Context& context_, const void* data, std::size_t size)
-    : gfx::UniformBuffer(size), 
+UniformBuffer::UniformBuffer(Context& context_, const void* data, std::size_t size_)
+    : gfx::UniformBuffer(size_), 
       context(context_) {
     
     auto& backend = static_cast<RendererBackend&>(context.getBackend());

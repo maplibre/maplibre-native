@@ -11,17 +11,31 @@ if(MLN_WITH_WEBGPU)
         # Dawn provides a native implementation of WebGPU
         # It can be built from source or linked as a prebuilt library
 
-        # Option 1: Use Dawn as a submodule
+        # Option 1: Use Dawn as a submodule or prebuilt
         if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/vendor/dawn)
-            add_subdirectory(vendor/dawn)
-            target_link_libraries(mbgl-core PRIVATE dawn_native dawn_proc)
-            target_compile_definitions(mbgl-core PRIVATE USE_DAWN=1)
+            # Check if Dawn is already built
+            if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/vendor/dawn/build/src/dawn/native/libwebgpu_dawn.a)
+                message(STATUS "Using prebuilt Dawn libraries")
+                target_link_libraries(mbgl-core PRIVATE 
+                    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/dawn/build/src/dawn/native/libwebgpu_dawn.a
+                    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/dawn/build/src/dawn/libdawn_proc.a
+                    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/dawn/build/src/dawn/platform/libdawn_platform.a
+                    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/dawn/build/src/dawn/common/libdawn_common.a
+                )
+                target_include_directories(mbgl-core SYSTEM PRIVATE
+                    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/dawn/include
+                    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/dawn/build/gen/include
+                )
+            else()
+                message(FATAL_ERROR "Dawn is not built. Please build Dawn first in vendor/dawn/build")
+            endif()
+            target_compile_definitions(mbgl-core PRIVATE MLN_USE_DAWN=1)
         else()
             # Option 2: Find prebuilt Dawn
             find_package(Dawn)
             if(Dawn_FOUND)
                 target_link_libraries(mbgl-core PRIVATE Dawn::dawn_native Dawn::dawn_proc)
-                target_compile_definitions(mbgl-core PRIVATE USE_DAWN=1)
+                target_compile_definitions(mbgl-core PRIVATE MLN_USE_DAWN=1)
             else()
                 message(WARNING "Dawn not found. WebGPU backend will use stub implementation.")
             endif()
