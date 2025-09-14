@@ -4,11 +4,28 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class MLNNativeNetworkManager;
 
+@interface NetworkResponse : NSObject
+    
+@property (nullable) NSError *error;
+@property (nullable) NSData *data;
+@property NSURLResponse *response;
+
++(NetworkResponse *)responseWithData:(NSData *)data
+                         urlResponse:(NSURLResponse *)response
+                               error:(NSError *)error;
+
+@end
+
+
 @protocol MLNNativeNetworkDelegate <NSObject>
 
 @optional
 
 - (NSURLSession *)sessionForNetworkManager:(MLNNativeNetworkManager *)networkManager;
+
+- (NSMutableURLRequest *)willSendRequest:(NSMutableURLRequest *)request;
+
+- (NetworkResponse *)didReceiveResponse:(NetworkResponse *)response;
 
 @required
 
