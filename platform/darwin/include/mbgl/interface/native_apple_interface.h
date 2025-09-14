@@ -6,8 +6,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface NetworkResponse : NSObject
     
-@property (nullable) NSError *error;
-@property (nullable) NSData *data;
+@property (retain, nullable) NSError *error;
+@property (retain, nullable) NSData *data;
 @property NSURLResponse *response;
 
 +(NetworkResponse *)responseWithData:(NSData *)data
