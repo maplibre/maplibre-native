@@ -85,6 +85,7 @@ public:
 
     WGPURenderPipeline getPipeline() const { return pipeline; }
     WGPUBindGroupLayout getBindGroupLayout() const { return bindGroupLayout; }
+    const std::vector<shaders::AttributeInfo>& getAttributeInfos() const { return attributeInfos; }
 
 private:
     void createPipeline(const std::string& vertexSource, const std::string& fragmentSource);

@@ -2,6 +2,7 @@
 
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
+#include <mbgl/shaders/custom_geometry_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {
@@ -15,8 +16,8 @@ struct ShaderSource<BuiltIn::CustomGeometryShader, gfx::Backend::Type::WebGPU> {
     
     static constexpr auto vertex = R"(
 struct VertexInput {
-    @location(0) position: vec3<f32>,
-    @location(1) texcoord: vec2<f32>,
+    @location(3) position: vec3<f32>,
+    @location(4) texcoord: vec2<f32>,
 };
 
 struct VertexOutput {

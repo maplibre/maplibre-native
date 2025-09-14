@@ -2,6 +2,7 @@
 
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
+#include <mbgl/shaders/heatmap_texture_layer_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {
@@ -15,7 +16,7 @@ struct ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::WebGPU> {
     
     static constexpr auto vertex = R"(
 struct VertexInput {
-    @location(0) position: vec2<i32>,
+    @location(5) position: vec2<i32>,
 };
 
 struct VertexOutput {

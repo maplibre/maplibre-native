@@ -2,6 +2,7 @@
 
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
+#include <mbgl/shaders/fill_layer_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {
@@ -38,15 +39,13 @@ fn unpack_mix_float(packedValue: vec2<f32>, t: f32) -> f32 {
 }
 
 struct VertexInput {
-    @location(0) position: vec2<i16>,
-    @location(1) color: vec4<f32>,
-    @location(2) opacity: vec2<f32>,
+    @location(4) position: vec2<i32>,
+    @location(5) color: vec4<f32>,
+    @location(6) opacity: vec2<f32>,
 };
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
-    @location(0) color: vec4<f32>,
-    @location(1) opacity: f32,
 };
 
 struct FillDrawableUBO {
@@ -64,26 +63,18 @@ struct FillDrawableUBO {
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
 
-    // Convert integer position to float
+    // Transform vertex position using the matrix
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
-
-    // Apply matrix transformation
     out.position = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
 
-    // Unpack and mix color based on interpolation factor
-    out.color = unpack_mix_color(in.color, drawable.color_t);
-
-    // Unpack and mix opacity
-    out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
-
+    // Since we're using uniform opacity, we don't compute vertex opacity
     return out;
 }
 )";
     
     static constexpr const char* fragment = R"(
 struct FragmentInput {
-    @location(0) color: vec4<f32>,
-    @location(1) opacity: f32,
+    // No inputs from vertex shader since we're using uniforms
 };
 
 struct FillEvaluatedPropsUBO {
@@ -100,12 +91,12 @@ struct FillEvaluatedPropsUBO {
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    // Use interpolated color from vertex shader
-    let final_color = in.color;
-    // Combine vertex opacity with uniform opacity
-    let final_opacity = in.opacity * props.opacity;
+    // For fill layers, color comes from uniform
+    let color = props.color;
+    let opacity = props.opacity;
 
-    return vec4<f32>(final_color.rgb, final_color.a * final_opacity);
+    // Return the final color
+    return color * opacity;
 }
 )";
 };
@@ -119,9 +110,9 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::WebGPU> {
     
     static constexpr const char* vertex = R"(
 struct VertexInput {
-    @location(0) position: vec2<i32>,
-    @location(1) outline_color: vec4<f32>,
-    @location(2) opacity: vec2<f32>,
+    @location(4) position: vec2<i32>,
+    @location(5) outline_color: vec4<f32>,
+    @location(6) opacity: vec2<f32>,
 };
 
 struct VertexOutput {
@@ -192,7 +183,7 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::WebGP
 template <>
 struct ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillOutlineTriangulatedShader";
-    static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
     
