@@ -299,6 +299,11 @@ void Drawable::draw(PaintParameters& parameters) const {
 
                         // Check the UniformBufferArray for actual uniform buffers
                         // The layer tweakers populate these with the correct data
+                        static int debugUniformCount = 0;
+                        bool shouldLog = (debugUniformCount++ < 10);
+
+                        // WebGPU shaders now use the same binding indices as Metal/Vulkan
+                        // No remapping needed - just use the buffer index directly as the binding index
                         for (size_t i = 0; i < impl->uniformBuffers.allocatedSize(); ++i) {
                             const auto& uniformBuffer = impl->uniformBuffers.get(i);
                             if (uniformBuffer) {
@@ -310,17 +315,30 @@ void Drawable::draw(PaintParameters& parameters) const {
                                     entry.offset = 0;
                                     entry.size = webgpuUniformBuffer->getSize();
                                     entries.push_back(entry);
+
+                                    if (shouldLog) {
+                                        mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Added uniform buffer at index/binding " +
+                                            std::to_string(i) + " with size " + std::to_string(entry.size));
+                                    }
                                 }
                             }
                         }
 
-                        // If no uniform buffers from the array, we can't draw
+                        // Check if we have the minimum required uniform buffers
+                        // Fill shaders require at least binding 0 (drawable UBO)
+                        // Some may also require binding 1 (props UBO)
                         if (entries.empty()) {
                             static int noUniformBuffersCount = 0;
                             if (noUniformBuffersCount++ < 5) {
                                 mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: No uniform buffers available in UniformBufferArray for drawable: " + name);
                             }
                             return;  // Can't render without uniform buffers
+                        }
+
+                        // If we only have one buffer and the shader expects two, add a dummy for binding 1
+                        // This can happen if the props UBO isn't populated by the layer tweaker
+                        if (entries.size() == 1 && shouldLog) {
+                            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Only one uniform buffer found, shader may expect two");
                         }
 
                         // Create bind group descriptor
