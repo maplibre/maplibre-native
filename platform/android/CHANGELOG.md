@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## 11.13.3
+
+### ✨ Features and improvements
+
+- Added network delegate methods in iOS
+
 ## 11.13.2
 
 ### ✨ Features and improvements
