@@ -53,9 +53,9 @@ const ZERO: f32 = 1.0 / 255.0 / 16.0;
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
     
-    // Get weight and radius
-    let weight = mix(in.weight.x, in.weight.y, drawable.weight_t);
-    let radius = mix(in.radius.x, in.radius.y, drawable.radius_t);
+    // Get weight and radius using unpack_mix_float helper
+    let weight = unpack_mix_float(in.weight, drawable.weight_t);
+    let radius = unpack_mix_float(in.radius, drawable.radius_t);
     
     // Decode extrusion vector
     let pos_f = vec2<f32>(f32(in.position.x), f32(in.position.y));
