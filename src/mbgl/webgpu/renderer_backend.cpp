@@ -8,7 +8,24 @@
 
 // Include shader group and individual shader headers
 #include <mbgl/shaders/webgpu/shader_group.hpp>
+#include <mbgl/shaders/webgpu/background.hpp>
+#include <mbgl/shaders/webgpu/circle.hpp>
+#include <mbgl/shaders/webgpu/clipping_mask.hpp>
+#include <mbgl/shaders/webgpu/collision.hpp>
+#include <mbgl/shaders/webgpu/custom_geometry.hpp>
+#include <mbgl/shaders/webgpu/custom_symbol_icon.hpp>
+#include <mbgl/shaders/webgpu/debug.hpp>
 #include <mbgl/shaders/webgpu/fill.hpp>
+#include <mbgl/shaders/webgpu/fill_extrusion.hpp>
+#include <mbgl/shaders/webgpu/heatmap.hpp>
+#include <mbgl/shaders/webgpu/heatmap_texture.hpp>
+#include <mbgl/shaders/webgpu/hillshade.hpp>
+#include <mbgl/shaders/webgpu/hillshade_prepare.hpp>
+#include <mbgl/shaders/webgpu/line.hpp>
+#include <mbgl/shaders/webgpu/location_indicator.hpp>
+#include <mbgl/shaders/webgpu/raster.hpp>
+#include <mbgl/shaders/webgpu/symbol.hpp>
+#include <mbgl/shaders/webgpu/widevector.hpp>
 
 namespace mbgl {
 namespace webgpu {
@@ -66,17 +83,41 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
 } // namespace
 
 void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramParameters& parameters) {
-    // Register just the FillShader for now - more will be added as their headers are created
-    registerTypes<shaders::BuiltIn::FillShader>(registry, parameters);
-
-    // TODO: Add more shader types as their WebGPU implementations are created:
-    // registerTypes<
-    //     shaders::BuiltIn::FillShader,
-    //     shaders::BuiltIn::LineShader,
-    //     shaders::BuiltIn::CircleShader,
-    //     shaders::BuiltIn::BackgroundShader,
-    //     ...
-    // >(registry, parameters);
+    // Register all shader types - even if headers don't exist yet, fallback implementation will be used
+    // As WebGPU shader headers are created, they will automatically be picked up
+    registerTypes<
+        shaders::BuiltIn::BackgroundShader,
+        shaders::BuiltIn::BackgroundPatternShader,
+        shaders::BuiltIn::CircleShader,
+        shaders::BuiltIn::ClippingMaskProgram,
+        shaders::BuiltIn::CollisionBoxShader,
+        shaders::BuiltIn::CollisionCircleShader,
+        shaders::BuiltIn::CustomGeometryShader,
+        shaders::BuiltIn::CustomSymbolIconShader,
+        shaders::BuiltIn::DebugShader,
+        shaders::BuiltIn::FillShader,
+        shaders::BuiltIn::FillOutlineShader,
+        shaders::BuiltIn::FillPatternShader,
+        shaders::BuiltIn::FillOutlinePatternShader,
+        shaders::BuiltIn::FillOutlineTriangulatedShader,
+        shaders::BuiltIn::FillExtrusionShader,
+        shaders::BuiltIn::FillExtrusionPatternShader,
+        shaders::BuiltIn::HeatmapShader,
+        shaders::BuiltIn::HeatmapTextureShader,
+        shaders::BuiltIn::HillshadeShader,
+        shaders::BuiltIn::HillshadePrepareShader,
+        shaders::BuiltIn::LineShader,
+        shaders::BuiltIn::LineGradientShader,
+        shaders::BuiltIn::LinePatternShader,
+        shaders::BuiltIn::LineSDFShader,
+        shaders::BuiltIn::LocationIndicatorShader,
+        shaders::BuiltIn::LocationIndicatorTexturedShader,
+        shaders::BuiltIn::RasterShader,
+        shaders::BuiltIn::SymbolIconShader,
+        shaders::BuiltIn::SymbolSDFShader,
+        shaders::BuiltIn::SymbolTextAndIconShader,
+        shaders::BuiltIn::WideVectorShader
+    >(registry, parameters);
 }
 
 void RendererBackend::setSurface(void* nativeWindow) {
