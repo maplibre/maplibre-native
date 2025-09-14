@@ -78,6 +78,7 @@ public:
             attributeInfos.push_back(attr);
         }
         createShaderModules(vertexSource, fragmentSource);
+        createPipelineLayout();
     }
 
     // Basic constructor (for compatibility)
