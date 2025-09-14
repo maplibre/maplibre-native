@@ -228,8 +228,7 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
 
     pipeline = wgpuDeviceCreateRenderPipeline(device, &pipelineDesc);
     if (!pipeline) {
-        // Log::Error(Event::Shader, "WebGPU ShaderProgram: Failed to create render pipeline");
-        // Logging disabled to prevent heap corruption in multi-threaded context
+        mbgl::Log::Error(mbgl::Event::Shader, "WebGPU ShaderProgram: Failed to create render pipeline");
         // Clean up all resources on failure
         if (bindGroupLayout) {
             wgpuBindGroupLayoutRelease(bindGroupLayout);
@@ -248,8 +247,7 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
             fragmentShaderModule = nullptr;
         }
     } else {
-        // Log::Info(Event::Shader, "WebGPU ShaderProgram: Successfully created render pipeline");
-        // Logging disabled to prevent heap corruption in multi-threaded context
+        mbgl::Log::Info(mbgl::Event::Shader, "WebGPU ShaderProgram: Successfully created render pipeline");
     }
 }
 
