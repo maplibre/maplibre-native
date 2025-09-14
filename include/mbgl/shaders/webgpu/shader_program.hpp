@@ -94,6 +94,10 @@ public:
                                         const gfx::ColorMode& colorMode,
                                         const std::optional<std::size_t> reuseHash = std::nullopt);
 
+    // Overload without Renderable for drawable use
+    WGPURenderPipeline getRenderPipeline(const WGPUVertexBufferLayout* vertexLayouts,
+                                        uint32_t vertexLayoutCount);
+
     // gfx::Shader interface (required for is_shader_v trait)
     const std::string_view typeName() const noexcept override { return Name; }
     std::optional<size_t> getSamplerLocation(const size_t id) const override;

@@ -429,5 +429,14 @@ WGPUVertexFormat ShaderProgram::getWGPUFormat(gfx::AttributeDataType type) {
     }
 }
 
+WGPURenderPipeline ShaderProgram::getRenderPipeline(const WGPUVertexBufferLayout* vertexLayouts,
+                                                   uint32_t vertexLayoutCount) {
+    // Use a default color mode for drawable use
+    gfx::ColorMode defaultColorMode = gfx::ColorMode::alphaBlended();
+
+    // Create pipeline with provided vertex layouts
+    return createPipeline(vertexLayouts, vertexLayoutCount, defaultColorMode);
+}
+
 } // namespace webgpu
 } // namespace mbgl
