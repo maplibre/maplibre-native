@@ -13,7 +13,8 @@ void TransformActive::easeTo(const CameraOptions& inputCamera, const AnimationOp
     Duration duration = animationOptions.duration.value_or(Duration::zero());
     if (state.getLatLngBounds() == LatLngBounds() && !isGestureInProgress() && duration != Duration::zero()) {
         // reuse flyTo, without exaggerated animation, to achieve constant ground speed.
-        return flyTo(camera, animationOptions, true);
+        flyTo(camera, animationOptions, true);
+        return;
     }
 
     double zoom = camera.zoom.value_or(getZoom());

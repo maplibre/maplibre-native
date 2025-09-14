@@ -1,6 +1,21 @@
 # Changelog MapLibre Native for Android
 
-## main
+## 11.13.2
+
+### ✨ Features and improvements
+
+- Sync with maplibre primary repo
+
+## 11.13.1
+
+### ✨ Features and improvements
+
+- Fix for raster dem encoding override in style.json ([#3570](https://github.com/maplibre/maplibre-native/pull/3570)).
+
+### 🐞 Bug fixes
+
+- Fix Android backend cleanup ([#3681](https://github.com/maplibre/maplibre-native/pull/3681)).
+- Add weak pointer management to RasterSource and derived classes ([#3726](https://github.com/maplibre/maplibre-native/pull/3726)).
 
 ## 11.13.1
 

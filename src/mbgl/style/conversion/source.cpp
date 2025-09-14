@@ -17,7 +17,8 @@ namespace style {
 namespace conversion {
 
 // A tile source can either specify a URL to TileJSON, or inline TileJSON.
-static std::optional<variant<std::string, Tileset>> convertURLOrTileset(const Convertible& value, Error& error) {
+namespace {
+std::optional<variant<std::string, Tileset>> convertURLOrTileset(const Convertible& value, Error& error) {
     auto urlVal = objectMember(value, "url");
     if (!urlVal) {
         std::optional<Tileset> tileset = convert<Tileset>(value, error);
@@ -36,9 +37,9 @@ static std::optional<variant<std::string, Tileset>> convertURLOrTileset(const Co
     return {*url};
 }
 
-static std::optional<std::unique_ptr<Source>> convertRasterSource(const std::string& id,
-                                                                  const Convertible& value,
-                                                                  Error& error) {
+std::optional<std::unique_ptr<Source>> convertRasterSource(const std::string& id,
+                                                           const Convertible& value,
+                                                           Error& error) {
     std::optional<variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
     if (!urlOrTileset) {
         return std::nullopt;
@@ -58,9 +59,9 @@ static std::optional<std::unique_ptr<Source>> convertRasterSource(const std::str
     return {std::make_unique<RasterSource>(id, std::move(*urlOrTileset), tileSize)};
 }
 
-static std::optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::string& id,
-                                                                     const Convertible& value,
-                                                                     Error& error) {
+std::optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::string& id,
+                                                              const Convertible& value,
+                                                              Error& error) {
     std::optional<variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
     if (!urlOrTileset) {
         return std::nullopt;
@@ -87,9 +88,9 @@ static std::optional<std::unique_ptr<Source>> convertRasterDEMSource(const std::
     return {std::make_unique<RasterDEMSource>(id, std::move(*urlOrTileset), tileSize, options)};
 }
 
-static std::optional<std::unique_ptr<Source>> convertVectorSource(const std::string& id,
-                                                                  const Convertible& value,
-                                                                  Error& error) {
+std::optional<std::unique_ptr<Source>> convertVectorSource(const std::string& id,
+                                                           const Convertible& value,
+                                                           Error& error) {
     std::optional<variant<std::string, Tileset>> urlOrTileset = convertURLOrTileset(value, error);
     if (!urlOrTileset) {
         return std::nullopt;
@@ -115,9 +116,9 @@ static std::optional<std::unique_ptr<Source>> convertVectorSource(const std::str
     return {std::make_unique<VectorSource>(id, std::move(*urlOrTileset), std::move(maxzoom), std::move(minzoom))};
 }
 
-static std::optional<std::unique_ptr<Source>> convertGeoJSONSource(const std::string& id,
-                                                                   const Convertible& value,
-                                                                   Error& error) {
+std::optional<std::unique_ptr<Source>> convertGeoJSONSource(const std::string& id,
+                                                            const Convertible& value,
+                                                            Error& error) {
     auto dataValue = objectMember(value, "data");
     if (!dataValue) {
         error.message = "GeoJSON source must have a data value";
@@ -147,9 +148,9 @@ static std::optional<std::unique_ptr<Source>> convertGeoJSONSource(const std::st
     return {std::move(result)};
 }
 
-static std::optional<std::unique_ptr<Source>> convertImageSource(const std::string& id,
-                                                                 const Convertible& value,
-                                                                 Error& error) {
+std::optional<std::unique_ptr<Source>> convertImageSource(const std::string& id,
+                                                          const Convertible& value,
+                                                          Error& error) {
     auto urlValue = objectMember(value, "url");
     if (!urlValue) {
         error.message = "Image source must have a url value";
@@ -188,6 +189,7 @@ static std::optional<std::unique_ptr<Source>> convertImageSource(const std::stri
 
     return {std::move(result)};
 }
+} // namespace
 
 std::optional<std::unique_ptr<Source>> Converter<std::unique_ptr<Source>>::operator()(const Convertible& value,
                                                                                       Error& error,

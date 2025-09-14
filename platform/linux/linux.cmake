@@ -16,7 +16,7 @@ pkg_search_module(ICUUC icu-uc)
 pkg_search_module(ICUI18N icu-i18n)
 find_program(ARMERGE NAMES armerge)
 
-if(MLN_WITH_WAYLAND)
+if(MLN_WITH_WAYLAND AND NOT MLN_WITH_VULKAN)
     # See https://github.com/maplibre/maplibre-native/pull/2022
 
     # MLN_WITH_EGL needs to be set for Wayland, otherwise this CMakeLists will
@@ -175,42 +175,54 @@ target_link_libraries(
         ${WEBP_LIBRARIES}
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:${ICUUC_LIBRARIES}>
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:${ICUI18N_LIBRARIES}>
-        $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:$<IF:$<BOOL:${MLN_CORE_INCLUDE_DEPS}>,$<TARGET_OBJECTS:mbgl-vendor-icu>,mbgl-vendor-icu>>
+        $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:mbgl-vendor-icu>
         PNG::PNG
         mbgl-vendor-nunicode
         mbgl-vendor-sqlite
 )
 
 # Bundle system provided libraries
-if(MLN_CORE_INCLUDE_DEPS AND NOT MLN_USE_BUILTIN_ICU AND NOT "${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
+if(NOT MLN_USE_BUILTIN_ICU AND NOT "${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
     message(STATUS "Found armerge: ${ARMERGE}")
-    include(${CMAKE_CURRENT_LIST_DIR}/cmake/find_static_library.cmake)
-    find_static_library(PNG_STATIC_LIB NAMES png)
-    find_static_library(ZLIB_STATIC_LIB NAMES z)
-    find_static_library(JPEG_STATIC_LIB NAMES jpeg)
-    find_static_library(WEBP_STATIC_LIB NAMES webp)
-    find_static_library(CURL_STATIC_LIB NAMES curl)
-    find_static_library(UV_STATIC_LIB NAMES uv)
-    find_static_library(OPENSSL_STATIC_LIB NAMES ssl)
-    find_static_library(SQLITE_STATIC_LIB NAMES sqlite3)
+    include(${PROJECT_SOURCE_DIR}/cmake/find_static_library.cmake)
+    set(STATIC_LIBS "")
+
+    find_static_library(STATIC_LIBS NAMES png)
+    find_static_library(STATIC_LIBS NAMES z)
+    find_static_library(STATIC_LIBS NAMES jpeg)
+    find_static_library(STATIC_LIBS NAMES webp)
+    find_static_library(STATIC_LIBS NAMES uv uv_a)
+    find_static_library(STATIC_LIBS NAMES ssl)
+    find_static_library(STATIC_LIBS NAMES crypto)
+    find_static_library(STATIC_LIBS NAMES bz2 bzip2)
+
+    if(MLN_WITH_VULKAN)
+        find_static_library(STATIC_LIBS NAMES glslang)
+        find_static_library(STATIC_LIBS NAMES glslang-default-resource-limits)
+        find_static_library(STATIC_LIBS NAMES SPIRV)
+        find_static_library(STATIC_LIBS NAMES SPIRV-Tools)
+        find_static_library(STATIC_LIBS NAMES SPIRV-Tools-opt)
+        find_static_library(STATIC_LIBS NAMES MachineIndependent)
+        find_static_library(STATIC_LIBS NAMES GenericCodeGen)
+    endif()
 
     add_custom_command(
         TARGET mbgl-core
         POST_BUILD
-        COMMAND armerge --keep-symbols '.*' --output libmbgl-core-amalgam.a
+        COMMAND armerge --keep-symbols 'mbgl.*' --output libmbgl-core-amalgam.a
             $<TARGET_FILE:mbgl-core>
+            $<TARGET_FILE:freetype>
+            $<TARGET_FILE:mbgl-vendor-csscolorparser>
+            $<TARGET_FILE:harfbuzz>
+            $<TARGET_FILE:mbgl-vendor-nunicode>
+            $<TARGET_FILE:mbgl-vendor-sqlite>
+            $<TARGET_FILE:mbgl-vendor-parsedate>
             ${ICUUC_LIBRARY_DIRS}/libicuuc.a
             ${ICUUC_LIBRARY_DIRS}/libicudata.a
             ${ICUI18N_LIBRARY_DIRS}/libicui18n.a
-            ${PNG_STATIC_LIB}
-            ${ZLIB_STATIC_LIB}
-            ${JPEG_STATIC_LIB}
-            ${WEBP_STATIC_LIB}
-            ${CURL_STATIC_LIB}
-            ${UV_STATIC_LIB}
-            ${OPENSSL_STATIC_LIB}
-            ${SQLITE_STATIC_LIB}
+            ${STATIC_LIBS}
     )
+
 endif()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)

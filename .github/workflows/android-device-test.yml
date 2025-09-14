@@ -75,9 +75,9 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository_owner == 'maplibre' && github.event.workflow_run.conclusion == 'success'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v4
         with:
           node-version-file: '.nvmrc'
 
@@ -97,7 +97,7 @@ jobs:
         id: get-pr-number
 
       - name: Generate token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
         id: generate_token
         with:
           skip-token-revoke: true  # revoking will fail for long running workflows, because the token will already have expired
@@ -106,7 +106,7 @@ jobs:
 
       - name: Check if comment on PR contains '!benchmark android'
         if: matrix.test.name == 'Android Benchmark' && steps.get-pr-number.outputs.pr-number
-        uses: peter-evans/find-comment@v3
+        uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
         id: benchmark_comment
         with:
           issue-number: ${{ steps.get-pr-number.outputs.pr-number }}
@@ -123,7 +123,7 @@ jobs:
         run:
           echo "run_device_test=true" >> "$GITHUB_ENV"
 
-      - uses: LouisBrunner/checks-action@v2.0.0
+      - uses: LouisBrunner/checks-action@6b626ffbad7cc56fd58627f774b9067e6118af23 # v2.0.0
         id: create_check
         with:
           token: ${{ steps.generate_token.outputs.token }}
@@ -140,7 +140,7 @@ jobs:
 
       - name: Configure AWS Credentials
         if: env.run_device_test == 'true'
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v4
         with:
           aws-region: us-west-2
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
@@ -193,20 +193,20 @@ jobs:
 
       - name: Upload Test Artifacts
         if: (matrix.test.name == 'Android Benchmark' || failure()) && env.run_device_test == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: "Test Artifacts ${{ matrix.test.name }}"
           path: test_artifacts.zip
 
       - name: Generate another token (previous one could have expired)
         if: always()
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
         id: generate_token_2
         with:
           app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
           private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
-      - uses: LouisBrunner/checks-action@v2.0.0
+      - uses: LouisBrunner/checks-action@6b626ffbad7cc56fd58627f774b9067e6118af23 # v2.0.0
         if: always()
         with:
           token: ${{ steps.generate_token_2.outputs.token }}

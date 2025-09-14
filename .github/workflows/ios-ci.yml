@@ -30,6 +30,7 @@ permissions:
   id-token: write         # needed for AWS
   contents: write         # allow making a release
   actions: write          # for triggering ios-release-cocoapods.yml
+  issues: write           # for notify-release-on-prs.ts
 
 jobs:
   pre_job:
@@ -37,7 +38,7 @@ jobs:
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files-yaml.outputs.ios_any_modified != 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
 
@@ -71,13 +72,13 @@ jobs:
         working-directory: platform/ios
         shell: bash
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
           fetch-depth: 0
 
       - name: Cache Bazel
-        uses: actions/cache@v4
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
@@ -140,7 +141,7 @@ jobs:
       #     zip -r "$render_test_app_dir"/RenderTest.xctest.zip RenderTest.xctest
       #     echo render_test_artifacts_dir="$render_test_app_dir" >> "$GITHUB_ENV"
 
-      # - uses: actions/upload-artifact@v4
+      # - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       #   with:
       #     name: ios-render-test
       #     retention-days: 3
@@ -167,7 +168,7 @@ jobs:
       #     zip -r "$ios_cpp_test_app_dir"/CppUnitTests.xctest.zip CppUnitTests.xctest
       #     echo ios_cpp_test_artifacts_dir="$ios_cpp_test_app_dir" >> "$GITHUB_ENV"
 
-      # - uses: actions/upload-artifact@v4
+      # - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       #   with:
       #     name: ios-cpp-unit-tests
       #     retention-days: 3
@@ -188,7 +189,6 @@ jobs:
 
       # - name: Upload size test as artifact (Bloaty)
       #   if: github.event_name == 'pull_request'
-      #   uses: actions/upload-artifact@v4
       #   with:
       #     name: ios-size-test-files
       #     retention-days: 3
@@ -228,7 +228,7 @@ jobs:
         working-directory: platform/ios
         shell: bash
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
           fetch-depth: 0
@@ -246,7 +246,7 @@ jobs:
           (github.event_name == 'push' && steps.version-file-ios-changed.outputs.any_changed == 'true')
         run: echo make_release=true >> "$GITHUB_ENV"
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v4
         if: env.make_release
         with:
           node-version-file: ".nvmrc"
@@ -319,7 +319,7 @@ jobs:
       - name: Release (GitHub)
         if: env.make_release
         id: github_release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
         with:
           name: ios-v${{ env.version }}
           files: |
@@ -376,7 +376,7 @@ jobs:
     runs-on: macos-14
     if: needs.pre_job.outputs.should_skip != 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           submodules: recursive
           fetch-depth: 0
