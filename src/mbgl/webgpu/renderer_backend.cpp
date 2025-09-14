@@ -4,6 +4,7 @@
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/size.hpp>
 
 // Include shader group and individual shader headers
 #include <mbgl/shaders/webgpu/shader_group.hpp>
@@ -12,24 +13,38 @@
 namespace mbgl {
 namespace webgpu {
 
+// Forward declare and define the Impl class
+class RendererBackend::Impl {
+public:
+    void* instance = nullptr;
+    void* device = nullptr;
+    void* queue = nullptr;
+    void* surface = nullptr;
+};
+
 RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
-    : gfx::RendererBackend(contextMode_) {
+    : gfx::RendererBackend(contextMode_),
+      impl(std::make_unique<Impl>()) {
 }
 
 RendererBackend::~RendererBackend() = default;
 
-void RendererBackend::bind() {
-    gfx::RendererBackend::bind();
+void RendererBackend::activate() {
+    // Activation logic if needed
+}
+
+void RendererBackend::deactivate() {
+    // Deactivation logic if needed
 }
 
 std::unique_ptr<gfx::Context> RendererBackend::createContext() {
-    auto context = std::make_unique<Context>(*this);
-    return context;
+    auto ctx = std::make_unique<Context>(*this);
+    return ctx;
 }
 
-gfx::BackendScope RendererBackend::getDefaultRenderable() {
-    return gfx::BackendScope{};
-}
+// getDefaultRenderable() is pure virtual and must be implemented by platform-specific backends
+// The platform backend (e.g., GLFWWebGPUBackend) typically inherits from gfx::Renderable itself
+// and returns *this from getDefaultRenderable()
 
 namespace {
 
@@ -64,78 +79,53 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramPa
     // >(registry, parameters);
 }
 
-void RendererBackend::updateSurface(wgpu::Surface surface) {
-    this->surface = surface;
+void RendererBackend::setSurface(void* nativeWindow) {
+    // Platform-specific surface creation will be handled by subclasses
+    // For now, just store the native window handle
+    // The actual surface creation depends on the platform (X11, Wayland, etc.)
 }
 
-wgpu::Device RendererBackend::getDevice() const {
-    if (device) {
-        return device;
-    }
-
-    // Initialize WebGPU if not already done
-    const_cast<RendererBackend*>(this)->initializeDevice();
-    return device;
+void RendererBackend::setInstance(void* instance) {
+    impl->instance = instance;
 }
 
-wgpu::Surface RendererBackend::getSurface() const {
-    return surface;
+void RendererBackend::setDevice(void* device) {
+    impl->device = device;
 }
 
-void RendererBackend::initializeDevice() {
-    if (device) {
-        return;
-    }
+void RendererBackend::setQueue(void* queue) {
+    impl->queue = queue;
+}
 
-    // Create instance
-    wgpu::InstanceDescriptor desc{};
-    instance = wgpu::CreateInstance(&desc);
+void* RendererBackend::getInstance() const {
+    return impl->instance;
+}
 
-    // Request adapter
-    adapter = nullptr;
-    instance.RequestAdapter(
-        nullptr,
-        [](WGPURequestAdapterStatus status, WGPUAdapter adapter, const char* message, void* userdata) {
-            if (status == WGPURequestAdapterStatus_Success) {
-                *static_cast<wgpu::Adapter*>(userdata) = wgpu::Adapter(adapter);
-            } else {
-                Log::Error(Event::Render, "Failed to get WebGPU adapter: %s", message);
-            }
-        },
-        &adapter
-    );
+void* RendererBackend::getDevice() const {
+    return impl->device;
+}
 
-    // Wait for adapter (in production, this should be async)
-    while (!adapter) {
-        // Process callbacks - implementation depends on the backend
-    }
+void* RendererBackend::getQueue() const {
+    return impl->queue;
+}
 
-    // Request device
-    device = nullptr;
-    adapter.RequestDevice(
-        nullptr,
-        [](WGPURequestDeviceStatus status, WGPUDevice device, const char* message, void* userdata) {
-            if (status == WGPURequestDeviceStatus_Success) {
-                *static_cast<wgpu::Device*>(userdata) = wgpu::Device(device);
-            } else {
-                Log::Error(Event::Render, "Failed to get WebGPU device: %s", message);
-            }
-        },
-        &device
-    );
+void* RendererBackend::getSurface() const {
+    return impl->surface;
+}
 
-    // Wait for device (in production, this should be async)
-    while (!device) {
-        // Process callbacks
-    }
+void* RendererBackend::getCurrentTextureView() {
+    // Default implementation - platform backends can override if needed
+    return nullptr;
+}
 
-    // Set up error callback
-    device.SetUncapturedErrorCallback(
-        [](WGPUErrorType type, const char* message, void*) {
-            Log::Error(Event::Render, "WebGPU Error (%d): %s", type, message);
-        },
-        nullptr
-    );
+void* RendererBackend::getDepthStencilView() {
+    // Default implementation - platform backends can override if needed
+    return nullptr;
+}
+
+mbgl::Size RendererBackend::getFramebufferSize() const {
+    // Default implementation - platform backends should override
+    return {0, 0};
 }
 
 } // namespace webgpu

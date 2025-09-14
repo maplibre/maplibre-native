@@ -21,12 +21,13 @@ public:
     explicit RendererBackend(gfx::ContextMode);
     ~RendererBackend() override;
 
-    gfx::Renderable& getDefaultRenderable() override;
+    // getDefaultRenderable() is pure virtual - must be implemented by platform backends
+    // Platform backends typically inherit from gfx::Renderable and return *this
     void initShaders(gfx::ShaderRegistry&, const ProgramParameters&) override;
 
     // Platform-specific surface creation
     void setSurface(void* nativeWindow);
-    
+
     // WebGPU-specific methods
     void setInstance(void* instance);
     void setDevice(void* device);
@@ -35,8 +36,8 @@ public:
     void* getDevice() const;
     void* getQueue() const;
     void* getSurface() const;
-    
-    // Surface texture access - to be overridden by platform backends
+
+    // Surface texture access - can be overridden by platform backends
     virtual void* getCurrentTextureView();
     virtual void* getDepthStencilView();
     virtual mbgl::Size getFramebufferSize() const;
