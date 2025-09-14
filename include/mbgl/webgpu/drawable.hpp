@@ -24,11 +24,10 @@ class RenderPipeline;
 
 class Drawable : public gfx::Drawable {
 public:
-    explicit Drawable(std::string name);
+    Drawable(std::string name);
     ~Drawable() override;
 
     void upload(gfx::UploadPass&);
-    void uploadTextures(UploadPass&) const noexcept;
     void draw(PaintParameters&) const override;
     
     void setIndexData(gfx::IndexVectorBasePtr, std::vector<UniqueDrawSegment> segments) override;
@@ -37,15 +36,16 @@ public:
     const gfx::UniformBufferArray& getUniformBuffers() const override;
     gfx::UniformBufferArray& mutableUniformBuffers() override;
     
-    void setEnableColor(bool value) override;
-    void setColorMode(const gfx::ColorMode& value) override;
-    void setEnableDepth(bool value) override;
-    void setDepthType(gfx::DepthMaskType value) override;
-    void setDepthModeFor3D(const gfx::DepthMode& value);
-    void setStencilModeFor3D(const gfx::StencilMode& value);
-    void setLineWidth(int32_t value) override;
-    void setCullFaceMode(const gfx::CullFaceMode&) override;
-    void setVertexAttrId(std::size_t id);
+    void setColorMode(const gfx::ColorMode&) override;
+
+    void setShader(gfx::ShaderProgramBasePtr) override;
+
+    void setEnableStencil(bool) override;
+    void setEnableDepth(bool) override;
+    void setSubLayerIndex(int32_t) override;
+    void setDepthType(gfx::DepthMaskType) override;
+
+    void setVertexAttrId(const size_t);
     
     void updateVertexAttributes(gfx::VertexAttributeArrayPtr,
                                std::size_t vertexCount,
@@ -54,9 +54,7 @@ public:
                                const SegmentBase* segments,
                                std::size_t segmentCount) override;
 
-protected:
-    void buildWebGPUPipeline() noexcept;
-    void createBindGroup(WGPUBindGroupLayout layout) noexcept;
+
 
     class Impl;
     const std::unique_ptr<Impl> impl;
