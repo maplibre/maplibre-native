@@ -119,6 +119,11 @@ void* RendererBackend::getCurrentTextureView() {
     return nullptr;
 }
 
+void* RendererBackend::getDepthStencilView() {
+    // Default implementation - platform backends should override
+    return nullptr;
+}
+
 mbgl::Size RendererBackend::getFramebufferSize() const {
     // Default implementation - platform backends should override
     return {800, 600};

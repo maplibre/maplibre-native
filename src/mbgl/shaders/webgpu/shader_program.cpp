@@ -144,17 +144,25 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
         return;
     }
 
-    // Set up vertex state with vertex buffer for position data
-    WGPUVertexAttribute vertexAttribute = {};
-    vertexAttribute.format = WGPUVertexFormat_Sint16x2;  // 2 int16 values for x,y
-    vertexAttribute.offset = 0;
-    vertexAttribute.shaderLocation = 0;  // @location(0) in shader
-    
+    // Set up vertex state with vertex buffer for line data
+    // Lines need two attributes: pos_normal and data
+    WGPUVertexAttribute vertexAttrs[2] = {};
+
+    // Attribute 0: pos_normal (vec2<i16>)
+    vertexAttrs[0].format = WGPUVertexFormat_Sint16x2;  // 2 int16 values for packed pos/normal
+    vertexAttrs[0].offset = 0;
+    vertexAttrs[0].shaderLocation = 0;  // @location(0) in shader
+
+    // Attribute 1: data (vec4<u8>)
+    vertexAttrs[1].format = WGPUVertexFormat_Uint8x4;  // 4 uint8 values for extrusion/direction
+    vertexAttrs[1].offset = 4;  // After pos_normal (2 * sizeof(int16))
+    vertexAttrs[1].shaderLocation = 1;  // @location(1) in shader
+
     WGPUVertexBufferLayout vertexBufferLayout = {};
-    vertexBufferLayout.arrayStride = 4;  // 2 * sizeof(int16)
+    vertexBufferLayout.arrayStride = 8;  // 4 bytes for pos_normal + 4 bytes for data
     vertexBufferLayout.stepMode = WGPUVertexStepMode_Vertex;
-    vertexBufferLayout.attributeCount = 1;
-    vertexBufferLayout.attributes = &vertexAttribute;
+    vertexBufferLayout.attributeCount = 2;
+    vertexBufferLayout.attributes = vertexAttrs;
     
     WGPUVertexState vertexState = {};
     vertexState.module = vertexShaderModule;
@@ -197,11 +205,11 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     primitiveState.frontFace = WGPUFrontFace_CCW;
     primitiveState.cullMode = WGPUCullMode_None;
 
-    // Set up depth stencil state - disable depth testing for now
+    // Set up depth stencil state - enable depth testing
     WGPUDepthStencilState depthStencilState = {};
     depthStencilState.format = WGPUTextureFormat_Depth24PlusStencil8;
-    depthStencilState.depthWriteEnabled = WGPUOptionalBool_False;
-    depthStencilState.depthCompare = WGPUCompareFunction_Always;
+    depthStencilState.depthWriteEnabled = WGPUOptionalBool_True;
+    depthStencilState.depthCompare = WGPUCompareFunction_Less;
     depthStencilState.stencilFront.compare = WGPUCompareFunction_Always;
     depthStencilState.stencilFront.failOp = WGPUStencilOperation_Keep;
     depthStencilState.stencilFront.depthFailOp = WGPUStencilOperation_Keep;
@@ -221,7 +229,7 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     pipelineDesc.vertex = vertexState;
     pipelineDesc.fragment = &fragmentState;
     pipelineDesc.primitive = primitiveState;
-    pipelineDesc.depthStencil = nullptr; // No depth-stencil for now
+    pipelineDesc.depthStencil = &depthStencilState; // Enable depth-stencil
     pipelineDesc.multisample.count = 1;
     pipelineDesc.multisample.mask = 0xFFFFFFFF;
     pipelineDesc.multisample.alphaToCoverageEnabled = 0;

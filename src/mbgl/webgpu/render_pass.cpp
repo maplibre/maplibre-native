@@ -10,6 +10,7 @@
 #include <mbgl/util/logging.hpp>
 
 #include <cstring> // for strlen
+#include <cstdlib> // for std::getenv
 
 namespace mbgl {
 namespace webgpu {
@@ -69,9 +70,34 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
         renderPassDesc.colorAttachmentCount = 1;
         renderPassDesc.colorAttachments = &colorAttachment;
 
-        // TODO: Add depth/stencil attachment if needed
-        if (descriptor.clearDepth || descriptor.clearStencil) {
-            // Would need to create/get depth texture and set up depth/stencil attachment
+        // Add depth/stencil attachment
+        wgpu::RenderPassDepthStencilAttachment depthStencilAttachment = {};
+        void* depthStencilViewPtr = backend.getDepthStencilView();
+        if (depthStencilViewPtr) {
+            // Don't use Acquire - the backend owns the view
+            wgpu::TextureView depthStencilView(reinterpret_cast<WGPUTextureView>(depthStencilViewPtr));
+
+            depthStencilAttachment.view = depthStencilView;
+
+            // Configure depth operations
+            if (descriptor.clearDepth) {
+                depthStencilAttachment.depthLoadOp = wgpu::LoadOp::Clear;
+                depthStencilAttachment.depthClearValue = descriptor.clearDepth.value();
+            } else {
+                depthStencilAttachment.depthLoadOp = wgpu::LoadOp::Load;
+            }
+            depthStencilAttachment.depthStoreOp = wgpu::StoreOp::Store;
+
+            // Configure stencil operations
+            if (descriptor.clearStencil) {
+                depthStencilAttachment.stencilLoadOp = wgpu::LoadOp::Clear;
+                depthStencilAttachment.stencilClearValue = descriptor.clearStencil.value();
+            } else {
+                depthStencilAttachment.stencilLoadOp = wgpu::LoadOp::Load;
+            }
+            depthStencilAttachment.stencilStoreOp = wgpu::StoreOp::Store;
+
+            renderPassDesc.depthStencilAttachment = &depthStencilAttachment;
         }
 
         // Create the render pass encoder
@@ -118,20 +144,24 @@ RenderPass::~RenderPass() {
 
 void RenderPass::pushDebugGroup(const char* name) {
     if (impl->encoder) {
-        // TODO: Debug groups on render pass encoders seem to cause a freeze in Dawn
-        // Commenting out for now to allow rendering to proceed
-        // WGPUStringView label = {name, name ? strlen(name) : 0};
-        // wgpuRenderPassEncoderPushDebugGroup(impl->encoder, label);
-    } else {
+        // Debug groups on render pass encoders can cause issues in some Dawn versions
+        // Enable with environment variable if needed for debugging
+        static bool enableDebugGroups = std::getenv("WEBGPU_ENABLE_DEBUG_GROUPS") != nullptr;
+        if (enableDebugGroups) {
+            WGPUStringView label = {name, name ? strlen(name) : 0};
+            wgpuRenderPassEncoderPushDebugGroup(impl->encoder, label);
+        }
     }
 }
 
 void RenderPass::popDebugGroup() {
     if (impl->encoder) {
-        // TODO: Debug groups on render pass encoders seem to cause a freeze in Dawn
-        // Commenting out for now to allow rendering to proceed
-        // wgpuRenderPassEncoderPopDebugGroup(impl->encoder);
-    } else {
+        // Debug groups on render pass encoders can cause issues in some Dawn versions
+        // Enable with environment variable if needed for debugging
+        static bool enableDebugGroups = std::getenv("WEBGPU_ENABLE_DEBUG_GROUPS") != nullptr;
+        if (enableDebugGroups) {
+            wgpuRenderPassEncoderPopDebugGroup(impl->encoder);
+        }
     }
 }
 

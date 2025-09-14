@@ -290,6 +290,10 @@ void Drawable::uploadTextures(UploadPass&) const noexcept {
 }
 
 void Drawable::draw(PaintParameters& parameters) const {
+    static int drawCallCount = 0;
+    if (drawCallCount++ < 10) {
+        mbgl::Log::Info(mbgl::Event::Render, "WebGPU Drawable::draw() called for: " + getName());
+    }
 
     if (!getEnabled()) {
         return;
@@ -308,6 +312,10 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     WGPURenderPassEncoder renderPassEncoder = webgpuRenderPass->getEncoder();
     if (!renderPassEncoder) {
+        static int noEncoderCount = 0;
+        if (noEncoderCount++ < 5) {
+            mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: No render pass encoder available");
+        }
         return;
     }
 
@@ -322,38 +330,8 @@ void Drawable::draw(PaintParameters& parameters) const {
             // Get the appropriate matrix for transformation
             mat4 tileMatrix;
 
-            // For debugging: Try using just the projection matrix to see if vertices appear
-            static bool useSimpleProjection = true;
-
-            if (useSimpleProjection) {
-                // Create a simple orthographic projection for testing
-                // The vertex data seems to use a larger range (0-16384 or more)
-                // Let's use a wider range to capture all geometry
-                float range = 32768.0f;  // Wider range to capture all vertices
-
-                // Initialize to identity
-                for (int i = 0; i < 16; i++) tileMatrix[i] = 0.0f;
-
-                // Column 0: X axis scaling
-                tileMatrix[0] = 2.0f / range;  // Scale X
-
-                // Column 1: Y axis scaling (flip for Y-down to Y-up)
-                tileMatrix[5] = -2.0f / range; // Scale Y (negative to flip)
-
-                // Column 2: Z axis (no change)
-                tileMatrix[10] = 1.0f;
-
-                // Column 3: Translation - center the range
-                tileMatrix[12] = -1.0f;  // Translate X: map 0 -> -1
-                tileMatrix[13] = 1.0f;   // Translate Y: map 0 -> 1 (after flip)
-                tileMatrix[14] = 0.0f;   // No Z translation
-
-                // W component (homogeneous coordinate)
-                tileMatrix[15] = 1.0f;
-
-                // Debug: Print what we just set
-
-            } else if (const auto& tileid = getTileID()) {
+            // Get the correct transformation matrix based on drawable type
+            if (const auto& tileid = getTileID()) {
                 // Get the tile-specific transformation matrix
                 mat4 tileTransform;
                 parameters.state.matrixFor(tileTransform, tileid->toUnwrapped());
@@ -363,9 +341,9 @@ void Drawable::draw(PaintParameters& parameters) const {
                     matrix::translate(tileTransform, tileTransform, orig->x, orig->y, 0);
                 }
 
-                // Compute final MVP: Projection * View * Model
-                const mat4& projMatrix = parameters.transformParams.projMatrix;
-                matrix::multiply(tileMatrix, projMatrix, tileTransform);
+                // The projection matrix should transform to NDC space
+                // Combine it with the tile transform
+                matrix::multiply(tileMatrix, parameters.transformParams.projMatrix, tileTransform);
             } else {
                 // Fallback to projection matrix if no tile
                 tileMatrix = parameters.transformParams.projMatrix;
@@ -373,15 +351,43 @@ void Drawable::draw(PaintParameters& parameters) const {
 
             // Log matrix values for debugging - show full matrix
             static int matrixLogCount = 0;
-            if (matrixLogCount++ < 5) {  // Only log first few matrices to avoid spam
-                // for (int i = 0; i < 4; i++) {
-                //               std::to_string(tileMatrix[i*4+2]) + ", " +
-                // }
+            if (matrixLogCount++ < 3) {  // Only log first few matrices to avoid spam
+                mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Projection matrix:");
+                const auto& proj = parameters.transformParams.projMatrix;
+                mbgl::Log::Info(mbgl::Event::Render, "  Row 0: " +
+                    std::to_string(proj[0]) + ", " + std::to_string(proj[1]) + ", " +
+                    std::to_string(proj[2]) + ", " + std::to_string(proj[3]));
+                mbgl::Log::Info(mbgl::Event::Render, "  Row 1: " +
+                    std::to_string(proj[4]) + ", " + std::to_string(proj[5]) + ", " +
+                    std::to_string(proj[6]) + ", " + std::to_string(proj[7]));
+                mbgl::Log::Info(mbgl::Event::Render, "  Row 2: " +
+                    std::to_string(proj[8]) + ", " + std::to_string(proj[9]) + ", " +
+                    std::to_string(proj[10]) + ", " + std::to_string(proj[11]));
+                mbgl::Log::Info(mbgl::Event::Render, "  Row 3: " +
+                    std::to_string(proj[12]) + ", " + std::to_string(proj[13]) + ", " +
+                    std::to_string(proj[14]) + ", " + std::to_string(proj[15]));
+
+                if (const auto& tileid = getTileID()) {
+                    mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Tile matrix (should give NDC):");
+                    mbgl::Log::Info(mbgl::Event::Render, "  Row 0: " +
+                        std::to_string(tileMatrix[0]) + ", " + std::to_string(tileMatrix[1]) + ", " +
+                        std::to_string(tileMatrix[2]) + ", " + std::to_string(tileMatrix[3]));
+                    mbgl::Log::Info(mbgl::Event::Render, "  Row 1: " +
+                        std::to_string(tileMatrix[4]) + ", " + std::to_string(tileMatrix[5]) + ", " +
+                        std::to_string(tileMatrix[6]) + ", " + std::to_string(tileMatrix[7]));
+                    mbgl::Log::Info(mbgl::Event::Render, "  Row 2: " +
+                        std::to_string(tileMatrix[8]) + ", " + std::to_string(tileMatrix[9]) + ", " +
+                        std::to_string(tileMatrix[10]) + ", " + std::to_string(tileMatrix[11]));
+                    mbgl::Log::Info(mbgl::Event::Render, "  Row 3: " +
+                        std::to_string(tileMatrix[12]) + ", " + std::to_string(tileMatrix[13]) + ", " +
+                        std::to_string(tileMatrix[14]) + ", " + std::to_string(tileMatrix[15]));
+                }
             }
 
-            // Convert to column-major format for WebGPU (mat4 is row-major in MapLibre)
             // Convert from double (mat4) to float for WebGPU
             // mat4 is std::array<double, 16> but WebGPU needs float[16]
+            // Both MapLibre and WebGPU WGSL use column-major matrices
+            // The matrix is already in the correct format, just convert to float
             float matrix[16];
             for (int i = 0; i < 16; i++) {
                 matrix[i] = static_cast<float>(tileMatrix[i]);
@@ -398,6 +404,34 @@ void Drawable::draw(PaintParameters& parameters) const {
 
             // Update the uniform buffer
             wgpuQueueWriteBuffer(queue, impl->uniformBuffer, 0, matrix, sizeof(matrix));
+
+            // Create bind group if needed
+            if (!impl->bindGroup && shader) {
+                // Get the shader program
+                auto webgpuShader = std::static_pointer_cast<mbgl::webgpu::ShaderProgram>(shader);
+                if (webgpuShader) {
+                    WGPUBindGroupLayout layout = webgpuShader->getBindGroupLayout();
+                    if (layout) {
+                        // Create bind group entry for uniform buffer
+                        WGPUBindGroupEntry entry = {};
+                        entry.binding = 0;  // Binding 0 for uniforms
+                        entry.buffer = impl->uniformBuffer;
+                        entry.offset = 0;
+                        entry.size = sizeof(matrix);
+
+                        // Create bind group descriptor
+                        WGPUBindGroupDescriptor bgDesc = {};
+                        WGPUStringView bgLabel = {"Drawable Bind Group", strlen("Drawable Bind Group")};
+                        bgDesc.label = bgLabel;
+                        bgDesc.layout = layout;
+                        bgDesc.entryCount = 1;
+                        bgDesc.entries = &entry;
+
+                        // Create the bind group
+                        impl->bindGroup = wgpuDeviceCreateBindGroup(device, &bgDesc);
+                    }
+                }
+            }
 
             // Debug logging removed to prevent heap corruption in multi-threaded environment
         }
@@ -451,7 +485,10 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
 
     // Set the pipeline
-
+    static int pipelineSetCount = 0;
+    if (pipelineSetCount++ < 5) {
+        mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Setting pipeline on render pass encoder");
+    }
     wgpuRenderPassEncoderSetPipeline(renderPassEncoder, impl->pipeline);
 
     // Continue with rest of drawing even without pipeline for debugging
@@ -460,8 +497,13 @@ void Drawable::draw(PaintParameters& parameters) const {
     if (impl->vertexBuffer) {
         // Log first vertex position for debugging (assuming int16x2 format)
         if (impl->vertexData.size() >= 4) {
-            // int16_t x = *reinterpret_cast<const int16_t*>(impl->vertexData.data());
-            // int16_t y = *reinterpret_cast<const int16_t*>(impl->vertexData.data() + 2);
+            int16_t x = *reinterpret_cast<const int16_t*>(impl->vertexData.data());
+            int16_t y = *reinterpret_cast<const int16_t*>(impl->vertexData.data() + 2);
+            static int vertexLogCount = 0;
+            if (vertexLogCount++ < 5) {
+                mbgl::Log::Info(mbgl::Event::Render, "WebGPU: First vertex position: (" +
+                    std::to_string(x) + ", " + std::to_string(y) + ")");
+            }
         }
         wgpuRenderPassEncoderSetVertexBuffer(renderPassEncoder, 0, impl->vertexBuffer, 0, impl->vertexData.size());
     } else {
@@ -487,18 +529,26 @@ void Drawable::draw(PaintParameters& parameters) const {
         // Draw indexed geometry
         uint32_t indexCount = static_cast<uint32_t>(impl->indexVector->elements());
 
-
+        static int indexedDrawCount = 0;
+        if (indexedDrawCount++ < 5) {
+            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Drawing indexed with " + std::to_string(indexCount) + " indices");
+        }
 
         wgpuRenderPassEncoderDrawIndexed(renderPassEncoder, indexCount, 1, 0, 0, 0);
     } else if (impl->vertexBuffer && impl->vertexCount > 0) {
         // Draw non-indexed
         uint32_t vertexCount = static_cast<uint32_t>(impl->vertexCount);
 
+        static int nonIndexedDrawCount = 0;
+        if (nonIndexedDrawCount++ < 5) {
+            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Drawing non-indexed with " + std::to_string(vertexCount) + " vertices");
+        }
 
         wgpuRenderPassEncoderDraw(renderPassEncoder, vertexCount, 1, 0, 0);
     } else {
         static int noDataLogCount = 0;
         if (noDataLogCount++ < 5) {
+            mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: No vertex/index data to draw");
         }
     }
 }

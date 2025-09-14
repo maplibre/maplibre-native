@@ -21,13 +21,8 @@ protected:
     void init() override;
 
 private:
-    // TODO: Implement WebGPU-specific drawable configuration
-    // Context* context = nullptr;
-    // void* pipeline = nullptr;
-    // void* vertexBuffer = nullptr;
-    // void* indexBuffer = nullptr;
-    // void* uniformBuffer = nullptr;
-    // std::vector<void*> textures;
+    // WebGPU-specific drawable configuration is handled in the drawable implementation
+    // Pipeline, buffers, and textures are managed by the Context and Drawable classes
 };
 
 } // namespace webgpu
