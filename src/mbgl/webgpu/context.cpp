@@ -99,24 +99,15 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registr
         return it->second;
     }
 
-    // Get the shader group from registry
-    auto& shaderGroup = registry.getShaderGroup(name);
-    if (!shaderGroup) {
-        // If no shader group exists, create and initialize one
-        auto webgpuShaderGroup = std::make_shared<webgpu::ShaderGroup>();
-        webgpuShaderGroup->initialize(*this);
-        bool registered = registry.registerShaderGroup(std::move(webgpuShaderGroup), name);
-        (void)registered; // Ignore return value
-    }
-
-    // Try to get the shader from the group
+    // Try getting shader group by name first (for layer-specific shader groups)
+    auto shaderGroup = registry.getShaderGroup(name);
     if (shaderGroup) {
         auto shader = shaderGroup->getShader(name);
         if (shader) {
             // Convert gfx::Shader to ShaderProgramBase
-            // Since our ShaderProgram inherits from ShaderProgramBase, we need to cast
             auto shaderProgram = std::static_pointer_cast<gfx::ShaderProgramBase>(shader);
             impl->shaderCache[name] = shaderProgram;
+            mbgl::Log::Info(mbgl::Event::Shader, "WebGPU: Retrieved shader '" + name + "' from shader group");
             return shaderProgram;
         }
     }
@@ -189,6 +180,8 @@ fn main() -> @location(0) vec4<f32> {
     // Create new shader program
     auto shader = std::make_shared<ShaderProgram>(*this, vertexSource, fragmentSource);
     impl->shaderCache[name] = shader;
+
+    mbgl::Log::Info(mbgl::Event::Shader, "WebGPU: Created fallback shader for '" + name + "'");
 
     return shader;
 }
