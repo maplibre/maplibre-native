@@ -18,11 +18,19 @@ public:
     PremultipliedImage readStillImage() override;
     RendererBackend* getRendererBackend() override;
 
+    // Override WebGPU-specific methods
+    void* getCurrentTextureView() override;
+    void* getDepthStencilView() override;
+    mbgl::Size getFramebufferSize() const override;
+
 private:
     void activate() override;
     void deactivate() override;
+    void createOffscreenTextures();
 
 private:
+    class Impl;
+    std::unique_ptr<Impl> impl;
     bool active = false;
     SwapBehaviour swapBehaviour = SwapBehaviour::NoFlush;
 };

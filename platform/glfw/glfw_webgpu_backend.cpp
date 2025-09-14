@@ -597,6 +597,47 @@ mbgl::Size GLFWWebGPUBackend::getFramebufferSize() const {
     return getSize();
 }
 
+void* GLFWWebGPUBackend::getDepthStencilView() {
+    // Return the depth/stencil view if we have one
+    if (depthStencilView) {
+        return reinterpret_cast<void*>(depthStencilView.Get());
+    }
+
+    // If we don't have one, try to create it
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+
+    if (width > 0 && height > 0 && wgpuDevice) {
+        // Create depth texture
+        wgpu::TextureDescriptor depthDesc = {};
+        depthDesc.usage = wgpu::TextureUsage::RenderAttachment;
+        depthDesc.dimension = wgpu::TextureDimension::e2D;
+        depthDesc.size = {static_cast<uint32_t>(width), static_cast<uint32_t>(height), 1};
+        depthDesc.format = wgpu::TextureFormat::Depth24PlusStencil8;
+        depthDesc.mipLevelCount = 1;
+        depthDesc.sampleCount = 1;
+        depthDesc.label = "Depth/Stencil Texture";
+
+        depthStencilTexture = wgpuDevice.CreateTexture(&depthDesc);
+
+        if (depthStencilTexture) {
+            wgpu::TextureViewDescriptor viewDesc = {};
+            viewDesc.format = wgpu::TextureFormat::Depth24PlusStencil8;
+            viewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            viewDesc.baseMipLevel = 0;
+            viewDesc.mipLevelCount = 1;
+            viewDesc.baseArrayLayer = 0;
+            viewDesc.arrayLayerCount = 1;
+            viewDesc.aspect = wgpu::TextureAspect::All;
+            viewDesc.label = "Depth/Stencil TextureView";
+
+            depthStencilView = depthStencilTexture.CreateView(&viewDesc);
+        }
+    }
+
+    return reinterpret_cast<void*>(depthStencilView.Get());
+}
+
 void GLFWWebGPUBackend::reconfigureSurface() {
     if (!wgpuSurface || !wgpuDevice || isShuttingDown) {
         return;
@@ -643,6 +684,42 @@ void GLFWWebGPUBackend::reconfigureSurface() {
     
     wgpuSurface.Configure(&config);
     
+    // Create depth/stencil texture if needed or if size changed
+    if (!depthStencilTexture ||
+        depthStencilTexture.GetWidth() != static_cast<uint32_t>(width) ||
+        depthStencilTexture.GetHeight() != static_cast<uint32_t>(height)) {
+
+        // Release old depth texture
+        depthStencilView = nullptr;
+        depthStencilTexture = nullptr;
+
+        // Create new depth texture
+        wgpu::TextureDescriptor depthDesc = {};
+        depthDesc.usage = wgpu::TextureUsage::RenderAttachment;
+        depthDesc.dimension = wgpu::TextureDimension::e2D;
+        depthDesc.size = {static_cast<uint32_t>(width), static_cast<uint32_t>(height), 1};
+        depthDesc.format = wgpu::TextureFormat::Depth24PlusStencil8;
+        depthDesc.mipLevelCount = 1;
+        depthDesc.sampleCount = 1;
+        depthDesc.label = "Depth/Stencil Texture";
+
+        depthStencilTexture = wgpuDevice.CreateTexture(&depthDesc);
+
+        if (depthStencilTexture) {
+            wgpu::TextureViewDescriptor viewDesc = {};
+            viewDesc.format = wgpu::TextureFormat::Depth24PlusStencil8;
+            viewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            viewDesc.baseMipLevel = 0;
+            viewDesc.mipLevelCount = 1;
+            viewDesc.baseArrayLayer = 0;
+            viewDesc.arrayLayerCount = 1;
+            viewDesc.aspect = wgpu::TextureAspect::All;
+            viewDesc.label = "Depth/Stencil TextureView";
+
+            depthStencilView = depthStencilTexture.CreateView(&viewDesc);
+        }
+    }
+
     // Update state
     surfaceConfigured = true;
     surfaceNeedsReconfigure = false;
