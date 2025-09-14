@@ -51,7 +51,7 @@ namespace webgpu {
 
 class Context;
 
-class ShaderProgram : public gfx::ShaderProgramBase {
+class ShaderProgram final : public gfx::ShaderProgramBase {
 public:
     // Static name member required by is_shader_v trait
     static constexpr std::string_view Name = "WebGPUShader";
@@ -73,8 +73,8 @@ public:
                   const std::string& fragmentSource);
     ~ShaderProgram() override;
 
-    // ShaderProgramBase interface
-    const std::string_view typeName() const noexcept override { return "WebGPU"; }
+    // gfx::Shader interface (required for is_shader_v trait)
+    const std::string_view typeName() const noexcept override { return Name; }
     std::optional<size_t> getSamplerLocation(const size_t) const override { return std::nullopt; }
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
     const gfx::VertexAttributeArray& getInstanceAttributes() const override { return instanceAttributes; }
