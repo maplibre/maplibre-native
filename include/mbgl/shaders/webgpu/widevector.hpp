@@ -2,6 +2,7 @@
 
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
+#include <mbgl/shaders/widevector_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {
@@ -16,16 +17,16 @@ struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::WebGPU> {
     // Simplified wide vector shader for WebGPU
     static constexpr auto vertex = R"(
 struct VertexInput {
-    @location(0) position: vec3<f32>,
-    @location(1) normal: vec2<f32>,
-    @location(2) texCoord: vec2<f32>,
+    @location(5) position: vec3<f32>,
+    @location(6) normal: vec2<f32>,
+    @location(7) texCoord: vec2<f32>,
 };
 
 struct InstanceInput {
-    @location(3) instanceCenter: vec3<f32>,
-    @location(4) instanceColor: vec4<f32>,
-    @location(5) instancePrev: i32,
-    @location(6) instanceNext: i32,
+    @location(8) instanceCenter: vec3<f32>,
+    @location(9) instanceColor: vec4<f32>,
+    @location(10) instancePrev: i32,
+    @location(11) instanceNext: i32,
 };
 
 struct VertexOutput {

@@ -146,49 +146,23 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     }
 
     // Create bind group layout for uniforms
-    // Different shaders need different uniform buffer bindings:
-    // - Fill shaders: Binding 2 (drawable) and Binding 5 (evaluated props)
-    // - Line shaders: Binding 2 (drawable) and Binding 4 (evaluated props)
-    // - Circle shaders: Binding 2 (drawable) and Binding 5 (evaluated props)
-    // For now, create a layout that supports all possible bindings (2, 3, 4, 5)
-    // The actual bindings used will depend on what uniform buffers are provided
+    // WebGPU follows the same binding scheme as Metal/Vulkan
+    // Uniform buffers are bound at their UBO index as the binding index
+    // Create bindings for indices 0-5 to cover all possible UBOs
     std::vector<WGPUBindGroupLayoutEntry> bindingEntries;
 
-    // Binding 2: Drawable UBO (vertex shader) - used by all shaders
-    WGPUBindGroupLayoutEntry drawableEntry = {};
-    drawableEntry.binding = 2;
-    drawableEntry.visibility = WGPUShaderStage_Vertex;
-    drawableEntry.buffer.type = WGPUBufferBindingType_Uniform;
-    drawableEntry.buffer.hasDynamicOffset = 0;
-    drawableEntry.buffer.minBindingSize = 0; // Allow any size
-    bindingEntries.push_back(drawableEntry);
-
-    // Binding 3: Tile Props UBO (fragment shader) - used by some shaders like LineSDF
-    WGPUBindGroupLayoutEntry tilePropsEntry = {};
-    tilePropsEntry.binding = 3;
-    tilePropsEntry.visibility = WGPUShaderStage_Fragment;
-    tilePropsEntry.buffer.type = WGPUBufferBindingType_Uniform;
-    tilePropsEntry.buffer.hasDynamicOffset = 0;
-    tilePropsEntry.buffer.minBindingSize = 0; // Allow any size
-    bindingEntries.push_back(tilePropsEntry);
-
-    // Binding 4: Line Evaluated Props UBO (fragment shader)
-    WGPUBindGroupLayoutEntry linePropsEntry = {};
-    linePropsEntry.binding = 4;
-    linePropsEntry.visibility = WGPUShaderStage_Fragment;
-    linePropsEntry.buffer.type = WGPUBufferBindingType_Uniform;
-    linePropsEntry.buffer.hasDynamicOffset = 0;
-    linePropsEntry.buffer.minBindingSize = 0; // Allow any size
-    bindingEntries.push_back(linePropsEntry);
-
-    // Binding 5: Fill/Circle Evaluated Props UBO (fragment shader)
-    WGPUBindGroupLayoutEntry propsEntry = {};
-    propsEntry.binding = 5;
-    propsEntry.visibility = WGPUShaderStage_Fragment;
-    propsEntry.buffer.type = WGPUBufferBindingType_Uniform;
-    propsEntry.buffer.hasDynamicOffset = 0;
-    propsEntry.buffer.minBindingSize = 0; // Allow any size
-    bindingEntries.push_back(propsEntry);
+    // Create bindings 0-5 for all possible uniform buffer indices
+    for (uint32_t binding = 0; binding <= 5; ++binding) {
+        WGPUBindGroupLayoutEntry entry = {};
+        entry.binding = binding;
+        // Most UBOs are used by both vertex and fragment shaders, but some are specific
+        // For simplicity, allow all bindings to be used by both stages
+        entry.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment;
+        entry.buffer.type = WGPUBufferBindingType_Uniform;
+        entry.buffer.hasDynamicOffset = 0;
+        entry.buffer.minBindingSize = 0; // Allow any size
+        bindingEntries.push_back(entry);
+    }
 
     WGPUBindGroupLayoutDescriptor bindGroupLayoutDesc = {};
     WGPUStringView bindGroupLabel = {"Uniform Bind Group Layout", strlen("Uniform Bind Group Layout")};
@@ -346,8 +320,8 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     // Set up depth stencil state - enable depth testing
     WGPUDepthStencilState depthStencilState = {};
     depthStencilState.format = WGPUTextureFormat_Depth24PlusStencil8;
-    depthStencilState.depthWriteEnabled = WGPUOptionalBool_True;
-    depthStencilState.depthCompare = WGPUCompareFunction_Less;
+    depthStencilState.depthWriteEnabled = WGPUOptionalBool_False;
+    depthStencilState.depthCompare = WGPUCompareFunction_Always;
     depthStencilState.stencilFront.compare = WGPUCompareFunction_Always;
     depthStencilState.stencilFront.failOp = WGPUStencilOperation_Keep;
     depthStencilState.stencilFront.depthFailOp = WGPUStencilOperation_Keep;

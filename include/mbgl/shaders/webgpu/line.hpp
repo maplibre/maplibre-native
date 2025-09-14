@@ -2,6 +2,7 @@
 
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
+#include <mbgl/shaders/line_layer_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {
@@ -15,8 +16,8 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::WebGPU> {
     
     static constexpr const char* vertex = R"(
 struct VertexInput {
-    @location(0) pos_normal: vec4<f32>,  // xy = position, zw = normal
-    @location(1) data: vec4<f32>,        // xy = extrude, z = linesofar, w = reserved
+    @location(4) pos_normal: vec4<f32>,  // xy = position, zw = normal
+    @location(5) data: vec4<f32>,        // xy = extrude, z = linesofar, w = reserved
 };
 
 struct VertexOutput {
@@ -104,8 +105,8 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::WebGPU> {
 
     static constexpr const char* vertex = R"(
 struct VertexInput {
-    @location(0) pos_normal: vec4<f32>,
-    @location(1) data: vec4<f32>,
+    @location(4) pos_normal: vec4<f32>,
+    @location(5) data: vec4<f32>,
 };
 
 struct VertexOutput {
@@ -207,8 +208,8 @@ struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::WebGPU> {
 
     static constexpr const char* vertex = R"(
 struct VertexInput {
-    @location(0) pos_normal: vec4<f32>,
-    @location(1) data: vec4<f32>,
+    @location(4) pos_normal: vec4<f32>,
+    @location(5) data: vec4<f32>,
 };
 
 struct VertexOutput {

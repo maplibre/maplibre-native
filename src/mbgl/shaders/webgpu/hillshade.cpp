@@ -8,8 +8,8 @@ namespace shaders {
 using HillshadeShaderSource = ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::WebGPU>;
 
 const std::array<AttributeInfo, 2> HillshadeShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Float2, idHillshadePosVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::Float2, idHillshadeTexturePosVertexAttribute},
+    AttributeInfo{hillshadeUBOCount + 0, gfx::AttributeDataType::Float2, idHillshadePosVertexAttribute},
+    AttributeInfo{hillshadeUBOCount + 1, gfx::AttributeDataType::Float2, idHillshadeTexturePosVertexAttribute},
 };
 const std::array<TextureInfo, 1> HillshadeShaderSource::textures = {
     TextureInfo{0, idHillshadeImageTexture}

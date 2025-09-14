@@ -34,9 +34,15 @@ void LayerGroup::upload(gfx::UploadPass& uploadPass) {
 
 void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
-
+    static int renderCallCount = 0;
+    if (renderCallCount++ < 10) {
+        mbgl::Log::Info(mbgl::Event::Render, "WebGPU LayerGroup::render() called for: " + getName());
+    }
 
     if (!enabled || !getDrawableCount() || !parameters.renderPass) {
+        mbgl::Log::Warning(mbgl::Event::Render, "WebGPU LayerGroup::render() early return - enabled:" +
+            std::to_string(enabled) + " drawableCount:" + std::to_string(getDrawableCount()) +
+            " hasRenderPass:" + std::to_string(parameters.renderPass != nullptr));
         return;
     }
 
@@ -50,6 +56,12 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     visitDrawables([&](gfx::Drawable& drawable) {
         drawableCount++;
 
+        static int visitCount = 0;
+        if (visitCount++ < 20) {
+            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Visiting drawable #" + std::to_string(drawableCount) +
+                " enabled:" + std::to_string(drawable.getEnabled()) +
+                " hasRenderPass:" + std::to_string(drawable.hasRenderPass(parameters.pass)));
+        }
 
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
@@ -62,7 +74,9 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         drawable.draw(parameters);
     });
 
-
+    if (drawableCount == 0) {
+        mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: No drawables visited in layer group " + getName());
+    }
 }
 
 } // namespace webgpu

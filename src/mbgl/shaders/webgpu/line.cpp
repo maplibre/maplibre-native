@@ -8,8 +8,8 @@ namespace shaders {
 using LineShaderSource = ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::WebGPU>;
 
 const std::array<AttributeInfo, 2> LineShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Float4, idLinePosNormalVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::Float4, idLineDataVertexAttribute},
+    AttributeInfo{lineUBOCount + 0, gfx::AttributeDataType::Float4, idLinePosNormalVertexAttribute},
+    AttributeInfo{lineUBOCount + 1, gfx::AttributeDataType::Float4, idLineDataVertexAttribute},
 };
 const std::array<TextureInfo, 0> LineShaderSource::textures = {};
 
@@ -17,8 +17,8 @@ const std::array<TextureInfo, 0> LineShaderSource::textures = {};
 using LineGradientShaderSource = ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::WebGPU>;
 
 const std::array<AttributeInfo, 2> LineGradientShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Float4, idLinePosNormalVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::Float4, idLineDataVertexAttribute},
+    AttributeInfo{lineUBOCount + 0, gfx::AttributeDataType::Float4, idLinePosNormalVertexAttribute},
+    AttributeInfo{lineUBOCount + 1, gfx::AttributeDataType::Float4, idLineDataVertexAttribute},
 };
 const std::array<TextureInfo, 1> LineGradientShaderSource::textures = {
     TextureInfo{0, idLineImageTexture}
@@ -28,8 +28,8 @@ const std::array<TextureInfo, 1> LineGradientShaderSource::textures = {
 using LinePatternShaderSource = ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::WebGPU>;
 
 const std::array<AttributeInfo, 2> LinePatternShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Float4, idLinePosNormalVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::Float4, idLineDataVertexAttribute},
+    AttributeInfo{lineUBOCount + 0, gfx::AttributeDataType::Float4, idLinePosNormalVertexAttribute},
+    AttributeInfo{lineUBOCount + 1, gfx::AttributeDataType::Float4, idLineDataVertexAttribute},
 };
 const std::array<TextureInfo, 1> LinePatternShaderSource::textures = {
     TextureInfo{0, idLineImageTexture}
@@ -39,8 +39,8 @@ const std::array<TextureInfo, 1> LinePatternShaderSource::textures = {
 using LineSDFShaderSource = ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::WebGPU>;
 
 const std::array<AttributeInfo, 2> LineSDFShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Float4, idLinePosNormalVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::Float4, idLineDataVertexAttribute},
+    AttributeInfo{lineUBOCount + 0, gfx::AttributeDataType::Float4, idLinePosNormalVertexAttribute},
+    AttributeInfo{lineUBOCount + 1, gfx::AttributeDataType::Float4, idLineDataVertexAttribute},
 };
 const std::array<TextureInfo, 1> LineSDFShaderSource::textures = {
     TextureInfo{0, idLineImageTexture}

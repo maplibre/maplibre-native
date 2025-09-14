@@ -2,6 +2,7 @@
 
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
+#include <mbgl/shaders/location_indicator_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {
@@ -15,7 +16,7 @@ struct ShaderSource<BuiltIn::LocationIndicatorShader, gfx::Backend::Type::WebGPU
 
     static constexpr auto vertex = R"(
 struct VertexInput {
-    @location(0) position: vec2<f32>,
+    @location(5) position: vec2<f32>,
 };
 
 struct VertexOutput {
@@ -61,8 +62,8 @@ struct ShaderSource<BuiltIn::LocationIndicatorTexturedShader, gfx::Backend::Type
 
     static constexpr auto vertex = R"(
 struct VertexInput {
-    @location(0) position: vec2<f32>,
-    @location(1) uv: vec2<f32>,
+    @location(5) position: vec2<f32>,
+    @location(6) uv: vec2<f32>,
 };
 
 struct VertexOutput {
