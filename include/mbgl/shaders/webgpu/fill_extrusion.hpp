@@ -7,6 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
+
 template <>
 struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillExtrusionShader";
@@ -60,21 +61,13 @@ struct FillExtrusionPropsUBO {
 @group(0) @binding(1) var<uniform> props: FillExtrusionPropsUBO;
 @group(0) @binding(2) var<uniform> uboIndex: u32;
 
-fn unpack_mix_float(value: f32, t: f32) -> f32 {
-    return value;
-}
-
-fn unpack_mix_color(packed: vec4<f32>, t: f32) -> vec4<f32> {
-    return packed;
-}
-
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
     let drawable = drawableVector[uboIndex];
     
-    let base = max(unpack_mix_float(in.base, drawable.base_t), 0.0);
-    let height = max(unpack_mix_float(in.height, drawable.height_t), 0.0);
+    let base = max(unpack_mix_float(vec2<f32>(in.base, in.base), drawable.base_t), 0.0);
+    let height = max(unpack_mix_float(vec2<f32>(in.height, in.height), drawable.height_t), 0.0);
     
     let normal = vec3<f32>(f32(in.normal_ed.x), f32(in.normal_ed.y), f32(in.normal_ed.z));
     let t = mix(base, height, f32(in.normal_ed.w));

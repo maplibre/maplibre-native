@@ -7,11 +7,6 @@
 namespace mbgl {
 namespace shaders {
 
-constexpr auto circleShaderPrelude = R"(
-#define idCircleDrawableUBO         idDrawableReservedVertexOnlyUBO
-#define idCircleEvaluatedPropsUBO   layerUBOStartId
-)";
-
 template <>
 struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "CircleShader";
@@ -20,7 +15,6 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::WebGPU> {
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
     
-    static constexpr auto prelude = circleShaderPrelude;
     static constexpr auto vertex = R"(
 struct VertexInput {
     @location(0) position: vec2<i32>,

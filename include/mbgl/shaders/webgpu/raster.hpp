@@ -7,6 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
+
 template <>
 struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "RasterShader";

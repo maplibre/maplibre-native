@@ -1,4 +1,5 @@
 #include <mbgl/shaders/webgpu/shader_program.hpp>
+#include <mbgl/shaders/webgpu/common.hpp>
 #include <mbgl/webgpu/context.hpp>
 #include <mbgl/util/logging.hpp>
 
@@ -105,11 +106,16 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
         return;
     }
 
+    // Get the prelude from common.hpp
+    using PreludeShader = shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::WebGPU>;
+    std::string vertexWithPrelude = std::string(PreludeShader::prelude) + "\n" + vertexSource;
+    std::string fragmentWithPrelude = std::string(PreludeShader::prelude) + "\n" + fragmentSource;
+
     // Create vertex shader module
     WGPUShaderModuleWGSLDescriptor wgslDesc = {};
     wgslDesc.chain.sType = (WGPUSType)0x00040006;  // WGPUSType_ShaderModuleWGSLDescriptor
     wgslDesc.chain.next = nullptr;
-    WGPUStringView vertexCode = {vertexSource.c_str(), vertexSource.length()};
+    WGPUStringView vertexCode = {vertexWithPrelude.c_str(), vertexWithPrelude.length()};
     wgslDesc.code = vertexCode;
 
     WGPUShaderModuleDescriptor vertexShaderDesc = {};
@@ -125,7 +131,7 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
     }
 
     // Create fragment shader module
-    WGPUStringView fragmentCode = {fragmentSource.c_str(), fragmentSource.length()};
+    WGPUStringView fragmentCode = {fragmentWithPrelude.c_str(), fragmentWithPrelude.length()};
     wgslDesc.code = fragmentCode;
 
     WGPUShaderModuleDescriptor fragmentShaderDesc = {};

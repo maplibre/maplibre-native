@@ -7,6 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
+
 template <>
 struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "HeatmapShader";

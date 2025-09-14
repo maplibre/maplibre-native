@@ -7,6 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
+
 template <>
 struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "SymbolIconShader";
