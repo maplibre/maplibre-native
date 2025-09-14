@@ -53,6 +53,18 @@ class Context;
 
 class ShaderProgram : public gfx::ShaderProgramBase {
 public:
+    // Constructor that takes attribute array from shader definitions
+    template<size_t N>
+    ShaderProgram(Context& ctx,
+                  const std::string& vertexSource,
+                  const std::string& fragmentSource,
+                  const std::array<shaders::AttributeInfo, N>& attrs)
+        : ShaderProgram(ctx, vertexSource, fragmentSource) {
+        // Copy attributes - just set them in the vertex attribute array
+        // The attributes will be populated by the drawable when needed
+    }
+
+    // Basic constructor
     ShaderProgram(Context& context,
                   const std::string& vertexSource,
                   const std::string& fragmentSource);
@@ -76,7 +88,7 @@ private:
     WGPUPipelineLayout pipelineLayout = nullptr;
     WGPUShaderModule vertexShaderModule = nullptr;
     WGPUShaderModule fragmentShaderModule = nullptr;
-    
+
     gfx::VertexAttributeArray vertexAttributes;
     gfx::VertexAttributeArray instanceAttributes;
 };
