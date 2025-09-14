@@ -14,8 +14,31 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::WebGPU> {
     static const std::array<TextureInfo, 0> textures;
     
     static constexpr const char* vertex = R"(
+// Helper functions for unpacking colors
+fn unpack_float(packedValue: f32) -> vec2<f32> {
+    let packedIntValue = i32(packedValue);
+    let v0 = packedIntValue / 256;
+    return vec2<f32>(f32(v0), f32(packedIntValue - v0 * 256));
+}
+
+fn decode_color(encoded: vec2<f32>) -> vec4<f32> {
+    let e0 = unpack_float(encoded[0]) / 255.0;
+    let e1 = unpack_float(encoded[1]) / 255.0;
+    return vec4<f32>(e0.x, e0.y, e1.x, e1.y);
+}
+
+fn unpack_mix_color(packedColors: vec4<f32>, t: f32) -> vec4<f32> {
+    let color1 = decode_color(vec2<f32>(packedColors[0], packedColors[1]));
+    let color2 = decode_color(vec2<f32>(packedColors[2], packedColors[3]));
+    return mix(color1, color2, t);
+}
+
+fn unpack_mix_float(packedValue: vec2<f32>, t: f32) -> f32 {
+    return mix(packedValue[0], packedValue[1], t);
+}
+
 struct VertexInput {
-    @location(0) position: vec2<i32>,
+    @location(0) position: vec2<i16>,
     @location(1) color: vec4<f32>,
     @location(2) opacity: vec2<f32>,
 };
@@ -26,7 +49,7 @@ struct VertexOutput {
     @location(1) opacity: f32,
 };
 
-struct FillUBO {
+struct FillDrawableUBO {
     matrix: mat4x4<f32>,
     color_t: f32,
     opacity_t: f32,
@@ -34,24 +57,24 @@ struct FillUBO {
     pad2: f32,
 };
 
-@group(0) @binding(0) var<uniform> fill_ubo: FillUBO;
+@group(0) @binding(0) var<uniform> drawable: FillDrawableUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-    
+
     // Convert integer position to float
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
-    
+
     // Apply matrix transformation
-    out.position = fill_ubo.matrix * vec4<f32>(pos, 0.0, 1.0);
-    
-    // Mix color based on interpolation factor
-    out.color = mix(in.color, in.color, fill_ubo.color_t);
-    
-    // Mix opacity
-    out.opacity = mix(in.opacity.x, in.opacity.y, fill_ubo.opacity_t);
-    
+    out.position = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
+
+    // Unpack and mix color based on interpolation factor
+    out.color = unpack_mix_color(in.color, drawable.color_t);
+
+    // Unpack and mix opacity
+    out.opacity = unpack_mix_float(in.opacity, drawable.opacity_t);
+
     return out;
 }
 )";
@@ -62,7 +85,7 @@ struct FragmentInput {
     @location(1) opacity: f32,
 };
 
-struct FillPropsUBO {
+struct FillEvaluatedPropsUBO {
     color: vec4<f32>,
     outline_color: vec4<f32>,
     opacity: f32,
@@ -71,15 +94,16 @@ struct FillPropsUBO {
     to_scale: f32,
 };
 
-@group(0) @binding(1) var<uniform> props: FillPropsUBO;
+@group(0) @binding(1) var<uniform> props: FillEvaluatedPropsUBO;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
-    // Use either uniform color or interpolated color
+    // Use interpolated color from vertex shader
     let final_color = in.color;
+    // Combine vertex opacity with uniform opacity
     let final_opacity = in.opacity * props.opacity;
-    
-    return final_color * final_opacity;
+
+    return vec4<f32>(final_color.rgb, final_color.a * final_opacity);
 }
 )";
 };

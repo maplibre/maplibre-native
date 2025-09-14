@@ -145,20 +145,37 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
         return;
     }
 
-    // Create bind group layout for uniforms (MVP matrix)
-    WGPUBindGroupLayoutEntry bindingEntry = {};
-    bindingEntry.binding = 0;
-    bindingEntry.visibility = WGPUShaderStage_Vertex;
-    bindingEntry.buffer.type = WGPUBufferBindingType_Uniform;
-    bindingEntry.buffer.hasDynamicOffset = 0;
-    bindingEntry.buffer.minBindingSize = 64; // 4x4 matrix
-    
+    // Create bind group layout for uniforms
+    // For fill shaders, we need two uniform buffers:
+    // - Binding 0: FillDrawableUBO (vertex shader)
+    // - Binding 1: FillEvaluatedPropsUBO (fragment shader)
+    std::vector<WGPUBindGroupLayoutEntry> bindingEntries;
+
+    // Binding 0: Drawable UBO (vertex shader)
+    WGPUBindGroupLayoutEntry drawableEntry = {};
+    drawableEntry.binding = 0;
+    drawableEntry.visibility = WGPUShaderStage_Vertex;
+    drawableEntry.buffer.type = WGPUBufferBindingType_Uniform;
+    drawableEntry.buffer.hasDynamicOffset = 0;
+    drawableEntry.buffer.minBindingSize = 80; // FillDrawableUBO size
+    bindingEntries.push_back(drawableEntry);
+
+    // Binding 1: Evaluated Props UBO (fragment shader)
+    // TODO: Only add this for shaders that need it (e.g., FillShader)
+    WGPUBindGroupLayoutEntry propsEntry = {};
+    propsEntry.binding = 1;
+    propsEntry.visibility = WGPUShaderStage_Fragment;
+    propsEntry.buffer.type = WGPUBufferBindingType_Uniform;
+    propsEntry.buffer.hasDynamicOffset = 0;
+    propsEntry.buffer.minBindingSize = 48; // FillEvaluatedPropsUBO size
+    bindingEntries.push_back(propsEntry);
+
     WGPUBindGroupLayoutDescriptor bindGroupLayoutDesc = {};
     WGPUStringView bindGroupLabel = {"Uniform Bind Group Layout", strlen("Uniform Bind Group Layout")};
     bindGroupLayoutDesc.label = bindGroupLabel;
-    bindGroupLayoutDesc.entryCount = 1;
-    bindGroupLayoutDesc.entries = &bindingEntry;
-    
+    bindGroupLayoutDesc.entryCount = bindingEntries.size();
+    bindGroupLayoutDesc.entries = bindingEntries.data();
+
     bindGroupLayout = wgpuDeviceCreateBindGroupLayout(device, &bindGroupLayoutDesc);
     if (!bindGroupLayout) {
         // Log::Warning(Event::Shader, "WebGPU ShaderProgram: Failed to create bind group layout, using auto layout");
