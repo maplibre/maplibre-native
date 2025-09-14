@@ -22,7 +22,7 @@
 #include <GLFW/glfw3native.h>
 
 // Dawn-specific headers
-#ifdef MLN_USE_DAWN
+#ifdef MLN_WITH_DAWN
 #include <dawn/dawn_proc.h>
 #include <dawn/native/DawnNative.h>
 #include <webgpu/webgpu.h>
@@ -113,7 +113,7 @@ public:
         
         // Create command encoder
         WGPUCommandEncoderDescriptor encoderDesc = {};
-#ifdef MLN_USE_DAWN
+#ifdef MLN_WITH_DAWN
         WGPUStringView encoderLabel = { "Command Encoder", WGPU_STRLEN };
         encoderDesc.label = encoderLabel;
 #else
@@ -129,7 +129,7 @@ public:
         colorAttachment.clearValue = {0.2, 0.2, 0.3, 1.0};  // Dark blue background
         
         WGPURenderPassDescriptor renderPassDesc = {};
-#ifdef MLN_USE_DAWN
+#ifdef MLN_WITH_DAWN
         WGPUStringView renderPassLabel = { "Render Pass", WGPU_STRLEN };
         renderPassDesc.label = renderPassLabel;
 #else
@@ -151,7 +151,7 @@ public:
         
         // Submit commands
         WGPUCommandBufferDescriptor cmdBufferDesc = {};
-#ifdef MLN_USE_DAWN
+#ifdef MLN_WITH_DAWN
         WGPUStringView cmdBufferLabel = { "Command Buffer", WGPU_STRLEN };
         cmdBufferDesc.label = cmdBufferLabel;
 #else
@@ -190,7 +190,7 @@ private:
     WGPUBuffer vertexBuffer = nullptr;
     
     bool createInstance() {
-#ifdef MLN_USE_DAWN
+#ifdef MLN_WITH_DAWN
         // Initialize Dawn's proc table
         dawnProcSetProcs(&dawn::native::GetProcs());
         
@@ -211,7 +211,7 @@ private:
     }
     
     bool createSurface() {
-#ifdef MLN_USE_DAWN
+#ifdef MLN_WITH_DAWN
     #ifdef __APPLE__
         // Create Metal surface for macOS
         NSWindow* nsWindow = glfwGetCocoaWindow(window);
@@ -238,7 +238,7 @@ private:
         metalDesc.chain.sType = static_cast<WGPUSType>(0x0000000E); // WGPUSType_SurfaceDescriptorFromMetalLayer
         metalDesc.layer = metalLayer;
         surfaceDesc.nextInChain = reinterpret_cast<const WGPUChainedStruct*>(&metalDesc);
-#ifdef MLN_USE_DAWN
+#ifdef MLN_WITH_DAWN
         WGPUStringView surfaceLabel = { "Metal Surface", WGPU_STRLEN };
         surfaceDesc.label = surfaceLabel;
 #else
@@ -249,7 +249,7 @@ private:
     #endif
 #else
         WGPUSurfaceDescriptor surfaceDesc = {};
-#ifdef MLN_USE_DAWN
+#ifdef MLN_WITH_DAWN
         WGPUStringView surfaceLabel = { "GLFW Surface", WGPU_STRLEN };
         surfaceDesc.label = surfaceLabel;
 #else
@@ -335,7 +335,7 @@ private:
         // Create shader module
         WGPUShaderModuleWGSLDescriptor wgslDesc = {};
         wgslDesc.chain.sType = static_cast<WGPUSType>(0x00000006); // WGPUSType_ShaderModuleWGSLDescriptor
-#ifdef MLN_USE_DAWN
+#ifdef MLN_WITH_DAWN
         WGPUStringView codeView = { shaderCode, WGPU_STRLEN };
         wgslDesc.code = codeView;
 #else
@@ -344,7 +344,7 @@ private:
         
         WGPUShaderModuleDescriptor shaderDesc = {};
         shaderDesc.nextInChain = &wgslDesc.chain;
-#ifdef MLN_USE_DAWN
+#ifdef MLN_WITH_DAWN
         WGPUStringView shaderLabel = { "Triangle Shader", WGPU_STRLEN };
         shaderDesc.label = shaderLabel;
 #else
@@ -371,7 +371,7 @@ private:
         
         // Pipeline
         WGPURenderPipelineDescriptor pipelineDesc = {};
-#ifdef MLN_USE_DAWN
+#ifdef MLN_WITH_DAWN
         WGPUStringView pipelineLabel = { "Triangle Pipeline", WGPU_STRLEN };
         pipelineDesc.label = pipelineLabel;
 #else
@@ -379,7 +379,7 @@ private:
 #endif
         
         pipelineDesc.vertex.module = shaderModule;
-#ifdef MLN_USE_DAWN
+#ifdef MLN_WITH_DAWN
         WGPUStringView vsEntryPoint = { "vs_main", WGPU_STRLEN };
         pipelineDesc.vertex.entryPoint = vsEntryPoint;
 #else
@@ -390,7 +390,7 @@ private:
         
         WGPUFragmentState fragmentState = {};
         fragmentState.module = shaderModule;
-#ifdef MLN_USE_DAWN
+#ifdef MLN_WITH_DAWN
         WGPUStringView fsEntryPoint = { "fs_main", WGPU_STRLEN };
         fragmentState.entryPoint = fsEntryPoint;
 #else
@@ -426,7 +426,7 @@ private:
     
     bool createVertexBuffer() {
         WGPUBufferDescriptor bufferDesc = {};
-#ifdef MLN_USE_DAWN
+#ifdef MLN_WITH_DAWN
         WGPUStringView bufferLabel = { "Vertex Buffer", WGPU_STRLEN };
         bufferDesc.label = bufferLabel;
 #else
