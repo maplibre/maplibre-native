@@ -301,8 +301,12 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, 
               completionHandler:^(NSData* data, NSURLResponse* res, NSError* error) {
                 session = nil;
 
-                if ([networkManager.delegate respondsToSelector:@selector(didReceiveResponse:data:error:)]) {
-                    [networkManager.delegate didReceiveResponse:res data:data error:error];
+                if ([networkManager.delegate respondsToSelector:@selector(didReceiveResponse:)]) {
+                    NetworkResponse *networkResponse = [NetworkResponse responseWithData:data urlResponse:res error:error];
+                    networkResponse = [networkManager.delegate didReceiveResponse:networkResponse];
+                    data = networkResponse.data;
+                    res = networkResponse.response;
+                    error = networkResponse.error;
                 }
 
 

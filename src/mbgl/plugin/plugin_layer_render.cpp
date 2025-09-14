@@ -86,10 +86,10 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
                                [[maybe_unused]] const RenderTree& renderTree,
                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
     auto pluginLayer = static_cast<const mbgl::style::PluginLayer::Impl&>(*baseImpl);
-
+    
     std::vector<OverscaledTileID> removedTiles;
     bool removeAllTiles = ((renderTiles == nullptr) || (renderTiles->empty()));
-
+    
     // Get list of tiles to remove and then remove them
     for (auto currentCollection : _featureCollectionByTile) {
         if (removeAllTiles || !hasRenderTile(currentCollection.first)) {
@@ -105,16 +105,16 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
             _featureCollectionByTile.erase(tileID);
         }
     }
-
+    
     if (renderTiles) {
         if (!renderTiles->empty()) {
             auto drawPass = RenderPass::Pass3D;
-
+            
             // If we're reading feature collections, go through
             // and notify the plugin of any new feature collections
             for (const RenderTile& tile : *renderTiles) {
                 const auto& tileID = tile.getOverscaledTileID();
-
+                
                 const auto* optRenderData = getRenderDataForPass(tile, drawPass);
                 if (!optRenderData || !optRenderData->bucket || !optRenderData->bucket->hasData()) {
                     removeTile(drawPass, tileID);
@@ -126,14 +126,14 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
                 if (featureCollection == nullptr) {
                     continue;
                 }
-
+                
                 // See if we already have this tile's feature collection
                 if (_featureCollectionByTile.contains(tileID)) {
                     continue;
                 }
-
+                
                 _featureCollectionByTile[tileID] = featureCollection;
-
+                
                 //                static_cast<const Impl&>(*baseImpl);
                 //                auto layer = static_cast<const mbgl::style::PluginLayer::Impl
                 //                &>(*renderData.layerProperties->baseImpl);
@@ -145,38 +145,40 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
             }
         }
     }
-
+    
     // create layer group
     if (!layerGroup) {
         if (auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID())) {
             setLayerGroup(std::move(layerGroup_), changes);
         }
     }
-
+    
     auto* localLayerGroup = static_cast<LayerGroup*>(layerGroup.get());
-
+    
     // TODO: Implement this
     bool hostChanged = false;
-
+    
     // create drawable
-    if (localLayerGroup->getDrawableCount() == 0 || hostChanged) {
-        localLayerGroup->clearDrawables();
-
-        // create tweaker
-        auto tweaker = std::make_shared<RenderPluginLayerTweaker>(this);
-
-        // create empty drawable using a builder
-        std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder(getID());
-        auto& drawable = builder->getCurrentDrawable(true);
-        drawable->setIsCustom(true);
-        drawable->setRenderPass(RenderPass::Translucent);
-
-        // assign tweaker to drawable
-        drawable->addTweaker(tweaker);
-
-        // add drawable to layer group
-        localLayerGroup->addDrawable(std::move(drawable));
-        ++stats.drawablesAdded;
+    if (pluginLayer.getTypeInfo()->source != mbgl::style::LayerTypeInfo::Source::Required) {
+        if (localLayerGroup->getDrawableCount() == 0 || hostChanged) {
+            localLayerGroup->clearDrawables();
+            
+            // create tweaker
+            auto tweaker = std::make_shared<RenderPluginLayerTweaker>(this);
+            
+            // create empty drawable using a builder
+            std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder(getID());
+            auto& drawable = builder->getCurrentDrawable(true);
+            drawable->setIsCustom(true);
+            drawable->setRenderPass(RenderPass::Translucent);
+            
+            // assign tweaker to drawable
+            drawable->addTweaker(tweaker);
+            
+            // add drawable to layer group
+            localLayerGroup->addDrawable(std::move(drawable));
+            ++stats.drawablesAdded;
+        }
     }
 }
 

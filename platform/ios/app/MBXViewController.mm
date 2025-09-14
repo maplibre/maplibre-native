@@ -284,6 +284,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.mapView addPluginLayerType:[PluginLayerExample class]];
     [self.mapView addPluginLayerType:[PluginLayerExampleMetalRendering class]];
     [self.mapView addPluginProtocolHandler:[PluginProtocolExample class]];
+
     [self.mapView addStyleFilter:[[StyleFilterExample alloc] init]];
 
 }
