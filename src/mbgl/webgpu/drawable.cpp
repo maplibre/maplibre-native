@@ -38,15 +38,7 @@ Drawable::~Drawable() {
         impl->bindGroup = nullptr;
     }
     
-    if (impl->uniformBuffer) {
-        wgpuBufferRelease(impl->uniformBuffer);
-        impl->uniformBuffer = nullptr;
-    }
-
-    if (impl->propsUniformBuffer) {
-        wgpuBufferRelease(impl->propsUniformBuffer);
-        impl->propsUniformBuffer = nullptr;
-    }
+    // Uniform buffers are managed by UniformBufferArray
     
     if (impl->vertexBuffer) {
         wgpuBufferRelease(impl->vertexBuffer);
@@ -74,69 +66,15 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         return;
     }
 
-    // Create bind group if we have a stored layout
-    if (impl->bindGroupLayout && !impl->bindGroup) {
-
-        // Create a uniform buffer for the transformation matrix if not exists
-        if (!impl->uniformBuffer) {
-            // Create identity matrix as placeholder - will be updated in draw()
-            float matrix[16] = {
-                1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, 1.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f
-            };
-
-            WGPUBufferDescriptor uniformBufferDesc = {};
-            WGPUStringView uniformLabel = {"Uniform Buffer", strlen("Uniform Buffer")};
-            uniformBufferDesc.label = uniformLabel;
-            uniformBufferDesc.size = 80; // FillDrawableUBO size (matrix + color_t + opacity_t + padding)
-            uniformBufferDesc.usage = WGPUBufferUsage_Uniform | WGPUBufferUsage_CopyDst;
-            uniformBufferDesc.mappedAtCreation = 1;
-
-            impl->uniformBuffer = wgpuDeviceCreateBuffer(device, &uniformBufferDesc);
-
-            if (impl->uniformBuffer) {
-                void* mappedData = wgpuBufferGetMappedRange(impl->uniformBuffer, 0, 80);
-                if (mappedData) {
-                    // Create full uniform buffer structure
-                    struct {
-                        float matrix[16];
-                        float color_t;
-                        float opacity_t;
-                        float pad1;
-                        float pad2;
-                    } uboData;
-                    std::memcpy(uboData.matrix, matrix, sizeof(matrix));
-                    uboData.color_t = 0.0f;
-                    uboData.opacity_t = 1.0f;
-                    uboData.pad1 = 0.0f;
-                    uboData.pad2 = 0.0f;
-                    std::memcpy(mappedData, &uboData, 80);
-                    wgpuBufferUnmap(impl->uniformBuffer);
-                }
-            }
+    // Store the bind group layout if available for later bind group creation
+    if (impl->bindGroupLayout && !impl->bindGroup && shader) {
+        auto webgpuShader = std::static_pointer_cast<mbgl::webgpu::ShaderProgram>(shader);
+        if (webgpuShader) {
+            impl->bindGroupLayout = webgpuShader->getBindGroupLayout();
         }
 
-        // Create bind group with uniform buffer
-        WGPUBindGroupEntry uniformEntry = {};
-        uniformEntry.binding = 0;
-        uniformEntry.buffer = impl->uniformBuffer;
-        uniformEntry.offset = 0;
-        uniformEntry.size = 80; // FillDrawableUBO size
-
-        WGPUBindGroupDescriptor bindGroupDesc = {};
-        WGPUStringView label = {"Drawable Bind Group", strlen("Drawable Bind Group")};
-        bindGroupDesc.label = label;
-        bindGroupDesc.layout = impl->bindGroupLayout;
-        bindGroupDesc.entryCount = 1;
-        bindGroupDesc.entries = &uniformEntry;
-
-        impl->bindGroup = wgpuDeviceCreateBindGroup(device, &bindGroupDesc);
-        if (impl->bindGroup) {
-        } else {
-        }
     }
+    // Bind group will be created during draw() using the UniformBufferArray
 
     // Extract vertex data from attributes if needed
     if (impl->needsVertexExtraction && vertexAttributes) {
@@ -344,195 +282,17 @@ void Drawable::draw(PaintParameters& parameters) const {
     WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
 
     if (device && queue) {
-        // First, make sure the UniformBufferArray is bound (this updates the buffers)
+        // Call bind on UniformBufferArray to ensure buffers are ready (like Metal does)
         impl->uniformBuffers.bind(*parameters.renderPass);
 
-        // Create uniform buffer if it doesn't exist
-        if (!impl->uniformBuffer) {
-            WGPUBufferDescriptor uniformBufferDesc = {};
-            WGPUStringView uniformLabel = {"Drawable Uniform Buffer", strlen("Drawable Uniform Buffer")};
-            uniformBufferDesc.label = uniformLabel;
-            uniformBufferDesc.size = 80; // FillDrawableUBO size
-            uniformBufferDesc.usage = WGPUBufferUsage_Uniform | WGPUBufferUsage_CopyDst;
-            uniformBufferDesc.mappedAtCreation = 0;
+        // Create bind group from UniformBufferArray if needed
+        if (!impl->bindGroup && shader) {
+            // Get the shader program
+            auto webgpuShader = std::static_pointer_cast<mbgl::webgpu::ShaderProgram>(shader);
+            if (webgpuShader) {
+                WGPUBindGroupLayout layout = webgpuShader->getBindGroupLayout();
+                if (layout) {
 
-            impl->uniformBuffer = wgpuDeviceCreateBuffer(device, &uniformBufferDesc);
-            if (!impl->uniformBuffer) {
-                mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to create uniform buffer");
-                return;
-            }
-            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Created uniform buffer in draw()");
-        }
-
-        // Update uniform buffer with current projection matrix
-        if (impl->uniformBuffer) {
-            // Get the appropriate matrix for transformation
-            mat4 tileMatrix;
-
-            // Get the correct transformation matrix based on drawable type
-            if (const auto& tileid = getTileID()) {
-                // Get the tile-specific transformation matrix
-                mat4 tileTransform;
-                parameters.state.matrixFor(tileTransform, tileid->toUnwrapped());
-
-                // Apply drawable origin if it exists
-                if (const auto& orig = getOrigin(); orig.has_value()) {
-                    matrix::translate(tileTransform, tileTransform, orig->x, orig->y, 0);
-                }
-
-                // The projection matrix should transform to NDC space
-                // Combine it with the tile transform
-                matrix::multiply(tileMatrix, parameters.transformParams.projMatrix, tileTransform);
-            } else {
-                // Fallback to projection matrix if no tile
-                tileMatrix = parameters.transformParams.projMatrix;
-            }
-
-            // Log matrix values for debugging - show full matrix
-            static int matrixLogCount = 0;
-            if (matrixLogCount++ < 3) {  // Only log first few matrices to avoid spam
-                mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Projection matrix:");
-                const auto& proj = parameters.transformParams.projMatrix;
-                mbgl::Log::Info(mbgl::Event::Render, "  Row 0: " +
-                    std::to_string(proj[0]) + ", " + std::to_string(proj[1]) + ", " +
-                    std::to_string(proj[2]) + ", " + std::to_string(proj[3]));
-                mbgl::Log::Info(mbgl::Event::Render, "  Row 1: " +
-                    std::to_string(proj[4]) + ", " + std::to_string(proj[5]) + ", " +
-                    std::to_string(proj[6]) + ", " + std::to_string(proj[7]));
-                mbgl::Log::Info(mbgl::Event::Render, "  Row 2: " +
-                    std::to_string(proj[8]) + ", " + std::to_string(proj[9]) + ", " +
-                    std::to_string(proj[10]) + ", " + std::to_string(proj[11]));
-                mbgl::Log::Info(mbgl::Event::Render, "  Row 3: " +
-                    std::to_string(proj[12]) + ", " + std::to_string(proj[13]) + ", " +
-                    std::to_string(proj[14]) + ", " + std::to_string(proj[15]));
-
-                if (getTileID()) {
-                    mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Tile matrix (should give NDC):");
-                    mbgl::Log::Info(mbgl::Event::Render, "  Row 0: " +
-                        std::to_string(tileMatrix[0]) + ", " + std::to_string(tileMatrix[1]) + ", " +
-                        std::to_string(tileMatrix[2]) + ", " + std::to_string(tileMatrix[3]));
-                    mbgl::Log::Info(mbgl::Event::Render, "  Row 1: " +
-                        std::to_string(tileMatrix[4]) + ", " + std::to_string(tileMatrix[5]) + ", " +
-                        std::to_string(tileMatrix[6]) + ", " + std::to_string(tileMatrix[7]));
-                    mbgl::Log::Info(mbgl::Event::Render, "  Row 2: " +
-                        std::to_string(tileMatrix[8]) + ", " + std::to_string(tileMatrix[9]) + ", " +
-                        std::to_string(tileMatrix[10]) + ", " + std::to_string(tileMatrix[11]));
-                    mbgl::Log::Info(mbgl::Event::Render, "  Row 3: " +
-                        std::to_string(tileMatrix[12]) + ", " + std::to_string(tileMatrix[13]) + ", " +
-                        std::to_string(tileMatrix[14]) + ", " + std::to_string(tileMatrix[15]));
-                }
-            }
-
-            // Convert from double (mat4) to float for WebGPU
-            // mat4 is std::array<double, 16> but WebGPU needs float[16]
-            // Both MapLibre and WebGPU WGSL use column-major matrices
-            // The matrix is already in the correct format, just convert to float
-            float matrix[16];
-            for (int i = 0; i < 16; i++) {
-                matrix[i] = static_cast<float>(tileMatrix[i]);
-            }
-
-            // Debug: verify conversion
-            static int debugCount = 0;
-            if (debugCount++ < 5) {
-
-            }
-
-            // Note: WebGPU uses depth range [0, 1] vs OpenGL's [-1, 1]
-            // But MapLibre's matrices might already account for this
-
-            // Create the full uniform buffer data (80 bytes total)
-            struct FillDrawableUBO {
-                float matrix[16];  // 64 bytes
-                float color_t;     // 4 bytes
-                float opacity_t;   // 4 bytes
-                float pad1;        // 4 bytes
-                float pad2;        // 4 bytes
-            } uboData;
-
-            // Copy matrix
-            std::memcpy(uboData.matrix, matrix, sizeof(matrix));
-
-            // Set default values for now
-            uboData.color_t = 0.0f;
-            uboData.opacity_t = 1.0f;
-            uboData.pad1 = 0.0f;
-            uboData.pad2 = 0.0f;
-
-            // Update the uniform buffer with full 80 bytes
-            wgpuQueueWriteBuffer(queue, impl->uniformBuffer, 0, &uboData, sizeof(uboData));
-
-            // Create bind group if needed
-            static int bindGroupCheckCount = 0;
-            if (bindGroupCheckCount++ < 10) {
-                mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Checking bind group creation - bindGroup: " +
-                    std::string(impl->bindGroup ? "exists" : "null") + ", shader: " +
-                    std::string(shader ? "exists" : "null"));
-            }
-
-            if (!impl->bindGroup && shader) {
-                // Get the shader program
-                auto webgpuShader = std::static_pointer_cast<mbgl::webgpu::ShaderProgram>(shader);
-                if (webgpuShader) {
-                    WGPUBindGroupLayout layout = webgpuShader->getBindGroupLayout();
-                    static int layoutCheckCount = 0;
-                    if (layoutCheckCount++ < 10) {
-                        mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Got bind group layout: " +
-                            std::string(layout ? "valid" : "null"));
-                    }
-                    if (layout) {
-                        // Check if uniform buffer exists
-                        if (!impl->uniformBuffer) {
-                            mbgl::Log::Error(mbgl::Event::Render, "WebGPU: No uniform buffer available for bind group creation");
-                            // Create uniform buffer now if it doesn't exist
-                            WGPUBufferDescriptor uniformBufferDesc = {};
-                            WGPUStringView uniformLabel = {"Drawable Uniform Buffer", strlen("Drawable Uniform Buffer")};
-                            uniformBufferDesc.label = uniformLabel;
-                            uniformBufferDesc.size = 80; // FillDrawableUBO size
-                            uniformBufferDesc.usage = WGPUBufferUsage_Uniform | WGPUBufferUsage_CopyDst;
-                            uniformBufferDesc.mappedAtCreation = 0;
-
-                            impl->uniformBuffer = wgpuDeviceCreateBuffer(device, &uniformBufferDesc);
-                            if (impl->uniformBuffer) {
-                                mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Created uniform buffer for bind group");
-                            }
-                        }
-
-                        // Create second uniform buffer for props if it doesn't exist
-                        if (!impl->propsUniformBuffer) {
-                            // Create props uniform buffer with default values
-                            struct FillEvaluatedPropsUBO {
-                                float color[4];
-                                float outline_color[4];
-                                float opacity;
-                                float fade;
-                                float from_scale;
-                                float to_scale;
-                            } propsData = {
-                                {1.0f, 1.0f, 1.0f, 1.0f},  // color
-                                {0.0f, 0.0f, 0.0f, 1.0f},  // outline_color
-                                1.0f,  // opacity
-                                1.0f,  // fade
-                                1.0f,  // from_scale
-                                1.0f   // to_scale
-                            };
-
-                            WGPUBufferDescriptor propsBufferDesc = {};
-                            WGPUStringView propsLabel = {"Props Uniform Buffer", strlen("Props Uniform Buffer")};
-                            propsBufferDesc.label = propsLabel;
-                            propsBufferDesc.size = 48; // FillEvaluatedPropsUBO size
-                            propsBufferDesc.usage = WGPUBufferUsage_Uniform | WGPUBufferUsage_CopyDst;
-                            propsBufferDesc.mappedAtCreation = 1;
-
-                            impl->propsUniformBuffer = wgpuDeviceCreateBuffer(device, &propsBufferDesc);
-                            if (impl->propsUniformBuffer) {
-                                void* mappedData = wgpuBufferGetMappedRange(impl->propsUniformBuffer, 0, 48);
-                                if (mappedData) {
-                                    std::memcpy(mappedData, &propsData, sizeof(propsData));
-                                    wgpuBufferUnmap(impl->propsUniformBuffer);
-                                }
-                            }
-                        }
 
                         // Create bind group entries from UniformBufferArray
                         std::vector<WGPUBindGroupEntry> entries;
@@ -554,25 +314,13 @@ void Drawable::draw(PaintParameters& parameters) const {
                             }
                         }
 
-                        // If no uniform buffers from the array, use our fallback buffers
+                        // If no uniform buffers from the array, we can't draw
                         if (entries.empty()) {
-                            // Binding 0: Drawable UBO
-                            WGPUBindGroupEntry drawableEntry = {};
-                            drawableEntry.binding = 0;
-                            drawableEntry.buffer = impl->uniformBuffer;
-                            drawableEntry.offset = 0;
-                            drawableEntry.size = 80;  // FillDrawableUBO size
-                            entries.push_back(drawableEntry);
-
-                            // Binding 1: Props UBO (if available)
-                            if (impl->propsUniformBuffer) {
-                                WGPUBindGroupEntry propsEntry = {};
-                                propsEntry.binding = 1;
-                                propsEntry.buffer = impl->propsUniformBuffer;
-                                propsEntry.offset = 0;
-                                propsEntry.size = 48;  // FillEvaluatedPropsUBO size
-                                entries.push_back(propsEntry);
+                            static int noUniformBuffersCount = 0;
+                            if (noUniformBuffersCount++ < 5) {
+                                mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: No uniform buffers available in UniformBufferArray for drawable: " + name);
                             }
+                            return;  // Can't render without uniform buffers
                         }
 
                         // Create bind group descriptor
@@ -590,16 +338,14 @@ void Drawable::draw(PaintParameters& parameters) const {
                         } else {
                             mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to create bind group for drawable");
                         }
-                    } else {
-                        mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: No bind group layout available from shader");
-                    }
                 } else {
-                    mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: Failed to cast shader to WebGPU shader");
+                    mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: No bind group layout available from shader");
                 }
+            } else {
+                mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: Failed to cast shader to WebGPU shader");
             }
-
-            // Debug logging removed to prevent heap corruption in multi-threaded environment
         }
+
     }
 
     // Get pipeline from shader if we don't have it yet
