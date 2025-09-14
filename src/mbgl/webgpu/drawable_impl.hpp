@@ -29,38 +29,40 @@ public:
 
     std::vector<UniqueDrawSegment> segments;
 
-    WGPURenderPipeline pipeline = nullptr;
-    WGPUBindGroup bindGroup = nullptr;
-    WGPUBindGroupLayout bindGroupLayout = nullptr;  // Store layout for deferred bind group creation
-    
-    // Buffer resources
-    WGPUBuffer vertexBuffer = nullptr;
-    WGPUBuffer indexBuffer = nullptr;
-    std::vector<uint8_t> vertexData;
-    std::size_t vertexStride = 0;
-    std::size_t vertexSize = 0;
-    
-    gfx::IndexVectorBasePtr indexVector;
+    // Vertex description (similar to Metal's vertexDesc/vertexDescHash)
+    std::size_t vertexDescHash = 0;
+
+    // Index data (matching Metal's indexes)
+    gfx::IndexVectorBasePtr indexes;
     std::size_t vertexCount = 0;
     gfx::AttributeDataType vertexType = gfx::AttributeDataType::Invalid;
-    bool needsVertexExtraction = false;  // Flag to indicate vertices need extraction from attributes
 
     gfx::AttributeBindingArray attributeBindings;
     gfx::AttributeBindingArray instanceBindings;
 
     UniformBufferArray uniformBuffers;
 
-    // Render state
-    bool colorEnabled = true;
-    gfx::ColorMode colorMode;
-    bool depthEnabled = false;
-    gfx::DepthMaskType depthMask = gfx::DepthMaskType::ReadWrite;
+    // Render state (matching Metal)
     gfx::DepthMode depthMode = gfx::DepthMode::disabled();
     gfx::StencilMode stencilMode;
     gfx::CullFaceMode cullFaceMode;
     std::size_t vertexAttrId = 0;
 
+    // Pipeline state (WebGPU equivalent of Metal's pipelineState)
+    WGPURenderPipeline pipelineState = nullptr;
+
     std::optional<gfx::RenderPassDescriptor> renderPassDescriptor;
+
+    // WebGPU-specific state (similar to Metal's depthStencilState)
+    WGPUDepthStencilState depthStencilState = {};
+    gfx::StencilMode previousStencilMode;
+
+    // WebGPU-specific resources needed for rendering
+    WGPUBindGroup bindGroup = nullptr;
+    WGPUBindGroupLayout bindGroupLayout = nullptr;
+    WGPUBuffer vertexBuffer = nullptr;
+    WGPUBuffer indexBuffer = nullptr;
+    std::vector<uint8_t> vertexData;
 };
 
 // WebGPU uses the base DrawSegment implementation directly
