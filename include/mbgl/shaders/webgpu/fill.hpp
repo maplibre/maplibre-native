@@ -57,7 +57,8 @@ struct FillDrawableUBO {
     pad2: f32,
 };
 
-@group(0) @binding(0) var<uniform> drawable: FillDrawableUBO;
+// Use the same binding index as Metal: idFillDrawableUBO = 2
+@group(0) @binding(2) var<uniform> drawable: FillDrawableUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -94,7 +95,8 @@ struct FillEvaluatedPropsUBO {
     to_scale: f32,
 };
 
-@group(0) @binding(1) var<uniform> props: FillEvaluatedPropsUBO;
+// Use the same binding index as Metal: idFillEvaluatedPropsUBO = 3 (Metal/WebGPU, not Vulkan)
+@group(0) @binding(3) var<uniform> props: FillEvaluatedPropsUBO;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {

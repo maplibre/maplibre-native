@@ -147,23 +147,23 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
 
     // Create bind group layout for uniforms
     // For fill shaders, we need two uniform buffers:
-    // - Binding 0: FillDrawableUBO (vertex shader)
-    // - Binding 1: FillEvaluatedPropsUBO (fragment shader)
+    // - Binding 2: FillDrawableUBO (vertex shader) - matches Metal's idFillDrawableUBO
+    // - Binding 3: FillEvaluatedPropsUBO (fragment shader) - matches Metal's idFillEvaluatedPropsUBO
     std::vector<WGPUBindGroupLayoutEntry> bindingEntries;
 
-    // Binding 0: Drawable UBO (vertex shader)
+    // Binding 2: Drawable UBO (vertex shader)
     WGPUBindGroupLayoutEntry drawableEntry = {};
-    drawableEntry.binding = 0;
+    drawableEntry.binding = 2;  // idFillDrawableUBO
     drawableEntry.visibility = WGPUShaderStage_Vertex;
     drawableEntry.buffer.type = WGPUBufferBindingType_Uniform;
     drawableEntry.buffer.hasDynamicOffset = 0;
     drawableEntry.buffer.minBindingSize = 80; // FillDrawableUBO size
     bindingEntries.push_back(drawableEntry);
 
-    // Binding 1: Evaluated Props UBO (fragment shader)
+    // Binding 3: Evaluated Props UBO (fragment shader)
     // TODO: Only add this for shaders that need it (e.g., FillShader)
     WGPUBindGroupLayoutEntry propsEntry = {};
-    propsEntry.binding = 1;
+    propsEntry.binding = 3;  // idFillEvaluatedPropsUBO (Metal/WebGPU, not Vulkan)
     propsEntry.visibility = WGPUShaderStage_Fragment;
     propsEntry.buffer.type = WGPUBufferBindingType_Uniform;
     propsEntry.buffer.hasDynamicOffset = 0;
