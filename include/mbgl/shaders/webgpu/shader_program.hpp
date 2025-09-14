@@ -115,13 +115,15 @@ public:
     WGPUBindGroupLayout getBindGroupLayout() const { return bindGroupLayout; }
     const std::vector<shaders::AttributeInfo>& getAttributeInfos() const { return attributeInfos; }
 
+    // Make getWGPUFormat public for use in drawable
+    static WGPUVertexFormat getWGPUFormat(gfx::AttributeDataType type);
+
 private:
     void createShaderModules(const std::string& vertexSource, const std::string& fragmentSource);
     void createPipelineLayout();
     WGPURenderPipeline createPipeline(const WGPUVertexBufferLayout* vertexLayouts,
                                      uint32_t vertexLayoutCount,
                                      const gfx::ColorMode& colorMode);
-    static WGPUVertexFormat getWGPUFormat(gfx::AttributeDataType type);
     static WGPUBlendOperation getWGPUBlendOperation(gfx::ColorBlendEquationType equation);
     static WGPUBlendFactor getWGPUBlendFactor(gfx::ColorBlendFactorType factor);
 
