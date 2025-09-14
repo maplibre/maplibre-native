@@ -12,9 +12,11 @@
       "generator": "Xcode",
       "description": "Create Xcode project for iOS",
       "binaryDir": "${sourceDir}/build-ios",
+      "toolchainFile": "${sourceDir}/platform/ios/ios.toolchain.cmake",
       "cacheVariables": {
         "CMAKE_SYSTEM_NAME": "iOS",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "CMAKE_OSX_DEPLOYMENT_TARGET": "14.0",
         "MLN_WITH_METAL": "ON",
         "MLN_WITH_OPENGL": "OFF"
       }
@@ -27,6 +29,7 @@
       "cacheVariables": {
         "CMAKE_SYSTEM_NAME": "Darwin",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "CMAKE_OSX_DEPLOYMENT_TARGET": "14.3",
         "MLN_WITH_METAL": "ON",
         "MLN_WITH_OPENGL": "OFF",
         "CMAKE_BUILD_TYPE": "Debug",
@@ -71,14 +74,6 @@
       }
     },
     {
-      "name": "macos-core",
-      "inherits": "macos",
-      "cacheVariables": {
-        "MLN_CORE_INCLUDE_DEPS": "ON",
-        "MLN_WITH_GLFW": "OFF"
-      }
-    },
-    {
       "name": "linux",
       "hidden": true,
       "generator": "Ninja",
@@ -107,14 +102,6 @@
       }
     },
     {
-      "name": "linux-opengl-core",
-      "inherits": "linux-opengl",
-      "cacheVariables": {
-        "MLN_CORE_INCLUDE_DEPS": "ON",
-        "MLN_USE_BUILTIN_ICU": "OFF"
-      }
-    },
-    {
       "name": "linux-vulkan",
       "binaryDir": "${sourceDir}/build-linux-vulkan",
       "inherits": "linux",
@@ -122,14 +109,6 @@
         "MLN_WITH_VULKAN": "ON",
         "MLN_WITH_WAYLAND": "OFF",
         "MLN_WITH_X11": "ON"
-      }
-    },
-    {
-      "name": "linux-vulkan-core",
-      "inherits": "linux-vulkan",
-      "cacheVariables": {
-        "MLN_CORE_INCLUDE_DEPS": "ON",
-        "MLN_USE_BUILTIN_ICU": "OFF"
       }
     },
     {
@@ -201,7 +180,7 @@
   "buildPresets": [
     {
       "name": "macos-core",
-      "configurePreset": "macos-core",
+      "configurePreset": "macos",
       "targets": ["mbgl-core"]
     },
     {

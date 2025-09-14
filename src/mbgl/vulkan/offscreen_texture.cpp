@@ -143,7 +143,7 @@ bool OffscreenTexture::isRenderable() {
 }
 
 PremultipliedImage OffscreenTexture::readStillImage() {
-    return getResource<OffscreenTextureResource>().readStillImage();
+    return getResource<OffscreenTextureResource>().readStillImage(); // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
 const gfx::Texture2DPtr& OffscreenTexture::getTexture() {

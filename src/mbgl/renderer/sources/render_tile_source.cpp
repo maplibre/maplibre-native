@@ -348,7 +348,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         for (auto& lg : {outlineLayerGroup, textLayerGroup}) {
             lg->removeDrawablesIf([&](gfx::Drawable& drawable) {
                 return drawable.getName() == drawableName &&
-                       !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
+                       !(drawable.getTileID().has_value() && newTiles.contains(*drawable.getTileID()));
             });
         }
 
@@ -404,7 +404,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         // erase drawables that are not in the current tile set
         tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
             return drawable.getName() == drawableName &&
-                   !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
+                   !(drawable.getTileID().has_value() && newTiles.contains(*drawable.getTileID()));
         });
 
         // add new drawables and update existing ones

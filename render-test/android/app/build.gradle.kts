@@ -60,6 +60,11 @@ android {
     productFlavors {
         create("opengl") {
             dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_WITH_OPENGL=ON")
+                }
+            }
         }
         create("vulkan") {
             dimension = "renderer"
