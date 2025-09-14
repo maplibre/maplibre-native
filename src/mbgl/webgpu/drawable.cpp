@@ -332,14 +332,32 @@ void Drawable::draw(PaintParameters& parameters) const {
         return;
     }
 
-    // Update uniform buffer with current projection matrix
-    if (impl->uniformBuffer) {
-        auto& context = static_cast<webgpu::Context&>(parameters.context);
-        auto& backend = static_cast<webgpu::RendererBackend&>(context.getBackend());
-        WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
-        WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
+    // Get WebGPU context and device
+    auto& context = static_cast<webgpu::Context&>(parameters.context);
+    auto& backend = static_cast<webgpu::RendererBackend&>(context.getBackend());
+    WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
+    WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
 
-        if (device && queue) {
+    if (device && queue) {
+        // Create uniform buffer if it doesn't exist
+        if (!impl->uniformBuffer) {
+            WGPUBufferDescriptor uniformBufferDesc = {};
+            WGPUStringView uniformLabel = {"Drawable Uniform Buffer", strlen("Drawable Uniform Buffer")};
+            uniformBufferDesc.label = uniformLabel;
+            uniformBufferDesc.size = 80; // FillDrawableUBO size
+            uniformBufferDesc.usage = WGPUBufferUsage_Uniform | WGPUBufferUsage_CopyDst;
+            uniformBufferDesc.mappedAtCreation = 0;
+
+            impl->uniformBuffer = wgpuDeviceCreateBuffer(device, &uniformBufferDesc);
+            if (!impl->uniformBuffer) {
+                mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to create uniform buffer");
+                return;
+            }
+            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Created uniform buffer in draw()");
+        }
+
+        // Update uniform buffer with current projection matrix
+        if (impl->uniformBuffer) {
             // Get the appropriate matrix for transformation
             mat4 tileMatrix;
 
@@ -437,12 +455,41 @@ void Drawable::draw(PaintParameters& parameters) const {
             wgpuQueueWriteBuffer(queue, impl->uniformBuffer, 0, &uboData, sizeof(uboData));
 
             // Create bind group if needed
+            static int bindGroupCheckCount = 0;
+            if (bindGroupCheckCount++ < 10) {
+                mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Checking bind group creation - bindGroup: " +
+                    std::string(impl->bindGroup ? "exists" : "null") + ", shader: " +
+                    std::string(shader ? "exists" : "null"));
+            }
+
             if (!impl->bindGroup && shader) {
                 // Get the shader program
                 auto webgpuShader = std::static_pointer_cast<mbgl::webgpu::ShaderProgram>(shader);
                 if (webgpuShader) {
                     WGPUBindGroupLayout layout = webgpuShader->getBindGroupLayout();
+                    static int layoutCheckCount = 0;
+                    if (layoutCheckCount++ < 10) {
+                        mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Got bind group layout: " +
+                            std::string(layout ? "valid" : "null"));
+                    }
                     if (layout) {
+                        // Check if uniform buffer exists
+                        if (!impl->uniformBuffer) {
+                            mbgl::Log::Error(mbgl::Event::Render, "WebGPU: No uniform buffer available for bind group creation");
+                            // Create uniform buffer now if it doesn't exist
+                            WGPUBufferDescriptor uniformBufferDesc = {};
+                            WGPUStringView uniformLabel = {"Drawable Uniform Buffer", strlen("Drawable Uniform Buffer")};
+                            uniformBufferDesc.label = uniformLabel;
+                            uniformBufferDesc.size = 80; // FillDrawableUBO size
+                            uniformBufferDesc.usage = WGPUBufferUsage_Uniform | WGPUBufferUsage_CopyDst;
+                            uniformBufferDesc.mappedAtCreation = 0;
+
+                            impl->uniformBuffer = wgpuDeviceCreateBuffer(device, &uniformBufferDesc);
+                            if (impl->uniformBuffer) {
+                                mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Created uniform buffer for bind group");
+                            }
+                        }
+
                         // Create bind group entry for uniform buffer
                         WGPUBindGroupEntry entry = {};
                         entry.binding = 0;  // Binding 0 for uniforms
