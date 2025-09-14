@@ -12,6 +12,61 @@ ShaderProgram::ShaderProgram(Context& context_,
     createPipeline(vertexSource, fragmentSource);
 }
 
+WGPUVertexFormat ShaderProgram::getWGPUFormat(gfx::AttributeDataType type) {
+    switch (type) {
+        case gfx::AttributeDataType::Byte:
+            return WGPUVertexFormat_Sint8;
+        case gfx::AttributeDataType::Byte2:
+            return WGPUVertexFormat_Sint8x2;
+        case gfx::AttributeDataType::Byte4:
+            return WGPUVertexFormat_Sint8x4;
+        case gfx::AttributeDataType::UByte:
+            return WGPUVertexFormat_Uint8;
+        case gfx::AttributeDataType::UByte2:
+            return WGPUVertexFormat_Uint8x2;
+        case gfx::AttributeDataType::UByte4:
+            return WGPUVertexFormat_Uint8x4;
+        case gfx::AttributeDataType::Short:
+            return WGPUVertexFormat_Sint16;
+        case gfx::AttributeDataType::Short2:
+            return WGPUVertexFormat_Sint16x2;
+        case gfx::AttributeDataType::Short4:
+            return WGPUVertexFormat_Sint16x4;
+        case gfx::AttributeDataType::UShort:
+            return WGPUVertexFormat_Uint16;
+        case gfx::AttributeDataType::UShort2:
+            return WGPUVertexFormat_Uint16x2;
+        case gfx::AttributeDataType::UShort4:
+            return WGPUVertexFormat_Uint16x4;
+        case gfx::AttributeDataType::Int:
+            return WGPUVertexFormat_Sint32;
+        case gfx::AttributeDataType::Int2:
+            return WGPUVertexFormat_Sint32x2;
+        case gfx::AttributeDataType::Int3:
+            return WGPUVertexFormat_Sint32x3;
+        case gfx::AttributeDataType::Int4:
+            return WGPUVertexFormat_Sint32x4;
+        case gfx::AttributeDataType::UInt:
+            return WGPUVertexFormat_Uint32;
+        case gfx::AttributeDataType::UInt2:
+            return WGPUVertexFormat_Uint32x2;
+        case gfx::AttributeDataType::UInt3:
+            return WGPUVertexFormat_Uint32x3;
+        case gfx::AttributeDataType::UInt4:
+            return WGPUVertexFormat_Uint32x4;
+        case gfx::AttributeDataType::Float:
+            return WGPUVertexFormat_Float32;
+        case gfx::AttributeDataType::Float2:
+            return WGPUVertexFormat_Float32x2;
+        case gfx::AttributeDataType::Float3:
+            return WGPUVertexFormat_Float32x3;
+        case gfx::AttributeDataType::Float4:
+            return WGPUVertexFormat_Float32x4;
+        default:
+            return WGPUVertexFormat_Float32x2; // Default fallback
+    }
+}
+
 ShaderProgram::~ShaderProgram() {
     // Release resources in reverse order of creation
     // Pipeline depends on pipeline layout and shader modules
@@ -144,21 +199,70 @@ void ShaderProgram::createPipeline(const std::string& vertexSource, const std::s
         return;
     }
 
-    // Set up vertex state - for now just use position attribute
-    // The actual attribute layout should come from the shader definitions
+    // Set up vertex state based on provided attributes or use defaults
     WGPUVertexBufferLayout vertexBufferLayout = {};
+    std::vector<WGPUVertexAttribute> vertexAttrs;
 
-    static WGPUVertexAttribute fillAttrs[1] = {};
+    if (!attributeInfos.empty()) {
+        // Use the attributes passed from shader definitions
+        size_t currentOffset = 0;
+        for (const auto& attrInfo : attributeInfos) {
+            WGPUVertexAttribute attr = {};
+            attr.format = getWGPUFormat(attrInfo.dataType);
+            attr.offset = currentOffset;
+            attr.shaderLocation = attrInfo.index;
+            vertexAttrs.push_back(attr);
 
-    // Attribute 0: position (vec2<i16>)
-    fillAttrs[0].format = WGPUVertexFormat_Sint16x2;
-    fillAttrs[0].offset = 0;
-    fillAttrs[0].shaderLocation = 0;
+            // Calculate offset for next attribute based on data type size
+            switch (attrInfo.dataType) {
+                case gfx::AttributeDataType::Byte:
+                case gfx::AttributeDataType::UByte:
+                    currentOffset += 1; break;
+                case gfx::AttributeDataType::Byte2:
+                case gfx::AttributeDataType::UByte2:
+                case gfx::AttributeDataType::Short:
+                case gfx::AttributeDataType::UShort:
+                    currentOffset += 2; break;
+                case gfx::AttributeDataType::Byte4:
+                case gfx::AttributeDataType::UByte4:
+                case gfx::AttributeDataType::Short2:
+                case gfx::AttributeDataType::UShort2:
+                case gfx::AttributeDataType::Float:
+                case gfx::AttributeDataType::Int:
+                case gfx::AttributeDataType::UInt:
+                    currentOffset += 4; break;
+                case gfx::AttributeDataType::Float2:
+                case gfx::AttributeDataType::Short4:
+                case gfx::AttributeDataType::UShort4:
+                case gfx::AttributeDataType::Int2:
+                case gfx::AttributeDataType::UInt2:
+                    currentOffset += 8; break;
+                case gfx::AttributeDataType::Float3:
+                case gfx::AttributeDataType::Int3:
+                case gfx::AttributeDataType::UInt3:
+                    currentOffset += 12; break;
+                case gfx::AttributeDataType::Float4:
+                case gfx::AttributeDataType::Int4:
+                case gfx::AttributeDataType::UInt4:
+                    currentOffset += 16; break;
+                default:
+                    currentOffset += 8; break;
+            }
+        }
+        vertexBufferLayout.arrayStride = currentOffset;
+    } else {
+        // Fallback: assume simple position-only layout
+        WGPUVertexAttribute attr = {};
+        attr.format = WGPUVertexFormat_Sint16x2;
+        attr.offset = 0;
+        attr.shaderLocation = 0;
+        vertexAttrs.push_back(attr);
+        vertexBufferLayout.arrayStride = 4;
+    }
 
-    vertexBufferLayout.arrayStride = 4;  // 4 bytes for position only for now
     vertexBufferLayout.stepMode = WGPUVertexStepMode_Vertex;
-    vertexBufferLayout.attributeCount = 1;
-    vertexBufferLayout.attributes = fillAttrs;
+    vertexBufferLayout.attributeCount = vertexAttrs.size();
+    vertexBufferLayout.attributes = vertexAttrs.data();
     
     WGPUVertexState vertexState = {};
     vertexState.module = vertexShaderModule;
