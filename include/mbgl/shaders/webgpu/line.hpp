@@ -98,34 +98,162 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "LineGradientShader";
-    static const std::array<AttributeInfo, 7> attributes;
+    static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
-    
-    static constexpr const char* vertex = "";
-    static constexpr const char* fragment = "";
+
+    static constexpr const char* vertex = R"(
+struct VertexInput {
+    @location(0) pos_normal: vec4<f32>,
+    @location(1) data: vec4<f32>,
+};
+
+struct VertexOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) v_lineprogress: f32,
+};
+
+struct LineGradientUBO {
+    matrix: mat4x4<f32>,
+};
+
+@group(0) @binding(0) var<uniform> ubo: LineGradientUBO;
+
+@vertex
+fn main(in: VertexInput) -> VertexOutput {
+    var out: VertexOutput;
+    let pos = in.pos_normal.xy;
+    let normal = in.pos_normal.zw;
+    let linesofar = in.data.z;
+
+    out.position = ubo.matrix * vec4<f32>(pos + normal * 2.0, 0.0, 1.0);
+    out.v_lineprogress = linesofar;
+    return out;
+}
+)";
+
+    static constexpr const char* fragment = R"(
+@group(0) @binding(1) var gradient_texture: texture_2d<f32>;
+@group(0) @binding(2) var gradient_sampler: sampler;
+
+@fragment
+fn main(@location(0) v_lineprogress: f32) -> @location(0) vec4<f32> {
+    let color = textureSample(gradient_texture, gradient_sampler, vec2<f32>(v_lineprogress, 0.5));
+    return color;
+}
+)";
 };
 
 template <>
 struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "LinePatternShader";
-    static const std::array<AttributeInfo, 9> attributes;
+    static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
-    
-    static constexpr const char* vertex = "";
-    static constexpr const char* fragment = "";
+
+    static constexpr const char* vertex = R"(
+struct VertexInput {
+    @location(0) pos_normal: vec4<f32>,
+    @location(1) data: vec4<f32>,
+};
+
+struct VertexOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) v_normal: vec2<f32>,
+    @location(1) v_width: f32,
+};
+
+struct LinePatternUBO {
+    matrix: mat4x4<f32>,
+    pattern_size: vec2<f32>,
+    tile_units_to_pixels: f32,
+    pad: f32,
+};
+
+@group(0) @binding(0) var<uniform> ubo: LinePatternUBO;
+
+@vertex
+fn main(in: VertexInput) -> VertexOutput {
+    var out: VertexOutput;
+    let pos = in.pos_normal.xy;
+    let normal = in.pos_normal.zw;
+
+    out.position = ubo.matrix * vec4<f32>(pos + normal * 2.0, 0.0, 1.0);
+    out.v_normal = normal;
+    out.v_width = 1.0;
+    return out;
+}
+)";
+
+    static constexpr const char* fragment = R"(
+@group(0) @binding(1) var pattern_texture: texture_2d<f32>;
+@group(0) @binding(2) var pattern_sampler: sampler;
+
+@fragment
+fn main(@location(0) v_normal: vec2<f32>, @location(1) v_width: f32) -> @location(0) vec4<f32> {
+    let pattern_pos = v_normal * 0.5 + 0.5;
+    let color = textureSample(pattern_texture, pattern_sampler, pattern_pos);
+    return color;
+}
+)";
 };
 
 template <>
 struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "LineSDFShader";
-    static const std::array<AttributeInfo, 9> attributes;
+    static const std::array<AttributeInfo, 2> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
-    
-    static constexpr const char* vertex = "";
-    static constexpr const char* fragment = "";
+
+    static constexpr const char* vertex = R"(
+struct VertexInput {
+    @location(0) pos_normal: vec4<f32>,
+    @location(1) data: vec4<f32>,
+};
+
+struct VertexOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) v_normal: vec2<f32>,
+    @location(1) v_tex: vec2<f32>,
+};
+
+struct LineSDFUBO {
+    matrix: mat4x4<f32>,
+    patternscale_a: vec2<f32>,
+    patternscale_b: vec2<f32>,
+    tex_y_a: f32,
+    tex_y_b: f32,
+    sdfgamma: f32,
+    pad: f32,
+};
+
+@group(0) @binding(0) var<uniform> ubo: LineSDFUBO;
+
+@vertex
+fn main(in: VertexInput) -> VertexOutput {
+    var out: VertexOutput;
+    let pos = in.pos_normal.xy;
+    let normal = in.pos_normal.zw;
+    let linesofar = in.data.z;
+
+    out.position = ubo.matrix * vec4<f32>(pos + normal * 2.0, 0.0, 1.0);
+    out.v_normal = normal;
+    out.v_tex = vec2<f32>(linesofar / ubo.patternscale_a.x, normal.y * 0.5 + 0.5);
+    return out;
+}
+)";
+
+    static constexpr const char* fragment = R"(
+@group(0) @binding(1) var sdf_texture: texture_2d<f32>;
+@group(0) @binding(2) var sdf_sampler: sampler;
+
+@fragment
+fn main(@location(0) v_normal: vec2<f32>, @location(1) v_tex: vec2<f32>) -> @location(0) vec4<f32> {
+    let dist = textureSample(sdf_texture, sdf_sampler, v_tex).a;
+    let alpha = smoothstep(0.5 - 0.03, 0.5 + 0.03, dist);
+    return vec4<f32>(1.0, 1.0, 1.0, alpha);
+}
+)";
 };
 
 } // namespace shaders
