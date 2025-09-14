@@ -8,7 +8,7 @@
 #include <mbgl/util/monotonic_timer.hpp>
 
 #include <cassert>
-#include <math.h>
+#include <cmath>
 
 #define USE_DESCRIPTOR_POOL_RESET
 

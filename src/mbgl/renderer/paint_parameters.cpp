@@ -158,7 +158,7 @@ void PaintParameters::clearStencil() {
     vulkanRenderPass.clearStencil();
 
     context.renderingStats().stencilClears++;
-#else // !MLN_RENDER_BACKEND_METAL
+#elif MLN_RENDER_BACKEND_OPENGL
     context.clearStencilBuffer(0b00000000);
 #endif
 }
@@ -249,7 +249,7 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
         vulkanContext.renderingStats().stencilUpdates++;
     }
 
-#else  // MLN_RENDER_BACKEND_OPENGL
+#elif MLN_RENDER_BACKEND_OPENGL
     auto program = staticData.shaders->getLegacyGroup().get<ClippingMaskProgram>();
 
     if (!program) {

@@ -10,9 +10,8 @@
 
 #include <cassert>
 #include <memory>
-#include <string>
-#include <stdexcept>
 #include <optional>
+#include <string>
 
 namespace mbgl {
 namespace style {
@@ -109,6 +108,8 @@ bool layerTypeInfoEquals(const mbgl::style::LayerTypeInfo* one, const mbgl::styl
  * create an instance of the desired type, calling `LayerManager`:
  *
  *     auto circleLayer = LayerManager::get()->createLayer("circle", ...);
+ *
+ * NOTE: Derived class must invalidate `weakFactory` in their destructor
  */
 class Layer {
 public:
