@@ -53,6 +53,9 @@ class Context;
 
 class ShaderProgram : public gfx::ShaderProgramBase {
 public:
+    // Static name member required by is_shader_v trait
+    static constexpr std::string_view Name = "WebGPUShader";
+
     // Constructor that takes attribute array from shader definitions
     template<size_t N>
     ShaderProgram(Context& ctx,
