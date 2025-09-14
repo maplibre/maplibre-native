@@ -54,6 +54,7 @@ public:
     
     // Override virtual methods from RendererBackend
     void* getCurrentTextureView() override;
+    void* getDepthStencilView() override;
     mbgl::Size getFramebufferSize() const override;
 
 private:
@@ -69,6 +70,10 @@ private:
     mutable std::mutex textureViewMutex;
     wgpu::TextureView currentTextureView;  // Keep the current texture view alive
     wgpu::Texture currentTexture;  // Keep the texture alive as well
+
+    // Depth/stencil texture and view
+    wgpu::Texture depthStencilTexture;
+    wgpu::TextureView depthStencilView;
     
     // Frame synchronization
     std::atomic<bool> frameInProgress{false};

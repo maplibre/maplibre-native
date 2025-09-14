@@ -38,6 +38,7 @@ public:
     
     // Surface texture access - to be overridden by platform backends
     virtual void* getCurrentTextureView();
+    virtual void* getDepthStencilView();
     virtual mbgl::Size getFramebufferSize() const;
 
 protected:

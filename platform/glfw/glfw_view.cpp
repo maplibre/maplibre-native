@@ -1176,9 +1176,12 @@ void GLFWView::render() {
 
         // Swap buffers for the appropriate backend
         // WebGPU backend handles its own swap
+#if MLN_RENDER_BACKEND_WEBGPU
         if (mbgl::gfx::Backend::GetType() == mbgl::gfx::Backend::Type::WebGPU) {
             static_cast<GLFWWebGPUBackend*>(backend.get())->swap();
-        } else {
+        } else
+#endif
+        {
             // OpenGL or other backends
             glfwSwapBuffers(window);
         }
