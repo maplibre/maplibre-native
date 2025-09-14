@@ -9,8 +9,8 @@
 namespace mbgl {
 namespace webgpu {
 
-DrawableBuilder::DrawableBuilder(std::string name)
-    : gfx::DrawableBuilder(std::move(name)) {}
+DrawableBuilder::DrawableBuilder(std::string name_)
+    : gfx::DrawableBuilder(std::move(name_)) {}
 
 DrawableBuilder::~DrawableBuilder() = default;
 
