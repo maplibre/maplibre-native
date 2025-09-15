@@ -60,8 +60,11 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             return;
         }
 
-        // Like Metal's tile_layer_group.cpp line 129: uniformBuffers.bindMtl(renderPass)
-        // In WebGPU, we copy uniform buffers to each drawable since we use bind groups
+        // Call bindWebgpu to bind uniform buffers (similar to Metal's bindMtl)
+        auto& webgpuRenderPass = static_cast<webgpu::RenderPass&>(*parameters.renderPass);
+        static_cast<webgpu::UniformBufferArray&>(uniformBuffers).bindWebgpu(webgpuRenderPass);
+
+        // In WebGPU, we also copy uniform buffers to each drawable since we use bind groups
         auto& drawableWebGPU = static_cast<webgpu::Drawable&>(drawable);
 
         // Copy uniform buffers from layer group to drawable
