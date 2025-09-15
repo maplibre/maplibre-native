@@ -26,7 +26,9 @@ bool TestRunner::startTest(const std::string& basePath) {
         return false;
     }
 
+    mbgl::Log::Info(mbgl::Event::General, "Start BenchmarkRunner");
     int status = mbgl::runBenchmark(static_cast<uint32_t>(argv.size()), argv.data());
+    mbgl::Log::Info(mbgl::Event::General, "BenchmarkRunner finished with status: '%d'", status);
 
     return status == 0;
 }
