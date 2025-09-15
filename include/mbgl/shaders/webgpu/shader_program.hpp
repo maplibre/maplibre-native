@@ -65,51 +65,29 @@ public:
                   WGPUShaderModule vertexModule,
                   WGPUShaderModule fragmentModule);
 
-    // Constructor that takes attribute array from shader definitions (for compatibility)
-    template<size_t N>
-    ShaderProgram(Context& ctx,
+    // Minimal constructor for Context::createShader compatibility
+    ShaderProgram(Context& context,
                   const std::string& vertexSource,
-                  const std::string& fragmentSource,
-                  const std::array<shaders::AttributeInfo, N>& attrs)
-        : context(&ctx) {
-        // Store attributes for pipeline creation
-        attributeInfos.reserve(N);
-        for (const auto& attr : attrs) {
-            attributeInfos.push_back(attr);
-            // Initialize the vertex attribute (like Metal does)
-            initAttribute(attr);
-        }
-        createShaderModules(vertexSource, fragmentSource);
-        createPipelineLayout();
-    }
+                  const std::string& fragmentSource);
 
-    // Constructor that takes both attributes and textures (matching Metal's approach)
+    // Template constructor for shader_group compatibility (required by shader definitions)
     template<size_t N, size_t M>
-    ShaderProgram(Context& ctx,
+    ShaderProgram(Context& context,
                   const std::string& vertexSource,
                   const std::string& fragmentSource,
                   const std::array<shaders::AttributeInfo, N>& attrs,
                   const std::array<shaders::TextureInfo, M>& texts)
-        : context(&ctx) {
-        // Store attributes for pipeline creation
-        attributeInfos.reserve(N);
+        : ShaderProgram(context, vertexSource, fragmentSource) {
+        // Initialize attributes like Metal does
         for (const auto& attr : attrs) {
-            attributeInfos.push_back(attr);
-            // Initialize the vertex attribute (like Metal does)
             initAttribute(attr);
         }
-        // Initialize textures
+        // Initialize textures like Metal does
         for (const auto& tex : texts) {
             initTexture(tex);
         }
-        createShaderModules(vertexSource, fragmentSource);
-        createPipelineLayout();
     }
 
-    // Basic constructor (for compatibility)
-    ShaderProgram(Context& context,
-                  const std::string& vertexSource,
-                  const std::string& fragmentSource);
     ~ShaderProgram() override;
 
     // Metal-like lazy pipeline creation with caching
@@ -118,10 +96,6 @@ public:
                                         uint32_t vertexLayoutCount,
                                         const gfx::ColorMode& colorMode,
                                         const std::optional<std::size_t> reuseHash = std::nullopt);
-
-    // Overload without Renderable for drawable use
-    WGPURenderPipeline getRenderPipeline(const WGPUVertexBufferLayout* vertexLayouts,
-                                        uint32_t vertexLayoutCount);
 
     // gfx::Shader interface (required for is_shader_v trait)
     const std::string_view typeName() const noexcept override { return Name; }
@@ -134,31 +108,15 @@ public:
     void initInstanceAttribute(const shaders::AttributeInfo& info);
     void initTexture(const shaders::TextureInfo& info);
 
-    WGPURenderPipeline getPipeline() const { 
-        // Return the most recently cached pipeline, or nullptr if none
-        if (!renderPipelineCache.empty()) {
-            return renderPipelineCache.begin()->second;
-        }
-        return nullptr; 
-    }
-    WGPUBindGroupLayout getBindGroupLayout() const { return bindGroupLayout; }
-    const std::vector<shaders::AttributeInfo>& getAttributeInfos() const { return attributeInfos; }
 
-    // Make getWGPUFormat public for use in drawable
-    static WGPUVertexFormat getWGPUFormat(gfx::AttributeDataType type);
-
-private:
-    void createShaderModules(const std::string& vertexSource, const std::string& fragmentSource);
+protected:
     void createPipelineLayout();
     WGPURenderPipeline createPipeline(const WGPUVertexBufferLayout* vertexLayouts,
                                      uint32_t vertexLayoutCount,
                                      const gfx::ColorMode& colorMode);
-    static WGPUBlendOperation getWGPUBlendOperation(gfx::ColorBlendEquationType equation);
-    static WGPUBlendFactor getWGPUBlendFactor(gfx::ColorBlendFactorType factor);
 
     std::string shaderName;
-    RendererBackend* backend = nullptr;
-    Context* context = nullptr;
+    RendererBackend& backend;
 
     // Metal-like resource management
     WGPUShaderModule vertexShaderModule = nullptr;
@@ -173,8 +131,6 @@ private:
     gfx::VertexAttributeArray vertexAttributes;
     gfx::VertexAttributeArray instanceAttributes;
     std::array<std::optional<size_t>, shaders::maxTextureCountPerShader> textureBindings;
-
-    std::vector<shaders::AttributeInfo> attributeInfos;
 };
 
 } // namespace webgpu
