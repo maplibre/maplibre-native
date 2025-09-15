@@ -160,6 +160,9 @@ void ShaderProgram::createShaderModules(const std::string& vertexSource, const s
     vertexShaderDesc.nextInChain = (WGPUChainedStruct*)&wgslDesc;
 
     vertexShaderModule = wgpuDeviceCreateShaderModule(device, &vertexShaderDesc);
+    if (!vertexShaderModule) {
+        Log::Error(Event::Render, "Failed to create vertex shader module");
+    }
 
     // Create fragment shader module
     WGPUStringView fragmentCode = {fragmentWithPrelude.c_str(), fragmentWithPrelude.length()};
@@ -171,6 +174,9 @@ void ShaderProgram::createShaderModules(const std::string& vertexSource, const s
     fragmentShaderDesc.nextInChain = (WGPUChainedStruct*)&wgslDesc;
 
     fragmentShaderModule = wgpuDeviceCreateShaderModule(device, &fragmentShaderDesc);
+    if (!fragmentShaderModule) {
+        Log::Error(Event::Render, "Failed to create fragment shader module");
+    }
 }
 
 // Create pipeline layout (similar to Metal's approach)
@@ -326,10 +332,12 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
     pipelineDesc.multisample.mask = 0xFFFFFFFF;
     pipelineDesc.multisample.alphaToCoverageEnabled = 0;
 
-    // Log::Info(Event::Render, "Creating pipeline with " + std::to_string(vertexLayoutCount) + " vertex layouts");
+    Log::Info(Event::Render, "Creating pipeline with " + std::to_string(vertexLayoutCount) + " vertex layouts");
     WGPURenderPipeline pipeline = wgpuDeviceCreateRenderPipeline(device, &pipelineDesc);
     if (!pipeline) {
         Log::Error(Event::Render, "Failed to create pipeline");
+    } else {
+        Log::Info(Event::Render, "Pipeline created successfully");
     }
     return pipeline;
 }

@@ -48,7 +48,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 #endif
 
     // Stencil clipping is handled by the render pipeline state
-    // Uniform buffers are bound per-drawable in WebGPU through bind groups
+    // Match Metal's approach: bind uniform buffers to drawables
 
     // Render tiles
     // TileLayerGroup doesn't have getCurrentTileIDs() - just visit all drawables
@@ -56,9 +56,20 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     visitDrawables([&](gfx::Drawable& drawable) {
         drawableIndex++;
 
-
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
+        }
+
+        // Like Metal's tile_layer_group.cpp line 129: uniformBuffers.bindMtl(renderPass)
+        // In WebGPU, we copy uniform buffers to each drawable since we use bind groups
+        auto& drawableWebGPU = static_cast<webgpu::Drawable&>(drawable);
+
+        // Copy uniform buffers from layer group to drawable
+        for (size_t i = 0; i < uniformBuffers.allocatedSize(); ++i) {
+            const auto& uniformBuffer = uniformBuffers.get(i);
+            if (uniformBuffer) {
+                drawableWebGPU.mutableUniformBuffers().set(i, uniformBuffer);
+            }
         }
 
         // Apply tweakers if any

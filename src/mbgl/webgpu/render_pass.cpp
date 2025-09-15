@@ -102,11 +102,13 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
         }
 
         // Create the render pass encoder
+        mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Beginning render pass");
         wgpu::CommandEncoder wgpuEncoder(impl->commandEncoder);
         wgpu::RenderPassEncoder passEncoder = wgpuEncoder.BeginRenderPass(&renderPassDesc);
         impl->encoder = passEncoder.MoveToCHandle();
 
         if (impl->encoder) {
+            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Render pass created successfully");
 
 
             // Set viewport to full framebuffer
