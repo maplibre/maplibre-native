@@ -2,6 +2,7 @@
 
 #include "glfw_backend.hpp"
 #include <mbgl/webgpu/renderer_backend.hpp>
+#include <mbgl/webgpu/context.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <memory>
@@ -48,6 +49,7 @@ protected:
 
     // WebGPU-specific methods
 public:
+    mbgl::webgpu::Context& getContext() { return static_cast<mbgl::webgpu::Context&>(*(this->context)); }
     WGPUDevice getWGPUDevice() { return wgpuDevice.Get(); }
     WGPUSurface getWGPUSurface() { return wgpuSurface.Get(); }
     wgpu::TextureFormat getSwapChainFormat() const { return swapChainFormat; }
