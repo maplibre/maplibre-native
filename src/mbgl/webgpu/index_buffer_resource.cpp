@@ -9,7 +9,7 @@ IndexBufferResource::IndexBufferResource(BufferResource&& buffer_) noexcept
     if (buffer.getBuffer()) {
         auto& stats = buffer.getContext().renderingStats();
         stats.numIndexBuffers++;
-        stats.memIndexBuffers += buffer.getSize();
+        stats.memIndexBuffers += buffer.getSizeInBytes();
     }
 }
 
@@ -17,7 +17,7 @@ IndexBufferResource::~IndexBufferResource() noexcept {
     if (buffer.getBuffer()) {
         auto& stats = buffer.getContext().renderingStats();
         stats.numIndexBuffers--;
-        stats.memIndexBuffers -= buffer.getSize();
+        stats.memIndexBuffers -= buffer.getSizeInBytes();
     }
 }
 
