@@ -245,7 +245,6 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     imageManager->setLoaded(updateParameters->spriteLoaded);
 
     const LayerDifference layerDiff = diffLayers(layerImpls, updateParameters->layers);
-
     layerImpls = updateParameters->layers;
     const bool layersAddedOrRemoved = !layerDiff.added.empty() || !layerDiff.removed.empty();
 
@@ -1034,8 +1033,7 @@ void RenderOrchestrator::onGlyphsError(const FontStack& fontStack,
     }
     ss << " for font stack " << fontStackToString(fontStack) << ":( " << util::toString(error) << ")";
     auto errorDetail = ss.str();
-    // Log::Error(Event::Style, errorDetail);
-    // Logging disabled to prevent heap corruption in multi-threaded context
+    Log::Error(Event::Style, errorDetail);
     observer->onResourceError(error);
 }
 
@@ -1043,13 +1041,12 @@ void RenderOrchestrator::onGlyphsRequested(const FontStack& fontStack, const Gly
     observer->onGlyphsRequested(fontStack, range);
 }
 
-void RenderOrchestrator::onTileError(RenderSource& /*source*/, const OverscaledTileID& /*tileID*/, std::exception_ptr error) {
+void RenderOrchestrator::onTileError(RenderSource& source, const OverscaledTileID& tileID, std::exception_ptr error) {
     MLN_TRACE_FUNC();
 
-    // Log::Error(Event::Style,
-    //            "Failed to load tile " + util::toString(tileID) + " for source " + source.baseImpl->id + ": " +
-    //                util::toString(error));
-    // Logging with string concatenation disabled to prevent heap corruption in multi-threaded context
+    Log::Error(Event::Style,
+               "Failed to load tile " + util::toString(tileID) + " for source " + source.baseImpl->id + ": " +
+                   util::toString(error));
     observer->onResourceError(error);
 }
 

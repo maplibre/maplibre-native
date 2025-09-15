@@ -87,8 +87,6 @@ void DrawableBuilder::flush(gfx::Context& context) {
     }
     if (currentDrawable) {
         drawables.emplace_back(std::move(currentDrawable));
-    } else {
-        Log::Warning(Event::General, "DrawableBuilder::flush - currentDrawable is null after init(), not adding to vector");
     }
 }
 

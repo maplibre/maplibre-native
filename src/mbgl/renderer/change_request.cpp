@@ -10,7 +10,6 @@ AddLayerGroupRequest::AddLayerGroupRequest(AddLayerGroupRequest &&other)
     : layerGroup(std::move(other.layerGroup)) {}
 
 void AddLayerGroupRequest::execute(RenderOrchestrator &orchestrator) {
-
     orchestrator.addLayerGroup(std::move(layerGroup));
 }
 
