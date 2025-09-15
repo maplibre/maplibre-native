@@ -47,6 +47,10 @@ public:
         const std::optional<std::chrono::duration<double>> lastUpdate,
         /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) override;
 
+    const gfx::UniqueVertexBufferResource& getBuffer(const gfx::VertexVectorBasePtr&,
+                                                     gfx::BufferUsageType,
+                                                     bool forceUpdate);
+
 private:
     CommandEncoder& commandEncoder;
 };
