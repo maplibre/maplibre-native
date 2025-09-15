@@ -1,20 +1,31 @@
 #pragma once
 
+
+#include <mbgl/gfx/index_buffer.hpp>
+#include <mbgl/gfx/vertex_buffer.hpp>
+
 #include <mbgl/gfx/upload_pass.hpp>
+#include <mbgl/gfx/renderbuffer.hpp>
 
 namespace mbgl {
 namespace gfx {
 class CommandEncoder;
+class Renderable;
 } // namespace gfx
 
 namespace webgpu {
 
 class CommandEncoder;
 
+class RenderbufferResource : public gfx::RenderbufferResource {
+public:
+    RenderbufferResource() = default;
+};
+
 class UploadPass final : public gfx::UploadPass {
 public:
-    UploadPass(CommandEncoder& commandEncoder, const char* name);
-    ~UploadPass() override = default;
+    UploadPass(gfx::Renderable& renderable, CommandEncoder& commandEncoder, const char* name);
+    ~UploadPass() override;
 
 private:
     void pushDebugGroup(const char* name) override;
@@ -53,6 +64,7 @@ public:
 
 private:
     CommandEncoder& commandEncoder;
+    std::vector<gfx::DebugGroup<gfx::UploadPass>> debugGroups;
 };
 
 } // namespace webgpu

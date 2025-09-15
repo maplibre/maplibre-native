@@ -74,6 +74,7 @@ protected:
     std::vector<gfx::DebugGroup<gfx::UploadPass>> uploadDebugGroups;
     mbgl::unordered_set<RenderPass*> renderPasses;
     mbgl::unordered_set<UploadPass*> uploadPasses;
+    UploadPass* currentUploadPass = nullptr;
 };
 
 } // namespace webgpu

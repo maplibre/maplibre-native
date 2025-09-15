@@ -4,6 +4,7 @@
 #include <mbgl/util/string.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/webgpu/renderer_backend.hpp>
+#include <mbgl/webgpu/renderable_resource.hpp>
 #include <mbgl/gfx/renderable.hpp>
 
 #include <GLFW/glfw3.h>
@@ -30,7 +31,47 @@
 #include <thread>
 #include <chrono>
 
+// Forward declaration
+class GLFWWebGPUBackend;
+
 namespace mbgl {
+
+// WebGPU-specific RenderableResource implementation (similar to Metal's)
+class WebGPURenderableResource final : public webgpu::RenderableResource {
+public:
+    WebGPURenderableResource(GLFWWebGPUBackend& backend_)
+        : backend(backend_) {}
+
+    void bind() override {
+        // WebGPU binding happens at the command encoder level
+        // Surface texture acquisition happens in the render pass
+    }
+
+    void swap() override {
+        // Swap is handled by the surface presentation
+    }
+
+    const mbgl::webgpu::RendererBackend& getBackend() const override {
+        return backend;
+    }
+
+    const WGPUCommandEncoder& getCommandEncoder() const override {
+        // Return the current command encoder from the backend
+        // This would need to be properly implemented
+        static WGPUCommandEncoder encoder = nullptr;
+        return encoder;
+    }
+
+    WGPURenderPassEncoder getRenderPassEncoder() const override {
+        // Return the current render pass encoder
+        // This would need to be properly implemented
+        return nullptr;
+    }
+
+private:
+    GLFWWebGPUBackend& backend;
+};
+
 namespace gfx {
 template <>
 std::unique_ptr<GLFWBackend> Backend::Create<mbgl::gfx::Backend::Type::WebGPU>(GLFWwindow* window, bool capFrameRate) {
@@ -42,7 +83,7 @@ std::unique_ptr<GLFWBackend> Backend::Create<mbgl::gfx::Backend::Type::WebGPU>(G
 GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     : GLFWBackend(),
       mbgl::webgpu::RendererBackend(mbgl::gfx::ContextMode::Unique),
-      mbgl::gfx::Renderable(mbgl::Size{0, 0}, nullptr),
+      mbgl::gfx::Renderable(mbgl::Size{0, 0}, std::make_unique<mbgl::WebGPURenderableResource>(*this)),
       window(window_) {
     
 
