@@ -12,134 +12,79 @@
 namespace mbgl {
 namespace webgpu {
 
-// Metal-like constructor: takes pre-compiled shader modules
+namespace {
+WGPUBlendOperation webgpuBlendOperation(const gfx::ColorBlendEquationType& equation) {
+    switch (equation) {
+        case gfx::ColorBlendEquationType::Add:
+            return WGPUBlendOperation_Add;
+        case gfx::ColorBlendEquationType::Subtract:
+            return WGPUBlendOperation_Subtract;
+        case gfx::ColorBlendEquationType::ReverseSubtract:
+            return WGPUBlendOperation_ReverseSubtract;
+        default:
+            return WGPUBlendOperation_Add;
+    }
+}
+
+WGPUBlendFactor webgpuBlendFactor(const gfx::ColorBlendFactorType& factor) {
+    switch (factor) {
+        case gfx::ColorBlendFactorType::Zero:
+            return WGPUBlendFactor_Zero;
+        case gfx::ColorBlendFactorType::One:
+            return WGPUBlendFactor_One;
+        case gfx::ColorBlendFactorType::SrcColor:
+            return WGPUBlendFactor_Src;
+        case gfx::ColorBlendFactorType::OneMinusSrcColor:
+            return WGPUBlendFactor_OneMinusSrc;
+        case gfx::ColorBlendFactorType::SrcAlpha:
+            return WGPUBlendFactor_SrcAlpha;
+        case gfx::ColorBlendFactorType::OneMinusSrcAlpha:
+            return WGPUBlendFactor_OneMinusSrcAlpha;
+        case gfx::ColorBlendFactorType::DstAlpha:
+            return WGPUBlendFactor_DstAlpha;
+        case gfx::ColorBlendFactorType::OneMinusDstAlpha:
+            return WGPUBlendFactor_OneMinusDstAlpha;
+        case gfx::ColorBlendFactorType::DstColor:
+            return WGPUBlendFactor_Dst;
+        case gfx::ColorBlendFactorType::OneMinusDstColor:
+            return WGPUBlendFactor_OneMinusDst;
+        case gfx::ColorBlendFactorType::SrcAlphaSaturate:
+            return WGPUBlendFactor_SrcAlphaSaturated;
+        case gfx::ColorBlendFactorType::ConstantColor:
+            return WGPUBlendFactor_Constant;
+        case gfx::ColorBlendFactorType::OneMinusConstantColor:
+            return WGPUBlendFactor_OneMinusConstant;
+        case gfx::ColorBlendFactorType::ConstantAlpha:
+            return WGPUBlendFactor_Constant;
+        case gfx::ColorBlendFactorType::OneMinusConstantAlpha:
+            return WGPUBlendFactor_OneMinusConstant;
+        default:
+            return WGPUBlendFactor_One;
+    }
+}
+} // namespace
+
 ShaderProgram::ShaderProgram(std::string name,
                            RendererBackend& backend_,
                            WGPUShaderModule vertexModule,
                            WGPUShaderModule fragmentModule)
-    : shaderName(std::move(name)),
-      backend(&backend_),
+    : ShaderProgramBase(),
+      shaderName(std::move(name)),
+      backend(backend_),
       vertexShaderModule(vertexModule),
       fragmentShaderModule(fragmentModule) {
-    // Create bind group layout and pipeline layout (similar to Metal's approach)
     createPipelineLayout();
 }
 
-// Compatibility constructor
-ShaderProgram::ShaderProgram(Context& context_,
+// Minimal constructor for Context::createShader compatibility
+ShaderProgram::ShaderProgram(Context& context,
                            const std::string& vertexSource,
                            const std::string& fragmentSource)
-    : context(&context_) {
-    createShaderModules(vertexSource, fragmentSource);
-    createPipelineLayout();
-}
+    : ShaderProgramBase(),
+      shaderName("ContextShader"),
+      backend(static_cast<RendererBackend&>(context.getBackend())) {
 
-ShaderProgram::~ShaderProgram() {
-    // Release cached pipelines
-    for (auto& pair : renderPipelineCache) {
-        if (pair.second) {
-            wgpuRenderPipelineRelease(pair.second);
-        }
-    }
-    renderPipelineCache.clear();
-
-    // Release resources in reverse order of creation
-    if (pipelineLayout) {
-        wgpuPipelineLayoutRelease(pipelineLayout);
-        pipelineLayout = nullptr;
-    }
-
-    if (bindGroupLayout) {
-        wgpuBindGroupLayoutRelease(bindGroupLayout);
-        bindGroupLayout = nullptr;
-    }
-
-    // Only release shader modules if we created them (not if passed in)
-    if (vertexShaderModule && context) {
-        wgpuShaderModuleRelease(vertexShaderModule);
-        vertexShaderModule = nullptr;
-    }
-
-    if (fragmentShaderModule && context) {
-        wgpuShaderModuleRelease(fragmentShaderModule);
-        fragmentShaderModule = nullptr;
-    }
-}
-
-// Metal-like lazy pipeline creation with caching
-WGPURenderPipeline ShaderProgram::getRenderPipeline(const gfx::Renderable& renderable,
-                                                   const WGPUVertexBufferLayout* vertexLayouts,
-                                                   uint32_t vertexLayoutCount,
-                                                   const gfx::ColorMode& colorMode,
-                                                   const std::optional<std::size_t> reuseHash) {
-    // Check cache first
-    if (reuseHash.has_value()) {
-        auto it = renderPipelineCache.find(reuseHash.value());
-        if (it != renderPipelineCache.end()) {
-            return it->second;
-        }
-    }
-
-    // Create new pipeline
-    WGPURenderPipeline pipeline = createPipeline(vertexLayouts, vertexLayoutCount, colorMode);
-
-    // Cache the pipeline if we have a reuse hash
-    if (reuseHash.has_value() && pipeline) {
-        renderPipelineCache[reuseHash.value()] = pipeline;
-    }
-
-    return pipeline;
-}
-
-// Metal-like sampler location getter
-std::optional<size_t> ShaderProgram::getSamplerLocation(const size_t id) const {
-    return (id < textureBindings.size()) ? textureBindings[id] : std::nullopt;
-}
-
-// Metal-like attribute initialization
-void ShaderProgram::initAttribute(const shaders::AttributeInfo& info) {
-    const auto index = static_cast<int>(info.index);
-#if !defined(NDEBUG)
-    // Indexes must be unique, if there's a conflict check the `attributes` array in the shader
-    vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) {
-        assert(attrib.getIndex() != index);
-    });
-    instanceAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) {
-        assert(attrib.getIndex() != index);
-    });
-#endif
-    vertexAttributes.set(info.id, index, info.dataType, 1);
-}
-
-// Metal-like instance attribute initialization
-void ShaderProgram::initInstanceAttribute(const shaders::AttributeInfo& info) {
-    // Index is the block index of the instance attribute
-    const auto index = static_cast<int>(info.index);
-#if !defined(NDEBUG)
-    // Indexes must not be reused by regular attributes or uniform blocks
-    // More than one instance attribute can have the same index, if they share the block
-    vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) {
-        assert(attrib.getIndex() != index);
-    });
-#endif
-    instanceAttributes.set(info.id, index, info.dataType, 1);
-}
-
-// Metal-like texture initialization
-void ShaderProgram::initTexture(const shaders::TextureInfo& info) {
-    assert(info.id < textureBindings.size());
-    if (info.id >= textureBindings.size()) {
-        return;
-    }
-    textureBindings[info.id] = info.index;
-}
-
-// Create shader modules from source (for compatibility constructors)
-void ShaderProgram::createShaderModules(const std::string& vertexSource, const std::string& fragmentSource) {
-    if (!context) return;
-
-    auto& backendRef = static_cast<webgpu::RendererBackend&>(context->getBackend());
-    WGPUDevice device = static_cast<WGPUDevice>(backendRef.getDevice());
+    WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
     if (!device) return;
 
     // Get the prelude from common.hpp
@@ -177,21 +122,111 @@ void ShaderProgram::createShaderModules(const std::string& vertexSource, const s
     if (!fragmentShaderModule) {
         Log::Error(Event::Render, "Failed to create fragment shader module");
     }
+
+    createPipelineLayout();
 }
 
-// Create pipeline layout (similar to Metal's approach)
-void ShaderProgram::createPipelineLayout() {
-    WGPUDevice device = nullptr;
-    if (backend) {
-        device = static_cast<WGPUDevice>(backend->getDevice());
-    } else if (context) {
-        auto& backendRef = static_cast<webgpu::RendererBackend&>(context->getBackend());
-        device = static_cast<WGPUDevice>(backendRef.getDevice());
+ShaderProgram::~ShaderProgram() {
+    // Release cached pipelines
+    for (auto& pair : renderPipelineCache) {
+        if (pair.second) {
+            wgpuRenderPipelineRelease(pair.second);
+        }
     }
+    renderPipelineCache.clear();
+
+    // Release resources
+    if (pipelineLayout) {
+        wgpuPipelineLayoutRelease(pipelineLayout);
+        pipelineLayout = nullptr;
+    }
+
+    if (bindGroupLayout) {
+        wgpuBindGroupLayoutRelease(bindGroupLayout);
+        bindGroupLayout = nullptr;
+    }
+
+    // Release shader modules if we created them
+    if (vertexShaderModule) {
+        wgpuShaderModuleRelease(vertexShaderModule);
+        vertexShaderModule = nullptr;
+    }
+
+    if (fragmentShaderModule) {
+        wgpuShaderModuleRelease(fragmentShaderModule);
+        fragmentShaderModule = nullptr;
+    }
+}
+
+WGPURenderPipeline ShaderProgram::getRenderPipeline(const gfx::Renderable& renderable,
+                                                   const WGPUVertexBufferLayout* vertexLayouts,
+                                                   uint32_t vertexLayoutCount,
+                                                   const gfx::ColorMode& colorMode,
+                                                   const std::optional<std::size_t> reuseHash) {
+    // Check cache first
+    if (reuseHash.has_value()) {
+        auto it = renderPipelineCache.find(reuseHash.value());
+        if (it != renderPipelineCache.end()) {
+            return it->second;
+        }
+    }
+
+    // Create new pipeline
+    WGPURenderPipeline pipeline = createPipeline(vertexLayouts, vertexLayoutCount, colorMode);
+
+    // Cache the pipeline if we have a reuse hash
+    if (reuseHash.has_value() && pipeline) {
+        renderPipelineCache[reuseHash.value()] = pipeline;
+    }
+
+    return pipeline;
+}
+
+std::optional<size_t> ShaderProgram::getSamplerLocation(const size_t id) const {
+    return (id < textureBindings.size()) ? textureBindings[id] : std::nullopt;
+}
+
+void ShaderProgram::initAttribute(const shaders::AttributeInfo& info) {
+    const auto index = static_cast<int>(info.index);
+#if !defined(NDEBUG)
+    // Indexes must be unique, if there's a conflict check the `attributes` array in the shader
+    vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) {
+        assert(attrib.getIndex() != index);
+    });
+    instanceAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) {
+        assert(attrib.getIndex() != index);
+    });
+#endif
+    vertexAttributes.set(info.id, index, info.dataType, 1);
+}
+
+void ShaderProgram::initInstanceAttribute(const shaders::AttributeInfo& info) {
+    // Index is the block index of the instance attribute
+    const auto index = static_cast<int>(info.index);
+#if !defined(NDEBUG)
+    // Indexes must not be reused by regular attributes or uniform blocks
+    // More than one instance attribute can have the same index, if they share the block
+    vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) {
+        assert(attrib.getIndex() != index);
+    });
+#endif
+    instanceAttributes.set(info.id, index, info.dataType, 1);
+}
+
+void ShaderProgram::initTexture(const shaders::TextureInfo& info) {
+    assert(info.id < textureBindings.size());
+    if (info.id >= textureBindings.size()) {
+        return;
+    }
+    textureBindings[info.id] = info.index;
+}
+
+void ShaderProgram::createPipelineLayout() {
+    WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
 
     if (!device) return;
 
-    // Create bind group layout for uniforms (same as before)
+    // Create bind group layout for uniforms
     std::vector<WGPUBindGroupLayoutEntry> bindingEntries;
 
     // Create bindings 0-5 for all possible uniform buffer indices
@@ -229,17 +264,10 @@ void ShaderProgram::createPipelineLayout() {
     pipelineLayout = wgpuDeviceCreatePipelineLayout(device, &pipelineLayoutDesc);
 }
 
-// Create pipeline with given parameters (Metal-like lazy creation)
 WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* vertexLayouts,
                                                 uint32_t vertexLayoutCount,
                                                 const gfx::ColorMode& colorMode) {
-    WGPUDevice device = nullptr;
-    if (backend) {
-        device = static_cast<WGPUDevice>(backend->getDevice());
-    } else if (context) {
-        auto& backendRef = static_cast<webgpu::RendererBackend&>(context->getBackend());
-        device = static_cast<WGPUDevice>(backendRef.getDevice());
-    }
+    WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
 
     if (!device || !vertexShaderModule || !fragmentShaderModule || !pipelineLayout) {
         Log::Error(Event::Render, "createPipeline missing requirement: device=" +
@@ -260,22 +288,22 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
 
     // Set up fragment state with color mode blending
     WGPUBlendComponent alphaBlend = {};
-    alphaBlend.operation = getWGPUBlendOperation(gfx::ColorBlendEquationType::Add);
-    alphaBlend.srcFactor = getWGPUBlendFactor(gfx::ColorBlendFactorType::SrcAlpha);
-    alphaBlend.dstFactor = getWGPUBlendFactor(gfx::ColorBlendFactorType::OneMinusSrcAlpha);
+    alphaBlend.operation = webgpuBlendOperation(gfx::ColorBlendEquationType::Add);
+    alphaBlend.srcFactor = webgpuBlendFactor(gfx::ColorBlendFactorType::SrcAlpha);
+    alphaBlend.dstFactor = webgpuBlendFactor(gfx::ColorBlendFactorType::OneMinusSrcAlpha);
 
     WGPUBlendComponent colorBlend = {};
-    colorBlend.operation = getWGPUBlendOperation(gfx::ColorBlendEquationType::Add);
-    colorBlend.srcFactor = getWGPUBlendFactor(gfx::ColorBlendFactorType::SrcAlpha);
-    colorBlend.dstFactor = getWGPUBlendFactor(gfx::ColorBlendFactorType::OneMinusSrcAlpha);
+    colorBlend.operation = webgpuBlendOperation(gfx::ColorBlendEquationType::Add);
+    colorBlend.srcFactor = webgpuBlendFactor(gfx::ColorBlendFactorType::SrcAlpha);
+    colorBlend.dstFactor = webgpuBlendFactor(gfx::ColorBlendFactorType::OneMinusSrcAlpha);
 
     // Apply color mode blending if not replace
     if (!colorMode.blendFunction.is<gfx::ColorMode::Replace>()) {
         colorMode.blendFunction.match(
             [&](const auto& blendFunction) {
-                colorBlend.operation = getWGPUBlendOperation(gfx::ColorBlendEquationType(blendFunction.equation));
-                colorBlend.srcFactor = getWGPUBlendFactor(gfx::ColorBlendFactorType(blendFunction.srcFactor));
-                colorBlend.dstFactor = getWGPUBlendFactor(gfx::ColorBlendFactorType(blendFunction.dstFactor));
+                colorBlend.operation = webgpuBlendOperation(gfx::ColorBlendEquationType(blendFunction.equation));
+                colorBlend.srcFactor = webgpuBlendFactor(gfx::ColorBlendFactorType(blendFunction.srcFactor));
+                colorBlend.dstFactor = webgpuBlendFactor(gfx::ColorBlendFactorType(blendFunction.dstFactor));
                 alphaBlend = colorBlend;
             });
     }
@@ -332,131 +360,11 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
     pipelineDesc.multisample.mask = 0xFFFFFFFF;
     pipelineDesc.multisample.alphaToCoverageEnabled = 0;
 
-    Log::Info(Event::Render, "Creating pipeline with " + std::to_string(vertexLayoutCount) + " vertex layouts");
     WGPURenderPipeline pipeline = wgpuDeviceCreateRenderPipeline(device, &pipelineDesc);
     if (!pipeline) {
-        Log::Error(Event::Render, "Failed to create pipeline");
-    } else {
-        Log::Info(Event::Render, "Pipeline created successfully");
+        Log::Error(Event::Render, shaderName + " pipeline creation failed");
     }
     return pipeline;
-}
-
-// WebGPU blend operation conversion (similar to Metal's conversion functions)
-WGPUBlendOperation ShaderProgram::getWGPUBlendOperation(gfx::ColorBlendEquationType equation) {
-    switch (equation) {
-        case gfx::ColorBlendEquationType::Add:
-            return WGPUBlendOperation_Add;
-        case gfx::ColorBlendEquationType::Subtract:
-            return WGPUBlendOperation_Subtract;
-        case gfx::ColorBlendEquationType::ReverseSubtract:
-            return WGPUBlendOperation_ReverseSubtract;
-        default:
-            return WGPUBlendOperation_Add;
-    }
-}
-
-// WebGPU blend factor conversion (similar to Metal's conversion functions)
-WGPUBlendFactor ShaderProgram::getWGPUBlendFactor(gfx::ColorBlendFactorType factor) {
-    switch (factor) {
-        case gfx::ColorBlendFactorType::Zero:
-            return WGPUBlendFactor_Zero;
-        case gfx::ColorBlendFactorType::One:
-            return WGPUBlendFactor_One;
-        case gfx::ColorBlendFactorType::SrcColor:
-            return WGPUBlendFactor_Src;
-        case gfx::ColorBlendFactorType::OneMinusSrcColor:
-            return WGPUBlendFactor_OneMinusSrc;
-        case gfx::ColorBlendFactorType::SrcAlpha:
-            return WGPUBlendFactor_SrcAlpha;
-        case gfx::ColorBlendFactorType::OneMinusSrcAlpha:
-            return WGPUBlendFactor_OneMinusSrcAlpha;
-        case gfx::ColorBlendFactorType::DstAlpha:
-            return WGPUBlendFactor_DstAlpha;
-        case gfx::ColorBlendFactorType::OneMinusDstAlpha:
-            return WGPUBlendFactor_OneMinusDstAlpha;
-        case gfx::ColorBlendFactorType::DstColor:
-            return WGPUBlendFactor_Dst;
-        case gfx::ColorBlendFactorType::OneMinusDstColor:
-            return WGPUBlendFactor_OneMinusDst;
-        case gfx::ColorBlendFactorType::SrcAlphaSaturate:
-            return WGPUBlendFactor_SrcAlphaSaturated;
-        case gfx::ColorBlendFactorType::ConstantColor:
-            return WGPUBlendFactor_Constant;
-        case gfx::ColorBlendFactorType::OneMinusConstantColor:
-            return WGPUBlendFactor_OneMinusConstant;
-        case gfx::ColorBlendFactorType::ConstantAlpha:
-            return WGPUBlendFactor_Constant;
-        case gfx::ColorBlendFactorType::OneMinusConstantAlpha:
-            return WGPUBlendFactor_OneMinusConstant;
-        default:
-            return WGPUBlendFactor_One;
-    }
-}
-
-// Vertex format conversion (unchanged)
-WGPUVertexFormat ShaderProgram::getWGPUFormat(gfx::AttributeDataType type) {
-    switch (type) {
-        case gfx::AttributeDataType::Byte:
-            return WGPUVertexFormat_Sint8;
-        case gfx::AttributeDataType::Byte2:
-            return WGPUVertexFormat_Sint8x2;
-        case gfx::AttributeDataType::Byte4:
-            return WGPUVertexFormat_Sint8x4;
-        case gfx::AttributeDataType::UByte:
-            return WGPUVertexFormat_Uint8;
-        case gfx::AttributeDataType::UByte2:
-            return WGPUVertexFormat_Uint8x2;
-        case gfx::AttributeDataType::UByte4:
-            return WGPUVertexFormat_Uint8x4;
-        case gfx::AttributeDataType::Short:
-            return WGPUVertexFormat_Sint16;
-        case gfx::AttributeDataType::Short2:
-            return WGPUVertexFormat_Sint16x2;
-        case gfx::AttributeDataType::Short4:
-            return WGPUVertexFormat_Sint16x4;
-        case gfx::AttributeDataType::UShort:
-            return WGPUVertexFormat_Uint16;
-        case gfx::AttributeDataType::UShort2:
-            return WGPUVertexFormat_Uint16x2;
-        case gfx::AttributeDataType::UShort4:
-            return WGPUVertexFormat_Uint16x4;
-        case gfx::AttributeDataType::Int:
-            return WGPUVertexFormat_Sint32;
-        case gfx::AttributeDataType::Int2:
-            return WGPUVertexFormat_Sint32x2;
-        case gfx::AttributeDataType::Int3:
-            return WGPUVertexFormat_Sint32x3;
-        case gfx::AttributeDataType::Int4:
-            return WGPUVertexFormat_Sint32x4;
-        case gfx::AttributeDataType::UInt:
-            return WGPUVertexFormat_Uint32;
-        case gfx::AttributeDataType::UInt2:
-            return WGPUVertexFormat_Uint32x2;
-        case gfx::AttributeDataType::UInt3:
-            return WGPUVertexFormat_Uint32x3;
-        case gfx::AttributeDataType::UInt4:
-            return WGPUVertexFormat_Uint32x4;
-        case gfx::AttributeDataType::Float:
-            return WGPUVertexFormat_Float32;
-        case gfx::AttributeDataType::Float2:
-            return WGPUVertexFormat_Float32x2;
-        case gfx::AttributeDataType::Float3:
-            return WGPUVertexFormat_Float32x3;
-        case gfx::AttributeDataType::Float4:
-            return WGPUVertexFormat_Float32x4;
-        default:
-            return WGPUVertexFormat_Float32x2;
-    }
-}
-
-WGPURenderPipeline ShaderProgram::getRenderPipeline(const WGPUVertexBufferLayout* vertexLayouts,
-                                                   uint32_t vertexLayoutCount) {
-    // Use a default color mode for drawable use
-    gfx::ColorMode defaultColorMode = gfx::ColorMode::alphaBlended();
-
-    // Create pipeline with provided vertex layouts
-    return createPipeline(vertexLayouts, vertexLayoutCount, defaultColorMode);
 }
 
 } // namespace webgpu

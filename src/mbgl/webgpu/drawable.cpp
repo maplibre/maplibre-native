@@ -420,8 +420,28 @@ void Drawable::draw(PaintParameters& parameters) const {
     if (!impl->bindGroup && shader) {
         auto webgpuShader = std::static_pointer_cast<mbgl::webgpu::ShaderProgram>(shader);
         if (webgpuShader) {
-            WGPUBindGroupLayout layout = webgpuShader->getBindGroupLayout();
-            if (layout) {
+            WGPUDevice bindGroupDevice = static_cast<WGPUDevice>(backend.getDevice());
+            if (bindGroupDevice) {
+                // Create bind group layout inline like Metal does
+                // WebGPU requires explicit bind group layout creation
+                std::vector<WGPUBindGroupLayoutEntry> layoutEntries;
+                for (uint32_t binding = 0; binding <= 5; ++binding) {
+                    WGPUBindGroupLayoutEntry entry = {};
+                    entry.binding = binding;
+                    entry.visibility = WGPUShaderStage_Vertex | WGPUShaderStage_Fragment;
+                    entry.buffer.type = WGPUBufferBindingType_Uniform;
+                    entry.buffer.hasDynamicOffset = 0;
+                    entry.buffer.minBindingSize = 0;
+                    layoutEntries.push_back(entry);
+                }
+
+                WGPUBindGroupLayoutDescriptor layoutDesc = {};
+                WGPUStringView layoutLabel = {"Bind Group Layout", strlen("Bind Group Layout")};
+                layoutDesc.label = layoutLabel;
+                layoutDesc.entryCount = layoutEntries.size();
+                layoutDesc.entries = layoutEntries.data();
+
+                WGPUBindGroupLayout layout = wgpuDeviceCreateBindGroupLayout(bindGroupDevice, &layoutDesc);
                 // Create bind group entries from UniformBufferArray
                 std::vector<WGPUBindGroupEntry> entries;
 
@@ -466,7 +486,10 @@ void Drawable::draw(PaintParameters& parameters) const {
                 bgDesc.entries = entries.data();
 
                 // Create the bind group
-                impl->bindGroup = wgpuDeviceCreateBindGroup(device, &bgDesc);
+                impl->bindGroup = wgpuDeviceCreateBindGroup(bindGroupDevice, &bgDesc);
+
+                // Clean up the temporary layout
+                wgpuBindGroupLayoutRelease(layout);
             }
         }
     }
@@ -522,12 +545,18 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
 
         // Get render pipeline similar to Metal's getRenderPipelineState
-        // WebGPU doesn't have the same descriptor pattern as Metal
-        // We'll use the simpler overload that doesn't need a renderable
-        // Log::Info(Event::Render, "Creating render pipeline with " + std::to_string(vertexLayouts.size()) + " vertex layouts");
+        // Use the aligned API with proper parameters
+        gfx::ColorMode colorMode = gfx::ColorMode::alphaBlended();
+
+        // Get the renderable from render pass descriptor like Metal does
+        const auto& renderable = webgpuRenderPass.getDescriptor().renderable;
+
         impl->pipelineState = shaderWebGPU.getRenderPipeline(
+            renderable,
             vertexLayouts.empty() ? nullptr : vertexLayouts.data(),
-            vertexLayouts.size());
+            vertexLayouts.size(),
+            colorMode,
+            std::nullopt);
         if (!impl->pipelineState) {
             Log::Error(Event::Render, "getRenderPipeline returned null");
         } else {

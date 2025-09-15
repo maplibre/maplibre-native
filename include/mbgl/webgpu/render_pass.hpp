@@ -19,9 +19,14 @@ class RenderPass final : public gfx::RenderPass {
 public:
     RenderPass(CommandEncoder& commandEncoder, const char* name, const gfx::RenderPassDescriptor& descriptor);
     ~RenderPass() override;
-    
-    // Get the WebGPU render pass encoder for drawing
+
+    // Match Metal's interface
+    CommandEncoder& getCommandEncoder() { return commandEncoder; }
+    const CommandEncoder& getCommandEncoder() const { return commandEncoder; }
+
+    // Get the WebGPU render pass encoder (similar to Metal's getMetalEncoder)
     WGPURenderPassEncoder getEncoder() const;
+    const gfx::RenderPassDescriptor& getDescriptor() const { return descriptor; }
 
 private:
     void pushDebugGroup(const char* name) override;
@@ -29,8 +34,10 @@ private:
     void addDebugSignpost(const char* name) override;
 
 private:
+    gfx::RenderPassDescriptor descriptor;
+    CommandEncoder& commandEncoder;
     const gfx::DebugGroup<gfx::CommandEncoder> debugGroup;
-    
+
     // Implementation details
     class Impl;
     std::unique_ptr<Impl> impl;
