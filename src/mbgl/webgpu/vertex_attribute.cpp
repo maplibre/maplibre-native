@@ -34,6 +34,10 @@ const gfx::UniqueVertexBufferResource& VertexAttribute::getBuffer(gfx::VertexAtt
     return attrib_.getBuffer();
 }
 
+bool VertexAttributeArray::isModifiedAfter(std::chrono::duration<double> time) const {
+    // Use the base class implementation
+    return gfx::VertexAttributeArray::isModifiedAfter(time);
+}
 
 } // namespace webgpu
 } // namespace mbgl
