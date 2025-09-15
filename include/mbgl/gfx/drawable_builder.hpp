@@ -5,7 +5,6 @@
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/gfx/polyline_generator.hpp>
-#include <mbgl/util/logging.hpp>
 
 #include <array>
 #include <memory>
