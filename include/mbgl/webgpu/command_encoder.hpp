@@ -59,6 +59,9 @@ private:
     void pushDebugGroup(const char* name) override;
     void popDebugGroup() override;
 
+    // WebGPU-specific: submit command buffer directly
+    void submitCommandBuffer();
+
 protected:
     struct GroupEntry {
         std::string name;
