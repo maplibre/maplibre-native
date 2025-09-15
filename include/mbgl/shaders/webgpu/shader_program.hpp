@@ -76,8 +76,13 @@ public:
                   const std::string& vertexSource,
                   const std::string& fragmentSource,
                   const std::array<shaders::AttributeInfo, N>& attrs,
-                  const std::array<shaders::TextureInfo, M>& texts)
+                  const std::array<shaders::TextureInfo, M>& texts,
+                  const std::string& name = "ShaderProgram")
         : ShaderProgram(context, vertexSource, fragmentSource) {
+        // Update the shader name if provided
+        if (name != "ShaderProgram") {
+            shaderName = name;
+        }
         // Initialize attributes like Metal does
         for (const auto& attr : attrs) {
             initAttribute(attr);

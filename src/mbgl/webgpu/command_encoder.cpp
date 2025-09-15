@@ -42,6 +42,7 @@ std::unique_ptr<gfx::RenderPass> CommandEncoder::createRenderPass(const char* na
 }
 
 std::unique_ptr<gfx::UploadPass> CommandEncoder::createUploadPass(const char* name, gfx::Renderable& renderable) {
+    Log::Info(Event::Render, std::string("WebGPU CommandEncoder: Creating upload pass: ") + (name ? name : "unnamed"));
     return std::make_unique<UploadPass>(renderable, *this, name);
 }
 

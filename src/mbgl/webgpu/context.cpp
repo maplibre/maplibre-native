@@ -15,6 +15,7 @@
 #include <mbgl/renderer/render_target.hpp>
 #include <mbgl/webgpu/tile_layer_group.hpp>
 #include <mbgl/webgpu/layer_group.hpp>
+#include <mbgl/webgpu/render_pass.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/util/logging.hpp>
 
@@ -34,10 +35,12 @@ Context::~Context() = default;
 
 void Context::beginFrame() {
     // Begin a new frame - WebGPU command recording starts here
+    mbgl::Log::Info(mbgl::Event::Render, "WebGPU Context: beginFrame()");
 }
 
 void Context::endFrame() {
     // End the frame - submit WebGPU commands
+    mbgl::Log::Info(mbgl::Event::Render, "WebGPU Context: endFrame()");
 }
 
 void Context::performCleanup() {
@@ -81,11 +84,13 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registr
 }
 
 TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
+    mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Creating TileLayerGroup: " + name);
     auto tileLayerGroup = std::make_shared<webgpu::TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
     return tileLayerGroup;
 }
 
 LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
+    mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Creating LayerGroup: " + name);
     auto layerGroup = std::make_shared<webgpu::LayerGroup>(layerIndex, initialCapacity, std::move(name));
     return layerGroup;
 }
@@ -113,11 +118,13 @@ void Context::clearStencilBuffer(int32_t value) {
 
 bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& ptr, const void* data, std::size_t size, bool persistent) {
     if (!ptr) {
+        mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Creating new uniform buffer, size: " + std::to_string(size));
         ptr = createUniformBuffer(data, size, persistent);
         return true;
     }
 
     // Update existing buffer
+    mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Updating uniform buffer, size: " + std::to_string(size));
     auto* buffer = static_cast<UniformBuffer*>(ptr.get());
     buffer->update(data, size);
     return false;
@@ -131,12 +138,22 @@ gfx::UniformBufferArray& Context::mutableGlobalUniformBuffers() {
     return *globalUniformBuffers;
 }
 
-void Context::bindGlobalUniformBuffers(gfx::RenderPass&) const noexcept {
-    // Bind global uniform buffers for rendering
+void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexcept {
+    mbgl::Log::Info(mbgl::Event::Render, "WebGPU Context::bindGlobalUniformBuffers called");
+    // In WebGPU, we can't bind buffers globally to the render pass like Metal does.
+    // Instead, we need to ensure these buffers are available for drawables to include
+    // in their bind groups. The actual binding happens per-drawable.
+
+    // Store a reference to global buffers in the render pass for drawables to access
+    auto& webgpuRenderPass = static_cast<webgpu::RenderPass&>(renderPass);
+    webgpuRenderPass.setGlobalUniformBuffers(globalUniformBuffers.get());
 }
 
-void Context::unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept {
-    // Unbind global uniform buffers
+void Context::unbindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexcept {
+    mbgl::Log::Info(mbgl::Event::Render, "WebGPU Context::unbindGlobalUniformBuffers called");
+    // Clear the global buffer reference from the render pass
+    auto& webgpuRenderPass = static_cast<webgpu::RenderPass&>(renderPass);
+    webgpuRenderPass.setGlobalUniformBuffers(nullptr);
 }
 
 #if !defined(NDEBUG)
@@ -200,7 +217,6 @@ const BufferResource& Context::getTileIndexBuffer() {
     }
     return *tileIndexBuffer;
 }
-
 
 } // namespace webgpu
 } // namespace mbgl

@@ -1,12 +1,19 @@
-#include <mbgl/webgpu/layer_group.hpp>
-#include <mbgl/gfx/drawable.hpp>
+
 #include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/renderer/render_orchestrator.hpp>
+#include <mbgl/gfx/renderable.hpp>
+#include <mbgl/gfx/renderer_backend.hpp>
+
+#include <mbgl/webgpu/layer_group.hpp>
 #include <mbgl/webgpu/render_pass.hpp>
 #include <mbgl/webgpu/drawable.hpp>
+#include <mbgl/webgpu/context.hpp>
+
+#include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/shaders/webgpu/shader_program.hpp>
+
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/convert.hpp>
 
 namespace mbgl {
 namespace webgpu {
@@ -33,16 +40,7 @@ void LayerGroup::upload(gfx::UploadPass& uploadPass) {
 }
 
 void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
-
-    static int renderCallCount = 0;
-    if (renderCallCount++ < 10) {
-        mbgl::Log::Info(mbgl::Event::Render, "WebGPU LayerGroup::render() called for: " + getName());
-    }
-
     if (!enabled || !getDrawableCount() || !parameters.renderPass) {
-        mbgl::Log::Warning(mbgl::Event::Render, "WebGPU LayerGroup::render() early return - enabled:" +
-            std::to_string(enabled) + " drawableCount:" + std::to_string(getDrawableCount()) +
-            " hasRenderPass:" + std::to_string(parameters.renderPass != nullptr));
         return;
     }
 
@@ -50,33 +48,23 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     const auto debugGroup = parameters.encoder->createDebugGroup(getName() + "-render");
 #endif
 
-    // Match Metal's approach: bind layer group uniform buffers before drawing
-    // In WebGPU, since we use bind groups per drawable, we copy buffers to each drawable
+    auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
 
-    int drawableCount = 0;
+    bool bindUBOs = false;
     visitDrawables([&](gfx::Drawable& drawable) {
-        drawableCount++;
-
-        static int visitCount = 0;
-        if (visitCount++ < 20) {
-            mbgl::Log::Info(mbgl::Event::Render, "WebGPU: Visiting drawable #" + std::to_string(drawableCount) +
-                " enabled:" + std::to_string(drawable.getEnabled()) +
-                " hasRenderPass:" + std::to_string(drawable.hasRenderPass(parameters.pass)));
-        }
-
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
         }
 
-        // Call bindWebgpu to bind uniform buffers (similar to Metal's bindMtl)
-        auto& webgpuRenderPass = static_cast<webgpu::RenderPass&>(*parameters.renderPass);
-        static_cast<webgpu::UniformBufferArray&>(uniformBuffers).bindWebgpu(webgpuRenderPass);
+        if (!bindUBOs) {
+            // In WebGPU, binding happens per-drawable through bind groups,
+            // but we still call bindWebgpu once to prepare any shared state
+            static_cast<webgpu::UniformBufferArray&>(uniformBuffers).bindWebgpu(renderPass);
+            bindUBOs = true;
+        }
 
-        // In WebGPU, we also need to copy layer group uniform buffers to each drawable
-        // since WebGPU uses bind groups per drawable
+        // Copy uniform buffers from layer group to drawable for WebGPU's bind groups
         auto& drawableWebGPU = static_cast<webgpu::Drawable&>(drawable);
-
-        // Copy uniform buffers from layer group to drawable
         for (size_t i = 0; i < uniformBuffers.allocatedSize(); ++i) {
             const auto& uniformBuffer = uniformBuffers.get(i);
             if (uniformBuffer) {
@@ -90,10 +78,6 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
         drawable.draw(parameters);
     });
-
-    if (drawableCount == 0) {
-        mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: No drawables visited in layer group " + getName());
-    }
 }
 
 } // namespace webgpu

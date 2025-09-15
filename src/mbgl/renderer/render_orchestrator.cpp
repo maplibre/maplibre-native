@@ -907,6 +907,9 @@ void RenderOrchestrator::updateLayerIndex(LayerGroupBasePtr layerGroup, const in
 bool RenderOrchestrator::addLayerGroup(LayerGroupBasePtr layerGroup) {
     MLN_TRACE_FUNC();
 
+    mbgl::Log::Info(mbgl::Event::Render, "RenderOrchestrator::addLayerGroup called for: " +
+                    layerGroup->getName() + " at index " + std::to_string(layerGroup->getLayerIndex()));
+
     const auto index = layerGroup->getLayerIndex();
     const auto range = layerGroupsByLayerIndex.equal_range(index);
     bool found = false;
@@ -927,6 +930,8 @@ bool RenderOrchestrator::addLayerGroup(LayerGroupBasePtr layerGroup) {
 }
 
 bool RenderOrchestrator::removeLayerGroup(const LayerGroupBasePtr& layerGroup) {
+    mbgl::Log::Info(mbgl::Event::Render, "RenderOrchestrator::removeLayerGroup called for: " +
+                    (layerGroup ? layerGroup->getName() : "null"));
     MLN_TRACE_FUNC();
 
     if (!layerGroup) {

@@ -58,6 +58,13 @@ void RenderLayer::prepare(const LayerPrepareParameters& params) {
     assert(params.source->isEnabled());
     renderTiles = params.source->getRenderTiles();
     renderTilesOwner = params.source->getRawRenderTiles();
+
+    static int prepareCount = 0;
+    if (prepareCount++ < 10) {
+        mbgl::Log::Info(mbgl::Event::Render, "RenderLayer::prepare called for " + getID() +
+                       " with " + std::to_string(renderTiles ? renderTiles->size() : 0) + " tiles");
+    }
+
     addRenderPassesFromTiles();
 
     updateRenderTileIDs();
@@ -222,6 +229,8 @@ void RenderLayer::activateLayerGroup(const LayerGroupBasePtr& layerGroup_,
                                      bool activate,
                                      UniqueChangeRequestVec& changes) {
     if (layerGroup_) {
+        mbgl::Log::Info(mbgl::Event::Render, "RenderLayer::activateLayerGroup called for: " +
+                        layerGroup_->getName() + " activate=" + std::to_string(activate));
         if (activate) {
             // The RenderTree has determined this layer should be included in the renderable set for a frame
             changes.emplace_back(std::make_unique<AddLayerGroupRequest>(layerGroup_));
