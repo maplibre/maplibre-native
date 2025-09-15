@@ -36,11 +36,11 @@ const gfx::Context& UploadPass::getContext() const {
 std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResource(
     const void* data,
     std::size_t size,
-    gfx::BufferUsageType usage,
+    gfx::BufferUsageType /*usage*/,
     bool persistent) {
-    
+
     auto& context = static_cast<Context&>(getContext());
-    BufferResource buffer(context, data, size, WGPUBufferUsage_Vertex, persistent);
+    BufferResource buffer(context, data, size, WGPUBufferUsage_Vertex, /*isIndexBuffer=*/false, persistent);
     return std::make_unique<VertexBufferResource>(std::move(buffer));
 }
 
@@ -54,11 +54,11 @@ void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource,
 std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(
     const void* data,
     std::size_t size,
-    gfx::BufferUsageType usage,
+    gfx::BufferUsageType /*usage*/,
     bool persistent) {
-    
+
     auto& context = static_cast<Context&>(getContext());
-    BufferResource buffer(context, data, size, WGPUBufferUsage_Index, persistent);
+    BufferResource buffer(context, data, size, WGPUBufferUsage_Index, /*isIndexBuffer=*/true, persistent);
     return std::make_unique<IndexBufferResource>(std::move(buffer));
 }
 

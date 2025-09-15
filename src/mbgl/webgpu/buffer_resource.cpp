@@ -3,6 +3,7 @@
 #include <mbgl/webgpu/renderer_backend.hpp>
 
 #include <cstring>
+#include <cassert>
 
 namespace mbgl {
 namespace webgpu {
@@ -11,16 +12,27 @@ BufferResource::BufferResource(Context& context_,
                                const void* data,
                                std::size_t size_,
                                uint32_t usage_,
+                               bool isIndexBuffer_,
                                bool persistent_)
-    : context(&context_), size(size_), usage(usage_), persistent(persistent_) {
-    
+    : context(context_),
+      size(size_),
+      usage(usage_),
+      isIndexBuffer(isIndexBuffer_),
+      persistent(persistent_) {
+
     if (size == 0) {
         return;
     }
 
-    auto& backend = static_cast<RendererBackend&>(context->getBackend());
+    // Store raw data if provided
+    if (data) {
+        raw.resize(size);
+        std::memcpy(raw.data(), data, size);
+    }
+
+    auto& backend = static_cast<RendererBackend&>(context.getBackend());
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
-    
+
     if (!device) {
         return;
     }
@@ -35,39 +47,90 @@ BufferResource::BufferResource(Context& context_,
 
     // Create buffer
     buffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
-    
+
     if (buffer && data) {
         // Copy initial data if provided
-        void* mappedData = wgpuBufferGetMappedRange(buffer, 0, size);
-        if (mappedData) {
-            std::memcpy(mappedData, data, size);
+        void* mapped = wgpuBufferGetMappedRange(buffer, 0, size);
+        if (mapped) {
+            std::memcpy(mapped, data, size);
             wgpuBufferUnmap(buffer);
         }
     }
 }
 
-BufferResource::~BufferResource() {
+BufferResource::BufferResource(BufferResource&& other) noexcept
+    : context(other.context),
+      buffer(other.buffer),
+      raw(std::move(other.raw)),
+      size(other.size),
+      usage(other.usage),
+      version(other.version),
+      isIndexBuffer(other.isIndexBuffer),
+      persistent(other.persistent) {
+    other.buffer = nullptr;
+    other.size = 0;
+}
+
+BufferResource::~BufferResource() noexcept {
     if (buffer) {
         wgpuBufferRelease(buffer);
         buffer = nullptr;
     }
 }
 
-void BufferResource::update(const void* data, std::size_t updateSize, std::size_t offset) {
-    if (!buffer || !data || updateSize == 0) {
+BufferResource& BufferResource::operator=(BufferResource&& other) noexcept {
+    if (this != &other) {
+        // Can't reassign context reference, so check they match
+        assert(&context == &other.context);
+
+        if (buffer) {
+            wgpuBufferRelease(buffer);
+        }
+        buffer = other.buffer;
+        raw = std::move(other.raw);
+        size = other.size;
+        usage = other.usage;
+        version = other.version;
+        isIndexBuffer = other.isIndexBuffer;
+        persistent = other.persistent;
+
+        other.buffer = nullptr;
+        other.size = 0;
+    }
+    return *this;
+}
+
+BufferResource BufferResource::clone() const {
+    return BufferResource(context, raw.empty() ? nullptr : raw.data(), size, usage, isIndexBuffer, persistent);
+}
+
+void BufferResource::update(const void* data, std::size_t updateSize, std::size_t offset) noexcept {
+    if (!data || updateSize == 0) {
         return;
     }
 
-    
-    // Get the queue from backend
-    auto& backend = static_cast<RendererBackend&>(context->getBackend());
-    WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
-    if (!queue) {
-        return;
+    // Update raw data if we have it
+    if (!raw.empty() && offset + updateSize <= raw.size()) {
+        std::memcpy(raw.data() + offset, data, updateSize);
     }
-    
-    // Write data to buffer using queue
-    wgpuQueueWriteBuffer(queue, buffer, offset, data, updateSize);
+
+    // Update GPU buffer if we have one
+    if (buffer) {
+        // Get the queue from backend
+        auto& backend = static_cast<RendererBackend&>(context.getBackend());
+        WGPUQueue queue = static_cast<WGPUQueue>(backend.getQueue());
+        if (queue) {
+            // Write data to buffer using queue
+            wgpuQueueWriteBuffer(queue, buffer, offset, data, updateSize);
+        }
+    }
+
+    // Increment version to indicate change
+    ++version;
+}
+
+bool BufferResource::needReBind(VersionType otherVersion) const noexcept {
+    return version != otherVersion;
 }
 
 } // namespace webgpu
